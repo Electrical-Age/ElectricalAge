@@ -132,7 +132,7 @@ public class ElectricalStackMachineProcess implements IProcess {
         if (this.smeltCan()) {
             Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
             Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory, outSlotIdList);
-            inventory.decrStackSize(inputSlotId, recipe.input.stackSize);
+            inventory.decrStackSize(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);
         }
     }

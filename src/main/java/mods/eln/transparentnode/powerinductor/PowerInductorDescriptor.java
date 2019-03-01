@@ -37,10 +37,7 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
     public double getlValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorContainer.cableId);
-        if (core == null)
-            return getlValue(0);
-        else
-            return getlValue(core.stackSize);
+        return getlValue(core.getCount());
     }
 
     public double getRsValue(IInventory inventory) {

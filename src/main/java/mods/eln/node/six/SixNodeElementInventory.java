@@ -7,6 +7,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import org.jetbrains.annotations.NotNull;
 
 public class SixNodeElementInventory implements IInventory, INBTTReady {
     SixNodeElementRender sixnodeRender = null;
@@ -35,11 +37,11 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
     @Override
     public int getSizeInventory() {
-
         return getInv().length;
     }
 
 
+    @NotNull
     @Override
     public ItemStack getStackInSlot(int slot) {
 
@@ -48,47 +50,34 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     }
 
 
+    @NotNull
     @Override
     public ItemStack decrStackSize(int slot, int amt) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            if (stack.stackSize <= amt) {
-                setInventorySlotContents(slot, null);
-            } else {
-                stack = stack.splitStack(amt);
-                if (stack.stackSize == 0) {
-                    setInventorySlotContents(slot, null);
-                }
-            }
-        }
+        stack.splitStack(amt);
         return stack;
     }
 
+    @NotNull
     @Override
     public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            setInventorySlotContents(slot, null);
-        }
+        stack.setCount(0);
         return stack;
     }
 
 
     @Override
-    public void setInventorySlotContents(int slot, ItemStack stack) {
-        try {
-            getInv()[slot] = stack;
-            if (stack != null && stack.stackSize > getInventoryStackLimit()) {
-                stack.stackSize = getInventoryStackLimit();
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
+    public void setInventorySlotContents(int slot, @NotNull ItemStack stack) {
+        getInv()[slot] = stack;
+        int stackLimit = getInventoryStackLimit();
+        if (stack.getCount() > stackLimit) {
+            stack.setCount(stackLimit);
         }
-
-
     }
 
 
+    @NotNull
     @Override
     public String getName() {
         return "tco.SixNodeInventory";
@@ -97,37 +86,21 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
     @Override
     public int getInventoryStackLimit() {
-
         return stackLimit;
     }
 
-
     @Override
-    public boolean isUseableByPlayer(EntityPlayer player) {
-
-		/*if(sixNodeElement != null)
-		{
-			SixNode sixNode = (SixNode) NodeManager.instance.getNodeFromCoordonate(sixNodeElement.sixNode.coordinate);
-			if(sixNode == null) return false;
-			if(sixNode.sideElementList[sixNodeElement.side.getInt()] != sixNodeElement) return false;
-		//	if( != transparentNodeElement.node) return false;
-			return player.getDistanceSq(sixNodeElement.sixNode.coordinate.x + 0.5, sixNodeElement.sixNode.coordinate.y + 0.5, sixNodeElement.sixNode.coordinate.z + 0.5) < 18;
-		}*/
+    public boolean isUsableByPlayer(@NotNull EntityPlayer player) {
         return true;
-		
-/*		if(sixNodeElement != null)
-			return player.getDistanceSq(sixNodeElement.sixNode.coordinate.x + 0.5, sixNodeElement.sixNode.coordinate.y + 0.5, sixNodeElement.sixNode.coordinate.z + 0.5) < 18;
-		return player.getDistanceSq(sixnodeRender.tileEntity.xCoord + 0.5, sixnodeRender.tileEntity.yCoord + 0.5, sixnodeRender.tileEntity.zCoord + 0.5) < 18;
-*/
     }
 
     @Override
-    public void openInventory(EntityPlayer player) {
+    public void openInventory(@NotNull EntityPlayer player) {
 
     }
 
     @Override
-    public void closeInventory(EntityPlayer player) {
+    public void closeInventory(@NotNull EntityPlayer player) {
 
     }
 
@@ -153,8 +126,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
 
     @Override
-    public boolean isItemValidForSlot(int i, ItemStack itemstack) {
-
+    public boolean isItemValidForSlot(int i, @NotNull ItemStack itemstack) {
         return false;
     }
 
@@ -184,10 +156,17 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
         return false;
     }
 
+    @NotNull
     @Override
     public ITextComponent getDisplayName() {
-        return null;
+        return new TextComponentString("SixNodeInventory");
     }
 
-
+    @Override
+    public boolean isEmpty() {
+        for (ItemStack itemStack : inv) {
+            if (itemStack.getCount() > 0) return false;
+        }
+        return true;
+    }
 }

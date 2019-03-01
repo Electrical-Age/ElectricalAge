@@ -34,7 +34,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
     }
 
     fun subtractEnergyForBlockBreak(stack: ItemStack, state: IBlockState) {
-        if (getStrVsBlock(stack, state) == strengthOn) {
+        if (getDestroySpeed(stack, state) == strengthOn) {
             var e = getEnergy(stack) - energyPerBlock
             if (e < 0) e = 0.0
             setEnergy(stack, e)

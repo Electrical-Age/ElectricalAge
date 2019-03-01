@@ -26,9 +26,9 @@ public class ConfigurableAiWander extends EntityAIBase {
      * Returns whether the EntityAIBase should begin execution.
      */
     public boolean shouldExecute() {
-        if (this.entity.getAge() >= 100) {
+        /*if (this.entity.getIdleTime() >= 100) {
             return false;
-        } else if (this.entity.getRNG().nextInt(randLimit) != 0) {
+        } else */if (this.entity.getRNG().nextInt(randLimit) != 0) {
             return false;
         } else {
             Vec3d vec3 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
@@ -36,9 +36,9 @@ public class ConfigurableAiWander extends EntityAIBase {
             if (vec3 == null) {
                 return false;
             } else {
-                this.xPosition = vec3.xCoord;
-                this.yPosition = vec3.yCoord;
-                this.zPosition = vec3.zCoord;
+                this.xPosition = vec3.x;
+                this.yPosition = vec3.y;
+                this.zPosition = vec3.z;
                 return true;
             }
         }

@@ -35,7 +35,7 @@ public class TutorialSignOverlay {
 
         int px = MathHelper.floor(player.posX), py = MathHelper.floor(player.posY), pz = MathHelper.floor(player.posZ);
         int r = 1;
-        World w = player.worldObj;
+        World w = player.world;
 
         TutorialSignRender best = null;
         double bestDistance = 10000;
@@ -71,7 +71,7 @@ public class TutorialSignOverlay {
             GL11.glScalef(0.5f, 0.5f, 0.5f);
             int y = 0;
             for (String str : best.texts) {
-                Minecraft.getMinecraft().fontRendererObj.drawString(str, 10/* event.resolution.getScaledWidth() / 2 - 50*/, 10 + y, 0xFFFFFF);
+                Minecraft.getMinecraft().fontRenderer.drawString(str, 10/* event.resolution.getScaledWidth() / 2 - 50*/, 10 + y, 0xFFFFFF);
                 y += 10;
             }
             GL11.glPopMatrix();

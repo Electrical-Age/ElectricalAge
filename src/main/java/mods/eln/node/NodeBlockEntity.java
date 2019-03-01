@@ -1,8 +1,6 @@
 package mods.eln.node;
 
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -15,9 +13,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -59,7 +54,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             boolean newRedstone = (b & 0x10) != 0;
             if (redstone != newRedstone) {
                 redstone = newRedstone;
-                worldObj.notifyNeighborsRespectDebug(getPos(), getBlockType());
+                world.notifyNeighborsRespectDebug(getPos(), getBlockType(), true);
             }
 
         } catch (IOException e) {
@@ -68,7 +63,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
         if (lastLight != light) {
             lastLight = light;
-            worldObj.checkLightFor(EnumSkyBlock.BLOCK, getPos());
+            world.checkLightFor(EnumSkyBlock.BLOCK, getPos());
         }
 
     }
@@ -84,7 +79,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public abstract int isProvidingWeakPower(Direction side);
     //{
-    //if(worldObj.isRemote) return 0;
+    //if(world.isRemote) return 0;
     //return getNode().isProvidingWeakPower(side);
     //}
 
@@ -120,7 +115,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public int getLightValue() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             if (lastLight == 0xFF) {
                 return 0;
             }
@@ -163,8 +158,8 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     @Override
     public void onLoad()
     {
-        if (!worldObj.isRemote) {
-            // worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+        if (!world.isRemote) {
+            // world.setBlock(xCoord, yCoord, zCoord, 0);
         } else {
             clientList.add(this);
         }
@@ -173,20 +168,20 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public void onBlockAdded() {
-        if (!worldObj.isRemote && getNode() == null) {
-            worldObj.setBlockToAir(pos);
+        if (!world.isRemote && getNode() == null) {
+            world.setBlockToAir(pos);
         }
     }
 
     public void onBreakBlock() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onBreakBlock();
         }
     }
 
     public void onChunkUnload() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
     }
@@ -199,14 +194,14 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     @Override
     public void invalidate() {
 
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
         super.invalidate();
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return false;
             getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
             return true;
@@ -219,7 +214,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public void onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onNeighborBlockChange();
         }
@@ -227,19 +222,19 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public Node getNode() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             Utils.fatal();
             return null;
         }
-        if (this.worldObj == null) return null;
+        if (this.world == null) return null;
         if (node == null) {
-            NodeBase nodeFromCoordinate = NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, worldObj));
+            NodeBase nodeFromCoordinate = NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, world));
             if (nodeFromCoordinate instanceof Node) {
                 node = (Node) nodeFromCoordinate;
             } else {
-                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordinate(pos, worldObj));
+                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordinate(pos, world));
             }
-            if (node == null) DelayedBlockRemove.add(new Coordinate(pos, this.worldObj));
+            if (node == null) DelayedBlockRemove.add(new Coordinate(pos, this.world));
         }
         return node;
     }
@@ -247,7 +242,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public static NodeBlockEntity getEntity(BlockPos pos) {
         TileEntity entity;
-        if ((entity = Minecraft.getMinecraft().theWorld.getTileEntity(pos)) != null) {
+        if ((entity = Minecraft.getMinecraft().world.getTileEntity(pos)) != null) {
             if (entity instanceof NodeBlockEntity) {
                 return (NodeBlockEntity) entity;
             }
@@ -276,7 +271,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        assert(worldObj.isRemote);
+        assert(world.isRemote);
         byte[] bytes = pkt.getNbtCompound().getByteArray("eln");
         DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(bytes));
         Eln.packetHandler.packetRx(dataInputStream, net, Minecraft.getMinecraft().player);
@@ -290,7 +285,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             stream.writeInt(pos.getY());
             stream.writeInt(pos.getZ());
 
-            stream.writeByte(worldObj.provider.getDimension());
+            stream.writeByte(world.provider.getDimension());
 
             stream.writeUTF(getNodeUuid());
         } catch (IOException e) {
@@ -312,7 +307,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public boolean canConnectRedstone(Direction xn) {
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return redstone;
         else {
             if (getNode() == null) return false;

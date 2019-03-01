@@ -32,14 +32,14 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     private SimpleNode node;
 
     public SimpleNode getNode() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             Utils.fatal();
             return null;
         }
         if (node == null) {
-            node = (SimpleNode) NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, worldObj));
+            node = (SimpleNode) NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, world));
             if (node == null) {
-                DelayedBlockRemove.add(new Coordinate(pos, this.worldObj));
+                DelayedBlockRemove.add(new Coordinate(pos, this.world));
                 return null;
             }
         }
@@ -50,15 +50,15 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     //***************** Wrapping **************************
 
     void onBlockAdded() {
-		/*if (!worldObj.isRemote){
+		/*if (!world.isRemote){
 			if (getNode() == null) {
-				worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+				world.setBlockToAir(xCoord, yCoord, zCoord);
 			}
 		}*/
     }
 
     public void onBreakBlock() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onBreakBlock();
         }
@@ -66,7 +66,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     public void onChunkUnload() {
         super.onChunkUnload();
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
     }
@@ -77,14 +77,14 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     @Override
     public void invalidate() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
         super.invalidate();
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return false;
             getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
             return true;
@@ -93,7 +93,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     }
 
     void onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onNeighborBlockChange();
         }
@@ -131,7 +131,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        assert(worldObj.isRemote);
+        assert(world.isRemote);
         byte[] bytes = pkt.getNbtCompound().getByteArray("eln");
         DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(bytes));
         Eln.packetHandler.packetRx(dataInputStream, net, Minecraft.getMinecraft().player);
@@ -141,8 +141,8 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     public void serverPublishUnserialize(DataInputStream stream) {
         try {
             if (front != (front = Direction.fromInt(stream.readByte()))) {
-                IBlockState state = this.worldObj.getBlockState(this.pos);
-                worldObj.notifyBlockUpdate(getPos(), state, state, 0);
+                IBlockState state = this.world.getBlockState(this.pos);
+                world.notifyBlockUpdate(getPos(), state, state, 0);
             }
         } catch (IOException e) {
             e.printStackTrace();

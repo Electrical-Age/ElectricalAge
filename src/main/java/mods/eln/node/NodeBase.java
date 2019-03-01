@@ -87,7 +87,7 @@ public abstract class NodeBase {
     }
 
     public void notifyNeighbor() {
-        coordinate.world().notifyNeighborsRespectDebug(coordinate.pos, coordinate.getBlockState().getBlock());
+        coordinate.world().notifyNeighborsRespectDebug(coordinate.pos, coordinate.getBlockState().getBlock(), true);
     }
 
     //public abstract Block getBlock();
@@ -205,17 +205,17 @@ public abstract class NodeBase {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!entityPlayer.worldObj.isRemote && entityPlayer.getHeldItemMainhand() != null) {
+        if (!entityPlayer.world.isRemote) {
             if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = multiMeterString(side);
                 if (str != null)
-                    Utils.addChatMessage(entityPlayer, str);
+                    Utils.sendMessage(entityPlayer, str);
                 return true;
             }
             if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = thermoMeterString(side);
                 if (str != null)
-                    Utils.addChatMessage(entityPlayer, str);
+                    Utils.sendMessage(entityPlayer, str);
                 return true;
             }
             if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
@@ -226,8 +226,8 @@ public abstract class NodeBase {
                     str += str1;
                 if (str2 != null)
                     str += str2;
-                if (str.equals("") == false)
-                    Utils.addChatMessage(entityPlayer, str);
+                if (!str.equals(""))
+                    Utils.sendMessage(entityPlayer, str);
                 return true;
             }
         }
@@ -490,7 +490,7 @@ public abstract class NodeBase {
         for (Object obj : server.getEntityWorld().playerEntities) {
 
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) server.worldServerForDimension(player.dimension);
+            WorldServer worldServer = server.getWorld(player.dimension);
 
             if (player.dimension != this.coordinate.getDimension()) continue;
             if (!worldServer.getPlayerChunkMap().isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
@@ -533,7 +533,7 @@ public abstract class NodeBase {
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         for (Object obj : server.getEntityWorld().playerEntities) {
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) server.worldServerForDimension(player.dimension);
+            WorldServer worldServer = server.getWorld(player.dimension);
             if (player.dimension != this.coordinate.getDimension()) continue;
             if (!worldServer.getPlayerChunkMap().isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
 
@@ -550,6 +550,7 @@ public abstract class NodeBase {
         Utils.sendPacketToClient(getPublishPacket(), player);
     }
 
+    @Deprecated  // WTF
     public void dropItem(ItemStack itemStack) {
         if (itemStack == null) return;
         World w = coordinate.world();
@@ -561,7 +562,7 @@ public abstract class NodeBase {
             double var11 = (double) (w.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             EntityItem var13 = new EntityItem(w, (double) pos.getX() + var7, (double) pos.getY() + var9, (double) pos.getZ() + var11, itemStack);
             var13.setPickupDelay(10);
-            w.spawnEntityInWorld(var13);
+            w.spawnEntity(var13);
         }
     }
 

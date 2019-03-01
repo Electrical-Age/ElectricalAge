@@ -41,7 +41,7 @@ public class SolarPanelElement extends TransparentNodeElement {
     DiodeProcess diode;
     PowerSourceBipole powerSource;
 
-    SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
+    SolarPanelSlowProcess slowProcess = new SolarPanelSlowProcess(this);
 
     public double panelAlpha = Math.PI / 2;
     private GhostPowerNode groundNode = null;

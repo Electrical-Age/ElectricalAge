@@ -187,9 +187,9 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject {
     public void idraw2(int x, int y) {
         if (visible && (x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height) || drag) {
             int px, py;
-            px = xPosition - helper.getHoveringTextWidth(comment, Minecraft.getMinecraft().fontRendererObj) / 2;
+            px = xPosition - helper.getHoveringTextWidth(comment, Minecraft.getMinecraft().fontRenderer) / 2;
             py = yPosition + height + 20/* - helper.getHoveringTextHeight(comment,Minecraft.getMinecraft().fontRenderer)*/;
-            helper.drawHoveringText(comment, px, py, Minecraft.getMinecraft().fontRendererObj);
+            helper.drawHoveringText(comment, px, py, Minecraft.getMinecraft().fontRenderer);
         }
     }
 

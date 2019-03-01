@@ -128,7 +128,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             GL11.glScalef(1 / 128f, -1 / 128f, 1);
             int idx = 0;
             for (String log : logs) {
-                Minecraft.getMinecraft().fontRendererObj.drawString(idx == 0 ? Color.COLOR_BRIGHT_GREEN + "> " +
+                Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? Color.COLOR_BRIGHT_GREEN + "> " +
                     log.substring(2) : Color.COLOR_DARK_GREEN + log, 80, 1 + idx, 0xFFD0D0D0 /*No effect...*/);
                 idx += 8;
             }

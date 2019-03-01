@@ -71,7 +71,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 //    @Optional.Method(modid = Other.modIdIc2)
 //    @Override
 //    public boolean emitsEnergyTo(TileEntity receiver, EnumFacing direction) {
-//        if (worldObj.isRemote)
+//        if (world.isRemote)
 //            return false;
 //        SimpleNode n = getNode();
 //        if (n == null)
@@ -82,7 +82,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 //    @Optional.Method(modid = Other.modIdIc2)
 //    @Override
 //    public double getOfferedEnergy() {
-//        if (worldObj.isRemote)
+//        if (world.isRemote)
 //            return 0;
 //        if (getNode() == null)
 //            return 0;
@@ -95,7 +95,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 //    @Optional.Method(modid = Other.modIdIc2)
 //    @Override
 //    public void drawEnergy(double amount) {
-//        if (worldObj.isRemote)
+//        if (world.isRemote)
 //            return;
 //        if (getNode() == null)
 //            return;
@@ -148,7 +148,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     public boolean canConnectEnergy(EnumFacing from) {
         // Utils.println("*****canConnectEnergy*****");
         // return true;
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return false;
         if (getNode() == null)
             return false;
@@ -160,7 +160,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     @Optional.Method(modid = Other.modIdTe)
     public int extractEnergy(EnumFacing from, int maxExtract, boolean simulate) {
         // Utils.println("*****extractEnergy*****");
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return 0;
         if (getNode() == null)
             return 0;

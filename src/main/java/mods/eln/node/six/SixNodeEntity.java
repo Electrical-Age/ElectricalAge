@@ -62,14 +62,14 @@ public class SixNodeEntity extends NodeBlockEntity {
             e.printStackTrace();
         }
 
-        //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
+        //	world.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
         // TODO(1.10): This is hopefully unneeded.
 //        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
-//            Chunk chunk = worldObj.getChunkFromBlockCoords(pos);
+//            Chunk chunk = world.getChunkFromBlockCoords(pos);
 //            chunk.generateHeightMap();
 //            Utils.updateSkylight(chunk);
 //            chunk.generateSkylightMap();
-//            Utils.updateAllLightTypes(worldObj, xCoord, yCoord, zCoord);
+//            Utils.updateAllLightTypes(world, xCoord, yCoord, zCoord);
 //        }
     }
 
@@ -154,8 +154,7 @@ public class SixNodeEntity extends NodeBlockEntity {
     }
 
     public boolean hasVolume(World world, int x, int y, int z) {
-
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             for (SixNodeElementRender e : elementRenderList) {
                 if (e != null && e.sixNodeDescriptor.hasVolume())
                     return true;
@@ -195,7 +194,7 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     @Override
     public int isProvidingWeakPower(Direction side) {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             int max = 0;
             for (SixNodeElementRender r : elementRenderList) {
                 if (r == null) continue;

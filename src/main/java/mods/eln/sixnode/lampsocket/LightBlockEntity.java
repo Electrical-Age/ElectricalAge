@@ -69,7 +69,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
 	/*void removeLight(int light) {
-        //int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
+        //int meta = world.getBlockMetadata(xCoord, yCoord, zCoord);
 		for (int idx = 0; idx < lightList.size(); idx++) {
 			if (lightList.get(idx) == light) {
 				lightList.remove(idx);
@@ -102,23 +102,23 @@ public class LightBlockEntity extends TileEntity {
 
     void lightManager() {
 		/*if (lightList.size() == 0) {
-			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+			world.setBlock(xCoord, yCoord, zCoord, 0);
 		} else {
 			int light = getLight();
-			if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-				worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+			if (light != world.getBlockMetadata(xCoord, yCoord, zCoord)) {
+				world.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
+				world.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
 			}
 		}*/
     }
 
     public void updateEntity() {
-        if (worldObj.isRemote) return;
+        if (world.isRemote) return;
         BlockPos pos = this.pos;
         if (lightList.isEmpty()) {
-            //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(pos);
-            //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            //	world.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
+            world.setBlockToAir(pos);
+            //world.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
             //Eln.instance.tileEntityDestructor.add(this);
             Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
             return;
@@ -136,11 +136,11 @@ public class LightBlockEntity extends TileEntity {
                 iterator.remove();
             }
         }
-        IBlockState state = worldObj.getBlockState(pos);
+        IBlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
         if (light != block.getMetaFromState(state)) {
             block.setLightLevel(2);
-            worldObj.notifyLightSet(pos);
+            world.notifyLightSet(pos);
         }
     }
 

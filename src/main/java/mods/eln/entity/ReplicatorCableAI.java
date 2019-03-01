@@ -87,8 +87,7 @@ public class ReplicatorCableAI extends EntityAIBase implements ITimeRemoverObser
     }
 
     @Override
-    public boolean continueExecuting() {
-        //Utils.println("Continue");
+    public boolean shouldContinueExecuting() {
         return cableCoordinate != null;
     }
 
@@ -115,7 +114,7 @@ public class ReplicatorCableAI extends EntityAIBase implements ITimeRemoverObser
             double u = cable.electricalLoad.getU();
             double nextRp = Math.pow(u / Eln.LVU, -0.3) * u * u / (50);
             if (resistorLoad.getR() < 0.8 * nextRp) {
-                entity.attackEntityFrom(DamageSource.magic, 5);
+                entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, 5);
             } else {
                 entity.eatElectricity(resistorLoad.getP() * 0.05);
             }

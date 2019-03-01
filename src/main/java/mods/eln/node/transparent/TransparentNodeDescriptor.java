@@ -202,9 +202,9 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return 0;
     }
 
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, BlockPos pos) {
+    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List<AxisAlignedBB> list, BlockPos pos) {
         AxisAlignedBB bb = new AxisAlignedBB(pos);
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 
     public void setGhostGroup(GhostGroup ghostGroup) {

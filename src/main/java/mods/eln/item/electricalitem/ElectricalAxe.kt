@@ -3,7 +3,6 @@ package mods.eln.item.electricalitem
 import mods.eln.misc.Utils
 import mods.eln.sim.IProcess
 import mods.eln.wiki.Data
-import net.minecraft.block.Block
 import net.minecraft.block.material.Material
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
@@ -13,9 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.ActionResult
 import net.minecraft.util.EnumActionResult
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
-import net.minecraftforge.common.util.ChunkCoordComparator
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -29,10 +26,10 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
-    override fun getStrVsBlock(stack: ItemStack, state: IBlockState?): Float {
+    override fun getDestroySpeed(stack: ItemStack, state: IBlockState?): Float {
         return when {
             state != null && (state.material === Material.WOOD || state.material === Material.PLANTS || state.material === Material.VINE) -> getStrength(stack)
-            else -> super.getStrVsBlock(stack, state)
+            else -> super.getDestroySpeed(stack, state)
         }
     }
 
@@ -51,7 +48,7 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
     private fun setCapitation(p: EntityPlayer?, stack: ItemStack, capitation: Boolean) {
         getNbt(stack).setBoolean("capitation", capitation)
         if (p != null) {
-            Utils.addChatMessage(p, "Set treecapitation to $capitation")
+            Utils.sendMessage(p, "Set treecapitation to $capitation")
         }
     }
 

@@ -1,5 +1,6 @@
 package mods.eln.node;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -10,7 +11,7 @@ import net.minecraft.server.MinecraftServer;
 public class NodeServer {
 
     public NodeServer() {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
 
     }
 
@@ -37,12 +38,10 @@ public class NodeServer {
                 }
             }
 
-            for (Object obj : server.getPlayerList().getPlayerList()) {
-                EntityPlayerMP player = (EntityPlayerMP) obj;
-
+            for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
                 NodeBase openContainerNode = null;
                 INodeContainer container = null;
-                if (player.openContainer != null && player.openContainer instanceof INodeContainer) {
+                if (player.openContainer instanceof INodeContainer) {
                     container = ((INodeContainer) player.openContainer);
                     openContainerNode = container.getNode();
                 }

@@ -34,11 +34,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         return damageValue;
     }
 
-    /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-     */
     @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        ItemStack stack = player.getHeldItem(hand);
         Block block = world.getBlockState(pos).getBlock();
         int side = facing.getIndex();
         if ((block == Blocks.SNOW_LAYER) && ((Utils.getMetaFromPos(world, pos) & 0x7) < 1)) {
@@ -62,13 +60,15 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
                 pos = pos.add(1,0,0);
         }
 
-        if (stack.stackSize == 0)
+        if (stack.isEmpty())
             return EnumActionResult.FAIL;
         if (!player.canPlayerEdit(pos, EnumFacing.getFacingFromVector(hitX,hitY,hitZ), stack))
             return EnumActionResult.FAIL;
         if ((pos.getY() == 255) && (this.block.getMaterial(world.getBlockState(pos)).isSolid()))
             return EnumActionResult.FAIL;
 
+        // TODO(1.12): Whatever, we're discarding all this code. Thank god.
+/*
         int i1 = getMetadata(stack.getItemDamage());
         int metadata = this.block.getMetaFromState(this.block.onBlockPlaced(world, pos, facing, hitX, hitY, hitZ, i1, player));
 
@@ -77,6 +77,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
             stack.stackSize -= 1;
         }
+*/
 
         return EnumActionResult.SUCCESS;
     }
@@ -126,7 +127,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
             String error;
             if ((error = descriptor.checkCanPlace(coord, direction, LRDU.Up)) != null) {
-                Utils.addChatMessage(player, error);
+                Utils.sendMessage(player, error);
                 return false;
             }
 

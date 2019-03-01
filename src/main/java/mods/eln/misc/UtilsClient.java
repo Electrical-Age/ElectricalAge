@@ -91,7 +91,7 @@ public class UtilsClient {
     public static void clientOpenGui(GuiScreen gui) {
         guiLastOpen = gui;
         EntityPlayerSP clientPlayer = getClientPlayer();
-        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
+        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.world, 0, 0, 0);
     }
 
     public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
@@ -133,9 +133,9 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, new BlockPos(MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ)));
+        int light = getLight(e.world, new BlockPos(MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ)));
         // light =
-        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
+        // e.world.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
         // MathHelper.floor(e.posY), MathHelper.floor(e.posZ),0);
         // Utils.println(light);
         GL11.glColor4f(r, g, b, 1f - (light / 15f));

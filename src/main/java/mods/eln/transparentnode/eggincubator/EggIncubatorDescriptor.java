@@ -115,6 +115,6 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, BlockPos pos) {
         AxisAlignedBB bb = new AxisAlignedBB(pos);
         bb = bb.setMaxY(0.5);
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

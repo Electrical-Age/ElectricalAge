@@ -2,7 +2,7 @@ package mods.eln.server;
 
 import mods.eln.Eln;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 public class SaveConfig extends WorldSavedData {
 

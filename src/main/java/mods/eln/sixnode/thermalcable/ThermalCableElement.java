@@ -126,7 +126,7 @@ public class ThermalCableElement extends SixNodeElement {
         ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
-            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
         } else if (currentItemStack != null) {
             Item item = currentItemStack.getItem();

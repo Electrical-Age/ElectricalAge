@@ -1,12 +1,11 @@
 package mods.eln.ore;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;

@@ -35,7 +35,7 @@ public class ElnServerPacket implements Packet {
 
     public void readPacketData(PacketBuffer buf) {
         try {
-            this.channelName = buf.readStringFromBuffer(20);
+            this.channelName = buf.readString(20);
         } catch (Exception e) {
             e.printStackTrace();
         }

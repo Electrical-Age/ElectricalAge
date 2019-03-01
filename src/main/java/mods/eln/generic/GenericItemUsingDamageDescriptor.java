@@ -16,6 +16,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class GenericItemUsingDamageDescriptor {
@@ -103,12 +104,8 @@ public class GenericItemUsingDamageDescriptor {
         return newItemStack(1);
     }
 
-    public boolean checkSameItemStack(ItemStack stack) {
-        if (stack == null)
-            return false;
-        if (stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage)
-            return false;
-        return true;
+    public boolean checkSameItemStack(@Nonnull ItemStack stack) {
+        return stack.getItem() == parentItem && stack.getItemDamage() == parentItemDamage;
     }
 
     /**
@@ -150,7 +147,7 @@ public class GenericItemUsingDamageDescriptor {
         return nbt;
     }
 
-    public float getStrVsBlock(ItemStack stack, IBlockState state) {
+    public float getDestroySpeed(ItemStack stack, IBlockState state) {
         return 0.2f;
     }
 

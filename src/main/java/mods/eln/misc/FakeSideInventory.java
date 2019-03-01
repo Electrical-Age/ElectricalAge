@@ -36,7 +36,11 @@ public class FakeSideInventory implements ISidedInventory {
 
     @Override
     public void setInventorySlotContents(int var1, ItemStack var2) {
+    }
 
+    @Override
+    public boolean isEmpty() {
+        return true;
     }
 
     @Override
@@ -61,11 +65,10 @@ public class FakeSideInventory implements ISidedInventory {
 
     @Override
     public void markDirty() {
-
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer var1) {
+    public boolean isUsableByPlayer(EntityPlayer player) {
         return false;
     }
 

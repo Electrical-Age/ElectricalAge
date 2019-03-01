@@ -1,8 +1,10 @@
 package mods.eln.misc;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -47,6 +49,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.lwjgl.opengl.GL11;
+import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -379,8 +382,8 @@ public class Utils {
             NBTTagCompound var4 = (NBTTagCompound) var2.getCompoundTagAt(var3);
             int var5 = var4.getByte("Slot") & 255;
 
-            if (var5 >= 0 && var5 < inventory.getSizeInventory()) {
-                inventory.setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
+            if (var5 < inventory.getSizeInventory()) {
+                inventory.setInventorySlotContents(var5, new ItemStack(var4));
             }
         }
     }
@@ -389,7 +392,7 @@ public class Utils {
         NBTTagList var2 = new NBTTagList();
 
         for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3) {
-            if (inventory.getStackInSlot(var3) != null) {
+            if (!inventory.getStackInSlot(var3).isEmpty()) {
                 NBTTagCompound var4 = new NBTTagCompound();
                 var4.setByte("Slot", (byte) var3);
                 inventory.getStackInSlot(var3).writeToNBT(var4);
@@ -539,7 +542,7 @@ public class Utils {
     }
 
     public static World getWorld(int dim) {
-        return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(dim);
+        return FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(dim);
     }
 
     public static boolean getWorldExist(int dim) {
@@ -572,7 +575,7 @@ public class Utils {
             double var11 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             EntityItem drop = new EntityItem(world, (double) pos.getX() + var7, (double) pos.getY() + var9, (double) pos.getZ() + var11, itemStack);
             drop.setPickupDelay(10);
-            world.spawnEntityInWorld(drop);
+            world.spawnEntity(drop);
         }
     }
 
@@ -587,16 +590,16 @@ public class Utils {
 
         // First, make a list of possible target slots.
         ArrayList<Integer> slots = new ArrayList<>(4);
-        int need = stack.stackSize;
+        int need = stack.getCount();
         for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
             ItemStack slot = inventory.getStackInSlot(i);
-            if (slot != null && slot.stackSize < limit && slot.isItemEqual(stack)) {
+            if (!slot.isEmpty() && slot.getCount() < limit && slot.isItemEqual(stack)) {
                 slots.add(i);
-                need -= limit - slot.stackSize;
+                need -= limit - slot.getCount();
             }
         }
         for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
-            if (inventory.getStackInSlot(i) == null) {
+            if (inventory.getStackInSlot(i).isEmpty()) {
                 slots.add(i);
                 need -= limit;
             }
@@ -608,17 +611,17 @@ public class Utils {
         }
 
         // Yes. Proceed.
-        int toPut = stack.stackSize;
+        int toPut = stack.getCount();
         for (Integer slot : slots) {
             ItemStack target = inventory.getStackInSlot(slot);
-            if (target == null) {
+            if (target.isEmpty()) {
                 int amount = Math.min(toPut, limit);
                 inventory.setInventorySlotContents(slot, new ItemStack(stack.getItem(), amount, stack.getItemDamage()));
                 toPut -= amount;
             } else {
-               int space = limit - target.stackSize;
+               int space = limit - target.getCount();
                int amount = Math.min(toPut, space);
-               target.stackSize += amount;
+               target.setCount(target.getCount() + amount);
                toPut -= amount;
             }
             if (toPut <= 0) break;
@@ -634,7 +637,7 @@ public class Utils {
         ItemStack[] inputStack = new ItemStack[stackList.length];
 
         for (int idx = 0; idx < outputStack.length; idx++) {
-            if (inventory.getStackInSlot(slotsIdList[idx]) != null)
+            if (!inventory.getStackInSlot(slotsIdList[idx]).isEmpty())
                 outputStack[idx] = inventory.getStackInSlot(slotsIdList[idx]).copy();
         }
         for (int idx = 0; idx < stackList.length; idx++) {
@@ -654,16 +657,16 @@ public class Utils {
                     break;
                 } else if (targetStack.isItemEqual(stack)) {
                     // inventory.decrStackSize(idx, -stack.stackSize);
-                    int transferMax = limit - targetStack.stackSize;
+                    int transferMax = limit - targetStack.getCount();
                     if (transferMax > 0) {
-                        int transfer = stack.stackSize;
+                        int transfer = stack.getCount();
                         if (transfer > transferMax)
                             transfer = transferMax;
-                        outputStack[idx].stackSize += transfer;
-                        stack.stackSize -= transfer;
+                        outputStack[idx].setCount(outputStack[idx].getCount() + transfer);
+                        stack.setCount(stack.getCount() - transfer);
                     }
 
-                    if (stack.stackSize == 0) {
+                    if (stack.isEmpty()) {
                         oneStackDone = true;
                         break;
                     }
@@ -681,24 +684,24 @@ public class Utils {
         int limit = inventory.getInventoryStackLimit();
 
         for (ItemStack stack : stackList) {
-            for (int idx = 0; idx < slotsIdList.length; idx++) {
-                ItemStack targetStack = inventory.getStackInSlot(slotsIdList[idx]);
-                if (targetStack == null) {
-                    inventory.setInventorySlotContents(slotsIdList[idx], stack.copy());
-                    stack.stackSize = 0;
+            for (int i : slotsIdList) {
+                ItemStack targetStack = inventory.getStackInSlot(i);
+                if (targetStack.isEmpty()) {
+                    inventory.setInventorySlotContents(i, stack.copy());
+                    stack.setCount(0);
                     break;
                 } else if (targetStack.isItemEqual(stack)) {
                     // inventory.decrStackSize(idx, -stack.stackSize);
-                    int transferMax = limit - targetStack.stackSize;
+                    int transferMax = limit - targetStack.getCount();
                     if (transferMax > 0) {
-                        int transfer = stack.stackSize;
+                        int transfer = stack.getCount();
                         if (transfer > transferMax)
                             transfer = transferMax;
-                        inventory.decrStackSize(slotsIdList[idx], -transfer);
-                        stack.stackSize -= transfer;
+                        inventory.decrStackSize(i, -transfer);
+                        stack.setCount(stack.getCount() - transfer);
                     }
 
-                    if (stack.stackSize == 0) {
+                    if (stack.isEmpty()) {
                         break;
                     }
                 }
@@ -747,7 +750,7 @@ public class Utils {
 
         } else {
             ItemDamage = stream.readShort();
-            if (old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage) {
+            if (old == null || Item.getIdFromItem(old.getItem().getItem()) != itemId || old.getItem().getItemDamage() != ItemDamage) {
                 BlockPos pos = tileEntity.getPos();
                 return new EntityItem(tileEntity.getWorld(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
             } else {
@@ -873,16 +876,17 @@ public class Utils {
         return i;
     }
 
+    @Deprecated
     static public void getItemStack(String name, List list) {
         // TODO: Fuck this function.
         Iterator itItem = Item.REGISTRY.iterator();
-        List<ItemStack> tempList = new ArrayList<ItemStack>(3000);
+        NonNullList<ItemStack> tempList = NonNullList.create();
         Item item;
 
         while (itItem.hasNext()) {
             item = (Item) itItem.next();
             if (item != null) {
-                item.getSubItems(item, (CreativeTabs) null, tempList);
+                item.getSubItems(item.getCreativeTab(), tempList);
             }
         }
 
@@ -1102,36 +1106,16 @@ public class Utils {
             Field f = o.getClass().getDeclaredField(feildName);
             f.setAccessible(true);
             return f.getInt(o);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public static <T> double readPrivateDouble(Object o, String feildName) {
-        try {
-            Field f = o.getClass().getDeclaredField(feildName);
-            f.setAccessible(true);
-            return f.getDouble(o);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
+        } catch (IllegalArgumentException | SecurityException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
         return 0;
     }
 
     public static ItemStack[][] getItemStackGrid(IRecipe r) {
+        throw new InvalidStateException("The wiki should not be used.");
+/*
+
         ItemStack[][] stacks = new ItemStack[3][3];
         try {
             if (r instanceof ShapedRecipes) {
@@ -1202,9 +1186,13 @@ public class Utils {
             // TODO: handle exception
         }
         return null;
+*/
     }
 
     public static ArrayList<ItemStack> getRecipeInputs(IRecipe r) {
+        throw new InvalidStateException("The wiki should not be used.");
+/*
+
         try {
             ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
             if (r instanceof ShapedRecipes) {
@@ -1241,6 +1229,7 @@ public class Utils {
         } catch (Exception e) {
             return new ArrayList<ItemStack>();
         }
+*/
     }
 
     public static double getWorldTime(World world) {
@@ -1253,8 +1242,8 @@ public class Utils {
         return Block.isEqualTo(block, FLOWING_WATER) || Block.isEqualTo(block, WATER);
     }
 
-    public static void addChatMessage(EntityPlayer entityPlayer, String string) {
-        entityPlayer.addChatMessage(new TextComponentString(string));
+    public static void sendMessage(EntityPlayer entityPlayer, String string) {
+        entityPlayer.sendStatusMessage(new TextComponentString(string), true);  // TODO(1.12): Or false?
     }
 
     public static ItemStack newItemStack(int i, int size, int damage) {
@@ -1308,9 +1297,9 @@ public class Utils {
 //        chunk.generateSkylightMap();
 //    }
 //
-//    public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
-//        worldObj.func_147451_t(xCoord, yCoord, zCoord);
-//        worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
+//    public static void updateAllLightTypes(World world, int xCoord, int yCoord, int zCoord) {
+//        world.func_147451_t(xCoord, yCoord, zCoord);
+//        world.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
 //    }
 
     public static int getItemId(ItemStack stack) {

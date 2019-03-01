@@ -15,8 +15,10 @@ import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
+import net.minecraft.util.text.TextFormatting
 import net.minecraft.world.World
 import net.minecraftforge.fml.common.Optional
+import javax.xml.soap.Text
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNodeWailaProvider,
@@ -87,7 +89,7 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
 
     override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {
-        mutableListOf("${SpecialChars.WHITE}${itemStack.displayName}")
+        mutableListOf("${TextFormatting.WHITE}${itemStack.displayName}")
     } else {
         currenttip
     }

@@ -6,11 +6,9 @@ import org.lwjgl.opengl.GL11;
 
 public class TransparentNodeRender extends TileEntitySpecialRenderer {
     @Override
-    public void renderTileEntityAt(TileEntity entity, double x, double y,
-                                   double z, float var8, int var9) {
-
+    public void render(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         //Utils.println("delta T : " + var8);
-        TransparentNodeEntity tileEntity = (TransparentNodeEntity) entity;
+        TransparentNodeEntity tileEntity = (TransparentNodeEntity) te;
         if (tileEntity.elementRender == null) return;
         //Utils.glDefaultColor();
         GL11.glPushMatrix();

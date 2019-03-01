@@ -84,7 +84,9 @@ public class Coordinate implements INBTTReady {
     public World world() {
         if (w == null) {
             // TODO(1.12): This is not cached. Oversight or deliberate?
-            return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(getDimension());
+            return FMLCommonHandler.instance()
+                .getMinecraftServerInstance()
+                .getWorld(getDimension());
         }
         return w;
     }
@@ -160,7 +162,7 @@ public class Coordinate implements INBTTReady {
     }
 
     public void setPosition(Vec3d vp) {
-        pos.setPos(vp.xCoord, vp.yCoord, vp.zCoord);
+        pos.setPos(vp.x, vp.y, vp.z);
     }
 
     public TileEntity getTileEntity() {
@@ -189,10 +191,10 @@ public class Coordinate implements INBTTReady {
         pos.getZ() + o.getZ());
     }
 
-    public void setWorld(World worldObj) {
-        if (worldObj.isRemote)
-            w = worldObj;
-        dimension = worldObj.provider.getDimension();
+    public void setWorld(World world) {
+        if (world.isRemote)
+            w = world;
+        dimension = world.provider.getDimension();
     }
 
     public void setBlock(Block b) {

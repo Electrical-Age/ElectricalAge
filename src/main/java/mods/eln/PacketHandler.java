@@ -37,7 +37,7 @@ public class PacketHandler {
         FMLProxyPacket packet = event.getPacket();
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
         NetworkManager manager = event.getManager();
-        EntityPlayer player = ((NetHandlerPlayServer) event.getHandler()).playerEntity; // EntityPlayerMP
+        EntityPlayer player = ((NetHandlerPlayServer) event.getHandler()).player; // EntityPlayerMP
 
         packetRx(stream, manager, player);
     }
@@ -119,7 +119,7 @@ public class PacketHandler {
         try {
             if (stream.readByte() != player.dimension)
                 return;
-            SoundClient.play(SoundCommand.fromStream(stream, player.worldObj));
+            SoundClient.play(SoundCommand.fromStream(stream, player.world));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -131,7 +131,7 @@ public class PacketHandler {
         EntityPlayer clientPlayer = (EntityPlayer) player;
         try {
             clientPlayer.openGui(Eln.instance, stream.readInt(),
-                clientPlayer.worldObj, stream.readInt(), stream.readInt(),
+                clientPlayer.world, stream.readInt(), stream.readInt(),
                 stream.readInt());
         } catch (IOException e) {
             e.printStackTrace();
@@ -166,7 +166,7 @@ public class PacketHandler {
 
 
             if (clientPlayer.dimension == dimension) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(new BlockPos(x,y,z));
+                TileEntity entity = clientPlayer.world.getTileEntity(new BlockPos(x,y,z));
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {
@@ -199,7 +199,7 @@ public class PacketHandler {
             dimension = stream.readByte();
 
             if (clientPlayer.dimension == dimension) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(new BlockPos(x,y,z));
+                TileEntity entity = clientPlayer.world.getTileEntity(new BlockPos(x,y,z));
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {

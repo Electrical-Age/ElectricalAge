@@ -19,6 +19,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -30,7 +31,7 @@ import java.util.List;
 
 public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
     TransparentNodeElementRender elementRender = null;
-    short elementRenderId;
+    private short elementRenderId;
 
 
     @Override
@@ -57,26 +58,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
                 elementRender.networkUnserialize(stream);
             }
 
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
+        } catch (IOException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
 
@@ -123,9 +105,9 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         if (elementRender != null) elementRender.notifyNeighborSpawn();
     }
 
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, Coordinate blockCoord) {
+    public void addCollisionBoxesToList(AxisAlignedBB axisAlignedBB, List<AxisAlignedBB> list, Coordinate blockCoord) {
         TransparentNodeDescriptor desc = null;
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             desc = elementRender == null ? null : elementRender.transparentNodedescriptor;
         } else {
             TransparentNode node = (TransparentNode) getNode();
@@ -139,9 +121,9 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         }
         if (desc == null) {
             AxisAlignedBB bb = new AxisAlignedBB(pos);
-            if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+            if (axisAlignedBB.intersects(bb)) list.add(bb);
         } else {
-            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, pos);
+            desc.addCollisionBoxesToList(axisAlignedBB, list, pos);
         }
     }
 
@@ -177,19 +159,18 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     ISidedInventory getSidedInventory() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             if (elementRender == null) return FakeSideInventory.getInstance();
             IInventory i = elementRender.getInventory();
-            if (i != null && i instanceof ISidedInventory) {
+            if (i instanceof ISidedInventory) {
                 return (ISidedInventory) i;
             }
         } else {
             Node node = getNode();
-            if (node != null && node instanceof TransparentNode) {
+            if (node instanceof TransparentNode) {
                 TransparentNode tn = (TransparentNode) node;
                 IInventory i = tn.getInventory(null);
-                ;
-                if (i != null && i instanceof ISidedInventory) {
+                if (i instanceof ISidedInventory) {
                     return (ISidedInventory) i;
                 }
             }
@@ -202,26 +183,30 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         return getSidedInventory().getSizeInventory();
     }
 
+    @NotNull
     @Override
     public ItemStack getStackInSlot(int var1) {
         return getSidedInventory().getStackInSlot(var1);
     }
 
+    @NotNull
     @Override
     public ItemStack decrStackSize(int var1, int var2) {
         return getSidedInventory().decrStackSize(var1, var2);
     }
 
+    @NotNull
     @Override
     public ItemStack removeStackFromSlot(int var1) {
         return getSidedInventory().removeStackFromSlot(var1);
     }
 
     @Override
-    public void setInventorySlotContents(int var1, ItemStack var2) {
+    public void setInventorySlotContents(int var1, @NotNull ItemStack var2) {
         getSidedInventory().setInventorySlotContents(var1, var2);
     }
 
+    @NotNull
     @Override
     public String getName() {
         return getSidedInventory().getName();
@@ -238,21 +223,26 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer var1) {
-        return getSidedInventory().isUseableByPlayer(var1);
+    public boolean isEmpty() {
+        return getSidedInventory().isEmpty();
     }
 
     @Override
-    public void openInventory(EntityPlayer var1) {
-        getSidedInventory().openInventory(var1);
+    public boolean isUsableByPlayer(@NotNull EntityPlayer player) {
+        return getSidedInventory().isUsableByPlayer(player);
     }
 
     @Override
-    public void closeInventory(EntityPlayer var1) { getSidedInventory().closeInventory(var1); }
+    public void openInventory(EntityPlayer player) {
+        getSidedInventory().openInventory(player);
+    }
 
     @Override
-    public boolean isItemValidForSlot(int var1, ItemStack var2) {
-        return getSidedInventory().isItemValidForSlot(var1, var2);
+    public void closeInventory(EntityPlayer player) { getSidedInventory().closeInventory(player); }
+
+    @Override
+    public boolean isItemValidForSlot(int var1, ItemStack stack) {
+        return getSidedInventory().isItemValidForSlot(var1, stack);
     }
 
     @Override
@@ -262,7 +252,6 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
     @Override
     public void setField(int id, int value) {
-
     }
 
     @Override
@@ -272,21 +261,20 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
     @Override
     public void clear() {
-
     }
 
     @Override
-    public int[] getSlotsForFace(EnumFacing var1) {
-        return getSidedInventory().getSlotsForFace(var1);
+    public int[] getSlotsForFace(@NotNull EnumFacing facing) {
+        return getSidedInventory().getSlotsForFace(facing);
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing var3) {
-        return getSidedInventory().canInsertItem(var1, var2, var3);
+    public boolean canInsertItem(int var1, @NotNull ItemStack stack, @NotNull EnumFacing facing) {
+        return getSidedInventory().canInsertItem(var1, stack, facing);
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing var3) {
-        return getSidedInventory().canExtractItem(var1, var2, var3);
+    public boolean canExtractItem(int var1, @NotNull ItemStack stack, @NotNull EnumFacing facing) {
+        return getSidedInventory().canExtractItem(var1, stack, facing);
     }
 }

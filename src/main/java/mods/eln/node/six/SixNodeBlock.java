@@ -96,13 +96,11 @@ public class SixNodeBlock extends NodeBlock {
 
     }
 
+    // TODO(1.12) Whatever this was, it's broken now.
     // @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
-        /*
-		 * for (Integer id : repertoriedItemStackId) { subItems.add(new ItemStack(this, 1, id)); }
-		 */
-        Eln.sixNodeItem.getSubItems(par1, tab, subItems);
-    }
+//    public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
+//        Eln.sixNodeItem.getSubItems(par1, tab, subItems);
+//    }
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
@@ -327,75 +325,75 @@ public class SixNodeBlock extends NodeBlock {
         }
         // XN
 
-        if (isIn(x, end.xCoord, start.xCoord) && booltemp[0]) {
+        if (isIn(x, end.x, start.x) && booltemp[0]) {
             double hitX, hitY, hitZ, ratio;
-            ratio = (x - start.xCoord) / (end.xCoord - start.xCoord);
+            ratio = (x - start.x) / (end.x - start.x);
             if (ratio <= 1.1) {
-                hitX = start.xCoord + ratio * (end.xCoord - start.xCoord);
-                hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
-                hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
+                hitX = start.x + ratio * (end.x - start.x);
+                hitY = start.y + ratio * (end.y - start.y);
+                hitZ = start.z + ratio * (end.z - start.z);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
                     return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.XN.toForge(), pos);
             }
         }
         // XP
-        if (isIn(x + 1, start.xCoord, end.xCoord) && booltemp[1]) {
+        if (isIn(x + 1, start.x, end.x) && booltemp[1]) {
             double hitX, hitY, hitZ, ratio;
-            ratio = (x + 1 - start.xCoord) / (end.xCoord - start.xCoord);
+            ratio = (x + 1 - start.x) / (end.x - start.x);
             if (ratio <= 1.1) {
-                hitX = start.xCoord + ratio * (end.xCoord - start.xCoord);
-                hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
-                hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
+                hitX = start.x + ratio * (end.x - start.x);
+                hitY = start.y + ratio * (end.y - start.y);
+                hitZ = start.z + ratio * (end.z - start.z);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
                     return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.XP.toForge(), pos);
             }
         }
         // YN
-        if (isIn(y, end.yCoord, start.yCoord) && booltemp[2]) {
+        if (isIn(y, end.y, start.y) && booltemp[2]) {
             double hitX, hitY, hitZ, ratio;
-            ratio = (y - start.yCoord) / (end.yCoord - start.yCoord);
+            ratio = (y - start.y) / (end.y - start.y);
             if (ratio <= 1.1) {
-                hitX = start.xCoord + ratio * (end.xCoord - start.xCoord);
-                hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
-                hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
+                hitX = start.x + ratio * (end.x - start.x);
+                hitY = start.y + ratio * (end.y - start.y);
+                hitZ = start.z + ratio * (end.z - start.z);
                 if (isIn(hitX, x + w, x + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
                     return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.YN.toForge(), pos);
             }
 
         }
         // YP
-        if (isIn(y + 1, start.yCoord, end.yCoord) && booltemp[3]) {
+        if (isIn(y + 1, start.y, end.y) && booltemp[3]) {
             double hitX, hitY, hitZ, ratio;
-            ratio = (y + 1 - start.yCoord) / (end.yCoord - start.yCoord);
+            ratio = (y + 1 - start.y) / (end.y - start.y);
             if (ratio <= 1.1) {
-                hitX = start.xCoord + ratio * (end.xCoord - start.xCoord);
-                hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
-                hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
+                hitX = start.x + ratio * (end.x - start.x);
+                hitY = start.y + ratio * (end.y - start.y);
+                hitZ = start.z + ratio * (end.z - start.z);
                 if (isIn(hitX, x + w, x + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
                     return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.YP.toForge(), pos);
             }
         }
         // ZN
-        if (isIn(z, end.zCoord, start.zCoord) && booltemp[4]) {
+        if (isIn(z, end.z, start.z) && booltemp[4]) {
             double hitX, hitY, hitZ, ratio;
-            ratio = (z - start.zCoord) / (end.zCoord - start.zCoord);
+            ratio = (z - start.z) / (end.z - start.z);
             if (ratio <= 1.1) {
-                hitX = start.xCoord + ratio * (end.xCoord - start.xCoord);
-                hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
-                hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
+                hitX = start.x + ratio * (end.x - start.x);
+                hitY = start.y + ratio * (end.y - start.y);
+                hitZ = start.z + ratio * (end.z - start.z);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitX, x + w, x + 1 - w))
                     return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.ZN.toForge(), pos);
 
             }
         }
         // ZP
-        if (isIn(z + 1, start.zCoord, end.zCoord) && booltemp[5]) {
+        if (isIn(z + 1, start.z, end.z) && booltemp[5]) {
             double hitX, hitY, hitZ, ratio;
-            ratio = (z + 1 - start.zCoord) / (end.zCoord - start.zCoord);
+            ratio = (z + 1 - start.z) / (end.z - start.z);
             if (ratio <= 1.1) {
-                hitX = start.xCoord + ratio * (end.xCoord - start.xCoord);
-                hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
-                hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
+                hitX = start.x + ratio * (end.x - start.x);
+                hitY = start.y + ratio * (end.y - start.y);
+                hitZ = start.z + ratio * (end.z - start.z);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitX, x + w, x + 1 - w))
                     return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.ZP.toForge(), pos);
             }
@@ -416,7 +414,7 @@ public class SixNodeBlock extends NodeBlock {
         if (!world.isRemote)
             start = start.addVector(0, 1.62, 0);
         Vec3d var5 = entityLiving.getLook(0.5f);
-        Vec3d end = start.addVector(var5.xCoord * distanceMax, var5.yCoord * distanceMax, var5.zCoord * distanceMax);
+        Vec3d end = start.addVector(var5.x * distanceMax, var5.y * distanceMax, var5.z * distanceMax);
 
         return collisionRayTrace(world.getBlockState(pos), world, pos, start, end);
     }

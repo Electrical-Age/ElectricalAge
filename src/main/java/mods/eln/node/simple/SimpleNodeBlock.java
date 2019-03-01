@@ -114,10 +114,11 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     }
 
     // client server
+
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer entityPlayer, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
-        return entity.onBlockActivated(entityPlayer, Direction.fromFacing(side), vx, vy, vz);
+        return entity.onBlockActivated(playerIn, Direction.fromFacing(facing), hitX, hitY, hitZ);
     }
 
 }

@@ -16,7 +16,6 @@ public class DelayedTaskManager {
 
     public DelayedTaskManager() {
         MinecraftForge.EVENT_BUS.register(this);
-        FMLCommonHandler.instance().bus().register(this);
     }
 
     public void clear() {

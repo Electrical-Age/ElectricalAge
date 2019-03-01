@@ -5,6 +5,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -43,10 +44,14 @@ public class TransparentNodeBlock extends NodeBlock {
 	}
 */
 
+/*
     //@SideOnly(Side.CLIENT)
     public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
+
+
         Eln.transparentNodeItem.getSubItems(par1, tab, subItems);
     }
+*/
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
@@ -108,8 +113,8 @@ public class TransparentNodeBlock extends NodeBlock {
 
     public void addCollisionBoxesToList(World world, BlockPos pos, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
         TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity == null || (tileEntity instanceof TransparentNodeEntity == false)) {
-            super.addCollisionBoxToList(world.getBlockState(pos), world, pos, par5AxisAlignedBB, list, entity);
+        if ((!(tileEntity instanceof TransparentNodeEntity))) {
+            addCollisionBoxToList(pos, entity.getCollisionBoundingBox(), list, par5AxisAlignedBB);
         } else {
             ((TransparentNodeEntity) tileEntity).addCollisionBoxesToList(par5AxisAlignedBB, list, null);
         }
@@ -129,20 +134,10 @@ public class TransparentNodeBlock extends NodeBlock {
             // wanted the superclass.
             System.out.println("Unknown block meta-tag: " + state.getBlock().getMetaFromState(state));
             return (TileEntity) EntityMetaTag.Basic.cls.getConstructor().newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
-        while (true) ;
+        throw new IllegalStateException("Failed to create tile entity.");
     }
 
     public String getNodeUuid() {

@@ -1,5 +1,6 @@
 package mods.eln.client;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -16,7 +17,7 @@ public class FrameTime {
 
     public FrameTime() {
         instance = this;
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public void init() {
@@ -59,7 +60,7 @@ public class FrameTime {
 
         //Utils.println(NodeBlockEntity.clientList.size());
         Iterator<NodeBlockEntity> i = NodeBlockEntity.clientList.iterator();
-        World w = Minecraft.getMinecraft().theWorld;
+        World w = Minecraft.getMinecraft().world;
 
         if (!Utils.isGameInPause()) {
             float deltaTcaped = getNotCaped2();
@@ -72,7 +73,7 @@ public class FrameTime {
                 e.clientRefresh(deltaTcaped);
             }
         }
-        //Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(1, 1).
+        //Minecraft.getMinecraft().world.getChunkFromChunkCoords(1, 1).
         //	Utils.println("delta T : " + deltaT + "   " + event);
     }
 }

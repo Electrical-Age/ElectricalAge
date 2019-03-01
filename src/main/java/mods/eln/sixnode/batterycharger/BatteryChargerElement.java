@@ -218,12 +218,8 @@ public class BatteryChargerElement extends SixNodeElement {
                 descriptor.setRp(powerResistor, false);
             } else {
                 ItemStack booster = (getInventory().getStackInSlot(BatteryChargerContainer.boosterSlotId));
-                double boost = 1.0;
-                double eff = 1.0;
-                if (booster != null) {
-                    boost = Math.pow(1.25, booster.stackSize);
-                    eff = Math.pow(0.9, booster.stackSize);
-                }
+                double boost = Math.pow(1.25, booster.getCount());
+                double eff = Math.pow(0.9, booster.getCount());
 
                 energyCounter += powerResistor.getP() * time * eff;
 

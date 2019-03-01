@@ -82,17 +82,17 @@ public class ReplicatorEntity extends EntityMob {
         hunger += 0.05 / hungerTime;
 
         if (hunger > 1 && Math.random() < 0.05 / 5) {
-            attackEntityFrom(DamageSource.starve, 1);
+            attackEntityFrom(DamageSource.STARVE, 1);
         }
         if (hunger < 0.5 && Math.random() * 10 < 0.05) {
             heal(1f);
         }
         if (hunger < hungerToDuplicate) {
-            ReplicatorEntity entityliving = new ReplicatorEntity(this.worldObj);
+            ReplicatorEntity entityliving = new ReplicatorEntity(this.world);
             entityliving.setLocationAndAngles(this.posX, this.posY, this.posZ, 0f, 0f);
             entityliving.rotationYawHead = entityliving.rotationYaw;
             entityliving.renderYawOffset = entityliving.rotationYaw;
-            worldObj.spawnEntityInWorld(entityliving);
+            world.spawnEntity(entityliving);
             entityliving.playLivingSound();
             hunger = 0;
         }
@@ -143,13 +143,8 @@ public class ReplicatorEntity extends EntityMob {
 
         if (isSpawnedFromWeather) {
             if (Math.random() < 0.33) {
-                for (Object s : EntityList.ID_TO_CLASS.entrySet()) {
-                    Entry e = (Entry) s;
-                    if (e.getValue() == ReplicatorEntity.class) {
-                        this.entityDropItem(new ItemStack((Item) Item.getByNameOrId("spawn_egg"), 1, (Integer) e.getKey()), 0.5f);
-                        break;
-                    }
-                }
+                int id = EntityList.getID(ReplicatorEntity.class);
+                this.entityDropItem(new ItemStack(Item.getByNameOrId("spawn_egg"), 1, id), 0.5f);
             }
         }
     }

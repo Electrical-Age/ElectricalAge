@@ -20,7 +20,7 @@ public class ReplicatorPopProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
+        World world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
 
         int replicatorCount = 0;
 
@@ -40,7 +40,7 @@ public class ReplicatorPopProcess implements IProcess {
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
             for (Object obj : world.playerEntities) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
-                if (Math.random() * (world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {
+                if (Math.random() * (world.playerEntities.size()) < time * popPerSecondPerPlayer && player.world == world) {
                     int x, y, z;
                     x = (int) (player.posX + Utils.rand(-100, 100));
                     z = (int) (player.posZ + Utils.rand(-100, 100));
@@ -52,13 +52,13 @@ public class ReplicatorPopProcess implements IProcess {
                         y++;
                     }
 
-                    ReplicatorEntity entityliving = new ReplicatorEntity(world);
-                    entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
-                    entityliving.rotationYawHead = entityliving.rotationYaw;
-                    entityliving.renderYawOffset = entityliving.rotationYaw;
-                    world.spawnEntityInWorld(entityliving);
-                    entityliving.playLivingSound();
-                    entityliving.isSpawnedFromWeather = true;
+                    ReplicatorEntity replicator = new ReplicatorEntity(world);
+                    replicator.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
+                    replicator.rotationYawHead = replicator.rotationYaw;
+                    replicator.renderYawOffset = replicator.rotationYaw;
+                    world.spawnEntity(replicator);
+                    replicator.playLivingSound();
+                    replicator.isSpawnedFromWeather = true;
                     Utils.println("Spawn Replicator at " + x + " " + y + " " + z);
                 }
             }
@@ -94,7 +94,7 @@ if (Math.random() < time * popPerSecondPerChunk * world.getChunkProvider().getLo
 			entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
 			entityliving.rotationYawHead = entityliving.rotationYaw;
 			entityliving.renderYawOffset = entityliving.rotationYaw;
-			world.spawnEntityInWorld(entityliving);
+			world.spawnEntity(entityliving);
 			entityliving.playLivingSound();
 			entityliving.isSpawnedFromWeather = true;
 		//	Utils.println("Spawn Replicator at " + x + " " + y + " " + z);					

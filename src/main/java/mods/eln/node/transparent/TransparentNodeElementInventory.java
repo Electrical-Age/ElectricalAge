@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
+import org.jetbrains.annotations.NotNull;
 
 public class TransparentNodeElementInventory implements ISidedInventory, INBTTReady {
     protected TransparentNodeElementRender transparentNodeRender = null;
@@ -39,42 +40,31 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
         return getInv().length;
     }
 
+    @NotNull
     @Override
     public ItemStack getStackInSlot(int slot) {
-
         return getInv()[slot];
     }
 
     @Override
     public ItemStack decrStackSize(int slot, int amt) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            if (stack.stackSize <= amt) {
-                setInventorySlotContents(slot, null);
-            } else {
-                stack = stack.splitStack(amt);
-                if (stack.stackSize == 0) {
-                    setInventorySlotContents(slot, null);
-                }
-            }
-        }
+        stack.splitStack(amt);
         return stack;
     }
 
     @Override
     public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            setInventorySlotContents(slot, null);
-        }
+        stack.setCount(0);
         return stack;
     }
 
     @Override
-    public void setInventorySlotContents(int slot, ItemStack stack) {
+    public void setInventorySlotContents(int slot, @NotNull ItemStack stack) {
         getInv()[slot] = stack;
-        if (stack != null && stack.stackSize > getInventoryStackLimit()) {
-            stack.stackSize = getInventoryStackLimit();
+        if (stack.getCount() > getInventoryStackLimit()) {
+            stack.setCount(getInventoryStackLimit());
         }
     }
 
@@ -85,18 +75,20 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
 
     @Override
     public int getInventoryStackLimit() {
-
         return stackLimit;
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer player) {
-
-		/*
-         * if(transparentNodeElement != null) { if(NodeManager.instance.getNodeFromCoordonate(transparentNodeElement.node.coordinate) != transparentNodeElement.node) return false; return player.getDistance(transparentNodeElement.node.coordinate.x + 0.5, transparentNodeElement.node.coordinate.y + 0.5, transparentNodeElement.node.coordinate.z + 0.5) < 10; }
-		 */
+    public boolean isEmpty() {
+        for (ItemStack stack : getInv()) {
+            if (!stack.isEmpty()) return false;
+        }
         return true;
-        // return player.getDistanceSq(transparentNodeRender.tileEntity.xCoord + 0.5, transparentNodeRender.tileEntity.yCoord + 0.5, transparentNodeRender.tileEntity.zCoord + 0.5) < 18;
+    }
+
+    @Override
+    public boolean isUsableByPlayer(EntityPlayer player) {
+        return true;
     }
 
     @Override

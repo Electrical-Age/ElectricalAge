@@ -264,7 +264,7 @@ public class Obj3D {
         // Returns the bounding box of the vertices we'd draw.
         public BoundingBox boundingBox() {
             if (boundingBox == null) {
-                BoundingBox box = BoundingBox.mergeIdentity();
+                BoundingBox box = BoundingBox.Companion.mergeIdentity();
                 for (FaceGroup fg : faceGroup) {
                     box = box.merge(fg.boundingBox());
                 }

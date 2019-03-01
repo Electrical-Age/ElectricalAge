@@ -42,16 +42,16 @@ public class ClientProxy extends CommonProxy {
             manager -> new ReplicatorRender(manager, new ModelSilverfish(), 0.3f));
 
         Eln.clientKeyHandler = new ClientKeyHandler();
-        FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
+        MinecraftForge.EVENT_BUS.register(Eln.clientKeyHandler);
         MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
         uuidManager = new UuidManager();
         soundClientEventListener = new SoundClientEventListener(uuidManager);
 
         if (Eln.versionCheckEnabled)
-            FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
+            MinecraftForge.EVENT_BUS.register(VersionCheckerHandler.getInstance());
 
         if (Eln.analyticsEnabled)
-            FMLCommonHandler.instance().bus().register(AnalyticsHandler.getInstance());
+            MinecraftForge.EVENT_BUS.register(AnalyticsHandler.getInstance());
 
         new FrameTime();
         new ConnectionListener();

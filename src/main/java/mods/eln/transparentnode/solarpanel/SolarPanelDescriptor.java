@@ -151,6 +151,6 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
             return;
         }
         AxisAlignedBB bb = new AxisAlignedBB(pos).setMaxY(0.5);
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

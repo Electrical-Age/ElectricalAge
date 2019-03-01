@@ -113,7 +113,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
                     for (int idx = 0; idx < lamp.socketDescriptor.range + light; idx++) {
                         // newCoord.move(lamp.side.getInverse());
-                        vp.addVector(vv.xCoord, vv.yCoord, vv.zCoord);
+                        vp.addVector(vv.x, vv.y, vv.z);
                         c.setPosition(vp);
                         Block b = c.getBlockState().getBlock();
 
@@ -122,7 +122,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                             break;
                         }
                         if (isOpaque(c)) {
-                            vp.addVector(-vv.xCoord, -vv.yCoord, -vv.zCoord);
+                            vp.addVector(-vv.x, -vv.y, -vv.z);
                             c.setPosition(vp);
                             b = c.getBlockState().getBlock();
                             break;
@@ -267,9 +267,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public void rotateAroundZ(Vec3d v, float par1) {
         float f1 = MathHelper.cos(par1);
         float f2 = MathHelper.sin(par1);
-        double d0 = v.xCoord * (double) f1 + v.yCoord * (double) f2;
-        double d1 = v.yCoord * (double) f1 - v.xCoord * (double) f2;
-        double d2 = v.zCoord;
+        double d0 = v.x * (double) f1 + v.y * (double) f2;
+        double d1 = v.y * (double) f1 - v.x * (double) f2;
+        double d2 = v.z;
         v = new Vec3d(d0, d1, d2);
     }
 
@@ -295,7 +295,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                 break;
             }
             if (isOpaque(newCoord)) {
-                vp.add(new Vec3d(-vv.xCoord, -vv.yCoord, -vv.zCoord));
+                vp.add(new Vec3d(-vv.x, -vv.y, -vv.z));
                 newCoord.setPosition(vp);
                 break;
             }
@@ -309,7 +309,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     if (count == 2)
                         break;
                 }
-                vp.add(new Vec3d(-vv.xCoord, -vv.yCoord, -vv.zCoord));
+                vp.add(new Vec3d(-vv.x, -vv.y, -vv.z));
                 newCoord.setPosition(vp);
             }
         }

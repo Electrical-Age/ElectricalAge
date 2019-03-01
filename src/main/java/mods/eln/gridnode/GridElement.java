@@ -64,30 +64,30 @@ abstract public class GridElement extends TransparentNodeElement {
         }
         // Check if it's the *correct* cable descriptor.
         if (!cable.equals(desc.cableDescriptor)) {
-            Utils.addChatMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
+            Utils.sendMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
             return true;
         }
         if (other == null || other == this) {
-            Utils.addChatMessage(entityPlayer, "Setting starting point");
+            Utils.sendMessage(entityPlayer, "Setting starting point");
             pending.put(uuid, Pair.of(this.coordinate(), side));
         } else {
             final double distance = other.coordinate().trueDistanceTo(this.coordinate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
-            if (stack.stackSize < distance) {
-                Utils.addChatMessage(entityPlayer, "You need " + cableLength + " units of cable");
+            if (stack.getCount() < distance) {
+                Utils.sendMessage(entityPlayer, "You need " + cableLength + " units of cable");
             } else if (distance > range) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
+                Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
             } else if (!this.canConnect(other)) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect these two objects");
+                Utils.sendMessage(entityPlayer, "Cannot connect these two objects");
             } else if (!this.validLOS(other)) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect, no line of sight");
+                Utils.sendMessage(entityPlayer, "Cannot connect, no line of sight");
             } else {
                 if (GridLink.addLink(this, other, side, p.getRight(), cable, cableLength)) {
-                    Utils.addChatMessage(entityPlayer, "Added connection");
+                    Utils.sendMessage(entityPlayer, "Added connection");
                     stack.splitStack(cableLength);
                 } else {
-                    Utils.addChatMessage(entityPlayer, "Already connected");
+                    Utils.sendMessage(entityPlayer, "Already connected");
                 }
             }
             pending.remove(uuid);
@@ -287,9 +287,9 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     private void writeVec(DataOutputStream stream, Vec3d sp) throws IOException {
-        stream.writeFloat((float) sp.xCoord);
-        stream.writeFloat((float) sp.yCoord);
-        stream.writeFloat((float) sp.zCoord);
+        stream.writeFloat((float) sp.x);
+        stream.writeFloat((float) sp.y);
+        stream.writeFloat((float) sp.z);
     }
 
     @Override

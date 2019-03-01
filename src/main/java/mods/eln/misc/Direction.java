@@ -475,7 +475,7 @@ public enum Direction {
     }
 
     public Vec3d rotateFromXN(Vec3d vec) {
-        double x = vec.xCoord, y = vec.yCoord, z = vec.zCoord;
+        double x = vec.x, y = vec.y, z = vec.z;
         switch (this) {
             case XN:
                 break;
@@ -527,31 +527,31 @@ public enum Direction {
 
 
 //    public void rotateFromXN(Vec3d p) {
-//        double x = p.xCoord, y = p.yCoord, z = p.zCoord;
+//        double x = p.x, y = p.y, z = p.z;
 //        switch (this) {
 //            case XN:
 //                break;
 //            case XP:
-//                p.xCoord = -x;
-//                p.zCoord = -z;
+//                p.x = -x;
+//                p.z = -z;
 //                break;
 //            case YN:
-//                p.xCoord = y;
-//                p.yCoord = x;
-//                p.zCoord = -z;
+//                p.x = y;
+//                p.y = x;
+//                p.z = -z;
 //                break;
 //            case YP:
-//                p.xCoord = y;
-//                p.yCoord = -x;
-//                p.zCoord = z;
+//                p.x = y;
+//                p.y = -x;
+//                p.z = z;
 //                break;
 //            case ZN:
-//                p.xCoord = -z;
-//                p.zCoord = x;
+//                p.x = -z;
+//                p.z = x;
 //                break;
 //            case ZP:
-//                p.xCoord = z;
-//                p.zCoord = -x;
+//                p.x = z;
+//                p.z = -x;
 //                break;
 //            default:
 //                break;

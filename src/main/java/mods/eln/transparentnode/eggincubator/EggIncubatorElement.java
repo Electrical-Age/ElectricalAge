@@ -76,14 +76,12 @@ public class EggIncubatorElement extends TransparentNodeElement {
                     inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
                     EntityChicken chicken = new EntityChicken(node.coordinate.world());
                     chicken.setGrowingAge(-24000);
-                    EntityLiving entityliving = (EntityLiving) chicken;
-                    entityliving.setLocationAndAngles(node.coordinate.pos.getX() + 0.5, node.coordinate.pos.getY() + 0.5, node.coordinate.pos.getZ() + 0.5, MathHelper.wrapDegrees(node.coordinate.world().rand.nextFloat() * 360.0F), 0.0F);
-                    entityliving.rotationYawHead = entityliving.rotationYaw;
-                    entityliving.renderYawOffset = entityliving.rotationYaw;
-                    //entityliving.func_110161_a((EntityLivingData)null); 1.6.4
-                    node.coordinate.world().spawnEntityInWorld(entityliving);
-                    entityliving.playLivingSound();
-                    //node.coordinate.world().spawnEntityInWorld());
+                    chicken.setLocationAndAngles(node.coordinate.pos.getX() + 0.5, node.coordinate.pos.getY() + 0.5, node.coordinate.pos.getZ() + 0.5, MathHelper.wrapDegrees(node.coordinate.world().rand.nextFloat() * 360.0F), 0.0F);
+                    chicken.rotationYawHead = chicken.rotationYaw;
+                    chicken.renderYawOffset = chicken.rotationYaw;
+                    node.coordinate.world().spawnEntity(chicken);
+                    chicken.playLivingSound();
+                    //node.coordinate.world().spawnEntity());
                     resetEnergy();
 
                     needPublish();
@@ -174,8 +172,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
-            else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).stackSize);
+            stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).getCount());
 
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 
@@ -189,7 +186,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Has egg"), inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null ?
+        info.put(I18N.tr("Has egg"), !inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).isEmpty() ?
             I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Power consumption"), Utils.plotPower("", powerResistor.getP()));

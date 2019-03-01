@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -52,7 +53,8 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         descriptors.add(descriptor);
         descriptor.setParent(this, damage);
         // TODO(1.10): Mumble mumble.
-        GameRegistry.register(descriptor.parentItem);
+        throw new IllegalStateException("This code is fucked.");
+//        GameRegistry.register(descriptor.parentItem);
     }
 
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
@@ -123,16 +125,21 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 //        }
 //    }
 
+
     @SideOnly(Side.CLIENT)
     @Override
-    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
+    public void getSubItems(CreativeTabs tabs, NonNullList<ItemStack> items) {
+        // TODO(1.12)
+        throw new IllegalStateException("Don't get me started.");
+
         // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
-        //for(Entry<Integer, Descriptor> entry : subItemList.entrySet())
-        for (int id : orderList) {
-            ItemStack stack = Utils.newItemStack(itemID, 1, id);
-            stack.setTagCompound(subItemList.get(id).getDefaultNBT());
-            list.add(stack);
-        }
+        //for(Entry<Integer, Descriptor> entry : subItemList.entrySet()
+
+//        for (int id : orderList) {
+//            ItemStack stack = Utils.newItemStack(itemID, 1, id);
+//            stack.setTagCompound(subItemList.get(id).getDefaultNBT());
+//            list.add(stack);
+//        }
     }
 
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
@@ -143,17 +150,17 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         UtilsClient.showItemTooltip(listFromDescriptor, list);
     }
 
-    public boolean onEntityItemUpdate(EntityItem entityItem) {
-        Descriptor desc = getDescriptor(entityItem.getEntityItem());
-        if (desc != null) return desc.onEntityItemUpdate(entityItem);
-        return false;
-    }
-
-    //TODO: Maybe its onItemUse only?
-    @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-        Descriptor desc = getDescriptor(stack);
-        if (desc != null) return desc.onItemUse(stack, player);
-        return EnumActionResult.FAIL;
-    }
+//    public boolean onEntityItemUpdate(EntityItem entityItem) {
+//        Descriptor desc = getDescriptor(entityItem.getEntityItem());
+//        if (desc != null) return desc.onEntityItemUpdate(entityItem);
+//        return false;
+//    }
+//
+//    //TODO: Maybe its onItemUse only?
+//    @Override
+//    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+//        Descriptor desc = getDescriptor(stack);
+//        if (desc != null) return desc.onItemUse(stack, player);
+//        return EnumActionResult.FAIL;
+//    }
 }

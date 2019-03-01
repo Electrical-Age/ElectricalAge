@@ -2,14 +2,12 @@ package mods.eln;
 
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
-import mods.eln.client.SoundLoader;
 import mods.eln.entity.EntityIDs;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.eventhandlers.ElnFMLEventsHandler;
 import mods.eln.eventhandlers.ElnForgeEventsHandler;
 import mods.eln.generic.*;
-import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
@@ -30,13 +28,11 @@ import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeManagerNbt;
 import mods.eln.node.NodeServer;
-import mods.eln.node.simple.SimpleNodeItem;
 import mods.eln.node.six.*;
 import mods.eln.node.transparent.*;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
-import mods.eln.packets.*;
 import mods.eln.server.*;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
@@ -45,15 +41,7 @@ import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.simplenode.computerprobe.ComputerProbeBlock;
-import mods.eln.simplenode.computerprobe.ComputerProbeEntity;
-import mods.eln.simplenode.computerprobe.ComputerProbeNode;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.OcDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
 import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
@@ -115,7 +103,6 @@ import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
-import mods.eln.transparentnode.computercraftio.PeripheralHandler;
 import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
 import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
@@ -139,7 +126,6 @@ import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
 import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
@@ -148,36 +134,28 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.*;
-import net.minecraft.item.Item.ToolMaterial;
-import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -318,9 +296,14 @@ public class Eln {
 
     public static double maxSoundDistance = 16;
     private double cablePowerFactor;
+    private final ResourceLocation resourceEln = new ResourceLocation(MODID);
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+
+        // TODO(1.12): Finish reimplementing this.
+
+        /*
         elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel(Eln.MODID);
         elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
         elnNetwork.registerMessage(TransparentNodeResponsePacketHandler.class, TransparentNodeResponsePacket.class, 2, Side.CLIENT);
@@ -527,10 +510,12 @@ public class Eln {
         transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
 
         oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
-        /*
+        */
+/*
          *
 		 * int id = 0,subId = 0,completId; String name;
-		 */
+		 *//*
+
 
         SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
@@ -629,6 +614,7 @@ public class Eln {
         if (isDevelopmentRun()) {
             registerWipItems();
         }
+*/
     }
 
     private void registerGridDevices(int id) {
@@ -686,7 +672,7 @@ public class Eln {
     private boolean ComputerProbeEnable;
     private boolean ElnToOtherEnergyConverterEnable;
 
-    // FMLCommonHandler.instance().bus().register(this);
+    // MinecraftForge.EVENT_BUS.register(this);
 
 
     @EventHandler
@@ -807,7 +793,7 @@ public class Eln {
         checkRecipe();
 
         MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
-        FMLCommonHandler.instance().bus().register(new ElnFMLEventsHandler());
+        MinecraftForge.EVENT_BUS.register(new ElnFMLEventsHandler());
 
         FMLInterModComms.sendMessage("Waila", "register", "mods.eln.integration.waila.WailaIntegration.callbackRegister");
 
@@ -818,6 +804,7 @@ public class Eln {
     private EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
     private EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
 
+/*
     private void registerEnergyConverter() {
         if (ElnToOtherEnergyConverterEnable) {
             String entityName = "eln.EnergyConverterElnToOtherEntity";
@@ -860,10 +847,12 @@ public class Eln {
             }
         }
     }
+*/
 
 
     private ComputerProbeBlock computerProbeBlock;
 
+/*
     private void registerComputer() {
         if (ComputerProbeEnable) {
             String entityName = TR_NAME(Type.TILE, "eln.ElnProbe");
@@ -878,6 +867,7 @@ public class Eln {
         }
 
     }
+*/
 
     TestBlock testBlock;
 
@@ -893,55 +883,43 @@ public class Eln {
         Utils.println("No recipe for ");
         for (SixNodeDescriptor d : sixNodeItem.subItemList.values()) {
             ItemStack stack = d.newItemStack();
-            if (!recipeExists(stack)) {
+            if (recipeMissing(stack)) {
                 Utils.println("  " + d.name);
             }
         }
         for (TransparentNodeDescriptor d : transparentNodeItem.subItemList.values()) {
             ItemStack stack = d.newItemStack();
-            if (!recipeExists(stack)) {
+            if (recipeMissing(stack)) {
                 Utils.println("  " + d.name);
             }
         }
         for (GenericItemUsingDamageDescriptor d : sharedItem.subItemList.values()) {
             ItemStack stack = d.newItemStack();
-            if (!recipeExists(stack)) {
+            if (recipeMissing(stack)) {
                 Utils.println("  " + d.name);
             }
         }
         for (GenericItemUsingDamageDescriptor d : sharedItemStackOne.subItemList.values()) {
             ItemStack stack = d.newItemStack();
-            if (!recipeExists(stack)) {
+            if (recipeMissing(stack)) {
                 Utils.println("  " + d.name);
             }
         }
     }
 
-    private boolean recipeExists(ItemStack stack) {
-        if (stack == null)
-            return false;
-        List list = CraftingManager.getInstance().getRecipeList();
-        for (Object o : list) {
-            if (o instanceof IRecipe) {
-                IRecipe r = (IRecipe) o;
-                if (r.getRecipeOutput() == null)
-                    continue;
-                if (Utils.areSame(stack, r.getRecipeOutput()))
-                    return true;
-            }
+    private boolean recipeMissing(@NotNull ItemStack stack) {
+        for (IRecipe recipe : CraftingManager.REGISTRY) {
+            if (Utils.areSame(stack, recipe.getRecipeOutput()))
+                return false;
         }
-        return false;
+        return true;
     }
-
-    // ElnHttpServer elnHttpServer;
 
     public ServerEventListener serverEventListener;
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-
         serverEventListener = new ServerEventListener();
-
     }
 
 	/*
@@ -993,8 +971,6 @@ public class Eln {
 
     }
 
-    //public TileEntityDestructor tileEntityDestructor;
-
     public static WindProcess wind;
 
     @EventHandler
@@ -1023,7 +999,7 @@ public class Eln {
         {
             MinecraftServer server = FMLCommonHandler.instance()
                 .getMinecraftServerInstance();
-            WorldServer worldServer = server.worldServers[0];
+            WorldServer worldServer = server.getWorld(0);
 
 
             ghostManagerNbt = (GhostManagerNbt) worldServer.getMapStorage().getOrLoadData(
@@ -3991,7 +3967,7 @@ public class Eln {
 //            //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
 //        }
     }
-
+/*
     private void registerTool() {
         // TODO(1.10): Actually, this might be fine.
         {
@@ -4035,7 +4011,7 @@ public class Eln {
             GameRegistry.register(axeCopper);
         }
 
-    }
+    }*/
 
     private void registerSolarTracker(int id) {
         int subId, completId;
@@ -6276,7 +6252,8 @@ public class Eln {
     }
 
     private void addShapelessRecipe(ItemStack output, Object... params) {
-        GameRegistry.addRecipe(new ShapelessOreRecipe(output, params));
+        // TODO(1.12): Either fix this, os preferably use some LL thing. Or JSON recipes, whatever.
+//        GameRegistry.addRecipe(new ShapelessOreRecipe(output, params));
     }
 
     private void recipeElectricalMotor() {
@@ -6686,7 +6663,7 @@ public class Eln {
             return;
         }
         ItemStack output = outOres.get(0).copy();
-        output.stackSize = outputCount;
+        output.setCount(outputCount);
         LogWrapper.info("Adding mod recipe fromFacing " + inputName + " to " + outputName);
         for (ItemStack input : inOres) {
             maceratorRecipes.addRecipe(new Recipe(input, output, f));
@@ -7361,7 +7338,8 @@ public class Eln {
     }
 
     private void addRecipe(ItemStack output, Object... params) {
-        GameRegistry.addRecipe(new ShapedOreRecipe(output, params));
+        // TODO(1.12): Either fix this, os preferably use some LL thing. Or JSON recipes, whatever.
+//        GameRegistry.addRecipe(new ShapedOreRecipe(output, params));
     }
 
     private void recipeTool() {
@@ -7399,13 +7377,13 @@ public class Eln {
     }
 
     private void registerReplicator() {
-        EntityRegistry.registerModEntity(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), EntityIDs.REPLICATOR.getId(), Eln.instance, 20, 20, true);
         // TODO(1.10): Fix.
+//        EntityRegistry.registerModEntity(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), EntityIDs.REPLICATOR.getId(), Eln.instance, 20, 20, true);
 //        ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
 //        ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
 //        ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
-        ReplicatorEntity.dropList.add(new ItemStack(Items.REDSTONE));
-        ReplicatorEntity.dropList.add(new ItemStack(Items.GLOWSTONE_DUST));
+//        ReplicatorEntity.dropList.add(new ItemStack(Items.REDSTONE));
+//        ReplicatorEntity.dropList.add(new ItemStack(Items.GLOWSTONE_DUST));
     }
 
     // Registers WIP items.

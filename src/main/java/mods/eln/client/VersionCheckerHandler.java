@@ -8,6 +8,7 @@ import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -102,9 +103,9 @@ public class VersionCheckerHandler {
             return;
 
         final Minecraft m = FMLClientHandler.instance().getClient();
-        final WorldClient world = m.theWorld;
+        final WorldClient world = m.world;
 
-        if (m == null || world == null)
+        if (world == null)
             return;
 
         if (!ready)
@@ -112,11 +113,11 @@ public class VersionCheckerHandler {
 
         // Print the current version when the client start a map
         if (Eln.versionCheckEnabled) {
-            m.player.addChatMessage(new TextComponentString(Version.printColor()));
-            m.player.addChatMessage(new TextComponentString(versionMsg));
+            m.player.sendMessage(new TextComponentString(Version.printColor()));
+            m.player.sendMessage(new TextComponentString(versionMsg));
         }
 
-        FMLCommonHandler.instance().bus().unregister(this);
+        MinecraftForge.EVENT_BUS.unregister(this);
         ready = false;
     }
 }

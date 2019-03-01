@@ -46,16 +46,13 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
     public double getlValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.cableId);
-        if (core == null)
-            return getlValue(0);
-        else
-            return getlValue(core.stackSize);
+        return getlValue(core.getCount());
     }
 
     public double getRsValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
 
-        if (core == null) return MnaConst.highImpedance;
+        if (core.isEmpty()) return MnaConst.highImpedance;
         FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
         double coreFactor = coreDescriptor.cableMultiplicator;

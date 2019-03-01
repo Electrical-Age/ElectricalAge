@@ -237,7 +237,6 @@ public class PowerSocketElement extends SixNodeElement {
 
     private int getRange(PowerSocketDescriptor desc, SixNodeElementInventory inventory2) {
         ItemStack stack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
-        if (stack == null) return desc.range;
-        return desc.range + stack.stackSize;
+        return desc.range + stack.getCount();
     }
 }

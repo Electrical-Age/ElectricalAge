@@ -166,7 +166,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
 
     // TODO(1.10): Filling with fuel
     override fun onBlockActivated(player: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-//        if (!(player?.worldObj?.isRemote ?: true)) {
+//        if (!(player?.world?.isRemote ?: true)) {
 //            val bucket = player?.heldItemMainhand
 //            if (FluidContainerRegistry.isBucket(bucket) && FluidContainerRegistry.isFilledContainer(bucket)) {
 //                val deltaLevel = 1.0 / FuelGeneratorDescriptor.TankCapacityInBuckets;

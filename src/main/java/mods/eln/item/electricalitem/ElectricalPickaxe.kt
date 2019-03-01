@@ -1,7 +1,6 @@
 package mods.eln.item.electricalitem
 
 import mods.eln.wiki.Data
-import net.minecraft.block.Block
 import net.minecraft.block.material.Material
 import net.minecraft.block.state.IBlockState
 import net.minecraft.item.Item
@@ -15,11 +14,11 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
-    override fun getStrVsBlock(stack: ItemStack, state: IBlockState): Float {
+    override fun getDestroySpeed(stack: ItemStack, state: IBlockState): Float {
         return when {
             state.material in pickaxeEffectiveAgainst -> getStrength(stack)
             state.block in blocksEffectiveAgainst -> getStrength(stack)
-            else -> super.getStrVsBlock(stack, state)
+            else -> super.getDestroySpeed(stack, state)
         }
     }
 

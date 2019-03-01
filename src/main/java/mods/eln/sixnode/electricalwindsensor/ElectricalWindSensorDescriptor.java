@@ -98,7 +98,7 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
     @Override
     public boolean canBePlacedOnSide(EntityPlayer player, Direction side) {
         if (side.isY()) {
-            Utils.addChatMessage(player, tr("You can't place this block on the floor or the ceiling"));
+            Utils.sendMessage(player, tr("You can't place this block on the floor or the ceiling"));
             return false;
         }
         return super.canBePlacedOnSide(player, side);

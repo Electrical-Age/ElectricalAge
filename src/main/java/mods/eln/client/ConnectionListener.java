@@ -1,5 +1,6 @@
 package mods.eln.client;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -17,7 +18,7 @@ import java.io.IOException;
 public class ConnectionListener {
 
     public ConnectionListener() {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     static boolean newConnection = false;

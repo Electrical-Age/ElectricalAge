@@ -135,7 +135,7 @@ public class SixNode extends Node {
 	            double var11 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            EntityItem var13 = new EntityItem(coordinate.world(), (double)coordinate.x + var7, (double)coordinate.y + var9, (double)coordinate.z + var11, itemStack);
 	            var13.delayBeforeCanPickup = 10;
-	            coordinate.world().spawnEntityInWorld(var13);
+	            coordinate.world().spawnEntity(var13);
 	        }
 	    }*/
 

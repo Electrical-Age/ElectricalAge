@@ -121,7 +121,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
             glNewList(list, GL_COMPILE);
             glBegin(GL_TRIANGLES);
 
-            if (start.xCoord == end.xCoord && start.zCoord == end.zCoord) {
+            if (start.x == end.x && start.z == end.z) {
                 // Poles right on top of each other? No catenaries here.
                 drawBox(spread(start, end), spread(end, start));
             } else {
@@ -147,9 +147,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
             // Figure out the lighting.
 //            Vec3 middle = Vec3.createVectorHelper(0, 0, 0);
 //            for (Vec3 x : v) {
-//                middle = middle.addVector(x.xCoord, x.yCoord, x.zCoord);
+//                middle = middle.addVector(x.x, x.y, x.z);
 //            }
-//            middle = multiply(middle, v.length).addVector(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+//            middle = multiply(middle, v.length).addVector(tileEntity.x, tileEntity.y, tileEntity.z);
 //            glColor3d(
 //                    139 / 255.0,
 //                    69 / 255.0,
@@ -159,14 +159,14 @@ public abstract class GridRender extends TransparentNodeElementRender {
             for (int i = 0; i < box.length; i++) {
                 final int bc = box[i] - 1;
                 glTexCoord2f(boxTex[bc * 2], boxTex[bc * 2 + 1]);
-                glVertex3f((float) v[bc].xCoord, (float) v[bc].yCoord, (float) v[bc].zCoord);
+                glVertex3f((float) v[bc].x, (float) v[bc].y, (float) v[bc].z);
             }
         }
 
         private Vec3d[] translate(Vec3d[] start, Vec3d delta) {
             Vec3d ret[] = new Vec3d[start.length];
             for (int i = 0; i < start.length; i++) {
-                ret[i] = start[i].addVector(delta.xCoord, delta.yCoord, delta.zCoord);
+                ret[i] = start[i].addVector(delta.x, delta.y, delta.z);
             }
             return ret;
         }
@@ -196,9 +196,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
 
         Vec3d multiply(Vec3d a, double b) {
             return new Vec3d(
-                a.xCoord * b,
-                a.yCoord * b,
-                a.zCoord * b
+                a.x * b,
+                a.y * b,
+                a.z * b
             );
         }
 
@@ -208,9 +208,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
             final double slack = 1.005;
             final int vertices = 16;
 
-            double dx = (end.xCoord) - (start.xCoord);
-            double dy = (end.yCoord) - (start.yCoord);
-            double dz = (end.zCoord) - (start.zCoord);
+            double dx = (end.x) - (start.x);
+            double dy = (end.y) - (start.y);
+            double dz = (end.z) - (start.z);
             double dw = Math.sqrt(dx * dx + dz * dz);
             double k = Math.sqrt(dx * dx + dy * dy + dz * dz) * slack;
             double l = 0;
@@ -232,7 +232,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 double x1 = 0 + dx * n1;
                 double z1 = 0 + dz * n1;
                 double y1 = a * Math.cosh(((Math.sqrt(x1 * x1 + z1 * z1)) - p) / a) + q;
-                vex[i] = new Vec3d(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1);
+                vex[i] = new Vec3d(start.x + x1, start.y + y1, start.z + z1);
             }
             return vex;
         }

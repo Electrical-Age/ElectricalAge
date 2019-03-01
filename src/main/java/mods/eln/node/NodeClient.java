@@ -1,6 +1,7 @@
 package mods.eln.node;
 
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -12,7 +13,7 @@ public class NodeClient {
     public static final ArrayList<NodeBlockEntity> nodeNeedRefreshList = new ArrayList<NodeBlockEntity>();
 
     public NodeClient() {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public void init() {
@@ -58,9 +59,9 @@ public class NodeClient {
 
 		    for (NodeBlockEntity node : NodeBlockEntity.nodeAddedList)
 		    {
-		    	stream.writeShort((short) (node.xCoord - x));
-		    	stream.writeShort((short) (node.yCoord - y));
-		    	stream.writeShort((short) (node.zCoord - z));
+		    	stream.writeShort((short) (node.x - x));
+		    	stream.writeShort((short) (node.y - y));
+		    	stream.writeShort((short) (node.z - z));
 		    }
 
 		    Packet250CustomPayload packet = new Packet250CustomPayload();

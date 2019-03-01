@@ -61,7 +61,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
             }
             true
         } else {
-            Utils.addChatMessage(entityPlayer, tr("Brush is dry"))
+            Utils.sendMessage(entityPlayer, tr("Brush is dry"))
             false
         }
     }

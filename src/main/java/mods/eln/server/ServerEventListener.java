@@ -32,7 +32,6 @@ public class ServerEventListener {
 
     public ServerEventListener() {
         MinecraftForge.EVENT_BUS.register(this);
-        FMLCommonHandler.instance().bus().register(this);
     }
 
     @SubscribeEvent
@@ -59,7 +58,7 @@ public class ServerEventListener {
     public double getLightningClosestTo(Coordinate c) {
         double best = 10000000;
         for (EntityLightningBolt l : lightningList) {
-            if (c.world() != l.worldObj) continue;
+            if (c.world() != l.world) continue;
             double d = l.getDistance(c.pos.getX(), c.pos.getY(), c.pos.getZ());
             if (d < best) best = d;
         }

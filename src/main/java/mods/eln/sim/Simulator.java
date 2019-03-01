@@ -1,5 +1,6 @@
 package mods.eln.sim;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -72,7 +73,7 @@ public class Simulator /* ,IPacketHandler */ {
         this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
         this.thermalPeriod = thermalPeriod;
 
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
 
@@ -103,8 +104,6 @@ public class Simulator /* ,IPacketHandler */ {
         slowPreProcessList.clear();
 
         electricalProcessList.clear();
-        // electricalConnectionList.clear();
-        // electricalLoadList.clear();
 
         thermalFastProcessList.clear();
         thermalSlowProcessList.clear();
@@ -453,7 +452,7 @@ public class Simulator /* ,IPacketHandler */ {
 
 			for (Object obj : server.getConfigurationManager().playerEntityList) {
 				EntityPlayerMP player = (EntityPlayerMP) obj;
-				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
+				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
 				PlayerManager playerManager = worldServer.getPlayerManager();
 				Utils.sendPacketToClient(bos, player);
 			}

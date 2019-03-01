@@ -1,9 +1,7 @@
 package mods.eln.generic;
 
 import mods.eln.misc.UtilsClient;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,9 +13,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -45,7 +40,8 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         setUnlocalizedName(descriptor.name);
         orderList.add(damage);
         descriptor.setParent(this, damage);
-        GameRegistry.register(descriptor.parentItem);
+        // TODO(1.12): Registration is fucked.
+//        GameRegistry.register(descriptor.parentItem);
     }
 
     public Descriptor getDescriptor(int damage) {
@@ -61,7 +57,8 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack s, World w, EntityPlayer p, EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer p, EnumHand hand) {
+        ItemStack s = p.getHeldItem(hand);
         Descriptor desc = getDescriptor(s);
         if (desc == null)
             return new ActionResult(EnumActionResult.PASS, s);
@@ -95,14 +92,15 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 //        }
 //    }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
-        // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
-        for (int id : orderList) {
-            subItemList.get(id).getSubItems(list);
-        }
-    }
+    // TODO(1.12): Whatever this was, it's broken.
+//    @Override
+//    @SideOnly(Side.CLIENT)
+//    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
+//        // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
+//        for (int id : orderList) {
+//            subItemList.get(id).getSubItems(list);
+//        }
+//    }
 
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		/*Descriptor desc = getDescriptor(itemStack);
@@ -122,11 +120,12 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float vx, float vy, float vz) {
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        ItemStack stack = player.getHeldItem(hand);
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
             return EnumActionResult.PASS;
-        return d.onItemUse(stack, player, world, pos, hand, facing, vx, vy, vz);
+        return d.onItemUse(stack, player, world, pos, hand, facing, hitX, hitY, hitZ);
     }
 
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
@@ -156,11 +155,11 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public float getStrVsBlock(ItemStack stack, IBlockState state) {
+    public float getDestroySpeed(ItemStack stack, IBlockState state) {
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
             return 0.2f;
-        return d.getStrVsBlock(stack, state);
+        return d.getDestroySpeed(stack, state);
     }
 
     @Override

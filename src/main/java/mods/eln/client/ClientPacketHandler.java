@@ -16,7 +16,7 @@ import java.io.DataInputStream;
 public class ClientPacketHandler {
 
     public ClientPacketHandler() {
-        //FMLCommonHandler.instance().bus().register(this);
+        //MinecraftForge.EVENT_BUS.register(this);
         Eln.eventChannel.register(this);
     }
 

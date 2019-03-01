@@ -259,7 +259,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     @Override
     public boolean onEntityItemUpdate(EntityItem entityItem) {
         if (entityItem.isBurning()) {
-            entityItem.worldObj.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2, true);
+            entityItem.world.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2, true);
             entityItem.extinguish();
             entityItem.setDead();
         }

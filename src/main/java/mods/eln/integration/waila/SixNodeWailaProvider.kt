@@ -4,7 +4,6 @@ import com.google.common.cache.CacheLoader
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
-import mcp.mobius.waila.api.SpecialChars
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import net.minecraft.entity.player.EntityPlayerMP
@@ -12,6 +11,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.text.TextFormatting
 import net.minecraft.world.World
 import net.minecraftforge.fml.common.Optional
 
@@ -33,7 +33,7 @@ class SixNodeWailaProvider : IWailaDataProvider {
     override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> {
         getSixData(accessor)?.data?.forEach {
-            currenttip.add("${it.key}: ${SpecialChars.WHITE}${it.value}")
+            currenttip.add("${it.key}: ${TextFormatting.WHITE}${it.value}")
         }
 
         return currenttip
@@ -51,7 +51,7 @@ class SixNodeWailaProvider : IWailaDataProvider {
 
     override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {
-        mutableListOf("${SpecialChars.WHITE}${itemStack.displayName}")
+        mutableListOf("${TextFormatting.WHITE}${itemStack.displayName}")
     } else {
         currenttip
     }

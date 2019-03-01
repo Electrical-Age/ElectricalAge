@@ -104,6 +104,7 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 	compile group: "net.shadowfacts", name: "Forgelin", version: "1.8.2"
+    compile group: "com.teamwizardry.librarianlib", name: "librarianlib-1.12.2", version: "4.17"
     implementation "dan200.computercraft:ComputerCraft:1.80pr1-build5"
     implementation "li.cil.oc:OpenComputers:MC1.10.2-1.7.2.172"
     deobfCompile "mcp.mobius.waila:Hwyla:1.8.17-B31_1.10.2"

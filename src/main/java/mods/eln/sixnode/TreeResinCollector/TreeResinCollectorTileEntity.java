@@ -21,9 +21,9 @@ public class TreeResinCollectorTileEntity extends TileEntity implements ITickabl
     float timeCounter = 0;
 
     boolean onBlockActivated() {
-        if (worldObj.isRemote) return true;
+        if (world.isRemote) return true;
         while (occupancy >= 1f) {
-            Utils.dropItem(Eln.treeResin.newItemStack(1), new Coordinate( this.pos.getX(), this.pos.getY(), this.pos.getZ(), worldObj));
+            Utils.dropItem(Eln.treeResin.newItemStack(1), new Coordinate( this.pos.getX(), this.pos.getY(), this.pos.getZ(), world));
             occupancy -= 1f;
         }
         return true;
@@ -31,7 +31,7 @@ public class TreeResinCollectorTileEntity extends TileEntity implements ITickabl
 
     @Override
     public void update() {
-        if (worldObj.isRemote) return;
+        if (world.isRemote) return;
         timeCounter += 1f / 20f;
         if (timeCounter > timeTarget) {
             int[] posWood = new int[3];
@@ -44,14 +44,14 @@ public class TreeResinCollectorTileEntity extends TileEntity implements ITickabl
 
             int yStart, yEnd;
 
-            while (worldObj.getBlockState(new BlockPos(posWood[0], posWood[1] - 1, posWood[2])) == Blocks.LOG) {
+            while (world.getBlockState(new BlockPos(posWood[0], posWood[1] - 1, posWood[2])) == Blocks.LOG) {
                 posWood[1]--;
             }
             yStart = posWood[1];
 
             posWood[1] = pos.getY();
             timeCounter -= timeTarget;
-            while (worldObj.getBlockState(new BlockPos(posWood[0], posWood[1] + 1, posWood[2])).getBlock() == Blocks.LOG) {
+            while (world.getBlockState(new BlockPos(posWood[0], posWood[1] + 1, posWood[2])).getBlock() == Blocks.LOG) {
                 posWood[1]++;
             }
             yEnd = posWood[1];
@@ -59,7 +59,7 @@ public class TreeResinCollectorTileEntity extends TileEntity implements ITickabl
             int collectorCount = 0;
             posCollector[1] = yStart;
             for (posCollector[1] = yStart; posCollector[1] <= yEnd; posCollector[1]++) {
-                //////	if (worldObj.getBlockId(posCollector[0], posCollector[1] + 1, posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
+                //////	if (world.getBlockId(posCollector[0], posCollector[1] + 1, posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
                 {
                     //////		collectiorCount++;
                 }

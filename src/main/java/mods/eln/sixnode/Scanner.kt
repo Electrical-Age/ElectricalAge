@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import com.teamwizardry.librarianlib.features.kotlin.isNotEmpty
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
@@ -113,12 +114,12 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
                 val slots = te.getSlotsForFace(targetSide)
                 when (mode) {
                     ScanMode.SIMPLE -> slots.forEach {
-                        sum += te.getStackInSlot(it)?.stackSize ?: 0
+                        sum += te.getStackInSlot(it).count
                         limit += te.inventoryStackLimit
                     }
 
                     ScanMode.SLOTS -> slots.forEach {
-                        sum += if ((te.getStackInSlot(it)?.stackSize ?: 0) > 0) 1 else 0
+                        sum += if (te.getStackInSlot(it).isNotEmpty) 1 else 0
                         limit += 1
                     }
                 }
@@ -126,12 +127,12 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
             }
             is IInventory -> {
                 val sum = when (mode) {
-                    ScanMode.SIMPLE -> (0..te.sizeInventory - 1).sumBy {
-                        te.getStackInSlot(it)?.stackSize ?: 0
+                    ScanMode.SIMPLE -> (0 until te.sizeInventory).sumBy {
+                        te.getStackInSlot(it).count
                     }.toDouble()
 
-                    ScanMode.SLOTS -> (0..te.sizeInventory - 1).count {
-                        (te.getStackInSlot(it)?.stackSize ?: 0) > 0
+                    ScanMode.SLOTS -> (0 until te.sizeInventory).count {
+                        te.getStackInSlot(it).isNotEmpty
                     }.toDouble() * te.inventoryStackLimit
                 }
                 return sum / te.inventoryStackLimit / te.sizeInventory

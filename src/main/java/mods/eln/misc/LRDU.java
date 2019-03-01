@@ -191,8 +191,8 @@ public enum LRDU {
 
     public Vec3d rotateOnXnLeft(Vec3d v) {
         double x = v.x;
-        double y = v.yCoord;
-        double z = v.zCoord;
+        double y = v.y;
+        double z = v.z;
         switch (this) {
             case Left:
                 return v;

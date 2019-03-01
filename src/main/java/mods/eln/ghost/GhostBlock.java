@@ -53,7 +53,7 @@ public class GhostBlock extends Block {
 //        switch (meta) {
 //            case tFloor:
 //                AxisAlignedBB axisalignedbb1 = AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
-//                if (axisalignedbb1 != null && par5AxisAlignedBB.intersectsWith(axisalignedbb1)) {
+//                if (axisalignedbb1 != null && par5AxisAlignedBB.intersects(axisalignedbb1)) {
 //                    list.add(axisalignedbb1);
 //                }
 //                break;
@@ -131,7 +131,7 @@ public class GhostBlock extends Block {
 
     // TODO(1.10): ...but block states should do this.
     @Override
-    public boolean isFullyOpaque(IBlockState state) {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
@@ -146,7 +146,12 @@ public class GhostBlock extends Block {
     }
 
     @Override
-    public boolean isBlockSolid(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
+    public boolean isTopSolid(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side) {
         return false;
     }
 
@@ -160,11 +165,11 @@ public class GhostBlock extends Block {
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!world.isRemote) {
             GhostElement element = getElement(world, getBedSpawnPosition(state, world, pos, player));
             if (element != null)
-                return element.onBlockActivated(player, Direction.fromFacing(side), hitX, hitY, hitZ);
+                return element.onBlockActivated(player, Direction.fromFacing(facing), hitX, hitY, hitZ);
         }
         return true;
     }

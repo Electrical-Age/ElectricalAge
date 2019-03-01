@@ -59,36 +59,34 @@ public class ConsoleListener extends CommandBase {
     }
 
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "eln";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getUsage(ICommandSender icommandsender) {
         //TODO Rewrite
         String str = Color.COLOR_DARK_CYAN + "ELN mod console." + Color.COLOR_BRIGHT_GREY + " Type \"\\eln \" + TAB";
         return str;
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         int argc = args.length;
 
         switch (argc) {
             case 1:
                 //Parse for probable commands
                 if (args[0].isEmpty()) {
-                    sender.addChatMessage(new TextComponentString(Color.COLOR_DARK_CYAN + "ELN >"));
-                    sender.addChatMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_listCmd + "\" to print the full command list."));
-                    sender.addChatMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_man + "\" + <command> for command usage (or command + TAB)."));
+                    sender.sendMessage(new TextComponentString(Color.COLOR_DARK_CYAN + "ELN >"));
+                    sender.sendMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_listCmd + "\" to print the full command list."));
+                    sender.sendMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_man + "\" + <command> for command usage (or command + TAB)."));
                     List<String> ret = new ArrayList<String>();
                     ret.add(cmdNameStr_listCmd);
                     return ret;
                 }
                 List<String> cmdl = new ArrayList<String>();
-                Iterator<String> iter = cmdVisibleList.iterator();
-                while (iter.hasNext()) {
-                    String val = iter.next();
+                for (String val : cmdVisibleList) {
                     if (val.toLowerCase().startsWith(args[0].toLowerCase()))
                         cmdl.add(val);
                 }
@@ -107,7 +105,7 @@ public class ConsoleListener extends CommandBase {
 
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         String cmd;
 
         if (args.length >= 1) {
@@ -211,7 +209,7 @@ public class ConsoleListener extends CommandBase {
             ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
             if (!arg0.valid)
                 return;
-            Eln.instance.saveConfig.reGenOre = arg0.value;
+            Eln.saveConfig.reGenOre = arg0.value;
             cprint(sender, strOffsetL0 + "Regenerate ore at next map reload : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
             cprint(sender, strOffsetL0 + "Parameter saved in the map and effective once.");
         } else if (cmd.equalsIgnoreCase(cmdNameStr_generateLangFileTemplate)) {
@@ -358,7 +356,7 @@ public class ConsoleListener extends CommandBase {
     }
 
     private void cprint(ICommandSender ics, String text) {
-        ics.addChatMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + text));
+        ics.sendMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + text));
     }
 }
 

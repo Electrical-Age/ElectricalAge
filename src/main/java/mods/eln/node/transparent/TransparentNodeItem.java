@@ -45,7 +45,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
         String error;
         if ((error = descriptor.checkCanPlace(coord, front)) != null) {
-            Utils.addChatMessage(player, error);
+            Utils.sendMessage(player, error);
             return false;
         }
 

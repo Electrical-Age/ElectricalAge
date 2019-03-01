@@ -7,56 +7,56 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class SolarPannelSlowProcess implements IProcess {
-    SolarPanelElement solarPannel;
-
-    public SolarPannelSlowProcess(SolarPanelElement solarPannel) {
-        this.solarPannel = solarPannel;
+@SuppressWarnings("SuspiciousNameCombination")
+public class SolarPanelSlowProcess implements IProcess {
+    SolarPanelSlowProcess(SolarPanelElement solarPanel) {
+        this.solarPanel = solarPanel;
     }
 
-    double timeCounter = 0;
-    final double timeCounterRefreshMax = 0.2;
+    private SolarPanelElement solarPanel;
+    private double timeCounter = 0;
 
     @Override
     public void process(double time) {
+        double timeCounterRefreshMax = 0.2;
         timeCounter -= time;
         if (timeCounter < 0) {
             //Utils.println("Solar Light : " + getSolarLight());
-            /*if(solarPannel.descriptor.basicModel == false)
+            /*if(solarPanel.descriptor.basicModel == false)
 			{
-				solarPannel.currentSource.setI(solarPannel.descriptor.solarIfS.getValue(getSolarLight()));
+				solarPanel.currentSource.setI(solarPanel.descriptor.solarIfS.getValue(getSolarLight()));
 			}
 			else*/
             {
-                solarPannel.powerSource.setP(solarPannel.descriptor.electricalPmax * getSolarLight());
+                solarPanel.powerSource.setP(solarPanel.descriptor.electricalPmax * getSolarLight());
             }
             timeCounter += Math.random() * timeCounterRefreshMax / 2 + timeCounterRefreshMax / 2;
         }
 
     }
 
-    public double getSolarLight() {
+    double getSolarLight() {
         double solarAlpha = getSolarAlpha();
         //	Utils.print("solarAlpha : " + solarAlpha + "  ");
         if (solarAlpha >= Math.PI) return 0.0;
 
-        if (solarPannel.getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId) != null) {
-            solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
+        if (!solarPanel.getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId).isEmpty()) {
+            solarPanel.panelAlpha = solarPanel.descriptor.alphaTrunk(solarAlpha);
         }
 
 
-        Coordinate coordinate = solarPannel.node.coordinate;
+        Coordinate coordinate = solarPanel.node.coordinate;
         Vec3d v = Utils.getVec05(coordinate);
-        double x = v.xCoord + solarPannel.descriptor.solarOffsetX, y = v.yCoord + solarPannel.descriptor.solarOffsetY, z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
+        double x = v.x + solarPanel.descriptor.solarOffsetX, y = v.y + solarPanel.descriptor.solarOffsetY, z = v.z + solarPanel.descriptor.solarOffsetZ;
 
 
-        double lightAlpha = solarPannel.panelAlpha - solarAlpha;
+        double lightAlpha = solarPanel.panelAlpha - solarAlpha;
         double light = Math.cos(lightAlpha);
 
 
         if (light < 0.0) light = 0.0;
 
-        if (coordinate.doesWorldExist() == false) return light;
+        if (!coordinate.doesWorldExist()) return light;
 
         World world = coordinate.world();
         if (world.getWorldInfo().isRaining()) light *= 0.5;
@@ -85,7 +85,7 @@ public class SolarPannelSlowProcess implements IProcess {
         return light;
     }
 
-    public static double getSolarAlpha(World world) {
+    static double getSolarAlpha(World world) {
         double alpha = world.getCelestialAngleRadians(0f);
         if (alpha < Math.PI / 2 * 3) {
             alpha += Math.PI / 2;
@@ -96,7 +96,7 @@ public class SolarPannelSlowProcess implements IProcess {
         return alpha;
     }
 
-    public double getSolarAlpha() {
-        return getSolarAlpha(solarPannel.node.coordinate.world());
+    double getSolarAlpha() {
+        return getSolarAlpha(solarPanel.node.coordinate.world());
     }
 }

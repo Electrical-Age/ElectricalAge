@@ -238,7 +238,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
 //                oRender = Eln.clientLiveDataManager.newData(item, RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1)
 //            val render = oRender as RenderStorage
 //
-//            render.generate(e!!.worldObj, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
+//            render.generate(e!!.world, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
 //
 //            val scale = 1f / resWidth * 0.50f
 //            GL11.glTranslatef(0.90668f, 0.163f, -0.25078f)

@@ -34,10 +34,12 @@ public class OreBlock extends Block {
         return i;
     }
 
+/*
     @Override
     public void getSubBlocks(Item i, CreativeTabs tab, List l) { //Puts all sub blocks into the creative inventory
         Eln.oreItem.getSubItems(i, tab, l);
     }
+*/
 
     // TODO(1.10): Fix item rendering.
 //    @Override
