@@ -43,8 +43,7 @@ integrated into the development version of the mod. Anyone who wish to try the c
 can download the develop branch and build the mod himself.
 
 Pull requests are always merged into the **"develop"** branch. If you are willing to contribute, make sure sending us
-pull requests against the develop branch but not the *master* branch. Attention, **"develop"** is not the default branch
-on github, so you need to pull and checkout the development branch before atually starting your development.
+pull requests against the develop branch but not the *master* branch. Unlike a lot of projects **"develop"** is the main branch on GitHub, so this is the default if you don't go out of your way to change it.
 
 
 ### GIT Flow
@@ -73,3 +72,5 @@ stop just because a release is happening.
 **development branch** is first committed there, then cherry-picked to the **release branch**. The **release branch**
 is then pushed to **master** (again), and tagged (again), going from e.g. 0.52.0 to 0.52.1.
 - **develop**, **master** and the **release branches** are all protected; no rebasing happens there.
+- If you want to test multiple features together, you should still develop them separately. You can create a separate combined branch in your own repository that you regularly merge the feature branches into. Do not attempt to PR the combo branch.
+- If you want to develop one feature on top of another, then make sure you PR the 'base' feature before the derived one. If you send us a too-large PR we will ask you to chop it up.

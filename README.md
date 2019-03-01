@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=ports/1.10)](https://travis-ci.org/Electrical-Age/ElectricalAge)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge?ref=badge_shield)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0dd12c97357f4542903a667fa82a852c)](https://www.codacy.com/app/Baughn/ElectricalAge?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Electrical-Age/ElectricalAge&amp;utm_campaign=Badge_Grade)
 
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
 
@@ -123,6 +124,8 @@ Most graphics and all 3D models are licensed under the Creative Commons Attribut
   Designed by [Luis Prado](https://thenounproject.com/Luis/).
 - src/main/resources/assets/eln/textures/blocks/scanner.png
   Designed by [Creative Stall](https://thenounproject.com/creativestall/).
+- src/main/resources/assets/eln/textures/items/
+Designed by Guillermo Guso from the Noun Project
 
 Some graphics are public domain. These are:
 

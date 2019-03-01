@@ -41,7 +41,7 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 val pos = BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z))
                 val state = world.getBlockState(pos)
                 val block = state.block
-                if (!block.isAir(state, world, pos) && block !== Eln.lightBlock) {
+                if (!block.isAir(state, world, pos)) {
                     x -= v.x
                     y -= v.y
                     z -= v.z
@@ -51,17 +51,16 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
             }
 
             while (rCount > 0) {
-                val pos = BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z))
+                var stride = 1
+                val pos = BlockPos.MutableBlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z))
                 val state = world.getBlockState(pos)
                 val block = state.block
                 if (block.isAir(state, world, pos) || block === Eln.lightBlock) {
                     LightBlockEntity.addLight(world, pos, light, 10)
-                    return
+                    stride = 3
                 }
-                x -= v.x
-                y -= v.y
-                z -= v.z
-                rCount--
+                pos.setPos(pos.x - v.x * stride, pos.y - v.y * stride, pos.z - v.z * stride)
+                rCount -= stride
             }
         }
     }

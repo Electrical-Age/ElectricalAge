@@ -60,9 +60,7 @@ public class Simulator /* ,IPacketHandler */ {
     public boolean checkThermalLoad(double thermalRs, double thermalRp, double thermalC) {
         if (thermalC < getMinimalThermalC(thermalRs, thermalRp)) {
             Utils.println("checkThermalLoad ERROR");
-            while (true)
-                ;
-            // return false;
+            throw new IllegalStateException("Thermal load outside safe limits.");
         }
         return true;
     }
@@ -496,6 +494,7 @@ public class Simulator /* ,IPacketHandler */ {
     }
 
     void thermalStep(double dt, Iterable<ThermalConnection> connectionList, Iterable<IProcess> processList, Iterable<ThermalLoad> loadList) {
+        // Compute heat transferred over each thermal connection:
         for (ThermalConnection c : connectionList) {
             double i;
             i = (c.L2.Tc - c.L1.Tc) / ((c.L2.Rs + c.L1.Rs));

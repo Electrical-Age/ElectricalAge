@@ -2846,7 +2846,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
-                "maceratorb", MVU, 400,// double nominalU,double nominalP,
+                "maceratorb", MVU, 2000,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2890,7 +2890,7 @@ public class Eln {
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
                 name,// String name,
                 obj.getObj("platemachineb"),
-                MVU, 400,// double nominalU,double nominalP,
+                MVU, 2000,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2950,7 +2950,7 @@ public class Eln {
             CompressorDescriptor desc = new CompressorDescriptor(
                 name,// String name,
                 obj.getObj("compressorb"),
-                MVU, 400,// double nominalU,double nominalP,
+                MVU, 2000,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2994,7 +2994,7 @@ public class Eln {
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
                 name,// String name,
                 obj.getObj("magnetizerb"),
-                MVU, 400,// double nominalU,double nominalP,
+                MVU, 2000,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -3465,7 +3465,17 @@ public class Eln {
             element = new CombustionChamber(TR_NAME(Type.NONE, "Combustion Chamber"));
             sharedItem.addElement(completId, element);
         }
-
+        {
+            ThermalIsolatorElement element;
+            subId = 1;
+            completId = subId + (id << 6);
+            element = new ThermalIsolatorElement(
+                TR_NAME(Type.NONE, "Thermal Insulation"),
+                0.5,
+                500
+            );
+            sharedItem.addElement(completId, element);
+        }
     }
 
     private void registerFerromagneticCore(int id) {
@@ -4689,8 +4699,19 @@ public class Eln {
 
             ElectricalLampItem desc = new ElectricalLampItem(
                 name,
-                10, 8, 20, 15, 5, 50,// int light,int range,
-                6000, 100// , energyStorage,discharg, charge
+                10, 6, 20, 12, 8, 50,// int light,int range,
+                6000, 100// , energyStorage, discharge, charge
+            );
+            sharedItemStackOne.addElement(subId + (id << 6), desc);
+        }
+        {
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Improved Flashlight");
+
+            ElectricalLampItem desc = new ElectricalLampItem(
+                name,
+                15, 8, 20, 15, 12, 50,// int light,int range,
+                24000, 400// , energyStorage, discharge, charge
             );
             sharedItemStackOne.addElement(subId + (id << 6), desc);
         }
@@ -6216,6 +6237,12 @@ public class Eln {
             "L L",
             " L ",
             'L', new ItemStack(Blocks.STONE));
+        addRecipe(findItemStack("Thermal Insulation", 4),
+            "WSW",
+            "SWS",
+            "WSW",
+            'S', new ItemStack(Blocks.STONE),
+            'W', new ItemStack(Blocks.WOOL));
     }
 
     private void recipeFerromagneticCore() {
@@ -6426,6 +6453,14 @@ public class Eln {
             " I ",
             'L', findItemStack("50V Incandescent Light Bulb"),
             'B', findItemStack("Portable Battery"),
+            'G', new ItemStack(Blocks.GLASS_PANE),
+            'I', new ItemStack(Items.IRON_INGOT));
+        addRecipe(findItemStack("Improved Flashlight"),
+            "GLG",
+            "IBI",
+            " I ",
+            'L', findItemStack("50V LED Bulb"),
+            'B', findItemStack("Portable Battery Pack"),
             'G', new ItemStack(Blocks.GLASS_PANE),
             'I', new ItemStack(Items.IRON_INGOT));
 

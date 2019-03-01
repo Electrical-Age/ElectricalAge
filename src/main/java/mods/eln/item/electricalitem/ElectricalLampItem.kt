@@ -75,12 +75,12 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
     override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ActionResult<ItemStack> {
         if (!w.isRemote) {
             var lightState = getLightState(s) + 1
-            if (lightState > 1) lightState = 0
+            if (lightState > 2) lightState = 0
             //((EntityPlayer) entity).sendMessage("Flashlight !!!");
             when (lightState) {
                 0 -> Utils.sendMessage(p as EntityPlayerMP, "Flashlight OFF")
                 1 -> Utils.sendMessage(p as EntityPlayerMP, "Flashlight ON")
-                2 -> Utils.sendMessage(p as EntityPlayerMP, "Flashlight ON-2")
+                2 -> Utils.sendMessage(p as EntityPlayerMP, "Flashlight BOOSTED")
                 else -> {
                 }
             }
