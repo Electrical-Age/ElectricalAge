@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalfiredetector;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -96,7 +97,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Fire present"), firePresent ? I18N.tr("Yes") : I18N.tr("No"));
-        if (Eln.wailaEasyMode && !descriptor.batteryPowered) {
+        if (Config.INSTANCE.getWailaEasyMode() && !descriptor.batteryPowered) {
             info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
         }
         if (descriptor.batteryPowered) {

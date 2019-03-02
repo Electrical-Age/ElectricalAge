@@ -3,6 +3,7 @@ package mods.eln.transparentnode.electricalfurnace;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
@@ -141,11 +142,11 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
         smeltResistor.highImpedance();
         slowRefreshProcess.process(0.05);
 
-        Eln.instance.lowVoltageCableDescriptor.applyTo(electricalLoad);
+        Cable.Companion.getLowVoltage().descriptor.applyTo(electricalLoad);
         //electricalLoad.setRs(MnaConst.highImpedance);
 
 
-        //	ItemStack stack = new ItemStack(Item.coal);
+        //	ItemStack stack = new ItemStack(Items.coal);
         //	EntityItem entity = new EntityItem(node.coordinate.world(), node.coordinate.x + 0.5, node.coordinate.y + 0.5, node.coordinate.z + 1.5, stack);
         //	node.coordinate.world().spawnEntity(entity);
 

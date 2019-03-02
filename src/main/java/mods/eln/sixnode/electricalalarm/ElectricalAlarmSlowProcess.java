@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalalarm;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -26,7 +27,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
 
-            boolean warm = element.inputGate.getU() > Eln.instance.SVU / 2;
+            boolean warm = element.inputGate.getU() > Cable.SVU / 2;
             element.setWarm(warm);
             if (warm & !element.mute) {
                 if (soundTimeTimeout == 0) {

@@ -35,8 +35,8 @@ public class NodeManager extends WorldSavedData {
 
     // private ArrayList<Node> nodeArray = new ArrayList<Node>();
 
-    public NodeManager(String par1Str) {
-        super(par1Str);
+    public NodeManager(String name) {
+        super(name);
         nodesMap = new HashMap<Coordinate, NodeBase>();
         nodes = new ArrayList<NodeBase>();
         instance = this;

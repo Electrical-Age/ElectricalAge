@@ -1,5 +1,6 @@
 package mods.eln.client;
 
+import mods.eln.init.Config;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -49,7 +50,7 @@ public class AnalyticsHandler {
                     // Prepare get parameters
                     final String version = Version.getVersionName().replaceAll("\\s+", "");
                     final String lang = I18N.getCurrentLanguage();
-                    final String url = String.format(URL, Eln.playerUUID, version, lang);
+                    final String url = String.format(URL, Config.INSTANCE.getPlayerUUID(), version, lang);
 
                     // Send HTTP get request
                     CloseableHttpClient client = HttpClientBuilder.create().build();

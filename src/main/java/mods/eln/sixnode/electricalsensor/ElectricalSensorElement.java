@@ -2,6 +2,8 @@ package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -160,7 +162,7 @@ public class ElectricalSensorElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             switch (typeOfSensor) {
                 case voltageType:
                     info.put(I18N.tr("Measured voltage"), Utils.plotVolt("", aLoad.getU()));
@@ -199,10 +201,10 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.instance.signalCableDescriptor.applyTo(outputGate);
+        Cable.Companion.getSignal().descriptor.applyTo(outputGate);
         computeElectricalLoad();
-        Eln.applySmallRs(aLoad);
-        if (bLoad != null) Eln.applySmallRs(bLoad);
+        Cable.applySmallRs(aLoad);
+        if (bLoad != null) Cable.applySmallRs(bLoad);
     }
 
     @Override

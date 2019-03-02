@@ -1,11 +1,11 @@
 package mods.eln.entity;
 
+import mods.eln.init.Config;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
@@ -13,13 +13,11 @@ import net.minecraft.world.World;
 
 public class ReplicatorPopProcess implements IProcess {
 
-    public ReplicatorPopProcess() {
-    }
-
-    public static double popPerSecondPerPlayer = 1.0 / 60;
-
     @Override
     public void process(double time) {
+        if (!Config.INSTANCE.getReplicatorSpawn())
+            return;
+
         World world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
 
         int replicatorCount = 0;
@@ -40,7 +38,7 @@ public class ReplicatorPopProcess implements IProcess {
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
             for (Object obj : world.playerEntities) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
-                if (Math.random() * (world.playerEntities.size()) < time * popPerSecondPerPlayer && player.world == world) {
+                if (Math.random() * (world.playerEntities.size()) < time * Config.INSTANCE.getReplicatorSpawnPerSecondPerPlayer() && player.world == world) {
                     int x, y, z;
                     x = (int) (player.posX + Utils.rand(-100, 100));
                     z = (int) (player.posZ + Utils.rand(-100, 100));

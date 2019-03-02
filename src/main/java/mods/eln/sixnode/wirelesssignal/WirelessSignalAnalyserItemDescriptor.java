@@ -55,7 +55,7 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
         /*ArrayList<WirelessSignalInfo> list = WirelessSignalRxProcess.getTxList(c);
 		int idx = 0;
 		for (WirelessSignalInfo e : list) {
-			Utils.sendMessage(player, e.tx.getChannel() + " Strength=" + String.format("%2.1f", e.power) + " Value=" + String.format("%2.1fV", e.tx.getValue() * Eln.instance.SVU));
+			Utils.sendMessage(player, e.tx.getChannel() + " Strength=" + String.format("%2.1f", e.power) + " Value=" + String.format("%2.1fV", e.tx.getValue() * Cable.SVU));
 			idx++;
 		}
 		if (list.size() == 0) {

@@ -2,6 +2,7 @@ package mods.eln.sixnode.energymeter;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -45,8 +46,6 @@ public class EnergyMeterElement extends SixNodeElement {
     public ResistorSwitch shunt = new ResistorSwitch("shunt", aLoad, bLoad);
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-
-    public float voltageMax = (float) Eln.SVU, voltageMin = 0;
 
     int energyUnit = 1, timeUnit = 0;
 
@@ -188,7 +187,7 @@ public class EnergyMeterElement extends SixNodeElement {
     public void computeElectricalLoad() {
         ItemStack cable = inventory.getStackInSlot(EnergyMeterContainer.cableSlotId);
 
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        cableDescriptor = null; // TODO(1.12): (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
         if (cableDescriptor == null) {
             aLoad.highImpedance();
             bLoad.highImpedance();
@@ -314,7 +313,7 @@ public class EnergyMeterElement extends SixNodeElement {
             }
 
             if (highImp) shunt.ultraImpedance();
-            else Eln.applySmallRs(shunt);
+            else Cable.Companion.applySmallRs(shunt);
 
             publishTimeout -= time;
             if (publishTimeout < 0) {

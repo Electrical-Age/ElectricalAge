@@ -1,8 +1,7 @@
 package mods.eln.transparentnode.electricalantennatx;
 
-import mods.eln.Eln;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.Coordinate;
-import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.sim.IProcess;
@@ -45,7 +44,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 Block block;
                 block = coord.world().getBlockState(coord.pos).getBlock();
                 if ((coord.world().isAirBlock(coord.pos) && block != Blocks.FIRE)) {
-                    if (block == Eln.transparentNodeBlock
+                    if (block == ModBlock.transparentNodeBlock
                         && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordinate(coord)) != null
                         && (node.element instanceof ElectricalAntennaRxElement)) {
                         ElectricalAntennaRxElement rx = (ElectricalAntennaRxElement) node.element;

@@ -1,6 +1,7 @@
 package mods.eln.sixnode.TreeResinCollector;
 
 import mods.eln.Eln;
+import mods.eln.init.Items;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -23,7 +24,7 @@ public class TreeResinCollectorTileEntity extends TileEntity implements ITickabl
     boolean onBlockActivated() {
         if (world.isRemote) return true;
         while (occupancy >= 1f) {
-            Utils.dropItem(Eln.treeResin.newItemStack(1), new Coordinate( this.pos.getX(), this.pos.getY(), this.pos.getZ(), world));
+            Utils.dropItem(Items.treeResin.newItemStack(1), new Coordinate( this.pos.getX(), this.pos.getY(), this.pos.getZ(), world));
             occupancy -= 1f;
         }
         return true;

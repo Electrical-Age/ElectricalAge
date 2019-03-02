@@ -46,7 +46,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 
     public ArrayList<ItemStack> getBlockDropped(int fortune) {
         ArrayList<ItemStack> list = new ArrayList<ItemStack>();
-        list.add(new ItemStack(Eln.oreItem, 1, metadata));
+        //TODO(1.12) list.add(new ItemStack(Eln.oreItem, 1, metadata));
         return list;
     }
 
@@ -66,7 +66,8 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
             int posY = spawnHeightMin + random.nextInt(spawnHeightMax - spawnHeightMin); //Y coordinate less than 40 to gen at
             int posZ = z + random.nextInt(16); //Z coordinate to gen at
             int size = spawnSizeMin + random.nextInt(spawnSizeMax - spawnSizeMin);
-            new WorldGenMinable(Eln.oreBlock.getStateFromMeta(metadata), size).generate(w, random, new BlockPos( posX, posY, posZ)); //The gen call
+            // TODO(1.12)
+            //new WorldGenMinable(Eln.oreBlock.getStateFromMeta(metadata), size).generate(w, random, new BlockPos( posX, posY, posZ)); //The gen call
         }
         //}
         //new WorldGenTrees(par1, par2, par3, par4, par5)

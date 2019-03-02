@@ -3,12 +3,13 @@ package mods.eln.node;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.ghost.GhostBlock;
+import mods.eln.init.Config;
+import mods.eln.init.Items;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNode;
-import mods.eln.server.PlayerManager;
 import mods.eln.sim.*;
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,7 +19,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -134,7 +134,7 @@ public abstract class NodeBase {
     }
 
     public static boolean isBlockWrappable(Block block, World w, BlockPos pos) {
-        Block[] blocks = {Eln.sixNodeBlock,
+        Block[] blocks = {ModBlock.sixNodeBlock,
             Blocks.TORCH,
             Blocks.REDSTONE_TORCH,
             Blocks.UNLIT_REDSTONE_TORCH,
@@ -161,9 +161,9 @@ public abstract class NodeBase {
     }
 
     public void physicalSelfDestruction(float explosionStrength) {
-        if (destructed == true) return;
+        if (destructed) return;
         destructed = true;
-        if (Eln.instance.explosionEnable == false) explosionStrength = 0;
+        if (!Config.INSTANCE.getExplosionEnable()) explosionStrength = 0;
         disconnect();
         World world = coordinate.world();
         BlockPos.MutableBlockPos pos = coordinate.pos;
@@ -206,19 +206,19 @@ public abstract class NodeBase {
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (!entityPlayer.world.isRemote) {
-            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
+            if (Items.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = multiMeterString(side);
                 if (str != null)
                     Utils.sendMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
+            if (Items.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = thermoMeterString(side);
                 if (str != null)
                     Utils.sendMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
+            if (Items.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str1 = multiMeterString(side);
                 String str2 = thermoMeterString(side);
                 String str = "";
@@ -232,7 +232,7 @@ public abstract class NodeBase {
             }
         }
         if (hasGui(side)) {
-            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ());
+            entityPlayer.openGui(Eln.Companion, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ());
             return true;
         }
 

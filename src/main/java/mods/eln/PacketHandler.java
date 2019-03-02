@@ -8,7 +8,6 @@ import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
 import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeBase;
@@ -67,43 +66,9 @@ public class PacketHandler {
                 case Eln.packetDestroyUuid:
                     packetDestroyUuid(stream, manager, player);
                     break;
-                case Eln.packetClientToServerConnection:
-                    packetNewClient(manager, player);
-                    break;
-                case Eln.packetServerToClientInfo:
-                    packetServerInfo(stream, manager, player);
-                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-
-    private void packetNewClient(NetworkManager manager, EntityPlayer player) {
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream stream = new DataOutputStream(bos);
-
-        try {
-            stream.writeByte(Eln.packetServerToClientInfo);
-            for (IConfigSharing c : Eln.instance.configShared) {
-                c.serializeConfig(stream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Utils.sendPacketToClient(bos, (EntityPlayerMP) player);
-    }
-
-    private void packetServerInfo(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        for (IConfigSharing c : Eln.instance.configShared) {
-            try {
-                c.deserialize(stream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -130,7 +95,7 @@ public class PacketHandler {
     void packetOpenLocalGui(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         EntityPlayer clientPlayer = (EntityPlayer) player;
         try {
-            clientPlayer.openGui(Eln.instance, stream.readInt(),
+            clientPlayer.openGui(Eln.Companion, stream.readInt(),
                 clientPlayer.world, stream.readInt(), stream.readInt(),
                 stream.readInt());
         } catch (IOException e) {

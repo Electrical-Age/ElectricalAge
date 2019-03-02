@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.autominer;
 
 import mods.eln.Eln;
+import mods.eln.init.Config;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.electricalitem.OreColorMapping;
@@ -238,7 +239,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         // OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
         MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 
-        int scannerRadius = Eln.instance.autominerRange;
+        int scannerRadius = Config.INSTANCE.getAutominerRange();
         double scannerEnergy = 0;
 
         jobCoord.setDimension(miner.node.coordinate.getDimension());

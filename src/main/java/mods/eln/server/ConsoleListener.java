@@ -153,79 +153,16 @@ public class ConsoleListener extends CommandBase {
                 authorsStr += Eln.AUTHORS[idx] + ' ';
             cprint(sender, strOffsetL0 + "Authors: " + Color.COLOR_DARK_GREY + authorsStr);
             cprint(sender, strOffsetL0 + "Website: " + Color.COLOR_DARK_GREY + Eln.URL);
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_aging)) {
-            cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_aging);
-            if (!checkArgCount(sender, args, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
-            if (!arg0.valid)
-                return;
-            SaveConfig.instance.batteryAging = (arg0.value);
-            SaveConfig.instance.electricalLampAging = (arg0.value);
-            SaveConfig.instance.heatFurnaceFuel = (arg0.value);
-            SaveConfig.instance.infinitePortableBattery = (!arg0.value);
-            cprint(sender, strOffsetL0 + "Batteries / Furnace Fuel / Lamp aging : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(sender, strOffsetL0 + "Parameter saved in the map.");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_lampAging)) {
-            cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_lampAging);
-            if (!checkArgCount(sender, args, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
-            if (!arg0.valid)
-                return;
-            SaveConfig.instance.electricalLampAging = (arg0.value);
-            cprint(sender, strOffsetL0 + "Lamp aging : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(sender, strOffsetL0 + "Parameter saved in the map.");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_batteryAging)) {
-            cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_batteryAging);
-            if (!checkArgCount(sender, args, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
-            if (!arg0.valid)
-                return;
-            SaveConfig.instance.batteryAging = (arg0.value);
-            cprint(sender, strOffsetL0 + "Non portable batteries aging : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(sender, strOffsetL0 + "Parameter saved in the map.");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_heatFurnaceFuel)) {
-            cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_heatFurnaceFuel);
-            if (!checkArgCount(sender, args, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
-            if (!arg0.valid)
-                return;
-            SaveConfig.instance.heatFurnaceFuel = (arg0.value);
-            cprint(sender, strOffsetL0 + "Furnace fuel aging : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(sender, strOffsetL0 + "Parameter saved in the map.");
         } else if (cmd.equalsIgnoreCase(cmdNameStr_newWind)) {
             cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_newWind);
             if (!checkArgCount(sender, args, 0))
                 return;
-            Eln.wind.newWindTarget();
-            cprint(sender, strOffsetL0 + "New random wind amplitude target : " + Eln.wind.getTargetNotFiltred());
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_regenOre)) {
-            cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_regenOre);
-            if (!checkArgCount(sender, args, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
-            if (!arg0.valid)
-                return;
-            Eln.saveConfig.reGenOre = arg0.value;
-            cprint(sender, strOffsetL0 + "Regenerate ore at next map reload : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(sender, strOffsetL0 + "Parameter saved in the map and effective once.");
+            Eln.windProcess.newWindTarget();
+            cprint(sender, strOffsetL0 + "New random wind amplitude target : " + Eln.windProcess.getTargetNotFiltred());
         } else if (cmd.equalsIgnoreCase(cmdNameStr_generateLangFileTemplate)) {
             cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_generateLangFileTemplate);
             cprint(sender, strOffsetL0 + "New language system parses source code, see here how to generate language " +
                 "files: https://github.com/Electrical-Age/ElectricalAge");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)) {
-            cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_killMonstersAroundLamps);
-            if (!checkArgCount(sender, args, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(sender, args[1]);
-            if (!arg0.valid)
-                return;
-            Eln.instance.killMonstersAroundLamps = arg0.value;
-            cprint(sender, strOffsetL0 + "Avoid monsters spawning around lamps : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(sender, strOffsetL0 + "Warning: Command effective to this game instance only.");
         } else {
             cprint(sender, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_RED + "Error: Unknown command.");
         }
@@ -272,11 +209,6 @@ public class ConsoleListener extends CommandBase {
             cprint(ics, strOffsetL0 + "Parameters :");
             cprint(ics, strOffsetL1 + "@0:string : Command name to get documentation.");
             cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_about)) {
-            cprint(ics, strOffsetL0 + "Returns useful information on this mod.");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "No input parameters.");
-            cprint(ics, "");
         } else if (cmd.equalsIgnoreCase(cmdNameStr_listCmd)) {
             cprint(ics, strOffsetL0 + "Lists all ELN publicly available commands.");
             cprint(ics, "");
@@ -287,51 +219,11 @@ public class ConsoleListener extends CommandBase {
             cprint(ics, "");
             cprint(ics, strOffsetL0 + "No input parameters.");
             cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_aging)) {
-            cprint(ics, strOffsetL0 + "Enables/disables aging on :");
-            cprint(ics, strOffsetL0 + "- Portable and standards batteries,");
-            cprint(ics, strOffsetL0 + "- Lamps,");
-            cprint(ics, strOffsetL0 + "- Fuel into electrical furnaces.");
-            cprint(ics, strOffsetL0 + "Acts as a combination of the following commands :");
-            cprint(ics, strOffsetL0 + "- " + cmdNameStr_batteryAging + ", " + cmdNameStr_lampAging + ", " + cmdNameStr_heatFurnaceFuel);
-            cprint(ics, strOffsetL0 + "Changes stored into the map.");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Aging state (enabled/disabled).");
-            cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_lampAging)) {
-            cprint(ics, strOffsetL0 + "Enables/disables aging on lamps.");
-            cprint(ics, strOffsetL0 + "Changes stored into the map.");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Aging state (enabled/disabled).");
-            cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_batteryAging)) {
-            cprint(ics, strOffsetL0 + "Enables/disables aging on standard batteries.");
-            cprint(ics, strOffsetL0 + "Changes stored into the map.");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Aging state (enabled/disabled).");
-            cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_heatFurnaceFuel)) {
-            cprint(ics, strOffsetL0 + "Enables/disables aging on fuel into electrical furnaces.");
-            cprint(ics, strOffsetL0 + "Changes stored into the map.");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Aging state (enabled/disabled).");
-            cprint(ics, "");
         } else if (cmd.equalsIgnoreCase(cmdNameStr_newWind)) {
             cprint(ics, strOffsetL0 + "Changes progressively the wind to another target amplitude.");
             cprint(ics, strOffsetL0 + "Changes stored into the map.");
             cprint(ics, "");
             cprint(ics, strOffsetL0 + "No input parameters.");
-            cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_regenOre)) {
-            cprint(ics, strOffsetL0 + "When set, regenerates ELN ores at the next map reload.");
-            cprint(ics, strOffsetL0 + "Changes stored into the map and effective once when set.");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Regenerate flag (enabled/disabled).");
             cprint(ics, "");
         } else if (cmd.equalsIgnoreCase(cmdNameStr_generateLangFileTemplate)) {
             cprint(ics, strOffsetL0 + "Generate a new language file or complete an existing one");
@@ -339,15 +231,6 @@ public class ConsoleListener extends CommandBase {
             cprint(ics, "");
             cprint(ics, strOffsetL0 + "Parameters :");
             cprint(ics, strOffsetL1 + "@0:string : full file path.");
-            cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)) {
-            cprint(ics, strOffsetL0 + "When set, monsters don't spawn around the lamps (default).");
-            cprint(ics, strOffsetL0 + "When clear, leaving lights on in dark zones is recommended...");
-            cprint(ics, strOffsetL0 + "Effective only during this game instance.");
-            cprint(ics, strOffsetL0 + "(See \"Eln.cfg\" for permanent effect.)");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Enable/disable.");
             cprint(ics, "");
         } else {
             cprint(ics, Color.COLOR_DARK_RED + strOffsetL0 + "Error : Unknown/Undocumented command.");

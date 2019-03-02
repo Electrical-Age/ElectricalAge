@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.heatfurnace;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.sim.FurnaceProcess;
 import mods.eln.sim.RegulatorFurnaceProcess;
 
@@ -19,7 +20,7 @@ public class HeatFurnaceThermalProcess extends RegulatorFurnaceProcess {
         super.process(time);
         //	else
         if (element.getControlExternal()) {
-            double ratio = element.electricalCmdLoad.getU() / Eln.instance.SVU;
+            double ratio = element.electricalCmdLoad.getU() / Cable.SVU;
 
             if (ratio < 0.1) {
                 element.setTakeFuel(false);

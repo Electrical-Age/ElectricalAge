@@ -472,17 +472,20 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
 
                         stackGreen += blockKeyFactor[blockKey.toInt()] * dToStack
 
-                        // TODO(1.10): This needs a total rewrite.
+                        // TODO(1.12): This needs a total rewrite.
                         val state = Block.getStateById(blockKey.toInt())
                         val b = state.block
                         //val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
-                        if (b !== Blocks.AIR && b !== Eln.lightBlock) {
+/*
+                        if (b !== ModBlock.AIR && b !== Eln.lightBlock) {
                             stackRed += if (state.isOpaqueCube)
                                 0.2f * dToStack
                             else
                                 0.1f * dToStack
-                        } else
+                        } else {
                             stackBlue += 0.06f * dToStack
+                        }
+*/
 
                         x += vx * dBest
                         y += vy * dBest
@@ -571,6 +574,7 @@ object OreColorMapping {
 
     fun updateColorMapping(): FloatArray {
         val blockKeyMapping = FloatArray(1024 * 64)
+/*
         for (blockId in 0..4095) {
             for (meta in 0..15) {
                 blockKeyMapping[blockId + (meta shl 12)] = 0f
@@ -583,6 +587,8 @@ object OreColorMapping {
         }
 
         cache = blockKeyMapping
+        return blockKeyMapping
+*/
         return blockKeyMapping
     }
 }

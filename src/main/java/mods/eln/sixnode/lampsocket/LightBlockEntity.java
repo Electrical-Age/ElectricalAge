@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
@@ -119,7 +120,7 @@ public class LightBlockEntity extends TileEntity {
             //	world.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
             world.setBlockToAir(pos);
             //world.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
-            //Eln.instance.tileEntityDestructor.add(this);
+            //Eln.tileEntityDestructor.add(this);
             Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
             return;
         }
@@ -146,14 +147,14 @@ public class LightBlockEntity extends TileEntity {
 
     public static void addLight(World w, BlockPos pos, int light, int timeout) {
         Block block = w.getBlockState(pos).getBlock();
-        if (block != Eln.lightBlock) {
+        if (block != ModBlock.lightBlock) {
             if (block != Blocks.AIR) return;
-            w.setBlockState(pos, Eln.lightBlock.getDefaultState());
+            w.setBlockState(pos, ModBlock.lightBlock.getDefaultState());
             w.setLightFor(EnumSkyBlock.BLOCK, pos, 2);
         }
 
         TileEntity t = w.getTileEntity(pos);
-        if (t != null && t instanceof LightBlockEntity)
+        if (t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else
             Utils.println("ASSERT if(t != null && t instanceof LightBlockEntity)");

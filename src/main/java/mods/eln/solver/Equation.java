@@ -946,7 +946,7 @@ public class Equation implements IValue, INBTTReady {
 
     public static class BatteryCharge implements IOperator {
         public BatteryCharge() {
-            FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
+            FunctionTable uFq = Eln.Companion.getBatteryVoltageFunctionTable();
             double dq = 0.001;
             double q = 0;
             eMax = 0;
@@ -971,7 +971,7 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public double getValue() {
-            FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
+            FunctionTable uFq = Eln.Companion.getBatteryVoltageFunctionTable();
             double probeU = probe.getValue();
             if (probeU > 1.5) return 1;
             double q = 0, dq = 0.001;

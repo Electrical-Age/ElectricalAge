@@ -91,7 +91,7 @@ public class UtilsClient {
     public static void clientOpenGui(GuiScreen gui) {
         guiLastOpen = gui;
         EntityPlayerSP clientPlayer = getClientPlayer();
-        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.world, 0, 0, 0);
+        clientPlayer.openGui(Eln.Companion, GuiHandler.genericOpen, clientPlayer.world, 0, 0, 0);
     }
 
     public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
@@ -487,7 +487,7 @@ public class UtilsClient {
 //        // ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
 //        FontRenderer font = null;
 //        if (par1ItemStack != null) {
-//            Item i = par1ItemStack.getItem();
+//            Items i = par1ItemStack.getItem();
 //            if (i == null)
 //                return;
 //            font = i.getFontRenderer(par1ItemStack);
@@ -550,7 +550,7 @@ public class UtilsClient {
     }
 
     public static void sendPacketToServer(PacketBuffer bos) {
-        CPacketCustomPayload packet = new CPacketCustomPayload(Eln.channelName, bos);
+        CPacketCustomPayload packet = new CPacketCustomPayload(Eln.eventChannelID, bos);
         Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
     }
 

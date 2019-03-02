@@ -7,6 +7,7 @@ import mods.eln.generic.GenericItemUsingDamageSlot
 import mods.eln.gui.*
 import mods.eln.gui.ISlotSkin.SlotSkin
 import mods.eln.i18n.I18N
+import mods.eln.init.Cable
 import mods.eln.item.FuelBurnerDescriptor
 import mods.eln.item.regulator.IRegulatorDescriptor
 import mods.eln.item.regulator.IRegulatorDescriptor.RegulatorType
@@ -75,7 +76,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         GL11.glColor3f(1f, 1f, 1f)
     }
 
-    // TODO(1.10): Item rendering.
+    // TODO(1.10): Items rendering.
 //    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
 //    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
 //                                       helper: IItemRenderer.ItemRendererHelper?) =
@@ -124,7 +125,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
             when {
                 externalControlled -> {
-                    setCmd(controlLoad.u / Eln.SVU)
+                    setCmd(controlLoad.u / Cable.SVU)
                 }
                 else -> {
                     setCmd(manualControl)

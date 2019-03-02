@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalswitch;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeBase;
@@ -53,9 +54,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         boolean signalSwitch) {
         super(name, ElectricalSwitchElement.class, ElectricalSwitchRender.class);
 
-        if (!Eln.noSymbols) {
-            setDefaultIcon("switch");
-        }
+        setDefaultIcon("switch");
 
         this.nominalVoltage = nominalVoltage;
         this.nominalPower = nominalPower;
@@ -175,7 +174,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
                 break;
             case Lever:
                 GL11.glPushMatrix();
-                if (nominalVoltage <= Eln.MVU) {
+                if (nominalVoltage <= Cable.MVU) {
                     GL11.glScaled(0.5f, 0.5f, 0.5f);
                 }
 

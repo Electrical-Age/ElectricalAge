@@ -98,7 +98,7 @@ public class SixNodeBlock extends NodeBlock {
 
     // TODO(1.12) Whatever this was, it's broken now.
     // @SideOnly(Side.CLIENT)
-//    public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
+//    public void getSubBlocks(Items par1, CreativeTabs tab, List subItems) {
 //        Eln.sixNodeItem.getSubItems(par1, tab, subItems);
 //    }
 
@@ -141,7 +141,7 @@ public class SixNodeBlock extends NodeBlock {
 //        if (e == null) return blockIcon;
 //        SixNodeEntity sne = (SixNodeEntity) e;
 //        Block b = sne.sixNodeCacheBlock;
-//        if (b == Blocks.air) return blockIcon;
+//        if (b == ModBlock.air) return blockIcon;
 //        // return b.getIcon(w, x, y, z, side);
 //        try {
 //            return b.getIcon(side, sne.sixNodeCacheBlockMeta);
@@ -149,8 +149,8 @@ public class SixNodeBlock extends NodeBlock {
 //            return blockIcon;
 //        }
 //
-//        // return Blocks.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
-//        // return Blocks.stone.getIcon(w, x, y, z, side);
+//        // return ModBlock.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
+//        // return ModBlock.stone.getIcon(w, x, y, z, side);
 //    }
 
     @Override
@@ -454,7 +454,7 @@ public class SixNodeBlock extends NodeBlock {
 //        if (e == null) return 0;
 //        SixNodeEntity sne = (SixNodeEntity) e;
 //        Block b = sne.sixNodeCacheBlock;
-//        if (b == Blocks.air) return 0;
+//        if (b == ModBlock.air) return 0;
 //        // return b.getIcon(w, x, y, z, side);
 //        try {
 //            return b.getLightOpacity();

@@ -186,9 +186,9 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
 //                    }
 //                }
 //            } else {
-//                if (Eln.multiMeterElement.checkSameItemStack(player?.currentEquippedItem) ||
-//                    Eln.thermometerElement.checkSameItemStack(player?.currentEquippedItem) ||
-//                    Eln.allMeterElement.checkSameItemStack(player?.currentEquippedItem)) {
+//                if (Items.multiMeterElement.checkSameItemStack(player?.currentEquippedItem) ||
+//                    Items.thermometerElement.checkSameItemStack(player?.currentEquippedItem) ||
+//                    Items.allMeterElement.checkSameItemStack(player?.currentEquippedItem)) {
 //                    return false
 //                }
 //

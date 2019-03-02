@@ -2,6 +2,7 @@ package mods.eln.transparentnode.transformer;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -305,7 +306,7 @@ public class TransformerElement extends TransparentNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()));
         info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             FerromagneticCoreDescriptor core =
                 (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(
                     inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));

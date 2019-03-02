@@ -2,6 +2,7 @@ package mods.eln.sixnode.modbusrtu;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -141,7 +142,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        if (Eln.modbusEnable) {
+        if (Config.INSTANCE.getModbusEnable()) {
             info.put(I18N.tr("Modbus TCP"), Eln.modbusServer.getHost() + ":" + Eln.modbusServer.getPort());
             info.put(I18N.tr("Modbus Unit ID"), String.valueOf(station));
         } else {

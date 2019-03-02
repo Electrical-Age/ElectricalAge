@@ -44,7 +44,7 @@ public class TransparentNode extends Node {
 
         elementId = nbt.getShort("eid");
         try {
-            TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(elementId);
+            TransparentNodeDescriptor descriptor = null; //TODO(1.12): Eln.transparentNodeItem.getDescriptor(elementId);
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
         } catch (InstantiationException e) {
 
@@ -139,7 +139,7 @@ public class TransparentNode extends Node {
     public void initializeFromThat(Direction side, EntityLivingBase entityLiving, ItemStack itemStack) {
         try {
             // Direction front = null;
-            TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(itemStack);
+            TransparentNodeDescriptor descriptor = null; // TODO(1.12): Eln.transparentNodeItem.getDescriptor(itemStack);
             /*
 			 * switch(descriptor.getFrontType()) { case BlockSide: front = side; break; case PlayerView: front = Utils.entityLivingViewDirection(entityLiving).getInverse(); break; case PlayerViewHorizontal: front = Utils.entityLivingHorizontalViewDirection(entityLiving).getInverse(); break;
 			 * 
@@ -247,8 +247,7 @@ public class TransparentNode extends Node {
 
     @Override
     public String getNodeUuid() {
-
-        return Eln.transparentNodeBlock.getNodeUuid();
+        return null; // TODO(1.12): Eln.transparentNodeBlock.getNodeUuid();
     }
 
     @Override

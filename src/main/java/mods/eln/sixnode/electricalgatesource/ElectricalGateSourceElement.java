@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalgatesource;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -134,7 +135,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.instance.signalCableDescriptor.applyTo(outputGate);
+        Cable.Companion.getSignal().descriptor.applyTo(outputGate);
         computeElectricalLoad();
     }
 

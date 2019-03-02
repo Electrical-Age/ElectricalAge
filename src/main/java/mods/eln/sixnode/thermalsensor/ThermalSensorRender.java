@@ -3,6 +3,7 @@ package mods.eln.sixnode.thermalsensor;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -85,11 +86,11 @@ public class ThermalSensorRender extends SixNodeElementRender {
         if (!descriptor.temperatureOnly) {
             if (front.left() == lrdu && cable != null) return cable.render;
             if (front.right() == lrdu && cable != null) return cable.render;
-            if (front == lrdu) return Eln.instance.signalCableDescriptor.render;
+            if (front == lrdu) return Cable.Companion.getSignal().descriptor.render;
         } else {
             if (front.inverse() == lrdu && cable != null) return cable.render;
             if (front.inverse() == lrdu && ecable != null) return ecable.render;
-            if (front == lrdu) return Eln.instance.signalCableDescriptor.render;
+            if (front == lrdu) return Cable.Companion.getSignal().descriptor.render;
         }
         return null;
     }

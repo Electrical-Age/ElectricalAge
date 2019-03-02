@@ -28,7 +28,7 @@ public class SaveConfig extends WorldSavedData {
         infinitePortableBattery = nbt.getBoolean("infinitPortableBattery");
         reGenOre = nbt.getBoolean("reGenOre");
         cableRsFactor_lastUsed = nbt.getDouble("cableRsFactor_lastUsed");
-        Eln.wind.readFromNBT(nbt, "wind");
+        Eln.windProcess.readFromNBT(nbt, "wind");
     }
 
     @Override
@@ -38,7 +38,7 @@ public class SaveConfig extends WorldSavedData {
         nbt.setBoolean("batteryAging", batteryAging);
         nbt.setBoolean("infinitPortableBattery", infinitePortableBattery);
         nbt.setBoolean("reGenOre", reGenOre);
-        Eln.wind.writeToNBT(nbt, "wind");
+        Eln.windProcess.writeToNBT(nbt, "wind");
         return nbt;
     }
 

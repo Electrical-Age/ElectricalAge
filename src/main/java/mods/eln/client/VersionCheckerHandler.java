@@ -111,12 +111,6 @@ public class VersionCheckerHandler {
         if (!ready)
             return;
 
-        // Print the current version when the client start a map
-        if (Eln.versionCheckEnabled) {
-            m.player.sendMessage(new TextComponentString(Version.printColor()));
-            m.player.sendMessage(new TextComponentString(versionMsg));
-        }
-
         MinecraftForge.EVENT_BUS.unregister(this);
         ready = false;
     }

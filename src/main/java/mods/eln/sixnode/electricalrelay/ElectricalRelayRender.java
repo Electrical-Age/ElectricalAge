@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalrelay;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
@@ -78,7 +79,7 @@ public class ElectricalRelayRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        if (lrdu == front) return Eln.instance.signalCableDescriptor.render;
+        if (lrdu == front) return Cable.Companion.getSignal().descriptor.render;
         if (lrdu == front.left() || lrdu == front.right()) return descriptor.cable.render;
         return null;
     }

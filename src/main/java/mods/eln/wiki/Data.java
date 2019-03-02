@@ -51,7 +51,7 @@ public class Data {
 
     public static void addOre(ItemStack stack) {
 
-        add(tr("Ore"), stack);
+        add(tr("oreBlock"), stack);
     }
 
     public static void addPortable(ItemStack stack) {

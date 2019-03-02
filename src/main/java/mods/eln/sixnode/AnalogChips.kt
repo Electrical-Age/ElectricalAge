@@ -4,6 +4,8 @@ import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
 import mods.eln.i18n.I18N
+import mods.eln.init.Cable
+import mods.eln.init.Config
 import mods.eln.misc.*
 import mods.eln.node.Node
 import mods.eln.node.Synchronizable
@@ -23,7 +25,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -182,10 +183,10 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
     }
 
     override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when (lrdu) {
-        front -> Eln.instance.signalCableDescriptor.render
-        front.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance.signalCableDescriptor.render else null
-        front.left() -> if (descriptor.function.inputCount >= 2) Eln.instance.signalCableDescriptor.render else null
-        front.right() -> if (descriptor.function.inputCount >= 3) Eln.instance.signalCableDescriptor.render else null
+        front -> Cable.signal.descriptor.render
+        front.inverse() -> if (descriptor.function.inputCount >= 1) Cable.signal.descriptor.render else null
+        front.left() -> if (descriptor.function.inputCount >= 2) Cable.signal.descriptor.render else null
+        front.right() -> if (descriptor.function.inputCount >= 3) Cable.signal.descriptor.render else null
         else -> null
     }
 }
@@ -238,12 +239,12 @@ class PIDRegulator : AnalogFunction() {
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
         pid.setOperator(arrayOf(
-            IValue { (inputs[0] ?: 0.0) / Eln.SVU },
-            IValue { (inputs[1] ?: 0.0) / Eln.SVU } ,
+            IValue { (inputs[0] ?: 0.0) / Cable.SVU },
+            IValue { (inputs[1] ?: 0.0) / Cable.SVU } ,
             IValue { Kp }, IValue { Ki} , IValue { Kd }
         ))
         pid.process(deltaTime)
-        return Eln.SVU * pid.value
+        return Cable.SVU * pid.value
     }
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
@@ -264,7 +265,7 @@ class PIDRegulator : AnalogFunction() {
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
         val info = super.getWaila(inputs, output)
         info[I18N.tr("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
-        if (Eln.wailaEasyMode) {
+        if (Config.wailaEasyMode) {
             info[I18N.tr("State")] = "Si = ${pid.iStack}"
         }
         return info
@@ -399,7 +400,7 @@ open class VoltageControlledSawtoothOscillator : AnalogFunction() {
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
         out += Math.pow(50.0, (inputs[0] ?: 0.0) / 50) * 2 * deltaTime
-        if (out > Eln.SVU) {
+        if (out > Cable.SVU) {
             out = 0.0
         }
         return out
@@ -722,7 +723,7 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
         CUTOFF_FREQUENCY_CHANGED(1)
     }
 
-    private var cutOffFrequency = Eln.instance.electricalFrequency / 4.0
+    private var cutOffFrequency = Config.electricalFrequency / 4.0
         get() = (function as Filter).feedback / (2.0 * Math.PI)
         set(value) {
             field = value
@@ -757,7 +758,7 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
 
 class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
     AnalogChipRender(entity, side, descriptor) {
-    internal var cutOffFrequency = Synchronizable(Eln.instance.electricalFrequency.toFloat() / 4f)
+    internal var cutOffFrequency = Synchronizable(Config.electricalFrequency.toFloat() / 4f)
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = FilterGui(this)
 
@@ -797,7 +798,7 @@ class FilterGui(private var render: FilterRender) : GuiScreenEln() {
             freq?.value = render.cutOffFrequency.value
         }
         freq?.setComment(0, I18N.tr("Cut-off frequency %s Hz",
-            String.format("%1.3f", freq?.value ?: Eln.instance.electricalFrequency / 4f)))
+            String.format("%1.3f", freq?.value ?: Config.electricalFrequency / 4f)))
     }
 
     override fun newHelper(): GuiHelper {

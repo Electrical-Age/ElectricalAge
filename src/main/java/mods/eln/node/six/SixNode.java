@@ -80,7 +80,9 @@ public class SixNode extends Node {
 
     public boolean createSubBlock(ItemStack itemStack, Direction direction, EntityPlayer player) {
 
-        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
+        // TODO(1.12)
+        //SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
+        SixNodeDescriptor descriptor = null;
         if (sideElementList[direction.getInt()] != null)
             return false;
         try {
@@ -195,7 +197,7 @@ public class SixNode extends Node {
                 sideElementIdList[idx] = 0;
             } else {
                 try {
-                    SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
+                    SixNodeDescriptor descriptor = null; // TODO(1.12) Eln.sixNodeItem.getDescriptor(sideElementId);
                     sideElementIdList[idx] = sideElementId;
                     sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
                     sideElementList[idx].readFromNBT(nbt.getCompoundTag("ED" + idx));
@@ -608,8 +610,9 @@ public class SixNode extends Node {
 
     @Override
     public String getNodeUuid() {
-
-        return Eln.sixNodeBlock.getNodeUuid();
+        // TODO(1.12)
+        return "";
+//        return Eln.sixNodeBlock.getNodeUuid();
     }
 
     @Override

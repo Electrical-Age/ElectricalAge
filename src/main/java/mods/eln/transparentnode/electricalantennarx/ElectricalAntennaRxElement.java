@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalantennarx;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -150,7 +151,7 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Receiving"), powerSrc.getP() != 0 ? "Yes" : "No");
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Power received"), Utils.plotPower("", powerSrc.getP()));
             info.put(I18N.tr("Effective power"), Utils.plotPower("", powerSrc.getEffectiveP()));
         }

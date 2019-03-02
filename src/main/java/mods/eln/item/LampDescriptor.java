@@ -1,7 +1,5 @@
 package mods.eln.item;
 
-import mods.eln.Eln;
-import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.mna.component.Resistor;
@@ -12,14 +10,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade implements IConfigSharing {
+public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
     public enum Type {Incandescent, eco, LED}
 
@@ -67,7 +62,6 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
                 break;
         }
 
-        Eln.instance.configShared.add(this);
         voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU);
     }
 
@@ -130,15 +124,5 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
             else
                 list.add(tr("Condition:") + " " + tr("Bad"));
         }
-    }
-
-    @Override
-    public void serializeConfig(DataOutputStream stream) throws IOException {
-        stream.writeDouble(nominalLife);
-    }
-
-    @Override
-    public void deserialize(DataInputStream stream) throws IOException {
-        serverNominalLife = stream.readDouble();
     }
 }

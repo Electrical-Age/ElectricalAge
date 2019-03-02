@@ -4,6 +4,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import mods.eln.Eln;
 import mods.eln.Other;
+import mods.eln.init.Config;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -355,7 +356,7 @@ public class ComputerProbeNode extends SimpleNode /*implements IPeripheral */{
 
         @Override
         public int getRange() {
-            return Eln.wirelessTxRange;
+            return Config.INSTANCE.getWirelessTxRange();
         }
 
         @Override

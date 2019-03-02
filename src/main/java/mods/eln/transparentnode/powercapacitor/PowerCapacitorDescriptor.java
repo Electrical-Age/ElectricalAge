@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.powercapacitor;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
@@ -35,7 +36,7 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
     public double getCValue(int cableCount, double nominalDielVoltage) {
         if (cableCount == 0) return 0;
-        double uTemp = nominalDielVoltage / Eln.LVU;
+        double uTemp = nominalDielVoltage / Cable.LVU;
         return serie.getValue(cableCount - 1) / uTemp / uTemp;
     }
 

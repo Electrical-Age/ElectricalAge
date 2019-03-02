@@ -3,6 +3,7 @@ package mods.eln.gridnode.electricalpole;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderType;
 import mods.eln.gridnode.GridRender;
+import mods.eln.init.Cable;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.SlewLimiter;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -45,7 +46,7 @@ public class ElectricalPoleRender extends GridRender {
     @Override
     public void draw() {
         super.draw();
-        cableRenderType = drawCable(front.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType);
+        cableRenderType = drawCable(front.down(), Cable.Companion.getVeryHighVoltage().descriptor.render, eConn, cableRenderType);
     }
 
     @Override

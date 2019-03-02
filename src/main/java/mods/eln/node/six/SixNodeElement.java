@@ -2,6 +2,7 @@ package mods.eln.node.six;
 
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.*;
 import mods.eln.node.INodeElement;
 import mods.eln.sim.ElectricalLoad;
@@ -245,7 +246,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 	}*/
 
     public ItemStack getDropItemStack() {
-        return new ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId); //sixNode.sideElementIdList[side.getInt()]
+        return new ItemStack(ModBlock.sixNodeBlock, 1, itemStackDamageId); //sixNode.sideElementIdList[side.getInt()]
     }
 
     public void readFromNBT(NBTTagCompound nbt) {

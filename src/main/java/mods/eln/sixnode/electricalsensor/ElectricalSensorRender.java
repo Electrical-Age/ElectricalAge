@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -66,10 +67,10 @@ public class ElectricalSensorRender extends SixNodeElementRender {
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
         if (descriptor.voltageOnly) {
-            if (lrdu == front) return Eln.instance.signalCableDescriptor.render;
+            if (lrdu == front) return Cable.Companion.getSignal().descriptor.render;
             if (lrdu == front.inverse()) return cableRender;
         } else {
-            if (lrdu == front) return Eln.instance.signalCableDescriptor.render;
+            if (lrdu == front) return Cable.Companion.getSignal().descriptor.render;
             if (lrdu == front.left() || lrdu == front.right()) return cableRender;
         }
         return super.getCableRender(lrdu);

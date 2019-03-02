@@ -19,7 +19,7 @@ public class OreBlock extends Block {
 
     public OreBlock() {
         super(Material.ROCK); //Parameters: Block ID, Block material
-    /*	setTextureFile("/TutorialGFX/Blocks.png"); //The texture file used
+    /*	setTextureFile("/TutorialGFX/ModBlock.png"); //The texture file used
 		setBlockName("DeverionXBlockOre"); //The incode block name
 		setCreativeTab(eln.c.tabGems); //The tab it appears in*/
         setHardness(3.0F); //The block hardness
@@ -36,7 +36,7 @@ public class OreBlock extends Block {
 
 /*
     @Override
-    public void getSubBlocks(Item i, CreativeTabs tab, List l) { //Puts all sub blocks into the creative inventory
+    public void getSubBlocks(Items i, CreativeTabs tab, List l) { //Puts all sub blocks into the creative inventory
         Eln.oreItem.getSubItems(i, tab, l);
     }
 */
@@ -51,9 +51,12 @@ public class OreBlock extends Block {
 //    }
 
     public ArrayList<ItemStack> getBlockDropped(World w, int x, int y, int z, int meta, int fortune) { //Specifies the block drop
+/*
         OreDescriptor desc = Eln.oreItem.getDescriptor(meta);
         if (desc == null) return new ArrayList<ItemStack>();
         return desc.getBlockDropped(fortune);
+*/
+      return null;
     }
 
     @Override

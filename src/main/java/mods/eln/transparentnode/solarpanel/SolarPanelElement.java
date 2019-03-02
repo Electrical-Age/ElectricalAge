@@ -2,6 +2,7 @@ package mods.eln.transparentnode.solarpanel;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.GhostPowerNode;
@@ -234,7 +235,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"));
         info.put(I18N.tr("Panel angle"), Utils.plotValue((panelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
         info.put(I18N.tr("Producing energy"), (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Produced power"), Utils.plotPower("", powerSource.getP()));
         }
         return info;

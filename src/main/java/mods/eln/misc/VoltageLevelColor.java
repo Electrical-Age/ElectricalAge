@@ -1,6 +1,7 @@
 package mods.eln.misc;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import org.lwjgl.opengl.GL11;
 
@@ -20,7 +21,7 @@ public enum VoltageLevelColor {
         this.voltageLevel = voltageLevel;
     }
 
-    // TODO(1.10): Item rendering.
+    // TODO(1.10): Items rendering.
 //    public void drawIconBackground(IItemRenderer.ItemRenderType type) {
 //        if (!Eln.noVoltageBackground && voltageLevel != null &&
 //            type == IItemRenderer.ItemRenderType.INVENTORY || type == IItemRenderer.ItemRenderType.FIRST_PERSON_MAP) {
@@ -33,13 +34,13 @@ public enum VoltageLevelColor {
     public static VoltageLevelColor fromVoltage(double voltage) {
         if (voltage < 0) {
             return None;
-        } else if (voltage <= 2 * Eln.LVU) {
+        } else if (voltage <= 2 * Cable.LVU) {
             return LowVoltage;
-        } else if (voltage <= 2 * Eln.MVU) {
+        } else if (voltage <= 2 * Cable.MVU) {
             return MediumVoltage;
-        } else if (voltage <= 2 * Eln.HVU) {
+        } else if (voltage <= 2 * Cable.HVU) {
             return HighVoltage;
-        } else if (voltage <= 2 * Eln.VVU) {
+        } else if (voltage <= 2 * Cable.VHVU) {
             return VeryHighVoltage;
         } else {
             return None;

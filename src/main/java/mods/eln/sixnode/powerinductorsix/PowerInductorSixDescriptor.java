@@ -1,6 +1,7 @@
 package mods.eln.sixnode.powerinductorsix;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -57,7 +58,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
         double coreFactor = coreDescriptor.cableMultiplicator;
 
-        return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
+        return Cable.Companion.getLowVoltage().descriptor.electricalRs * coreFactor;
     }
 
     public void setParent(net.minecraft.item.Item item, int damage) {

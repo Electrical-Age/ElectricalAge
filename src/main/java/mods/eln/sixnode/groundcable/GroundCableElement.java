@@ -3,6 +3,7 @@ package mods.eln.sixnode.groundcable;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -117,7 +118,7 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.applySmallRs(electricalLoad);
+        Cable.applySmallRs(electricalLoad);
     }
 
     @Override

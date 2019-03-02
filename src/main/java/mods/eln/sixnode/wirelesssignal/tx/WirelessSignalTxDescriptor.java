@@ -41,7 +41,7 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor {
 //    }
 //
 //    @Override
-//    public void setParent(Item item, int damage) {
+//    public void setParent(Items item, int damage) {
 //        super.setParent(item, damage);
 //        Data.addSignal(newItemStack());
 //    }

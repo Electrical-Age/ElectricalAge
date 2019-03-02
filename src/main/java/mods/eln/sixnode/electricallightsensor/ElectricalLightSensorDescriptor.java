@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricallightsensor;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -51,7 +52,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         if (dayLightOnly) {
             Collections.addAll(list, tr("Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.").split("\n"));
-            list.add(tr("0V at night, %sV at noon.", Utils.plotValue(Eln.SVU)));
+            list.add(tr("0V at night, %sV at noon.", Utils.plotValue(Cable.SVU)));
         } else {
             Collections.addAll(list, tr("Provides an electrical voltage\nin the presence of light.").split("\n"));
         }

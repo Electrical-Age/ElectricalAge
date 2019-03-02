@@ -1,6 +1,7 @@
 package mods.eln.ghost;
 
 import mods.eln.Eln;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -33,7 +34,7 @@ public class GhostGroup {
     ArrayList<GhostGroupElement> elementList = new ArrayList<GhostGroupElement>();
 
     public void addElement(int x, int y, int z) {
-        elementList.add(new GhostGroupElement(x, y, z, Eln.ghostBlock, GhostBlock.tCube));
+        elementList.add(new GhostGroupElement(x, y, z, ModBlock.ghostBlock, GhostBlock.tCube));
     }
 
     public void addElement(int x, int y, int z, Block block, int meta) {

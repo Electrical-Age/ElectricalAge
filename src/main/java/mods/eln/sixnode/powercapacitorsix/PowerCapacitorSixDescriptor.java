@@ -1,6 +1,7 @@
 package mods.eln.sixnode.powercapacitorsix;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -45,7 +46,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
     public double getCValue(int cableCount, double nominalDielVoltage) {
         if (cableCount == 0) return 1e-6;
-        double uTemp = nominalDielVoltage / Eln.LVU;
+        double uTemp = nominalDielVoltage / Cable.LVU;
         return serie.getValue(cableCount - 1) / uTemp / uTemp;
     }
 

@@ -66,7 +66,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
             if (glichedTimer > 0)
                 glichedTimer -= time/* * Utils.rand(0.2, 1.8)*/;
 
-            double strangth = range - Eln.instance.serverEventListener.getLightningClosestTo(c);
+            double strangth = range - Eln.serverEventListener.getLightningClosestTo(c);
             if (strangth > 0 && glichedTimer <= 0) {
                 glichedTimer = glitchLength;
                 glichedStrangth = (strangth) / range;

@@ -1,6 +1,7 @@
 package mods.eln.ghost;
 
 import mods.eln.Eln;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
@@ -17,8 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class GhostManager extends WorldSavedData {
-    public GhostManager(String par1Str) {
-        super(par1Str);
+    public GhostManager(String name) {
+        super(name);
     }
 
     Map<Coordinate, GhostElement> ghostTable = new Hashtable<Coordinate, GhostElement>();
@@ -182,7 +183,7 @@ public class GhostManager extends WorldSavedData {
     }
 
     public void createGhost(Coordinate coordinate, Coordinate observerCoordinate, int UUID) {
-        createGhost(coordinate, observerCoordinate, UUID, Eln.ghostBlock, GhostBlock.tCube);
+        createGhost(coordinate, observerCoordinate, UUID, ModBlock.ghostBlock, GhostBlock.tCube);
     }
 
     public void createGhost(Coordinate coordinate, Coordinate observerCoordinate, int UUID, Block block, int meta) {

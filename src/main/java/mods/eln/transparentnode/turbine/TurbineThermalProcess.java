@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.turbine;
 
-import mods.eln.Eln;
+import mods.eln.init.Config;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sim.mna.component.VoltageSource;
@@ -28,7 +28,7 @@ public class TurbineThermalProcess implements IProcess {
         efficiency = Math.abs(1 - (turbine.coolLoad.Tc + PhysicalConstant.Tref) / (turbine.warmLoad.Tc + PhysicalConstant.Tref));
         if (efficiency < 0.05) efficiency = 0.05;
 
-        double E = src.getP() * time / Eln.instance.heatTurbinePowerFactor;
+        double E = src.getP() * time / Config.INSTANCE.getHeatTurbinePowerFactor();
 
         double Pout = E / time;
         double Pin = descriptor.PoutToPin.getValue(Pout) / efficiency;

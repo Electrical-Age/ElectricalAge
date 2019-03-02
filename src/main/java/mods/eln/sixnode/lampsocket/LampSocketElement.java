@@ -3,6 +3,7 @@ package mods.eln.sixnode.lampsocket;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
@@ -15,7 +16,6 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.MonsterPopFreeProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -37,7 +37,6 @@ public class LampSocketElement extends SixNodeElement {
 
     LampSocketDescriptor socketDescriptor = null;
 
-    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordinate, Eln.instance.killMonstersAroundLampsRange);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 
     public LampSocketProcess lampProcess = new LampSocketProcess(this);
@@ -70,9 +69,7 @@ public class LampSocketElement extends SixNodeElement {
 
         lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
         slowProcessList.add(lampProcess);
-        slowProcessList.add(monsterPopFreeProcess);
     }
-
 
     @Override
     public IInventory getInventory() {
@@ -222,7 +219,7 @@ public class LampSocketElement extends SixNodeElement {
         } else {
             info.put(I18N.tr("Bulb"), I18N.tr("None"));
         }
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             if (poweredByLampSupply) {
                 info.put(I18N.tr("Channel"), channel);
             }

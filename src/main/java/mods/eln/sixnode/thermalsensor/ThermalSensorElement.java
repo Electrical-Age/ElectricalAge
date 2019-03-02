@@ -2,6 +2,9 @@ package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
+import mods.eln.init.Config;
+import mods.eln.init.Items;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -145,7 +148,7 @@ public class ThermalSensorElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             switch (typeOfSensor) {
                 case temperatureType:
                     info.put(I18N.tr("Measured temperature"), Utils.plotCelsius("", thermalLoad.getT()));
@@ -179,7 +182,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.instance.signalCableDescriptor.applyTo(outputGate);
+        Cable.Companion.getSignal().descriptor.applyTo(outputGate);
         computeElectricalLoad();
     }
 
@@ -224,13 +227,13 @@ public class ThermalSensorElement extends SixNodeElement {
         if (onBlockActivatedRotate(entityPlayer)) return true;
         ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
 
-        if (Eln.multiMeterElement.checkSameItemStack(currentItemStack)) {
+        if (Items.multiMeterElement.checkSameItemStack(currentItemStack)) {
             return false;
         }
-        if (Eln.thermometerElement.checkSameItemStack(currentItemStack)) {
+        if (Items.thermometerElement.checkSameItemStack(currentItemStack)) {
             return false;
         }
-        if (Eln.allMeterElement.checkSameItemStack(currentItemStack)) {
+        if (Items.allMeterElement.checkSameItemStack(currentItemStack)) {
             return false;
         }
         return inventory.take(currentItemStack, this, false, true);

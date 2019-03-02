@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.teleporter;
 
 import mods.eln.Eln;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -44,8 +45,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
         Coordinate lightCoordinate = new Coordinate(this.d.lightCoordinate);
         lightCoordinate.applyTransformation(front, c);
 
-        boolean lightEnable = tileEntity.getWorld().getBlockState(lightCoordinate.pos).getBlock() == Eln.lightBlock;
-
+        boolean lightEnable = tileEntity.getWorld().getBlockState(lightCoordinate.pos).getBlock() == ModBlock.lightBlock;
 
         front.glRotateXnRef();
         GL11.glTranslatef(-1, 0, 0);

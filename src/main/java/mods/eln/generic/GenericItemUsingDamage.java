@@ -95,7 +95,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     // TODO(1.12): Whatever this was, it's broken.
 //    @Override
 //    @SideOnly(Side.CLIENT)
-//    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
+//    public void getSubItems(Items itemID, CreativeTabs tabs, List list) {
 //        // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
 //        for (int id : orderList) {
 //            subItemList.get(id).getSubItems(list);

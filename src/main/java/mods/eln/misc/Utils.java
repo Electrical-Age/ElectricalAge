@@ -3,6 +3,9 @@ package mods.eln.misc;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.init.Cable;
+import mods.eln.init.Config;
+import mods.eln.init.Items;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.sim.PhysicalConstant;
@@ -77,31 +80,31 @@ public class Utils {
     }
 
     public static void println(String str) {
-        if (!Eln.debugEnabled)
+        if (!Config.INSTANCE.getDebugEnable())
             return;
         System.out.println(str);
     }
 
     public static void println(Object str) {
-        if (!Eln.debugEnabled)
+        if (!Config.INSTANCE.getDebugEnable())
             return;
         System.out.println(str.toString());
     }
 
     public static void print(String str) {
-        if (!Eln.debugEnabled)
+        if (!Config.INSTANCE.getDebugEnable())
             return;
         System.out.print(str);
     }
 
     public static void print(Object str) {
-        if (!Eln.debugEnabled)
+        if (!Config.INSTANCE.getDebugEnable())
             return;
         System.out.print(str.toString());
     }
 
     public static void print(String format, Object... data) {
-        if (!Eln.debugEnabled) return;
+        if (!Config.INSTANCE.getDebugEnable()) return;
         print(String.format(format, data));
     }
 
@@ -183,7 +186,7 @@ public class Utils {
      * Returns the number of ticks that the supplied fuel item will keep the furnace burning, or 0 if the item isn't fuel
      */
     /*
-	 * public static int getItemBurnTime(ItemStack par0ItemStack) { if (par0ItemStack == null) { return 0; } else { int var1 = par0ItemStack.getItem().shiftedIndex; Item var2 = par0ItemStack.getItem();
+	 * public static int getItemBurnTime(ItemStack par0ItemStack) { if (par0ItemStack == null) { return 0; } else { int var1 = par0ItemStack.getItem().shiftedIndex; Items var2 = par0ItemStack.getItem();
 	 * 
 	 * if (par0ItemStack.getItem() instanceof ItemBlock && Block.blocksList[var1] != null) { Block var3 = Block.blocksList[var1];
 	 * 
@@ -191,7 +194,7 @@ public class Utils {
 	 * 
 	 * if (var3.blockMaterial == Material.wood) { return 300; } }
 	 * 
-	 * if (var2 instanceof ItemTool && ((ItemTool) var2).getToolMaterialName().equals("WOOD")) return 200; if (var2 instanceof ItemSword && ((ItemSword) var2).func_77825_f().equals("WOOD")) return 200; if (var2 instanceof ItemHoe && ((ItemHoe) var2).func_77842_f().equals("WOOD")) return 200; if (var1 == Item.stick.shiftedIndex) return 100; if (var1 == Item.coal.shiftedIndex) return 1600; if (var1 == Item.bucketLava.shiftedIndex) return 20000; if (var1 == Block.sapling.blockID) return 100; if (var1 == Item.blazeRod.shiftedIndex) return 2400; return GameRegistry.getFuelValue(par0ItemStack); } }
+	 * if (var2 instanceof ItemTool && ((ItemTool) var2).getToolMaterialName().equals("WOOD")) return 200; if (var2 instanceof ItemSword && ((ItemSword) var2).func_77825_f().equals("WOOD")) return 200; if (var2 instanceof ItemHoe && ((ItemHoe) var2).func_77842_f().equals("WOOD")) return 200; if (var1 == Items.stick.shiftedIndex) return 100; if (var1 == Items.coal.shiftedIndex) return 1600; if (var1 == Items.bucketLava.shiftedIndex) return 20000; if (var1 == Block.sapling.blockID) return 100; if (var1 == Items.blazeRod.shiftedIndex) return 2400; return GameRegistry.getFuelValue(par0ItemStack); } }
 	 */
     public static double getItemEnergie(ItemStack par0ItemStack) {
         return burnTimeToEnergyFactor * 80000.0 / 1600 * TileEntityFurnace.getItemBurnTime(par0ItemStack);
@@ -547,18 +550,18 @@ public class Utils {
 
     public static double getWind(int worldId, int y) {
         if (!getWorldExist(worldId)) {
-            return Math.max(0.0, Eln.instance.wind.getWind(y));
+            return Math.max(0.0, Eln.windProcess.getWind(y));
         } else {
             World world = getWorld(worldId);
             float factor = 1f + world.getRainStrength(0) * 0.2f + world.getThunderStrength(0) * 0.2f;
-            return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getThunderStrength(0) * 2f);
+            return Math.max(0.0, Eln.windProcess.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getThunderStrength(0) * 2f);
         }
     }
 
     // public static double getWind(World world, int y)
     // {
     // float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
-    // return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
+    // return Math.max(0.0, Eln.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
     // }
 
     public static void dropItem(ItemStack itemStack, BlockPos pos, World world) {
@@ -807,9 +810,9 @@ public class Utils {
         // In case future Minecraft versions allow you to grow more hands.
         for (EnumHand hand : EnumHand.values()) {
             ItemStack heldItem = entityPlayer.getHeldItem(hand);
-            if (Eln.multiMeterElement.checkSameItemStack(heldItem)
-                || Eln.thermometerElement.checkSameItemStack(heldItem)
-                || Eln.allMeterElement.checkSameItemStack(heldItem))
+            if (Items.multiMeterElement.checkSameItemStack(heldItem)
+                || Items.thermometerElement.checkSameItemStack(heldItem)
+                || Items.allMeterElement.checkSameItemStack(heldItem))
                 return true;
         }
         return false;
@@ -1371,7 +1374,7 @@ public class Utils {
     }
 
     public static boolean isWrench(ItemStack stack) {
-        return areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
+        return stack.getDisplayName().toLowerCase().contains("wrench");
     }
 
     // @SideOnly(Side.SERVER)
@@ -1395,7 +1398,7 @@ public class Utils {
     }
 
     public static String plotSignal(double U, double I) {
-        return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U / Eln.SVU);
+        return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U / Cable.SVU);
     }
 
     public static float limit(float value, float min, float max) {

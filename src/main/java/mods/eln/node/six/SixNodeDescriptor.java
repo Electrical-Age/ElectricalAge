@@ -23,7 +23,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         this.RenderClass = RenderClass;
     }
 
-    // TODO(1.10): Item rendering.
+    // TODO(1.10): Items rendering.
 //    @Override
 //    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 //        return voltageLevelColor != VoltageLevelColor.None;

@@ -30,12 +30,7 @@ public class GenericItemBlockUsingDamageDescriptor {
     public void setDefaultIcon(String name) {
         String iconName = name.replaceAll(" ", "").toLowerCase();
 
-        if (Eln.noSymbols &&
-            getClass().getClassLoader().getResource("assets/eln/textures/blocks/" + iconName + "-ni.png") != null) {
-            this.iconName = iconName + "-ni";
-        } else {
-            this.iconName = iconName;
-        }
+        this.iconName = iconName;
     }
 
     public NBTTagCompound getDefaultNBT() {

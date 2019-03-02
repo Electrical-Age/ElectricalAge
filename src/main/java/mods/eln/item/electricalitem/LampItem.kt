@@ -55,7 +55,7 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 val pos = BlockPos.MutableBlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z))
                 val state = world.getBlockState(pos)
                 val block = state.block
-                if (block.isAir(state, world, pos) || block === Eln.lightBlock) {
+                if (block.isAir(state, world, pos)) {
                     LightBlockEntity.addLight(world, pos, light, 10)
                     stride = 3
                 }

@@ -25,7 +25,7 @@ public class DelayedBlockRemove implements ITask {
     public static void add(Coordinate c) {
         if (blocks.contains(c)) return;
         blocks.add(c);
-        Eln.delayedTask.add(new DelayedBlockRemove(c));
+        Eln.delayedTaskManager.add(new DelayedBlockRemove(c));
     }
 
     @Override

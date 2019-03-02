@@ -1,5 +1,6 @@
 package mods.eln.client;
 
+import mods.eln.init.Config;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -41,16 +42,14 @@ public class ClientProxy extends CommonProxy {
             ReplicatorEntity.class,
             manager -> new ReplicatorRender(manager, new ModelSilverfish(), 0.3f));
 
-        Eln.clientKeyHandler = new ClientKeyHandler();
-        MinecraftForge.EVENT_BUS.register(Eln.clientKeyHandler);
+        // TODO(1.12): Is this important?
+        //Eln.clientKeyHandler = new ClientKeyHandler();
+        //MinecraftForge.EVENT_BUS.register(Eln.clientKeyHandler);
         MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
         uuidManager = new UuidManager();
         soundClientEventListener = new SoundClientEventListener(uuidManager);
 
-        if (Eln.versionCheckEnabled)
-            MinecraftForge.EVENT_BUS.register(VersionCheckerHandler.getInstance());
-
-        if (Eln.analyticsEnabled)
+        if (Config.INSTANCE.getAnalyticsEnabled())
             MinecraftForge.EVENT_BUS.register(AnalyticsHandler.getInstance());
 
         new FrameTime();

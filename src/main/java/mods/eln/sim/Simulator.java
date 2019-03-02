@@ -93,7 +93,7 @@ public class Simulator /* ,IPacketHandler */ {
         run = false;
     }
 
-    public void init() {
+    public void reinit() {
         nodeCount = 0;
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
@@ -455,7 +455,7 @@ public class Simulator /* ,IPacketHandler */ {
 				Utils.sendPacketToClient(bos, player);
 			}
 			//S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-			//Eln.instance.eventChannel.sendToAll(new FMLProxyPacket(packet));
+			//Eln.eventChannel.sendToAll(new FMLProxyPacket(packet));
 		}
 		
 		Utils.println((System.nanoTime() - stackStart) / 1000);*/

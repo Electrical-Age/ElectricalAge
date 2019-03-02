@@ -43,7 +43,7 @@ public class ElnPacket implements Packet {
 
 	@Override
 	public void processPacket(NetHandler nethandler) {
-		Eln.instance.
+		Eln.
 	}
 
 	@Override

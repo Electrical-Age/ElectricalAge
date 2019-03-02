@@ -1,9 +1,9 @@
 package mods.eln.sixnode
 
 import com.teamwizardry.librarianlib.features.kotlin.isNotEmpty
-import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.i18n.I18N
+import mods.eln.init.Cable
 import mods.eln.item.ElectricalFuseDescriptor
 import mods.eln.item.GenericItemUsingDamageDescriptorUpgrade
 import mods.eln.misc.*
@@ -199,8 +199,8 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     fun computeElectricalLoad() {
-        Eln.instance.veryHighVoltageCableDescriptor.applyTo(aLoad)
-        Eln.instance.veryHighVoltageCableDescriptor.applyTo(bLoad)
+        Cable.veryHighVoltage.descriptor.applyTo(aLoad)
+        Cable.veryHighVoltage.descriptor.applyTo(bLoad)
         refreshSwitchResistor()
     }
 

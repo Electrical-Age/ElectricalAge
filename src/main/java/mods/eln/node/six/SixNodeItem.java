@@ -3,6 +3,7 @@ package mods.eln.node.six;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -97,7 +98,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if (!descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(pos, par1World), Direction.fromFacing(side).getInverse()) == false) {
             return false;
         }
-        if (par1World.getBlockState(new BlockPos(vect[0], vect[1], vect[2])).getBlock() == Eln.sixNodeBlock)
+        if (par1World.getBlockState(new BlockPos(vect[0], vect[1], vect[2])).getBlock() == ModBlock.sixNodeBlock)
             return true;
         if (super.canPlaceBlockOnSide(par1World, pos, side, par6EntityPlayer, par7ItemStack))
             return true;

@@ -122,64 +122,56 @@ public class ItemEnergyInventoryProcess implements IProcess {
                 e.i.electricalItemUpdate(e.stack, energyUpdatePeriod);
             }
 
-            if (Eln.saveConfig.infinitePortableBattery) {
-                for (Element e : list) {
-                    double chargePower = e.i.getChargePower(e.stack);
-                    double energy = Math.min(e.i.getEnergyMax(e.stack), e.i.getEnergy(e.stack) + e.i.getChargePower(e.stack) * time);
-                    e.i.setEnergy(e.stack, energy);
-                }
-            } else {
-                boolean rememberDst = false;
-                double rememberDstEToDstMax = 0;
-                while (true) {
-                    Element src = getMax(list);
+            boolean rememberDst = false;
+            double rememberDstEToDstMax = 0;
+            while (true) {
+                Element src = getMax(list);
 
-                    if (src == null)
+                if (src == null)
+                    break;
+
+                double eFromSrc = Math.min(src.i.getEnergy(src.stack), src.i.getDischagePower(src.stack) * time);
+                double eStart = eFromSrc;
+
+                boolean done = false;
+                while (eFromSrc != 0) {
+                    Element dst = getMin(list);
+                    if (dst.p == src.p) {
+                        done = true;
                         break;
-
-                    double eFromSrc = Math.min(src.i.getEnergy(src.stack), src.i.getDischagePower(src.stack) * time);
-                    double eStart = eFromSrc;
-
-                    boolean done = false;
-                    while (eFromSrc != 0) {
-                        Element dst = getMin(list);
-                        if (dst.p == src.p) {
-                            done = true;
-                            break;
-                        }
-
-                        double eToDstMax;
-
-                        if (rememberDst) {
-                            eToDstMax = rememberDstEToDstMax;
-                            rememberDst = false;
-                        } else {
-                            eToDstMax = Math.min(dst.i.getEnergyMax(dst.stack) - dst.i.getEnergy(dst.stack), dst.i.getChargePower(dst.stack) * time);
-                        }
-
-                        double eToDst = Math.min(eFromSrc, eToDstMax);
-                        eFromSrc -= eToDst;
-                        dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack) + eToDst);
-                        eToDstMax -= eToDst;
-
-                        if (eToDstMax == 0) {
-                            list.remove(dst);
-                        } else {
-                            rememberDst = true;
-                            rememberDstEToDstMax = eToDstMax;
-                        }
                     }
 
-                    src.i.setEnergy(src.stack, src.i.getEnergy(src.stack) - (eStart - eFromSrc));
+                    double eToDstMax;
 
-                    if (done)
-                        break;
+                    if (rememberDst) {
+                        eToDstMax = rememberDstEToDstMax;
+                        rememberDst = false;
+                    } else {
+                        eToDstMax = Math.min(dst.i.getEnergyMax(dst.stack) - dst.i.getEnergy(dst.stack), dst.i.getChargePower(dst.stack) * time);
+                    }
 
-                    list.remove(src);
+                    double eToDst = Math.min(eFromSrc, eToDstMax);
+                    eFromSrc -= eToDst;
+                    dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack) + eToDst);
+                    eToDstMax -= eToDst;
 
-                    if (list.size() < 2)
-                        break;
+                    if (eToDstMax == 0) {
+                        list.remove(dst);
+                    } else {
+                        rememberDst = true;
+                        rememberDstEToDstMax = eToDstMax;
+                    }
                 }
+
+                src.i.setEnergy(src.stack, src.i.getEnergy(src.stack) - (eStart - eFromSrc));
+
+                if (done)
+                    break;
+
+                list.remove(src);
+
+                if (list.size() < 2)
+                    break;
             }
         }
     }

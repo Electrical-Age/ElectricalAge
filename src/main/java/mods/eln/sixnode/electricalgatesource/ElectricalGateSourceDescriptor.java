@@ -57,7 +57,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    // TODO(1.10): Item rendering.
+    // TODO(1.10): Items rendering.
 //    @Override
 //    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 //        return type != ItemRenderType.INVENTORY;

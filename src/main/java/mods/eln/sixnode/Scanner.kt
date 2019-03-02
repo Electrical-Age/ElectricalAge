@@ -4,6 +4,7 @@ import com.teamwizardry.librarianlib.features.kotlin.isNotEmpty
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
+import mods.eln.init.Cable
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.six.*
@@ -202,5 +203,5 @@ class ScannerRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeD
         mode = ScanMode.fromByte(stream.readByte())!!
     }
 
-    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor = Eln.instance.signalCableDescriptor.render
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor = Cable.signal.descriptor.render
 }

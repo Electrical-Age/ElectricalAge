@@ -1,6 +1,7 @@
 package mods.eln.entity;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.Coordinate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
@@ -39,7 +40,7 @@ public class ReplicatorCableAI extends EntityAIBase implements ITimeRemoverObser
     ReplicatorCableAI(ReplicatorEntity entity) {
         load.setAsPrivate();
         this.entity = entity;
-        Eln.instance.highVoltageCableDescriptor.applyTo(load);
+        Cable.Companion.getHighVoltage().descriptor.applyTo(load);
         load.setRs(load.getRs() * 10);
         this.setMutexBits(1);
     }
@@ -112,7 +113,7 @@ public class ReplicatorCableAI extends EntityAIBase implements ITimeRemoverObser
         if (distance < 2) {
             //Utils.println("replicator on cable !");
             double u = cable.electricalLoad.getU();
-            double nextRp = Math.pow(u / Eln.LVU, -0.3) * u * u / (50);
+            double nextRp = Math.pow(u / Cable.LVU, -0.3) * u * u / (50);
             if (resistorLoad.getR() < 0.8 * nextRp) {
                 entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, 5);
             } else {

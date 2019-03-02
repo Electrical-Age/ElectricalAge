@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalsource;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -59,7 +60,7 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an ideal voltage source\nwithout energy or power limitation.").split("\\\n"));
         list.add("");
-        list.add(tr("Internal resistance: %s\u2126", Utils.plotValue(Eln.instance.lowVoltageCableDescriptor.electricalRs)));
+        list.add(tr("Internal resistance: %s\u2126", Utils.plotValue(Cable.Companion.getLowVoltage().descriptor.electricalRs)));
         list.add("");
         list.add(tr("Creative block."));
     }

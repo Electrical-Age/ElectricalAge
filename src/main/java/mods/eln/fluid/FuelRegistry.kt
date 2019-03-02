@@ -1,6 +1,6 @@
 package mods.eln.fluid
 
-import mods.eln.Eln
+import mods.eln.init.Config.fuelHeatValueFactor
 import net.minecraftforge.fluids.Fluid
 import net.minecraftforge.fluids.FluidRegistry
 
@@ -61,7 +61,7 @@ object FuelRegistry {
         "ic2steam" to 2.257  // Ditto, this is still steam. IC2 doesn't want to use other mods' steam.
     ).mapValues {
         // Unusually, the commonly accepted value (2.2) is pretty much correct. Undo the usual mapping.
-        it.value / Eln.fuelHeatValueFactor
+        it.value / fuelHeatValueFactor
     }
     val steamList = steam.keys.toTypedArray()
 
@@ -71,6 +71,6 @@ object FuelRegistry {
     fun fluidListToFluids(fluidNames: Array<String>) =
         fluidNames.map { FluidRegistry.getFluid(it) }.filterNotNull().toTypedArray()
 
-    fun heatEnergyPerMilliBucket(fuelName: String): Double = Eln.fuelHeatValueFactor * (allFuels[fuelName] ?: 0.0)
+    fun heatEnergyPerMilliBucket(fuelName: String): Double = fuelHeatValueFactor * (allFuels[fuelName] ?: 0.0)
     fun heatEnergyPerMilliBucket(fluid: Fluid?): Double = heatEnergyPerMilliBucket(fluid?.name ?: "")
 }

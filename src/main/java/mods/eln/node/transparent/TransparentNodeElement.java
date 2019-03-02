@@ -258,7 +258,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     public ItemStack getDropItemStack() {
-        ItemStack itemStack = new ItemStack(Eln.transparentNodeBlock, 1, node.elementId);
+        ItemStack itemStack = null; // TODO(1.12): new ItemStack(Eln.transparentNodeBlock, 1, node.elementId);
         itemStack.setTagCompound(getItemStackNBT());
         return itemStack;
     }

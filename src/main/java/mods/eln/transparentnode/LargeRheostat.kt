@@ -51,7 +51,7 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         dissipator.obj.getPart("wiper")?.draw()
     }
 
-    // TODO(1.10): Item rendering.
+    // TODO(1.10): Items rendering.
 //    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
 //    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
 //                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY

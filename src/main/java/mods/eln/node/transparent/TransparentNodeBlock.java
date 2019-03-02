@@ -46,7 +46,7 @@ public class TransparentNodeBlock extends NodeBlock {
 
 /*
     //@SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
+    public void getSubBlocks(Items par1, CreativeTabs tab, List subItems) {
 
 
         Eln.transparentNodeItem.getSubItems(par1, tab, subItems);

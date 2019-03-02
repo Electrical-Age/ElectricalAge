@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalfiredetector
 
 import mods.eln.Eln
+import mods.eln.init.Cable
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
@@ -73,7 +74,7 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
         }
     }
 
-    override fun getCableRender(lrdu: LRDU) = Eln.instance.signalCableDescriptor.render!!
+    override fun getCableRender(lrdu: LRDU) = Cable.signal.descriptor.render!!
 
     override fun newGuiDraw(side: Direction, player: EntityPlayer) = if (inventory != null)
         ElectricalFireDetectorGui(player, inventory, this) else null

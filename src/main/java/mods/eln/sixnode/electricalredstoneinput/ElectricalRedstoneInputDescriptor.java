@@ -23,7 +23,7 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
     public ElectricalRedstoneInputDescriptor(String name, Obj3D obj) {
         super(name, ElectricalRedstoneInputElement.class, ElectricalRedstoneInputRender.class);
-        //obj = Eln.instance.obj.getObj(objName);
+        //obj = Eln.obj.getObj(objName);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
