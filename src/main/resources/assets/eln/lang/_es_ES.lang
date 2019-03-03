@@ -1,14 +1,14 @@
-# ElectricalAge language file (Spain - Spanish)
-
-# Mod info
-mod.name=Electrical Age
-mod.desc=¡Electricidad en tu base!
-
-# Machines
-50v_macerator.name=Macerator de 50V   
-
-# Achievements
-achievement.openGuide=Wiki            
-achievement.openGuide.desc=Abre la wiki.
-achievement.craft50VMacerator=Trituradora Novice
-achievement.craft50VMacerator.desc=Craftea un Macerator de 50V
+eln:# ElectricalAge language file (Spain - Spanish)
+eln:
+eln:# Mod info
+eln:mod.name=Electrical Age
+eln:mod.desc=¡Electricidad en tu base!
+eln:
+eln:# Machines
+eln:50v_macerator.name=Macerator de 50V   
+eln:
+eln:# Achievements
+eln:achievement.openGuide=Wiki            
+eln:achievement.openGuide.desc=Abre la wiki.
+eln:achievement.craft50VMacerator=Trituradora Novice
+eln:achievement.craft50VMacerator.desc=Craftea un Macerator de 50V
