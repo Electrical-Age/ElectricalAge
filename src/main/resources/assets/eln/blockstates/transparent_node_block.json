@@ -1,5 +1,7 @@
 {
 	"variants": {
-		"normal": {}
+		"normal": {
+            "model": "eln:light"
+        }
 	}
 }
