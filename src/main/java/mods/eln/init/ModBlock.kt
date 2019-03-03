@@ -6,7 +6,7 @@ import net.minecraft.block.material.Material
 
 object ModBlock {
     @JvmField
-    val oreBlock = BlockModVariant("oreBlock", Material.IRON,
+    val oreBlock = ElnOreBlock(
         "copperOre",
         "leadOre")
 
@@ -22,6 +22,13 @@ object ModBlock {
 
     @JvmField
     val lightBlock = BlockMod("Light", Material.AIR)
+}
+
+class ElnOreBlock(vararg variants: String) : BlockModVariant("oreBlock", Material.ROCK, *variants) {
+    init {
+        setHardness(3.0f)
+        setResistance(5.0f)
+    }
 }
 
 class ElnBlockMod(name: String, material: Material, val uuid: String) : BlockMod(name, material)

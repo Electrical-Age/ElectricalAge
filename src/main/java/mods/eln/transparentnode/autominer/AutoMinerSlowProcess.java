@@ -2,30 +2,26 @@ package mods.eln.transparentnode.autominer;
 
 import mods.eln.Eln;
 import mods.eln.init.Config;
+import mods.eln.init.ElnOreBlock;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.electricalitem.OreColorMapping;
-import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
-import mods.eln.ore.OreBlock;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
-import net.minecraft.block.state.BlockStateBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
@@ -353,7 +349,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         IBlockState state = coordinate.world().getBlockState(coordinate.pos);
         Block block = state.getBlock();
         if (block instanceof BlockOre) return true;
-        if (block instanceof OreBlock) return true;
+        if (block instanceof ElnOreBlock) return true;
         if (block instanceof BlockRedstoneOre) return true;
 
 
