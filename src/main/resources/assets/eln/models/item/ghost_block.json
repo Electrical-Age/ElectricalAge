@@ -1,6 +1,2 @@
 {
-	"parent": "item/generated",
-	"textures": {
-		"layer0": "eln:items/ghost_block"
-	}
 }

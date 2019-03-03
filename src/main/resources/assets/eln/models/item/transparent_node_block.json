@@ -1,6 +1,2 @@
 {
-	"parent": "item/generated",
-	"textures": {
-		"layer0": "eln:items/transparent_node_block"
-	}
 }

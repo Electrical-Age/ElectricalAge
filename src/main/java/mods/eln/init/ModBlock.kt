@@ -2,13 +2,11 @@ package mods.eln.init
 
 import com.teamwizardry.librarianlib.features.base.block.BlockMod
 import com.teamwizardry.librarianlib.features.base.block.BlockModVariant
-import jdk.nashorn.internal.ir.Block
-import mods.eln.Eln
 import net.minecraft.block.material.Material
 
 object ModBlock {
     @JvmField
-    val oreBlock = BlockModVariant("oreBlock", Material.ROCK,
+    val oreBlock = BlockModVariant("oreBlock", Material.IRON,
         "copperOre",
         "leadOre")
 

@@ -1,6 +1,2 @@
 {
-	"parent": "block/cube_all",
-	"textures": {
-		"all": "eln:blocks/six_node_block"
-	}
 }

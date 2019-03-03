@@ -1,6 +1,6 @@
 {
-	"parent": "item/generated",
-	"textures": {
-		"layer0": "eln:items/copper_ore"
-	}
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "eln:blocks/copper_ore"
+    }
 }
