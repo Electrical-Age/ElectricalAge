@@ -10,7 +10,6 @@ eclipse
 /logs
 /config
 /saves
-*.json
 options.txt
 /out
 /classes
