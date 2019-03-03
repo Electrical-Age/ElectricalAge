@@ -7,24 +7,24 @@ import net.minecraft.block.material.Material
 object ModBlock {
     @JvmField
     val oreBlock = ElnOreBlock(
-        "copperOre",
-        "leadOre")
+        "copper_ore",
+        "lead_ore")
 
     // TODO(1.12): These are obviously not done.
     @JvmField
-    val ghostBlock = ElnBlockMod("ghostBlock", Material.ROCK, "g")
+    val ghostBlock = ElnBlockMod("ghost", Material.ROCK, "g")
 
     @JvmField
-    val sixNodeBlock = ElnBlockMod("sixNodeBlock", Material.ROCK, "s")
+    val sixNodeBlock = ElnBlockMod("sixnode", Material.ROCK, "s")
 
     @JvmField
-    val transparentNodeBlock = ElnBlockMod("transparentNodeBlock", Material.ROCK, "t")
+    val transparentNodeBlock = ElnBlockMod("transparentnode", Material.ROCK, "t")
 
     @JvmField
-    val lightBlock = BlockMod("Light", Material.AIR)
+    val lightBlock = BlockMod("light", Material.AIR)
 }
 
-class ElnOreBlock(vararg variants: String) : BlockModVariant("oreBlock", Material.ROCK, *variants) {
+class ElnOreBlock(vararg variants: String) : BlockModVariant("ore", Material.ROCK, *variants) {
     init {
         setHardness(3.0f)
         setResistance(5.0f)
