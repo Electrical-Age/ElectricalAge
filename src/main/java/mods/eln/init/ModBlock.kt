@@ -10,6 +10,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.Entity
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import java.lang.Math.abs
 
 object ModBlock {
     @JvmField
@@ -42,8 +43,8 @@ class ElnOreBlock(vararg variants: String) : BlockModVariant("ore", Material.ROC
 
 class RubberBlock : BlockMod("rubber", Material.WOOD) {
     override fun onLanded(worldIn: World, entityIn: Entity) {
-        if (entityIn.motionY < -0.1) {
-            entityIn.setVelocityAndUpdate(entityIn.motionX, entityIn.motionY * -0.75, entityIn.motionZ)
+        if (abs(entityIn.motionY) > 0.1) {
+            entityIn.motionY = abs(entityIn.motionY * 0.75)
         } else {
             entityIn.motionY = 0.0
         }
