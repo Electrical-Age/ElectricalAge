@@ -40,7 +40,7 @@ class ElnOreBlock(vararg variants: String) : BlockModVariant("ore", Material.ROC
     }
 }
 
-class RubberBlock : BlockMod("rubber", Material.ROCK) {
+class RubberBlock : BlockMod("rubber", Material.WOOD) {
     override fun onLanded(worldIn: World, entityIn: Entity) {
         if (entityIn.motionY < -0.1) {
             entityIn.setVelocityAndUpdate(entityIn.motionX, entityIn.motionY * -0.75, entityIn.motionZ)
