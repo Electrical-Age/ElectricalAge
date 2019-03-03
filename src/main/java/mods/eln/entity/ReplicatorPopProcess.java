@@ -2,6 +2,7 @@ package mods.eln.entity;
 
 import mods.eln.init.Config;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameRules;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -34,8 +35,7 @@ public class ReplicatorPopProcess implements IProcess {
 
         if (world.getDifficulty() == EnumDifficulty.PEACEFUL) return;
 
-        if (world.getWorldInfo().isThundering()) {
-            MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        if (world.getWorldInfo().isThundering() && world.getGameRules().getBoolean("doMobSpawning")) {
             for (Object obj : world.playerEntities) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
                 if (Math.random() * (world.playerEntities.size()) < time * Config.INSTANCE.getReplicatorSpawnPerSecondPerPlayer() && player.world == world) {
