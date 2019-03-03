@@ -107,7 +107,7 @@ dependencies {
     compile group: "com.teamwizardry.librarianlib", name: "librarianlib-1.12.2", version: "4.17"
     compileOnly "dan200.computercraft:ComputerCraft:1.80pr1-build5"
     compileOnly "li.cil.oc:OpenComputers:MC1.12.2-1.7.4.153"
-    compileOnly "mcp.mobius.waila:Hwyla:1.8.26-B41_1.12.2"
+    compile "mcp.mobius.waila:Hwyla:1.8.26-B41_1.12.2"
     // TODO(1.12): Switch to this.
 //    deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
 

@@ -14,11 +14,11 @@ public class ElnServerPacket implements Packet {
     private static final String __OBFID = "CL_00001297";
 
     public ElnServerPacket(ByteBuf buf) {
-        this(Eln.channelName, buf);
+        this(Eln.eventChannelID, buf);
     }
 
     public ElnServerPacket(byte[] buf) {
-        this(Eln.channelName, buf);
+        this(Eln.eventChannelID, buf);
     }
 
     public ElnServerPacket(String channelName, ByteBuf buf) {

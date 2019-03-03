@@ -1,14 +1,16 @@
 package mods.eln.init
 
 import com.teamwizardry.librarianlib.features.base.block.BlockMod
+import com.teamwizardry.librarianlib.features.base.block.BlockModVariant
 import jdk.nashorn.internal.ir.Block
+import mods.eln.Eln
 import net.minecraft.block.material.Material
 
 object ModBlock {
     @JvmField
-    val oreBlock = BlockMod("oreBlock", Material.ROCK,
-        "Copper oreBlock",
-        "Lead oreBlock")
+    val oreBlock = BlockModVariant("oreBlock", Material.ROCK,
+        "copperOre",
+        "leadOre")
 
     // TODO(1.12): These are obviously not done.
     @JvmField
