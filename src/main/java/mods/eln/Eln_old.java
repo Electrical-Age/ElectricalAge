@@ -24,8 +24,6 @@ import mods.eln.node.NodeManagerNbt;
 import mods.eln.node.NodePublishProcess;
 import mods.eln.node.six.*;
 import mods.eln.node.transparent.*;
-import mods.eln.ore.OreDescriptor;
-import mods.eln.ore.OreItem;
 import mods.eln.server.*;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;

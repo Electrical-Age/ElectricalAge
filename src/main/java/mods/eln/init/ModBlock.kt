@@ -9,6 +9,7 @@ import net.minecraft.block.properties.IProperty
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.Entity
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import java.lang.Math.abs
 
@@ -18,7 +19,8 @@ object ModBlock {
         "copper_ore",
         "lead_ore")
 
-    val rubberBlock = RubberBlock()
+    val rubberBlock = RubberBlock("rubber", 0.75f)
+    val flubberBlock = RubberBlock("flubber", 2f)
 
     // TODO(1.12): These are obviously not done.
     @JvmField
@@ -41,10 +43,10 @@ class ElnOreBlock(vararg variants: String) : BlockModVariant("ore", Material.ROC
     }
 }
 
-class RubberBlock : BlockMod("rubber", Material.WOOD) {
+class RubberBlock(name: String, private val bounce: Float) : BlockMod(name, Material.WOOD) {
     override fun onLanded(worldIn: World, entityIn: Entity) {
         if (abs(entityIn.motionY) > 0.1) {
-            entityIn.motionY = abs(entityIn.motionY * 0.75)
+            entityIn.motionY = abs(entityIn.motionY * bounce)
         } else {
             entityIn.motionY = 0.0
         }
@@ -55,4 +57,10 @@ class RubberBlock : BlockMod("rubber", Material.WOOD) {
     }
 }
 
-class ElnBlockMod(name: String, material: Material, val uuid: String) : BlockMod(name, material)
+class SixNodeProxyBlock()
+
+class ElnProxyBlock(name: String, val uuid: String)
+
+class ElnBlockMod(name: String, material: Material, val uuid: String) : BlockMod(name, material) {
+
+}
