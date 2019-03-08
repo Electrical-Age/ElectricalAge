@@ -46,6 +46,7 @@ compileJava {
 sourceSets {
     main {
         java.srcDirs = ['src/main/java']
+        java.excludes = ['**/Eln_old.java']  // TODO(1.12): Just delete this at the end.
         resources.srcDirs = ['src/main/resources']
         resources.excludes = ['*']
         kotlin.srcDirs = ['src/main/java']
