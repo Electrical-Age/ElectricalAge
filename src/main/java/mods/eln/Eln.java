@@ -226,6 +226,7 @@ public class Eln {
 
     public static ItemArmor helmetCopper, plateCopper, legsCopper, bootsCopper;
     public static ItemArmor helmetECoal, plateECoal, legsECoal, bootsECoal;
+    public static ItemArmor helmetEDiamond, plateEDiamond, legsEDiamond, bootsEDiamond;
 
     public static SharedItem sharedItem;
     public static SharedItem sharedItemStackOne;
@@ -2945,7 +2946,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
-                "maceratorb", MVU, 1000,
+                "maceratorb", MVU, 2000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
                 mediumVoltageCableDescriptor,
@@ -2988,7 +2989,7 @@ public class Eln {
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
                 name,
                 obj.getObj("platemachineb"),
-                MVU, 1000,
+                MVU, 2000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
                 mediumVoltageCableDescriptor,
@@ -3047,7 +3048,7 @@ public class Eln {
             CompressorDescriptor desc = new CompressorDescriptor(
                 name,
                 obj.getObj("compressorb"),
-                MVU, 1000,
+                MVU, 2000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
                 mediumVoltageCableDescriptor,
@@ -3090,7 +3091,7 @@ public class Eln {
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
                 name,
                 obj.getObj("magnetizerb"),
-                MVU, 1000,
+                MVU, 2000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
                 mediumVoltageCableDescriptor,
@@ -3942,7 +3943,7 @@ public class Eln {
     private void registerArmor() {
         ItemStack stack;
         String name;
-
+        //register Copper Set
         {
             name = TR_NAME(Type.ITEM, "Copper Helmet");
             helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
@@ -3967,7 +3968,7 @@ public class Eln {
             GameRegistry.registerItem(bootsCopper, "Eln." + name);
             GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
         }
-
+        //register E-Coal Set
         int armorPoint;
         String t1, t2;
         t1 = "eln:textures/armor/ecoal_layer_1.png";
@@ -4038,6 +4039,75 @@ public class Eln {
             )).setUnlocalizedName(name).setTextureName("eln:ecoal_boots").setCreativeTab(creativeTab);
             GameRegistry.registerItem(bootsECoal, "Eln." + name);
             GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
+        }
+        //register E-Diamond Set
+        t1 = "eln:textures/armor/ediamond_layer_1.png";
+        t2 = "eln:textures/armor/ediamond_layer_2.png";
+        energyPerDamage = 250;
+        ArmorMaterial eDiamondMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial("EDiamond", 10, new int[]{2, 6, 5, 2}, 9);
+        {
+            name = TR_NAME(Type.ITEM, "E-Diamond Helmet");
+            armor = 2;
+            armorMarge = 1;
+            helmetEDiamond = (ItemArmor) (new ElectricalArmor(eDiamondMaterial, 2, ArmourType.Helmet, t1, t2,
+                (armor + armorMarge) * energyPerDamage, 250.0,// double
+                // energyStorage,double
+                // chargePower
+                armor / 20.0, armor * energyPerDamage,// double
+                // ratioMax,double
+                // ratioMaxEnergy,
+                energyPerDamage// double energyPerDamage
+            )).setUnlocalizedName(name).setTextureName("eln:ediamond_helmet").setCreativeTab(creativeTab);
+            GameRegistry.registerItem(helmetEDiamond, "Eln." + name);
+            GameRegistry.registerCustomItemStack(name, new ItemStack(helmetEDiamond));
+        }
+        {
+            name = TR_NAME(Type.ITEM, "E-Diamond Chestplate");
+            armor = 6;
+            armorMarge = 2;
+            plateEDiamond = (ItemArmor) (new ElectricalArmor(eDiamondMaterial, 2, ArmourType.Chestplate, t1, t2,
+                (armor + armorMarge) * energyPerDamage, 250.0,// double
+                // energyStorage,double
+                // chargePower
+                armor / 20.0, armor * energyPerDamage,// double
+                // ratioMax,double
+                // ratioMaxEnergy,
+                energyPerDamage// double energyPerDamage
+            )).setUnlocalizedName(name).setTextureName("eln:ediamond_chestplate").setCreativeTab(creativeTab);
+            GameRegistry.registerItem(plateEDiamond, "Eln." + name);
+            GameRegistry.registerCustomItemStack(name, new ItemStack(plateEDiamond));
+        }
+        {
+            name = TR_NAME(Type.ITEM, "E-Diamond Leggings");
+            armor = 5;
+            armorMarge = 2;
+            legsEDiamond = (ItemArmor) (new ElectricalArmor(eDiamondMaterial, 2, ArmourType.Leggings, t1, t2,
+                (armor + armorMarge) * energyPerDamage, 250.0,// double
+                // energyStorage,double
+                // chargePower
+                armor / 20.0, armor * energyPerDamage,// double
+                // ratioMax,double
+                // ratioMaxEnergy,
+                energyPerDamage// double energyPerDamage
+            )).setUnlocalizedName(name).setTextureName("eln:ediamond_leggings").setCreativeTab(creativeTab);
+            GameRegistry.registerItem(legsEDiamond, "Eln." + name);
+            GameRegistry.registerCustomItemStack(name, new ItemStack(legsEDiamond));
+        }
+        {
+            name = TR_NAME(Type.ITEM, "E-Diamond Boots");
+            armor = 2;
+            armorMarge = 1;
+            bootsEDiamond = (ItemArmor) (new ElectricalArmor(eDiamondMaterial, 2, ArmourType.Boots, t1, t2,
+                (armor + armorMarge) * energyPerDamage, 250.0,// double
+                // energyStorage,double
+                // chargePower
+                armor / 20.0, armor * energyPerDamage,// double
+                // ratioMax,double
+                // ratioMaxEnergy,
+                energyPerDamage// double energyPerDamage
+            )).setUnlocalizedName(name).setTextureName("eln:ediamond_boots").setCreativeTab(creativeTab);
+            GameRegistry.registerItem(bootsEDiamond, "Eln." + name);
+            GameRegistry.registerCustomItemStack(name, new ItemStack(bootsEDiamond));
         }
     }
 
@@ -4988,6 +5058,14 @@ public class Eln {
             OreDictionary.registerOre(dictAdvancedChip, desc.newItemStack());
         }
         {
+            subId = 1337;
+            name = TR_NAME(Type.NONE, "Elite Chip");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
             subId = 2;
             name = TR_NAME(Type.NONE, "Machine Block");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
@@ -5096,7 +5174,14 @@ public class Eln {
             Data.addResource(desc.newItemStack());
             addToOre("ingotSilicon", desc.newItemStack());
         }
-
+        {
+            subId = 18;
+            name = TR_NAME(Type.NONE, "LED Plate");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Contains diodes which produce light from electricity. \nCan also be modified to produce electricity from sunlight."});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
         {
             subId = 22;
             name = TR_NAME(Type.NONE, "Machine Booster");
@@ -6180,12 +6265,11 @@ public class Eln {
     private void recipeSolarPanel() {
         addRecipe(findItemStack("Small Solar Panel"),
             "LLL",
-            "CSC",
+            "SSS",
             "III",
-            'S', "plateSilicon",
+            'S', findItemStack("LED Plate"),
             'L', findItemStack("Lapis Dust"),
-            'I', new ItemStack(Items.iron_ingot),
-            'C', findItemStack("Standard Low Voltage Cable"));
+            'I', new ItemStack(Items.iron_ingot));
 
         addRecipe(findItemStack("Small Rotating Solar Panel"),
             "ISI",
@@ -6326,7 +6410,7 @@ public class Eln {
     private void recipeLampItem() {
         // Tungsten
         addRecipe(
-            findItemStack("Small 50V Incandescent Light Bulb", 4),
+            findItemStack("Small 50V Incandescent Light Bulb", 64),
             " G ",
             "GFG",
             " S ",
@@ -6334,7 +6418,7 @@ public class Eln {
             'F', dictTungstenIngot,
             'S', findItemStack("Copper Cable"));
 
-        addRecipe(findItemStack("50V Incandescent Light Bulb", 4),
+        addRecipe(findItemStack("50V Incandescent Light Bulb", 64),
             " G ",
             "GFG",
             " S ",
@@ -6342,7 +6426,7 @@ public class Eln {
             'F', dictTungstenIngot,
             'S', findItemStack("Standard Low Voltage Cable"));
 
-        addRecipe(findItemStack("200V Incandescent Light Bulb", 4),
+        addRecipe(findItemStack("200V Incandescent Light Bulb", 64),
             " G ",
             "GFG",
             " S ",
@@ -6351,7 +6435,7 @@ public class Eln {
             'S', findItemStack("Standard Medium Voltage Cable"));
 
         // CARBON
-        addRecipe(findItemStack("Small 50V Carbon Incandescent Light Bulb", 4),
+        addRecipe(findItemStack("Small 50V Carbon Incandescent Light Bulb", 16),
             " G ",
             "GFG",
             " S ",
@@ -6359,7 +6443,7 @@ public class Eln {
             'F', new ItemStack(Items.coal),
             'S', findItemStack("Copper Cable"));
 
-        addRecipe(findItemStack("Small 50V Carbon Incandescent Light Bulb", 4),
+        addRecipe(findItemStack("Small 50V Carbon Incandescent Light Bulb", 16),
             " G ",
             "GFG",
             " S ",
@@ -6368,7 +6452,7 @@ public class Eln {
             'S', findItemStack("Copper Cable"));
 
         addRecipe(
-            findItemStack("50V Carbon Incandescent Light Bulb", 4),
+            findItemStack("50V Carbon Incandescent Light Bulb", 16),
             " G ",
             "GFG",
             " S ",
@@ -6376,7 +6460,7 @@ public class Eln {
             'F', new ItemStack(Items.coal),
             'S', findItemStack("Standard Low Voltage Cable"));
 
-        addRecipe(findItemStack("50V Carbon Incandescent Light Bulb", 4),
+        addRecipe(findItemStack("50V Carbon Incandescent Light Bulb", 16),
             " G ",
             "GFG",
             " S ",
@@ -6425,20 +6509,20 @@ public class Eln {
             'F', dictTungstenIngot,
             'S', findItemStack("Standard Medium Voltage Cable"));
 
-        addRecipe(findItemStack("50V LED Bulb", 2),
+        addRecipe(findItemStack("50V LED Bulb", 1),
             "GGG",
-            "SSS",
+            " S ",
             " C ",
             'G', new ItemStack(Blocks.glass_pane),
-            'S', findItemStack("Silicon Ingot"),
+            'S', findItemStack("LED Plate"),
             'C', findItemStack("Standard Low Voltage Cable"));
 
-        addRecipe(findItemStack("200V LED Bulb", 2),
+        addRecipe(findItemStack("200V LED Bulb", 1),
             "GGG",
-            "SSS",
+            " S ",
             " C ",
             'G', new ItemStack(Blocks.glass_pane),
-            'S', findItemStack("Silicon Ingot"),
+            'S', findItemStack("LED Plate"),
             'C', findItemStack("Standard Medium Voltage Cable"));
 
     }
@@ -6785,12 +6869,19 @@ public class Eln {
             'S', "ingotSilicon",
             'R', new ItemStack(Items.redstone));
         addRecipe(findItemStack("Advanced Chip"),
+            "SRS",
+            "RCR",
+            "SRS",
+            'C', dictCheapChip,
+            'S', "ingotSilicon",
+            'R', new ItemStack(Items.redstone));
+        addRecipe(findItemStack("Elite Chip"),
             "LRL",
             "RCR",
             "LRL",
-            'C', dictCheapChip,
-            'L', "ingotSilicon",
-            'R', new ItemStack(Items.redstone));
+            'C', dictAdvancedChip,
+            'L', findItemStack("LED Plate"),
+            'R', new ItemStack(Blocks.redstone_block));
 
         addRecipe(findItemStack("Machine Block"),
             "rLr",
@@ -6988,6 +7079,11 @@ public class Eln {
         plateMachineRecipes.addRecipe(new Recipe(
             findItemStack("Silicon Ingot", 4),
             findItemStack("Silicon Plate"), 1.0 * f));
+
+        plateMachineRecipes.addRecipe(new Recipe(
+            findItemStack("Silicon Plate", 1),
+            findItemStack("LED Plate"), 100.0 * f));
+
         plateMachineRecipes.addRecipe(new Recipe(
             findItemStack("Pure Copper Ingot", 50),
             findItemStack("Glorious Copper Plate"), 20.0 * f));
