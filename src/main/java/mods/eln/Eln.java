@@ -6808,7 +6808,7 @@ public class Eln {
     }
 
     private void recipeDust() {
-        addShapelessRecipe(findItemStack("Alloy Dust", 2),
+        addShapelessRecipe(findItemStack("Alloy Dust", 6),
             "dustIron",
             "dustCoal",
             dictTungstenDust,
@@ -6972,7 +6972,7 @@ public class Eln {
     }
 
     private void recipeMiningPipe() {
-        addRecipe(findItemStack("Mining Pipe", 4),
+        addRecipe(findItemStack("Mining Pipe", 12),
             "A",
             "A",
             'A', "ingotAlloy");
