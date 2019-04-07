@@ -1367,10 +1367,13 @@ public class Eln {
         int subId, completId;
         String name;
         double heatTIme = 30;
+        double[] voltageFunctionTableCapacitor = {0, 0, 0, 0, 0, 0,
+            0};
         double[] voltageFunctionTable = {0.000, 0.9, 1.0, 1.025, 1.04, 1.05,
             2.0};
         FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
             6.0 / 5);
+        FunctionTable voltageFunctionCapacitor = new FunctionTable(voltageFunctionTableCapacitor, 6.0 / 5);
         double[] condoVoltageFunctionTable = {0.000, 0.89, 0.90, 0.905, 0.91, 1.1,
             1.5};
         FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
@@ -1381,7 +1384,7 @@ public class Eln {
         double stdDischargeTime = 4 * 60;
         double stdU = LVU;
         double stdP = LVP() / 4;
-        double stdEfficiency = 0.96;
+        double stdEfficiency = 0.76;
         double condoEfficiency = 1.0 - 2.0 / 50.0;
 
         batteryVoltageFunctionTable = voltageFunction;
@@ -1425,7 +1428,7 @@ public class Eln {
                 voltageFunction,
                 stdU / 4, stdP / 2 * 1.2,
                 0.000,
-                stdP / 2,
+                stdP / 8,
                 stdDischargeTime * 8 * batteryCapacityFactor,
                 stdEfficiency,
                 stdBatteryHalfLife,
@@ -1450,16 +1453,15 @@ public class Eln {
                 true,
                 true,
                 voltageFunction,
-                stdU * 4,
-                stdP * 1.2, 0.000,
-                stdP,
+                stdU * 4, stdP * 2 * 1.2, 0.000,
+                stdP * 2,
                 stdDischargeTime * batteryCapacityFactor,
-                stdEfficiency,
+                stdEfficiency * 1.13, //85.88%
                 stdBatteryHalfLife,
                 heatTIme,
                 60,
                 -100,
-                "A different layout increase the voltage rating of this battery."
+                "A different layout increase the voltage, power, and efficiency of this battery."
             );
             desc.setRenderSpec("highvoltage");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1504,16 +1506,16 @@ public class Eln {
                 batteryCableDescriptor,
                 0.5,
                 true,
-                false,
+                true,
                 voltageFunction,
                 stdU,
                 stdP * 1.2,
                 0.000,
                 stdP, stdDischargeTime * batteryCapacityFactor,
-                stdEfficiency * 0.80, //76.8%
+                stdEfficiency * 1.25, //95%
                 stdBatteryHalfLife * 8,
                 heatTIme, 60, -100,
-                "It's design is less efficient to allow it to never decay."
+                "It's design is far more efficient, which allows it to last much longer."
             );
             desc.setRenderSpec("life");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1530,17 +1532,17 @@ public class Eln {
                 batteryCableDescriptor,
                 1.0,
                 false,
-                false,
+                true,
                 voltageFunction,
                 stdU,
                 stdP * 1.2 * 2,
                 0.000,
                 stdP * 2,
                 stdDischargeTime / 4 * batteryCapacityFactor,
-                stdEfficiency,
-                stdBatteryHalfLife * 8,
+                stdEfficiency * 0.76, //57.76%
+                stdBatteryHalfLife / 100,
                 heatTIme, 60, -100,
-                "A single use battery. It's cheap, but do NOT attempt to recharge it."
+                "A single use battery. It's crude and inefficient. Do NOT attempt to recharge it."
             );
             desc.setRenderSpec("coal");
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1550,7 +1552,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Experimental Battery");
 
             BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU * 2,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, false,voltageFunctionCapacitor, stdU * 2,
                 stdP * 1.2 * 8,
                 0.025,
                 stdP * 8, stdDischargeTime / 4 * batteryCapacityFactor,
@@ -1562,6 +1564,27 @@ public class Eln {
                 "A prototype battery which combines the benefits of the other batteries. Too bad leaks power, though."
             );
             desc.setRenderSpec("highvoltage");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 7;
+            name = TR_NAME(Type.NONE, "Crypto Capacitor");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0, true, false, voltageFunction, stdU*1.2380952380952380952380952380952, //this is a dirty hack because somebody hardcoded battery max value
+                2110 * 1000000, //totalpower
+                0, //no self-discharge
+                2110, //power (as seen on the GUI)
+                10, //time (in seconds) to fill battery
+                .99999, //efficiency
+                stdBatteryHalfLife * 9001,
+                heatTIme,
+                60,
+                -100,
+                "Literally just a capacitor in a battery case. Has infinite life and 100% efficiency, but bad storage"
+            );
+            desc.setRenderSpec("lowcost");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
