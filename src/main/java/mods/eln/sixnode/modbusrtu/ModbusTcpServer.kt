@@ -56,11 +56,11 @@ class ModbusTcpServer(port: Int = 1502) {
 
         fun start() = Thread(Runnable {
             while (!socket.isClosed) {
+                inputBuffer.clear()
                 val size = socket.inputStream.read(inputBuffer.array(), inputBuffer.position(), inputBuffer.remaining())
                 if (size > 0) {
                     inputBuffer.position(inputBuffer.position() + size).flip()
                     handle(socket.outputStream)
-                    inputBuffer.flip()
                 } else {
                     socket.close()
                 }
@@ -76,7 +76,10 @@ class ModbusTcpServer(port: Int = 1502) {
                         val slaveAddress = inputBuffer.get()
                         val functionCode = inputBuffer.get()
                         val response = ByteBuffer.allocate(OutputBufferSize)
-                            .putShort(transactionId).putShort(0).putShort(0).put(slaveAddress)
+                            .putShort(transactionId)
+                            .putShort(0) // protocol
+                            .putShort(0) // length, actually 0...
+                            .put(slaveAddress) // start address
                         val slave = slaves[slaveAddress.toInt()]
                         if (slave != null) {
                             synchronized(slave) {
@@ -99,8 +102,9 @@ class ModbusTcpServer(port: Int = 1502) {
                             response.put((0x80 + functionCode).toByte()).put(0x0B.toByte())
                             inputBuffer.position(inputBuffer.position() + remaining - 2)
                         }
-                        response.putShort(4, (response.position() - 6).toShort()).flip()
-                        output.write(response.array(), 0, response.remaining())
+                        val position = response.position()
+                        response.putShort(4, (position - 6).toShort()).flip()
+                        output.write(response.array(), 0, position)
                         output.flush()
                     } else {
                         return
@@ -225,14 +229,12 @@ class ModbusTcpServer(port: Int = 1502) {
             }
 
             // check remaining amount of data and writing coils
-            if (inputBuffer.remaining().toByte() == byteCount) {
+            if (inputBuffer.remaining().toByte() >= byteCount) {
                 // Wrinting registers...
                 try {
                     var addr  = address
-                    var value = 0.toShort()
-                    while (inputBuffer.hasRemaining()) {
-                        value = inputBuffer.short
-                        slave.setHoldingRegister(addr.toInt(), value)
+                    for (i in 1..quantity) {
+                        slave.setHoldingRegister(addr.toInt(), inputBuffer.short)
                         addr++
                     }
                     response.put(0x0f.toByte()).putShort(address).putShort(quantity)
@@ -262,13 +264,12 @@ class ModbusTcpServer(port: Int = 1502) {
             }
 
             // check remaining amount of data and writing coils
-            if (inputBuffer.remaining().toByte() == byteCount) {
+            if (inputBuffer.remaining().toByte() >= byteCount) {
                 // Wrinting registers...
                 try {
                     var addr  = address
-                    var value = 0.toShort()
-                    while (inputBuffer.hasRemaining()) {
-                        value = inputBuffer.short
+                    for (i in 1..quantity) {
+                        val value = inputBuffer.short
                         slave.setHoldingRegister(addr.toInt(), value)
                         addr++
                     }
