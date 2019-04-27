@@ -2,8 +2,15 @@ package mods.eln.fluid;
 
 import mods.eln.misc.INBTTReady;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.*;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
+
+import javax.annotation.Nullable;
 
 /**
  * Use one of these if you want your block to support Forge fluids!
@@ -39,7 +46,7 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
+    public int fill(FluidStack resource, boolean doFill) {
         if (tank.getFluidAmount() > 0) {
             // No change in type of fluid.
             return tank.fill(resource, doFill);
@@ -48,9 +55,8 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
             setHeatEnergyPerMilliBucket(resource.getFluid());
             return tank.fill(resource, doFill);
         } else {
-            int resourceId = resource.getFluidID();
-            for (int i = 0; i < whitelist.length; i++) {
-                if (whitelist[i].getID() == resourceId) {
+            for (Fluid whitelisted : whitelist) {
+                if (whitelisted == resource.getFluid()) {
                     setHeatEnergyPerMilliBucket(resource.getFluid());
                     return tank.fill(resource, doFill);
                 }
@@ -59,42 +65,25 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
         }
     }
 
+    @Nullable
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
-        if (resource.isFluidEqual(tank.getFluid()))
+    public FluidStack drain(FluidStack resource, boolean doDrain) {
+        if (resource.isFluidEqual(tank.getFluid())) {
             return tank.drain(resource.amount, doDrain);
-        else
+        } else {
             return null;
+        }
     }
 
+    @Nullable
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
+    public FluidStack drain(int maxDrain, boolean doDrain) {
         return tank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid) {
-        int fluidId = fluid.getID();
-        if (tank.getFluidAmount() > 0) {
-            return tank.getFluid().getFluidID() == fluidId;
-        } else {
-            for (int i = 0; i < whitelist.length; i++) {
-                if (whitelist[i].getID() == fluidId) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid) {
-        return true;
-    }
-
-    @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from) {
-        return new FluidTankInfo[]{tank.getInfo()};
+    public IFluidTankProperties[] getTankProperties() {
+        return tank.getTankProperties();
     }
 
     @Override
@@ -104,10 +93,11 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         NBTTagCompound t = new NBTTagCompound();
         tank.writeToNBT(t);
         nbt.setTag(str + "tank", t);
         nbt.setFloat(str + "fhm", fluid_heat_mb);
+        return nbt;
     }
 }

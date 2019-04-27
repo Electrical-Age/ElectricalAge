@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalgatesource;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -81,9 +82,10 @@ public class ElectricalGateSourceElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) ((front.toInt() << 0)));
+        return nbt;
     }
 
     @Override
@@ -133,7 +135,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.instance.signalCableDescriptor.applyTo(outputGate);
+        Cable.Companion.getSignal().descriptor.applyTo(outputGate);
         computeElectricalLoad();
     }
 
@@ -147,7 +149,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
 
         if (onBlockActivatedRotate(entityPlayer)) {
             return true;

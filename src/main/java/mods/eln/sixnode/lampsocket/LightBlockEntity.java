@@ -1,13 +1,16 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.init.ModBlock;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
@@ -30,7 +33,7 @@ public class LightBlockEntity extends TileEntity {
 
 
     public interface LightBlockObserver {
-        void lightBlockDestructor(Coordonate coord);
+        void lightBlockDestructor(Coordinate coord);
     }
 
     static class LightHandle implements INBTTReady {
@@ -54,9 +57,10 @@ public class LightBlockEntity extends TileEntity {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setByte(str + "value", value);
             nbt.setInteger(str + "timeout", timeout);
+            return nbt;
         }
     }
 
@@ -66,7 +70,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
 	/*void removeLight(int light) {
-        //int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
+        //int meta = world.getBlockMetadata(xCoord, yCoord, zCoord);
 		for (int idx = 0; idx < lightList.size(); idx++) {
 			if (lightList.get(idx) == light) {
 				lightList.remove(idx);
@@ -99,32 +103,31 @@ public class LightBlockEntity extends TileEntity {
 
     void lightManager() {
 		/*if (lightList.size() == 0) {
-			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+			world.setBlock(xCoord, yCoord, zCoord, 0);
 		} else {
 			int light = getLight();
-			if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-				worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+			if (light != world.getBlockMetadata(xCoord, yCoord, zCoord)) {
+				world.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
+				world.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
 			}
 		}*/
     }
 
-    @Override
     public void updateEntity() {
-        if (worldObj.isRemote) return;
-
+        if (world.isRemote) return;
+        BlockPos pos = this.pos;
         if (lightList.isEmpty()) {
-            //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
-            //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
-            //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " ");
+            //	world.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
+            world.setBlockToAir(pos);
+            //world.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            //Eln.tileEntityDestructor.add(this);
+            Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
             return;
         }
 
         int light = 0;
         Iterator<LightHandle> iterator = lightList.iterator();
-
+        
         while (iterator.hasNext()) {
             LightHandle l = iterator.next();
             if (light < l.value) light = l.value;
@@ -134,43 +137,44 @@ public class LightBlockEntity extends TileEntity {
                 iterator.remove();
             }
         }
-
-        if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+        IBlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+        if (light != block.getMetaFromState(state)) {
+            block.setLightLevel(2);
+            world.notifyLightSet(pos);
         }
     }
 
-    public static void addLight(World w, int x, int y, int z, int light, int timeout) {
-        Block block = w.getBlock(x, y, z);
-        if (block != Eln.lightBlock) {
-            if (block != Blocks.air) return;
-            w.setBlock(x, y, z, Eln.lightBlock, light, 2);
+    public static void addLight(World w, BlockPos pos, int light, int timeout) {
+        Block block = w.getBlockState(pos).getBlock();
+        if (block != ModBlock.lightBlock) {
+            if (block != Blocks.AIR) return;
+            w.setBlockState(pos, ModBlock.lightBlock.getDefaultState());
+            w.setLightFor(EnumSkyBlock.BLOCK, pos, 2);
         }
 
-        TileEntity t = w.getTileEntity(x, y, z);
-        if (t != null && t instanceof LightBlockEntity)
+        TileEntity t = w.getTileEntity(pos);
+        if (t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else
             Utils.println("ASSERT if(t != null && t instanceof LightBlockEntity)");
     }
 
-    public static void addLight(Coordonate coord, int light, int timeout) {
-        addLight(coord.world(), coord.x, coord.y, coord.z, light, timeout);
+    public static void addLight(Coordinate coord, int light, int timeout) {
+        addLight(coord.world(), coord.pos, light, timeout);
     }
 
-	/*public static void removeLight(Coordonate coord, int light) {
+	/*public static void removeLight(Coordinate coord, int light) {
 		int blockId = coord.getBlockId();
 		if (blockId != Eln.lightBlockId) return;
 		((LightBlockEntity)coord.getTileEntity()).removeLight(light);
 	}
 	
-	public static void replaceLight(Coordonate coord, int oldLight, int newLight) {
+	public static void replaceLight(Coordinate coord, int oldLight, int newLight) {
 		int blockId = coord.getBlockId();
 		if (blockId != Eln.lightBlockId) {
 			//coord.setBlock(Eln.lightBlockId, newLight);
-			Utils.println("ASSERT public static void replaceLight(Coordonate coord, int oldLight, int newLight) " + coord);
+			Utils.println("ASSERT public static void replaceLight(Coordinate coord, int oldLight, int newLight) " + coord);
 			return;
 		}
 		((LightBlockEntity)coord.getTileEntity()).replaceLight(oldLight,newLight);

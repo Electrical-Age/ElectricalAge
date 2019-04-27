@@ -5,15 +5,15 @@ import mods.eln.fsm.State;
 import mods.eln.fsm.StateMachine;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.List;
 import java.util.Random;
@@ -158,13 +158,13 @@ public class TurretSlowProcess extends StateMachine {
                 }
             }
 
-            Coordonate coord = element.coordonate();
+            Coordinate coord = element.coordinate();
             AxisAlignedBB bb = coord.getAxisAlignedBB((int) element.getDescriptor().getProperties().detectionDistance);
             @SuppressWarnings("unchecked")
             List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
             for (EntityLivingBase entity : list) {
-                double dx = (entity.posX - coord.x - 0.5);
-                double dz = (entity.posZ - coord.z - 0.5);
+                double dx = (entity.posX - coord.pos.getX() - 0.5);
+                double dz = (entity.posZ - coord.pos.getY() - 0.5);
                 double entityAngle = -Math.toDegrees(Math.atan2(dz, dx));
                 switch (element.front) {
                     case XN:
@@ -196,11 +196,11 @@ public class TurretSlowProcess extends StateMachine {
                         if (filterClass == null || !filterClass.isAssignableFrom(entity.getClass())) return null;
                     }
 
-                    List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
+                    List<Block> blockList = Utils.traceRay(coord.world(), coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5,
                         entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
                     boolean visible = true;
                     for (Block b : blockList)
-                        if (b.isOpaqueCube()) {
+                        if (b.isOpaqueCube(b.getDefaultState())) {
                             visible = false;
                             break;
                         }
@@ -254,11 +254,11 @@ public class TurretSlowProcess extends StateMachine {
                 if (filterClass == null || !filterClass.isAssignableFrom(target.getClass())) return new SeekingState();
             }
 
-            Coordonate coord = element.coordonate();
+            Coordinate coord = element.coordinate();
 
-            double dx = (float) (target.posX - coord.x - 0.5);
-            double dy = (float) (target.posY + target.getEyeHeight() - coord.y - 0.75);
-            double dz = (float) (target.posZ - coord.z - 0.5);
+            double dx = (float) (target.posX - coord.pos.getX() - 0.5);
+            double dy = (float) (target.posY + target.getEyeHeight() - coord.pos.getY() - 0.75);
+            double dz = (float) (target.posZ - coord.pos.getZ() - 0.5);
             double entityAngle = -Math.toDegrees(Math.atan2(dz, dx));
             switch (element.front) {
                 case XN:
@@ -288,14 +288,14 @@ public class TurretSlowProcess extends StateMachine {
             element.setTurretAngle((float) entityAngle);
             element.setGunElevation((float) -entityAngle2);
 
-            if (Math.abs(target.posX - coord.x) > element.getDescriptor().getProperties().aimDistance ||
-                Math.abs(target.posZ - coord.z) > element.getDescriptor().getProperties().aimDistance)
+            if (Math.abs(target.posX - coord.pos.getX()) > element.getDescriptor().getProperties().aimDistance ||
+                Math.abs(target.posZ - coord.pos.getZ()) > element.getDescriptor().getProperties().aimDistance)
                 return new SeekingState();
 
-            List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
+            List<Block> blockList = Utils.traceRay(coord.world(), coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5,
                 target.posX, target.posY + target.getEyeHeight(), target.posZ);
             for (Block b : blockList)
-                if (b.isOpaqueCube())
+                if (b.isOpaqueCube(b.getDefaultState()))
                     return new SeekingState();
 
             if (element.getGunPosition() == 1 && element.isTargetReached() &&
@@ -348,7 +348,7 @@ public class TurretSlowProcess extends StateMachine {
             element.energyBuffer = MaximalEnergy;
         }
 
-        if (element.coordonate().getBlockExist())
+        if (element.coordinate().doesBlockExist())
             super.process(time);
 
         if (actualPower == 0 || full)

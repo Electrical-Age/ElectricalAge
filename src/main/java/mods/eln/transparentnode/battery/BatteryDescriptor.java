@@ -236,29 +236,30 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         return energy;
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(true, true);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(true, true);
+//        }
+//    }
 
     @Override
     public boolean onEntityItemUpdate(EntityItem entityItem) {
         if (entityItem.isBurning()) {
-            entityItem.worldObj.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2, true);
+            entityItem.world.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2, true);
             entityItem.extinguish();
             entityItem.setDead();
         }

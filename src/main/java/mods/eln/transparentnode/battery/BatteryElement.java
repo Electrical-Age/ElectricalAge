@@ -2,6 +2,7 @@ package mods.eln.transparentnode.battery;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.OverHeatingProtectionDescriptor;
 import mods.eln.item.OverVoltageProtectionDescriptor;
 import mods.eln.misc.Direction;
@@ -198,13 +199,14 @@ public class BatteryElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+        return inventory.take(entityPlayer.getHeldItemMainhand());
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         //inventory.writeToNBT(nbt, str + "inv");
+        return nbt;
     }
 
     @Override
@@ -266,7 +268,7 @@ public class BatteryElement extends TransparentNodeElement {
         wailaList.put(I18N.tr("Charge"), Utils.plotPercent("", batteryProcess.getCharge()));
         wailaList.put(I18N.tr("Energy"), Utils.plotEnergy("", batteryProcess.getEnergy()));
         wailaList.put(I18N.tr("Life"), Utils.plotPercent("", batteryProcess.life));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             wailaList.put(I18N.tr("Voltage"), Utils.plotVolt("", batteryProcess.getU()));
             wailaList.put(I18N.tr("Current"), Utils.plotAmpere("", batteryProcess.getDischargeCurrent()));
         }

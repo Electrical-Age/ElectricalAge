@@ -1,9 +1,10 @@
 package mods.eln.sim;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
@@ -70,7 +71,7 @@ public class Simulator /* ,IPacketHandler */ {
         this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
         this.thermalPeriod = thermalPeriod;
 
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
 
@@ -92,7 +93,7 @@ public class Simulator /* ,IPacketHandler */ {
         run = false;
     }
 
-    public void init() {
+    public void reinit() {
         nodeCount = 0;
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
@@ -101,8 +102,6 @@ public class Simulator /* ,IPacketHandler */ {
         slowPreProcessList.clear();
 
         electricalProcessList.clear();
-        // electricalConnectionList.clear();
-        // electricalLoadList.clear();
 
         thermalFastProcessList.clear();
         thermalSlowProcessList.clear();
@@ -451,12 +450,12 @@ public class Simulator /* ,IPacketHandler */ {
 
 			for (Object obj : server.getConfigurationManager().playerEntityList) {
 				EntityPlayerMP player = (EntityPlayerMP) obj;
-				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
+				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
 				PlayerManager playerManager = worldServer.getPlayerManager();
 				Utils.sendPacketToClient(bos, player);
 			}
 			//S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-			//Eln.instance.eventChannel.sendToAll(new FMLProxyPacket(packet));
+			//Eln.eventChannel.sendToAll(new FMLProxyPacket(packet));
 		}
 		
 		Utils.println((System.nanoTime() - stackStart) / 1000);*/

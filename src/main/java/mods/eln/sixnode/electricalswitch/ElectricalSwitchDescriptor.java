@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalswitch;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeBase;
@@ -53,9 +54,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         boolean signalSwitch) {
         super(name, ElectricalSwitchElement.class, ElectricalSwitchRender.class);
 
-        if (!Eln.noSymbols) {
-            setDefaultIcon("switch");
-        }
+        setDefaultIcon("switch");
 
         this.nominalVoltage = nominalVoltage;
         this.nominalPower = nominalPower;
@@ -120,30 +119,31 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
-        if (type != ItemRenderType.INVENTORY) {
-            draw(0f, 0f, null);
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
+//        if (type != ItemRenderType.INVENTORY) {
+//            draw(0f, 0f, null);
+//        } else {
+//            super.renderItem(type, item, data);
+//        }
+//    }
 
     public void draw(float on, float distance, TileEntity e) {
         switch (objType) {
@@ -174,7 +174,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
                 break;
             case Lever:
                 GL11.glPushMatrix();
-                if (nominalVoltage <= Eln.MVU) {
+                if (nominalVoltage <= Cable.MVU) {
                     GL11.glScaled(0.5f, 0.5f, 0.5f);
                 }
 

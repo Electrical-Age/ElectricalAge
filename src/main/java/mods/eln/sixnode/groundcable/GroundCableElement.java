@@ -3,6 +3,7 @@ package mods.eln.sixnode.groundcable;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -60,9 +61,10 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("color", (byte) (color + (colorCare << 4)));
+        return nbt;
     }
 
     @Override
@@ -116,15 +118,15 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.applySmallRs(electricalLoad);
+        Cable.applySmallRs(electricalLoad);
     }
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
-            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
         } else if (currentItemStack != null) {
             Item item = currentItemStack.getItem();

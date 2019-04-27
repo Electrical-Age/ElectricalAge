@@ -1,8 +1,12 @@
 package mods.eln.client;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
+import mods.eln.init.Config;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.entity.ReplicatorEntity;
@@ -22,30 +26,31 @@ public class ClientProxy extends CommonProxy {
     public static UuidManager uuidManager;
     public static SoundClientEventListener soundClientEventListener;
 
+    //TODO: FIX ITEM RENDERING 1.10
     @Override
     public void registerRenderers() {
         new ClientPacketHandler();
         ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
         ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
 
-        MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
+//        MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
+//        MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
+//        MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
+//        MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
 
-        RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(), (float) 0.3));
+        RenderingRegistry.registerEntityRenderingHandler(
+            ReplicatorEntity.class,
+            manager -> new ReplicatorRender(manager, new ModelSilverfish(), 0.3f));
 
-        Eln.clientKeyHandler = new ClientKeyHandler();
-        FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
+        // TODO(1.12): Is this important?
+        //Eln.clientKeyHandler = new ClientKeyHandler();
+        //MinecraftForge.EVENT_BUS.register(Eln.clientKeyHandler);
         MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
         uuidManager = new UuidManager();
         soundClientEventListener = new SoundClientEventListener(uuidManager);
 
-        if (Eln.versionCheckEnabled)
-            FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
-
-        if (Eln.analyticsEnabled)
-            FMLCommonHandler.instance().bus().register(AnalyticsHandler.getInstance());
+        if (Config.INSTANCE.getAnalyticsEnabled())
+            MinecraftForge.EVENT_BUS.register(AnalyticsHandler.getInstance());
 
         new FrameTime();
         new ConnectionListener();

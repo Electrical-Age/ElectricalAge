@@ -2,6 +2,7 @@ package mods.eln.transparentnode.turbine;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -169,7 +170,7 @@ public class TurbineElement extends TransparentNodeElement {
         info.put(I18N.tr("Nominal") + " \u0394T",
             (warmLoad.Tc - coolLoad.Tc == descriptor.nominalDeltaT ? I18N.tr("Yes") : I18N.tr("No")));
         info.put(I18N.tr("Generated power"), Utils.plotPower("", electricalPowerSourceProcess.getP()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put("\u0394T", Utils.plotCelsius("", warmLoad.Tc - coolLoad.Tc));
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalPowerSourceProcess.getU()));
         }

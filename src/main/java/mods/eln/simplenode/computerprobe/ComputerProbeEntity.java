@@ -1,6 +1,6 @@
 package mods.eln.simplenode.computerprobe;
 
-import cpw.mods.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -15,12 +15,6 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public String getComponentName() {
         return "ElnProbe";
     }
-
-  /*  @Callback
-    @Optional.Method(modid = Other.modIdOc)
-    public Object[] greet(Context context, Arguments args) {
-        return new Object[]{String.format("Hello, %s!", args.checkString(0))};
-    }*/
 
     @Callback
     @Optional.Method(modid = Other.modIdOc)
@@ -98,10 +92,13 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
         return (ComputerProbeNode) super.getNode();
     }
 
-    //return new String[]{"writeDir", "readDir", "writeOut", "readOut", "readIn"};
-
     @Override
     public String getNodeUuid() {
         return ComputerProbeNode.getNodeUuidStatic();
+    }
+
+    @Override
+    public void update() {
+
     }
 }

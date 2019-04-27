@@ -2,6 +2,7 @@ package mods.eln.transparentnode.eggincubator;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
@@ -24,7 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -74,16 +75,14 @@ public class EggIncubatorElement extends TransparentNodeElement {
                 descriptor.setState(powerResistor, true);
                 if (energy <= 0) {
                     inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
-                    EntityChicken chicken = new EntityChicken(node.coordonate.world());
+                    EntityChicken chicken = new EntityChicken(node.coordinate.world());
                     chicken.setGrowingAge(-24000);
-                    EntityLiving entityliving = (EntityLiving) chicken;
-                    entityliving.setLocationAndAngles(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
-                    entityliving.rotationYawHead = entityliving.rotationYaw;
-                    entityliving.renderYawOffset = entityliving.rotationYaw;
-                    //entityliving.func_110161_a((EntityLivingData)null); 1.6.4
-                    node.coordonate.world().spawnEntityInWorld(entityliving);
-                    entityliving.playLivingSound();
-                    //node.coordonate.world().spawnEntityInWorld());
+                    chicken.setLocationAndAngles(node.coordinate.pos.getX() + 0.5, node.coordinate.pos.getY() + 0.5, node.coordinate.pos.getZ() + 0.5, MathHelper.wrapDegrees(node.coordinate.world().rand.nextFloat() * 360.0F), 0.0F);
+                    chicken.rotationYawHead = chicken.rotationYaw;
+                    chicken.renderYawOffset = chicken.rotationYaw;
+                    node.coordinate.world().spawnEntity(chicken);
+                    chicken.playLivingSound();
+                    //node.coordinate.world().spawnEntity());
                     resetEnergy();
 
                     needPublish();
@@ -101,8 +100,9 @@ public class EggIncubatorElement extends TransparentNodeElement {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "energyCounter", energy);
+            return nbt;
         }
     }
 
@@ -173,8 +173,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
-            else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).stackSize);
+            stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).getCount());
 
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 
@@ -188,9 +187,9 @@ public class EggIncubatorElement extends TransparentNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Has egg"), inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null ?
+        info.put(I18N.tr("Has egg"), !inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).isEmpty() ?
             I18N.tr("Yes") : I18N.tr("No"));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Power consumption"), Utils.plotPower("", powerResistor.getP()));
         }
         return info;

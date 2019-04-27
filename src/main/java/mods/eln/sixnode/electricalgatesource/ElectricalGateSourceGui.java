@@ -46,7 +46,7 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     protected void preDraw(float f, int x, int y) {
         super.preDraw(f, x, y);
         if (render.voltageSyncNew) syncVoltage();
-        voltage.setComment(0, tr("Output at %1$%", ((int) voltage.getValue() * 2)));
+        voltage.setComment(0, tr("Output at %s", ((int) voltage.getValue() * 2)));
     }
 
     @Override

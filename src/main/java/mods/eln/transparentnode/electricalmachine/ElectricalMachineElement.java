@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -129,13 +130,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     }
 
     private void setPhysicalValue() {
-        ItemStack stack;
-
-        int boosterCount = 0;
-        stack = getInventory().getStackInSlot(boosterSlotId);
-        if (stack != null) {
-            boosterCount = stack.stackSize;
-        }
+        int boosterCount = getInventory().getStackInSlot(boosterSlotId).getCount();
         double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount);
         slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
         slowRefreshProcess.setSpeedUp(speedUp);
@@ -146,7 +141,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return booterAccepter.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+        return booterAccepter.take(entityPlayer.getHeldItemMainhand(), this, false, true);
     }
 
     public void networkSerialize(java.io.DataOutputStream stream) {
@@ -168,9 +163,10 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setBoolean("powerOn", powerOn);
+        return nbt;
     }
 
     @Override
@@ -191,7 +187,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Power consumption"), Utils.plotPower("", slowRefreshProcess.getPower()));
         info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Power provided"), Utils.plotPower("", electricalLoad.getI() * electricalLoad.getU()));
         }
         return info;

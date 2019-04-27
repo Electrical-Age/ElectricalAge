@@ -1,7 +1,9 @@
 package mods.eln.mechanical
 
+import mods.eln.init.Config
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
+import mods.eln.init.Cable
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.EntityMetaTag
@@ -84,7 +86,7 @@ class GeneratorDescriptor(
 class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
-    override val cableRender = Eln.instance.stdCableRender3200V
+    override val cableRender = Cable.veryHighVoltage.descriptor.render
     val desc = desc_ as GeneratorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
@@ -136,7 +138,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
     }
 
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu == LRDU.Down && side == front) return Eln.instance.stdCableRender3200V
+        if (lrdu == LRDU.Down && side == front) return Cable.veryHighVoltage.descriptor.render
         return null
     }
 
@@ -283,7 +285,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         var info = mutableMapOf<String, String>()
         info.put("Energy", Utils.plotEnergy("", shaft.energy))
         info.put("Speed", Utils.plotRads("", shaft.rads))
-        if (Eln.wailaEasyMode) {
+        if (Config.wailaEasyMode) {
             info.put("Voltage", Utils.plotVolt("", electricalPowerSource.getU()))
             info.put("Current", Utils.plotAmpere("", electricalPowerSource.getI()))
             info.put("Temperature", Utils.plotCelsius("", thermal.t))

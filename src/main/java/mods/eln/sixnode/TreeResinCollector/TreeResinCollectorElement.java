@@ -1,7 +1,8 @@
 package mods.eln.sixnode.TreeResinCollector;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.init.Items;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -16,6 +17,7 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.io.DataOutputStream;
@@ -66,55 +68,52 @@ public class TreeResinCollectorElement extends SixNodeElement {
     }
 
     double getProductPerSecond() {
-        Coordonate coord = sixNode.coordonate;
-        World worldObj = coord.world();
+        Coordinate coord = sixNode.coordinate;
+        World world = coord.world();
         int[] posWood = new int[3];
         int[] posCollector = new int[3];
         Direction woodDirection = side;
-        posWood[0] = coord.x;
-        posWood[1] = coord.y;
-        posWood[2] = coord.z;
-        posCollector[0] = coord.x;
-        posCollector[1] = coord.y;
-        posCollector[2] = coord.z;
+        posWood = Utils.posToArray(coord.pos);
+        //Tried not using the function again (since the values are the same)
+        posCollector = posWood;
         woodDirection.applyTo(posWood, 1);
         int leafCount = 0;
         int yStart, yEnd;
 
-        while (TreeResinCollectorDescriptor.isWood(worldObj.getBlock(posWood[0], posWood[1] - 1, posWood[2]))) {
+        while (TreeResinCollectorDescriptor.isWood(world.getBlockState(new BlockPos(posWood[0], posWood[1] - 1, posWood[2])).getBlock())) {
             posWood[1]--;
         }
         yStart = posWood[1];
 
-        posWood[1] = coord.y;
+        posWood[1] = coord.pos.getY();
         // timeCounter-= timeTarget;
-        while (TreeResinCollectorDescriptor.isWood(worldObj.getBlock(posWood[0], posWood[1] + 1, posWood[2]))) {
-            if (TreeResinCollectorDescriptor.isLeaf(worldObj.getBlock(posCollector[0], posWood[1] + 1, posCollector[2])))
+        while (TreeResinCollectorDescriptor.isWood(world.getBlockState(new BlockPos(posWood[0], posWood[1] + 1, posWood[2])).getBlock())) {
+            if (TreeResinCollectorDescriptor.isLeaf(world.getBlockState(new BlockPos(posCollector[0], posWood[1] + 1, posCollector[2])).getBlock()))
                 leafCount++;
             posWood[1]++;
         }
         yEnd = posWood[1];
 
-        int collectiorCount = 0;
-        Coordonate coordTemp = new Coordonate(posCollector[0], 0, posCollector[2], worldObj);
+        int collectorCount = 0;
+        Coordinate coordTemp = new Coordinate(posCollector[0], 0, posCollector[2], world);
         posCollector[1] = yStart;
         for (posCollector[1] = yStart; posCollector[1] <= yEnd; posCollector[1]++) {
-            coordTemp.y = posCollector[1];
-            // if(worldObj.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
-            NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
+            coordTemp.pos.setY(posCollector[1]);
+            // if(world.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
+            NodeBase node = NodeManager.instance.getNodeFromCoordinate(coordTemp);
             if (node instanceof SixNode) {
                 SixNode six = (SixNode) node;
                 if (six.getElement(side) != null && six.getElement(side) instanceof TreeResinCollectorElement) {
-                    collectiorCount++;
+                    collectorCount++;
                 }
             }
         }
-        if (collectiorCount == 0) {
-            collectiorCount++;
-            Utils.println("ASSERT collectiorCount == 0");
+        if (collectorCount == 0) {
+            collectorCount++;
+            Utils.println("ASSERT collectorCount == 0");
         }
         double leaf = leafCount >= 1 ? 1 : 0.000000001;
-        double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount) * leaf;
+        double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectorCount) * leaf;
         return productPerSeconde;
     }
 
@@ -139,10 +138,10 @@ public class TreeResinCollectorElement extends SixNodeElement {
         }
 
         for (int idx = 0; idx < productI; idx++) {
-            sixNode.dropItem(Eln.treeResin.newItemStack(1));
+            sixNode.dropItem(Items.treeResin.newItemStack());
         }
 
-        Utils.addChatMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
+        Utils.sendMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
         needPublish();
         return true;
     }
@@ -154,9 +153,10 @@ public class TreeResinCollectorElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("timeFromLastActivated", timeFromLastActivated);
+        return nbt;
     }
 
     class TreeResinCollectorSlowProcess implements IProcess {
@@ -176,7 +176,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (getCoordonate().getBlockExist())
+            if (getCoordinate().doesBlockExist())
                 stream.writeFloat((float) getProduct(getProductPerSecond()));
             else
                 stream.writeFloat(0);

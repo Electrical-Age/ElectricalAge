@@ -22,7 +22,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -248,9 +248,9 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         if (useUuid()) stop(uuid);
 
         if (transparentNodeDescriptor.hasGhostGroup()) {
-            Eln.ghostManager.removeObserver(node.coordonate);
-            Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordonate);
-            //transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
+            Eln.ghostManager.removeObserver(node.coordinate);
+            Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordinate);
+            //transparentNodeDescriptor.getGhostGroup(front).erase(node.coordinate);
         }
         node.dropInventory(getInventory());
         node.dropElement(node.removedByPlayer);
@@ -258,7 +258,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     public ItemStack getDropItemStack() {
-        ItemStack itemStack = new ItemStack(Eln.transparentNodeBlock, 1, node.elementId);
+        ItemStack itemStack = null; // TODO(1.12): new ItemStack(Eln.transparentNodeBlock, 1, node.elementId);
         itemStack.setTagCompound(getItemStackNBT());
         return itemStack;
     }
@@ -352,7 +352,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
 
         IInventory inv = getInventory();
@@ -385,6 +385,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
 
         nbt.setByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
+        return nbt;
     }
 
     public void reconnect() {
@@ -413,8 +414,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return 0f;
     }
 
-    public Coordonate getGhostObserverCoordonate() {
-        return node.coordonate;
+    public Coordinate getGhostObserverCoordinate() {
+        return node.coordinate;
 
     }
 
@@ -434,11 +435,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public World world() {
 
-        return node.coordonate.world();
+        return node.coordinate.world();
     }
 
-    public Coordonate coordonate() {
-        return node.coordonate;
+    public Coordinate coordinate() {
+        return node.coordinate;
     }
 
 
@@ -457,7 +458,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public void play(SoundCommand s) {
         s.addUuid(getUuid());
-        s.set(node.coordonate);
+        s.set(node.coordinate);
         s.play();
     }
 

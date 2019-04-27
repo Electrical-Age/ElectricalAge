@@ -17,16 +17,13 @@ import net.minecraft.init.Blocks
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.MathHelper
+import net.minecraft.util.ActionResult
+import net.minecraft.util.EnumActionResult
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.MathHelper
 import net.minecraft.world.World
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 import org.lwjgl.opengl.GL11
-import kotlin.experimental.and
-import kotlin.experimental.or
 
-@ExperimentalUnsignedTypes
 class PortableOreScannerItem(name: String, obj: Obj3D,
                              private var energyStorage: Double, internal var chargePower: Double, private var dischargePower: Double,
                              private var viewRange: Float, private var viewYAlpha: Float, private var resWidth: Int, private var resHeight: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
@@ -70,8 +67,8 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
         }
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ItemStack {
-        if (w.isRemote) return s
+    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ActionResult<ItemStack> {
+        if (w.isRemote) return ActionResult(EnumActionResult.SUCCESS, s)
         val energy = getEnergy(s)
         val state = getState(s)
 
@@ -86,7 +83,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
             }
             else -> {}
         }
-        return s
+        return ActionResult(EnumActionResult.SUCCESS, s)
     }
 
     override fun setParent(item: Item, damage: Int) {
@@ -105,9 +102,9 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
+        list.add(tr("Discharge power: %sW", Utils.plotValue(dischargePower)))
         if (itemStack != null) {
-            list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
+            list.add(tr("Stored energy: %sJ (%s)", Utils.plotValue(getEnergy(itemStack)),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))
         }
     }
@@ -165,189 +162,189 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
         return 0
     }
 
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
-
     override fun onBlockStartBreak(itemstack: ItemStack, x: Int, y: Int, z: Int, player: EntityPlayer): Boolean {
-        if (!player.worldObj.isRemote) {
+        if (!player.world.isRemote) {
             setDamage(itemstack, (getDamage(itemstack) + 1).toByte())
         }
         return super.onBlockStartBreak(itemstack, x, y, z, player)
     }
 
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
-            return
-        }
-
-        val energy = getEnergy(item)
-        val state = getState(item)
-
-        GL11.glPushMatrix()
-        val e: Entity?
-
-        when (type) {
-            IItemRenderer.ItemRenderType.ENTITY -> {
-                e = null
-                GL11.glTranslatef(0f, -0.2f, 0f)
-                GL11.glRotatef(90f, 0f, 0f, 1f)
-            }
-
-            IItemRenderer.ItemRenderType.EQUIPPED -> {
-                e = data[1] as Entity
-                GL11.glRotatef(130f, 0f, 0f, 1f)
-                GL11.glRotatef(140f, 1f, 0f, 0f)
-                GL11.glRotatef(-20f, 0f, 1f, 0f)
-                GL11.glScalef(1.6f, 1.6f, 1.6f)
-                GL11.glTranslatef(-0.2f, 0.7f, -0.0f)
-            }
-
-            IItemRenderer.ItemRenderType.EQUIPPED_FIRST_PERSON -> {
-                e = data[1] as Entity
-                GL11.glTranslatef(0f, 1f, 0f)
-                GL11.glRotatef(90f, 0f, 0f, 1f)
-                GL11.glRotatef(35f, 1f, 0f, 0f)
-                GL11.glTranslatef(0.0f, 1f, -0.2f)
-            }
-
-            IItemRenderer.ItemRenderType.INVENTORY -> {
-                GL11.glPopMatrix()
-                return
-            }
-
-            IItemRenderer.ItemRenderType.FIRST_PERSON_MAP -> e = null
-
-            else -> e = null
-        }
-
-        val drawScreen = e != null && UtilsClient.clientDistanceTo(e) < 10
-        val drawRay = drawScreen && state == State.Run
-
-        base.draw()
-
-        if (drawRay) {
-            GL11.glPushMatrix()
-
-            var oRender = Eln.clientLiveDataManager.getData(item, 1)
-            if (oRender == null)
-                oRender = Eln.clientLiveDataManager.newData(item, RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1)
-            val render = oRender as RenderStorage
-
-            render.generate(e!!.worldObj, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
-
-            val scale = 1f / resWidth * 0.50f
-            GL11.glTranslatef(0.90668f, 0.163f, -0.25078f)
-            GL11.glRotatef(270f, 1f, 0f, 0f)
-            GL11.glRotatef(270f, 0f, 0f, 1f)
-            GL11.glScalef(scale, -scale, 1f)
-            render.draw()
-
-            GL11.glPopMatrix()
-
-            var r = 0f
-            var g = 0f
-            var b = 0f
-            var count = 0
-
-            var y = 0
-            while (y < resHeight) {
-                var x = 0
-                while (x < resHeight) {
-                    r += render.screenRed[y][x]
-                    g += render.screenGreen[y][x]
-                    b += render.screenBlue[y][x]
-                    count++
-                    x += 6
-                }
-                y += 6
-            }
-            r /= count.toFloat()
-            g /= count.toFloat()
-            b /= count.toFloat()
-            UtilsClient.drawHalo(screenLuma, r, g, b, e, false)
-        }
-
-        if (drawScreen) {
-            if (state == State.Idle) {
-                GL11.glColor4f(0.5f, 0.5f, 0.5f, 1f)
-                led.draw()
-                GL11.glColor4f(1f, 1f, 1f, 1f)
-                buttons.draw()
-            }
-            UtilsClient.disableLight()
-            if (state != State.Idle) {
-                GL11.glColor4f(1f, 1f, 1f, 1f)
-                buttons.draw()
-
-                var r = 0f
-                var g = 0f
-                var b = 0f
-                when (state) {
-                    State.Boot -> {
-                        r = 0.9f
-                        g = 0.4f
-                        b = 0f
-                    }
-                    State.Run -> {
-                        r = 0f
-                        g = 1f
-                        b = 0f
-                    }
-                    State.Stop -> {
-                        r = 1f
-                        g = 0f
-                        b = 0f
-                    }
-                    else -> {
-                    }
-                }
-                GL11.glColor4f(r * 0.6f, g * 0.6f, b * 0.6f, 1f)
-                led.draw()
-                UtilsClient.enableBlend()
-                UtilsClient.drawHaloNoLightSetup(ledHalo, r, g, b, e, false)
-            }
-
-            GL11.glColor4f(1f, 1f, 1f, 0.4f)
-            when (state) {
-                State.Boot -> textInit.draw()
-                State.Run -> {
-                    textRun.draw()
-                    val batLevel = Math.min(textBat.size - 1, (energy / energyStorage * textBat.size + 0.5f).toInt())
-                    textBat[batLevel].draw()
-                }
-                else -> {
-                }
-            }
-            UtilsClient.enableBlend()
-            GL11.glColor4f(1f, 1f, 1f, 1f)
-            var breakLevel = getDamage(item) / damagePerBreakLevel
-            if (state == State.Idle) breakLevel = Math.min(breakLevel, screenDamage.size - 1)
-            for (idx in 0 until breakLevel) {
-                if (idx == screenDamage.size) break
-                screenDamage[Math.min(screenDamage.size - 1, breakLevel - 1) - idx].draw()
-            }
-
-            UtilsClient.disableBlend()
-            UtilsClient.enableLight()
-        }
-
-        GL11.glPopMatrix()
-    }
+    // TODO(1.10): Fix rendering
+//    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
+//        return true
+//    }
+//
+//    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
+//        return type != ItemRenderType.INVENTORY
+//    }
+//
+//    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, *data)
+//            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
+//            return
+//        }
+//
+//        val energy = getEnergy(item)
+//        val state = getState(item)
+//
+//        GL11.glPushMatrix()
+//        val e: Entity?
+//
+//        when (type) {
+//            IItemRenderer.ItemRenderType.ENTITY -> {
+//                e = null
+//                GL11.glTranslatef(0f, -0.2f, 0f)
+//                GL11.glRotatef(90f, 0f, 0f, 1f)
+//            }
+//
+//            IItemRenderer.ItemRenderType.EQUIPPED -> {
+//                e = data[1] as Entity
+//                GL11.glRotatef(130f, 0f, 0f, 1f)
+//                GL11.glRotatef(140f, 1f, 0f, 0f)
+//                GL11.glRotatef(-20f, 0f, 1f, 0f)
+//                GL11.glScalef(1.6f, 1.6f, 1.6f)
+//                GL11.glTranslatef(-0.2f, 0.7f, -0.0f)
+//            }
+//
+//            IItemRenderer.ItemRenderType.EQUIPPED_FIRST_PERSON -> {
+//                e = data[1] as Entity
+//                GL11.glTranslatef(0f, 1f, 0f)
+//                GL11.glRotatef(90f, 0f, 0f, 1f)
+//                GL11.glRotatef(35f, 1f, 0f, 0f)
+//                GL11.glTranslatef(0.0f, 1f, -0.2f)
+//            }
+//
+//            IItemRenderer.ItemRenderType.INVENTORY -> {
+//                GL11.glPopMatrix()
+//                return
+//            }
+//
+//            IItemRenderer.ItemRenderType.FIRST_PERSON_MAP -> e = null
+//
+//            else -> e = null
+//        }
+//
+//        val drawScreen = e != null && UtilsClient.clientDistanceTo(e) < 10
+//        val drawRay = drawScreen && state == State.Run
+//
+//        base.draw()
+//
+//        if (drawRay) {
+//            GL11.glPushMatrix()
+//
+//            var oRender = Eln.clientLiveDataManager.getData(item, 1)
+//            if (oRender == null)
+//                oRender = Eln.clientLiveDataManager.newData(item, RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1)
+//            val render = oRender as RenderStorage
+//
+//            render.generate(e!!.world, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
+//
+//            val scale = 1f / resWidth * 0.50f
+//            GL11.glTranslatef(0.90668f, 0.163f, -0.25078f)
+//            GL11.glRotatef(270f, 1f, 0f, 0f)
+//            GL11.glRotatef(270f, 0f, 0f, 1f)
+//            GL11.glScalef(scale, -scale, 1f)
+//            render.draw()
+//
+//            GL11.glPopMatrix()
+//
+//            var r = 0f
+//            var g = 0f
+//            var b = 0f
+//            var count = 0
+//
+//            var y = 0
+//            while (y < resHeight) {
+//                var x = 0
+//                while (x < resHeight) {
+//                    r += render.screenRed[y][x]
+//                    g += render.screenGreen[y][x]
+//                    b += render.screenBlue[y][x]
+//                    count++
+//                    x += 6
+//                }
+//                y += 6
+//            }
+//            r /= count.toFloat()
+//            g /= count.toFloat()
+//            b /= count.toFloat()
+//            UtilsClient.drawHalo(screenLuma, r, g, b, e, false)
+//        }
+//
+//        if (drawScreen) {
+//            if (state == State.Idle) {
+//                GL11.glColor4f(0.5f, 0.5f, 0.5f, 1f)
+//                led.draw()
+//                GL11.glColor4f(1f, 1f, 1f, 1f)
+//                buttons.draw()
+//            }
+//            UtilsClient.disableLight()
+//            if (state != State.Idle) {
+//                GL11.glColor4f(1f, 1f, 1f, 1f)
+//                buttons.draw()
+//
+//                var r = 0f
+//                var g = 0f
+//                var b = 0f
+//                when (state) {
+//                    State.Boot -> {
+//                        r = 0.9f
+//                        g = 0.4f
+//                        b = 0f
+//                    }
+//                    State.Run -> {
+//                        r = 0f
+//                        g = 1f
+//                        b = 0f
+//                    }
+//                    State.Stop -> {
+//                        r = 1f
+//                        g = 0f
+//                        b = 0f
+//                    }
+//                    else -> {
+//                    }
+//                }
+//                GL11.glColor4f(r * 0.6f, g * 0.6f, b * 0.6f, 1f)
+//                led.draw()
+//                UtilsClient.enableBlend()
+//                UtilsClient.drawHaloNoLightSetup(ledHalo, r, g, b, e, false)
+//            }
+//
+//            GL11.glColor4f(1f, 1f, 1f, 0.4f)
+//            when (state) {
+//                State.Boot -> textInit.draw()
+//                State.Run -> {
+//                    textRun.draw()
+//                    val batLevel = Math.min(textBat.size - 1, (energy / energyStorage * textBat.size + 0.5f).toInt())
+//                    textBat[batLevel].draw()
+//                }
+//                else -> {
+//                }
+//            }
+//            UtilsClient.enableBlend()
+//            GL11.glColor4f(1f, 1f, 1f, 1f)
+//            var breakLevel = getDamage(item) / damagePerBreakLevel
+//            if (state == State.Idle) breakLevel = Math.min(breakLevel, screenDamage.size - 1)
+//            for (idx in 0 until breakLevel) {
+//                if (idx == screenDamage.size) break
+//                screenDamage[Math.min(screenDamage.size - 1, breakLevel - 1) - idx].draw()
+//            }
+//
+//            UtilsClient.disableBlend()
+//            UtilsClient.enableLight()
+//        }
+//
+//        GL11.glPopMatrix()
+//    }
 
     class RenderStorage(private var viewRange: Float, viewYAlpha: Float, var resWidth: Int, private var resHeight: Int) {
-
         private var camDist: Float = 0.toFloat()
         internal var screenRed: Array<FloatArray>
         internal var screenBlue: Array<FloatArray>
         internal var screenGreen: Array<FloatArray>
-        private var worldBlocks: Array<Array<UShortArray>>
+        private var worldBlocks: Array<Array<ShortArray>>
         private var worldBlocksDim: Int = 0
         private var worldBlocksDim2: Int = 0
 
@@ -358,12 +355,13 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
             screenRed = Array(resHeight) { FloatArray(resWidth) }
             screenBlue = Array(resHeight) { FloatArray(resWidth) }
             screenGreen = Array(resHeight) { FloatArray(resWidth) }
-            worldBlocks = Array(worldBlocksDim) { Array(worldBlocksDim) { UShortArray(worldBlocksDim) } }
+            worldBlocks = Array(worldBlocksDim) { Array(worldBlocksDim) { ShortArray(worldBlocksDim) } }
         }
 
         class OreScannerConfigElement(var blockKey: Int, var factor: Float)
 
         fun generate(w: World, posX: Double, posY: Double, posZ: Double, alphaY: Float, alphaX: Float) {
+            // TODO(1.10): This is pretty much entirely broken.
             val blockKeyFactor = OreColorMapping.map
 
             val posXint = Math.round(posX).toInt()
@@ -373,7 +371,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
             for (z in 0 until worldBlocksDim) {
                 for (y in 0 until worldBlocksDim) {
                     for (x in 0 until worldBlocksDim) {
-                        worldBlocks[x][y][z] = 65535U
+                        worldBlocks[x][y][z] = 65535.toShort()
                     }
                 }
             }
@@ -424,9 +422,9 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                     var d = 0f
 
                     while (d < viewRange) {
-                        val xFloor = MathHelper.floor_float(x).toFloat()
-                        val yFloor = MathHelper.floor_float(y).toFloat()
-                        val zFloor = MathHelper.floor_float(z).toFloat()
+                        val xFloor = MathHelper.floor(x).toFloat()
+                        val yFloor = MathHelper.floor(y).toFloat()
+                        val zFloor = MathHelper.floor(z).toFloat()
 
                         var dx = x - xFloor
                         var dy = y - yFloor
@@ -442,31 +440,25 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                         val zInt = zFloor.toInt() + worldBlocksDim2
 
                         var blockKey = worldBlocks[xInt][yInt][zInt]
-                        if (blockKey == 65535.toUShort()) {
+                        if (blockKey == 65535.toShort()) {
                             val xBlock = posXint + xFloor.toInt()
                             val yBlock = posYint + yFloor.toInt()
                             val zBlock = posZint + zFloor.toInt()
-                            blockKey = 0U
+                            blockKey = 0
                             if (yBlock in 0..255) {
-                                val chunk = w.getChunkFromBlockCoords(xBlock, zBlock)
-                                if (chunk != null) {
-                                    val storage = chunk.blockStorageArray[yBlock shr 4]
-                                    if (storage != null) {
-                                        val xLocal = xBlock and 0xF
-                                        val yLocal = yBlock and 0xF
-                                        val zLocal = zBlock and 0xF
+                                val chunk = w.getChunk(BlockPos(xBlock, yBlock, zBlock))
+                                val storage = chunk.blockStorageArray[yBlock shr 4]
+                                if (storage != null) {
+                                    val xLocal = xBlock and 0xF
+                                    val yLocal = yBlock and 0xF
+                                    val zLocal = zBlock and 0xF
 
-                                        var blockId = storage.blockLSBArray[yLocal shl 8 or (zLocal shl 4) or xLocal].toUByte()
-                                        if (storage.blockMSBArray != null) {
-                                            blockId = blockId or ((storage.blockMSBArray.get(xLocal, yLocal, zLocal) shl 8).toUByte())
-                                        }
-
-                                        blockKey = (blockId + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal).toUInt() shl 12)).toUShort()
-                                    }
+                                    val state = storage.get(xLocal, yLocal, zLocal)
+                                    blockKey = Block.getStateId(state).toShort()
                                 }
                             }
-                            if (blockKey >= 1024U * 64U) {
-                                blockKey = 0U
+                            if (blockKey >= 1024 * 64) {
+                                blockKey = 0
                             }
                             worldBlocks[xInt][yInt][zInt] = blockKey
                         }
@@ -479,14 +471,21 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                         }
 
                         stackGreen += blockKeyFactor[blockKey.toInt()] * dToStack
-                        val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
-                        if (b !== Blocks.air && b !== Eln.lightBlock) {
-                            stackRed += if (b.isOpaqueCube)
+
+                        // TODO(1.12): This needs a total rewrite.
+                        val state = Block.getStateById(blockKey.toInt())
+                        val b = state.block
+                        //val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
+/*
+                        if (b !== ModBlock.AIR && b !== Eln.lightBlock) {
+                            stackRed += if (state.isOpaqueCube)
                                 0.2f * dToStack
                             else
                                 0.1f * dToStack
-                        } else
+                        } else {
                             stackBlue += 0.06f * dToStack
+                        }
+*/
 
                         x += vx * dBest
                         y += vy * dBest
@@ -561,7 +560,6 @@ private enum class State(val serialized: Byte) {
 private const val bootTime: Short = 4 * 20
 private const val stopTime: Short = 1 * 20
 
-@ExperimentalUnsignedTypes
 object OreColorMapping {
     val map: FloatArray
         get() {
@@ -576,6 +574,7 @@ object OreColorMapping {
 
     fun updateColorMapping(): FloatArray {
         val blockKeyMapping = FloatArray(1024 * 64)
+/*
         for (blockId in 0..4095) {
             for (meta in 0..15) {
                 blockKeyMapping[blockId + (meta shl 12)] = 0f
@@ -588,6 +587,8 @@ object OreColorMapping {
         }
 
         cache = blockKeyMapping
+        return blockKeyMapping
+*/
         return blockKeyMapping
     }
 }

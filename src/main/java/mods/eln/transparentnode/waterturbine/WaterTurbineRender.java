@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.waterturbine;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
@@ -24,7 +24,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 
     }
 
-    Coordonate waterCoord, waterCoordRight;
+    Coordinate waterCoord, waterCoordRight;
     RcInterpolator powerFactorFilter = new RcInterpolator(1);
     RcInterpolator dirFilter = new RcInterpolator(0.5f);
     WaterTurbineDescriptor descriptor;
@@ -43,7 +43,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 
     public void refresh(float deltaT) {
         float flowDir = waterCoord.getMeta() > waterCoordRight.getMeta() ? 1 : -1;
-        if (Utils.isWater(waterCoord) == false)
+        if (Utils.isWateryEnoughForTurbine(waterCoord) == false)
             flowDir = 0;
 
         dirFilter.setTarget(flowDir);
@@ -60,11 +60,11 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
             alpha += 360;
 
         if ((int) (alpha / 45) != (int) (alphaN_1 / 45) && soundPlaying == false) {
-            Coordonate coord = coordonate();
+            Coordinate coord = coordinate();
             play(new SoundCommand(descriptor.soundName)
                 .mulVolume(descriptor.nominalVolume * (0.007f + 0.2f * (float) powerFactorFilter.get() * (float) powerFactorFilter.get()),
                     1.1f));
-            //SoundClient.playFromBlock(tileEntity.worldObj,coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);
+            //SoundClient.playFromBlock(tileEntity.world,coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);
             soundPlaying = true;
         } else
             soundPlaying = false;
@@ -98,11 +98,11 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
             e.printStackTrace();
         }
 
-        waterCoord = this.descriptor.getWaterCoordonate(tileEntity.getWorldObj());
-        waterCoord.setWorld(tileEntity.getWorldObj());
-        waterCoord.applyTransformation(front, coordonate());
-        waterCoordRight = new Coordonate(waterCoord);
-        waterCoordRight.setWorld(tileEntity.getWorldObj());
+        waterCoord = this.descriptor.getWaterCoordinate(tileEntity.getWorld());
+        waterCoord.setWorld(tileEntity.getWorld());
+        waterCoord.applyTransformation(front, coordinate());
+        waterCoordRight = new Coordinate(waterCoord);
+        waterCoordRight.setWorld(tileEntity.getWorld());
         waterCoordRight.move(front.right());
     }
 }

@@ -202,7 +202,7 @@ public class EnergyMeterGui extends GuiContainerEln {
         helper.drawRect(6, y, helper.xSize - 6, y + 1, 0xff404040);
 
         y += 3;
-        helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Energy counter: %1$J", (int) (render.energyStack)));
+        helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Energy counter: %sJ", (int) (render.energyStack)));
         y += 10;
         helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Time counter:", (int) (render.timerCouter)));
     }

@@ -64,9 +64,10 @@ public class ThermalCableElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("color", (byte) (color + (colorCare << 4)));
+        return nbt;
     }
 
     @Override
@@ -122,10 +123,10 @@ public class ThermalCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
-            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
         } else if (currentItemStack != null) {
             Item item = currentItemStack.getItem();

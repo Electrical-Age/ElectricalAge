@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalredstoneoutput;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -39,7 +40,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
     }
 
     public boolean refreshRedstone() {
-        int newValue = (int) (inputGate.getU() * 15.0 / Eln.SVU + 0.5);
+        int newValue = (int) (inputGate.getU() * 15.0 / Cable.SVU + 0.5);
         if (newValue != redstoneValue) {
             redstoneValue = newValue;
             notifyNeighbor();
@@ -67,10 +68,11 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) (front.toInt() << 0));
         nbt.setInteger("redstoneValue", redstoneValue);
+        return nbt;
     }
 
     @Override

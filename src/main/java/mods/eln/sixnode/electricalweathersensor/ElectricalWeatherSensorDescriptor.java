@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalweathersensor;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -51,35 +52,36 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an electrical signal\ndepending the actual weather.").split("\n"));
-        list.add(tr("Clear: %1$V", 0));
-        list.add(tr("Rain: %1$V", Utils.plotValue(Eln.SVU / 2)));
-        list.add(tr("Storm: %1$V", Utils.plotValue(Eln.SVU)));
+        list.add(tr("Clear: %sV", 0));
+        list.add(tr("Rain: %sV", Utils.plotValue(Cable.SVU / 2)));
+        list.add(tr("Storm: %sV", Utils.plotValue(Cable.SVU)));
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glScalef(2f, 2f, 2f);
-            draw();
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glScalef(2f, 2f, 2f);
+//            draw();
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {

@@ -30,34 +30,35 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
         render.draw(factor, distance, e);
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void setParent(Item item, int damage) {
-        super.setParent(item, damage);
-        Data.addSignal(newItemStack());
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glScalef(1.5f, 1.5f, 1.5f);
-            draw(0f, 1f, null);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void setParent(Items item, int damage) {
+//        super.setParent(item, damage);
+//        Data.addSignal(newItemStack());
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glScalef(1.5f, 1.5f, 1.5f);
+//            draw(0f, 1f, null);
+//        }
+//    }
 }

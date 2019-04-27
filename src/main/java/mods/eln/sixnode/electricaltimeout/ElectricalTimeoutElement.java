@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricaltimeout;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -64,11 +65,12 @@ public class ElectricalTimeoutElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) (front.toInt() << 0));
         nbt.setFloat("timeOutValue", (float) timeOutValue);
         nbt.setFloat("timeOutCounter", (float) timeOutCounter);
+        return nbt;
     }
 
     @Override
@@ -100,7 +102,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Input"), inputGate.stateHigh() ? I18N.tr("ON") : I18N.tr("OFF"));
         info.put(I18N.tr("Output"), timeOutCounter > 0 ? I18N.tr("ON") : I18N.tr("OFF"));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Remaining"), Utils.plotValue(timeOutCounter, "s"));
         }
         return info;

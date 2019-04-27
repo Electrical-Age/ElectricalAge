@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.powerinductor;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
@@ -37,10 +38,7 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
     public double getlValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorContainer.cableId);
-        if (core == null)
-            return getlValue(0);
-        else
-            return getlValue(core.stackSize);
+        return getlValue(core.getCount());
     }
 
     public double getRsValue(IInventory inventory) {
@@ -51,7 +49,7 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
         double coreFactor = coreDescriptor.cableMultiplicator;
 
-        return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
+        return Cable.Companion.getLowVoltage().descriptor.electricalRs * coreFactor;
     }
 
     public void setParent(net.minecraft.item.Item item, int damage) {
@@ -63,19 +61,20 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return true;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        draw();
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        draw();
+//    }
 }

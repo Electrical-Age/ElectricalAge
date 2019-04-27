@@ -35,7 +35,7 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
         if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.powerConsumtion * time * 4) {
             if (upToDate) {
                 upToDate = false;
-                oldDate = element.sixNode.coordonate.world().getWorldTime();
+                oldDate = element.sixNode.coordinate.world().getWorldTime();
                 if (batteryStack != null) battery.setEnergy(batteryStack, 0);
                 element.needPublish();
             }
@@ -55,8 +55,9 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setBoolean(str + "upToDate", upToDate);
         nbt.setLong(str + "oldDate", oldDate);
+        return nbt;
     }
 }

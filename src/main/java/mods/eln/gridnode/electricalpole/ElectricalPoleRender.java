@@ -3,6 +3,7 @@ package mods.eln.gridnode.electricalpole;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderType;
 import mods.eln.gridnode.GridRender;
+import mods.eln.init.Cable;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.SlewLimiter;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -29,7 +30,7 @@ public class ElectricalPoleRender extends GridRender {
         this.descriptor = (ElectricalPoleDescriptor) descriptor;
 
         if (this.descriptor.includeTransformer) {
-            addLoopedSound(new LoopedSound("eln:Transformer", coordonate(), ISound.AttenuationType.LINEAR) {
+            addLoopedSound(new LoopedSound("eln:Transformer", coordinate(), ISound.AttenuationType.LINEAR) {
                 @Override
                 public float getVolume() {
                     if (load.getPosition() > ElectricalPoleRender.this.descriptor.minimalLoadToHum)
@@ -45,7 +46,7 @@ public class ElectricalPoleRender extends GridRender {
     @Override
     public void draw() {
         super.draw();
-        cableRenderType = drawCable(front.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType);
+        cableRenderType = drawCable(front.down(), Cable.Companion.getVeryHighVoltage().descriptor.render, eConn, cableRenderType);
     }
 
     @Override

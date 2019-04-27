@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalentitysensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -75,7 +76,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Entity present"), slowProcess.state ? I18N.tr("Yes") : I18N.tr("No"));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
         }
         return info;
@@ -93,7 +94,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+        return inventory.take(entityPlayer.getHeldItemMainhand());
     }
 
     @Override

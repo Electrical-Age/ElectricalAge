@@ -106,27 +106,28 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
         return Direction.XN;
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            draw(0f, false);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            objItemScale(obj);
+//            Direction.ZN.glRotateXnRef();
+//            draw(0f, false);
+//        }
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
@@ -134,11 +135,11 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Generates energy from wind."));
-        list.add(tr("Voltage: %1$V", Utils.plotValue(maxVoltage)));
-        list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
+        list.add(tr("Voltage: %sV", Utils.plotValue(maxVoltage)));
+        list.add(tr("Power: %sW", Utils.plotValue(nominalPower)));
         list.add(tr("Wind area:"));
-        list.add("  " + tr("Front: %1$", rayX));
-        list.add("  " + tr("Up/Down: %1$", rayY));
-        list.add("  " + tr("Left/Right: %1$", rayZ));
+        list.add("  " + tr("Front: %s", rayX));
+        list.add("  " + tr("Up/Down: %s", rayY));
+        list.add("  " + tr("Left/Right: %s", rayZ));
     }
 }

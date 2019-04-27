@@ -37,8 +37,8 @@ public class PowerCapacitorSixGui extends GuiContainerEln {
 
     @Override
     protected void postDraw(float f, int x, int y) {
-        helper.drawString(8, 8, 0xFF000000, tr("Capacity: %1$F", Utils.plotValue(render.descriptor.getCValue(render.inventory))));
-        helper.drawString(8, 8 + 8 + 1, 0xFF000000, tr("Nominal voltage: %1$V", Utils.plotValue(render.descriptor.getUNominalValue(render.inventory))));
+        helper.drawString(8, 8, 0xFF000000, tr("Capacity: %sF", Utils.plotValue(render.descriptor.getCValue(render.inventory))));
+        helper.drawString(8, 8 + 8 + 1, 0xFF000000, tr("Nominal voltage: %sV", Utils.plotValue(render.descriptor.getUNominalValue(render.inventory))));
         super.postDraw(f, x, y);
     }
 

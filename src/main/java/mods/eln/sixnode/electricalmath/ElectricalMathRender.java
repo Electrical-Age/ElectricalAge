@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalmath;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
@@ -17,7 +18,7 @@ import java.io.IOException;
 public class ElectricalMathRender extends SixNodeElementRender {
 
     ElectricalMathDescriptor descriptor;
-    Coordonate coord;
+    Coordinate coord;
     PhysicalInterpolator interpolator;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
@@ -34,7 +35,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalMathDescriptor) descriptor;
         interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-        coord = new Coordonate(tileEntity);
+        coord = new Coordinate(tileEntity);
         ledOn[0] = true;
         ledOn[4] = true;
     }
@@ -100,7 +101,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             ledTime = 0;
         }
 
-        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
+        if (!Utils.isPlayerAround(tileEntity.getWorld(), coord.getAxisAlignedBB(0)))
             interpolator.setTarget(0f);
         else
             interpolator.setTarget(1f);
@@ -110,6 +111,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return Cable.Companion.getSignal().descriptor.render;
     }
 }

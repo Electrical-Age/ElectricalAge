@@ -85,8 +85,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Nominal voltage: %1V$", Utils.plotValue(nominalU)));
-        list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalP)));
+        list.add(tr("Nominal voltage: %sV", Utils.plotValue(nominalU)));
+        list.add(tr("Nominal power: %sW", Utils.plotValue(nominalP)));
     }
 
     public void applyTo(ElectricalLoad load) {
@@ -129,24 +129,25 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
         return null;
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(null, getDefaultHandle(), null, null, 0f, 0f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(null, getDefaultHandle(), null, null, 0f, 0f);
+//        }
+//    }
 
     private Object getDefaultHandle() {
         if (defaultHandle == null)

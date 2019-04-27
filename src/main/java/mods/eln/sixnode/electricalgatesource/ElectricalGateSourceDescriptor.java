@@ -57,31 +57,32 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glScalef(1.5f, 1.5f, 1.5f);
-            //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
-            draw(0f, 1f, null);
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
+    // TODO(1.10): Items rendering.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type != ItemRenderType.INVENTORY) {
+//            GL11.glScalef(1.5f, 1.5f, 1.5f);
+//            //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
+//            draw(0f, 1f, null);
+//        } else {
+//            super.renderItem(type, item, data);
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {

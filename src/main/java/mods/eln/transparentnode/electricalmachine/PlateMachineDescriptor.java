@@ -41,8 +41,9 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         rot1.draw(handle.counter, 0f, 0f, -1f);
         rot2.draw(handle.counter, 0f, 0f, 1f);
 
-        UtilsClient.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
-        UtilsClient.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
+        // TODO(1.10): Fix rendering.
+//        UtilsClient.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
+//        UtilsClient.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
     }
 
     @Override

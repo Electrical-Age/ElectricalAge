@@ -5,24 +5,25 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.wiki.Data
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.inventory.EntityEquipmentSlot
 import net.minecraft.item.ItemArmor
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.DamageSource
+import net.minecraft.world.World
 import net.minecraftforge.common.ISpecialArmor
 
-class ElectricalArmor(par2EnumArmorMaterial: ItemArmor.ArmorMaterial,
-                      par3: Int,
-                      type: genericArmorItem.ArmourType,
-                      t1: String,
-                      t2: String,
+class ElectricalArmor(materialIn: ItemArmor.ArmorMaterial,
+                      renderSlotIn: Int,
+                      equipmentSlotIn: EntityEquipmentSlot,
                       private var energyStorage: Double,
                       internal var chargePower: Double,
                       private var ratioMax: Double,
                       private var ratioMaxEnergy: Double,
-                      private var energyPerDamage: Double) : genericArmorItem(par2EnumArmorMaterial, par3, type, t1, t2), IItemEnergyBattery, ISpecialArmor {
+                      private var energyPerDamage: Double) : genericArmorItem(materialIn, renderSlotIn, equipmentSlotIn), IItemEnergyBattery, ISpecialArmor {
 
     private val defaultNBT: NBTTagCompound
         get() {
@@ -65,14 +66,14 @@ class ElectricalArmor(par2EnumArmorMaterial: ItemArmor.ArmorMaterial,
         if (nbt == null) {
             stack.tagCompound = defaultNBT
         }
-        return stack.tagCompound
+        return stack.tagCompound!!
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Charge power: %1\$W", chargePower.toInt()))
-        list.add(tr("Stored energy: %1\$J (%2$%)", getEnergy(itemStack),
-                (getEnergy(itemStack) / energyStorage * 100).toInt()))
+    override fun addInformation(stack: ItemStack, worldIn: World?, tooltip: MutableList<String>, flagIn: ITooltipFlag) {
+        super.addInformation(stack, worldIn, tooltip, flagIn)
+        tooltip.add(tr("Charge power: %sW", chargePower.toInt()))
+        tooltip.add(tr("Stored energy: %sJ (%s)", getEnergy(stack),
+                (getEnergy(stack) / energyStorage * 100).toInt()))
     }
 
     override fun getEnergy(stack: ItemStack): Double {

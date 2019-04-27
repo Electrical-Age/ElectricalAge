@@ -3,6 +3,8 @@ package mods.eln.misc;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
 
 public class FakeSideInventory implements ISidedInventory {
 
@@ -28,23 +30,32 @@ public class FakeSideInventory implements ISidedInventory {
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int var1) {
+    public ItemStack removeStackFromSlot(int var1) {
         return null;
     }
 
     @Override
     public void setInventorySlotContents(int var1, ItemStack var2) {
-
     }
 
     @Override
-    public String getInventoryName() {
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public String getName() {
         return "FakeSideInventory";
     }
 
     @Override
-    public boolean hasCustomInventoryName() {
+    public boolean hasCustomName() {
         return false;
+    }
+
+    @Override
+    public ITextComponent getDisplayName() {
+        return null;
     }
 
     @Override
@@ -54,21 +65,20 @@ public class FakeSideInventory implements ISidedInventory {
 
     @Override
     public void markDirty() {
-
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer var1) {
+    public boolean isUsableByPlayer(EntityPlayer player) {
         return false;
     }
 
     @Override
-    public void openInventory() {
+    public void openInventory(EntityPlayer var1) {
 
     }
 
     @Override
-    public void closeInventory() {
+    public void closeInventory(EntityPlayer var1) {
 
     }
 
@@ -78,17 +88,37 @@ public class FakeSideInventory implements ISidedInventory {
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1) {
+    public int getField(int id) {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value) {
+
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 0;
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+    @Override
+    public int[] getSlotsForFace(EnumFacing var1) {
         return new int[]{};
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
+    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing var3) {
         return false;
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int var3) {
+    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing var3) {
         return false;
     }
 }

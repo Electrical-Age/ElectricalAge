@@ -1,6 +1,7 @@
 package mods.eln;
 
-import cpw.mods.fml.common.network.IGuiHandler;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
@@ -16,9 +17,9 @@ import java.io.IOException;
 
 public class GuiHandler implements IGuiHandler {
 
-    INodeEntity getNodeEntity(World world, int x, int y, int z) {
-        TileEntity e = world.getTileEntity(x, y, z);
-        if (e == null || false == e instanceof INodeEntity) return null;
+   private INodeEntity getNodeEntity(World world, int x, int y, int z) {
+        TileEntity e = world.getTileEntity(new BlockPos(x,y,z));
+        if (!(e instanceof INodeEntity)) return null;
         return (INodeEntity) e;
     }
 

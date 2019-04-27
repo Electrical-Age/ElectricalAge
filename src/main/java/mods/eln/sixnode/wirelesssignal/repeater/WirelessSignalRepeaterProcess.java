@@ -1,6 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.repeater;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
@@ -29,7 +29,7 @@ public class WirelessSignalRepeaterProcess implements IProcess, IWirelessSignalS
         if (sleepTimer < 0) {
             sleepTimer += Utils.rand(1.2, 2);
 
-            spot = WirelessUtils.buildSpot(rx.getCoordonate(), null, rx.descriptor.range);
+            spot = WirelessUtils.buildSpot(rx.getCoordinate(), null, rx.descriptor.range);
 
             if (boot) {
                 boot = false;
@@ -49,8 +49,8 @@ public class WirelessSignalRepeaterProcess implements IProcess, IWirelessSignalS
     }
 
     @Override
-    public Coordonate getCoordonate() {
-        return rx.getCoordonate();
+    public Coordinate getCoordinate() {
+        return rx.getCoordinate();
     }
 
     @Override

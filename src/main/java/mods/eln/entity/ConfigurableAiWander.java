@@ -3,7 +3,7 @@ package mods.eln.entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.RandomPositionGenerator;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 public class ConfigurableAiWander extends EntityAIBase {
 
@@ -26,19 +26,19 @@ public class ConfigurableAiWander extends EntityAIBase {
      * Returns whether the EntityAIBase should begin execution.
      */
     public boolean shouldExecute() {
-        if (this.entity.getAge() >= 100) {
+        /*if (this.entity.getIdleTime() >= 100) {
             return false;
-        } else if (this.entity.getRNG().nextInt(randLimit) != 0) {
+        } else */if (this.entity.getRNG().nextInt(randLimit) != 0) {
             return false;
         } else {
-            Vec3 vec3 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
+            Vec3d vec3 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
 
             if (vec3 == null) {
                 return false;
             } else {
-                this.xPosition = vec3.xCoord;
-                this.yPosition = vec3.yCoord;
-                this.zPosition = vec3.zCoord;
+                this.xPosition = vec3.x;
+                this.yPosition = vec3.y;
+                this.zPosition = vec3.z;
                 return true;
             }
         }

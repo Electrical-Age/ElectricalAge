@@ -16,8 +16,6 @@ public class SignalInductorRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
-        ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
         GL11.glLineWidth(10);

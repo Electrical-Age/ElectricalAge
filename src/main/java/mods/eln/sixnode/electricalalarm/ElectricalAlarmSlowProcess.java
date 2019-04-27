@@ -1,7 +1,8 @@
 package mods.eln.sixnode.electricalalarm;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.init.Cable;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sound.SoundCommand;
@@ -26,12 +27,12 @@ public class ElectricalAlarmSlowProcess implements IProcess {
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
 
-            boolean warm = element.inputGate.getU() > Eln.instance.SVU / 2;
+            boolean warm = element.inputGate.getU() > Cable.SVU / 2;
             element.setWarm(warm);
             if (warm & !element.mute) {
                 if (soundTimeTimeout == 0) {
                     float speed = 1f;
-                    Coordonate coord = element.sixNode.coordonate;
+                    Coordinate coord = element.sixNode.coordinate;
                     element.play(new SoundCommand(element.descriptor.soundName).mulVolume(1F, 1.0F).longRange().addUuid(soundUuid));
                     soundTimeTimeout = element.descriptor.soundTime;
                 }

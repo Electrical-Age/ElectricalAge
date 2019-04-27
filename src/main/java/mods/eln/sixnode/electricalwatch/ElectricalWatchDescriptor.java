@@ -88,9 +88,9 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
             UtilsClient.enableBlend();
             //UtilsClient.enableBilinear();
             obj.bindTexture("Reflection.png");
-            float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-            float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-            float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+            float rotYaw = Minecraft.getMinecraft().player.rotationYaw / 360.f;
+            float rotPitch = Minecraft.getMinecraft().player.rotationPitch / 180.f;
+            float pos = (((float) Minecraft.getMinecraft().player.posX) + ((float) Minecraft.getMinecraft().player.posZ)) / 64.f;
             glass.draw(rotYaw + pos, rotPitch * 0.875f);
             //UtilsClient.disableBilinear(); //BUG: Not always disabled.
             UtilsClient.disableBlend();
@@ -103,30 +103,31 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
         //Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glRotatef(90, 1, 0, 0);
-            draw(0.1f, 0.2f, true);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glRotatef(90, 1, 0, 0);
+//            draw(0.1f, 0.2f, true);
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {

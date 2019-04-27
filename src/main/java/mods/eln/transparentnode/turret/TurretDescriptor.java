@@ -93,34 +93,35 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Scans for entities and shoots if the\nentity matches the configurable filter criteria.").split("\n"));
-        list.add(tr("Nominal voltage: %1$V", 800));
-        list.add(tr("Standby power: %1$W", Utils.plotValue(getProperties().basePower)));
-        list.add(tr("Laser charge power: %1$W...%2$kW", 100, 10));
+        list.add(tr("Nominal voltage: %sV", 800));
+        list.add(tr("Standby power: %sW", Utils.plotValue(getProperties().basePower)));
+        list.add(tr("Laser charge power: %sW...%skW", 100, 10));
         list.add(tr("CAUTION: Cables can get quite hot!"));
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
-            super.renderItem(type, item, data);
-        else
-            draw(null);
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY)
+//            super.renderItem(type, item, data);
+//        else
+//            draw(null);
+//    }
 
     public void draw(TurretRender render) {
         float turretAngle = render != null ? render.getTurretAngle() : 0;

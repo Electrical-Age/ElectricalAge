@@ -27,7 +27,6 @@ import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -42,9 +41,8 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
     }
 
     fun getRsValue(inventory: IInventory): Double {
-        val core = inventory.getStackInSlot(ResistorContainer.coreId) ?: return series.getValue(0)
-
-        return series.getValue(core.stackSize)
+        val core = inventory.getStackInSlot(ResistorContainer.coreId)
+        return series.getValue(core.count)
     }
 
     fun draw(position: Float = 0f) {
@@ -53,12 +51,13 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         dissipator.obj.getPart("wiper")?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
-                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
-        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
+    // TODO(1.10): Items rendering.
+//    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
+//                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
+//
+//    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
+//        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
@@ -242,7 +241,7 @@ class LargeRheostatGUI(player: EntityPlayer, inventory: IInventory, internal var
     GuiContainerEln(ResistorContainer(player, inventory)) {
 
     override fun postDraw(f: Float, x: Int, y: Int) {
-        helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %1$", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ohm")))
+        helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %s", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ohm")))
         super.postDraw(f, x, y)
     }
 

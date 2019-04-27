@@ -1,8 +1,9 @@
 package mods.eln.mechanical
 
-import mods.eln.Eln
+import mods.eln.init.Config
 import mods.eln.fluid.FuelRegistry
 import mods.eln.fluid.PreciseElementFluidHandler
+import mods.eln.init.Cable
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.published
@@ -150,8 +151,8 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             rc.readFromNBT(nbt, str)
         }
 
-        override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
-            rc.writeToNBT(nbt, str)
+        override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
+            return rc.writeToNBT(nbt, str)
         }
     }
 
@@ -174,10 +175,10 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
 
     override fun thermoMeterString(side: Direction?) = Utils.plotPercent(" Eff:", efficiency.toDouble()) + fluidRate.toString() + "mB/s"
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         tank.writeToNBT(nbt, "tank")
-        turbineSlowProcess.writeToNBT(nbt, "proc")
+        return turbineSlowProcess.writeToNBT(nbt, "proc")
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {
@@ -190,7 +191,7 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         var info = mutableMapOf<String, String>()
         info.put("Speed", Utils.plotRads("", shaft.rads))
         info.put("Energy", Utils.plotEnergy("", shaft.energy))
-        if (Eln.wailaEasyMode) {
+        if (Config.wailaEasyMode) {
             info.put("Efficency", Utils.plotPercent("", efficiency.toDouble()))
             info.put("Fuel usage", Utils.plotBuckets("", fluidRate / 1000.0) + "/s")
         }
@@ -204,7 +205,7 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
 }
 
 class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
-    override val cableRender = Eln.instance.stdCableRenderSignal
+    override val cableRender = Cable.signal.descriptor.render
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)

@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalrelay;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -86,11 +87,12 @@ public class ElectricalRelayElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) (front.toInt() << 0));
         nbt.setBoolean("switchState", switchState);
         nbt.setBoolean("defaultOutput", defaultOutput);
+        return nbt;
     }
 
     @Override
@@ -124,7 +126,7 @@ public class ElectricalRelayElement extends SixNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Position"), switchState ? I18N.tr("Closed") : I18N.tr("Open"));
         info.put(I18N.tr("Current"), Utils.plotAmpere("", aLoad.getCurrent()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Default position"), defaultOutput ? I18N.tr("Closed") : I18N.tr("Open"));
             info.put(I18N.tr("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
         }

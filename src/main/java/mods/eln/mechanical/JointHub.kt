@@ -15,13 +15,12 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
+class JointHubDescriptor(baseName: String, override val obj: Obj3D) : SimpleShaftDescriptor(baseName,
     JointHubElement::class, JointHubRender::class, EntityMetaTag.Basic) {
-    override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
-    val staticOnAllSides = arrayOf(obj.getPart("Cap"))
-    val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
+    private val staticOnAllSides = arrayOf(obj.getPart("Cap"))
+    private val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
 
     override fun draw(angle: Double) {
         draw(angle, Direction.XP, DirectionSet());
@@ -30,12 +29,12 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
     fun draw(angle: Double, front: Direction, connectedSides: DirectionSet) {
         static.forEach { it.draw() }
 
-        assert(rotatingOnAllSides.size > 0)
+        assert(rotatingOnAllSides.isNotEmpty())
         val bb = rotatingOnAllSides[0].boundingBox()
         val centre = bb.centre()
-        val ox = centre.xCoord
-        val oy = centre.yCoord
-        val oz = centre.zCoord
+        val ox = centre.x
+        val oy = centre.y
+        val oz = centre.z
         var direction = front;
         for (i in 0..3) {
             if (connectedSides.contains(direction)) {
@@ -94,9 +93,9 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         connectedSides.serialize(stream)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
-        connectedSides.writeToNBT(nbt, "connectedSides")
+        return connectedSides.writeToNBT(nbt, "connectedSides")
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {

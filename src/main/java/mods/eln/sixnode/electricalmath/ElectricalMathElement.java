@@ -133,7 +133,7 @@ public class ElectricalMathElement extends SixNodeElement {
 
         @Override
         public double getValue() {
-            return sixNode.coordonate.world().getWorldTime() / (24000.0 - 1.0);
+            return sixNode.coordinate.world().getWorldTime() / (24000.0 - 1.0);
         }
 
         @Override
@@ -199,10 +199,8 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     void checkRedstone() {
-        int redstoneInStack = 0;
-
         ItemStack stack = inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
-        if (stack != null) redstoneInStack = stack.stackSize;
+        int redstoneInStack = stack.getCount();
 
         redstoneReady = redstoneRequired <= redstoneInStack;
         needPublish();
@@ -224,10 +222,10 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setString("expression", expression);
-        equation.writeToNBT(nbt, "equation");
+        return equation.writeToNBT(nbt, "equation");
     }
 
     @Override

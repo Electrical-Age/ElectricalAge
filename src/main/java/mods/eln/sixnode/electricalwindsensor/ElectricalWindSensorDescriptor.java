@@ -62,42 +62,43 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an electrical signal\ndependant on wind speed.").split("\n"));
-        list.add(tr("Maximum wind speed is %1$m/s", Utils.plotValue(windMax)));
+        list.add(tr("Maximum wind speed is %sm/s", Utils.plotValue(windMax)));
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glRotatef(270, 1, 0, 0);
-            GL11.glTranslatef(-0.6f, 0f, 0f);
-
-            GL11.glScalef(2f, 2f, 2f);
-
-            draw(0);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glRotatef(270, 1, 0, 0);
+//            GL11.glTranslatef(-0.6f, 0f, 0f);
+//
+//            GL11.glScalef(2f, 2f, 2f);
+//
+//            draw(0);
+//        }
+//    }
 
     @Override
     public boolean canBePlacedOnSide(EntityPlayer player, Direction side) {
         if (side.isY()) {
-            Utils.addChatMessage(player, tr("You can't place this block on the floor or the ceiling"));
+            Utils.sendMessage(player, tr("You can't place this block on the floor or the ceiling"));
             return false;
         }
         return super.canBePlacedOnSide(player, side);

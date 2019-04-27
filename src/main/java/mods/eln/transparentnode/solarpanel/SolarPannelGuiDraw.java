@@ -59,15 +59,15 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 
         super.preDraw(f, x, y);
         if (render.pannelAlphaSyncNew) syncVumeter();
-        //vuMeterTemperature.temperatureHit = (float) (SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
+        //vuMeterTemperature.temperatureHit = (float) (SolarPanelSlowProcess.getSolarAlpha(render.tileEntity.world));
         vuMeterTemperature.setEnable(!render.hasTracker);
-        int sunAlpha = ((int) (180 / Math.PI * SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.getWorldObj())) - 90);
+        int sunAlpha = ((int) (180 / Math.PI * SolarPanelSlowProcess.getSolarAlpha(render.tileEntity.getWorld())) - 90);
 
-        vuMeterTemperature.setComment(0, tr("Solar panel angle: %1$°", ((int) (180 / Math.PI * vuMeterTemperature.getValue()) - 90)));
+        vuMeterTemperature.setComment(0, tr("Solar panel angle: %s°", ((int) (180 / Math.PI * vuMeterTemperature.getValue()) - 90)));
         if (Math.abs(sunAlpha) > 90)
             vuMeterTemperature.setComment(1, tr("It is night"));
         else
-            vuMeterTemperature.setComment(1, tr("Sun angle: %1$°", sunAlpha));
+            vuMeterTemperature.setComment(1, tr("Sun angle: %s°", sunAlpha));
     }
 
     @Override

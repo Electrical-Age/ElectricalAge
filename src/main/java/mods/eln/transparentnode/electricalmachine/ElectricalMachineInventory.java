@@ -4,6 +4,7 @@ import mods.eln.misc.Direction;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 
 public class ElectricalMachineInventory extends TransparentNodeElementInventory {
     private ElectricalMachineElement machineElement;
@@ -24,10 +25,10 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int side) {
+    public int[] getSlotsForFace(EnumFacing side) {
         if (transparentNodeElement == null) return new int[0];
 
-        switch (Direction.fromIntMinecraftSide(side)) {
+        switch (Direction.fromFacing(side)) {
             case YP:
                 return new int[]{machineElement.inSlotId};
             default:
@@ -40,8 +41,8 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int side) {
-        switch (Direction.fromIntMinecraftSide(side)) {
+    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing side) {
+        switch (Direction.fromFacing(side)) {
             case YP:
                 return true;
             default:
@@ -50,8 +51,8 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int side) {
-        switch (Direction.fromIntMinecraftSide(side)) {
+    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing side) {
+        switch (Direction.fromFacing(side)) {
             case YP:
                 return false;
             default:

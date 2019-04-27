@@ -4,10 +4,12 @@ import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class BasicContainer extends Container {
 
@@ -24,8 +26,8 @@ public class BasicContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer player) {
-        return inventory.isUseableByPlayer(player);
+    public boolean canInteractWith(@NotNull EntityPlayer player) {
+        return inventory.isUsableByPlayer(player);
     }
 
     protected void bindPlayerInventory(InventoryPlayer inventoryPlayer) {
@@ -45,49 +47,34 @@ public class BasicContainer extends Container {
 
     @Override
     protected Slot addSlotToContainer(Slot slot) {
-        // slot.xDisplayPosition = helper.
+        // slot.xPos = helper.
         return super.addSlotToContainer(slot);
     }
 
     public ItemStack transferStackInSlot(EntityPlayer player, int slotId) {
-        ItemStack itemstack = null;
-        Slot slot = (Slot) this.inventorySlots.get(slotId);
+        Slot slot = this.inventorySlots.get(slotId);
         if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
+            ItemStack stack = slot.getStack();
             int invSize = inventory.getSizeInventory();
             if (slotId < invSize) {
-                if (!this.mergeItemStack(itemstack1, invSize, inventorySlots.size(), true)) {
-                }
-                // return null;
-                // this.mergeItemStack(itemstack1, invSize, inventorySlots.size(), true);
+                this.mergeItemStack(stack, invSize, inventorySlots.size(), true);
             } else {
-                if (!this.mergeItemStack(itemstack1, 0, invSize, true)) {
+                if (!this.mergeItemStack(stack, 0, invSize, true)) {
                     if (slotId < invSize + 27) {
-                        if (!this.mergeItemStack(itemstack1, invSize + 27, inventorySlots.size(), false)) {
-                        }
+                        this.mergeItemStack(stack, invSize + 27, inventorySlots.size(), false);
                     } else {
-                        if (!this.mergeItemStack(itemstack1, invSize, invSize + 27, false)) {
-                        }
+                        this.mergeItemStack(stack, invSize, invSize + 27, false);
                     }
                 }
-
-                // return null;
-                // this.mergeItemStack(itemstack1, 0, invSize, false);
             }
-            // if (!this.mergeItemStack(itemstack1, 0, inventorySlots.size(), true))
-            // return null;
-            // this.mergeItemStack(itemstack1, slotId, inventorySlots.size(), true);
-            // this.mergeItemStack(itemstack1, 0, slotId - 1, true);
 
-            if (itemstack1.stackSize == 0) {
-                slot.putStack((ItemStack) null);
+            if (stack.isEmpty()) {
+                slot.putStack(ItemStack.EMPTY);
             } else {
                 slot.onSlotChanged();
             }
         }
 
-        // return itemstack;
         return null;
     }
 
@@ -103,22 +90,22 @@ public class BasicContainer extends Container {
         ItemStack itemstack1;
 
         if (par1ItemStack.isStackable()) {
-            while (par1ItemStack.stackSize > 0 && (!par4 && k < par3 || par4 && k >= par2)) {
-                slot = (Slot) this.inventorySlots.get(k);
+            while (!par1ItemStack.isEmpty() && (!par4 && k < par3 || par4 && k >= par2)) {
+                slot = this.inventorySlots.get(k);
 
                 itemstack1 = slot.getStack();
 
-                if (slot.isItemValid(par1ItemStack) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
-                    int l = itemstack1.stackSize + par1ItemStack.stackSize;
+                if (slot.isItemValid(par1ItemStack) && !itemstack1.isEmpty() && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
+                    int l = itemstack1.getCount() + par1ItemStack.getCount();
                     int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
                     if (l <= maxSize) {
-                        par1ItemStack.stackSize = 0;
-                        itemstack1.stackSize = l;
+                        par1ItemStack.setCount(0);
+                        itemstack1.setCount(1);
                         slot.onSlotChanged();
                         flag1 = true;
-                    } else if (itemstack1.stackSize < maxSize) {
-                        par1ItemStack.stackSize -= maxSize - itemstack1.stackSize;
-                        itemstack1.stackSize = maxSize;
+                    } else if (itemstack1.getCount() < maxSize) {
+                        par1ItemStack.splitStack(maxSize - itemstack1.getCount());
+                        itemstack1.setCount(maxSize);
                         slot.onSlotChanged();
                         flag1 = true;
                     }
@@ -132,7 +119,7 @@ public class BasicContainer extends Container {
             }
         }
 
-        if (par1ItemStack.stackSize > 0) {
+        if (!par1ItemStack.isEmpty()) {
             if (par4) {
                 k = par3 - 1;
             } else {
@@ -140,31 +127,27 @@ public class BasicContainer extends Container {
             }
 
             while (!par4 && k < par3 || par4 && k >= par2) {
-                slot = (Slot) this.inventorySlots.get(k);
+                slot = this.inventorySlots.get(k);
                 itemstack1 = slot.getStack();
 
-                if (itemstack1 == null && slot.isItemValid(par1ItemStack)) {
-                    int l = par1ItemStack.stackSize;
+                if (!itemstack1.isEmpty() && slot.isItemValid(par1ItemStack)) {
+                    int l = par1ItemStack.getCount();
                     int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
                     if (l <= maxSize) {
                         slot.putStack(par1ItemStack.copy());
                         slot.onSlotChanged();
-                        par1ItemStack.stackSize = 0;
+                        par1ItemStack.setCount(0);
                         flag1 = true;
                         break;
                     } else {
-                        par1ItemStack.stackSize -= maxSize;
+                        par1ItemStack.splitStack(maxSize);
                         ItemStack newItemStack = par1ItemStack.copy();
-                        newItemStack.stackSize = maxSize;
+                        newItemStack.setCount(maxSize);
                         slot.putStack(newItemStack);
                         slot.onSlotChanged();
                         flag1 = true;
                         break;
                     }
-                    /*
-					 * slot.putStack(par1ItemStack.copy()); slot.onSlotChanged(); par1ItemStack.stackSize = 0; flag1 = true;
-					 */
-                    // break;
                 }
 
                 if (par4) {
@@ -179,15 +162,15 @@ public class BasicContainer extends Container {
     }
 
     @Override
-    public ItemStack slotClick(int arg0, int arg1, int arg2, EntityPlayer arg3) {
+    public ItemStack slotClick(int arg0, int arg1, ClickType type, EntityPlayer arg3) {
         if (arg0 >= this.inventorySlots.size()) {
             System.out.println("Damned !!! What happen ?");
-            Utils.addChatMessage(arg3, "Damn! Sorry, this is a debug");
-            Utils.addChatMessage(arg3, "message from Electrical age.");
-            Utils.addChatMessage(arg3, "Could you send me a message about that?");
-            Utils.addChatMessage(arg3, "Thanks :D");
+            Utils.sendMessage(arg3, "Damn! Sorry, this is a debug");
+            Utils.sendMessage(arg3, "message from Electrical age.");
+            Utils.sendMessage(arg3, "Could you send me a message about that?");
+            Utils.sendMessage(arg3, "Thanks :D");
             return null;
         }
-        return super.slotClick(arg0, arg1, arg2, arg3);
+        return super.slotClick(arg0, arg1, type, arg3);
     }
 }

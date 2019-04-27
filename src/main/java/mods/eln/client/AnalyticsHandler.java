@@ -1,10 +1,12 @@
 package mods.eln.client;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import mods.eln.init.Config;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Version;
@@ -20,8 +22,8 @@ import java.io.IOException;
 
 /**
  * Sent analytics information about the mod and the game configuration.<br>
- * Singleton class. Uses the {@link cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent} and must be registered by
- * the caller on the {@link cpw.mods.fml.common.FMLCommonHandler} bus.
+ * Singleton class. Uses the {@link net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent} and must be registered by
+ * the caller on the {@link net.minecraftforge.fml.common.FMLCommonHandler} bus.
  *
  * @author metc
  */
@@ -48,7 +50,7 @@ public class AnalyticsHandler {
                     // Prepare get parameters
                     final String version = Version.getVersionName().replaceAll("\\s+", "");
                     final String lang = I18N.getCurrentLanguage();
-                    final String url = String.format(URL, Eln.playerUUID, version, lang);
+                    final String url = String.format(URL, Config.INSTANCE.getPlayerUUID(), version, lang);
 
                     // Send HTTP get request
                     CloseableHttpClient client = HttpClientBuilder.create().build();
@@ -80,15 +82,15 @@ public class AnalyticsHandler {
             return;
 
         final Minecraft m = FMLClientHandler.instance().getClient();
-        final WorldClient world = m.theWorld;
+        final WorldClient world = m.world;
 
-        if (m == null || world == null)
+        if (world == null)
             return;
 
         if (!ready)
             return;
 
-        FMLCommonHandler.instance().bus().unregister(this);
+        MinecraftForge.EVENT_BUS.unregister(this);
         ready = false;
     }
 }

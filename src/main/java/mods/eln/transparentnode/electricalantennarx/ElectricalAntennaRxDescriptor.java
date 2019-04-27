@@ -72,30 +72,31 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
         GL11.glEnable(GL11.GL_CULL_FACE);
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
-            super.renderItem(type, item, data);
-        else
-            draw();
-    }
+//    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY)
+//            super.renderItem(type, item, data);
+//        else
+//            draw();
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Wireless energy receiver."));
         list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
-        list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
+        list.add("  " + tr("Voltage: %sV", Utils.plotValue(electricalNominalVoltage)));
+        list.add("  " + tr("Power: %sW", Utils.plotValue(electricalNominalPower)));
     }
 }

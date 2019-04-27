@@ -1,13 +1,14 @@
 package mods.eln.sim.nbt;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.Utils;
 
 public class NbtElectricalGateInputOutput extends NbtElectricalLoad {
 
     public NbtElectricalGateInputOutput(String name) {
         super(name);
-        Eln.instance.signalCableDescriptor.applyTo(this);
+        Cable.Companion.getSignal().descriptor.applyTo(this);
     }
 
     public String plot(String str) {
@@ -15,15 +16,15 @@ public class NbtElectricalGateInputOutput extends NbtElectricalLoad {
     }
 
     public boolean isInputHigh() {
-        return getU() > Eln.SVU * 0.6;
+        return getU() > Cable.SVU * 0.6;
     }
 
     public boolean isInputLow() {
-        return getU() < Eln.SVU * 0.2;
+        return getU() < Cable.SVU * 0.2;
     }
 
     public double getInputNormalized() {
-        double norm = getU() * Eln.SVUinv;
+        double norm = getU() * Cable.SVUinv;
         if (norm < 0.0) norm = 0.0;
         if (norm > 1.0) norm = 1.0;
         return norm;
@@ -32,7 +33,7 @@ public class NbtElectricalGateInputOutput extends NbtElectricalLoad {
     public double getInputBornedU() {
         double U = this.getU();
         if (U < 0.0) U = 0.0;
-        if (U > Eln.SVU) U = Eln.SVU;
+        if (U > Cable.SVU) U = Cable.SVU;
         return U;
     }
 }

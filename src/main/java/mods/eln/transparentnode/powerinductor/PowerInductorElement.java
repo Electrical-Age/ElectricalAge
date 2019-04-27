@@ -70,8 +70,8 @@ public class PowerInductorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        //Eln.applySmallRs(positiveLoad);
-        //Eln.applySmallRs(negativeLoad);
+        //Cable.applySmallRs(positiveLoad);
+        //Cable.applySmallRs(negativeLoad);
 
         setupPhysical();
 
@@ -108,8 +108,8 @@ public class PowerInductorElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-        super.writeToNBT(nbt);
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        return super.writeToNBT(nbt);
     }
 
     @Override

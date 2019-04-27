@@ -1,13 +1,14 @@
 package mods.eln.entity;
 
+import com.google.common.base.Predicate;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 
 public class ReplicatorHungryAttack extends EntityAINearestAttackableTarget {
 
     ReplicatorEntity replicator;
 
-    public ReplicatorHungryAttack(ReplicatorEntity replicator, Class par2Class, int par3, boolean par4) {
-        super(replicator, par2Class, par3, par4);
+    public ReplicatorHungryAttack(ReplicatorEntity replicator, Class classTarget, int chance, boolean checkSight, boolean onlyNearby, Predicate targetSelector) {
+        super(replicator, classTarget, chance, checkSight, onlyNearby, targetSelector);
         this.replicator = replicator;
     }
 

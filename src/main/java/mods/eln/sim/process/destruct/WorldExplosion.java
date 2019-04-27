@@ -1,39 +1,41 @@
 package mods.eln.sim.process.destruct;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.init.Config;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 
 public class WorldExplosion implements IDestructable {
 
     Object origine;
 
-    Coordonate c;
+    Coordinate c;
     float strength;
     String type;
 
-    public WorldExplosion(Coordonate c) {
+    public WorldExplosion(Coordinate c) {
         this.c = c;
     }
 
     public WorldExplosion(SixNodeElement e) {
-        this.c = e.getCoordonate();
+        this.c = e.getCoordinate();
         this.type = e.toString();
         origine = e;
     }
 
     public WorldExplosion(TransparentNodeElement e) {
-        this.c = e.coordonate();
+        this.c = e.coordinate();
         this.type = e.toString();
         origine = e;
     }
 
     public WorldExplosion(EnergyConverterElnToOtherNode e) {
-        this.c = e.coordonate;
+        this.c = e.coordinate;
         this.type = e.toString();
         origine = e;
     }
@@ -50,12 +52,12 @@ public class WorldExplosion implements IDestructable {
 
     @Override
     public void destructImpl() {
-        //NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordonate(c));
+        //NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordinate(c));
 
-        if (Eln.instance.explosionEnable)
-            c.world().createExplosion((Entity) null, c.x, c.y, c.z, strength, true);
+        if (Config.INSTANCE.getExplosionEnable())
+            c.world().createExplosion((Entity) null, c.pos.getX(), c.pos.getY(), c.pos.getZ(), strength, true);
         else
-            c.world().setBlock(c.x, c.y, c.z, Blocks.air);
+            c.world().setBlockToAir(new BlockPos(c.pos.getX(), c.pos.getY(), c.pos.getZ()));
     }
 
     @Override

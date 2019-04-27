@@ -1,22 +1,21 @@
 package mods.eln.client;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
 import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Root;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.StatCollector;
 import org.lwjgl.input.Keyboard;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-//import mods.eln.wiki.Root;
 
 public class ClientKeyHandler {
 
@@ -38,7 +37,7 @@ public class ClientKeyHandler {
         for (int i = 0; i < desc.length; ++i) {
             if (i != 3)
                 states[i] = false;
-            keys[i] = new KeyBinding(desc[i], keyValues[i], StatCollector.translateToLocal("ElectricalAge"));
+            keys[i] = new KeyBinding(desc[i], keyValues[i], "ElectricalAge");
             ClientRegistry.registerKeyBinding(keys[i]);
         }
     }
@@ -46,7 +45,7 @@ public class ClientKeyHandler {
     @SubscribeEvent
     public void onKeyInput(KeyInputEvent event) {
         for (int i = 0; i < desc.length; ++i) {
-            boolean s = keys[i].getIsKeyPressed();
+            boolean s = keys[i].isPressed();
             if (s == false) continue;
             if (states[i])
                 setState(i, false);
@@ -58,7 +57,7 @@ public class ClientKeyHandler {
     public void tick(ClientTickEvent event) {
         if (event.phase != Phase.START) return;
         for (int i = 0; i < desc.length; ++i) {
-            boolean s = keys[i].getIsKeyPressed();
+            boolean s = keys[i].isPressed();
             if (s == false && states[i] == true) {
                 setState(i, false);
             }

@@ -11,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class GuiContainerEln extends GuiContainer implements IGuiObjectObserver, GuiTextFieldElnObserver {
@@ -44,8 +45,8 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
     void apply(GuiHelperContainer helper) {
         for (int idx = inventorySlots.inventorySlots.size() - 36; idx < inventorySlots.inventorySlots.size(); idx++) {
             Slot s = (Slot) inventorySlots.inventorySlots.get(idx);
-            s.xDisplayPosition += helper.xInv;
-            s.yDisplayPosition += helper.yInv;
+            s.xPos += helper.xInv;
+            s.yPos += helper.yInv;
         }
     }
 
@@ -84,22 +85,23 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
     }
 
     @Override
-    protected void keyTyped(char key, int code) {
+    protected void keyTyped(char key, int code) throws IOException {
         helper.keyTyped(key, code);
         if (code == Keyboard.KEY_ESCAPE) {
             super.keyTyped(key, code);
         }
     }
 
-    protected void mouseClicked(int x, int y, int code) {
+    protected void mouseClicked(int x, int y, int code) throws IOException {
         helper.mouseClicked(x, y, code);
         super.mouseClicked(x, y, code);
     }
 
     @Override
-    protected void mouseMovedOrUp(int x, int y, int witch) {
-        helper.mouseMovedOrUp(x, y, witch);
-        super.mouseMovedOrUp(x, y, witch);
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        // TODO(1.10): Really not sure about this.
+        super.mouseReleased(mouseX, mouseY, state);
+        helper.mouseMovedOrUp(mouseX, mouseY, state);
     }
 
     public boolean doesGuiPauseGame() {
@@ -138,10 +140,10 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 
             switch (skin) {
                 case medium:
-                    drawTexturedModalRectEln(slot.xDisplayPosition - 1, slot.yDisplayPosition - 1, 55, 16, 73 - 55, 34 - 16);
+                    drawTexturedModalRectEln(slot.xPos - 1, slot.yPos - 1, 55, 16, 73 - 55, 34 - 16);
                     break;
                 case big:
-                    drawTexturedModalRectEln(slot.xDisplayPosition - 5, slot.yDisplayPosition - 5, 111, 30, 137 - 111, 56 - 30);
+                    drawTexturedModalRectEln(slot.xPos - 5, slot.yPos - 5, 111, 30, 137 - 111, 56 - 30);
                     break;
             }
         }
@@ -157,30 +159,29 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 
         for (Object o : inventorySlots.inventorySlots) {
             Slot slot = (Slot) o;
-            if (slot.getHasStack() == false
-                && mx - guiLeft >= slot.xDisplayPosition && my - guiTop >= slot.yDisplayPosition
-                && mx - guiLeft < slot.xDisplayPosition + 17 && my - guiTop < slot.yDisplayPosition + 17) {
+            if (!slot.getHasStack()
+                && mx - guiLeft >= slot.xPos && my - guiTop >= slot.yPos
+                && mx - guiLeft < slot.xPos + 17 && my - guiTop < slot.yPos + 17) {
                 list.clear();
 
-                SlotSkin comment = SlotSkin.none;
                 if (slot instanceof ISlotWithComment) {
                     ((ISlotWithComment) slot).getComment(list);
                     int x, y;
                     int strWidth = 0;
                     for (String str : list) {
-                        int size = fontRendererObj.getStringWidth(str);
+                        int size = fontRenderer.getStringWidth(str);
                         if (size > strWidth) strWidth = size;
                     }
 
-                    x = slot.xDisplayPosition;
-                    y = slot.yDisplayPosition;
+                    x = slot.xPos;
+                    y = slot.yPos;
 
                     int xOffset = 0;
                     if (guiLeft + x + strWidth + 30 > this.width) {
                         xOffset -= strWidth + 20;
                     }
                     if (!list.isEmpty())
-                        drawHoveringText((java.util.List) list, mx - guiLeft + xOffset, my - guiTop, fontRendererObj);
+                        drawHoveringText((java.util.List) list, mx - guiLeft + xOffset, my - guiTop, fontRenderer);
                 }
             }
         }

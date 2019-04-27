@@ -2,6 +2,7 @@ package mods.eln.sixnode.lampsupply;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -144,7 +145,7 @@ public class LampSupplyElement extends SixNodeElement {
             if (sleepTimer < 0) {
                 sleepTimer += Utils.rand(1.2, 2);
 
-                IWirelessSignalSpot spot = WirelessUtils.buildSpot(LampSupplyElement.this.getCoordonate(), null, 0);
+                IWirelessSignalSpot spot = WirelessUtils.buildSpot(LampSupplyElement.this.getCoordinate(), null, 0);
                 WirelessUtils.getTx(spot, txSet, txStrength);
             }
 
@@ -227,7 +228,7 @@ public class LampSupplyElement extends SixNodeElement {
             }
         }
         info.put(I18N.tr("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
         }
         return info;
@@ -256,7 +257,7 @@ public class LampSupplyElement extends SixNodeElement {
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
 
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+        return inventory.take(entityPlayer.getHeldItemMainhand(), this, false, true);
     }
 
     @Override
@@ -278,7 +279,7 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         int idx = 0;
         for (Entry e : entries) {
@@ -291,6 +292,7 @@ public class LampSupplyElement extends SixNodeElement {
 
             idx++;
         }
+        return nbt;
     }
 
     @Override
@@ -404,7 +406,6 @@ public class LampSupplyElement extends SixNodeElement {
 
     private int getRange(LampSupplyDescriptor desc, IInventory inventory2) {
         ItemStack stack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
-        if (stack == null) return desc.range;
-        return desc.range + stack.stackSize;
+        return desc.range + stack.getCount();
     }
 }

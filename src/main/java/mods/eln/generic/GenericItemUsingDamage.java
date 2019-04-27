@@ -1,19 +1,17 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -31,24 +29,19 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         setHasSubtypes(true);
     }
 
-    public void setDefaultElement(Descriptor descriptor) {
-        defaultElement = descriptor;
-    }
-
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        ItemStack stack = new ItemStack(this, 1, damage);
-        LanguageRegistry.addName(stack, descriptor.name);
+        setTranslationKey(descriptor.name);
         descriptor.setParent(this, damage);
     }
 
     public void addElement(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        ItemStack stack = new ItemStack(this, 1, damage);
-        LanguageRegistry.addName(stack, descriptor.name);
+        setTranslationKey(descriptor.name);
         orderList.add(damage);
         descriptor.setParent(this, damage);
-        GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
+        // TODO(1.12): Registration is fucked.
+//        GameRegistry.register(descriptor.parentItem);
     }
 
     public Descriptor getDescriptor(int damage) {
@@ -64,38 +57,16 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+    public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer p, EnumHand hand) {
+        ItemStack s = p.getHeldItem(hand);
         Descriptor desc = getDescriptor(s);
         if (desc == null)
-            return s;
+            return new ActionResult(EnumActionResult.PASS, s);
         return desc.onItemRightClick(s, w, p);
     }
 
-	/*//caca1.5.1
     @Override
-	@SideOnly(Side.CLIENT)
-	public int getIconFromDamage(int damage) {
-	return getDescriptor(damage).getIconId();
-	
-	}
-	@Override
-	public String getTextureFile () {
-	return CommonProxy.ITEMS_PNG;
-	}
-	@Override
-	public String getItemNameIS(ItemStack itemstack) {
-	return getItemName() + "." + getDescriptor(itemstack).name;
-	}
-
-	/*
-	@Override
-	public String getUnlocalizedNameInefficiently(ItemStack par1ItemStack) {
-		return "trololol";
-	}
-	*/
-
-    @Override
-    public String getUnlocalizedName(ItemStack par1ItemStack) {
+    public String getTranslationKey(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
         if (desc != null && desc.name != null) {
             return desc.name.replaceAll("\\s+", "_");
@@ -104,40 +75,32 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         }
     }
 
-	/*
-	@Override
-	public String getItemStackDisplayName(ItemStack par1ItemStack) {
-		Descriptor desc = getDescriptor(par1ItemStack);
-		if (desc == null)
-			return "NullItem";
-		return desc.getName(par1ItemStack);
-	}
-	*/
+    // TODO(1.10): Fix item rendering.
+//    public IIcon getIconFromDamage(int damage) {
+//        GenericItemUsingDamageDescriptor desc = getDescriptor(damage);
+//        if (desc != null) {
+//            return getDescriptor(damage).getIcon();
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    @SideOnly(value = Side.CLIENT)
+//    public void registerIcons(IIconRegister iconRegister) {
+//        for (GenericItemUsingDamageDescriptor descriptor : subItemList.values()) {
+//            descriptor.updateIcons(iconRegister);
+//        }
+//    }
 
-    public IIcon getIconFromDamage(int damage) {
-        GenericItemUsingDamageDescriptor desc = getDescriptor(damage);
-        if (desc != null) {
-            return getDescriptor(damage).getIcon();
-        }
-        return null;
-    }
-
-    @Override
-    @SideOnly(value = Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        for (GenericItemUsingDamageDescriptor descriptor : subItemList.values()) {
-            descriptor.updateIcons(iconRegister);
-        }
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
-        // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
-        for (int id : orderList) {
-            subItemList.get(id).getSubItems(list);
-        }
-    }
+    // TODO(1.12): Whatever this was, it's broken.
+//    @Override
+//    @SideOnly(Side.CLIENT)
+//    public void getSubItems(Items itemID, CreativeTabs tabs, List list) {
+//        // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
+//        for (int id : orderList) {
+//            subItemList.get(id).getSubItems(list);
+//        }
+//    }
 
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		/*Descriptor desc = getDescriptor(itemStack);
@@ -157,11 +120,12 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        ItemStack stack = player.getHeldItem(hand);
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
-            return false;
-        return d.onItemUse(stack, player, world, x, y, z, side, vx, vy, vz);
+            return EnumActionResult.PASS;
+        return d.onItemUse(stack, player, world, pos, hand, facing, hitX, hitY, hitZ);
     }
 
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
@@ -174,7 +138,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     public boolean onBlockStartBreak(ItemStack itemstack, int X, int Y, int Z, EntityPlayer player) {
         GenericItemUsingDamageDescriptor d = getDescriptor(itemstack);
         if (d == null)
-            return super.onBlockStartBreak(itemstack, X, Y, Z, player);
+            return super.onBlockStartBreak(itemstack, new BlockPos(X, Y, Z), player);
         return d.onBlockStartBreak(itemstack, X, Y, Z, player);
     }
 
@@ -191,20 +155,20 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public float func_150893_a(ItemStack stack, Block block) { //getStrVsBlock
+    public float getDestroySpeed(ItemStack stack, IBlockState state) {
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
             return 0.2f;
-        return d.getStrVsBlock(stack, block);
+        return d.getDestroySpeed(stack, state);
     }
 
     @Override
-    public boolean canHarvestBlock(Block par1Block, ItemStack item) {
+    public boolean canHarvestBlock(IBlockState state) {
         return true;
     }
 
     @Override
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, World w, IBlockState state, BlockPos pos, EntityLivingBase entity) {
         if (w.isRemote) {
             return false;
         }
@@ -213,7 +177,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 
         if (d == null)
             return true;
-        return d.onBlockDestroyed(stack, w, block, x, y, z, entity);
+        return d.onBlockDestroyed(stack, w, state, pos, entity);
     }
 
     @Override

@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalcable;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -80,9 +81,10 @@ public class ElectricalCableElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("color", (byte) (color + (colorCare << 4)));
+        return nbt;
     }
 
     @Override
@@ -120,7 +122,7 @@ public class ElectricalCableElement extends SixNodeElement {
         } else {
             info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
             info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
-            if (Eln.wailaEasyMode) {
+            if (Config.INSTANCE.getWailaEasyMode()) {
                 info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
             }
         }
@@ -158,14 +160,14 @@ public class ElectricalCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-	/*	World w = sixNode.coordonate.world();
+	/*	World w = sixNode.coordinate.world();
 		boolean exist = w.blockExists(10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         //int i;
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
-            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
         } else if (currentItemStack != null) {
             Item item = currentItemStack.getItem();

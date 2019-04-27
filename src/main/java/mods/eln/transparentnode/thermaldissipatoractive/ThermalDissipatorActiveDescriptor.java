@@ -90,25 +90,26 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
     }
 
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(0f);
+//        }
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
@@ -116,13 +117,13 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Used to cool down turbines."));
-        list.add(tr("Max. temperature: %1$°C", Utils.plotValue(warmLimit)));
+        list.add(tr("Max. temperature: %s°C", Utils.plotValue(warmLimit)));
         list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Temperature: %1$°C", Utils.plotValue(nominalT)));
-        list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
-        list.add("  " + tr("Fan voltage: %1$V", Utils.plotValue(nominalElectricalU)));
-        list.add("  " + tr("Fan power consumption: %1$W", Utils.plotValue(electricalNominalP)));
-        list.add("  " + tr("Fan cooling power: %1$W", Utils.plotValue(nominalElectricalCoolingPower)));
+        list.add("  " + tr("Temperature: %s°C", Utils.plotValue(nominalT)));
+        list.add("  " + tr("Cooling power: %sW", Utils.plotValue(nominalP)));
+        list.add("  " + tr("Fan voltage: %sV", Utils.plotValue(nominalElectricalU)));
+        list.add("  " + tr("Fan power consumption: %sW", Utils.plotValue(electricalNominalP)));
+        list.add("  " + tr("Fan cooling power: %sW", Utils.plotValue(nominalElectricalCoolingPower)));
 
     }
 }

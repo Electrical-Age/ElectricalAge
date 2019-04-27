@@ -3,17 +3,18 @@ package mods.eln.node.six;
 import mods.eln.misc.Direction;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
 public class SixNodeRender extends TileEntitySpecialRenderer {
-    @Override
-    public void renderTileEntityAt(TileEntity entity, double x, double y,
-                                   double z, float var8) {
-        Minecraft.getMinecraft().mcProfiler.startSection("SixNode");
 
-        SixNodeEntity tileEntity = (SixNodeEntity) entity;
+    @Override
+    public void renderTileEntityFast(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float partial, BufferBuilder buffer) {
+        Minecraft.getMinecraft().profiler.startSection("SixNode");
+
+        SixNodeEntity tileEntity = (SixNodeEntity) te;
 
 
         GL11.glPushMatrix();
@@ -23,7 +24,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
 			if(SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId] != null)
 			{
 				UtilsClient.glDefaultColor();
-				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.getWorldObj(),entity.xCoord,entity.yCoord,entity.zCoord);
+				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.getWorld(),entity.x,entity.y,entity.z);
 			}
 		}*/
 
@@ -41,7 +42,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
         }
         GL11.glPopMatrix();
         //Utils.glDefaultColor();
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getMinecraft().profiler.endSection();
 
     }
 

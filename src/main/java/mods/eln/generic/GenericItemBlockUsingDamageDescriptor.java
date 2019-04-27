@@ -1,22 +1,18 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.EnumActionResult;
 
 import java.util.List;
 
 public class GenericItemBlockUsingDamageDescriptor {
 
     String iconName;
-    IIcon iconIndex;
     public String name;
 
     public Item parentItem;
@@ -34,12 +30,7 @@ public class GenericItemBlockUsingDamageDescriptor {
     public void setDefaultIcon(String name) {
         String iconName = name.replaceAll(" ", "").toLowerCase();
 
-        if (Eln.noSymbols &&
-            getClass().getClassLoader().getResource("assets/eln/textures/blocks/" + iconName + "-ni.png") != null) {
-            this.iconName = iconName + "-ni";
-        } else {
-            this.iconName = iconName;
-        }
+        this.iconName = iconName;
     }
 
     public NBTTagCompound getDefaultNBT() {
@@ -49,14 +40,15 @@ public class GenericItemBlockUsingDamageDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<String> list, boolean par4) {
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
-    }
+    // TODO(1.10): These are all implicit now.
+//    @SideOnly(value = Side.CLIENT)
+//    public void updateIcons(IIconRegister iconRegister) {
+//        this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
+//    }
+//
+//    public IIcon getIcon() {
+//        return iconIndex;
+//    }
 
     public String getName(ItemStack stack) {
         return name;
@@ -94,7 +86,7 @@ public class GenericItemBlockUsingDamageDescriptor {
         return false;
     }
 
-    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player) {
-        return false;
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player) {
+        return EnumActionResult.FAIL;
     }
 }

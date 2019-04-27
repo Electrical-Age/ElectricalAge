@@ -6,7 +6,7 @@ import net.minecraft.network.PacketBuffer;
 
 import java.nio.ByteBuffer;
 
-public class ElnPacket extends Packet {
+public class ElnPacket implements Packet {
 
     private String channel;
     private byte[] data;
@@ -43,7 +43,7 @@ public class ElnPacket extends Packet {
 
 	@Override
 	public void processPacket(NetHandler nethandler) {
-		Eln.instance.
+		Eln.
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package mods.eln.sixnode.hub;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -55,11 +56,12 @@ public class HubElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         for (int idx = 0; idx < 6; idx++) {
             nbt.setBoolean("connectionGrid" + idx, connectionGrid[idx]);
         }
+        return nbt;
     }
 
     @Override
@@ -123,7 +125,7 @@ public class HubElement extends SixNodeElement {
     public void initialize() {
         setup();
         for (int idx = 0; idx < 4; idx++) {
-            Eln.applySmallRs(electricalLoad[idx]);
+            Cable.applySmallRs(electricalLoad[idx]);
         }
     }
 

@@ -2,6 +2,7 @@ package mods.eln.sixnode.batterycharger;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Direction;
@@ -113,7 +114,7 @@ public class BatteryChargerElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Charge Current"), Utils.plotAmpere("", powerLoad.getCurrent()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
             info.put(I18N.tr("Power"), Utils.plotPower("", powerLoad.getI() * powerLoad.getU()));
         }
@@ -142,15 +143,16 @@ public class BatteryChargerElement extends SixNodeElement {
         if (onBlockActivatedRotate(entityPlayer)) {
             return true;
         } else {
-            return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+            return inventory.take(entityPlayer.getHeldItemMainhand(), this, false, true);
         }
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setBoolean("powerOn", powerOn);
         nbt.setDouble("energyCounter", slowProcess.energyCounter);
+        return nbt;
     }
 
     @Override
@@ -217,12 +219,8 @@ public class BatteryChargerElement extends SixNodeElement {
                 descriptor.setRp(powerResistor, false);
             } else {
                 ItemStack booster = (getInventory().getStackInSlot(BatteryChargerContainer.boosterSlotId));
-                double boost = 1.0;
-                double eff = 1.0;
-                if (booster != null) {
-                    boost = Math.pow(1.25, booster.stackSize);
-                    eff = Math.pow(0.9, booster.stackSize);
-                }
+                double boost = Math.pow(1.25, booster.getCount());
+                double eff = Math.pow(0.9, booster.getCount());
 
                 energyCounter += powerResistor.getP() * time * eff;
 

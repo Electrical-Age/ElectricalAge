@@ -55,29 +55,30 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
         Data.addMachine(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0.0f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(0.0f);
+//        }
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
@@ -104,10 +105,10 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean canBePlacedOnSide(EntityPlayer player, Coordonate c, Direction side) {
+    public boolean canBePlacedOnSide(EntityPlayer player, Coordinate c, Direction side) {
         Block b = c.getBlock();
         if (!isWood(b) || side.isY()) {
-            Utils.addChatMessage(player, tr("This block can only be placed on the side of a tree!"));
+            Utils.sendMessage(player, tr("This block can only be placed on the side of a tree!"));
             return false;
         }
         return true;

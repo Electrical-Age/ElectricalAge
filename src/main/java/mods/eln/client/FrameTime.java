@@ -1,9 +1,10 @@
 package mods.eln.client;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.client.Minecraft;
@@ -16,7 +17,7 @@ public class FrameTime {
 
     public FrameTime() {
         instance = this;
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public void init() {
@@ -59,20 +60,20 @@ public class FrameTime {
 
         //Utils.println(NodeBlockEntity.clientList.size());
         Iterator<NodeBlockEntity> i = NodeBlockEntity.clientList.iterator();
-        World w = Minecraft.getMinecraft().theWorld;
+        World w = Minecraft.getMinecraft().world;
 
         if (!Utils.isGameInPause()) {
             float deltaTcaped = getNotCaped2();
             while (i.hasNext()) {
                 NodeBlockEntity e = i.next();
-                if (e.getWorldObj() != w) {
+                if (e.getWorld() != w) {
                     i.remove();
                     continue;
                 }
                 e.clientRefresh(deltaTcaped);
             }
         }
-        //Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(1, 1).
+        //Minecraft.getMinecraft().world.getChunkFromChunkCoords(1, 1).
         //	Utils.println("delta T : " + deltaT + "   " + event);
     }
 }

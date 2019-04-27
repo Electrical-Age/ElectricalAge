@@ -23,7 +23,7 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
     public ElectricalRedstoneInputDescriptor(String name, Obj3D obj) {
         super(name, ElectricalRedstoneInputElement.class, ElectricalRedstoneInputRender.class);
-        //obj = Eln.instance.obj.getObj(objName);
+        //obj = Eln.obj.getObj(objName);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
@@ -56,29 +56,30 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
         Collections.addAll(list, tr("Converts Redstone signal\nto an electrical voltage.").split("\n"));
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(15);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(15);
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {

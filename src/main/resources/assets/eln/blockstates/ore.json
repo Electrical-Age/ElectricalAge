@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"variant=copper_ore": {
+			"model": "eln:copper_ore"
+		},
+		"variant=lead_ore": {
+			"model": "eln:lead_ore"
+		}
+	}
+}

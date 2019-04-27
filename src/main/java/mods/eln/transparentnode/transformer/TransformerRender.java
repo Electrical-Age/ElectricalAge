@@ -29,7 +29,7 @@ public class TransformerRender extends TransparentNodeElementRender {
     public TransformerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (TransformerDescriptor) descriptor;
-        addLoopedSound(new LoopedSound("eln:Transformer", coordonate(), ISound.AttenuationType.LINEAR) {
+        addLoopedSound(new LoopedSound("eln:Transformer", coordinate(), ISound.AttenuationType.LINEAR) {
             @Override
             public float getVolume() {
                 if (load.getPosition() > TransformerRender.this.descriptor.minimalLoadToHum)
@@ -40,7 +40,7 @@ public class TransformerRender extends TransparentNodeElementRender {
             }
         });
 
-        coordinate = new Coordonate(tileEntity);
+        coordinate = new Coordinate(tileEntity);
         doorOpen = new PhysicalInterpolator(0.4f, 4.0f, 0.9f, 0.05f);
     }
 
@@ -68,7 +68,7 @@ public class TransformerRender extends TransparentNodeElementRender {
     private Obj3DPart feroPart;
     private boolean hasCasing = false;
 
-    private final Coordonate coordinate;
+    private final Coordinate coordinate;
     private final PhysicalInterpolator doorOpen;
 
     @Override
@@ -150,7 +150,7 @@ public class TransformerRender extends TransparentNodeElementRender {
         load.step(deltaT);
 
         if (hasCasing) {
-            if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coordinate.moved(front).getAxisAlignedBB(0)))
+            if (!Utils.isPlayerAround(tileEntity.getWorld(), coordinate.moved(front).getAxisAlignedBB(0)))
                 doorOpen.setTarget(0f);
             else
                 doorOpen.setTarget(1f);

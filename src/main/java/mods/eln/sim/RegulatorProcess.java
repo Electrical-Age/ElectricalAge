@@ -115,8 +115,9 @@ public abstract class RegulatorProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setDouble(str + name + "errorIntegrated", errorIntegrated);
         nbt.setDouble(str + name + "target", target);
+        return nbt;
     }
 }

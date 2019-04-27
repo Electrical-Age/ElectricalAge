@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.autominer;
 
-import mods.eln.Eln;
+import mods.eln.init.Config;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
@@ -24,7 +25,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     private final boolean[] ledsAState;
     private final boolean[] ledsPState;
 
-    private final RenderStorage render = new RenderStorage(Eln.instance.autominerRange, 130, 24, 24);
+    private final RenderStorage render = new RenderStorage(Config.INSTANCE.getAutominerRange(), 130, 24, 24);
 
     private final PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
     private final RcInterpolator rotSpeed = new RcInterpolator(1);
@@ -65,7 +66,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             ledsPState[idx] = Math.random() > 0.5;
         }
 
-        addLoopedSound(new LoopedSound("eln:autominer", coordonate(), ISound.AttenuationType.LINEAR) {
+        addLoopedSound(new LoopedSound("eln:autominer", coordinate(), ISound.AttenuationType.LINEAR) {
             @Override
             public float getVolume() {
                 if (powerOk &&
@@ -192,9 +193,10 @@ public class AutoMinerRender extends TransparentNodeElementRender {
                         camAlpha = (float) (Math.PI / 2);
                         break;
                 }
-                render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5,
-                    tileEntity.yCoord + 0.5 - (Math.max(0, pipeLength - 5)),
-                    tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
+                BlockPos pos = tileEntity.getPos();
+                render.generate(this.tileEntity.getWorld(), pos.getX() + 0.5,
+                    pos.getY() + 0.5 - (Math.max(0, pipeLength - 5)),
+                    pos.getZ() + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
             }
         }
 

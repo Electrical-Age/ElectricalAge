@@ -17,7 +17,7 @@ public abstract class Node extends NodeBase {
         if (light < 0) light = 0;
         if (lastLight != light) {
             lastLight = light;
-            coordonate.world().updateLightByType(EnumSkyBlock.Block, coordonate.x, coordonate.y, coordonate.z);
+            coordinate.world().setLightFor(EnumSkyBlock.BLOCK, coordinate.pos, light);
             setNeedPublish(true);
         }
 
@@ -35,9 +35,10 @@ public abstract class Node extends NodeBase {
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("lastLight", (byte) lastLight);
+        return nbt;
     }
 
     boolean oldSendedRedstone = false;
@@ -59,7 +60,7 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
+        return (NodeBlockEntity) coordinate.world().getTileEntity(coordinate.pos);
     }
 
     public int isProvidingWeakPower(Direction side) {

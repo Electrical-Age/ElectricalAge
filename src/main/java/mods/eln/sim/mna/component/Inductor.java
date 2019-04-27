@@ -85,9 +85,10 @@ public class Inductor extends Bipole implements ISubSystemProcessI, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         str += name;
         nbt.setDouble(str + "Istate", currentState.state);
+        return nbt;
     }
 
     public void resetStates() {

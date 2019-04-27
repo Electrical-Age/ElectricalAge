@@ -29,12 +29,12 @@ public class GuiButtonEln extends GuiButton implements IGuiObject {
     @Override
     public void idraw(int x, int y, float f) {
         GL11.glColor4f(1f, 1f, 1f, 1f);
-        drawButton(Minecraft.getMinecraft(), x, y);
+        drawButton(Minecraft.getMinecraft(), x, y, 2.0f);
     }
 
     @Override
     public int getYMax() {
-        return yPosition + height;
+        return y + height;
     }
 
     @Override
@@ -47,13 +47,13 @@ public class GuiButtonEln extends GuiButton implements IGuiObject {
 
     @Override
     public void imouseClicked(int x, int y, int code) {
-        if (mousePressed(Minecraft.getMinecraft(), x, y)) {
-            Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
-            onMouseClicked();
-            if (observer != null) {
-                observer.guiObjectEvent(this);
-            }
-        }
+//        if (mousePressed(Minecraft.getMinecraft(), x, y)) {
+//            Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.(new ResourceLocation("gui.button.press"), 1.0F));
+//            onMouseClicked();
+//            if (observer != null) {
+//                observer.guiObjectEvent(this);
+//            }
+//        }
     }
 
     @Override
@@ -66,14 +66,14 @@ public class GuiButtonEln extends GuiButton implements IGuiObject {
 
     @Override
     public void idraw2(int x, int y) {
-        if (helper != null && visible && x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height)
+        if (helper != null && visible && x >= x && y >= y && x < x + width && y < y + height)
             helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
     }
 
     @Override
     public void translate(int x, int y) {
-        this.xPosition += x;
-        this.yPosition += y;
+        this.x += x;
+        this.y += y;
     }
 
     ArrayList<String> comment = new ArrayList<String>();

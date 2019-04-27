@@ -19,13 +19,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class SixNodeEntity extends NodeBlockEntity {
-    //boolean[] syncronizedSideEnable = new boolean[6];
-
 
     public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
     short[] elementRenderIdList = new short[6];
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
 
     public SixNodeEntity() {
@@ -35,22 +33,8 @@ public class SixNodeEntity extends NodeBlockEntity {
         }
     }
 
-	/* caca
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction direction) {
-		
-		//Utils.println("onBlockActivated " + direction);
-		
-		return getNode().onBlockActivated(entityPlayer, direction);
-	}
-	*/
-
-    public static final int singleTargetId = 2;
-
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
-
-        Block sixNodeCacheBlockOld = sixNodeCacheBlock;
-
         super.serverPublishUnserialize(stream);
 
         try {
@@ -67,45 +51,26 @@ public class SixNodeEntity extends NodeBlockEntity {
                 } else {
                     if (id != elementRenderIdList[idx]) {
                         elementRenderIdList[idx] = id;
-                        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(id);
+                        SixNodeDescriptor descriptor = null; // TODO(1.12) Eln.sixNodeItem.getDescriptor(id);
                         elementRenderList[idx] = (SixNodeElementRender) descriptor.RenderClass.getConstructor(SixNodeEntity.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
                     }
                     elementRenderList[idx].publishUnserialize(stream);
                 }
             }
 
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
+        } catch (IOException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
 
-        //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
-        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
-            Chunk chunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord);
-            chunk.generateHeightMap();
-            Utils.updateSkylight(chunk);
-            chunk.generateSkylightMap();
-            Utils.updateAllLightTypes(worldObj, xCoord, yCoord, zCoord);
-        }
-
+        //	world.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
+        // TODO(1.10): This is hopefully unneeded.
+//        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
+//            Chunk chunk = world.getChunkFromBlockCoords(pos);
+//            chunk.generateHeightMap();
+//            Utils.updateSkylight(chunk);
+//            chunk.generateSkylightMap();
+//            Utils.updateAllLightTypes(world, xCoord, yCoord, zCoord);
+//        }
     }
 
     @Override
@@ -189,8 +154,7 @@ public class SixNodeEntity extends NodeBlockEntity {
     }
 
     public boolean hasVolume(World world, int x, int y, int z) {
-
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             for (SixNodeElementRender e : elementRenderList) {
                 if (e != null && e.sixNodeDescriptor.hasVolume())
                     return true;
@@ -215,7 +179,9 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     @Override
     public String getNodeUuid() {
-        return Eln.sixNodeBlock.getNodeUuid();
+        return "";
+        // TODO(1.12)
+        //return Eln.sixNodeBlock.getNodeUuid();
     }
 
     @Override
@@ -230,7 +196,7 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     @Override
     public int isProvidingWeakPower(Direction side) {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             int max = 0;
             for (SixNodeElementRender r : elementRenderList) {
                 if (r == null) continue;

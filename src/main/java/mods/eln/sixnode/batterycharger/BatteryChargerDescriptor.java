@@ -78,25 +78,24 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    //boolean[] defaultCharged = new boolean[]{true, true, true, true};
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        }
-        draw(null, null);
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        }
+//        draw(null, null);
+//    }
 
     public void applyTo(NbtElectricalLoad powerLoad) {
         cable.applyTo(powerLoad);
@@ -113,7 +112,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...").split("\\\n"));
-        list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalPower)));
+        list.add(tr("Nominal power: %sW", Utils.plotValue(nominalPower)));
     }
 
     @Override

@@ -57,9 +57,10 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) (front.toInt() << 0));
+        return nbt;
     }
 
     @Override
@@ -121,12 +122,12 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (currentItemStack != null) {
             Item item = currentItemStack.getItem();
             /*if (item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;
-				entityPlayer.addChatMessage("Wire color care " + colorCare);
+				entityPlayer.sendMessage("Wire color care " + colorCare);
 				sixNode.reconnect();
 			}
 			if (item == Eln.brushItem) {
@@ -137,7 +138,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
 					
 					sixNode.reconnect();
 				} else {
-					entityPlayer.addChatMessage("Brush is empty");
+					entityPlayer.sendMessage("Brush is empty");
 				}
 			}*/
         }

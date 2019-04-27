@@ -1,11 +1,11 @@
 package mods.eln.transparentnode.windturbine;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 class WindTurbineSlowProcess implements IProcess, INBTTReady {
@@ -32,7 +32,7 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     }
 
     double getWind() {
-        return Math.abs(localWind + Utils.getWind(turbine.node.coordonate.dimention, turbine.node.coordonate.y +
+        return Math.abs(localWind + Utils.getWind(turbine.node.coordinate.getDimension(), turbine.node.coordinate.pos.getY() +
             turbine.descriptor.offY)) * environmentWindFactor;
     }
 
@@ -47,46 +47,37 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
         if (environmentTimeCounter < 0.0) {
             environmentTimeCounter += environmentTimeCounterReset * (0.75 + Math.random() * 0.5);
 
-            int x1, x2, y1, y2, z1, z2;
+            int x1, x2, y1, y2, z1, z2, xc, yc, zc;
 
-            Coordonate coord = new Coordonate(turbine.node.coordonate);
+            Coordinate coord = new Coordinate(turbine.node.coordinate);
 
-            x1 = coord.x - d.rayX;
-            x2 = coord.x + d.rayX;
-            y1 = coord.y - d.rayY + d.offY;
-            y2 = coord.y + d.rayY + d.offY;
-            z1 = coord.z - d.rayZ;
-            z2 = coord.z + d.rayZ;
+            xc = coord.pos.getX();
+            yc = coord.pos.getY();
+            zc = coord.pos.getZ();
+            x1 = xc - d.rayX;
+            x2 = xc + d.rayX;
+            y1 = yc - d.rayY + d.offY;
+            y2 = yc + d.rayY + d.offY;
+            z1 = zc - d.rayZ;
+            z2 = zc + d.rayZ;
 
             int blockBusyCount = -d.blockMalusSubCount;
-            boolean notInCache = false;
-            if (turbine.node.coordonate.getWorldExist()) {
-                World world = turbine.node.coordonate.world();
-                //IChunkProvider chunk = world.getChunkProvider();
+            if (turbine.node.coordinate.doesWorldExist()) {
+                World world = turbine.node.coordinate.world();
 
                 for (int x = x1; x <= x2; x++) {
                     for (int y = y1; y <= y2; y++) {
                         for (int z = z1; z <= z2; z++) {
-                            if (!world.blockExists(x, y, z)) {
-                                notInCache = true;
-                                break;
-                            }
-                            if (world.getBlock(x, y, z) != Blocks.air) {
+                            if (!world.isAirBlock(new BlockPos(x,y,z))) {
                                 blockBusyCount++;
                             }
                         }
-                        if (notInCache) break;
                     }
-                    if (notInCache) break;
                 }
-            } else {
-                notInCache = true;
             }
-            if (!notInCache) {
-                environmentWindFactor = Math.max(0.0, Math.min(1.0, 1.0 - blockBusyCount * d.blockMalus));
+            environmentWindFactor = Math.max(0.0, Math.min(1.0, 1.0 - blockBusyCount * d.blockMalus));
 
-                Utils.println("EnvironementWindFactor : " + environmentWindFactor);
-            }
+            Utils.println("EnvironementWindFactor : " + environmentWindFactor);
         }
 
         localWindTimeCounter -= time;
@@ -136,8 +127,9 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setDouble(str + name + "localWind", localWind);
         nbt.setDouble(str + name + "environementWindFactor", environmentWindFactor);
+        return nbt;
     }
 }

@@ -4,13 +4,10 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
+public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public Class ElementClass, RenderClass;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -26,37 +23,38 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         this.RenderClass = RenderClass;
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
-    }
+    // TODO(1.10): Items rendering.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return voltageLevelColor != VoltageLevelColor.None;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return false;
+//    }
+//
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return false;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (getIcon() == null)
+//            return;
+//
+//        voltageLevelColor.drawIconBackground(type);
+//
+//        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+//        String icon = getIcon().getIconName().substring(4);
+//        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
+//    }
 
     public boolean hasVolume() {
         return false;
     }
 
-    public boolean canBePlacedOnSide(EntityPlayer player, Coordonate c, Direction side) {
+    public boolean canBePlacedOnSide(EntityPlayer player, Coordinate c, Direction side) {
         return canBePlacedOnSide(player, side);
     }
 
@@ -66,7 +64,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
                 if (d == side)
                     return true;
             }
-            Utils.addChatMessage(player, tr("You can't place this block at this side"));
+            Utils.sendMessage(player, tr("You can't place this block at this side"));
             return false;
         }
         return true;
@@ -102,7 +100,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 
     protected Direction[] placeDirection = null;
 
-    public String checkCanPlace(Coordonate coord, Direction direction, LRDU front) {
+    public String checkCanPlace(Coordinate coord, Direction direction, LRDU front) {
         if (placeDirection != null) {
             boolean ok = false;
             for (Direction d : placeDirection) {

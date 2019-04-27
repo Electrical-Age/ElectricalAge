@@ -1,6 +1,6 @@
 package mods.eln.sound;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import mods.eln.client.UuidManager;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundManager;
@@ -22,7 +22,7 @@ public class SoundClientEventListener {
     @SubscribeEvent
     public void event(PlaySoundSourceEvent e) {
         if (currentUuid == null) return;
-        uuidManager.add(currentUuid, new SoundClientEntity(e.manager, e.sound));
+        uuidManager.add(currentUuid, new SoundClientEntity(e.getManager(), e.getSound()));
     }
 
     static class KillSound {

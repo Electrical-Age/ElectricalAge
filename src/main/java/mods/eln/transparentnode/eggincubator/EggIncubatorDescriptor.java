@@ -14,7 +14,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -60,24 +61,25 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
         Data.addMachine(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0, 1f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(0, 1f);
+//        }
+//    }
 
     void draw(int eggStackSize, float powerFactor) {
         if (eggStackSize == 0) powerFactor = 0f;
@@ -110,9 +112,9 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
-        AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z);
-        bb.maxY -= 0.5;
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, BlockPos pos) {
+        AxisAlignedBB bb = new AxisAlignedBB(pos);
+        bb = bb.setMaxY(0.5);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

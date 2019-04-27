@@ -2,7 +2,7 @@ package mods.eln.server;
 
 import mods.eln.Eln;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 public class SaveConfig extends WorldSavedData {
 
@@ -28,19 +28,18 @@ public class SaveConfig extends WorldSavedData {
         infinitePortableBattery = nbt.getBoolean("infinitPortableBattery");
         reGenOre = nbt.getBoolean("reGenOre");
         cableRsFactor_lastUsed = nbt.getDouble("cableRsFactor_lastUsed");
-
-        Eln.wind.readFromNBT(nbt, "wind");
+        Eln.windProcess.readFromNBT(nbt, "wind");
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel);
         nbt.setBoolean("electricalLampAging", electricalLampAging);
         nbt.setBoolean("batteryAging", batteryAging);
         nbt.setBoolean("infinitPortableBattery", infinitePortableBattery);
         nbt.setBoolean("reGenOre", reGenOre);
-
-        Eln.wind.writeToNBT(nbt, "wind");
+        Eln.windProcess.writeToNBT(nbt, "wind");
+        return nbt;
     }
 
     @Override

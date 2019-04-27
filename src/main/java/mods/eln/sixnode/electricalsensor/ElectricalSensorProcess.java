@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.sim.IProcess;
 
 public class ElectricalSensorProcess implements IProcess {
@@ -49,8 +50,8 @@ public class ElectricalSensorProcess implements IProcess {
     }
 
     void setOutput(double physical) {
-        double U = (physical - sensor.lowValue) / (sensor.highValue - sensor.lowValue) * Eln.SVU;
-        if (U > Eln.SVU) U = Eln.SVU;
+        double U = (physical - sensor.lowValue) / (sensor.highValue - sensor.lowValue) * Cable.SVU;
+        if (U > Cable.SVU) U = Cable.SVU;
         if (U < 0) U = 0;
         sensor.outputGateProcess.setU(U);
     }

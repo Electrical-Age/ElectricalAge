@@ -3,8 +3,10 @@ package mods.eln.transparentnode.turret;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
+import mods.eln.init.Config;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -61,7 +63,7 @@ public class TurretElement extends TransparentNodeElement {
         simulation = new TurretMechanicsSimulation((TurretDescriptor) descriptor);
         slowProcessList.add(simulation);
 
-        Eln.instance.highVoltageCableDescriptor.applyTo(load);
+        Cable.Companion.getHighVoltage().descriptor.applyTo(load);
         electricalLoadList.add(load);
         electricalComponentList.add(powerResistor);
 
@@ -97,8 +99,8 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     public void shoot() {
-        Coordonate lightSourceCoordinate = new Coordonate();
-        lightSourceCoordinate.copyFrom(coordonate());
+        Coordinate lightSourceCoordinate = new Coordinate();
+        lightSourceCoordinate.copyFrom(coordinate());
         lightSourceCoordinate.move(front);
         LightBlockEntity.addLight(lightSourceCoordinate, 25, 2);
         if (simulation.shoot()) needPublish();
@@ -151,7 +153,7 @@ public class TurretElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
-        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
+        return acceptingInventory.take(entityPlayer.getHeldItemMainhand());
     }
 
     @Override
@@ -173,11 +175,12 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("chargePower", chargePower);
         nbt.setBoolean("filterIsSpare", filterIsSpare);
         nbt.setDouble("energyBuffer", energyBuffer);
+        return nbt;
     }
 
     @Override
@@ -265,7 +268,7 @@ public class TurretElement extends TransparentNodeElement {
             }
         }
 
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Charge level"),
                 Utils.plotPercent("", energyBuffer / descriptor.getProperties().impulseEnergy));
         }

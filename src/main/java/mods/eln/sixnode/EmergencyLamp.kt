@@ -112,7 +112,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
             var closestDistance = 10000f
 
             LampSupplyElement.channelMap[channel]?.forEach {
-                val distance = it.element.sixNode.coordonate.trueDistanceTo(sixNode.coordonate).toFloat()
+                val distance = it.element.sixNode.coordinate.trueDistanceTo(sixNode.coordinate).toFloat()
                 if (distance < closestDistance && distance <= it.element.range) {
                     closestDistance = distance
                     closestPowerSupply = it
@@ -214,12 +214,13 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         channel = nbt.getString("channel")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         nbt.setBoolean("on", on)
         nbt.setDouble("charge", charge)
         nbt.setBoolean("poweredByCable", poweredByCable)
         nbt.setString("channel", channel)
+        return nbt
     }
 
     override fun hasGui() = true
@@ -295,7 +296,7 @@ class EmergencyLampGui(private var render: EmergencyLampRender)
             if (render.isConnectedToLampSupply)
                 channel.setComment(1, "§2" + tr("connected to " + render.channel))
             else
-                channel.setComment(1, "§4" + tr("%1$ is not in range!", render.channel))
+                channel.setComment(1, "§4" + tr("%s is not in range!", render.channel))
         } else {
             channel.visible = false
             buttonSupplyType.displayString = tr("Powered by cable")

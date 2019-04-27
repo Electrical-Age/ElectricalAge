@@ -37,24 +37,21 @@ public class HeatFurnaceInventoryProcess implements IProcess, INBTTReady {
         }
         furnace.thermalLoad.setRp(furnace.descriptor.thermal.Rp / isolationFactor);
 
-        int combustionChamberNbr = 0;
-        if (combustionChamberStack != null) {
-            combustionChamberNbr = combustionChamberStack.stackSize;
-        }
+        int combustionChamberNbr = combustionChamberStack.getCount();
         furnace.furnaceProcess.nominalPower = furnace.descriptor.nominalPower + furnace.descriptor.combustionChamberPower * combustionChamberNbr;
 
         if (furnace.getTakeFuel() && SaveConfig.instance != null) {
             if (!SaveConfig.instance.heatFurnaceFuel) {
                 combustibleBuffer = furnace.furnaceProcess.nominalCombustibleEnergy;
-            } else if (combustibleStack != null) {
+            } else if (!combustibleStack.isEmpty()) {
                 double itemEnergy = Utils.getItemEnergie(combustibleStack);
                 if (itemEnergy != 0) {
                     if (furnace.furnaceProcess.combustibleEnergy + combustibleBuffer < furnace.furnaceProcess.nominalCombustibleEnergy) {
                         //	furnace.furnaceProcess.combustibleEnergy += itemEnergy;
                         combustibleBuffer += itemEnergy;
                         furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
-                        if (combustibleStack.getItem().getUnlocalizedName().toLowerCase().contains("bucket")) {
-                            furnace.inventory.setInventorySlotContents(HeatFurnaceContainer.combustibleId, new ItemStack(Items.bucket));
+                        if (combustibleStack.getItem().getTranslationKey().toLowerCase().contains("bucket")) {
+                            furnace.inventory.setInventorySlotContents(HeatFurnaceContainer.combustibleId, new ItemStack(Items.BUCKET));
                         }
                     }
                 }
@@ -77,7 +74,8 @@ public class HeatFurnaceInventoryProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setDouble(str + "HFIP" + "combustribleBuffer", combustibleBuffer);
+        return nbt;
     }
 }

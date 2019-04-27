@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.teleporter;
 
 import mods.eln.Eln;
+import mods.eln.init.ModBlock;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -16,14 +17,14 @@ import java.io.IOException;
 public class TeleporterRender extends TransparentNodeElementRender {
 
     TeleporterDescriptor d;
-    Coordonate c;
+    Coordinate c;
 
     public TeleporterRender(TransparentNodeEntity tileEntity,
                             TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.d = (TeleporterDescriptor) descriptor;
         doorInterpolator.setMaxSpeed(0.3f);
-        c = new Coordonate(tileEntity);
+        c = new Coordinate(tileEntity);
     }
 
     public static final float doorAlphaOpen = -90;
@@ -41,11 +42,10 @@ public class TeleporterRender extends TransparentNodeElementRender {
 
     @Override
     public void draw() {
-        Coordonate lightCoordonate = new Coordonate(this.d.lightCoordonate);
-        lightCoordonate.applyTransformation(front, c);
+        Coordinate lightCoordinate = new Coordinate(this.d.lightCoordinate);
+        lightCoordinate.applyTransformation(front, c);
 
-        boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
-
+        boolean lightEnable = tileEntity.getWorld().getBlockState(lightCoordinate.pos).getBlock() == ModBlock.lightBlock;
 
         front.glRotateXnRef();
         GL11.glTranslatef(-1, 0, 0);
@@ -116,7 +116,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
             d.scr1_cables.draw();
             d.scr2_transporter.draw();
 
-            if (!tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).isEmpty())
+            if (!tileEntity.getWorld().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).isEmpty())
                 d.scr3_userin.draw();
 
             if (doorState)

@@ -52,9 +52,9 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         //UtilsClient.disableDepthTest();
         UtilsClient.enableBlend();
         obj.bindTexture("Glass.png");
-        float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-        float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-        float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+        float rotYaw = Minecraft.getMinecraft().player.rotationYaw / 360.f;
+        float rotPitch = Minecraft.getMinecraft().player.rotationPitch / 180.f;
+        float pos = (((float) Minecraft.getMinecraft().player.posX) + ((float) Minecraft.getMinecraft().player.posZ)) / 64.f;
         if (window != null)
             window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
         UtilsClient.disableBlend();
@@ -62,29 +62,30 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         UtilsClient.enableCulling();
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(1f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(1f);
+//        }
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {

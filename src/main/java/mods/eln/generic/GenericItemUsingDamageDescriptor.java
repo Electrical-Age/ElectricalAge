@@ -1,29 +1,27 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class GenericItemUsingDamageDescriptor {
 
     public String IconName;
-    private IIcon iconIndex;
     public String name;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -51,8 +49,8 @@ public class GenericItemUsingDamageDescriptor {
 
     }
 
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
-        return s;
+    public ActionResult<ItemStack> onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+        return new ActionResult(EnumActionResult.PASS, s);
     }
 
     public void getSubItems(List list) {
@@ -60,14 +58,15 @@ public class GenericItemUsingDamageDescriptor {
         list.add(stack);
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon(IconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
-    }
+    // TODO(1.10): These are all implicit now.
+//    @SideOnly(value = Side.CLIENT)
+//    public void updateIcons(IIconRegister iconRegister) {
+//        this.iconIndex = iconRegister.registerIcon(IconName);
+//    }
+//
+//    public IIcon getIcon() {
+//        return iconIndex;
+//    }
 
     public String getName(ItemStack stack) {
         return name;
@@ -76,7 +75,7 @@ public class GenericItemUsingDamageDescriptor {
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
         if (stack == null)
             return null;
-        if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
+        if (!(stack.getItem() instanceof GenericItemUsingDamage))
             return null;
         return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) stack.getItem()).getDescriptor(stack);
     }
@@ -105,40 +104,37 @@ public class GenericItemUsingDamageDescriptor {
         return newItemStack(1);
     }
 
-    public boolean checkSameItemStack(ItemStack stack) {
-        if (stack == null)
-            return false;
-        if (stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage)
-            return false;
-        return true;
+    public boolean checkSameItemStack(@Nonnull ItemStack stack) {
+        return stack.getItem() == parentItem && stack.getItemDamage() == parentItemDamage;
     }
 
     /**
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-        return false;
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float vx, float vy, float vz) {
+        return EnumActionResult.PASS;
     }
 
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
-
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
-    }
+    // TODO(1.10): Fix item render.
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return voltageLevelColor != VoltageLevelColor.None;
+//    }
+//
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return false;
+//    }
+//
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (getIcon() == null)
+//            return;
+//
+//        voltageLevelColor.drawIconBackground(type);
+//
+//        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+//        String icon = getIcon().getIconName().substring(4);
+//        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
+//    }
 
     public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
     }
@@ -151,11 +147,11 @@ public class GenericItemUsingDamageDescriptor {
         return nbt;
     }
 
-    public float getStrVsBlock(ItemStack stack, Block block) {
+    public float getDestroySpeed(ItemStack stack, IBlockState state) {
         return 0.2f;
     }
 
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, World w, IBlockState state, BlockPos pos, EntityLivingBase entity) {
         return false;
     }
 

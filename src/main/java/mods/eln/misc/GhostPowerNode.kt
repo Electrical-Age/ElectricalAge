@@ -6,11 +6,11 @@ import mods.eln.sim.ElectricalLoad
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
 
-class GhostPowerNode(origin: Coordonate, front: Direction, offset: Coordonate, val load: ElectricalLoad): GhostNode() {
+class GhostPowerNode(origin: Coordinate, front: Direction, offset: Coordinate, val load: ElectricalLoad): GhostNode() {
 
-    val coord = Coordonate(offset).apply {
+    val coord = Coordinate(offset).apply {
         applyTransformation(front, origin)
-        dimention = origin.dimention
+        dimension = origin.dimension
     }
 
     fun initialize() {

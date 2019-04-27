@@ -86,24 +86,25 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
         if (main != null) main.draw();
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw();
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw();
+//        }
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
@@ -111,8 +112,8 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
 
         list.add(tr("Generates electricity using heat."));
         list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Temperature difference: %1$°C", Utils.plotValue(nominalDeltaT)));
-        list.add("  " + tr("Voltage: %1$V", Utils.plotValue(nominalU)));
-        list.add("  " + tr("Power: %1$W", Utils.plotValue(nominalP)));
+        list.add("  " + tr("Temperature difference: %s°C", Utils.plotValue(nominalDeltaT)));
+        list.add("  " + tr("Voltage: %sV", Utils.plotValue(nominalU)));
+        list.add("  " + tr("Power: %sW", Utils.plotValue(nominalP)));
     }
 }

@@ -1,35 +1,40 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.List;
@@ -42,8 +47,6 @@ public class UtilsClient {
 
     static boolean lightmapTexUnitTextureEnable;
 
-    protected static RenderItem itemRenderer;
-
     private static int uuid = Integer.MIN_VALUE;
 
     final static ResourceLocation whiteTexture = new ResourceLocation("eln", "sprites/cable.png");
@@ -51,8 +54,9 @@ public class UtilsClient {
     private UtilsClient() {
     }
 
-    public static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
-        EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+    private static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
+        // TODO(1.10): Not sure this will work in multiplayer.
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
 
         return (float) Math.sqrt((xCoord - player.posX) * (xCoord - player.posX)
             + (yCoord - player.posY) * (yCoord - player.posY)
@@ -60,21 +64,22 @@ public class UtilsClient {
     }
 
     public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
-        return distanceFromClientPlayer(tileEntity.getWorldObj(), tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+        BlockPos pos = tileEntity.getPos();
+        return distanceFromClientPlayer(tileEntity.getWorld(), pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public static EntityClientPlayerMP getClientPlayer() {
-        return Minecraft.getMinecraft().thePlayer;
+    public static EntityPlayerSP getClientPlayer() {
+        return Minecraft.getMinecraft().player;
     }
 
-    public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
+    public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
         if (halo == null)
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(w, x, y, z) * 19 / 15 - 4;
+        int light = getLight(w, pos) * 19 / 15 - 4;
         Entity e = getClientPlayer();
-        float d = (float) (Math.abs(x - e.posX) + Math.abs(y - e.posY) + Math.abs(z - e.posZ));
+        float d = (float) (Math.abs(pos.getX() - e.posX) + Math.abs(pos.getY() - e.posY) + Math.abs(pos.getZ() - e.posZ));
 
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
         halo.draw(d * 20, 1, 0, 0);
@@ -85,25 +90,25 @@ public class UtilsClient {
 
     public static void clientOpenGui(GuiScreen gui) {
         guiLastOpen = gui;
-        EntityClientPlayerMP clientPlayer = getClientPlayer();
-        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
+        EntityPlayerSP clientPlayer = getClientPlayer();
+        clientPlayer.openGui(Eln.Companion, GuiHandler.genericOpen, clientPlayer.world, 0, 0, 0);
     }
 
-    public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
+    public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
         disableLight();
         enableBlend();
 
-        UtilsClient.drawHaloNoLightSetup(halo, r, g, b, w, x, y, z, bilinear);
+        UtilsClient.drawHaloNoLightSetup(halo, r, g, b, w, pos, bilinear);
         enableLight();
         disableBlend();
     }
 
     public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, TileEntity e, boolean bilinear) {
-        drawHaloNoLightSetup(halo, r, g, b, e.getWorldObj(), e.xCoord, e.yCoord, e.zCoord, bilinear);
+        drawHaloNoLightSetup(halo, r, g, b, e.getWorld(), e.getPos(), bilinear);
     }
 
     public static void drawHalo(Obj3DPart halo, float r, float g, float b, TileEntity e, boolean bilinear) {
-        drawHalo(halo, r, g, b, e.getWorldObj(), e.xCoord, e.yCoord, e.zCoord, bilinear);
+        drawHalo(halo, r, g, b, e.getWorld(), e.getPos(), bilinear);
     }
 
     public static void drawHaloNoLightSetup(Obj3DPart halo, float distance) {
@@ -128,10 +133,10 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
+        int light = getLight(e.world, new BlockPos(MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ)));
         // light =
-        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
-        // MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
+        // e.world.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
+        // MathHelper.floor(e.posY), MathHelper.floor(e.posZ),0);
         // Utils.println(light);
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
         halo.draw();
@@ -225,86 +230,87 @@ public class UtilsClient {
         // OpenGlHelper.glBlendFunc(1, 1, 1, 1);
     }
 
-    public static void drawIcon(ItemRenderType type) {
-        enableBlend();
-        if (type == ItemRenderType.INVENTORY) {
-
-            disableCulling();
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glTexCoord2f(1f, 0f);
-            GL11.glVertex3f(16f, 0f, 0f);
-            GL11.glTexCoord2f(0f, 0f);
-            GL11.glVertex3f(0f, 0f, 0f);
-            GL11.glTexCoord2f(0f, 1f);
-            GL11.glVertex3f(0f, 16f, 0f);
-            GL11.glTexCoord2f(1f, 1f);
-            GL11.glVertex3f(16f, 16f, 0f);
-            GL11.glEnd();
-            enableCulling();
-        } else if (type == ItemRenderType.ENTITY) {
-
-            disableCulling();
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glTexCoord2f(1f, 1f);
-            GL11.glVertex3f(0, 0f, 0.5f);
-            GL11.glTexCoord2f(0f, 1f);
-            GL11.glVertex3f(0.0f, 0f, -0.5f);
-            GL11.glTexCoord2f(0f, 0f);
-            GL11.glVertex3f(0.0f, 1f, -0.5f);
-            GL11.glTexCoord2f(1f, 0f);
-            GL11.glVertex3f(0.0f, 1f, 0.5f);
-            GL11.glEnd();
-            enableCulling();
-        } else {
-            GL11.glTranslatef(0.5f, -0.3f, 0.5f);
-
-            disableCulling();
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glTexCoord2f(1f, 1f);
-            GL11.glVertex3f(0.0f, 0.5f, 0.5f);
-            GL11.glTexCoord2f(0f, 1f);
-            GL11.glVertex3f(0.0f, 0.5f, -0.5f);
-            GL11.glTexCoord2f(0f, 0f);
-            GL11.glVertex3f(0.0f, 1.5f, -0.5f);
-            GL11.glTexCoord2f(1f, 0f);
-            GL11.glVertex3f(0.0f, 1.5f, 0.5f);
-            GL11.glEnd();
-            enableCulling();
-        }
-        disableBlend();
-    }
-
-    public static void drawIcon(ItemRenderType type, ResourceLocation icon) {
-        bindTexture(icon);
-        drawIcon(type);
-    }
-
-    public static void drawEnergyBare(ItemRenderType type, float e) {
-        drawIcon(type, new ResourceLocation("eln", "sprites/portablebatteryoverlay.png"));
-
-        float x = 13f, y = 14f - e * 12f;
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-        GL11.glColor3f(0f, 0f, 0f);
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex3f(x + 1f, 2, 0.01f);
-        GL11.glVertex3f(x, 2, 0f);
-        GL11.glVertex3f(x, 14f, 0f);
-        GL11.glVertex3f(x + 1f, 14f, 0.01f);
-        GL11.glEnd();
-
-        GL11.glColor3f(1, e, 0f);
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex3f(x + 1f, y, 0.01f);
-        GL11.glVertex3f(x, y, 0f);
-        GL11.glVertex3f(x, 14f, 0f);
-        GL11.glVertex3f(x + 1f, 14f, 0.01f);
-        GL11.glEnd();
-
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glColor3f(1f, 1f, 1f);
-
-    }
+    // TODO(1.10): Fix icon rendering.
+//    public static void drawIcon(ItemRenderType type) {
+//        enableBlend();
+//        if (type == ItemRenderType.INVENTORY) {
+//
+//            disableCulling();
+//            GL11.glBegin(GL11.GL_QUADS);
+//            GL11.glTexCoord2f(1f, 0f);
+//            GL11.glVertex3f(16f, 0f, 0f);
+//            GL11.glTexCoord2f(0f, 0f);
+//            GL11.glVertex3f(0f, 0f, 0f);
+//            GL11.glTexCoord2f(0f, 1f);
+//            GL11.glVertex3f(0f, 16f, 0f);
+//            GL11.glTexCoord2f(1f, 1f);
+//            GL11.glVertex3f(16f, 16f, 0f);
+//            GL11.glEnd();
+//            enableCulling();
+//        } else if (type == ItemRenderType.ENTITY) {
+//
+//            disableCulling();
+//            GL11.glBegin(GL11.GL_QUADS);
+//            GL11.glTexCoord2f(1f, 1f);
+//            GL11.glVertex3f(0, 0f, 0.5f);
+//            GL11.glTexCoord2f(0f, 1f);
+//            GL11.glVertex3f(0.0f, 0f, -0.5f);
+//            GL11.glTexCoord2f(0f, 0f);
+//            GL11.glVertex3f(0.0f, 1f, -0.5f);
+//            GL11.glTexCoord2f(1f, 0f);
+//            GL11.glVertex3f(0.0f, 1f, 0.5f);
+//            GL11.glEnd();
+//            enableCulling();
+//        } else {
+//            GL11.glTranslatef(0.5f, -0.3f, 0.5f);
+//
+//            disableCulling();
+//            GL11.glBegin(GL11.GL_QUADS);
+//            GL11.glTexCoord2f(1f, 1f);
+//            GL11.glVertex3f(0.0f, 0.5f, 0.5f);
+//            GL11.glTexCoord2f(0f, 1f);
+//            GL11.glVertex3f(0.0f, 0.5f, -0.5f);
+//            GL11.glTexCoord2f(0f, 0f);
+//            GL11.glVertex3f(0.0f, 1.5f, -0.5f);
+//            GL11.glTexCoord2f(1f, 0f);
+//            GL11.glVertex3f(0.0f, 1.5f, 0.5f);
+//            GL11.glEnd();
+//            enableCulling();
+//        }
+//        disableBlend();
+//    }
+//
+//    public static void drawIcon(ItemRenderType type, ResourceLocation icon) {
+//        bindTexture(icon);
+//        drawIcon(type);
+//    }
+//
+//    public static void drawEnergyBare(ItemRenderType type, float e) {
+//        drawIcon(type, new ResourceLocation("eln", "sprites/portablebatteryoverlay.png"));
+//
+//        float x = 13f, y = 14f - e * 12f;
+//        GL11.glDisable(GL11.GL_TEXTURE_2D);
+//
+//        GL11.glColor3f(0f, 0f, 0f);
+//        GL11.glBegin(GL11.GL_QUADS);
+//        GL11.glVertex3f(x + 1f, 2, 0.01f);
+//        GL11.glVertex3f(x, 2, 0f);
+//        GL11.glVertex3f(x, 14f, 0f);
+//        GL11.glVertex3f(x + 1f, 14f, 0.01f);
+//        GL11.glEnd();
+//
+//        GL11.glColor3f(1, e, 0f);
+//        GL11.glBegin(GL11.GL_QUADS);
+//        GL11.glVertex3f(x + 1f, y, 0.01f);
+//        GL11.glVertex3f(x, y, 0f);
+//        GL11.glVertex3f(x, 14f, 0f);
+//        GL11.glVertex3f(x + 1f, 14f, 0.01f);
+//        GL11.glEnd();
+//
+//        GL11.glEnable(GL11.GL_TEXTURE_2D);
+//        GL11.glColor3f(1f, 1f, 1f);
+//
+//    }
 
     public static void bindTexture(ResourceLocation resource) {
         Minecraft.getMinecraft().renderEngine.bindTexture(resource);
@@ -372,25 +378,25 @@ public class UtilsClient {
         GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
-    static public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {
-        if (entityItem == null)
-            return;
-
-        entityItem.hoverStart = 0.0f;
-        entityItem.rotationYaw = 0.0f;
-        entityItem.motionX = 0.0;
-        entityItem.motionY = 0.0;
-        entityItem.motionZ = 0.0;
-
-        Render var10;
-        var10 = RenderManager.instance.getEntityRenderObject(entityItem);
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float) x, (float) y, (float) z);
-        GL11.glRotatef(roty, 0, 1, 0);
-        GL11.glScalef(scale, scale, scale);
-        var10.doRender(entityItem, 0, 0, 0, 0, 0);
-        GL11.glPopMatrix();
-    }
+//    static public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {
+//        if (entityItem == null)
+//            return;
+//
+//        entityItem.hoverStart = 0.0f;
+//        entityItem.rotationYaw = 0.0f;
+//        entityItem.motionX = 0.0;
+//        entityItem.motionY = 0.0;
+//        entityItem.motionZ = 0.0;
+//
+//        Render var10;
+//        var10 = RenderManager.instance.getEntityRenderObject(entityItem);
+//        GL11.glPushMatrix();
+//        GL11.glTranslatef((float) x, (float) y, (float) z);
+//        GL11.glRotatef(roty, 0, 1, 0);
+//        GL11.glScalef(scale, scale, scale);
+//        var10.doRender(entityItem, 0, 0, 0, 0, 0);
+//        GL11.glPopMatrix();
+//    }
 
     static public void drawConnectionPinSixNode(float d, float w, float h) {
         d += 0.1f;
@@ -453,70 +459,66 @@ public class UtilsClient {
         enableTexture();
     }
 
-    static RenderItem getItemRender() {
-        if (itemRenderer == null)
-            itemRenderer = new RenderItem();
-        return itemRenderer;
-    }
+//    static RenderItem getItemRender() {
+//        if (itemRenderer == null)
+//            itemRenderer = new RenderItem();
+//        return itemRenderer;
+//    }
 
     static Minecraft mc() {
         return Minecraft.getMinecraft();
     }
 
-    public static void guiScale() {
-        GL11.glScalef(16f, 16f, 1f);
-    }
-
-    public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui) {
-        // Block b = Block.getBlockFromItem(par1ItemStack.getItem());
-        // b.rend
-        // ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
-        // ForgeHooksClient.renderInventoryItem(Minecraft.getMinecraft().bl, engine, item, inColor, zLevel, x, y)
-
-        RenderItem itemRenderer = getItemRender();
-        // GL11.glDisable(3042);
-        if (gui) {
-            GL11.glEnable(32826);
-            RenderHelper.enableGUIStandardItemLighting();
-        }
-        // GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-        // ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
-        itemRenderer.zLevel = 400.0F;
-        // ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
-        FontRenderer font = null;
-        if (par1ItemStack != null) {
-            Item i = par1ItemStack.getItem();
-            if (i == null)
-                return;
-            font = i.getFontRenderer(par1ItemStack);
-        }
-        if (font == null)
-            font = mc().fontRenderer;
-        itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
-        // itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
-
-        itemRenderer.zLevel = 0.0F;
-
-        if (gui) {
-            RenderHelper.disableStandardItemLighting();
-            GL11.glDisable(32826);
-        }
-
-        if (par1ItemStack.stackSize > 1) {
-            disableDepthTest();
-            // GL11.glPushMatrix();
-            // GL
-            // GL11.glScalef(0.5f, 0.5f, 0.5f);
-            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.stackSize, x + 10, y + 9, 0xFFFFFFFF);
-            // GL11.glPopMatrix();
-            enableDepthTest();
-        }
-    }
+//    public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui) {
+//        // Block b = Block.getBlockFromItem(par1ItemStack.getItem());
+//        // b.rend
+//        // ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
+//        // ForgeHooksClient.renderInventoryItem(Minecraft.getMinecraft().bl, engine, item, inColor, zLevel, x, y)
+//
+//        RenderItem itemRenderer = getItemRender();
+//        // GL11.glDisable(3042);
+//        if (gui) {
+//            GL11.glEnable(32826);
+//            RenderHelper.enableGUIStandardItemLighting();
+//        }
+//        // GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+//        // ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
+//        itemRenderer.zLevel = 400.0F;
+//        // ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
+//        FontRenderer font = null;
+//        if (par1ItemStack != null) {
+//            Items i = par1ItemStack.getItem();
+//            if (i == null)
+//                return;
+//            font = i.getFontRenderer(par1ItemStack);
+//        }
+//        if (font == null)
+//            font = mc().fontRenderer;
+//        itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
+//        // itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
+//
+//        itemRenderer.zLevel = 0.0F;
+//
+//        if (gui) {
+//            RenderHelper.disableStandardItemLighting();
+//            GL11.glDisable(32826);
+//        }
+//
+//        if (par1ItemStack.stackSize > 1) {
+//            disableDepthTest();
+//            // GL11.glPushMatrix();
+//            // GL
+//            // GL11.glScalef(0.5f, 0.5f, 0.5f);
+//            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.stackSize, x + 10, y + 9, 0xFFFFFFFF);
+//            // GL11.glPopMatrix();
+//            enableDepthTest();
+//        }
+//    }
 
     public static double clientDistanceTo(Entity e) {
         if (e == null)
             return 100000000.0;
-        Entity c = Minecraft.getMinecraft().thePlayer;
+        Entity c = Minecraft.getMinecraft().player;
         double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
         return Math.sqrt(x * x + y * y + z * z);
     }
@@ -524,15 +526,19 @@ public class UtilsClient {
     public static double clientDistanceTo(TransparentNodeEntity t) {
         if (t == null)
             return 100000000.0;
-        Entity c = Minecraft.getMinecraft().thePlayer;
-        double x = (c.posX - t.xCoord), y = (c.posY - t.yCoord), z = (c.posZ - t.zCoord);
+        Entity c = Minecraft.getMinecraft().player;
+        BlockPos pos = t.getPos();
+        double x = (c.posX - pos.getX()), y = (c.posY - pos.getY()), z = (c.posZ - pos.getZ());
         return Math.sqrt(x * x + y * y + z * z);
     }
 
-    public static int getLight(World w, int x, int y, int z) {
-        int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
-        int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
-        return Math.max(b, s);
+    private static int getLight(World w, BlockPos pos) {
+        // TODO(1.10): Is this right?
+        return w.getLight(pos);
+//        w.getLight()
+//        int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
+//        int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
+//        return Math.max(b, s);
     }
 
     public static void disableDepthTest() {
@@ -543,10 +549,16 @@ public class UtilsClient {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
 
-    public static void sendPacketToServer(ByteArrayOutputStream bos) {
-        C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
+    public static void sendPacketToServer(PacketBuffer bos) {
+        CPacketCustomPayload packet = new CPacketCustomPayload(Eln.eventChannelID, bos);
         Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
-        // Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
+    }
+
+    @Deprecated
+    public static void sendPacketToServer(ByteArrayOutputStream bos) {
+        ByteBuf buf = Unpooled.buffer()
+            .writeBytes(bos.toByteArray());
+        sendPacketToServer(new PacketBuffer(buf));
     }
 
     public static int getUuid() {

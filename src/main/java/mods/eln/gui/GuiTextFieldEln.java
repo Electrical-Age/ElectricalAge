@@ -17,7 +17,8 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject {
     IGuiObjectObserver iGuiObjectObserver;
 
     public GuiTextFieldEln(FontRenderer par1FontRenderer, int x, int y, int w, int h, GuiHelper helper) {
-        super(par1FontRenderer, x, y, w, h);
+        super(0, // TODO(1.10): 0 is almost certainly wrong.
+            par1FontRenderer, x, y, w, h);
         setTextColor(-1);
         setDisabledTextColour(-1);
         setEnableBackgroundDrawing(true);

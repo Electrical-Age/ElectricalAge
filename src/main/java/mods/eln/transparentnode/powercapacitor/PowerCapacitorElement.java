@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.powercapacitor;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -100,8 +101,8 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        Eln.applySmallRs(positiveLoad);
-        Eln.applySmallRs(negativeLoad);
+        Cable.applySmallRs(positiveLoad);
+        Cable.applySmallRs(negativeLoad);
 
         setupPhysical();
 
@@ -149,9 +150,10 @@ public class PowerCapacitorElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("punkELeft", punkProcess.eLeft);
+        return nbt;
     }
 
     @Override

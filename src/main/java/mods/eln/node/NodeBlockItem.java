@@ -1,16 +1,19 @@
 package mods.eln.node;
 
+import mods.eln.misc.Coordinate;
+import mods.eln.misc.Direction;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class NodeBlockItem extends ItemBlock {
 
     public NodeBlockItem(Block b) {
         super(b);
-        setUnlocalizedName("NodeBlockItem");
+        setTranslationKey("NodeBlockItem");
     }
 
 
@@ -23,23 +26,24 @@ public class NodeBlockItem extends ItemBlock {
     /*int getBlockID(){
         return Block.getIdFromBlock(getBlock());
     }*/
-    NodeBlock getBlock() {
+    public NodeBlock getBlock() {
         return (NodeBlock) Block.getBlockFromItem(this);
     }
 
-    public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
-    /*	if(world.isRemote) return false;
+    public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, Coordinate coord, float hitX, float hitY, float hitZ, int metadata) {
+        World w = coord.world();
+        BlockPos pos = coord.pos;
+    	/*if(w.isRemote) return false;
         Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
-    	
 
     	NodeBase node = (NodeBase) getBlock().newNodeBase();
-		node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
+		node.onBlockPlacedBy(new Coordinate(pos ,w),direction,player,stack);
 		
-		world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
-    	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);
+		w.setBlockState(pos, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
+    	getBlock().onBlockPlacedBy(w, pos, direction, player,metadata);
     	
     	node.checkCanStay(true);
-    	*/
+        */
         return false;
 
     }

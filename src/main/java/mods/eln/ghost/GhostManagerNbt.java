@@ -2,7 +2,7 @@ package mods.eln.ghost;
 
 import mods.eln.Eln;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 public class GhostManagerNbt extends WorldSavedData {
     public GhostManagerNbt(String par1Str) {
@@ -20,7 +20,8 @@ public class GhostManagerNbt extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         //Eln.ghostManager.saveToNbt(nbt, Integer.MIN_VALUE);
+        return nbt;
     }
 }

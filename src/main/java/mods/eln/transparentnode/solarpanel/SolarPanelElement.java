@@ -2,6 +2,7 @@ package mods.eln.transparentnode.solarpanel;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.GhostPowerNode;
@@ -41,7 +42,7 @@ public class SolarPanelElement extends TransparentNodeElement {
     DiodeProcess diode;
     PowerSourceBipole powerSource;
 
-    SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
+    SolarPanelSlowProcess slowProcess = new SolarPanelSlowProcess(this);
 
     public double panelAlpha = Math.PI / 2;
     private GhostPowerNode groundNode = null;
@@ -139,7 +140,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         descriptor.applyTo(negativeLoad);
 
         if (descriptor.groundCoordinate != null) {
-            GhostPowerNode n = new GhostPowerNode(node.coordonate, front, descriptor.groundCoordinate, negativeLoad);
+            GhostPowerNode n = new GhostPowerNode(node.coordinate, front, descriptor.groundCoordinate, negativeLoad);
             n.initialize();
             groundNode = n;
         }
@@ -156,14 +157,15 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
+        return descriptor.canRotate && inventory.take(entityPlayer.getHeldItemMainhand(), this, true, false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         powerSource.writeToNBT(nbt, "powerSource");
         nbt.setDouble("panelAlpha", panelAlpha);
+        return nbt;
     }
 
     @Override
@@ -233,7 +235,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"));
         info.put(I18N.tr("Panel angle"), Utils.plotValue((panelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
         info.put(I18N.tr("Producing energy"), (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Produced power"), Utils.plotPower("", powerSource.getP()));
         }
         return info;

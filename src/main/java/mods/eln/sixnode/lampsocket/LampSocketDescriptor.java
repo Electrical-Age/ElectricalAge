@@ -14,7 +14,7 @@ import static mods.eln.i18n.I18N.tr;
 public class LampSocketDescriptor extends SixNodeDescriptor {
 
     public LampSocketType socketType;
-    LampSocketObjRender render;
+//    LampSocketObjRender render;
 
     public boolean cameraOpt = true;
 
@@ -31,7 +31,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     public boolean paintable = false;
 
-    public LampSocketDescriptor(String name, LampSocketObjRender render,
+    public LampSocketDescriptor(String name, /*LampSocketObjRender render,*/
                                 LampSocketType socketType,
                                 boolean paintable,
                                 int range,
@@ -44,7 +44,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         this.alphaZMin = alphaZMin;
         this.alphaZMax = alphaZMax;
         this.alphaZBoot = alphaZBoot;
-        this.render = render;
+//        this.render = render;
 
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
@@ -66,30 +66,31 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         Data.addLight(newItemStack());
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
-            super.renderItem(type, item, data);
-        else {
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            render.draw(this, type, 0.f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY)
+//            super.renderItem(type, item, data);
+//        else {
+//            GL11.glScalef(1.25f, 1.25f, 1.25f);
+//            render.draw(this, type, 0.f);
+//        }
+//    }
 
     @Override
     public boolean hasVolume() {
@@ -104,10 +105,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         if (range != 0 || alphaZMin != alphaZMax) {
             //list.add("Projector");
             if (range != 0) {
-                list.add(tr("Spot range: %1$ blocks", range));
+                list.add(tr("Spot range: %s blocks", range));
             }
             if (alphaZMin != alphaZMax) {
-                list.add(tr("Angle: %1$° to %2$°", ((int) alphaZMin), ((int) alphaZMax)));
+                list.add(tr("Angle: %s° to %s°", ((int) alphaZMin), ((int) alphaZMax)));
             }
         }
     }

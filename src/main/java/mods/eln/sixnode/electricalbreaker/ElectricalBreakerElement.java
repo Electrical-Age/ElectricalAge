@@ -2,6 +2,8 @@ package mods.eln.sixnode.electricalbreaker;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Cable;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -37,7 +39,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
-    public float voltageMax = (float) Eln.SVU, voltageMin = 0;
+    public float voltageMax = (float) Cable.SVU, voltageMin = 0;
 
     boolean switchState = false;
     double currantMax = 0;
@@ -83,12 +85,13 @@ public class ElectricalBreakerElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) (front.toInt() << 0));
         nbt.setBoolean("switchState", switchState);
         nbt.setFloat("voltageMax", voltageMax);
         nbt.setFloat("voltageMin", voltageMin);
+        return nbt;
     }
 
     @Override
@@ -122,7 +125,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Contact"), switchState ? I18N.tr("Closed") : I18N.tr("Open"));
         info.put(I18N.tr("Current"), Utils.plotAmpere("", aLoad.getCurrent()));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
         }
         return info;

@@ -94,14 +94,14 @@ public class ElectricalFurnaceProcess implements IProcess {
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
     private boolean smeltCan() {
-        if (inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId) == null) {
+        if (inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId).isEmpty()) {
             return false;
         } else {
             ItemStack var1 = getSmeltResult();
             if (var1 == null) return false;
-            if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId) == null) return true;
+            if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isEmpty()) return true;
             if (!inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isItemEqual(var1)) return false;
-            int result = inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).stackSize + var1.stackSize;
+            int result = inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).getCount() + var1.getCount();
 
             //energyNeeded = 1000.0;
             return (result <= inventory.getInventoryStackLimit() && result <= var1.getMaxStackSize());
@@ -109,7 +109,7 @@ public class ElectricalFurnaceProcess implements IProcess {
     }
 
     public ItemStack getSmeltResult() {
-        return FurnaceRecipes.smelting().getSmeltingResult(inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId));
+        return FurnaceRecipes.instance().getSmeltingResult(inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId));
     }
 
     /**
@@ -122,7 +122,7 @@ public class ElectricalFurnaceProcess implements IProcess {
             if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId) == null) {
                 inventory.setInventorySlotContents(1, var1.copy());
             } else if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isItemEqual(var1)) {
-                inventory.decrStackSize(ElectricalFurnaceElement.outSlotId, -var1.stackSize);
+                inventory.decrStackSize(ElectricalFurnaceElement.outSlotId, -var1.getCount());
             }
 
             /*--this.furnaceItemStacks[0].stackSize;

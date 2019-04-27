@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
@@ -54,7 +55,7 @@ public class ElectricalAntennaTxRender extends TransparentNodeElementRender {
             if (lrdu == rot)
                 CableRender.drawCable(descriptor.cable.render, maskTemp, connectionType);
             else if (lrdu == rot.left() || lrdu == rot.right())
-                CableRender.drawCable(Eln.instance.signalCableDescriptor.render, maskTemp, connectionType);
+                CableRender.drawCable(Cable.Companion.getSignal().descriptor.render, maskTemp, connectionType);
         }
     }
 
@@ -71,8 +72,8 @@ public class ElectricalAntennaTxRender extends TransparentNodeElementRender {
         if (front.getInverse() != side.applyLRDU(lrdu)) return null;
 
         if (side == front.applyLRDU(rot)) return descriptor.cable.render;
-        if (side == front.applyLRDU(rot.left())) return Eln.instance.signalCableDescriptor.render;
-        if (side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
+        if (side == front.applyLRDU(rot.left())) return Cable.Companion.getSignal().descriptor.render;
+        if (side == front.applyLRDU(rot.right())) return Cable.Companion.getSignal().descriptor.render;
         return null;
     }
 

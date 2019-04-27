@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalalarm;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
@@ -61,7 +62,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
             Byte b;
             b = stream.readByte();
             front = LRDU.fromInt((b >> 4) & 3);
-            warm = (b & 1) != 0 ? true : false;
+            warm = (b & 1) != 0;
             mute = stream.readBoolean();
             Utils.println("WARM : " + warm);
         } catch (IOException e) {
@@ -71,7 +72,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return Cable.Companion.getSignal().descriptor.render;
     }
 
     @Override

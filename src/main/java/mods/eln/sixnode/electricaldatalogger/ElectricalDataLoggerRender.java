@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricaldatalogger;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -35,7 +36,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return Cable.Companion.getSignal().descriptor.render;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
                 drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
             }
         }
-        descriptor.draw(log, side, front, this.tileEntity.xCoord, this.tileEntity.zCoord);
+        descriptor.draw(log, side, front, this.tileEntity.getPos().getX(), this.tileEntity.getPos().getZ());
     }
 
 	/*

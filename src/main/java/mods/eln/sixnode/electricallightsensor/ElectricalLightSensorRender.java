@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricallightsensor;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -31,6 +32,6 @@ public class ElectricalLightSensorRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return Cable.Companion.getSignal().descriptor.render;
     }
 }

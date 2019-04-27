@@ -7,9 +7,7 @@ import mods.eln.misc.*
 import mods.eln.node.transparent.*
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
-import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -37,9 +35,9 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             assert(rotating.size > 0)
             val bb = rotating[0].boundingBox()
             val centre = bb.centre()
-            val ox = centre.xCoord
-            val oy = centre.yCoord
-            val oz = centre.zCoord
+            val ox = centre.x
+            val oy = centre.y
+            val oz = centre.z
             GL11.glTranslated(ox, oy, oz)
             GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)
@@ -49,23 +47,24 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
     }
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            objItemScale(obj)
-            preserveMatrix {
-                Direction.ZN.glRotateXnRef()
-                GL11.glTranslatef(0f, -1f, 0f)
-                GL11.glScalef(0.6f, 0.6f, 0.6f)
-                draw(0.0)
-            }
-        }
-    }
+    // TODO(1.10): Shaft item renderer
+//    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
+//        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, *data)
+//        } else {
+//            objItemScale(obj)
+//            preserveMatrix {
+//                Direction.ZN.glRotateXnRef()
+//                GL11.glTranslatef(0f, -1f, 0f)
+//                GL11.glScalef(0.6f, 0.6f, 0.6f)
+//                draw(0.0)
+//            }
+//        }
+//    }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
+//    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
 }
 
 open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
@@ -83,7 +82,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     private val soundLooper: ShaftSoundLooper?
     val volumeSetting = SlewLimiter(0.5f)
 
-    inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
+    inner private class ShaftSoundLooper(sound: String, coord: Coordinate) : LoopedSound(sound, coord) {
         override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
         override fun getVolume() = volumeSetting.position
     }
@@ -93,7 +92,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
         volumeSetting.position = 0f
         val sound = this.desc.sound
         if (sound != null) {
-            soundLooper = ShaftSoundLooper(sound, coordonate())
+            soundLooper = ShaftSoundLooper(sound, coordinate())
             addLoopedSound(soundLooper)
         } else {
             soundLooper = null
@@ -191,14 +190,14 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
-        shaft.writeToNBT(nbt, "shaft")
+        return shaft.writeToNBT(nbt, "shaft")
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {
         super.readFromNBT(nbt)
-        shaft.readFromNBT(nbt, "shaft")
+        return shaft.readFromNBT(nbt, "shaft")
     }
 
     override fun multiMeterString(side: Direction?): String {

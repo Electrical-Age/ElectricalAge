@@ -2,8 +2,9 @@ package mods.eln.misc;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Vec3;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -75,6 +76,22 @@ public enum Direction {
         if (dir == 5) vector[2] += distance;
     }
 
+    public void applyTo(BlockPos.MutableBlockPos pos, int distance) {
+        pos.setPos(
+            pos.getX() + (dir == 0 ? -distance : dir == 1 ? distance : 0),
+            pos.getY() + (dir == 2 ? -distance : dir == 3 ? distance : 0),
+            pos.getZ() + (dir == 4 ? -distance : dir == 5 ? distance : 0)
+        );
+    }
+
+    public BlockPos applied(BlockPos pos, int distance) {
+        return pos.add(
+            dir == 0 ? -distance : dir == 1 ? distance : 0,
+            dir == 2 ? -distance : dir == 3 ? distance : 0,
+            dir == 4 ? -distance : dir == 5 ? distance : 0
+        );
+    }
+
     public int getHorizontalIndex() {
         switch (this) {
             case XN:
@@ -125,12 +142,13 @@ public enum Direction {
      */
     public TileEntity applyToTileEntity(TileEntity tileEntity) {
         if (tileEntity == null) return null;
-        int coords[] = {tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord};
+        int coords[] = {tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ()};
 
         coords[dir / 2] += getSign();
+        BlockPos moved = new BlockPos(coords[0], coords[1], coords[2]);
 
-        if (tileEntity.getWorldObj() != null && tileEntity.getWorldObj().blockExists(coords[0], coords[1], coords[2])) {
-            return tileEntity.getWorldObj().getTileEntity(coords[0], coords[1], coords[2]);
+        if (!tileEntity.getWorld().isAirBlock(moved)) {
+            return tileEntity.getWorld().getTileEntity(moved);
         } else {
             return null;
         }
@@ -418,8 +436,9 @@ public enum Direction {
         }
     }
 
-    public TileEntity getTileEntity(Coordonate coordonate) {
-        int x = coordonate.x, y = coordonate.y, z = coordonate.z;
+    public TileEntity getTileEntity(Coordinate coordinate) {
+        BlockPos pos = coordinate.pos;
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
         switch (this) {
             case XN:
                 x--;
@@ -443,47 +462,35 @@ public enum Direction {
                 break;
         }
 
-        return coordonate.world().getTileEntity(x, y, z);
+        return coordinate.world().getTileEntity(new BlockPos(x, y, z));
     }
 
-    public void writeToNBT(NBTTagCompound nbt, String name) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String name) {
         nbt.setByte(name, (byte) getInt());
+        return nbt;
     }
 
     static public Direction readFromNBT(NBTTagCompound nbt, String name) {
         return Direction.fromInt(nbt.getByte(name));
     }
 
-    public void rotateFromXN(double[] p) {
-        double x = p[0], y = p[1], z = p[2];
+    public Vec3d rotateFromXN(Vec3d vec) {
+        double x = vec.x, y = vec.y, z = vec.z;
         switch (this) {
             case XN:
                 break;
             case XP:
-                p[0] = -x;
-                p[2] = -z;
-                break;
+                return new Vec3d(-x, y, -z);
             case YN:
-                p[0] = y;
-                p[1] = x;
-                p[2] = -z;
-                break;
+                return new Vec3d(y, x, -z);
             case YP:
-                p[0] = y;
-                p[1] = -x;
-                p[2] = z;
-                break;
+                return new Vec3d(y, -x, z);
             case ZN:
-                p[0] = -z;
-                p[2] = x;
-                break;
+                return new Vec3d(-z, y, x);
             case ZP:
-                p[0] = z;
-                p[2] = -x;
-                break;
-            default:
-                break;
+                return new Vec3d(z, y, -x);
         }
+        return vec;
     }
 
     public void rotateFromXN(int[] p) {
@@ -518,68 +525,71 @@ public enum Direction {
         }
     }
 
-    public void rotateFromXN(Vec3 p) {
-        double x = p.xCoord, y = p.yCoord, z = p.zCoord;
-        switch (this) {
-            case XN:
-                break;
-            case XP:
-                p.xCoord = -x;
-                p.zCoord = -z;
-                break;
-            case YN:
-                p.xCoord = y;
-                p.yCoord = x;
-                p.zCoord = -z;
-                break;
-            case YP:
-                p.xCoord = y;
-                p.yCoord = -x;
-                p.zCoord = z;
-                break;
-            case ZN:
-                p.xCoord = -z;
-                p.zCoord = x;
-                break;
-            case ZP:
-                p.xCoord = z;
-                p.zCoord = -x;
-                break;
-            default:
-                break;
-        }
-    }
 
-    public void rotateFromXN(Coordonate p) {
-        int x = p.x, y = p.y, z = p.z;
+//    public void rotateFromXN(Vec3d p) {
+//        double x = p.x, y = p.y, z = p.z;
+//        switch (this) {
+//            case XN:
+//                break;
+//            case XP:
+//                p.x = -x;
+//                p.z = -z;
+//                break;
+//            case YN:
+//                p.x = y;
+//                p.y = x;
+//                p.z = -z;
+//                break;
+//            case YP:
+//                p.x = y;
+//                p.y = -x;
+//                p.z = z;
+//                break;
+//            case ZN:
+//                p.x = -z;
+//                p.z = x;
+//                break;
+//            case ZP:
+//                p.x = z;
+//                p.z = -x;
+//                break;
+//            default:
+//                break;
+//        }
+//    }
+
+    public void rotateFromXN(Coordinate p) {
+        int x = p.pos.getX(), y = p.pos.getY(), z = p.pos.getZ();
+        int newX = x, newY = y, newZ = z;
         switch (this) {
             case XN:
                 break;
             case XP:
-                p.x = -x;
-                p.z = -z;
+                newX = -x;
+                newZ = -z;
                 break;
             case YN:
-                p.x = y;
-                p.y = x;
-                p.z = -z;
+                newX = y;
+                newY = x;
+                newZ = -z;
                 break;
             case YP:
-                p.x = y;
-                p.y = -x;
-                p.z = z;
+                newX = y;
+                newY = -x;
+                newZ = z;
                 break;
             case ZN:
-                p.x = -z;
-                p.z = x;
+                newX = -z;
+                newZ = x;
                 break;
             case ZP:
-                p.x = z;
-                p.z = -x;
+                newX = z;
+                newZ = -x;
                 break;
             default:
                 break;
         }
+        p.pos.setPos(newX, newY, newZ);
     }
 
     public void glTranslate(float v) {
@@ -607,7 +617,7 @@ public enum Direction {
         }
     }
 
-    public static Direction from(ForgeDirection direction) {
+    public static Direction fromFacing(EnumFacing direction) {
         switch (direction) {
             case DOWN:
                 return YN;
@@ -626,23 +636,22 @@ public enum Direction {
         }
     }
 
-    public ForgeDirection toForge() {
+    public EnumFacing toForge() {
         switch (this) {
             case YN:
-                return ForgeDirection.DOWN;
+                return EnumFacing.DOWN;
             case XP:
-                return ForgeDirection.EAST;
+                return EnumFacing.EAST;
             case ZN:
-                return ForgeDirection.NORTH;
+                return EnumFacing.NORTH;
             case ZP:
-                return ForgeDirection.SOUTH;
+                return EnumFacing.SOUTH;
             case YP:
-                return ForgeDirection.UP;
+                return EnumFacing.UP;
             case XN:
-                return ForgeDirection.WEST;
-            default:
-                return ForgeDirection.UNKNOWN;
+                return EnumFacing.WEST;
         }
+        throw new RuntimeException("Kaboom!");
     }
 
     public void glRotateZnRefInv() {

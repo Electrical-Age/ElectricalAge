@@ -87,12 +87,12 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
 
         vuMeterHeat.setComment(new String[]{});
         vuMeterHeat.setComment(0, tr("Temperature gauge"));
-        vuMeterHeat.setComment(1, tr("Actual: %1$°C", Utils.plotValue(render.temperature)));
+        vuMeterHeat.setComment(1, tr("Actual: %s°C", Utils.plotValue(render.temperature)));
         if (!render.controleExternal)
             vuMeterHeat.setComment(2, Utils.plotCelsius("Set point:", vuMeterHeat.getValue()));
-        vuMeterGain.setComment(0, tr("Control gauge at %1$%", (int) (vuMeterGain.getValue()) * 100));
+        vuMeterGain.setComment(0, tr("Control gauge at %s", (int) (vuMeterGain.getValue()) * 100));
 
-        vuMeterGain.setComment(1, tr("Power: %1$W", render.power));
+        vuMeterGain.setComment(1, tr("Power: %sW", render.power));
     }
 
     @Override

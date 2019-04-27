@@ -30,7 +30,7 @@ public class AutoMinerContainer extends BasicContainer {
             ElectricalDrillDescriptor.class, SlotSkin.medium,
             new String[]{tr("Drill slot")});
         slots[1] = new GenericItemUsingDamageSlot(inventory, 1, 3000, 3000, 1,
-            OreScanner.class, SlotSkin.medium, new String[]{tr("Ore scanner slot")});
+            OreScanner.class, SlotSkin.medium, new String[]{tr("oreBlock scanner slot")});
         slots[2] = new GenericItemUsingDamageSlot(inventory, MiningPipeSlotId, 134 + 18, 8, 64,
             MiningPipeDescriptor.class, SlotSkin.medium, new String[]{tr("Mining pipe slot")});
 

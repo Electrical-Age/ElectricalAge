@@ -1,13 +1,13 @@
 package mods.eln;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import mods.eln.misc.Coordinate;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
 import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeBase;
@@ -33,10 +33,10 @@ public class PacketHandler {
 
     @SubscribeEvent
     public void onServerPacket(ServerCustomPacketEvent event) {
-        FMLProxyPacket packet = event.packet;
+        FMLProxyPacket packet = event.getPacket();
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
-        NetworkManager manager = event.manager;
-        EntityPlayer player = ((NetHandlerPlayServer) event.handler).playerEntity; // EntityPlayerMP
+        NetworkManager manager = event.getManager();
+        EntityPlayer player = ((NetHandlerPlayServer) event.getHandler()).player; // EntityPlayerMP
 
         packetRx(stream, manager, player);
     }
@@ -66,43 +66,9 @@ public class PacketHandler {
                 case Eln.packetDestroyUuid:
                     packetDestroyUuid(stream, manager, player);
                     break;
-                case Eln.packetClientToServerConnection:
-                    packetNewClient(manager, player);
-                    break;
-                case Eln.packetServerToClientInfo:
-                    packetServerInfo(stream, manager, player);
-                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-
-    private void packetNewClient(NetworkManager manager, EntityPlayer player) {
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream stream = new DataOutputStream(bos);
-
-        try {
-            stream.writeByte(Eln.packetServerToClientInfo);
-            for (IConfigSharing c : Eln.instance.configShared) {
-                c.serializeConfig(stream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Utils.sendPacketToClient(bos, (EntityPlayerMP) player);
-    }
-
-    private void packetServerInfo(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        for (IConfigSharing c : Eln.instance.configShared) {
-            try {
-                c.deserialize(stream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -118,7 +84,7 @@ public class PacketHandler {
         try {
             if (stream.readByte() != player.dimension)
                 return;
-            SoundClient.play(SoundCommand.fromStream(stream, player.worldObj));
+            SoundClient.play(SoundCommand.fromStream(stream, player.world));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,8 +95,8 @@ public class PacketHandler {
     void packetOpenLocalGui(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         EntityPlayer clientPlayer = (EntityPlayer) player;
         try {
-            clientPlayer.openGui(Eln.instance, stream.readInt(),
-                clientPlayer.worldObj, stream.readInt(), stream.readInt(),
+            clientPlayer.openGui(Eln.Companion, stream.readInt(),
+                clientPlayer.world, stream.readInt(), stream.readInt(),
                 stream.readInt());
         } catch (IOException e) {
             e.printStackTrace();
@@ -139,10 +105,10 @@ public class PacketHandler {
 
     void packetForNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         try {
-            Coordonate coordonate = new Coordonate(stream.readInt(),
+            Coordinate coordinate = new Coordinate(stream.readInt(),
                 stream.readInt(), stream.readInt(), stream.readByte());
 
-            NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
+            NodeBase node = NodeManager.instance.getNodeFromCoordinate(coordinate);
             if (node != null && node.getNodeUuid().equals(stream.readUTF())) {
                 node.networkUnserialize(stream, (EntityPlayerMP) player);
             } else {
@@ -155,17 +121,17 @@ public class PacketHandler {
 
     void packetForClientNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         EntityPlayer clientPlayer = (EntityPlayer) player;
-        int x, y, z, dimention;
+        int x, y, z, dimension;
         try {
 
             x = stream.readInt();
             y = stream.readInt();
             z = stream.readInt();
-            dimention = stream.readByte();
+            dimension = stream.readByte();
 
 
-            if (clientPlayer.dimension == dimention) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
+            if (clientPlayer.dimension == dimension) {
+                TileEntity entity = clientPlayer.world.getTileEntity(new BlockPos(x,y,z));
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {
@@ -191,14 +157,14 @@ public class PacketHandler {
     void packetNodeSingleSerialized(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         try {
             EntityPlayer clientPlayer = player;
-            int x, y, z, dimention;
+            int x, y, z, dimension;
             x = stream.readInt();
             y = stream.readInt();
             z = stream.readInt();
-            dimention = stream.readByte();
+            dimension = stream.readByte();
 
-            if (clientPlayer.dimension == dimention) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
+            if (clientPlayer.dimension == dimension) {
+                TileEntity entity = clientPlayer.world.getTileEntity(new BlockPos(x,y,z));
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {

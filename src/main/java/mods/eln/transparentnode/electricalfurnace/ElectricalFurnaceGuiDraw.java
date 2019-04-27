@@ -66,8 +66,8 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
         if (render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
 
-        vuMeterTemperature.setComment(1, tr("Actual: %1$°C", Utils.plotValue(render.temperature + PhysicalConstant.Tamb)));
-        vuMeterTemperature.setComment(2, tr("Set point: %1$°C", Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb)));
+        vuMeterTemperature.setComment(1, tr("Actual: %s°C", Utils.plotValue(render.temperature + PhysicalConstant.Tamb)));
+        vuMeterTemperature.setComment(2, tr("Set point: %s°C", Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb)));
     }
 
     @Override

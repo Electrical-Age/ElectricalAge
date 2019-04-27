@@ -63,9 +63,7 @@ public class ElectricalStackMachineProcess implements IProcess {
     public void process(double time) {
         ItemStack itemStackIn = inventory.getStackInSlot(inputSlotId);
 
-        boolean itemTypeChanged = itemStackIn == null && itemStackInOld != null ||
-            itemStackIn != null && itemStackInOld == null ||
-            itemStackIn != null && itemStackInOld != null && !itemStackIn.getUnlocalizedName().equals(itemStackInOld.getUnlocalizedName());
+        boolean itemTypeChanged = !itemStackIn.isItemEqual(itemStackInOld);
 
         if (itemTypeChanged || (!smeltCan()) || !smeltInProcess) {
             smeltInit();
@@ -132,7 +130,7 @@ public class ElectricalStackMachineProcess implements IProcess {
         if (this.smeltCan()) {
             Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
             Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory, outSlotIdList);
-            inventory.decrStackSize(inputSlotId, recipe.input.stackSize);
+            inventory.decrStackSize(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);
         }
     }

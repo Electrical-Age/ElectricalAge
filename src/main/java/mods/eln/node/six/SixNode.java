@@ -37,7 +37,7 @@ public class SixNode extends Node {
     public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>(1);
     public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>(1);
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
     //public int sixNodeCacheMapId = -1;
 
@@ -80,7 +80,9 @@ public class SixNode extends Node {
 
     public boolean createSubBlock(ItemStack itemStack, Direction direction, EntityPlayer player) {
 
-        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
+        // TODO(1.12)
+        //SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
+        SixNodeDescriptor descriptor = null;
         if (sideElementList[direction.getInt()] != null)
             return false;
         try {
@@ -127,15 +129,15 @@ public class SixNode extends Node {
         protected void dropItem(ItemStack itemStack)
 	    {
 	    	
-	        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
+	        if (coordinate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
 	        {
 	            float var6 = 0.7F;
-	            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
+	            double var7 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            double var9 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            double var11 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            EntityItem var13 = new EntityItem(coordinate.world(), (double)coordinate.x + var7, (double)coordinate.y + var9, (double)coordinate.z + var11, itemStack);
 	            var13.delayBeforeCanPickup = 10;
-	            coordonate.world().spawnEntityInWorld(var13);
+	            coordinate.world().spawnEntity(var13);
 	        }
 	    }*/
 
@@ -195,7 +197,7 @@ public class SixNode extends Node {
                 sideElementIdList[idx] = 0;
             } else {
                 try {
-                    SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
+                    SixNodeDescriptor descriptor = null; // TODO(1.12) Eln.sixNodeItem.getDescriptor(sideElementId);
                     sideElementIdList[idx] = sideElementId;
                     sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
                     sideElementList[idx].readFromNBT(nbt.getCompoundTag("ED" + idx));
@@ -231,7 +233,7 @@ public class SixNode extends Node {
         return false;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
         nbt.setInteger("cacheBlockId", Block.getIdFromBlock(sixNodeCacheBlock));
         nbt.setByte("cacheBlockMeta", sixNodeCacheBlockMeta);
@@ -250,6 +252,7 @@ public class SixNode extends Node {
         NBTTagCompound nodeNbt = new NBTTagCompound();
         super.writeToNBT(nodeNbt);
         nbt.setTag("node", nodeNbt);
+        return nbt;
     }
 
     public boolean getSideEnable(Direction direction) {
@@ -485,13 +488,13 @@ public class SixNode extends Node {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (sixNodeCacheBlock != Blocks.air) {
+        if (sixNodeCacheBlock != Blocks.AIR) {
             return false;
         } else {
 
-            ItemStack stack = entityPlayer.getCurrentEquippedItem();
+            ItemStack stack = entityPlayer.getHeldItemMainhand();
 
-            Block b = Blocks.air;
+            Block b = Blocks.AIR;
             if (stack != null)
                 b = Block.getBlockFromItem(stack.getItem());
 
@@ -522,12 +525,13 @@ public class SixNode extends Node {
                     entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
 
                 //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
+                // TODO(1.10): Hopefully this is unnecessary.
                 {
-                    Chunk chunk = coordonate.world().getChunkFromBlockCoords(coordonate.x, coordonate.z);
-                    Utils.generateHeightMap(chunk);
-                    Utils.updateSkylight(chunk);
-                    chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+//                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.pos);
+//                    Utils.generateHeightMap(chunk);
+//                    Utils.updateSkylight(chunk);
+//                    chunk.generateSkylightMap();
+//                    Utils.updateAllLightTypes(coordinate.world(), coordinate.pos);
                 }
                 return true;
             } else {
@@ -606,8 +610,9 @@ public class SixNode extends Node {
 
     @Override
     public String getNodeUuid() {
-
-        return Eln.sixNodeBlock.getNodeUuid();
+        // TODO(1.12)
+        return "";
+//        return Eln.sixNodeBlock.getNodeUuid();
     }
 
     @Override

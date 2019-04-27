@@ -1,6 +1,6 @@
 package mods.eln.sixnode.electricalwindsensor;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
@@ -25,9 +25,9 @@ public class ElectricalWindSensorSlowProcess implements IProcess, INBTTReady {
         timeCounter += time;
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
-            Coordonate coord = element.sixNode.coordonate;
+            Coordinate coord = element.sixNode.coordinate;
+            element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.getDimension(), coord.pos.getY()) / element.descriptor.windMax);
 
-            element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.dimention, coord.y) / element.descriptor.windMax);
         }
     }
 
@@ -36,6 +36,7 @@ public class ElectricalWindSensorSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
+        return nbt;
     }
 }

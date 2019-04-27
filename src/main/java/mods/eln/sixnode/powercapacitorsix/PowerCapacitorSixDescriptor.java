@@ -1,6 +1,7 @@
 package mods.eln.sixnode.powercapacitorsix;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -45,27 +46,29 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
     public double getCValue(int cableCount, double nominalDielVoltage) {
         if (cableCount == 0) return 1e-6;
-        double uTemp = nominalDielVoltage / Eln.LVU;
+        double uTemp = nominalDielVoltage / Cable.LVU;
         return serie.getValue(cableCount - 1) / uTemp / uTemp;
     }
 
     public double getCValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerCapacitorSixContainer.redId);
         ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
-        if (core == null || diel == null)
+
+
+        if (core.isEmpty() || diel.isEmpty())
             return getCValue(0, 0);
         else {
-            return getCValue(core.stackSize, getUNominalValue(inventory));
+            return getCValue(core.getCount(), getUNominalValue(inventory));
         }
     }
 
     public double getUNominalValue(IInventory inventory) {
         ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
-        if (diel == null)
+        if (diel.isEmpty())
             return 10000;
         else {
             DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-            return desc.uNominal * diel.stackSize;
+            return desc.uNominal * diel.getCount();
         }
     }
 
@@ -80,27 +83,28 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         if (null != CapacitorCore) CapacitorCore.draw();
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw();
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type != ItemRenderType.INVENTORY) {
+//            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+//            GL11.glScalef(1.25f, 1.25f, 1.25f);
+//            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+//            draw();
+//        } else {
+//            super.renderItem(type, item, data);
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {

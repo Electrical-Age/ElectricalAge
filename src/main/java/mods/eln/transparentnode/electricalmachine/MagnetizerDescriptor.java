@@ -43,7 +43,8 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         rot.draw(handle.counter, 0f, 0f, 1f);
 
         GL11.glScalef(0.5f, 0.5f, 0.5f);
-        UtilsClient.drawEntityItem(inEntity, 0.0, 0.25f, 0f, handle.itemCounter, 1f);
+        // TODO(1.10): Items something something
+        //UtilsClient.drawEntityItem(inEntity, 0.0, 0.25f, 0f, handle.itemCounter, 1f);
     }
 
     @Override

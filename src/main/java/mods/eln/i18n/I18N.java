@@ -1,14 +1,14 @@
 package mods.eln.i18n;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.registry.LanguageRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.util.text.TextComponentTranslation;
+
+import javax.xml.soap.Text;
 
 /**
  * Internationalization and localization helper class.
  */
 public class I18N {
-    private final static LanguageRegistry languageRegistry = LanguageRegistry.instance();
-
     public static String getCurrentLanguage() {
         return FMLCommonHandler.instance().getCurrentLanguage();
     }
@@ -35,7 +35,7 @@ public class I18N {
      * Translates the given string. You can pass arguments to the method and reference them in the string using
      * the placeholders %N$ whereas N is the index of the actual parameter <b>starting at 1</b>.
      * <p>
-     * Example: tr("You have %1$ lives left", 4);
+     * Example: tr("You have %s lives left", 4);
      * <p>
      * IT IS IMPORTANT THAT YOU PASS THE <b>STRING LITERALS</b> AT LEAST ONCE AS THE FIRST PARAMETER TO THIS METHOD or
      * you call the method TR() with the actual string literal in order to register the translation text automatically!
@@ -50,15 +50,10 @@ public class I18N {
      */
     public static String tr(final String text, Object... objects) {
         // Try to find the translation for the string using forge API.
-        String translation = languageRegistry.getStringLocalization(encodeLangKey(text));
+        String translation = new TextComponentTranslation(encodeLangKey(text)).getFormattedText();
 
-        // If no translation was found, just use the original text.
-        if (translation == null || "".equals(translation)) {
-            translation = text;
-        } else {
-            // Replace placeholders .
-            translation = translation.replace("\\n", "\n").replace("\\:", ":");
-        }
+        // Replace placeholders .
+        translation = translation.replace("\\n", "\n").replace("\\:", ":");
 
         // Replace placeholders in string by actual string values of the passed objects.
         for (int i = 0; i < objects.length; ++i) {

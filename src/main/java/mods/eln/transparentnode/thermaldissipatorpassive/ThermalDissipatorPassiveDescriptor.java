@@ -60,10 +60,10 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Used to cool down turbines."));
-        list.add(tr("Max. temperature: %1$°C", Utils.plotValue(warmLimit)));
+        list.add(tr("Max. temperature: %s°C", Utils.plotValue(warmLimit)));
         list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Temperature: %1$°C", Utils.plotValue(nominalT)));
-        list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
+        list.add("  " + tr("Temperature: %s°C", Utils.plotValue(nominalT)));
+        list.add("  " + tr("Cooling power: %sW", Utils.plotValue(nominalP)));
     }
 
 
@@ -72,23 +72,24 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
     }
 
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw();
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw();
+//        }
+//    }
 }

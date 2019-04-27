@@ -1,6 +1,7 @@
 package mods.eln.sim;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,12 +23,12 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
     @Override
     public void process(double time) {
         if (state) {
-            if (gate.getU() < Eln.instance.SVU * 0.3) {
+            if (gate.getU() < Cable.SVU * 0.3) {
                 state = false;
                 setOutput(false);
             } else setOutput(true);
         } else {
-            if (gate.getU() > Eln.instance.SVU * 0.7) {
+            if (gate.getU() > Cable.SVU * 0.7) {
                 state = true;
                 setOutput(true);
             } else setOutput(false);
@@ -40,7 +41,8 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setBoolean(str + name + "state", state);
+        return nbt;
     }
 }

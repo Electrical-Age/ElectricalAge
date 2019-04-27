@@ -1,6 +1,5 @@
 package mods.eln.mechanical
 
-import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
 import mods.eln.gui.GuiHelper
@@ -8,6 +7,7 @@ import mods.eln.gui.GuiScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N
+import mods.eln.init.Cable
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
@@ -106,10 +106,11 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
         maxRads = nbt.getFloat("maxRads")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         nbt.setFloat("minRads", minRads)
         nbt.setFloat("maxRads", maxRads)
+        return nbt
     }
 
     override fun getWaila(): Map<String, String> {
@@ -125,7 +126,7 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     internal var maxRads = TachometerElement.DefaultMaxRads
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, Eln.instance.stdCableRenderSignal, connections, renderPreProcess)
+        renderPreProcess = drawCable(Direction.YN, Cable.signal.descriptor.render, connections, renderPreProcess)
         super.draw()
     }
 

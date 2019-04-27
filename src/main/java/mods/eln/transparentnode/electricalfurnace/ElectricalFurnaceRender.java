@@ -11,6 +11,7 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -99,7 +100,8 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
                 entityItemIn = null;
                 stream.readShort();
             } else {
-                entityItemIn = new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(read, 1, stream.readShort()));
+                BlockPos pos = tileEntity.getPos();
+                entityItemIn = new EntityItem(tileEntity.getWorld(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 1.2, Utils.newItemStack(read, 1, stream.readShort()));
             }
 
             heatingCorpResistorP = stream.readShort();

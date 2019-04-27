@@ -26,8 +26,8 @@ public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorU
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Nominal:"));
-        list.add("  " + tr("Power: %1$W", Utils.plotValue(nominalPower)));
-        list.add("  " + tr("Time per operation: %1$h", operationTime));
-        list.add("  " + tr("Energy per operation: %1$J", Utils.plotValue(OperationEnergy)));
+        list.add("  " + tr("Power: %sW", Utils.plotValue(nominalPower)));
+        list.add("  " + tr("Time per operation: %sh", operationTime));
+        list.add("  " + tr("Energy per operation: %sJ", Utils.plotValue(OperationEnergy)));
     }
 }

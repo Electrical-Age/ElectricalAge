@@ -49,11 +49,9 @@ public class ElectricalMathGui extends GuiContainerEln {
     protected void postDraw(float f, int x, int y) {
         super.postDraw(f, x, y);
         int c;
-        int redNbr = 0;
         ItemStack stack = render.inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
+        int redNbr = stack.getCount();
 
-        if (stack != null)
-            redNbr = stack.stackSize;
         if (!expression.getText().equals(render.expression)) {
             c = 0xFF404040;
             helper.drawString(8 + 44 / 2, 29, c, tr("Waiting for completion..."));
@@ -65,7 +63,7 @@ public class ElectricalMathGui extends GuiContainerEln {
                 c = 0xFF108F00;
             else
                 c = 0xFFFF0000;
-            helper.drawString(8 + 44 / 2, 29, c, tr("%1$ Redstone(s) required", render.redstoneRequired));
+            helper.drawString(8 + 44 / 2, 29, c, tr("%s Redstone(s) required", render.redstoneRequired));
         } else {
             c = 0xFFFF0000;
             helper.drawString(8 + 44 / 2, 29, c, tr("Invalid equation!"));

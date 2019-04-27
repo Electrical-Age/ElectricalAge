@@ -3,6 +3,7 @@ package mods.eln.sixnode.lampsocket;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
@@ -15,7 +16,6 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.MonsterPopFreeProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -37,7 +37,6 @@ public class LampSocketElement extends SixNodeElement {
 
     LampSocketDescriptor socketDescriptor = null;
 
-    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, Eln.instance.killMonstersAroundLampsRange);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 
     public LampSocketProcess lampProcess = new LampSocketProcess(this);
@@ -70,9 +69,7 @@ public class LampSocketElement extends SixNodeElement {
 
         lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
         slowProcessList.add(lampProcess);
-        slowProcessList.add(monsterPopFreeProcess);
     }
-
 
     @Override
     public IInventory getInventory() {
@@ -103,12 +100,13 @@ public class LampSocketElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) ((front.toInt() << 0) + (grounded ? 4 : 0)));
         nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
         nbt.setString("channel", channel);
         nbt.setByte("color", (byte) (paintColor));
+        return nbt;
     }
 
     public void networkUnserialize(DataInputStream stream) {
@@ -221,7 +219,7 @@ public class LampSocketElement extends SixNodeElement {
         } else {
             info.put(I18N.tr("Bulb"), I18N.tr("None"));
         }
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             if (poweredByLampSupply) {
                 info.put(I18N.tr("Channel"), channel);
             }
@@ -274,7 +272,7 @@ public class LampSocketElement extends SixNodeElement {
             //negativeLoad.highImpedance();
         } else {
             cableDescriptor.applyTo(positiveLoad);
-            //cableDescriptor.applyTo(negativeLoad, grounded,5);
+            //cableDescriptor.applied(negativeLoad, grounded,5);
         }
 
         lampDescriptor = (LampDescriptor) Utils.getItemObject(lamp);
@@ -296,7 +294,7 @@ public class LampSocketElement extends SixNodeElement {
             return true;
         }
 
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (currentItemStack != null) {
             GenericItemUsingDamageDescriptor itemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(currentItemStack);
             if (itemDescriptor != null) {
@@ -312,7 +310,7 @@ public class LampSocketElement extends SixNodeElement {
             }
         }
 
-        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
+        return acceptingInventory.take(entityPlayer.getHeldItemMainhand(), this, true, false);
     }
 
     public int getLightValue() {

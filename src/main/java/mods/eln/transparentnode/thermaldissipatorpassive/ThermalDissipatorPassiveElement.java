@@ -3,6 +3,7 @@ package mods.eln.transparentnode.thermaldissipatorpassive;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.init.Config;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -87,20 +88,15 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
-        ItemStack stack = entityPlayer.getCurrentEquippedItem();
-        if (stack == null) return false;
-        if (stack.getItem() == Items.water_bucket) {
+        ItemStack stack = entityPlayer.getHeldItemMainhand();
+        if (stack.getItem() == Items.WATER_BUCKET) {
             thermalLoad.Tc *= 0.5;
-
-            entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, new ItemStack(Items.bucket));
+            entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, new ItemStack(Items.BUCKET));
             return true;
         }
-        if (stack.getItem() == Item.getItemFromBlock(Blocks.ice)) {
+        if (stack.getItem() == Item.getItemFromBlock(Blocks.ICE)) {
             thermalLoad.Tc *= 0.2;
-            if (stack.stackSize != 0)
-                stack.stackSize--;
-            else
-                entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, null);
+            stack.splitStack(1);
             return true;
         }
         return false;
@@ -110,7 +106,7 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
-        if (Eln.wailaEasyMode) {
+        if (Config.INSTANCE.getWailaEasyMode()) {
             info.put(I18N.tr("Thermal power"), Utils.plotPower("", thermalLoad.getPower()));
         }
         return info;

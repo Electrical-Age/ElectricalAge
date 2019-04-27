@@ -69,12 +69,13 @@ public class DataLogs implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setByteArray(str + "log", copyLog());
         nbt.setFloat(str + "samplingPeriod", samplingPeriod);
         nbt.setFloat(str + "maxValue", maxValue);
         nbt.setFloat(str + "minValue", minValue);
         nbt.setByte(str + "unitType", unitType);
+        return nbt;
     }
 
     public byte[] copyLog() {

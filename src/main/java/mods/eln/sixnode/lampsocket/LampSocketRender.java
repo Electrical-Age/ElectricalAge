@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import org.lwjgl.opengl.GL11;
 
@@ -69,63 +70,65 @@ public class LampSocketRender extends SixNodeElementRender {
         return inventory;
     }
 
+    // TODO(1.10): Fix render.
     @Override
     public void draw() {
         super.draw(); //Colored cable only
 
         GL11.glRotatef(descriptor.initialRotateDeg, 1.f, 0.f, 0.f);
-        descriptor.render.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity));
+        //descriptor.render.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity));
     }
 
     @Override
     public void refresh(float deltaT) {
-        if (descriptor.render instanceof LampSocketSuspendedObjRender) {
-            float dt = deltaT;
-
-            entityTimout -= dt;
-            if (entityTimout < 0) {
-                entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord, tileEntity.yCoord - 2, tileEntity.zCoord, tileEntity.getWorldObj()).getAxisAlignedBB(2));
-                entityTimout = 0.1f;
-            }
-
-            for (Object o : entityList) {
-                Entity e = (Entity) o;
-                float eFactor = 0;
-                if (e instanceof EntityArrow)
-                    eFactor = 1f;
-                if (e instanceof EntityLivingBase)
-                    eFactor = 4f;
-
-                if (eFactor == 0)
-                    continue;
-                pertuVz += e.motionX * eFactor * dt;
-                pertuVy += e.motionZ * eFactor * dt;
-            }
-
-            if (tileEntity.getWorldObj().getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord) > 3) {
-                float weather = (float) UtilsClient.getWeather(tileEntity.getWorldObj()) * 0.9f + 0.1f;
-
-                weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
-                weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
-                if (weatherAlphaY > 2 * Math.PI)
-                    weatherAlphaY -= 2 * Math.PI;
-                if (weatherAlphaZ > 2 * Math.PI)
-                    weatherAlphaZ -= 2 * Math.PI;
-                pertuVy += Math.random() * Math.sin(weatherAlphaY) * weather * weather * dt * 3;
-                pertuVz += Math.random() * Math.cos(weatherAlphaY) * weather * weather * dt * 3;
-
-                pertuVy += 0.4 * dt * weather * Math.signum(pertuVy) * Math.random();
-                pertuVz += 0.4 * dt * weather * Math.signum(pertuVz) * Math.random();
-            }
-
-            pertuVy -= pertuPy / 10 * dt;
-            pertuVy *= (1 - 0.2 * dt);
-            pertuPy += pertuVy;
-
-            pertuVz -= pertuPz / 10 * dt;
-            pertuVz *= (1 - 0.2 * dt);
-            pertuPz += pertuVz;
-        }
+        // TODO(1.10): Fix render.
+//        if (descriptor.render instanceof LampSocketSuspendedObjRender) {
+//            float dt = deltaT;
+//            BlockPos pos = tileEntity.getPos();
+//            entityTimout -= dt;
+//            if (entityTimout < 0) {
+//                entityList = tileEntity.getWorld().getEntitiesWithinAABB(Entity.class, new Coordinate(pos.getX(), pos.getY() - 2, pos.getZ(), tileEntity.getWorld()).getAxisAlignedBB(2));
+//                entityTimout = 0.1f;
+//            }
+//
+//            for (Object o : entityList) {
+//                Entity e = (Entity) o;
+//                float eFactor = 0;
+//                if (e instanceof EntityArrow)
+//                    eFactor = 1f;
+//                if (e instanceof EntityLivingBase)
+//                    eFactor = 4f;
+//
+//                if (eFactor == 0)
+//                    continue;
+//                pertuVz += e.motionX * eFactor * dt;
+//                pertuVy += e.motionZ * eFactor * dt;
+//            }
+//
+//            if (tileEntity.getWorld().getSavedLightValue(EnumSkyBlock.SKY, pos.getX(), pos.getY(), pos.getZ()) > 3) {
+//                float weather = (float) UtilsClient.getWeather(tileEntity.getWorld()) * 0.9f + 0.1f;
+//
+//                weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
+//                weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
+//                if (weatherAlphaY > 2 * Math.PI)
+//                    weatherAlphaY -= 2 * Math.PI;
+//                if (weatherAlphaZ > 2 * Math.PI)
+//                    weatherAlphaZ -= 2 * Math.PI;
+//                pertuVy += Math.random() * Math.sin(weatherAlphaY) * weather * weather * dt * 3;
+//                pertuVz += Math.random() * Math.cos(weatherAlphaY) * weather * weather * dt * 3;
+//
+//                pertuVy += 0.4 * dt * weather * Math.signum(pertuVy) * Math.random();
+//                pertuVz += 0.4 * dt * weather * Math.signum(pertuVz) * Math.random();
+//            }
+//
+//            pertuVy -= pertuPy / 10 * dt;
+//            pertuVy *= (1 - 0.2 * dt);
+//            pertuPy += pertuVy;
+//
+//            pertuVz -= pertuPz / 10 * dt;
+//            pertuVz *= (1 - 0.2 * dt);
+//            pertuPz += pertuVz;
+//        }
     }
 
     void setLight(byte newLight) {

@@ -1,6 +1,7 @@
 package mods.eln.sixnode.powerinductorsix;
 
 import mods.eln.Eln;
+import mods.eln.init.Cable;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -46,21 +47,18 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
     public double getlValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.cableId);
-        if (core == null)
-            return getlValue(0);
-        else
-            return getlValue(core.stackSize);
+        return getlValue(core.getCount());
     }
 
     public double getRsValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
 
-        if (core == null) return MnaConst.highImpedance;
+        if (core.isEmpty()) return MnaConst.highImpedance;
         FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
         double coreFactor = coreDescriptor.cableMultiplicator;
 
-        return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
+        return Cable.Companion.getLowVoltage().descriptor.electricalRs * coreFactor;
     }
 
     public void setParent(net.minecraft.item.Item item, int damage) {
@@ -77,27 +75,28 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
         if (null != InductorCore) InductorCore.draw();
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw();
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type != ItemRenderType.INVENTORY) {
+//            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+//            GL11.glScalef(1.25f, 1.25f, 1.25f);
+//            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+//            draw();
+//        } else {
+//            super.renderItem(type, item, data);
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
