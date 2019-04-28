@@ -71,6 +71,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
 import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
+import mods.eln.sixnode.awgcable.AwgCableDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
@@ -276,6 +277,8 @@ public class Eln {
     public ElectricalCableDescriptor batteryCableDescriptor;
     public ElectricalCableDescriptor meduimVoltageCableDescriptor;
     public ElectricalCableDescriptor signalBusCableDescriptor;
+
+    public AwgCableDescriptor lowCurrentCableDescriptor;
 
     public OreRegenerate oreRegenerate;
 
@@ -1148,6 +1151,8 @@ public class Eln {
     public CableRenderDescriptor stdCableRender3200V;
     public CableRenderDescriptor stdCableRenderCreative;
 
+    public CableRenderDescriptor stdCableRenderLowCurrent;
+
     public static final double gateOutputCurrent = 0.100;
     public static final double SVU = 50, SVII = gateOutputCurrent / 50,
         SVUinv = 1.0 / SVU;
@@ -1400,6 +1405,27 @@ public class Eln {
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
             // GameRegistry.registerCustomItemStack(name, desc.newItemStack(1));
 
+        }
+
+        {
+            subId = 25;
+
+            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 0.5f, 0.5f);
+
+            name = TR_NAME(Type.NONE, "Low Current Cable");
+
+            AwgCableDescriptor lowCurrentCableDescriptor = new AwgCableDescriptor(name, stdCableRenderLowCurrent);
+
+            lowCurrentCableDescriptor.setCableType(
+                5,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime,
+                1
+            );
+
+            sixNodeItem.addDescriptor(subId + (id << 6), lowCurrentCableDescriptor);
         }
     }
 
