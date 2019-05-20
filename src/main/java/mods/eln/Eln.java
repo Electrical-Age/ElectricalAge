@@ -29,7 +29,6 @@ import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.gridnode.transformer.GridTransformerDescriptor;
-import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -39,6 +38,7 @@ import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.mechanical.*;
 import mods.eln.misc.*;
+import mods.eln.misc.materials.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
@@ -71,7 +71,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
 import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
-import mods.eln.sixnode.awgcable.AwgCableDescriptor;
+import mods.eln.sixnode.currentcable.CurrentCableDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
@@ -110,7 +110,6 @@ import mods.eln.sixnode.modbusrtu.ModbusTcpServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
 import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
-import mods.eln.sixnode.powersocket.PowerSocketElement;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
@@ -278,7 +277,9 @@ public class Eln {
     public ElectricalCableDescriptor meduimVoltageCableDescriptor;
     public ElectricalCableDescriptor signalBusCableDescriptor;
 
-    public AwgCableDescriptor lowCurrentCableDescriptor;
+    public static MaterialProperties mp;
+
+    public CurrentCableDescriptor lowCurrentCableDescriptor;
 
     public OreRegenerate oreRegenerate;
 
@@ -568,6 +569,8 @@ public class Eln {
         transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
 
         oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
+
+        mp = new MaterialProperties();
         /*
          *
          * int id = 0,subId = 0,completId; String name;
@@ -1192,6 +1195,7 @@ public class Eln {
 
         CableRenderDescriptor render;
         ElectricalCableDescriptor desc;
+
         {
             subId = 0;
 
@@ -1414,15 +1418,78 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Low Current Cable");
 
-            AwgCableDescriptor lowCurrentCableDescriptor = new AwgCableDescriptor(name, stdCableRenderLowCurrent);
+            CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
 
             lowCurrentCableDescriptor.setCableType(
-                5,
+                25,
+                MaterialType.COPPER,
                 0,
                 cableWarmLimit,
                 -100,
-                cableHeatingTime,
-                1
+                cableHeatingTime
+            );
+
+            sixNodeItem.addDescriptor(subId + (id << 6), lowCurrentCableDescriptor);
+        }
+
+        {
+            subId = 26;
+
+            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 1f, 0.5f);
+
+            name = TR_NAME(Type.NONE, "Medium Current Cable");
+
+            CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
+
+            lowCurrentCableDescriptor.setCableType(
+                75,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
+            );
+
+            sixNodeItem.addDescriptor(subId + (id << 6), lowCurrentCableDescriptor);
+        }
+
+        {
+            subId = 27;
+
+            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 2f, 1f);
+
+            name = TR_NAME(Type.NONE, "High Current Cable");
+
+            CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
+
+            lowCurrentCableDescriptor.setCableType(
+                150,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
+            );
+
+            sixNodeItem.addDescriptor(subId + (id << 6), lowCurrentCableDescriptor);
+        }
+
+        {
+            subId = 28;
+
+            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 4f, 2f);
+
+            name = TR_NAME(Type.NONE, "Very High Current Cable");
+
+            CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
+
+            lowCurrentCableDescriptor.setCableType(
+                600,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
             );
 
             sixNodeItem.addDescriptor(subId + (id << 6), lowCurrentCableDescriptor);

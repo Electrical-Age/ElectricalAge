@@ -1,4 +1,4 @@
-package mods.eln.sixnode.awgcable;
+package mods.eln.sixnode.currentcable;
 
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
@@ -15,15 +15,15 @@ import org.lwjgl.opengl.GL11;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class AwgCableRender extends SixNodeElementRender {
+public class CurrentCableRender extends SixNodeElementRender {
 
-    AwgCableDescriptor descriptor;
+    CurrentCableDescriptor descriptor;
 
     int color = 0;
 
-    public AwgCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+    public CurrentCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
-        this.descriptor = (AwgCableDescriptor) descriptor;
+        this.descriptor = (CurrentCableDescriptor) descriptor;
     }
 
     public boolean drawCableAuto() { return false; }

@@ -1,4 +1,4 @@
-package mods.eln.sixnode.awgcable;
+package mods.eln.sixnode.currentcable;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -22,14 +22,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AwgCableElement extends SixNodeElement {
+public class CurrentCableElement extends SixNodeElement {
 
     public NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
     NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
@@ -37,14 +36,14 @@ public class AwgCableElement extends SixNodeElement {
     ElectricalLoadHeatThermalLoad heater = new ElectricalLoadHeatThermalLoad(electricalLoad, thermalLoad);
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 
-    AwgCableDescriptor descriptor;
+    CurrentCableDescriptor descriptor;
 
     int color;
     int colorCare;
 
-    public AwgCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+    public CurrentCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
-        this.descriptor = (AwgCableDescriptor) descriptor;
+        this.descriptor = (CurrentCableDescriptor) descriptor;
 
         color = 0;
         colorCare = 1;

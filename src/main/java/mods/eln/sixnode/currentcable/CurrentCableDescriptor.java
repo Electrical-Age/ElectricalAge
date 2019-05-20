@@ -1,10 +1,11 @@
-package mods.eln.sixnode.awgcable;
+package mods.eln.sixnode.currentcable;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
+import mods.eln.misc.materials.MaterialType;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -20,12 +21,12 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class AwgCableDescriptor extends SixNodeDescriptor {
+public class CurrentCableDescriptor extends SixNodeDescriptor {
 
     public CableRenderDescriptor render;
 
     double electricalRs;
-    double electricalMaxI;
+    public double electricalMaxI;
 
     double thermalC;
     double thermalRp;
@@ -33,27 +34,39 @@ public class AwgCableDescriptor extends SixNodeDescriptor {
     double thermalWarmLimit;
     double thermalCoolLimit;
 
-    public AwgCableDescriptor(String name, CableRenderDescriptor render) {
-        super(name, AwgCableElement.class, AwgCableRender.class);
-
+    public CurrentCableDescriptor(String name, CableRenderDescriptor render) {
+        super(name, CurrentCableElement.class, CurrentCableRender.class);
         this.render = render;
-
     }
 
-    public void setCableType(double cableAwg, double insulationThickness, double thermalWarmLimit, double thermalCoolLimit, double thermalNominalHeatTime, double thermalConductivityTao) {
-
-        //TODO: Base on the cableAwg
-        electricalMaxI = cableAwg;
-
-        electricalRs = (electricalMaxI / 2000);
+    /**
+     *
+     * @param conductorArea size of conductor area (mm^2)
+     * @param type material type (Copper, Iron, etc.)
+     * @param insulationThickness thickness of insulation (mm)
+     * @param thermalWarmLimit maximum temperature (C)
+     * @param thermalCoolLimit minimum temperature (C)
+     * @param thermalNominalHeatTime
+     */
+    public void setCableType(double conductorArea, MaterialType type, double insulationThickness, double thermalWarmLimit, double thermalCoolLimit, double thermalNominalHeatTime) {
 
         this.thermalWarmLimit = thermalWarmLimit;
         this.thermalCoolLimit = thermalCoolLimit;
 
+        this.electricalMaxI = 0.355 * conductorArea; // roughly (mm^2 / I) that is suggested by https://www.powerstream.com/Wire_Size.htm for power transmission lines
+
+        electricalRs = Eln.mp.getElectricalResistivity(type) * (conductorArea / 1000000 / 1.0); // resistivity (ohms/meter)* (cross sectional area (m) / length (m))
+        System.out.println("Cable Resistance: " + electricalRs);
+
+        // begin odd thermal system code
         double thermalMaximalPowerDissipated = electricalMaxI * electricalMaxI * electricalRs * 2;
         thermalC = (thermalMaximalPowerDissipated * thermalNominalHeatTime) / thermalWarmLimit;
         thermalRp = thermalWarmLimit / thermalMaximalPowerDissipated;
-        thermalRs = thermalConductivityTao / thermalC / 2;
+        thermalRs = (Eln.mp.getThermalConductivity(type) / 385.0) / thermalC / 2;
+        // TODO: FIX WHEN REDOING THERMAL SYSTEM
+        // I replaced thermalConductivityTao with (material.getThermalConductivity() / 385.0)
+        // Since thermalConductivityTao is typically 1, I'm going to use Copper's thermal conductivity constant as a baseline.
+        // When someone redoes the thermal system, please remove this shim and do it correctly.
 
         Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC);
 
@@ -103,14 +116,16 @@ public class AwgCableDescriptor extends SixNodeDescriptor {
 
     public static CableRenderDescriptor getCableRender(ItemStack cable) {
         if (cable == null) return null;
-        GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
-        if (desc instanceof ElectricalCableDescriptor)
-            return ((ElectricalCableDescriptor) desc).render;
+        GenericItemBlockUsingDamageDescriptor desc = CurrentCableDescriptor.getDescriptor(cable);
+        if (desc instanceof CurrentCableDescriptor)
+            return ((CurrentCableDescriptor) desc).render;
         else
             return null;
     }
 
-    public void bindCableTexture() {
-        this.render.bindCableTexture();
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return false;
     }
+
 }

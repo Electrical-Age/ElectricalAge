@@ -22,6 +22,7 @@ import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sixnode.currentcable.CurrentCableDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -137,24 +138,37 @@ public class TransformerElement extends TransparentNodeElement implements IConfi
         ItemStack primaryCable = inventory.getStackInSlot(TransformerContainer.primaryCableSlotId);
         ItemStack secondaryCable = inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId);
         ItemStack core = inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId);
-        ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
+
+        CurrentCableDescriptor primaryCurrentCableDescriptor = null, secondaryCurrentCableDescriptor = null;
+        ElectricalCableDescriptor primaryVoltageCableDescriptor = null, secondaryVoltageCableDescriptor = null;
 
         if (primaryCable != null) {
-            primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
+            Object o = Eln.sixNodeItem.getDescriptor(primaryCable);
+            if (o instanceof ElectricalCableDescriptor) {
+                primaryVoltageCableDescriptor = (ElectricalCableDescriptor) o;
+                voltagePrimaryWatchdog.setUNominal(primaryVoltageCableDescriptor.electricalNominalVoltage);
+            } else if (o instanceof CurrentCableDescriptor) {
+                primaryCurrentCableDescriptor = (CurrentCableDescriptor) o;
+                voltagePrimaryWatchdog.setUNominal(1000000);
+            } else {
+                // no cable in slot
+                voltagePrimaryWatchdog.setUNominal(1000000);
+            }
         }
+
         if (secondaryCable != null) {
-            secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
+            Object o = Eln.sixNodeItem.getDescriptor(secondaryCable);
+            if (o instanceof ElectricalCableDescriptor) {
+                secondaryVoltageCableDescriptor = (ElectricalCableDescriptor) o;
+                voltageSecondaryWatchdog.setUNominal(secondaryVoltageCableDescriptor.electricalNominalVoltage);
+            } else if (o instanceof CurrentCableDescriptor) {
+                secondaryCurrentCableDescriptor = (CurrentCableDescriptor) o;
+                voltageSecondaryWatchdog.setUNominal(1000000);
+            } else {
+                // no cable in slot
+                voltageSecondaryWatchdog.setUNominal(1000000);
+            }
         }
-
-        if (primaryCableDescriptor != null)
-            voltagePrimaryWatchdog.setUNominal(primaryCableDescriptor.electricalNominalVoltage);
-        else
-            voltagePrimaryWatchdog.setUNominal(1000000);
-
-        if (secondaryCableDescriptor != null)
-            voltageSecondaryWatchdog.setUNominal(secondaryCableDescriptor.electricalNominalVoltage);
-        else
-            voltageSecondaryWatchdog.setUNominal(1000000);
 
         double coreFactor = 1;
         if (core != null) {
@@ -167,16 +181,26 @@ public class TransformerElement extends TransparentNodeElement implements IConfi
             primaryLoad.highImpedance();
             primaryMaxCurrent = 0;
         } else {
-            primaryCableDescriptor.applyTo(primaryLoad, coreFactor);
-            primaryMaxCurrent = (float) primaryCableDescriptor.electricalMaximalCurrent;
+            if (primaryVoltageCableDescriptor != null) {
+                primaryVoltageCableDescriptor.applyTo(primaryLoad, coreFactor);
+                primaryMaxCurrent = (float) primaryVoltageCableDescriptor.electricalMaximalCurrent;
+            } else if (primaryCurrentCableDescriptor != null) {
+                primaryCurrentCableDescriptor.applyTo(primaryLoad, coreFactor);
+                primaryMaxCurrent = (float) primaryCurrentCableDescriptor.electricalMaxI;
+            }
         }
 
         if (secondaryCable == null || core == null) {
             secondaryLoad.highImpedance();
             secondaryMaxCurrent = 0;
         } else {
-            secondaryCableDescriptor.applyTo(secondaryLoad, coreFactor);
-            secondaryMaxCurrent = (float) secondaryCableDescriptor.electricalMaximalCurrent;
+            if (secondaryVoltageCableDescriptor != null) {
+                secondaryVoltageCableDescriptor.applyTo(secondaryLoad, coreFactor);
+                primaryMaxCurrent = (float) secondaryVoltageCableDescriptor.electricalMaximalCurrent;
+            } else if (secondaryCurrentCableDescriptor != null) {
+                secondaryCurrentCableDescriptor.applyTo(secondaryLoad, coreFactor);
+                primaryMaxCurrent = (float) secondaryCurrentCableDescriptor.electricalMaxI;
+            }
         }
 
         if (primaryCable != null && secondaryCable != null) {

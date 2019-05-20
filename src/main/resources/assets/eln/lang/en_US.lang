@@ -1127,3 +1127,6 @@ Transmission_Tower.name=T2 Transmission Tower
 Utility_Pole.name=T1 Utility Pole
 Utility_Pole_w/DC-DC_Converter.name=T1 Utility Pole with Transformer
 Low_Current_Cable.name=Low Current Cable
+Medium_Current_Cable.name=Medium Current Cable
+High_Current_Cable.name=High Current Cable
+Very_High_Current_Cable.name=Very High Current Cable
