@@ -81,7 +81,7 @@ public class ThermalCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        return NodeBase.maskThermalWire + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+        return NodeBase.MASK_THERMAL_WIRE + (color << NodeBase.MASK_COLOR_SHIFT) + (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ThermalCableElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeByte((color << 4));
-            stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+            stream.writeShort((short) (thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));
         } catch (IOException e) {
             e.printStackTrace();
         }

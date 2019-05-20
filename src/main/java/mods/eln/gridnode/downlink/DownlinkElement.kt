@@ -66,6 +66,6 @@ class DownlinkElement(node: TransparentNode, descriptor: TransparentNodeDescript
     }
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
-        return NodeBase.maskElectricalPower
+        return NodeBase.MASK_ELECTRICAL_POWER
     }
 }

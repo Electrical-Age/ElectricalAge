@@ -110,7 +110,7 @@ public class ElectricalRelayElement extends SixNodeElement implements IConfigura
     public int getConnectionMask(LRDU lrdu) {
         if (front.left() == lrdu) return descriptor.cable.getNodeMask();
         if (front.right() == lrdu) return descriptor.cable.getNodeMask();
-        if (front == lrdu) return NodeBase.maskElectricalInputGate;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

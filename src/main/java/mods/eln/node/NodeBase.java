@@ -31,49 +31,43 @@ import java.util.ArrayList;
 
 public abstract class NodeBase {
 
-    public static final int maskElectricalPower = 1 << 0;
-    public static final int maskThermal = 1 << 1;
+    public static final int MASK_ELECTRICAL_POWER = 1 << 0;
+    public static final int MASK_THERMAL = 1 << 1;
 
-    public static final int maskElectricalGate = (1 << 2);
-    public static final int maskElectricalAll = maskElectricalPower | maskElectricalGate;
+    public static final int MASK_ELECTRICAL_GATE = (1 << 2);
+    public static final int MASK_ELECTRICAL_ALL = MASK_ELECTRICAL_POWER | MASK_ELECTRICAL_GATE;
 
-    public static final int maskElectricalInputGate = maskElectricalGate;
-    public static final int maskElectricalOutputGate = maskElectricalGate;
+    public static final int MASK_ELECTRICAL_INPUT_GATE = MASK_ELECTRICAL_GATE;
+    public static final int MASK_ELECTRICAL_OUTPUT_GATE = MASK_ELECTRICAL_GATE;
 
-    public static final int maskWire = 0;
-    public static final int maskElectricalWire = (1 << 3);
-    public static final int maskThermalWire = maskWire + maskThermal;
+    public static final int MASK_WIRE = 0;
+    public static final int MASK_ELECTRICAL_WIRE = (1 << 3);
+    public static final int MASK_THERMAL_WIRE = MASK_WIRE + MASK_THERMAL;
 
-    public static final int maskSignal = (1 << 9);
-    public static final int maskRs485 = (1 << 10);
+    public static final int MASK_SIGNAL = (1 << 9);
+    public static final int MASK_RS_485 = (1 << 10);
 
-    public static final int maskSignalBus = (1 << 11);
+    public static final int MASK_SIGNAL_BUS = (1 << 11);
 
-    public static final int maskColorData = 0xF << 16;
-    public static final int maskColorShift = 16;
-    public static final int maskColorCareShift = 20;
-    public static final int maskColorCareData = 1 << 20;
+    public static final int MASK_COLOR_DATA = 0xF << 16;
+    public static final int MASK_COLOR_SHIFT = 16;
+    public static final int MASK_COLOR_CARE_SHIFT = 20;
+    public static final int MASK_COLOR_CARE_DATA = 1 << 20;
 
-    public static final double networkSerializeUFactor = 10.0;
-    public static final double networkSerializeIFactor = 100.0;
-    public static final double networkSerializeTFactor = 10.0;
+    public static final double NETWORK_SERIALIZE_U_FACTOR = 10.0;
+    public static final double NETWORK_SERIALIZE_I_FACTOR = 100.0;
+    public static final double NETWORK_SERIALIZE_T_FACTOR = 10.0;
 
     public byte neighborOpaque;
     public byte neighborWrapable;
-
-    public static int teststatic;
 
     public Coordonate coordonate;
 
     public ArrayList<NodeConnection> nodeConnectionList = new ArrayList<NodeConnection>(4);
 
-    private boolean initialized = false;
-
     private boolean isAdded = false;
 
     private boolean needPublish = false;
-
-    // public static boolean canBePlacedOn(ItemStack itemStack,Direction side)
 
     public boolean mustBeSaved() {
         return true;
@@ -83,15 +77,12 @@ public abstract class NodeBase {
         return 0;
     }
 
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
-
-    }
+    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {}
 
     public void notifyNeighbor() {
         coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
     }
 
-    //public abstract Block getBlock();
     public abstract String getNodeUuid();
 
     public LRDUCubeMask lrduCubeMask = new LRDUCubeMask();
@@ -161,9 +152,9 @@ public abstract class NodeBase {
     }
 
     public void physicalSelfDestruction(float explosionStrength) {
-        if (destructed == true) return;
+        if (destructed) return;
         destructed = true;
-        if (Eln.instance.explosionEnable == false) explosionStrength = 0;
+        if (!Eln.instance.explosionEnable) explosionStrength = 0;
         disconnect();
         coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
         NodeManager.instance.removeNode(this);
@@ -185,8 +176,7 @@ public abstract class NodeBase {
             Utils.println("Node::constructor( meta = " + itemStack.getItemDamage() + ")");
     }
 
-    abstract public void initializeFromThat(Direction front,
-                                            EntityLivingBase entityLiving, ItemStack itemStack);
+    abstract public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack);
 
     public NodeBase getNeighbor(Direction direction) {
         int[] position = new int[3];
@@ -233,7 +223,7 @@ public abstract class NodeBase {
                     str += str1;
                 if (str2 != null)
                     str += str2;
-                if (str.equals("") == false)
+                if (!str.equals(""))
                     Utils.addChatMessage(entityPlayer, str);
                 return true;
             }
@@ -399,8 +389,8 @@ public abstract class NodeBase {
 
     public static boolean compareConnectionMask(int mask1, int mask2) {
         if (((mask1 & 0xFFFF) & (mask2 & 0xFFFF)) == 0) return false;
-        if (((mask1 & maskColorCareData) & (mask2 & maskColorCareData)) == 0) return true;
-        if ((mask1 & maskColorData) == (mask2 & maskColorData)) return true;
+        if (((mask1 & MASK_COLOR_CARE_DATA) & (mask2 & MASK_COLOR_CARE_DATA)) == 0) return true;
+        if ((mask1 & MASK_COLOR_DATA) == (mask2 & MASK_COLOR_DATA)) return true;
         return false;
     }
 
@@ -446,24 +436,15 @@ public abstract class NodeBase {
     }
 
     public void readFromNBT(NBTTagCompound nbt) {
-
         coordonate.readFromNBT(nbt, "c");
-
         neighborOpaque = nbt.getByte("NBOpaque");
         neighborWrapable = nbt.getByte("NBWrap");
-
-        initialized = true;
     }
 
     public void writeToNBT(NBTTagCompound nbt) {
-
         coordonate.writeToNBT(nbt, "c");
-
-        int idx;
-
         nbt.setByte("NBOpaque", neighborOpaque);
         nbt.setByte("NBWrap", neighborWrapable);
-
     }
 
     public String multiMeterString(Direction side) {
@@ -495,9 +476,7 @@ public abstract class NodeBase {
 
     boolean needNotify = false;
 
-    public void publishSerialize(DataOutputStream stream) {
-
-    }
+    public void publishSerialize(DataOutputStream stream) {}
 
     public void preparePacketForClient(DataOutputStream stream) {
         try {
@@ -512,7 +491,6 @@ public abstract class NodeBase {
             stream.writeUTF(getNodeUuid());
 
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -527,8 +505,6 @@ public abstract class NodeBase {
     }
 
     public void sendPacketToAllClient(ByteArrayOutputStream bos, double range) {
-        //Profiler p = new Profiler();
-
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
         for (Object obj : server.getConfigurationManager().playerEntityList) {
@@ -617,9 +593,7 @@ public abstract class NodeBase {
 
     public abstract void initializeFromNBT();
 
-    public void globalBoot() {
-
-    }
+    public void globalBoot() {}
 
     public void needPublish() {
         setNeedPublish(true);

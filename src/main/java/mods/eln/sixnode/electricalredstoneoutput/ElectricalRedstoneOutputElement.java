@@ -85,7 +85,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu.left()) return NodeBase.maskElectricalInputGate;
+        if (front == lrdu.left()) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

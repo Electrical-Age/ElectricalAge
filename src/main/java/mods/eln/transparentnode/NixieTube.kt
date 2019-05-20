@@ -132,7 +132,7 @@ class NixieTubeElement(node: TransparentNode, _descriptor: TransparentNodeDescri
 
     override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int {
         if(lrdu != LRDU.Down) return 0
-        return NodeBase.maskElectricalInputGate
+        return NodeBase.MASK_ELECTRICAL_INPUT_GATE
     }
 
     override fun networkSerialize(stream: DataOutputStream) {

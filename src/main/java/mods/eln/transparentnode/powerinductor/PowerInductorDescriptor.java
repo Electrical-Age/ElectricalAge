@@ -49,7 +49,7 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
         if (core == null) return MnaConst.highImpedance;
         FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
-        double coreFactor = coreDescriptor.cableMultiplicator;
+        double coreFactor = coreDescriptor.cableMultiplier;
 
         return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
     }

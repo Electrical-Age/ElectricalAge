@@ -102,9 +102,9 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (front.getInverse() != side.applyLRDU(lrdu)) return 0;
 
-        if (side == front.applyLRDU(rot)) return NodeBase.maskElectricalPower;
-        if (side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalOutputGate;
-        if (side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
+        if (side == front.applyLRDU(rot)) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (side == front.applyLRDU(rot.left())) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
+        if (side == front.applyLRDU(rot.right())) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

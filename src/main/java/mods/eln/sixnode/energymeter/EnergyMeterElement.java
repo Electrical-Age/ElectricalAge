@@ -112,8 +112,8 @@ public class EnergyMeterElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (inventory.getStackInSlot(EnergyMeterContainer.cableSlotId) == null) return 0;
-        if (front == lrdu) return NodeBase.maskElectricalAll;
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
+        if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
 
         return 0;
     }

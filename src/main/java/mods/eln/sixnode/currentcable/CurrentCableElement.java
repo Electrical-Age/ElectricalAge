@@ -83,7 +83,7 @@ public class CurrentCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        return descriptor.getNodeMask() /*+ NodeBase.maskElectricalWire*/ + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+        return descriptor.getNodeMask() /*+ NodeBase.MASK_ELECTRICAL_WIRE*/ + (color << NodeBase.MASK_COLOR_SHIFT) + (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
     }
 
     @Override

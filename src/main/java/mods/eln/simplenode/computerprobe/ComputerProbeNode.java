@@ -112,7 +112,7 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 
     @Override
     public int getSideConnectionMask(Direction side, LRDU lrduA) {
-        return NodeBase.maskElectricalGate;
+        return NodeBase.MASK_ELECTRICAL_GATE;
     }
 
     @Override

@@ -6,11 +6,11 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -21,7 +21,7 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalCableDescriptor extends SixNodeDescriptor {
+public class ElectricalCableDescriptor extends GenericCableDescriptor {
 
     double electricalNominalRs;
     public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
@@ -155,9 +155,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
     public int getNodeMask() {
         if (signalWire)
-            return NodeBase.maskElectricalGate;
+            return NodeBase.MASK_ELECTRICAL_GATE;
         else
-            return NodeBase.maskElectricalPower;
+            return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     public static CableRenderDescriptor getCableRender(ItemStack cable) {

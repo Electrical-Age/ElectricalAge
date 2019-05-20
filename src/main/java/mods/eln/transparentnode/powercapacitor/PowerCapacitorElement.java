@@ -83,8 +83,8 @@ public class PowerCapacitorElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
-        if (side == front.left()) return node.maskElectricalPower;
-        if (side == front.right()) return node.maskElectricalPower;
+        if (side == front.left()) return node.MASK_ELECTRICAL_POWER;
+        if (side == front.right()) return node.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

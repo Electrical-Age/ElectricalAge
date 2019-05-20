@@ -63,9 +63,9 @@ public class ElectricalCableRender extends SixNodeElementRender {
             Byte b;
             b = stream.readByte();
             color = (b >> 4) & 0xF;
-        /*	voltage = stream.readShort() / NodeBase.networkSerializeUFactor;
-			current = stream.readShort() / NodeBase.networkSerializeIFactor;
-			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;*/
+        /*	voltage = stream.readShort() / NodeBase.NETWORK_SERIALIZE_U_FACTOR;
+			current = stream.readShort() / NodeBase.NETWORK_SERIALIZE_I_FACTOR;
+			temperature = stream.readShort() / NodeBase.NETWORK_SERIALIZE_T_FACTOR;*/
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -55,7 +55,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu == lrdu.Down && side.isNotY()) {
-            return NodeBase.maskElectricalGate;
+            return NodeBase.MASK_ELECTRICAL_GATE;
         }
         return 0;
     }

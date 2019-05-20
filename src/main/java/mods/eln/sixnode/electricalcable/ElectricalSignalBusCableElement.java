@@ -1,7 +1,6 @@
 package mods.eln.sixnode.electricalcable;
 
 import mods.eln.Eln;
-import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -13,10 +12,8 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,7 +45,7 @@ public class ElectricalSignalBusCableElement extends ElectricalCableElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
-        int color = (mask >> NodeBase.maskColorShift) & 0xF;
+        int color = (mask >> NodeBase.MASK_COLOR_SHIFT) & 0xF;
         ElectricalLoad load = coloredElectricalLoads[color];
         Utils.println("ESBCE.gEL: mask " + mask + ", color " + color + ", load " + load);
         return load;

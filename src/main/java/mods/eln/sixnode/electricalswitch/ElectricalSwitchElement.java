@@ -129,10 +129,10 @@ public class ElectricalSwitchElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeBoolean(switchState);
-            stream.writeShort((short) (aLoad.getU() * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) (bLoad.getU() * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) (aLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-            //stream.writeShort((short)(thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+            stream.writeShort((short) (aLoad.getU() * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) (bLoad.getU() * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) (aLoad.getCurrent() * NodeBase.NETWORK_SERIALIZE_I_FACTOR));
+            //stream.writeShort((short)(thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));
             stream.writeShort(0);
         } catch (IOException e) {
             e.printStackTrace();

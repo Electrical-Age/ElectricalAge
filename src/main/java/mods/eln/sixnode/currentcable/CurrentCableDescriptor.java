@@ -7,11 +7,10 @@ import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.materials.MaterialType;
 import mods.eln.node.NodeBase;
-import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -21,12 +20,11 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class CurrentCableDescriptor extends SixNodeDescriptor {
+public class CurrentCableDescriptor extends GenericCableDescriptor {
 
     public CableRenderDescriptor render;
 
     double electricalRs;
-    public double electricalMaxI;
 
     double thermalC;
     double thermalRp;
@@ -37,6 +35,7 @@ public class CurrentCableDescriptor extends SixNodeDescriptor {
     public CurrentCableDescriptor(String name, CableRenderDescriptor render) {
         super(name, CurrentCableElement.class, CurrentCableRender.class);
         this.render = render;
+        electricalNominalVoltage = 1000000000;
     }
 
     /**
@@ -48,18 +47,18 @@ public class CurrentCableDescriptor extends SixNodeDescriptor {
      * @param thermalCoolLimit minimum temperature (C)
      * @param thermalNominalHeatTime
      */
-    public void setCableType(double conductorArea, MaterialType type, double insulationThickness, double thermalWarmLimit, double thermalCoolLimit, double thermalNominalHeatTime) {
+    public void setCableProperties(double conductorArea, MaterialType type, double insulationThickness, double thermalWarmLimit, double thermalCoolLimit, double thermalNominalHeatTime) {
 
         this.thermalWarmLimit = thermalWarmLimit;
         this.thermalCoolLimit = thermalCoolLimit;
 
-        this.electricalMaxI = 0.355 * conductorArea; // roughly (mm^2 / I) that is suggested by https://www.powerstream.com/Wire_Size.htm for power transmission lines
+        this.electricalMaximalCurrent = 0.355 * conductorArea; // roughly (mm^2 / I) that is suggested by https://www.powerstream.com/Wire_Size.htm for power transmission lines
 
         electricalRs = Eln.mp.getElectricalResistivity(type) * (conductorArea / 1000000 / 1.0); // resistivity (ohms/meter)* (cross sectional area (m) / length (m))
         System.out.println("Cable Resistance: " + electricalRs);
 
         // begin odd thermal system code
-        double thermalMaximalPowerDissipated = electricalMaxI * electricalMaxI * electricalRs * 2;
+        double thermalMaximalPowerDissipated = electricalMaximalCurrent * electricalMaximalCurrent * electricalRs * 2;
         thermalC = (thermalMaximalPowerDissipated * thermalNominalHeatTime) / thermalWarmLimit;
         thermalRp = thermalWarmLimit / thermalMaximalPowerDissipated;
         thermalRs = (Eln.mp.getThermalConductivity(type) / 385.0) / thermalC / 2;
@@ -106,12 +105,12 @@ public class CurrentCableDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Nominal Ratings:"));
-        list.add("  " + tr("Current: %1$A", Utils.plotValue(electricalMaxI)));
+        list.add("  " + tr("Current: %1$A", Utils.plotValue(electricalMaximalCurrent)));
         list.add("  " + tr("Serial resistance: %1$\u2126", Utils.plotValue(electricalRs * 2)));
     }
 
     public int getNodeMask() {
-        return NodeBase.maskElectricalPower;
+        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     public static CableRenderDescriptor getCableRender(ItemStack cable) {

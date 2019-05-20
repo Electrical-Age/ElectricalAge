@@ -1,6 +1,5 @@
 package mods.eln.sixnode.powersocket;
 
-import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.ConfigCopyToolDescriptor;
@@ -36,8 +35,6 @@ import net.minecraft.nbt.NBTTagString;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class PowerSocketElement extends SixNodeElement implements IConfigurable {
@@ -130,7 +127,7 @@ public class PowerSocketElement extends SixNodeElement implements IConfigurable 
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (getInventory().getStackInSlot(PowerSocketContainer.cableSlotId) == null) return 0;
-        return NodeBase.maskElectricalPower + (1 << NodeBase.maskColorCareShift) + (paintColor << NodeBase.maskColorShift);
+        return NodeBase.MASK_ELECTRICAL_POWER + (1 << NodeBase.MASK_COLOR_CARE_SHIFT) + (paintColor << NodeBase.MASK_COLOR_SHIFT);
     }
 
     @Override

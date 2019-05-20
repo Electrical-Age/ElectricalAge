@@ -82,7 +82,7 @@ public class HubElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (getElectricalLoad(lrdu, 0) != null)
-            return NodeBase.maskElectricalAll;
+            return NodeBase.MASK_ELECTRICAL_ALL;
 
         return 0;
     }

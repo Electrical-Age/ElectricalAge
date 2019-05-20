@@ -48,10 +48,10 @@ public class BatteryRender extends TransparentNodeElementRender {
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
         try {
-			/*voltagePositive = stream.readShort() / Node.networkSerializeUFactor;
-			voltageNegative = stream.readShort() / Node.networkSerializeUFactor;
-			current = stream.readShort() / Node.networkSerializeIFactor;
-			temperature = stream.readShort() / Node.networkSerializeTFactor;
+			/*voltagePositive = stream.readShort() / Node.NETWORK_SERIALIZE_U_FACTOR;
+			voltageNegative = stream.readShort() / Node.NETWORK_SERIALIZE_U_FACTOR;
+			current = stream.readShort() / Node.NETWORK_SERIALIZE_I_FACTOR;
+			temperature = stream.readShort() / Node.NETWORK_SERIALIZE_T_FACTOR;
 			*/
             power = stream.readFloat();
             energy = stream.readFloat();

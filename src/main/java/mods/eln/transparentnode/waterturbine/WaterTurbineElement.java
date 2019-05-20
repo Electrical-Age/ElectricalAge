@@ -67,7 +67,7 @@ public class WaterTurbineElement extends TransparentNodeElement {
     public int getConnectionMask(Direction side, LRDU lrdu) {
 
         if (lrdu != LRDU.Down) return 0;
-        if (side == front) return NodeBase.maskElectricalPower;
+        if (side == front) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

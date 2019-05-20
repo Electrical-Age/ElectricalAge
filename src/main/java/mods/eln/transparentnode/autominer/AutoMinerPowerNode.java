@@ -25,7 +25,7 @@ public class AutoMinerPowerNode extends GhostNode {
         if (element == null) return 0;
         if (directionA != front) return 0;
         if (lrduA != LRDU.Down) return 0;
-        return maskElectricalPower;
+        return MASK_ELECTRICAL_POWER;
     }
 
     @Override

@@ -94,8 +94,8 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if ((side == front.left() || side == front.right()) && lrdu == LRDU.Down)
-            return NodeBase.maskElectricalInputGate;
-        if (side == front.getInverse() && lrdu == LRDU.Down) return NodeBase.maskThermal;
+            return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
+        if (side == front.getInverse() && lrdu == LRDU.Down) return NodeBase.MASK_THERMAL;
         return 0;
     }
 
@@ -131,7 +131,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         try {
             stream.writeBoolean(getControlExternal());
             stream.writeBoolean(getTakeFuel());
-            stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+            stream.writeShort((short) (thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));
             stream.writeFloat((float) furnaceProcess.getGain());
             stream.writeFloat((float) regulator.getTarget());
             stream.writeShort((int) furnaceProcess.getP());

@@ -15,7 +15,7 @@ public class TestNode extends SimpleNode {
 
     @Override
     public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-        return maskElectricalPower;
+        return MASK_ELECTRICAL_POWER;
     }
 
     @Override

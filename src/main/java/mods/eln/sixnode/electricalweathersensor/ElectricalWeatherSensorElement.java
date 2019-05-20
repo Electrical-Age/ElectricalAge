@@ -50,7 +50,7 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+        if (front == lrdu.left()) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         return 0;
     }
 

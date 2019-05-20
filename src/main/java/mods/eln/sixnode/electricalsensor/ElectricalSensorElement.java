@@ -140,12 +140,12 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
     public int getConnectionMask(LRDU lrdu) {
         boolean cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
         if (!descriptor.voltageOnly) {
-            if (front.left() == lrdu && cable) return NodeBase.maskElectricalAll;
-            if (front.right() == lrdu && cable) return NodeBase.maskElectricalAll;
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front.left() == lrdu && cable) return NodeBase.MASK_ELECTRICAL_ALL;
+            if (front.right() == lrdu && cable) return NodeBase.MASK_ELECTRICAL_ALL;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         } else {
-            if (front.inverse() == lrdu && cable) return NodeBase.maskElectricalAll;
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front.inverse() == lrdu && cable) return NodeBase.MASK_ELECTRICAL_ALL;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         }
         return 0;
     }

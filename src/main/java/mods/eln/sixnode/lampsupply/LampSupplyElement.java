@@ -209,7 +209,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
-        if (front == lrdu) return NodeBase.maskElectricalPower;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

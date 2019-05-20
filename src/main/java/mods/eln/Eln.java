@@ -1420,7 +1420,7 @@ public class Eln {
 
             CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
 
-            lowCurrentCableDescriptor.setCableType(
+            lowCurrentCableDescriptor.setCableProperties(
                 25,
                 MaterialType.COPPER,
                 0,
@@ -1441,7 +1441,7 @@ public class Eln {
 
             CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
 
-            lowCurrentCableDescriptor.setCableType(
+            lowCurrentCableDescriptor.setCableProperties(
                 75,
                 MaterialType.COPPER,
                 0,
@@ -1462,7 +1462,7 @@ public class Eln {
 
             CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
 
-            lowCurrentCableDescriptor.setCableType(
+            lowCurrentCableDescriptor.setCableProperties(
                 150,
                 MaterialType.COPPER,
                 0,
@@ -1483,7 +1483,7 @@ public class Eln {
 
             CurrentCableDescriptor lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
 
-            lowCurrentCableDescriptor.setCableType(
+            lowCurrentCableDescriptor.setCableProperties(
                 600,
                 MaterialType.COPPER,
                 0,

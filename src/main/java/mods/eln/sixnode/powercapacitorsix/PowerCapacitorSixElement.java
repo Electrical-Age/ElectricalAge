@@ -3,7 +3,6 @@ package mods.eln.sixnode.powercapacitorsix;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
-import mods.eln.item.DielectricItem;
 import mods.eln.item.IConfigurable;
 import mods.eln.item.ItemMovingHelper;
 import mods.eln.misc.Direction;
@@ -95,8 +94,8 @@ public class PowerCapacitorSixElement extends SixNodeElement implements IConfigu
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (lrdu == front.right()) return NodeBase.maskElectricalPower;
-        if (lrdu == front.left()) return NodeBase.maskElectricalPower;
+        if (lrdu == front.right()) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (lrdu == front.left()) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

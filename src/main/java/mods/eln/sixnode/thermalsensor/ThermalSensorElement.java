@@ -123,17 +123,17 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
     public int getConnectionMask(LRDU lrdu) {
         if (!descriptor.temperatureOnly) {
             if (getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId) != null) {
-                if (front.left() == lrdu) return NodeBase.maskThermal;
-                if (front.right() == lrdu) return NodeBase.maskThermal;
+                if (front.left() == lrdu) return NodeBase.MASK_THERMAL;
+                if (front.right() == lrdu) return NodeBase.MASK_THERMAL;
             }
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         } else {
             if (isItemThermalCable()) {
-                if (front.inverse() == lrdu) return NodeBase.maskThermal;
+                if (front.inverse() == lrdu) return NodeBase.MASK_THERMAL;
             } else if (isItemElectricalCable()) {
-                if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+                if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
             }
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         }
         return 0;
     }

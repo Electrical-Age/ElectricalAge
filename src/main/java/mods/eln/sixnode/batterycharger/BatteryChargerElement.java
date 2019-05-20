@@ -100,7 +100,7 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu) return NodeBase.maskElectricalPower;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

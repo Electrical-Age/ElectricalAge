@@ -2,13 +2,11 @@ package mods.eln.mechanical
 
 import mods.eln.Eln
 import mods.eln.cable.CableRender
-import mods.eln.cable.CableRenderDescriptor
 import mods.eln.generic.GenericItemUsingDamage
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment
 import mods.eln.generic.GenericItemUsingDamageSlot
 import mods.eln.gui.GuiContainerEln
-import mods.eln.gui.GuiHelperContainer
 import mods.eln.gui.HelperStdContainer
 import mods.eln.gui.ISlotSkin
 import mods.eln.i18n.I18N.tr
@@ -24,13 +22,10 @@ import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.SoundCommand
 import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.world.World
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -174,7 +169,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
     val inputGate = NbtElectricalGateInput("clutchIn")
     var slipping = true
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? = inputGate
-    override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int = NodeBase.maskElectricalInputGate
+    override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int = NodeBase.MASK_ELECTRICAL_INPUT_GATE
 
     val clutchPlateStack: ItemStack?
         get() {
