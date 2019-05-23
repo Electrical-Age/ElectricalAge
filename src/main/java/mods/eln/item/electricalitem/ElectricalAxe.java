@@ -1,5 +1,7 @@
 package mods.eln.item.electricalitem;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
@@ -23,7 +25,7 @@ public class ElectricalAxe extends ElectricalTool {
     @Override
     public float getStrVsBlock(ItemStack stack, Block block) {
         float value = block != null && (block.getMaterial() == Material.wood || block.getMaterial() == Material.plants || block.getMaterial() == Material.vine) ? getStrength(stack) : super.getStrVsBlock(stack, block);
-        Utils.println(value);
+        Eln.dp.println(DebugType.OTHER, Float.toString(value));
         return value;
     }
 }

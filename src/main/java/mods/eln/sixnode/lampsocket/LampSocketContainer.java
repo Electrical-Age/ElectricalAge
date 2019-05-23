@@ -4,7 +4,9 @@ import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.LampSlot;
 import mods.eln.misc.BasicContainer;
 import mods.eln.node.six.SixNodeItemSlot;
+import mods.eln.sixnode.currentcable.CurrentCableDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -20,7 +22,7 @@ public class LampSocketContainer extends BasicContainer {
         super(player, inventory, new Slot[]{
             new LampSlot(inventory, lampSlotId, 70 + 0, 57, 1, descriptor.socketType),
             //new SixNodeItemSlot(inventory, 0, 1, 62 + 0, 17, new Class[]{ElectricalCableDescriptor.class}),
-            new SixNodeItemSlot(inventory, cableSlotId, 70 + 18, 57, 1, new Class[]{ElectricalCableDescriptor.class},
+            new SixNodeItemSlot(inventory, cableSlotId, 70 + 18, 57, 1, new Class[]{ElectricalCableDescriptor.class, CurrentCableDescriptor.class},
                 SlotSkin.medium, new String[]{tr("Electrical cable slot")})
         });
     }

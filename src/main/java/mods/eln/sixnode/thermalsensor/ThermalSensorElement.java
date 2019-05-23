@@ -20,6 +20,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricaldatalogger.DataLogs;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -202,7 +203,7 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
             cableDescriptor.setThermalLoad(thermalLoad);
             thermalLoad.setAsFast();
         } else if (descriptor.getClass() == ElectricalCableDescriptor.class) {
-            ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+            GenericCableDescriptor cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
             cableDescriptor.applyTo(thermalLoad);
             thermalLoad.Rp = 1000000000.0;
             thermalLoad.setAsSlow();

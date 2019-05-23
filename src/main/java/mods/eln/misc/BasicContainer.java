@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
 import net.minecraft.entity.player.EntityPlayer;
@@ -181,7 +183,7 @@ public class BasicContainer extends Container {
     @Override
     public ItemStack slotClick(int arg0, int arg1, int arg2, EntityPlayer arg3) {
         if (arg0 >= this.inventorySlots.size()) {
-            System.out.println("Damned !!! What happen ?");
+            Eln.dp.println(DebugType.OTHER, "Damned !!! What happen ?");
             Utils.addChatMessage(arg3, "Damn! Sorry, this is a debug");
             Utils.addChatMessage(arg3, "message from Electrical age.");
             Utils.addChatMessage(arg3, "Could you send me a message about that?");

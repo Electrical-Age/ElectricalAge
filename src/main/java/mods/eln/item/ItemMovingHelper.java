@@ -1,5 +1,7 @@
 package mods.eln.item;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -28,7 +30,7 @@ public abstract class ItemMovingHelper {
         if(stack != null) {
             now = stack.stackSize;
         }
-        Utils.println(String.format("IMH.m: now %d, desired %d", now, desired));
+        Eln.dp.println(DebugType.OTHER, String.format("IMH.m: now %d, desired %d", now, desired));
         if(now < desired) {
             int diff = desired - now;
             for(int idx = 0; idx < src.getSizeInventory(); idx++) {
@@ -47,13 +49,13 @@ public abstract class ItemMovingHelper {
                 if(diff <= 0) break;
             }
             int moved = (desired - now) - diff;
-            Utils.println(String.format("IMH.m: moved %d into node", moved));
+            Eln.dp.println(DebugType.OTHER, String.format("IMH.m: moved %d into node", moved));
             if(moved > 0) {
                 dst.setInventorySlotContents(dstSlot, newStackOfSize(now + moved));
             }
         } else {
             int diff = now - desired;
-            Utils.println(String.format("IMH.m: moving %d items", diff));
+            Eln.dp.println(DebugType.OTHER, String.format("IMH.m: moving %d items", diff));
             if(diff > 0) {
                 if (src.addItemStackToInventory(newStackOfSize(diff))) {
                     if(desired == 0) {
@@ -61,9 +63,9 @@ public abstract class ItemMovingHelper {
                     } else {
                         dst.setInventorySlotContents(dstSlot, newStackOfSize(desired));
                     }
-                    Utils.println("IMH.m: move succeeded");
+                    Eln.dp.println(DebugType.OTHER, "IMH.m: move succeeded");
                 } else {
-                    Utils.println("IMH.m: move failed!");
+                    Eln.dp.println(DebugType.OTHER, "IMH.m: move failed!");
                 }
             }
             // Grissess: Since we can't tell how the inventory might have been changed

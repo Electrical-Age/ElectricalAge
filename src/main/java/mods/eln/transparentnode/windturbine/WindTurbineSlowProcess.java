@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.windturbine;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
@@ -85,7 +87,7 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
             if (!notInCache) {
                 environmentWindFactor = Math.max(0.0, Math.min(1.0, 1.0 - blockBusyCount * d.blockMalus));
 
-                Utils.println("EnvironementWindFactor : " + environmentWindFactor);
+                Eln.dp.println(DebugType.TRANSPARENT_NODE, "EnvironementWindFactor : " + environmentWindFactor);
             }
         }
 
@@ -125,7 +127,7 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
 
         counter++;
         if (counter % 20 == 0) {
-            Utils.println("Wind : " + getWind() + "  Derivate : " + localWindDerive + " EPmax : " + P);
+            Eln.dp.println(DebugType.TRANSPARENT_NODE, "Wind : " + getWind() + "  Derivate : " + localWindDerive + " EPmax : " + P);
         }
     }
 

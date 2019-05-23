@@ -21,6 +21,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils;
@@ -328,7 +329,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     void setupFromInventory() {
         ItemStack cableStack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
         if (cableStack != null) {
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
+            GenericCableDescriptor desc = (GenericCableDescriptor) GenericCableDescriptor.getDescriptor(cableStack);
             desc.applyTo(powerLoad);
             voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
         } else {

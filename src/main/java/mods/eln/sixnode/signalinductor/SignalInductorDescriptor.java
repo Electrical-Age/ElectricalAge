@@ -1,4 +1,4 @@
-package mods.eln.signalinductor;
+package mods.eln.sixnode.signalinductor;
 
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;

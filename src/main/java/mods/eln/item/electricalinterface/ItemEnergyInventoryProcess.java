@@ -2,6 +2,7 @@ package mods.eln.item.electricalinterface;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -37,7 +38,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
         public Exclusion(double timeout, Object o) {
             this.timeout = timeout;
             this.o = o;
-            Utils.println("new");
+            Eln.dp.println(DebugType.OTHER, "new");
         }
     }
 
@@ -64,7 +65,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
     boolean isExcluded(Object o) {
         for (Exclusion e : exclude) {
             if (e.o == o) {
-                Utils.println("Exclude");
+                Eln.dp.println(DebugType.OTHER, "Exclude");
                 return true;
             }
         }

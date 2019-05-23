@@ -28,7 +28,7 @@ public class ElectricalCableDescriptor extends GenericCableDescriptor {
     public boolean signalWire;
 
     public double electricalMaximalVoltage, electricalMaximalCurrent;
-    public double electricalRp = Double.POSITIVE_INFINITY, electricalRs = Double.POSITIVE_INFINITY, electricalC = 1;
+    public double electricalRp = Double.POSITIVE_INFINITY, electricalC = 1;
     public double thermalRp = 1, thermalRs = 1, thermalC = 1;
     public double thermalWarmLimit = 100, thermalCoolLimit = -100;
     double electricalMaximalI;
@@ -162,7 +162,7 @@ public class ElectricalCableDescriptor extends GenericCableDescriptor {
 
     public static CableRenderDescriptor getCableRender(ItemStack cable) {
         if (cable == null) return null;
-        GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
+        GenericItemBlockUsingDamageDescriptor desc = GenericCableDescriptor.getDescriptor(cable);
         if (desc instanceof ElectricalCableDescriptor)
             return ((ElectricalCableDescriptor) desc).render;
         else

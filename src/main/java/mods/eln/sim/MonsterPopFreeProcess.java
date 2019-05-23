@@ -1,6 +1,7 @@
 package mods.eln.sim;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
@@ -44,7 +45,7 @@ public class MonsterPopFreeProcess implements IProcess {
                         //Utils.println("MonsterPopFreeProcess : Must die");
                         if (!(o instanceof ReplicatorEntity) && !(o instanceof EntityWither) && !(o instanceof EntityEnderman)) {
                             mob.setDead();
-                            Utils.println("MonsterPopFreeProcess : Dead");
+                            Eln.dp.println(DebugType.MNA,"MonsterPopFreeProcess : Dead");
                         }
                     }
                 }

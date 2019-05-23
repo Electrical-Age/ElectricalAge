@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalcable;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -47,7 +48,7 @@ public class ElectricalSignalBusCableElement extends ElectricalCableElement {
     public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
         int color = (mask >> NodeBase.MASK_COLOR_SHIFT) & 0xF;
         ElectricalLoad load = coloredElectricalLoads[color];
-        Utils.println("ESBCE.gEL: mask " + mask + ", color " + color + ", load " + load);
+        Eln.dp.println(DebugType.SIX_NODE, "ESBCE.gEL: mask " + mask + ", color " + color + ", load " + load);
         return load;
     }
 
@@ -106,16 +107,16 @@ public class ElectricalSignalBusCableElement extends ElectricalCableElement {
     @Override
     public void newConnectionAt(NodeConnection connection, boolean isA) {
         if(!isA) return;  // Only run for one of the connection attempts between two ESBCEs; choose A arbitrarily.
-        Utils.println("ESBCE.nCA:");
+        Eln.dp.println(DebugType.SIX_NODE, "ESBCE.nCA:");
         NodeBase other = connection.N2;
-        Utils.println("\tother is: " + other);
+        Eln.dp.println(DebugType.SIX_NODE, "\tother is: " + other);
         if(other instanceof SixNode) {
-            Utils.println("\tother is SixNode");
+            Eln.dp.println(DebugType.SIX_NODE, "\tother is SixNode");
             SixNode sixother = (SixNode) other;
             SixNodeElement el = sixother.getElement(connection.dir2.applyLRDU(connection.lrdu2));
-            Utils.println("\tel is: " + el);
+            Eln.dp.println(DebugType.SIX_NODE, "\tel is: " + el);
             if(el instanceof ElectricalSignalBusCableElement) {
-                Utils.println("\tel is ESBCE too");
+                Eln.dp.println(DebugType.SIX_NODE, "\tel is ESBCE too");
                 // Connect the other 15 colors, too
                 for(int i = 1; i < 16; i++) {
                     ElectricalConnection econ = new ElectricalConnection(
@@ -127,6 +128,6 @@ public class ElectricalSignalBusCableElement extends ElectricalCableElement {
                 }
             }
         }
-        Utils.println("ESBCE.nCA ends.");
+        Eln.dp.println(DebugType.SIX_NODE, "ESBCE.nCA ends.");
     }
 }

@@ -1,5 +1,7 @@
 package mods.eln.item.electricalitem;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.generic.genericArmorItem;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
@@ -56,7 +58,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
         double e = getEnergy(stack);
         e = Math.max(0.0, e - damage * energyPerDamage);
         setEnergy(stack, e);
-        Utils.println("armor hit  damage=" + damage + " energy=" + e + " energyLost=" + damage * energyPerDamage);
+        Eln.dp.println(DebugType.OTHER, "armor hit  damage=" + damage + " energy=" + e + " energyLost=" + damage * energyPerDamage);
     }
 
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {

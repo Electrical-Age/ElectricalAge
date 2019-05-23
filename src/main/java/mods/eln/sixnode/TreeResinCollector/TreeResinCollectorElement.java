@@ -1,6 +1,7 @@
 package mods.eln.sixnode.TreeResinCollector;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -111,7 +112,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
         }
         if (collectiorCount == 0) {
             collectiorCount++;
-            Utils.println("ASSERT collectiorCount == 0");
+            Eln.dp.println(DebugType.SIX_NODE, "ASSERT collectiorCount == 0");
         }
         double leaf = leafCount >= 1 ? 1 : 0.000000001;
         double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount) * leaf;

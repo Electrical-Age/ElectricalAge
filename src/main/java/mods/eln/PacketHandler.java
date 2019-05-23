@@ -6,6 +6,7 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
@@ -146,7 +147,7 @@ public class PacketHandler {
             if (node != null && node.getNodeUuid().equals(stream.readUTF())) {
                 node.networkUnserialize(stream, (EntityPlayerMP) player);
             } else {
-                Utils.println("packetForNode node found");
+                Eln.dp.println(DebugType.NETWORK, "packetForNode node found");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -171,10 +172,10 @@ public class PacketHandler {
                     if (node.getNodeUuid().equals(stream.readUTF())) {
                         node.serverPacketUnserialize(stream);
                         if (0 != stream.available()) {
-                            Utils.println("0 != stream.available()");
+                            Eln.dp.println(DebugType.NETWORK, "0 != stream.available()");
                         }
                     } else {
-                        Utils.println("Wrong node UUID warning");
+                        Eln.dp.println(DebugType.NETWORK, "Wrong node UUID warning");
                         int dataSkipLength = stream.readByte();
                         for (int idx = 0; idx < dataSkipLength; idx++) {
                             stream.readByte();
@@ -182,7 +183,7 @@ public class PacketHandler {
                     }
                 }
             } else
-                Utils.println("No node found for " + x + " " + y + " " + z);
+                Eln.dp.println(DebugType.NETWORK, "No node found for " + x + " " + y + " " + z);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -204,18 +205,18 @@ public class PacketHandler {
                     if (node.getNodeUuid().equals(stream.readUTF())) {
                         node.serverPublishUnserialize(stream);
                         if (0 != stream.available()) {
-                            Utils.println("0 != stream.available()");
+                            Eln.dp.println(DebugType.NETWORK, "0 != stream.available()");
 
                         }
                     } else {
-                        Utils.println("Wrong node UUID warning");
+                        Eln.dp.println(DebugType.NETWORK, "Wrong node UUID warning");
                         int dataSkipLength = stream.readByte();
                         for (int idx = 0; idx < dataSkipLength; idx++) {
                             stream.readByte();
                         }
                     }
                 } else
-                    Utils.println("No node found for " + x + " " + y + " " + z);
+                    Eln.dp.println(DebugType.NETWORK, "No node found for " + x + " " + y + " " + z);
             }
         } catch (IOException e) {
             e.printStackTrace();

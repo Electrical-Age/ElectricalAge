@@ -4,6 +4,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +46,7 @@ public class LiveDataManager {
 
     public Object newData(Object key, Object data, int timeout) {
         map.put(key, new Element(data, timeout));
-        Utils.println("NewLiveData");
+        Eln.dp.println(DebugType.OTHER, "NewLiveData");
         return data;
     }
 
@@ -59,7 +61,7 @@ public class LiveDataManager {
             e.timeout--;
             if (e.timeout < 0) {
                 keyToRemove.add(entry.getKey());
-                Utils.println("LiveDeleted");
+                Eln.dp.println(DebugType.OTHER, "LiveDeleted");
             }
         }
 

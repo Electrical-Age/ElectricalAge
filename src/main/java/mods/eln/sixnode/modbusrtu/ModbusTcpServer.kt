@@ -1,6 +1,7 @@
 package mods.eln.sixnode.modbusrtu
 
 import mods.eln.Eln
+import mods.eln.debug.DebugType
 import mods.eln.misc.Utils
 import java.io.OutputStream
 import java.net.*
@@ -22,7 +23,7 @@ class ModbusTcpServer(port: Int = 1502) {
             try {
                 server.bind(InetSocketAddress(port))
             } catch (e: BindException) {
-                Utils.println("Exception while binding Modbus RTU Server. Modbus server disabled!")
+                Eln.dp.println(DebugType.NETWORK, "Exception while binding Modbus RTU Server. Modbus server disabled!")
                 server.close()
                 e.printStackTrace()
             }

@@ -19,6 +19,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -268,7 +269,7 @@ public class LampSocketElement extends SixNodeElement implements IConfigurable {
         ItemStack lamp = acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.lampSlotId);
         ItemStack cable = acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId);
 
-        ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        GenericCableDescriptor cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 
         if (cableDescriptor == null) {
             positiveLoad.highImpedance();

@@ -1,5 +1,7 @@
 package mods.eln.sim.mna;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
@@ -153,7 +155,7 @@ public class SubSystem {
             if (stateCount > 1) {
                 int idx = 0;
                 idx++;
-                Utils.println("//////////SingularMatrix////////////");
+                Eln.dp.println(DebugType.MNA,"//////////SingularMatrix////////////");
             }
         }
 
@@ -163,7 +165,7 @@ public class SubSystem {
         matrixValid = true;
 
         p.stop();
-        Utils.println(p);
+        Eln.dp.println(DebugType.MNA, p.toString());
     }
 
     public void addToA(State a, State b, double v) {
@@ -310,7 +312,7 @@ public class SubSystem {
             s.step();
         }
 
-        System.out.println("END");
+        Eln.dp.println(DebugType.MNA, "END");
 
         s.step();
         s.step();

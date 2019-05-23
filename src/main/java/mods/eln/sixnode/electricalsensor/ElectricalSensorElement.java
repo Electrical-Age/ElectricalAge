@@ -22,6 +22,7 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricaldatalogger.DataLogs;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -217,7 +218,7 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
         //if (!descriptor.voltageOnly)
         {
             ItemStack cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId);
-            ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+            GenericCableDescriptor cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 
             if (cableDescriptor == null) {
                 if (resistor != null) resistor.highImpedance();

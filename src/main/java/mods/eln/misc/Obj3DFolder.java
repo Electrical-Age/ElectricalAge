@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Obj3D.Obj3DPart;
 
 import java.io.File;
@@ -38,7 +40,7 @@ public class Obj3DFolder {
                         String filename = entries.nextElement().getName();
                         if (filename.startsWith("assets/eln/model/") && filename.toLowerCase().endsWith(".obj")) {
                             filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
-                            Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
+                            Eln.dp.println(DebugType.RENDER, String.format("Loading model %03d '%s'", ++modelCount, filename));
                             loadObj(filename);
                         }
                     }
@@ -64,7 +66,7 @@ public class Obj3DFolder {
             } else if (file.getName().toLowerCase().endsWith(".obj")) {
                 String filename = file.getPath().replaceAll("\\\\", "/");
                 filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
-                Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
+                Eln.dp.println(DebugType.RENDER, String.format("Loading model %03d '%s'", ++modelCount, filename));
                 loadObj(filename);
             }
         }
@@ -81,12 +83,12 @@ public class Obj3DFolder {
             String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
             tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
             if (nameToObjHash.containsKey(tag)) {
-                Utils.println("Double load of model " + tag);
+                Eln.dp.println(DebugType.RENDER, "Double load of model " + tag);
             }
             nameToObjHash.put(tag, obj);    // name of the file, without extension
-            Utils.println(String.format(" - model '%s' loaded", modelPath));
+            Eln.dp.println(DebugType.RENDER, String.format(" - model '%s' loaded", modelPath));
         } else {
-            Utils.println(String.format(" - unable to load model '%s'", modelPath));
+            Eln.dp.println(DebugType.RENDER, String.format(" - unable to load model '%s'", modelPath));
         }
     }
 

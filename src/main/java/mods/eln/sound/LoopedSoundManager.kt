@@ -1,6 +1,7 @@
 package mods.eln.sound
 
 import mods.eln.Eln
+import mods.eln.debug.DebugType
 import net.minecraft.client.Minecraft
 
 class LoopedSoundManager(val updateInterval: Float = 0.5f) {
@@ -35,7 +36,7 @@ class LoopedSoundManager(val updateInterval: Float = 0.5f) {
                     try {
                         soundHandler.playSound(it)
                     } catch (e: IllegalArgumentException) {
-                        System.out.println(e)
+                        Eln.dp.println(DebugType.SOUND, e.toString())
                     }
                 }
                 if (distDeltaSquared >= Eln.maxSoundDistance * Eln.maxSoundDistance || it.volume == 0f || it.pitch == 0f) {

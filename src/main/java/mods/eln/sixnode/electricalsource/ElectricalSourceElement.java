@@ -15,6 +15,7 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;

@@ -5,6 +5,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.*;
 import mods.eln.server.DelayedBlockRemove;
 import net.minecraft.client.Minecraft;
@@ -249,7 +250,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             if (nodeFromCoordonate instanceof Node) {
                 node = (Node) nodeFromCoordonate;
             } else {
-                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordonate(xCoord, yCoord, zCoord, worldObj));
+                Eln.dp.println(DebugType.NODE, "ASSERT WRONG TYPE public Node getNode " + new Coordonate(xCoord, yCoord, zCoord, worldObj));
             }
             if (node == null) DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
         }
@@ -272,7 +273,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     public Packet getDescriptionPacket() {
         Node node = getNode(); //TO DO NULL POINTER
         if (node == null) {
-            Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
+            Eln.dp.println(DebugType.NODE, "ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
         return new S3FPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());

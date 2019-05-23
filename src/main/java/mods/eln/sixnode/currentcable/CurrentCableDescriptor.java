@@ -2,6 +2,7 @@ package mods.eln.sixnode.currentcable;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.debug.DebugType;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
@@ -23,8 +24,6 @@ import static mods.eln.i18n.I18N.tr;
 public class CurrentCableDescriptor extends GenericCableDescriptor {
 
     public CableRenderDescriptor render;
-
-    double electricalRs;
 
     double thermalC;
     double thermalRp;
@@ -55,7 +54,7 @@ public class CurrentCableDescriptor extends GenericCableDescriptor {
         this.electricalMaximalCurrent = 0.355 * conductorArea; // roughly (mm^2 / I) that is suggested by https://www.powerstream.com/Wire_Size.htm for power transmission lines
 
         electricalRs = Eln.mp.getElectricalResistivity(type) * (conductorArea / 1000000 / 1.0); // resistivity (ohms/meter)* (cross sectional area (m) / length (m))
-        System.out.println("Cable Resistance: " + electricalRs);
+        Eln.dp.println(DebugType.SIX_NODE, "Cable Resistance: " + electricalRs);
 
         // begin odd thermal system code
         double thermalMaximalPowerDissipated = electricalMaximalCurrent * electricalMaximalCurrent * electricalRs * 2;

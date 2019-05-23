@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricaldigitaldisplay;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.IConfigurable;
@@ -92,13 +94,13 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement implements I
     @Override
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
-        Utils.println("EDDE.nU");
+        Eln.dp.println(DebugType.SIX_NODE, "EDDE.nU");
         try {
             switch(stream.readByte()) {
                 case ElectricalDigitalDisplayDescriptor.netSetRange:
                     min = stream.readFloat();
                     max = stream.readFloat();
-                    Utils.println(String.format("EDDE.nu: nSR %f - %f", min, max));
+                    Eln.dp.println(DebugType.SIX_NODE, String.format("EDDE.nu: nSR %f - %f", min, max));
                     needPublish();
                     break;
             }

@@ -1,5 +1,7 @@
 package mods.eln.fsm;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.sim.IProcess;
 
 public class StateMachine implements IProcess {
@@ -24,7 +26,7 @@ public class StateMachine implements IProcess {
     @Override
     public void process(double time) {
         if (state == null) {
-            if (debug) System.out.println("INVALID STATE!!");
+            if (debug) Eln.dp.println(DebugType.OTHER, "INVALID STATE!!");
             return;
         }
 

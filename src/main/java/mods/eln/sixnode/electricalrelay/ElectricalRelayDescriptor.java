@@ -6,6 +6,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -35,11 +36,11 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
         this.cable = cable;
         this.obj = obj;
 
-        if (obj != null) {
-            main = obj.getPart("main");
-            relay0 = obj.getPart("relay0");
-            relay1 = obj.getPart("relay1");
-            backplate = obj.getPart("backplate");
+        if (this.obj != null) {
+            main = this.obj.getPart("main");
+            relay0 = this.obj.getPart("relay0");
+            relay1 = this.obj.getPart("relay1");
+            backplate = this.obj.getPart("backplate");
 
             if (relay0 != null) {
                 r0rOff = relay0.getFloat("rOff");
@@ -52,7 +53,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
             }
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cable);
+        voltageLevelColor = VoltageLevelColor.fromCable(this.cable);
     }
 
     void applyTo(ElectricalLoad load) {

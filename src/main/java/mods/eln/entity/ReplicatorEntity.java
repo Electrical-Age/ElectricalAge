@@ -1,5 +1,7 @@
 package mods.eln.entity;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -166,6 +168,6 @@ public class ReplicatorEntity extends EntityMob {
         hunger = nbt.getDouble("ElnHunger");
         isSpawnedFromWeather = nbt.getBoolean("isSpawnedFromWeather");
 
-        Utils.println("[Replicator] " + posX + " " + posY + " " + posZ + " ");
+        Eln.dp.println(DebugType.OTHER, "[Replicator] " + posX + " " + posY + " " + posZ + " ");
     }
 }

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.PhysicalConstant;
@@ -56,7 +58,7 @@ public class DataLogs implements INBTTReady {
     @Override
     public void readFromNBT(NBTTagCompound nbt, String str) {
         byte[] cpy = nbt.getByteArray(str + "log");
-        Utils.println("Datalog readnbt " + cpy.length);
+        Eln.dp.println(DebugType.SIX_NODE, "Datalog readnbt " + cpy.length);
         for (int idx = 0; idx < cpy.length; idx++) {
             write(cpy[cpy.length - 1 - idx]);
         }
@@ -65,7 +67,7 @@ public class DataLogs implements INBTTReady {
         maxValue = nbt.getFloat(str + "maxValue");
         minValue = nbt.getFloat(str + "minValue");
         unitType = nbt.getByte(str + "unitType");
-        Utils.println("Datalog readnbt done");
+        Eln.dp.println(DebugType.SIX_NODE, "Datalog readnbt done");
     }
 
     @Override

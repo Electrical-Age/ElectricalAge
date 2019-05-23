@@ -4,6 +4,7 @@ import mods.eln.Eln
 import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
+import mods.eln.debug.DebugType
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
@@ -118,7 +119,7 @@ class NixieTubeElement(node: TransparentNode, _descriptor: TransparentNodeDescri
         process = NixieTubeProcess()
         slowProcessList.add(process)
         reconnect()
-        Utils.println("NTE.initialize")
+        Eln.dp.println(DebugType.TRANSPARENT_NODE, "NTE.initialize")
     }
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? {

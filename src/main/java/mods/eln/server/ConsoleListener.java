@@ -5,6 +5,7 @@
 package mods.eln.server;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Color;
 import mods.eln.misc.Version;
 import mods.eln.sim.mna.SubSystem;
@@ -251,7 +252,7 @@ public class ConsoleListener extends CommandBase {
             cprint(ics, strOffsetL0 + "Avoid monsters spawning around lamps : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
             cprint(ics, strOffsetL0 + "Warning: Command effective to this game instance only.");
         } else if(cmd.equalsIgnoreCase((cmdNameStr_matrix))) {
-            System.out.println("Dumping current matrix state");
+            Eln.dp.println(DebugType.CONSOLE, "Dumping current matrix state");
 
             String dumpSubSystems = "";
             int ssc = Eln.simulator.mna.systems.size();
@@ -268,7 +269,7 @@ public class ConsoleListener extends CommandBase {
                 w.flush();
                 w.close();
             } catch (Exception e) {
-                System.out.println("Failed to write to " + f.getAbsolutePath() + " because " + e);
+                Eln.dp.println(DebugType.FILE, "Failed to write to " + f.getAbsolutePath() + " because " + e);
             }
 
             if (ssc == 1) {

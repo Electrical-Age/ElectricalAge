@@ -1,6 +1,8 @@
 package mods.eln.sound;
 
+import mods.eln.Eln;
 import mods.eln.client.IUuidEntity;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundManager;
@@ -28,7 +30,7 @@ public class SoundClientEntity implements IUuidEntity {
 
     @Override
     public void kill() {
-        Utils.println("Sound deleted");
+        Eln.dp.println(DebugType.SOUND, "Sound deleted");
         sm.stopSound(sound);
     }
 }

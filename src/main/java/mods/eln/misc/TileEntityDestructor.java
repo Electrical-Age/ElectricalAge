@@ -4,6 +4,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import net.minecraft.tileentity.TileEntity;
 
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class TileEntityDestructor {
         for (TileEntity t : destroyList) {
             if (t.getWorldObj() != null && t.getWorldObj().getTileEntity(t.xCoord, t.yCoord, t.zCoord) == t) {
                 t.getWorldObj().setBlockToAir(t.xCoord, t.yCoord, t.zCoord);
-                Utils.println("destroy light at " + t.xCoord + " " + t.yCoord + " " + t.zCoord);
+                Eln.dp.println(DebugType.RENDER, "destroy light at " + t.xCoord + " " + t.yCoord + " " + t.zCoord);
             }
         }
         destroyList.clear();

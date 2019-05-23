@@ -1,5 +1,7 @@
 package mods.eln.sim;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.FunctionTable;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
@@ -43,7 +45,7 @@ public class BatteryProcess implements IProcess {
         double wasteQ = 0;
         Q = Math.max(Q - voltageSource.getCurrent() * time / QNominal, 0);
         if (Q > lastQ && !isRechargeable) {
-            System.out.println("Battery is recharging when it shouldn't!");
+            Eln.dp.println(DebugType.MNA, "Battery is recharging when it shouldn't!");
             wasteQ = Q - lastQ;
             Q = lastQ;
         }

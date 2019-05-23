@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricaldigitaldisplay;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
@@ -50,7 +52,7 @@ public class ElectricalDigitalDisplayGui extends GuiScreenEln {
                 NumberFormat fmt = NumberFormat.getInstance();
                 float newMin = fmt.parse(minValue.getText()).floatValue();
                 float newMax = fmt.parse(maxValue.getText()).floatValue();
-                Utils.println(String.format("EDDG sending %f - %f", newMin, newMax));
+                Eln.dp.println(DebugType.SIX_NODE, String.format("EDDG sending %f - %f", newMin, newMax));
 
                 try {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
