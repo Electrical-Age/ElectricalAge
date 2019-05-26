@@ -35,21 +35,28 @@ fun wouldExplode(a: ShaftNetwork, b: ShaftNetwork): Boolean {
  */
 open class ShaftNetwork() : INBTTReady {
     val parts = HashSet<ShaftPart>()
-    val elements: HashSet<ShaftElement>
+    var elements = HashSet<ShaftElement>()
+    var _mass = 0.0
+    // This has to remain overridable/RO because of things like the fixed shaft  - Grissess
+    open val mass: Double
         get() {
-            var ret = HashSet<ShaftElement>()
-            parts.forEach { ret.add(it.element) }
-            return ret
+            return _mass
         }
+    fun updateCache() {
+        parts.forEach { elements.add(it.element) }
+        elements.forEach { _mass += it.shaftMass }
+    }
 
     constructor(first: ShaftElement, side: Direction) : this() {
         parts.add(ShaftPart(first, side))
+        updateCache()
     }
 
     constructor(first: ShaftElement, sides: Iterator<Direction>) : this() {
         sides.forEach {
             parts.add(ShaftPart(first, it))
         }
+        updateCache()
     }
 
     constructor(other: ShaftNetwork) : this() {
@@ -60,17 +67,10 @@ open class ShaftNetwork() : INBTTReady {
         other.parts.forEach { it.element.setShaft(it.side, this) }
         parts.addAll(other.parts)
         other.parts.clear()
+        updateCache()
     }
 
     // Aggregate properties of the (current) shaft:
-    open val mass: Double
-        get() {
-            var sum = 0.0
-            for (e in elements) {
-                sum += e.shaftMass
-            }
-            return sum
-        }
     var _rads = 0.0
     open var rads: Double
         get() = _rads
@@ -154,8 +154,12 @@ open class ShaftNetwork() : INBTTReady {
             part.element.setShaft(part.side, this)
         }
         other.parts.clear()
+        updateCache()
+        other.updateCache()
 
-        if(!loadMerge) energy = newEnergy - energyLostPerDeltaRad * deltaRads * deltaRads
+        if(!loadMerge) {
+            energy = newEnergy - energyLostPerDeltaRad * deltaRads * deltaRads
+        }
 
         // Utils.println(String.format("SN.mS: Result %s r=%f e=%f", this, rads, energy))
 
@@ -252,6 +256,7 @@ open class ShaftNetwork() : INBTTReady {
 
             // Utils.println("SN.rN new shaft, unseen.size = " + unseen.size)
             // We ran out of network. Any elements remaining in unseen should thus form a new network.
+            shaft.updateCache()
             shaft = ShaftNetwork()
             shaft.rads = curRads
         }
