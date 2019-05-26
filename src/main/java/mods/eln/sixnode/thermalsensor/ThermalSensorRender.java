@@ -12,6 +12,7 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,7 +33,7 @@ public class ThermalSensorRender extends SixNodeElementRender {
     float lowValue = 0, highValue = 50;
 
     ThermalCableDescriptor cable;
-    ElectricalCableDescriptor ecable;
+    GenericCableDescriptor ecable;
 
     public ThermalSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -66,9 +67,10 @@ public class ThermalSensorRender extends SixNodeElementRender {
             highValue = (float) (stream.readFloat() + PhysicalConstant.Tamb);
             ItemStack stack = Utils.unserialiseItemStack(stream);
             GenericItemBlockUsingDamageDescriptor desc = ThermalCableDescriptor.getDescriptor(stack);
+            System.out.println("==========================================HERE=============>>>>" + desc);
             if (desc instanceof ThermalCableDescriptor) cable = (ThermalCableDescriptor) desc;
             else cable = null;
-            if (desc instanceof ElectricalCableDescriptor) ecable = (ElectricalCableDescriptor) desc;
+            if (desc instanceof GenericCableDescriptor) ecable = (GenericCableDescriptor) desc;
             else ecable = null;
         } catch (IOException e) {
             e.printStackTrace();

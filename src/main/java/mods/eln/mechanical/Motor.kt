@@ -80,7 +80,8 @@ class MotorDescriptor(
     }
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        list.add("Converts electricity into mechanical energy, or (badly) vice versa.")
+        list.add("Converts electricity into")
+        list.add("mechanical energy, or (badly) vice versa.")
         list.add("Nominal usage ->")
         list.add(Utils.plotVolt("  Voltage in: ", nominalU.toDouble()))
         list.add(Utils.plotPower("  Power in: ", nominalP.toDouble()))

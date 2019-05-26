@@ -29,7 +29,7 @@ public class ElectricalCableDescriptor extends GenericCableDescriptor {
 
     public double electricalMaximalVoltage, electricalMaximalCurrent;
     public double electricalRp = Double.POSITIVE_INFINITY, electricalC = 1;
-    public double thermalRp = 1, thermalRs = 1, thermalC = 1;
+
     public double thermalWarmLimit = 100, thermalCoolLimit = -100;
     double electricalMaximalI;
     public double electricalRsMin = 0;
@@ -42,11 +42,11 @@ public class ElectricalCableDescriptor extends GenericCableDescriptor {
 
     String description = "todo cable";
 
-    public CableRenderDescriptor render;
-
     public ElectricalCableDescriptor(String name, CableRenderDescriptor render, String description, boolean signalWire) {
         super(name, ElectricalCableElement.class, ElectricalCableRender.class);
-
+        thermalRp = 1;
+        thermalRs = 1;
+        thermalC = 1;
         this.description = description;
         this.render = render;
         this.signalWire = signalWire;
@@ -153,20 +153,12 @@ public class ElectricalCableDescriptor extends GenericCableDescriptor {
         }
     }
 
+    @Override
     public int getNodeMask() {
         if (signalWire)
             return NodeBase.MASK_ELECTRICAL_GATE;
         else
             return NodeBase.MASK_ELECTRICAL_POWER;
-    }
-
-    public static CableRenderDescriptor getCableRender(ItemStack cable) {
-        if (cable == null) return null;
-        GenericItemBlockUsingDamageDescriptor desc = GenericCableDescriptor.getDescriptor(cable);
-        if (desc instanceof ElectricalCableDescriptor)
-            return ((ElectricalCableDescriptor) desc).render;
-        else
-            return null;
     }
 
     public void bindCableTexture() {

@@ -26,12 +26,12 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
     private Obj3DPart backplate;
     private Obj3D obj;
 
-    ElectricalCableDescriptor cable;
+    GenericCableDescriptor cable;
 
     float r0rOff, r0rOn, r1rOff, r1rOn;
     public float speed;
 
-    public ElectricalRelayDescriptor(String name, Obj3D obj, ElectricalCableDescriptor cable) {
+    public ElectricalRelayDescriptor(String name, Obj3D obj, GenericCableDescriptor cable) {
         super(name, ElectricalRelayElement.class, ElectricalRelayRender.class);
         this.cable = cable;
         this.obj = obj;
@@ -53,7 +53,11 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
             }
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(this.cable);
+        if (this.cable instanceof ElectricalCableDescriptor) {
+            voltageLevelColor = VoltageLevelColor.fromCable((ElectricalCableDescriptor) this.cable);
+        } else {
+            voltageLevelColor = VoltageLevelColor.None;
+        }
     }
 
     void applyTo(ElectricalLoad load) {

@@ -5,6 +5,7 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.debug.DebugType;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.materials.MaterialType;
 import mods.eln.node.NodeBase;
@@ -16,20 +17,13 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
 public class CurrentCableDescriptor extends GenericCableDescriptor {
-
-    public CableRenderDescriptor render;
-
-    double thermalC;
-    double thermalRp;
-    double thermalRs;
-    double thermalWarmLimit;
-    double thermalCoolLimit;
 
     public CurrentCableDescriptor(String name, CableRenderDescriptor render) {
         super(name, CurrentCableElement.class, CurrentCableRender.class);
@@ -53,8 +47,8 @@ public class CurrentCableDescriptor extends GenericCableDescriptor {
 
         this.electricalMaximalCurrent = 0.355 * conductorArea; // roughly (mm^2 / I) that is suggested by https://www.powerstream.com/Wire_Size.htm for power transmission lines
 
-        electricalRs = Eln.mp.getElectricalResistivity(type) * (conductorArea / 1000000 / 1.0); // resistivity (ohms/meter)* (cross sectional area (m) / length (m))
-        Eln.dp.println(DebugType.SIX_NODE, "Cable Resistance: " + electricalRs);
+        electricalRs = Eln.mp.getElectricalResistivity(type) * (conductorArea / 1000000 / 1.0) * Eln.cableResistanceMultiplier; // resistivity (ohms/meter)* (cross sectional area (m) / length (m))
+        Eln.dp.println(DebugType.SIX_NODE, "(" + this.name + ") Current Cable Resistance: " + electricalRs);
 
         // begin odd thermal system code
         double thermalMaximalPowerDissipated = electricalMaximalCurrent * electricalMaximalCurrent * electricalRs * 2;
@@ -112,18 +106,19 @@ public class CurrentCableDescriptor extends GenericCableDescriptor {
         return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
-    public static CableRenderDescriptor getCableRender(ItemStack cable) {
-        if (cable == null) return null;
-        GenericItemBlockUsingDamageDescriptor desc = CurrentCableDescriptor.getDescriptor(cable);
-        if (desc instanceof CurrentCableDescriptor)
-            return ((CurrentCableDescriptor) desc).render;
-        else
-            return null;
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
     }
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return false;
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (getIcon() == null)
+            return;
+
+        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+        String icon = getIcon().getIconName().substring(4);
+        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
     }
 
 }

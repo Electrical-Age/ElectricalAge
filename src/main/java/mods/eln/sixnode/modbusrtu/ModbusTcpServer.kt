@@ -2,7 +2,6 @@ package mods.eln.sixnode.modbusrtu
 
 import mods.eln.Eln
 import mods.eln.debug.DebugType
-import mods.eln.misc.Utils
 import java.io.OutputStream
 import java.net.*
 import java.nio.ByteBuffer
