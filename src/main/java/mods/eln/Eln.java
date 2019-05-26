@@ -1367,7 +1367,7 @@ public class Eln {
             subId = 25;
             name = TR_NAME(Type.NONE, "Low Current Cable");
 
-            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 0.45f, 0.45f);
+            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 0.45f, 0.45f);
             lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
             lowCurrentCableDescriptor.setCableProperties(
                 25,
@@ -1383,7 +1383,7 @@ public class Eln {
             subId = 26;
             name = TR_NAME(Type.NONE, "Medium Current Cable");
 
-            stdCableRenderMediumCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 0.95f, 0.45f);
+            stdCableRenderMediumCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 0.95f, 0.45f);
             mediumCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderMediumCurrent);
             mediumCurrentCableDescriptor.setCableProperties(
                 75,
@@ -1399,7 +1399,7 @@ public class Eln {
             subId = 27;
             name = TR_NAME(Type.NONE, "High Current Cable");
 
-            stdCableRenderHighCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 1.95f, 0.95f);
+            stdCableRenderHighCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 1.95f, 0.95f);
             highCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderHighCurrent);
             highCurrentCableDescriptor.setCableProperties(
                 150,
@@ -1415,7 +1415,7 @@ public class Eln {
             subId = 28;
             name = TR_NAME(Type.NONE, "Very High Current Cable");
 
-            stdCableRenderVeryHighCurrent = new CableRenderDescriptor("eln", "sprites/cable.png", 3.95f, 1.95f);
+            stdCableRenderVeryHighCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 3.95f, 1.95f);
             veryHighCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderVeryHighCurrent);
             veryHighCurrentCableDescriptor.setCableProperties(
                 600,
