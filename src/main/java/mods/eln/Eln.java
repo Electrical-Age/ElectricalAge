@@ -542,7 +542,7 @@ public class Eln {
 
         Eln.maxSoundDistance = config.get("debug", "maxSoundDistance", 16.0).getDouble();
 
-        Eln.cableResistanceMultiplier = config.get("debug", "cableResistanceMultiplier", 1.0).getDouble();
+        Eln.cableResistanceMultiplier = config.get("debug", "cableResistanceMultiplier", 1000.0).getDouble();
 
         {
             // typstr gets the most current list of values that you can use
