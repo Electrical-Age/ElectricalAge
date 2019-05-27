@@ -3,7 +3,6 @@ package mods.eln.sound;
 import mods.eln.Eln;
 import mods.eln.client.IUuidEntity;
 import mods.eln.debug.DebugType;
-import mods.eln.misc.Utils;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundManager;
 

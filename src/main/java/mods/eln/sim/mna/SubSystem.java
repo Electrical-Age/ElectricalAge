@@ -3,7 +3,6 @@ package mods.eln.sim.mna;
 import mods.eln.Eln;
 import mods.eln.debug.DebugType;
 import mods.eln.misc.Profiler;
-import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.Delay;
 import mods.eln.sim.mna.component.Resistor;

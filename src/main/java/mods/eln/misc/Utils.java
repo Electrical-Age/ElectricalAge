@@ -229,7 +229,10 @@ public class Utils {
     public static String plotValue(double value) {
         double valueAbs = Math.abs(value);
         if (valueAbs < 0.0001) {
-            return "0";
+            // if one cared? I'd suggest just converting the double completely, and skip this whole "switch" thing.
+            // plus, FPU's almost never give you 0.0 or -0.0 (yup, negative zero is a thing)
+            //return String.format("%1.3fµ",value * 10000);
+            return "0.0";
         } else if (valueAbs < 0.000999) {
             return String.format("%1.2fµ",value * 10000);
         } else if (valueAbs < 0.00999) {
@@ -248,8 +251,15 @@ public class Utils {
             return String.format("%1.2fk", value / 1000.0);
         } else if (valueAbs < 99999) {
             return String.format("%2.1fk", value / 1000.0);
-        } else { // if(value < 1000000)
+        } else if (valueAbs < 999999) {
             return String.format("%3.0fk", value / 1000.0);
+        } else if (valueAbs < 9999999) {
+            return String.format("%1.2fM", value / 1000000.0);
+        } else if (valueAbs < 99999999) {
+            return String.format("%2.1fM", value / 1000000.0);
+        } else {
+            return String.format("%3.0fM", value / 1000000.0);
+            // and bigger, and bigger, and bigger... I think if you're going over 1MA or 1MV, you're probably done.
         }
     }
 

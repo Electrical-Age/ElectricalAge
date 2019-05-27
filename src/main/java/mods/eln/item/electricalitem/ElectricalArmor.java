@@ -4,7 +4,6 @@ import mods.eln.Eln;
 import mods.eln.debug.DebugType;
 import mods.eln.generic.genericArmorItem;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
-import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;

@@ -7,13 +7,11 @@ import mods.eln.debug.DebugType
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 import mods.eln.misc.INBTTReady
-import mods.eln.misc.Utils
 import mods.eln.node.NodeManager
 import mods.eln.sim.process.destruct.DelayedDestruction
 import mods.eln.sim.process.destruct.ShaftSpeedWatchdog
 import mods.eln.sim.process.destruct.WorldExplosion
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.server.MinecraftServer
 import java.lang.Double.isNaN
 import java.util.*
 

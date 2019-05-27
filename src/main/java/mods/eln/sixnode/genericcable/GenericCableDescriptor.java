@@ -7,7 +7,6 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.item.ItemStack;
 
 public abstract class GenericCableDescriptor extends SixNodeDescriptor {
@@ -31,6 +30,10 @@ public abstract class GenericCableDescriptor extends SixNodeDescriptor {
         super(name, ElementClass, RenderClass);
     }
 
+    public int getNodeMask() {
+        return NodeBase.MASK_ELECTRICAL_POWER;
+    }
+
     public abstract void applyTo(ElectricalLoad electricalLoad, double rsFactor);
 
     public abstract void applyTo(ElectricalLoad electricalLoad);
@@ -48,9 +51,5 @@ public abstract class GenericCableDescriptor extends SixNodeDescriptor {
             return ((GenericCableDescriptor) desc).render;
         else
             return null;
-    }
-
-    public int getNodeMask() {
-        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 }

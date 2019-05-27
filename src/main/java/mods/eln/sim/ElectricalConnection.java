@@ -2,7 +2,6 @@ package mods.eln.sim;
 
 import mods.eln.Eln;
 import mods.eln.debug.DebugType;
-import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.InterSystem;
 
 public class ElectricalConnection extends InterSystem {

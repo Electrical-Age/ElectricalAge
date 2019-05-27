@@ -1,6 +1,5 @@
 package mods.eln.gridnode
 
-import jdk.nashorn.internal.objects.NativeDebug.getClass
 import mods.eln.misc.Direction
 import mods.eln.misc.Obj3D
 import mods.eln.misc.preserveMatrix
@@ -9,10 +8,8 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
-
-import java.util.ArrayList
-
-import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL11.glRotatef
+import java.util.*
 
 open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Class<*>, RenderClass: Class<*>, val cableTexture: String, val cableDescriptor: ElectricalCableDescriptor, val connectRange: Int) : TransparentNodeDescriptor(name, ElementClass, RenderClass) {
     val plus = ArrayList<Obj3D.Obj3DPart>()

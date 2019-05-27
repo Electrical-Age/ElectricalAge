@@ -2,7 +2,6 @@ package mods.eln.entity;
 
 import mods.eln.Eln;
 import mods.eln.debug.DebugType;
-import mods.eln.misc.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureAttribute;

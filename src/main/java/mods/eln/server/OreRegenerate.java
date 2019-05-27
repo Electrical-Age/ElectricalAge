@@ -6,7 +6,6 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
 import mods.eln.debug.DebugType;
-import mods.eln.misc.Utils;
 import mods.eln.ore.OreDescriptor;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;

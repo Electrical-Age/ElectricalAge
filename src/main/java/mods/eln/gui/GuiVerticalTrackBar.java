@@ -2,7 +2,6 @@ package mods.eln.gui;
 
 import mods.eln.Eln;
 import mods.eln.debug.DebugType;
-import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 

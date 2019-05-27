@@ -106,7 +106,7 @@ public class PowerSocketElement extends SixNodeElement implements IConfigurable 
             if(handle != null && handle.element.getChannelState(handle.id)) {
                 ItemStack cable = getInventory().getStackInSlot(PowerSocketContainer.cableSlotId);
                 if (cable != null) {
-                    ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cable);
+                    GenericCableDescriptor desc = (GenericCableDescriptor) GenericCableDescriptor.getDescriptor(cable);
                     loadResistor.connectTo(handle.element.powerLoad, outputLoad);
                     desc.applyTo(loadResistor);
                 }

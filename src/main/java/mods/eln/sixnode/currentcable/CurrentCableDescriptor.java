@@ -3,7 +3,6 @@ package mods.eln.sixnode.currentcable;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.debug.DebugType;
-import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;

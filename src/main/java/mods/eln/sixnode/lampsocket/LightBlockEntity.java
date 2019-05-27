@@ -4,7 +4,6 @@ import mods.eln.Eln;
 import mods.eln.debug.DebugType;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
-import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
