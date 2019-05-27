@@ -12,7 +12,6 @@ public class DebugPrint {
         enabledTypes = enabled;
         Eln.logger.info("Debugger enabled?: " + Eln.debugEnabled);
         Eln.logger.info("Enabled Debugging types: " + enabledTypes);
-
     }
 
     public void add(DebugType t) {
@@ -39,18 +38,14 @@ public class DebugPrint {
     }
 
     public void println(DebugType type, String str) {
-        if (Eln.debugEnabled) {
-            if (enabledTypes.contains(type)) {
+        if (Eln.debugEnabled && enabledTypes.contains(type)) {
                 Eln.logger.info("[" + type.name() + "]: " + str);
-            }
         }
     }
 
     public void print(DebugType type, String str) {
-        if (Eln.debugEnabled) {
-            if (enabledTypes.contains(type)) {
+        if (Eln.debugEnabled && enabledTypes.contains(type)) {
                 Eln.logger.info("[" + type.name() + "]: " + str);
-            }
         }
     }
 
@@ -61,6 +56,4 @@ public class DebugPrint {
     public void print(DebugType type, String format, Object... data) {
         print(type, String.format(format, data));
     }
-
-
 }

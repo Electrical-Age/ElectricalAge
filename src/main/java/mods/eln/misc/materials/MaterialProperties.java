@@ -7,7 +7,7 @@ import java.util.HashMap;
  */
 public class MaterialProperties {
 
-    HashMap<MaterialType, MaterialData> materials = new HashMap<>();
+    private HashMap<MaterialType, MaterialData> materials = new HashMap<>();
 
     public MaterialProperties() {
         materials.put(MaterialType.COPPER, new MaterialData(

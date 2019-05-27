@@ -212,7 +212,6 @@ public class TransformerElement extends TransparentNodeElement implements IConfi
             if (isIsolator) {
                 primaryVoltageSource.setU(0);
                 secondaryVoltageSource.setU(0);
-            } else {
             }
             populated = false;
         }
