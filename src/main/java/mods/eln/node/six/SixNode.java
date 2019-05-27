@@ -1,8 +1,12 @@
 package mods.eln.node.six;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.item.IConfigurable;
-import mods.eln.misc.*;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.LRDUCubeMask;
+import mods.eln.misc.Utils;
 import mods.eln.node.ISixNodeCache;
 import mods.eln.node.Node;
 import mods.eln.node.NodeConnection;
@@ -96,7 +100,7 @@ public class SixNode extends Node {
 
             connect();
 
-            Utils.println("createSubBlock " + sideElementIdList[direction.getInt()] + " " + direction);
+            Eln.dp.println(DebugType.SIX_NODE, "createSubBlock " + sideElementIdList[direction.getInt()] + " " + direction);
 
             setNeedPublish(true);
             return true;
@@ -157,7 +161,7 @@ public class SixNode extends Node {
         if (sideElementList[direction.getInt()] == null)
             return false;
 
-        Utils.println("deleteSubBlock " + " " + direction);
+        Eln.dp.println(DebugType.SIX_NODE, "deleteSubBlock " + " " + direction);
 
         disconnect();
         SixNodeElement e = sideElementList[direction.getInt()];
@@ -448,11 +452,11 @@ public class SixNode extends Node {
     }
 
     public void tryConnectTwoInternalElement(Direction side, SixNodeElement element, LRDU lrdu, Direction otherSide, SixNodeElement otherElement, LRDU otherLRDU) {
-        Utils.println("SixNode.tCTIE:");
+        Eln.dp.println(DebugType.SIX_NODE, "SixNode.tCTIE:");
         int mskThis = element.getConnectionMask(lrdu);
         int mskOther = otherElement.getConnectionMask(otherLRDU);
         if (compareConnectionMask(mskThis, mskOther)) {
-            Utils.println("\tConnection OK.");
+            Eln.dp.println(DebugType.SIX_NODE, "\tConnection OK.");
             lrduElementMask.set(side, lrdu, true);
             lrduElementMask.set(otherSide, otherLRDU, true);
             NodeConnection nodeConnection = new NodeConnection(this, side, lrdu, this, otherSide, otherLRDU);
@@ -496,7 +500,7 @@ public class SixNode extends Node {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
         if (element == null) {
-            Utils.println("sixnode newConnectionAt error");
+            Eln.dp.println(DebugType.SIX_NODE, "sixnode newConnectionAt error");
             while (true)
                 ;
         }
@@ -509,7 +513,7 @@ public class SixNode extends Node {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
         if (element == null) {
-            Utils.println("sixnode newConnectionAt error");
+            Eln.dp.println(DebugType.SIX_NODE, "sixnode newConnectionAt error");
             while (true)
                 ;
         }
@@ -546,7 +550,7 @@ public class SixNode extends Node {
 			}*/
 
             if (accepted) {
-                Utils.println("ACACAC");
+                Eln.dp.println(DebugType.SIX_NODE, "ACACAC");
 
 
                 setNeedPublish(true);
@@ -618,7 +622,7 @@ public class SixNode extends Node {
             if (side != null & sideElementIdList[side.getInt()] == stream.readShort()) {
                 sideElementList[side.getInt()].networkUnserialize(stream, player);
             } else {
-                Utils.println("sixnode unserialize miss");
+                Eln.dp.println(DebugType.SIX_NODE, "sixnode unserialize miss");
             }
         } catch (IOException e) {
 

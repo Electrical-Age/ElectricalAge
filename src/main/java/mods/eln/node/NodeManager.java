@@ -1,5 +1,7 @@
 package mods.eln.node;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
@@ -46,7 +48,7 @@ public class NodeManager extends WorldSavedData {
     public void addNode(NodeBase node) {
         // nodeArray.add(node);
         if (node.coordonate == null) {
-            Utils.println("Null coordonate addnode");
+            Eln.dp.println(DebugType.NODE, "Null coordonate addnode");
             while (true)
                 ;
         }
@@ -56,7 +58,7 @@ public class NodeManager extends WorldSavedData {
         }
 
         nodes.add(node);
-        Utils.println("NodeManager has " + nodesMap.size() + "node");
+        Eln.dp.println(DebugType.NODE, "NodeManager has " + nodesMap.size() + "node");
         // nodeArray.put(new NodeIdentifier(node), node);
     }
 
@@ -64,14 +66,14 @@ public class NodeManager extends WorldSavedData {
         if (node == null) return;
         nodesMap.remove(node.coordonate);
         nodes.remove(node);
-        Utils.println("NodeManager has " + nodesMap.size() + "node");
+        Eln.dp.println(DebugType.NODE, "NodeManager has " + nodesMap.size() + "node");
     }
 
     public void removeCoordonate(Coordonate c) {
         // nodeArray.remove(node);
         NodeBase n = nodesMap.remove(c);
         if (n != null) nodes.remove(n);
-        Utils.println("NodeManager has " + nodesMap.size() + "node");
+        Eln.dp.println(DebugType.NODE, "NodeManager has " + nodesMap.size() + "node");
     }
 
     @Override

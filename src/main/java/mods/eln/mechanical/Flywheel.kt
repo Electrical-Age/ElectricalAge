@@ -1,5 +1,7 @@
 package mods.eln.mechanical
 
+import mods.eln.Eln
+import mods.eln.debug.DebugType
 import mods.eln.misc.Direction
 import mods.eln.misc.LinearFunction
 import mods.eln.misc.Obj3D
@@ -49,20 +51,20 @@ class FlyWheelElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             //if(objects.size > 0) Utils.println("FFP.sP: within range: " + objects.size)
             for(obj in objects) {
                 val ent = obj as Entity
-                Utils.println(String.format("FPP.sP: considering %s", ent))
+                Eln.dp.println(DebugType.MECHANICAL, String.format("FPP.sP: considering %s", ent))
                 val dx = Math.abs(ent.posX - coord.x - 0.5)
                 val dy = Math.abs(ent.posY - coord.y - 1)
                 val dz = Math.abs(ent.posZ - coord.z - 0.5)
                 if(dy > yTolerance) {
-                    Utils.println("FPP.sP: dy out of range (" + dy + "; c.y " + coord.y + " e.y" + ent.posY + "): " + ent)
+                    Eln.dp.println(DebugType.MECHANICAL, "FPP.sP: dy out of range (" + dy + "; c.y " + coord.y + " e.y" + ent.posY + "): " + ent)
                     continue
                 }
                 if(dx > xzTolerance) {
-                    Utils.println("FPP.sP: dx out of range (" + dx + "; c.x " + coord.x + " e.x" + ent.posX + "): " + ent)
+                    Eln.dp.println(DebugType.MECHANICAL, "FPP.sP: dx out of range (" + dx + "; c.x " + coord.x + " e.x" + ent.posX + "): " + ent)
                     continue
                 }
                 if(dz > xzTolerance) {
-                    Utils.println("FPP.sP: dz out of range (" + dz + "; c.z " + coord.z + " e.z" + ent.posZ + "): " + ent)
+                    Eln.dp.println(DebugType.MECHANICAL, "FPP.sP: dz out of range (" + dz + "; c.z " + coord.z + " e.z" + ent.posZ + "): " + ent)
                     continue
                 }
                 val mag = velocityF.getValue(rads)
@@ -74,7 +76,7 @@ class FlyWheelElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
                 ent.addVelocity(vel[0], vel[1], vel[2])
                 var dmg = damageF.getValue(rads).toInt()
                 if(ent !is EntityLivingBase) dmg = 0
-                Utils.println("FFP.sP: ent " + ent + " flung " + vel.joinToString(",") + " for damage " + dmg)
+                Eln.dp.println(DebugType.MECHANICAL, "FFP.sP: ent " + ent + " flung " + vel.joinToString(",") + " for damage " + dmg)
                 if(dmg <= 0) continue
                 ent.attackEntityFrom(DamageSource("Flywheel"), dmg.toFloat())
             }

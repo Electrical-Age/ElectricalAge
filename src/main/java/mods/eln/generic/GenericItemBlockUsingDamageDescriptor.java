@@ -94,7 +94,7 @@ public class GenericItemBlockUsingDamageDescriptor {
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack) {
         if (stack == null) return null;
         Item item = stack.getItem();
-        if (item instanceof GenericItemBlockUsingDamage == false) return null;
+        if (!(item instanceof GenericItemBlockUsingDamage)) return null;
         GenericItemBlockUsingDamage genItem = (GenericItemBlockUsingDamage) item;
         return genItem.getDescriptor(stack);
     }
@@ -102,7 +102,7 @@ public class GenericItemBlockUsingDamageDescriptor {
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
         GenericItemBlockUsingDamageDescriptor desc = getDescriptor(stack);
         if (desc == null) return null;
-        if (extendClass.isAssignableFrom(desc.getClass()) == false) return null;
+        if (!(extendClass.isAssignableFrom(desc.getClass()))) return null;
         return desc;
     }
 

@@ -20,6 +20,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricaldatalogger.DataLogs;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -123,17 +124,17 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
     public int getConnectionMask(LRDU lrdu) {
         if (!descriptor.temperatureOnly) {
             if (getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId) != null) {
-                if (front.left() == lrdu) return NodeBase.maskThermal;
-                if (front.right() == lrdu) return NodeBase.maskThermal;
+                if (front.left() == lrdu) return NodeBase.MASK_THERMAL;
+                if (front.right() == lrdu) return NodeBase.MASK_THERMAL;
             }
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         } else {
             if (isItemThermalCable()) {
-                if (front.inverse() == lrdu) return NodeBase.maskThermal;
+                if (front.inverse() == lrdu) return NodeBase.MASK_THERMAL;
             } else if (isItemElectricalCable()) {
-                if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+                if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
             }
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         }
         return 0;
     }
@@ -202,7 +203,7 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
             cableDescriptor.setThermalLoad(thermalLoad);
             thermalLoad.setAsFast();
         } else if (descriptor.getClass() == ElectricalCableDescriptor.class) {
-            ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+            GenericCableDescriptor cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
             cableDescriptor.applyTo(thermalLoad);
             thermalLoad.Rp = 1000000000.0;
             thermalLoad.setAsSlow();

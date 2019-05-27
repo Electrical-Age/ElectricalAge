@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricaldatalogger;
 
-import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
@@ -128,7 +127,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement implements IConf
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
+        if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

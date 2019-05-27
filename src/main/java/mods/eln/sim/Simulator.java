@@ -4,7 +4,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import mods.eln.misc.Utils;
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
@@ -59,7 +60,7 @@ public class Simulator /* ,IPacketHandler */ {
 
     public boolean checkThermalLoad(double thermalRs, double thermalRp, double thermalC) {
         if (thermalC < getMinimalThermalC(thermalRs, thermalRp)) {
-            Utils.println("checkThermalLoad ERROR");
+            Eln.dp.println(DebugType.MNA, "checkThermalLoad ERROR");
             while (true)
                 ;
             // return false;
@@ -172,7 +173,7 @@ public class Simulator /* ,IPacketHandler */ {
                     thermalFastConnectionList.add(connection);
 
             } else {
-                Utils.println("***** addThermalConnection ERROR ****");
+                Eln.dp.println(DebugType.MNA,"***** addThermalConnection ERROR ****");
             }
         }
     }
@@ -478,7 +479,7 @@ public class Simulator /* ,IPacketHandler */ {
             thermalSlowNsStack /= 20;
             slowNsStack /= 20;
 
-            Utils.println("ticks " + new DecimalFormat("#").format((int) avgTickTime) + " us" + "  E " + electricalNsStack / 1000 + "  TF " + thermalFastNsStack / 1000 + "  TS " + thermalSlowNsStack / 1000 + "  S " + slowNsStack / 1000
+            Eln.dp.print(DebugType.MNA, "ticks " + new DecimalFormat("#").format((int) avgTickTime) + " us" + "  E " + electricalNsStack / 1000 + "  TF " + thermalFastNsStack / 1000 + "  TS " + thermalSlowNsStack / 1000 + "  S " + slowNsStack / 1000
 
                 + "    " + mna.getSubSystemCount() + " SS"
                 + "    " + electricalProcessList.size() + " EP"

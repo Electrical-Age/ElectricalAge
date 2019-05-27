@@ -3,16 +3,15 @@ package mods.eln.mechanical
 import cpw.mods.fml.common.Loader
 import cpw.mods.fml.common.LoaderState
 import mods.eln.Eln
+import mods.eln.debug.DebugType
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 import mods.eln.misc.INBTTReady
-import mods.eln.misc.Utils
 import mods.eln.node.NodeManager
 import mods.eln.sim.process.destruct.DelayedDestruction
 import mods.eln.sim.process.destruct.ShaftSpeedWatchdog
 import mods.eln.sim.process.destruct.WorldExplosion
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.server.MinecraftServer
 import java.lang.Double.isNaN
 import java.util.*
 
@@ -106,14 +105,14 @@ open class ShaftNetwork() : INBTTReady {
      */
     fun mergeShafts(other: ShaftNetwork, invoker: ShaftElement?): ShaftNetwork {
         assert(other != this)
-        Utils.println(String.format("SN.ms(this=%s, %s, invoker=%s)", this, other, invoker))
+        Eln.dp.println(DebugType.MECHANICAL, String.format("SN.ms(this=%s, %s, invoker=%s)", this, other, invoker))
 
         // If the other class wants to take this merge, let it.
         // In particular, don't presume that:
         // (1) setShaft won't be called on the invoker during the merge, and
         // (2) that the invoker will have the same shaft afterward
         if(other.hasMergePrecedenceOver(this)) {
-            Utils.println(String.format("SN.mS: merge prec %s over %s", other, this))
+            Eln.dp.println(DebugType.MECHANICAL, String.format("SN.mS: merge prec %s over %s", other, this))
             return other.mergeShafts(this, invoker)
         }
 
@@ -137,7 +136,7 @@ open class ShaftNetwork() : INBTTReady {
             deltaRads = Math.abs(rads - other.rads)
 
             if (wouldExplode(this, other) && invoker != null) {
-                Utils.println(String.format("SN.mS: Bad matching, %s will explode", invoker))
+                Eln.dp.println(DebugType.MECHANICAL, String.format("SN.mS: Bad matching, %s will explode", invoker))
                 DelayedDestruction(
                     WorldExplosion(invoker.coordonate()).machineExplosion(),
                     0.0  // Sooner than later, just not right now :)
@@ -176,7 +175,7 @@ open class ShaftNetwork() : INBTTReady {
         val neighbours = getNeighbours(from)
         for (neighbour in neighbours) {
             if(neighbour.thisShaft != this) {
-                Utils.println("SN.cS: WARNING: Connecting part with this != getShaft(side)")
+                Eln.dp.println(DebugType.MECHANICAL, "SN.cS: WARNING: Connecting part with this != getShaft(side)")
                 continue
             }
             if (neighbour.otherShaft != null && neighbour.otherShaft != this) {
@@ -364,7 +363,7 @@ data class ShaftNeighbour(
     fun makeConnection() {
         val thisNet = thisPart.element.getShaft(thisPart.side)
         val otherNet = otherPart.element.getShaft(otherPart.side)
-        if(thisNet != otherNet) Utils.println("ShaftNeighbour.makeConnection: WARNING: Not actually connected?")
+        if(thisNet != otherNet) Eln.dp.println(DebugType.MECHANICAL,"ShaftNeighbour.makeConnection: WARNING: Not actually connected?")
         thisPart.element.connectedOnSide(thisPart.side, thisNet!!)
         otherPart.element.connectedOnSide(otherPart.side, otherNet!!)
     }
@@ -372,7 +371,7 @@ data class ShaftNeighbour(
     fun breakConnection() {
         val thisNet = thisPart.element.getShaft(thisPart.side)
         val otherNet = otherPart.element.getShaft(otherPart.side)
-        if(thisNet != otherNet) Utils.println("ShaftNeighbour.breakConnection: WARNING: Break already broken connection?")
+        if(thisNet != otherNet) Eln.dp.println(DebugType.MECHANICAL,"ShaftNeighbour.breakConnection: WARNING: Break already broken connection?")
         thisPart.element.disconnectedOnSide(thisPart.side, thisNet)
         otherPart.element.disconnectedOnSide(otherPart.side, otherNet)
         // TODO: Unmerge networks here eventually?

@@ -3,6 +3,7 @@ package mods.eln.misc;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -74,33 +75,34 @@ public class Utils {
         return random.nextDouble() * (max - min) + min;
     }
 
+    @Deprecated
     public static void println(String str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.println(str);
+        if (Eln.debugEnabled) {
+            Eln.dp.println(DebugType.LEGACY, str);
+        }
     }
 
+    @Deprecated
     public static void println(Object str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.println(str.toString());
+        if (Eln.debugEnabled) {
+            Eln.dp.println(DebugType.LEGACY, str.toString());
+        }
     }
 
     public static void print(String str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.print(str);
+        if (Eln.debugEnabled) {
+            Eln.dp.print(DebugType.LEGACY, str);
+        }
     }
 
+    @Deprecated
     public static void print(Object str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.print(str.toString());
+        Eln.dp.print(DebugType.LEGACY, str.toString());
     }
 
+    @Deprecated
     public static void print(String format, Object... data) {
-        if (!Eln.debugEnabled) return;
-        print(String.format(format, data));
+        Eln.dp.println(DebugType.LEGACY, String.format(format, data));
     }
 
     static String floatToStr(double f, int high, int low) {
@@ -227,7 +229,10 @@ public class Utils {
     public static String plotValue(double value) {
         double valueAbs = Math.abs(value);
         if (valueAbs < 0.0001) {
-            return "0";
+            // if one cared? I'd suggest just converting the double completely, and skip this whole "switch" thing.
+            // plus, FPU's almost never give you 0.0 or -0.0 (yup, negative zero is a thing)
+            //return String.format("%1.3fµ",value * 10000);
+            return "0.0";
         } else if (valueAbs < 0.000999) {
             return String.format("%1.2fµ",value * 10000);
         } else if (valueAbs < 0.00999) {
@@ -246,8 +251,15 @@ public class Utils {
             return String.format("%1.2fk", value / 1000.0);
         } else if (valueAbs < 99999) {
             return String.format("%2.1fk", value / 1000.0);
-        } else { // if(value < 1000000)
+        } else if (valueAbs < 999999) {
             return String.format("%3.0fk", value / 1000.0);
+        } else if (valueAbs < 9999999) {
+            return String.format("%1.2fM", value / 1000000.0);
+        } else if (valueAbs < 99999999) {
+            return String.format("%2.1fM", value / 1000000.0);
+        } else {
+            return String.format("%3.0fM", value / 1000000.0);
+            // and bigger, and bigger, and bigger... I think if you're going over 1MA or 1MV, you're probably done.
         }
     }
 
@@ -927,10 +939,6 @@ public class Utils {
         return getSide() == Side.SERVER;
     }
 
-    public static void printSide(String string) {
-        Utils.println(string);
-    }
-
     public static short modbusToShort(double outputNormalized, int i) {
         int bit = Float.floatToRawIntBits((float) outputNormalized);
         if (i == 1)
@@ -1457,11 +1465,11 @@ public class Utils {
     }
 
     public static void printFunction(FunctionTable func, double start, double end, double step) {
-        Utils.println("********");
+        Eln.dp.println(DebugType.OTHER, "********");
         double x;
         for (int idx = 0; (x = start + step * idx) < end + 0.00001; idx++) {
-            Utils.println(func.getValue(x));
+            Eln.dp.println(DebugType.OTHER, Double.toString(func.getValue(x)));
         }
-        Utils.println("********");
+        Eln.dp.println(DebugType.OTHER, "********");
     }
 }

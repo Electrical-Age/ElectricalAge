@@ -6,6 +6,7 @@ import mods.eln.item.CaseItemDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.BasicContainer;
 import mods.eln.node.six.SixNodeItemSlot;
+import mods.eln.sixnode.currentcable.CurrentCableDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -21,17 +22,22 @@ public class TransformerContainer extends BasicContainer {
 
     public TransformerContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{
-            new SixNodeItemSlot(inventory, primaryCableSlotId, 58, 30, 16, new Class[]{ElectricalCableDescriptor.class},
+            new SixNodeItemSlot(inventory, primaryCableSlotId, 58, 30, 16,
+                new Class[]{ElectricalCableDescriptor.class, CurrentCableDescriptor.class},
                 SlotSkin.medium,
                 new String[]{tr("Electrical cable slot")}),
             new SixNodeItemSlot(inventory, secondaryCableSlotId, 100, 30, 16,
-                new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium,
+                new Class[]{ElectricalCableDescriptor.class, CurrentCableDescriptor.class},
+                SlotSkin.medium,
                 new String[]{tr("Electrical cable slot")}),
             new GenericItemUsingDamageSlot(inventory, ferromagneticSlotId, 58 + (100 - 58) / 2, 30, 1,
-                new Class[]{FerromagneticCoreDescriptor.class}, SlotSkin.medium,
+                new Class[]{FerromagneticCoreDescriptor.class},
+                SlotSkin.medium,
                 new String[]{tr("Ferromagnetic core slot")}),
             new GenericItemUsingDamageSlot(inventory, CasingSlotId, 130, 74, 1,
-                new Class[] {CaseItemDescriptor.class}, SlotSkin.medium, new String[] {tr("Casing slot")})
+                new Class[] {CaseItemDescriptor.class},
+                SlotSkin.medium,
+                new String[] {tr("Casing slot")})
         });
     }
 }

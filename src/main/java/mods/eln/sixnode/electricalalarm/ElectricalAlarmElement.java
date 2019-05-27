@@ -72,7 +72,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu) return NodeBase.maskElectricalInputGate;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

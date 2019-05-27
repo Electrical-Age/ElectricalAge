@@ -3,7 +3,6 @@ package mods.eln.sixnode.wirelesssignal;
 import mods.eln.misc.Coordonate;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
 import java.util.*;

@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
@@ -339,7 +340,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     }
 
     public void publish() {
-        Utils.print("Light published");
+        Eln.dp.println(DebugType.SIX_NODE, "Light published");
     }
 
     public void setLightAt(Coordonate coord, int value) {

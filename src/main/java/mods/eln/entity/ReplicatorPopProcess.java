@@ -2,6 +2,7 @@ package mods.eln.entity;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -45,7 +46,7 @@ public class ReplicatorPopProcess implements IProcess {
                     x = (int) (player.posX + Utils.rand(-100, 100));
                     z = (int) (player.posZ + Utils.rand(-100, 100));
                     y = 2;
-                    Utils.println("POP");
+                    Eln.dp.println(DebugType.OTHER, "POP");
 
                     if (world.blockExists(x, y, z) == false) break;
 
@@ -60,7 +61,7 @@ public class ReplicatorPopProcess implements IProcess {
                     world.spawnEntityInWorld(entityliving);
                     entityliving.playLivingSound();
                     entityliving.isSpawnedFromWeather = true;
-                    Utils.println("Spawn Replicator at " + x + " " + y + " " + z);
+                    Eln.dp.println(DebugType.OTHER, "Spawn Replicator at " + x + " " + y + " " + z);
                 }
             }
         }

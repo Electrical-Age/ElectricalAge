@@ -170,8 +170,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     override fun getConnectionMask(side: Direction?, lrdu: LRDU?) = when (lrdu) {
         LRDU.Down -> when (side) {
-            front.inverse -> NodeBase.maskThermal
-            else -> NodeBase.maskElectricalInputGate
+            front.inverse -> NodeBase.MASK_THERMAL
+            else -> NodeBase.MASK_ELECTRICAL_INPUT_GATE
         }
         else -> 0
     }

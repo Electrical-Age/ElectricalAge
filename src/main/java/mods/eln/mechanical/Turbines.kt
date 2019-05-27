@@ -166,7 +166,7 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     override fun getElectricalLoad(side: Direction, lrdu: LRDU) = throttle
     override fun getThermalLoad(side: Direction?, lrdu: LRDU?) = null
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
-        if (lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.maskElectricalGate
+        if (lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.MASK_ELECTRICAL_GATE
         return 0
     }
 

@@ -113,10 +113,10 @@ public class DiodeElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeByte(front.toInt() << 4);
-            stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-            stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+            stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.NETWORK_SERIALIZE_I_FACTOR));
+            stream.writeShort((short) (thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));
         } catch (IOException e) {
             e.printStackTrace();
         }

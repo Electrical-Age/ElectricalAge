@@ -142,7 +142,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
         if (desc.includeTransformer) {
-            return NodeBase.maskElectricalPower
+            return NodeBase.MASK_ELECTRICAL_POWER
         } else {
             return 0
         }

@@ -6,12 +6,10 @@ import mods.eln.node.transparent.TransparentNodeElementRender
 import mods.eln.node.transparent.TransparentNodeEntity
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.Vec3
-
+import org.lwjgl.opengl.GL11.*
 import java.io.DataInputStream
 import java.io.IOException
-import java.util.ArrayList
-
-import org.lwjgl.opengl.GL11.*
+import java.util.*
 
 abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(tileEntity, descriptor) {
     private val descriptor: GridDescriptor

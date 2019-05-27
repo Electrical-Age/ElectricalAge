@@ -14,7 +14,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -43,7 +43,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
     double currantMax = 0;
     boolean nbtBoot = false;
 
-    public ElectricalCableDescriptor cableDescriptor = null;
+    public GenericCableDescriptor cableDescriptor = null;
 
     public static final byte setVoltageMaxId = 1;
     public static final byte setVoltageMinId = 2;
@@ -106,8 +106,8 @@ public class ElectricalBreakerElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId) == null) return 0;
-        if (front == lrdu) return NodeBase.maskElectricalAll;
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
+        if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
 
         return 0;
     }
@@ -157,7 +157,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
     public void refreshSwitchResistor() {
         ItemStack cable = inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId);
-        ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        GenericCableDescriptor cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
         if (cableDescriptor == null || !switchState) {
             switchResistor.ultraImpedance();
         } else {
@@ -187,7 +187,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
         if (!nbtBoot) setSwitchState(false);
         nbtBoot = false;
 
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
         if (cableDescriptor == null) {
             aLoad.highImpedance();
             bLoad.highImpedance();

@@ -140,7 +140,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = when (lrdu) {
         LRDU.Down -> when (side) {
-            front, front.inverse -> NodeBase.maskElectricalPower
+            front, front.inverse -> NodeBase.MASK_ELECTRICAL_POWER
             else -> 0
         }
         else -> 0

@@ -21,6 +21,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils;
@@ -33,7 +34,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -209,7 +212,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
-        if (front == lrdu) return NodeBase.maskElectricalPower;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 
@@ -328,7 +331,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     void setupFromInventory() {
         ItemStack cableStack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
         if (cableStack != null) {
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
+            GenericCableDescriptor desc = (GenericCableDescriptor) GenericCableDescriptor.getDescriptor(cableStack);
             desc.applyTo(powerLoad);
             voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
         } else {

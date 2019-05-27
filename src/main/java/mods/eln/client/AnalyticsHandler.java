@@ -6,6 +6,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
@@ -65,7 +66,7 @@ public class AnalyticsHandler {
 
                 } catch (Exception e) {
                     String error = "Unable to send analytics data: " + e.getMessage() + ".";
-                    System.err.println(error);
+                    Eln.dp.println(DebugType.NETWORK, error);
                 }
                 AnalyticsHandler.getInstance().ready = true;
             }

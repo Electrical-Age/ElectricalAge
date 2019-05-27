@@ -58,7 +58,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
         if (core == null) return MnaConst.highImpedance;
         FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
-        double coreFactor = coreDescriptor.cableMultiplicator;
+        double coreFactor = coreDescriptor.cableMultiplier;
 
         return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
     }

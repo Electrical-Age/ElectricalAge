@@ -112,10 +112,10 @@ public class SolarPanelElement extends TransparentNodeElement {
         if (lrdu != LRDU.Down) return 0;
         if (groundNode == null) {
             // Single-tile solar panel.
-            if (side == front.left()) return NodeBase.maskElectricalPower;
-            if (side == front.right() && !grounded) return NodeBase.maskElectricalPower;
+            if (side == front.left()) return NodeBase.MASK_ELECTRICAL_POWER;
+            if (side == front.right() && !grounded) return NodeBase.MASK_ELECTRICAL_POWER;
         } else {
-            if (side == front) return NodeBase.maskElectricalPower;
+            if (side == front) return NodeBase.MASK_ELECTRICAL_POWER;
         }
         return 0;
     }

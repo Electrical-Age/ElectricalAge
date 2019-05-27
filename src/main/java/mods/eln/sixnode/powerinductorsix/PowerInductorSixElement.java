@@ -63,8 +63,8 @@ public class PowerInductorSixElement extends SixNodeElement implements IConfigur
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (lrdu == front.right()) return NodeBase.maskElectricalPower;
-        if (lrdu == front.left()) return NodeBase.maskElectricalPower;
+        if (lrdu == front.right()) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (lrdu == front.left()) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

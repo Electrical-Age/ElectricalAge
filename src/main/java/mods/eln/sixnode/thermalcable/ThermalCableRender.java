@@ -79,7 +79,7 @@ public class ThermalCableRender extends SixNodeElementRender {
             b = stream.readByte();
 
             color = (b >> 4) & 0xF;
-            temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
+            temperature = stream.readShort() / NodeBase.NETWORK_SERIALIZE_T_FACTOR;
         } catch (IOException e) {
             e.printStackTrace();
         }

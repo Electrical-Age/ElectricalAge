@@ -8,6 +8,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Color;
 import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
@@ -59,7 +60,7 @@ public class VersionCheckerHandler {
         // Print the current version when the client start a map
         if (Eln.versionCheckEnabled) {
             //m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
-            System.out.println(Version.printColor());
+            Eln.dp.println(DebugType.OTHER, Version.printColor());
             String elnVers = "Electrical Age";
             m.thePlayer.addChatMessage(new ChatComponentText(elnVers));
             m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
@@ -109,7 +110,7 @@ public class VersionCheckerHandler {
 
                 } catch (Exception e) {
                     final String error = "Unable to check the latest available version.";
-                    System.err.println(error);
+                    Eln.dp.println(DebugType.NETWORK, error);
                     msg = Color.RED + "> " + error;
 
                     e.printStackTrace();

@@ -7,10 +7,8 @@ import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.ElectricalLoad
-import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.nbt.NBTTagCompound
 
 class FixedShaftDescriptor(name: String, override val obj: Obj3D) : SimpleShaftDescriptor(
     name, FixedShaftElement::class, ShaftRender::class, EntityMetaTag.Basic

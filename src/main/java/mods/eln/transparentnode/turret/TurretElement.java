@@ -131,7 +131,7 @@ public class TurretElement extends TransparentNodeElement implements IConfigurab
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        if (side == front.back() && lrdu == LRDU.Down) return NodeBase.maskElectricalPower;
+        if (side == front.back() && lrdu == LRDU.Down) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

@@ -1,11 +1,9 @@
 package mods.eln.misc
 
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import sun.audio.AudioPlayer.player
-import net.minecraft.network.play.server.S2FPacketSetSlot
 import net.minecraft.entity.player.EntityPlayerMP
-
+import net.minecraft.item.ItemStack
+import net.minecraft.network.play.server.S2FPacketSetSlot
 
 
 /**

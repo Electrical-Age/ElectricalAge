@@ -1,7 +1,8 @@
 package mods.eln.sim.mna;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Profiler;
-import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.*;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
@@ -93,7 +94,7 @@ public class RootSystem {
                 componentCnt += s.component.size();
             }
             p.stop();
-            Utils.println(p + " **** " + stateCnt + "   " + componentCnt);
+            Eln.dp.println(DebugType.MNA,p + " **** " + stateCnt + "   " + componentCnt);
         }
     }
 

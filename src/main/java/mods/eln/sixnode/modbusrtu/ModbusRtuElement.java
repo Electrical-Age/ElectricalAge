@@ -129,7 +129,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        return NodeBase.maskElectricalGate;
+        return NodeBase.MASK_ELECTRICAL_GATE;
     }
 
     @Override

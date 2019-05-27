@@ -1,6 +1,5 @@
 package mods.eln.sixnode.powersocket;
 
-import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.ConfigCopyToolDescriptor;
@@ -23,6 +22,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,8 +36,6 @@ import net.minecraft.nbt.NBTTagString;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class PowerSocketElement extends SixNodeElement implements IConfigurable {
@@ -108,7 +106,7 @@ public class PowerSocketElement extends SixNodeElement implements IConfigurable 
             if(handle != null && handle.element.getChannelState(handle.id)) {
                 ItemStack cable = getInventory().getStackInSlot(PowerSocketContainer.cableSlotId);
                 if (cable != null) {
-                    ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cable);
+                    GenericCableDescriptor desc = (GenericCableDescriptor) GenericCableDescriptor.getDescriptor(cable);
                     loadResistor.connectTo(handle.element.powerLoad, outputLoad);
                     desc.applyTo(loadResistor);
                 }
@@ -130,7 +128,7 @@ public class PowerSocketElement extends SixNodeElement implements IConfigurable 
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (getInventory().getStackInSlot(PowerSocketContainer.cableSlotId) == null) return 0;
-        return NodeBase.maskElectricalPower + (1 << NodeBase.maskColorCareShift) + (paintColor << NodeBase.maskColorShift);
+        return NodeBase.MASK_ELECTRICAL_POWER + (1 << NodeBase.MASK_COLOR_CARE_SHIFT) + (paintColor << NodeBase.MASK_COLOR_SHIFT);
     }
 
     @Override
@@ -179,7 +177,7 @@ public class PowerSocketElement extends SixNodeElement implements IConfigurable 
     void setupFromInventory() {
         ItemStack cableStack = getInventory().getStackInSlot(PowerSocketContainer.cableSlotId);
         if (cableStack != null) {
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
+            GenericCableDescriptor desc = (GenericCableDescriptor) GenericCableDescriptor.getDescriptor(cableStack);
             desc.applyTo(outputLoad);
             voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
         } else {

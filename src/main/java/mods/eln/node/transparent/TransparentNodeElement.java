@@ -108,7 +108,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         try {
             switch (readed = stream.readByte()) {
                 case unserializeGroundedId:
-                    grounded = stream.readByte() != 0 ? true : false;
+                    grounded = stream.readByte() != 0;
                     onGroundedChangedByClient();
                     return unserializeNulldId;
                 default:
@@ -227,12 +227,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public void selfDestroy() {
         node.physicalSelfDestruction(0f);
     }
-    /*
-	public static boolean canBePlacedOnSide(Direction side,int type)
-	{
-		return true;
-	}
-	*/
 
     public void stop(int uuid) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
@@ -256,7 +250,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         if (transparentNodeDescriptor.hasGhostGroup()) {
             Eln.ghostManager.removeObserver(node.coordonate);
             Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordonate);
-            //transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
         }
         node.dropInventory(getInventory());
         node.dropElement(node.removedByPlayer);
@@ -304,42 +297,29 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public abstract void initialize();
 
-    public void readItemStackNBT(NBTTagCompound nbt) {
-
-    }
-
-
-    //  public abstract void destroyFrom(SixNode sixNode);
+    public void readItemStackNBT(NBTTagCompound nbt) {}
 
     public abstract boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
                                              float vx, float vy, float vz);
 
 
     public void readFromNBT(NBTTagCompound nbt) {
-
-        int idx;
-
         IInventory inv = getInventory();
         if (inv != null) {
             Utils.readFromNBT(nbt, "inv", inv);
         }
 
-        idx = 0;
-
         for (State electricalLoad : electricalLoadList) {
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
         }
-
 
         for (NbtThermalLoad thermalLoad : thermalLoadList) {
             thermalLoad.readFromNBT(nbt, "");
         }
 
-
         for (Component c : electricalComponentList)
             if (c instanceof INBTTReady)
                 ((INBTTReady) c).readFromNBT(nbt, "");
-
 
         for (IProcess process : slowProcessList) {
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
@@ -351,7 +331,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
         }
 
-
         byte b = nbt.getByte("others");
         front = Direction.fromInt(b & 0x7);
         grounded = (b & 8) != 0;
@@ -359,8 +338,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
 
     public void writeToNBT(NBTTagCompound nbt) {
-        int idx = 0;
-
         IInventory inv = getInventory();
         if (inv != null) {
             Utils.writeToNBT(nbt, "inv", inv);
@@ -378,7 +355,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
             if (c instanceof INBTTReady)
                 ((INBTTReady) c).writeToNBT(nbt, "");
 
-
         for (IProcess process : slowProcessList) {
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
         }
@@ -388,7 +364,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         for (IProcess process : thermalFastProcessList) {
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
         }
-
 
         nbt.setByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
     }
@@ -411,11 +386,9 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
-    }
+    public void inventoryChange(IInventory inventory) {}
 
     public float getLightOpacity() {
-
         return 0f;
     }
 
@@ -437,7 +410,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return false;
     }
 
-
     public World world() {
 
         return node.coordonate.world();
@@ -446,7 +418,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public Coordonate coordonate() {
         return node.coordonate;
     }
-
 
     private int uuid = 0;
 
@@ -470,14 +441,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public void unload() {
 
     }
-
-/*	protected boolean hasSidedInventory(){
-		return false;
-	}
-	public int tileEntityMetaTag() {
-		return hasSidedInventory() ? 0x4 : 0;
-	}
-	*/
 
     public Map<String, String> getWaila() {
         Map<String, String> wailaList = new HashMap<String, String>();

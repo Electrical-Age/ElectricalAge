@@ -1,7 +1,9 @@
 package mods.eln.sound;
 
+import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
 import mods.eln.client.SoundLoader;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,10 +43,10 @@ public class SoundClient {
                 float normalizedBlockFactor = blockFactor;
 
                 bandVolume -= ((trackCount - 1 - idx) / (trackCount - 1f) + 0.2) * normalizedBlockFactor;
-                Utils.print(bandVolume + " ");
+                Eln.dp.println(DebugType.SOUND, bandVolume + " ");
                 p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
             }
-            Utils.println("");
+            Eln.dp.println(DebugType.SOUND, "");
         }
 
         ClientProxy.soundClientEventListener.currentUuid = null;

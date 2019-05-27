@@ -78,11 +78,11 @@ public class ElectricalSourceElement extends SixNodeElement implements IConfigur
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (((ElectricalSourceDescriptor) sixNodeElementDescriptor).isSignalSource()) {
-            return NodeBase.maskElectricalGate + (color << NodeBase.maskColorShift) +
-                (colorCare << NodeBase.maskColorCareShift);
+            return NodeBase.MASK_ELECTRICAL_GATE + (color << NodeBase.MASK_COLOR_SHIFT) +
+                (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
         } else {
-            return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) +
-                (colorCare << NodeBase.maskColorCareShift);
+            return NodeBase.MASK_ELECTRICAL_POWER + (color << NodeBase.MASK_COLOR_SHIFT) +
+                (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
         }
     }
 

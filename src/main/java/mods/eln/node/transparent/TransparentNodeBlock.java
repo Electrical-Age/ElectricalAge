@@ -1,6 +1,7 @@
 package mods.eln.node.transparent;
 
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
@@ -132,7 +133,7 @@ public class TransparentNodeBlock extends NodeBlock {
             // Only real fix is to replace the blocks, but there should be no
             // serious downside to getting the wrong subclass so long as they really
             // wanted the superclass.
-            System.out.println("Unknown block meta-tag: " + meta);
+            Eln.dp.println(DebugType.NODE, "Unknown block meta-tag: " + meta);
             return (TileEntity) EntityMetaTag.Basic.cls.getConstructor().newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();

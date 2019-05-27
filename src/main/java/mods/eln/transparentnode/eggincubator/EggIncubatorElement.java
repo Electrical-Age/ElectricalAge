@@ -120,7 +120,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu == lrdu.Down) {
-            return NodeBase.maskElectricalPower;
+            return NodeBase.MASK_ELECTRICAL_POWER;
         }
         return 0;
     }

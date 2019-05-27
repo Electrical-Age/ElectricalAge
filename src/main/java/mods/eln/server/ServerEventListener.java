@@ -5,6 +5,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
@@ -19,7 +20,9 @@ import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -77,11 +80,11 @@ public class ServerEventListener {
         } catch (Exception ex) {
             try {
                 ex.printStackTrace();
-                System.out.println("Using BACKUP Electrical Age save: " + fileNames.backupSave);
+                Eln.dp.println(DebugType.FILE, "Using BACKUP Electrical Age save: " + fileNames.backupSave);
                 readSave(fileNames.backupSave);
             } catch (Exception ex2) {
                 ex2.printStackTrace();
-                System.out.println("Failed to read backup save!");
+                Eln.dp.println(DebugType.FILE, "Failed to read backup save!");
                 ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
             }
         }

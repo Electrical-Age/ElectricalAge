@@ -146,9 +146,9 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
         if (lrdu != LRDU.Down) return 0
         return when (side) {
-            front -> NodeBase.maskElectricalInputGate
-            front.back() -> NodeBase.maskThermal
-            else -> NodeBase.maskElectricalPower
+            front -> NodeBase.MASK_ELECTRICAL_INPUT_GATE
+            front.back() -> NodeBase.MASK_THERMAL
+            else -> NodeBase.MASK_ELECTRICAL_POWER
         }
     }
 

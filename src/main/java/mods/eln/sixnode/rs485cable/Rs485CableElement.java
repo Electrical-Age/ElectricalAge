@@ -31,7 +31,7 @@ public class Rs485CableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        return NodeBase.maskRs485;
+        return NodeBase.MASK_RS_485;
     }
 
     @Override

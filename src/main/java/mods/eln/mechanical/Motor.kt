@@ -10,7 +10,6 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
-import mods.eln.sim.ThermalLoad
 import mods.eln.sim.ThermalLoadInitializer
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.mna.component.VoltageSource
@@ -28,7 +27,6 @@ import org.lwjgl.opengl.GL11
 import java.awt.Color
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import javax.rmi.CORBA.Util
 
 class MotorDescriptor(
     val name: String,
@@ -82,7 +80,8 @@ class MotorDescriptor(
     }
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        list.add("Converts electricity into mechanical energy, or (badly) vice versa.")
+        list.add("Converts electricity into")
+        list.add("mechanical energy, or (badly) vice versa.")
         list.add("Nominal usage ->")
         list.add(Utils.plotVolt("  Voltage in: ", nominalU.toDouble()))
         list.add(Utils.plotPower("  Power in: ", nominalP.toDouble()))
@@ -280,7 +279,7 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = thermal
 
     override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int {
-        if(lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.maskElectricalPower
+        if(lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.MASK_ELECTRICAL_POWER
         return 0
     }
 

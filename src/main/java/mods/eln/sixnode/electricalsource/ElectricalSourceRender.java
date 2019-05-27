@@ -62,7 +62,7 @@ public class ElectricalSourceRender extends SixNodeElementRender {
             return Eln.instance.lowVoltageCableDescriptor.render;
         if (voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage)
             return Eln.instance.meduimVoltageCableDescriptor.render;
-        if (voltage > Eln.instance.highVoltageCableDescriptor.electricalMaximalVoltage)
+        if (voltage < Eln.instance.highVoltageCableDescriptor.electricalMaximalVoltage)
             return Eln.instance.highVoltageCableDescriptor.render;
         return Eln.instance.veryHighVoltageCableDescriptor.render;
     }

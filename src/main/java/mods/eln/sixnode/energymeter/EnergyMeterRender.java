@@ -9,8 +9,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.energymeter.EnergyMeterElement.Mod;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
@@ -105,7 +105,7 @@ public class EnergyMeterRender extends SixNodeElementRender {
             mod = Mod.valueOf(stream.readUTF());
             timerCouter = stream.readDouble();
             // energyStack = stream.readDouble();
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
+            GenericCableDescriptor desc = (GenericCableDescriptor) GenericCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), GenericCableDescriptor.class);
 
             energyUnit = stream.readByte();
             timeUnit = stream.readByte();

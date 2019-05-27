@@ -6,7 +6,6 @@ import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.sim.ElectricalLoad
-import mods.eln.sim.ThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.EntityPlayerMP
@@ -14,13 +13,9 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.Vec3
 import org.apache.commons.lang3.tuple.Pair
-
 import java.io.DataOutputStream
 import java.io.IOException
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
-import java.util.UUID
+import java.util.*
 
 abstract class GridElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor, internal var connectRange: Int) : TransparentNodeElement(transparentNode, descriptor) {
     var gridLinkList = HashSet<GridLink>()

@@ -1,4 +1,4 @@
-package mods.eln.signalinductor;
+package mods.eln.sixnode.signalinductor;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;

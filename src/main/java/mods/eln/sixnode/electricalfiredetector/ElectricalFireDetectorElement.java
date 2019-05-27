@@ -79,7 +79,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (!descriptor.batteryPowered && front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+        if (!descriptor.batteryPowered && front == lrdu.left()) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         return 0;
     }
 

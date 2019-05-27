@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.teleporter;
 
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -83,7 +85,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
         if (side == Direction.YP || side == Direction.YN) return 0;
         if (lrdu != LRDU.Down) return 0;
-        return node.maskElectricalPower;
+        return node.MASK_ELECTRICAL_POWER;
     }
 
     @Override
@@ -251,7 +253,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
                     break;
             }
 
-            Utils.println("Teleporter state=" + state);
+            Eln.dp.println(DebugType.TRANSPARENT_NODE, "Teleporter state=" + state);
             needPublish();
 
         }

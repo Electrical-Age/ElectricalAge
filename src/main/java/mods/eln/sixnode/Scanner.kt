@@ -155,7 +155,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     override fun getThermalLoad(lrdu: LRDU, mask: Int): ThermalLoad? = null
 
     override fun getConnectionMask(lrdu: LRDU) = when (lrdu) {
-        front.inverse() -> NodeBase.maskElectricalOutputGate
+        front.inverse() -> NodeBase.MASK_ELECTRICAL_OUTPUT_GATE
         else -> 0
     }
 

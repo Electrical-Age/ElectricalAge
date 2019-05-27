@@ -17,6 +17,8 @@ import mods.eln.block.ArcMetalItemBlock;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
+import mods.eln.debug.DebugPrint;
+import mods.eln.debug.DebugType;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.eventhandlers.ElnFMLEventsHandler;
@@ -29,7 +31,6 @@ import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.gridnode.transformer.GridTransformerDescriptor;
-import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -39,6 +40,8 @@ import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.mechanical.*;
 import mods.eln.misc.*;
+import mods.eln.misc.materials.MaterialProperties;
+import mods.eln.misc.materials.MaterialType;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
@@ -52,7 +55,6 @@ import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
 import mods.eln.packets.*;
 import mods.eln.server.*;
-import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
@@ -68,10 +70,10 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.I
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.OcDescriptor;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
-import mods.eln.simplenode.test.TestBlock;
 import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
+import mods.eln.sixnode.currentcable.CurrentCableDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
 import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
@@ -109,8 +111,8 @@ import mods.eln.sixnode.modbusrtu.ModbusTcpServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
 import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
-import mods.eln.sixnode.powersocket.PowerSocketElement;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
+import mods.eln.sixnode.signalinductor.SignalInductorDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
 import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
@@ -134,11 +136,7 @@ import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
 import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
-import mods.eln.transparentnode.electricalmachine.ArcFurnaceDescriptor;
-import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
-import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
-import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
-import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
+import mods.eln.transparentnode.electricalmachine.*;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
 import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
@@ -179,13 +177,16 @@ import net.minecraftforge.common.config.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
 import static mods.eln.i18n.I18N.*;
 
 @SuppressWarnings({"SameParameterValue", "PointlessArithmeticExpression"})
-@Mod(modid = Eln.MODID, name = Eln.NAME, version = "@VERSION@")
+@Mod(modid = Eln.MODID, name = Eln.NAME, version = "@VERSION@", acceptedMinecraftVersions = "@VERSION@", acceptableRemoteVersions = "@VERSION@", acceptableSaveVersions = "")
 public class Eln {
     // Mod information (override from 'mcmod.info' file)
     public final static String MODID = "Eln";
@@ -196,16 +197,15 @@ public class Eln {
     public final static String SRC_URL = "https://github.com/jrddunbr/ElectricalAge";
     public final static String[] AUTHORS = {"Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn", "jrddunbr", "Grissess", "OmegaHaxors"};
 
-    public static final String channelName = "miaouMod";
-    public static final double solarPanelBasePower = 65.0;
-    public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
-    public static SimpleNetworkWrapper elnNetwork;
+    // The instance of your mod that Forge uses.
+    @Instance("Eln")
+    public static Eln instance;
 
-    // public static final double networkSerializeValueFactor = 100.0;
-    // public static final byte packetNodeSerialized24bitPosition = 11;
-    // public static final byte packetNodeSerialized48bitPosition = 12;
-    // public static final byte packetNodeRefreshRequest = 13;
+    // Says where the client and server 'proxy' code is loaded.
+    @SidedProxy(clientSide = "mods.eln.client.ClientProxy", serverSide = "mods.eln.CommonProxy")
+    public static CommonProxy proxy;
 
+    /* Network Packet Constants */
     public static final byte packetPlayerKey = 14;
     public static final byte packetNodeSingleSerialized = 15;
     public static final byte packetPublishForNode = 16;
@@ -215,7 +215,108 @@ public class Eln {
     public static final byte packetDestroyUuid = 20;
     public static final byte packetClientToServerConnection = 21;
     public static final byte packetServerToClientInfo = 22;
+    public static final String channelName = "miaouMod"; // network chanel of some kind (NOT ingame channels)
 
+    /* Items */
+
+    public static String dictTungstenOre, dictTungstenDust, dictTungstenIngot;
+    public static String dictCheapChip, dictAdvancedChip;
+    public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
+
+    public static Item swordCopper, hoeCopper, shovelCopper, pickaxeCopper, axeCopper;
+
+    public static ItemArmor helmetCopper, plateCopper, legsCopper, bootsCopper;
+    public static ItemArmor helmetECoal, plateECoal, legsECoal, bootsECoal;
+
+    public static SharedItem sharedItem;
+    public static SharedItem sharedItemStackOne;
+    public static ItemStack wrenchItemStack;
+
+    public static SixNodeItem sixNodeItem;
+    public static TransparentNodeItem transparentNodeItem;
+    public static OreItem oreItem;
+
+    public GraphiteDescriptor GraphiteDescriptor;
+
+    /* Blocks */
+
+    public static SixNodeBlock sixNodeBlock;
+    public static TransparentNodeBlock transparentNodeBlock;
+    public static OreBlock oreBlock;
+    public static GhostBlock ghostBlock;
+    public static LightBlock lightBlock;
+    public static ArcClayBlock arcClayBlock;
+    public static ArcMetalBlock arcMetalBlock;
+
+    /* Cables */
+
+    //public ElectricalCableDescriptor creativeCableDescriptor;
+    /*public ElectricalCableDescriptor T2TransmissionCableDescriptor;
+    public ElectricalCableDescriptor T1TransmissionCableDescriptor;*/
+    public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
+    public ElectricalCableDescriptor highVoltageCableDescriptor;
+    public ElectricalCableDescriptor signalCableDescriptor;
+    public ElectricalCableDescriptor lowVoltageCableDescriptor;
+    public ElectricalCableDescriptor batteryCableDescriptor;
+    public ElectricalCableDescriptor meduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor signalBusCableDescriptor;
+    public CopperCableDescriptor copperCableDescriptor;
+    public CurrentCableDescriptor lowCurrentCableDescriptor;
+    public CurrentCableDescriptor mediumCurrentCableDescriptor;
+    public CurrentCableDescriptor highCurrentCableDescriptor;
+    public CurrentCableDescriptor veryHighCurrentCableDescriptor;
+
+    /* Configuration Options */
+
+    public static boolean debugEnabled = false;  // Read from configuration file. Default is `false`.
+    public static boolean versionCheckEnabled = true; // Read from configuration file. Default is `true`.
+    public static boolean analyticsEnabled = true; // Read from configuration file. Default is `true`.
+    public static String playerUUID = null; // Read from configuration file. Default is `null`.
+    public double heatTurbinePowerFactor = 1;
+    public double solarPanelPowerFactor = 1;
+    public double windTurbinePowerFactor = 1;
+    public double waterTurbinePowerFactor = 1;
+    public double fuelGeneratorPowerFactor = 1;
+    public double fuelHeatFurnacePowerFactor = 1;
+    public int autominerRange = 10;
+    public static boolean wailaEasyMode = false;
+    public static double shaftEnergyFactor = 0.05;
+    public static double fuelHeatValueFactor = 0.0000675;
+    private int plateConversionRatio;
+    public static boolean noSymbols = false;
+    public static boolean noVoltageBackground = false;
+    public static double maxSoundDistance = 16;
+    private double cableFactor;
+    double stdBatteryHalfLife = 2 * Utils.minecraftDay;
+    double batteryCapacityFactor = 1.;
+    public boolean killMonstersAroundLamps;
+    public int killMonstersAroundLampsRange;
+    public int maxReplicators = 100;
+    float xRayScannerRange;
+    boolean addOtherModOreToXRay;
+    private boolean replicatorPop;
+    boolean xRayScannerCanBeCrafted = true;
+    public boolean forceOreRegen;
+    public boolean explosionEnable;
+    public static boolean modbusEnable = false;
+    public static int modbusPort;
+    public double electricalFrequency, thermalFrequency;
+    public int electricalInterSystemOverSampling;
+    public static boolean oredictTungsten, oredictChips;
+    public static boolean genCopper, genLead, genTungsten, genCinnabar;
+    public static final double solarPanelBasePower = 65.0;
+    private double incandescentLampLife;
+    private double economicLampLife;
+    private double carbonLampLife;
+    private double ledLampLife;
+    public static boolean ledLampInfiniteLife = false;
+    public static double cableResistanceMultiplier = 1.0;
+
+
+    /* Other */
+
+    public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
+    public static SimpleNetworkWrapper elnNetwork;
     public static PacketHandler packetHandler;
     static NodeServer nodeServer;
     public static LiveDataManager clientLiveDataManager;
@@ -231,143 +332,96 @@ public class Eln {
     public static DelayedTaskManager delayedTask;
     public static ItemEnergyInventoryProcess itemEnergyInventoryProcess;
     public static CreativeTabs creativeTab;
-
-    public static Item swordCopper, hoeCopper, shovelCopper, pickaxeCopper, axeCopper;
-
-    public static ItemArmor helmetCopper, plateCopper, legsCopper, bootsCopper;
-    public static ItemArmor helmetECoal, plateECoal, legsECoal, bootsECoal;
-
-    public static SharedItem sharedItem;
-    public static SharedItem sharedItemStackOne;
-    public static ItemStack wrenchItemStack;
-    public static SixNodeBlock sixNodeBlock;
-    public static TransparentNodeBlock transparentNodeBlock;
-    public static OreBlock oreBlock;
-    public static GhostBlock ghostBlock;
-    public static LightBlock lightBlock;
-    public static ArcClayBlock arcClayBlock;
-    public static ArcMetalBlock arcMetalBlock;
-
-    public static SixNodeItem sixNodeItem;
-    public static TransparentNodeItem transparentNodeItem;
-    public static OreItem oreItem;
-
-    // The instance of your mod that Forge uses.
-    @Instance("Eln")
-    public static Eln instance;
-
-    // Says where the client and server 'proxy' code is loaded.
-    @SidedProxy(clientSide = "mods.eln.client.ClientProxy", serverSide = "mods.eln.CommonProxy")
-    public static CommonProxy proxy;
-
-    public double electricalFrequency, thermalFrequency;
-    public int electricalInterSystemOverSampling;
-
-    public CopperCableDescriptor copperCableDescriptor;
-    public GraphiteDescriptor GraphiteDescriptor;
-
-    public ElectricalCableDescriptor creativeCableDescriptor;
-    /*public ElectricalCableDescriptor T2TransmissionCableDescriptor;
-    public ElectricalCableDescriptor T1TransmissionCableDescriptor;*/
-    public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
-    public ElectricalCableDescriptor highVoltageCableDescriptor;
-    public ElectricalCableDescriptor signalCableDescriptor;
-    public ElectricalCableDescriptor lowVoltageCableDescriptor;
-    public ElectricalCableDescriptor batteryCableDescriptor;
-    public ElectricalCableDescriptor meduimVoltageCableDescriptor;
-    public ElectricalCableDescriptor signalBusCableDescriptor;
-
+    public static MaterialProperties mp;
     public OreRegenerate oreRegenerate;
-
     public static final Obj3DFolder obj = new Obj3DFolder();
+    public static ArrayList<DebugType> debugTypes = new ArrayList<>();
+    public static DebugPrint dp;
+    public static Logger logger;
 
-    public static boolean oredictTungsten, oredictChips;
-    public static boolean genCopper, genLead, genTungsten, genCinnabar;
-    public static String dictTungstenOre, dictTungstenDust, dictTungstenIngot;
-    public static String dictCheapChip, dictAdvancedChip;
-    public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
-    public static boolean modbusEnable = false;
-    public static int modbusPort;
 
-    float xRayScannerRange;
-    boolean addOtherModOreToXRay;
+    public RecipesList magnetiserRecipes = new RecipesList();
+    public RecipesList compressorRecipes = new RecipesList();
+    public RecipesList plateMachineRecipes = new RecipesList();
+    public RecipesList arcFurnaceRecipes = new RecipesList();
+    private ElectricalFurnaceDescriptor electricalFurnace;
+    public RecipesList maceratorRecipes = new RecipesList();
+    public FunctionTable batteryVoltageFunctionTable;
+    public CableRenderDescriptor stdCableRenderSignal;
+    public CableRenderDescriptor stdCableRenderSignalBus;
+    public CableRenderDescriptor stdCableRender50V;
+    public CableRenderDescriptor stdCableRender200V;
+    public CableRenderDescriptor stdCableRender800V;
+    public CableRenderDescriptor stdCableRender3200V;
+    public CableRenderDescriptor stdCableRenderCreative;
 
-    private boolean replicatorPop;
+    public CableRenderDescriptor stdCableRenderLowCurrent;
+    public CableRenderDescriptor stdCableRenderMediumCurrent;
+    public CableRenderDescriptor stdCableRenderHighCurrent;
+    public CableRenderDescriptor stdCableRenderVeryHighCurrent;
 
-    boolean xRayScannerCanBeCrafted = true;
-    public boolean forceOreRegen;
-    public boolean explosionEnable;
+    public static final double gateOutputCurrent = 0.100;
+    public static final double SVU = 50, SVII = gateOutputCurrent / 50,
+        SVUinv = 1.0 / SVU;
+    public static final double LVU = 50;
+    public static final double MVU = 200;
+    public static final double HVU = 800;
+    public static final double VVU = 3200;
 
-    public static boolean debugEnabled = false;  // Read from configuration file. Default is `false`.
-    public static boolean versionCheckEnabled = true; // Read from configuration file. Default is `true`.
-    public static boolean analyticsEnabled = true; // Read from configuration file. Default is `true`.
-    public static String playerUUID = null; // Read from configuration file. Default is `null`.
+    public static final double SVP = gateOutputCurrent * SVU;
 
-    public double heatTurbinePowerFactor = 1;
-    public double solarPanelPowerFactor = 1;
-    public double windTurbinePowerFactor = 1;
-    public double waterTurbinePowerFactor = 1;
-    public double fuelGeneratorPowerFactor = 1;
-    public double fuelHeatFurnacePowerFactor = 1;
-    public int autominerRange = 10;
+    public double LVP() {
+        return 1000 * cableFactor;
+    }
+    public double MVP() {
+        return 2000 * cableFactor;
+    }
+    public double HVP() {
+        return 5000 * cableFactor;
+    }
+    public double VVP() {
+        return 15000 * cableFactor;
+    }
 
-    public boolean killMonstersAroundLamps;
-    public int killMonstersAroundLampsRange;
+    public static final double cableHeatingTime = 30;
+    public static final double cableWarmLimit = 130;
+    public static final double cableThermalConductionTao = 0.5;
+    public static final ThermalLoadInitializer cableThermalLoadInitializer = new ThermalLoadInitializer(
+        cableWarmLimit, -100, cableHeatingTime, cableThermalConductionTao);
+    public static final ThermalLoadInitializer sixNodeThermalLoadInitializer = new ThermalLoadInitializer(
+        cableWarmLimit, -100, cableHeatingTime, 1000);
+    public static int wirelessTxRange = 32;
+    //public TileEntityDestructor tileEntityDestructor;
+    public static WindProcess wind;
+    public ServerEventListener serverEventListener;
+    public static FMLEventChannel eventChannel;
+    //boolean computerCraftReady = false;
+    private boolean ComputerProbeEnable;
+    private boolean ElnToOtherEnergyConverterEnable;
 
-    public int maxReplicators = 100;
+    // FMLCommonHandler.instance().bus().register(this);
 
-    double stdBatteryHalfLife = 2 * Utils.minecraftDay;
-    double batteryCapacityFactor = 1.;
+    private EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
+    private EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
+    private EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
+    private ComputerProbeBlock computerProbeBlock;
 
-    public static boolean wailaEasyMode = false;
-
-    public static double shaftEnergyFactor = 0.05;
-
-    public static double fuelHeatValueFactor = 0.0000675;
-    private int plateConversionRatio;
-
-    public static boolean noSymbols = false;
-    public static boolean noVoltageBackground = false;
-
-    public static double maxSoundDistance = 16;
-    private double cablePowerFactor;
+    /************************************
+    *                                   *
+    *                                   *
+    *                                   *
+    ************************************/
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        logger = LogManager.getLogger(Eln.MODID);
 
-        elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
-        elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
-        elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
-        elnNetwork.registerMessage(TransparentNodeResponsePacketHandler.class, TransparentNodeResponsePacket.class, 2, Side.CLIENT);
-        elnNetwork.registerMessage(GhostNodeWailaRequestPacketHandler.class, GhostNodeWailaRequestPacket.class, 3, Side.SERVER);
-        elnNetwork.registerMessage(GhostNodeWailaResponsePacketHandler.class, GhostNodeWailaResponsePacket.class, 4, Side.CLIENT);
-        elnNetwork.registerMessage(SixNodeWailaRequestPacketHandler.class, SixNodeWailaRequestPacket.class, 5, Side.SERVER);
-        elnNetwork.registerMessage(SixNodeWailaResponsePacketHandler.class, SixNodeWailaResponsePacket.class, 6, Side.CLIENT);
-
-        ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
-        // LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
-
-        // Update ModInfo by code
-        ModMetadata meta = event.getModMetadata();
-        meta.modId = MODID;
-        meta.version = Version.getVersionName();
-        meta.name = NAME;
-        meta.description = tr("mod.meta.desc");
-        meta.url = URL;
-        meta.updateUrl = UPDATE_URL;
-        meta.authorList = Arrays.asList(AUTHORS);
-        meta.autogenerated = false; // Force to update from code
-
-        Utils.println(Version.print());
-
-        Side side = FMLCommonHandler.instance().getEffectiveSide();
-        if (side == Side.CLIENT)
-            MinecraftForge.EVENT_BUS.register(new SoundLoader());
+        // The absolute first thing to do is load the configuration file so that if anything goes wrong, the DebugPrint class has been prepared.
+        // All prints before that point are handled with logger.info()
 
         Configuration config = new Configuration(
             event.getSuggestedConfigurationFile());
         config.load();
-
 
         //Hacks for correct long date typing failures in config file
         //WARNING/BUG: "renameProperty" changes the type to String! However read functions don't seem to care attention to it, so it's OK... for the moment.
@@ -381,6 +435,8 @@ public class Eln {
             config.renameProperty("simulation", "electricalFrequancy", "electricalFrequency");
         if (config.hasKey("simulation", "thermalFrequancy"))
             config.renameProperty("simulation", "thermalFrequancy", "thermalFrequency");
+        if (config.hasKey("balancing", "cablePowerFactor"))
+            config.renameProperty("balancing", "cablePowerFactor", "cableFactor");
 
 
         modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
@@ -389,7 +445,6 @@ public class Eln {
 
         explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
 
-        //explosionEnable = false;
         versionCheckEnabled = config.get("general", "versionCheckEnable", true).getBoolean(true);
         analyticsEnabled = config.get("general", "analyticsEnable", true).getBoolean(true);
 
@@ -477,7 +532,7 @@ public class Eln {
         wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
         wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
-        cablePowerFactor = config.get("balancing", "cablePowerFactor", 1.0, "Multiplication factor for cable power capacity. We recommend 2.0 to 4.0 for larger modpacks, but 1.0 for Eln standalone, or if you like a challenge.", 0.5, 4.0).getDouble(1.0);
+        cableFactor = config.get("balancing", "cableFactor", 1.0, "Multiplication factor for cable power capacity. We recommend 2.0 to 4.0 for larger modpacks, but 1.0 for Eln standalone, or if you like a challenge.", 0.5, 4.0).getDouble(1.0);
 
         fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
             "Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
@@ -487,7 +542,64 @@ public class Eln {
 
         Eln.maxSoundDistance = config.get("debug", "maxSoundDistance", 16.0).getDouble();
 
+        Eln.cableResistanceMultiplier = config.get("debug", "cableResistanceMultiplier", 1.0).getDouble();
+
+        {
+            // typstr gets the most current list of values that you can use
+            String typstr = "";
+            for (DebugType dt: DebugType.values()) {
+                typstr += dt.name() + ", ";
+            }
+            typstr = typstr.substring(0, typstr.length() - 2);
+
+            // if not created, it will create the value with everything enabled, and also dynamically edit the comment to list all possible types you can use
+            String dst = config.get("debug", "enabledTypes", typstr, "One/multiple of: " + typstr).getString();
+
+            // this parses all of the ones the user has selected and adds them to the debugTypes list.
+            for (String str: dst.split(",")) {
+                str = str.trim();
+                //Eln.logger.info("Enabling debug prints for " + str);
+                try {
+                    Eln.debugTypes.add(DebugType.valueOf(str));
+                } catch (Exception e) {
+                    Eln.logger.error("Error loading config with DebugType: " + e);
+                }
+            }
+        }
+
         config.save();
+
+        // load up the debug printer before anything else starts.
+        dp = new DebugPrint(debugTypes);
+
+        elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
+        elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+        elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
+        elnNetwork.registerMessage(TransparentNodeResponsePacketHandler.class, TransparentNodeResponsePacket.class, 2, Side.CLIENT);
+        elnNetwork.registerMessage(GhostNodeWailaRequestPacketHandler.class, GhostNodeWailaRequestPacket.class, 3, Side.SERVER);
+        elnNetwork.registerMessage(GhostNodeWailaResponsePacketHandler.class, GhostNodeWailaResponsePacket.class, 4, Side.CLIENT);
+        elnNetwork.registerMessage(SixNodeWailaRequestPacketHandler.class, SixNodeWailaRequestPacket.class, 5, Side.SERVER);
+        elnNetwork.registerMessage(SixNodeWailaResponsePacketHandler.class, SixNodeWailaResponsePacket.class, 6, Side.CLIENT);
+
+        ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
+        // LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
+
+        // Update ModInfo by code
+        ModMetadata meta = event.getModMetadata();
+        meta.modId = MODID;
+        meta.version = Version.getVersionName();
+        meta.name = NAME;
+        meta.description = tr("mod.meta.desc");
+        meta.url = URL;
+        meta.updateUrl = UPDATE_URL;
+        meta.authorList = asList(AUTHORS);
+        meta.autogenerated = false; // Force to update from code
+
+        Eln.dp.println(DebugType.OTHER, Version.print());
+
+        Side side = FMLCommonHandler.instance().getEffectiveSide();
+        if (side == Side.CLIENT)
+            MinecraftForge.EVENT_BUS.register(new SoundLoader());
 
         eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
@@ -565,6 +677,8 @@ public class Eln {
         transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
 
         oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
+
+        mp = new MaterialProperties();
         /*
          *
          * int id = 0,subId = 0,completId; String name;
@@ -572,7 +686,6 @@ public class Eln {
 
         SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-        registerTestBlock();
         registerEnergyConverter();
         registerComputer();
 
@@ -667,21 +780,10 @@ public class Eln {
 
         OreDictionary.registerOre("blockAluminum", arcClayBlock);
         OreDictionary.registerOre("blockSteel", arcMetalBlock);
-
-        // Register WIP items only on development runs!
-        if (isDevelopmentRun()) {
-            registerWipItems();
-        }
     }
 
     private void registerGridDevices(int id) {
         int subId;
-        {
-            subId = 2;
-//			DownlinkDescriptor descriptor =
-//					new DownlinkDescriptor("Downlink", obj.getObj("DownLink"), "textures/wire.png", highVoltageCableDescriptor);
-//			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
-        }
         {
             subId = 3;
             GridTransformerDescriptor descriptor =
@@ -757,14 +859,6 @@ public class Eln {
             // Reserved for T2.5 poles.
         }
     }
-
-    public static FMLEventChannel eventChannel;
-    //boolean computerCraftReady = false;
-    private boolean ComputerProbeEnable;
-    private boolean ElnToOtherEnergyConverterEnable;
-
-    // FMLCommonHandler.instance().bus().register(this);
-
 
     @EventHandler
     public void modsLoaded(FMLPostInitializationEvent event) {
@@ -891,12 +985,8 @@ public class Eln {
 
         FMLInterModComms.sendMessage("Waila", "register", "mods.eln.integration.waila.WailaIntegration.callbackRegister");
 
-        Utils.println("Electrical age init done");
+        Eln.dp.println(DebugType.OTHER, "Electrical age init done");
     }
-
-    private EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
-    private EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
-    private EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
 
     private void registerEnergyConverter() {
         if (ElnToOtherEnergyConverterEnable) {
@@ -942,7 +1032,6 @@ public class Eln {
     }
 
 
-    private ComputerProbeBlock computerProbeBlock;
 
     private void registerComputer() {
         if (ComputerProbeEnable) {
@@ -959,40 +1048,29 @@ public class Eln {
 
     }
 
-    TestBlock testBlock;
-
-    private void registerTestBlock() {
-        /*
-         * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
-         *
-         * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
-         */
-    }
-
     private void checkRecipe() {
-        Utils.println("No recipe for ");
         for (SixNodeDescriptor d : sixNodeItem.subItemList.values()) {
             ItemStack stack = d.newItemStack();
             if (!recipeExists(stack)) {
-                Utils.println("  " + d.name);
+                Eln.dp.println(DebugType.SIX_NODE, "No recipe for " + d.name);
             }
         }
         for (TransparentNodeDescriptor d : transparentNodeItem.subItemList.values()) {
             ItemStack stack = d.newItemStack();
             if (!recipeExists(stack)) {
-                Utils.println("  " + d.name);
+                Eln.dp.println(DebugType.TRANSPARENT_NODE, "No recipe for "+ d.name);
             }
         }
         for (GenericItemUsingDamageDescriptor d : sharedItem.subItemList.values()) {
             ItemStack stack = d.newItemStack();
             if (!recipeExists(stack)) {
-                Utils.println("  " + d.name);
+                Eln.dp.println(DebugType.OTHER, "No recipe for " + d.name);
             }
         }
         for (GenericItemUsingDamageDescriptor d : sharedItemStackOne.subItemList.values()) {
             ItemStack stack = d.newItemStack();
             if (!recipeExists(stack)) {
-                Utils.println("  " + d.name);
+                Eln.dp.println(DebugType.OTHER, "No recipe for " + d.name);
             }
         }
     }
@@ -1012,10 +1090,6 @@ public class Eln {
         }
         return false;
     }
-
-    // ElnHttpServer elnHttpServer;
-
-    public ServerEventListener serverEventListener;
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
@@ -1071,10 +1145,6 @@ public class Eln {
         WirelessSignalTxElement.channelMap.clear();
 
     }
-
-    //public TileEntityDestructor tileEntityDestructor;
-
-    public static WindProcess wind;
 
     @EventHandler
     public void onServerStart(FMLServerAboutToStartEvent ev) {
@@ -1139,68 +1209,18 @@ public class Eln {
         regenOreScannerFactors();
     }
 
-
-    public CableRenderDescriptor stdCableRenderSignal;
-    public CableRenderDescriptor stdCableRenderSignalBus;
-    public CableRenderDescriptor stdCableRender50V;
-    public CableRenderDescriptor stdCableRender200V;
-    public CableRenderDescriptor stdCableRender800V;
-    public CableRenderDescriptor stdCableRender3200V;
-    public CableRenderDescriptor stdCableRenderCreative;
-
-    public static final double gateOutputCurrent = 0.100;
-    public static final double SVU = 50, SVII = gateOutputCurrent / 50,
-        SVUinv = 1.0 / SVU;
-    public static final double LVU = 50;
-    public static final double MVU = 200;
-    public static final double HVU = 800;
-    public static final double VVU = 3200;
-
-    public static final double SVP = gateOutputCurrent * SVU;
-
-    public double LVP() {
-        return 1000 * cablePowerFactor;
-    }
-    public double MVP() {
-        return 2000 * cablePowerFactor;
-    }
-    public double HVP() {
-        return 5000 * cablePowerFactor;
-    }
-    public double VVP() {
-        return 15000 * cablePowerFactor;
-    }
-
-    public static final double cableHeatingTime = 30;
-    public static final double cableWarmLimit = 130;
-    public static final double cableThermalConductionTao = 0.5;
-    public static final ThermalLoadInitializer cableThermalLoadInitializer = new ThermalLoadInitializer(
-        cableWarmLimit, -100, cableHeatingTime, cableThermalConductionTao);
-    public static final ThermalLoadInitializer sixNodeThermalLoadInitializer = new ThermalLoadInitializer(
-        cableWarmLimit, -100, cableHeatingTime, 1000);
-
-    public static int wirelessTxRange = 32;
-
     private void registerElectricalCable(int id) {
-        int subId, completId;
+        int subId;
         String name;
-
-        CableRenderDescriptor render;
-        ElectricalCableDescriptor desc;
         {
             subId = 0;
-
             name = TR_NAME(Type.NONE, "Signal Cable");
 
             stdCableRenderSignal = new CableRenderDescriptor("eln",
                 "sprites/cable.png", 0.95f, 0.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRenderSignal,
+            signalCableDescriptor = new ElectricalCableDescriptor(name, stdCableRenderSignal,
                 "For signal transmission.", true);
-
-            signalCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
+            signalCableDescriptor.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
                     * gateOutputCurrent / SVII,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
@@ -1211,26 +1231,17 @@ public class Eln {
                 cableHeatingTime, 1// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
-
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-            // GameRegistry.registerCustomItemStack(name, desc.newItemStack(1));
-
+            sixNodeItem.addDescriptor(subId + (id << 6), signalCableDescriptor);
         }
-
         {
             subId = 4;
-
             name = TR_NAME(Type.NONE, "Low Voltage Cable");
 
             stdCableRender50V = new CableRenderDescriptor("eln",
                 "sprites/cable.png", 1.95f, 0.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRender50V,
+            lowVoltageCableDescriptor = new ElectricalCableDescriptor(name, stdCableRender50V,
                 "For low voltage with high current.", false);
-
-            lowVoltageCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(LVU, LVP(), 0.2 / 20,// electricalNominalVoltage,
+            lowVoltageCableDescriptor.setPhysicalConstantLikeNormalCable(LVU, LVP(), 0.2 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
@@ -1240,41 +1251,18 @@ public class Eln {
                 cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
-
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRender50V,
-                "For low voltage with high current.", false);
-
-            desc.setPhysicalConstantLikeNormalCable(
-                LVU, LVP() / 4, 0.2 / 20,// electricalNominalVoltage,
-                // electricalNominalPower,
-                // electricalNominalPowerDrop,
-                LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
-                // electricalMaximalPower,
-                20,// electricalOverVoltageStartPowerLost,
-                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
-                // thermalConductivityTao
-            );
-            batteryCableDescriptor = desc;
-
+            sixNodeItem.addDescriptor(subId + (id << 6), lowVoltageCableDescriptor);
         }
 
         {
             subId = 8;
-
             name = TR_NAME(Type.NONE, "Medium Voltage Cable");
 
             stdCableRender200V = new CableRenderDescriptor("eln",
                 "sprites/cable.png", 2.95f, 0.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRender200V,
+            meduimVoltageCableDescriptor = new ElectricalCableDescriptor(name, stdCableRender200V,
                 "miaou", false);
-
-            meduimVoltageCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(MVU, MVP(), 0.10 / 20,// electricalNominalVoltage,
+            meduimVoltageCableDescriptor.setPhysicalConstantLikeNormalCable(MVU, MVP(), 0.10 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 MVU * 1.3, MVP() * 1.2,// electricalMaximalVoltage,
@@ -1284,25 +1272,17 @@ public class Eln {
                 cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
-
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-
+            sixNodeItem.addDescriptor(subId + (id << 6), meduimVoltageCableDescriptor);
         }
         {
             subId = 12;
-
-            // highVoltageCableId = subId;
             name = TR_NAME(Type.NONE, "High Voltage Cable");
 
             stdCableRender800V = new CableRenderDescriptor("eln",
                 "sprites/cable.png", 3.95f, 1.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRender800V,
+            highVoltageCableDescriptor = new ElectricalCableDescriptor(name, stdCableRender800V,
                 "miaou2", false);
-
-            highVoltageCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(HVU, HVP(), 0.025 * 5 / 4 / 20,// electricalNominalVoltage,
+            highVoltageCableDescriptor.setPhysicalConstantLikeNormalCable(HVU, HVP(), 0.025 * 5 / 4 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 HVU * 1.3, HVP() * 1.2,// electricalMaximalVoltage,
@@ -1312,27 +1292,18 @@ public class Eln {
                 cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
-
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            sixNodeItem.addDescriptor(subId + (id << 6), highVoltageCableDescriptor);
 
         }
-
-
         {
             subId = 16;
-
-            // highVoltageCableId = subId;
             name = TR_NAME(Type.NONE, "Very High Voltage Cable");
 
             stdCableRender3200V = new CableRenderDescriptor("eln",
                 "sprites/cableVHV.png", 3.95f, 1.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRender3200V,
+            veryHighVoltageCableDescriptor = new ElectricalCableDescriptor(name, stdCableRender3200V,
                 "miaou2", false);
-
-            veryHighVoltageCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(VVU, VVP(), 0.025 * 5 / 4 / 20 / 8,// electricalNominalVoltage,
+            veryHighVoltageCableDescriptor.setPhysicalConstantLikeNormalCable(VVU, VVP(), 0.025 * 5 / 4 / 20 / 8,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 VVU * 1.3, VVP() * 1.2,// electricalMaximalVoltage,
@@ -1342,48 +1313,40 @@ public class Eln {
                 cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
-
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-
+            sixNodeItem.addDescriptor(subId + (id << 6), veryHighVoltageCableDescriptor);
         }
+
+        /* Disabling Creative Cables as the Current Cables are much better.
 
         {
             subId = 24;
-
             name = TR_NAME(Type.NONE, "Creative Cable");
 
             stdCableRenderCreative = new CableRenderDescriptor("eln",
                 "sprites/cablecreative.png", 8.0f, 4.0f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRenderCreative,
+            creativeCableDescriptor = new ElectricalCableDescriptor(name, stdCableRenderCreative,
                 "Experience the power of Microresistance", false);
-
-            creativeCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(VVU, VVU * VVP(), 1e-9, //what!?
+            creativeCableDescriptor.setPhysicalConstantLikeNormalCable(VVU, VVU * VVP(), 1e-9, //what!?
                 VVU * 1.3, VVU * VVP() * 1.2,
                 40,// electricalOverVoltageStartPowerLost,
                 cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
                 cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            sixNodeItem.addDescriptor(subId + (id << 6), creativeCableDescriptor);
         }
+
+        */
 
         {
             subId = 20;
-
             name = TR_NAME(Type.NONE, "Signal Bus Cable");
 
             stdCableRenderSignalBus = new CableRenderDescriptor("eln",
                 "sprites/cable.png", 3.95f, 3.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRenderSignalBus,
+            signalBusCableDescriptor = new ElectricalCableDescriptor(name, stdCableRenderSignalBus,
                 "For transmitting many signals.", true);
-
-            signalBusCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
+            signalBusCableDescriptor.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
                     * gateOutputCurrent / SVII,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
@@ -1394,12 +1357,72 @@ public class Eln {
                 cableHeatingTime, 1// thermalNominalHeatTime,
                 // thermalConductivityTao
             );
+            signalBusCableDescriptor.ElementClass = ElectricalSignalBusCableElement.class;
+            sixNodeItem.addDescriptor(subId + (id << 6), signalBusCableDescriptor);
+        }
+        {
+            subId = 25;
+            name = TR_NAME(Type.NONE, "Low Current Cable");
 
-            desc.ElementClass = ElectricalSignalBusCableElement.class;
+            stdCableRenderLowCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 0.45f, 0.45f);
+            lowCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderLowCurrent);
+            lowCurrentCableDescriptor.setCableProperties(
+                25,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), lowCurrentCableDescriptor);
+        }
+        {
+            subId = 26;
+            name = TR_NAME(Type.NONE, "Medium Current Cable");
 
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-            // GameRegistry.registerCustomItemStack(name, desc.newItemStack(1));
+            stdCableRenderMediumCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 0.95f, 0.45f);
+            mediumCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderMediumCurrent);
+            mediumCurrentCableDescriptor.setCableProperties(
+                75,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), mediumCurrentCableDescriptor);
+        }
+        {
+            subId = 27;
+            name = TR_NAME(Type.NONE, "High Current Cable");
 
+            stdCableRenderHighCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 1.95f, 0.95f);
+            highCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderHighCurrent);
+            highCurrentCableDescriptor.setCableProperties(
+                150,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), highCurrentCableDescriptor);
+        }
+        {
+            subId = 28;
+            name = TR_NAME(Type.NONE, "Very High Current Cable");
+
+            stdCableRenderVeryHighCurrent = new CableRenderDescriptor("eln", "sprites/currentcable.png", 3.95f, 1.95f);
+            veryHighCurrentCableDescriptor = new CurrentCableDescriptor(name, stdCableRenderVeryHighCurrent);
+            veryHighCurrentCableDescriptor.setCableProperties(
+                600,
+                MaterialType.COPPER,
+                0,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), veryHighCurrentCableDescriptor);
         }
     }
 
@@ -1442,8 +1465,6 @@ public class Eln {
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }
-
-    public FunctionTable batteryVoltageFunctionTable;
 
     private void registerBattery(int id) {
         int subId, completId;
@@ -1609,49 +1630,6 @@ public class Eln {
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
-        /*{
-            subId = 32;
-            name = TR_NAME(Type.NONE, "50V Condensator");
-
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "condo200", batteryCableDescriptor, 0.0, true, false,
-                condoVoltageFunction,
-                stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
-                // electricalPMax,electricalDischargeRate
-                stdP * 8, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "Obselete, must be deleted" // name, description)
-            );
-            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-            desc.setDefaultIcon("empty-texture");
-            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        }
-
-        {
-            subId = 36;
-            name = TR_NAME(I18N.Type.NONE, "200V Condensator");
-
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "condo200", highVoltageCableDescriptor, 0.0, true, false,
-                condoVoltageFunction,
-                MVU, MVP() * 1.5, 0.005, // electricalU,//
-                // electricalPMax,electricalDischargeRate
-                MVP(), 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
-            );
-            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-            desc.setDefaultIcon("empty-texture");
-            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        } */
     }
 
     private void registerGround(int id) {
@@ -2706,6 +2684,38 @@ public class Eln {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+
+        {
+            subId = 5;
+            name = TR_NAME(Type.NONE, "Low Current Relay");
+
+            desc = new ElectricalRelayDescriptor(name, obj.getObj("RelaySmall"), lowCurrentCableDescriptor);
+            sixNodeItem.addDescriptor(subId  + (id << 6), desc);
+        }
+
+        {
+            subId = 6;
+            name = TR_NAME(Type.NONE, "Medium Current Relay");
+
+            desc = new ElectricalRelayDescriptor(name, obj.getObj("RelaySmall"), mediumCurrentCableDescriptor);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 7;
+            name = TR_NAME(Type.NONE, "High Current Relay");
+
+            desc = new ElectricalRelayDescriptor(name, obj.getObj("RelaySmall"), highCurrentCableDescriptor);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 8;
+            name = TR_NAME(Type.NONE, "Very High Current Relay");
+
+            desc = new ElectricalRelayDescriptor(name, obj.getObj("relay800"), veryHighCurrentCableDescriptor);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
     }
 
     private void registerElectricalGateSource(int id) {
@@ -3071,9 +3081,6 @@ public class Eln {
         // Utils.smeltRecipeList.addMachine(new ItemStack(Blocks.furnace));
     }
 
-    private ElectricalFurnaceDescriptor electricalFurnace;
-    public RecipesList maceratorRecipes = new RecipesList();
-
     private void registerMacerator(int id) {
         int subId, completId;
         String name;
@@ -3109,9 +3116,7 @@ public class Eln {
         }
     }
 
-    public RecipesList compressorRecipes = new RecipesList();
-    public RecipesList plateMachineRecipes = new RecipesList();
-    public RecipesList arcFurnaceRecipes = new RecipesList();
+
 
     private void registerArcFurnace(int id) {
 
@@ -3238,7 +3243,7 @@ public class Eln {
         }
     }
 
-    public RecipesList magnetiserRecipes = new RecipesList();
+
 
     private void registerMagnetizer(int id) {
 
@@ -3583,12 +3588,6 @@ public class Eln {
         }
 
     }
-
-    private double incandescentLampLife;
-    private double economicLampLife;
-    private double carbonLampLife;
-    private double ledLampLife;
-    public static boolean ledLampInfiniteLife = false;
 
     private void registerLampItem(int id) {
         int subId, completId;
@@ -4186,7 +4185,6 @@ public class Eln {
     }
 
     private void registerArmor() {
-        ItemStack stack;
         String name;
 
         {
@@ -4214,17 +4212,15 @@ public class Eln {
             GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
         }
 
-        int armorPoint;
         String t1, t2;
         t1 = "eln:textures/armor/ecoal_layer_1.png";
         t2 = "eln:textures/armor/ecoal_layer_2.png";
         double energyPerDamage = 500;
-        int armor, armorMarge;
+        int armor;
         ArmorMaterial eCoalMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial("ECoal", 10, new int[]{3, 8, 6, 3}, 9);
         {
             name = TR_NAME(Type.ITEM, "E-Coal Helmet");
             armor = 3;
-            armorMarge = 2; //getting rid of this. Safe to delete.
             helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Helmet, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
                 8000, 2000.0,// double energyStorage,double chargePower
@@ -4237,7 +4233,6 @@ public class Eln {
         {
             name = TR_NAME(Type.ITEM, "E-Coal Chestplate");
             armor = 8;
-            armorMarge = 4;
             plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Chestplate, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
                 8000, 2000.0,// double
@@ -4254,7 +4249,6 @@ public class Eln {
         {
             name = TR_NAME(Type.ITEM, "E-Coal Leggings");
             armor = 6;
-            armorMarge = 3;
             legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Leggings, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
                 8000, 2000.0,// double
@@ -4271,7 +4265,6 @@ public class Eln {
         {
             name = TR_NAME(Type.ITEM, "E-Coal Boots");
             armor = 3;
-            armorMarge = 2;
             bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Boots, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
                 8000, 2000.0,// double
@@ -4288,7 +4281,6 @@ public class Eln {
     }
 
     private void registerTool() {
-        ItemStack stack;
         String name;
         {
             name = TR_NAME(Type.ITEM, "Copper Sword");
@@ -4325,7 +4317,6 @@ public class Eln {
 
     private void registerSolarTracker(int id) {
         int subId, completId;
-        String name;
 
         SolarTrackerDescriptor element;
         {
@@ -4340,7 +4331,7 @@ public class Eln {
     }
 
     private void registerWindTurbine(int id) {
-        int subId, completId;
+        int subId;
         String name;
 
         FunctionTable PfW = new FunctionTable(
@@ -4448,7 +4439,7 @@ public class Eln {
     }
 
     private void registerThermalDissipatorPassiveAndActive(int id) {
-        int subId, completId;
+        int subId;
         String name;
         {
             subId = 0;
@@ -4510,7 +4501,7 @@ public class Eln {
     }
 
     private void registerTransparentNodeMisc(int id) {
-        int subId, completId;
+        int subId;
         String name;
         {
             subId = 0;
@@ -4555,20 +4546,6 @@ public class Eln {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
-
-		/*if (Other.ccLoaded && ComputerProbeEnable) {
-			subId = 4;
-			name = "ComputerCraft Probe";
-
-			ComputerCraftIoDescriptor desc = new ComputerCraftIoDescriptor(
-					name,
-					obj.getObj("passivethermaldissipatora")
-
-					);
-
-			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-		}*/
-
     }
 
     private void registerTurret(int id) {
@@ -4583,7 +4560,7 @@ public class Eln {
     }
 
     private void registerElectricalAntenna(int id) {
-        int subId, completId;
+        int subId;
         String name;
         {
 
@@ -4923,7 +4900,7 @@ public class Eln {
     }
 
     private void registerAutoMiner(int id) {
-        int subId, completId;
+        int subId;
         String name;
         {
             subId = 0;
@@ -5185,8 +5162,7 @@ public class Eln {
     }
 
     private void registerElectricalTool(int id) {
-        int subId, completId;
-        ItemStack stack;
+        int subId;
         String name;
         {
             subId = 0;
@@ -5229,7 +5205,7 @@ public class Eln {
     }
 
     private void registerPortableItem(int id) {
-        int subId, completId;
+        int subId;
         String name;
         {
             subId = 0;
@@ -5309,7 +5285,7 @@ public class Eln {
     }
 
     private void registerMiscItem(int id) {
-        int subId, completId;
+        int subId;
         String name;
         {
             subId = 0;
@@ -6345,26 +6321,6 @@ public class Eln {
                     Character.valueOf('m'), findItemStack("Advanced Machine Block"));
             }
         }
-
-//		if (oreNames.contains("sheetPlastic")) {
-//			addRecipe(findItemStack("Downlink"),
-//					"H H",
-//					"PMP",
-//					"PPP",
-//					'P', "sheetPlastic",
-//					'M', findItemStack("Machine Block"),
-//					'H', findItemStack("High Voltage Cable")
-//			);
-//		} else {
-//			addRecipe(findItemStack("Downlink"),
-//					"H H",
-//					"PMP",
-//					"PPP",
-//					'P', "itemRubber",
-//					'M', findItemStack("Machine Block"),
-//					'H', findItemStack("High Voltage Cable")
-//			);
-//		}
     }
 
 
@@ -7011,11 +6967,11 @@ public class Eln {
     }
 
     private void recipeGraphite() {
-        addRecipe(findItemStack("Creative Cable", 1),
+        /*addRecipe(findItemStack("Creative Cable", 1),
             "I",
             "S",
             'S', findItemStack("unreleasedium"),
-            'I', findItemStack("Synthetic Diamond"));
+            'I', findItemStack("Synthetic Diamond"));*/
         addRecipe(new ItemStack(arcClayBlock),
             "III",
             "III",
@@ -7567,7 +7523,7 @@ public class Eln {
         in = findItemStack("Tungsten Dust");
         Utils.addSmelting(in.getItem(), in.getItemDamage(),
             findItemStack("Tungsten Ingot"));
-        in = findItemStack("ingotAlloy");
+        // in = findItemStack("ingotAlloy");
         // Utils.addSmelting(in.getItem().itemID, in.getItemDamage(),
         // findItemStack("Ferrite Ingot"));
         in = findItemStack("dustIron");
@@ -8215,7 +8171,7 @@ public class Eln {
 
         if (replicatorRegistrationId == -1)
             replicatorRegistrationId = EntityRegistry.findGlobalUniqueEntityId();
-        Utils.println("Replicator registred at" + replicatorRegistrationId);
+        Eln.dp.println(DebugType.OTHER, "Replicator registred at" + replicatorRegistrationId);
         // Register mob
         EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), replicatorRegistrationId, redColor, orangeColor);
 
@@ -8227,10 +8183,6 @@ public class Eln {
         // Add mob spawn
         // EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
 
-    }
-
-    // Registers WIP items.
-    private void registerWipItems() {
     }
 
     public void regenOreScannerFactors() {
@@ -8257,7 +8209,7 @@ public class Eln {
                         }
 
                         if (!find) {
-                            Utils.println(id + " added to xRay (other mod)");
+                            Eln.dp.println(DebugType.OTHER, id + " added to xRay (other mod)");
                             oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
                         }
                     }

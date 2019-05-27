@@ -1,6 +1,7 @@
 package mods.eln.sim;
 
-import mods.eln.misc.Utils;
+import mods.eln.Eln;
+import mods.eln.debug.DebugType;
 import mods.eln.sim.mna.component.InterSystem;
 
 public class ElectricalConnection extends InterSystem {
@@ -10,7 +11,7 @@ public class ElectricalConnection extends InterSystem {
     public ElectricalConnection(ElectricalLoad L1, ElectricalLoad L2) {
         this.L1 = L1;
         this.L2 = L2;
-        if(L1 == L2) Utils.println("WARNING: Attempt to connect load to itself?");
+        if(L1 == L2) Eln.dp.println(DebugType.MNA,"WARNING: Attempt to connect load to itself?");
     }
 
     public void notifyRsChange() {

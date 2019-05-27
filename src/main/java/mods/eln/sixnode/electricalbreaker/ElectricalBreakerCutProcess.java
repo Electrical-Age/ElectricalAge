@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricalbreaker;
 
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalBreakerCutProcess implements IProcess, INBTTReady {
@@ -20,7 +20,7 @@ public class ElectricalBreakerCutProcess implements IProcess, INBTTReady {
         double U = breaker.aLoad.getU();
         double I = breaker.aLoad.getCurrent();
         double Tmax = 0;
-        ElectricalCableDescriptor cable = breaker.cableDescriptor;
+        GenericCableDescriptor cable = breaker.cableDescriptor;
         if (cable == null) {
             T = 0;
         } else {

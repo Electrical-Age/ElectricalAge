@@ -104,7 +104,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
         if (!descriptor.powerLrdu(side, front)) return 0;
-        return NodeBase.maskElectricalPower;
+        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     @Override

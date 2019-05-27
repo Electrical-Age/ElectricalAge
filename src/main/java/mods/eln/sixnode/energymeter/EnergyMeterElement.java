@@ -18,7 +18,7 @@ import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -50,7 +50,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
     int energyUnit = 1, timeUnit = 0;
 
-    public ElectricalCableDescriptor cableDescriptor = null;
+    public GenericCableDescriptor cableDescriptor = null;
 
     public static final byte clientEnergyStackId = 1;
     public static final byte clientModId = 2;
@@ -112,8 +112,8 @@ public class EnergyMeterElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (inventory.getStackInSlot(EnergyMeterContainer.cableSlotId) == null) return 0;
-        if (front == lrdu) return NodeBase.maskElectricalAll;
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
+        if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_ALL;
 
         return 0;
     }
@@ -188,7 +188,7 @@ public class EnergyMeterElement extends SixNodeElement {
     public void computeElectricalLoad() {
         ItemStack cable = inventory.getStackInSlot(EnergyMeterContainer.cableSlotId);
 
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
         if (cableDescriptor == null) {
             aLoad.highImpedance();
             bLoad.highImpedance();

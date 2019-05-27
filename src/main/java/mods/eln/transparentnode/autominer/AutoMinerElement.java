@@ -79,7 +79,7 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        return NodeBase.maskElectricalPower;
+        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     @Override

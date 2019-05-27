@@ -22,6 +22,7 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricaldatalogger.DataLogs;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -140,12 +141,12 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
     public int getConnectionMask(LRDU lrdu) {
         boolean cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
         if (!descriptor.voltageOnly) {
-            if (front.left() == lrdu && cable) return NodeBase.maskElectricalAll;
-            if (front.right() == lrdu && cable) return NodeBase.maskElectricalAll;
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front.left() == lrdu && cable) return NodeBase.MASK_ELECTRICAL_ALL;
+            if (front.right() == lrdu && cable) return NodeBase.MASK_ELECTRICAL_ALL;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         } else {
-            if (front.inverse() == lrdu && cable) return NodeBase.maskElectricalAll;
-            if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+            if (front.inverse() == lrdu && cable) return NodeBase.MASK_ELECTRICAL_ALL;
+            if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         }
         return 0;
     }
@@ -217,7 +218,7 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
         //if (!descriptor.voltageOnly)
         {
             ItemStack cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId);
-            ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+            GenericCableDescriptor cableDescriptor = (GenericCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 
             if (cableDescriptor == null) {
                 if (resistor != null) resistor.highImpedance();

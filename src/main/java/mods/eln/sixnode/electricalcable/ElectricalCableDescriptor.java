@@ -2,15 +2,14 @@ package mods.eln.sixnode.electricalcable;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sixnode.genericcable.GenericCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -21,15 +20,15 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalCableDescriptor extends SixNodeDescriptor {
+public class ElectricalCableDescriptor extends GenericCableDescriptor {
 
     double electricalNominalRs;
     public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
     public boolean signalWire;
 
     public double electricalMaximalVoltage, electricalMaximalCurrent;
-    public double electricalRp = Double.POSITIVE_INFINITY, electricalRs = Double.POSITIVE_INFINITY, electricalC = 1;
-    public double thermalRp = 1, thermalRs = 1, thermalC = 1;
+    public double electricalRp = Double.POSITIVE_INFINITY, electricalC = 1;
+
     public double thermalWarmLimit = 100, thermalCoolLimit = -100;
     double electricalMaximalI;
     public double electricalRsMin = 0;
@@ -42,11 +41,11 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
     String description = "todo cable";
 
-    public CableRenderDescriptor render;
-
     public ElectricalCableDescriptor(String name, CableRenderDescriptor render, String description, boolean signalWire) {
         super(name, ElectricalCableElement.class, ElectricalCableRender.class);
-
+        thermalRp = 1;
+        thermalRs = 1;
+        thermalC = 1;
         this.description = description;
         this.render = render;
         this.signalWire = signalWire;
@@ -153,20 +152,12 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
         }
     }
 
+    @Override
     public int getNodeMask() {
         if (signalWire)
-            return NodeBase.maskElectricalGate;
+            return NodeBase.MASK_ELECTRICAL_GATE;
         else
-            return NodeBase.maskElectricalPower;
-    }
-
-    public static CableRenderDescriptor getCableRender(ItemStack cable) {
-        if (cable == null) return null;
-        GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
-        if (desc instanceof ElectricalCableDescriptor)
-            return ((ElectricalCableDescriptor) desc).render;
-        else
-            return null;
+            return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     public void bindCableTexture() {
