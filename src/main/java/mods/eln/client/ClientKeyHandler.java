@@ -1,6 +1,5 @@
 package mods.eln.client;
 
-import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
@@ -75,7 +74,7 @@ public class ClientKeyHandler {
         DataOutputStream stream = new DataOutputStream(bos);
 
         try {
-            stream.writeByte(Eln.packetPlayerKey);
+            stream.writeByte(Eln.PACKET_PLAYER_KEY);
             stream.writeByte(id);
             stream.writeBoolean(state);
         } catch (IOException e) {

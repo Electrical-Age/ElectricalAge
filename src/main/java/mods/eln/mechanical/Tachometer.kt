@@ -68,7 +68,7 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
     override fun getThermalLoad(side: Direction?, lrdu: LRDU?): ThermalLoad? = null
 
     override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int = if (side == front || side == front.inverse) {
-        NodeBase.maskElectricalOutputGate
+        NodeBase.MASK_ELECTRICAL_OUTPUT_GATE
     } else {
         0
     }

@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalgatesource;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
@@ -101,7 +100,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         return 0;
     }
 

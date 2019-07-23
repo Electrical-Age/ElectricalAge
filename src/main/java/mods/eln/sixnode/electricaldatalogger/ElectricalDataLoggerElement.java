@@ -15,7 +15,6 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.ByteArrayOutputStream;
@@ -121,7 +120,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
+        if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

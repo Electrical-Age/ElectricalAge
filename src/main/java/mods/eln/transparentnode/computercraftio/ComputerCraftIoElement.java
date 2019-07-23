@@ -1,10 +1,8 @@
 package mods.eln.transparentnode.computercraftio;
 
-import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
@@ -51,7 +49,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement /*implements 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu == lrdu.Down && side.isNotY()) {
-            return NodeBase.maskElectricalGate;
+            return NodeBase.MASK_ELECTRICAL_GATE;
         }
         return 0;
     }

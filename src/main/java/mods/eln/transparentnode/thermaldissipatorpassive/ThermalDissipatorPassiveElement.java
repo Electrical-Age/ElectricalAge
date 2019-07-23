@@ -1,7 +1,6 @@
 package mods.eln.transparentnode.thermaldissipatorpassive;
 
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -64,7 +63,7 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
     public int getConnectionMask(Direction side, LRDU lrdu) {
 
         if (side == Direction.YN || side == Direction.YP || lrdu != lrdu.Down) return 0;
-        return node.maskThermal;
+        return node.MASK_THERMAL;
     }
 
     @Override

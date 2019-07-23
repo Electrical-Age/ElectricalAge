@@ -279,7 +279,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public void preparePacketForServer(DataOutputStream stream) {
         try {
-            stream.writeByte(Eln.packetPublishForNode);
+            stream.writeByte(Eln.PACKET_PUBLISH_FOR_NODE);
 
             stream.writeInt(pos.getX());
             stream.writeInt(pos.getY());

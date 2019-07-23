@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.turret;
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Cable;
@@ -131,7 +130,7 @@ public class TurretElement extends TransparentNodeElement {
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        if (side == front.back() && lrdu == LRDU.Down) return NodeBase.maskElectricalPower;
+        if (side == front.back() && lrdu == LRDU.Down) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

@@ -1,6 +1,5 @@
 package mods.eln.simplenode.energyconverter;
 
-import mods.eln.Eln;
 import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -46,7 +45,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
     @Override
     public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-        if (directionA == getFront()) return maskElectricalPower;
+        if (directionA == getFront()) return MASK_ELECTRICAL_POWER;
         return 0;
     }
 

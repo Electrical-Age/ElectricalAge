@@ -1,7 +1,6 @@
 package mods.eln.sixnode
 
 import com.teamwizardry.librarianlib.features.kotlin.isNotEmpty
-import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
 import mods.eln.init.Cable
@@ -157,7 +156,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     override fun getThermalLoad(lrdu: LRDU?) = null
 
     override fun getConnectionMask(lrdu: LRDU) = when (lrdu) {
-        front.inverse() -> NodeBase.maskElectricalOutputGate
+        front.inverse() -> NodeBase.MASK_ELECTRICAL_OUTPUT_GATE
         else -> 0
     }
 

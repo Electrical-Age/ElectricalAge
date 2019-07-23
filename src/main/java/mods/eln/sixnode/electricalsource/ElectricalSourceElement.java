@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalsource;
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Cable;
@@ -80,11 +79,11 @@ public class ElectricalSourceElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (((ElectricalSourceDescriptor) sixNodeElementDescriptor).isSignalSource()) {
-            return NodeBase.maskElectricalGate + (color << NodeBase.maskColorShift) +
-                (colorCare << NodeBase.maskColorCareShift);
+            return NodeBase.MASK_ELECTRICAL_GATE + (color << NodeBase.MASK_COLOR_SHIFT) +
+                (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
         } else {
-            return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) +
-                (colorCare << NodeBase.maskColorCareShift);
+            return NodeBase.MASK_ELECTRICAL_POWER + (color << NodeBase.MASK_COLOR_SHIFT) +
+                (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
         }
     }
 

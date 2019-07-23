@@ -1,6 +1,5 @@
 package mods.eln.sixnode.lampsupply;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -208,7 +207,7 @@ public class LampSupplyElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
-        if (front == lrdu) return NodeBase.maskElectricalPower;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

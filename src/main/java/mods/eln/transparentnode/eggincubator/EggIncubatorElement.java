@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.eggincubator;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -19,7 +18,6 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -120,7 +118,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu == lrdu.Down) {
-            return NodeBase.maskElectricalPower;
+            return NodeBase.MASK_ELECTRICAL_POWER;
         }
         return 0;
     }

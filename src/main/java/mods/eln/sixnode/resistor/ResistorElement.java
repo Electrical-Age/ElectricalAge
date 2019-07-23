@@ -1,6 +1,5 @@
 package mods.eln.sixnode.resistor;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -109,8 +108,8 @@ public class ResistorElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (lrdu == front.right() || lrdu == front.left()) return NodeBase.maskElectricalPower;
-        if (lrdu == front && descriptor.isRheostat) return NodeBase.maskElectricalInputGate;
+        if (lrdu == front.right() || lrdu == front.left()) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (lrdu == front && descriptor.isRheostat) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

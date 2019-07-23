@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.waterturbine;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Coordinate;
@@ -68,7 +67,7 @@ public class WaterTurbineElement extends TransparentNodeElement {
     public int getConnectionMask(Direction side, LRDU lrdu) {
 
         if (lrdu != LRDU.Down) return 0;
-        if (side == front) return NodeBase.maskElectricalPower;
+        if (side == front) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

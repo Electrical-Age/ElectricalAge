@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricaltimeout;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -15,8 +14,6 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataInputStream;
@@ -87,8 +84,8 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu) return NodeBase.maskElectricalInputGate;
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalOutputGate;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
+        if (front.inverse() == lrdu) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         return 0;
     }
 

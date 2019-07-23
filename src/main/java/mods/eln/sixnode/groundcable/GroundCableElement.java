@@ -1,6 +1,5 @@
 package mods.eln.sixnode.groundcable;
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Cable;
@@ -85,7 +84,7 @@ public class GroundCableElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         //if (inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
-        return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+        return NodeBase.MASK_ELECTRICAL_POWER + (color << NodeBase.MASK_COLOR_SHIFT) + (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
     }
 
     @Override

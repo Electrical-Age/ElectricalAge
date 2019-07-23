@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalcable;
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
@@ -102,7 +101,7 @@ public class ElectricalCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        return descriptor.getNodeMask() /*+ NodeBase.maskElectricalWire*/ + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+        return descriptor.getNodeMask() /*+ NodeBase.MASK_ELECTRICAL_WIRE*/ + (color << NodeBase.MASK_COLOR_SHIFT) + (colorCare << NodeBase.MASK_COLOR_CARE_SHIFT);
     }
 
     @Override
@@ -143,9 +142,9 @@ public class ElectricalCableElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeByte(color << 4);
-        /*	stream.writeShort((short) (electricalLoad.Uc * NodeBase.networkSerializeUFactor));
-	    	stream.writeShort((short) (electricalLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));*/
+        /*	stream.writeShort((short) (electricalLoad.Uc * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+	    	stream.writeShort((short) (electricalLoad.getCurrent() * NodeBase.NETWORK_SERIALIZE_I_FACTOR));
+	    	stream.writeShort((short) (thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));*/
         } catch (IOException e) {
             e.printStackTrace();
         }

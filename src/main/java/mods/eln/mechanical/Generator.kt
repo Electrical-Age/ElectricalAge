@@ -263,7 +263,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
     override fun getThermalLoad(side: Direction?, lrdu: LRDU?) = thermal
 
     override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int {
-        if (lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.maskElectricalPower
+        if (lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.MASK_ELECTRICAL_POWER
         return 0
     }
 

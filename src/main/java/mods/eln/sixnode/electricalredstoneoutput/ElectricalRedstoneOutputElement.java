@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Cable;
 import mods.eln.misc.Direction;
@@ -13,7 +12,6 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
@@ -88,7 +86,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu.left()) return NodeBase.maskElectricalInputGate;
+        if (front == lrdu.left()) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

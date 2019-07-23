@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.electricalmachine;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.item.MachineBoosterDescriptor;
@@ -25,7 +24,6 @@ import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.IOException;
@@ -103,7 +101,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
         if (!descriptor.powerLrdu(side, front)) return 0;
-        return NodeBase.maskElectricalPower;
+        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     @Override

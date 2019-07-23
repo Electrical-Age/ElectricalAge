@@ -36,7 +36,7 @@ public class GuiHandler implements IGuiHandler {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 DataOutputStream stream = new DataOutputStream(bos);
 
-                stream.writeByte(Eln.packetOpenLocalGui);
+                stream.writeByte(Eln.PACKET_OPEN_LOCAL_GUI);
                 stream.writeInt(id);
                 stream.writeInt(x);
                 stream.writeInt(y);

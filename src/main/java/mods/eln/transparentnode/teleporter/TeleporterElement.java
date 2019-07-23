@@ -83,7 +83,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
         if (side == Direction.YP || side == Direction.YN) return 0;
         if (lrdu != LRDU.Down) return 0;
-        return NodeBase.maskElectricalPower;
+        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     @Override

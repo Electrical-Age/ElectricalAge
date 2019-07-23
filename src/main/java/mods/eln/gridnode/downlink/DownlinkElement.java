@@ -72,6 +72,6 @@ public class DownlinkElement extends GridElement {
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        return NodeBase.maskElectricalPower;
+        return NodeBase.MASK_ELECTRICAL_POWER;
     }
 }

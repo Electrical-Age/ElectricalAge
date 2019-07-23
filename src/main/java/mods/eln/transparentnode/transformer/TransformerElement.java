@@ -100,10 +100,10 @@ public class TransformerElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu == LRDU.Down) {
-            if (side == front.left()) return NodeBase.maskElectricalPower;
-            if (side == front.right()) return NodeBase.maskElectricalPower;
-            if (side == front && !grounded) return NodeBase.maskElectricalPower;
-            if (side == front.back() && !grounded) return NodeBase.maskElectricalPower;
+            if (side == front.left()) return NodeBase.MASK_ELECTRICAL_POWER;
+            if (side == front.right()) return NodeBase.MASK_ELECTRICAL_POWER;
+            if (side == front && !grounded) return NodeBase.MASK_ELECTRICAL_POWER;
+            if (side == front.back() && !grounded) return NodeBase.MASK_ELECTRICAL_POWER;
         }
         return 0;
     }

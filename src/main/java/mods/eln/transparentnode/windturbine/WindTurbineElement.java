@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.windturbine;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -56,8 +55,8 @@ public class WindTurbineElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
-        if (side == cableFront.left()) return NodeBase.maskElectricalPower;
-        if (side == cableFront.right() && !grounded) return NodeBase.maskElectricalPower;
+        if (side == cableFront.left()) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (side == cableFront.right() && !grounded) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

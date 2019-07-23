@@ -81,7 +81,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
             controleExternal = stream.readBoolean();
             takeFuel = stream.readBoolean();
 
-            temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
+            temperature = stream.readShort() / NodeBase.NETWORK_SERIALIZE_T_FACTOR;
             float readF;
             readF = stream.readFloat();
             if (gainSyncValue != readF || controleExternal) {

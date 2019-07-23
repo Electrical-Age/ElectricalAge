@@ -26,7 +26,6 @@ import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiv
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -134,9 +133,9 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
         if (lrdu != LRDU.Down) return 0
         return when (side) {
-            front -> NodeBase.maskElectricalInputGate
-            front.back() -> NodeBase.maskThermal
-            else -> NodeBase.maskElectricalPower
+            front -> NodeBase.MASK_ELECTRICAL_INPUT_GATE
+            front.back() -> NodeBase.MASK_THERMAL
+            else -> NodeBase.MASK_ELECTRICAL_POWER
         }
     }
 

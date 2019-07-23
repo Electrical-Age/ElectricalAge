@@ -197,10 +197,10 @@ public class LampSocketElement extends SixNodeElement {
     public int getConnectionMask(LRDU lrdu) {
         if (acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
         if (poweredByLampSupply) return 0;
-        if (grounded) return NodeBase.maskElectricalPower;
+        if (grounded) return NodeBase.MASK_ELECTRICAL_POWER;
 
-        if (front == lrdu) return NodeBase.maskElectricalPower;
-        if (front == lrdu.inverse()) return NodeBase.maskElectricalPower;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (front == lrdu.inverse()) return NodeBase.MASK_ELECTRICAL_POWER;
 
         return 0;
     }

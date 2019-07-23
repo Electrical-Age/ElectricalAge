@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalrelay;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -19,8 +18,6 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataInputStream;
@@ -112,7 +109,7 @@ public class ElectricalRelayElement extends SixNodeElement {
     public int getConnectionMask(LRDU lrdu) {
         if (front.left() == lrdu) return descriptor.cable.getNodeMask();
         if (front.right() == lrdu) return descriptor.cable.getNodeMask();
-        if (front == lrdu) return NodeBase.maskElectricalInputGate;
+        if (front == lrdu) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
         return 0;
     }
 

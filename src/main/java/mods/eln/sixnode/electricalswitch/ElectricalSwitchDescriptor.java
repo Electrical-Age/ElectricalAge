@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalswitch;
 
-import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.init.Cable;
 import mods.eln.misc.*;
@@ -194,9 +193,9 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 
     public int getNodeMask() {
         if (signalSwitch)
-            return NodeBase.maskElectricalGate;
+            return NodeBase.MASK_ELECTRICAL_GATE;
         else
-            return NodeBase.maskElectricalPower;
+            return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     @Override

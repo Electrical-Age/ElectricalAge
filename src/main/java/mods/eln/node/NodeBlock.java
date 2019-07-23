@@ -1,5 +1,6 @@
 package mods.eln.node;
 
+import com.teamwizardry.librarianlib.features.base.block.BlockMod;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
@@ -21,12 +22,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-public abstract class NodeBlock extends Block {//BlockContainer
+public abstract class NodeBlock extends BlockMod {//BlockContainer
     public int blockItemNbr;
     Class tileEntityClass;
 
     public NodeBlock(Material material, Class tileEntityClass, int blockItemNbr) {
-        super(material);
+        super("NodeBloc", Material.ROCK);
         setTranslationKey("NodeBlock");
         this.tileEntityClass = tileEntityClass;
         useNeighborBrightness = true;
@@ -54,7 +55,6 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
     @Override
     public boolean canProvidePower(IBlockState state) {
-
         return super.canProvidePower(state);
     }
 
@@ -74,7 +74,6 @@ public abstract class NodeBlock extends Block {//BlockContainer
         return this.getRenderType(state);
     }
 
-
     public int getLightValue(IBlockAccess world, BlockPos pos) {
         final TileEntity entity = world.getTileEntity(pos);
         if (entity == null || !(entity instanceof NodeBlockEntity)) return 0;
@@ -82,12 +81,9 @@ public abstract class NodeBlock extends Block {//BlockContainer
         return tileEntity.getLightValue();
     }
 
-
     //client server
     public boolean onBlockPlacedBy(World world, BlockPos pos, Direction front, EntityLivingBase entityLiving, IBlockState state) {
-
         NodeBlockEntity tileEntity = (NodeBlockEntity) world.getTileEntity(pos);
-
         tileEntity.onBlockPlacedBy(front, entityLiving, state);
         return true;
     }
@@ -99,7 +95,6 @@ public abstract class NodeBlock extends Block {//BlockContainer
             entity.onBlockAdded();
         }
     }
-
 
     @SideOnly(Side.SERVER)
     public void breakBlock(World par1World, BlockPos pos, Block par5, int par6) {
@@ -118,7 +113,6 @@ public abstract class NodeBlock extends Block {//BlockContainer
             entity.onNeighborBlockChange();
         }
     }
-
 
     @Override
     public int damageDropped(IBlockState state) {
@@ -148,29 +142,11 @@ public abstract class NodeBlock extends Block {//BlockContainer
     public TileEntity createTileEntity(World var1, IBlockState state) {
         try {
             return (TileEntity) tileEntityClass.getConstructor().newInstance();
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
-        while (true) ;
+        return null;
     }
-
-
 }
 
 

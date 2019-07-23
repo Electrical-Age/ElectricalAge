@@ -22,7 +22,7 @@ public class TeleporterPowerNode extends GhostNode {
         if (e == null) return 0;
         if (directionA == Direction.YP || directionA == Direction.YN) return 0;
         if (lrduA != LRDU.Down) return 0;
-        return maskElectricalPower;
+        return MASK_ELECTRICAL_POWER;
     }
 
     @Override

@@ -28,7 +28,7 @@ public class SoundServer {
         DataOutputStream stream = new DataOutputStream(bos);
 
         try {
-            stream.writeByte(Eln.packetPlaySound);
+            stream.writeByte(Eln.PACKET_PLAY_SOUND);
 
             stream.writeByte(p.world.provider.getDimension());
 

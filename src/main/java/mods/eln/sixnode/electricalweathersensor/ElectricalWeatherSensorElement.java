@@ -12,7 +12,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +50,7 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+        if (front == lrdu.left()) return NodeBase.MASK_ELECTRICAL_OUTPUT_GATE;
         return 0;
     }
 

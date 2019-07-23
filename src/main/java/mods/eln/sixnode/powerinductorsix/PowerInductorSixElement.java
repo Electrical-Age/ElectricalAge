@@ -1,6 +1,5 @@
 package mods.eln.sixnode.powerinductorsix;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -60,8 +59,8 @@ public class PowerInductorSixElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (lrdu == front.right()) return NodeBase.maskElectricalPower;
-        if (lrdu == front.left()) return NodeBase.maskElectricalPower;
+        if (lrdu == front.right()) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (lrdu == front.left()) return NodeBase.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

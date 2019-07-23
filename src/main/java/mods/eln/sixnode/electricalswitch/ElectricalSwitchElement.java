@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalswitch;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.init.Items;
@@ -20,7 +19,6 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
@@ -132,10 +130,10 @@ public class ElectricalSwitchElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeBoolean(switchState);
-            stream.writeShort((short) (aLoad.getU() * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) (bLoad.getU() * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) (aLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-            //stream.writeShort((short)(thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+            stream.writeShort((short) (aLoad.getU() * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) (bLoad.getU() * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) (aLoad.getCurrent() * NodeBase.NETWORK_SERIALIZE_I_FACTOR));
+            //stream.writeShort((short)(thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));
             stream.writeShort(0);
         } catch (IOException e) {
             e.printStackTrace();

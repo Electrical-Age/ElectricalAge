@@ -105,10 +105,10 @@ public class TurbineElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu == LRDU.Down) {
-            if (side == front) return NodeBase.maskElectricalPower;
-            if (side == front.back()) return NodeBase.maskElectricalPower;
-            if (side == front.left()) return NodeBase.maskThermal;
-            if (side == front.right()) return NodeBase.maskThermal;
+            if (side == front) return NodeBase.MASK_ELECTRICAL_POWER;
+            if (side == front.back()) return NodeBase.MASK_ELECTRICAL_POWER;
+            if (side == front.left()) return NodeBase.MASK_THERMAL;
+            if (side == front.right()) return NodeBase.MASK_THERMAL;
         }
         return 0;
     }

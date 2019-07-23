@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.electricalantennarx;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Coordinate;
@@ -77,8 +76,8 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (front.getInverse() != side.applyLRDU(lrdu)) return 0;
 
-        if (side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalPower;
-        if (side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
+        if (side == front.applyLRDU(rot.left())) return NodeBase.MASK_ELECTRICAL_POWER;
+        if (side == front.applyLRDU(rot.right())) return NodeBase.MASK_ELECTRICAL_INPUT_GATE;
 
         return 0;
     }

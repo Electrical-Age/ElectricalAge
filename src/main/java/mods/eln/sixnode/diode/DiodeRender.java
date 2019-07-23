@@ -35,10 +35,10 @@ public class DiodeRender extends SixNodeElementRender {
             Byte b;
             b = stream.readByte();
             front = LRDU.fromInt((b >> 4) & 3);
-            voltageAnode = stream.readShort() / NodeBase.networkSerializeUFactor;
-            voltageCatode = stream.readShort() / NodeBase.networkSerializeUFactor;
-            current = stream.readShort() / NodeBase.networkSerializeIFactor;
-            temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
+            voltageAnode = stream.readShort() / NodeBase.NETWORK_SERIALIZE_U_FACTOR;
+            voltageCatode = stream.readShort() / NodeBase.NETWORK_SERIALIZE_U_FACTOR;
+            current = stream.readShort() / NodeBase.NETWORK_SERIALIZE_I_FACTOR;
+            temperature = stream.readShort() / NodeBase.NETWORK_SERIALIZE_T_FACTOR;
         } catch (IOException e) {
             e.printStackTrace();
         }

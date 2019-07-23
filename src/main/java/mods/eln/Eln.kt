@@ -210,15 +210,15 @@ class Eln {
         lateinit var eventChannel: FMLEventChannel
         const val eventChannelID = "eln-event"
 
-        const val packetPlayerKey: Byte = 14
-        const val packetNodeSingleSerialized: Byte = 15
-        const val packetPublishForNode: Byte = 16
-        const val packetOpenLocalGui: Byte = 17
-        const val packetForClientNode: Byte = 18
-        const val packetPlaySound: Byte = 19
-        const val packetDestroyUuid: Byte = 20
-        const val packetClientToServerConnection: Byte = 21
-        const val packetServerToClientInfo: Byte = 22
+        const val PACKET_PLAYER_KEY: Byte = 14
+        const val PACKET_NODE_SINGLE_SERIALIZED: Byte = 15
+        const val PACKET_PUBLISH_FOR_NODE: Byte = 16
+        const val PACKET_OPEN_LOCAL_GUI: Byte = 17
+        const val PACKET_FOR_CLIENT_NODE: Byte = 18
+        const val PACKET_PLAY_SOUND: Byte = 19
+        const val PACKET_DESTROY_UUID: Byte = 20
+        const val PACKET_CLIENT_TO_SERVER_CONNECTION: Byte = 21
+        const val PACKET_SERVER_TO_CLIENT_INFO: Byte = 22
 
         // Ditto, rendering:
         @JvmField

@@ -52,7 +52,7 @@ public class ConnectionListener {
             DataOutputStream stream = new DataOutputStream(bos);
 
             try {
-                stream.writeByte(Eln.packetClientToServerConnection);
+                stream.writeByte(Eln.PACKET_CLIENT_TO_SERVER_CONNECTION);
             } catch (IOException e) {
 
                 e.printStackTrace();

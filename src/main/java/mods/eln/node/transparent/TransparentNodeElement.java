@@ -233,7 +233,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         DataOutputStream stream = new DataOutputStream(bos);
 
         try {
-            stream.writeByte(Eln.packetDestroyUuid);
+            stream.writeByte(Eln.PACKET_DESTROY_UUID);
             stream.writeInt(uuid);
 
             sendPacketToAllClient(bos);

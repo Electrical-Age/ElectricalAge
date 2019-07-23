@@ -2,7 +2,6 @@ package mods.eln.simplenode.computerprobe;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
-import mods.eln.Eln;
 import mods.eln.Other;
 import mods.eln.init.Config;
 import mods.eln.misc.Coordinate;
@@ -109,7 +108,7 @@ public class ComputerProbeNode extends SimpleNode /*implements IPeripheral */{
 
     @Override
     public int getSideConnectionMask(Direction side, LRDU lrduA) {
-        return NodeBase.maskElectricalGate;
+        return NodeBase.MASK_ELECTRICAL_GATE;
     }
 
     @Override

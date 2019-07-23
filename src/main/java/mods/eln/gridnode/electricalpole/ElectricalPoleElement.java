@@ -134,7 +134,7 @@ public class ElectricalPoleElement extends GridElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (desc.includeTransformer) {
-            return NodeBase.maskElectricalPower;
+            return NodeBase.MASK_ELECTRICAL_POWER;
         } else {
             return 0;
         }

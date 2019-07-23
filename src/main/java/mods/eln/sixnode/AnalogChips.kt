@@ -1,6 +1,5 @@
 package mods.eln.sixnode
 
-import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
 import mods.eln.i18n.I18N
@@ -133,10 +132,10 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
     }
 
     override fun getConnectionMask(lrdu: LRDU?): Int = when (lrdu) {
-        front -> Node.maskElectricalOutputGate
-        front.inverse() -> if (inputPins[0] != null) Node.maskElectricalInputGate else 0
-        front.left() -> if (inputPins[1] != null) Node.maskElectricalInputGate else 0
-        front.right() -> if (inputPins[2] != null) Node.maskElectricalInputGate else 0
+        front -> Node.MASK_ELECTRICAL_OUTPUT_GATE
+        front.inverse() -> if (inputPins[0] != null) Node.MASK_ELECTRICAL_INPUT_GATE else 0
+        front.left() -> if (inputPins[1] != null) Node.MASK_ELECTRICAL_INPUT_GATE else 0
+        front.right() -> if (inputPins[2] != null) Node.MASK_ELECTRICAL_INPUT_GATE else 0
         else -> 0
     }
 

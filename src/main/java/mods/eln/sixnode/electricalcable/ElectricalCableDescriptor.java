@@ -156,9 +156,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
     public int getNodeMask() {
         if (signalWire)
-            return NodeBase.maskElectricalGate;
+            return NodeBase.MASK_ELECTRICAL_GATE;
         else
-            return NodeBase.maskElectricalPower;
+            return NodeBase.MASK_ELECTRICAL_POWER;
     }
 
     public static CableRenderDescriptor getCableRender(ItemStack cable) {

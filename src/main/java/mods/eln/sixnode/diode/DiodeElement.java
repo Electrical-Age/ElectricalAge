@@ -1,6 +1,5 @@
 package mods.eln.sixnode.diode;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.misc.Direction;
@@ -19,9 +18,6 @@ import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sim.process.heater.DiodeHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
@@ -118,10 +114,10 @@ public class DiodeElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeByte(front.toInt() << 4);
-            stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-            stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-            stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+            stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.NETWORK_SERIALIZE_U_FACTOR));
+            stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.NETWORK_SERIALIZE_I_FACTOR));
+            stream.writeShort((short) (thermalLoad.Tc * NodeBase.NETWORK_SERIALIZE_T_FACTOR));
         } catch (IOException e) {
             e.printStackTrace();
         }

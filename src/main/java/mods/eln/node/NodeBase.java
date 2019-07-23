@@ -32,35 +32,33 @@ import java.util.ArrayList;
 
 public abstract class NodeBase {
 
-    public static final int maskElectricalPower = 1 << 0;
-    public static final int maskThermal = 1 << 1;
+    public static final int MASK_ELECTRICAL_POWER = 1 << 0;
+    public static final int MASK_THERMAL = 1 << 1;
 
-    public static final int maskElectricalGate = (1 << 2);
-    public static final int maskElectricalAll = maskElectricalPower | maskElectricalGate;
+    public static final int MASK_ELECTRICAL_GATE = (1 << 2);
+    public static final int MASK_ELECTRICAL_ALL = MASK_ELECTRICAL_POWER | MASK_ELECTRICAL_GATE;
 
-    public static final int maskElectricalInputGate = maskElectricalGate;
-    public static final int maskElectricalOutputGate = maskElectricalGate;
+    public static final int MASK_ELECTRICAL_INPUT_GATE = MASK_ELECTRICAL_GATE;
+    public static final int MASK_ELECTRICAL_OUTPUT_GATE = MASK_ELECTRICAL_GATE;
 
-    public static final int maskWire = 0;
-    public static final int maskElectricalWire = (1 << 3);
-    public static final int maskThermalWire = maskWire + maskThermal;
+    public static final int MASK_WIRE = 0;
+    public static final int MASK_ELECTRICAL_WIRE = (1 << 3);
+    public static final int MASK_THERMAL_WIRE = MASK_WIRE + MASK_THERMAL;
 
-    public static final int maskSignal = (1 << 9);
-    public static final int maskRs485 = (1 << 10);
+    public static final int MASK_SIGNAL = (1 << 9);
+    public static final int MASK_RS_485 = (1 << 10);
 
-    public static final int maskColorData = 0xF << 16;
-    public static final int maskColorShift = 16;
-    public static final int maskColorCareShift = 20;
-    public static final int maskColorCareData = 1 << 20;
+    public static final int MASK_COLOR_DATA = 0xF << 16;
+    public static final int MASK_COLOR_SHIFT = 16;
+    public static final int MASK_COLOR_CARE_SHIFT = 20;
+    public static final int MASK_COLOR_CARE_DATA = 1 << 20;
 
-    public static final double networkSerializeUFactor = 10.0;
-    public static final double networkSerializeIFactor = 100.0;
-    public static final double networkSerializeTFactor = 10.0;
+    public static final double NETWORK_SERIALIZE_U_FACTOR = 10.0;
+    public static final double NETWORK_SERIALIZE_I_FACTOR = 100.0;
+    public static final double NETWORK_SERIALIZE_T_FACTOR = 10.0;
 
     public byte neighborOpaque;
     public byte neighborWrapable;
-
-    public static int teststatic;
 
     public Coordinate coordinate;
 
@@ -358,8 +356,8 @@ public abstract class NodeBase {
 
     public static boolean compareConnectionMask(int mask1, int mask2) {
         if (((mask1 & 0xFFFF) & (mask2 & 0xFFFF)) == 0) return false;
-        if (((mask1 & maskColorCareData) & (mask2 & maskColorCareData)) == 0) return true;
-        if ((mask1 & maskColorData) == (mask2 & maskColorData)) return true;
+        if (((mask1 & MASK_COLOR_CARE_DATA) & (mask2 & MASK_COLOR_CARE_DATA)) == 0) return true;
+        if ((mask1 & MASK_COLOR_DATA) == (mask2 & MASK_COLOR_DATA)) return true;
         return false;
     }
 
@@ -456,7 +454,7 @@ public abstract class NodeBase {
 
     public void preparePacketForClient(DataOutputStream stream) {
         try {
-            stream.writeByte(Eln.packetForClientNode);
+            stream.writeByte(Eln.PACKET_FOR_CLIENT_NODE);
 
             BlockPos pos = coordinate.pos;
             stream.writeInt(pos.getX());
@@ -508,7 +506,7 @@ public abstract class NodeBase {
 
         try {
 
-            stream.writeByte(Eln.packetNodeSingleSerialized);
+            stream.writeByte(Eln.PACKET_NODE_SINGLE_SERIALIZED);
 
             BlockPos pos = coordinate.pos;
             stream.writeInt(pos.getX());

@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.battery;
 
-import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.init.Config;
 import mods.eln.item.OverHeatingProtectionDescriptor;
@@ -139,8 +138,8 @@ public class BatteryElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
-        if (side == front.left()) return node.maskElectricalPower;
-        if (side == front.right() && !grounded) return node.maskElectricalPower;
+        if (side == front.left()) return node.MASK_ELECTRICAL_POWER;
+        if (side == front.right() && !grounded) return node.MASK_ELECTRICAL_POWER;
         return 0;
     }
 

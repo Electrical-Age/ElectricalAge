@@ -21,7 +21,7 @@ public class NodeEntityClientSender {
 
     public void preparePacketForServer(DataOutputStream stream) {
         try {
-            stream.writeByte(Eln.packetPublishForNode);
+            stream.writeByte(Eln.PACKET_PUBLISH_FOR_NODE);
             BlockPos pos = e.getPos();
             stream.writeInt(pos.getX());
             stream.writeInt(pos.getY());

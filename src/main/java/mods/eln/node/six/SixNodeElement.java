@@ -197,7 +197,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         DataOutputStream stream = new DataOutputStream(bos);
 
         try {
-            stream.writeByte(Eln.packetDestroyUuid);
+            stream.writeByte(Eln.PACKET_DESTROY_UUID);
             stream.writeInt(uuid);
 
             sendPacketToAllClient(bos);
