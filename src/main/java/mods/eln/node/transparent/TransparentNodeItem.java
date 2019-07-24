@@ -18,13 +18,11 @@ import net.minecraft.world.World;
 
 public class TransparentNodeItem extends GenericItemBlockUsingDamage<TransparentNodeDescriptor> {
 
-
     public TransparentNodeItem(Block b) {
         super(b);
         setHasSubtypes(true);
         setTranslationKey("TransparentNodeItem");
     }
-
 
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState state) {
@@ -35,34 +33,24 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         int[] v = new int[]{descriptor.getSpawnDeltaX(), descriptor.getSpawnDeltaY(), descriptor.getSpawnDeltaZ()};
         front.rotateFromXN(v);
         pos = pos.add(v[0], v[1], v[2]);
-
         Block bb = world.getBlockState(pos).getBlock();
         if (bb.isReplaceable(world, pos)) ;
         //if(world.getBlock(x, y, z) != ModBlock.air) return false;
-
         Coordinate coord = new Coordinate(pos, world);
-
-
         String error;
         if ((error = descriptor.checkCanPlace(coord, front)) != null) {
             Utils.sendMessage(player, error);
             return false;
         }
-
         GhostGroup ghostgroup = descriptor.getGhostGroup(front);
         if (ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
-
         TransparentNode node = new TransparentNode();
         node.onBlockPlacedBy(coord, front, player, stack);
         //TODO: Probably use getStateForPlacement instead
         world.setBlockState(pos, Block.getBlockFromItem(this).getStateFromMeta(node.getBlockMetadata() & 0x03));//caca1.5.1
         ((NodeBlock) Block.getBlockFromItem(this)).onBlockPlacedBy(world, pos, direction, player, state);
-
-
         node.checkCanStay(true);
-
         return true;
-
     }
 
     // TODO(1.10): Fix item rendering.

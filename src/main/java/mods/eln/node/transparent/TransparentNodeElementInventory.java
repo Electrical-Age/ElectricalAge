@@ -15,6 +15,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     protected TransparentNodeElement transparentNodeElement = null;
 
     int stackLimit;
+    private ItemStack[] inv;
 
     public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
         inv = new ItemStack[size];
@@ -28,15 +29,12 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
         this.transparentNodeElement = TransparentNodeElement;
     }
 
-    private ItemStack[] inv;
-
     private ItemStack[] getInv() {
         return inv;
     }
 
     @Override
     public int getSizeInventory() {
-
         return getInv().length;
     }
 
@@ -80,9 +78,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
 
     @Override
     public boolean isEmpty() {
-        for (ItemStack stack : getInv()) {
-            if (!stack.isEmpty()) return false;
-        }
+        for (ItemStack stack : getInv()) if (!stack.isEmpty()) return false;
         return true;
     }
 
@@ -92,43 +88,35 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public void openInventory(EntityPlayer player) {
-
-    }
+    public void openInventory(EntityPlayer player) {}
 
     @Override
-    public void closeInventory(EntityPlayer player) {
-
-    }
+    public void closeInventory(EntityPlayer player) {}
 
     @Override
     public void markDirty() {
-        if (transparentNodeElement != null && !transparentNodeElement.node.isDestructing()) {
+        if (transparentNodeElement != null && !transparentNodeElement.node.isDestructing())
             transparentNodeElement.inventoryChange(this);
-        }
     }
 
     @Override
     public void readFromNBT(NBTTagCompound nbt, String str) {
-
         Utils.readFromNBT(nbt, str, this);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
-
         return Utils.writeToNBT(nbt, str, this);
     }
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack) {
         for (int idx = 0; idx < 6; idx++) {
+            // this is a gem. wat.
             int[] lol = getSlotsForFace(EnumFacing.VALUES[idx]);
-            for (int hohoho : lol) {
-                if (hohoho == i && canInsertItem(i, itemstack, EnumFacing.VALUES[idx])) {
+            for (int hohoho : lol)
+                if (hohoho == i && canInsertItem(i, itemstack, EnumFacing.VALUES[idx]))
                     return true;
-                }
-            }
         }
         return false;
     }
@@ -139,9 +127,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public void setField(int id, int value) {
-
-    }
+    public void setField(int id, int value) {}
 
     @Override
     public int getFieldCount() {
@@ -149,13 +135,10 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public void clear() {
-
-    }
+    public void clear() {}
 
     @Override
     public boolean hasCustomName() {
-
         return false;
     }
 
@@ -178,5 +161,4 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     public boolean canExtractItem(int var1, ItemStack var2, EnumFacing var3) {
         return false;
     }
-
 }

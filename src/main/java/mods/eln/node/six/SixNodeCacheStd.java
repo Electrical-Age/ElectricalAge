@@ -18,8 +18,6 @@ public class SixNodeCacheStd implements ISixNodeCache {
 
     @Override
     public int getMeta(ItemStack stack) {
-
         return stack.getItemDamage();
     }
-
 }

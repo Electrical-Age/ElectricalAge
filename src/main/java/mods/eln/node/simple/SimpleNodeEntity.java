@@ -30,6 +30,7 @@ import java.io.IOException;
 public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity, ITickable {
 
     private SimpleNode node;
+    public Direction front;
 
     public SimpleNode getNode() {
         if (world.isRemote) {
@@ -46,9 +47,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
         return node;
     }
 
-
     //***************** Wrapping **************************
-
     void onBlockAdded() {
 		/*if (!world.isRemote){
 			if (getNode() == null) {
@@ -99,18 +98,13 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
         }
     }
 
-
     //***************** Descriptor **************************
     public Object getDescriptor() {
         SimpleNodeBlock b = (SimpleNodeBlock) getBlockType();
         return DescriptorManager.get(b.descriptorKey);
     }
 
-
     //***************** Network **************************
-
-    public Direction front;
-
     // TODO(1.10): Packets are probably still broken somehow!
     @Nullable
     @Override
@@ -150,11 +144,9 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     }
 
     @Override
-    public void serverPacketUnserialize(DataInputStream stream) {
-    }
+    public void serverPacketUnserialize(DataInputStream stream) {}
 
     public NodeEntityClientSender sender = new NodeEntityClientSender(this, getNodeUuid());
-
 
     //*********************** GUI ***************************
     @Override

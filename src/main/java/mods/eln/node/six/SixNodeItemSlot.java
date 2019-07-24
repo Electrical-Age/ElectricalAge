@@ -6,6 +6,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
 public class SixNodeItemSlot extends SlotWithSkinAndComment {
+    Class[] descriptorClassList;
+    int stackLimit;
 
     public SixNodeItemSlot(
         IInventory inventory, int slot,
@@ -17,30 +19,19 @@ public class SixNodeItemSlot extends SlotWithSkinAndComment {
         this.descriptorClassList = descriptorClassList;
     }
 
-
-    Class[] descriptorClassList;
-    int stackLimit;
-
-
     /**
      * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
      */
     public boolean isItemValid(ItemStack itemStack) {
         if (itemStack.getItem() != Eln.sixNodeItem) return false;
         SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
-
-        for (Class classFilter : descriptorClassList) {
-            if (descriptor.getClass().equals(classFilter)) return true;
-        }
+        for (Class classFilter : descriptorClassList) if (descriptor.getClass().equals(classFilter)) return true;
         return false;
     }
 
-
     @Override
     public int getSlotStackLimit() {
-
         //return super.getSlotStackLimit();
         return stackLimit;
     }
-
 }

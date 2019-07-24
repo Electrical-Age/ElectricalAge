@@ -8,9 +8,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public abstract class Node extends NodeBase {
-
-
     private int lastLight = 0;
+    boolean oldSendedRedstone = false;
 
     public void setLightValue(int light) {
         if (light > 15) light = 15;
@@ -20,20 +19,16 @@ public abstract class Node extends NodeBase {
             coordinate.world().setLightFor(EnumSkyBlock.BLOCK, coordinate.pos, light);
             setNeedPublish(true);
         }
-
     }
 
     public int getLightValue() {
         return lastLight;
     }
 
-
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
-
         lastLight = nbt.getByte("lastLight");
     }
-
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
@@ -41,11 +36,8 @@ public abstract class Node extends NodeBase {
         return nbt;
     }
 
-    boolean oldSendedRedstone = false;
-
     public void publishSerialize(DataOutputStream stream) {
         super.publishSerialize(stream);
-
         try {
             boolean redstone = canConnectRedstone();
             stream.writeByte(lastLight | (redstone ? 0x10 : 0x00));
@@ -53,11 +45,9 @@ public abstract class Node extends NodeBase {
                 needNotify = true;
             oldSendedRedstone = redstone;
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
-
 
     public NodeBlockEntity getEntity() {
         return (NodeBlockEntity) coordinate.world().getTileEntity(coordinate.pos);
@@ -70,6 +60,4 @@ public abstract class Node extends NodeBase {
     public boolean canConnectRedstone() {
         return false;
     }
-
-
 }

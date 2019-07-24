@@ -7,7 +7,6 @@ package mods.eln.node.transparent;
  */
 public enum EntityMetaTag {
     Fluid(1, TransparentNodeEntityWithFluid.class),
-
     // 3, because this is the default value used in pre-metatag worlds.
     Basic(3, TransparentNodeEntity.class);
 

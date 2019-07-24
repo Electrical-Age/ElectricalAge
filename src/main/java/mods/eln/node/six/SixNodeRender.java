@@ -13,10 +13,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
     @Override
     public void renderTileEntityFast(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float partial, BufferBuilder buffer) {
         Minecraft.getMinecraft().profiler.startSection("SixNode");
-
         SixNodeEntity tileEntity = (SixNodeEntity) te;
-
-
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x + .5F, (float) y + .5F, (float) z + .5F);
         /*if(tileEntity.sixNodeCacheMapId >= 0)
@@ -27,7 +24,6 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
 				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.getWorld(),entity.x,entity.y,entity.z);
 			}
 		}*/
-
         int idx = 0;
         for (SixNodeElementRender render : tileEntity.elementRenderList) {
             if (render != null) {
@@ -43,8 +39,5 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
         GL11.glPopMatrix();
         //Utils.glDefaultColor();
         Minecraft.getMinecraft().profiler.endSection();
-
     }
-
-
 }

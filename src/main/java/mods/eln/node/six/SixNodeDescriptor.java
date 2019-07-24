@@ -10,6 +10,8 @@ import static mods.eln.i18n.I18N.tr;
 public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public Class ElementClass, RenderClass;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
+    protected GhostGroup ghostGroup = null;
+    protected Direction[] placeDirection = null;
 
     public SixNodeDescriptor(String name, Class ElementClass, Class RenderClass) {
         super(name);
@@ -70,12 +72,9 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return true;
     }
 
-
     public void setGhostGroup(GhostGroup ghostGroup) {
         this.ghostGroup = ghostGroup;
     }
-
-    protected GhostGroup ghostGroup = null;
 
     public boolean hasGhostGroup() {
         return ghostGroup != null;
@@ -97,8 +96,6 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public void setPlaceDirection(Direction[] d) {
         placeDirection = d;
     }
-
-    protected Direction[] placeDirection = null;
 
     public String checkCanPlace(Coordinate coord, Direction direction, LRDU front) {
         if (placeDirection != null) {
@@ -125,7 +122,6 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                 Direction viewDirection = Utils.entityLivingHorizontalViewDirection(player);
                 LRDU front = side.getLRDUGoingTo(viewDirection);
                 return side == Direction.YN ? front : front.inverse();
-
             default:
                 return LRDU.Up;
         }

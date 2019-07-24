@@ -16,12 +16,10 @@ public class NodeBlockItem extends ItemBlock {
         setTranslationKey("NodeBlockItem");
     }
 
-
     @Override
     public int getMetadata(int damageValue) {
         return damageValue;
     }
-
 
     /*int getBlockID(){
         return Block.getIdFromBlock(getBlock());
@@ -45,6 +43,5 @@ public class NodeBlockItem extends ItemBlock {
     	node.checkCanStay(true);
         */
         return false;
-
     }
 }

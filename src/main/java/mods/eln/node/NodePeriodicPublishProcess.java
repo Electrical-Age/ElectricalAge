@@ -4,14 +4,13 @@ import mods.eln.sim.IProcess;
 
 public class NodePeriodicPublishProcess implements IProcess {
     NodeBase node;
+    private double counter = 0, random, base;
 
     public NodePeriodicPublishProcess(NodeBase node, double base, double random) {
         this.node = node;
         this.base = base;
         this.random = random;
     }
-
-    double counter = 0, random, base;
 
     @Override
     public void process(double time) {
@@ -27,5 +26,4 @@ public class NodePeriodicPublishProcess implements IProcess {
         this.random = random;
         counter = 0;
     }
-
 }

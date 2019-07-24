@@ -48,6 +48,10 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public static final byte unserializeGroundedId = -127;
     public static final byte unserializeNulldId = -128;
     TransparentNodeDescriptor transparentNodeDescriptor;
+    public TransparentNode node;
+    public Direction front;
+    public boolean grounded = true;
+    private int uuid = 0;
 
     public TransparentNodeDescriptor getDescriptor() {
         return transparentNodeDescriptor;
@@ -84,11 +88,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         Eln.simulator.removeAllThermalFastProcess(thermalFastProcessList);
     }
 
-    public TransparentNode node;
-    public Direction front;
-    public boolean grounded = true;
-
-
     public void onGroundedChangedByClient() {
         needPublish();
     }
@@ -102,14 +101,13 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         try {
             switch (readed = stream.readByte()) {
                 case unserializeGroundedId:
-                    grounded = stream.readByte() != 0 ? true : false;
+                    grounded = stream.readByte() != 0;
                     onGroundedChangedByClient();
                     return unserializeNulldId;
                 default:
                     return readed;
             }
         } catch (IOException e) {
-
             e.printStackTrace();
         }
         return unserializeNulldId;
@@ -134,16 +132,12 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public void sendIdToAllClient(byte id) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
         DataOutputStream packet = new DataOutputStream(bos);
-
         preparePacketForClient(packet);
-
         try {
             packet.writeByte(id);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
         sendPacketToAllClient(bos);
     }
 
@@ -151,20 +145,15 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public void sendStringToAllClient(byte id, String str) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
         DataOutputStream packet = new DataOutputStream(bos);
-
         preparePacketForClient(packet);
-
         try {
             packet.writeByte(id);
             packet.writeUTF(str);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
         sendPacketToAllClient(bos);
     }
-
 
     private void sendPacketToAllClient(ByteArrayOutputStream bos) {
         node.sendPacketToAllClient(bos);
@@ -184,35 +173,27 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return null;
     }
 
-
     public void onNeighborBlockChange() {
         checkCanStay(false);
     }
 
-
     public void checkCanStay(boolean onCreate) {
         Block block;
         boolean needDestroy = false;
-        if (transparentNodeDescriptor.mustHaveFloor()) {
+        if (transparentNodeDescriptor.mustHaveFloor())
             if (!node.isBlockOpaque(Direction.YN)) needDestroy = true;
-        }
-        if (transparentNodeDescriptor.mustHaveCeiling()) {
+        if (transparentNodeDescriptor.mustHaveCeiling())
             if (!node.isBlockOpaque(Direction.YP)) needDestroy = true;
-        }
-        if (transparentNodeDescriptor.mustHaveWallFrontInverse()) {
+        if (transparentNodeDescriptor.mustHaveWallFrontInverse())
             if (!node.isBlockOpaque(front.getInverse())) needDestroy = true;
-        }
         if (transparentNodeDescriptor.mustHaveWall()) {
             boolean wall = false;
-
             if (node.isBlockOpaque(Direction.XN)) wall = true;
             if (node.isBlockOpaque(Direction.XP)) wall = true;
             if (node.isBlockOpaque(Direction.ZN)) wall = true;
             if (node.isBlockOpaque(Direction.ZP)) wall = true;
-
             if (!wall) needDestroy = true;
         }
-
         if (needDestroy) {
             selfDestroy();
         }
@@ -227,26 +208,20 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 		return true;
 	}
 	*/
-
     public void stop(int uuid) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
         DataOutputStream stream = new DataOutputStream(bos);
-
         try {
             stream.writeByte(Eln.PACKET_DESTROY_UUID);
             stream.writeInt(uuid);
-
             sendPacketToAllClient(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
-
         }
     }
 
     public void onBreakElement() {
         if (useUuid()) stop(uuid);
-
         if (transparentNodeDescriptor.hasGhostGroup()) {
             Eln.ghostManager.removeObserver(node.coordinate);
             Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordinate);
@@ -254,7 +229,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         }
         node.dropInventory(getInventory());
         node.dropElement(node.removedByPlayer);
-
     }
 
     public ItemStack getDropItemStack() {
@@ -267,28 +241,23 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return null;
     }
 
-
     public abstract ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu);
 
     public abstract ThermalLoad getThermalLoad(Direction side, LRDU lrdu);
 
     public abstract int getConnectionMask(Direction side, LRDU lrdu);
 
-
     public abstract String multiMeterString(Direction side);
 
     public abstract String thermoMeterString(Direction side);
-
 
     public void networkSerialize(DataOutputStream stream) {
         try {
             stream.writeByte(front.getInt() + (grounded ? 8 : 0));
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
-
 
     public void initializeFromThat(Direction front, EntityLivingBase entityLiving, NBTTagCompound itemStackNbt) {
         this.front = front;
@@ -298,92 +267,48 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public abstract void initialize();
 
-    public void readItemStackNBT(NBTTagCompound nbt) {
-
-    }
-
+    public void readItemStackNBT(NBTTagCompound nbt) {}
 
     //  public abstract void destroyFrom(SixNode sixNode);
 
-    public abstract boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-                                             float vx, float vy, float vz);
-
+    public abstract boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz);
 
     public void readFromNBT(NBTTagCompound nbt) {
-
-        int idx;
-
         IInventory inv = getInventory();
-        if (inv != null) {
-            Utils.readFromNBT(nbt, "inv", inv);
-        }
-
-        idx = 0;
-
-        for (State electricalLoad : electricalLoadList) {
+        if (inv != null) Utils.readFromNBT(nbt, "inv", inv);
+        for (State electricalLoad : electricalLoadList)
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
-        }
-
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
+        for (NbtThermalLoad thermalLoad : thermalLoadList)
             thermalLoad.readFromNBT(nbt, "");
-        }
-
-
         for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).readFromNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
+            if (c instanceof INBTTReady) ((INBTTReady) c).readFromNBT(nbt, "");
+        for (IProcess process : slowProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
+        for (IProcess process : electricalProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
+        for (IProcess process : thermalFastProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-
-
         byte b = nbt.getByte("others");
         front = Direction.fromInt(b & 0x7);
         grounded = (b & 8) != 0;
     }
 
-
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
-
         IInventory inv = getInventory();
-        if (inv != null) {
-            Utils.writeToNBT(nbt, "inv", inv);
-        }
-
-        for (State electricalLoad : electricalLoadList) {
+        if (inv != null) Utils.writeToNBT(nbt, "inv", inv);
+        for (State electricalLoad : electricalLoadList)
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
+        for (NbtThermalLoad thermalLoad : thermalLoadList)
             thermalLoad.writeToNBT(nbt, "");
-        }
-
         for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).writeToNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
+            if (c instanceof INBTTReady) ((INBTTReady) c).writeToNBT(nbt, "");
+        for (IProcess process : slowProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
+        for (IProcess process : electricalProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
+        for (IProcess process : thermalFastProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-
-
         nbt.setByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
         return nbt;
     }
@@ -396,7 +321,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         node.setNeedPublish(true);
     }
 
-
     public void connect() {
         node.connect();
     }
@@ -406,35 +330,27 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
-    }
+    public void inventoryChange(IInventory inventory) {}
 
     public float getLightOpacity() {
-
         return 0f;
     }
 
     public Coordinate getGhostObserverCoordinate() {
         return node.coordinate;
-
     }
 
     public void ghostDestroyed(int UUID) {
-        if (UUID == transparentNodeDescriptor.getGhostGroupUuid()) {
-            selfDestroy();
-        }
+        if (UUID == transparentNodeDescriptor.getGhostGroupUuid()) selfDestroy();
     }
 
     public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (UUID == transparentNodeDescriptor.getGhostGroupUuid()) {
+        if (UUID == transparentNodeDescriptor.getGhostGroupUuid())
             return node.onBlockActivated(entityPlayer, side, vx, vy, vz);
-        }
         return false;
     }
 
-
     public World world() {
-
         return node.coordinate.world();
     }
 
@@ -442,13 +358,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return node.coordinate;
     }
 
-
-    private int uuid = 0;
-
     public int getUuid() {
-        if (uuid == 0) {
-            uuid = Utils.getUuid();
-        }
+        if (uuid == 0) uuid = Utils.getUuid();
         return uuid;
     }
 
@@ -462,9 +373,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         s.play();
     }
 
-    public void unload() {
-
-    }
+    public void unload() {}
 
 /*	protected boolean hasSidedInventory(){
 		return false;
@@ -473,7 +382,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 		return hasSidedInventory() ? 0x4 : 0;
 	}
 	*/
-
     public Map<String, String> getWaila() {
         Map<String, String> wailaList = new HashMap<String, String>();
         wailaList.put("Info", multiMeterString(this.front));

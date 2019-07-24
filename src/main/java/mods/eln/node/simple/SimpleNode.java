@@ -24,8 +24,17 @@ import java.util.ArrayList;
 
 public abstract class SimpleNode extends NodeBase {
 
+    public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
+    public ArrayList<State> electricalLoadList = new ArrayList<State>(4);
+    public ArrayList<IProcess> thermalFastProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<IProcess> thermalSlowProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
+    public ArrayList<NbtThermalLoad> thermalLoadList = new ArrayList<NbtThermalLoad>(4);
     public EntityPlayerMP removedByPlayer;
     String descriptorKey = "";
+    private Direction front;
 
     protected void setDescriptorKey(String key) {
         descriptorKey = key;
@@ -34,8 +43,6 @@ public abstract class SimpleNode extends NodeBase {
     protected Object getDescriptor() {
         return DescriptorManager.get(descriptorKey);
     }
-
-    private Direction front;
 
     public Direction getFront() {
         return front;
@@ -67,7 +74,6 @@ public abstract class SimpleNode extends NodeBase {
 
     public abstract void initialize();
 
-
     @Override
     public void publishSerialize(DataOutputStream stream) {
         super.publishSerialize(stream);
@@ -78,29 +84,14 @@ public abstract class SimpleNode extends NodeBase {
         }
     }
 
-
-    public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
-
-    public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
-    public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
-    public ArrayList<State> electricalLoadList = new ArrayList<State>(4);
-
-    public ArrayList<IProcess> thermalFastProcessList = new ArrayList<IProcess>(4);
-    public ArrayList<IProcess> thermalSlowProcessList = new ArrayList<IProcess>(4);
-    public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
-    public ArrayList<NbtThermalLoad> thermalLoadList = new ArrayList<NbtThermalLoad>(4);
-
     @Override
     public void connectJob() {
         super.connectJob();
-
         Eln.simulator.addAllSlowProcess(slowProcessList);
-
         Eln.simulator.addAllElectricalComponent(electricalComponentList);
         for (State load : electricalLoadList)
             Eln.simulator.addElectricalLoad(load);
         Eln.simulator.addAllElectricalProcess(electricalProcessList);
-
         Eln.simulator.addAllThermalConnection(thermalConnectionList);
         for (NbtThermalLoad load : thermalLoadList)
             Eln.simulator.addThermalLoad(load);
@@ -111,14 +102,11 @@ public abstract class SimpleNode extends NodeBase {
     @Override
     public void disconnectJob() {
         super.disconnectJob();
-
         Eln.simulator.removeAllSlowProcess(slowProcessList);
-
         Eln.simulator.removeAllElectricalComponent(electricalComponentList);
         for (State load : electricalLoadList)
             Eln.simulator.removeElectricalLoad(load);
         Eln.simulator.removeAllElectricalProcess(electricalProcessList);
-
         Eln.simulator.removeAllThermalConnection(thermalConnectionList);
         for (NbtThermalLoad load : thermalLoadList)
             Eln.simulator.removeThermalLoad(load);
@@ -128,68 +116,40 @@ public abstract class SimpleNode extends NodeBase {
 
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
-
         front = Direction.readFromNBT(nbt, "SNfront");
-
         setDescriptorKey(nbt.getString("SNdescriptorKey"));
-
-        for (State electricalLoad : electricalLoadList) {
+        for (State electricalLoad : electricalLoadList)
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.readFromNBT(nbt, "");
-        }
-
+        for (NbtThermalLoad thermalLoad : thermalLoadList) thermalLoad.readFromNBT(nbt, "");
         for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).readFromNBT(nbt, "");
-
-        for (IProcess process : slowProcessList) {
+            if (c instanceof INBTTReady) ((INBTTReady) c).readFromNBT(nbt, "");
+        for (IProcess process : slowProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
+        for (IProcess process : electricalProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
+        for (IProcess process : thermalFastProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalSlowProcessList) {
+        for (IProcess process : thermalSlowProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
-
         front.writeToNBT(nbt, "SNfront");
-
         nbt.setString("SNdescriptorKey", descriptorKey == null ? "" : descriptorKey);
-
-        for (State electricalLoad : electricalLoadList) {
+        for (State electricalLoad : electricalLoadList)
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.writeToNBT(nbt, "");
-        }
-
+        for (NbtThermalLoad thermalLoad : thermalLoadList) thermalLoad.writeToNBT(nbt, "");
         for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).writeToNBT(nbt, "");
-
-        for (IProcess process : slowProcessList) {
+            if (c instanceof INBTTReady) ((INBTTReady) c).writeToNBT(nbt, "");
+        for (IProcess process : slowProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
+        for (IProcess process : electricalProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
+        for (IProcess process : thermalFastProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalSlowProcessList) {
+        for (IProcess process : thermalSlowProcessList)
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
         return nbt;
     }
 }

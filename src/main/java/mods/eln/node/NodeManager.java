@@ -47,6 +47,7 @@ public class NodeManager extends WorldSavedData {
         // nodeArray.add(node);
         if (node.coordinate == null) {
             Utils.println("Null coordinate addnode");
+            //TODO: oof.
             while (true)
                 ;
         }
@@ -182,7 +183,7 @@ public class NodeManager extends WorldSavedData {
         nodesCopy.addAll(nodes);
         for (NodeBase node : nodesCopy) {
             try {
-                if (node.mustBeSaved() == false) continue;
+                if (!node.mustBeSaved()) continue;
                 if (dim != Integer.MIN_VALUE && node.coordinate.getDimension() != dim) continue;
                 NBTTagCompound nbtNode = new NBTTagCompound();
                 nbtNode.setString("tag", node.getNodeUuid());

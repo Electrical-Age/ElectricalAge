@@ -1,6 +1,5 @@
 package mods.eln.node;
 
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -11,6 +10,9 @@ import java.util.ArrayList;
 
 public class NodeClient {
     public static final ArrayList<NodeBlockEntity> nodeNeedRefreshList = new ArrayList<NodeBlockEntity>();
+
+    public static final int refreshDivider = 5;
+    public int refreshCounter = 0;
 
     public NodeClient() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -23,9 +25,6 @@ public class NodeClient {
     public void stop() {
         nodeNeedRefreshList.clear();
     }
-
-    public static final int refreshDivider = 5;
-    public int refreshCounter = 0;
 
     @SubscribeEvent
     public void tick(ClientTickEvent event) {
@@ -78,6 +77,4 @@ public class NodeClient {
 			e.printStackTrace();
 		}*/
     }
-
-
 }

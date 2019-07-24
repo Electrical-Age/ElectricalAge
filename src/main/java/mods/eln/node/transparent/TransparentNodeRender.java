@@ -17,8 +17,5 @@ public class TransparentNodeRender extends TileEntitySpecialRenderer {
         tileEntity.elementRender.draw();
         GL11.glPopMatrix();
         //Utils.glDefaultColor();
-
     }
-
-
 }

@@ -6,12 +6,9 @@ import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
-import net.minecraft.block.BlockStone;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -21,7 +18,7 @@ import static mods.eln.i18n.I18N.tr;
 public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public Class ElementClass, RenderClass;
     protected VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
-
+    protected GhostGroup ghostGroup = null;
     public final EntityMetaTag tileEntityMetaTag;
 
     public TransparentNodeDescriptor(
@@ -34,9 +31,6 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         this.RenderClass = RenderClass;
         this.tileEntityMetaTag = tag;
     }
-
-
-    protected GhostGroup ghostGroup = null;
 
     public TransparentNodeDescriptor(String name, Class ElementClass, Class RenderClass) {
         this(name, ElementClass, RenderClass, EntityMetaTag.Basic);
@@ -75,7 +69,6 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         //factor = obj.dimMaxInv*1.0f;
         factor = Math.max(factor, (Math.max(obj.zMax, -obj.xMin) + Math.max(obj.xMax, -obj.zMin)) * 0.7f);
         factor = 1f / factor;
-
         GL11.glScalef(factor, factor, factor);
         //GL11.glTranslatef((Math.max(obj.zMax,-obj.xMin) - Math.max(obj.xMax,-obj.zMin))*0.5f,-((obj.yMax + Math.max(-obj.xMin,obj.zMax)*0.3f) + (obj.yMin + Math.min(obj.zMin,-obj.xMax)*0.3f))*0.4f,0.0f);
         GL11.glTranslatef((Math.min(obj.zMin, obj.xMin) + Math.max(obj.xMax, obj.zMax)) / 2 - (obj.xMax + obj.xMin) / 2, 1.0f - (obj.xMax + obj.xMin) / 2 - (obj.zMax + obj.zMin) / 2 - (obj.yMax + obj.yMin) / 2, 0.0f);
@@ -109,7 +102,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             Coordinate temp = new Coordinate(coord);
             temp.move(Direction.YN);
             block = temp.getBlockState().getBlock();
-            if (block == null || ((!block.isOpaqueCube(temp.getBlockState())) && block instanceof BlockHopper == false))
+            if (block == null || ((!block.isOpaqueCube(temp.getBlockState())) && !(block instanceof BlockHopper)))
                 return tr("You can't place this block at this side");
         }
         if (mustHaveCeiling()) {
@@ -143,15 +136,12 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             temp.move(Direction.ZP);
             block = temp.getBlockState().getBlock();;
             if (block != null && block.isOpaqueCube(temp.getBlockState())) wall = true;
-
             if (!wall) return tr("You can't place this block at this side");
         }
-
         GhostGroup ghostGroup = getGhostGroup(front);
-        if (ghostGroup != null && ghostGroup.canBePloted(coord) == false) return tr("Not enough space for this block");
+        if (ghostGroup != null && !ghostGroup.canBePloted(coord)) return tr("Not enough space for this block");
         return null;
     }
-
 
     public Direction getFrontFromPlace(Direction side, EntityLivingBase entityLiving) {
         Direction front = Direction.XN;
@@ -168,7 +158,6 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             case PlayerViewHorizontal:
                 front = Utils.entityLivingHorizontalViewDirection(entityLiving).getInverse();
                 break;
-
         }
         return front;
     }
@@ -183,22 +172,18 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
     }
 
     public int getGhostGroupUuid() {
-
         return -1;
     }
 
     public int getSpawnDeltaX() {
-
         return 0;
     }
 
     public int getSpawnDeltaY() {
-
         return 0;
     }
 
     public int getSpawnDeltaZ() {
-
         return 0;
     }
 

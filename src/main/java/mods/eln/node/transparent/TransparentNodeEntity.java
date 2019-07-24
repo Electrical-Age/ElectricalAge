@@ -1,6 +1,5 @@
 package mods.eln.node.transparent;
 
-import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
@@ -10,7 +9,6 @@ import mods.eln.node.Node;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
@@ -28,11 +26,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-
 public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
     TransparentNodeElementRender elementRender = null;
     private short elementRenderId;
-
 
     @Override
     public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
@@ -43,7 +39,6 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
         super.serverPublishUnserialize(stream);
-
         try {
             Short id = stream.readShort();
             if (id == 0) {
@@ -57,11 +52,9 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
                 }
                 elementRender.networkUnserialize(stream);
             }
-
         } catch (IOException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
-
     }
 
     public Container newContainer(Direction side, EntityPlayer player) {
@@ -114,11 +107,10 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
             desc = node == null ? null : node.element.transparentNodeDescriptor;
         }
         BlockPos pos;
-        if (blockCoord != null) {
+        if (blockCoord != null)
             pos = blockCoord.pos;
-        } else {
+        else
             pos = this.pos;
-        }
         if (desc == null) {
             AxisAlignedBB bb = new AxisAlignedBB(pos);
             if (axisAlignedBB.intersects(bb)) list.add(bb);
@@ -140,16 +132,13 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
     @Override
     public void destructor() {
-        if (elementRender != null)
-            elementRender.destructor();
+        if (elementRender != null) elementRender.destructor();
         super.destructor();
     }
 
     @Override
     public void clientRefresh(float deltaT) {
-        if (elementRender != null) {
-            elementRender.refresh(deltaT);
-        }
+        if (elementRender != null) elementRender.refresh(deltaT);
     }
 
     @Override
@@ -259,8 +248,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public void clear() {
-    }
+    public void clear() {}
 
     @Override
     public int[] getSlotsForFace(@NotNull EnumFacing facing) {

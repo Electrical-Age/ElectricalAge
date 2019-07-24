@@ -11,7 +11,6 @@ import net.minecraft.server.MinecraftServer
 
 /*
  * Each tick, publishes all nodes that ask for it.
- *
  * Additionally, publish all nodes with an inventory that are opened by a player, to that player.
  */
 class NodePublishProcess : IProcess {

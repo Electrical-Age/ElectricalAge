@@ -59,15 +59,11 @@ public abstract class NodeBase {
 
     public byte neighborOpaque;
     public byte neighborWrapable;
-
     public Coordinate coordinate;
-
     public ArrayList<NodeConnection> nodeConnectionList = new ArrayList<NodeConnection>(4);
-
     private boolean initialized = false;
-
+    boolean destructed = false;
     private boolean isAdded = false;
-
     private boolean needPublish = false;
 
     // public static boolean canBePlacedOn(ItemStack itemStack,Direction side)
@@ -80,9 +76,7 @@ public abstract class NodeBase {
         return 0;
     }
 
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
-
-    }
+    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {}
 
     public void notifyNeighbor() {
         coordinate.world().notifyNeighborsRespectDebug(coordinate.pos, coordinate.getBlockState().getBlock(), true);
@@ -151,8 +145,6 @@ public abstract class NodeBase {
     public NodeBase() {
         coordinate = new Coordinate();
     }
-
-    boolean destructed = false;
 
     public boolean isDestructing() {
         return destructed;
@@ -290,9 +282,7 @@ public abstract class NodeBase {
 
     public abstract ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB);
 
-    public void checkCanStay(boolean onCreate) {
-
-    }
+    public void checkCanStay(boolean onCreate) {}
 
     public void connectJob() {
         // EXTERNAL OTHERS SIXNODE
@@ -318,7 +308,6 @@ public abstract class NodeBase {
                 }
             }
         }
-
         {
             for (Direction dir : Direction.values()) {
                 NodeBase otherNode = getNeighbor(dir);
@@ -327,16 +316,12 @@ public abstract class NodeBase {
                         tryConnectTwoNode(this, dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
                     }
                 }
-
             }
         }
-
     }
 
     public void disconnectJob() {
-
         for (NodeConnection c : nodeConnectionList) {
-
             if (c.N1 != this) {
                 c.N1.nodeConnectionList.remove(c);
                 c.N1.setNeedPublish(true);
@@ -348,9 +333,7 @@ public abstract class NodeBase {
             }
             c.destroy();
         }
-
         lrduCubeMask.clear();
-
         nodeConnectionList.clear();
     }
 
@@ -361,11 +344,9 @@ public abstract class NodeBase {
         return false;
     }
 
-    public void externalDisconnect(Direction side, LRDU lrdu) {
-    }
+    public void externalDisconnect(Direction side, LRDU lrdu) {}
 
-    public void newConnectionAt(Direction side, LRDU lrdu) {
-    }
+    public void newConnectionAt(Direction side, LRDU lrdu) {}
 
     public void connectInit() {
         lrduCubeMask.clear();
@@ -373,18 +354,13 @@ public abstract class NodeBase {
     }
 
     public void connect() {
-
         if (isAdded) {
             disconnect();
         }
-
         connectInit();
         connectJob();
-
         isAdded = true;
-
         setNeedPublish(true);
-
     }
 
     public void disconnect() {
@@ -392,9 +368,7 @@ public abstract class NodeBase {
             Utils.println("Node destroy error already destroy");
             return;
         }
-
         disconnectJob();
-
         isAdded = false;
     }
 
@@ -403,21 +377,14 @@ public abstract class NodeBase {
     }
 
     public void readFromNBT(NBTTagCompound nbt) {
-
         coordinate.readFromNBT(nbt, "c");
-
         neighborOpaque = nbt.getByte("NBOpaque");
         neighborWrapable = nbt.getByte("NBWrap");
-
         initialized = true;
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-
         coordinate.writeToNBT(nbt, "c");
-
-        int idx;
-
         nbt.setByte("NBOpaque", neighborOpaque);
         nbt.setByte("NBWrap", neighborWrapable);
         return nbt;
@@ -448,25 +415,18 @@ public abstract class NodeBase {
 
     boolean needNotify = false;
 
-    public void publishSerialize(DataOutputStream stream) {
-
-    }
+    public void publishSerialize(DataOutputStream stream) {}
 
     public void preparePacketForClient(DataOutputStream stream) {
         try {
             stream.writeByte(Eln.PACKET_FOR_CLIENT_NODE);
-
             BlockPos pos = coordinate.pos;
             stream.writeInt(pos.getX());
             stream.writeInt(pos.getY());
             stream.writeInt(pos.getZ());
-
             stream.writeByte(coordinate.getDimension());
-
             stream.writeUTF(getNodeUuid());
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -475,54 +435,38 @@ public abstract class NodeBase {
         Utils.sendPacketToClient(bos, player);
     }
 
-
     public void sendPacketToAllClient(ByteArrayOutputStream bos) {
         sendPacketToAllClient(bos, 100000);
     }
 
     public void sendPacketToAllClient(ByteArrayOutputStream bos, double range) {
         //Profiler p = new Profiler();
-
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
         for (Object obj : server.getEntityWorld().playerEntities) {
-
             EntityPlayerMP player = (EntityPlayerMP) obj;
             WorldServer worldServer = server.getWorld(player.dimension);
-
             if (player.dimension != this.coordinate.getDimension()) continue;
             if (!worldServer.getPlayerChunkMap().isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
             if (coordinate.distanceTo(player) > range) continue;
-
             Utils.sendPacketToClient(bos, player);
         }
-
     }
 
     public ByteArrayOutputStream getPublishPacket() {
-
         ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
         DataOutputStream stream = new DataOutputStream(bos);
-
         try {
-
             stream.writeByte(Eln.PACKET_NODE_SINGLE_SERIALIZED);
-
             BlockPos pos = coordinate.pos;
             stream.writeInt(pos.getX());
             stream.writeInt(pos.getY());
             stream.writeInt(pos.getZ());
             stream.writeByte(coordinate.getDimension());
-
             stream.writeUTF(getNodeUuid());
-
             publishSerialize(stream);
-
             return bos;
         } catch (IOException e) {
-
             e.printStackTrace();
-
         }
         return null;
     }
@@ -534,7 +478,6 @@ public abstract class NodeBase {
             WorldServer worldServer = server.getWorld(player.dimension);
             if (player.dimension != this.coordinate.getDimension()) continue;
             if (!worldServer.getPlayerChunkMap().isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
-
             Utils.sendPacketToClient(getPublishPacket(), player);
         }
         if (needNotify) {
@@ -573,9 +516,7 @@ public abstract class NodeBase {
 
     public abstract void initializeFromNBT();
 
-    public void globalBoot() {
-
-    }
+    public void globalBoot() {}
 
     public void needPublish() {
         setNeedPublish(true);

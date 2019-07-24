@@ -26,6 +26,9 @@ public abstract class TransparentNodeElementRender {
     public Direction front;
     public boolean grounded;
     public TransparentNodeDescriptor transparentNodedescriptor;
+    private int uuid = 0;
+    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
+    static final LRDUMask maskTempDraw = new LRDUMask();
 
     public TransparentNodeElementRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         this.tileEntity = tileEntity;
@@ -34,21 +37,16 @@ public abstract class TransparentNodeElementRender {
 
     protected EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old) throws IOException {
         return Utils.unserializeItemStackToEntityItem(stream, old, tileEntity);
-
     }
 
     // TODO(1.10): ITEM RENDERING
     public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {/*
         if(entityItem == null) return;
-		
-
-
 		entityItem.hoverStart = 0.0f;
 		entityItem.rotationYaw = 0.0f;
 		entityItem.motionX = 0.0;
 		entityItem.motionY = 0.0;
 		entityItem.motionZ =0.0;
-		
 		Render var10 = null;
 		var10 = RenderManager.instance.getEntityRenderObject(entityItem);
 		GL11.glPushMatrix();
@@ -59,7 +57,6 @@ public abstract class TransparentNodeElementRender {
 		GL11.glPopMatrix();	
 		*/
         //UtilsClient.drawEntityItem(entityItem, x, y, z, roty, scale);
-
     }
 
     public void glCableTransforme(Direction inverse) {
@@ -75,7 +72,6 @@ public abstract class TransparentNodeElementRender {
             front = Direction.fromInt(b & 0x7);
             grounded = (b & 8) != 0;
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -96,7 +92,6 @@ public abstract class TransparentNodeElementRender {
         tileEntity.sendPacketToServer(bos);
     }
 
-
     public void clientSetGrounded(boolean value) {
         clientSendBoolean(TransparentNodeElement.unserializeGroundedId, value);
     }
@@ -105,89 +100,64 @@ public abstract class TransparentNodeElementRender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeByte(value ? 1 : 0);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSendId(Byte id) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSendString(Byte id, String str) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeUTF(str);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSendFloat(Byte id, float str) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeFloat(str);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSendInt(Byte id, int str) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeInt(str);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public boolean cameraDrawOptimisation() {
@@ -195,11 +165,8 @@ public abstract class TransparentNodeElementRender {
     }
 
     public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-
         return null;
     }
-
-    static final LRDUMask maskTempDraw = new LRDUMask();
 
     public CableRenderType drawCable(Direction side, CableRenderDescriptor render, LRDUMask connection, CableRenderType renderPreProcess) {
         if (render == null) return renderPreProcess;
@@ -207,7 +174,6 @@ public abstract class TransparentNodeElementRender {
         GL11.glPushMatrix();
         glCableTransforme(side);
         render.bindCableTexture();
-
         for (LRDU lrdu : LRDU.values()) {
             Utils.setGlColorFromDye(renderPreProcess.otherdry[lrdu.toInt()]);
             if (!connection.get(lrdu)) continue;
@@ -219,22 +185,13 @@ public abstract class TransparentNodeElementRender {
         return renderPreProcess;
     }
 
-    public void notifyNeighborSpawn() {
+    public void notifyNeighborSpawn() {}
 
-
-    }
-
-    public void serverPacketUnserialize(DataInputStream stream) {
-
-
-    }
+    public void serverPacketUnserialize(DataInputStream stream) {}
 
     protected Coordinate coordinate() {
         return new Coordinate(tileEntity.getPos(), tileEntity.getWorld());
     }
-
-
-    private int uuid = 0;
 
     public int getUuid() {
         if (uuid == 0) {
@@ -247,14 +204,11 @@ public abstract class TransparentNodeElementRender {
         return uuid != 0;
     }
 
-
     public void play(SoundCommand s) {
         s.addUuid(getUuid());
         s.set(tileEntity);
         s.play();
     }
-
-    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
 
     @SideOnly(Side.CLIENT)
     protected void addLoopedSound(final LoopedSound loopedSound) {
@@ -264,7 +218,6 @@ public abstract class TransparentNodeElementRender {
     public void destructor() {
         if (usedUuid())
             ClientProxy.uuidManager.kill(uuid);
-
         loopedSoundManager.dispose();
     }
 

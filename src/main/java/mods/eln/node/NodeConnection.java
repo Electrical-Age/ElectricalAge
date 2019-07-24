@@ -22,7 +22,6 @@ public class NodeConnection {
         this.lrdu2 = lrdu2;
         this.EC = EC;
         this.TC = TC;
-
     }
 
     public void destroy() {

@@ -8,6 +8,59 @@ import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
 class AutoAcceptInventoryProxy(val inventory: IInventory) {
+    private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(inventory.sizeInventory)
+
+    fun acceptIfEmpty(
+        index: Int,
+        vararg types: Class<out Any>
+    ): AutoAcceptInventoryProxy {
+        if (index >= 0 && index < itemAcceptors.count()) {
+            itemAcceptors[index] = ItemAcceptorIfEmpty(index, types)
+        }
+        return this
+    }
+
+    fun acceptIfIncrement(
+        index: Int,
+        maxItems: Int,
+        vararg types: Class<out Any>
+    ): AutoAcceptInventoryProxy {
+        if (index >= 0 && index < itemAcceptors.count()) {
+            itemAcceptors[index] = ItemAcceptorIfIncrement(index, maxItems, types)
+        }
+        return this
+    }
+
+    fun acceptAlways(
+        index: Int,
+        maxItems: Int,
+        existingItemHandler: ExistingItemHandler?,
+        vararg types: Class<out Any>
+    ): AutoAcceptInventoryProxy {
+        if (index >= 0 && index < itemAcceptors.count()) {
+            itemAcceptors[index] = ItemAcceptorAlways(index, maxItems, types, existingItemHandler)
+        }
+        return this
+    }
+
+    fun take(itemStack: ItemStack) = itemAcceptors.filterNotNull().any { it.take(itemStack, inventory) }
+
+    fun take(
+        itemStack: ItemStack,
+        nodeElement: INodeElement?,
+        publish: Boolean = false,
+        notifyInventoryChange: Boolean = false
+    ) = if (take(itemStack)) {
+            if (publish) {
+                nodeElement?.needPublish()
+            }
+            if (notifyInventoryChange) {
+                nodeElement?.inventoryChange(inventory)
+            }
+            true
+        } else
+            false
+
     interface ExistingItemHandler {
         fun handleExistingInventoryItem(itemStack: ItemStack)
     }
@@ -22,8 +75,10 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         abstract fun take(itemStack: ItemStack, inventory: IInventory): Boolean
     }
 
-    private open class ItemAcceptorIfEmpty(index: Int, val acceptedItems: Array<out Class<out Any>>)
-        : ItemAcceptor(index) {
+    private open class ItemAcceptorIfEmpty(
+        index: Int,
+        val acceptedItems: Array<out Class<out Any>>
+    ): ItemAcceptor(index) {
         override fun take(itemStack: ItemStack, inventory: IInventory): Boolean {
             // Do nothing if we already have a stack.
             if (inventory.getStackInSlot(index).isEmpty) {
@@ -48,13 +103,14 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
                     }
                 }
             }
-
             return false
         }
     }
 
-    private open class ItemAcceptorIfIncrement(index: Int, val maxItems: Int, acceptedItems: Array<out Class<out Any>>)
-        : ItemAcceptorIfEmpty(index, acceptedItems) {
+    private open class ItemAcceptorIfIncrement(
+        index: Int,
+        val maxItems: Int, acceptedItems: Array<out Class<out Any>>
+    ): ItemAcceptorIfEmpty(index, acceptedItems) {
         override fun take(itemStack: ItemStack, inventory: IInventory): Boolean {
             if (super.take(itemStack, inventory)) return true
 
@@ -83,9 +139,16 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         }
     }
 
-    private class ItemAcceptorAlways(index: Int, maxItems: Int, acceptedItems: Array<out Class<out Any>>,
-                                     val existingItemHandler: ExistingItemHandler?)
-        : ItemAcceptorIfIncrement(index, maxItems, acceptedItems) {
+    private class ItemAcceptorAlways(
+        index: Int,
+        maxItems: Int,
+        acceptedItems: Array<out Class<out Any>>,
+        val existingItemHandler: ExistingItemHandler?
+    ): ItemAcceptorIfIncrement(
+        index,
+        maxItems,
+        acceptedItems
+    ) {
         override fun take(itemStack: ItemStack, inventory: IInventory): Boolean {
             if (super.take(itemStack, inventory)) return true
             if (itemStack.isEmpty) return false
@@ -114,47 +177,7 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
                     return true
                 }
             }
-
             return false
         }
     }
-
-    private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(inventory.sizeInventory)
-
-    fun acceptIfEmpty(index: Int, vararg types: Class<out Any>): AutoAcceptInventoryProxy {
-        if (index >= 0 && index < itemAcceptors.count()) {
-            itemAcceptors[index] = ItemAcceptorIfEmpty(index, types)
-        }
-        return this
-    }
-
-    fun acceptIfIncrement(index: Int, maxItems: Int, vararg types: Class<out Any>): AutoAcceptInventoryProxy {
-        if (index >= 0 && index < itemAcceptors.count()) {
-            itemAcceptors[index] = ItemAcceptorIfIncrement(index, maxItems, types)
-        }
-        return this
-    }
-
-    fun acceptAlways(index: Int, maxItems: Int, existingItemHandler: ExistingItemHandler?,
-                     vararg types: Class<out Any>): AutoAcceptInventoryProxy {
-        if (index >= 0 && index < itemAcceptors.count()) {
-            itemAcceptors[index] = ItemAcceptorAlways(index, maxItems, types, existingItemHandler)
-        }
-        return this
-    }
-
-    fun take(itemStack: ItemStack) = itemAcceptors.filterNotNull().any { it.take(itemStack, inventory) }
-
-    fun take(itemStack: ItemStack, nodeElement: INodeElement?, publish: Boolean = false,
-             notifyInventoryChange: Boolean = false) =
-        if (take(itemStack)) {
-            if (publish) {
-                nodeElement?.needPublish()
-            }
-            if (notifyInventoryChange) {
-                nodeElement?.inventoryChange(inventory)
-            }
-            true
-        } else
-            false
 }

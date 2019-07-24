@@ -28,6 +28,12 @@ public abstract class SixNodeElementRender {
     int glList, cableList[];
     boolean cableListReady[] = {false, false, false, false};
     boolean glListReady = false;
+    boolean needRedraw;
+    public LRDU front;
+    CableRenderType connectionType;
+    public SixNodeDescriptor sixNodeDescriptor;
+    private int uuid = 0;
+    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
 
     public SixNodeElementRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         this.sixNodeDescriptor = descriptor;
@@ -65,7 +71,6 @@ public abstract class SixNodeElementRender {
         UtilsClient.drawConnectionPinSixNode(front, d, 1.8f, 0.9f);
     }
 
-
     public void drawSignalPin(float d[]) {
         drawSignalPin(front, d);
     }
@@ -77,11 +82,7 @@ public abstract class SixNodeElementRender {
         GL11.glColor3f(1, 1, 1);
     }
 
-    boolean needRedraw;
-
-    public void newConnectionType(CableRenderType connectionType) {
-
-    }
+    public void newConnectionType(CableRenderType connectionType) {}
 
     public void draw() {
         // Minecraft.getMinecraft().profiler.startSection("SixNodeRender");
@@ -102,7 +103,6 @@ public abstract class SixNodeElementRender {
                 }
             }
         }
-
         for (int idx = 0; idx < 4; idx++) {
             Utils.setGlColorFromDye(connectionType.otherdry[idx]);
             if (cableListReady[idx]) {
@@ -110,7 +110,6 @@ public abstract class SixNodeElementRender {
                 GL11.glCallList(cableList[idx]);
             }
         }
-
         GL11.glColor3f(1f, 1f, 1f);
         // Minecraft.getMinecraft().profiler.endSection();
     }
@@ -129,19 +128,12 @@ public abstract class SixNodeElementRender {
             GL11.glNewList(glList, GL11.GL_COMPILE);
             glListDraw();
             GL11.glEndList();
-
             glListReady = true;
         }
         GL11.glCallList(glList);
     }
 
-    public void glListDraw() {
-
-    }
-
-    public LRDU front;
-    CableRenderType connectionType;
-    public SixNodeDescriptor sixNodeDescriptor;
+    public void glListDraw() {}
 
     public int isProvidingWeakPower(Direction side) {
         return 0;
@@ -152,26 +144,17 @@ public abstract class SixNodeElementRender {
             byte b = stream.readByte();
             connectedSide.set(b & 0xF);
             front = front.fromInt((b >> 4) & 0x3);
-
             needRedraw = true;
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
         glListReady = false;
     }
 
-    public void singleUnserialize(DataInputStream stream) {
-
-    }
-
-    private int uuid = 0;
+    public void singleUnserialize(DataInputStream stream) {}
 
     public int getUuid() {
-        if (uuid == 0) {
-            uuid = UtilsClient.getUuid();
-        }
+        if (uuid == 0)  uuid = UtilsClient.getUuid();
         return uuid;
     }
 
@@ -186,17 +169,12 @@ public abstract class SixNodeElementRender {
     }
 
     public void destructor() {
-        if (usedUuid())
-            ClientProxy.uuidManager.kill(uuid);
-
-        if (glListEnable()) {
-            UtilsClient.glDeleteListsSafe(glList);
-        }
+        if (usedUuid())  ClientProxy.uuidManager.kill(uuid);
+        if (glListEnable()) UtilsClient.glDeleteListsSafe(glList);
         UtilsClient.glDeleteListsSafe(cableList[0]);
         UtilsClient.glDeleteListsSafe(cableList[1]);
         UtilsClient.glDeleteListsSafe(cableList[2]);
         UtilsClient.glDeleteListsSafe(cableList[3]);
-
         loopedSoundManager.dispose();
     }
 
@@ -211,12 +189,9 @@ public abstract class SixNodeElementRender {
     public void preparePacketForServer(DataOutputStream stream) {
         try {
             tileEntity.preparePacketForServer(stream);
-
             stream.writeByte(side.getInt());
             stream.writeShort(tileEntity.elementRenderIdList[side.getInt()]);
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -237,88 +212,64 @@ public abstract class SixNodeElementRender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeFloat(value);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSetFloat(int id, float value1, float value2) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeFloat(value1);
             stream.writeFloat(value2);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSetDouble(byte id, double value) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeDouble(value);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSetString(byte id, String text) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeUTF(text);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSetInt(byte id, int value) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeInt(value);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -327,15 +278,11 @@ public abstract class SixNodeElementRender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeByte(value);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
 
@@ -345,33 +292,23 @@ public abstract class SixNodeElementRender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public boolean cameraDrawOptimisation() {
-
         return true;
     }
 
-    public void serverPacketUnserialize(DataInputStream stream) throws IOException {
-
-    }
+    public void serverPacketUnserialize(DataInputStream stream) throws IOException {}
 
     public void notifyNeighborSpawn() {
         needRedraw = true;
     }
-
-    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
 
     @SideOnly(Side.CLIENT)
     protected void addLoopedSound(final LoopedSound loopedSound) {

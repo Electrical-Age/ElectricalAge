@@ -1,6 +1,5 @@
 package mods.eln.node;
 
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -25,29 +24,26 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.util.LinkedList;
 
-
 public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient, INodeEntity {
 
     public static final LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
 
+    boolean redstone = false;
+    int lastLight = 0xFF;
+    boolean firstUnserialize = true;
+    Node node = null;
 
     public NodeBlock getBlock() {
         return (NodeBlock) getBlockType();
     }
 
-    boolean redstone = false;
-    int lastLight = 0xFF;
-    boolean firstUnserialize = true;
-
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
-
         int light = 0;
         try {
             if (firstUnserialize) {
                 firstUnserialize = false;
                 Utils.notifyNeighbor(this);
-
             }
             Byte b = stream.readByte();
             light = b & 0xF;
@@ -56,23 +52,17 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
                 redstone = newRedstone;
                 world.notifyNeighborsRespectDebug(getPos(), getBlockType(), true);
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         if (lastLight != light) {
             lastLight = light;
             world.checkLightFor(EnumSkyBlock.BLOCK, getPos());
         }
-
     }
 
     @Override
-    public void serverPacketUnserialize(DataInputStream stream) {
-
-    }
-
+    public void serverPacketUnserialize(DataInputStream stream) {}
 
     //abstract public Node newNode();
     //abstract public Node newNode(Direction front,EntityLiving entityLiving,int metadata);
@@ -82,8 +72,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     //if(world.isRemote) return 0;
     //return getNode().isProvidingWeakPower(side);
     //}
-
-    Node node = null;
 
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
@@ -95,10 +83,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         return null;
     }
 
-
-    public NodeBlockEntity() {
-    }
-
+    public NodeBlockEntity() {}
 
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
@@ -141,7 +126,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         return super.writeToNBT(nbt);
     }
 
-
     //max draw distance
     @Override
     @SideOnly(Side.CLIENT)
@@ -149,11 +133,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         return 4096.0 * (4) * (4);
     }
 
-
-    void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, IBlockState state) {
-
-    }
-
+    void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, IBlockState state) {}
 
     @Override
     public void onLoad()
@@ -164,8 +144,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             clientList.add(this);
         }
     }
-
-
 
     public void onBlockAdded() {
         if (!world.isRemote && getNode() == null) {
@@ -193,7 +171,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     @Override
     public void invalidate() {
-
         if (world.isRemote) {
             destructor();
         }
@@ -207,10 +184,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             return true;
         }
         //if(entityPlayer.getCurrentEquippedItem().getItem() instanceof ItemBlock)
-        {
-            return true;
-        }
-        //return true;
+        return true;
     }
 
     public void onNeighborBlockChange() {
@@ -220,13 +194,11 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
     }
 
-
     public Node getNode() {
         if (world.isRemote) {
             Utils.fatal();
             return null;
         }
-        if (this.world == null) return null;
         if (node == null) {
             NodeBase nodeFromCoordinate = NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, world));
             if (nodeFromCoordinate instanceof Node) {
@@ -238,7 +210,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
         return node;
     }
-
 
     public static NodeBlockEntity getEntity(BlockPos pos) {
         TileEntity entity;
@@ -259,7 +230,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
-
         NBTTagCompound tagCompound = new NBTTagCompound();
         tagCompound.setByteArray("eln", node.getPublishPacket().toByteArray());
         return new SPacketUpdateTileEntity(
@@ -280,13 +250,10 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     public void preparePacketForServer(DataOutputStream stream) {
         try {
             stream.writeByte(Eln.PACKET_PUBLISH_FOR_NODE);
-
             stream.writeInt(pos.getX());
             stream.writeInt(pos.getY());
             stream.writeInt(pos.getZ());
-
             stream.writeByte(world.provider.getDimension());
-
             stream.writeUTF(getNodeUuid());
         } catch (IOException e) {
             e.printStackTrace();
@@ -296,7 +263,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     public void sendPacketToServer(ByteArrayOutputStream bos) {
         UtilsClient.sendPacketToServer(bos);
     }
-
 
     public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
         return null;
@@ -315,7 +281,5 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
     }
 
-    public void clientRefresh(float deltaT) {
-
-    }
+    public void clientRefresh(float deltaT) {}
 }

@@ -20,12 +20,11 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 public abstract class SimpleNodeBlock extends BlockContainer {
+    String descriptorKey;
 
     protected SimpleNodeBlock(Material material) {
         super(material);
     }
-
-    String descriptorKey;
 
     public SimpleNodeBlock setDescriptorKey(String descriptorKey) {
         this.descriptorKey = descriptorKey;
@@ -36,7 +35,6 @@ public abstract class SimpleNodeBlock extends BlockContainer {
         this.descriptorKey = descriptor.descriptorKey;
         return this;
     }
-
 
     Direction getFrontForPlacement(EntityLivingBase e) {
         return Utils.entityLivingViewDirection(e).getInverse();
@@ -52,7 +50,6 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	}*/
 
     protected abstract SimpleNode newNode();
-
 
     SimpleNode getNode(World world, BlockPos pos) {
         SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
@@ -114,11 +111,9 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     }
 
     // client server
-
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
         return entity.onBlockActivated(playerIn, Direction.fromFacing(facing), hitX, hitY, hitZ);
     }
-
 }

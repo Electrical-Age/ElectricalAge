@@ -22,14 +22,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class TransparentNode extends Node {
-
     public TransparentNodeElement element;
     public int elementId;
     public EntityPlayerMP removedByPlayer;
 
     @Override
     public boolean nodeAutoSave() {
-
         return false;
     }
 
@@ -41,46 +39,24 @@ public class TransparentNode extends Node {
 
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt.getCompoundTag("node"));
-
         elementId = nbt.getShort("eid");
         try {
             TransparentNodeDescriptor descriptor = null; //TODO(1.12): Eln.transparentNodeItem.getDescriptor(elementId);
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
         element.readFromNBT(nbt.getCompoundTag("element"));
-
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(Utils.newNbtTagCompund(nbt, "node"));
-
         nbt.setShort("eid", (short) elementId);
-
         return element.writeToNBT(Utils.newNbtTagCompund(nbt, "element"));
-
     }
 
     @Override
     public void onBreakBlock() {
-
         element.onBreakElement();
         super.onBreakBlock();
     }
@@ -116,24 +92,18 @@ public class TransparentNode extends Node {
 
     @Override
     public void publishSerialize(DataOutputStream stream) {
-
         super.publishSerialize(stream);
-
         try {
             stream.writeShort(this.elementId);
             element.networkSerialize(stream);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public enum FrontType {
         BlockSide, PlayerView, PlayerViewHorizontal, BlockSideInv
     }
-
-    ;
 
     @Override
     public void initializeFromThat(Direction side, EntityLivingBase entityLiving, ItemStack itemStack) {
@@ -142,34 +112,15 @@ public class TransparentNode extends Node {
             TransparentNodeDescriptor descriptor = null; // TODO(1.12): Eln.transparentNodeItem.getDescriptor(itemStack);
             /*
 			 * switch(descriptor.getFrontType()) { case BlockSide: front = side; break; case PlayerView: front = Utils.entityLivingViewDirection(entityLiving).getInverse(); break; case PlayerViewHorizontal: front = Utils.entityLivingHorizontalViewDirection(entityLiving).getInverse(); break;
-			 * 
 			 * }
 			 */
-
             int metadata = itemStack.getItemDamage();
             elementId = metadata;
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
             element.initializeFromThat(side, entityLiving, itemStack.getTagCompound());
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -206,8 +157,6 @@ public class TransparentNode extends Node {
     @Override
     public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
         super.networkUnserialize(stream, player);
-
-        Direction side;
         try {
             if (elementId == stream.readShort()) {
                 element.networkUnserialize(stream, player);
@@ -215,7 +164,6 @@ public class TransparentNode extends Node {
                 Utils.println("Transparent node unserialize miss");
             }
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -234,7 +182,6 @@ public class TransparentNode extends Node {
 
     @Override
     public void checkCanStay(boolean onCreate) {
-
         super.checkCanStay(onCreate);
         element.checkCanStay(onCreate);
     }
@@ -255,7 +202,5 @@ public class TransparentNode extends Node {
         super.unload();
         if (element != null)
             element.unload();
-
     }
-
 }

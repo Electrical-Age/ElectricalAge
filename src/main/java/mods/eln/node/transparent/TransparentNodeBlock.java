@@ -28,16 +28,15 @@ import java.util.List;
 import java.util.Random;
 
 public class TransparentNodeBlock extends NodeBlock {
-
-    public TransparentNodeBlock(Material material,
-                                Class tileEntityClass) {
+    public TransparentNodeBlock(
+        Material material,
+        Class tileEntityClass
+    ) {
         super(material, tileEntityClass, 0);
-
     }
 
 	/*@Override
     public TileEntity createNewTileEntity(World world, int meta) {
-
 		if((meta & 0x4) != 0)
 			return new TransparentNodeEntityWithSiededInv();
 		return super.createNewTileEntity(world, meta);
@@ -47,8 +46,6 @@ public class TransparentNodeBlock extends NodeBlock {
 /*
     //@SideOnly(Side.CLIENT)
     public void getSubBlocks(Items par1, CreativeTabs tab, List subItems) {
-
-
         Eln.transparentNodeItem.getSubItems(par1, tab, subItems);
     }
 */
@@ -68,7 +65,6 @@ public class TransparentNodeBlock extends NodeBlock {
         return state.getRenderType();
     }
 
-
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer entityPlayer, boolean willHarvest) {
         if (!world.isRemote) {
@@ -81,7 +77,6 @@ public class TransparentNodeBlock extends NodeBlock {
                 }
             }
         }
-
         return super.removedByPlayer(state, world, pos, entityPlayer, willHarvest);
     }
 
@@ -140,8 +135,8 @@ public class TransparentNodeBlock extends NodeBlock {
         throw new IllegalStateException("Failed to create tile entity.");
     }
 
+    //TODO: again, lol.
     public String getNodeUuid() {
-
         return "t";
     }
 

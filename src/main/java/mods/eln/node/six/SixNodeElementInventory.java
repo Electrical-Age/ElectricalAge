@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 public class SixNodeElementInventory implements IInventory, INBTTReady {
     SixNodeElementRender sixnodeRender = null;
     SixNodeElement sixNodeElement = null;
-
     int stackLimit;
+    private ItemStack[] inv;
 
     public SixNodeElementInventory(int size, int stackLimit, SixNodeElementRender sixnodeRender) {
         inv = new ItemStack[size];
@@ -28,9 +28,6 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
         this.sixNodeElement = sixNodeElement;
     }
 
-
-    private ItemStack[] inv;
-
     private ItemStack[] getInv() {
         return inv;
     }
@@ -40,15 +37,12 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
         return getInv().length;
     }
 
-
     @NotNull
     @Override
     public ItemStack getStackInSlot(int slot) {
-
         if (slot >= getInv().length) return null;
         return getInv()[slot];
     }
-
 
     @NotNull
     @Override
@@ -66,23 +60,18 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
         return stack;
     }
 
-
     @Override
     public void setInventorySlotContents(int slot, @NotNull ItemStack stack) {
         getInv()[slot] = stack;
         int stackLimit = getInventoryStackLimit();
-        if (stack.getCount() > stackLimit) {
-            stack.setCount(stackLimit);
-        }
+        if (stack.getCount() > stackLimit) stack.setCount(stackLimit);
     }
-
 
     @NotNull
     @Override
     public String getName() {
         return "tco.SixNodeInventory";
     }
-
 
     @Override
     public int getInventoryStackLimit() {
@@ -95,15 +84,10 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     }
 
     @Override
-    public void openInventory(@NotNull EntityPlayer player) {
-
-    }
+    public void openInventory(@NotNull EntityPlayer player) {}
 
     @Override
-    public void closeInventory(@NotNull EntityPlayer player) {
-
-    }
-
+    public void closeInventory(@NotNull EntityPlayer player) {}
 
     @Override
     public void markDirty() {
@@ -114,16 +98,13 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
     @Override
     public void readFromNBT(NBTTagCompound nbt, String str) {
-
         Utils.readFromNBT(nbt, str, this);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
-
         return Utils.writeToNBT(nbt, str, this);
     }
-
 
     @Override
     public boolean isItemValidForSlot(int i, @NotNull ItemStack itemstack) {
@@ -136,9 +117,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     }
 
     @Override
-    public void setField(int id, int value) {
-
-    }
+    public void setField(int id, int value) {}
 
     @Override
     public int getFieldCount() {
@@ -146,13 +125,10 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     }
 
     @Override
-    public void clear() {
-
-    }
+    public void clear() {}
 
     @Override
     public boolean hasCustomName() {
-
         return false;
     }
 

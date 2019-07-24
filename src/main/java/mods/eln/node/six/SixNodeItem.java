@@ -23,7 +23,6 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> {
-
     public SixNodeItem(Block b) {
         super(b);
         setHasSubtypes(true);
@@ -43,24 +42,13 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if ((block == Blocks.SNOW_LAYER) && ((Utils.getMetaFromPos(world, pos) & 0x7) < 1)) {
             side = 1;
         } else if ((block != Blocks.VINE) && (block != Blocks.TALLGRASS) && (block != Blocks.DEADBUSH) && (!block.isReplaceable(world, pos))) {
-            if (side == 0)
-                pos = pos.add(0,-1,0);
-            if (side == 1)
-                pos = pos.add(0,1,0);
-            if (side == 2)
-
-                pos = pos.add(0,0,-1);
-            if (side == 3)
-
-                pos = pos.add(0,0,1);
-            if (side == 4)
-
-                pos = pos.add(-1,0,0);
-            if (side == 5)
-
-                pos = pos.add(1,0,0);
+            if (side == 0) pos = pos.add(0,-1,0);
+            if (side == 1) pos = pos.add(0,1,0);
+            if (side == 2) pos = pos.add(0,0,-1);
+            if (side == 3) pos = pos.add(0,0,1);
+            if (side == 4) pos = pos.add(-1,0,0);
+            if (side == 5) pos = pos.add(1,0,0);
         }
-
         if (stack.isEmpty())
             return EnumActionResult.FAIL;
         if (!player.canPlayerEdit(pos, EnumFacing.getFacingFromVector(hitX,hitY,hitZ), stack))
@@ -72,21 +60,17 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 /*
         int i1 = getMetadata(stack.getItemDamage());
         int metadata = this.block.getMetaFromState(this.block.onBlockPlaced(world, pos, facing, hitX, hitY, hitZ, i1, player));
-
         if (placeBlockAt(stack, player, world, pos, EnumFacing.getFacingFromVector(hitX, hitY, hitZ), hitX, hitY, hitZ, block.getStateFromMeta(metadata))) {
             world.playSound(player, new BlockPos(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F), this.block.getSoundType().getStepSound(), SoundCategory.BLOCKS, this.block.getSoundType().volume + 1.0F / 2.0F, this.block.getSoundType().getPitch() * 0.8F);
-
             stack.stackSize -= 1;
         }
 */
-
         return EnumActionResult.SUCCESS;
     }
 
     /**
      * Returns true if the given ItemBlock can be placed on the given side of the given block position.
      */
-
     // func_150936_a <= canPlaceItemBlockOnSide
     @Override
     public boolean canPlaceBlockOnSide(World par1World, BlockPos pos, EnumFacing side, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack) {
@@ -95,15 +79,11 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         int[] vect = new int[]{pos.getX(), pos.getY(), pos.getZ()};
         Direction.fromFacing(side).applyTo(vect, 1);
         SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
-        if (!descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(pos, par1World), Direction.fromFacing(side).getInverse()) == false) {
+        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(pos, par1World), Direction.fromFacing(side).getInverse()))
             return false;
-        }
         if (par1World.getBlockState(new BlockPos(vect[0], vect[1], vect[2])).getBlock() == ModBlock.sixNodeBlock)
             return true;
-        if (super.canPlaceBlockOnSide(par1World, pos, side, par6EntityPlayer, par7ItemStack))
-            return true;
-
-        return false;
+        return super.canPlaceBlockOnSide(par1World, pos, side, par6EntityPlayer, par7ItemStack);
     }
 
     public boolean isStackValidToPlace(ItemStack stack) {
@@ -112,54 +92,43 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     }
 
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world,BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState state) {
-        if (world.isRemote)
-            return false;
-        if (!isStackValidToPlace(stack))
-            return false;
-
+        if (world.isRemote)  return false;
+        if (!isStackValidToPlace(stack)) return false;
         Direction direction = Direction.fromFacing(side).getInverse();
         Block blockOld = world.getBlockState(pos).getBlock();
         SixNodeBlock block = (SixNodeBlock) Block.getBlockFromItem(this);
         if (world.isAirBlock(pos) || blockOld.isReplaceable(world, pos)) {
             // blockID = this.getBlockID();
-
             Coordinate coord = new Coordinate(pos, world);
             SixNodeDescriptor descriptor = getDescriptor(stack);
-
             String error;
             if ((error = descriptor.checkCanPlace(coord, direction, LRDU.Up)) != null) {
                 Utils.sendMessage(player, error);
                 return false;
             }
-
             if (block.getIfOtherBlockIsSolid(world, pos, direction)) {
                 GhostGroup ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up);
                 if (ghostgroup != null)
                     ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
-
                 SixNode sixNode = new SixNode();
                 sixNode.onBlockPlacedBy(new Coordinate(pos, world), direction, player, stack);
                 sixNode.createSubBlock(stack, direction, player);
-
                 world.setBlockState(pos, block.getStateFromMeta( block.getMetaFromState(state) & 0x03));
                 block.getIfOtherBlockIsSolid(world, pos, direction);
                 block.onBlockPlacedBy(world, pos, Direction.fromFacing(side).getInverse(), player, state);
                 return true;
-
             }
         } else if (blockOld == block) {
-
             SixNode sixNode = (SixNode) ((SixNodeEntity) world.getTileEntity(pos)).getNode();
             if (sixNode == null) {
                 world.setBlockToAir(pos);
                 return false;
             }
-            if (sixNode.getSideEnable(direction) == false && block.getIfOtherBlockIsSolid(world, pos, direction)) {
+            if (!sixNode.getSideEnable(direction) && block.getIfOtherBlockIsSolid(world, pos, direction)) {
                 sixNode.createSubBlock(stack, direction, player);
                 block.onBlockPlacedBy(world, pos, Direction.fromFacing(side).getInverse(), player, state);
                 return true;
             }
-
         } else {
             SixNode sixNode = (SixNode) ((SixNodeEntity) world.getTileEntity(pos)).getNode();
             if (sixNode == null) {

@@ -10,7 +10,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class NodeEntityClientSender {
-
     private TileEntity e;
     private String nodeUuid;
 
@@ -26,18 +25,12 @@ public class NodeEntityClientSender {
             stream.writeInt(pos.getX());
             stream.writeInt(pos.getY());
             stream.writeInt(pos.getZ());
-
             stream.writeByte(e.getWorld().provider.getDimension());
-
             stream.writeUTF(nodeUuid);
-
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
-
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
         UtilsClient.sendPacketToServer(bos);
@@ -47,50 +40,36 @@ public class NodeEntityClientSender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeByte(value ? 1 : 0);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSendId(Byte id) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 
     public void clientSendString(Byte id, String str) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeUTF(str);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
 
@@ -100,15 +79,11 @@ public class NodeEntityClientSender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeFloat(str);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
 
@@ -118,17 +93,12 @@ public class NodeEntityClientSender {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);
-
             preparePacketForServer(stream);
-
             stream.writeByte(id);
             stream.writeInt(str);
-
             sendPacketToServer(bos);
         } catch (IOException e) {
-
             e.printStackTrace();
         }
-
     }
 }

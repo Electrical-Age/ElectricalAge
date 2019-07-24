@@ -26,17 +26,14 @@ public class SimpleNodeItem extends ItemBlock {
             node.setDescriptorKey(block.descriptorKey);
             node.onBlockPlacedBy(new Coordinate(pos, world), block.getFrontForPlacement(player), player, stack);
         }
-
         if (!world.setBlockState(pos, newState, 3)) {
             if (node != null) node.onBreakBlock();
             return false;
         }
-
         IBlockState state = world.getBlockState(pos);
         if (state.getBlock() == this.block) {
             this.block.onBlockPlacedBy(world, pos, state, player, stack);
         }
-
         return true;
     }
 }

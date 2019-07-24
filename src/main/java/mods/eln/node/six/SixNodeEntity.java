@@ -19,10 +19,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class SixNodeEntity extends NodeBlockEntity {
-
     public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
     short[] elementRenderIdList = new short[6];
-
     public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
 
@@ -36,12 +34,9 @@ public class SixNodeEntity extends NodeBlockEntity {
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
         super.serverPublishUnserialize(stream);
-
         try {
-
             sixNodeCacheBlock = Block.getBlockById(stream.readInt());
             sixNodeCacheBlockMeta = stream.readByte();
-
             int idx;
             for (idx = 0; idx < 6; idx++) {
                 short id = stream.readShort();
@@ -57,11 +52,9 @@ public class SixNodeEntity extends NodeBlockEntity {
                     elementRenderList[idx].publishUnserialize(stream);
                 }
             }
-
         } catch (IOException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
-
         //	world.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
         // TODO(1.10): This is hopefully unneeded.
 //        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
@@ -75,9 +68,7 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     @Override
     public void serverPacketUnserialize(DataInputStream stream) {
-
         super.serverPacketUnserialize(stream);
-
         try {
             int side = stream.readByte();
             int id = stream.readShort();
@@ -85,7 +76,6 @@ public class SixNodeEntity extends NodeBlockEntity {
                 elementRenderList[side].serverPacketUnserialize(stream);
             }
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -106,42 +96,34 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
         side = side.applyLRDU(lrdu);
-        if (elementRenderList[side.getInt()] == null)
-            return null;
-
+        if (elementRenderList[side.getInt()] == null) return null;
         return elementRenderList[side.getInt()].getCableRender(lrdu);
     }
 
     public int getCableDry(Direction side, LRDU lrdu) {
         side = side.applyLRDU(lrdu);
-        if (elementRenderList[side.getInt()] == null)
-            return 0;
-
+        if (elementRenderList[side.getInt()] == null) return 0;
         return elementRenderList[side.getInt()].getCableDry(lrdu);
     }
 
     @Override
     public boolean cameraDrawOptimisation() {
-        for (SixNodeElementRender e : elementRenderList) {
-            if (e != null && !e.cameraDrawOptimisation())
-                return false;
-        }
+        for (SixNodeElementRender e : elementRenderList)
+            if (e != null && !e.cameraDrawOptimisation()) return false;
         return true;
     }
 
     @Override
     public void destructor() {
-        for (SixNodeElementRender render : elementRenderList) {
-            if (render != null)
-                render.destructor();
-        }
+        for (SixNodeElementRender render : elementRenderList)
+            if (render != null) render.destructor();
         super.destructor();
     }
 
     /*public float getBlockHardness(World world, int x, int y, int z) {
-
         return 0;
     }*/
+
     public int getDamageValue(World world, int x, int y, int z) {
         if (world.isRemote) {
             for (int idx = 0; idx < 6; idx++) {
@@ -155,26 +137,20 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     public boolean hasVolume(World world, int x, int y, int z) {
         if (world.isRemote) {
-            for (SixNodeElementRender e : elementRenderList) {
-                if (e != null && e.sixNodeDescriptor.hasVolume())
-                    return true;
-            }
+            for (SixNodeElementRender e : elementRenderList)
+                if (e != null && e.sixNodeDescriptor.hasVolume()) return true;
             return false;
         } else {
             SixNode node = ((SixNode) getNode());
-            if (node == null)
-                return false;
+            if (node == null) return false;
             return node.hasVolume();
         }
     }
 
     @Override
     public void tileEntityNeighborSpawn() {
-
-        for (SixNodeElementRender e : elementRenderList) {
-            if (e != null)
-                e.notifyNeighborSpawn();
-        }
+        for (SixNodeElementRender e : elementRenderList)
+            if (e != null) e.notifyNeighborSpawn();
     }
 
     @Override
@@ -186,12 +162,8 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     @Override
     public void clientRefresh(float deltaT) {
-        for (SixNodeElementRender e : elementRenderList) {
-            if (e != null) {
-                e.refresh(deltaT);
-            }
-        }
-
+        for (SixNodeElementRender e : elementRenderList)
+            if (e != null)  e.refresh(deltaT);
     }
 
     @Override
@@ -209,4 +181,3 @@ public class SixNodeEntity extends NodeBlockEntity {
         }
     }
 }
-// && 
