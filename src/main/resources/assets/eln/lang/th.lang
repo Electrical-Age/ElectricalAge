@@ -1,265 +1,265 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-Electrical_Age_[WIP]=Elektrische leeftijd [WIP]
+Electrical_Age_[WIP]=ยุคอิเล็กทรอนิกส์ [WIP]
 achievement.craft_50v_macerator=Crushing Novice
 achievement.craft_50v_macerator.desc=Craft a 50V Macerator
 achievement.open_guide=Wiki Power
 achievement.open_guide.desc=Open the wiki guide
 
 # ./src/main/java/mods/eln/Eln.java
-10A_Diode.name=10A Diode
-200V_Active_Thermal_Dissipator.name=200V Actieve koeler
-200V_Battery_Charger.name=200V Batterij oplader
-200V_Compressor.name=200V Compressor
-200V_Condensator.name=200V Condensator
-200V_Copper_Heating_Corp.name=200V Koper verwarmingselement
-200V_Economic_Light_Bulb.name=200V Spaarlamp
+10A_Diode.name=ไดโอด 10A
+200V_Active_Thermal_Dissipator.name=ฮีทซิงค์ 200V
+200V_Battery_Charger.name=แท่นชาร์จ 200V
+200V_Compressor.name=คอมเพรสเซอร์ 200V
+200V_Condensator.name=ตัวเก็บประจุ 200v
+200V_Copper_Heating_Corp.name=คอยร้อนทองแดง 200v
+200V_Economic_Light_Bulb.name=หลอดประหยัดพลังงาน 200V
 200V_Emergency_Lamp.name=200V Emergency Lamp
-200V_Farming_Lamp.name=200V Landbouw lamp
+200V_Farming_Lamp.name=หลอดปลูกต้นไม้ 200V
 200V_Fuel_Generator.name=200V Fuel Generator
-200V_Incandescent_Light_Bulb.name=200V Gloeilamp
-200V_Iron_Heating_Corp.name=200V Ijzer verwarmingselement
+200V_Incandescent_Light_Bulb.name=หลอดไส้ 200V
+200V_Iron_Heating_Corp.name=คอยร้อนเหล็ก 200v
 200V_LED_Bulb.name=200V LED Bulb
-200V_Macerator.name=200V Verpulveraar
-200V_Magnetizer.name=200V Magnetiseerder
-200V_Plate_Machine.name=200V Plaatwals
-200V_Power_Socket.name=200V Stopcontact
-200V_Tungsten_Heating_Corp.name=200V Wolfraam verwarmingselement
-200V_Turbine.name=200V Turbine
-25A_Diode.name=25A Diode
+200V_Macerator.name=เครื่องบด 200V
+200V_Magnetizer.name=ตัวถอนและอัดแม่เหล็ก 200V
+200V_Plate_Machine.name=เครื่องรีด 200V
+200V_Power_Socket.name=ปลั๊กไฟ 200V
+200V_Tungsten_Heating_Corp.name=คอยร้อนทังสเตน 200v
+200V_Turbine.name=กังหัน 200V
+25A_Diode.name=ไดโอด 25A
 2x3_Rotating_Solar_Panel.name=2x3 Rotating Solar Panel
 2x3_Solar_Panel.name=2x3 Solar Panel
-50V_Battery_Charger.name=50V Batterij oplader
-50V_Carbon_Incandescent_Light_Bulb.name=50V Koolstof gloeilamp
-50V_Compressor.name=50V Compressor
-50V_Condensator.name=50V Condensator
-50V_Copper_Heating_Corp.name=50V Koper verwarmingselement
-50V_Economic_Light_Bulb.name=50V Spaarlamp
-50V_Egg_Incubator.name=50V broedmachine
+50V_Battery_Charger.name=แท่นชาร์จ 50V
+50V_Carbon_Incandescent_Light_Bulb.name=หลอดไส้คาร์บอน 50V
+50V_Compressor.name=คอมเพรสเซอร์ 50V
+50V_Condensator.name=ตัวเก็บประจุ 50v
+50V_Copper_Heating_Corp.name=คอยร้อนทองแดง 50v
+50V_Economic_Light_Bulb.name=หลอดประหยัดพลังงาน 50V
+50V_Egg_Incubator.name=ตู้ฟักไข่ 50V
 50V_Emergency_Lamp.name=50V Emergency Lamp
-50V_Farming_Lamp.name=50V Landbouw lamp
+50V_Farming_Lamp.name=หลอดปลูกต้นไม้ 50V
 50V_Fuel_Generator.name=50V Fuel Generator
-50V_Incandescent_Light_Bulb.name=50V Gloeilamp
-50V_Iron_Heating_Corp.name=50V Ijzer verwarmingselement
+50V_Incandescent_Light_Bulb.name=หลอดไส้ 50V
+50V_Iron_Heating_Corp.name=คอยร้อนเหล็ก 50v
 50V_LED_Bulb.name=50V LED Bulb
-50V_Macerator.name=50V Verpulveraar
-50V_Magnetizer.name=50V Magnetiseerder
-50V_Plate_Machine.name=50V Plaatwals
-50V_Power_Socket.name=50V Stopcontact
-50V_Tungsten_Heating_Corp.name=50V Wolfraam verwarmingselement
-50V_Turbine.name=50V Turbine
-800V_Defence_Turret.name=800V Verdedigingstorentje
+50V_Macerator.name=ปั้มดูดส่งนํ้าดีนํ้าเสีย 50V
+50V_Magnetizer.name=ตัวถอนและอัดแม่เหล็ก 50V
+50V_Plate_Machine.name=เครื่องอัดไฮดรอลิก 50V
+50V_Power_Socket.name=ปลั๊กไฟ 50V
+50V_Tungsten_Heating_Corp.name=คอยร้อนทังสเตน 50v
+50V_Turbine.name=กังหัน 50V
+800V_Defence_Turret.name=ป้อมปืมป้องกัน 800V
 AND_Chip.name=AND Chip
-Advanced_Chip.name=Geavanceerde Chip
-Advanced_Electrical_Motor.name=Geavanceerde Elektrische Motor
-Advanced_Energy_Meter.name=Geavanceerde energiemeter
-Advanced_Machine_Block.name=Geavanceerde machineblok
-Advanced_Magnet.name=Geavanceerde magneet
-AllMeter.name=Universele Meter
-Alloy_Dust.name=Legering stof
-Alloy_Ingot.name=Legering staaf
-Alloy_Plate.name=Legering plaat
-Amplifier.name=Amplifier
-Analog_Watch.name=Analoog Horloge
-Analog_vuMeter.name=Analoge meter
-Analogic_Regulator.name=Analoge regelaar
-Animal_Filter.name=Dier filter
-Auto_Miner.name=Automatische graver
-Average_Electrical_Drill.name=Normale elektrische boormachine
-Average_Ferromagnetic_Core.name=Normale ferromagnetische kern
-Basic_Magnet.name=Basis magneet
+Advanced_Chip.name=ชิปขั้นสูง
+Advanced_Electrical_Motor.name=มอเตอร์ไฟฟ้าขั้นสูง
+Advanced_Energy_Meter.name=มิเตอร์วัดพลังงานขั้นสูง
+Advanced_Machine_Block.name=บล็อกเครื่องจักรขั้นสูง
+Advanced_Magnet.name=แม่เหล็กขั้นสูง
+AllMeter.name=Universal มิเตอร์
+Alloy_Dust.name=ผงอัลลอย
+Alloy_Ingot.name=แท่งอัลลอย
+Alloy_Plate.name=แผ่นอัลลอย
+Amplifier.name=ภาคขยาย
+Analog_Watch.name=นาฬิกาเข็ม
+Analog_vuMeter.name=มาตรวัดอนาล็อก
+Analogic_Regulator.name=Analogic Regulator
+Animal_Filter.name=ฟิลเตอร์สัตว์
+Auto_Miner.name=เครื่องขุดเหมืองอัตโนมัติ
+Average_Electrical_Drill.name=หัวขุดเจาะไฟฟ้า
+Average_Ferromagnetic_Core.name=แกนเฟอร์ไรต์เฉลี่ย
+Basic_Magnet.name=แม่เหล็ก
 Big_Fuel_Burner.name=Big Fuel Burner
-Black_Brush.name=Zwarte Borstel
+Black_Brush.name=แปรงสีดำ
 Blown_Lead_Fuse.name=Blown Lead Fuse
-Blue_Brush.name=Blauwe Borstel
-Brown_Brush.name=Bruine Borstel
-Capacity_Oriented_Battery.name=Capaciteit Georiënteerde Batterij
+Blue_Brush.name=แปรงสีฟ้า
+Brown_Brush.name=แปรงสีนํ้าตาล
+Capacity_Oriented_Battery.name=แบตเตอรี่เน้นเก็บประจุ
 Casing.name=Casing
-Cheap_Chip.name=Goedkope Chip
-Cheap_Electrical_Drill.name=Goedkoop Elektrisch Boormachine
-Cheap_Ferromagnetic_Core.name=Goedkope ferromagnetische kern
-Cinnabar_Dust.name=Cinnabar Dust
-Cinnabar_Ore.name=Cinnabar Ore
-Coal_Dust.name=Kool Stof
-Coal_Plate.name=Kool plaat
-Combustion_Chamber.name=Verbrandingskamer
+Cheap_Chip.name=ชิพราคาถูก
+Cheap_Electrical_Drill.name=หัวขุดเจาะไฟฟ้าราคาถูก
+Cheap_Ferromagnetic_Core.name=แกนเหนี่ยวนำราคาถูก
+Cinnabar_Dust.name=ผงซินนาบาร์
+Cinnabar_Ore.name=แร่ซินนาบาร์
+Coal_Dust.name=ผงถ่าน
+Coal_Plate.name=แผ่นถ่าน
+Combustion_Chamber.name=ห้องเผาไหม้
 Configurable_summing_unit.name=Configurable summing unit
-Copper_Cable.name=Koperen Kabel
-Copper_Dust.name=Koper stof
-Copper_Ingot.name=Koperstaaf
-Copper_Ore.name=Kopererts
-Copper_Plate.name=Koper plaat
-Copper_Thermal_Cable.name=Koper thermische kabel
-Cost_Oriented_Battery.name=Kostenefficiënte batterij 
-Current_Oriented_Battery.name=Stroomefficiënte batterij
-Cyan_Brush.name=Cyaan borstel
+Copper_Cable.name=สายทองแดง
+Copper_Dust.name=ผงทองแดง
+Copper_Ingot.name=แท่งทองแดง
+Copper_Ore.name=แร่ทองแดง
+Copper_Plate.name=แผ่นทองแดง
+Copper_Thermal_Cable.name=ท่อทองแดงนำความร้อน
+Cost_Oriented_Battery.name=แบตเตอรี่เน้นราคา
+Current_Oriented_Battery.name=แบตเตอรี่เน้นกระแส
+Cyan_Brush.name=แปรงสีคราม
 DC-DC_Converter.name=DC-DC Converter
 D_Flip_Flop_Chip.name=D Flip Flop Chip
-Data_Logger.name=Data Logger
-Data_Logger_Print.name=Data Logger Print
-Dielectric.name=Diëlectricum
-Digital_Watch.name=Digitaal horloge
-Electrical_Anemometer_Sensor.name=Electrische anemometer sensor
-Electrical_Breaker.name=Elektrische onderbreker
-Electrical_Daylight_Sensor.name=Elektrische daglicht sensor
-Electrical_Entity_Sensor.name=Elektrische entiteit sensor
-Electrical_Fire_Buzzer.name=Electrical Fire Buzzer
-Electrical_Fire_Detector.name=Elektrische brand detector
-Electrical_Furnace.name=Elektrische oven
-Electrical_Fuse_Holder.name=Electrical Fuse Holder
-Electrical_Light_Sensor.name=Elektrische licht sensor
-Electrical_Motor.name=Elektrische motor
-Electrical_Probe.name=Elektrische sonde
-Electrical_Probe_Chip.name=Elektrische sonde chip
-Electrical_Source.name=Elektrische bron
-Electrical_Timer.name=Elektrische timer
-Electrical_Weather_Sensor.name=Elektrische weer sensor
+Data_Logger.name=เครื่องบันทึกข้อมูล
+Data_Logger_Print.name=แผ่นปริ้นบันทึกข้อมูล
+Dielectric.name=ไดอิเล็กตริก
+Digital_Watch.name=นาฬิกาดิจิตอล
+Electrical_Anemometer_Sensor.name=ตัววัดความเร็วลม
+Electrical_Breaker.name=เบรกเกอร์อิเล็กทรอนิกส์
+Electrical_Daylight_Sensor.name=เซ็นเซอร์แสงกลางวัน
+Electrical_Entity_Sensor.name=ตัวตรวจจับเอกลักษณ์
+Electrical_Fire_Buzzer.name=ออดไฟไหม้
+Electrical_Fire_Detector.name=ตัวตรวจจับไฟ
+Electrical_Furnace.name=เตาหลอมไฟฟ้า
+Electrical_Fuse_Holder.name=กล่องฟิวส์ไฟฟ้า
+Electrical_Light_Sensor.name=เซ็นเซอร์แสง
+Electrical_Motor.name=มอเตอร์ไฟฟ้า
+Electrical_Probe.name=เครื่องมือวัดทางไฟฟ้า
+Electrical_Probe_Chip.name=ชิปเครื่องมือวัดทางไฟฟ้า
+Electrical_Source.name=แหล่งกำเนิดไฟฟ้า
+Electrical_Timer.name=ทามเมอร์
+Electrical_Weather_Sensor.name=ตัววัดสภาพอากาศ
 Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
-Energy_Meter.name=Energie meter
-Experimental_Transporter.name=Experimental Transporter
-Fast_Electrical_Drill.name=Snelle elektrische boormachine
-Ferrite_Ingot.name=Ferriet staaf
-Flat_Lamp_Socket.name=Platte lamphouder
-Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
-Flywheel.name=Flywheel
+Energy_Meter.name=มิเตอร์วัดพลังงาน
+Experimental_Transporter.name=เครื่องทดลองขนส่ง
+Fast_Electrical_Drill.name=หัวขุดเจาะไฟฟ้าความเร็วสูง
+Ferrite_Ingot.name=แท่งเฟอร์ไรท์
+Flat_Lamp_Socket.name=โคมหลอดเกลียว
+Fluorescent_Lamp_Socket.name=โคมหลอดฟลูออเรสเซนต์
+Flywheel.name=ล้อตุนกำลัง
 Fuel_Heat_Furnace.name=Fuel Heat Furnace
-Gas_Turbine.name=Gas Turbine
+Gas_Turbine.name=แก๊สเทอร์ไบน์
 Generator.name=Generator
-Gold_Dust.name=Goud stof
-Gold_Plate.name=Goud plaat
-Gray_Brush.name=Grijze borstel
-Green_Brush.name=Groene borstel
-Ground_Cable.name=Aardingskabel
-High_Power_Receiver_Antenna.name=Hoog-vermogen ontvangst-antenne
-High_Power_Transmitter_Antenna.name=Hoog-vermogen verzend-antenne
-High_Voltage_Cable.name=Hoogspanning kabel
-High_Voltage_Relay.name=Hoogspanning relais
-High_Voltage_Switch.name=Hoogspanning schakelaar
-Hub.name=Bus
-Industrial_Data_Logger.name=Industrial Data Logger
-Iron_Cable.name=Ijzer kabel
-Iron_Dust.name=Ijzer stof
-Iron_Plate.name=Ijzer plaat
+Gold_Dust.name=ทองแท่ง
+Gold_Plate.name=แผ่นทอง
+Gray_Brush.name=แปรงสีเทา
+Green_Brush.name=แปรงสีเขียว
+Ground_Cable.name=สายดิน
+High_Power_Receiver_Antenna.name=เสาภาครับกำลังสูง
+High_Power_Transmitter_Antenna.name=เสาภาคส่งกำลังสูง
+High_Voltage_Cable.name=สายแรงสูง
+High_Voltage_Relay.name=รีเลย์แรงสูง
+High_Voltage_Switch.name=สวิตซ์แรงสูง
+Hub.name=ฮับ
+Industrial_Data_Logger.name=เครื่องบันทึกข้อมูลอุตสาหกรรม
+Iron_Cable.name=สายโลหะ
+Iron_Dust.name=ผงโลหะ
+Iron_Plate.name=แผ่นโลหะ
 JK_Flip_Flop_Chip.name=JK Flip Flop Chip
-Joint.name=Joint
+Joint.name=ร่วมกัน
 Joint_hub.name=Joint hub
-LED_vuMeter.name=LED voltmeter
-Lamp_Socket_A.name=Lamphouder A
-Lamp_Socket_B_Projector.name=Lamphouder B projector
-Lamp_Supply.name=Lamp toevoer
+LED_vuMeter.name=LEDโวลต์มิเตอร์
+Lamp_Socket_A.name=ซ็อกเก็ตหลอดไฟ A
+Lamp_Socket_B_Projector.name=ซ็อกเก็ตหลอดไฟ B โปรเจคเตอร์
+Lamp_Supply.name=แหล่งจ่ายไฟ
 Large_Rheostat.name=Large Rheostat
-Lead_Dust.name=Lood stof
-Lead_Fuse_for_high_voltage_cables.name=Lead Fuse for high voltage cables
-Lead_Fuse_for_low_voltage_cables.name=Lead Fuse for low voltage cables
-Lead_Fuse_for_medium_voltage_cables.name=Lead Fuse for medium voltage cables
-Lead_Fuse_for_very_high_voltage_cables.name=Lead Fuse for very high voltage cables
-Lead_Ingot.name=Lood staaf
-Lead_Ore.name=Lood erts
-Lead_Plate.name=Lood plaat
-Life_Oriented_Battery.name=Leeftijd-efficiënte batterij
-Light_Blue_Brush.name=Licht blauwe borstel
-Lime_Brush.name=Limoen borstel
-Long_Suspended_Lamp_Socket.name=Lange hangende lamphouder
-Low_Power_Receiver_Antenna.name=Laag-vermogen ontvangst-antenne
-Low_Power_Transmitter_Antenna.name=Laag-vermogen verzend-antenne
-Low_Voltage_Cable.name=Laagspanning kabel
-Low_Voltage_Relay.name=Laagspanning relais
-Low_Voltage_Switch.name=Laagspanning schakelaar
+Lead_Dust.name=ผงตะกั่ว
+Lead_Fuse_for_high_voltage_cables.name=ฟิวส์ตะกั่วสำหรับสายแรงสูง
+Lead_Fuse_for_low_voltage_cables.name=ฟิวส์ตะกั่วสำหรับสายแรงตํ่า
+Lead_Fuse_for_medium_voltage_cables.name=ฟิวส์ตะกั่วสำหรับสายแรงปานกลาง
+Lead_Fuse_for_very_high_voltage_cables.name=ฟิวส์ตะกั่วสำหรับสายแรงสูงมาก
+Lead_Ingot.name=แท่งตะกั่ว
+Lead_Ore.name=แร่ตะกั่ว
+Lead_Plate.name=แผ่นตะกั่ว
+Life_Oriented_Battery.name=แบตเตอรี่เน้นอายุ
+Light_Blue_Brush.name=แปรงสีฟ้าอ่อน
+Lime_Brush.name=แปรงสีเขียวมะนาว
+Long_Suspended_Lamp_Socket.name=โคมไฟติดลอยยาว
+Low_Power_Receiver_Antenna.name=เสาภาครับกำลังตํ่า
+Low_Power_Transmitter_Antenna.name=เสาภาคส่งกำลังตํ่า
+Low_Voltage_Cable.name=สายแรงตํ่า
+Low_Voltage_Relay.name=รีเลย์แรงตํ่า
+Low_Voltage_Switch.name=สวิตซ์แรงตํ่า
 Lowpass_filter.name=Lowpass filter
-Machine_Block.name=Machine blok
-Machine_Booster.name=Machine booster
-Magenta_Brush.name=Magenta borstel
+Machine_Block.name=กล่องเครื่องจักร
+Machine_Booster.name=ตัวเร่งการทำงาน
+Magenta_Brush.name=แปรงสีม่วงแดงเข้ม
 Medium_Fuel_Burner.name=Medium Fuel Burner
-Medium_Power_Receiver_Antenna.name=Midden-vermogen ontvangst-antenne
-Medium_Power_Transmitter_Antenna.name=Midden-vermogen verzend-antenne
-Medium_Voltage_Cable.name=Middenspanning kabel
-Medium_Voltage_Relay.name=Middenspanning relais
-Medium_Voltage_Switch.name=Middenspanning schakelaar
-Mercury.name=Kwik
-Mining_Pipe.name=Mijn buis
-Modbus_RTU.name=Modbus RTU
-Modern_Data_Logger.name=Modern Data Logger
-Monster_Filter.name=Monster filter
-MultiMeter.name=Multimeter
+Medium_Power_Receiver_Antenna.name=เสาภาครับกำลัง
+Medium_Power_Transmitter_Antenna.name=เสาภาคส่งกำลัง
+Medium_Voltage_Cable.name=สายปานกลาง
+Medium_Voltage_Relay.name=รีเลย์ปานกลาง
+Medium_Voltage_Switch.name=สวิตซ์ปานกลาง
+Mercury.name=ปรอท
+Mining_Pipe.name=ท่อขุด
+Modbus_RTU.name=โปรโตคอล MODBUS
+Modern_Data_Logger.name=เครื่องบันทึกข้อมูลที่ทันสมัย
+Monster_Filter.name=ฟิลเตอร์มอนเตอร์
+MultiMeter.name=มัลติมิเตอร์
 NAND_Chip.name=NAND Chip
 NOR_Chip.name=NOR Chip
 NOT_Chip.name=NOT Chip
-Nuclear_Alarm.name=Nucleair alarm
+Nuclear_Alarm.name=สัญญาณเตือนภัยนิวเคลียร์
 OR_Chip.name=OR Chip
 On_OFF_Regulator_10_Percent.name=On/off regulator 10%
 On_OFF_Regulator_1_Percent.name=On/off regulator 1%
 OpAmp.name=OpAmp
-Optimal_Ferromagnetic_Core.name=Optimale ferromagnetische kern
-Orange_Brush.name=Orange borstel
-Ore_Scanner.name=Grondstof scanner
+Optimal_Ferromagnetic_Core.name=แกนเฟอร์ไรด์ดีที่สุด
+Orange_Brush.name=แปรงสีส้ม
+Ore_Scanner.name=ตัวแสกนแร่
 Oscillator_Chip.name=Oscillator Chip
-Overheating_Protection.name=Oververhitting beveiliging
-Overvoltage_Protection.name=Overvoltage beveiliging
+Overheating_Protection.name=อุปกรณ์ป้องกันความร้อนเกิน
+Overvoltage_Protection.name=อุปกรณ์ป้องกันแรงดันเกิน
 PAL_Chip.name=PAL Chip
 PID_Regulator.name=PID Regulator
-Pink_Brush.name=Roze borstel
-Player_Filter.name=Speler filter
-Portable_Battery.name=Draagbare batterij
-Portable_Battery_Pack.name=Draagbaar batterijpakket
-Portable_Condensator.name=Draagbare condensator
-Portable_Condensator_Pack.name=Draagbaar condensatorpakket
-Portable_Electrical_Axe.name=Draagbare elektrische bijl
-Portable_Electrical_Mining_Drill.name=Draagbare elektrische boormachine
-Power_Capacitor.name=Vermogencondensator
-Power_Inductor.name=Vermogenspoel
-Power_Resistor.name=Vermogenweerstand
+Pink_Brush.name=แปรงสีชมพู
+Player_Filter.name=ฟิลเตอร์ผู้เล่น
+Portable_Battery.name=แบตเตอรี่พกพา
+Portable_Battery_Pack.name=แพ็คแบตเตอรี่พกพา
+Portable_Condensator.name=ตัวเก็บประจุพกพา
+Portable_Condensator_Pack.name=แพ็คตัวเก็บประจุพกพา
+Portable_Electrical_Axe.name=ขวานไฟฟ้าแบบพกพา
+Portable_Electrical_Mining_Drill.name=เครื่องขุดเจาะไฟฟ้าพกพา
+Power_Capacitor.name=ตัวเก็บประจุ
+Power_Inductor.name=ตัวเหนี่ยวนำ
+Power_Resistor.name=ตัวต้านทาน
 Power_capacitor.name=Power capacitor
 Power_inductor.name=Power inductor
-Purple_Brush.name=Paarse borstel
-Red_Brush.name=Rode borstel
-Redstone-to-Voltage_Converter.name=Redstone-naar-spanning omzetter
-Rheostat.name=Potentiometer
-Robust_Lamp_Socket.name=Robuuste lamphouder
-Rubber.name=Rubber
+Purple_Brush.name=แปรงสีม่วง
+Red_Brush.name=แปรงสีแดง
+Redstone-to-Voltage_Converter.name=ตัวแปลง Redstone ไป Voltage
+Rheostat.name=เครื่องบังคับกำลังกระแสไฟฟ้า
+Robust_Lamp_Socket.name=โคมติดกำแพง
+Rubber.name=ยาง
 Sample_and_hold.name=Sample and hold
 Scanner.name=Scanner
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
-Sconce_Lamp_Socket.name=Sconce Lamp Socket
-Signal_20H_inductor.name=Signal 20H inductor
-Signal_Antenna.name=Signaal antenne
-Signal_Button.name=Signaal drukknop
-Signal_Cable.name=Signaal kabel
-Signal_Diode.name=Signaal diode
-Signal_Processor.name=Signaal processor
-Signal_Relay.name=Signaal relais
-Signal_Source.name=Signaal bron
-Signal_Switch.name=Signaal schakelaar
-Signal_Switch_with_LED.name=Signaal schakelaar met LED
-Signal_Trimmer.name=Signal Trimmer
-Silicon_Dust.name=Silicium stof
-Silicon_Ingot.name=Silicium staaf
-Silicon_Plate.name=Siliconen plaat
-Silver_Brush.name=Zilveren borstel
-Simple_Lamp_Socket.name=Simpele lamphouder
-Single-use_Battery.name=Niet oplaadbare batterij
-Small_200V_Copper_Heating_Corp.name=Kleine 200V koper verwarmingselement
-Small_200V_Iron_Heating_Corp.name=Kleine 200V ijzer verwarmingselement
-Small_200V_Tungsten_Heating_Corp.name=Kleine 200V wolfraam verwarmingselement
-Small_50V_Carbon_Incandescent_Light_Bulb.name=Kleine 50V koolstof gloeilamp
+Sconce_Lamp_Socket.name=โคมเทียนติดกำแพง
+Signal_20H_inductor.name=ตัวเหนี่ยวนำสัญญาณ 20H
+Signal_Antenna.name=เสาอากาศ
+Signal_Button.name=ปุ่มสัญญาณ
+Signal_Cable.name=สายนำสัญญาณ
+Signal_Diode.name=ตัวไดโอดสัญญาณ
+Signal_Processor.name=ตัวประมวลผลสัญญาณ
+Signal_Relay.name=ตัวรีเลย์สัญญาณ
+Signal_Source.name=แหล่งกำเนิดสัญญาณ
+Signal_Switch.name=สวิตซ์สัญญาณ
+Signal_Switch_with_LED.name=สวิตซ์สัญญาณพร้อม LED
+Signal_Trimmer.name=ตัวปรับสัญญาณ
+Silicon_Dust.name=ผงซิลิกอน
+Silicon_Ingot.name=แท่งซิลิกอน
+Silicon_Plate.name=แผ่นซิลิกอน
+Silver_Brush.name=แปรงสีเงิน
+Simple_Lamp_Socket.name=โคมไฟ
+Single-use_Battery.name=แบตเตอรี่ใช้แล้วทิ้ง
+Small_200V_Copper_Heating_Corp.name=คอยร้อนทองแดงขนาดเล็ก200v
+Small_200V_Iron_Heating_Corp.name=คอยร้อนเหล็กขนาดเล็ก200v
+Small_200V_Tungsten_Heating_Corp.name=Small 200V Tungsten Heating Corp
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Small 50V Carbon Incandescent Light Bulb
 Small_50V_Copper_Heating_Corp.name=Small 50V Copper Heating Corp
-Small_50V_Economic_Light_Bulb.name=Kleine 50V Spaarlamp
+Small_50V_Economic_Light_Bulb.name=Small 50V Economic Light Bulb
 Small_50V_Incandescent_Light_Bulb.name=Small 50V Incandescent Light Bulb
 Small_50V_Iron_Heating_Corp.name=Small 50V Iron Heating Corp
 Small_50V_Tungsten_Heating_Corp.name=Small 50V Tungsten Heating Corp
-Small_Active_Thermal_Dissipator.name=Small Active Thermal Dissipator
-Small_Flashlight.name=Small Flashlight
+Small_Active_Thermal_Dissipator.name=ฮีทซิงค์ติดพักลมขนาดเล็ก
+Small_Flashlight.name=ไฟฉายขนาดเล็ก
 Small_Fuel_Burner.name=Small Fuel Burner
-Small_Passive_Thermal_Dissipator.name=Small Passive Thermal Dissipator
-Small_Rotating_Solar_Panel.name=Small Rotating Solar Panel
-Small_Solar_Panel.name=Small Solar Panel
-Solar_Tracker.name=Solar Tracker
-Standard_Alarm.name=Standard Alarm
+Small_Passive_Thermal_Dissipator.name=ฮีทซิงค์ขนาดเล็ก
+Small_Rotating_Solar_Panel.name=แผงโซล่าเซลล์หมุนได้
+Small_Solar_Panel.name=แผงโซล่าเซลล์
+Solar_Tracker.name=อุปกรณ์ติดตามดวงอาทิตย์
+Standard_Alarm.name=สัญญาณเตือนภัย
 Steam_Turbine.name=Steam Turbine
-Stone_Heat_Furnace.name=Stone Heat Furnace
-Street_Light.name=Streetlight
-Suspended_Lamp_Socket.name=Suspended Lamp Socket
-Tachometer.name=Tachometer
+Stone_Heat_Furnace.name=เตาหลอมหิน
+Street_Light.name=ไฟถนน
+Suspended_Lamp_Socket.name=โคมไฟติดลอย
+Tachometer.name=มิเตอร์วัดวามเร็ว
 Temperature_Probe.name=Temperature Probe
 Thermal_Probe.name=Thermal Probe
 Thermal_Probe_Chip.name=Thermal Probe Chip
@@ -267,35 +267,35 @@ Thermistor.name=Thermistor
 Thermometer.name=Thermometer
 Tree_Resin.name=Tree Resin
 Tree_Resin_Collector.name=Tree Resin Collector
-Tungsten_Cable.name=Tungsten Cable
-Tungsten_Dust.name=Tungsten Dust
-Tungsten_Ingot.name=Tungsten Ingot
-Tungsten_Ore.name=Tungsten Ore
-Tutorial_Sign.name=Tutorial Sign
-Very_High_Voltage_Cable.name=Very High Voltage Cable
-Very_High_Voltage_Relay.name=Very High Voltage Relay
-Very_High_Voltage_Switch.name=Very High Voltage Switch
-Voltage-to-Redstone_Converter.name=Voltage-to-Redstone Converter
-Voltage_Oriented_Battery.name=Voltage Oriented Battery
+Tungsten_Cable.name=สายทังสเตน
+Tungsten_Dust.name=ผงทังสเตน
+Tungsten_Ingot.name=แท่งทังสเตน
+Tungsten_Ore.name=แร่ทังสเตน
+Tutorial_Sign.name=ป้ายสอน
+Very_High_Voltage_Cable.name=สายแรงสูงมาก
+Very_High_Voltage_Relay.name=รีเลย์แรงสูงมาก
+Very_High_Voltage_Switch.name=สวิตซ์แรงสูงมาก
+Voltage-to-Redstone_Converter.name=ตัวแปลง Voltage ไป Redstone
+Voltage_Oriented_Battery.name=แบตเตอรี่เน้นแรงดัน
 Voltage_Probe.name=Voltage Probe
 Voltage_controlled_amplifier.name=Voltage controlled amplifier
 Voltage_controlled_sawtooth_oscillator.name=Voltage controlled sawtooth oscillator
 Voltage_controlled_sine_oscillator.name=Voltage controlled sine oscillator
-Water_Turbine.name=Water Turbine
+Water_Turbine.name=กังหันนํ้า
 Weak_50V_Battery_Charger.name=Weak 50V Battery Charger
-White_Brush.name=White Brush
-Wind_Turbine.name=Wind Turbine
-Wireless_Analyser.name=Wireless Analyzer
-Wireless_Button.name=Wireless Button
-Wireless_Signal_Receiver.name=Wireless Signal Receiver
-Wireless_Signal_Repeater.name=Wireless Signal Repeater
-Wireless_Signal_Transmitter.name=Wireless Signal Transmitter
-Wireless_Switch.name=Wireless Switch
-Wrench.name=Wrench
-X-Ray_Scanner.name=X-Ray Scanner
+White_Brush.name=แปรงสีขาว
+Wind_Turbine.name=กังหันลม
+Wireless_Analyser.name=ตัววิเคราะห์ไร้สาย
+Wireless_Button.name=ปุ่มไร้สาย
+Wireless_Signal_Receiver.name=ภาครับสัญญาณไร้สาย
+Wireless_Signal_Repeater.name=ระบบทวนสัญญาณไร้สาย
+Wireless_Signal_Transmitter.name=ภาคส่งสัญญาณไร้สาย
+Wireless_Switch.name=สวิตซ์ไร้สาย
+Wrench.name=ประแจ
+X-Ray_Scanner.name=เครื่องสแกน X-Ray
 XNOR_Chip.name=XNOR Chip
 XOR_Chip.name=XOR Chip
-Yellow_Brush.name=Yellow Brush
+Yellow_Brush.name=แปรงสีเหลือง
 entity.EAReplicator.name=Replicator
 item.Copper Axe.name=Copper Axe
 item.Copper Axe.name=Copper Axe
@@ -311,31 +311,31 @@ item.E-Coal Boots.name=E-Coal Boots
 item.E-Coal Boots.name=E-Coal Boots
 item.E-Coal Boots.name=E-Coal Boots
 itemGroup.Eln=Electrical Age
-mod.meta.desc=Electricity in your base!
+mod.meta.desc=ไฟฟ้าในฐานของคุณ!
 tile.eln.ElnProbe.name=Eln Computer Probe
 tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age to other energy exporter
 tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age to other energy exporter
 tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other energy exporter
 
 # ./src/main/java/mods/eln/i18n/I18N.java
-You_have_%1$_lives_left=You have %1$ lives left
+You_have_%1$_lives_left=คุณเหลืออีก %1$ ชีวิต
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.kt
-Brush_is_dry=Kwast is droog
-Can_paint_%1$_blocks=Can paint %1$ blocks
+Brush_is_dry=Brush is dry
+Can_paint_%1$_blocks=สามารถทาสี %1$ บล็อค
 
 # ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
 Can_be_used_to_encase_EA_items_that_support_it=Can be used to encase EA items that support it
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
-Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
+Upgrade_for_the_Stone_Heat_Furnace.=อัพเกรดสำหรับเตาหลอมหิน
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Energie per handeling: %1$s
+Energy_per_operation\:_%1$J=Energy per operation: %1$J
 Time_per_operation\:_%1$h=Time per operation: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Cable loss factor: %1$
+Cable_loss_factor\:_%1$=อัตราสูญเสียสายเคเบิล: %1$
 
 # ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
 Burn_unit_for_the_gas_heat_furnace.=Burn unit for the gas heat furnace.
@@ -344,14 +344,14 @@ Produced_heat_power\:_=Produced heat power:
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
 # ./src/main/java/mods/eln/item/LampDescriptor.java
-Bad=Bad
-Condition\:=Condition:
-End_of_life=End of life
-Good=Good
-New=New
-Nominal_lifetime\:_%1$h=Nominal lifetime: %1$h
-Technology\:_%1$=Technology: %1$
-Used=Used
+Bad=แย่
+Condition\:=เงื่อนไข:
+End_of_life=สิ้นอายุการใช้งาน
+Good=ดี
+New=ใหม่
+Nominal_lifetime\:_%1$h=อายุการใช้งาน: %1$h
+Technology\:_%1$=เทคโนโลยี: %1$
+Used=ใช้แล้ว
 
 # ./src/main/java/mods/eln/item/LampSlot.java
 Lamp_slot=Lamp slot
@@ -363,13 +363,13 @@ Useful_to_prevent_overheating\nof_Batteries=Useful to prevent overheating\nof Ba
 Useful_to_prevent_over-voltage\nof_Batteries=Useful to prevent over-voltage\nof Batteries
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
-Solar_panel_upgrade=Solar panel upgrade
+Solar_panel_upgrade=แผงโซล่าเซลล์อัพเกรด
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
-State\:=State:
-Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+State\:=สถานะ:
+Stored_Energy\:_%1$J_(%2$%)=พลังงานจัดเก็บ: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -378,10 +378,10 @@ Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
 Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
-Hold_shift=Hold shift
+Hold_shift=กด shift ค้าง
 
 # ./src/main/java/mods/eln/misc/Version.java
-mod.name=Electrical Age
+mod.name=ยุคอิเล็กทรอนิกส์
 
 # ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
 
@@ -436,13 +436,13 @@ Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntim
 This_block_can_only_be_placed_on_the_side_of_a_tree!=This block can only be placed on the side of a tree!
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
-Battery_slot=Battery slot
+Battery_slot=ช่องแบตเตอรี่
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
-Charge_Current=Charge Current
+Charge_Current=จ่ายกระแส
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
@@ -450,18 +450,18 @@ Charge_Current=Charge Current
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeElement.java
-Forward_Voltage=Forward Voltage
+Forward_Voltage=แรงดันไป
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
 Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
-Engaged=Engaged
-Input_Voltage=Input Voltage
+Engaged=ติดพัน
+Input_Voltage=แรงดันขาเข้า
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
-Sound_is_muted=Sound is muted
-Sound_is_not_muted=Sound is not muted
+Sound_is_muted=ปิดเสียง
+Sound_is_not_muted=เปิดเสียง
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
@@ -469,33 +469,33 @@ Sound_is_not_muted=Sound is not muted
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java
-Contact=Contact
+Contact=หน้าสัมผัส
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
 Maximum_voltage_before_cutting_off=Maximum voltage before cutting off
 Minimum_voltage_before_cutting_off=Minimum voltage before cutting off
-Switch_is_off=Switch is off
-Switch_is_on=Switch is on
+Switch_is_off=สวิตซ์ปิด
+Switch_is_on=สวิตซ์เปิด
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
 A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
 Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
-Current\:_%1$A=Current: %1$A
+Current\:_%1$A=กระแส: %1$A
 Not_adapted_to_transport_power.=Not adapted to transport power.
 Save_usage\:=Save usage:
 Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
-Signal_Voltage=Signal Voltage
+Signal_Voltage=สัญญาณแรงดัน
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
-It_can_store_up_to_256_points.=It can store up to 256 points.
+It_can_store_up_to_256_points.=สามารถเก็บได้ถึง 256 จุด
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
-Back_to_display=Back to display
+Back_to_display=กลับสู่การแสดงผล
 Configuration=Configuration
 Current_[A]=Current [A]
 Energy_[J]=Energy [J]
@@ -505,8 +505,8 @@ Print=Print
 Sampling_period=Sampling period
 Temp._[*C]=Temp. [*C]
 Voltage_[V]=Voltage [V]
-Y-axis_max=Y-as maximum
-Y-axis_min=Y-as minimum
+Y-axis_max=Y-axis max
+Y-axis_min=Y-axis min
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
@@ -523,7 +523,7 @@ Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Battery powered buzzer \
 Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
-Fire_detected\:_=Vuur gedetecteerd:
+Fire_detected\:_=ตรวจพบไฟ:
 Fire_present=Fire present
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
@@ -533,24 +533,24 @@ Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
 Output_at_%1$%=Output at %1$%
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
-0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
+0V_at_night,_%1$V_at_noon.=0V ตอนกลางคืน, %1$V ตอนกลางวัน
 Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
-Light_level=Light level
+Light_level=ระดับแสง
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-Applicable_boolean_operators\:=Applicable boolean operators:
-Applicable_functions\:=Applicable functions:
-Applicable_mathematical_operators\:=Applicable mathematical operators:
+Applicable_boolean_operators\:=ดำเนินการทางตรรกะที่เหมาะสม:
+Applicable_functions\:=ฟังก์ชั่นเหมาะสม:
+Applicable_mathematical_operators\:=ดำเนินการทางคณิตศาสตร์ที่เหมาะสม:
 Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
-Equation=Equation
-Input_voltages=Input voltages
+Equation=สมการ
+Input_voltages=แรงดันขาเข้า
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
 %1$_Redstone(s)_required=%1$ Redstone(s) required
@@ -574,7 +574,7 @@ Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage
 A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
-Default_position=Default position
+Default_position=ตำแหน่งเริ่มต้น
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
 Normally_closed=Normally closed
@@ -586,16 +586,16 @@ Measures_electrical_values_on_cables.=Measures electrical values on cables.
 Measures_voltage_on_cables.=Measures voltage on cables.
 
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
-Measured_current=Measured current
-Measured_power=Measured power
-Measured_voltage=Measured voltage
+Measured_current=วัดกระแสแล้ว
+Measured_power=วัดกำลังแล้ว
+Measured_voltage=วัดแรงดันแล้ว
 
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
 Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
 Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
-Creative_block.=Creative block.
+Creative_block.=บล็อกความคิดสร้างสรรค์
 Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
@@ -605,8 +605,8 @@ Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electric
 Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutElement.java
-Output=Output
-Remaining=Remaining
+Output=เอาท์พุต
+Remaining=ที่เหลืออยู่
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
 Set=Set
@@ -627,10 +627,10 @@ Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical s
 You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
-Counter=Counter
-Energy_left=Energy left
-Mode=Mode
-Prepay=Prepay
+Counter=เคาน์เตอร์
+Energy_left=พลังงานเหลือ
+Mode=โหมด
+Prepay=การชำระล่วงหน้า
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
 Change_password=Change password
@@ -661,54 +661,54 @@ Angle\:_%1$°_to_%2$°=Angle: %1$° to %2$°
 Spot_range\:_%1$_blocks=Spot range: %1$ blocks
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketElement.java
-Bulb=Bulb
+Bulb=หลอดไฟ
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-Cable_slot_empty=Cable slot empty
+Cable_slot_empty=ช่องเสียบสายเคเบิลว่างเปล่า
 Orientation\:_%1$°=Orientation: %1$°
 Parallel=Parallel
 Serial=Serial
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
+Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=ช่องใส่สายไฟ\nความไกลคือ 32 บล็อค\n
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
-Total_power=Total power
+Total_power=กำลังทั้งหมด
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
-Power_channel_name=Stroom kanaal naam
-Wireless_channel_name=Draadloze kanaal naam
+Power_channel_name=Power channel name
+Wireless_channel_name=Wireless channel name
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
 Modbus_TCP=Modbus TCP
 Modbus_Unit_ID=Modbus Unit ID
-Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus is disabled, enable it in Eln.cfg
+Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus ถูกปิด, เปิดใช้งานใน Eln.cfg
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
-Add=Toevoegen
-Channel_name=Kanaal naam
+Add=Add
+Channel_name=Channel name
 Modbus_ID=Modbus ID
 Modbus_RTU=Modbus RTU
 Station_ID=Station ID
-Station_name=Station naam
-Wireless_RX=Draadloze RX
-Wireless_TX=Draadloze TX
+Station_name=Station name
+Wireless_RX=Wireless RX
+Wireless_TX=Wireless TX
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
-(Increases_maximum_voltage)=(Verhoogt maximale voltage)
+(Increases_maximum_voltage)=(Increases maximum voltage)
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
-Capacity=Capacity
+Capacity=ความจุ
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
-Inductance=Inductance
+Inductance=การเหนี่ยวนำ
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
@@ -716,10 +716,10 @@ Inductance=Inductance
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
-Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
+Specify_the_device_to_supply_through_this_socket.=อุปกรณ์ที่จัดหาจะกำหนดผ่านซ็อกเก็ตนี้
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
-(Sets_resistance)=(Zet weerstand)
+(Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
@@ -731,19 +731,19 @@ Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
 Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
-Thermic_power=Thermic power
+Thermic_power=กำลังความร้อน
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
-Cable_slot=Cable slot
+Cable_slot=ช่องใส่สาย
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Can measure:
-Measures_temperature_of_cables.=Meet de temperatuur van kabels.
+Measures_temperature_of_cables.=วัดอุณหภูมิของสายเคเบิล
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
 __Temperature_Power_conducted=Temperature/Power conducted
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
-Measured_temperature=Measured temperature
+Measured_temperature=วัดอุณหภูมิแล้ว
 Measured_thermal_power=Measured thermal power
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
@@ -759,11 +759,11 @@ Set_beacon_name=Set beacon name
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Fuel_level=Fuel level
+Fuel_level=ระดับเชื้อเพลิง
 Nominal_power\:_%1$_W=Nominal power: %1$ W
 Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
 Produces_electricity_using_gasoline.=Produces electricity using gasoline.
-State=State
+State=สถานะ
 
 # ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
 Actual\:_%1$=Actual: %1$
@@ -778,7 +778,7 @@ __Max._temperature\:_=  Max. temperature:
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
 Nom._Resistance\:_%1$=Nom. Resistance: %1$
-Power_loss=Power loss
+Power_loss=สูญเสียกำลัง
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Drill slot
@@ -789,7 +789,7 @@ Ore_scanner_slot=Ore scanner slot
 Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerElement.java
-Depth=Depth
+Depth=ความลึก
 Silk_touch=Silk touch
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
@@ -798,8 +798,8 @@ Halves_speed,_triples_power_draw=Halves speed, triples power draw
 Silk_Touch=Silk Touch
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
-Overheating_protection=Oververhittingsbeveiliging
-Overvoltage_protection=Overspanningsbeveiliging
+Overheating_protection=Overheating protection
+Overvoltage_protection=Overvoltage protection
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
 Actual_charge\:_=Actual charge:
@@ -811,36 +811,36 @@ Nominal_voltage\:_=Nominal voltage:
 _charged_at_=charged at
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charged=Geladen
-Discharge=Ontladen
-Energy\:=Energie:
-Energy\:_%1$=Energie: %1$
+Charged=Charged
+Discharge=Discharge
+Energy\:=Energy:
+Energy\:_%1$=Energy: %1$
 Life\:=Life:
-No_charge=Geen lading
-Power_in\:=Stroom in:
-Power_out\:=Stroom uit:
+No_charge=No charge
+Power_in\:=Power in:
+Power_out\:=Power out:
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
 Egg_slot=Egg slot
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
-Has_egg=Has egg
+Has_egg=มีไข่
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
-Wireless_energy_receiver.=Wireless energy receiver.
+Wireless_energy_receiver.=ภาครับพลังงานไร้สาย
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
-Effective_power=Effective power
-Power_received=Power received
-Receiving=Receiving
+Effective_power=กำลังที่มีประสิทธิภาพ
+Power_received=กำลังภาครับ
+Receiving=กำลังรับ
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=Efficiency: %1$% up to %2$%
-Wireless_energy_transmitter.=Wireless energy transmitter.
+Efficiency\:_%1$%_up_to_%2$%=ประสิทธิภาพ: %1$% ถึง %2$%
+Wireless_energy_transmitter.=ภาคส่งพลังงานไร้าย
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
-Efficiency=Efficiency
-Transmitting=Transmitting
+Efficiency=อย่างมีประสิทธิภาพ
+Transmitting=กำลังส่ง
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
 Heating_corp_slot=Heating corp slot
@@ -849,26 +849,26 @@ Heating_corp_slot=Heating corp slot
 Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceElement.java
-Heating_element=Heating element
+Heating_element=องค์ประกอบความร้อน
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
-Auto_shutdown=Automatische uitschakeling
-Manual_shutdown=Handmatige uitschakeling
-Set_point\:_%1$°C=Zet punt: %1$°C
+Auto_shutdown=Auto shutdown
+Manual_shutdown=Manual shutdown
+Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
-Cost=Kosten
+Cost=Cost
 Nominal_voltage\:_%1V$=Nominal voltage: %1V$
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
-Power_provided=Power provided
+Power_provided=พลังงานที่เตรียมไว้
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=Combustion chamber slot
 Fuel_slot=Fuel slot
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
-Set_temperature=Set temperature
+Set_temperature=ตั้งอุณหภูมิ
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
 Control_gauge_at_%1$%=Control gauge at %1$%
@@ -882,38 +882,38 @@ Take_fuel=Take fuel
 Solar_tracker_slot=Solar tracker slot
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
-Can_be_geared_towards_the_sun.=Can be geared towards the sun.
+Can_be_geared_towards_the_sun.=สามารถหันไปทางดวงอาทิตย์
 Max._power\:_%1$W=Max. power: %1$W
 Max._voltage\:_%1$V=Max. voltage: %1$V
-Produces_power_from_solar_radiation.=Produces power from solar radiation.
+Produces_power_from_solar_radiation.=ผลิตไฟฟ้าจากพลังงานแสงอาทิตย์
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
-Panel_angle=Panel angle
-Producing_energy=Producing energy
-Sun_angle=Sun angle
+Panel_angle=มุมแผง
+Producing_energy=ผลิตภัณฑ์พลังงาน
+Sun_angle=มุมดวงอาทิตย์
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
-It_is_night=Het is nacht
-Solar_panel_angle\:_%1$°=Hoek van het zonnepaneel: %1$°
-Sun_angle\:_%1$°=Hoek van de zon: %1$°
+It_is_night=It is night
+Solar_panel_angle\:_%1$°=Solar panel angle: %1$°
+Sun_angle\:_%1$°=Sun angle: %1$°
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
-Destination=Destination
-Distance=Distance
-Required_energy=Required energy
+Destination=ปลายทาง
+Distance=ระยะ
+Required_energy=จำเป็นต้องใช้พลังงาน
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Destination transporter
-Power_consumption\:=Stroom gebruik:
-Power_consumption\:_%1$W=Stroom gebruik: %1$W
-Required_energy\:_%1$J=Benodigde energie: %1$J
-Start=Begin
+Power_consumption\:=Power consumption:
+Power_consumption\:_%1$W=Power consumption: %1$W
+Required_energy\:_%1$J=Required energy: %1$J
+Start=Start
 Transporter_name=Transporter name
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
-Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
-Fan_voltage\:_%1$V=Fan voltage: %1$V
+Fan_cooling_power\:_%1$W=กำลังพัดลมระบายความร้อน: %1$W
+Fan_power_consumption\:_%1$W=การกินพลังงานพัดลมระบายความร้อน: %1$W
+Fan_voltage\:_%1$V=แรงดันพัดลม: %1$V
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
 
@@ -925,165 +925,165 @@ The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage 
 Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerElement.java
-Core_factor=Core factor
-Isolated=Isolated
-Ratio=Ratio
+Core_factor=ปัจจัยหลัก
+Isolated=แยก
+Ratio=อัตราส่วน
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
-Generates_electricity_using_heat.=Generates electricity using heat.
-Temperature_difference\:_%1$°C=Temperature difference: %1$°C
+Generates_electricity_using_heat.=ผลิตไฟฟ้าโดยใช้ความร้อน
+Temperature_difference\:_%1$°C=ความแตกต่างอุณหภูมิ: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
-Nominal=Nominal
+Nominal=น้อย
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
-CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
-Laser_charge_power\:_%1$W...%2$kW=Laser charge power: %1$W...%2$kW
+CAUTION\:_Cables_can_get_quite_hot!=คำเตือน: สายเคเบิลค่อนข้างร้อน
+Laser_charge_power\:_%1$W...%2$kW=ค่าการจ่ายพลังงานเลเซอร์: %1$W...%2$kW
 Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
-Standby_power\:_%1$W=Standby power: %1$W
+Standby_power\:_%1$W=พลังงานขณะสแตนด์บาย: %1$W
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
 ??=??
-Charge_level=Charge level
-Shoot_=Shoot
-Shoot_everything=Shoot everything
-Shoot_nothing=Shoot nothing
-Target=Target
-animals=animals
-monsters=monsters
-players=players
+Charge_level=ระดับการจ่าย
+Shoot_=ยิง
+Shoot_everything=ยิงทุกอย่าง
+Shoot_nothing=ห้ามยิง
+Target=เป้าหมาย
+animals=สัตว์
+monsters=มอนเตอร์
+players=ผู้เล่น
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=Aanvallen:
-Do_not_attack\:=Niet aanvallen:
+Attack\:=Attack:
+Do_not_attack\:=Do not attack:
 Recharge_power\:=Recharge power:
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
-Generates_energy_using_water_stream.=Generates energy using water stream.
+Generates_energy_using_water_stream.=ผลิตพลังงานโดยใช้ไอนํ้า
 No_place_for_water_turbine!=No place for water turbine!
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=Front: %1$
-Generates_energy_from_wind.=Generates energy from wind.
+Front\:_%1$=หน้า: %1$
+Generates_energy_from_wind.=ผลิตพลังงาน
 Left_Right\:_%1$=Left/Right: %1$
 Up_Down\:_%1$=Up/Down: %1$
-Wind_area\:=Wind area:
+Wind_area\:=พื้นที่ลม:
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Light=Licht
+Light=Light
 Machine=Machine
-Ore=Erts
-Portable=Draagbaar
-Resource=Middel
-Signal=Signaal
+Ore=Ore
+Portable=Portable
+Resource=Resource
+Signal=Signal
 Thermal=Thermal
 Upgrade=Upgrade
 Utilities=Utilities
-Wiring=Bedrading
+Wiring=Wiring
 
 # ./src/main/java/mods/eln/wiki/Default.java
-Previous=Vorige
+Previous=Previous
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
 Can_be_used_to_craft\:=Can be used to craft:
 Cannot_be_crafted!=Cannot be crafted!
-Cost_%1$J=Kost %1$J
-Created_by\:=Gemaakt door:
+Cost_%1$J=Cost %1$J
+Created_by\:=Created by:
 Is_not_a_crafting_material!=Is not a crafting material!
-Recipe\:=Recept:
+Recipe\:=Recipe:
 
 # Appearing in multiple source files
 %1$_is_not_in_range!=%1$ is not in range!
-(Increases_capacity)=(Vergroot capaciteit)
-(Increases_inductance)=(Verhoogt inductie)
+(Increases_capacity)=(Increases capacity)
+(Increases_inductance)=(Increases inductance)
 Actual\:_%1$°C=Actual: %1$°C
-Battery_level=Battery level
-Biggest=Grootste
+Battery_level=ระดับแบตเตอรี่
+Biggest=Biggest
 Booster_slot=Booster slot
 Can_create\:=Can create:
-Capacity\:_%1$F=Capaciteit: %1$F
-Channel=Channel
-Charge=Laden
-Charge_power=Charge power
-Charge_power\:_%1$W=Charge power: %1$W
-Closed=Closed
-Connected=Verbonden
-Cooling_power\:_%1$W=Cooling power: %1$W
-Copper_cable_slot=Copper cable slot
+Capacity\:_%1$F=Capacity: %1$F
+Channel=ชาแนล
+Charge=Charge
+Charge_power=จ่ายพลังงาน
+Charge_power\:_%1$W=จ่ายพลังงาน: %1$W
+Closed=ปิด
+Connected=Connected
+Cooling_power\:_%1$W=พลังงานทำความเย็น: %1$W
+Copper_cable_slot=ช่องใส่สายทองแดง
 Current=Current
 Dielectric_slot=Dielectric slot
-Discharge_power\:_%1$W=Discharge power: %1$W
-Electrical_cable_slot=Electrical cable slot
-Energy=Energie
+Discharge_power\:_%1$W=คายพลังงาน: %1$W
+Electrical_cable_slot=ช่องเสียบเคเบิลไฟฟ้า
+Energy=Energy
 Entity_filter_slot=Entity filter slot
 External_control=External control
 Ferromagnetic_core_slot=Ferromagnetic core slot
-Generated_power=Generated power
-Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
-Generating=Generating
+Generated_power=ผลิตพลังงาน
+Generates_heat_when_supplied_with_fuel.=สร้างความร้อนเมื่อทำงานด้วยน้ำมันเชื้อเพลิง
+Generating=กำลังผลิต
 Has_a_signal_output.=Has a signal output.
-Inductance\:_%1$H=Inductie: %1$H
-Input=Input
-Input_voltage=Input voltage
-Internal_control=Interne controle
+Inductance\:_%1$H=Inductance: %1$H
+Input=อินพุต
+Input_voltage=แรงดันขาเข้า
+Internal_control=Internal control
 Internal_resistance\:_%1$\u2126=Internal resistance: %1$\u2126
-Is_off=Is off
-Is_on=Is on
-Life=Life
-Max._temperature\:_%1$°C=Max. temperature: %1$°C
+Is_off=ปิด
+Is_on=เปิด
+Life=ชีวิต
+Max._temperature\:_%1$°C=อุณหภูมิสูงสุด: %1$°C
 Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
 Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
-No=No
-Nominal\:=Nominal:
-Nominal_power\:_%1$W=Nominal power: %1$W
-Nominal_usage\:=Nominal usage:
-Nominal_voltage\:_%1$V=Nominal voltage: %1$V
-None=None
-Not_connected=Niet verbonden
+No=ไม่
+Nominal\:=ปกติ:
+Nominal_power\:_%1$W=พลังานที่กำหนด: %1$W
+Nominal_usage\:=การใช้งานปกติ:
+Nominal_voltage\:_%1$V=แรงดันปกติ: %1$V
+None=ไม่มี
+Not_connected=Not connected
 Not_enough_space_for_this_block=Not enough space for this block
-OFF=OFF
-ON=ON
-Off=Off
-On=On
-Open=Open
+OFF=ปิด
+ON=เปิด
+Off=ปิด
+On=เปิด
+Open=เปิด
 Output_voltage=Output voltage
-Portable_battery_slot=Portable battery slot
-Position=Position
+Portable_battery_slot=ช่องแบตเตอรี่พกพา
+Position=ตำแหน่ง
 Power=Power
-Power\:_%1$W=Power: %1$W
-Power_consumption=Power consumption
+Power\:_%1$W=พลังงาน: %1$W
+Power_consumption=การใช้พลังงาน
 Powered_by_Lamp_Supply=Powered by Lamp Supply
 Powered_by_cable=Powered by cable
-Produced_power=Produced power
-Range\:_%1$_blocks=Range: %1$ blocks
+Produced_power=ผลผลิตพลังงาน
+Range\:_%1$_blocks=ระยะ: %1$ บล็อค
 Redstone_slot=Redstone slot
-Redstone_value=Redstone value
+Redstone_value=ค่า Redstone
 Regulator_slot=Regulator slot
 Reset=Reset
-Resistance=Resistance
+Resistance=ความต้านทาน
 Resistance\:_%1$\u2126=Resistance: %1$\u2126
-Smallest=Kleinste
-Specify_the_channel=Specificeer het kanaal
+Smallest=Smallest
+Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel
-Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
-Temperature=Temperatuur
-Temperature\:_%1$°C=Temperature: %1$°C
-Temperature_gauge=Temperatuurmeter
+Stored_energy\:_%1$J_(%2$%)=เก็บพลังงาน: %1$J (%2$%)
+Temperature=Temperature
+Temperature\:_%1$°C=อุณหภูมิ: %1$°C
+Temperature_gauge=Temperature gauge
 Thermal_isolator_slot=Thermal isolator slot
-Thermal_power=Thermal power
-Toggle=Schakel
-Toggle_switch=Schakel schakelaar
+Thermal_power=พลังงานความร้อน
+Toggle=Toggle
+Toggle_switch=Toggle switch
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
-Used_to_cool_down_turbines.=Used to cool down turbines.
+Used_to_cool_down_turbines.=ใช้ทำให้กังหันเย็นลง
 Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
 Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
 Validate=Validate
 Voltage=Voltage
-Voltage\:_%1$V=Voltage: %1$V
-Voltage_drop=Voltage drop
-Voltages=Voltages
-Yes=Yes
+Voltage\:_%1$V=แรงดัน: %1$V
+Voltage_drop=แรงดันตก
+Voltages=แรงดัน
+Yes=ใช่
 You_can't_place_this_block_at_this_side=You can't place this block at this side
 _O\:_= O:

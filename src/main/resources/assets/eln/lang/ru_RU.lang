@@ -1,344 +1,384 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-Electrical_Age_[WIP]=Electrical Age [В РАЗРАБОТКЕ]
-achievement.craft_50v_macerator=Начинающий дроблильшик
-achievement.craft_50v_macerator.desc=Создайте Дробитель на 50В
-achievement.open_guide=Могущество Wiki
-achievement.open_guide.desc=Открыть внутреигровую Вики
+Electrical_Age_[WIP]=Electrical Age [WIP]
+achievement.craft_50v_macerator=Новичок-дробитель
+achievement.craft_50v_macerator.desc=Скрафтить дробилку на 50В
+achievement.open_guide=Вики Сила
+achievement.open_guide.desc=Открыть гайд на вики
 
 # ./src/main/java/mods/eln/Eln.java
-10A_Diode.name=Диод на 10А
+10A_Diode.name=Диод на 10A
 200V_Active_Thermal_Dissipator.name=Активный радиатор на 200В
 200V_Battery_Charger.name=Зарядник на 200В
-200V_Compressor.name=Компрессор на 200В
+200V_Compressor.name=Пресс на 200В
 200V_Condensator.name=Конденсатор на 200В
 200V_Copper_Heating_Corp.name=Медный нагревательный элемент на 200В
 200V_Economic_Light_Bulb.name=Энергосберегающая лампочка на 200В
-200V_Farming_Lamp.name=Фермерская лампа на 200В
+200V_Emergency_Lamp.name=200В Лампа аварийного освещения
+200V_Farming_Lamp.name=Уличная лампа на 200В
 200V_Fuel_Generator.name=Топливный генератор на 200В
-200V_Incandescent_Light_Bulb.name=Лампа накаливания на 200В
+200V_Incandescent_Light_Bulb.name=Лампочка на 200В
 200V_Iron_Heating_Corp.name=Железный нагревательный элемент на 200В
-200V_LED_Bulb.name=Светодиод на 200В
-200V_Macerator.name=Дробитель на 200В
+200V_LED_Bulb.name=Светодиодная лампа на 200В
+200V_Macerator.name=Дробилка на 200В
 200V_Magnetizer.name=Намагничиватель на 200В
-200V_Plate_Machine.name=Прокатный стан на 200В
+200V_Plate_Machine.name=Прокатный станок на 200В
 200V_Power_Socket.name=Розетка на 200В
 200V_Tungsten_Heating_Corp.name=Вольфрамовый нагревательный элемент на 200В
-200V_Turbine.name=Тепловая турбина на 200В
+200V_Turbine.name=Турбина на 200В
 25A_Diode.name=Диод на 25А
+2x3_Rotating_Solar_Panel.name=Подвижная солнечная панель 2х3
+2x3_Solar_Panel.name=Солнечная панель 2х3 блока
 50V_Battery_Charger.name=Зарядник на 50В
-50V_Carbon_Incandescent_Light_Bulb.name=Карбоновая лампа накаливания на 50В
-50V_Compressor.name=Компрессор на 50В
+50V_Carbon_Incandescent_Light_Bulb.name=Угольная лампа накаливания на 50В
+50V_Compressor.name=Пресс на 50В
 50V_Condensator.name=Конденсатор на 50В
 50V_Copper_Heating_Corp.name=Медный нагревательный элемент на 50В
 50V_Economic_Light_Bulb.name=Энергосберегающая лампочка на 50В
-50V_Egg_Incubator.name=Инкубатор яиц на 50В
-50V_Farming_Lamp.name=Фермерская лампа на 50В
+50V_Egg_Incubator.name=Инкубатор на 50В
+50V_Emergency_Lamp.name=50В Лампа аварийного освещения
+50V_Farming_Lamp.name=Уличная лампа на 50В
 50V_Fuel_Generator.name=Топливный генератор на 50В
-50V_Incandescent_Light_Bulb.name=Лампа накаливания на 50В
+50V_Incandescent_Light_Bulb.name=Лампочка на 50В
 50V_Iron_Heating_Corp.name=Железный нагревательный элемент на 50В
-50V_LED_Bulb.name=Светодиод на 50В
-50V_Macerator.name=Дробитель на 50В
+50V_LED_Bulb.name=Светодиодная лампа на 50В
+50V_Macerator.name=Дробилка на 50В
 50V_Magnetizer.name=Намагничиватель на 50В
-50V_Plate_Machine.name=Прокатный стан на 50В
+50V_Plate_Machine.name=Прокатный станок на 50В
 50V_Power_Socket.name=Розетка на 50В
 50V_Tungsten_Heating_Corp.name=Вольфрамовый нагревательный элемент на 50В
-50V_Turbine.name=Тепловая турбина на 50В
+50V_Turbine.name=Турбина на 50В
 800V_Defence_Turret.name=Защитная турель на 800В
-AND_Chip.name=Чип с элементом И
-Advanced_Chip.name=Продвинутая микросхема
-Advanced_Electrical_Motor.name=Продвинутый электромотор
+AND_Chip.name=Чип 'И'
+Advanced_Chip.name=Продвинутый чип
+Advanced_Electrical_Motor.name=Улучшенный электродвигатель
 Advanced_Energy_Meter.name=Продвинутый счетчик
-Advanced_Machine_Block.name=Продвинутый корпус механизма
+Advanced_Machine_Block.name=Продвинутый машинный блок
 Advanced_Magnet.name=Улучшенный магнит
 AllMeter.name=Универсальный измеритель
-Alloy_Dust.name=Распыленный сверхсплав
-Alloy_Ingot.name=Слиток сверхсплава
-Alloy_Plate.name=Пластина из сверхсплава
+Alloy_Dust.name=Измельченный сплав
+Alloy_Ingot.name=Слиток сплава
+Alloy_Plate.name=Пластина сплава
+Amplifier.name=Усилитель
 Analog_Watch.name=Аналоговые часы
-Analog_vuMeter.name=Аналоговый индикатор
-Analogic_Regulator.name=Аналогический регулятор
-Animal_Filter.name=Фильтр животных
-Auto_Miner.name=Автошахтер
-Average_Electrical_Drill.name=Обычная насадка для бура
-Average_Ferromagnetic_Core.name=Обычное ферромагнитное ядро
-Basic_Magnet.name=Базовый магнит
-Black_Brush.name=Черная кисточка
-Blue_Brush.name=Синяя кисточка
-Brown_Brush.name=Коричневая кисточка
-Capacity_Oriented_Battery.name=Вместительный аккумулятор
-Cheap_Chip.name=Дешевый чип
-Cheap_Electrical_Drill.name=Дешевая насадка для бура
-Cheap_Ferromagnetic_Core.name=Дешевое ферромагнитное ядро
-Cinnabar_Dust.name=Распыленная киноварь
+Analog_vuMeter.name=Аналоговый датчик
+Analogic_Regulator.name=Ручной регулятор
+Animal_Filter.name=Фильтр на животных
+Auto_Miner.name=Буровая установка
+Average_Electrical_Drill.name=Обычный бур
+Average_Ferromagnetic_Core.name=Средний ферромагнитный сердечник
+Basic_Magnet.name=Магнит
+Big_Fuel_Burner.name=Большой топливосжигатель
+Black_Brush.name=Черный валик
+Blown_Lead_Fuse.name=Перегоревший свинцовый предохранитель
+Blue_Brush.name=Синий валик
+Brown_Brush.name=Коричневый валик
+Capacity_Oriented_Battery.name=Емкий аккумулятор
+Casing.name=Корпус
+Cheap_Chip.name=Дешёвый чип
+Cheap_Electrical_Drill.name=Дешевый электрический бур
+Cheap_Ferromagnetic_Core.name=Дешевый ферромагнитный сердечник
+Cinnabar_Dust.name=Измельченная киноварь 
 Cinnabar_Ore.name=Киноварь
-Coal_Dust.name=Распыленный уголь
+Coal_Dust.name=Измельченный уголь
 Coal_Plate.name=Угольная пластина
-Combustion_Chamber.name=Камера внутреннего сгорания
-Copper_Cable.name=Медный провод
-Copper_Dust.name=Распыленная медь
+Combustion_Chamber.name=Камера сгорания
+Configurable_summing_unit.name=Конфигурируемый сумматор
+Copper_Cable.name=Медный кабель
+Copper_Dust.name=Измельченная медь
 Copper_Ingot.name=Медный слиток
 Copper_Ore.name=Медная руда
 Copper_Plate.name=Медная пластина
-Copper_Thermal_Cable.name=Медный теплопровод
+Copper_Thermal_Cable.name=Медный термический кабель
 Cost_Oriented_Battery.name=Дешевый аккумулятор
 Current_Oriented_Battery.name=Мощный аккумулятор
-Cyan_Brush.name=Бирюзовая кисточка
-D_Flip_Flop_Chip.name=Чип с D-триггером
-Data_Logger.name=Осциллограф
-Data_Logger_Print.name=Распечаток осциллографа
+Cyan_Brush.name=Голубой валик 
+DC-DC_Converter.name=Конвертер постоянного тока
+D_Flip_Flop_Chip.name=Чип 'D флип-флоп'
+Data_Logger.name=Самописец
+Data_Logger_Print.name=Бумага для принтера
 Dielectric.name=Диэлектрик
 Digital_Watch.name=Цифровые часы
-Electrical_Anemometer_Sensor.name=Электрический анемометр
-Electrical_Breaker.name=Выключатель
-Electrical_Daylight_Sensor.name=Датчик дневного света
-Electrical_Entity_Sensor.name=Датчик движения
-Electrical_Fire_Detector.name=Датчик огня
-Electrical_Furnace.name=Электрическая печь
-Electrical_Light_Sensor.name=Датчик света
-Electrical_Motor.name=Электромотор
-Electrical_Probe.name=Электрический зонд
-Electrical_Probe_Chip.name=Чип электрического зонда
-Electrical_Source.name=Творческий источник энергии
+Electrical_Anemometer_Sensor.name=Анемометр
+Electrical_Breaker.name=Электрический выключатель
+Electrical_Daylight_Sensor.name=Электрический сенсор дневного света
+Electrical_Entity_Sensor.name=Электрический сенсор
+Electrical_Fire_Buzzer.name=Электрическая пожарная сирена
+Electrical_Fire_Detector.name=Электрический датчик огня
+Electrical_Furnace.name=Электрическая плита
+Electrical_Fuse_Holder.name=Электрический корпус для предохранителя
+Electrical_Light_Sensor.name=Электрический сенсор света
+Electrical_Motor.name=Электродвигатель
+Electrical_Probe.name=Датчик
+Electrical_Probe_Chip.name=Чип датчика
+Electrical_Source.name=Источник энергии
 Electrical_Timer.name=Таймер
-Electrical_Weather_Sensor.name=Погодный сенсор
-Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Гаечный ключ из мода\nElectricalAge, может быть\nиспользован, чтобы \nповорачивать небольшие \nнастенные блоки.
-Energy_Meter.name=Вольтметр
-Experimental_Transporter.name=Экспериментальный транспортер
-Fast_Electrical_Drill.name=Качественная насадка для бура
-Ferrite_Ingot.name=Слиток феррита
+Electrical_Weather_Sensor.name=Электрический погодный сенсор
+Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Ключ из Electrical Age.\nМожет вращать блоки.
+Energy_Meter.name=Счетчик
+Experimental_Transporter.name=Экспериментальный телепортер  
+Fast_Electrical_Drill.name=Быстрый электрический бур
+Ferrite_Ingot.name=Ферритовый слиток
 Flat_Lamp_Socket.name=Плоский плафон
-Fluorescent_Lamp_Socket.name=Люминесцентный плафон
+Fluorescent_Lamp_Socket.name=Плафон для флюоресцентной лампы 
+Flywheel.name=Маховик
+Fuel_Heat_Furnace.name=Печь на твердом топливе
+Gas_Turbine.name=Газовая турбина
 Generator.name=Генератор
-Gold_Dust.name=Распыленное золото
+Gold_Dust.name=Измельченное золото
 Gold_Plate.name=Золотая пластина
-Gray_Brush.name=Серая кисточка
-Green_Brush.name=Зеленая кисточка
-Ground_Cable.name=Заземляющий провод
-High_Power_Receiver_Antenna.name=Высоковольтный электроприемник
-High_Power_Transmitter_Antenna.name=Высоковольтный электропередатчик
-High_Voltage_Cable.name=Высоковольтный провод
+Gray_Brush.name=Серый валик
+Green_Brush.name=Зеленый валик
+Ground_Cable.name=Заземление
+High_Power_Receiver_Antenna.name=Силовая приемная антенна
+High_Power_Transmitter_Antenna.name=Силовая передающая антенна
+High_Voltage_Cable.name=Высоковольтный кабель
 High_Voltage_Relay.name=Высоковольтное реле
 High_Voltage_Switch.name=Высоковольтный рубильник
-Hub.name=Распределитель
-Industrial_Data_Logger.name=Продвинутый осциллограф
-Iron_Cable.name=Железный провод
-Iron_Dust.name=Распыленное железо
+Hub.name=Узел пересечения
+Industrial_Data_Logger.name=Промышленный самописец
+Iron_Cable.name=Железный кабель
+Iron_Dust.name=Измельченное железо
 Iron_Plate.name=Железная пластина
-JK_Flip_Flop_Chip.name=Чип с JK-триггером
-LED_vuMeter.name=Светодиодный индикатор
-Lamp_Socket_A.name=Люстра
-Lamp_Socket_B_Projector.name=Прожектор
-Lamp_Supply.name=Блок освещения
+JK_Flip_Flop_Chip.name=Флип-флоп чип JK
+Joint.name=Шарнир
+Joint_hub.name=Шарнирный хаб
+LED_vuMeter.name=Цифровой измеритель сигнала
+Lamp_Socket_A.name=Люстра А
+Lamp_Socket_B_Projector.name=Люстра В
+Lamp_Supply.name=Щиток освещения
 Large_Rheostat.name=Большой реостат
-Lead_Dust.name=Распыленный свинец
+Lead_Dust.name=Измельченный свинец
+Lead_Fuse_for_high_voltage_cables.name=Свинцовый предохранитель высокого напряжения
+Lead_Fuse_for_low_voltage_cables.name=Свинцовый предохранитель малого напряжения
+Lead_Fuse_for_medium_voltage_cables.name=Свинцовый предохранитель среднего напряжения
+Lead_Fuse_for_very_high_voltage_cables.name=Свинцовый предохранитель сверхвысокого напряжения
 Lead_Ingot.name=Свинцовый слиток
 Lead_Ore.name=Свинцовая руда
 Lead_Plate.name=Свинцовая пластина
-Life_Oriented_Battery.name=Долговременный аккумулятор
-Light_Blue_Brush.name=Голубая кисточка
-Lime_Brush.name=Лаймовая кисточка
-Long_Suspended_Lamp_Socket.name=Плафон на длинной подвеске
-Low_Power_Receiver_Antenna.name=Низковольтный электроприемник
-Low_Power_Transmitter_Antenna.name=Низковольтный электропередатчик
-Low_Voltage_Cable.name=Низковольтный провод
+Life_Oriented_Battery.name=Долговечный аккумулятор
+Light_Blue_Brush.name=Светло-синий валик
+Lime_Brush.name=Лаймовый валик
+Long_Suspended_Lamp_Socket.name=Длинный подвешенный светильник
+Low_Power_Receiver_Antenna.name=Маломощная принимающая антенна
+Low_Power_Transmitter_Antenna.name=Маломощная предающая антенна
+Low_Voltage_Cable.name=Низковольтный кабель
 Low_Voltage_Relay.name=Низковольтное реле
-Low_Voltage_Switch.name=Низковольтный выключатель
-Machine_Block.name=Корпус механизма
-Machine_Booster.name=Ускоритель
-Magenta_Brush.name=Пурпурная кисточка
-Medium_Power_Receiver_Antenna.name=Средневольтовый электроприемник
-Medium_Power_Transmitter_Antenna.name=Средневольтовый электропередатчик
-Medium_Voltage_Cable.name=Средневольтовый провод
-Medium_Voltage_Relay.name=Средневольтовое реле
-Medium_Voltage_Switch.name=Средневольтовый выключатель
+Low_Voltage_Switch.name=Низковольтный переключатель
+Lowpass_filter.name=Фильтр низких частот
+Machine_Block.name=Машинный блок
+Machine_Booster.name=Ускоритель машин
+Magenta_Brush.name=Пурпурный валик 
+Medium_Fuel_Burner.name=Средний топливосжигатель
+Medium_Power_Receiver_Antenna.name=Токопринимающая антенна средней мощности
+Medium_Power_Transmitter_Antenna.name=Токопередающая антенна средней мощности
+Medium_Voltage_Cable.name=Провод среднего напряжения
+Medium_Voltage_Relay.name=Реле среднего напряжения
+Medium_Voltage_Switch.name=Выключатель среднего напряжения
 Mercury.name=Ртуть
-Mining_Pipe.name=Удлинитель шахтерского бура
+Mining_Pipe.name=Буровая труба
 Modbus_RTU.name=Modbus RTU
-Modern_Data_Logger.name=Современный осциллограф
-Monster_Filter.name=Фильтр враждебных существ
+Modern_Data_Logger.name=Современный самописец
+Monster_Filter.name=Фильтр на монстров
 MultiMeter.name=Мультиметр
-NAND_Chip.name=Чип с обратным элементом И
-NOR_Chip.name=Чип с обратным элементом ИЛИ
-NOT_Chip.name=Чип с инвертором
-Nuclear_Alarm.name=Ядерная сирена
-OR_Chip.name=Чип с элементом ИЛИ
-On_OFF_Regulator_10_Percent.name=Автоматическое реле на 10%
-On_OFF_Regulator_1_Percent.name=Автоматическое реле на 1%
-Optimal_Ferromagnetic_Core.name=Оптимальное ферромагнитное ядро
-Orange_Brush.name=Оранжевая кисточка
+NAND_Chip.name=Чип памяти NAND
+NOR_Chip.name=Чип 'ИЛИ-НЕ'
+NOT_Chip.name=Чип 'НЕ'
+Nuclear_Alarm.name=Сигнал ядерной тревоги
+OR_Chip.name=Чип 'ИЛИ'
+On_OFF_Regulator_10_Percent.name=Регулятор с шагом 10%
+On_OFF_Regulator_1_Percent.name=Регулятор с шагом 1%
+OpAmp.name=Операционный усилитель
+Optimal_Ferromagnetic_Core.name=Оптимальный ферромагнитный сердечник
+Orange_Brush.name=Оранжевый валик
 Ore_Scanner.name=Сканер руд
-Oscillator_Chip.name=Чип с осциллятором
+Oscillator_Chip.name=Генераторный чип
 Overheating_Protection.name=Защита от перегрева
 Overvoltage_Protection.name=Защита от перенапряжения
-PAL_Chip.name=Чип с программируемой матричной логикой
-Pink_Brush.name=Розовая кисточка
-Player_Filter.name=Фильтр игроков
-Portable_Battery.name=Карманная батарейка
-Portable_Battery_Pack.name=Упакованные карманные батарейки
+PAL_Chip.name=Чип "ПЛИС"
+PID_Regulator.name=ПИД Регулятор
+Pink_Brush.name=Розовый валик
+Player_Filter.name=Фильтр на игроков
+Portable_Battery.name=Переносной аккумулятор
+Portable_Battery_Pack.name=Переносной аккумуляторный блок
 Portable_Condensator.name=Карманный конденсатор
-Portable_Condensator_Pack.name=Упакованные карманные конденсаторы
-Portable_Electrical_Axe.name=Портативная электропила
-Portable_Electrical_Mining_Drill.name=Портативный электробур
+Portable_Condensator_Pack.name=Переносной конденсаторный блок
+Portable_Electrical_Axe.name=Электропила
+Portable_Electrical_Mining_Drill.name=Ручной бур
 Power_Capacitor.name=Конденсатор
-Power_Inductor.name=Катушка индуктивности
+Power_Inductor.name=Индуктор
 Power_Resistor.name=Резистор
 Power_capacitor.name=Конденсатор
 Power_inductor.name=Катушка индуктивности
-Purple_Brush.name=Фиолетовая кисточка
-Red_Brush.name=Красная кисточка
-Redstone-to-Voltage_Converter.name=Приемщик редстоун-сигнала
+Purple_Brush.name=Фиолетовый валик
+Red_Brush.name=Красный валик
+Redstone-to-Voltage_Converter.name=Преобразователь сигнала редстоун - напряжение
 Rheostat.name=Реостат
-Robust_Lamp_Socket.name=Прочный плафон
+Robust_Lamp_Socket.name=Защищенный светильник 
 Rubber.name=Резина
-Schmitt_Trigger_Chip.name=Чип с триггером Шмитта
-Sconce_Lamp_Socket.name=Плафон-канделябр
-Signal_20H_inductor.name=Сигнальная катушка индуктивности на 20H
+Sample_and_hold.name=Выборка и хранение
+Scanner.name=Сканер
+Schmitt_Trigger_Chip.name=Чип Шмитта
+Sconce_Lamp_Socket.name=Бра
+Signal_20H_inductor.name=Сигнальный индуктор на 20Гн
 Signal_Antenna.name=Сигнальная антенна
 Signal_Button.name=Сигнальная кнопка
-Signal_Cable.name=Сигнальный провод
-Signal_Diode.name=Диод
-Signal_Processor.name=Обработчик сигнала
-Signal_Relay.name=Реле
+Signal_Cable.name=Сигнальный кабель
+Signal_Diode.name=Сигнальный диод
+Signal_Processor.name=Сигнальный процессор
+Signal_Relay.name=Сигнальное реле
 Signal_Source.name=Источник сигнала
-Signal_Switch.name=Сигнальный переключатель
-Signal_Switch_with_LED.name=Сигнальный переключатель со светодиодом
-Signal_Trimmer.name=Сигнальный ограничитель
-Silicon_Dust.name=Распыленный кремний
+Signal_Switch.name=Сигнальный выключатель
+Signal_Switch_with_LED.name=Цифровой сигнальный выключатель
+Signal_Trimmer.name=Регулятор сигнала 
+Silicon_Dust.name=Измельченный кремний
 Silicon_Ingot.name=Кремниевый слиток
 Silicon_Plate.name=Кремниевая пластина
-Silver_Brush.name=Серая кисточка
-Simple_Lamp_Socket.name=Обычный плафон
-Single-use_Battery.name=Одноразовый аккумулятор
-Small_200V_Copper_Heating_Corp.name=Небольшой медный нагревательный элемент на 200В
-Small_200V_Iron_Heating_Corp.name=Небольшой железный нагревательный элемент на 200В
-Small_200V_Tungsten_Heating_Corp.name=Небольшой вольфрамовый нагревательный элемент на 200В
-Small_50V_Carbon_Incandescent_Light_Bulb.name=Маленькая карбоновая лампочка на 50В
-Small_50V_Copper_Heating_Corp.name=Маленький медный нагревательный элемент на 50В
-Small_50V_Economic_Light_Bulb.name=Маленькая энергосберегающая лампочка на 50В
-Small_50V_Incandescent_Light_Bulb.name=Маленькая лампа накаливания на 50В
-Small_50V_Iron_Heating_Corp.name=Маленький железный нагревательный элемент на 50В
-Small_50V_Tungsten_Heating_Corp.name=Небольшой вольфрамовый нагревательный элемент на 50В
-Small_Active_Thermal_Dissipator.name=Небольшой активный радиатор
-Small_Flashlight.name=Маленький фонарик
-Small_Passive_Thermal_Dissipator.name=Небольшой пассивный радиатор
-Small_Rotating_Solar_Panel.name=Небольшая настраиваемая солнечная батарея
-Small_Solar_Panel.name=Небольшая солнечная батарея
-Solar_Tracker.name=Отслеживатель солнца
-Standard_Alarm.name=Обыкновенная сирена
+Silver_Brush.name=Серебряный валик
+Simple_Lamp_Socket.name=Простой светильник
+Single-use_Battery.name=Одноразовая батарейка
+Small_200V_Copper_Heating_Corp.name=Малый медный нагревательный элемент на 200В
+Small_200V_Iron_Heating_Corp.name=Малый железный нагревательный элемент на 200В
+Small_200V_Tungsten_Heating_Corp.name=Малый вольфрамовый нагревательный элемент на 200В
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Малая угольная лампа накаливания на 50В
+Small_50V_Copper_Heating_Corp.name=Малый медный нагревательный элемент на 50В
+Small_50V_Economic_Light_Bulb.name=Малая энергосберегающая лампа на 50В
+Small_50V_Incandescent_Light_Bulb.name=Малая лампочка на 50В
+Small_50V_Iron_Heating_Corp.name=Малый железный нагревательный элемент на 50В
+Small_50V_Tungsten_Heating_Corp.name=Малый вольфрамовый нагревательный элемент на 50В
+Small_Active_Thermal_Dissipator.name=Малый активный радиатор
+Small_Flashlight.name=Карманный фонарик
+Small_Fuel_Burner.name=Маленький топливосжигатель
+Small_Passive_Thermal_Dissipator.name=Малый пассивный радиатор 
+Small_Rotating_Solar_Panel.name=Малая подвижная солнечная панель
+Small_Solar_Panel.name=Малая солнечная панель
+Solar_Tracker.name=Датчик солнца
+Standard_Alarm.name=Тревожный сигнал
 Steam_Turbine.name=Паровая турбина
-Stone_Heat_Furnace.name=Каменная тепловая печь
+Stone_Heat_Furnace.name=Каменная печь
 Street_Light.name=Уличный фонарь
-Suspended_Lamp_Socket.name=Удлиненный подвесной плафон
+Suspended_Lamp_Socket.name=Подвешенный светильник
+Tachometer.name=Тахометр
 Temperature_Probe.name=Датчик температуры
-Thermal_Probe.name=Термальный датчик
-Thermal_Probe_Chip.name=Термосенсорный чип
-Thermistor.name=Термистор
-ThermoMeter.name=Термометр
-Transformer.name=Трансформатор
-Tree_Resin.name=Каучук
-Tree_Resin_Collector.name=Сборщик каучука
+Thermal_Probe.name=Термический датчик
+Thermal_Probe_Chip.name=Чип термического датчика
+Thermistor.name=Терморезистор
+Thermometer.name=Термометр
+Tree_Resin.name=Сок гевеи
+Tree_Resin_Collector.name=Емкость для сока гевеи
 Tungsten_Cable.name=Вольфрамовый провод
-Tungsten_Dust.name=Распыленный вольфрам
+Tungsten_Dust.name=Измельченный вольфрам
 Tungsten_Ingot.name=Вольфрамовый слиток
 Tungsten_Ore.name=Вольфрамовая руда
-Tutorial_Sign.name=Подсказка
-Very_High_Voltage_Cable.name=Силовой кабель
-Very_High_Voltage_Relay.name=Силовое реле
-Very_High_Voltage_Switch.name=Силовой рубильник
-Voltage-to-Redstone_Converter.name=Испускатель редстоун-сигнала
+Tutorial_Sign.name=Обучающая метка
+Very_High_Voltage_Cable.name=Кабель сверхвысокого напряжения 
+Very_High_Voltage_Relay.name=Реле сверхвысокого напряжения
+Very_High_Voltage_Switch.name=Выключатель сверхвысокого напряжения
+Voltage-to-Redstone_Converter.name=Преобразователь сигнала напряжение - редстоун
 Voltage_Oriented_Battery.name=Высоковольтный аккумулятор
 Voltage_Probe.name=Датчик напряжения
-Water_Turbine.name=Гидротурбина
-Weak_50V_Battery_Charger.name=Маломощный зарядник на 50В
-White_Brush.name=Белая кисточка
-Wind_Turbine.name=Ветряная турбина
-Wireless_Analyser.name=Анализатор беспроводных сигналов
-Wireless_Button.name=Беспроводная сигнальная кнопка
-Wireless_Signal_Receiver.name=Сигнальный приемник
-Wireless_Signal_Repeater.name=Сигнальный усилитель
-Wireless_Signal_Transmitter.name=Сигнальный передатчик
-Wireless_Switch.name=Беспроводной сигнальный переключатель
+Voltage_controlled_amplifier.name=Контролируемый электроусилитель
+Voltage_controlled_sawtooth_oscillator.name=Управляемый напряжением генератор пилообразного сигнала
+Voltage_controlled_sine_oscillator.name=Управляемый напряжением гармонический осциллятор
+Water_Turbine.name=Водная турбина
+Weak_50V_Battery_Charger.name=Слабый зарядник на 50В
+White_Brush.name=Белый валик
+Wind_Turbine.name=Ветрогенератор
+Wireless_Analyser.name=Анализатор беспроводных сетей
+Wireless_Button.name=Беспроводная кнопка
+Wireless_Signal_Receiver.name=Приемник беспрводного сигнала 
+Wireless_Signal_Repeater.name=Усилитель беспроводного сигнала 
+Wireless_Signal_Transmitter.name=Передатчик беспроводного сигнала
+Wireless_Switch.name=Беспроводной выключатель 
 Wrench.name=Гаечный ключ
-X-Ray_Scanner.name=Рентген-сканер
-XNOR_Chip.name=Чип с обратным исключающим ИЛИ
-XOR_Chip.name=Чип с исключающим ИЛИ
-Yellow_Brush.name=Желтая кисточка
+X-Ray_Scanner.name=Рентгеновский сканер
+XNOR_Chip.name=Чип 'НЕ-ИЛИ'
+XOR_Chip.name=Чип 'Исключающее ИЛИ'
+Yellow_Brush.name=Желтый валик
 entity.EAReplicator.name=Репликатор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.Copper Axe.name\=Медный топор
-item.E-Coal Boots.name\=E-Углеродные ботинки
-item.E-Coal Boots.name\=E-Углеродные ботинки
-item.E-Coal Boots.name\=E-Углеродные ботинки
-item.E-Coal Boots.name\=E-Углеродные ботинки
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.Copper Axe.name=Медный топор
+item.E-Coal Boots.name=Е-Угольные ботинки
+item.E-Coal Boots.name=Е-Угольные ботинки
+item.E-Coal Boots.name=Е-Угольные ботинки
+item.E-Coal Boots.name=Е-Угольные ботинки
 itemGroup.Eln=Electrical Age
-mod.meta.desc=Электричество у вас на базе\!
-tile.eln.ElnProbe.name=Компьютерный зонд
-tile.eln.EnergyConverterElnToOtherHVUBlock.name=Конвертер электричества на 800В
-tile.eln.EnergyConverterElnToOtherLVUBlock.name=Конвертер электричества на 50В
-tile.eln.EnergyConverterElnToOtherMVUBlock.name=Конвертер электричества на 200В
+mod.meta.desc=Электричество на вашей базе! 
+tile.eln.ElnProbe.name=Компьютерный переходник 
+tile.eln.EnergyConverterElnToOtherHVUBlock.name=Преобразователь энергии из Electrical Age в другую на 800В
+tile.eln.EnergyConverterElnToOtherLVUBlock.name=Преобразователь энергии из Electrical Age в другую на 50В
+tile.eln.EnergyConverterElnToOtherMVUBlock.name=Преобразователь энергии из Electrical Age в другую на 200В
 
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=У вас осталось %1$ жизней
 
-# ./src/main/java/mods/eln/item/BrushDescriptor.java
-Brush_is_dry=Кисточка - сухая
-Can_paint_%1$_blocks=Может окрасить до %1$ блоков
+# ./src/main/java/mods/eln/item/BrushDescriptor.kt
+Brush_is_dry=Валик высох
+Can_paint_%1$_blocks=Может окрасить %1$ блоков
+
+# ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
+Can_be_used_to_encase_EA_items_that_support_it=Может использоваться для заключения в него поддерживаемых предметов EA
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
-Upgrade_for_the_Stone_Heat_Furnace.=Улучшение для каменной тепловой печи
+Upgrade_for_the_Stone_Heat_Furnace.=Улучшение для каменной печи
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Необх. энерг. для одого процесса\: %1$Дж
-Time_per_operation\:_%1$s=Необх. время для одного процесса\: %1$сек
+Energy_per_operation\:_%1$J=Энергия на операцию: %1$Дж
+Time_per_operation\:_%1$h=Время на операцию : %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Коэффициент потерь\: %1$
+Cable_loss_factor\:_%1$=Фактор потерь: %1$
+
+# ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
+Burn_unit_for_the_gas_heat_furnace.=Сожгите что-нибудь для газовой печи
+Produced_heat_power\:_=Выработанная тепловая мощь:
 
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
 # ./src/main/java/mods/eln/item/LampDescriptor.java
 Bad=Плохое
-Condition\:=Условие\:
-End_of_life=Окончание срока службы
+Condition\:=Состояние:
+End_of_life=Непригоден
 Good=Хорошее
-New=Новое
-Nominal_lifetime\:_%1$h=Минимальная продолжительность жизни\: %1$ч
-Technology\:_%1$=Технология\: %1$
-Used=Уже использованное
+New=Новый
+Nominal_lifetime\:_%1$h=Номинальное время работы: %1$ч
+Technology\:_%1$=Технология: %1$
+Used=Использованный
 
 # ./src/main/java/mods/eln/item/LampSlot.java
-Lamp_slot=Слот для лампочки
+Lamp_slot=Слот для лампы
 
 # ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
 Useful_to_prevent_overheating\nof_Batteries=Полезно для предотвращения\nперегрева аккумуляторов
 
 # ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
-Useful_to_prevent_over-voltage\nof_Batteries=Полезно для предотвращения\nперенапряжения в аккумуляторах
+Useful_to_prevent_over-voltage\nof_Batteries=Полезно для предотвращения перенапряжения батарей
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
-Solar_panel_upgrade=Улучшение для солнечной батареи
+Solar_panel_upgrade=Улучшение для солнечной панели
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
-Off=Выкл
-On=Вкл
-State\:=Состояние\:
-Stored_Energy\:_%1$J_(%2$%)=Содержащаяся энергия\: %1$Дж (%2$%)
+State\:=Состояние:
+Stored_Energy\:_%1$J_(%2$%)=Запасенная энергия: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
+# ./src/main/java/mods/eln/mechanical/Tachometer.kt
+Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
+Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
+
 # ./src/main/java/mods/eln/misc/UtilsClient.java
-Hold_shift=Удерживайте shift
+Hold_shift=Зажмите Shift
 
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
@@ -348,27 +388,76 @@ mod.name=Electrical Age
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Входная мощность ограничена до %1$Вт
 
+# ./src/main/java/mods/eln/sixnode/AnalogChips.kt
+A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.
+A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.
+An_amplifier_increases_the_voltage\nof_an_input_signal_by_a_configurable\ngain_and_outputs_that_voltage.=An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.
+Cut-off_frequency_%1$_Hz=Частота отсечки %1$ Гц
+Gain=Усиление
+Gain_for_input_\u00a713=Gain for input \u00a713
+Gain_for_input_\u00a722=Gain for input \u00a722
+Gain_for_input_\u00a741=Gain for input \u00a741
+Lowpass_filter_-_Passes_signals_with_a\nfrequency_lower_than_a_certain_cutoff_frequency\nand_attenuates_signals_with_frequencies_higher\nthan_the_cutoff_frequency.=Низкочастотный фильтр - Пропускает сигналы с\n частотой ниже частоты отсечки и ослабляет\n сигналы с частотой выше частоты отсечки.
+Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_as_configurable_amplifier.=Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.
+Params=Параметры
+Proportional–integral–derivative_controller._A_PID\ncontroller_continuously_calculates_an_error_value_as\nthe_difference_between_a_desired_setpoint_and_a_measured\nprocess_variable_and_applies_a_correction_based_on\nproportional,_integral,_and_derivative_terms.=Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.
+Samples_the_voltage_of_a_varying_analog_signal_when\nthe_clock_input_changes_from_0_to_1_and_holds_its\noutput_voltage_at_a_constant_level_until_next_clock_pulse.\nYou_can_see_it_as_an_analog_D-Flipflop.=Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.
+The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_each_input_can_be_configured.=The summing unit outputs the sum of\nthe three weighted inputs.The\ngain for each input can be configured.
+
+# ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
+Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
+
+# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
+
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
-_O\:_= O\:
+A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
+If_the_input_J_is_1_(high)_and_K_is_0_(low)\nduring_a_clock_pulse,_the_output_becomes_1_(high).\nIf_J_is_0_(low)_and_K_is_1_(high)_during_the_pulse,\nthe_output_becomes_0_(low)._If_both_inputs_are_0_(low)\nduring_the_clock_pulse,_the_state_is_maintained._If_both\ninputs_are_1_(high)_the_input_is_toggled_if_a_rising_edge\nwas_detected_at_the_clock_input.=If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.
+If_the_input_voltage_is_lower_than_10V,_the\noutput_is_0_(low),_if_the_output_is_bigger_or\nequal_to_30V,_the_output_will_be_1_(high)._For\nall_voltages_in_between,_the_output_does_not_change.=If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.
+Implements_an_exclusive_or.\nAn_output_of_1_(high)_results_if_one_or\nall_three_inputs_to_the_gate_are_1_(high).=Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).
+Implements_logical_conjunction.\nA_1_(high)_output_results_only_if_all_of\nthe_three_inputs_to_the_AND_gate_are_1_(high).=Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).
+Implements_logical_disjunction.\nA_1_(high)_output_results_if_at_least\none_input_to_the_gate_is_1_(high).=Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).
+Inverts_the_input_signal.\nOutputs_a_voltage_representing_the\nopposite_logic-level_to_its_input.=Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.
+Its_output_is_complement_(inverted)\nto_that_of_the_AND_gate.=Выход является (противоположным) по отношению к гейту 'Исключающее И (AND)'
+Its_output_is_complement_(inverted)\nto_that_of_the_OR_gate.=Выход является (противоположным) по отношению к гейту 'ИЛИ (OR)'
+Its_output_is_complement_(inverted)\nto_that_of_the_XOR_gate.=Выход является (противоположным) по отношению к гейту 'Исключающее ИЛИ (XOR)'
+Outputs_a_rectangular_signal_which's_frequency\ndepends_to_the_input_voltage._The_higher_the\ninput_voltage_-_the_higher_the_frequency.=Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.
+The_D_flip-flop_captures_the_value\nof_the_D-input_at_a_rising_edge\nportion_of_the_clock_cycle.=The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.
+UNDEF=Не определено
+
+# ./src/main/java/mods/eln/sixnode/Scanner.kt
+-_For_inventories,_outputs_either_total_fill_or_fraction_of_slots_with_any_items.=- For inventories, outputs either total fill or fraction of slots with any items.
+-_For_tanks,_outputs_fill_percentage.=- For tanks, outputs fill percentage.
+Otherwise_behaves_as_a_vanilla_comparator.=Иначе ведёт себя как стандартный редстоун-компаратор
+Right-click_to_change_mode.=Нажмите правую кнопку мыши для смены режима
+Scans_blocks_to_produce_signals.=Сканирует блоки чтобы генерировать сигналы.
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
-Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Если висит на дереве, то\nсо временем производит \nкаучук.
-This_block_can_only_be_placed_on_the_side_of_a_tree!=Этот блок можно повесить только на дерево\!
+Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Производит древесную смолу,\nкогда устанавливают на дереве.
+This_block_can_only_be_placed_on_the_side_of_a_tree!=Это можно разместить только на дереве!
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
-Battery_slot=Слот для батарейки
+Battery_slot=Слот для аккумулятора
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
-Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Может быть использовано\nдля перезарядки таких\nпредметов, как\: Фонарик,\nРентген-сканер, Карманная\nбатарейка и т.д.
+Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Может быть использовано для перезарядки\nэлектроники, например:\nФонарика, рентгеновского сканера\nи переносной батарейки ...
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
+Charge_Current=Заряд тока
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
-Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Ток в диоде может течь\nтолько в одну сторону,\nот анода к катоду.
+Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeElement.java
+Forward_Voltage=Прямое напряжение
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
-=
-Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Издает звук тревоги,\nесли входной сигнал\nмощный
+Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
+Engaged=Занято
+Input_Voltage=Входное напряжение
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Звук выключен
@@ -377,453 +466,624 @@ Sound_is_not_muted=Звук включен
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
-Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Защищает электрические\nкомпоненты\nРазрывает контакт, если\:\n- Напряжение превышает указанный уровень\n- Сила тока превышает лимит проводов
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java
+Contact=Контакт
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
-Maximum_voltage_before_cutting_off=Макс. напряжение перед разрывом цепи
-Minimum_voltage_before_cutting_off=Мин. напряжение перед разрывом цепи
-Switch_is_off=Переключатель выключен
-Switch_is_on=Переключатель включен
+Maximum_voltage_before_cutting_off=Макс. напряжение
+Minimum_voltage_before_cutting_off=Мин. напряжение
+Switch_is_off=Выключен
+Switch_is_on=Включен
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
-A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=Сигнал - это электрическая\nинформация, которая варьирует в пределах\n0 и %1$ вольт
-Cable_is_adapted_to_conduct\nelectrical_signals.=Этот кабель адаптирован для \nпередачи электрических сигналов.
-Current\:_%1$A=Сила тока\: %1$A
-Not_adapted_to_transport_power.=Не адаптирован для передачи энергии.
-Save_usage\:=Безопасное использование\:
-Serial_resistance\:_%1$Ω=Сопротивление тока\: %1$Ω
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
+Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
+Current\:_%1$A=Сила тока: %1$A
+Not_adapted_to_transport_power.=Не готово для передачи энергии
+Save_usage\:=Безопасное использование:
+Serial_resistance\:_%1$\u2126= Постоянное сопротивление: %1$\u2126
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
+Signal_Voltage=Сигнал напряжения
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
-It_can_store_up_to_256_points.=Может хранить в себе до 256 точек.
-Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Измеряет напряжение\nэлектрического сигнала\nи изображает полученные \nданные в реальном времени.
+It_can_store_up_to_256_points.=Может содержать до 256 пунктов
+Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
-Back_to_display=Назад к экрану
-Configuration=Настройка
+Back_to_display=Вернутся к дисплею
+Configuration=Конфигурация
 Current_[A]=Сила тока [А]
 Energy_[J]=Энергия [Дж]
 Percent_[-]%=Проценты [-]%
 Power_[W]=Мощность [Вт]
-Print=Печать
-Sampling_period=Период измерения
-Temp._[*C]=Темпер. [*C]
-Voltage_[V]=Напряжение [V]
-Y-axis_max=Макс. по оси Y
-Y-axis_min=Мин. по оси Y
+Print=Печатать
+Sampling_period=Период измерений
+Temp._[*C]=Темп. [*C]
+Voltage_[V]=Напряжение [В]
+Y-axis_max=Ось Y макс.
+Y-axis_min=Ось Y мин.
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
-Output_voltage_increases\nif_entities_are_moving_around.=Выходное напряжение\nусиливается, если вокруг\nнего двигаются сущности.
+Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java
+Entity_present=Текущая сущность
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
-Output_voltage_increases\nif_a_fire_has_been_detected.=При обнаружении огня\nвыходной сигнал увеличивается.
+Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Заряженная пожарная сирена\nактивируется огнём.
+Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
+Fire_detected\:_=Обнаружено возгорание:
+Fire_present=Присутствует огонь
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
-Provides_configurable_signal\nvoltage.=Выдаёт настраиваемое напряжение.
+Provides_configurable_signal\nvoltage.=Поддерживает настраиваемый сигнал\nнапряжения.
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
 Output_at_%1$%=Выход на %1$%
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
-0V_at_night,_%1$V_at_noon.=0В ночью, %1$В днем.
-Provides_an_electrical_voltage\nin_the_presence_of_light.=При наличии света испускает \nэлектрический сигнал.
-Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Испускает электрический сигнал,\nпропорциональный интенсивности\nдневного света.
+0V_at_night,_%1$V_at_noon.=0В ночью, %1$В днем
+Provides_an_electrical_voltage\nin_the_presence_of_light.=Поддерживает электрическое напряжение\nв наличии света. 
+Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Поддерживает электрическое напряжение\nпропорциональное интенсивности\nдневного света.
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
+Light_level=Уровень освещенности
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-Applicable_boolean_operators\:=Допустимые булевые операторы\: 
-Applicable_functions\:=Допустимые функции\:
-Applicable_mathematical_operators\:=Допустимые математические операторы\:
-Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Высчитывает выходной сигнал\nна основе 3-х входов (A, B, C), при\nпомощи уравнения.
+Applicable_boolean_operators\:=Применимые логические операторы: 
+Applicable_functions\:=Применимые функции:
+Applicable_mathematical_operators\:=Применимые математические операторы:
+Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Рассчитывает выходной сигнал из\nтрех входов (A, B, C) используя равенство.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
+Equation=Уравнение
+Input_voltages=Входные напряжения
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
-%1$_Redstone(s)_required=Требуется %1$ ед. редстоун(-а)
-Equation_required!=Требуется ввести уравнение\!
-Inputs_are=Входы
-Invalid_equation!=Неверное уравнение\!
+%1$_Redstone(s)_required=%1$ редстоуна необходимо
+Equation_required!=Необходимо уравнение
+Inputs_are=Вход
+Invalid_equation!=Неверное уравнение
 Output_voltage_formula=Формула выходного напряжения
-Waiting_for_completion...=Ожидание завершения...
+Waiting_for_completion...=Ожидайте завершения...
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
-Converts_Redstone_signal\nto_an_electrical_voltage.=Конвертирует редстоун-сигнал\nв электрический сигнал.
+Converts_Redstone_signal\nto_an_electrical_voltage.=Преобразовывает сигнал редстоуна\nв электрическое напряжение.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
-Converts_electrical_voltage\ninto_a_Redstone_signal.=Конвертирует электрический\nсигнал в редстоун-сигнал.
+Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
-A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=Реле - это электрический\nконтакт, который проводит\nток, либо нет, в зависимости\nот входного сигнала.
+A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
+Default_position=Позиция по умолчанию
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
-Normally_closed=По-умолчанию закрыто
-Normally_open=По-умолчанию открыто
+Normally_closed=Нормально замкнутые контакты
+Normally_open=Нормально разомкнутые контакты
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
+Can_measure_Voltage_Power_Current=Может измерять Напряжение/Мощность/Силу тока
+Measures_electrical_values_on_cables.=Измеряет электрические значения в проводах
+Measures_voltage_on_cables.=Измеряет напряжение в проводах
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
+Measured_current=Измеренная сила тока
+Measured_power=Измеренная мощность
+Measured_voltage=Измеренное напряжение
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
+Measured_voltage\ncorresponding\nto_0%_output=Измеренное напряжение \nведёт к  \n0% выводу.
+Measured_voltage\ncorresponding\nto_100%_output=Измеренное напряжение \nведёт к \n100% выводу.
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
-Creative_block.=Творческий блок.
-Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Является идеальным источником\nэнергии, без каких-либо\nограничений.
-
-# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceGui.java
-Output_voltage=Выходное напряжение
+Creative_block.=Творческий блок
+Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
-Can_break_an_electrical_circuit\ninterrupting_the_current.=Может нарушить электрическую\nцепь прервав течение тока.
+Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
-Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=При высоком входном сигнале, таймер \nподдерживает высокий выходной сигнал \nв течение заданного интервала. \nМожет быть запущен повторно.
+Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutElement.java
+Output=Вывод
+Remaining=Осталось
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
-Set=Старт
-The_time_interval_the\noutput_is_kept_high.=Интервал времени,\nпо которому на выходе\nбудет сильный сигнал.
+Set=Установить
+The_time_interval_the\noutput_is_kept_high.=Промежуток времени на котором\nсигнал без помех.
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
-Displays_the_value_of_a_signal.=Отображает значение сигнала.
-
-# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
-Portable_battery_slot=Слот для батарейки
+Displays_the_value_of_a_signal.=Показывает величину сигнала
 
 # ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
-Clear\:_%1$V=Ясно\: %1$В
-Provides_an_electrical_signal\ndepending_the_actual_weather.=Испускает электрический\nсигнал, зависящий от\nтекущей погоды.
-Rain\:_%1$V=Дождь\: %1$В
-Storm\:_%1$V=Буря\: %1$В
+Clear\:_%1$V=Ясно: %1$В
+Provides_an_electrical_signal\ndepending_the_actual_weather.=Provides an electrical signal\ndepending the actual weather.
+Rain\:_%1$V=Дождь: %1$В
+Storm\:_%1$V=Шторм: %1$В
 
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
-Maximum_wind_speed_is_%1$m_s=Максимальная скорость ветра - %1$м/с
-Provides_an_electrical_signal\ndependant_on_wind_speed.=Испускает электрический\nсигнал, зависящий от силы\nветра.
-You_can't_place_this_block_on_the_floor_or_the_ceiling=Вы не можете разместить этот блок на полу или на потолке
+Maximum_wind_speed_is_%1$m_s=Максимальная скорость ветра %1$ м/с
+Provides_an_electrical_signal\ndependant_on_wind_speed.=Выдает сигнал в зависимости от скорости ветра
+You_can't_place_this_block_on_the_floor_or_the_ceiling=Вы не можете поместить этот блок на полy или потолке
 
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
-Can_measure_Voltage_Power_Current=Может измерять напряжение, мощность и силу тока.
-Measures_electrical_values_on_cables.=Измеряет электрические значения\nв проводах.
-Measures_voltage_on_cables.=Измеряет напряжение в проводах.
-
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
-Current=Сила тока
-Measured_voltage\ncorresponding\nto_0%_output=Измеренное напряжение \nблизко к 0%
-Measured_voltage\ncorresponding\nto_100%_output=Измеренное напряжение \nблизко к 100%
-Voltage=Напряжение
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
+Counter=Счётчик
+Energy_left=Осталось энергии
+Mode=Мод
+Prepay=Предоплата
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
 Change_password=Сменить пароль
 Counter_Mode=Режим счетчика
-Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Считает электричество, переданное от\n\\u00a74красного\\u00a7f к \\u00a71синему\\u00a7f.
-Energy_counter\:_%1$J=Энергии насчитано\: %1$Дж
-Enter_new_energy=Введите новое кол-во энергии
+Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
+Energy_counter\:_%1$J=Счетчик энергии: %1$Дж
+Enter_new_energy=Введите новую величину
 Enter_password=Введите пароль
 Prepay_Mode=Режим предоплаты
-Reset_time_counter=Сбросить время
-Set_energy_counter=Начать счет энергии
-Time_counter\:=Времени насчитано\:
-Try_password=Попробовать пароль
-You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=Вы можете указать\nначальное кол-во доступной\nэнергии. Когда обратный отсчет\nдостигнет ноля - цепь будет \nразорвана.
-is_off=выкл.
-is_on=вкл.
-value_in_kJ=значение в кДж
+Reset_time_counter=Сбросить счетчик времени
+Set_energy_counter=Установить счетчик энергии 
+Time_counter\:=Счетчик времени
+Try_password=Введите пароль
+You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.
+is_off=Выключено
+is_on=Включено
+value_in_kJ=Значение в кДж
 
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
-Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Может быть использовано для\nуказания 0-вольтовой точки сети.\nНапример, для заземления негативных контактов \nаккумулятора.
-Provides_a_zero_volt_reference.=Обеспечивает нулевой вольт в сети.
+Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.
+Provides_a_zero_volt_reference.=Provides a zero volt reference.
 
 # ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
-Allows_crossing_cables\non_one_single_block.=Позволяет проводам\nпересекаться в одном \nблоке.
+Allows_crossing_cables\non_one_single_block.=Разрешает пересекающиеся кабели\nв одном блоке.
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
-Angle\:_%1$°_to_%2$°=Угол\: %1$° до %2$°
-Spot_range\:_%1$_blocks=Дальность света\: %1$ блока(-ов)
+Angle\:_%1$°_to_%2$°=Угол: от %1$° до %2$°
+Spot_range\:_%1$_blocks=Радиус обнаружения: %1$ блоков
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketElement.java
+Bulb=Лампа
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-%1$_is_not_in_range!=%1$ вне диапазона\!
-Cable_slot_empty=Слот для провода пуст
-Orientation\:_%1$°=Ориентация\: %1$°
-Parallel=Парралельно
-Powered_by_Lamp_Supply=Беспроводной режим
-Powered_by_cable=Проводной режим
+Cable_slot_empty=Нет кабеля
+Orientation\:_%1$°=Ориентация: %1$°
+Parallel=Параллельно 
 Serial=Последовательно
-Specify_the_supply_channel=Укажите имя канала
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Слот для провода.\nСтартовый диапазон - 32 блока.\nКаждый новый провод\nувеличивает его на еденицу.
+Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Разъем для электрического кабеля.\nДиапазон - 32 блока. \nКаждый дополнительный кабель\nувеличивает дальность.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
-Supplies_all_lamps_on_the_channel.=Подпитывает все плафоны на\nуказанной частоте, в определенном\nрадиусе.
+Supplies_all_lamps_on_the_channel.=Питает все лампы на канале
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
+Total_power=Суммарная мощность
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
-Power_channel_name=Имя канала
-Wireless_channel_name=Название канала
+Power_channel_name=Имя питающего канала
+Wireless_channel_name=Имя беспроводного канала 
+
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
+Modbus_TCP=Modbus TCP
+Modbus_Unit_ID=Modbus ID обьекта
+Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus отключен в конфигурационном файле мода Eln.cfg 
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
 Add=Добавить
-Channel_name=Название канала
+Channel_name=Имя канала
 Modbus_ID=Modbus ID
 Modbus_RTU=Modbus RTU
 Station_ID=ID станции
 Station_name=Имя станции
-Wireless_RX=Беспроводной RX
-Wireless_TX=Беспроводной TX
+Wireless_RX=Wireless RX
+Wireless_TX=Wireless TX
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
-(Increases_maximum_voltage)=(Увеличивает макс. напряжение)
+(Increases_maximum_voltage)=(Поднимает макс. напряжение)
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
+Capacity=Вместимость
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
 
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
+Inductance=Индуктивность
+
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
-Supplies_any_device\nplugged_in_with_energy.=Запитывает электричеством\nлюбое подключенное устройство.
+Supplies_any_device\nplugged_in_with_energy.=Обеспечивает энергией все подсоединенные устройства
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
-Specify_the_device_to_supply_through_this_socket.=Укажите устройство, которое будет запитано от этой розетки.
+Specify_the_device_to_supply_through_this_socket.=Подключить машину к этой розетке
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
-(Sets_resistance)=(Изменяет сопротивление)
-Coal_dust_slot=Слот для распыленного угля
+(Sets_resistance)=(Установить спротивление)
+Coal_dust_slot=Слот для измельченного угля
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
-High_parallel_resistance\n_\=>_Low_power_dissipation.=Высокое параллельное \nсопротивление \=> Низкие \nпотери мощности.
-Low_serial_resistance\n_\=>_High_conductivity.=Низкое сопротивление \=> Высокая проводимость.
-Parallel_resistance\:_%1$K_W=Параллельное сопротивление\: %1$K/Вт
-Serial_resistance\:_%1$K_W=Последовательное сопротивление\: %1$K/Вт
+High_parallel_resistance\n_\=>_Low_power_dissipation.=Высокое параллельное сопротивление\n => низкие потери энергии
+Low_serial_resistance\n_\=>_High_conductivity.=Низкое последовательное сопротивление \n=> Высокая проводимость.
+Parallel_resistance\:_%1$K_W=Параллельное сопротивление: %1$K/Вт
+Serial_resistance\:_%1$K_W=Сериесное сопротивление: %1$K/Вт
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
+Thermic_power=Термическая энергия
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
-Cable_slot=Слот для провода
+Cable_slot=Слот для кабеля
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
-Can_measure\:=Может измерять\:
-Measures_temperature_of_cables.=Измеряет температуру проводов.
-Measures_thermal_values_on_cables.=Измеряет температурные значения\nпроводов.
-__Temperature_Power_conducted=тепла/тока проведено
+Can_measure\:=Может измерять:
+Measures_temperature_of_cables.=Измеряет температуру кабелей
+Measures_thermal_values_on_cables.=Измеряет температуру в кабелях
+__Temperature_Power_conducted=Температура/Мощность проведено
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
+Measured_temperature=Измеренная температура
+Measured_thermal_power=Измеренная тепловая мощность
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
-Measured_temperature\ncorresponding\nto_0%_output=Измеренная температура\nблизко к 0%
-Measured_temperature\ncorresponding\nto_100%_output=Измеренная температура\nблизко к 100%
-Temperature=Температура
+Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorresponding\nto 0% output
+Measured_temperature\ncorresponding\nto_100%_output=Measured temperature\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
-No_text_associated_to_this_beacon=Нет текста, ассоциированного с этой подсказкой
+No_text_associated_to_this_beacon=Нет связанных с этим маячком текстов 
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
-Set_beacon_name=Имя подсказки
+Set_beacon_name=Укажите имя маячка
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Nominal_power\:_%1$_W=Минимальная мощность\: %1$ Вт
-Nominal_voltage\:_%1$_V=Минимальное напряжение\: %1$ В
-Produces_electricity_using_fuel.=Производит электричество сжигая топливо.
+Fuel_level=Уровень топлива
+Nominal_power\:_%1$_W=Номинальная мощность: %1$ Вт
+Nominal_voltage\:_%1$_V=Номинальное напряжение: %1$ В
+Produces_electricity_using_gasoline.=Вырабатывает электричество используя бензин.
+State=Состояние
+
+# ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
+Actual\:_%1$=Фактически: %1$
+Analog_regulator_slot=Интеллектуальный регулятор мощности
+Control_value_at_%1$=Контрольное значение: %1$
+Fuel_burner_slot=Слот для топлива
+Furnace_is_off=Печь выключена
+Furnace_is_on=Печь запущена
+Heat_Power\:_%1$=Тепловая мощность: %1$
+Set_point\:_%1$=Установка точки: %1$
+__Max._temperature\:_=  Макс. температура
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Мин. сопротивление\: %1$
+Nom._Resistance\:_%1$=Номинальное сопротивление: %1$
+Power_loss=Потеря мощности
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
-Drill_slot=Слот для наконечника для бура
-Mining_pipe_slot=Слот для удлинителя шахтерского бура
+Drill_slot=Слот для бура
+Mining_pipe_slot=Слот для буровых труб
 Ore_scanner_slot=Слот для сканера руд
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
-Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Роет в небольшом радиусе.\nИзвлекает ресурсы в большом радиусе\:\n10 блоков радиуса после 10 блоков глубины
+Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerElement.java
+Depth=Интенсивность
+Silk_touch=Шелковое касание
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
-Chest_missing_on_the\nback_of_the_auto_miner!=Отсутствует сундук для\nресурсов\!
-Halves_speed,_triples_power_draw=На половину быстрее, втрое больше энергозатрат
-Silk_Touch_Off=Шелковое касание отключено
-Silk_Touch_On=Шелковое касание включено
-Silk_touch=Шелковое касание
+Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner!
+Halves_speed,_triples_power_draw=Увеличивает скорость бурения в два раза, энергозатраты в три
+Silk_Touch=Шёлковое касание
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=Защита от перегрева
 Overvoltage_protection=Защита от перенапряжения
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
-Actual_charge\:_%1$%=Текущий заряд\: %1$%
-Energy_capacity\:_%1$J=Вместимость\: %1$Дж
-_charged_at_%1$%=заряжен на %1$%
+Actual_charge\:_=Текущий заряд:
+Energy_capacity\:_=Энергоемкость:
+Internal_resistance\:_=Внутреннее сопротивление:
+Life_\:_=Срок службы:
+Nominal_power\:_=Заявленная мощность:
+Nominal_voltage\:_=Заявленное напряжение:
+_charged_at_=Заряжено:
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charge=Заряд
-Charged=Полностью заряжен
-Discharge=Разряжается
-Energy\:=Энергия\:
-Energy\:_%1$=Энергия\: %1$
-Life\:=Срок службы\:
+Charged=Заряжено
+Discharge=Разрядка
+Energy\:=Энергия:
+Energy\:_%1$=Энергия: %1$
+Life\:=Состояние:
 No_charge=Не заряжается
-Power_in\:=Входная мощность\: 
-Power_out\:=Выходная мощность\:
+Power_in\:=Входная мощность:
+Power_out\:=Выходная мощность:
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
 Egg_slot=Слот для яйца
 
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
+Has_egg=Есть яйцо
+
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
-Wireless_energy_receiver.=Беспроводной приемник электричества
+Wireless_energy_receiver.=Беспроводной приемник энергии
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
+Effective_power=Эффективная мощность
+Power_received=Получено энергии
+Receiving=Получение
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=Эффективность\: %1$% вплоть до %2$%
-Wireless_energy_transmitter.=Беспроводной передатчик электричества.
+Efficiency\:_%1$%_up_to_%2$%=Эффективность: %1$% до %2$%
+Wireless_energy_transmitter.=Беспроводной передатчик энергии
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
+Efficiency=Эффективность
+Transmitting=Передающий
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
 Heating_corp_slot=Слот для нагревательного элемента
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
-Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Схожа с ванильной печкой,\nоднако, разогревается\nэлектричеством.
+Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Работает как ванильная печка, но использует электричество
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceElement.java
+Heating_element=Нагревающий элемент
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
 Auto_shutdown=Автовыключение
 Manual_shutdown=Ручное выключение
-Set_point\:_%1$°C=Контрольная точка\: %1$°C
+Set_point\:_%1$°C=Установить: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
-Cost=Затраты
+Cost=Цена
+Nominal_voltage\:_%1V$=Номинальное напряжение: %1V$
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
+Power_provided=Мощности выделено:
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
-Combustion_chamber_slot=Слот для камеры внутреннего сгорания
+Combustion_chamber_slot=Слот для камеры сгорания
 Fuel_slot=Слот для топлива
 
-# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
-Generates_heat_when_supplied_with_fuel.=Генерирует тепло, когда в нем есть топливо.
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
+Set_temperature=Установка температуры
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
-Control_gauge_at_%1$%=Шкала контроля на %1$%
-Decline_fuel=Отклонять топливо
-External_control=Внешн. контроль
-Internal_control=Внутр. контроль
-Take_fuel=Принимать топливо
+Control_gauge_at_%1$%=Установить на %1$%
+Decline_fuel=Добавить топливо
+Take_fuel=Взять топливо
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
-(Increases_maximal_voltage)=(Увеличивает макс. напряжение)
+(Increases_maximal_voltage)=(Поднимает максимальное напряжение)
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
-Solar_tracker_slot=Слот для отслеживателя солнца
+Solar_tracker_slot=Слот для датчика солнца
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
-Can_be_geared_towards_the_sun.=Может быть повернута к солнцу.
-Max._power\:_%1$W=Макс. мощность\: %1$Вт
-Max._voltage\:_%1$V=Макс. напряжение\: %1$В
-Produces_power_from_solar_radiation.=Производит электричество из солнечной радиации.
+Can_be_geared_towards_the_sun.=Может следовать за солнцем
+Max._power\:_%1$W=Макс. мощность: %1$Вт
+Max._voltage\:_%1$V=Макс. напряжение: %1$В
+Produces_power_from_solar_radiation.=Производит энергию из солнечного излучения
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
+Panel_angle=Угол наклона панели
+Producing_energy=Продуцируемая энергия
+Sun_angle=Угол солнца
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
-It_is_night=Сейчас ночь
-Solar_panel_angle\:_%1$°=Угол солнечной батареи\: %1$°
-Sun_angle\:_%1$°=Угол солнца\: %1$°
+It_is_night=Ночь
+Solar_panel_angle\:_%1$°=Угол наклона: %1$°
+Sun_angle\:_%1$°=Положение солнца: %1$°
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
+Destination=Место назначения
+Distance=Расстояние
+Required_energy=Необходимая энергия
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
-Destination_transporter=Конечный транспортер
-Power_consumption\:=Потребление энергии\:
-Power_consumption\:_%1$W=Потребление энергии\:  %1$Вт
-Required_energy\:_%1$J=Требуемая энергия\: %1$Дж
-Start=Начать
-Transporter_name=Имя транспортера
+Destination_transporter=Место назначения
+Power_consumption\:=Потребление энергии:
+Power_consumption\:_%1$W=Потребление энергии: %1$Вт
+Required_energy\:_%1$J=Требуемая энергия: %1$Дж
+Start=Старт
+Transporter_name=Имя телепортера
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=Сила охлаждения вентилятора\: %1$Вт
-Fan_power_consumption\:_%1$W=Расход энергии вентилятором\: %1$Вт
-Fan_voltage\:_%1$V=Напряжение вентилятора\: %1$В
+Fan_cooling_power\:_%1$W=Мощность охлаждения вентилятором: %1$Вт
+Fan_power_consumption\:_%1$W=Потребляемая мощность вентилятора: %1$Вт
+Fan_voltage\:_%1$V=Напряжение вентилятора: %1$В
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+Casing_slot=Слот для корпуса
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
-The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=Соотношение сопротивления\nпропорционально кол-ву\nпроводов в стеке.
-Transforms_an_input_voltage_to\nan_output_voltage.=Превращает входное напряжение \nв выходное.
+The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
+Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerElement.java
+Core_factor=Основной фактор
+Isolated=Изолирован
+Ratio=Соотношение
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
-Generates_electricity_using_heat.=Генерирует электричество используя тепло.
-Temperature_difference\:_%1$°C=Различие температуры\: %1$°C
+Generates_electricity_using_heat.=Вырабатывает электричество используя тепло
+Temperature_difference\:_%1$°C=Разница температур: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
+Nominal=Номинальное
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
-CAUTION\:_Cables_can_get_quite_hot!=ОСТОРОЖНО\: Провода могут быть очень горячими\!
-Laser_charge_power\:_%1$W...%2$kW=Энергопотребление при перезарядке\: %1$Вт...%2$кВт
-Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Ищет сущностей, совпадающих\nпо признакам с теми, что указаны\nв настройках и атакует их.
-Standby_power\:_%1$W=Энергопотребление в бездействии\: %1$Вт
+CAUTION\:_Cables_can_get_quite_hot!=ВНИМАНИЕ: провода могут быть горячими! 
+Laser_charge_power\:_%1$W...%2$kW=Мощность лазера: %1$W...%2$кВт
+Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
+Standby_power\:_%1$W=Потребляемая мощность в покое: %1$Вт
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
+??=??
+Charge_level=Уровень заряда
+Shoot_=Стрелять
+Shoot_everything=Стрелять по всем
+Shoot_nothing=Не стрелять
+Target=Цель
+animals=Животные
+monsters=Монстры
+players=Игроки
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=Атаковать\:
-Do_not_attack\:=Не атаковать\:
-Recharge_power\:=Мощность заряда\:
+Attack\:=Атаковать:
+Do_not_attack\:=Не атаковать:
+Recharge_power\:=Мощность повторной зарядки:
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
-Generates_energy_using_water_stream.=Генерирует электричество используя течение воды.
-No_place_for_water_turbine!=Нет места для турбины\!
+Generates_energy_using_water_stream.=Производит энергию за счет водных потоков
+No_place_for_water_turbine!=Нет места для водяной турбины!
+
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=Перед\: %1$
-Generates_energy_from_wind.=Генерирует энергию при помощи силы ветра.
-Left_Right\:_%1$=Слева/Справа\: %1$
-Up_Down\:_%1$=Сверху/Снизу\: %1$
-Wind_area\:=Ветреная площадь\:
+Front\:_%1$=Сторона: %1$
+Generates_energy_from_wind.=Производит энергию за счет ветра
+Left_Right\:_%1$=Лево/Право: %1$
+Up_Down\:_%1$=Верх/Низ: %1$
+Wind_area\:=Сторона ветра:
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Energy=Энергия
-Light=Освещение
-Machine=Машины
-Ore=Руды
-Portable=Переносные
-Resource=Ресурсы
-Signal=Сигнальные
-Thermal=Тепловые
-Upgrade=Улучшения
-Utilities=Иное
-Wiring=Проводка
+Light=Свет
+Machine=Машина
+Ore=Руда
+Portable=Переносной
+Resource=Ресурс
+Signal=Сигнал
+Thermal=Термо
+Upgrade=Улучшение
+Utilities=Полезности
+Wiring=Провода
 
 # ./src/main/java/mods/eln/wiki/Default.java
-Previous=Предыдущ.
+Previous=Предыдущая 
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
-Can_be_used_to_craft\:=Используется в рецепте\:
-Cannot_be_crafted!=Не может быть создано\!
-Cost_%1$J=Затрачивает %1$Дж
-Created_by\:=Создано\:
-Is_not_a_crafting_material!=Не является материалом для рецепта\!
-Recipe\:=Рецепт\:
+Can_be_used_to_craft\:=Может быть использована для крафта:
+Cannot_be_crafted!=Не может быть скрафчена!
+Cost_%1$J=Стоит %1$Дж
+Created_by\:=Создан:
+Is_not_a_crafting_material!=Не крафтовый материал
+Recipe\:=Рецепт:
 
 # Appearing in multiple source files
+%1$_is_not_in_range!=%1$ вне зоны досягаемости!
 (Increases_capacity)=(Увеличивает емкость)
 (Increases_inductance)=(Повышает индуктивность)
-Actual\:_%1$°C=Текущ.\: %1$°C
-Biggest=Наибольш.
+Actual\:_%1$°C=Текущая: %1$°C
+Battery_level=Уровень заряда батареи
+Biggest=Наибольший
 Booster_slot=Слот для ускорителя
-Can_create\:=Может создавать\:
-Capacity\:_%1$F=Емкость\: %1$F
-Charge_power\:_%1$W=Мощность подзарядки\: %1$Вт
-Connected=Подключено
-Cooling_power\:_%1$W=Мощность охлаждения\: %1$Вт
-Copper_cable_slot=Слот для медного проаода
+Can_create\:=Можно создать:
+Capacity\:_%1$F=Емкость: %1$Ф
+Channel=Канал
+Charge=Зарядка
+Charge_power=Мощность заряда
+Charge_power\:_%1$W=Мощность заряда: %1$Вт
+Closed=Закрыто
+Connected=Соединено
+Cooling_power\:_%1$W=Мощность охлаждения: %1$Вт
+Copper_cable_slot=Слот для медного провода
+Current=Сила тока
 Dielectric_slot=Слот для диэлектрика
-Discharge_power\:_%1$W=Мощность разрядки\: %1$Вт
+Discharge_power\:_%1$W=Разрядка: %1$Вт
 Electrical_cable_slot=Слот для провода
-Entity_filter_slot=Слот для фильтра существ
-Ferromagnetic_core_slot=Слот для ферромагнитного ядра
-Has_a_signal_output.=Имеет выходной сигнал.
-Inductance\:_%1$H=Индуктивность\: %1$H
-Internal_resistance\:_%1$Ω=Внутреннее сопротивление\: %1$Ω
-Is_off=Выкл.
-Is_on=Вкл.
-Max._temperature\:_%1$°C=Макс. нагрев\: %1$°C
-Measured_value\ncorresponding\nto_0%_output=Измеренное значение\nблизко к 0%
-Measured_value\ncorresponding\nto_100%_output=Измеренное значение\nблизко к 100%
-Nominal\:=Минимум\: 
-Nominal_power\:_%1$W=Минимальная мощность\: %1$Вт
-Nominal_usage\:=Минимальное кол-во использований\: 
-Nominal_voltage\:_%1$V=Минимальное напряжение\: %1$В
-Not_connected=Не соединено
+Energy=Энергия
+Entity_filter_slot=Слот для фильтра сущностей
+External_control=Внешнее управление
+Ferromagnetic_core_slot=Слот для ферромагнитного сердечника
+Generated_power=Мощность генератора
+Generates_heat_when_supplied_with_fuel.=Производит тепло будучи заправленным
+Generating=Генерирует
+Has_a_signal_output.=Имеет выход для сигнала
+Inductance\:_%1$H=Индуктивность: %1$Гн
+Input=Вход
+Input_voltage=Входное напряжение
+Internal_control=Ручное управление
+Internal_resistance\:_%1$\u2126=Внутреннее сопротивление: %1$\u2126
+Is_off=Выключено
+Is_on=Включено
+Life=Жизнь
+Max._temperature\:_%1$°C=Макс.температура: %1$°C
+Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
+Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
+No=Нет
+Nominal\:=Номинально:
+Nominal_power\:_%1$W=Мощность: %1$Вт
+Nominal_usage\:=Потребление:
+Nominal_voltage\:_%1$V=Напряжение: %1$В
+None=Нет
+Not_connected=Нет соединения
 Not_enough_space_for_this_block=Недостаточно места для этого блока
+OFF=Выключено
+ON=Включено
+Off=Выкл
+On=Вкл
+Open=Открыто
+Output_voltage=Выходное напряжение
+Portable_battery_slot=Слот для аккумулятора
+Position=Позиция
 Power=Мощность
-Power\:_%1$W=Мощность\: %1$Вт
-Range\:_%1$_blocks=Дальность\: %1$ блока(-ов)
+Power\:_%1$W=Мощность: %1$Вт
+Power_consumption=Потребляемая мощность
+Powered_by_Lamp_Supply=Питать от щитка освещения
+Powered_by_cable=Питать от кабеля
+Produced_power=Выработанная мощность
+Range\:_%1$_blocks=Радиус: %1$ блоков
 Redstone_slot=Слот для редстоуна
-Regulator_slot=Слот для регулировщика
-Reset=Сброс
-Resistance\:_%1$Ω=Сопротивление\: %1$Ω
-Smallest=Наименьш.
-Specify_the_channel=Необходимо указать канал
-Stored_energy\:_%1$J_(%2$%)=Содержащаяся энергия\: %1$Дж (%2$%)
-Temperature\:_%1$°C=Температура\: %1$°C
-Temperature_gauge=Шкала температуры
-Thermal_isolator_slot=Слот для термального изолятора
-Toggle=Переключать
-Toggle_switch=Переключить
-Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Переключает выход каждый\nраз, когда входное значение\nувеличивается.\nПолезно для переключения\nодной и той же лампочки при \nпомощи нескольких кнопок.
-Used_to_cool_down_turbines.=Используется для охлаждения тепловых турбин.
-Uses_the_biggest\nvalue_on_the_channel.=Использует наибольшее \nзначение в канале.
-Uses_the_smallest\nvalue_on_the_channel.=Использует наименьшее \nзначение в канале.
+Redstone_value=Redstone-значение
+Regulator_slot=Слот для регулятора
+Reset=Сбросить
+Resistance=Устойчивость
+Resistance\:_%1$\u2126=Сопротивление: %1$\u2126
+Smallest=Наименьший
+Specify_the_channel=Задать канал
+Specify_the_supply_channel=Назначите питающий канал
+Stored_energy\:_%1$J_(%2$%)=Запасенная энергия: %1$Дж (%2$%)
+Temperature=Температура
+Temperature\:_%1$°C=Температура: %1$°C
+Temperature_gauge=Установка температуры
+Thermal_isolator_slot=Слот для термоизолятора
+Thermal_power=Тепловая мощность
+Toggle=Переключаемый
+Toggle_switch=Переключатель
+Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
+Used_to_cool_down_turbines.=Используется для охлаждения турбин
+Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
+Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
 Validate=Проверить
-Voltage\:_%1$V=Напряжение\: %1$В
-You_can't_place_this_block_at_this_side=Вы не можете разместить данный блок с этой стороны
+Voltage=Напряжение
+Voltage\:_%1$V=Напряжение: %1$В
+Voltage_drop=Скачок напряжения
+Voltages=Напряжения
+Yes=Да
+You_can't_place_this_block_at_this_side=Вы не можете поставить этот блок здесь
+_O\:_= О:

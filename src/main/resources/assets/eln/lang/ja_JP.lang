@@ -1,249 +1,249 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-Electrical_Age_[WIP]=Elektrische leeftijd [WIP]
+Electrical_Age_[WIP]=イレクトリッカルエージ [WIP]
 achievement.craft_50v_macerator=Crushing Novice
 achievement.craft_50v_macerator.desc=Craft a 50V Macerator
 achievement.open_guide=Wiki Power
 achievement.open_guide.desc=Open the wiki guide
 
 # ./src/main/java/mods/eln/Eln.java
-10A_Diode.name=10A Diode
-200V_Active_Thermal_Dissipator.name=200V Actieve koeler
-200V_Battery_Charger.name=200V Batterij oplader
-200V_Compressor.name=200V Compressor
-200V_Condensator.name=200V Condensator
-200V_Copper_Heating_Corp.name=200V Koper verwarmingselement
-200V_Economic_Light_Bulb.name=200V Spaarlamp
+10A_Diode.name=10A ダイオード
+200V_Active_Thermal_Dissipator.name=200V Active Thermal Dissipator
+200V_Battery_Charger.name=200V 電池充電器
+200V_Compressor.name=200V コンプレッサー
+200V_Condensator.name=200V キャパシタ
+200V_Copper_Heating_Corp.name=200V Copper Heating Corp
+200V_Economic_Light_Bulb.name=200V エコ電球
 200V_Emergency_Lamp.name=200V Emergency Lamp
-200V_Farming_Lamp.name=200V Landbouw lamp
+200V_Farming_Lamp.name=200V Farming Lamp
 200V_Fuel_Generator.name=200V Fuel Generator
-200V_Incandescent_Light_Bulb.name=200V Gloeilamp
-200V_Iron_Heating_Corp.name=200V Ijzer verwarmingselement
+200V_Incandescent_Light_Bulb.name=200V 白熱電球
+200V_Iron_Heating_Corp.name=200V Iron Heating Corp
 200V_LED_Bulb.name=200V LED Bulb
-200V_Macerator.name=200V Verpulveraar
-200V_Magnetizer.name=200V Magnetiseerder
-200V_Plate_Machine.name=200V Plaatwals
-200V_Power_Socket.name=200V Stopcontact
-200V_Tungsten_Heating_Corp.name=200V Wolfraam verwarmingselement
-200V_Turbine.name=200V Turbine
-25A_Diode.name=25A Diode
+200V_Macerator.name=200V Macerator
+200V_Magnetizer.name=200V Magnetizer
+200V_Plate_Machine.name=200V Plate Machine
+200V_Power_Socket.name=200V コンセント
+200V_Tungsten_Heating_Corp.name=200V Tungsten Heating Corp
+200V_Turbine.name=200V タービン
+25A_Diode.name=25A ダイオード
 2x3_Rotating_Solar_Panel.name=2x3 Rotating Solar Panel
 2x3_Solar_Panel.name=2x3 Solar Panel
-50V_Battery_Charger.name=50V Batterij oplader
-50V_Carbon_Incandescent_Light_Bulb.name=50V Koolstof gloeilamp
-50V_Compressor.name=50V Compressor
-50V_Condensator.name=50V Condensator
-50V_Copper_Heating_Corp.name=50V Koper verwarmingselement
-50V_Economic_Light_Bulb.name=50V Spaarlamp
-50V_Egg_Incubator.name=50V broedmachine
+50V_Battery_Charger.name=50V 電池充電器
+50V_Carbon_Incandescent_Light_Bulb.name=50V Carbon Incandescent Light Bulb
+50V_Compressor.name=50V コンプレッサー
+50V_Condensator.name=50V Capacitor
+50V_Copper_Heating_Corp.name=50V Copper Heating Corp
+50V_Economic_Light_Bulb.name=50V Economic Light Bulb
+50V_Egg_Incubator.name=50V Egg Incubator
 50V_Emergency_Lamp.name=50V Emergency Lamp
-50V_Farming_Lamp.name=50V Landbouw lamp
+50V_Farming_Lamp.name=50V Farming Lamp
 50V_Fuel_Generator.name=50V Fuel Generator
-50V_Incandescent_Light_Bulb.name=50V Gloeilamp
-50V_Iron_Heating_Corp.name=50V Ijzer verwarmingselement
+50V_Incandescent_Light_Bulb.name=50V 白熱電球
+50V_Iron_Heating_Corp.name=50V Iron Heating Corp
 50V_LED_Bulb.name=50V LED Bulb
-50V_Macerator.name=50V Verpulveraar
-50V_Magnetizer.name=50V Magnetiseerder
-50V_Plate_Machine.name=50V Plaatwals
-50V_Power_Socket.name=50V Stopcontact
-50V_Tungsten_Heating_Corp.name=50V Wolfraam verwarmingselement
+50V_Macerator.name=50V Macerator
+50V_Magnetizer.name=50V Magnetizer
+50V_Plate_Machine.name=50V Plate Machine
+50V_Power_Socket.name=50V Power Socket
+50V_Tungsten_Heating_Corp.name=50V Tungsten Heating Corp
 50V_Turbine.name=50V Turbine
-800V_Defence_Turret.name=800V Verdedigingstorentje
+800V_Defence_Turret.name=800V Defence Turret
 AND_Chip.name=AND Chip
-Advanced_Chip.name=Geavanceerde Chip
-Advanced_Electrical_Motor.name=Geavanceerde Elektrische Motor
-Advanced_Energy_Meter.name=Geavanceerde energiemeter
-Advanced_Machine_Block.name=Geavanceerde machineblok
-Advanced_Magnet.name=Geavanceerde magneet
-AllMeter.name=Universele Meter
-Alloy_Dust.name=Legering stof
-Alloy_Ingot.name=Legering staaf
-Alloy_Plate.name=Legering plaat
+Advanced_Chip.name=Advanced Chip
+Advanced_Electrical_Motor.name=Advanced Electrical Motor
+Advanced_Energy_Meter.name=Advanced Energy Meter
+Advanced_Machine_Block.name=Advanced Machine Block
+Advanced_Magnet.name=Advanced Magnet
+AllMeter.name=Universal-Meter
+Alloy_Dust.name=Alloy Dust
+Alloy_Ingot.name=Alloy Ingot
+Alloy_Plate.name=Alloy Plate
 Amplifier.name=Amplifier
-Analog_Watch.name=Analoog Horloge
-Analog_vuMeter.name=Analoge meter
-Analogic_Regulator.name=Analoge regelaar
-Animal_Filter.name=Dier filter
-Auto_Miner.name=Automatische graver
-Average_Electrical_Drill.name=Normale elektrische boormachine
-Average_Ferromagnetic_Core.name=Normale ferromagnetische kern
-Basic_Magnet.name=Basis magneet
+Analog_Watch.name=Analog watch
+Analog_vuMeter.name=Analog Gauge
+Analogic_Regulator.name=Analogic Regulator
+Animal_Filter.name=Animal Filter
+Auto_Miner.name=Auto Miner
+Average_Electrical_Drill.name=Average Electrical Drill
+Average_Ferromagnetic_Core.name=Average Ferromagnetic Core
+Basic_Magnet.name=普通磁石
 Big_Fuel_Burner.name=Big Fuel Burner
-Black_Brush.name=Zwarte Borstel
+Black_Brush.name=Black Brush
 Blown_Lead_Fuse.name=Blown Lead Fuse
-Blue_Brush.name=Blauwe Borstel
-Brown_Brush.name=Bruine Borstel
-Capacity_Oriented_Battery.name=Capaciteit Georiënteerde Batterij
+Blue_Brush.name=Blue Brush
+Brown_Brush.name=Brown Brush
+Capacity_Oriented_Battery.name=Capacity Oriented Battery
 Casing.name=Casing
-Cheap_Chip.name=Goedkope Chip
-Cheap_Electrical_Drill.name=Goedkoop Elektrisch Boormachine
-Cheap_Ferromagnetic_Core.name=Goedkope ferromagnetische kern
+Cheap_Chip.name=Cheap Chip
+Cheap_Electrical_Drill.name=Cheap Electrical Drill
+Cheap_Ferromagnetic_Core.name=Cheap Ferromagnetic Core
 Cinnabar_Dust.name=Cinnabar Dust
 Cinnabar_Ore.name=Cinnabar Ore
-Coal_Dust.name=Kool Stof
-Coal_Plate.name=Kool plaat
-Combustion_Chamber.name=Verbrandingskamer
+Coal_Dust.name=Coal Dust
+Coal_Plate.name=Coal Plate
+Combustion_Chamber.name=Combustion Chamber
 Configurable_summing_unit.name=Configurable summing unit
-Copper_Cable.name=Koperen Kabel
-Copper_Dust.name=Koper stof
-Copper_Ingot.name=Koperstaaf
-Copper_Ore.name=Kopererts
-Copper_Plate.name=Koper plaat
-Copper_Thermal_Cable.name=Koper thermische kabel
-Cost_Oriented_Battery.name=Kostenefficiënte batterij 
-Current_Oriented_Battery.name=Stroomefficiënte batterij
-Cyan_Brush.name=Cyaan borstel
+Copper_Cable.name=銅ケーブル
+Copper_Dust.name=Copper Dust
+Copper_Ingot.name=Copper Ingot
+Copper_Ore.name=Copper Ore
+Copper_Plate.name=Copper Plate
+Copper_Thermal_Cable.name=Copper Thermal Cable
+Cost_Oriented_Battery.name=Cost Oriented Battery
+Current_Oriented_Battery.name=Current Oriented Battery
+Cyan_Brush.name=Cyan Brush
 DC-DC_Converter.name=DC-DC Converter
 D_Flip_Flop_Chip.name=D Flip Flop Chip
 Data_Logger.name=Data Logger
 Data_Logger_Print.name=Data Logger Print
-Dielectric.name=Diëlectricum
-Digital_Watch.name=Digitaal horloge
-Electrical_Anemometer_Sensor.name=Electrische anemometer sensor
-Electrical_Breaker.name=Elektrische onderbreker
-Electrical_Daylight_Sensor.name=Elektrische daglicht sensor
-Electrical_Entity_Sensor.name=Elektrische entiteit sensor
+Dielectric.name=Dielectric
+Digital_Watch.name=Digital Watch
+Electrical_Anemometer_Sensor.name=Electrical Anemometer Sensor
+Electrical_Breaker.name=Electrical Breaker
+Electrical_Daylight_Sensor.name=Electrical Daylight Sensor
+Electrical_Entity_Sensor.name=Electrical Entity Sensor
 Electrical_Fire_Buzzer.name=Electrical Fire Buzzer
-Electrical_Fire_Detector.name=Elektrische brand detector
-Electrical_Furnace.name=Elektrische oven
+Electrical_Fire_Detector.name=Electrical Fire Detector
+Electrical_Furnace.name=Electrical Furnace
 Electrical_Fuse_Holder.name=Electrical Fuse Holder
-Electrical_Light_Sensor.name=Elektrische licht sensor
-Electrical_Motor.name=Elektrische motor
-Electrical_Probe.name=Elektrische sonde
-Electrical_Probe_Chip.name=Elektrische sonde chip
-Electrical_Source.name=Elektrische bron
-Electrical_Timer.name=Elektrische timer
-Electrical_Weather_Sensor.name=Elektrische weer sensor
+Electrical_Light_Sensor.name=Electrical Light Sensor
+Electrical_Motor.name=電気モーター
+Electrical_Probe.name=Electrical Probe
+Electrical_Probe_Chip.name=Electrical Probe Chip
+Electrical_Source.name=Electrical Source
+Electrical_Timer.name=Electrical Timer
+Electrical_Weather_Sensor.name=Electrical Weather Sensor
 Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
-Energy_Meter.name=Energie meter
+Energy_Meter.name=Energy Meter
 Experimental_Transporter.name=Experimental Transporter
-Fast_Electrical_Drill.name=Snelle elektrische boormachine
-Ferrite_Ingot.name=Ferriet staaf
-Flat_Lamp_Socket.name=Platte lamphouder
+Fast_Electrical_Drill.name=Fast Electrical Drill
+Ferrite_Ingot.name=Ferrite Ingot
+Flat_Lamp_Socket.name=Flat Lamp Socket
 Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
 Flywheel.name=Flywheel
 Fuel_Heat_Furnace.name=Fuel Heat Furnace
 Gas_Turbine.name=Gas Turbine
 Generator.name=Generator
-Gold_Dust.name=Goud stof
-Gold_Plate.name=Goud plaat
-Gray_Brush.name=Grijze borstel
-Green_Brush.name=Groene borstel
-Ground_Cable.name=Aardingskabel
-High_Power_Receiver_Antenna.name=Hoog-vermogen ontvangst-antenne
-High_Power_Transmitter_Antenna.name=Hoog-vermogen verzend-antenne
-High_Voltage_Cable.name=Hoogspanning kabel
-High_Voltage_Relay.name=Hoogspanning relais
-High_Voltage_Switch.name=Hoogspanning schakelaar
-Hub.name=Bus
+Gold_Dust.name=Gold Dust
+Gold_Plate.name=Gold Plate
+Gray_Brush.name=Gray Brush
+Green_Brush.name=Green Brush
+Ground_Cable.name=アースケーブル
+High_Power_Receiver_Antenna.name=High Power Receiver Antenna
+High_Power_Transmitter_Antenna.name=High Power Transmitter Antenna
+High_Voltage_Cable.name=高電圧ケーブル
+High_Voltage_Relay.name=High Voltage Relay
+High_Voltage_Switch.name=High Voltage Switch
+Hub.name=Hub
 Industrial_Data_Logger.name=Industrial Data Logger
-Iron_Cable.name=Ijzer kabel
-Iron_Dust.name=Ijzer stof
-Iron_Plate.name=Ijzer plaat
+Iron_Cable.name=Iron Cable
+Iron_Dust.name=Iron Dust
+Iron_Plate.name=Iron Plate
 JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 Joint.name=Joint
 Joint_hub.name=Joint hub
-LED_vuMeter.name=LED voltmeter
-Lamp_Socket_A.name=Lamphouder A
-Lamp_Socket_B_Projector.name=Lamphouder B projector
-Lamp_Supply.name=Lamp toevoer
+LED_vuMeter.name=LED vuMeter
+Lamp_Socket_A.name=Lamp Socket A
+Lamp_Socket_B_Projector.name=Lamp Socket B Projector
+Lamp_Supply.name=Lamp Supply
 Large_Rheostat.name=Large Rheostat
-Lead_Dust.name=Lood stof
+Lead_Dust.name=Lead Dust
 Lead_Fuse_for_high_voltage_cables.name=Lead Fuse for high voltage cables
 Lead_Fuse_for_low_voltage_cables.name=Lead Fuse for low voltage cables
 Lead_Fuse_for_medium_voltage_cables.name=Lead Fuse for medium voltage cables
 Lead_Fuse_for_very_high_voltage_cables.name=Lead Fuse for very high voltage cables
-Lead_Ingot.name=Lood staaf
-Lead_Ore.name=Lood erts
-Lead_Plate.name=Lood plaat
-Life_Oriented_Battery.name=Leeftijd-efficiënte batterij
-Light_Blue_Brush.name=Licht blauwe borstel
-Lime_Brush.name=Limoen borstel
-Long_Suspended_Lamp_Socket.name=Lange hangende lamphouder
-Low_Power_Receiver_Antenna.name=Laag-vermogen ontvangst-antenne
-Low_Power_Transmitter_Antenna.name=Laag-vermogen verzend-antenne
-Low_Voltage_Cable.name=Laagspanning kabel
-Low_Voltage_Relay.name=Laagspanning relais
-Low_Voltage_Switch.name=Laagspanning schakelaar
+Lead_Ingot.name=Lead Ingot
+Lead_Ore.name=Lead Ore
+Lead_Plate.name=Lead Plate
+Life_Oriented_Battery.name=Life Oriented Battery
+Light_Blue_Brush.name=Light Blue Brush
+Lime_Brush.name=Lime Brush
+Long_Suspended_Lamp_Socket.name=Long Suspended Lamp Socket
+Low_Power_Receiver_Antenna.name=Low Power Receiver Antenna
+Low_Power_Transmitter_Antenna.name=Low Power Transmitter Antenna
+Low_Voltage_Cable.name=低電圧ケーブル
+Low_Voltage_Relay.name=Low Voltage Relay
+Low_Voltage_Switch.name=Low Voltage Switch
 Lowpass_filter.name=Lowpass filter
-Machine_Block.name=Machine blok
-Machine_Booster.name=Machine booster
-Magenta_Brush.name=Magenta borstel
+Machine_Block.name=Machine Block
+Machine_Booster.name=Machine Booster
+Magenta_Brush.name=Magenta Brush
 Medium_Fuel_Burner.name=Medium Fuel Burner
-Medium_Power_Receiver_Antenna.name=Midden-vermogen ontvangst-antenne
-Medium_Power_Transmitter_Antenna.name=Midden-vermogen verzend-antenne
-Medium_Voltage_Cable.name=Middenspanning kabel
-Medium_Voltage_Relay.name=Middenspanning relais
-Medium_Voltage_Switch.name=Middenspanning schakelaar
-Mercury.name=Kwik
-Mining_Pipe.name=Mijn buis
+Medium_Power_Receiver_Antenna.name=Medium Power Receiver Antenna
+Medium_Power_Transmitter_Antenna.name=Medium Power Transmitter Antenna
+Medium_Voltage_Cable.name=Medium Voltage Cable
+Medium_Voltage_Relay.name=Medium Voltage Relay
+Medium_Voltage_Switch.name=Medium Voltage Switch
+Mercury.name=Mercury
+Mining_Pipe.name=Mining Pipe
 Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=Modern Data Logger
-Monster_Filter.name=Monster filter
+Monster_Filter.name=Monster Filter
 MultiMeter.name=Multimeter
 NAND_Chip.name=NAND Chip
 NOR_Chip.name=NOR Chip
 NOT_Chip.name=NOT Chip
-Nuclear_Alarm.name=Nucleair alarm
+Nuclear_Alarm.name=Nuclear Alarm
 OR_Chip.name=OR Chip
 On_OFF_Regulator_10_Percent.name=On/off regulator 10%
 On_OFF_Regulator_1_Percent.name=On/off regulator 1%
 OpAmp.name=OpAmp
-Optimal_Ferromagnetic_Core.name=Optimale ferromagnetische kern
-Orange_Brush.name=Orange borstel
-Ore_Scanner.name=Grondstof scanner
+Optimal_Ferromagnetic_Core.name=Optimal Ferromagnetic Core
+Orange_Brush.name=Orange Brush
+Ore_Scanner.name=Ore Scanner
 Oscillator_Chip.name=Oscillator Chip
-Overheating_Protection.name=Oververhitting beveiliging
-Overvoltage_Protection.name=Overvoltage beveiliging
+Overheating_Protection.name=Overheating Protection
+Overvoltage_Protection.name=Overvoltage Protection
 PAL_Chip.name=PAL Chip
 PID_Regulator.name=PID Regulator
-Pink_Brush.name=Roze borstel
-Player_Filter.name=Speler filter
-Portable_Battery.name=Draagbare batterij
-Portable_Battery_Pack.name=Draagbaar batterijpakket
-Portable_Condensator.name=Draagbare condensator
-Portable_Condensator_Pack.name=Draagbaar condensatorpakket
-Portable_Electrical_Axe.name=Draagbare elektrische bijl
-Portable_Electrical_Mining_Drill.name=Draagbare elektrische boormachine
-Power_Capacitor.name=Vermogencondensator
-Power_Inductor.name=Vermogenspoel
-Power_Resistor.name=Vermogenweerstand
+Pink_Brush.name=Pink Brush
+Player_Filter.name=Player Filter
+Portable_Battery.name=Portable Battery
+Portable_Battery_Pack.name=Portable Battery Pack
+Portable_Condensator.name=Portable Capacitor
+Portable_Condensator_Pack.name=Portable Capacitor Pack
+Portable_Electrical_Axe.name=Portable Electrical Axe
+Portable_Electrical_Mining_Drill.name=Portable Electrical Mining Drill
+Power_Capacitor.name=Power Capacitor
+Power_Inductor.name=Power Inductor
+Power_Resistor.name=Power Resistor
 Power_capacitor.name=Power capacitor
 Power_inductor.name=Power inductor
-Purple_Brush.name=Paarse borstel
-Red_Brush.name=Rode borstel
-Redstone-to-Voltage_Converter.name=Redstone-naar-spanning omzetter
-Rheostat.name=Potentiometer
-Robust_Lamp_Socket.name=Robuuste lamphouder
+Purple_Brush.name=Purple Brush
+Red_Brush.name=Red Brush
+Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
+Rheostat.name=Rheostat
+Robust_Lamp_Socket.name=Robust Lamp Socket
 Rubber.name=Rubber
 Sample_and_hold.name=Sample and hold
 Scanner.name=Scanner
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
 Signal_20H_inductor.name=Signal 20H inductor
-Signal_Antenna.name=Signaal antenne
-Signal_Button.name=Signaal drukknop
-Signal_Cable.name=Signaal kabel
-Signal_Diode.name=Signaal diode
-Signal_Processor.name=Signaal processor
-Signal_Relay.name=Signaal relais
-Signal_Source.name=Signaal bron
-Signal_Switch.name=Signaal schakelaar
-Signal_Switch_with_LED.name=Signaal schakelaar met LED
+Signal_Antenna.name=Signal Antenna
+Signal_Button.name=Signal Button
+Signal_Cable.name=Signal Cable
+Signal_Diode.name=Signal Diode
+Signal_Processor.name=Signal Processor
+Signal_Relay.name=Signal Relay
+Signal_Source.name=Signal Source
+Signal_Switch.name=Signal Switch
+Signal_Switch_with_LED.name=Signal Switch with LED
 Signal_Trimmer.name=Signal Trimmer
-Silicon_Dust.name=Silicium stof
-Silicon_Ingot.name=Silicium staaf
-Silicon_Plate.name=Siliconen plaat
-Silver_Brush.name=Zilveren borstel
-Simple_Lamp_Socket.name=Simpele lamphouder
-Single-use_Battery.name=Niet oplaadbare batterij
-Small_200V_Copper_Heating_Corp.name=Kleine 200V koper verwarmingselement
-Small_200V_Iron_Heating_Corp.name=Kleine 200V ijzer verwarmingselement
-Small_200V_Tungsten_Heating_Corp.name=Kleine 200V wolfraam verwarmingselement
-Small_50V_Carbon_Incandescent_Light_Bulb.name=Kleine 50V koolstof gloeilamp
+Silicon_Dust.name=Silicon Dust
+Silicon_Ingot.name=Silicon Ingot
+Silicon_Plate.name=Silicon Plate
+Silver_Brush.name=Silver Brush
+Simple_Lamp_Socket.name=Simple Lamp Socket
+Single-use_Battery.name=Single-use Battery
+Small_200V_Copper_Heating_Corp.name=Small 200V Copper Heating Corp
+Small_200V_Iron_Heating_Corp.name=Small 200V Iron Heating Corp
+Small_200V_Tungsten_Heating_Corp.name=Small 200V Tungsten Heating Corp
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Small 50V Carbon Incandescent Light Bulb
 Small_50V_Copper_Heating_Corp.name=Small 50V Copper Heating Corp
-Small_50V_Economic_Light_Bulb.name=Kleine 50V Spaarlamp
+Small_50V_Economic_Light_Bulb.name=Small 50V Economic Light Bulb
 Small_50V_Incandescent_Light_Bulb.name=Small 50V Incandescent Light Bulb
 Small_50V_Iron_Heating_Corp.name=Small 50V Iron Heating Corp
 Small_50V_Tungsten_Heating_Corp.name=Small 50V Tungsten Heating Corp
@@ -321,7 +321,7 @@ tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other ene
 You_have_%1$_lives_left=You have %1$ lives left
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.kt
-Brush_is_dry=Kwast is droog
+Brush_is_dry=Brush is dry
 Can_paint_%1$_blocks=Can paint %1$ blocks
 
 # ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
@@ -331,7 +331,7 @@ Can_be_used_to_encase_EA_items_that_support_it=Can be used to encase EA items th
 Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Energie per handeling: %1$s
+Energy_per_operation\:_%1$J=Energy per operation: %1$J
 Time_per_operation\:_%1$h=Time per operation: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
@@ -505,8 +505,8 @@ Print=Print
 Sampling_period=Sampling period
 Temp._[*C]=Temp. [*C]
 Voltage_[V]=Voltage [V]
-Y-axis_max=Y-as maximum
-Y-axis_min=Y-as minimum
+Y-axis_max=Y-axis max
+Y-axis_min=Y-axis min
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
@@ -523,7 +523,7 @@ Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Battery powered buzzer \
 Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
-Fire_detected\:_=Vuur gedetecteerd:
+Fire_detected\:_=Fire detected:
 Fire_present=Fire present
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
@@ -679,8 +679,8 @@ Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
 Total_power=Total power
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
-Power_channel_name=Stroom kanaal naam
-Wireless_channel_name=Draadloze kanaal naam
+Power_channel_name=Power channel name
+Wireless_channel_name=Wireless channel name
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
 Modbus_TCP=Modbus TCP
@@ -688,17 +688,17 @@ Modbus_Unit_ID=Modbus Unit ID
 Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus is disabled, enable it in Eln.cfg
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
-Add=Toevoegen
-Channel_name=Kanaal naam
+Add=Add
+Channel_name=Channel name
 Modbus_ID=Modbus ID
 Modbus_RTU=Modbus RTU
 Station_ID=Station ID
-Station_name=Station naam
-Wireless_RX=Draadloze RX
-Wireless_TX=Draadloze TX
+Station_name=Station name
+Wireless_RX=Wireless RX
+Wireless_TX=Wireless TX
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
-(Increases_maximum_voltage)=(Verhoogt maximale voltage)
+(Increases_maximum_voltage)=(Increases maximum voltage)
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
 Capacity=Capacity
@@ -719,7 +719,7 @@ Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in wit
 Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
-(Sets_resistance)=(Zet weerstand)
+(Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
@@ -738,7 +738,7 @@ Cable_slot=Cable slot
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Can measure:
-Measures_temperature_of_cables.=Meet de temperatuur van kabels.
+Measures_temperature_of_cables.=Measures temperature of cables.
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
 __Temperature_Power_conducted=Temperature/Power conducted
 
@@ -798,8 +798,8 @@ Halves_speed,_triples_power_draw=Halves speed, triples power draw
 Silk_Touch=Silk Touch
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
-Overheating_protection=Oververhittingsbeveiliging
-Overvoltage_protection=Overspanningsbeveiliging
+Overheating_protection=Overheating protection
+Overvoltage_protection=Overvoltage protection
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
 Actual_charge\:_=Actual charge:
@@ -811,14 +811,14 @@ Nominal_voltage\:_=Nominal voltage:
 _charged_at_=charged at
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charged=Geladen
-Discharge=Ontladen
-Energy\:=Energie:
-Energy\:_%1$=Energie: %1$
+Charged=Charged
+Discharge=Discharge
+Energy\:=Energy:
+Energy\:_%1$=Energy: %1$
 Life\:=Life:
-No_charge=Geen lading
-Power_in\:=Stroom in:
-Power_out\:=Stroom uit:
+No_charge=No charge
+Power_in\:=Power in:
+Power_out\:=Power out:
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
 Egg_slot=Egg slot
@@ -852,12 +852,12 @@ Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla 
 Heating_element=Heating element
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
-Auto_shutdown=Automatische uitschakeling
-Manual_shutdown=Handmatige uitschakeling
-Set_point\:_%1$°C=Zet punt: %1$°C
+Auto_shutdown=Auto shutdown
+Manual_shutdown=Manual shutdown
+Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
-Cost=Kosten
+Cost=Cost
 Nominal_voltage\:_%1V$=Nominal voltage: %1V$
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
@@ -883,8 +883,8 @@ Solar_tracker_slot=Solar tracker slot
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=Can be geared towards the sun.
-Max._power\:_%1$W=Max. power: %1$W
-Max._voltage\:_%1$V=Max. voltage: %1$V
+Max._power\:_%1$W=高電力：%1$W
+Max._voltage\:_%1$V=高電圧：%1$V
 Produces_power_from_solar_radiation.=Produces power from solar radiation.
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
@@ -893,9 +893,9 @@ Producing_energy=Producing energy
 Sun_angle=Sun angle
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
-It_is_night=Het is nacht
-Solar_panel_angle\:_%1$°=Hoek van het zonnepaneel: %1$°
-Sun_angle\:_%1$°=Hoek van de zon: %1$°
+It_is_night=It is night
+Solar_panel_angle\:_%1$°=Solar panel angle: %1$°
+Sun_angle\:_%1$°=Sun angle: %1$°
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
 Destination=Destination
@@ -904,10 +904,10 @@ Required_energy=Required energy
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Destination transporter
-Power_consumption\:=Stroom gebruik:
-Power_consumption\:_%1$W=Stroom gebruik: %1$W
-Required_energy\:_%1$J=Benodigde energie: %1$J
-Start=Begin
+Power_consumption\:=Power consumption:
+Power_consumption\:_%1$W=Power consumption: %1$W
+Required_energy\:_%1$J=Required energy: %1$J
+Start=Start
 Transporter_name=Transporter name
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
@@ -954,8 +954,8 @@ monsters=monsters
 players=players
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=Aanvallen:
-Do_not_attack\:=Niet aanvallen:
+Attack\:=Attack:
+Do_not_attack\:=Do not attack:
 Recharge_power\:=Recharge power:
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
@@ -972,51 +972,51 @@ Up_Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Light=Licht
+Light=Light
 Machine=Machine
-Ore=Erts
-Portable=Draagbaar
-Resource=Middel
-Signal=Signaal
+Ore=Ore
+Portable=Portable
+Resource=Resource
+Signal=Signal
 Thermal=Thermal
 Upgrade=Upgrade
 Utilities=Utilities
-Wiring=Bedrading
+Wiring=Wiring
 
 # ./src/main/java/mods/eln/wiki/Default.java
-Previous=Vorige
+Previous=Previous
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
 Can_be_used_to_craft\:=Can be used to craft:
 Cannot_be_crafted!=Cannot be crafted!
-Cost_%1$J=Kost %1$J
-Created_by\:=Gemaakt door:
+Cost_%1$J=Cost %1$J
+Created_by\:=Created by:
 Is_not_a_crafting_material!=Is not a crafting material!
-Recipe\:=Recept:
+Recipe\:=Recipe:
 
 # Appearing in multiple source files
 %1$_is_not_in_range!=%1$ is not in range!
-(Increases_capacity)=(Vergroot capaciteit)
-(Increases_inductance)=(Verhoogt inductie)
+(Increases_capacity)=(Increases capacity)
+(Increases_inductance)=(Increases inductance)
 Actual\:_%1$°C=Actual: %1$°C
 Battery_level=Battery level
-Biggest=Grootste
+Biggest=Biggest
 Booster_slot=Booster slot
 Can_create\:=Can create:
-Capacity\:_%1$F=Capaciteit: %1$F
+Capacity\:_%1$F=Capacity: %1$F
 Channel=Channel
-Charge=Laden
+Charge=Charge
 Charge_power=Charge power
 Charge_power\:_%1$W=Charge power: %1$W
 Closed=Closed
-Connected=Verbonden
+Connected=Connected
 Cooling_power\:_%1$W=Cooling power: %1$W
 Copper_cable_slot=Copper cable slot
 Current=Current
 Dielectric_slot=Dielectric slot
 Discharge_power\:_%1$W=Discharge power: %1$W
 Electrical_cable_slot=Electrical cable slot
-Energy=Energie
+Energy=Energy
 Entity_filter_slot=Entity filter slot
 External_control=External control
 Ferromagnetic_core_slot=Ferromagnetic core slot
@@ -1024,10 +1024,10 @@ Generated_power=Generated power
 Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
 Generating=Generating
 Has_a_signal_output.=Has a signal output.
-Inductance\:_%1$H=Inductie: %1$H
+Inductance\:_%1$H=Inductance: %1$H
 Input=Input
 Input_voltage=Input voltage
-Internal_control=Interne controle
+Internal_control=Internal control
 Internal_resistance\:_%1$\u2126=Internal resistance: %1$\u2126
 Is_off=Is off
 Is_on=Is on
@@ -1041,7 +1041,7 @@ Nominal_power\:_%1$W=Nominal power: %1$W
 Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
 None=None
-Not_connected=Niet verbonden
+Not_connected=Not connected
 Not_enough_space_for_this_block=Not enough space for this block
 OFF=OFF
 ON=ON
@@ -1064,17 +1064,17 @@ Regulator_slot=Regulator slot
 Reset=Reset
 Resistance=Resistance
 Resistance\:_%1$\u2126=Resistance: %1$\u2126
-Smallest=Kleinste
-Specify_the_channel=Specificeer het kanaal
+Smallest=Smallest
+Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
-Temperature=Temperatuur
+Temperature=Temperature
 Temperature\:_%1$°C=Temperature: %1$°C
-Temperature_gauge=Temperatuurmeter
+Temperature_gauge=Temperature gauge
 Thermal_isolator_slot=Thermal isolator slot
 Thermal_power=Thermal power
-Toggle=Schakel
-Toggle_switch=Schakel schakelaar
+Toggle=Toggle
+Toggle_switch=Toggle switch
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
 Used_to_cool_down_turbines.=Used to cool down turbines.
 Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
