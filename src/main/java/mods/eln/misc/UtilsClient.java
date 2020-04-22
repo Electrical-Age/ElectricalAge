@@ -47,6 +47,7 @@ public class UtilsClient {
     private static int uuid = Integer.MIN_VALUE;
 
     final static ResourceLocation whiteTexture = new ResourceLocation("eln", "sprites/cable.png");
+    final static ResourceLocation portableBatteryOverlayResource = new ResourceLocation("eln", "sprites/portablebatteryoverlay.png");
 
     private UtilsClient() {
     }
@@ -280,7 +281,7 @@ public class UtilsClient {
     }
 
     public static void drawEnergyBare(ItemRenderType type, float e) {
-        drawIcon(type, new ResourceLocation("eln", "sprites/portablebatteryoverlay.png"));
+        drawIcon(type, portableBatteryOverlayResource);
 
         float x = 13f, y = 14f - e * 12f;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -288,22 +289,21 @@ public class UtilsClient {
         GL11.glColor3f(0f, 0f, 0f);
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex3f(x + 1f, 2, 0.01f);
-        GL11.glVertex3f(x, 2, 0f);
-        GL11.glVertex3f(x, 14f, 0f);
+        GL11.glVertex3f(x, 2, 0.01f);
+        GL11.glVertex3f(x, 14f, 0.01f);
         GL11.glVertex3f(x + 1f, 14f, 0.01f);
         GL11.glEnd();
 
         GL11.glColor3f(1, e, 0f);
         GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex3f(x + 1f, y, 0.01f);
-        GL11.glVertex3f(x, y, 0f);
-        GL11.glVertex3f(x, 14f, 0f);
-        GL11.glVertex3f(x + 1f, 14f, 0.01f);
+        GL11.glVertex3f(x + 1f, y, 0.02f);
+        GL11.glVertex3f(x, y, 0.02f);
+        GL11.glVertex3f(x, 14f, 0.02f);
+        GL11.glVertex3f(x + 1f, 14f, 0.02f);
         GL11.glEnd();
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glColor3f(1f, 1f, 1f);
-
     }
 
     public static void bindTexture(ResourceLocation resource) {

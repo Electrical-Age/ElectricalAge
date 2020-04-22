@@ -137,6 +137,7 @@ High_Voltage_Cable.name=High Voltage Cable
 High_Voltage_Relay.name=High Voltage Relay
 High_Voltage_Switch.name=High Voltage Switch
 Hub.name=Hub
+Improved_Flashlight.name=Improved Flashlight
 Industrial_Data_Logger.name=Industrial Data Logger
 Iron_Cable.name=Iron Cable
 Iron_Dust.name=Iron Dust
@@ -261,6 +262,7 @@ Street_Light.name=Streetlight
 Suspended_Lamp_Socket.name=Suspended Lamp Socket
 Tachometer.name=Tachometer
 Temperature_Probe.name=Temperature Probe
+Thermal_Insulation.name=Thermal Insulation
 Thermal_Probe.name=Thermal Probe
 Thermal_Probe_Chip.name=Thermal Probe Chip
 Thermistor.name=Thermistor
@@ -365,11 +367,23 @@ Useful_to_prevent_over-voltage\nof_Batteries=Useful to prevent over-voltage\nof 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
 Solar_panel_upgrade=Solar panel upgrade
 
-# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
+# ./src/main/java/mods/eln/item/ThermalIsolatorElement.kt
+Organic_Asbestos™=Organic Asbestos™
+Upgrade_for_the_Stone_Heat_Furnace=Upgrade for the Stone Heat Furnace
+__Heat_tolerance\:=  Heat tolerance:
+__Insulation\:=  Insulation:
 
-# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
+# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.kt
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalAxe.kt
+Cuts_down_trees._Right-click_to_make_it_act_like_a_regular_axe.=Cuts down trees. Right-click to make it act like a regular axe.
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.kt
 State\:=State:
-Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+Stored_Energy\:_%1\$J_(%2$%)=Stored Energy: %1\$J (%2$%)
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalPickaxe.kt
+Opens_holes._Right-click_to_open_smaller_holes.=Opens holes. Right-click to open smaller holes.
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -726,7 +740,7 @@ Coal_dust_slot=Coal dust slot
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
-Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
+Low_serialized_resistance\n_\=>_High_conductivity.=Low serialized resistance\n => High conductivity.
 Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
 Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W
 
@@ -763,7 +777,6 @@ Fuel_level=Fuel level
 Nominal_power\:_%1$_W=Nominal power: %1$ W
 Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
 Produces_electricity_using_gasoline.=Produces electricity using gasoline.
-State=State
 
 # ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
 Actual\:_%1$=Actual: %1$
@@ -1007,14 +1020,14 @@ Capacity\:_%1$F=Capacity: %1$F
 Channel=Channel
 Charge=Charge
 Charge_power=Charge power
-Charge_power\:_%1$W=Charge power: %1$W
+Charge_power\:_%1\$W=Charge power: %1\$W
 Closed=Closed
 Connected=Connected
 Cooling_power\:_%1$W=Cooling power: %1$W
 Copper_cable_slot=Copper cable slot
 Current=Current
 Dielectric_slot=Dielectric slot
-Discharge_power\:_%1$W=Discharge power: %1$W
+Discharge_power\:_%1\$W=Discharge power: %1\$W
 Electrical_cable_slot=Electrical cable slot
 Energy=Energy
 Entity_filter_slot=Entity filter slot
@@ -1067,7 +1080,8 @@ Resistance\:_%1$\u2126=Resistance: %1$\u2126
 Smallest=Smallest
 Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel
-Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
+State=State
+Stored_energy\:_%1\$J_(%2$%)=Stored energy: %1\$J (%2$%)
 Temperature=Temperature
 Temperature\:_%1$°C=Temperature: %1$°C
 Temperature_gauge=Temperature gauge

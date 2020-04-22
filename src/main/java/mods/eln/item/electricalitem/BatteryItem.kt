@@ -1,6 +1,7 @@
 package mods.eln.item.electricalitem
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor
+import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.misc.UtilsClient
@@ -11,8 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-
-import mods.eln.i18n.I18N.tr
+import kotlin.math.max
 
 class BatteryItem(name: String, private var energyStorage: Double, internal var chargePower: Double, internal var dischargePower: Double, private val priority: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
 
@@ -42,7 +42,7 @@ class BatteryItem(name: String, private var energyStorage: Double, internal var 
     }
 
     override fun setEnergy(stack: ItemStack, value: Double) {
-        getNbt(stack).setDouble("energy", Math.max(0.0, value))
+        getNbt(stack).setDouble("energy", max(0.0, value))
     }
 
     override fun getEnergyMax(stack: ItemStack): Double {
