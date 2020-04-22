@@ -1,5 +1,6 @@
 package mods.eln.item.electricalitem
 
+import mods.eln.i18n.I18N.tr
 import mods.eln.misc.Utils
 import mods.eln.sim.IProcess
 import mods.eln.wiki.Data
@@ -24,6 +25,11 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+        super.addInformation(itemStack, entityPlayer, list, par4)
+        list.add(tr("Cuts down trees. Right-click to make it act like a regular axe."))
+    }
+
     override fun getStrVsBlock(stack: ItemStack, block: Block?): Float {
         return when {
             block != null && (block.material === Material.wood || block.material === Material.plants || block.material === Material.vine) -> getStrength(stack)
@@ -39,7 +45,11 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
     }
 
     private fun getCapitation(stack: ItemStack): Boolean {
-        return getNbt(stack).getBoolean("capitation")
+        val nbt = getNbt(stack)
+        if (!nbt.hasKey("capitation")) {
+            nbt.setBoolean("capitation", true)
+        }
+        return nbt.getBoolean("capitation")
     }
 
     private fun setCapitation(p: EntityPlayer?, stack: ItemStack, capitation: Boolean) {
@@ -348,35 +358,37 @@ object TreeCapitation : IProcess {
             }
         }
     }
+}
 
-    /**
-     * The bits below, however, are from ToolCommons.java. Mostly. Maybe about half, by now.
-     */
-    fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
-        if (world.isRemote || !world.blockExists(x, y, z))
+/**
+ * The bits below, however, are from ToolCommons.java. Mostly. Maybe about half, by now.
+ */
+fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
+    if (world.isRemote || !world.blockExists(x, y, z))
+        return
+
+    val block = world.getBlock(x, y, z)
+    val meta = world.getBlockMetadata(x, y, z)
+
+    if (block != null && !block.isAir(world, x, y, z) && block.getPlayerRelativeBlockHardness(player, world, x, y, z) > 0) {
+        if (!block.canHarvestBlock(player, meta))
             return
 
-        val block = world.getBlock(x, y, z)
-        val meta = world.getBlockMetadata(x, y, z)
+        if (!player.capabilities.isCreativeMode) {
+            val energy = tool.getEnergy(stack)
+            tool.subtractEnergyForBlockBreak(stack, block)
+            val newEnergy = tool.getEnergy(stack)
+            if (newEnergy > 0 && newEnergy < energy) {
+                val localMeta = world.getBlockMetadata(x, y, z)
+                block.onBlockHarvested(world, x, y, z, localMeta, player)
 
-        if (block != null && !block.isAir(world, x, y, z) && block.getPlayerRelativeBlockHardness(player, world, x, y, z) > 0) {
-            if (!block.canHarvestBlock(player, meta)/* || !isRightMaterial(mat, materialsListing)*/)
-                return
-
-            if (!player.capabilities.isCreativeMode) {
-                tool.subtractEnergyForBlockBreak(stack, block)
-                if (tool.getEnergy(stack) > 0) {
-                    val localMeta = world.getBlockMetadata(x, y, z)
-                    block.onBlockHarvested(world, x, y, z, localMeta, player)
-
-                    if (block.removedByPlayer(world, player, x, y, z, true)) {
-                        block.onBlockDestroyedByPlayer(world, x, y, z, localMeta)
-                        block.harvestBlock(world, player, x, y, z, localMeta)
-                    }
+                if (block.removedByPlayer(world, player, x, y, z, true)) {
+                    block.onBlockDestroyedByPlayer(world, x, y, z, localMeta)
+                    block.harvestBlock(world, player, x, y, z, localMeta)
                 }
-            } else {
-                world.setBlockToAir(x, y, z)
             }
+        } else {
+            world.setBlockToAir(x, y, z)
         }
     }
 }
