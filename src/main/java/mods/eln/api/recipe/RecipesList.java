@@ -1,7 +1,8 @@
-package mods.eln.misc;
+package mods.eln.api.recipe;
 
 import mods.eln.Eln;
-import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
+import mods.eln.api.Misc;
+import mods.eln.api.Utilities;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
@@ -19,43 +20,6 @@ public class RecipesList {
 
     public RecipesList() {
         listOfList.add(this);
-    }
-
-    public ArrayList<Recipe> getRecipes() {
-        return recipeList;
-    }
-
-    public ArrayList<ItemStack> getMachines() {
-        return machineList;
-    }
-
-    public void addRecipe(Recipe recipe) {
-        recipeList.add(recipe);
-        recipe.setMachineList(machineList);
-    }
-
-    public void addMachine(ItemStack machine) {
-        machineList.add(machine);
-    }
-
-    public Recipe getRecipe(ItemStack input) {
-        for (Recipe r : recipeList) {
-            if (r.canBeCraftedBy(input)) return r;
-        }
-        return null;
-    }
-
-    public ArrayList<Recipe> getRecipeFromOutput(ItemStack output) {
-        ArrayList<Recipe> list = new ArrayList<Recipe>();
-        for (Recipe r : recipeList) {
-            for (ItemStack stack : r.getOutputCopy()) {
-                if (Utils.areSame(stack, output)) {
-                    list.add(r);
-                    break;
-                }
-            }
-        }
-        return list;
     }
 
     public static ArrayList<Recipe> getGlobalRecipeWithOutput(ItemStack output) {
@@ -76,8 +40,8 @@ public class RecipesList {
                     Recipe recipe; // List<Integer>, ItemStack
                     ItemStack stack = (ItemStack) pairs.getValue();
                     ItemStack li = (ItemStack) pairs.getKey();
-                    if (Utils.areSame(output, stack)) {
-                        list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+                    if (Utilities.areSame(output, stack)) {
+                        list.add(recipe = new Recipe(li.copy(), output, Misc.getElectricalFurnaceProcessEnergyNeededPerSmelt()));
                         recipe.setMachineList(Eln.instance.furnaceList);
                     }
                 } catch (Exception e) {
@@ -106,7 +70,7 @@ public class RecipesList {
             try {
                 ItemStack input1 = input.copy();
                 input1.stackSize = 1;
-                list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
+                list.add(smeltRecipe = new Recipe(input1, smeltResult, Misc.getElectricalFurnaceProcessEnergyNeededPerSmelt()));
                 smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
             } catch (Exception e) {
                 // TODO: handle exception
@@ -114,6 +78,43 @@ public class RecipesList {
         }
 
         return list;
+    }
+
+    public ArrayList<Recipe> getRecipes() {
+        return recipeList;
+    }
+
+    public ArrayList<ItemStack> getMachines() {
+        return machineList;
+    }
+
+    public void addRecipe(Recipe recipe) {
+        recipeList.add(recipe);
+        recipe.setMachineList(machineList);
+    }
+
+    public void addMachine(ItemStack machine) {
+        machineList.add(machine);
+    }
+
+    public ArrayList<Recipe> getRecipeFromOutput(ItemStack output) {
+        ArrayList<Recipe> list = new ArrayList<Recipe>();
+        for (Recipe r : recipeList) {
+            for (ItemStack stack : r.getOutputCopy()) {
+                if (Utilities.areSame(stack, output)) {
+                    list.add(r);
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+
+    public Recipe getRecipe(ItemStack input) {
+        for (Recipe r : recipeList) {
+            if (r.canBeCraftedBy(input)) return r;
+        }
+        return null;
     }
 }
 /*		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),

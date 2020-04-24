@@ -81,12 +81,17 @@ repositories {
         name = "mobiusstrip"
         url = "http://default.mobiusstrip.eu/maven/"
     }
+    ivy {
+        name 'MineTweaker3'
+        artifactPattern "http://minetweaker3.powerofbytes.com/download/[module]-[classifier]-[revision].[ext]"
+    }
 }
 
 dependencies {
     external files("libs/commons-math3-3.3.jar")
     shade "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
+	compile name: 'MineTweaker3', version: '1.7.10-3.0.10B', classifier: 'Dev', ext: 'jar'
 }
 
 jar {

@@ -10,6 +10,9 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import mods.eln.api.Utilities;
+import mods.eln.api.recipe.Recipe;
+import mods.eln.api.recipe.RecipesList;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -25,6 +28,7 @@ import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.integration.minetweaker.MinetweakerIntegration;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -937,7 +941,7 @@ public class Eln {
                 IRecipe r = (IRecipe) o;
                 if (r.getRecipeOutput() == null)
                     continue;
-                if (Utils.areSame(stack, r.getRecipeOutput()))
+                if (Utilities.areSame(stack, r.getRecipeOutput()))
                     return true;
             }
         }
@@ -952,7 +956,10 @@ public class Eln {
     public void postInit(FMLPostInitializationEvent event) {
 
         serverEventListener = new ServerEventListener();
-
+		
+		if(Loader.isModLoaded("MineTweaker3")){
+            MinetweakerIntegration.INSTANCE.initialize();
+        }
     }
 
 	/*

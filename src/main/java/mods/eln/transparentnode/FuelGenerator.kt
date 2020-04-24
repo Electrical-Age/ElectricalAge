@@ -60,7 +60,7 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
     internal val switch = obj?.getPart("switch")
     internal val cableRenderDescriptor = cable.render
 
-    internal val fuels = FuelRegistry.gasolineList
+    internal val fuels = { FuelRegistry.gasolineList }
 
     init {
         voltageLevelColor = VoltageLevelColor.fromCable(cable)
@@ -115,7 +115,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     internal var powerSource = PowerSource("powerSource", positiveLoad)
     internal var slowProcess = FuelGeneratorSlowProcess(this)
     internal var descriptor = descriptor_ as FuelGeneratorDescriptor
-    internal val fuels = FuelRegistry.fluidListToFluids(descriptor.fuels).map { it.id }
+    internal val fuels = FuelRegistry.fluidListToFluids(descriptor.fuels.invoke()).map { it.id }
     internal var tankLevel = 0.0
     internal var tankFluid = FluidRegistry.getFluid("lava").id
     internal var on by published(false)

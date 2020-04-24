@@ -3,6 +3,7 @@ package mods.eln.misc;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
+import mods.eln.api.Utilities;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -40,7 +41,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.lwjgl.opengl.GL11;
@@ -940,22 +940,6 @@ public class Utils {
         return Float.intBitsToFloat(bit);
     }
 
-    public static boolean areSame(ItemStack stack, ItemStack output) {
-        try {
-            if (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage()) return true;
-            int[] stackIds = OreDictionary.getOreIDs(stack);
-            int[] outputIds = OreDictionary.getOreIDs(output);
-            // System.out.println(Arrays.toString(stackIds) + "   " + Arrays.toString(outputIds));
-            for (int i : outputIds) {
-                for (int j : stackIds) {
-                    if (i == j) return true;
-                }
-            }
-        } catch (Exception e) {
-        }
-        return false;
-    }
-
     public static Vec3 getVec05(Coordonate c) {
         return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
     }
@@ -1416,9 +1400,9 @@ public class Utils {
         return new float[]{Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16)};
     }
 
-    public static boolean isWrench(ItemStack stack) {
-        return areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
-    }
+	public static boolean isWrench(ItemStack stack) {
+		return Utilities.areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
+	}
 
     // @SideOnly(Side.SERVER)
     public static boolean isPlayerUsingWrench(EntityPlayer player) {
