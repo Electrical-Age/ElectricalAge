@@ -1,341 +1,341 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-Electrical_Age_[WIP]=Elektrische leeftijd [WIP]
+Electrical_Age_[WIP]=Electrical Age [WIP]
 achievement.craft_50v_macerator=Crushing Novice
-achievement.craft_50v_macerator.desc=Craft a 50V Macerator
+achievement.craft_50v_macerator.desc=Készíts egy 50V Darálót
 achievement.open_guide=Wiki Power
-achievement.open_guide.desc=Open the wiki guide
+achievement.open_guide.desc=Wiki útmutató megnyitása
 
 # ./src/main/java/mods/eln/Eln.java
-10A_Diode.name=10A Diode
-200V_Active_Thermal_Dissipator.name=200V Actieve koeler
-200V_Battery_Charger.name=200V Batterij oplader
-200V_Compressor.name=200V Compressor
-200V_Condensator.name=200V Condensator
-200V_Copper_Heating_Corp.name=200V Koper verwarmingselement
-200V_Economic_Light_Bulb.name=200V Spaarlamp
+10A_Diode.name=10A Dióda
+200V_Active_Thermal_Dissipator.name=200V Aktív Hűtőborda
+200V_Battery_Charger.name=200V Akkumulátortöltő
+200V_Compressor.name=200V Kompresszor
+200V_Condensator.name=200V Kondenzátor
+200V_Copper_Heating_Corp.name=200V Réz Fűtőtest
+200V_Economic_Light_Bulb.name=200V Energiatakarékos Izzó
 200V_Emergency_Lamp.name=200V Emergency Lamp
-200V_Farming_Lamp.name=200V Landbouw lamp
-200V_Fuel_Generator.name=200V Fuel Generator
-200V_Incandescent_Light_Bulb.name=200V Gloeilamp
-200V_Iron_Heating_Corp.name=200V Ijzer verwarmingselement
-200V_LED_Bulb.name=200V LED Bulb
-200V_Macerator.name=200V Verpulveraar
-200V_Magnetizer.name=200V Magnetiseerder
-200V_Plate_Machine.name=200V Plaatwals
-200V_Power_Socket.name=200V Stopcontact
-200V_Tungsten_Heating_Corp.name=200V Wolfraam verwarmingselement
-200V_Turbine.name=200V Turbine
-25A_Diode.name=25A Diode
-2x3_Rotating_Solar_Panel.name=2x3 Rotating Solar Panel
-2x3_Solar_Panel.name=2x3 Solar Panel
-50V_Battery_Charger.name=50V Batterij oplader
-50V_Carbon_Incandescent_Light_Bulb.name=50V Koolstof gloeilamp
-50V_Compressor.name=50V Compressor
-50V_Condensator.name=50V Condensator
-50V_Copper_Heating_Corp.name=50V Koper verwarmingselement
-50V_Economic_Light_Bulb.name=50V Spaarlamp
-50V_Egg_Incubator.name=50V broedmachine
+200V_Farming_Lamp.name=200 Farm Lámpa
+200V_Fuel_Generator.name=200V Üzemanyag Generátor
+200V_Incandescent_Light_Bulb.name=200V Izzó
+200V_Iron_Heating_Corp.name=200V Vas Fűtőtest
+200V_LED_Bulb.name=200V LED
+200V_Macerator.name=200V Daráló
+200V_Magnetizer.name=200V Mágnesező
+200V_Plate_Machine.name=200V Lemezkészítő Gép
+200V_Power_Socket.name=200V Konnektor
+200V_Tungsten_Heating_Corp.name=200V Volfrám Fűtőtest
+200V_Turbine.name=200V Turbina
+25A_Diode.name=25A Dióda
+2x3_Rotating_Solar_Panel.name=2x3 Forgó Napelem
+2x3_Solar_Panel.name=2x3 Napelem
+50V_Battery_Charger.name=50V Akkumulátortöltő
+50V_Carbon_Incandescent_Light_Bulb.name=50V Szénszálas Izzó
+50V_Compressor.name=50V Kompresszor
+50V_Condensator.name=50V Kondenzátor
+50V_Copper_Heating_Corp.name=50V Réz Fűtőtest
+50V_Economic_Light_Bulb.name=50V Energiatakarékos Izzó
+50V_Egg_Incubator.name=50V Tojáskeltető
 50V_Emergency_Lamp.name=50V Emergency Lamp
-50V_Farming_Lamp.name=50V Landbouw lamp
-50V_Fuel_Generator.name=50V Fuel Generator
-50V_Incandescent_Light_Bulb.name=50V Gloeilamp
-50V_Iron_Heating_Corp.name=50V Ijzer verwarmingselement
-50V_LED_Bulb.name=50V LED Bulb
-50V_Macerator.name=50V Verpulveraar
-50V_Magnetizer.name=50V Magnetiseerder
-50V_Plate_Machine.name=50V Plaatwals
-50V_Power_Socket.name=50V Stopcontact
-50V_Tungsten_Heating_Corp.name=50V Wolfraam verwarmingselement
-50V_Turbine.name=50V Turbine
-800V_Defence_Turret.name=800V Verdedigingstorentje
+50V_Farming_Lamp.name=50V Farm Lámpa
+50V_Fuel_Generator.name=50V Üzemanyag Generátor
+50V_Incandescent_Light_Bulb.name=50V Izzó
+50V_Iron_Heating_Corp.name=50V Vas Fűtőtest
+50V_LED_Bulb.name=50V LED
+50V_Macerator.name=50V Daráló
+50V_Magnetizer.name=50V Mágnesező
+50V_Plate_Machine.name=50V Lemezkészítő Gép
+50V_Power_Socket.name=50V Konnektor
+50V_Tungsten_Heating_Corp.name=50V Volfrám Fűtőtest
+50V_Turbine.name=50V Turbina
+800V_Defence_Turret.name=800V Védő Löveg
 AND_Chip.name=AND Chip
-Advanced_Chip.name=Geavanceerde Chip
-Advanced_Electrical_Motor.name=Geavanceerde Elektrische Motor
-Advanced_Energy_Meter.name=Geavanceerde energiemeter
-Advanced_Machine_Block.name=Geavanceerde machineblok
-Advanced_Magnet.name=Geavanceerde magneet
-AllMeter.name=Universele Meter
-Alloy_Dust.name=Legering stof
-Alloy_Ingot.name=Legering staaf
-Alloy_Plate.name=Legering plaat
-Amplifier.name=Amplifier
-Analog_Watch.name=Analoog Horloge
-Analog_vuMeter.name=Analoge meter
-Analogic_Regulator.name=Analoge regelaar
-Animal_Filter.name=Dier filter
-Auto_Miner.name=Automatische graver
-Average_Electrical_Drill.name=Normale elektrische boormachine
-Average_Ferromagnetic_Core.name=Normale ferromagnetische kern
-Basic_Magnet.name=Basis magneet
+Advanced_Chip.name=Fejlett Chip
+Advanced_Electrical_Motor.name=Fejlett Elektromos Motor
+Advanced_Energy_Meter.name=Fejlett Energiamérő
+Advanced_Machine_Block.name=Fejlett Gép Blokk
+Advanced_Magnet.name=Fejlett Mágnes
+AllMeter.name=Multiméter
+Alloy_Dust.name=Öntvény por
+Alloy_Ingot.name=Öntvény Rúd
+Alloy_Plate.name=Öntvény Lemez
+Amplifier.name=Erősítő
+Analog_Watch.name=Analóg Óra
+Analog_vuMeter.name=Analóg Műszer
+Analogic_Regulator.name=Analóg Szabályzó
+Animal_Filter.name=Állat Szűrő
+Auto_Miner.name=Automata Bányász
+Average_Electrical_Drill.name=Átlagos Elektromos Fúró
+Average_Ferromagnetic_Core.name=Átlagos Ferromágnes Mag
+Basic_Magnet.name=Alap Mágnes
 Big_Fuel_Burner.name=Big Fuel Burner
-Black_Brush.name=Zwarte Borstel
-Blown_Lead_Fuse.name=Blown Lead Fuse
-Blue_Brush.name=Blauwe Borstel
-Brown_Brush.name=Bruine Borstel
-Capacity_Oriented_Battery.name=Capaciteit Georiënteerde Batterij
-Casing.name=Casing
-Cheap_Chip.name=Goedkope Chip
-Cheap_Electrical_Drill.name=Goedkoop Elektrisch Boormachine
-Cheap_Ferromagnetic_Core.name=Goedkope ferromagnetische kern
-Cinnabar_Dust.name=Cinnabar Dust
-Cinnabar_Ore.name=Cinnabar Ore
-Coal_Dust.name=Kool Stof
-Coal_Plate.name=Kool plaat
-Combustion_Chamber.name=Verbrandingskamer
+Black_Brush.name=Fekete Ecset
+Blown_Lead_Fuse.name=Kiégett ólom biztosíték
+Blue_Brush.name=Kék Ecset
+Brown_Brush.name=Barna Ecset
+Capacity_Oriented_Battery.name=Kapacitásorientált Akkumulátor
+Casing.name=Burkolat
+Cheap_Chip.name=Olcsó Chip
+Cheap_Electrical_Drill.name=Olcsó Elektromos Fúró
+Cheap_Ferromagnetic_Core.name=Olcsó Ferromágnes Mag
+Cinnabar_Dust.name=Cinóber Por
+Cinnabar_Ore.name=Cinóber Érc
+Coal_Dust.name=Szén Por
+Coal_Plate.name=Szén Lemez
+Combustion_Chamber.name=Égéstér
 Configurable_summing_unit.name=Configurable summing unit
-Copper_Cable.name=Koperen Kabel
-Copper_Dust.name=Koper stof
-Copper_Ingot.name=Koperstaaf
-Copper_Ore.name=Kopererts
-Copper_Plate.name=Koper plaat
-Copper_Thermal_Cable.name=Koper thermische kabel
-Cost_Oriented_Battery.name=Kostenefficiënte batterij 
-Current_Oriented_Battery.name=Stroomefficiënte batterij
-Cyan_Brush.name=Cyaan borstel
-DC-DC_Converter.name=DC-DC Converter
+Copper_Cable.name=Réz Kábel
+Copper_Dust.name=Réz Por
+Copper_Ingot.name=Réz Rúd
+Copper_Ore.name=Réz Érc
+Copper_Plate.name=Réz Lemez
+Copper_Thermal_Cable.name=Réz Hőkábel
+Cost_Oriented_Battery.name=Árorientált Akkumulátor
+Current_Oriented_Battery.name=Áramerősségorientált Akkumulátor
+Cyan_Brush.name=Cián Ecset
+DC-DC_Converter.name=DC-DC Konverter
 D_Flip_Flop_Chip.name=D Flip Flop Chip
-Data_Logger.name=Data Logger
-Data_Logger_Print.name=Data Logger Print
-Dielectric.name=Diëlectricum
-Digital_Watch.name=Digitaal horloge
-Electrical_Anemometer_Sensor.name=Electrische anemometer sensor
-Electrical_Breaker.name=Elektrische onderbreker
-Electrical_Daylight_Sensor.name=Elektrische daglicht sensor
-Electrical_Entity_Sensor.name=Elektrische entiteit sensor
-Electrical_Fire_Buzzer.name=Electrical Fire Buzzer
-Electrical_Fire_Detector.name=Elektrische brand detector
-Electrical_Furnace.name=Elektrische oven
-Electrical_Fuse_Holder.name=Electrical Fuse Holder
-Electrical_Light_Sensor.name=Elektrische licht sensor
-Electrical_Motor.name=Elektrische motor
-Electrical_Probe.name=Elektrische sonde
-Electrical_Probe_Chip.name=Elektrische sonde chip
-Electrical_Source.name=Elektrische bron
-Electrical_Timer.name=Elektrische timer
-Electrical_Weather_Sensor.name=Elektrische weer sensor
+Data_Logger.name=Adatgyűjtő
+Data_Logger_Print.name=Adatgyűjtő Nyomtatás
+Dielectric.name=Dielektrikum
+Digital_Watch.name=Digitális Óra
+Electrical_Anemometer_Sensor.name=Elektromos Szélsebességmérő
+Electrical_Breaker.name=Megszakító
+Electrical_Daylight_Sensor.name=Elektromos Fényérzékelő
+Electrical_Entity_Sensor.name=Elektromos Entitás Érzékelő
+Electrical_Fire_Buzzer.name=Elektromos Tűzérzékelő Zümmögő
+Electrical_Fire_Detector.name=Elektromos Tűzérzékelő
+Electrical_Furnace.name=Elektromos Sütő
+Electrical_Fuse_Holder.name=Biztosíték tartó
+Electrical_Light_Sensor.name=Elektromos Fényérzékelő
+Electrical_Motor.name=Elektromos Motor
+Electrical_Probe.name=Elektromos Mérőelektróda
+Electrical_Probe_Chip.name=Elektromos Mérő Chip
+Electrical_Source.name=Elektromos Forrás
+Electrical_Timer.name=Elektromos Időzítő
+Electrical_Weather_Sensor.name=Elektromos Időjárás Érzékelő
 Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
-Energy_Meter.name=Energie meter
-Experimental_Transporter.name=Experimental Transporter
-Fast_Electrical_Drill.name=Snelle elektrische boormachine
-Ferrite_Ingot.name=Ferriet staaf
-Flat_Lamp_Socket.name=Platte lamphouder
-Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
-Flywheel.name=Flywheel
+Energy_Meter.name=Energiamérő
+Experimental_Transporter.name=Kísérleti Szállító
+Fast_Electrical_Drill.name=Gyors Elektromos Fúró
+Ferrite_Ingot.name=Ferrit Rúd
+Flat_Lamp_Socket.name=Lapos Lámpacsatlakozó
+Fluorescent_Lamp_Socket.name=Fénycső Foglalat
+Flywheel.name=Malomkerék
 Fuel_Heat_Furnace.name=Fuel Heat Furnace
-Gas_Turbine.name=Gas Turbine
-Generator.name=Generator
-Gold_Dust.name=Goud stof
-Gold_Plate.name=Goud plaat
-Gray_Brush.name=Grijze borstel
-Green_Brush.name=Groene borstel
-Ground_Cable.name=Aardingskabel
-High_Power_Receiver_Antenna.name=Hoog-vermogen ontvangst-antenne
-High_Power_Transmitter_Antenna.name=Hoog-vermogen verzend-antenne
-High_Voltage_Cable.name=Hoogspanning kabel
-High_Voltage_Relay.name=Hoogspanning relais
-High_Voltage_Switch.name=Hoogspanning schakelaar
-Hub.name=Bus
-Industrial_Data_Logger.name=Industrial Data Logger
-Iron_Cable.name=Ijzer kabel
-Iron_Dust.name=Ijzer stof
-Iron_Plate.name=Ijzer plaat
+Gas_Turbine.name=Gázturbina
+Generator.name=Generátor
+Gold_Dust.name=Arany Por
+Gold_Plate.name=Arany Lemez
+Gray_Brush.name=Szürke Ecset
+Green_Brush.name=Zöld Ecset
+Ground_Cable.name=Földkábel
+High_Power_Receiver_Antenna.name=Nagy Teljesítményű Vevő Antenna
+High_Power_Transmitter_Antenna.name=Nagy Teljesítményű Adó Antenna
+High_Voltage_Cable.name=Nagyfeszültségű Kábel
+High_Voltage_Relay.name=Magasfeszültségű Relé
+High_Voltage_Switch.name=Magasfeszültségű Kapcsoló
+Hub.name=Port
+Industrial_Data_Logger.name=Ipari Adatgyűjtö
+Iron_Cable.name=Vas Kábel
+Iron_Dust.name=Vas Por
+Iron_Plate.name=Vas Lemez
 JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 Joint.name=Joint
 Joint_hub.name=Joint hub
-LED_vuMeter.name=LED voltmeter
-Lamp_Socket_A.name=Lamphouder A
-Lamp_Socket_B_Projector.name=Lamphouder B projector
-Lamp_Supply.name=Lamp toevoer
-Large_Rheostat.name=Large Rheostat
-Lead_Dust.name=Lood stof
-Lead_Fuse_for_high_voltage_cables.name=Lead Fuse for high voltage cables
-Lead_Fuse_for_low_voltage_cables.name=Lead Fuse for low voltage cables
-Lead_Fuse_for_medium_voltage_cables.name=Lead Fuse for medium voltage cables
-Lead_Fuse_for_very_high_voltage_cables.name=Lead Fuse for very high voltage cables
-Lead_Ingot.name=Lood staaf
-Lead_Ore.name=Lood erts
-Lead_Plate.name=Lood plaat
-Life_Oriented_Battery.name=Leeftijd-efficiënte batterij
-Light_Blue_Brush.name=Licht blauwe borstel
-Lime_Brush.name=Limoen borstel
-Long_Suspended_Lamp_Socket.name=Lange hangende lamphouder
-Low_Power_Receiver_Antenna.name=Laag-vermogen ontvangst-antenne
-Low_Power_Transmitter_Antenna.name=Laag-vermogen verzend-antenne
-Low_Voltage_Cable.name=Laagspanning kabel
-Low_Voltage_Relay.name=Laagspanning relais
-Low_Voltage_Switch.name=Laagspanning schakelaar
-Lowpass_filter.name=Lowpass filter
-Machine_Block.name=Machine blok
-Machine_Booster.name=Machine booster
-Magenta_Brush.name=Magenta borstel
+LED_vuMeter.name=LED vuMeter
+Lamp_Socket_A.name=Lámpacsatlakozó A
+Lamp_Socket_B_Projector.name=Lámpacsatlakozó B Vetítő
+Lamp_Supply.name=Lámpa tápegység
+Large_Rheostat.name=Nagy Reosztát
+Lead_Dust.name=Ólom Por
+Lead_Fuse_for_high_voltage_cables.name=Ólom biztosíték magasfeszültségű kábelekhez
+Lead_Fuse_for_low_voltage_cables.name=Ólom biztosíték kisfeszültségű kábelekhez
+Lead_Fuse_for_medium_voltage_cables.name=Ólom biztosíték középfeszültségű kábelekhez
+Lead_Fuse_for_very_high_voltage_cables.name=Ólom biztosíték nagyon magas feszültségű kábelekhez
+Lead_Ingot.name=Ólom Rúd
+Lead_Ore.name=Ólom Érc
+Lead_Plate.name=Ólom Lemez
+Life_Oriented_Battery.name=Élettartamorientált Akkumulátor
+Light_Blue_Brush.name=Világoskék Ecset
+Lime_Brush.name=Lime Ecset
+Long_Suspended_Lamp_Socket.name=Hosszú Felfüggesztett Lámpacsatlakozó
+Low_Power_Receiver_Antenna.name=Gyenge Vevő Antenna
+Low_Power_Transmitter_Antenna.name=Gyenge Adó Antenna
+Low_Voltage_Cable.name=Kisfeszültségű Kábel
+Low_Voltage_Relay.name=Kisfeszültégű Relé
+Low_Voltage_Switch.name=Kisfeszültségű Kapcsoló
+Lowpass_filter.name=Aluláteresztő szűrő
+Machine_Block.name=Gép Blokk
+Machine_Booster.name=Gép Erősítő
+Magenta_Brush.name=Magenta Ecset
 Medium_Fuel_Burner.name=Medium Fuel Burner
-Medium_Power_Receiver_Antenna.name=Midden-vermogen ontvangst-antenne
-Medium_Power_Transmitter_Antenna.name=Midden-vermogen verzend-antenne
-Medium_Voltage_Cable.name=Middenspanning kabel
-Medium_Voltage_Relay.name=Middenspanning relais
-Medium_Voltage_Switch.name=Middenspanning schakelaar
-Mercury.name=Kwik
-Mining_Pipe.name=Mijn buis
+Medium_Power_Receiver_Antenna.name=Közepes Teljesítményű Vevő Antenna
+Medium_Power_Transmitter_Antenna.name=Közepes Tejesítményű Adó Antenna
+Medium_Voltage_Cable.name=Középfeszültségű Kábel
+Medium_Voltage_Relay.name=Középfeszültségű Relé
+Medium_Voltage_Switch.name=Középfeszültségű Kapcsoló
+Mercury.name=Higany
+Mining_Pipe.name=Bányászati Cső
 Modbus_RTU.name=Modbus RTU
-Modern_Data_Logger.name=Modern Data Logger
-Monster_Filter.name=Monster filter
-MultiMeter.name=Multimeter
+Modern_Data_Logger.name=Modern Adatgyűjtő
+Monster_Filter.name=Szörny Szűrő
+MultiMeter.name=Multiméter
 NAND_Chip.name=NAND Chip
 NOR_Chip.name=NOR Chip
 NOT_Chip.name=NOT Chip
-Nuclear_Alarm.name=Nucleair alarm
+Nuclear_Alarm.name=Nukleáris vészjelző
 OR_Chip.name=OR Chip
-On_OFF_Regulator_10_Percent.name=On/off regulator 10%
-On_OFF_Regulator_1_Percent.name=On/off regulator 1%
-OpAmp.name=OpAmp
-Optimal_Ferromagnetic_Core.name=Optimale ferromagnetische kern
-Orange_Brush.name=Orange borstel
-Ore_Scanner.name=Grondstof scanner
-Oscillator_Chip.name=Oscillator Chip
-Overheating_Protection.name=Oververhitting beveiliging
-Overvoltage_Protection.name=Overvoltage beveiliging
+On_OFF_Regulator_10_Percent.name=Be/ki regulátor 10%
+On_OFF_Regulator_1_Percent.name=Be/ki regulátor 1%
+OpAmp.name=Műveleti Erősítő
+Optimal_Ferromagnetic_Core.name=Optimális Ferromágnes Mag
+Orange_Brush.name=Narancssárga Ecset
+Ore_Scanner.name=Érc szkenner
+Oscillator_Chip.name=Oszcillátor chip
+Overheating_Protection.name=Túlmelegedés elleni védelem
+Overvoltage_Protection.name=Túlfeszültség elleni védeleem
 PAL_Chip.name=PAL Chip
 PID_Regulator.name=PID Regulator
-Pink_Brush.name=Roze borstel
-Player_Filter.name=Speler filter
-Portable_Battery.name=Draagbare batterij
-Portable_Battery_Pack.name=Draagbaar batterijpakket
-Portable_Condensator.name=Draagbare condensator
-Portable_Condensator_Pack.name=Draagbaar condensatorpakket
-Portable_Electrical_Axe.name=Draagbare elektrische bijl
-Portable_Electrical_Mining_Drill.name=Draagbare elektrische boormachine
-Power_Capacitor.name=Vermogencondensator
-Power_Inductor.name=Vermogenspoel
-Power_Resistor.name=Vermogenweerstand
-Power_capacitor.name=Power capacitor
-Power_inductor.name=Power inductor
-Purple_Brush.name=Paarse borstel
-Red_Brush.name=Rode borstel
-Redstone-to-Voltage_Converter.name=Redstone-naar-spanning omzetter
-Rheostat.name=Potentiometer
-Robust_Lamp_Socket.name=Robuuste lamphouder
-Rubber.name=Rubber
+Pink_Brush.name=Rózsaszín Ecset
+Player_Filter.name=Játékos Szűrő
+Portable_Battery.name=Hordozható Akkumulátor
+Portable_Battery_Pack.name=Hordozható Akkumulátor Telep
+Portable_Condensator.name=Hordozható Kondenzátor
+Portable_Condensator_Pack.name=Hordozható Kondenzátorbank
+Portable_Electrical_Axe.name=Hordozható Elektromos Balta
+Portable_Electrical_Mining_Drill.name=Hordozható  Elektromos Bányászfúró
+Power_Capacitor.name=Nagy teljesítményű kondenzátor
+Power_Inductor.name=Nagy teljesítményű induktivitás
+Power_Resistor.name=Nagy teljesítményű ellenállás
+Power_capacitor.name=Nagy teljesítményű kondenzátor
+Power_inductor.name=Nagy teljesítményű Induktivitás
+Purple_Brush.name=Lila Ecset
+Red_Brush.name=Piros Ecset
+Redstone-to-Voltage_Converter.name=Vöröskő-Feszültség Konverter
+Rheostat.name=Reosztát
+Robust_Lamp_Socket.name=Robusztus Lámpacsatlakozó
+Rubber.name=Gumi
 Sample_and_hold.name=Sample and hold
-Scanner.name=Scanner
+Scanner.name=Szkenner
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
-Sconce_Lamp_Socket.name=Sconce Lamp Socket
-Signal_20H_inductor.name=Signal 20H inductor
-Signal_Antenna.name=Signaal antenne
-Signal_Button.name=Signaal drukknop
-Signal_Cable.name=Signaal kabel
-Signal_Diode.name=Signaal diode
-Signal_Processor.name=Signaal processor
-Signal_Relay.name=Signaal relais
-Signal_Source.name=Signaal bron
-Signal_Switch.name=Signaal schakelaar
-Signal_Switch_with_LED.name=Signaal schakelaar met LED
-Signal_Trimmer.name=Signal Trimmer
-Silicon_Dust.name=Silicium stof
-Silicon_Ingot.name=Silicium staaf
-Silicon_Plate.name=Siliconen plaat
-Silver_Brush.name=Zilveren borstel
-Simple_Lamp_Socket.name=Simpele lamphouder
-Single-use_Battery.name=Niet oplaadbare batterij
-Small_200V_Copper_Heating_Corp.name=Kleine 200V koper verwarmingselement
-Small_200V_Iron_Heating_Corp.name=Kleine 200V ijzer verwarmingselement
-Small_200V_Tungsten_Heating_Corp.name=Kleine 200V wolfraam verwarmingselement
-Small_50V_Carbon_Incandescent_Light_Bulb.name=Kleine 50V koolstof gloeilamp
-Small_50V_Copper_Heating_Corp.name=Small 50V Copper Heating Corp
-Small_50V_Economic_Light_Bulb.name=Kleine 50V Spaarlamp
-Small_50V_Incandescent_Light_Bulb.name=Small 50V Incandescent Light Bulb
-Small_50V_Iron_Heating_Corp.name=Small 50V Iron Heating Corp
-Small_50V_Tungsten_Heating_Corp.name=Small 50V Tungsten Heating Corp
-Small_Active_Thermal_Dissipator.name=Small Active Thermal Dissipator
-Small_Flashlight.name=Small Flashlight
+Sconce_Lamp_Socket.name=Gyertyatartó Lámpacsatlakozó
+Signal_20H_inductor.name=20H Jel Induktivitás
+Signal_Antenna.name=Jel Antenna
+Signal_Button.name=Jel Gomb
+Signal_Cable.name=Jel Kábel
+Signal_Diode.name=Jel Dióda
+Signal_Processor.name=Jel Processzor
+Signal_Relay.name=Jel Relé
+Signal_Source.name=Jelforrás
+Signal_Switch.name=Jelkapcsoló
+Signal_Switch_with_LED.name=Jelkapcsoló LED-el
+Signal_Trimmer.name=Jel Trimmer
+Silicon_Dust.name=Szilikon Por
+Silicon_Ingot.name=Szilikon Rúd
+Silicon_Plate.name=Szilikon Lemez
+Silver_Brush.name=Ezüst Ecset
+Simple_Lamp_Socket.name=Egyszerű Lámpacsatlakozó
+Single-use_Battery.name=Egyszer Használatos Elem
+Small_200V_Copper_Heating_Corp.name=Kicsi 200V Réz Fűtőtest
+Small_200V_Iron_Heating_Corp.name=Kicsi 200V Vas Fűtőtest
+Small_200V_Tungsten_Heating_Corp.name=Kicsi 200V Volfrám Fűtőtest
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Kicsi 50V Szénszálas Izzó
+Small_50V_Copper_Heating_Corp.name=Kicsi 50V Réz Fűtőtest
+Small_50V_Economic_Light_Bulb.name=Kicsi 50V Energiatakarékos Izzó
+Small_50V_Incandescent_Light_Bulb.name=Kicsi 50V Izzó
+Small_50V_Iron_Heating_Corp.name=Kicsi 50V Vas Fűtőtest
+Small_50V_Tungsten_Heating_Corp.name=Kicsi 50V Volfrám Fűtőtest
+Small_Active_Thermal_Dissipator.name=Kicsi Aktív Hűtőborda
+Small_Flashlight.name=Kicsi elemlámpa
 Small_Fuel_Burner.name=Small Fuel Burner
-Small_Passive_Thermal_Dissipator.name=Small Passive Thermal Dissipator
-Small_Rotating_Solar_Panel.name=Small Rotating Solar Panel
-Small_Solar_Panel.name=Small Solar Panel
-Solar_Tracker.name=Solar Tracker
-Standard_Alarm.name=Standard Alarm
-Steam_Turbine.name=Steam Turbine
-Stone_Heat_Furnace.name=Stone Heat Furnace
-Street_Light.name=Streetlight
-Suspended_Lamp_Socket.name=Suspended Lamp Socket
+Small_Passive_Thermal_Dissipator.name=Kicsi Passzív Hűtőborda
+Small_Rotating_Solar_Panel.name=Kicsi Forgó Napelem
+Small_Solar_Panel.name=Kicsi Napelem
+Solar_Tracker.name=Nap Követő
+Standard_Alarm.name=Szabvány Vészjelző
+Steam_Turbine.name=Gőzturbina
+Stone_Heat_Furnace.name=Kő Melegítő Kemence
+Street_Light.name=Utcai Lámpa
+Suspended_Lamp_Socket.name=Felfüggesztett Lámpacsatlakozó
 Tachometer.name=Tachometer
-Temperature_Probe.name=Temperature Probe
-Thermal_Probe.name=Thermal Probe
-Thermal_Probe_Chip.name=Thermal Probe Chip
-Thermistor.name=Thermistor
-Thermometer.name=Thermometer
-Tree_Resin.name=Tree Resin
-Tree_Resin_Collector.name=Tree Resin Collector
-Tungsten_Cable.name=Tungsten Cable
-Tungsten_Dust.name=Tungsten Dust
-Tungsten_Ingot.name=Tungsten Ingot
-Tungsten_Ore.name=Tungsten Ore
-Tutorial_Sign.name=Tutorial Sign
-Very_High_Voltage_Cable.name=Very High Voltage Cable
-Very_High_Voltage_Relay.name=Very High Voltage Relay
-Very_High_Voltage_Switch.name=Very High Voltage Switch
-Voltage-to-Redstone_Converter.name=Voltage-to-Redstone Converter
-Voltage_Oriented_Battery.name=Voltage Oriented Battery
-Voltage_Probe.name=Voltage Probe
+Temperature_Probe.name=Hőmérséklet Szonda
+Thermal_Probe.name=Hő Szonda
+Thermal_Probe_Chip.name=Hő Szonda Chip
+Thermistor.name=Termisztor
+Thermometer.name=Hőmérő
+Tree_Resin.name=Kaucsuk
+Tree_Resin_Collector.name=Kaucsuk Gyűjtő
+Tungsten_Cable.name=Volfrám kábel
+Tungsten_Dust.name=Volfrám Por
+Tungsten_Ingot.name=Volfrám Rúd
+Tungsten_Ore.name=Volfrám Érc
+Tutorial_Sign.name=Útmutató Tábla
+Very_High_Voltage_Cable.name=Nagyon Nagyfeszültségű Kábel
+Very_High_Voltage_Relay.name=Nagyon Nagyfeszültségű Relé
+Very_High_Voltage_Switch.name=Nagyon Nagyfeszültségű Kapcsoló
+Voltage-to-Redstone_Converter.name=Feszültség-Vöröskő Konverter
+Voltage_Oriented_Battery.name=Feszültégorientált Akkumulátor
+Voltage_Probe.name=Feszültség Mérő Elektróda
 Voltage_controlled_amplifier.name=Voltage controlled amplifier
 Voltage_controlled_sawtooth_oscillator.name=Voltage controlled sawtooth oscillator
 Voltage_controlled_sine_oscillator.name=Voltage controlled sine oscillator
-Water_Turbine.name=Water Turbine
-Weak_50V_Battery_Charger.name=Weak 50V Battery Charger
-White_Brush.name=White Brush
-Wind_Turbine.name=Wind Turbine
-Wireless_Analyser.name=Wireless Analyzer
-Wireless_Button.name=Wireless Button
-Wireless_Signal_Receiver.name=Wireless Signal Receiver
-Wireless_Signal_Repeater.name=Wireless Signal Repeater
-Wireless_Signal_Transmitter.name=Wireless Signal Transmitter
-Wireless_Switch.name=Wireless Switch
-Wrench.name=Wrench
-X-Ray_Scanner.name=X-Ray Scanner
+Water_Turbine.name=Vízturbina
+Weak_50V_Battery_Charger.name=Gyenge 50V Akkumulátortöltő
+White_Brush.name=Fehér Ecset
+Wind_Turbine.name=Szélturbina
+Wireless_Analyser.name=Vezeték nélküli elemző
+Wireless_Button.name=Vezeték nélküli Gomb
+Wireless_Signal_Receiver.name=Vezeték nélküli jel vevő
+Wireless_Signal_Repeater.name=Vezeték nélküli jel ismétlő
+Wireless_Signal_Transmitter.name=Vezeték nélküli jel adó
+Wireless_Switch.name=Vezeték nélküli kapcsoló
+Wrench.name=Villáskulcs
+X-Ray_Scanner.name=Röntgen Szkenner
 XNOR_Chip.name=XNOR Chip
 XOR_Chip.name=XOR Chip
-Yellow_Brush.name=Yellow Brush
+Yellow_Brush.name=Sárga Ecset
 entity.EAReplicator.name=Replicator
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.Copper Axe.name=Copper Axe
-item.E-Coal Boots.name=E-Coal Boots
-item.E-Coal Boots.name=E-Coal Boots
-item.E-Coal Boots.name=E-Coal Boots
-item.E-Coal Boots.name=E-Coal Boots
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.Copper Axe.name=Réz Balta
+item.E-Coal Boots.name=E-szén cipők
+item.E-Coal Boots.name=E-szén cipők
+item.E-Coal Boots.name=E-szén cipők
+item.E-Coal Boots.name=E-szén cipők
 itemGroup.Eln=Electrical Age
-mod.meta.desc=Electricity in your base!
-tile.eln.ElnProbe.name=Eln Computer Probe
-tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age to other energy exporter
-tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age to other energy exporter
-tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other energy exporter
+mod.meta.desc=Elektromosság a bázisodon!
+tile.eln.ElnProbe.name=Eln computer mérőszonda
+tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age energia átalakító
+tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V  Electrical Age energia átalakító
+tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V  Electrical Age energia átalakító
 
 # ./src/main/java/mods/eln/i18n/I18N.java
-You_have_%1$_lives_left=You have %1$ lives left
+You_have_%1$_lives_left=%1$ életed van hátra
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.kt
-Brush_is_dry=Kwast is droog
-Can_paint_%1$_blocks=Can paint %1$ blocks
+Brush_is_dry=Az ecset száraz
+Can_paint_%1$_blocks=%1$ blokkot tud lefesteni
 
 # ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
 Can_be_used_to_encase_EA_items_that_support_it=Can be used to encase EA items that support it
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
-Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
+Upgrade_for_the_Stone_Heat_Furnace.=Fejlesztés Kő Melegítő Kemencéhez
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Energie per handeling: %1$s
+Energy_per_operation\:_%1$J=Energia használatonként:%1$J
 Time_per_operation\:_%1$h=Time per operation: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Cable loss factor: %1$
+Cable_loss_factor\:_%1$=Kábel veszteség tényező: %1$
 
 # ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
 Burn_unit_for_the_gas_heat_furnace.=Burn unit for the gas heat furnace.
@@ -344,32 +344,32 @@ Produced_heat_power\:_=Produced heat power:
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
 # ./src/main/java/mods/eln/item/LampDescriptor.java
-Bad=Bad
-Condition\:=Condition:
-End_of_life=End of life
-Good=Good
-New=New
-Nominal_lifetime\:_%1$h=Nominal lifetime: %1$h
-Technology\:_%1$=Technology: %1$
-Used=Used
+Bad=Rossz
+Condition\:=Állapot:
+End_of_life=Élettartam vége
+Good=Jó
+New=Új
+Nominal_lifetime\:_%1$h=Névleges élettartam: %1$h
+Technology\:_%1$=Technológia: %1$
+Used=Használt
 
 # ./src/main/java/mods/eln/item/LampSlot.java
-Lamp_slot=Lamp slot
+Lamp_slot=Lámpa foglalat
 
 # ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
-Useful_to_prevent_overheating\nof_Batteries=Useful to prevent overheating\nof Batteries
+Useful_to_prevent_overheating\nof_Batteries=Hasznos az akkumulátorok túlmelegedésének védelmére
 
 # ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
-Useful_to_prevent_over-voltage\nof_Batteries=Useful to prevent over-voltage\nof Batteries
+Useful_to_prevent_over-voltage\nof_Batteries=Hasznos az akkumulátorok túlfeszültség védelmére
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
-Solar_panel_upgrade=Solar panel upgrade
+Solar_panel_upgrade=Napelem fejlesztés
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
-State\:=State:
-Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+State\:=Állapot:
+Stored_Energy\:_%1$J_(%2$%)=Tárolt Energia: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -378,7 +378,7 @@ Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
 Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
-Hold_shift=Hold shift
+Hold_shift=Tartsd lenyomva a shift-et
 
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
@@ -386,17 +386,17 @@ mod.name=Electrical Age
 # ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
-Input_power_is_limited_to_%1$W=Input power is limited to %1$W
+Input_power_is_limited_to_%1$W=Bemeneti teljesítmény korlátozva %1$W-ra
 
 # ./src/main/java/mods/eln/sixnode/AnalogChips.kt
 A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.
 A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.
 An_amplifier_increases_the_voltage\nof_an_input_signal_by_a_configurable\ngain_and_outputs_that_voltage.=An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.
-Cut-off_frequency_%1$_Hz=Cut-off frequency %1$ Hz
-Gain=Gain
-Gain_for_input_\u00a713=Gain for input \u00a713
-Gain_for_input_\u00a722=Gain for input \u00a722
-Gain_for_input_\u00a741=Gain for input \u00a741
+Cut-off_frequency_%1$_Hz=Vágási frekvenica %1$ Hz
+Gain=Erősítési tényező
+Gain_for_input_\u00a713=Erősítési tényező a bemenethez \u00a713
+Gain_for_input_\u00a722=Erősítési tényező a bemenethez \u00a722
+Gain_for_input_\u00a741=Erősítési tényező a bemenethez \u00a741
 Lowpass_filter_-_Passes_signals_with_a\nfrequency_lower_than_a_certain_cutoff_frequency\nand_attenuates_signals_with_frequencies_higher\nthan_the_cutoff_frequency.=Lowpass filter - Passes signals with a\nfrequency lower than a certain cutoff frequency\nand attenuates signals with frequencies higher\nthan the cutoff frequency.
 Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_as_configurable_amplifier.=Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.
 Params=Params
@@ -433,16 +433,16 @@ Scans_blocks_to_produce_signals.=Scans blocks to produce signals.
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
-This_block_can_only_be_placed_on_the_side_of_a_tree!=This block can only be placed on the side of a tree!
+This_block_can_only_be_placed_on_the_side_of_a_tree!=Ez a blokk csak egy fa mellé rakható!
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
-Battery_slot=Battery slot
+Battery_slot=Elem foglalat
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
-Charge_Current=Charge Current
+Charge_Current=Töltőáram
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
@@ -450,18 +450,18 @@ Charge_Current=Charge Current
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeElement.java
-Forward_Voltage=Forward Voltage
+Forward_Voltage=Nyitófeszültség
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
 Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
 Engaged=Engaged
-Input_Voltage=Input Voltage
+Input_Voltage=Bemeneti Feszültség
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
-Sound_is_muted=Sound is muted
-Sound_is_not_muted=Sound is not muted
+Sound_is_muted=Hang elnémítva
+Sound_is_not_muted=A hang nincs elnémítva
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
@@ -472,15 +472,15 @@ Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certai
 Contact=Contact
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
-Maximum_voltage_before_cutting_off=Maximum voltage before cutting off
-Minimum_voltage_before_cutting_off=Minimum voltage before cutting off
-Switch_is_off=Switch is off
-Switch_is_on=Switch is on
+Maximum_voltage_before_cutting_off=Legnagyobb feszültség leválasztás előtt
+Minimum_voltage_before_cutting_off=Legkisebb feszültség leválasztás előtt
+Switch_is_off=Kapcsoló kikapcsolva
+Switch_is_on=Kapcsoló bekapcsolva
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
 A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
 Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
-Current\:_%1$A=Current: %1$A
+Current\:_%1$A=Áramerősség %1$A
 Not_adapted_to_transport_power.=Not adapted to transport power.
 Save_usage\:=Save usage:
 Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
@@ -489,24 +489,24 @@ Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
 Signal_Voltage=Signal Voltage
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
-It_can_store_up_to_256_points.=It can store up to 256 points.
+It_can_store_up_to_256_points.=256 pontig tud tárolni.
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
-Back_to_display=Back to display
-Configuration=Configuration
-Current_[A]=Current [A]
-Energy_[J]=Energy [J]
-Percent_[-]%=Percent [-]%
-Power_[W]=Power [W]
-Print=Print
+Back_to_display=Vissza a kijelzőhöz
+Configuration=Beállítás
+Current_[A]=Áramerősség [A]
+Energy_[J]=Energia [J]
+Percent_[-]%=Százalék [-]%
+Power_[W]=Teljesítmény [W]
+Print=Nyomtatás
 Sampling_period=Sampling period
-Temp._[*C]=Temp. [*C]
-Voltage_[V]=Voltage [V]
-Y-axis_max=Y-as maximum
-Y-axis_min=Y-as minimum
+Temp._[*C]=Hőmérséklet [*C]
+Voltage_[V]=Feszültség [V]
+Y-axis_max=Y-tengely max
+Y-axis_min=Y-tengely min
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
@@ -523,42 +523,42 @@ Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Battery powered buzzer \
 Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
-Fire_detected\:_=Vuur gedetecteerd:
+Fire_detected\:_=Tűz érzékelve:
 Fire_present=Fire present
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
 Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
-Output_at_%1$%=Output at %1$%
+Output_at_%1$%=Kimenet %1$%-nál
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
-0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
+0V_at_night,_%1$V_at_noon.=0V éjjel, %1$V délben. 
 Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
-Light_level=Light level
+Light_level=Fényerő
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-Applicable_boolean_operators\:=Applicable boolean operators:
-Applicable_functions\:=Applicable functions:
-Applicable_mathematical_operators\:=Applicable mathematical operators:
+Applicable_boolean_operators\:=Alkalmazható logikai operátorok:
+Applicable_functions\:=Használható funkciók
+Applicable_mathematical_operators\:=Alkalmazható matematikai operátorok:
 Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
 Equation=Equation
-Input_voltages=Input voltages
+Input_voltages=Bementi feszültségek
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
-%1$_Redstone(s)_required=%1$ Redstone(s) required
-Equation_required!=Equation required!
-Inputs_are=Inputs are
-Invalid_equation!=Invalid equation!
+%1$_Redstone(s)_required=%1$ Vöröskő szükséges
+Equation_required!=Egyenlet szükséges!
+Inputs_are=A bemenetek
+Invalid_equation!=Érvénytelen egyenlet!
 Output_voltage_formula=Output voltage formula
-Waiting_for_completion...=Waiting for completion...
+Waiting_for_completion...=Várakozás a befejezésre...
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
 Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
@@ -574,28 +574,28 @@ Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage
 A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
-Default_position=Default position
+Default_position=Alap pozíció
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
-Normally_closed=Normally closed
-Normally_open=Normally open
+Normally_closed=Alapból zárt
+Normally_open=Alapból nyitott
 
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
-Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
-Measures_electrical_values_on_cables.=Measures electrical values on cables.
-Measures_voltage_on_cables.=Measures voltage on cables.
+Can_measure_Voltage_Power_Current=Tud mérni Feszültséget/Teljesítményt/Áramerősséget
+Measures_electrical_values_on_cables.=A kábeleken lévő értékeket méri.
+Measures_voltage_on_cables.=A kábelben lévő feszültséget méri.
 
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
-Measured_current=Measured current
-Measured_power=Measured power
-Measured_voltage=Measured voltage
+Measured_current=Mért áram
+Measured_power=Mért teljesítmény
+Measured_voltage=Mért feszültség
 
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
 Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
 Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
-Creative_block.=Creative block.
+Creative_block.=Kreatív blokk
 Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
@@ -609,45 +609,45 @@ Output=Output
 Remaining=Remaining
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
-Set=Set
+Set=Beállít
 The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kept high.
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
-Displays_the_value_of_a_signal.=Displays the value of a signal.
+Displays_the_value_of_a_signal.=Kijelzi a jel értékét.
 
 # ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
 Clear\:_%1$V=Clear: %1$V
 Provides_an_electrical_signal\ndepending_the_actual_weather.=Provides an electrical signal\ndepending the actual weather.
-Rain\:_%1$V=Rain: %1$V
-Storm\:_%1$V=Storm: %1$V
+Rain\:_%1$V=Eső: %1$V
+Storm\:_%1$V=Vihar: %1$V
 
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
-Maximum_wind_speed_is_%1$m_s=Maximum wind speed is %1$m/s
+Maximum_wind_speed_is_%1$m_s=Max. szélsebesség %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
-You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
+You_can't_place_this_block_on_the_floor_or_the_ceiling=Nem teheted ezt a blokkot a padlóra vagy a plafonra
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
-Counter=Counter
+Counter=Számláló
 Energy_left=Energy left
 Mode=Mode
 Prepay=Prepay
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
-Change_password=Change password
-Counter_Mode=Counter Mode
+Change_password=Jelszóváltoztatás
+Counter_Mode=Számláló mód
 Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
-Energy_counter\:_%1$J=Energy counter: %1$J
-Enter_new_energy=Enter new energy
-Enter_password=Enter password
+Energy_counter\:_%1$J=Energia számláló: %1$J
+Enter_new_energy=Írj be új energiaszintet
+Enter_password=Kérem a jelszót
 Prepay_Mode=Prepay Mode
-Reset_time_counter=Reset time counter
-Set_energy_counter=Set energy counter
-Time_counter\:=Time counter:
+Reset_time_counter=Időszámláló nullázás
+Set_energy_counter=Villanyóra beállítás
+Time_counter\:=Időszámláló:
 Try_password=Try password
 You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.
-is_off=is off
-is_on=is on
-value_in_kJ=value in kJ
+is_off=kikapcsolva
+is_on=bekapcsolva
+value_in_kJ=értéke kJ-ban
 
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
 Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.
@@ -661,26 +661,26 @@ Angle\:_%1$°_to_%2$°=Angle: %1$° to %2$°
 Spot_range\:_%1$_blocks=Spot range: %1$ blocks
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketElement.java
-Bulb=Bulb
+Bulb=Izzó
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-Cable_slot_empty=Cable slot empty
-Orientation\:_%1$°=Orientation: %1$°
-Parallel=Parallel
-Serial=Serial
+Cable_slot_empty=Üres kábelfoglalat
+Orientation\:_%1$°=Orientáció: %1$°
+Parallel=Párhuzamos
+Serial=Soros
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
 Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
-Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
+Supplies_all_lamps_on_the_channel.=Ellátja az összes lámpát a hálózaton.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
 Total_power=Total power
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
-Power_channel_name=Stroom kanaal naam
-Wireless_channel_name=Draadloze kanaal naam
+Power_channel_name=Energiacsatorna neve
+Wireless_channel_name=Vezeték nélküli csatorna neve
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
 Modbus_TCP=Modbus TCP
@@ -688,27 +688,27 @@ Modbus_Unit_ID=Modbus Unit ID
 Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus is disabled, enable it in Eln.cfg
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
-Add=Toevoegen
-Channel_name=Kanaal naam
+Add=Ad
+Channel_name=Csatorna neve
 Modbus_ID=Modbus ID
 Modbus_RTU=Modbus RTU
-Station_ID=Station ID
-Station_name=Station naam
-Wireless_RX=Draadloze RX
-Wireless_TX=Draadloze TX
+Station_ID=Állomás ID
+Station_name=Állomás név
+Wireless_RX=Vezeték nélküli RX
+Wireless_TX=Vezeték nélküli TX
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
-(Increases_maximum_voltage)=(Verhoogt maximale voltage)
+(Increases_maximum_voltage)=(Maximális feszültség növelése)
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
-Capacity=Capacity
+Capacity=Kapacitás
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
-Inductance=Inductance
+Inductance=Induktivítás
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
@@ -719,31 +719,31 @@ Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in wit
 Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
-(Sets_resistance)=(Zet weerstand)
-Coal_dust_slot=Coal dust slot
+(Sets_resistance)=(Ellenállás beállítása)
+Coal_dust_slot=Szén Por foglalat
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
 Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
-Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
-Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W
+Parallel_resistance\:_%1$K_W=Párhuzamos ellenállás: %1$K/W
+Serial_resistance\:_%1$K_W=Soros Ellenállás: %1$K/W
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
 Thermic_power=Thermic power
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
-Cable_slot=Cable slot
+Cable_slot=Kábel foglalat
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
-Can_measure\:=Can measure:
-Measures_temperature_of_cables.=Meet de temperatuur van kabels.
-Measures_thermal_values_on_cables.=Measures thermal values on cables.
-__Temperature_Power_conducted=Temperature/Power conducted
+Can_measure\:=Mérni tud:
+Measures_temperature_of_cables.=A kábelek hőmérsékletét méri.
+Measures_thermal_values_on_cables.=Megméri a kábel hőmérsékleti adatait.
+__Temperature_Power_conducted=Hő/áram vezetett
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
-Measured_temperature=Measured temperature
+Measured_temperature=Mért hőmérséklet
 Measured_thermal_power=Measured thermal power
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
@@ -751,83 +751,83 @@ Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorrespo
 Measured_temperature\ncorresponding\nto_100%_output=Measured temperature\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
-No_text_associated_to_this_beacon=No text associated to this beacon
+No_text_associated_to_this_beacon=Nincs hozzárendelt szöveg ezen jeladóhoz
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
-Set_beacon_name=Set beacon name
+Set_beacon_name=Jeladó név beállítás
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Fuel_level=Fuel level
-Nominal_power\:_%1$_W=Nominal power: %1$ W
-Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
-Produces_electricity_using_gasoline.=Produces electricity using gasoline.
-State=State
+Fuel_level=Üzemanyag szint
+Nominal_power\:_%1$_W=Névleges teljesítmény: %1$ W
+Nominal_voltage\:_%1$_V=Névleges feszültség: %1$ V
+Produces_electricity_using_gasoline.=Áramot generál gázolaj felhasználásával.
+State=Állapot
 
 # ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
 Actual\:_%1$=Actual: %1$
 Analog_regulator_slot=Analog regulator slot
 Control_value_at_%1$=Control value at %1$
 Fuel_burner_slot=Fuel burner slot
-Furnace_is_off=Furnace is off
-Furnace_is_on=Furnace is on
+Furnace_is_off=Kemence kikapcsolva
+Furnace_is_on=Kemence bekapcsolva
 Heat_Power\:_%1$=Heat Power: %1$
 Set_point\:_%1$=Set point: %1$
-__Max._temperature\:_=  Max. temperature:
+__Max._temperature\:_=  Max. hőmérséklet
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Nom. Resistance: %1$
-Power_loss=Power loss
+Nom._Resistance\:_%1$=Névleges ellenállás: %1$
+Power_loss=Energia veszteség
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
-Drill_slot=Drill slot
-Mining_pipe_slot=Mining pipe slot
-Ore_scanner_slot=Ore scanner slot
+Drill_slot=Fúró foglalat
+Mining_pipe_slot=Bányász cső foglalat
+Ore_scanner_slot=Érc szkenner foglalat
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
 Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerElement.java
 Depth=Depth
-Silk_touch=Silk touch
+Silk_touch=Gyengéd érintés
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
 Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner!
-Halves_speed,_triples_power_draw=Halves speed, triples power draw
-Silk_Touch=Silk Touch
+Halves_speed,_triples_power_draw=Felezi a sebességet, háromszorozza a energia felvételt
+Silk_Touch=Gyengéd Érintés
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
-Overheating_protection=Oververhittingsbeveiliging
-Overvoltage_protection=Overspanningsbeveiliging
+Overheating_protection=Túlmelegedés elleni védelem
+Overvoltage_protection=Túlfeszültség elleni védeleem
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
-Actual_charge\:_=Actual charge:
+Actual_charge\:_=Aktuális töltöttség:
 Energy_capacity\:_=Energy capacity:
-Internal_resistance\:_=Internal resistance:
-Life_\:_=Life :
-Nominal_power\:_=Nominal power:
-Nominal_voltage\:_=Nominal voltage:
-_charged_at_=charged at
+Internal_resistance\:_=Belső ellenállás
+Life_\:_=Élettartam :
+Nominal_power\:_=Névleges Teljesítmény:
+Nominal_voltage\:_=Névleges Feszültség:
+_charged_at_=Feltöltve
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charged=Geladen
-Discharge=Ontladen
-Energy\:=Energie:
-Energy\:_%1$=Energie: %1$
-Life\:=Life:
-No_charge=Geen lading
-Power_in\:=Stroom in:
-Power_out\:=Stroom uit:
+Charged=Feltöltött
+Discharge=Kisütés
+Energy\:=Energia:
+Energy\:_%1$=Energia: %1$
+Life\:=Élettartam:
+No_charge=Nincs töltése
+Power_in\:=Energia be:
+Power_out\:=Energia ki:
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
-Egg_slot=Egg slot
+Egg_slot=Tojás helye
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
 Has_egg=Has egg
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
-Wireless_energy_receiver.=Wireless energy receiver.
+Wireless_energy_receiver.=Vezeték nélküli energia vevő.
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
 Effective_power=Effective power
@@ -835,57 +835,57 @@ Power_received=Power received
 Receiving=Receiving
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=Efficiency: %1$% up to %2$%
-Wireless_energy_transmitter.=Wireless energy transmitter.
+Efficiency\:_%1$%_up_to_%2$%=Hatékonyság: %1$%-tól %2$%-ig
+Wireless_energy_transmitter.=Vezeték nélküli energia adó.
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
-Efficiency=Efficiency
+Efficiency=Hatékonyság
 Transmitting=Transmitting
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
-Heating_corp_slot=Heating corp slot
+Heating_corp_slot=Fűtőtest foglalat
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
 Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceElement.java
-Heating_element=Heating element
+Heating_element=Fűtőszál
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
-Auto_shutdown=Automatische uitschakeling
-Manual_shutdown=Handmatige uitschakeling
-Set_point\:_%1$°C=Zet punt: %1$°C
+Auto_shutdown=Automatikus kikapcsolás
+Manual_shutdown=Manuális kikapcsolás
+Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
-Cost=Kosten
+Cost=költség
 Nominal_voltage\:_%1V$=Nominal voltage: %1V$
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
 Power_provided=Power provided
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
-Combustion_chamber_slot=Combustion chamber slot
-Fuel_slot=Fuel slot
+Combustion_chamber_slot=Égéstér foglalat
+Fuel_slot=Üzemanyag foglalat
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
 Set_temperature=Set temperature
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
 Control_gauge_at_%1$%=Control gauge at %1$%
-Decline_fuel=Decline fuel
-Take_fuel=Take fuel
+Decline_fuel=Üzemanyag használat tiltása
+Take_fuel=Üzemanyag használat endegélyezése
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
-(Increases_maximal_voltage)=(Increases maximal voltage)
+(Increases_maximal_voltage)=(Maximális feszültség növelése)
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
-Solar_tracker_slot=Solar tracker slot
+Solar_tracker_slot=Nap követő foglalat
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
-Can_be_geared_towards_the_sun.=Can be geared towards the sun.
-Max._power\:_%1$W=Max. power: %1$W
-Max._voltage\:_%1$V=Max. voltage: %1$V
-Produces_power_from_solar_radiation.=Produces power from solar radiation.
+Can_be_geared_towards_the_sun.=A nap felé fordítható.
+Max._power\:_%1$W=Max. teljesítmény: %1$W
+Max._voltage\:_%1$V=Max. feszültség: %1$V
+Produces_power_from_solar_radiation.=Energiát állít elő a napsugárzásból.
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
 Panel_angle=Panel angle
@@ -893,9 +893,9 @@ Producing_energy=Producing energy
 Sun_angle=Sun angle
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
-It_is_night=Het is nacht
-Solar_panel_angle\:_%1$°=Hoek van het zonnepaneel: %1$°
-Sun_angle\:_%1$°=Hoek van de zon: %1$°
+It_is_night=Este van
+Solar_panel_angle\:_%1$°=Napelem dőlésszöge: %1$°
+Sun_angle\:_%1$°=Nap dőlésszöge: %1$°
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
 Destination=Destination
@@ -904,16 +904,16 @@ Required_energy=Required energy
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Destination transporter
-Power_consumption\:=Stroom gebruik:
-Power_consumption\:_%1$W=Stroom gebruik: %1$W
-Required_energy\:_%1$J=Benodigde energie: %1$J
-Start=Begin
-Transporter_name=Transporter name
+Power_consumption\:=Fogyasztás:
+Power_consumption\:_%1$W=Fogyasztás: %1$W
+Required_energy\:_%1$J=Szükséges energia: %1$J
+Start=Start
+Transporter_name=Szállító neve
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
-Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
-Fan_voltage\:_%1$V=Fan voltage: %1$V
+Fan_cooling_power\:_%1$W=Ventilátoros hűtés teljesítménye: %1$W
+Fan_power_consumption\:_%1$W=Ventilátor fogyasztása: %1$W
+Fan_voltage\:_%1$V=Ventilátor feszültsége: %1$V
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
 
@@ -926,164 +926,164 @@ Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage t
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerElement.java
 Core_factor=Core factor
-Isolated=Isolated
+Isolated=Szigetelt
 Ratio=Ratio
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
-Generates_electricity_using_heat.=Generates electricity using heat.
-Temperature_difference\:_%1$°C=Temperature difference: %1$°C
+Generates_electricity_using_heat.=Áramot generál hő felhasználásával.
+Temperature_difference\:_%1$°C=Hőmérséklet különbség: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=Nominal
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
-CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
-Laser_charge_power\:_%1$W...%2$kW=Laser charge power: %1$W...%2$kW
+CAUTION\:_Cables_can_get_quite_hot!=VIGYÁZZAT: A kábelek nagyon forróvá válhatnak!
+Laser_charge_power\:_%1$W...%2$kW=Lézeres töltési teljesítmény: %1$W...%2$kW
 Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
-Standby_power\:_%1$W=Standby power: %1$W
+Standby_power\:_%1$W=Készenléti fogyasztás: %1$W
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
 ??=??
-Charge_level=Charge level
+Charge_level=Töltöttségi szint
 Shoot_=Shoot
 Shoot_everything=Shoot everything
 Shoot_nothing=Shoot nothing
-Target=Target
-animals=animals
-monsters=monsters
-players=players
+Target=Célpont
+animals=állatok
+monsters=szörnyek
+players=játékosok
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=Aanvallen:
-Do_not_attack\:=Niet aanvallen:
-Recharge_power\:=Recharge power:
+Attack\:=Támadás:
+Do_not_attack\:=Ne támadja:
+Recharge_power\:=Újratöltési teljesítmény:
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
-Generates_energy_using_water_stream.=Generates energy using water stream.
-No_place_for_water_turbine!=No place for water turbine!
+Generates_energy_using_water_stream.=Áramot generál a víz áramlása segítségével.
+No_place_for_water_turbine!=Nincs hely vízturbinának!
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=Front: %1$
-Generates_energy_from_wind.=Generates energy from wind.
-Left_Right\:_%1$=Left/Right: %1$
-Up_Down\:_%1$=Up/Down: %1$
-Wind_area\:=Wind area:
+Front\:_%1$=Elülső: %1$
+Generates_energy_from_wind.=Energiát generál szélből.
+Left_Right\:_%1$=Balra/jobra: %1$
+Up_Down\:_%1$=Fel/le: %1$
+Wind_area\:=Szeles terület:
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Light=Licht
-Machine=Machine
-Ore=Erts
-Portable=Draagbaar
-Resource=Middel
-Signal=Signaal
-Thermal=Thermal
-Upgrade=Upgrade
+Light=Fény
+Machine=Gép
+Ore=Érc
+Portable=Hordozható
+Resource=Forrás
+Signal=Jel
+Thermal=Hő
+Upgrade=Fejlesztés
 Utilities=Utilities
-Wiring=Bedrading
+Wiring=Bekötés
 
 # ./src/main/java/mods/eln/wiki/Default.java
-Previous=Vorige
+Previous=Előző
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
-Can_be_used_to_craft\:=Can be used to craft:
-Cannot_be_crafted!=Cannot be crafted!
-Cost_%1$J=Kost %1$J
-Created_by\:=Gemaakt door:
-Is_not_a_crafting_material!=Is not a crafting material!
+Can_be_used_to_craft\:=Barkácsoláshoz használható:
+Cannot_be_crafted!=Nem barkácsolható!
+Cost_%1$J=Költség %1$J
+Created_by\:=Készítette:
+Is_not_a_crafting_material!=Ez nem barkácsoláshoz használható anyag!
 Recipe\:=Recept:
 
 # Appearing in multiple source files
-%1$_is_not_in_range!=%1$ is not in range!
-(Increases_capacity)=(Vergroot capaciteit)
-(Increases_inductance)=(Verhoogt inductie)
-Actual\:_%1$°C=Actual: %1$°C
+%1$_is_not_in_range!=%1$ ihatárértéken kívűl!
+(Increases_capacity)=(Növeli a kapacitást)
+(Increases_inductance)=(Induktivitást növeli)
+Actual\:_%1$°C=Aktuális: %1$°C
 Battery_level=Battery level
-Biggest=Grootste
-Booster_slot=Booster slot
-Can_create\:=Can create:
-Capacity\:_%1$F=Capaciteit: %1$F
-Channel=Channel
-Charge=Laden
+Biggest=Legnagyobb
+Booster_slot=Erősítő foglalat
+Can_create\:=Készíteni tud:
+Capacity\:_%1$F=Kapacitás: %1$F
+Channel=Csatorna
+Charge=Töltés
 Charge_power=Charge power
-Charge_power\:_%1$W=Charge power: %1$W
-Closed=Closed
-Connected=Verbonden
-Cooling_power\:_%1$W=Cooling power: %1$W
-Copper_cable_slot=Copper cable slot
-Current=Current
-Dielectric_slot=Dielectric slot
-Discharge_power\:_%1$W=Discharge power: %1$W
-Electrical_cable_slot=Electrical cable slot
-Energy=Energie
-Entity_filter_slot=Entity filter slot
-External_control=External control
-Ferromagnetic_core_slot=Ferromagnetic core slot
+Charge_power\:_%1$W=Töltés teljesítménye: %1$W
+Closed=Zárva
+Connected=Csatlakoztatava
+Cooling_power\:_%1$W=Hűtés teljesítménye: %1$W
+Copper_cable_slot=Rézkábel foglalat
+Current=Áramerősség
+Dielectric_slot=Dielektrikum foglalat
+Discharge_power\:_%1$W=Kisütés energiája: %1$W
+Electrical_cable_slot=Elektromos kábel foglalat
+Energy=Energia
+Entity_filter_slot=Entitás szűrő foglalat
+External_control=Külső vezérlés
+Ferromagnetic_core_slot=Ferromágnes Mag foglalat
 Generated_power=Generated power
-Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
+Generates_heat_when_supplied_with_fuel.=Hőt generál, ha el van látva üzemanyaggal.
 Generating=Generating
-Has_a_signal_output.=Has a signal output.
-Inductance\:_%1$H=Inductie: %1$H
-Input=Input
-Input_voltage=Input voltage
-Internal_control=Interne controle
+Has_a_signal_output.=Jelkimenete van.
+Inductance\:_%1$H=Induktivitás: %1$H
+Input=Bemenetek
+Input_voltage=Bemeneti feszültség 
+Internal_control=Belső vezerlés
 Internal_resistance\:_%1$\u2126=Internal resistance: %1$\u2126
-Is_off=Is off
-Is_on=Is on
-Life=Life
-Max._temperature\:_%1$°C=Max. temperature: %1$°C
+Is_off=Kikapcsolva
+Is_on=Bekapcsolva
+Life=Élettartam
+Max._temperature\:_%1$°C=Max. hőmérséklet: %1$°C
 Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
 Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
-No=No
-Nominal\:=Nominal:
-Nominal_power\:_%1$W=Nominal power: %1$W
-Nominal_usage\:=Nominal usage:
-Nominal_voltage\:_%1$V=Nominal voltage: %1$V
-None=None
-Not_connected=Niet verbonden
-Not_enough_space_for_this_block=Not enough space for this block
-OFF=OFF
-ON=ON
-Off=Off
-On=On
-Open=Open
-Output_voltage=Output voltage
-Portable_battery_slot=Portable battery slot
-Position=Position
-Power=Power
-Power\:_%1$W=Power: %1$W
-Power_consumption=Power consumption
-Powered_by_Lamp_Supply=Powered by Lamp Supply
-Powered_by_cable=Powered by cable
-Produced_power=Produced power
-Range\:_%1$_blocks=Range: %1$ blocks
-Redstone_slot=Redstone slot
-Redstone_value=Redstone value
-Regulator_slot=Regulator slot
-Reset=Reset
-Resistance=Resistance
+No=Nem
+Nominal\:=Névleges:
+Nominal_power\:_%1$W=Névleges teljesítmény: %1$W
+Nominal_usage\:=Névleges élettartam:
+Nominal_voltage\:_%1$V=Névleges feszültség:  %1$V
+None=egyik sem
+Not_connected=Nincs csatlakoztatva
+Not_enough_space_for_this_block=Nincs elég hely ennek a blokknak
+OFF=KI
+ON=BE
+Off=Ki
+On=Be
+Open=Nyitva
+Output_voltage=Kimeneti feszültség
+Portable_battery_slot=Hordozható akkumulátor foglalat
+Position=Pozíció
+Power=Energia
+Power\:_%1$W=Teljesítmény: %1$W
+Power_consumption=Fogyasztás
+Powered_by_Lamp_Supply=Lámpa tápegységről táplálva
+Powered_by_cable=Kábelről táplálva
+Produced_power=Termelt energia
+Range\:_%1$_blocks=Hatókör: %1$ blokk
+Redstone_slot=Redstone foglalat
+Redstone_value=Redstone  Érték
+Regulator_slot=Stabilizátor foglalat
+Reset=Nulláz
+Resistance=Ellenállás
 Resistance\:_%1$\u2126=Resistance: %1$\u2126
-Smallest=Kleinste
-Specify_the_channel=Specificeer het kanaal
+Smallest=Legkisebb
+Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel
-Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
-Temperature=Temperatuur
-Temperature\:_%1$°C=Temperature: %1$°C
-Temperature_gauge=Temperatuurmeter
+Stored_energy\:_%1$J_(%2$%)=Tárolt energia: %1$J (%2$%)
+Temperature=Hőmérséklet
+Temperature\:_%1$°C=Hőmérséklet: %1$°C
+Temperature_gauge=Hőmérő
 Thermal_isolator_slot=Thermal isolator slot
-Thermal_power=Thermal power
-Toggle=Schakel
-Toggle_switch=Schakel schakelaar
+Thermal_power=Hőenergia
+Toggle=Vált
+Toggle_switch=Kapcsoló váltás
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
-Used_to_cool_down_turbines.=Used to cool down turbines.
+Used_to_cool_down_turbines.=Turbinák hűtésére használható.
 Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
 Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
 Validate=Validate
-Voltage=Voltage
-Voltage\:_%1$V=Voltage: %1$V
-Voltage_drop=Voltage drop
-Voltages=Voltages
-Yes=Yes
-You_can't_place_this_block_at_this_side=You can't place this block at this side
+Voltage=Feszülség
+Voltage\:_%1$V=Feszültség: %1$V
+Voltage_drop=Feszültség esés
+Voltages=Feszültségek
+Yes=Igen
+You_can't_place_this_block_at_this_side=Nem teheted ezt a blokkot erre az oldalra
 _O\:_= O:

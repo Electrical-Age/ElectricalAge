@@ -1,0 +1,1089 @@
+#<ELN_LANGFILE_V1_1>
+
+# ./src/main/java/mods/eln/Achievements.java
+Electrical_Age_[WIP]=Electrical Age [WIP]
+achievement.craft_50v_macerator=Knusende begynder
+achievement.craft_50v_macerator.desc=Lav en 50V Macerator
+achievement.open_guide=Wiki Power
+achievement.open_guide.desc=Åbn wiki-guiden
+
+# ./src/main/java/mods/eln/Eln.java
+10A_Diode.name=10A Diode
+200V_Active_Thermal_Dissipator.name=200V Aktiv Termisk Afleder
+200V_Battery_Charger.name=200V Batteri Oplader
+200V_Compressor.name=200V Kompressor
+200V_Condensator.name=200V Kapacitor
+200V_Copper_Heating_Corp.name=200V Kobber varmer
+200V_Economic_Light_Bulb.name=200V Strømbesparende Pære
+200V_Emergency_Lamp.name=200V nødlampe
+200V_Farming_Lamp.name=200V Landbrugslampe
+200V_Fuel_Generator.name=200V benzin Generator
+200V_Incandescent_Light_Bulb.name=200V Glødepære
+200V_Iron_Heating_Corp.name=200V Jern Varmer
+200V_LED_Bulb.name=200V LED pære
+200V_Macerator.name=200V Kværner
+200V_Magnetizer.name=200V Magnetiserer
+200V_Plate_Machine.name=200V Plademaskine
+200V_Power_Socket.name=200V Stikkontakt
+200V_Tungsten_Heating_Corp.name=200V Wolfram Varmer
+200V_Turbine.name=200V Turbine
+25A_Diode.name=25A Diode
+2x3_Rotating_Solar_Panel.name=2x3 roterende solcellepanel
+2x3_Solar_Panel.name=2x3 solcellepanel
+50V_Battery_Charger.name=50V Batteri Oplader
+50V_Carbon_Incandescent_Light_Bulb.name=50V Kul Glødepære 
+50V_Compressor.name=50V Kompressor
+50V_Condensator.name=50V Kapacitor
+50V_Copper_Heating_Corp.name=50V Kobber Varmer
+50V_Economic_Light_Bulb.name=50V Økonomisk pære
+50V_Egg_Incubator.name=50V Ægge Inkubator
+50V_Emergency_Lamp.name=50V nødlampe
+50V_Farming_Lamp.name=50V Landbrugslampe
+50V_Fuel_Generator.name=50V benin Generator
+50V_Incandescent_Light_Bulb.name=50V Glødepære
+50V_Iron_Heating_Corp.name=50V Jern Varmer
+50V_LED_Bulb.name=50V LED pære
+50V_Macerator.name=50V Kværner
+50V_Magnetizer.name=50V Magnetiserer
+50V_Plate_Machine.name=50V Plade Maskine
+50V_Power_Socket.name=50V Stikkontakt
+50V_Tungsten_Heating_Corp.name=50V Wolfram Varmer
+50V_Turbine.name=50V Turbine
+800V_Defence_Turret.name=800V Forsvarstårn
+AND_Chip.name=AND Chip
+Advanced_Chip.name=Advanceret Chip
+Advanced_Electrical_Motor.name=Advanceret Elektrisk Motor
+Advanced_Energy_Meter.name=Advanceret EL-Måler
+Advanced_Machine_Block.name=Advanceret Maskine blok
+Advanced_Magnet.name=Advanceret Magnet
+AllMeter.name=Multi-Meter
+Alloy_Dust.name=Legerings Pulver
+Alloy_Ingot.name=Legerings Barre
+Alloy_Plate.name=Legeret Plade
+Amplifier.name=Forstærker
+Analog_Watch.name=Analog Ur
+Analog_vuMeter.name=Analog Måler
+Analogic_Regulator.name=Analogisk Regulator
+Animal_Filter.name=Dyre Filter
+Auto_Miner.name=Auto Miner
+Average_Electrical_Drill.name=Gennemnitligt Elektrisk Bor
+Average_Ferromagnetic_Core.name=Gennemsnitlig Ferromagnetisk Kerne
+Basic_Magnet.name=Basal Magnet
+Big_Fuel_Burner.name=Stor brændstofbrænder
+Black_Brush.name=Sort Pensel
+Blown_Lead_Fuse.name=Sprunget bly-sikring
+Blue_Brush.name=Blå Pensel
+Brown_Brush.name=Brun Pensel
+Capacity_Oriented_Battery.name=Kapacitet Orienteret Batteri
+Casing.name=Indkapsling
+Cheap_Chip.name=Billig Chip
+Cheap_Electrical_Drill.name=Billigt Elektrisk Bor
+Cheap_Ferromagnetic_Core.name=Billig Ferromagnetisk Kerne
+Cinnabar_Dust.name=Cinnober pulver
+Cinnabar_Ore.name=Cinnober Malm
+Coal_Dust.name=Kul Pulver
+Coal_Plate.name=Kul Plade
+Combustion_Chamber.name=Forbrændings Kammer
+Configurable_summing_unit.name=Konfigurerbar summeringsenhed
+Copper_Cable.name=Kobber kabel
+Copper_Dust.name=Kobber Pulver
+Copper_Ingot.name=Kobber Barre
+Copper_Ore.name=Kobber Malm
+Copper_Plate.name=Kobber Plade
+Copper_Thermal_Cable.name=Kobber Termisk Kabel
+Cost_Oriented_Battery.name=Pris Orrienteret Batteri
+Current_Oriented_Battery.name=Strømstyrke Orienteret Batteri
+Cyan_Brush.name=Tyrkis Pensel
+DC-DC_Converter.name=DC-DC konverter
+D_Flip_Flop_Chip.name=D Flip Flop Chip
+Data_Logger.name=Data Logger
+Data_Logger_Print.name=Data Logger Print
+Dielectric.name=Dielektrisk
+Digital_Watch.name=Digital Ur
+Electrical_Anemometer_Sensor.name=Elektrisk Vindmåler
+Electrical_Breaker.name=Elektrisk Afbryder
+Electrical_Daylight_Sensor.name=Elektrisk Dagslys Sensor
+Electrical_Entity_Sensor.name=Elektrisk Entitet Sensor
+Electrical_Fire_Buzzer.name=Elektrisk brand Alarm
+Electrical_Fire_Detector.name=Brandalarm
+Electrical_Furnace.name=Elektrisk Ovn
+Electrical_Fuse_Holder.name=Sikrings holder
+Electrical_Light_Sensor.name=Elektrisk Lys Sensor
+Electrical_Motor.name=Elektrisk Motor
+Electrical_Probe.name=Elektrisk Probe
+Electrical_Probe_Chip.name=Elektrisk Probe Chip
+Electrical_Source.name=Elektrisk Kilde
+Electrical_Timer.name=Elektrisk Timer
+Electrical_Weather_Sensor.name=Elektrisk Vejr Sensor
+Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age nøgle,\nKan bruges til at dreje\nsmå vægblokke
+Energy_Meter.name=EL-Måler
+Experimental_Transporter.name=Eksperimental Transporter
+Fast_Electrical_Drill.name=Hurtigt Elektrisk Bor
+Ferrite_Ingot.name=Ferrit Barre
+Flat_Lamp_Socket.name=Flad Lampefatning
+Fluorescent_Lamp_Socket.name=Fluorescerende Lampefatning
+Flywheel.name=Svinghjul
+Fuel_Heat_Furnace.name=Brændstof-varmeovn
+Gas_Turbine.name=Gas-turbine
+Generator.name=Generator
+Gold_Dust.name=Guld Pulver
+Gold_Plate.name=Guld Plade
+Gray_Brush.name=Grå Pensel
+Green_Brush.name=Grøn Pensel
+Ground_Cable.name=Jordforbindelse Kable
+High_Power_Receiver_Antenna.name=Highspændings Modtager Antenne
+High_Power_Transmitter_Antenna.name=Højspændnings Sender Antenne
+High_Voltage_Cable.name=Højspændnings Kable
+High_Voltage_Relay.name=Højspændnings Relæ
+High_Voltage_Switch.name=Højspændings Afbryder
+Hub.name=Hub
+Industrial_Data_Logger.name=Industriel Data Logger
+Iron_Cable.name=Jern Kable
+Iron_Dust.name=Jern Pulver
+Iron_Plate.name=Jern Plade
+JK_Flip_Flop_Chip.name=JK Flip Flop Chip
+Joint.name=Samling
+Joint_hub.name=Samlings Hub
+LED_vuMeter.name=LED VuMeter
+Lamp_Socket_A.name=Lampefatning A
+Lamp_Socket_B_Projector.name=Lampefatning B Projektør
+Lamp_Supply.name=Lys Forsyning
+Large_Rheostat.name=Stor Regulator
+Lead_Dust.name=Bly Pulver
+Lead_Fuse_for_high_voltage_cables.name=Bly-sikring til højspændingskabler
+Lead_Fuse_for_low_voltage_cables.name=Bly-sikring til lavspændingskabler
+Lead_Fuse_for_medium_voltage_cables.name=Bly-sikring til mellemspændingskabler
+Lead_Fuse_for_very_high_voltage_cables.name=Bly-sikring til høje højspændingskabler
+Lead_Ingot.name=Bly barre
+Lead_Ore.name=Bly Malm
+Lead_Plate.name=Bly Plade
+Life_Oriented_Battery.name=Livstids Orienteret Batteri
+Light_Blue_Brush.name=Lyseblå pensel
+Lime_Brush.name=Lime Pensel
+Long_Suspended_Lamp_Socket.name=Lang Ophængt Lampefatning
+Low_Power_Receiver_Antenna.name=Lavspændings Modtager Antenne
+Low_Power_Transmitter_Antenna.name=Lavspændings Sender Antenne
+Low_Voltage_Cable.name=Lavspændings Kable
+Low_Voltage_Relay.name=Lavspændings Relæ
+Low_Voltage_Switch.name=Lavspændings Afbryder
+Lowpass_filter.name=Lavpasfilter
+Machine_Block.name=Maskine Blok
+Machine_Booster.name=Maskine Booster
+Magenta_Brush.name=Lilla Pensel
+Medium_Fuel_Burner.name=Medium brændstofbrænder
+Medium_Power_Receiver_Antenna.name=Mediumspændings Modtager Antenne
+Medium_Power_Transmitter_Antenna.name=Mediumspændings Sender Antenne
+Medium_Voltage_Cable.name=Medium Spændnings Kabel
+Medium_Voltage_Relay.name=Medium Spændings Relæ
+Medium_Voltage_Switch.name=Medium Spændnings Afbryder
+Mercury.name=Kviksølv
+Mining_Pipe.name=Mine Rør
+Modbus_RTU.name=Modbus RTU
+Modern_Data_Logger.name=Moderne Data Logger
+Monster_Filter.name=Monster Filter
+MultiMeter.name=Multimeter
+NAND_Chip.name=NAND Chip
+NOR_Chip.name=NOR Chip
+NOT_Chip.name=NOT Chip
+Nuclear_Alarm.name=Reaktor Alarm
+OR_Chip.name=OR Chip
+On_OFF_Regulator_10_Percent.name=tænd / sluk-regulator 10%
+On_OFF_Regulator_1_Percent.name=tænd / sluk-regulator 1%
+OpAmp.name=OpAmp
+Optimal_Ferromagnetic_Core.name=Optimal Ferromagnetisk Kerne
+Orange_Brush.name=Orange Pensel
+Ore_Scanner.name=Malm Skanner
+Oscillator_Chip.name=Oscillator Chip
+Overheating_Protection.name=Overophednings Beskyttelse
+Overvoltage_Protection.name=Overspændings Beskyttelse
+PAL_Chip.name=PAL Chip
+PID_Regulator.name=PID-regulator
+Pink_Brush.name=Pink Pensel
+Player_Filter.name=Spiller Filter
+Portable_Battery.name=Flyttebar Batteri
+Portable_Battery_Pack.name=Flyttebar Batteri Pakke
+Portable_Condensator.name=Flyttebar Kapacitor
+Portable_Condensator_Pack.name=Flyttebar Kapacitor Pakke
+Portable_Electrical_Axe.name=Håndholdt Elektrisk Økse
+Portable_Electrical_Mining_Drill.name=Håndholt Elektrisk Mine Bor
+Power_Capacitor.name=Energi Kapicator
+Power_Inductor.name=Energi Induktor
+Power_Resistor.name=Energi Modstand
+Power_capacitor.name=kondensator
+Power_inductor.name=spole
+Purple_Brush.name=Lila Pensel
+Red_Brush.name=Rød Pensel
+Redstone-to-Voltage_Converter.name=Rødsten-Til-Volt Omformer
+Rheostat.name=Rheostat
+Robust_Lamp_Socket.name=Robust Lampefatning
+Rubber.name=Gummi
+Sample_and_hold.name=Prøve og hold
+Scanner.name=Scanner
+Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
+Sconce_Lamp_Socket.name=Sconce lampesokkel
+Signal_20H_inductor.name=Signal 20H Induktor
+Signal_Antenna.name=Signal Antenne
+Signal_Button.name=Signal Knap
+Signal_Cable.name=Signal Kabel
+Signal_Diode.name=Signal Diode
+Signal_Processor.name=Signal Processor
+Signal_Relay.name=Signal Relæ
+Signal_Source.name=Signal Kilde
+Signal_Switch.name=Signal Afbryder
+Signal_Switch_with_LED.name=Signal Afbryder med LED
+Signal_Trimmer.name=Signal Trimmer
+Silicon_Dust.name=Sillicium Pulver
+Silicon_Ingot.name=Sillicium Barre
+Silicon_Plate.name=Sillicium Plade
+Silver_Brush.name=Sølv Pensel
+Simple_Lamp_Socket.name=Simpel Lampefatning
+Single-use_Battery.name=Engangs Batteri
+Small_200V_Copper_Heating_Corp.name=Lille 200V Kobber Varmer
+Small_200V_Iron_Heating_Corp.name=Lille 200V Jern Varmer
+Small_200V_Tungsten_Heating_Corp.name=Lille 200V Wolfram Varmer
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Lille 50V Kul Glødepære
+Small_50V_Copper_Heating_Corp.name=Lille 50V Kobber Varmer
+Small_50V_Economic_Light_Bulb.name=Lille 50V Strømbesparende Pære
+Small_50V_Incandescent_Light_Bulb.name=Lille 50V Glødepære
+Small_50V_Iron_Heating_Corp.name=Lille 50V Jern Varmer
+Small_50V_Tungsten_Heating_Corp.name=Lille 50V Wolfram Varmer
+Small_Active_Thermal_Dissipator.name=Lille Aktiv Termisk Afkøler
+Small_Flashlight.name=Lille Lommelygte
+Small_Fuel_Burner.name=Lille brændstofbrænder
+Small_Passive_Thermal_Dissipator.name=Lille Passiv termisk Afkøler
+Small_Rotating_Solar_Panel.name=Lille Roterende Sol Panel
+Small_Solar_Panel.name=Lille Sol Panel
+Solar_Tracker.name=Sol Sporings Chip
+Standard_Alarm.name=Standard Alarm
+Steam_Turbine.name=Damp Turbine
+Stone_Heat_Furnace.name=Sten Ovn
+Street_Light.name=Gadelampe
+Suspended_Lamp_Socket.name=Ophængt Lampefatning
+Tachometer.name=omdrejningstæller
+Temperature_Probe.name=Temparatur Måler
+Thermal_Probe.name=Termisk Måler
+Thermal_Probe_Chip.name=Termisk Måler Chip
+Thermistor.name=Termistor
+Thermometer.name=Termometer
+Tree_Resin.name=Harpiks
+Tree_Resin_Collector.name=Harpiks Opsamler
+Tungsten_Cable.name=Wolfram Kabel
+Tungsten_Dust.name=Wolfram Pulver
+Tungsten_Ingot.name=Wolfram Barre
+Tungsten_Ore.name=Wolfram Malm
+Tutorial_Sign.name=Trænings Skilt
+Very_High_Voltage_Cable.name=Superhøjspændings Kabel
+Very_High_Voltage_Relay.name=Superhøjspændings Relæ
+Very_High_Voltage_Switch.name=Superhøjspændings  Afbryder
+Voltage-to-Redstone_Converter.name=Volt-til-Rødstens Omformer
+Voltage_Oriented_Battery.name=Volt Orienteret Batteri
+Voltage_Probe.name=Volt Meter
+Voltage_controlled_amplifier.name=Spændingsstyret forstærker
+Voltage_controlled_sawtooth_oscillator.name=Spændingsstyret savtand-oscillator
+Voltage_controlled_sine_oscillator.name=Spændingsstyret sinus-oscillator
+Water_Turbine.name=Vand Turbine
+Weak_50V_Battery_Charger.name=Svag 50V Batteri Oplader
+White_Brush.name=Hvid Pensel
+Wind_Turbine.name=Vind Turbine
+Wireless_Analyser.name=Trådløs Analysator
+Wireless_Button.name=Trådløs Knap
+Wireless_Signal_Receiver.name=Trådløs Signal Modtager
+Wireless_Signal_Repeater.name=Trådløs Signal Forstærker
+Wireless_Signal_Transmitter.name=Trådløs Signal Sender
+Wireless_Switch.name=Trådløs Afbryder
+Wrench.name=Skruenølge
+X-Ray_Scanner.name=Røntgen Skanner
+XNOR_Chip.name=XNOR Chip
+XOR_Chip.name=XOR Chip
+Yellow_Brush.name=Gul Pensel
+entity.EAReplicator.name=Replicator
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.Copper Axe.name=Kobber økse
+item.E-Coal Boots.name=E-kul støvler
+item.E-Coal Boots.name=E-kul støvler
+item.E-Coal Boots.name=E-kul støvler
+item.E-Coal Boots.name=E-kul støvler
+itemGroup.Eln=Electrical Age
+mod.meta.desc=Elektrisitet i din base!
+tile.eln.ElnProbe.name=Eln Computer Probe
+tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age til anden energi-eksportør
+tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age til anden energi-eksportør
+tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age til anden energi-eksportør
+
+# ./src/main/java/mods/eln/i18n/I18N.java
+You_have_%1$_lives_left=Du har %1$ liv tilbage
+
+# ./src/main/java/mods/eln/item/BrushDescriptor.kt
+Brush_is_dry=Børsten er tør
+Can_paint_%1$_blocks=Kan Male %1$ Blokke
+
+# ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
+Can_be_used_to_encase_EA_items_that_support_it=Kan bruges til at indkapsle EA-genstande, der understøtter det
+
+# ./src/main/java/mods/eln/item/CombustionChamber.java
+Upgrade_for_the_Stone_Heat_Furnace.=Opgradering til Sten ovnen
+
+# ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
+Energy_per_operation\:_%1$J=Energi pr. Operation: %1$J
+Time_per_operation\:_%1$h=Tid pr. Operation: %1$h
+
+# ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
+Cable_loss_factor\:_%1$=Kable tabsfaktor %1$
+
+# ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
+Burn_unit_for_the_gas_heat_furnace.=Brænder til gasvarmovnen.
+Produced_heat_power\:_=Produceret varmekraft:
+
+# ./src/main/java/mods/eln/item/HeatingCorpElement.java
+
+# ./src/main/java/mods/eln/item/LampDescriptor.java
+Bad=Dårlig
+Condition\:=Tilstand:
+End_of_life=Død
+Good=God
+New=ny
+Nominal_lifetime\:_%1$h=Normal Livstid %1$h
+Technology\:_%1$=Teknologi %1$
+Used=brugt
+
+# ./src/main/java/mods/eln/item/LampSlot.java
+Lamp_slot=Lampe felt
+
+# ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
+Useful_to_prevent_overheating\nof_Batteries=God til at beskytte imod overophedning \naf batterier
+
+# ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
+Useful_to_prevent_over-voltage\nof_Batteries=God til at beskytte imod overspænning \naf batterier
+
+# ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
+Solar_panel_upgrade=Sol Panels opgradering
+
+# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
+State\:=Stadie:
+Stored_Energy\:_%1$J_(%2$%)=Oplagret Energi: %1$J (%2$%)
+
+# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+
+# ./src/main/java/mods/eln/mechanical/Tachometer.kt
+Rads_s_corresponding\nto_0%_output=Rads/s tilsvarende\ntil 0% output
+Rads_s_corresponding\nto_100%_output=Rads / s tilsvarende\ntil 100% output
+
+# ./src/main/java/mods/eln/misc/UtilsClient.java
+Hold_shift=Hold shift inde
+
+# ./src/main/java/mods/eln/misc/Version.java
+mod.name=Electrical Age
+
+# ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
+
+# ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
+Input_power_is_limited_to_%1$W=Indgangs effekt er begrænset til %1$W
+
+# ./src/main/java/mods/eln/sixnode/AnalogChips.kt
+A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=En spændingsstyret forstærker (VCA)\ner en elektronisk forstærker, der varierer\ndens forøgelse afhængigt af styrespændingen.
+A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=En spændingsstyret oscillator eller VCO er\nen elektronisk oscillator, hvis svingning\nfrekvensen styres af en spændingsindgang.
+An_amplifier_increases_the_voltage\nof_an_input_signal_by_a_configurable\ngain_and_outputs_that_voltage.=En forstærker øger spændingen\naf et indgangssignal med en konfigurerbar\nforstærkning og output denne spænding.
+Cut-off_frequency_%1$_Hz=Cut-off frekvens %1$ Hz
+Gain=Gevinst
+Gain_for_input_\u00a713=Gevinst for input \u00a713
+Gain_for_input_\u00a722=Gevinst for input \u00a722
+Gain_for_input_\u00a741=Gevinst for input \u00a741
+Lowpass_filter_-_Passes_signals_with_a\nfrequency_lower_than_a_certain_cutoff_frequency\nand_attenuates_signals_with_frequencies_higher\nthan_the_cutoff_frequency.=Lavpassfilter - Videresender signaler med en\nfrekvens, der er lavere end en bestemt cut-off frekvens\nog dæmper signaler med højere frekvenser\nend cutoff-frekvensen.
+Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_as_configurable_amplifier.=Driftsforstærker - DC-koblet\nforstærker med høj forstærkning med\ndifferentiel input. Kan bruges til\nsammenligne spændinger eller som en konfigurerbar forstærker.
+Params=Parametre
+Proportional–integral–derivative_controller._A_PID\ncontroller_continuously_calculates_an_error_value_as\nthe_difference_between_a_desired_setpoint_and_a_measured\nprocess_variable_and_applies_a_correction_based_on\nproportional,_integral,_and_derivative_terms.=Proportional – integreret – derivat controller. En PID\ncontroller beregner kontinuerligt en fejlværdi som\nforskellen mellem et ønsket setpoint og et målt\nprocesvariabel og anvender en korrektion baseret på\nproportional, integreret og afledt.
+Samples_the_voltage_of_a_varying_analog_signal_when\nthe_clock_input_changes_from_0_to_1_and_holds_its\noutput_voltage_at_a_constant_level_until_next_clock_pulse.\nYou_can_see_it_as_an_analog_D-Flipflop.=Prøver spændingen i et varierende analogt signal, når\nurindgangen ændres fra 0 til 1 og holder dens\nudgangsspænding på et konstant niveau indtil næste urimpuls.\nDu kan se det som en analog D-Flipflop.
+The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_each_input_can_be_configured.=Summeringsenheden udsender summen af\nde tre vægtende input\nforstærkning for hver input kan konfigureres.
+
+# ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
+Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Beskytter elektriske komponenter.\nSikring smelter, hvis strømmen overstiger\nsikringsgrænse
+
+# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
+
+# ./src/main/java/mods/eln/sixnode/LogicGate.kt
+A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=En programmerbar array-logik (PAL) er en programmerbar\nhalvledere af logisk enhed, der bruges til at implementere enhver logik\nfunktion i kun et digitalt kredsløb. Funktionen er\nstatsløs, hvilket betyder, at der ikke gemmes nogen mellemtilstand.
+If_the_input_J_is_1_(high)_and_K_is_0_(low)\nduring_a_clock_pulse,_the_output_becomes_1_(high).\nIf_J_is_0_(low)_and_K_is_1_(high)_during_the_pulse,\nthe_output_becomes_0_(low)._If_both_inputs_are_0_(low)\nduring_the_clock_pulse,_the_state_is_maintained._If_both\ninputs_are_1_(high)_the_input_is_toggled_if_a_rising_edge\nwas_detected_at_the_clock_input.=Hvis input J er 1 (høj) og K er 0 (lav)\nunder en urimpuls bliver udgangen 1 (høj).\nHvis J er 0 (lav) og K er 1 (høj) under pulsen,\noutput bliver 0 (lav). Hvis begge indgange er 0 (lav)\nunder urimpulsen opretholdes tilstanden. Hvis begge dele\ninput er 1 (høj) indgangen skiftes, hvis en stigende kant\nblev fundet ved urinput.
+If_the_input_voltage_is_lower_than_10V,_the\noutput_is_0_(low),_if_the_output_is_bigger_or\nequal_to_30V,_the_output_will_be_1_(high)._For\nall_voltages_in_between,_the_output_does_not_change.=Hvis indgangsspændingen er lavere end 10V, skal\noutput er 0 (lav), hvis output er større eller\nsvarende til 30V, vil udgangen være 1 (høj). Til\nalle spændinger imellem ændres udgangen ikke.
+Implements_an_exclusive_or.\nAn_output_of_1_(high)_results_if_one_or\nall_three_inputs_to_the_gate_are_1_(high).=Implementerer en eksklusiv eller.\nEn output på 1 (høj) resulterer, hvis en eller\nalle tre indgange til porten er 1 (høj).
+Implements_logical_conjunction.\nA_1_(high)_output_results_only_if_all_of\nthe_three_inputs_to_the_AND_gate_are_1_(high).=Implementerer logisk sammenhæng.\nEn 1 (høj) output resulterer kun, hvis alle\nde tre indgange til AND-porten er 1 (høj).
+Implements_logical_disjunction.\nA_1_(high)_output_results_if_at_least\none_input_to_the_gate_is_1_(high).=Implementerer logisk adskillelse.\nDer opnås mindst 1 (høj) output\nen indgang til porten er 1 (høj).
+Inverts_the_input_signal.\nOutputs_a_voltage_representing_the\nopposite_logic-level_to_its_input.=Inverterer indgangssignalet.\nUdsender en spænding, der repræsenterer\nmodsat logisk niveau til dets input.
+Its_output_is_complement_(inverted)\nto_that_of_the_AND_gate.=Dets output er komplement (inverteret)\ntil porten AND.
+Its_output_is_complement_(inverted)\nto_that_of_the_OR_gate.=Dets output er komplement (inverteret)\ntil porten OR.
+Its_output_is_complement_(inverted)\nto_that_of_the_XOR_gate.=Dets output er komplement (inverteret)\ntil XOR-portens.
+Outputs_a_rectangular_signal_which's_frequency\ndepends_to_the_input_voltage._The_higher_the\ninput_voltage_-_the_higher_the_frequency.=Udsender et rektangulært signal, der er frekvens\nafhænger af indgangsspændingen. Jo højere\nindgangsspænding - jo højere er frekvensen.
+The_D_flip-flop_captures_the_value\nof_the_D-input_at_a_rising_edge\nportion_of_the_clock_cycle.=D-flip-flop fanger værdien\naf D-input i stigende kant\ndel af urcyklussen.
+UNDEF=UNDEF
+
+# ./src/main/java/mods/eln/sixnode/Scanner.kt
+-_For_inventories,_outputs_either_total_fill_or_fraction_of_slots_with_any_items.=- For varebeholdninger, output enten total udfyldning eller brøkdel af slots med eventuelle genstande.
+-_For_tanks,_outputs_fill_percentage.=- For tanke udfylder procentsatser.
+Otherwise_behaves_as_a_vanilla_comparator.=Opfører sig ellers som en standart-komparator.
+Right-click_to_change_mode.=Højreklik for at ændre tilstand.
+Scans_blocks_to_produce_signals.=Scanner blokke for at producere signaler.
+
+# ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
+Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Producerer træharpiks over\ntid, hvor du lægger den på et træ.
+This_block_can_only_be_placed_on_the_side_of_a_tree!=Denne blok kan kun placeres på siden af et træ!
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
+Battery_slot=Batteri felt
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
+Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Kan blive brugt til at oplade\nelektriske genstande som:\nlommelygter, X-Ray skanner,\nog Portabel Batterier.
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
+Charge_Current=Opladnings strøm
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
+Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Elektrisk strøm kan kun\nkøre igennem dioden\nfra anode til katode
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeElement.java
+Forward_Voltage=Forspænding
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
+Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Udsender en akustisk alarm, hvis\nindgangssignalet er højt
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
+Engaged=Beskæftiget
+Input_Voltage=Indgangs spænding
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
+Sound_is_muted=Lyden er slået fra
+Sound_is_not_muted=Lyden er ikke slået fra
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Beskytter elektriske komponenter\nÅbner kontakt, hvis:\n   - Spændingen overstiger et bestemt niveau\n- Strøm overskrider kabelgrænsen
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java
+Contact=Kontakt
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
+Maximum_voltage_before_cutting_off=Maksimal spænding før afbrydelse
+Minimum_voltage_before_cutting_off=Minimum spænding før afbrydelse
+Switch_is_off=Kontakten er slukket
+Switch_is_on=Kontakten er tændt
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=Et signal er elektrisk information\nsom skal være mellem 0V og %1$
+Cable_is_adapted_to_conduct\nelectrical_signals.=Kablet er tilpasset til at lede\nelektriske signaler.
+Current\:_%1$A=Strømstyrke: %1$A
+Not_adapted_to_transport_power.=Ikke tilpasset transportkraft.
+Save_usage\:=Gem brug:
+Serial_resistance\:_%1$\u2126=Seriemodstand: %1$\u2126
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
+Signal_Voltage=Signalspænding
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
+It_can_store_up_to_256_points.=Den kan Indeholde op til 256 Point
+Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Måler spændingen på et\nelektrisk signal og plotter\ndataene i realtid.
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
+Back_to_display=Tilbage til visning
+Configuration=Konfiguration
+Current_[A]=Strøm [A]
+Energy_[J]=Energi [J]
+Percent_[-]%=Procent [-]%
+Power_[W]=Effekt [W]
+Print=Print
+Sampling_period=Prøveudtagningsperiode
+Temp._[*C]=Temperatur. [*C]
+Voltage_[V]=Spænding [V]
+Y-axis_max=Y-aksel maks
+Y-axis_min=Y-aksel min
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
+Output_voltage_increases\nif_entities_are_moving_around.=Udgangsspændingen stiger\nhvis enheder bevæger sig rundt.
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java
+Entity_present=Enhed til stede
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
+Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Batteridrevet summer\naktiveret i nærvær af ild.
+Output_voltage_increases\nif_a_fire_has_been_detected.=Udgangsspændingen stiger\nhvis der er fundet en brand.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
+Fire_detected\:_=Brand opfanget:
+Fire_present=Ild til stede
+
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
+Provides_configurable_signal\nvoltage.=Tilvejebringer konfigurerbart signal\nspænding.
+
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
+Output_at_%1$%=Output ved %1$%
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
+0V_at_night,_%1$V_at_noon.=0V om natten, %1$V ved middagstid.
+Provides_an_electrical_voltage\nin_the_presence_of_light.=Giver en spænding\ni nærvær af lys.
+Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Giver en spænding\nsom er proportional med\ndagslysets intensitet.
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
+Light_level=Lysniveau
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
+Applicable_boolean_operators\:=Gældende boolean Operatører
+Applicable_functions\:=Gældende funktioner:
+Applicable_mathematical_operators\:=Gældende Matematiske Operatører
+Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Beregner et udgangssignal fra\n3 input (A, B, C) ved hjælp af en ligning.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
+Equation=ligning
+Input_voltages=Indgangs spændinger
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
+%1$_Redstone(s)_required=%1$ Rødsten(s) påkrævet
+Equation_required!=Ligning krævet!
+Inputs_are=Indgangene er
+Invalid_equation!=Ugyldig ligning!
+Output_voltage_formula=Udgangs spændings formel
+Waiting_for_completion...=Venter på en færdiggørelse...
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
+Converts_Redstone_signal\nto_an_electrical_voltage.=Konverterer et Redstone-signal\ntil en spænding.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputElement.java
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
+Converts_electrical_voltage\ninto_a_Redstone_signal.=Laver en elektrisk spænning \nom til Rødsten signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
+A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=Et relæ er en elektrisk\nkontakt, der leder elektrisk\nstrøm eller ej, afhængigt af\nden aktuelle indgangssignalspænding.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
+Default_position=Standard position
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
+Normally_closed=Normalt lukket
+Normally_open=Normalt åben
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
+Can_measure_Voltage_Power_Current=Kan måle spænding / effekt / strøm
+Measures_electrical_values_on_cables.=Måler elektriske værdier på kabler.
+Measures_voltage_on_cables.=Måler spænningen på kabler.
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
+Measured_current=Målt strøm
+Measured_power=Målt effekt
+Measured_voltage=Målt spænding
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
+Measured_voltage\ncorresponding\nto_0%_output=Målt spænding\ntilsvarende\ntil 0% output
+Measured_voltage\ncorresponding\nto_100%_output=Målt spænding\ntilsvarende\ntil 100% output
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
+Creative_block.=Kreativ Blok
+Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Giver en spændingskilde\nuden energi eller strømbegrænsning.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
+Can_break_an_electrical_circuit\ninterrupting_the_current.=Kan afbryde et elektrisk kredsløb \nfor at beskytte kablet.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
+Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Ved anvendelse af et højt signal,\ntimeren holder output højt for\net konfigurerbart interval. Kan udløses igen.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutElement.java
+Output=Udgang
+Remaining=Resterende
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
+Set=Set
+The_time_interval_the\noutput_is_kept_high.=Tidsintervallet\noutput holdes højt.
+
+# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
+Displays_the_value_of_a_signal.=Viser værdien af et signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
+Clear\:_%1$V=Slet:% 1 $ V
+Provides_an_electrical_signal\ndepending_the_actual_weather.=Giver et elektrisk signal\nafhængigt af det faktiske vejr.
+Rain\:_%1$V=Regn:  %1$V
+Storm\:_%1$V=Storm: %1$V
+
+# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
+Maximum_wind_speed_is_%1$m_s=Maksimal vindhastighed er %1$m/s
+Provides_an_electrical_signal\ndependant_on_wind_speed.=Giver et elektrisk signal\nafhængig af vindhastighed.
+You_can't_place_this_block_on_the_floor_or_the_ceiling=Du kan ikke placere denne blok på gulvet eller loftet
+
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
+Counter=Måler
+Energy_left=Energi tilbage
+Mode=Måde
+Prepay=Forudbetaling
+
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
+Change_password=Skift kodeord
+Counter_Mode=Tæller tilstand
+Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Tæller energien fra\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
+Energy_counter\:_%1$J=Energitæller: %1$J
+Enter_new_energy=Indtast ny energi
+Enter_password=Indtast adgangskode
+Prepay_Mode=Forudbetalings tilstand
+Reset_time_counter=Nulstil tidstæller
+Set_energy_counter=Indstil energitæller
+Time_counter\:=Tidstæller:
+Try_password=Prøv adgangskode
+You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=Du kan indstille en\nmængde tilgængelig energi.\nNår tælleren ankommer 0\nkontakten åbnes.
+is_off=er slukket
+is_on=er tændt
+value_in_kJ=værdi i KJ
+
+# ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
+Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Kan bruges til at indstille et punkt på et\nelektrisk netværk til et 0V potentiale.\nFor eksempel til jord negative batterikontakter.
+Provides_a_zero_volt_reference.=Giver nul volt reference.
+
+# ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
+Allows_crossing_cables\non_one_single_block.=Giver mulighed for at krydse kabler\npå en enkel blok.
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
+Angle\:_%1$°_to_%2$°=Vinkel: %1$° til %2$°
+Spot_range\:_%1$_blocks=Spot rækkevidde: % 1$ blokke
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketElement.java
+Bulb=Pære
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
+Cable_slot_empty=Kabel felt tomt
+Orientation\:_%1$°=Orientering: %1$°
+Parallel=Parallel
+Serial=Seriel
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
+Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Elektrisk kabel felt\nBasisområdet er 32 blokke.\nHvert ekstra kabel\nøger rækkevidde med en.
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
+Supplies_all_lamps_on_the_channel.=Forsyner alle lamper på kanalen.
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
+Total_power=Total effekt
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
+Power_channel_name=Power kanal navn
+Wireless_channel_name=Trådløs kanal navn
+
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
+Modbus_TCP=Modbus TCP
+Modbus_Unit_ID=Modbus-enheds-ID
+Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus er deaktiveret, aktiver det i Eln.cfg
+
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
+Add=tilføj
+Channel_name=Kanalnavn
+Modbus_ID=Modbus ID
+Modbus_RTU=Modbus RTU
+Station_ID=Trådløst ID
+Station_name=Trådløst navn
+Wireless_RX=Trådløs modtager
+Wireless_TX=Trådløs sender
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
+(Increases_maximum_voltage)=(Øger maksimal spænding)
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
+Capacity=Kapacitet
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
+Inductance=induktans
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
+
+# ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
+Supplies_any_device\nplugged_in_with_energy.=Leverer enhver enhed\ntilsluttet med energi.
+
+# ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
+Specify_the_device_to_supply_through_this_socket.=Specificer den enhed, der skal leveres via denne stik.
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
+(Sets_resistance)=(Indstil modstand)
+Coal_dust_slot=Kulstøvs felt
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
+High_parallel_resistance\n_\=>_Low_power_dissipation.=Høj parallel modstand\n  => Lav effektafledning.
+Low_serial_resistance\n_\=>_High_conductivity.=Lav seriel modstand\n  => Høj ledeevne
+Parallel_resistance\:_%1$K_W=Parallel modstand: %1$K/W
+Serial_resistance\:_%1$K_W=Seriel Modstand: %1$K/W
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
+Thermic_power=Termisk effekt
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
+Cable_slot=Kabel felt
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
+Can_measure\:=Kan måle:
+Measures_temperature_of_cables.=Måler temperaturen på kabler.
+Measures_thermal_values_on_cables.=Måler termiske værdier på kabler.
+__Temperature_Power_conducted=Temperatur / effekt udført
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
+Measured_temperature=Målt temperatur
+Measured_thermal_power=Målt termisk effekt
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
+Measured_temperature\ncorresponding\nto_0%_output=Målt temperatur\ntilsvarende\ntil 0% output
+Measured_temperature\ncorresponding\nto_100%_output=Målt temperatur\ntilsvarende\ntil 100% output
+
+# ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
+No_text_associated_to_this_beacon=Ingen tekst tilknyttet til denne beacon
+
+# ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
+Set_beacon_name=Indstil beacon-navn
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+
+# ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
+Fuel_level=Brændstofs niveau
+Nominal_power\:_%1$_W=Normal effekt: %1$ W
+Nominal_voltage\:_%1$_V=Normal spænding: %1$ V
+Produces_electricity_using_gasoline.=Producerer elektricitet ved brug af benzin.
+State=Stat
+
+# ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
+Actual\:_%1$=Faktisk: %1$
+Analog_regulator_slot=Analog regulator felt
+Control_value_at_%1$=Kontrolværdi til %1$
+Fuel_burner_slot=Brændstofbrænder felt
+Furnace_is_off=Ovnen er slukket
+Furnace_is_on=Ovnen er tændt
+Heat_Power\:_%1$=Varmekraft: %1$
+Set_point\:_%1$=Sætpunkt: %1$
+__Max._temperature\:_=  Maks. temperatur:
+
+# ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
+Nom._Resistance\:_%1$=Nom. Modstand: %1$
+Power_loss=Strøm tab
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
+Drill_slot=Bor felt
+Mining_pipe_slot=Mine rørs felt
+Ore_scanner_slot=Malm scanner felt
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
+Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Udgraver på en lille radius.\nSamler malm på en større radius:\n10 blokke radius efter 10 blokke dybde.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerElement.java
+Depth=Dybde
+Silk_touch=Silke berøring 
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
+Chest_missing_on_the\nback_of_the_auto_miner!=Kiste mangler på\nbagsiden af auto miner!
+Halves_speed,_triples_power_draw=Halvdelens hastighed, tredobler magttrækning
+Silk_Touch=Silke berørering 
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
+Overheating_protection=Overophednings beskyttelse
+Overvoltage_protection=Overspændings beskyttelse
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
+Actual_charge\:_=Faktisk opladning
+Energy_capacity\:_=Energikapacitet:
+Internal_resistance\:_=Intern modstand:
+Life_\:_=Liv:
+Nominal_power\:_=Nominel Effekt:
+Nominal_voltage\:_=Nominel spænding
+_charged_at_=Opladet ved
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
+Charged=opladet
+Discharge=aflader
+Energy\:=Energi:
+Energy\:_%1$=Energi: %1$
+Life\:=Liv:
+No_charge=Oplader ikke
+Power_in\:=Power ind:
+Power_out\:=Power ud
+
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
+Egg_slot=Æg felt
+
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
+Has_egg=Har æg
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
+Wireless_energy_receiver.=Trådløs Energy Modtager
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
+Effective_power=Effektiv Effekt
+Power_received=Effekt modtaget
+Receiving=Modtagelse
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
+Efficiency\:_%1$%_up_to_%2$%=Effiktivitet: %1$% op til %2$%
+Wireless_energy_transmitter.=Trådløs Energi Sender
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
+Efficiency=Effektivitet
+Transmitting=Transmission
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
+Heating_corp_slot=Opvarmnings corp slot
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
+Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Ligesom en vanilla ovn,\nmen opvarmer med elektricitet.
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceElement.java
+Heating_element=Varmeelement
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
+Auto_shutdown=Automatisk slukning
+Manual_shutdown=manuelt slukning
+Set_point\:_%1$°C=Sætpunkt: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
+Cost=Koster
+Nominal_voltage\:_%1V$=Normal spænding: %1V$
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
+Power_provided=Strøm leveret
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
+Combustion_chamber_slot=Forbrændingskammer felt
+Fuel_slot=Brændstofs felt
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
+Set_temperature=Indstil temperatur
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
+Control_gauge_at_%1$%=Kontrolmåler ved %1$%
+Decline_fuel=Nedbring brændstof
+Take_fuel=Tag brændstof
+
+# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
+(Increases_maximal_voltage)=(Øger maksimal spænding)
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
+Solar_tracker_slot=Solar tracker felt
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
+Can_be_geared_towards_the_sun.=Kan blive rettet mod solen
+Max._power\:_%1$W=Maks. effekt: %1$W
+Max._voltage\:_%1$V=Maks. spænding: %1$V
+Produces_power_from_solar_radiation.=Producere energi fra sol stråling
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
+Panel_angle=Panel vinkel
+Producing_energy=Producerer energi
+Sun_angle=Solvinkel
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
+It_is_night=Det er nat
+Solar_panel_angle\:_%1$°=Vinkel på solcellepanel: %1$°
+Sun_angle\:_%1$°=Sol Vinkel %1$°
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
+Destination=Bestemmelsessted
+Distance=Afstand
+Required_energy=Krævet energi
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
+Destination_transporter=Destinationstransportør
+Power_consumption\:=Power consumption:
+Power_consumption\:_%1$W=Strømforbrug: %1$W
+Required_energy\:_%1$J=Krævet energi: %1$J
+Start=Start
+Transporter_name=Transporter navn
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
+Fan_cooling_power\:_%1$W=Blæser kølingseffekt: %1$W
+Fan_power_consumption\:_%1$W=Blæser Energiforbrug: %1$W
+Fan_voltage\:_%1$V=Blæser Spænding: %1$V
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+Casing_slot=Indkapslings felt
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
+The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=Spændingsforholdet er proportionalt\ntil kabel antallet.
+Transforms_an_input_voltage_to\nan_output_voltage.=Transformerer en indgangsspænding til\nen udgangsspænding.
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerElement.java
+Core_factor=Kernefaktor
+Isolated=Isoleret
+Ratio=Forhold
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
+Generates_electricity_using_heat.=Genererer elektrisitet ved hjælp af varme
+Temperature_difference\:_%1$°C=Temperatur forskel %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
+Nominal=nominelt
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
+CAUTION\:_Cables_can_get_quite_hot!=Advarsel: Kablerne kan blive meget varme!
+Laser_charge_power\:_%1$W...%2$kW=Laser opladings forbrug: %1$W...%2$kW
+Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scanner efter enheder og skyder, hvis\nenhed matcher de konfigurerbare filterkriterier.
+Standby_power\:_%1$W=Standby forbrug: %1$W
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
+??=??
+Charge_level=Opladnings niveau
+Shoot_=Skyde
+Shoot_everything=Skyd alt
+Shoot_nothing=Skyde intet
+Target=Mål
+animals=dyr
+monsters=monstre
+players=spillere
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
+Attack\:=Angreb:
+Do_not_attack\:=Angreb ikke:
+Recharge_power\:=Genopladestyrke:
+
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
+Generates_energy_using_water_stream.=Genererer energi ved hjælp af vand damp
+No_place_for_water_turbine!=Ikke plads til vandturbinen!
+
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
+
+# ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
+Front\:_%1$=Front: %1$
+Generates_energy_from_wind.=Genererar energi ved hjælp af vind
+Left_Right\:_%1$=Venstre / højre: %1$
+Up_Down\:_%1$=Op / Ned: %1$
+Wind_area\:=Vind område:
+
+# ./src/main/java/mods/eln/wiki/Data.java
+Light=Lys
+Machine=Maskine
+Ore=Malm
+Portable=Transportabel
+Resource=Ressource
+Signal=Signal
+Thermal=Termisk
+Upgrade=Opgradering
+Utilities=Forsyningsværk
+Wiring=Ledninger
+
+# ./src/main/java/mods/eln/wiki/Default.java
+Previous=Tidligere
+
+# ./src/main/java/mods/eln/wiki/ItemDefault.java
+Can_be_used_to_craft\:=Kan bruges til at fremstille:
+Cannot_be_crafted!=Kan ikke laves!
+Cost_%1$J=Bruger %1$J
+Created_by\:=Lavet af:
+Is_not_a_crafting_material!=Er ikke et bygge materiale!
+Recipe\:=Opskrift:
+
+# Appearing in multiple source files
+%1$_is_not_in_range!=%1$ er ikke inden for rækkevidde!
+(Increases_capacity)=(Øger kapaciteten)
+(Increases_inductance)=(Øger induktansen)
+Actual\:_%1$°C=Faktiske: %1$°C
+Battery_level=Batteri niveau
+Biggest=største
+Booster_slot=Booster felt
+Can_create\:=Kan oprette:
+Capacity\:_%1$F=Kapacitet: %1$F
+Channel=Kanal
+Charge=Oplader
+Charge_power=Opladning Effekt
+Charge_power\:_%1$W=Opladsnings forbrug: %1$W
+Closed=Lukket
+Connected=forbundet
+Cooling_power\:_%1$W=Kølings forbrug: %1$W
+Copper_cable_slot=Kobber kabel felt
+Current=Strøm
+Dielectric_slot=Dielektrisk felt
+Discharge_power\:_%1$W=Afladnings forbrug: %1$W
+Electrical_cable_slot=Elektrisk kabel felt
+Energy=Energi
+Entity_filter_slot=Enheds filter plads
+External_control=Ekstern kontrol
+Ferromagnetic_core_slot=Ferromagnetisk kerne felt
+Generated_power=Genereret strøm
+Generates_heat_when_supplied_with_fuel.=Genererer varme når den er forsynet med brændstof
+Generating=Generering
+Has_a_signal_output.=Har en signaludgang.
+Inductance\:_%1$H=Induktans: %1$H
+Input=Input
+Input_voltage=Indgangs spænding
+Internal_control=Intern kontrol
+Internal_resistance\:_%1$\u2126=Intern modstand: %1$\u2126
+Is_off=er slukket
+Is_on=er tændt
+Life=Liv
+Max._temperature\:_%1$°C=Maks. temperatur: %1$°C
+Measured_value\ncorresponding\nto_0%_output=Målt værdi\ntilsvarende\ntil 0% output
+Measured_value\ncorresponding\nto_100%_output=Målt værdi\ntilsvarende\ntil 100% output
+No=Nej
+Nominal\:=Normal:
+Nominal_power\:_%1$W=Normal Energi %1$W
+Nominal_usage\:=Normal forbrug:
+Nominal_voltage\:_%1$V=Normal spænding: %1$V
+None=Ingen
+Not_connected=Ikke forbundet
+Not_enough_space_for_this_block=Ikke nok plads til denne blok
+OFF=Slukket
+ON=Tændt
+Off=Slået Fra
+On=Slået Til
+Open=Åben
+Output_voltage=Udgangs spændings
+Portable_battery_slot=Bærbart batteri felt
+Position=Position
+Power=Effekt
+Power\:_%1$W=Effekt: %1$W
+Power_consumption=Strømforbrug
+Powered_by_Lamp_Supply=Forsynes fra lampeforsyning
+Powered_by_cable=forsynes fra kabel
+Produced_power=Produceret Effekt
+Range\:_%1$_blocks=Rækkevidde: %1$ blokke
+Redstone_slot=Rødstens felt
+Redstone_value=Rødstens værdi
+Regulator_slot=Regulator felt
+Reset=Nulstil
+Resistance=Modstand
+Resistance\:_%1$\u2126=Modstand: %1$\u2126
+Smallest=Mindste
+Specify_the_channel=Specificer kanalen
+Specify_the_supply_channel=Angiv forsyningskanalen
+Stored_energy\:_%1$J_(%2$%)=Lagret energi: %1$J (%2$%)
+Temperature=Temperatur
+Temperature\:_%1$°C=Temperatur: %1$°C
+Temperature_gauge=Temperaturmåler
+Thermal_isolator_slot=Termisk isolator slot
+Thermal_power=Termisk Effekt
+Toggle=Kip Funktion
+Toggle_switch=Skiftende afbryder
+Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Skifter output hver gang\nen emitters værdi stiger.\nNyttigt at tillade flere knapper\nfor at kontrollere det samme lys.
+Used_to_cool_down_turbines.=bruges til at køle tubiner ned.
+Uses_the_biggest\nvalue_on_the_channel.=Bruger den største\nværdi på kanalen.
+Uses_the_smallest\nvalue_on_the_channel.=Bruger den mindste\nværdi på kanalen.
+Validate=Godkend
+Voltage=spænding 
+Voltage\:_%1$V=Volt: %1$V
+Voltage_drop=Spændings fald
+Voltages=Spændinger
+Yes=Ja
+You_can't_place_this_block_at_this_side=Du kan ikke placere denne blok på denne side
+_O\:_= O:

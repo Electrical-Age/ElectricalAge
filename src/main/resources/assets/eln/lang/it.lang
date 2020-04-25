@@ -15,6 +15,7 @@ achievement.open_guide.desc=Apri la guida wiki
 200V_Condensator.name=Condensatore 200V
 200V_Copper_Heating_Corp.name=Corpo Riscaldante in Rame 200V
 200V_Economic_Light_Bulb.name=Lampadina Economica 200V
+200V_Emergency_Lamp.name=Lampada di emergenza 200V
 200V_Farming_Lamp.name=Lampada Da Coltivazione 200V
 200V_Fuel_Generator.name=Generatore a Carburante 200V
 200V_Incandescent_Light_Bulb.name=Lampadina ad Incandescenza 200V
@@ -27,13 +28,16 @@ achievement.open_guide.desc=Apri la guida wiki
 200V_Tungsten_Heating_Corp.name=Corpo Riscaldante in Tungsteno 200V
 200V_Turbine.name=Turbina 200V
 25A_Diode.name=Diodo 25A
+2x3_Rotating_Solar_Panel.name=Pannello solare rotante 2x3
+2x3_Solar_Panel.name=Pannello solare 2x3
 50V_Battery_Charger.name=Caricabatterie 50V
 50V_Carbon_Incandescent_Light_Bulb.name=Lampadina ad Incandescenza al Carbonio 50V
 50V_Compressor.name=Compressore 50V
-50V_Condensator.name=Condensatore  50V
+50V_Condensator.name=Condensatore 50V
 50V_Copper_Heating_Corp.name=Corpo Riscaldante in Rame 50V
 50V_Economic_Light_Bulb.name=Lampadina Economica 50V
 50V_Egg_Incubator.name=Incubatrice per Uova 50V
+50V_Emergency_Lamp.name=Lampada di emergenza 50V
 50V_Farming_Lamp.name=Lampada Da Coltivazione 50V
 50V_Fuel_Generator.name=Generatore a Carburante 50V
 50V_Incandescent_Light_Bulb.name=Lampadina ad Incandescenza 50V
@@ -56,6 +60,7 @@ AllMeter.name=Multimetro
 Alloy_Dust.name=Polvere di Lega
 Alloy_Ingot.name=Lingotto di Lega
 Alloy_Plate.name=Piastra di Lega
+Amplifier.name=Amplificatore
 Analog_Watch.name=Orologio Analogico
 Analog_vuMeter.name=Misuratore Analogico
 Analogic_Regulator.name=Regolatore Analogico
@@ -64,10 +69,13 @@ Auto_Miner.name=Minatore Automatico
 Average_Electrical_Drill.name=Trapano Elettrico Medio
 Average_Ferromagnetic_Core.name=Nucleo Ferromagnetico Medio
 Basic_Magnet.name=Magnete Basico
+Big_Fuel_Burner.name=Bruciatore grande
 Black_Brush.name=Pennello Nero
+Blown_Lead_Fuse.name=Fusibile bruciato
 Blue_Brush.name=Pennello Blu
 Brown_Brush.name=Pennello Marrone
 Capacity_Oriented_Battery.name=Batteria Orientata alla Capacità
+Casing.name=Involucro
 Cheap_Chip.name=Chip Economico
 Cheap_Electrical_Drill.name=Trapano Elettrico Economico
 Cheap_Ferromagnetic_Core.name=Nucleo Ferromagnentico Economico
@@ -76,6 +84,7 @@ Cinnabar_Ore.name=Cinabro Grezzo
 Coal_Dust.name=Polvere di Carbone
 Coal_Plate.name=Piastra di Carbone
 Combustion_Chamber.name=Camera di Combustione
+Configurable_summing_unit.name=Unità di somma configurabile
 Copper_Cable.name=Cavo di Rame
 Copper_Dust.name=Polvere di Rame
 Copper_Ingot.name=Lingotto di Rame
@@ -85,7 +94,8 @@ Copper_Thermal_Cable.name=Cavo Termico di Rame
 Cost_Oriented_Battery.name=Batteria Orientata al Costo
 Current_Oriented_Battery.name=Batteria Orientata alla Corrente
 Cyan_Brush.name=Pennello Ciano
-D_Flip_Flop_Chip.name=Chip D Flip Flop
+DC-DC_Converter.name=Convertitore DC-DC
+D_Flip_Flop_Chip.name=Chip Flip-Flop D
 Data_Logger.name=Registratore di Dati
 Data_Logger_Print.name=Traccia Registratore di Dati
 Dielectric.name=Dielettrico
@@ -94,8 +104,10 @@ Electrical_Anemometer_Sensor.name=Sensore Anemometrico Elettrico
 Electrical_Breaker.name=Interruttore Elettrico
 Electrical_Daylight_Sensor.name=Sensore Elettrico di Luce Diurna
 Electrical_Entity_Sensor.name=Sensore Elettrico di Entità
+Electrical_Fire_Buzzer.name=Allarme incendio elettrico
 Electrical_Fire_Detector.name=Rivelatore Elettrico di Fuoco
 Electrical_Furnace.name=Fornace Elettrica
+Electrical_Fuse_Holder.name=Portafusibili
 Electrical_Light_Sensor.name=Sensore Elettrico di Luce
 Electrical_Motor.name=Motore Elettrico
 Electrical_Probe.name=Sonda Elettrica
@@ -103,58 +115,69 @@ Electrical_Probe_Chip.name=Chip per Sonda Elettrica
 Electrical_Source.name=Fonte Elettrica
 Electrical_Timer.name=Timer Elettrico
 Electrical_Weather_Sensor.name=Sensore Elettrico Meteo
-Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Chiave inglese,\npuò essere usata per girare\npiccoli blocchi da parete
+Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Chiave inglese di età elettrica, può essere utilizzata per ruotare componenti a parete.
 Energy_Meter.name=Contatore di Energia
 Experimental_Transporter.name=Trasportatore Sperimentale
 Fast_Electrical_Drill.name=Trapano Elettrico Veloce
 Ferrite_Ingot.name=Lingotto di Ferrite
 Flat_Lamp_Socket.name=Portalampada Piatto
 Fluorescent_Lamp_Socket.name=Portalampada per Lampadina Fluorescente
+Flywheel.name=Volano
+Fuel_Heat_Furnace.name=Fornace termica a carburante
+Gas_Turbine.name=Turbina a gas
 Generator.name=Generatore
 Gold_Dust.name=Polvere di Oro
 Gold_Plate.name=Piastra di oro
 Gray_Brush.name=Pennello Grigio
 Green_Brush.name=Pennello Verde
-Ground_Cable.name=Cavo di Messa a Terra
+Ground_Cable.name=Cavo di terra
 High_Power_Receiver_Antenna.name=Antenna Ricevente ad Alta Potenza
-High_Power_Transmitter_Antenna.name=Antenna Trasmettente ad Alta Potenza
+High_Power_Transmitter_Antenna.name=Antenna Trasmittente ad Alta Potenza
 High_Voltage_Cable.name=Cavo ad Alta Tensione
 High_Voltage_Relay.name=Relè ad Alta Tensione
 High_Voltage_Switch.name=Interruttore ad Alta Tensione
-Hub.name=Hub
+Hub.name=Snodo
 Industrial_Data_Logger.name=Registratore di Dati Industriale
 Iron_Cable.name=Cavo di Ferro
 Iron_Dust.name=Polvere di Ferro
 Iron_Plate.name=Piastra di Ferro
-JK_Flip_Flop_Chip.name=Chip JK Flip Flop
+JK_Flip_Flop_Chip.name=Chip Flip-Flop JK
+Joint.name=Asse
+Joint_hub.name=Snodo assi
 LED_vuMeter.name=Vu Meter LED
 Lamp_Socket_A.name=Portalampada A
 Lamp_Socket_B_Projector.name=Portalampada Proiettore B
 Lamp_Supply.name=Erogatore per Lampade
 Large_Rheostat.name=Reostato Grande
 Lead_Dust.name=Polvere di Piombo
+Lead_Fuse_for_high_voltage_cables.name=Fusibile per cavi ad alta tensione
+Lead_Fuse_for_low_voltage_cables.name=Fusibile per cavi a bassa tensione
+Lead_Fuse_for_medium_voltage_cables.name=Fusibile per cavi a media tensione
+Lead_Fuse_for_very_high_voltage_cables.name=Fusibile per cavi a tensione molto alta
 Lead_Ingot.name=Lingotto di Piombo
 Lead_Ore.name=Piombo Grezzo
 Lead_Plate.name=Piastra di Piombo
 Life_Oriented_Battery.name=Batteria orientata alla Durata
 Light_Blue_Brush.name=Pennello Azzurro
 Lime_Brush.name=Pennello Lime
-Long_Suspended_Lamp_Socket.name=Portalampada Lungo Sospeso
+Long_Suspended_Lamp_Socket.name=Portalampada sospeso lungo
 Low_Power_Receiver_Antenna.name=Antenna Ricevente a Bassa Potenza
 Low_Power_Transmitter_Antenna.name=Antenna Trasmittente a Bassa Potenza
 Low_Voltage_Cable.name=Cavo a Bassa Tensione
 Low_Voltage_Relay.name=Relè a Bassa Tensione
 Low_Voltage_Switch.name=Interruttore a Bassa Tensione
+Lowpass_filter.name=Filtro passa-basso
 Machine_Block.name=Blocco Macchina
 Machine_Booster.name=Booster Macchina
 Magenta_Brush.name=Pennello Magenta
+Medium_Fuel_Burner.name=Bruciatore medio
 Medium_Power_Receiver_Antenna.name=Antenna Ricevente a Media Potenza
 Medium_Power_Transmitter_Antenna.name=Antenna Trasmittente a Media Potenza
 Medium_Voltage_Cable.name=Cavo a Media Tensione
 Medium_Voltage_Relay.name=Relè a Media Tensione
 Medium_Voltage_Switch.name=Interruttore a Media Tensione
 Mercury.name=Mercurio
-Mining_Pipe.name=Condotto Minante
+Mining_Pipe.name=Condotto Minerario
 Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=Registratore di Dati Moderno
 Monster_Filter.name=Filtro Mostri
@@ -166,6 +189,7 @@ Nuclear_Alarm.name=Allarme Nucleare
 OR_Chip.name=Chip OR
 On_OFF_Regulator_10_Percent.name=Regolatore on/off 10%
 On_OFF_Regulator_1_Percent.name=Regolatore on/off 1%
+OpAmp.name=Amplificatore operazionale
 Optimal_Ferromagnetic_Core.name=Nucleo Ferromagnetico Ottimale
 Orange_Brush.name=Pennello Arancione
 Ore_Scanner.name=Scanner di Minerali
@@ -173,17 +197,18 @@ Oscillator_Chip.name=Chip Oscillatore
 Overheating_Protection.name=Protezione dal Surriscaldamento
 Overvoltage_Protection.name=Protezione da Sovratensione
 PAL_Chip.name=Chip PAL
+PID_Regulator.name=Controllore PID
 Pink_Brush.name=Pennello Rosa
 Player_Filter.name=Filtro Giocatori
 Portable_Battery.name=Batteria Portatile
 Portable_Battery_Pack.name=Pacco Batterie Portatile
-Portable_Condensator.name=Condensatore Portatile
-Portable_Condensator_Pack.name=Pacco Condensatori Portatile
+Portable_Condensator.name=Condensatore portatile
+Portable_Condensator_Pack.name=Pacco di condensatori portatile
 Portable_Electrical_Axe.name=Ascia Elettrica Portatile
 Portable_Electrical_Mining_Drill.name=Trapano Elettrico Portatile da Miniera
-Power_Capacitor.name=Condensatore di Potenza
-Power_Inductor.name=Induttore di Potenza
-Power_Resistor.name=Resistore di Potenza 
+Power_Capacitor.name=Condensatore di potenza
+Power_Inductor.name=Induttore di potenza
+Power_Resistor.name=Resistore di potenza 
 Power_capacitor.name=Condensatore di potenza
 Power_inductor.name=Induttore di potenza
 Purple_Brush.name=Pennello Viola
@@ -192,13 +217,15 @@ Redstone-to-Voltage_Converter.name=Convertitore Pietrarossa-Tensione
 Rheostat.name=Reostato
 Robust_Lamp_Socket.name=Portalampada Robusto
 Rubber.name=Gomma
+Sample_and_hold.name=Legge e mantiene
+Scanner.name=Scanner
 Schmitt_Trigger_Chip.name=Chip Trigger di Schmitt
 Sconce_Lamp_Socket.name=Portalampada da parete
 Signal_20H_inductor.name=Induttore di Segnale 20H
 Signal_Antenna.name=Antenna Segnale
-Signal_Button.name=Bottone Segnale
-Signal_Cable.name=Cavo Segnale
-Signal_Diode.name=Diodo Segnale
+Signal_Button.name=Pulsante per Segnale
+Signal_Cable.name=Cavo per Segnale
+Signal_Diode.name=Diodo per Segnale
 Signal_Processor.name=Processore di Segnale
 Signal_Relay.name=Relè di Segnale
 Signal_Source.name=Fonte di Segnale
@@ -222,21 +249,22 @@ Small_50V_Iron_Heating_Corp.name=Corpo Riscaldante Piccolo in Ferro 50V
 Small_50V_Tungsten_Heating_Corp.name=Corpo Riscaldante Piccolo in Tungsteno 50V
 Small_Active_Thermal_Dissipator.name=Dissipatore Termico Attivo Piccolo
 Small_Flashlight.name=Torcia Piccola
+Small_Fuel_Burner.name=Bruciatore piccolo
 Small_Passive_Thermal_Dissipator.name=Dissipatore Termico Passivo Piccolo
 Small_Rotating_Solar_Panel.name=Pannello Solare Rotante Piccolo
 Small_Solar_Panel.name=Pannello Solare Piccolo
 Solar_Tracker.name=Inseguitore Solare
 Standard_Alarm.name=Allarme Standard
 Steam_Turbine.name=Turbina a Vapore
-Stone_Heat_Furnace.name=Fornace di Pietra per Calore
+Stone_Heat_Furnace.name=Fornace termica in pietra
 Street_Light.name=Lampione
 Suspended_Lamp_Socket.name=Portalampada Sospeso
+Tachometer.name=Tachimetro
 Temperature_Probe.name=Sonda Temperatura
 Thermal_Probe.name=Sonda Termica
 Thermal_Probe_Chip.name=Chip per Sonda Termica
 Thermistor.name=Termistore
-ThermoMeter.name=Termometro
-Transformer.name=Trasformatore
+Thermometer.name=Termometro
 Tree_Resin.name=Resina d'Albero
 Tree_Resin_Collector.name=Collettore di Resina d'Albero
 Tungsten_Cable.name=Cavo in Tungsteno
@@ -250,6 +278,9 @@ Very_High_Voltage_Switch.name=Interruttore a Tensione Molto Alta
 Voltage-to-Redstone_Converter.name=Convertitore Tensione-Pietrarossa
 Voltage_Oriented_Battery.name=Batteria Orientata alla Tensione
 Voltage_Probe.name=Sonda di Tensione
+Voltage_controlled_amplifier.name=Amplificatore controllato\nda tensione
+Voltage_controlled_sawtooth_oscillator.name=Oscillatore a dente di sega\ncontrollato da tensione
+Voltage_controlled_sine_oscillator.name=Oscillatore sinusoidale\ncontrollato da tensione
 Water_Turbine.name=Turbina ad Acqua
 Weak_50V_Battery_Charger.name=Caricabatterie Debole 50V
 White_Brush.name=Pennello Bianco
@@ -266,21 +297,21 @@ XNOR_Chip.name=Chip XNOR
 XOR_Chip.name=Chip XOR
 Yellow_Brush.name=Pennello Giallo
 entity.EAReplicator.name=Replicatore
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.Copper Axe.name\=Ascia di Rame
-item.E-Coal Boots.name\=Stivali E-Carbone
-item.E-Coal Boots.name\=Stivali E-Carbone
-item.E-Coal Boots.name\=Stivali E-Carbone
-item.E-Coal Boots.name\=Stivali E-Carbone
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.Copper Axe.name=Ascia di Rame
+item.E-Coal Boots.name=Stivali E-Carbone
+item.E-Coal Boots.name=Stivali E-Carbone
+item.E-Coal Boots.name=Stivali E-Carbone
+item.E-Coal Boots.name=Stivali E-Carbone
 itemGroup.Eln=Età Elettrica
-mod.meta.desc=Elettricità nella tua base\!
+mod.meta.desc=Elettricità nella tua base!
 tile.eln.ElnProbe.name=Sonda Computer Eln
 tile.eln.EnergyConverterElnToOtherHVUBlock.name=Esportatore da Età Elettrica ad altra energia 800V
 tile.eln.EnergyConverterElnToOtherLVUBlock.name=Esportatore da Età Elettrica ad altra energia 50V
@@ -289,40 +320,47 @@ tile.eln.EnergyConverterElnToOtherMVUBlock.name=Esportatore da Età Elettrica ad
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=Hai %1$ vite rimaste
 
-# ./src/main/java/mods/eln/item/BrushDescriptor.java
+# ./src/main/java/mods/eln/item/BrushDescriptor.kt
 Brush_is_dry=Il pennello è secco
 Can_paint_%1$_blocks=Può colorare %1$ blocchi
 
+# ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
+Can_be_used_to_encase_EA_items_that_support_it=Può essere usato per incapsulare oggetti\nEA che lo supportano
+
 # ./src/main/java/mods/eln/item/CombustionChamber.java
-Upgrade_for_the_Stone_Heat_Furnace.=Aggiornamento per la Fornace di Pietra per Calore
+Upgrade_for_the_Stone_Heat_Furnace.=Aggiornamento per la Fornace termica in pietra
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Energia per operazione\: %1$J
-Time_per_operation\:_%1$s=Tempo per operazione\: %1$s
+Energy_per_operation\:_%1$J=Energia per operazione: %1$J
+Time_per_operation\:_%1$h=Tempo per operazione: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Fattore di perdita del cavo\: %1$
+Cable_loss_factor\:_%1$=Fattore di perdita del cavo: %1$
+
+# ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
+Burn_unit_for_the_gas_heat_furnace.=Unità di combustione per la fornace a carburante.
+Produced_heat_power\:_=Potenza termica prodotta:
 
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
 # ./src/main/java/mods/eln/item/LampDescriptor.java
 Bad=Cattivo
-Condition\:=Condizione\:
+Condition\:=Condizione:
 End_of_life=Fine della vita
 Good=Buono
 New=Nuovo
-Nominal_lifetime\:_%1$h=Durata di vita nominale\: %1$h
-Technology\:_%1$=Tecnologia\: %1$
+Nominal_lifetime\:_%1$h=Durata di vita nominale: %1$h
+Technology\:_%1$=Tecnologia: %1$
 Used=Usato
 
 # ./src/main/java/mods/eln/item/LampSlot.java
 Lamp_slot=Spazio lampadina
 
 # ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
-Useful_to_prevent_overheating\nof_Batteries=Utile per prevenire surriscaldamenti\ndelle Batterie
+Useful_to_prevent_overheating\nof_Batteries=Utile per prevenire il surriscaldamento delle batterie
 
 # ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
-Useful_to_prevent_over-voltage\nof_Batteries=Utile per prevenire sovratensioni\ndelle Batterie
+Useful_to_prevent_over-voltage\nof_Batteries=Utile per prevenire sovratensioni delle batterie
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
 Solar_panel_upgrade=Aggiornamento pannello solare
@@ -330,12 +368,14 @@ Solar_panel_upgrade=Aggiornamento pannello solare
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
-Off=Spento
-On=Acceso
-State\:=Stato\:
-Stored_Energy\:_%1$J_(%2$%)=Energia accumulata\: %1$J (%2$%)
+State\:=Stato:
+Stored_Energy\:_%1$J_(%2$%)=Energia accumulata: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+
+# ./src/main/java/mods/eln/mechanical/Tachometer.kt
+Rads_s_corresponding\nto_0%_output=Rad/s corrispondenti\nad un' uscita dello 0%
+Rads_s_corresponding\nto_100%_output=Rad/s corrispondenti\nad un' uscita del 100%
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Tieni premuto shift
@@ -348,27 +388,76 @@ mod.name=Età Elettrica
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Potenza in entrata limitata a %1$W
 
+# ./src/main/java/mods/eln/sixnode/AnalogChips.kt
+A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=Un amplificatore controllato da tensione (VCA)\nè un amplificatore elettronico che varia il suo\nguadagno in base alla tensione di controllo.
+A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=Un oscillatore controllato da tensione, o VCO,\nè un oscillatore elettronico che varia la sua\n frequenza in base alla tensione di controllo.
+An_amplifier_increases_the_voltage\nof_an_input_signal_by_a_configurable\ngain_and_outputs_that_voltage.=Un amplificatore moltiplica la sua \ntensione ingresso per un guadagno \nconfigurabile, ed emette il risultato come uscita.
+Cut-off_frequency_%1$_Hz=Frequenza di interruzione %1$ Hz
+Gain=Guadagno
+Gain_for_input_\u00a713=Guadagno per l'ingresso \u00a713
+Gain_for_input_\u00a722=Guadagno per l'ingresso \u00a722
+Gain_for_input_\u00a741=Guadagno per l'ingresso \u00a741
+Lowpass_filter_-_Passes_signals_with_a\nfrequency_lower_than_a_certain_cutoff_frequency\nand_attenuates_signals_with_frequencies_higher\nthan_the_cutoff_frequency.=Filtro passa-basso - Lascia passare\nsegnali con una frequenza minore di un\nriferimento, ed attenua i segnali con frequenza\nmaggiore del riferimento.
+Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_as_configurable_amplifier.=Amplificatore Operazionale - Amplificatore\nad alto guadagno con ingresso differenziale. \nPuò essere usato per comparare tensioni\no come amplificatore configurabile.
+Params=Parametri
+Proportional–integral–derivative_controller._A_PID\ncontroller_continuously_calculates_an_error_value_as\nthe_difference_between_a_desired_setpoint_and_a_measured\nprocess_variable_and_applies_a_correction_based_on\nproportional,_integral,_and_derivative_terms.=Controllore Proporzionale, Integrale, Derivativo. \nUn controllore PID calcola di continuo la differenza tra una\nvariabile misurata e un riferimento, applicando una correzione\nbasata sui termini proporzionale, integrale e derivativo.
+Samples_the_voltage_of_a_varying_analog_signal_when\nthe_clock_input_changes_from_0_to_1_and_holds_its\noutput_voltage_at_a_constant_level_until_next_clock_pulse.\nYou_can_see_it_as_an_analog_D-Flipflop.=Legge la tensione di un segnale analogico\nquando l'ingresso di clock passa da 0 a 1 e\nmantiene quella tensione in uscita fino al\nsuccessivo impulso di clock. Lo si può vedere\ncome un flip-flop D analogico.
+The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_each_input_can_be_configured.=L'unità di somma da' in uscita la somma\ndi tre ingressi pesati. Il guadagno di\nognuno si può configurare.
+
+# ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
+Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protegge i componenti elettrici.Il fusibile si brucia se la corrente\nsupera il limite del fusibile.
+
+# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
+
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
-_O\:_= O\:
+A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=Un Programmable Array Logic (PAL) è un dispositivo\nlogico programmabile, in grado di implementare\nqualunque funzione logica in un solo circuito digitale.\nLa funzione è senza stati, quindi non vengono salvati\nstati intermedi.
+If_the_input_J_is_1_(high)_and_K_is_0_(low)\nduring_a_clock_pulse,_the_output_becomes_1_(high).\nIf_J_is_0_(low)_and_K_is_1_(high)_during_the_pulse,\nthe_output_becomes_0_(low)._If_both_inputs_are_0_(low)\nduring_the_clock_pulse,_the_state_is_maintained._If_both\ninputs_are_1_(high)_the_input_is_toggled_if_a_rising_edge\nwas_detected_at_the_clock_input.=Se l'ingresso J è ad 1 (alto) e K è a 0 (basso)durante un impulso di clock, l'uscita diventa 1 (alta). \nSe J è a 0 (basso) e K è ad 1 (alto) durante un impulso di clock,l'uscita diventa 0 (bassa). \nSe sia J che K sono a 0 (basso) durante un'impulso di clock, l'uscita non cambia. \nSe sia J che K sono ad 1 (alto) durante un impulso di clock, l'uscita cambia stato.
+If_the_input_voltage_is_lower_than_10V,_the\noutput_is_0_(low),_if_the_output_is_bigger_or\nequal_to_30V,_the_output_will_be_1_(high)._For\nall_voltages_in_between,_the_output_does_not_change.=Se la tensione in ingresso è meno di 10V, \nl'uscita è a 0 (bassa). Se L'ingresso è maggiore\no uguale a 30V, l'uscita è ad 1 (alta). Per tutte\nle tensioni tra questi valori, l'uscita non cambia.
+Implements_an_exclusive_or.\nAn_output_of_1_(high)_results_if_one_or\nall_three_inputs_to_the_gate_are_1_(high).=Implementa una porta OR esclusiva.L'uscita è ad 1 (alta) se uno solo, o tutti\ne tre gli ingressi sono ad 1 (alti).
+Implements_logical_conjunction.\nA_1_(high)_output_results_only_if_all_of\nthe_three_inputs_to_the_AND_gate_are_1_(high).=Implementa un prodotto logico.L'uscita è ad 1 (alta) solo se tutti e tre gli ingressi sono ad 1 (alti).
+Implements_logical_disjunction.\nA_1_(high)_output_results_if_at_least\none_input_to_the_gate_is_1_(high).=Implementa una somma logica.L'uscita è ad 1 (alta) se almeno uno\ndegli ingressi è ad 1 (alto).
+Inverts_the_input_signal.\nOutputs_a_voltage_representing_the\nopposite_logic-level_to_its_input.=Inverte il segnale in ingresso.\nDa' in uscita una tensione che\nrappresenta il livello logico\nopposto a quello di ingresso.
+Its_output_is_complement_(inverted)\nto_that_of_the_AND_gate.=La sua uscita è complementare (invertita) a quella della porta AND.
+Its_output_is_complement_(inverted)\nto_that_of_the_OR_gate.=La sua uscita è complementare (invertita) a quella della porta OR.
+Its_output_is_complement_(inverted)\nto_that_of_the_XOR_gate.=La sua uscita è complementare (invertita) a quella della porta XOR.
+Outputs_a_rectangular_signal_which's_frequency\ndepends_to_the_input_voltage._The_higher_the\ninput_voltage_-_the_higher_the_frequency.=Emette un segnale rettangolare di frequenza dipendente dalla tensione di ingresso. Più alta è la tensione di ingresso - maggiore è la frequenza.
+The_D_flip-flop_captures_the_value\nof_the_D-input_at_a_rising_edge\nportion_of_the_clock_cycle.=Il flip-flop D legge il valore\ndell'ingresso D durante il\nfronte di salita di un ciclo di clock.
+UNDEF=Indefinito
+
+# ./src/main/java/mods/eln/sixnode/Scanner.kt
+-_For_inventories,_outputs_either_total_fill_or_fraction_of_slots_with_any_items.=- Per inventari, ha in uscita o un totalmente pieno\no la frazione di spazi con oggetti al loro interno.
+-_For_tanks,_outputs_fill_percentage.=- Per cisterne, ha in uscita la percentuale di riempimento.
+Otherwise_behaves_as_a_vanilla_comparator.=Altrimenti si comporta come un comparatore vanilla.
+Right-click_to_change_mode.=Click destro per cambiare modalità.
+Scans_blocks_to_produce_signals.=Scansiona blocchi per produrre segnali.
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
-Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produce Resina d'Albero man\nmano quando posto su un albero.
-This_block_can_only_be_placed_on_the_side_of_a_tree!=Questo blocco può essere piazzato solo sul tronco di un albero\!
+Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produce resina di albero nel tempo quando viene inserito su un albero.
+This_block_can_only_be_placed_on_the_side_of_a_tree!=Questo blocco può essere piazzato solo sul tronco di un albero!
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
 Battery_slot=Spazio batteria
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
-Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Può essere usato per ricaricare\noggetti elettrici come\:\nTorcia Elettrica, Scanner a Raggi X\ne Batteria Portatile ...
+Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Può essere utilizzato per caricare oggetti elettrici quali: torcia, scanner a raggi X e batteria portatile ...
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
+Charge_Current=Corrente di carica
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
-Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=La corrente elettrica può\ncircolare attraverso il diodo\nsolo dall'anodo al catodo
+Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=La corrente può scorrere attraverso il diodo solo dall'anodo verso al catodo
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeElement.java
+Forward_Voltage=Tensione diretta
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
-=
-Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emette un allarme acustico se\nil segnale in ingresso è alto
+Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emette un allarme acustico se il segnale di ingresso è alto
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
+Engaged=Attivato
+Input_Voltage=Tensione in ingresso
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Il suono è mutato
@@ -377,7 +466,10 @@ Sound_is_not_muted=Il suono non è mutato
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
-Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protegge componenti elettriche\nApre il contatto se\:\n- La tensione supera un certo livello\n- La corrente supera il limite del cavo
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protegge i componenti elettrici Apre il contatto se: - La tensione supera un certo livello - La corrente supera il limite del cavo
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java
+Contact=Contatto
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
 Maximum_voltage_before_cutting_off=Tensione massima prima di staccare
@@ -386,16 +478,21 @@ Switch_is_off=L'interruttore è spento
 Switch_is_on=L'interruttore è acceso
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
-A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=Un segnale è un'informazione elettrica\nche deve essere tra 0V e %1$V
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=Un segnale è un'informazione\nelettrica che deve essere tra 0V\ne %1$
 Cable_is_adapted_to_conduct\nelectrical_signals.=Il cavo è adattato per condurre\nsegnali elettrici.
-Current\:_%1$A=Corrente\: %1$A
+Current\:_%1$A=Corrente: %1$A
 Not_adapted_to_transport_power.=Non adattato a trasportare potenza.
-Save_usage\:=Risparmia uso\:
-Serial_resistance\:_%1$Ω=Resistenza in serie\: %1$Ω
+Save_usage\:=Risparmia uso:
+Serial_resistance\:_%1$\u2126=Resistenza in serie: %1$\u2126
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
+Signal_Voltage=Tensione di segnale
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
 It_can_store_up_to_256_points.=Può contenere fino a 256 punti.
-Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Misura la tensione di un\nsegnale elettrico e traccia\ni dati in tempo reale.
+Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Misura la tensione di un\nsegnale elettrico e ne traccia\nil grafico in tempo reale.
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
 Back_to_display=Ritorna al display
@@ -414,143 +511,181 @@ Y-axis_min=Minimo asse Y
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
-Output_voltage_increases\nif_entities_are_moving_around.=La tensione in uscita aumenta\nse delle entità si muovono intorno.
+Output_voltage_increases\nif_entities_are_moving_around.=La tensione di uscita aumenta se le entità si muovono.
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java
+Entity_present=Entità presente
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
-Output_voltage_increases\nif_a_fire_has_been_detected.=La tensione in uscita aumenta\nse un fuoco viene rilevato.
+Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Buzzer a batterie che si attiva in presenza di fuoco.
+Output_voltage_increases\nif_a_fire_has_been_detected.=La tensione di uscita aumenta se vengono rilevate delle fiamme.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
+Fire_detected\:_=Fuoco rilevato:
+Fire_present=Fuoco presente
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
-Provides_configurable_signal\nvoltage.=Fornisce un segnale di tensione\nconfigurabile.
+Provides_configurable_signal\nvoltage.=Fornisce un segnale di tensione configurabile.
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
 Output_at_%1$%=Output al %1$%
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
 0V_at_night,_%1$V_at_noon.=0V di notte, %1$V a mezzogiorno.
-Provides_an_electrical_voltage\nin_the_presence_of_light.=Fornisce una tensione elettrica\nin presenza di luce.
-Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Fornisce una tensione elettrica\nproporzionale all'intensità\ndella luce del giorno.
+Provides_an_electrical_voltage\nin_the_presence_of_light.=Fornisce una tensione elettrica in presenza di luce.
+Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Fornisce una tensione¹\nproporzionale all'intensità\ndella luce solare.
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
+Light_level=Livello di luce
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-Applicable_boolean_operators\:=Operatori booleani applicabili\:
-Applicable_functions\:=Funzioni applicabili\:
-Applicable_mathematical_operators\:=Operatori matematici applicabili\:
-Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calcola un segnale in uscita da\n3 in ingresso(A, B, C) usando una\nequazione.
+Applicable_boolean_operators\:=Operatori booleani applicabili:
+Applicable_functions\:=Funzioni applicabili:
+Applicable_mathematical_operators\:=Operatori matematici applicabili:
+Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calcola un segnale di uscita da\n3 ingressi (A, B, C) utilizzando un'equazione.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
+Equation=Equazione
+Input_voltages=Tensioni in ingresso
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
 %1$_Redstone(s)_required=%1$ Pietrarossa richiesta/e
-Equation_required!=Equazione richiesta\!
-Inputs_are=Gli input sono
-Invalid_equation!=Equazione non valida\!
+Equation_required!=Equazione richiesta!
+Inputs_are=Gli ingressi sono
+Invalid_equation!=Equazione non valida!
 Output_voltage_formula=Formula della tensione in uscita
 Waiting_for_completion...=Aspettando il completamento...
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
-Converts_Redstone_signal\nto_an_electrical_voltage.=Converte segnale Pietrarossa\nin tensione elettrica.
+Converts_Redstone_signal\nto_an_electrical_voltage.=Converte il segnale Redstone\nin una tensione elettrica.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
-Converts_electrical_voltage\ninto_a_Redstone_signal.=Converte tensione elettrica\nin un segnale Pietrarossa.
+Converts_electrical_voltage\ninto_a_Redstone_signal.=Converte la tensione elettrica \nin un segnale Redstone.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
-A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=Un relè è un contatto\nelettrico che conduce corrente\nelettrica a seconda della\ntensione del segnale in entrata.
+A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=Un relè è un interruttore che\nconduce o meno a seconda del\nsegnale di ingresso.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
+Default_position=Posizione di 
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
 Normally_closed=Normalmente chiuso
 Normally_open=Normalmente aperto
 
-# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
-Creative_block.=Blocco modalità creativa.
-Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Fornisce una fonte di tensione ideale\nsenza limite di energia o potenza.
-
-# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceGui.java
-Output_voltage=Tensione in uscita
-
-# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
-Can_break_an_electrical_circuit\ninterrupting_the_current.=Può rompere un circuito elettrico\ninterrompendo la corrente.
-
-# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
-Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Fino all'applicazione di un segnale alto,\nil timer mantiene l'output alto per un\nintervallo configurabile. Può essere re-innescato.
-
-# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
-Set=Imposta
-The_time_interval_the\noutput_is_kept_high.=L'intervallo di tempo in cui\nl'output è mantenuto alto.
-
-# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
-Displays_the_value_of_a_signal.=Mostra il valore di un segnale.
-
-# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
-Portable_battery_slot=Spazio batteria portatile
-
-# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
-Clear\:_%1$V=Cielo terso\: %1$V
-Provides_an_electrical_signal\ndepending_the_actual_weather.=Fornisce un segnale elettrico\na seconda del tempo atmosferico.
-Rain\:_%1$V=Pioggia\: %1$V
-Storm\:_%1$V=Tempesta\: %1$V
-
-# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
-Maximum_wind_speed_is_%1$m_s=La massima velocità del vento è %1$m/s
-Provides_an_electrical_signal\ndependant_on_wind_speed.=Fornisce un segnale elettrico\nsecondo la velocità del vento.
-You_can't_place_this_block_on_the_floor_or_the_ceiling=Non puoi piazzare questo blocco sul pavimento o sul soffitto
-
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=Può misurare Tensione/Potenza/Corrente
 Measures_electrical_values_on_cables.=Misura i valori elettrici sui cavi.
 Measures_voltage_on_cables.=Misura la tensione sui cavi.
 
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
-Current=Corrente
-Measured_voltage\ncorresponding\nto_0%_output=Tensione misurata\ncorrispondente\nal 0% dell'output
-Measured_voltage\ncorresponding\nto_100%_output=Tensione misurata\ncorrispondente\nal 100% dell'output
-Voltage=Tensione
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
+Measured_current=Corrente misurata
+Measured_power=Potenza misurata
+Measured_voltage=Tensione misurata
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
+Measured_voltage\ncorresponding\nto_0%_output=Tensione misurata corrispondente a 0% di uscita
+Measured_voltage\ncorresponding\nto_100%_output=Tensione misurata corrispondente a 100% di uscita
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
+Creative_block.=Blocco modalità creativa.
+Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Fornisce una sorgente ideale di tensione senza limitazioni energetiche o di potenza.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
+Can_break_an_electrical_circuit\ninterrupting_the_current.=Può interrompere un circuito elettrico\nfermando il flusso di corrente.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
+Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Dal momento dell'applicazione di un segnale alto, il timer mantiene l'output elevato per un intervallo configurabile. Può essere riattivato.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutElement.java
+Output=Uscita
+Remaining=Rimanente
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
+Set=Imposta
+The_time_interval_the\noutput_is_kept_high.=L'intervallo di tempo in cui l'output è mantenuto alto.
+
+# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
+Displays_the_value_of_a_signal.=Mostra il valore di un segnale.
+
+# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
+Clear\:_%1$V=Cielo terso: %1$V
+Provides_an_electrical_signal\ndepending_the_actual_weather.=Fornisce un segnale elettrico \na seconda delle condizioni meteo.
+Rain\:_%1$V=Pioggia: %1$V
+Storm\:_%1$V=Tempesta: %1$V
+
+# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
+Maximum_wind_speed_is_%1$m_s=La massima velocità del vento è %1$m/s
+Provides_an_electrical_signal\ndependant_on_wind_speed.=Fornisce un segnale elettrico \ndipendente dalla velocità del vento.
+You_can't_place_this_block_on_the_floor_or_the_ceiling=Non puoi piazzare questo blocco sul pavimento o sul soffitto
+
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
+Counter=Contatore
+Energy_left=Energia rimasta
+Mode=Modalità
+Prepay=Prepagata
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
 Change_password=Cambia password
 Counter_Mode=Modalità Contatore
-Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Conta l'energia condotta da\n\\u00a74red\\u00a7f a \\u00a71blue\\u00a7f.
-Energy_counter\:_%1$J=Contatore energia\: %1$J
+Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Conta l'energia condotta da \ u00a74red \ u00a7f a \ u00a71blue \ u00a7f.
+Energy_counter\:_%1$J=Contatore energia: %1$J
 Enter_new_energy=Digita una nuova energia
 Enter_password=Digita la password
 Prepay_Mode=Modalità pagamento anticipato
 Reset_time_counter=Resetta contatore tempo
 Set_energy_counter=Imposta contatore energia
-Time_counter\:=Contatore tempo\:
+Time_counter\:=Contatore tempo:
 Try_password=Prova la password
-You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=Puoi impostare una quantità\niniziale di energia disponibile.\nQuando il contatore arriva a 0\nil contatto verrà aperto.
+You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=Si può impostare una quantità\niniziale di energia disponibile.\nQuando il contatore arriva a 0,\nil contatto viene aperto.
 is_off=è spento
 is_on=è acceso
 value_in_kJ=valore in kJ
 
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
-Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Può essere usato per impostare la punta\ndi una rete elettrica a 0V di potenziale.\nPer esempio per mettere a terra i contatti negativi di una batteria.
-Provides_a_zero_volt_reference.=Fornisce una referenza di 0 volt.
+Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Può essere utilizzato per impostare un punto di rete elettrica a potenziale 0V. Ad esempio per connettere a terra il polo negativo di una batteria.
+Provides_a_zero_volt_reference.=Fornisce un riferimento di 0 volt.
 
 # ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
-Allows_crossing_cables\non_one_single_block.=Permette l'incrocio di cavi\nin un singolo blocco.
+Allows_crossing_cables\non_one_single_block.=Consente di incrociare i cavi in un unico blocco.
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
-Angle\:_%1$°_to_%2$°=Angolo\: %1$° fino a %2$°
-Spot_range\:_%1$_blocks=Raggio riflettore\: %1$ blocchi
+Angle\:_%1$°_to_%2$°=Angolo: %1$° fino a %2$°
+Spot_range\:_%1$_blocks=Raggio riflettore: %1$ blocchi
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketElement.java
+Bulb=Lampadina
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-%1$_is_not_in_range!=%1$ non è alla portata\!
 Cable_slot_empty=Spazio cavo vuoto
-Orientation\:_%1$°=Orientamento\: %1$°
+Orientation\:_%1$°=Orientamento: %1$°
 Parallel=Parallelo
-Powered_by_Lamp_Supply=Alimentato dall'Erogatore per Lampade
-Powered_by_cable=Alimentato da cavo
 Serial=Seriale
-Specify_the_supply_channel=Specifica il canale dell'alimentazione
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Spazio cavo elettrico\nIl raggio di base è 32 blocchi.\nOgni cavo aggiunto\naumenta il raggio di uno.
+Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Spazio per cavi\nIl raggio di base è 32 blocchi,\ne ogni cavo aggiunto lo aumenta\ndi uno.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Supplies_all_lamps_on_the_channel.=Alimenta tutte le lampadine sul canale.
 
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
+Total_power=Potenza totale
+
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
 Power_channel_name=Nome canale potenza
 Wireless_channel_name=Nome canale wireless
+
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
+Modbus_TCP=Modbus TCP
+Modbus_Unit_ID=Identificativo unità Modbus
+Modbus_is_disabled,_enable_it_in_Eln.cfg=Il Modbus è disattivato, va abilitato in Eln.cfg
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
 Add=Aggiungi
@@ -565,14 +700,20 @@ Wireless_TX=Wireless TX
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
 (Increases_maximum_voltage)=(Aumenta la tensione massima)
 
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
+Capacity=Capacità
+
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
 
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
+Inductance=Induttanza
+
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
-Supplies_any_device\nplugged_in_with_energy.=Alimenta ogni dispositivo\ninserito con energia.
+Supplies_any_device\nplugged_in_with_energy.=Fornisce energia a \nqualsiasi dispositivo collegato.
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
 Specify_the_device_to_supply_through_this_socket.=Specifica il dispositivo da alimentare con questa presa.
@@ -581,25 +722,33 @@ Specify_the_device_to_supply_through_this_socket.=Specifica il dispositivo da al
 (Sets_resistance)=(Imposta la resistenza)
 Coal_dust_slot=Spazio polvere di carbone
 
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
+
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
-High_parallel_resistance\n_\=>_Low_power_dissipation.=Alta resistenza in parallelo\n\=> Basso spreco di potenza.
-Low_serial_resistance\n_\=>_High_conductivity.=Bassa resistenza seriale\n\=> Alta conducibilità.
-Parallel_resistance\:_%1$K_W=Resistenza in parallelo\: %1$K/W
-Serial_resistance\:_%1$K_W=Resistenza in serie\: %1$K/W
+High_parallel_resistance\n_\=>_Low_power_dissipation.=Resistenza parallela elevata => Bassa dissipazione di potenza.
+Low_serial_resistance\n_\=>_High_conductivity.=Resistenza seriale bassa => Alta conduttività.
+Parallel_resistance\:_%1$K_W=Resistenza in parallelo: %1$K/W
+Serial_resistance\:_%1$K_W=Resistenza in serie: %1$K/W
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
+Thermic_power=Potenza termica
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
 Cable_slot=Spazio cavo
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
-Can_measure\:=Può misurare\:
+Can_measure\:=Può misurare:
 Measures_temperature_of_cables.=Misura la temperatura dei cavi.
 Measures_thermal_values_on_cables.=Misura valori termici sui cavi.
 __Temperature_Power_conducted=Temperatura/Potenza condotta
 
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
+Measured_temperature=Temperatura misurata
+Measured_thermal_power=Potenza termica misurata
+
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
-Measured_temperature\ncorresponding\nto_0%_output=Temperatura misurata\ncorrispondente\nallo 0% dell'output
-Measured_temperature\ncorresponding\nto_100%_output=Temperatura misurata\ncorrispondente\nal 100% dell'output
-Temperature=Temperatura
+Measured_temperature\ncorresponding\nto_0%_output=Temperatura misurata corrispondente a 0% di uscita
+Measured_temperature\ncorresponding\nto_100%_output=Temperatura misurata corrispondente a 100% di uscita
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
 No_text_associated_to_this_beacon=Nessun testo associato a questo faro
@@ -610,84 +759,120 @@ Set_beacon_name=Imposta nome faro
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Nominal_power\:_%1$_W=Potenza nominale\: %1$ W
-Nominal_voltage\:_%1$_V=Tensione nominale\: %1$ V
-Produces_electricity_using_fuel.=Produce elettricità usando carburante.
+Fuel_level=Livello carburante
+Nominal_power\:_%1$_W=Potenza nominale: %1$ W
+Nominal_voltage\:_%1$_V=Tensione nominale: %1$ V
+Produces_electricity_using_gasoline.=Produce elettricità usando carburante.
+State=Stato
+
+# ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
+Actual\:_%1$=Effettivo: %1$
+Analog_regulator_slot=Spazio per regolatore analogico
+Control_value_at_%1$=Valore di controllo a %1$
+Fuel_burner_slot=Spazio bruciatore
+Furnace_is_off=Fornace spenta
+Furnace_is_on=Fornace accesa
+Heat_Power\:_%1$=Potenza termica: %1$
+Set_point\:_%1$=Riferimento: %1$
+__Max._temperature\:_=  Temperatura massima:
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Resistenza nom. \: %1$
+Nom._Resistance\:_%1$=Resistenza nom. : %1$
+Power_loss=Perdita di potenza
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
-Drill_slot=Spazio trapano
+Drill_slot=Spazio trivella
 Mining_pipe_slot=Spazio condotto minante
 Ore_scanner_slot=Spazio scanner di minerali
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
-Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Scava entro un piccolo raggio.\nEstrae minerali entro un raggio maggiore\:\nraggio di 10 blocchi oltre 10 blocchi di profondità.
+Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Scava su un piccolo raggio. Oltre i 10 blocchi di profondità\nil raggio di scavo sale a 10 blocchi.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerElement.java
+Depth=Profondità
+Silk_touch=Tocco di velluto
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
-Chest_missing_on_the\nback_of_the_auto_miner!=Cassa mancante sul retro\ndel minatore automatico\!
+Chest_missing_on_the\nback_of_the_auto_miner!=Cassa mancante sul retro del minatore automatico!
 Halves_speed,_triples_power_draw=Dimezza la velocità, triplica l'assorbimento di potenza
-Silk_Touch_Off=Tocco di velluto disattivo
-Silk_Touch_On=Tocco di velluto attivo
-Silk_touch=Tocco di velluto
+Silk_Touch=Tocco di velluto
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=Protezione dal surriscaldamento
 Overvoltage_protection=Protezione da sovratensione
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
-Actual_charge\:_%1$%=Carica effettiva\: %1$%
-Energy_capacity\:_%1$J=Capacità energetica\: %1$J
-_charged_at_%1$%=carico al %1$%
+Actual_charge\:_=Carica effettiva:
+Energy_capacity\:_=Capacità di energia:
+Internal_resistance\:_=Resistenza interna:
+Life_\:_=Vita:
+Nominal_power\:_=Potenza nominale:
+Nominal_voltage\:_=Tensione nominale:
+_charged_at_=Carico a
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charge=Carica
 Charged=Carico
 Discharge=Scarica
-Energy\:=Energia\:
-Energy\:_%1$=Energia\: %1$
-Life\:=Vita\:
+Energy\:=Energia:
+Energy\:_%1$=Energia: %1$
+Life\:=Vita:
 No_charge=Nessuna carica
-Power_in\:=Potenza in ingresso\:
-Power_out\:=Potenza in uscita\:
+Power_in\:=Potenza in ingresso:
+Power_out\:=Potenza in uscita:
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
 Egg_slot=Spazio uovo
 
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
+Has_egg=Ha un'uovo
+
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
 Wireless_energy_receiver.=Ricevitore di energia wireless.
 
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
+Effective_power=Potenza effettiva
+Power_received=Potenza ricevuta
+Receiving=Ricevendo
+
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=Efficienza\: %1$% fino a %2$%
+Efficiency\:_%1$%_up_to_%2$%=Efficienza: %1$% fino a %2$%
 Wireless_energy_transmitter.=Trasmettitore di energia wireless.
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
+Efficiency=Efficienza
+Transmitting=Trasmettendo
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
 Heating_corp_slot=Spazio per il corpo riscaldante
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
-Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Simile ad una fornace vanilla,\nma riscalda con l'elettricità.
+Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Simile ad una fornace vanilla, ma si riscalda con elettricità.
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceElement.java
+Heating_element=Elemento termico
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
 Auto_shutdown=Spegnimento automatico
 Manual_shutdown=Spegnimento manuale
-Set_point\:_%1$°C=Imposta punto\: %1$°C
+Set_point\:_%1$°C=Imposta punto: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Costo
+Nominal_voltage\:_%1V$=Tensione nominale: %1V$
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
+Power_provided=Potenza fornita
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=Spazio camera di combustione
 Fuel_slot=Spazio carburante
 
-# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
-Generates_heat_when_supplied_with_fuel.=Genera calore quando rifornito di carburante.
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
+Set_temperature=Temperatura impostata
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
 Control_gauge_at_%1$%=Misuratore di controllo al %1$%
-Decline_fuel=Diminuisci carburante
-External_control=Controllo esterno
-Internal_control=Controllo interno
+Decline_fuel=Rifiuta carburante
 Take_fuel=Prendi carburante
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
@@ -698,60 +883,95 @@ Solar_tracker_slot=Spazio inseguitore solare
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=Può essere orientato verso il sole.
-Max._power\:_%1$W=Potenza massima\: %1$W
-Max._voltage\:_%1$V=Tensione massima\: %1$V
+Max._power\:_%1$W=Potenza massima: %1$W
+Max._voltage\:_%1$V=Tensione massima: %1$V
 Produces_power_from_solar_radiation.=Produce potenza dalla radiazione solare.
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
+Panel_angle=Angolo del pannello
+Producing_energy=Sta producendo energia
+Sun_angle=Angolo del Sole
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
 It_is_night=È notte
-Solar_panel_angle\:_%1$°=Angolo pannello solare\: %1$°
-Sun_angle\:_%1$°=Angolo sole\: %1$°
+Solar_panel_angle\:_%1$°=Angolo pannello solare: %1$°
+Sun_angle\:_%1$°=Angolo sole: %1$°
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
+Destination=Destinazione
+Distance=Distanza
+Required_energy=Energia necessaria
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Trasportatore di destinazione
-Power_consumption\:=Consumo di potenza\:
-Power_consumption\:_%1$W=Consumo di potenza\: %1$W
-Required_energy\:_%1$J=Energia richiesta\: %1$J
+Power_consumption\:=Consumo di potenza:
+Power_consumption\:_%1$W=Consumo di potenza: %1$W
+Required_energy\:_%1$J=Energia richiesta: %1$J
 Start=Inizia
 Transporter_name=Nome trasportatore
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=Potenza ventola di raffreddamento\: %1$W
-Fan_power_consumption\:_%1$W=Consumo di potenza della ventola\: %1$W
-Fan_voltage\:_%1$V=Tensione ventola\: %1$V
+Fan_cooling_power\:_%1$W=Potenza ventola di raffreddamento: %1$W
+Fan_power_consumption\:_%1$W=Consumo di potenza della ventola: %1$W
+Fan_voltage\:_%1$V=Tensione ventola: %1$V
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+Casing_slot=Spazio per involucro
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
-The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=Il rapporto della tensione è proporzionale\nal rapporto della somma delle pile di cavi.
+The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=Il rapporto della tensione è proporzionale\nal rapporto della quantità di cavi due due lati.
 Transforms_an_input_voltage_to\nan_output_voltage.=Trasforma una tensione in ingresso\nin una tensione in uscita.
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerElement.java
+Core_factor=Fattore del nucleo
+Isolated=Isolato
+Ratio=Rapporto
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
 Generates_electricity_using_heat.=Genera elettricità usando calore.
-Temperature_difference\:_%1$°C=Differenza di temperatura\: %1$°C
+Temperature_difference\:_%1$°C=Differenza di temperatura: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
+Nominal=Nominale
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
-CAUTION\:_Cables_can_get_quite_hot!=ATTENZIONE\: I cavi possono diventare piuttosto caldi\!
-Laser_charge_power\:_%1$W...%2$kW=Potenza della carica del laser\: %1$W...%2$kW
-Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Cerca entità e spara se l'entità\ncorrisponde ai criteri del filtro configurabile.
-Standby_power\:_%1$W=Consumo in stand-by\: %1$W
+CAUTION\:_Cables_can_get_quite_hot!=ATTENZIONE: I cavi possono diventare piuttosto caldi!
+Laser_charge_power\:_%1$W...%2$kW=Potenza della carica del laser: %1$W...%2$kW
+Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Esegue la scansione di entità e spara se l'oggetto corrisponde ai criteri di filtro configurabili.
+Standby_power\:_%1$W=Consumo in stand-by: %1$W
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
+??=??
+Charge_level=Livello di carica
+Shoot_=Spara
+Shoot_everything=Spara a tutto
+Shoot_nothing=Non sparare
+Target=Bersaglio
+animals=Animali
+monsters=Mostri
+players=Giocatori
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=Attacca\:
-Do_not_attack\:=Non attacca\:
-Recharge_power\:=Potenza di ricarica\:
+Attack\:=Attacca:
+Do_not_attack\:=Non attaccare:
+Recharge_power\:=Potenza di ricarica:
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
 Generates_energy_using_water_stream.=Genera energia usando un flusso d'acqua.
-No_place_for_water_turbine!=Non c'è spazio per la turbina ad acqua\!
+No_place_for_water_turbine!=Non c'è spazio per la turbina ad acqua!
+
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=Facciata\: %1$
+Front\:_%1$=Facciata: %1$
 Generates_energy_from_wind.=Genera energia dal vento.
-Left_Right\:_%1$=Sinistra/Destra\: %1$
-Up_Down\:_%1$=Su/Giù\: %1$
-Wind_area\:=Area del vento\:
+Left_Right\:_%1$=Sinistra/Destra: %1$
+Up_Down\:_%1$=Su/Giù: %1$
+Wind_area\:=Area del vento:
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Energy=Energia
 Light=Luce
 Machine=Macchina
 Ore=Minerale
@@ -767,63 +987,103 @@ Wiring=Cablaggio
 Previous=Indietro
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
-Can_be_used_to_craft\:=Può essere usato per craftare\:
-Cannot_be_crafted!=Non può essere craftato\!
+Can_be_used_to_craft\:=Può essere usato per craftare:
+Cannot_be_crafted!=Non può essere craftato!
 Cost_%1$J=Costo %1$J
-Created_by\:=Creato da\:
-Is_not_a_crafting_material!=Non è un materiale da crafting\!
-Recipe\:=Ricetta\:
+Created_by\:=Creato da:
+Is_not_a_crafting_material!=Non è un materiale da crafting!
+Recipe\:=Ricetta:
 
 # Appearing in multiple source files
+%1$_is_not_in_range!=%1$ non è alla portata!
 (Increases_capacity)=(Aumenta la capacità)
 (Increases_inductance)=(Aumenta l'induttanza)
-Actual\:_%1$°C=Attuale\: %1$°C
+Actual\:_%1$°C=Attuale: %1$°C
+Battery_level=Livello batteria
 Biggest=Il più grande
 Booster_slot=Spazio booster
-Can_create\:=Può creare\:
-Capacity\:_%1$F=Capacità\: %1$F
-Charge_power\:_%1$W=Potenza di carica\: %1$W
+Can_create\:=Può creare:
+Capacity\:_%1$F=Capacità: %1$F
+Channel=Canale
+Charge=Carica
+Charge_power=Potenza di carica
+Charge_power\:_%1$W=Potenza di carica: %1$W
+Closed=Chiuso
 Connected=Connesso
-Cooling_power\:_%1$W=Potenza di raffreddamento\: %1$W
+Cooling_power\:_%1$W=Potenza di raffreddamento: %1$W
 Copper_cable_slot=Spazio cavo di rame
+Current=Corrente
 Dielectric_slot=Spazio dielettrico
-Discharge_power\:_%1$W=Potenza di scarica\: %1$W
+Discharge_power\:_%1$W=Potenza di scarica: %1$W
 Electrical_cable_slot=Spazio cavo elettrico
+Energy=Energia
 Entity_filter_slot=Spazio filtro entità
+External_control=Controllo esterno
 Ferromagnetic_core_slot=Spazio nucleo ferromagnetico
+Generated_power=Potenza generata
+Generates_heat_when_supplied_with_fuel.=Genera calore quando rifornito di carburante.
+Generating=Generando
 Has_a_signal_output.=Ha un segnale in uscita.
-Inductance\:_%1$H=Induttanza\: %1$H
-Internal_resistance\:_%1$Ω=Resistenza interna\: %1$Ω
+Inductance\:_%1$H=Induttanza: %1$H
+Input=Ingresso
+Input_voltage=Tensione in ingresso
+Internal_control=Controllo interno
+Internal_resistance\:_%1$\u2126=Resistenza interna: %1$\u2126
 Is_off=È spento
 Is_on=È acceso
-Max._temperature\:_%1$°C=Temperatura max.\: %1$°C
-Measured_value\ncorresponding\nto_0%_output=Valore misurato\ncorrispondente\nallo 0% dell'output
-Measured_value\ncorresponding\nto_100%_output=Valore misurato\ncorrispondente\nal 100% dell'output
-Nominal\:=Nominale\:
-Nominal_power\:_%1$W=Potenza nominale\: %1$W
-Nominal_usage\:=Uso nominale\:
-Nominal_voltage\:_%1$V=Tensione nominale\: %1$V
+Life=Vita
+Max._temperature\:_%1$°C=Temperatura max.: %1$°C
+Measured_value\ncorresponding\nto_0%_output=Valore misurato corrispondente a 0% di uscita
+Measured_value\ncorresponding\nto_100%_output=Valore misurato corrispondente a 100% di uscita
+No=No
+Nominal\:=Nominale:
+Nominal_power\:_%1$W=Potenza nominale: %1$W
+Nominal_usage\:=Uso nominale:
+Nominal_voltage\:_%1$V=Tensione nominale: %1$V
+None=Nessuno
 Not_connected=Non connesso
 Not_enough_space_for_this_block=Non c'è abbastanza spazio per questo blocco
+OFF=Spento
+ON=Acceso
+Off=Spento
+On=Acceso
+Open=Aperto
+Output_voltage=Tensione in uscita
+Portable_battery_slot=Spazio batteria portatile
+Position=Posizione
 Power=Potenza
-Power\:_%1$W=Potenza\: %1$W
-Range\:_%1$_blocks=Raggio\: %1$ blocchi
+Power\:_%1$W=Potenza: %1$W
+Power_consumption=Consumo
+Powered_by_Lamp_Supply=Alimentato dall'Erogatore per Lampade
+Powered_by_cable=Alimentato da cavo
+Produced_power=Potenza prodotta
+Range\:_%1$_blocks=Raggio: %1$ blocchi
 Redstone_slot=Spazio pietrarossa
+Redstone_value=Valore pietrarossa
 Regulator_slot=Spazio regolatore
 Reset=Resetta
-Resistance\:_%1$Ω=Resistenza\: %1$Ω
+Resistance=Resistenza
+Resistance\:_%1$\u2126=Resistenza: %1$\u2126
 Smallest=Il più piccolo
 Specify_the_channel=Specifica il canale
-Stored_energy\:_%1$J_(%2$%)=Energia accumulata\: %1$J (%2$%)
-Temperature\:_%1$°C=Temperatura\: %1$°C
+Specify_the_supply_channel=Specifica il canale dell'alimentazione
+Stored_energy\:_%1$J_(%2$%)=Energia accumulata: %1$J (%2$%)
+Temperature=Temperatura
+Temperature\:_%1$°C=Temperatura: %1$°C
 Temperature_gauge=Misuratore temperatura
 Thermal_isolator_slot=Spazio per l'isolatore termico
+Thermal_power=Potenza termica
 Toggle=Inverti lo stato
 Toggle_switch=Inverti interruttore
-Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Inverte l'output ogni volta che\nun valore d'emettitore aumenta.\nUtile per permettere a più bottoni\ndi controllare la stessa luce.
+Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Inverte l'output ogni volta che un valore del segnale ricevuto aumenta.\nUtile per permettere a più pulsanti di controllare la stessa luce.
 Used_to_cool_down_turbines.=Usato per raffreddare le turbine.
-Uses_the_biggest\nvalue_on_the_channel.=Usa il valore più\ngrande sul canale.
-Uses_the_smallest\nvalue_on_the_channel.=Usa il valore più\npiccolo sul canale.
+Uses_the_biggest\nvalue_on_the_channel.=Utilizza il valore più grande sul canale.
+Uses_the_smallest\nvalue_on_the_channel.=Utilizza il valore più piccolo sul canale.
 Validate=Convalida
-Voltage\:_%1$V=Tensione\: %1$V
+Voltage=Tensione
+Voltage\:_%1$V=Tensione: %1$V
+Voltage_drop=Caduta di tensione
+Voltages=Tensioni
+Yes=Sì
 You_can't_place_this_block_at_this_side=Non puoi piazzare questo blocco su questo lato
+_O\:_= O:

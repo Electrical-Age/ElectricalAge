@@ -1,7 +1,7 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-Electrical_Age_[WIP]=电力时代Electrical Age\n(translate by KLsz and polish by aneBlack)
+Electrical_Age_[WIP]=电力时代Eln (Electrical Age) [测试版]
 achievement.craft_50v_macerator=初入粉碎之法
 achievement.craft_50v_macerator.desc=50V的粉碎工艺！
 achievement.open_guide=学会内置Wiki
@@ -9,17 +9,18 @@ achievement.open_guide.desc=内置Wiki的能量,超乎你想象
 
 # ./src/main/java/mods/eln/Eln.java
 10A_Diode.name=二极管(10A)
-200V_Active_Thermal_Dissipator.name=散热器(T\:200W+1.2kW,200°C;E\:200V,60W)
+200V_Active_Thermal_Dissipator.name=散热器(T:200W+1.2kW,200°C;E:200V,60W)
 200V_Battery_Charger.name=电池充电器(200V,1kW)
 200V_Compressor.name=压缩机(200V)
 200V_Condensator.name=电容(200V)
 200V_Copper_Heating_Corp.name=铜电热丝(200V,600W)
 200V_Economic_Light_Bulb.name=节能灯泡(200V,15W)
+200V_Emergency_Lamp.name=应急灯泡(200v)
 200V_Farming_Lamp.name=暖箱灯泡(200V,120W)
-200V_Fuel_Generator.name=200V Fuel Generator
+200V_Fuel_Generator.name=燃料发电机(200V)
 200V_Incandescent_Light_Bulb.name=白炽灯泡(200V,30W)
 200V_Iron_Heating_Corp.name=铁电热丝(200V,900W)
-200V_LED_Bulb.name=200V LED Bulb
+200V_LED_Bulb.name=200V LED 灯泡
 200V_Macerator.name=粉碎机(200V,400W)
 200V_Magnetizer.name=磁化器(200V,400W)
 200V_Plate_Machine.name=冷轧机(200V,400W)
@@ -27,6 +28,8 @@ achievement.open_guide.desc=内置Wiki的能量,超乎你想象
 200V_Tungsten_Heating_Corp.name=钨电热丝(200V,1.2kW)
 200V_Turbine.name=发电机(温差,200V,500W,Δ350°C)
 25A_Diode.name=二极管(25A)
+2x3_Rotating_Solar_Panel.name=大型追踪式太阳能电池板
+2x3_Solar_Panel.name=大型太阳能电池板
 50V_Battery_Charger.name=电池充电器(50V,400W)
 50V_Carbon_Incandescent_Light_Bulb.name=碳丝灯泡(50V,25W)
 50V_Compressor.name=压缩机(50V)
@@ -34,11 +37,12 @@ achievement.open_guide.desc=内置Wiki的能量,超乎你想象
 50V_Copper_Heating_Corp.name=铜电热丝(50V,250W)
 50V_Economic_Light_Bulb.name=节能灯泡(50V,15W)
 50V_Egg_Incubator.name=鸡蛋孵化器(50V)
+50V_Emergency_Lamp.name=应急灯泡(50v)
 50V_Farming_Lamp.name=暖箱灯泡(50V,120W)
-50V_Fuel_Generator.name=50V Fuel Generator
+50V_Fuel_Generator.name=燃料发电机(50V)
 50V_Incandescent_Light_Bulb.name=白炽灯泡(50V,30W)
 50V_Iron_Heating_Corp.name=铁电热丝(50V,375W)
-50V_LED_Bulb.name=50V LED Bulb
+50V_LED_Bulb.name=50V LED 灯泡
 50V_Macerator.name=粉碎机(50V,200W)
 50V_Magnetizer.name=磁化机(50V,200W)
 50V_Plate_Machine.name=冷轧机(50V,200W)
@@ -46,7 +50,7 @@ achievement.open_guide.desc=内置Wiki的能量,超乎你想象
 50V_Tungsten_Heating_Corp.name=钨电热丝(50V,500W)
 50V_Turbine.name=发电机(温差,50V,300W,Δ250°C)
 800V_Defence_Turret.name=防御塔(800V,min-50W,max-1kW)
-AND_Chip.name=AND Chip
+AND_Chip.name=芯片(AND)
 Advanced_Chip.name=芯片(高级)
 Advanced_Electrical_Motor.name=电机(高级)
 Advanced_Energy_Meter.name=电能表(高级)
@@ -56,18 +60,22 @@ AllMeter.name=通用表
 Alloy_Dust.name=钨钢合金粉
 Alloy_Ingot.name=钨钢合金锭
 Alloy_Plate.name=钨钢合金板
+Amplifier.name=放大器
 Analog_Watch.name=模拟时钟
 Analog_vuMeter.name=模拟电压表(信号)
-Analogic_Regulator.name=模拟温控组件
+Analogic_Regulator.name=模拟校准器
 Animal_Filter.name=动物筛选组件
 Auto_Miner.name=自动挖矿机(800V)
 Average_Electrical_Drill.name=电钻(1kW,5")
 Average_Ferromagnetic_Core.name=磁能核心(4.0)
 Basic_Magnet.name=磁铁(基础)
+Big_Fuel_Burner.name=燃料燃烧器(大型)
 Black_Brush.name=刷子(黑)
+Blown_Lead_Fuse.name=保险丝(损坏)
 Blue_Brush.name=刷子(蓝)
 Brown_Brush.name=刷子(棕)
 Capacity_Oriented_Battery.name=电源(容量更大,12V,125W,240kJ)
+Casing.name=Casing
 Cheap_Chip.name=芯片(基础)
 Cheap_Electrical_Drill.name=电钻(500W,8")
 Cheap_Ferromagnetic_Core.name=磁能核心(10.0)
@@ -76,6 +84,7 @@ Cinnabar_Ore.name=朱砂矿石
 Coal_Dust.name=煤粉
 Coal_Plate.name=煤板
 Combustion_Chamber.name=炉膛组件
+Configurable_summing_unit.name=可配置的加法单元
 Copper_Cable.name=导线(铜)
 Copper_Dust.name=铜粉
 Copper_Ingot.name=铜锭
@@ -83,9 +92,10 @@ Copper_Ore.name=铜矿
 Copper_Plate.name=铜板
 Copper_Thermal_Cable.name=导热管(铜,1k°C)
 Cost_Oriented_Battery.name=电源(更廉价,50V,250W,60KJ)
-Current_Oriented_Battery.name=电源(电流更大,50V,1000W,40KJ)
+Current_Oriented_Battery.name=电源(功率更大,50V,1000W,40KJ)
 Cyan_Brush.name=刷子(青)
-D_Flip_Flop_Chip.name=D Flip Flop Chip
+DC-DC_Converter.name=DC-DC变压器
+D_Flip_Flop_Chip.name=芯片(D触发器)
 Data_Logger.name=示波器(台式,信号)
 Data_Logger_Print.name=示波器(打印,信号)
 Dielectric.name=绝缘体
@@ -94,8 +104,10 @@ Electrical_Anemometer_Sensor.name=传感器(风力)
 Electrical_Breaker.name=断路器
 Electrical_Daylight_Sensor.name=感应器(阳光)
 Electrical_Entity_Sensor.name=感应器(实体)
+Electrical_Fire_Buzzer.name=电子火警蜂鸣器
 Electrical_Fire_Detector.name=电气火花传感器
-Electrical_Furnace.name=电炉
+Electrical_Furnace.name=熔炉(电)
+Electrical_Fuse_Holder.name=支架(保险丝)
 Electrical_Light_Sensor.name=感应器(光)
 Electrical_Motor.name=电机
 Electrical_Probe.name=电力传感器
@@ -103,14 +115,17 @@ Electrical_Probe_Chip.name=芯片(电力传感器)
 Electrical_Source.name=电源
 Electrical_Timer.name=断路延时器
 Electrical_Weather_Sensor.name=传感器(天气)
-Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=扳手用来翻转一些小方块
+Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
 Energy_Meter.name=电能表
 Experimental_Transporter.name=传送机
 Fast_Electrical_Drill.name=电钻(2kW,3")
 Ferrite_Ingot.name=铁氧体锭
 Flat_Lamp_Socket.name=灯座(扁平)
 Fluorescent_Lamp_Socket.name=灯座(荧光)
-Generator.name=Generator
+Flywheel.name=飞轮
+Fuel_Heat_Furnace.name=熔炉(燃料)
+Gas_Turbine.name=燃气轮机
+Generator.name=发电机
 Gold_Dust.name=金粉
 Gold_Plate.name=金板
 Gray_Brush.name=刷子(灰)
@@ -126,13 +141,19 @@ Industrial_Data_Logger.name=示波器(工业,信号)
 Iron_Cable.name=导线(铁)
 Iron_Dust.name=铁粉
 Iron_Plate.name=铁板
-JK_Flip_Flop_Chip.name=JK Flip Flop Chip
+JK_Flip_Flop_Chip.name=芯片(JK触发器)
+Joint.name=接合器
+Joint_hub.name=接合中心
 LED_vuMeter.name=LED指示灯
 Lamp_Socket_A.name=灯座(圆盘式)
 Lamp_Socket_B_Projector.name=灯座(圆盘式,高级)
 Lamp_Supply.name=无线照明控制盒
-Large_Rheostat.name=Large Rheostat
+Large_Rheostat.name=大变阻器
 Lead_Dust.name=铅粉
+Lead_Fuse_for_high_voltage_cables.name=保险丝(铅,800V)
+Lead_Fuse_for_low_voltage_cables.name=保险丝(铅,50V)
+Lead_Fuse_for_medium_voltage_cables.name=保险丝(铅,200V)
+Lead_Fuse_for_very_high_voltage_cables.name=保险丝(铅,3.2kV)
 Lead_Ingot.name=铅锭
 Lead_Ore.name=铅矿石
 Lead_Plate.name=铅板
@@ -145,9 +166,11 @@ Low_Power_Transmitter_Antenna.name=天线(发射)(50V,250W,200m)
 Low_Voltage_Cable.name=导线(50V,1kW)
 Low_Voltage_Relay.name=继电器(50V)
 Low_Voltage_Switch.name=开关(50V)
+Lowpass_filter.name=低通滤波器
 Machine_Block.name=机器方块
 Machine_Booster.name=增压器
 Magenta_Brush.name=刷子(品红)
+Medium_Fuel_Burner.name=燃料燃烧器(中型)
 Medium_Power_Receiver_Antenna.name=天线(接收)(200V,1kW)
 Medium_Power_Transmitter_Antenna.name=天线(发射)(200V,1kW,250m)
 Medium_Voltage_Cable.name=导线(200V,2kW)
@@ -155,24 +178,26 @@ Medium_Voltage_Relay.name=继电器(200V)
 Medium_Voltage_Switch.name=开关(200V)
 Mercury.name=汞
 Mining_Pipe.name=采矿管道
-Modbus_RTU.name=Modbus RTU通讯协议
+Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=示波器(薄屏,信号)
 Monster_Filter.name=怪物筛选组件
 MultiMeter.name=万用表
-NAND_Chip.name=NAND Chip
-NOR_Chip.name=NOR Chip
-NOT_Chip.name=NOT Chip
+NAND_Chip.name=芯片(NAND)
+NOR_Chip.name=芯片(NOR)
+NOT_Chip.name=芯片(NOT)
 Nuclear_Alarm.name=警报(核)
-OR_Chip.name=OR Chip
-On_OFF_Regulator_10_Percent.name=开/关温控10%
-On_OFF_Regulator_1_Percent.name=开/关温控1%
+OR_Chip.name=芯片(OR)
+On_OFF_Regulator_10_Percent.name=开/关校准器10%
+On_OFF_Regulator_1_Percent.name=开/关校准器1%
+OpAmp.name=放大器(运算)
 Optimal_Ferromagnetic_Core.name=磁能核心(1.0)
 Orange_Brush.name=刷子(橙)
 Ore_Scanner.name=矿物扫描仪
-Oscillator_Chip.name=Oscillator Chip
+Oscillator_Chip.name=芯片(振荡器)
 Overheating_Protection.name=保护装置(过热)
 Overvoltage_Protection.name=保护装置(过压)
-PAL_Chip.name=PAL Chip
+PAL_Chip.name=芯片(PAL)
+PID_Regulator.name=PID 校准器
 Pink_Brush.name=刷子(粉)
 Player_Filter.name=玩家筛选组件
 Portable_Battery.name=移动电池
@@ -192,7 +217,9 @@ Redstone-to-Voltage_Converter.name=转换器(红石→电)
 Rheostat.name=变阻器
 Robust_Lamp_Socket.name=灯座(小)
 Rubber.name=橡胶
-Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
+Sample_and_hold.name=采样保持器
+Scanner.name=扫描仪
+Schmitt_Trigger_Chip.name=芯片(Schmitt触发器)
 Sconce_Lamp_Socket.name=灯座(壁挂)
 Signal_20H_inductor.name=电感(20H)(信号)
 Signal_Antenna.name=天线(信号)
@@ -220,23 +247,24 @@ Small_50V_Economic_Light_Bulb.name=小型节能灯泡(50V)
 Small_50V_Incandescent_Light_Bulb.name=小型白炽灯泡(50V)
 Small_50V_Iron_Heating_Corp.name=加热核心(铁,50V,小)
 Small_50V_Tungsten_Heating_Corp.name=加热核心(钨,50V,小)
-Small_Active_Thermal_Dissipator.name=散热器(T\:200W+800W,150°C;E\:50V,50W)
+Small_Active_Thermal_Dissipator.name=散热器(T:200W+800W,150°C;E:50V,50W)
 Small_Flashlight.name=手电筒
+Small_Fuel_Burner.name=燃料燃烧器(小型)
 Small_Passive_Thermal_Dissipator.name=散热器(250W,220°C)
-Small_Rotating_Solar_Panel.name=太阳能电池板(追踪,14.8V,65W)
-Small_Solar_Panel.name=太阳能电板(14.8V,65W)
+Small_Rotating_Solar_Panel.name=小型追踪式太阳能电池板
+Small_Solar_Panel.name=小型太阳能电池板
 Solar_Tracker.name=太阳追踪组件
 Standard_Alarm.name=警报(基础)
-Steam_Turbine.name=Steam Turbine
-Stone_Heat_Furnace.name=燃烧器(800°C,1kW)
+Steam_Turbine.name=蒸汽轮机
+Stone_Heat_Furnace.name=燃料>热能炉(800°C,1kW)
 Street_Light.name=灯座(路灯)
 Suspended_Lamp_Socket.name=灯座(吊挂)
+Tachometer.name=转速表
 Temperature_Probe.name=温度传感器
 Thermal_Probe.name=热能传感器
 Thermal_Probe_Chip.name=芯片(热能传感器)
 Thermistor.name=热敏电阻
-ThermoMeter.name=温度计
-Transformer.name=变压器
+Thermometer.name=温度计
 Tree_Resin.name=树脂
 Tree_Resin_Collector.name=树脂收集器
 Tungsten_Cable.name=导线(钨)
@@ -244,12 +272,15 @@ Tungsten_Dust.name=钨粉
 Tungsten_Ingot.name=钨锭
 Tungsten_Ore.name=钨矿石
 Tutorial_Sign.name=指示标志
-Very_High_Voltage_Cable.name=导线(3200V)
-Very_High_Voltage_Relay.name=继电器(3200V)
-Very_High_Voltage_Switch.name=开关(3200V)
+Very_High_Voltage_Cable.name=导线(3.2kV)
+Very_High_Voltage_Relay.name=继电器(3.2kV)
+Very_High_Voltage_Switch.name=开关(3.2kV)
 Voltage-to-Redstone_Converter.name=转换器(电→红石)
 Voltage_Oriented_Battery.name=电源(电压更大,200V,250W)
 Voltage_Probe.name=电压传感器
+Voltage_controlled_amplifier.name=放大器(电压控制)
+Voltage_controlled_sawtooth_oscillator.name=振荡器(锯齿波,电压控制)
+Voltage_controlled_sine_oscillator.name=振荡器(正弦波,电压控制)
 Water_Turbine.name=发电机(水力,50V,30W)
 Weak_50V_Battery_Charger.name=电池充电器(50V,200W)
 White_Brush.name=刷子(白)
@@ -258,29 +289,29 @@ Wireless_Analyser.name=监测仪(无线)
 Wireless_Button.name=按钮(无线)
 Wireless_Signal_Receiver.name=信号接收器(无线)
 Wireless_Signal_Repeater.name=信号加强器(无线)
-Wireless_Signal_Transmitter.name=信号发射器(无线)
+Wireless_Signal_Transmitter.name=信号发送器(无线)
 Wireless_Switch.name=开关(无线)
 Wrench.name=扳手
 X-Ray_Scanner.name=扫描仪
-XNOR_Chip.name=XNOR Chip
-XOR_Chip.name=XOR Chip
+XNOR_Chip.name=芯片(XNOR)
+XOR_Chip.name=芯片(XOR)
 Yellow_Brush.name=刷子(黄)
 entity.EAReplicator.name=复制机
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.Copper Axe.name\=铜镐
-item.E-Coal Boots.name\=EC鞋
-item.E-Coal Boots.name\=EC鞋
-item.E-Coal Boots.name\=EC鞋
-item.E-Coal Boots.name\=EC鞋
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.Copper Axe.name=铜镐
+item.E-Coal Boots.name=EC鞋
+item.E-Coal Boots.name=EC鞋
+item.E-Coal Boots.name=EC鞋
+item.E-Coal Boots.name=EC鞋
 itemGroup.Eln=电力时代
-mod.meta.desc=你的基地,因使用电力产生红热的光芒\!
+mod.meta.desc=你的基地,因使用电力产生红热的光芒!
 tile.eln.ElnProbe.name=电力时代电脑传感器
 tile.eln.EnergyConverterElnToOtherHVUBlock.name=电力时代能源(800V)转至其他能源
 tile.eln.EnergyConverterElnToOtherLVUBlock.name=电力时代能源(50V)转至其他能源
@@ -289,53 +320,62 @@ tile.eln.EnergyConverterElnToOtherMVUBlock.name=电力时代能源(200V)转至�
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=你还剩%1$条生命
 
-# ./src/main/java/mods/eln/item/BrushDescriptor.java
+# ./src/main/java/mods/eln/item/BrushDescriptor.kt
 Brush_is_dry=刷子干了
 Can_paint_%1$_blocks=可以继续漆%1$个方块
+
+# ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
+Can_be_used_to_encase_EA_items_that_support_it=Can be used to encase EA items that support it
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
 Upgrade_for_the_Stone_Heat_Furnace.=你的发电机升级啦~
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=启动需要能量\:%1$J
-Time_per_operation\:_%1$s=启动所需时间\:%1$s
+Energy_per_operation\:_%1$J=启动需要能量: %1$J
+Time_per_operation\:_%1$h=Time per operation: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=导线损耗系数\:%1$
+Cable_loss_factor\:_%1$=导线损耗系数: %1$
+
+# ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
+Burn_unit_for_the_gas_heat_furnace.=为熔炉(气体燃料)准备
+Produced_heat_power\:_=产生热能
 
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
 # ./src/main/java/mods/eln/item/LampDescriptor.java
 Bad=差
-Condition\:=条件\:
+Condition\:=条件: 
 End_of_life=生命就此终结
 Good=好
 New=新
-Nominal_lifetime\:_%1$h=理论寿命\:%1$h
-Technology\:_%1$=科技\:%1$
+Nominal_lifetime\:_%1$h=额定寿命: %1$h
+Technology\:_%1$=科技: %1$
 Used=旧
 
 # ./src/main/java/mods/eln/item/LampSlot.java
 Lamp_slot=槽(灯)
 
 # ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
-Useful_to_prevent_overheating\nof_Batteries=有效防止电源过热
+Useful_to_prevent_overheating\nof_Batteries=防止电池过热
 
 # ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
-Useful_to_prevent_over-voltage\nof_Batteries=有效防止电源过压
+Useful_to_prevent_over-voltage\nof_Batteries=防止电池过充
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
-Solar_panel_upgrade=太阳能电板升级
+Solar_panel_upgrade=太阳能电池板升级
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
-Off=关
-On=开
-State\:=状态\:
-Stored_Energy\:_%1$J_(%2$%)=储存的能量\:%1$J(%2$%)
+State\:=状态: 
+Stored_Energy\:_%1$J_(%2$%)=储存的能量: %1$J(%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+
+# ./src/main/java/mods/eln/mechanical/Tachometer.kt
+Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
+Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=请戳Shift
@@ -346,29 +386,78 @@ mod.name=电力时代
 # ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
-Input_power_is_limited_to_%1$W=输入功率限制\:%1$W
+Input_power_is_limited_to_%1$W=输入功率限制: %1$W
+
+# ./src/main/java/mods/eln/sixnode/AnalogChips.kt
+A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.
+A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.
+An_amplifier_increases_the_voltage\nof_an_input_signal_by_a_configurable\ngain_and_outputs_that_voltage.=An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.
+Cut-off_frequency_%1$_Hz=截止频率 %1$ Hz
+Gain=增益
+Gain_for_input_\u00a713=增益(输入/u00a713)
+Gain_for_input_\u00a722=增益(输入/u00a722)
+Gain_for_input_\u00a741=增益(输入/u00a741)
+Lowpass_filter_-_Passes_signals_with_a\nfrequency_lower_than_a_certain_cutoff_frequency\nand_attenuates_signals_with_frequencies_higher\nthan_the_cutoff_frequency.=Lowpass filter - Passes signals with a\nfrequency lower than a certain cutoff frequency\nand attenuates signals with frequencies higher\nthan the cutoff frequency.
+Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_as_configurable_amplifier.=Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.
+Params=参数
+Proportional–integral–derivative_controller._A_PID\ncontroller_continuously_calculates_an_error_value_as\nthe_difference_between_a_desired_setpoint_and_a_measured\nprocess_variable_and_applies_a_correction_based_on\nproportional,_integral,_and_derivative_terms.=Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.
+Samples_the_voltage_of_a_varying_analog_signal_when\nthe_clock_input_changes_from_0_to_1_and_holds_its\noutput_voltage_at_a_constant_level_until_next_clock_pulse.\nYou_can_see_it_as_an_analog_D-Flipflop.=Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.
+The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_each_input_can_be_configured.=The summing unit outputs the sum of\nthe three weighted inputs.The\ngain for each input can be configured.
+
+# ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
+Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
+
+# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
 
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
-_O\:_= O\:
+A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
+If_the_input_J_is_1_(high)_and_K_is_0_(low)\nduring_a_clock_pulse,_the_output_becomes_1_(high).\nIf_J_is_0_(low)_and_K_is_1_(high)_during_the_pulse,\nthe_output_becomes_0_(low)._If_both_inputs_are_0_(low)\nduring_the_clock_pulse,_the_state_is_maintained._If_both\ninputs_are_1_(high)_the_input_is_toggled_if_a_rising_edge\nwas_detected_at_the_clock_input.=If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.
+If_the_input_voltage_is_lower_than_10V,_the\noutput_is_0_(low),_if_the_output_is_bigger_or\nequal_to_30V,_the_output_will_be_1_(high)._For\nall_voltages_in_between,_the_output_does_not_change.=If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.
+Implements_an_exclusive_or.\nAn_output_of_1_(high)_results_if_one_or\nall_three_inputs_to_the_gate_are_1_(high).=Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).
+Implements_logical_conjunction.\nA_1_(high)_output_results_only_if_all_of\nthe_three_inputs_to_the_AND_gate_are_1_(high).=Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).
+Implements_logical_disjunction.\nA_1_(high)_output_results_if_at_least\none_input_to_the_gate_is_1_(high).=Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).
+Inverts_the_input_signal.\nOutputs_a_voltage_representing_the\nopposite_logic-level_to_its_input.=Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.
+Its_output_is_complement_(inverted)\nto_that_of_the_AND_gate.=Its output is complement (inverted)\nto that of the AND gate.
+Its_output_is_complement_(inverted)\nto_that_of_the_OR_gate.=Its output is complement (inverted)\nto that of the OR gate.
+Its_output_is_complement_(inverted)\nto_that_of_the_XOR_gate.=Its output is complement (inverted)\nto that of the XOR gate.
+Outputs_a_rectangular_signal_which's_frequency\ndepends_to_the_input_voltage._The_higher_the\ninput_voltage_-_the_higher_the_frequency.=Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.
+The_D_flip-flop_captures_the_value\nof_the_D-input_at_a_rising_edge\nportion_of_the_clock_cycle.=The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.
+UNDEF=未定义
+
+# ./src/main/java/mods/eln/sixnode/Scanner.kt
+-_For_inventories,_outputs_either_total_fill_or_fraction_of_slots_with_any_items.=- For inventories, outputs either total fill or fraction of slots with any items.
+-_For_tanks,_outputs_fill_percentage.=对于液体容器，输出已使用空间占总容量的百分比。
+Otherwise_behaves_as_a_vanilla_comparator.=其他情况下的表现就像原版的比较器一样。
+Right-click_to_change_mode.=右击更改模式
+Scans_blocks_to_produce_signals.=扫描方块来产生信号。
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
-Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=放在树上即可生产树脂
-This_block_can_only_be_placed_on_the_side_of_a_tree!=这只能在一棵树的侧面防止啊
+Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
+This_block_can_only_be_placed_on_the_side_of_a_tree!=这只能在一棵树的侧面放置啊
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
 Battery_slot=槽(电池)
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
-Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=可以用来给电力时代的东西充电\n例如移动电池,手电筒,扫描仪
+Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
+Charge_Current=改变电流
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
-Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=电流只能从二极管的一端流到另一端
+Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeElement.java
+Forward_Voltage=正向电压
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
-=
-Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=当输入信号高的时候\n发出巨大的警报声
+Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
+Engaged=已被占用
+Input_Voltage=输入电压
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=声音已静音
@@ -377,7 +466,10 @@ Sound_is_not_muted=声音已开启
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
-Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=保护电路\n如果电压过大或电流过载都会打开
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=保护电路\n触发条件：\n  -电压超过设定值\n  -电流超过导线额定值
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java
+Contact=交流
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
 Maximum_voltage_before_cutting_off=切断前最大电压
@@ -386,16 +478,21 @@ Switch_is_off=开关关闭
 Switch_is_on=开关打开
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
-A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=信号用来传递电气信息\n必须要在0V和%1$V之间
-Cable_is_adapted_to_conduct\nelectrical_signals.=该电缆适用于传输电子信号
-Current\:_%1$A=电流\:%1$A
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
+Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
+Current\:_%1$A=电流: %1$A
 Not_adapted_to_transport_power.=没有适配到传送功率
-Save_usage\:=保存用法\:
-Serial_resistance\:_%1$Ω=串联电阻\:%1$Ω
+Save_usage\:=保存用法: 
+Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
+Signal_Voltage=信号电压
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
 It_can_store_up_to_256_points.=它最多可以储存256个单位
-Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=测量电子信号的实时电压
+Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
 Back_to_display=回到显示
@@ -414,29 +511,46 @@ Y-axis_min=Y轴最小值
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
-Output_voltage_increases\nif_entities_are_moving_around.=如果有生物在周围移动那么增大输出电压
+Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java
+Entity_present=实体出现
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
-Output_voltage_increases\nif_a_fire_has_been_detected.=如果周围有火那么增大输出电压
+Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Battery powered buzzer \nactivated in presence of fire.
+Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
+Fire_detected\:_=检测到火情: 
+Fire_present=火情出现
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
-Provides_configurable_signal\nvoltage.=提供可调整的信号电压
+Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
-Output_at_%1$%=输出\:%1$%
+Output_at_%1$%=输出: %1$%
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
 0V_at_night,_%1$V_at_noon.=夜间0V,午时%1$V
-Provides_an_electrical_voltage\nin_the_presence_of_light.=接受到光的时候提供电压
-Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=接收到日光的时候提供电压\n电压与日光强度成正比
+Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
+Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
+Light_level=光照强度
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-Applicable_boolean_operators\:=适用于布尔(boolean)算子\:
-Applicable_functions\:=适用于\:
+Applicable_boolean_operators\:=适用于布尔(boolean)算子: 
+Applicable_functions\:=适用于: 
 Applicable_mathematical_operators\:=适用于数学算子
-Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=用3个输入(A,B,C)值\n进行函数计算\n然后输出信号
+Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
+Equation=方程式
+Input_voltages=输入电压
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
 %1$_Redstone(s)_required=需要%1$个红石粉
@@ -447,116 +561,137 @@ Output_voltage_formula=输出电压公式
 Waiting_for_completion...=请稍后...
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
-Converts_Redstone_signal\nto_an_electrical_voltage.=把红石信号转换为电压
+Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
-Converts_electrical_voltage\ninto_a_Redstone_signal.=把电压转换为红石信号
+Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
-A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=继电器是根据信号电压的有无\n控制电路闭合断开的仪器
+A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
+Default_position=默认位置
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
 Normally_closed=默认关闭
 Normally_open=默认打开
 
-# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
-Creative_block.=创造方块
-Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=无限制的永久能源(创造专用)
-
-# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceGui.java
-Output_voltage=输出电压
-
-# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
-Can_break_an_electrical_circuit\ninterrupting_the_current.=能破坏导线以中断电流
-
-# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
-Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=当应用于高强度信号时\n定时器一定输出间隔后会输出高强度信号。\n可以循环进行
-
-# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
-Set=设置
-The_time_interval_the\noutput_is_kept_high.=保持高输出间隔
-
-# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
-Displays_the_value_of_a_signal.=显示信号的值
-
-# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
-Portable_battery_slot=槽(移动电池)
-
-# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
-Clear\:_%1$V=晴朗\:%1$V
-Provides_an_electrical_signal\ndepending_the_actual_weather.=提供信号,强度由天气决定
-Rain\:_%1$V=阴雨\:%1$V
-Storm\:_%1$V=雷暴\:%1$V
-
-# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
-Maximum_wind_speed_is_%1$m_s=最高风速%1$m/s
-Provides_an_electrical_signal\ndependant_on_wind_speed.=提供信号,强度由风速决定
-You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
-
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=可以测量电压/功率/电流
 Measures_electrical_values_on_cables.=测量电缆的电气值
 Measures_voltage_on_cables.=测量导线上的电压
 
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
-Current=电流
-Measured_voltage\ncorresponding\nto_0%_output=测量电压\n对应\n0%输出
-Measured_voltage\ncorresponding\nto_100%_output=测量电压\n对应\n0%输出
-Voltage=电压
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
+Measured_current=测量电流
+Measured_power=测量功率
+Measured_voltage=测量电压
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
+Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
+Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
+Creative_block.=创造方块
+Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
+Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
+Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutElement.java
+Output=输出
+Remaining=剩余
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
+Set=设置
+The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kept high.
+
+# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
+Displays_the_value_of_a_signal.=显示信号的值
+
+# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
+Clear\:_%1$V=晴朗: %1$V
+Provides_an_electrical_signal\ndepending_the_actual_weather.=Provides an electrical signal\ndepending the actual weather.
+Rain\:_%1$V=阴雨: %1$V
+Storm\:_%1$V=雷暴: %1$V
+
+# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
+Maximum_wind_speed_is_%1$m_s=最高风速%1$m/s
+Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
+You_can't_place_this_block_on_the_floor_or_the_ceiling=你不能将这个方块放在地板上或天花板上
+
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
+Counter=计数器
+Energy_left=剩余能源
+Mode=模式
+Prepay=预支付
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
 Change_password=修改密码
 Counter_Mode=计数模式
-Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=计算从\\u00a74red\\u00a7f到\\u00a71blue\\u00a7f的能量
-Energy_counter\:_%1$J=能量计算\:%1$J
+Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
+Energy_counter\:_%1$J=能量计算: %1$J
 Enter_new_energy=输入新能源
 Enter_password=输入密码
 Prepay_Mode=预付费模式
 Reset_time_counter=重置计时器
 Set_energy_counter=设置计时器
-Time_counter\:=计时器\:
+Time_counter\:=计时器: 
 Try_password=测试密码
-You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=你可以设置一个初始的可用能量。\n当计时器到达0时，电路联通。
+You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.
 is_off=关闭了
 is_on=打开着
 value_in_kJ=单位是kJ
 
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
-Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=可以用来设置0V的点位\n例如电池负极
+Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.
 Provides_a_zero_volt_reference.=提供0V电路供参考
 
 # ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
-Allows_crossing_cables\non_one_single_block.=允许导线在一个方块上面交叉
+Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one single block.
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
-Angle\:_%1$°_to_%2$°=角度\:%1$°到%2$°
-Spot_range\:_%1$_blocks=污染范围\:%1$个方块
+Angle\:_%1$°_to_%2$°=角度: %1$°到%2$°
+Spot_range\:_%1$_blocks=污染范围: %1$个方块
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketElement.java
+Bulb=气泡
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-%1$_is_not_in_range!=%1$不在范围内
 Cable_slot_empty=槽(导线)
-Orientation\:_%1$°=方向\:%1$°
+Orientation\:_%1$°=方向: %1$°
 Parallel=并联
-Powered_by_Lamp_Supply=由无线照明控制盒供电
-Powered_by_cable=导线供电
 Serial=串联
-Specify_the_supply_channel=指定供应通道
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=电力导线槽\n基本范围为32格\n每加入一条电线\n增加一格的范围
+Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Supplies_all_lamps_on_the_channel.=给接入该通道的每个电灯供电
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
+Total_power=总功率
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
 Power_channel_name=供电通道名称
 Wireless_channel_name=无限通道名称
 
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
+Modbus_TCP=Modbus TCP
+Modbus_Unit_ID=Modbus单元ID
+Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus已经被禁用，请前往Eln.cfg启用它，谢谢
+
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
 Add=增加
 Channel_name=通道名称
-Modbus_ID=Modbus网关
-Modbus_RTU=Modbus RTU通讯协议
+Modbus_ID=Modbus ID
+Modbus_RTU=Modbus RTU
 Station_ID=站点ID
 Station_name=站点名称
 Wireless_RX=无线接收
@@ -565,14 +700,20 @@ Wireless_TX=无线发送
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
 (Increases_maximum_voltage)=(增大最大电压)
 
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
+Capacity=容量
+
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
 
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
+Inductance=感应系数
+
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
-Supplies_any_device\nplugged_in_with_energy.=给任何接入的设备提供能量
+Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
 Specify_the_device_to_supply_through_this_socket.=提供给指定的已连接的某设备
@@ -581,25 +722,33 @@ Specify_the_device_to_supply_through_this_socket.=提供给指定的已连接的
 (Sets_resistance)=(设置电阻)
 Coal_dust_slot=槽(煤粉)
 
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
+
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
-High_parallel_resistance\n_\=>_Low_power_dissipation.=并联大阻抗的电阻\n以获得低功耗
-Low_serial_resistance\n_\=>_High_conductivity.=并联小阻抗的电阻\n以获得高功耗
-Parallel_resistance\:_%1$K_W=并联\:%1$K/W
-Serial_resistance\:_%1$K_W=串联\:%1$K/W
+High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
+Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
+Parallel_resistance\:_%1$K_W=并联: %1$K/W
+Serial_resistance\:_%1$K_W=串联: %1$K/W
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
+Thermic_power=热功率
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
 Cable_slot=槽(导线)
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
-Can_measure\:=可以测量\:
+Can_measure\:=可以测量:
 Measures_temperature_of_cables.=测量导线的温度
 Measures_thermal_values_on_cables.=测量导线的温度
 __Temperature_Power_conducted=热/电传导
 
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
+Measured_temperature=测量温度
+Measured_thermal_power=测量热功率
+
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
-Measured_temperature\ncorresponding\nto_0%_output=测量温度\n对应\n0%输出
-Measured_temperature\ncorresponding\nto_100%_output=测量温度\n对应\n0%输出
-Temperature=温度
+Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorresponding\nto 0% output
+Measured_temperature\ncorresponding\nto_100%_output=Measured temperature\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
 No_text_associated_to_this_beacon=没有关联到这个信标的文本
@@ -610,12 +759,26 @@ Set_beacon_name=设置信标名称
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Nominal_power\:_%1$_W=Nominal power\: %1$ W
-Nominal_voltage\:_%1$_V=Nominal voltage\: %1$ V
-Produces_electricity_using_fuel.=用燃料来发电
+Fuel_level=燃料级别
+Nominal_power\:_%1$_W=额定功率: %1$ W
+Nominal_voltage\:_%1$_V=额定电压: %1$V
+Produces_electricity_using_gasoline.=使用汽油发电
+State=状态
+
+# ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
+Actual\:_%1$=实际: %1$
+Analog_regulator_slot=槽(模拟校准器)
+Control_value_at_%1$=把值控制在 %1$
+Fuel_burner_slot=槽(燃料燃烧器)
+Furnace_is_off=熔炉已关闭
+Furnace_is_on=熔炉运行中
+Heat_Power\:_%1$=热能：%1$
+Set_point\:_%1$=设置温度: 
+__Max._temperature\:_=  最高温度：
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Nom. Resistance\: %1$
+Nom._Resistance\:_%1$=额定电阻值: %1$
+Power_loss=能量损失
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=槽(钻头)
@@ -623,138 +786,195 @@ Mining_pipe_slot=槽(挖矿管道)
 Ore_scanner_slot=槽(矿物扫描仪)
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
-Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=小搜索范围挖掘\n挖了10格深后以10个方块为半径挖掘
+Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerElement.java
+Depth=深度
+Silk_touch=精准采集
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
-Chest_missing_on_the\nback_of_the_auto_miner!=自动挖矿机背部没有检测到箱子耶
-Halves_speed,_triples_power_draw=Halves speed, triples power draw
-Silk_Touch_Off=Silk Touch Off
-Silk_Touch_On=Silk Touch On
-Silk_touch=Silk touch
+Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner!
+Halves_speed,_triples_power_draw=一半的速度，三倍功耗
+Silk_Touch=精准采集
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=保护装置(过热)
 Overvoltage_protection=当压力过大时提供保护
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
-Actual_charge\:_%1$%=实际电量\:%1$%
-Energy_capacity\:_%1$J=能量容量\:%1$J
-_charged_at_%1$%=剩余电量\:%1$%
+Actual_charge\:_=实际电量: 
+Energy_capacity\:_=能量容量: 
+Internal_resistance\:_=内阻: 
+Life_\:_=寿命: 
+Nominal_power\:_=额定功率: 
+Nominal_voltage\:_=额定电压: 
+_charged_at_=剩余电量
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charge=充电
 Charged=充满了
-Discharge=放点
-Energy\:=能量\:
-Energy\:_%1$=能量\:%1$
-Life\:=寿命\:
+Discharge=放电
+Energy\:=能量: 
+Energy\:_%1$=能量: %1$
+Life\:=寿命: 
 No_charge=没有充电
-Power_in\:=输入能量\:
+Power_in\:=输入能量: 
 Power_out\:=输出能量
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
 Egg_slot=槽(蛋)
 
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
+Has_egg=有鸡蛋
+
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
 Wireless_energy_receiver.=能源无线接收
 
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
+Effective_power=有效功率
+Power_received=接收的能源
+Receiving=正在接收
+
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=效率\:%1$%至%2$%
-Wireless_energy_transmitter.=能源无线发送
+Efficiency\:_%1$%_up_to_%2$%=效率: %1$%至%2$%
+Wireless_energy_transmitter.=能源发送器(无线)
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
+Efficiency=效率
+Transmitting=正在发送
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
 Heating_corp_slot=槽(加热核心)
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
-Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=跟一个正常的熔炉一样,只是用电驱动
+Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceElement.java
+Heating_element=发热元件
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
 Auto_shutdown=自动关闭
 Manual_shutdown=手动关闭
-Set_point\:_%1$°C=设置温度\:%1$°C
+Set_point\:_%1$°C=设置温度: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=价格
+Nominal_voltage\:_%1V$=Nominal voltage: %1V$
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
+Power_provided=提供的能量
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=槽(燃烧室)
 Fuel_slot=槽(燃料)
 
-# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
-Generates_heat_when_supplied_with_fuel.=提供燃料的时候产生热
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
+Set_temperature=设置温度
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
-Control_gauge_at_%1$%=操作规范\:%1$%
+Control_gauge_at_%1$%=操作规范: %1$%
 Decline_fuel=减少燃料
-External_control=手动控制
-Internal_control=自动控制
 Take_fuel=取走燃料
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(增大最大电压)
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
-Solar_tracker_slot=槽(太阳能跟踪器)
+Solar_tracker_slot=槽(太阳追踪组件)
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=可以使太阳能板直指太阳以获得更多的能源
-Max._power\:_%1$W=最大功率\:%1$W
-Max._voltage\:_%1$V=最大电压\:%1$V
+Max._power\:_%1$W=最大功率: %1$W
+Max._voltage\:_%1$V=最大电压: %1$V
 Produces_power_from_solar_radiation.=从太阳辐射获取能量
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
+Panel_angle=电板角度
+Producing_energy=正在产生能量
+Sun_angle=太阳角度
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
 It_is_night=晚上了
-Solar_panel_angle\:_%1$°=太阳能电板角度\:%1$°
-Sun_angle\:_%1$°=太阳角度\:%1$°
+Solar_panel_angle\:_%1$°=太阳能电板角度: %1$°
+Sun_angle\:_%1$°=太阳角度: %1$°
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
+Destination=目的地
+Distance=距离
+Required_energy=需要能量
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=传送至目的地
-Power_consumption\:=消耗功率\:
-Power_consumption\:_%1$W=使用功率\:%1$W
-Required_energy\:_%1$J=需要功率\:%1$J
+Power_consumption\:=消耗功率: 
+Power_consumption\:_%1$W=使用功率: %1$W
+Required_energy\:_%1$J=需要功率: %1$J
 Start=开始
 Transporter_name=传送机名称
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=风冷功率\:%1$W
-Fan_power_consumption\:_%1$W=风扇功率\:%1$W
-Fan_voltage\:_%1$V=风扇电压\:%1$V
+Fan_cooling_power\:_%1$W=风冷功率: %1$W
+Fan_power_consumption\:_%1$W=风扇功率: %1$W
+Fan_voltage\:_%1$V=风扇电压: %1$V
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+Casing_slot=Casing slot
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
-The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=电压与导线的数目成正比
-Transforms_an_input_voltage_to\nan_output_voltage.=将输入电压转换为输出电压
+The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
+Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerElement.java
+Core_factor=核心因素
+Isolated=隔离的
+Ratio=比例
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
 Generates_electricity_using_heat.=用热能来发电
-Temperature_difference\:_%1$°C=温度差\:%1$°C
+Temperature_difference\:_%1$°C=温度差: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
+Nominal=额定
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
-CAUTION\:_Cables_can_get_quite_hot!=警告\:导线过热
-Laser_charge_power\:_%1$W...%2$kW=激光充电功率\:%1$W...%2$kW
-Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=范围内如果找到的实体与过滤器一致\n那么开始攻击该实体直至实体从范围内移除
-Standby_power\:_%1$W=备用功率\:%1$W
+CAUTION\:_Cables_can_get_quite_hot!=警告:导线过热
+Laser_charge_power\:_%1$W...%2$kW=激光充电功率: %1$W...%2$kW
+Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
+Standby_power\:_%1$W=备用功率: %1$W
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
+??=？？
+Charge_level=充电程度
+Shoot_=射击
+Shoot_everything=射击所有东西
+Shoot_nothing=什么都不射击
+Target=目标
+animals=动物
+monsters=怪物
+players=玩家
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=攻击\:
-Do_not_attack\:=不攻击\:
-Recharge_power\:=放电功率
+Attack\:=攻击: 
+Do_not_attack\:=不攻击: 
+Recharge_power\:=充电功率
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
 Generates_energy_using_water_stream.=用流动水来发电
 No_place_for_water_turbine!=没有足够的空间供水力发电机工作
 
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
+
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=前面\:%1$
+Front\:_%1$=前面: %1$
 Generates_energy_from_wind.=用风来发电
-Left_Right\:_%1$=左/右\:%1$
-Up_Down\:_%1$=上/下\:%1$
+Left_Right\:_%1$=左/右: %1$
+Up_Down\:_%1$=上/下: %1$
 Wind_area\:=风区
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Energy=功率
 Light=亮度
 Machine=机器
-Ore=kuang'shi
+Ore=矿石
 Portable=便携式
 Resource=源
 Signal=信号
@@ -767,63 +987,103 @@ Wiring=布线
 Previous=过去的
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
-Can_be_used_to_craft\:=可以用来合成\:
-Cannot_be_crafted!=不能合成而得\!
-Cost_%1$J=消耗能量\:%1$J
-Created_by\:=制作原料\:
-Is_not_a_crafting_material!=不能合成其他物品\!
-Recipe\:=合成表\:
+Can_be_used_to_craft\:=可以用来合成: 
+Cannot_be_crafted!=不能合成而得!
+Cost_%1$J=消耗能量: %1$J
+Created_by\:=制作原料: 
+Is_not_a_crafting_material!=不能合成其他物品!
+Recipe\:=合成表: 
 
 # Appearing in multiple source files
+%1$_is_not_in_range!=%1$不在范围内
 (Increases_capacity)=(增大容量)
 (Increases_inductance)=(增大电感)
-Actual\:_%1$°C=实际温度\:%1$°C
+Actual\:_%1$°C=实际温度: %1$°C
+Battery_level=电池级别
 Biggest=最大的
 Booster_slot=槽(增压器)
-Can_create\:=可以合成\:
-Capacity\:_%1$F=容量\:%1$F
-Charge_power\:_%1$W=充电功率\:%1$W
+Can_create\:=可以合成: 
+Capacity\:_%1$F=容量: %1$F
+Channel=通道
+Charge=充电
+Charge_power=充电功率
+Charge_power\:_%1$W=充电功率: %1$W
+Closed=关闭
 Connected=已连接
-Cooling_power\:_%1$W=冷却功率\:%1$W
+Cooling_power\:_%1$W=冷却功率: %1$W
 Copper_cable_slot=槽(铜导线)
+Current=电流
 Dielectric_slot=槽(绝缘体)
-Discharge_power\:_%1$W=输出功率\:%1$W
+Discharge_power\:_%1$W=输出功率: %1$W
 Electrical_cable_slot=槽(电力导线)
-Entity_filter_slot=槽(生物过滤器)
+Energy=功率
+Entity_filter_slot=槽(实体过滤器)
+External_control=手动控制
 Ferromagnetic_core_slot=槽(磁能核心)
+Generated_power=产生能量
+Generates_heat_when_supplied_with_fuel.=提供燃料的时候产生热
+Generating=正在运行
 Has_a_signal_output.=有一个信号输出
-Inductance\:_%1$H=电感\:%1$H
-Internal_resistance\:_%1$Ω=内阻\:%1$Ω
+Inductance\:_%1$H=电感: %1$H
+Input=输入
+Input_voltage=输入电压
+Internal_control=自动控制
+Internal_resistance\:_%1$\u2126=Internal resistance: %1$\u2126
 Is_off=关
 Is_on=开
-Max._temperature\:_%1$°C=最高温度\:%1$°C
-Measured_value\ncorresponding\nto_0%_output=测量zhi\n对应\n0%输出
-Measured_value\ncorresponding\nto_100%_output=测量zhi\n对应\n0%输出
-Nominal\:=理论\:
-Nominal_power\:_%1$W=理论功率\:%1$W
-Nominal_usage\:=理论使用\:
-Nominal_voltage\:_%1$V=理论电压\:%1$V
+Life=寿命
+Max._temperature\:_%1$°C=最高温度: %1$°C
+Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
+Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
+No=否
+Nominal\:=额定: 
+Nominal_power\:_%1$W=额定功率: %1$W
+Nominal_usage\:=额定使用: 
+Nominal_voltage\:_%1$V=额定电压: %1$V
+None=无
 Not_connected=未连接
 Not_enough_space_for_this_block=没有足够空间放置这个方块
+OFF=关
+ON=开
+Off=关
+On=开
+Open=开
+Output_voltage=输出电压
+Portable_battery_slot=槽(移动电池)
+Position=方位
 Power=功率
-Power\:_%1$W=功率\:%1$W
-Range\:_%1$_blocks=范围\:%1$个方块
+Power\:_%1$W=功率: %1$W
+Power_consumption=消耗功率
+Powered_by_Lamp_Supply=由无线照明控制盒供电
+Powered_by_cable=导线供电
+Produced_power=已产生的能量
+Range\:_%1$_blocks=范围: %1$个方块
 Redstone_slot=槽(红石)
+Redstone_value=红石值
 Regulator_slot=槽(校准器)
 Reset=重置
-Resistance\:_%1$Ω=电阻\:%1$Ω
+Resistance=电阻
+Resistance\:_%1$\u2126=Resistance: %1$\u2126
 Smallest=最小的
 Specify_the_channel=指定通道
-Stored_energy\:_%1$J_(%2$%)=储存的能量\:%1$J(%2$%)
-Temperature\:_%1$°C=温度\:%1$°C
+Specify_the_supply_channel=指定供应通道
+Stored_energy\:_%1$J_(%2$%)=储存的能量: %1$J(%2$%)
+Temperature=温度
+Temperature\:_%1$°C=温度: %1$°C
 Temperature_gauge=温度计
 Thermal_isolator_slot=槽(隔热器)
+Thermal_power=热功率
 Toggle=切换
 Toggle_switch=切换开关
-Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=按按钮时增大输出\n在多个开关控制同一灯泡时很有用
+Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
 Used_to_cool_down_turbines.=用来冷却涡轮
-Uses_the_biggest\nvalue_on_the_channel.=使用通道上最高的值
-Uses_the_smallest\nvalue_on_the_channel.=使用通道上最低的值
-Validate=证实
-Voltage\:_%1$V=电压\:%1$V
+Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
+Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
+Validate=生效
+Voltage=电压
+Voltage\:_%1$V=电压: %1$V
+Voltage_drop=压降
+Voltages=电压
+Yes=是
 You_can't_place_this_block_at_this_side=不能把方块放在这一边哟~
+_O\:_= O: 

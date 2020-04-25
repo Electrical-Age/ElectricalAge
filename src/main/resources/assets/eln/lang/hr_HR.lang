@@ -1,301 +1,301 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-Electrical_Age_[WIP]=Elektrische leeftijd [WIP]
+Electrical_Age_[WIP]=Električno doba [WIP]
 achievement.craft_50v_macerator=Crushing Novice
 achievement.craft_50v_macerator.desc=Craft a 50V Macerator
-achievement.open_guide=Wiki Power
-achievement.open_guide.desc=Open the wiki guide
+achievement.open_guide=Wiki Snaga
+achievement.open_guide.desc=Otvori Wiki upute
 
 # ./src/main/java/mods/eln/Eln.java
-10A_Diode.name=10A Diode
-200V_Active_Thermal_Dissipator.name=200V Actieve koeler
-200V_Battery_Charger.name=200V Batterij oplader
-200V_Compressor.name=200V Compressor
-200V_Condensator.name=200V Condensator
-200V_Copper_Heating_Corp.name=200V Koper verwarmingselement
-200V_Economic_Light_Bulb.name=200V Spaarlamp
+10A_Diode.name=10A Dioda
+200V_Active_Thermal_Dissipator.name=200V Aktivni ventilator
+200V_Battery_Charger.name=200V Punjač Baterije
+200V_Compressor.name=200V Kompresor
+200V_Condensator.name=200V Capacitor
+200V_Copper_Heating_Corp.name=200V Copper Heating Corp
+200V_Economic_Light_Bulb.name=200V Ekonomska žarulja
 200V_Emergency_Lamp.name=200V Emergency Lamp
-200V_Farming_Lamp.name=200V Landbouw lamp
-200V_Fuel_Generator.name=200V Fuel Generator
-200V_Incandescent_Light_Bulb.name=200V Gloeilamp
-200V_Iron_Heating_Corp.name=200V Ijzer verwarmingselement
-200V_LED_Bulb.name=200V LED Bulb
-200V_Macerator.name=200V Verpulveraar
-200V_Magnetizer.name=200V Magnetiseerder
-200V_Plate_Machine.name=200V Plaatwals
-200V_Power_Socket.name=200V Stopcontact
-200V_Tungsten_Heating_Corp.name=200V Wolfraam verwarmingselement
-200V_Turbine.name=200V Turbine
-25A_Diode.name=25A Diode
+200V_Farming_Lamp.name=200V Farming lampa
+200V_Fuel_Generator.name=200V Generator goriva
+200V_Incandescent_Light_Bulb.name=200V Klasična žarulja
+200V_Iron_Heating_Corp.name=200V Iron Heating Corp
+200V_LED_Bulb.name=200V LED žarulja
+200V_Macerator.name=200V Usitnjavač
+200V_Magnetizer.name=200V Magnetizer
+200V_Plate_Machine.name=200V Stroj za ploče
+200V_Power_Socket.name=200V Utičnica
+200V_Tungsten_Heating_Corp.name=200V Tungsten Heating Corp
+200V_Turbine.name=200V Turbina
+25A_Diode.name=25A Dioda
 2x3_Rotating_Solar_Panel.name=2x3 Rotating Solar Panel
 2x3_Solar_Panel.name=2x3 Solar Panel
-50V_Battery_Charger.name=50V Batterij oplader
-50V_Carbon_Incandescent_Light_Bulb.name=50V Koolstof gloeilamp
-50V_Compressor.name=50V Compressor
-50V_Condensator.name=50V Condensator
-50V_Copper_Heating_Corp.name=50V Koper verwarmingselement
-50V_Economic_Light_Bulb.name=50V Spaarlamp
-50V_Egg_Incubator.name=50V broedmachine
+50V_Battery_Charger.name=50V Punjač Baterije
+50V_Carbon_Incandescent_Light_Bulb.name=50V Žarulja s ugljenom niti
+50V_Compressor.name=50V Kompresor
+50V_Condensator.name=50V Capacitor
+50V_Copper_Heating_Corp.name=50V Copper Heating Corp
+50V_Economic_Light_Bulb.name=50V Ekonomska žarulja
+50V_Egg_Incubator.name=50V Inkubator za jaje
 50V_Emergency_Lamp.name=50V Emergency Lamp
-50V_Farming_Lamp.name=50V Landbouw lamp
-50V_Fuel_Generator.name=50V Fuel Generator
-50V_Incandescent_Light_Bulb.name=50V Gloeilamp
-50V_Iron_Heating_Corp.name=50V Ijzer verwarmingselement
-50V_LED_Bulb.name=50V LED Bulb
-50V_Macerator.name=50V Verpulveraar
-50V_Magnetizer.name=50V Magnetiseerder
-50V_Plate_Machine.name=50V Plaatwals
-50V_Power_Socket.name=50V Stopcontact
-50V_Tungsten_Heating_Corp.name=50V Wolfraam verwarmingselement
-50V_Turbine.name=50V Turbine
-800V_Defence_Turret.name=800V Verdedigingstorentje
-AND_Chip.name=AND Chip
-Advanced_Chip.name=Geavanceerde Chip
-Advanced_Electrical_Motor.name=Geavanceerde Elektrische Motor
-Advanced_Energy_Meter.name=Geavanceerde energiemeter
-Advanced_Machine_Block.name=Geavanceerde machineblok
-Advanced_Magnet.name=Geavanceerde magneet
-AllMeter.name=Universele Meter
-Alloy_Dust.name=Legering stof
-Alloy_Ingot.name=Legering staaf
-Alloy_Plate.name=Legering plaat
+50V_Farming_Lamp.name=50V Farming lampa
+50V_Fuel_Generator.name=50V Generator goriva
+50V_Incandescent_Light_Bulb.name=50V Klasična žarulja
+50V_Iron_Heating_Corp.name=50V Iron Heating Corp
+50V_LED_Bulb.name=50V LED Žarulja
+50V_Macerator.name=50V Usitnjavač
+50V_Magnetizer.name=50V Magnetizer
+50V_Plate_Machine.name=50V Stroj za ploče
+50V_Power_Socket.name=50V Utičnica
+50V_Tungsten_Heating_Corp.name=50V Tungsten Heating Corp
+50V_Turbine.name=50V Turbina
+800V_Defence_Turret.name=800V Kupola za obranu
+AND_Chip.name=AND Čip
+Advanced_Chip.name=Napredni čip
+Advanced_Electrical_Motor.name=Napredni Električni motor
+Advanced_Energy_Meter.name=Napredni mjerač energije
+Advanced_Machine_Block.name=Napredni blok za strojeve
+Advanced_Magnet.name=Napredni magnet
+AllMeter.name=Univerzalni mjerač
+Alloy_Dust.name=Aluminijski prah
+Alloy_Ingot.name=Aluminijski komad
+Alloy_Plate.name=Aluminijska ploča
 Amplifier.name=Amplifier
-Analog_Watch.name=Analoog Horloge
-Analog_vuMeter.name=Analoge meter
-Analogic_Regulator.name=Analoge regelaar
-Animal_Filter.name=Dier filter
-Auto_Miner.name=Automatische graver
-Average_Electrical_Drill.name=Normale elektrische boormachine
-Average_Ferromagnetic_Core.name=Normale ferromagnetische kern
-Basic_Magnet.name=Basis magneet
+Analog_Watch.name=Analogni sat
+Analog_vuMeter.name=Analogni mjerač
+Analogic_Regulator.name=Analogni Regulator
+Animal_Filter.name=Filter za životinje
+Auto_Miner.name=Automatski Kopač
+Average_Electrical_Drill.name=Prosječna Električna Bušilica
+Average_Ferromagnetic_Core.name=Prosječna Feromagnetska Jezgra
+Basic_Magnet.name=Obični Magnet
 Big_Fuel_Burner.name=Big Fuel Burner
-Black_Brush.name=Zwarte Borstel
+Black_Brush.name=Crna Četka
 Blown_Lead_Fuse.name=Blown Lead Fuse
-Blue_Brush.name=Blauwe Borstel
-Brown_Brush.name=Bruine Borstel
-Capacity_Oriented_Battery.name=Capaciteit Georiënteerde Batterij
+Blue_Brush.name=Plava Četka
+Brown_Brush.name=Smeđa Četka
+Capacity_Oriented_Battery.name=Baterija namijenjena za kapacitet
 Casing.name=Casing
-Cheap_Chip.name=Goedkope Chip
-Cheap_Electrical_Drill.name=Goedkoop Elektrisch Boormachine
-Cheap_Ferromagnetic_Core.name=Goedkope ferromagnetische kern
-Cinnabar_Dust.name=Cinnabar Dust
-Cinnabar_Ore.name=Cinnabar Ore
-Coal_Dust.name=Kool Stof
-Coal_Plate.name=Kool plaat
-Combustion_Chamber.name=Verbrandingskamer
+Cheap_Chip.name=Jeftini čip
+Cheap_Electrical_Drill.name=Jeftina Električna Bušilica
+Cheap_Ferromagnetic_Core.name=Jeftina Feromagnetska Jezgra
+Cinnabar_Dust.name=Prašina Rumenice
+Cinnabar_Ore.name=Ruda Rumenice
+Coal_Dust.name=Ugljena Prašina
+Coal_Plate.name=Ugljena ploča
+Combustion_Chamber.name=Komora za izgaranje
 Configurable_summing_unit.name=Configurable summing unit
-Copper_Cable.name=Koperen Kabel
-Copper_Dust.name=Koper stof
-Copper_Ingot.name=Koperstaaf
-Copper_Ore.name=Kopererts
-Copper_Plate.name=Koper plaat
-Copper_Thermal_Cable.name=Koper thermische kabel
-Cost_Oriented_Battery.name=Kostenefficiënte batterij 
-Current_Oriented_Battery.name=Stroomefficiënte batterij
-Cyan_Brush.name=Cyaan borstel
+Copper_Cable.name=Bakreni vodič
+Copper_Dust.name=Bakrena prašina
+Copper_Ingot.name=Komad bakra
+Copper_Ore.name=Bakrena ruda
+Copper_Plate.name=Bakrena ploča
+Copper_Thermal_Cable.name=Bakreni Toplinski Vodič
+Cost_Oriented_Battery.name=Baterija namijenjena za štednju
+Current_Oriented_Battery.name=Baterija namijenjena za struju
+Cyan_Brush.name=Cijan Četka
 DC-DC_Converter.name=DC-DC Converter
 D_Flip_Flop_Chip.name=D Flip Flop Chip
-Data_Logger.name=Data Logger
-Data_Logger_Print.name=Data Logger Print
-Dielectric.name=Diëlectricum
-Digital_Watch.name=Digitaal horloge
-Electrical_Anemometer_Sensor.name=Electrische anemometer sensor
-Electrical_Breaker.name=Elektrische onderbreker
-Electrical_Daylight_Sensor.name=Elektrische daglicht sensor
-Electrical_Entity_Sensor.name=Elektrische entiteit sensor
-Electrical_Fire_Buzzer.name=Electrical Fire Buzzer
-Electrical_Fire_Detector.name=Elektrische brand detector
-Electrical_Furnace.name=Elektrische oven
+Data_Logger.name=Podatkovni Ispisivač
+Data_Logger_Print.name=Print Podatkovnog Ispisivača
+Dielectric.name=Dielektrik
+Digital_Watch.name=Digitalni Sat
+Electrical_Anemometer_Sensor.name=Električni Uređaj za mjerenje vjetrova
+Electrical_Breaker.name=Električni Prekidač
+Electrical_Daylight_Sensor.name=Električni detektor dana
+Electrical_Entity_Sensor.name=Električni detektor entiteta
+Electrical_Fire_Buzzer.name=Električni Požarni Alarm
+Electrical_Fire_Detector.name=Električni detektor požara
+Electrical_Furnace.name=Električna Peć
 Electrical_Fuse_Holder.name=Electrical Fuse Holder
-Electrical_Light_Sensor.name=Elektrische licht sensor
-Electrical_Motor.name=Elektrische motor
-Electrical_Probe.name=Elektrische sonde
-Electrical_Probe_Chip.name=Elektrische sonde chip
-Electrical_Source.name=Elektrische bron
-Electrical_Timer.name=Elektrische timer
-Electrical_Weather_Sensor.name=Elektrische weer sensor
+Electrical_Light_Sensor.name=Električni detektor svjetla
+Electrical_Motor.name=Električni Motor
+Electrical_Probe.name=Električna Sonda
+Electrical_Probe_Chip.name=Čip za Električnu Sondu
+Electrical_Source.name=Električni Izvor
+Electrical_Timer.name=Električni vremenski brojač
+Electrical_Weather_Sensor.name=Električni Senzor za Vrijeme
 Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
-Energy_Meter.name=Energie meter
-Experimental_Transporter.name=Experimental Transporter
-Fast_Electrical_Drill.name=Snelle elektrische boormachine
-Ferrite_Ingot.name=Ferriet staaf
-Flat_Lamp_Socket.name=Platte lamphouder
-Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
+Energy_Meter.name=Mjerač Energije
+Experimental_Transporter.name=Eksperimentalni Transporter
+Fast_Electrical_Drill.name=Brza Električna Bušilica
+Ferrite_Ingot.name=Komad Ferita
+Flat_Lamp_Socket.name=Ravna Lampa
+Fluorescent_Lamp_Socket.name=Fluorescentna Lampa
 Flywheel.name=Flywheel
 Fuel_Heat_Furnace.name=Fuel Heat Furnace
-Gas_Turbine.name=Gas Turbine
+Gas_Turbine.name=Turbina na benzin
 Generator.name=Generator
-Gold_Dust.name=Goud stof
-Gold_Plate.name=Goud plaat
-Gray_Brush.name=Grijze borstel
-Green_Brush.name=Groene borstel
-Ground_Cable.name=Aardingskabel
-High_Power_Receiver_Antenna.name=Hoog-vermogen ontvangst-antenne
-High_Power_Transmitter_Antenna.name=Hoog-vermogen verzend-antenne
-High_Voltage_Cable.name=Hoogspanning kabel
-High_Voltage_Relay.name=Hoogspanning relais
-High_Voltage_Switch.name=Hoogspanning schakelaar
-Hub.name=Bus
-Industrial_Data_Logger.name=Industrial Data Logger
-Iron_Cable.name=Ijzer kabel
-Iron_Dust.name=Ijzer stof
-Iron_Plate.name=Ijzer plaat
+Gold_Dust.name=Zlatna Prašina
+Gold_Plate.name=Zlatna Ploča
+Gray_Brush.name=Siva Četka
+Green_Brush.name=Zelena Četka
+Ground_Cable.name=Prizemni Vodič
+High_Power_Receiver_Antenna.name=Snažni Antena za primanje
+High_Power_Transmitter_Antenna.name=Snažna Antena za Odašiljanje
+High_Voltage_Cable.name=Vodič s visokim naponom
+High_Voltage_Relay.name=Relaj s visokim naponom
+High_Voltage_Switch.name=Prekidač za visoki napon
+Hub.name=Čvor
+Industrial_Data_Logger.name=Industrijski Podatkovni Ispisivač
+Iron_Cable.name=Željezni Vodič
+Iron_Dust.name=Željezna Prašina
+Iron_Plate.name=Željezna Ploča
 JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 Joint.name=Joint
 Joint_hub.name=Joint hub
-LED_vuMeter.name=LED voltmeter
-Lamp_Socket_A.name=Lamphouder A
-Lamp_Socket_B_Projector.name=Lamphouder B projector
-Lamp_Supply.name=Lamp toevoer
-Large_Rheostat.name=Large Rheostat
-Lead_Dust.name=Lood stof
+LED_vuMeter.name=LED VU Metar
+Lamp_Socket_A.name=Grlo za Lampu tip A
+Lamp_Socket_B_Projector.name=Grlo za Lampu tip B Projektor
+Lamp_Supply.name=Napajač za Lampe
+Large_Rheostat.name=Veliki Reostat
+Lead_Dust.name=Olovna Prašina
 Lead_Fuse_for_high_voltage_cables.name=Lead Fuse for high voltage cables
 Lead_Fuse_for_low_voltage_cables.name=Lead Fuse for low voltage cables
 Lead_Fuse_for_medium_voltage_cables.name=Lead Fuse for medium voltage cables
 Lead_Fuse_for_very_high_voltage_cables.name=Lead Fuse for very high voltage cables
-Lead_Ingot.name=Lood staaf
-Lead_Ore.name=Lood erts
-Lead_Plate.name=Lood plaat
-Life_Oriented_Battery.name=Leeftijd-efficiënte batterij
-Light_Blue_Brush.name=Licht blauwe borstel
-Lime_Brush.name=Limoen borstel
-Long_Suspended_Lamp_Socket.name=Lange hangende lamphouder
-Low_Power_Receiver_Antenna.name=Laag-vermogen ontvangst-antenne
-Low_Power_Transmitter_Antenna.name=Laag-vermogen verzend-antenne
-Low_Voltage_Cable.name=Laagspanning kabel
-Low_Voltage_Relay.name=Laagspanning relais
-Low_Voltage_Switch.name=Laagspanning schakelaar
+Lead_Ingot.name=Komad Olova
+Lead_Ore.name=Ruda Olova
+Lead_Plate.name=Olovna Ploča
+Life_Oriented_Battery.name=Dugotrajna Baterija
+Light_Blue_Brush.name=Svijetlo-plava Četka
+Lime_Brush.name=Limeta Četka
+Long_Suspended_Lamp_Socket.name=Duga viseća lampa
+Low_Power_Receiver_Antenna.name=Slaba Antena za Primanje
+Low_Power_Transmitter_Antenna.name=Slaba Antena za Odašiljanje
+Low_Voltage_Cable.name=Vodič s niskim naponom
+Low_Voltage_Relay.name=Relaj s niskim naponom
+Low_Voltage_Switch.name=Prekidač za niski napon
 Lowpass_filter.name=Lowpass filter
-Machine_Block.name=Machine blok
-Machine_Booster.name=Machine booster
-Magenta_Brush.name=Magenta borstel
+Machine_Block.name=Blok za Strojeve
+Machine_Booster.name=Mašinski Pojačavač
+Magenta_Brush.name=Purpurnocrvena Četka
 Medium_Fuel_Burner.name=Medium Fuel Burner
-Medium_Power_Receiver_Antenna.name=Midden-vermogen ontvangst-antenne
-Medium_Power_Transmitter_Antenna.name=Midden-vermogen verzend-antenne
-Medium_Voltage_Cable.name=Middenspanning kabel
-Medium_Voltage_Relay.name=Middenspanning relais
-Medium_Voltage_Switch.name=Middenspanning schakelaar
-Mercury.name=Kwik
-Mining_Pipe.name=Mijn buis
-Modbus_RTU.name=Modbus RTU
-Modern_Data_Logger.name=Modern Data Logger
-Monster_Filter.name=Monster filter
-MultiMeter.name=Multimeter
-NAND_Chip.name=NAND Chip
-NOR_Chip.name=NOR Chip
-NOT_Chip.name=NOT Chip
-Nuclear_Alarm.name=Nucleair alarm
-OR_Chip.name=OR Chip
+Medium_Power_Receiver_Antenna.name=Srednja Antena za Primanje
+Medium_Power_Transmitter_Antenna.name=Srednja Antena za Odašiljanje
+Medium_Voltage_Cable.name=Vodič sa srednjim naponom
+Medium_Voltage_Relay.name=Relej sa srednjim naponom
+Medium_Voltage_Switch.name=Prekidač za srednji napon
+Mercury.name=Živa
+Mining_Pipe.name=Cijev za kopanje
+Modbus_RTU.name=Modbus DTJ
+Modern_Data_Logger.name=Moderni Podatkovni Ispisivač
+Monster_Filter.name=Filter za čudovišta
+MultiMeter.name=Multimetar
+NAND_Chip.name=NAND Čip
+NOR_Chip.name=NOR Čip
+NOT_Chip.name=NOT Čip
+Nuclear_Alarm.name=Nuclear Alarm
+OR_Chip.name=OR Čip
 On_OFF_Regulator_10_Percent.name=On/off regulator 10%
 On_OFF_Regulator_1_Percent.name=On/off regulator 1%
 OpAmp.name=OpAmp
-Optimal_Ferromagnetic_Core.name=Optimale ferromagnetische kern
-Orange_Brush.name=Orange borstel
-Ore_Scanner.name=Grondstof scanner
+Optimal_Ferromagnetic_Core.name=Optimalna Feromagnetska Jezgra
+Orange_Brush.name=Narančasta Četka
+Ore_Scanner.name=Skener rude
 Oscillator_Chip.name=Oscillator Chip
-Overheating_Protection.name=Oververhitting beveiliging
-Overvoltage_Protection.name=Overvoltage beveiliging
-PAL_Chip.name=PAL Chip
+Overheating_Protection.name=Overheating Protection
+Overvoltage_Protection.name=Overvoltage Protection
+PAL_Chip.name=PAL Čip
 PID_Regulator.name=PID Regulator
-Pink_Brush.name=Roze borstel
-Player_Filter.name=Speler filter
-Portable_Battery.name=Draagbare batterij
-Portable_Battery_Pack.name=Draagbaar batterijpakket
-Portable_Condensator.name=Draagbare condensator
-Portable_Condensator_Pack.name=Draagbaar condensatorpakket
-Portable_Electrical_Axe.name=Draagbare elektrische bijl
-Portable_Electrical_Mining_Drill.name=Draagbare elektrische boormachine
-Power_Capacitor.name=Vermogencondensator
-Power_Inductor.name=Vermogenspoel
-Power_Resistor.name=Vermogenweerstand
+Pink_Brush.name=Roza Četka
+Player_Filter.name=Filter za igrače
+Portable_Battery.name=Prijenosna Baterija
+Portable_Battery_Pack.name=Prijesni paket baterija
+Portable_Condensator.name=Portable Capacitor
+Portable_Condensator_Pack.name=Portable Capacitor Pack
+Portable_Electrical_Axe.name=Prijesna Električna sjekira
+Portable_Electrical_Mining_Drill.name=Prijenosna Električna Bušilica
+Power_Capacitor.name=Električni Kondenzator
+Power_Inductor.name=Inductor za struju
+Power_Resistor.name=Otpornik
 Power_capacitor.name=Power capacitor
 Power_inductor.name=Power inductor
-Purple_Brush.name=Paarse borstel
-Red_Brush.name=Rode borstel
-Redstone-to-Voltage_Converter.name=Redstone-naar-spanning omzetter
-Rheostat.name=Potentiometer
-Robust_Lamp_Socket.name=Robuuste lamphouder
-Rubber.name=Rubber
+Purple_Brush.name=Ljubičasta Četka
+Red_Brush.name=Crvena Četka
+Redstone-to-Voltage_Converter.name=Redstone-na-Napon Pretvarač
+Rheostat.name=Reostat
+Robust_Lamp_Socket.name=Osnažena lampa
+Rubber.name=Guma
 Sample_and_hold.name=Sample and hold
 Scanner.name=Scanner
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
-Signal_20H_inductor.name=Signal 20H inductor
-Signal_Antenna.name=Signaal antenne
-Signal_Button.name=Signaal drukknop
-Signal_Cable.name=Signaal kabel
-Signal_Diode.name=Signaal diode
-Signal_Processor.name=Signaal processor
-Signal_Relay.name=Signaal relais
-Signal_Source.name=Signaal bron
-Signal_Switch.name=Signaal schakelaar
-Signal_Switch_with_LED.name=Signaal schakelaar met LED
-Signal_Trimmer.name=Signal Trimmer
-Silicon_Dust.name=Silicium stof
-Silicon_Ingot.name=Silicium staaf
-Silicon_Plate.name=Siliconen plaat
-Silver_Brush.name=Zilveren borstel
-Simple_Lamp_Socket.name=Simpele lamphouder
-Single-use_Battery.name=Niet oplaadbare batterij
-Small_200V_Copper_Heating_Corp.name=Kleine 200V koper verwarmingselement
-Small_200V_Iron_Heating_Corp.name=Kleine 200V ijzer verwarmingselement
-Small_200V_Tungsten_Heating_Corp.name=Kleine 200V wolfraam verwarmingselement
-Small_50V_Carbon_Incandescent_Light_Bulb.name=Kleine 50V koolstof gloeilamp
+Signal_20H_inductor.name=Signalni 20H Induktor
+Signal_Antenna.name=Signalna Antena
+Signal_Button.name=Signalni Gumb
+Signal_Cable.name=Signalna žica
+Signal_Diode.name=Signalna Dioda
+Signal_Processor.name=Signalni Procesor
+Signal_Relay.name=Signalni Relej
+Signal_Source.name=Signalni Izvor
+Signal_Switch.name=Signalni Prekidač
+Signal_Switch_with_LED.name=Signalni Prekidač sa LEDom
+Signal_Trimmer.name=Signalni Trimer
+Silicon_Dust.name=Silicijska Prašina
+Silicon_Ingot.name=Komad Silicija
+Silicon_Plate.name=Silicijska Ploča
+Silver_Brush.name=Srebrena Četka
+Simple_Lamp_Socket.name=Jednostavna Lampa
+Single-use_Battery.name=Jednokratna Baterija
+Small_200V_Copper_Heating_Corp.name=Small 200V Copper Heating Corp
+Small_200V_Iron_Heating_Corp.name=Small 200V Iron Heating Corp
+Small_200V_Tungsten_Heating_Corp.name=Small 200V Tungsten Heating Corp
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Mala 50V Žarulja s ugljenom niti
 Small_50V_Copper_Heating_Corp.name=Small 50V Copper Heating Corp
-Small_50V_Economic_Light_Bulb.name=Kleine 50V Spaarlamp
-Small_50V_Incandescent_Light_Bulb.name=Small 50V Incandescent Light Bulb
+Small_50V_Economic_Light_Bulb.name=Mala 50V Ekonomska žarulja
+Small_50V_Incandescent_Light_Bulb.name=Mala 50V Klasična žarulja
 Small_50V_Iron_Heating_Corp.name=Small 50V Iron Heating Corp
 Small_50V_Tungsten_Heating_Corp.name=Small 50V Tungsten Heating Corp
-Small_Active_Thermal_Dissipator.name=Small Active Thermal Dissipator
-Small_Flashlight.name=Small Flashlight
+Small_Active_Thermal_Dissipator.name=Mali aktivni ventilator
+Small_Flashlight.name=Mala baterija
 Small_Fuel_Burner.name=Small Fuel Burner
-Small_Passive_Thermal_Dissipator.name=Small Passive Thermal Dissipator
-Small_Rotating_Solar_Panel.name=Small Rotating Solar Panel
-Small_Solar_Panel.name=Small Solar Panel
-Solar_Tracker.name=Solar Tracker
-Standard_Alarm.name=Standard Alarm
-Steam_Turbine.name=Steam Turbine
-Stone_Heat_Furnace.name=Stone Heat Furnace
-Street_Light.name=Streetlight
-Suspended_Lamp_Socket.name=Suspended Lamp Socket
+Small_Passive_Thermal_Dissipator.name=Mali pasivni ventilator
+Small_Rotating_Solar_Panel.name=Mala rotirajuća solarna ploča
+Small_Solar_Panel.name=Mala solarna ploča
+Solar_Tracker.name=Solarni Tragač
+Standard_Alarm.name=Standarni Alarm
+Steam_Turbine.name=Parna Turbina
+Stone_Heat_Furnace.name=Kamena Toplinska peć
+Street_Light.name=Ulična rasvjeta
+Suspended_Lamp_Socket.name=Viseća lampa
 Tachometer.name=Tachometer
-Temperature_Probe.name=Temperature Probe
-Thermal_Probe.name=Thermal Probe
-Thermal_Probe_Chip.name=Thermal Probe Chip
-Thermistor.name=Thermistor
+Temperature_Probe.name=Sonda za temperaturu
+Thermal_Probe.name=Toplinska sonda
+Thermal_Probe_Chip.name=Čip za toplinsku sondu
+Thermistor.name=Termistor
 Thermometer.name=Thermometer
-Tree_Resin.name=Tree Resin
-Tree_Resin_Collector.name=Tree Resin Collector
-Tungsten_Cable.name=Tungsten Cable
-Tungsten_Dust.name=Tungsten Dust
-Tungsten_Ingot.name=Tungsten Ingot
-Tungsten_Ore.name=Tungsten Ore
-Tutorial_Sign.name=Tutorial Sign
-Very_High_Voltage_Cable.name=Very High Voltage Cable
-Very_High_Voltage_Relay.name=Very High Voltage Relay
-Very_High_Voltage_Switch.name=Very High Voltage Switch
-Voltage-to-Redstone_Converter.name=Voltage-to-Redstone Converter
-Voltage_Oriented_Battery.name=Voltage Oriented Battery
-Voltage_Probe.name=Voltage Probe
+Tree_Resin.name=Smola
+Tree_Resin_Collector.name=Skupljač smole
+Tungsten_Cable.name=Vodič od Volframa
+Tungsten_Dust.name=Volframska Prašina
+Tungsten_Ingot.name=Komad Volframa
+Tungsten_Ore.name=Ruda Volframa
+Tutorial_Sign.name=Znak za tutorijal
+Very_High_Voltage_Cable.name=Vodič s jako visokim naponom
+Very_High_Voltage_Relay.name=Relaj s jako visokim naponom
+Very_High_Voltage_Switch.name=Prekidač za jako visoki napon
+Voltage-to-Redstone_Converter.name=Napon-na-Redstone Pretvarač
+Voltage_Oriented_Battery.name=Baterija namijenjena za napon
+Voltage_Probe.name=Mjerna sonda za napon
 Voltage_controlled_amplifier.name=Voltage controlled amplifier
 Voltage_controlled_sawtooth_oscillator.name=Voltage controlled sawtooth oscillator
 Voltage_controlled_sine_oscillator.name=Voltage controlled sine oscillator
-Water_Turbine.name=Water Turbine
-Weak_50V_Battery_Charger.name=Weak 50V Battery Charger
-White_Brush.name=White Brush
-Wind_Turbine.name=Wind Turbine
-Wireless_Analyser.name=Wireless Analyzer
-Wireless_Button.name=Wireless Button
-Wireless_Signal_Receiver.name=Wireless Signal Receiver
-Wireless_Signal_Repeater.name=Wireless Signal Repeater
-Wireless_Signal_Transmitter.name=Wireless Signal Transmitter
-Wireless_Switch.name=Wireless Switch
-Wrench.name=Wrench
-X-Ray_Scanner.name=X-Ray Scanner
-XNOR_Chip.name=XNOR Chip
-XOR_Chip.name=XOR Chip
-Yellow_Brush.name=Yellow Brush
+Water_Turbine.name=Vodena Turbina
+Weak_50V_Battery_Charger.name=Slabi 50V Punjač Baterije
+White_Brush.name=Bijela Četka
+Wind_Turbine.name=Vjetrenjača
+Wireless_Analyser.name=Bežični Analizer
+Wireless_Button.name=Bežični Gumb
+Wireless_Signal_Receiver.name=Bežični Primatelj Signala
+Wireless_Signal_Repeater.name=Bežični ponavljač signala
+Wireless_Signal_Transmitter.name=Bežični odašiljač signala
+Wireless_Switch.name=Bežični prekidač
+Wrench.name=Ključ
+X-Ray_Scanner.name=Rendgenski Skener
+XNOR_Chip.name=XNOR Čip
+XOR_Chip.name=XOR Čip
+Yellow_Brush.name=Žuta Četka
 entity.EAReplicator.name=Replicator
 item.Copper Axe.name=Copper Axe
 item.Copper Axe.name=Copper Axe
@@ -310,32 +310,32 @@ item.E-Coal Boots.name=E-Coal Boots
 item.E-Coal Boots.name=E-Coal Boots
 item.E-Coal Boots.name=E-Coal Boots
 item.E-Coal Boots.name=E-Coal Boots
-itemGroup.Eln=Electrical Age
-mod.meta.desc=Electricity in your base!
+itemGroup.Eln=Električno Doba
+mod.meta.desc=Struja u tvojoj bazi!
 tile.eln.ElnProbe.name=Eln Computer Probe
 tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age to other energy exporter
 tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age to other energy exporter
 tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other energy exporter
 
 # ./src/main/java/mods/eln/i18n/I18N.java
-You_have_%1$_lives_left=You have %1$ lives left
+You_have_%1$_lives_left=Preostalo ti je %1$ života
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.kt
-Brush_is_dry=Kwast is droog
-Can_paint_%1$_blocks=Can paint %1$ blocks
+Brush_is_dry=Četka je suha
+Can_paint_%1$_blocks=Može obojati %1$ blokova
 
 # ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
 Can_be_used_to_encase_EA_items_that_support_it=Can be used to encase EA items that support it
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
-Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
+Upgrade_for_the_Stone_Heat_Furnace.=Nadogradnja za kamenu toplinsku peć
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Energie per handeling: %1$s
+Energy_per_operation\:_%1$J=Energija po operaciji: %1$J
 Time_per_operation\:_%1$h=Time per operation: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Cable loss factor: %1$
+Cable_loss_factor\:_%1$=Faktor gubitka kod kabela: %1$
 
 # ./src/main/java/mods/eln/item/FuelBurnerDescriptor.kt
 Burn_unit_for_the_gas_heat_furnace.=Burn unit for the gas heat furnace.
@@ -344,14 +344,14 @@ Produced_heat_power\:_=Produced heat power:
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
 # ./src/main/java/mods/eln/item/LampDescriptor.java
-Bad=Bad
-Condition\:=Condition:
-End_of_life=End of life
-Good=Good
-New=New
-Nominal_lifetime\:_%1$h=Nominal lifetime: %1$h
-Technology\:_%1$=Technology: %1$
-Used=Used
+Bad=Loše
+Condition\:=Stanje:
+End_of_life=Kraj života
+Good=Dobro
+New=Novo
+Nominal_lifetime\:_%1$h=Nazivni rok trajanja: %1$h
+Technology\:_%1$=Tehnologija: %1$
+Used=Korišteno
 
 # ./src/main/java/mods/eln/item/LampSlot.java
 Lamp_slot=Lamp slot
@@ -363,13 +363,13 @@ Useful_to_prevent_overheating\nof_Batteries=Useful to prevent overheating\nof Ba
 Useful_to_prevent_over-voltage\nof_Batteries=Useful to prevent over-voltage\nof Batteries
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
-Solar_panel_upgrade=Solar panel upgrade
+Solar_panel_upgrade=Nadogradnja za Solarnu ploču
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
-State\:=State:
-Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+State\:=Stanje:
+Stored_Energy\:_%1$J_(%2$%)=Spremljena Energija: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -378,10 +378,10 @@ Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
 Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
-Hold_shift=Hold shift
+Hold_shift=Drži SHIFT
 
 # ./src/main/java/mods/eln/misc/Version.java
-mod.name=Electrical Age
+mod.name=Električno Doba
 
 # ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
 
@@ -436,7 +436,7 @@ Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntim
 This_block_can_only_be_placed_on_the_side_of_a_tree!=This block can only be placed on the side of a tree!
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
-Battery_slot=Battery slot
+Battery_slot=Mjesto za bateriju
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
@@ -460,8 +460,8 @@ Engaged=Engaged
 Input_Voltage=Input Voltage
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
-Sound_is_muted=Sound is muted
-Sound_is_not_muted=Sound is not muted
+Sound_is_muted=Zvuk je isključen
+Sound_is_not_muted=Zvuk je uključen
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
@@ -480,7 +480,7 @@ Switch_is_on=Switch is on
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
 A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
 Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
-Current\:_%1$A=Current: %1$A
+Current\:_%1$A=Struja: %1$A
 Not_adapted_to_transport_power.=Not adapted to transport power.
 Save_usage\:=Save usage:
 Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
@@ -489,24 +489,24 @@ Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
 Signal_Voltage=Signal Voltage
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
-It_can_store_up_to_256_points.=It can store up to 256 points.
+It_can_store_up_to_256_points.=Može spremiti do 256 poena.
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
 Back_to_display=Back to display
-Configuration=Configuration
-Current_[A]=Current [A]
-Energy_[J]=Energy [J]
+Configuration=Konfiguracija
+Current_[A]=Jakost struje [A]
+Energy_[J]=Energija [J]
 Percent_[-]%=Percent [-]%
-Power_[W]=Power [W]
+Power_[W]=Snaga [W]
 Print=Print
 Sampling_period=Sampling period
-Temp._[*C]=Temp. [*C]
-Voltage_[V]=Voltage [V]
-Y-axis_max=Y-as maximum
-Y-axis_min=Y-as minimum
+Temp._[*C]=Temperatura  [*C]
+Voltage_[V]=Napon [V]
+Y-axis_max=Y-axis max
+Y-axis_min=Y-axis min
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
@@ -523,7 +523,7 @@ Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Battery powered buzzer \
 Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
-Fire_detected\:_=Vuur gedetecteerd:
+Fire_detected\:_=Vatra detektirana:
 Fire_present=Fire present
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
@@ -543,9 +543,9 @@ Light_level=Light level
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-Applicable_boolean_operators\:=Applicable boolean operators:
+Applicable_boolean_operators\:=Primjenjivi boolean operatori:
 Applicable_functions\:=Applicable functions:
-Applicable_mathematical_operators\:=Applicable mathematical operators:
+Applicable_mathematical_operators\:=Primjenjivi matematički operatori:
 Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathElement.java
@@ -583,7 +583,7 @@ Normally_open=Normally open
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
 Measures_electrical_values_on_cables.=Measures electrical values on cables.
-Measures_voltage_on_cables.=Measures voltage on cables.
+Measures_voltage_on_cables.=Mjeri napon na kablovima
 
 # ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
 Measured_current=Measured current
@@ -595,7 +595,7 @@ Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nt
 Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
-Creative_block.=Creative block.
+Creative_block.=Blok iz Kreativa.
 Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
@@ -609,7 +609,7 @@ Output=Output
 Remaining=Remaining
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
-Set=Set
+Set=Postavi
 The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kept high.
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
@@ -624,7 +624,7 @@ Storm\:_%1$V=Storm: %1$V
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
 Maximum_wind_speed_is_%1$m_s=Maximum wind speed is %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
-You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
+You_can't_place_this_block_on_the_floor_or_the_ceiling=Ne možeš postaviti taj blok na strop ili pod
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
 Counter=Counter
@@ -633,20 +633,20 @@ Mode=Mode
 Prepay=Prepay
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
-Change_password=Change password
+Change_password=Promijenite lozinku
 Counter_Mode=Counter Mode
 Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
 Energy_counter\:_%1$J=Energy counter: %1$J
 Enter_new_energy=Enter new energy
-Enter_password=Enter password
+Enter_password=Unesite lozinku
 Prepay_Mode=Prepay Mode
 Reset_time_counter=Reset time counter
 Set_energy_counter=Set energy counter
 Time_counter\:=Time counter:
-Try_password=Try password
+Try_password=Pokušaj lozinku
 You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.
-is_off=is off
-is_on=is on
+is_off=je ugašeno
+is_on=je upaljeno
 value_in_kJ=value in kJ
 
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
@@ -679,8 +679,8 @@ Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
 Total_power=Total power
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
-Power_channel_name=Stroom kanaal naam
-Wireless_channel_name=Draadloze kanaal naam
+Power_channel_name=Power channel name
+Wireless_channel_name=Ime za bežični kanal
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
 Modbus_TCP=Modbus TCP
@@ -688,17 +688,17 @@ Modbus_Unit_ID=Modbus Unit ID
 Modbus_is_disabled,_enable_it_in_Eln.cfg=Modbus is disabled, enable it in Eln.cfg
 
 # ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
-Add=Toevoegen
-Channel_name=Kanaal naam
+Add=Dodaj
+Channel_name=Ime kanala
 Modbus_ID=Modbus ID
 Modbus_RTU=Modbus RTU
-Station_ID=Station ID
-Station_name=Station naam
-Wireless_RX=Draadloze RX
-Wireless_TX=Draadloze TX
+Station_ID=ID Stanice
+Station_name=Ime stanice
+Wireless_RX=Wireless RX
+Wireless_TX=Wireless TX
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
-(Increases_maximum_voltage)=(Verhoogt maximale voltage)
+(Increases_maximum_voltage)=(Increases maximum voltage)
 
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
 Capacity=Capacity
@@ -719,7 +719,7 @@ Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in wit
 Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
-(Sets_resistance)=(Zet weerstand)
+(Sets_resistance)=(Postavlja otpor)
 Coal_dust_slot=Coal dust slot
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
@@ -737,8 +737,8 @@ Thermic_power=Thermic power
 Cable_slot=Cable slot
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
-Can_measure\:=Can measure:
-Measures_temperature_of_cables.=Meet de temperatuur van kabels.
+Can_measure\:=Može mjeriti:
+Measures_temperature_of_cables.=Mjeri temperaturu žica
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
 __Temperature_Power_conducted=Temperature/Power conducted
 
@@ -760,9 +760,9 @@ Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Fuel_level=Fuel level
-Nominal_power\:_%1$_W=Nominal power: %1$ W
-Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
-Produces_electricity_using_gasoline.=Produces electricity using gasoline.
+Nominal_power\:_%1$_W=Nazivna snaga: %1$ W
+Nominal_voltage\:_%1$_V=Nazivni napon: %1$ V
+Produces_electricity_using_gasoline.=Proizvodi struju koristeći benzin
 State=State
 
 # ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
@@ -777,12 +777,12 @@ Set_point\:_%1$=Set point: %1$
 __Max._temperature\:_=  Max. temperature:
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Nom. Resistance: %1$
+Nom._Resistance\:_%1$=Nazivni otpor: %1$
 Power_loss=Power loss
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Drill slot
-Mining_pipe_slot=Mining pipe slot
+Mining_pipe_slot=Mjesto za cijev za bušenje
 Ore_scanner_slot=Ore scanner slot
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
@@ -795,11 +795,11 @@ Silk_touch=Silk touch
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
 Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner!
 Halves_speed,_triples_power_draw=Halves speed, triples power draw
-Silk_Touch=Silk Touch
+Silk_Touch=Dodir svile
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
-Overheating_protection=Oververhittingsbeveiliging
-Overvoltage_protection=Overspanningsbeveiliging
+Overheating_protection=Zaštita protiv visoke temperature
+Overvoltage_protection=Zaštita protiv napon
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
 Actual_charge\:_=Actual charge:
@@ -811,23 +811,23 @@ Nominal_voltage\:_=Nominal voltage:
 _charged_at_=charged at
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
-Charged=Geladen
-Discharge=Ontladen
-Energy\:=Energie:
-Energy\:_%1$=Energie: %1$
-Life\:=Life:
-No_charge=Geen lading
-Power_in\:=Stroom in:
-Power_out\:=Stroom uit:
+Charged=Napunjeno
+Discharge=Prazni
+Energy\:=Energija:
+Energy\:_%1$=Energija: %1$
+Life\:=Život:
+No_charge=Nema naboja
+Power_in\:=Dolaz snage:
+Power_out\:=Izlaz snage:
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
-Egg_slot=Egg slot
+Egg_slot=Mjesto za jaje
 
 # ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorElement.java
 Has_egg=Has egg
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
-Wireless_energy_receiver.=Wireless energy receiver.
+Wireless_energy_receiver.=Bežični primatelj energije.
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxElement.java
 Effective_power=Effective power
@@ -835,8 +835,8 @@ Power_received=Power received
 Receiving=Receiving
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=Efficiency: %1$% up to %2$%
-Wireless_energy_transmitter.=Wireless energy transmitter.
+Efficiency\:_%1$%_up_to_%2$%=Učinkovitost: %1$% sve do %2$%
+Wireless_energy_transmitter.=Bežični odašiljač energije.
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxElement.java
 Efficiency=Efficiency
@@ -852,28 +852,28 @@ Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla 
 Heating_element=Heating element
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
-Auto_shutdown=Automatische uitschakeling
-Manual_shutdown=Handmatige uitschakeling
-Set_point\:_%1$°C=Zet punt: %1$°C
+Auto_shutdown=Automatsko gašenje
+Manual_shutdown=Ručno gašenje
+Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
-Cost=Kosten
+Cost=Cost
 Nominal_voltage\:_%1V$=Nominal voltage: %1V$
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
 Power_provided=Power provided
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
-Combustion_chamber_slot=Combustion chamber slot
-Fuel_slot=Fuel slot
+Combustion_chamber_slot=Mjesto za komoru za izgaranje
+Fuel_slot=Mjesto za gorivo
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
 Set_temperature=Set temperature
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
 Control_gauge_at_%1$%=Control gauge at %1$%
-Decline_fuel=Decline fuel
-Take_fuel=Take fuel
+Decline_fuel=Izbaci gorivo
+Take_fuel=Uzmi gorivo
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Increases maximal voltage)
@@ -882,10 +882,10 @@ Take_fuel=Take fuel
 Solar_tracker_slot=Solar tracker slot
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
-Can_be_geared_towards_the_sun.=Can be geared towards the sun.
+Can_be_geared_towards_the_sun.=Može biti usmjereno prema suncu.
 Max._power\:_%1$W=Max. power: %1$W
 Max._voltage\:_%1$V=Max. voltage: %1$V
-Produces_power_from_solar_radiation.=Produces power from solar radiation.
+Produces_power_from_solar_radiation.=Stvara snagu iz solarne radijacije.
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelElement.java
 Panel_angle=Panel angle
@@ -893,9 +893,9 @@ Producing_energy=Producing energy
 Sun_angle=Sun angle
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
-It_is_night=Het is nacht
-Solar_panel_angle\:_%1$°=Hoek van het zonnepaneel: %1$°
-Sun_angle\:_%1$°=Hoek van de zon: %1$°
+It_is_night=Sada je noć
+Solar_panel_angle\:_%1$°=Solar panel angle: %1$°
+Sun_angle\:_%1$°=Sun angle: %1$°
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
 Destination=Destination
@@ -904,16 +904,16 @@ Required_energy=Required energy
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Destination transporter
-Power_consumption\:=Stroom gebruik:
-Power_consumption\:_%1$W=Stroom gebruik: %1$W
-Required_energy\:_%1$J=Benodigde energie: %1$J
-Start=Begin
+Power_consumption\:=Potrošnja struje:
+Power_consumption\:_%1$W=Potrošnja struje: %1$W
+Required_energy\:_%1$J=Potrebna energija: %1$J
+Start=Početak
 Transporter_name=Transporter name
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
-Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
-Fan_voltage\:_%1$V=Fan voltage: %1$V
+Fan_cooling_power\:_%1$W=Snaga hlađenja ventilatora: %1$W
+Fan_power_consumption\:_%1$W=Potrošnja struje kod ventilatora: %1$W
+Fan_voltage\:_%1$V=Napon ventilatora: %1$V
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
 
@@ -930,17 +930,17 @@ Isolated=Isolated
 Ratio=Ratio
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
-Generates_electricity_using_heat.=Generates electricity using heat.
-Temperature_difference\:_%1$°C=Temperature difference: %1$°C
+Generates_electricity_using_heat.=Proizvodi sruju koristeći toplinu.
+Temperature_difference\:_%1$°C=Razlika u temperaturi: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=Nominal
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
-CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
-Laser_charge_power\:_%1$W...%2$kW=Laser charge power: %1$W...%2$kW
+CAUTION\:_Cables_can_get_quite_hot!=OPREZ: Kablovi mogu postati jako vrući!
+Laser_charge_power\:_%1$W...%2$kW=Naboj energije kod lasera: %1$W...%2$kW 
 Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
-Standby_power\:_%1$W=Standby power: %1$W
+Standby_power\:_%1$W=Snaga u stanju mirovanja: %1$W
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
 ??=??
@@ -954,104 +954,104 @@ monsters=monsters
 players=players
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
-Attack\:=Aanvallen:
-Do_not_attack\:=Niet aanvallen:
+Attack\:=Napada:
+Do_not_attack\:=Ne napada:
 Recharge_power\:=Recharge power:
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
-Generates_energy_using_water_stream.=Generates energy using water stream.
-No_place_for_water_turbine!=No place for water turbine!
+Generates_energy_using_water_stream.=Proizvodi struju koristeći brzinu vode.
+No_place_for_water_turbine!=Nema mjesta za vodenu turbinu!
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=Front: %1$
-Generates_energy_from_wind.=Generates energy from wind.
+Front\:_%1$=Prednja: %1$
+Generates_energy_from_wind.=Proizvodi struju koristeći vjetar.
 Left_Right\:_%1$=Left/Right: %1$
 Up_Down\:_%1$=Up/Down: %1$
-Wind_area\:=Wind area:
+Wind_area\:=Područje vjetra:
 
 # ./src/main/java/mods/eln/wiki/Data.java
-Light=Licht
-Machine=Machine
-Ore=Erts
-Portable=Draagbaar
-Resource=Middel
-Signal=Signaal
-Thermal=Thermal
-Upgrade=Upgrade
+Light=Svjetlost
+Machine=Stroj
+Ore=Ruda
+Portable=Prijenosno
+Resource=Resurs
+Signal=Signal
+Thermal=Toplinsko
+Upgrade=Nadogradnja
 Utilities=Utilities
-Wiring=Bedrading
+Wiring=Spajanje
 
 # ./src/main/java/mods/eln/wiki/Default.java
-Previous=Vorige
+Previous=Prethodni:
 
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
-Can_be_used_to_craft\:=Can be used to craft:
-Cannot_be_crafted!=Cannot be crafted!
-Cost_%1$J=Kost %1$J
-Created_by\:=Gemaakt door:
-Is_not_a_crafting_material!=Is not a crafting material!
+Can_be_used_to_craft\:=Može se koristiti za kraftanje:
+Cannot_be_crafted!=Ne može se kraftati!
+Cost_%1$J=Cost %1$J
+Created_by\:=Napravio:
+Is_not_a_crafting_material!=Nije materijal za kraftanje!
 Recipe\:=Recept:
 
 # Appearing in multiple source files
 %1$_is_not_in_range!=%1$ is not in range!
-(Increases_capacity)=(Vergroot capaciteit)
-(Increases_inductance)=(Verhoogt inductie)
+(Increases_capacity)=(Povećava kapacitet)
+(Increases_inductance)=(Increases inductance)
 Actual\:_%1$°C=Actual: %1$°C
 Battery_level=Battery level
-Biggest=Grootste
+Biggest=Najveći
 Booster_slot=Booster slot
-Can_create\:=Can create:
-Capacity\:_%1$F=Capaciteit: %1$F
+Can_create\:=Može napraviti:
+Capacity\:_%1$F=Capacity: %1$F
 Channel=Channel
-Charge=Laden
+Charge=Puni
 Charge_power=Charge power
 Charge_power\:_%1$W=Charge power: %1$W
 Closed=Closed
-Connected=Verbonden
+Connected=Spojeno
 Cooling_power\:_%1$W=Cooling power: %1$W
 Copper_cable_slot=Copper cable slot
-Current=Current
+Current=Struja
 Dielectric_slot=Dielectric slot
 Discharge_power\:_%1$W=Discharge power: %1$W
 Electrical_cable_slot=Electrical cable slot
-Energy=Energie
+Energy=Energija
 Entity_filter_slot=Entity filter slot
-External_control=External control
+External_control=Vanjska kontrola
 Ferromagnetic_core_slot=Ferromagnetic core slot
 Generated_power=Generated power
-Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
+Generates_heat_when_supplied_with_fuel.=Stvara toplinu kada se opskrbi sa gorivom.
 Generating=Generating
 Has_a_signal_output.=Has a signal output.
-Inductance\:_%1$H=Inductie: %1$H
+Inductance\:_%1$H=Inductance: %1$H
 Input=Input
 Input_voltage=Input voltage
-Internal_control=Interne controle
+Internal_control=Unutarnja kontrola
 Internal_resistance\:_%1$\u2126=Internal resistance: %1$\u2126
-Is_off=Is off
-Is_on=Is on
+Is_off=Je ugašeno
+Is_on=Je upaljeno
 Life=Life
 Max._temperature\:_%1$°C=Max. temperature: %1$°C
 Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
 Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
 No=No
 Nominal\:=Nominal:
-Nominal_power\:_%1$W=Nominal power: %1$W
+Nominal_power\:_%1$W=Nazivna snaga: %1$W
 Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
 None=None
-Not_connected=Niet verbonden
+Not_connected=Nije spojeno
 Not_enough_space_for_this_block=Not enough space for this block
 OFF=OFF
 ON=ON
-Off=Off
-On=On
+Off=Ugašeno
+On=Upaljeno
 Open=Open
-Output_voltage=Output voltage
+Output_voltage=Izlazni napon
 Portable_battery_slot=Portable battery slot
 Position=Position
-Power=Power
+Power=Snaga
 Power\:_%1$W=Power: %1$W
 Power_consumption=Power consumption
 Powered_by_Lamp_Supply=Powered by Lamp Supply
@@ -1061,27 +1061,27 @@ Range\:_%1$_blocks=Range: %1$ blocks
 Redstone_slot=Redstone slot
 Redstone_value=Redstone value
 Regulator_slot=Regulator slot
-Reset=Reset
+Reset=Resetiraj
 Resistance=Resistance
 Resistance\:_%1$\u2126=Resistance: %1$\u2126
-Smallest=Kleinste
-Specify_the_channel=Specificeer het kanaal
+Smallest=Najmanji
+Specify_the_channel=Odaberite kanal
 Specify_the_supply_channel=Specify the supply channel
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
-Temperature=Temperatuur
+Temperature=Temperatura
 Temperature\:_%1$°C=Temperature: %1$°C
-Temperature_gauge=Temperatuurmeter
+Temperature_gauge=Temperature gauge
 Thermal_isolator_slot=Thermal isolator slot
 Thermal_power=Thermal power
-Toggle=Schakel
-Toggle_switch=Schakel schakelaar
+Toggle=Uključi
+Toggle_switch=Toggle switch
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
 Used_to_cool_down_turbines.=Used to cool down turbines.
 Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
 Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
 Validate=Validate
-Voltage=Voltage
-Voltage\:_%1$V=Voltage: %1$V
+Voltage=Napon
+Voltage\:_%1$V=Napon: %1$V
 Voltage_drop=Voltage drop
 Voltages=Voltages
 Yes=Yes
