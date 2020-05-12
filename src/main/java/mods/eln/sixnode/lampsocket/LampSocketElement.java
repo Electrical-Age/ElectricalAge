@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.eventhandlers.MonsterEventHandler;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
@@ -15,7 +16,6 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.MonsterPopFreeProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -37,7 +37,6 @@ public class LampSocketElement extends SixNodeElement {
 
     LampSocketDescriptor socketDescriptor = null;
 
-    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, Eln.instance.killMonstersAroundLampsRange);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 
     public LampSocketProcess lampProcess = new LampSocketProcess(this);
@@ -64,13 +63,13 @@ public class LampSocketElement extends SixNodeElement {
 
     public int paintColor = 15;
 
+
     public LampSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         this.socketDescriptor = (LampSocketDescriptor) descriptor;
 
         lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
         slowProcessList.add(lampProcess);
-        slowProcessList.add(monsterPopFreeProcess);
     }
 
 
@@ -100,6 +99,9 @@ public class LampSocketElement extends SixNodeElement {
             //Of course, maps need to be loaded with this code before set an already existing lamp paintable.
             paintColor = 0x0F;
         }
+
+        // Monster block stuff:
+        lampProcess.monsterBlockTicksWhilePowerLoss = nbt.getInteger("mbpl");
     }
 
     @Override
@@ -109,6 +111,8 @@ public class LampSocketElement extends SixNodeElement {
         nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
         nbt.setString("channel", channel);
         nbt.setByte("color", (byte) (paintColor));
+        // Monster block stuff:
+        nbt.setInteger("mbpl", lampProcess.monsterBlockTicksWhilePowerLoss);
     }
 
     public void networkUnserialize(DataInputStream stream) {

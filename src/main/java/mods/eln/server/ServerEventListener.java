@@ -5,16 +5,20 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
+import mods.eln.eventhandlers.MonsterEventHandler;
 import mods.eln.item.electricalitem.TreeCapitation;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
@@ -46,9 +50,11 @@ public class ServerEventListener {
     }
 
     @SubscribeEvent
-    public void onNewEntity(EntityConstructing event) {
+    public void onNewEntity(EntityJoinWorldEvent event) {
         if (event.entity instanceof EntityLightningBolt) {
             lightningListNext.add((EntityLightningBolt) event.entity);
+        } else if (event.entity instanceof EntityMob) {
+            MonsterEventHandler.INSTANCE.onSpawn(event);
         }
     }
 
