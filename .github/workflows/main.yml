@@ -1,0 +1,35 @@
+name: Build on Push
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+     
+      - name: Pull Docker Image
+        run: docker pull electricalage/build:main
+
+      - name: Run Docker Container
+        run: |
+          docker run \
+            --rm \
+            -v "$(pwd)":/app \
+            electricalage/build:main
+
+      - name: Search For Jar File
+        run: |
+          ls build/libs
+          ls
+          
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ELN_mod
+          path: build/libs/*.jar

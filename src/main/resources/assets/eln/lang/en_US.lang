@@ -373,7 +373,7 @@ Upgrade_for_the_Stone_Heat_Furnace=Upgrade for the Stone Heat Furnace
 __Heat_tolerance\:=  Heat tolerance:
 __Insulation\:=  Insulation:
 
-# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.kt
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalArmor.kt
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalAxe.kt
 Cuts_down_trees._Right-click_to_make_it_act_like_a_regular_axe.=Cuts down trees. Right-click to make it act like a regular axe.
@@ -385,8 +385,6 @@ Stored_Energy\:_%1\$J_(%2$%)=Stored Energy: %1\$J (%2$%)
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalPickaxe.kt
 Opens_holes._Right-click_to_open_smaller_holes.=Opens holes. Right-click to open smaller holes.
 
-# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
-
 # ./src/main/java/mods/eln/mechanical/Tachometer.kt
 Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
 Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
@@ -397,7 +395,7 @@ Hold_shift=Hold shift
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
-# ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
+# ./src/main/java/mods/eln/node/transparent/TransparentNodeDescriptor.java
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Input power is limited to %1$W
@@ -420,8 +418,6 @@ The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_eac
 
 # ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
 Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
-
-# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
 
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
 A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
@@ -458,8 +454,6 @@ Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nan
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
 Charge_Current=Charge Current
 
-# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
-
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
 
@@ -476,8 +470,6 @@ Input_Voltage=Input Voltage
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
-
-# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
@@ -506,8 +498,6 @@ Signal_Voltage=Signal Voltage
 It_can_store_up_to_256_points.=It can store up to 256 points.
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
-# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
-
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
 Back_to_display=Back to display
 Configuration=Configuration
@@ -521,8 +511,6 @@ Temp._[*C]=Temp. [*C]
 Voltage_[V]=Voltage [V]
 Y-axis_max=Y-axis max
 Y-axis_min=Y-axis min
-
-# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
@@ -554,8 +542,6 @@ Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_dayli
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
 Light_level=Light level
 
-# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
-
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
 Applicable_functions\:=Applicable functions:
@@ -581,8 +567,6 @@ Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
 Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
-
-# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
 A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
@@ -614,6 +598,8 @@ Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides a
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
 Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
@@ -717,14 +703,8 @@ Wireless_TX=Wireless TX
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
 Capacity=Capacity
 
-# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
-
-# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
-
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
 Inductance=Inductance
-
-# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
@@ -735,8 +715,6 @@ Specify_the_device_to_supply_through_this_socket.=Specify the device to supply t
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
 (Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
-
-# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
@@ -771,6 +749,10 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/source/WirelessSignalSourceGui.java
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxElement.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Fuel_level=Fuel level
@@ -823,6 +805,8 @@ Nominal_power\:_=Nominal power:
 Nominal_voltage\:_=Nominal voltage: 
 _charged_at_=charged at 
 
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryElement.java
+
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
 Charged=Charged
 Discharge=Discharge
@@ -869,6 +853,8 @@ Auto_shutdown=Auto shutdown
 Manual_shutdown=Manual shutdown
 Set_point\:_%1$°C=Set point: %1$°C
 
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineContainer.java
+
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
 Nominal_voltage\:_%1V$=Nominal voltage: %1V$
@@ -890,6 +876,12 @@ Take_fuel=Take fuel
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Increases maximal voltage)
+
+# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorGui.java
+
+# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorContainer.java
+
+# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorGui.java
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
 Solar_tracker_slot=Solar tracker slot
@@ -928,7 +920,9 @@ Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
 Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
 
-# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveDescriptor.java
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveElement.java
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
 Casing_slot=Casing slot
@@ -948,6 +942,8 @@ Temperature_difference\:_%1$°C=Temperature difference: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=Nominal
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretContainer.java
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
@@ -975,14 +971,14 @@ Recharge_power\:=Recharge power:
 Generates_energy_using_water_stream.=Generates energy using water stream.
 No_place_for_water_turbine!=No place for water turbine!
 
-# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
-
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
 Front\:_%1$=Front: %1$
 Generates_energy_from_wind.=Generates energy from wind.
 Left_Right\:_%1$=Left/Right: %1$
 Up_Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
+
+# ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineElement.java
 
 # ./src/main/java/mods/eln/wiki/Data.java
 Light=Light

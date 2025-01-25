@@ -120,15 +120,20 @@ class ModbusTcpServer(port: Int = 1502) {
             val quantity = inputBuffer.short
 
             try {
-                // TODO: Support for multiple coils...
+                // multiple coils is not supported in this model...
                 if (quantity == 1.toShort()) {
                     val value = slave.getCoil(address.toInt())
                     response.put(0x01.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
+                } else {
+                    response.put((0x81.toByte())).put(0x03.toByte())
+                    return
                 }
             } catch (e: IllegalAddressException) {
+                response.put((0x81.toByte())).put(0x02.toByte())
+                return
             }
-            response.put((0x81.toByte())).put(0x02.toByte())
+            response.put((0x81.toByte())).put(0x04.toByte())
         }
 
         private fun readDiscreteInputs(slave: IModbusSlave, response: ByteBuffer) {
@@ -136,15 +141,20 @@ class ModbusTcpServer(port: Int = 1502) {
             val quantity = inputBuffer.short
 
             try {
-                // TODO: Support for multiple inputs...
+                // multiple inputs is NOT supported in this model...
                 if (quantity == 1.toShort()) {
                     val value = slave.getInput(address.toInt())
                     response.put(0x02.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
+                } else {
+                    response.put((0x82.toByte())).put(0x03.toByte())
+                    return
                 }
             } catch (e: IllegalAddressException) {
+                response.put((0x82.toByte())).put(0x02.toByte())
+                return
             }
-            response.put((0x82.toByte())).put(0x02.toByte())
+            response.put((0x82.toByte())).put(0x04.toByte())
         }
 
         private fun readInputRegisters(slave: IModbusSlave, response: ByteBuffer) {
@@ -230,7 +240,7 @@ class ModbusTcpServer(port: Int = 1502) {
 
             // check remaining amount of data and writing coils
             if (inputBuffer.remaining().toByte() >= byteCount) {
-                // Wrinting registers...
+                // Writing registers...
                 try {
                     var addr  = address
                     for (i in 1..quantity) {
@@ -265,7 +275,7 @@ class ModbusTcpServer(port: Int = 1502) {
 
             // check remaining amount of data and writing coils
             if (inputBuffer.remaining().toByte() >= byteCount) {
-                // Wrinting registers...
+                // Writing registers...
                 try {
                     var addr  = address
                     for (i in 1..quantity) {
