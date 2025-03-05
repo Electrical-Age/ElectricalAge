@@ -66,14 +66,6 @@ Game lifetime/complexity extended
 Electrical Age is still in **Beta**.
 Use at your own risk and do map backup frequently.
 
-## MAIN DEVELOPERS
-
-- **Dolu1990** (Code guru, concepts, some 3D models)
-- **Svein Ove Aas, aka. Baughn** (Code, some 3D models, concepts)
-- **cm0x4D** (Sound engineer, code and 3D models/texturing, concepts)
-- **lambdaShade** (3D models/texturing/graphics maestro, concepts, some sounds and lines of code)
-- **metc** (Website/Wiki webmaster)
-
 ## MAIN CONTRIBUTORS
 
 Code/models:
