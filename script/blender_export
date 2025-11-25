@@ -1,6 +1,18 @@
 #!/usr/bin/env nix-shell
 #!nix-shell -i bash -p blender
 
-set -e
-cd "$(dirname "$(readlink -f "$0")")"/..
-blender --background --python script/blender_export.py
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f "$0")")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR/.."
+cd "$PROJECT_ROOT"
+
+EXPORT_SCRIPT="script/blender_export.py"
+if [[ ! -f "$EXPORT_SCRIPT" ]]; then
+    echo "Error: $EXPORT_SCRIPT not found." >&2
+    exit 1
+fi
+
+echo "Running Blender export: $EXPORT_SCRIPT"
+
+blender --background --python "$EXPORT_SCRIPT"
