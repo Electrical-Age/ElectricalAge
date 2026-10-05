@@ -69,7 +69,7 @@ public class TransparentNodeBlock extends NodeBlock {
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer entityPlayer, boolean willHarvest) {
         if (!world.isRemote) {
-            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
+            NodeBlockEntity entity = tileAt(world, pos, NodeBlockEntity.class);
             if (entity != null) {
                 NodeBase nodeBase = entity.getNode();
                 if (nodeBase instanceof TransparentNode) {
@@ -87,9 +87,9 @@ public class TransparentNodeBlock extends NodeBlock {
     public int getDamageValue(World world, int x, int y, int z) {
         if (world == null)
             return 0;
-        TileEntity tile = WorldCompat.getTileEntity(world, x, y, z);
-        if (tile != null && tile instanceof TransparentNodeEntity)
-            return ((TransparentNodeEntity) WorldCompat.getTileEntity(world, x, y, z)).getDamageValue(world, x, y, z);
+        TransparentNodeEntity tile = tileAt(world, new BlockPos(x, y, z), TransparentNodeEntity.class);
+        if (tile != null)
+            return tile.getDamageValue(world, x, y, z);
         return 0;
     }
 

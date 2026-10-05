@@ -55,6 +55,18 @@ public abstract class NodeBlock extends Block {//BlockContainer
         return state.getValue(BlockMeta.META);
     }
 
+    /**
+     * The tile entity at pos if it is a {@code type}, else null. 1.12 calls block methods when the TE is gone or not
+     * there yet (/setblock replacing the block: PathWorldListener asks the OLD state for its collision box after the
+     * TE was removed; neighbour updates at chunk edges; a TE that failed to load). Every node block method that needs
+     * its TE goes through this and treats null as "nothing there".
+     */
+    public static <T> T tileAt(IBlockAccess world, BlockPos pos, Class<T> type) {
+        if (world == null || pos == null) return null;
+        TileEntity te = world.getTileEntity(pos);
+        return type.isInstance(te) ? type.cast(te) : null;
+    }
+
     @Override
     public float getBlockHardness(IBlockState state, World par1World, BlockPos pos) {
 
@@ -64,13 +76,15 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
     @Override
     public int getWeakPower(IBlockState state, IBlockAccess block, BlockPos pos, EnumFacing side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(pos);
+        NodeBlockEntity entity = tileAt(block, pos, NodeBlockEntity.class);
+        if (entity == null) return 0;
         return entity.isProvidingWeakPower(Direction.fromIntMinecraftSide(side.getIndex()));
     }
 
     @Override
     public boolean canConnectRedstone(IBlockState state, IBlockAccess block, BlockPos pos, EnumFacing side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(pos);
+        NodeBlockEntity entity = tileAt(block, pos, NodeBlockEntity.class);
+        if (entity == null) return false;
         return entity.canConnectRedstone(Direction.XN);
     }
 
@@ -108,8 +122,8 @@ public abstract class NodeBlock extends Block {//BlockContainer
     //client server
     public boolean onBlockPlacedBy(World world, int x, int y, int z, Direction front, EntityLivingBase entityLiving, int metadata) {
 
-        NodeBlockEntity tileEntity = (NodeBlockEntity) WorldCompat.getTileEntity(world, x, y, z);
-
+        NodeBlockEntity tileEntity = tileAt(world, new BlockPos(x, y, z), NodeBlockEntity.class);
+        if (tileEntity == null) return false;
         tileEntity.onBlockPlacedBy(front, entityLiving, metadata);
         return true;
     }
@@ -118,8 +132,8 @@ public abstract class NodeBlock extends Block {//BlockContainer
     @Override
     public void onBlockAdded(World par1World, BlockPos pos, IBlockState state) {
         if (par1World.isRemote == false) {
-            NodeBlockEntity entity = (NodeBlockEntity) par1World.getTileEntity(pos);
-            entity.onBlockAdded();
+            NodeBlockEntity entity = tileAt(par1World, pos, NodeBlockEntity.class);
+            if (entity != null) entity.onBlockAdded();
         }
     }
 
@@ -130,8 +144,8 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
         //if(par1World.isRemote == false)
         {
-            NodeBlockEntity entity = (NodeBlockEntity) par1World.getTileEntity(pos);
-            entity.onBreakBlock();
+            NodeBlockEntity entity = tileAt(par1World, pos, NodeBlockEntity.class);
+            if (entity != null) entity.onBreakBlock();
             super.breakBlock(par1World, pos, state);
         }
     }
@@ -139,8 +153,8 @@ public abstract class NodeBlock extends Block {//BlockContainer
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block b, BlockPos fromPos) {
         if (Utils.isRemote(world) == false) {
-            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
-            entity.onNeighborBlockChange();
+            NodeBlockEntity entity = tileAt(world, pos, NodeBlockEntity.class);
+            if (entity != null) entity.onNeighborBlockChange();
         }
     }
 
@@ -173,7 +187,8 @@ public abstract class NodeBlock extends Block {//BlockContainer
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer entityPlayer, EnumHand hand, EnumFacing side, float vx, float vy, float vz) {
         // 1.7.10 had one hand; EA code reads the main hand, so only react once (main hand).
         if (hand != EnumHand.MAIN_HAND) return false;
-        NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
+        NodeBlockEntity entity = tileAt(world, pos, NodeBlockEntity.class);
+        if (entity == null) return false;
 //    	entityPlayer.openGui( Eln.instance, 0,world,x ,y, z);
         return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side.getIndex()), vx, vy, vz);
     }

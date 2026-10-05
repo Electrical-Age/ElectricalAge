@@ -5,6 +5,7 @@ import mods.eln.compat.WorldCompat;
 import mods.eln.misc.DescriptorBase;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
+import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -54,7 +55,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 
 
     SimpleNode getNode(World world, int x, int y, int z) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
+        SimpleNodeEntity entity = getEntity(world, x, y, z);
         if (entity != null) {
             return entity.getNode();
         }
@@ -62,8 +63,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     }
 
     public SimpleNodeEntity getEntity(World world, int x, int y, int z) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
-        return entity;
+        return NodeBlock.tileAt(world, new BlockPos(x, y, z), SimpleNodeEntity.class);
     }
 
     /** 1.7.10 BlockContainer rendered as a normal block; 1.12's defaults to INVISIBLE. TODO(1.12 WP6): models. */
@@ -96,16 +96,16 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     @Override
     public void onBlockAdded(World par1World, BlockPos pos, IBlockState state) {
         if (par1World.isRemote == false) {
-            SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(pos);
-            entity.onBlockAdded();
+            SimpleNodeEntity entity = NodeBlock.tileAt(par1World, pos, SimpleNodeEntity.class);
+            if (entity != null) entity.onBlockAdded();
         }
     }
 
     // server
     @Override
     public void breakBlock(World par1World, BlockPos pos, IBlockState state) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(pos);
-        entity.onBreakBlock();
+        SimpleNodeEntity entity = NodeBlock.tileAt(par1World, pos, SimpleNodeEntity.class);
+        if (entity != null) entity.onBreakBlock();
         super.breakBlock(par1World, pos, state);
 
     }
@@ -113,8 +113,8 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block b, BlockPos fromPos) {
         if (Utils.isRemote(world) == false) {
-            SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
-            entity.onNeighborBlockChange();
+            SimpleNodeEntity entity = NodeBlock.tileAt(world, pos, SimpleNodeEntity.class);
+            if (entity != null) entity.onNeighborBlockChange();
         }
     }
 
@@ -123,7 +123,8 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer entityPlayer, EnumHand hand, EnumFacing side, float vx, float vy, float vz) {
         // 1.7.10 had one hand; EA code reads the main hand, so only react once (main hand).
         if (hand != EnumHand.MAIN_HAND) return false;
-        SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
+        SimpleNodeEntity entity = NodeBlock.tileAt(world, pos, SimpleNodeEntity.class);
+        if (entity == null) return false;
         return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side.getIndex()), vx, vy, vz);
     }
 
