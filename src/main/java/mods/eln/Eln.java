@@ -376,7 +376,7 @@ public class Eln {
 
         ghostBlock = new GhostBlock(); // TODO(1.12 WP5): was setBlockTextureName("iron_block")
 
-        obj.loadAllElnModels();
+        proxy.loadModels(); // client: parse the OBJ models (Eln.obj); dedicated server: none (descriptors null-guard)
 
         // 1.12: registered on RegistryEvent.Register (GameRegistryCompat), names eln:snake_case (rule 6)
         GameRegistryCompat.registerItem(sharedItem, "Eln.sharedItem");

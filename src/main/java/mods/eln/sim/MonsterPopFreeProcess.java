@@ -1,7 +1,6 @@
 package mods.eln.sim;
 
 import mods.eln.Eln;
-import mods.eln.entity.ReplicatorEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.boss.EntityWither;
@@ -25,6 +24,11 @@ public class MonsterPopFreeProcess implements IProcess {
         this.range = range;
     }
 
+    // TODO(1.12 WP14): back to `o instanceof ReplicatorEntity` once mods.eln.entity is ported (not in the build yet).
+    private static boolean isReplicator(Object o) {
+        return o.getClass().getName().equals("mods.eln.entity.ReplicatorEntity");
+    }
+
     @Override
     public void process(double time) {
         //Monster killing must be active before continuing :
@@ -42,7 +46,7 @@ public class MonsterPopFreeProcess implements IProcess {
                 if (oldList == null || !oldList.contains(o)) {
                     if (coordonate.distanceTo(mob) < range) {
                         //Utils.println("MonsterPopFreeProcess : Must die");
-                        if (!(o instanceof ReplicatorEntity) && !(o instanceof EntityWither) && !(o instanceof EntityEnderman)) {
+                        if (!isReplicator(o) && !(o instanceof EntityWither) && !(o instanceof EntityEnderman)) {
                             mob.setDead();
                             Utils.println("MonsterPopFreeProcess : Dead");
                         }

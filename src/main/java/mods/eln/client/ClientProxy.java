@@ -25,6 +25,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void loadModels() {
+        Eln.obj.loadAllElnModels();
+    }
+
+    @Override
     public void registerRenderers() {
         clientPacketHandler = new ClientPacketHandler();
         ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());

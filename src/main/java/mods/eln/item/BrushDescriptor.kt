@@ -16,7 +16,7 @@ import org.lwjgl.opengl.GL11
 
 class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
 
-    private val icon = ResourceLocation("eln", "textures/items/" + name.toLowerCase().replace(" ", "") + ".png")
+    private val icon = ResourceLocation("eln", "textures/items/" + name.lowercase().replace(" ", "") + ".png")
 
     override fun getName(stack: ItemStack): String {
         val creative = Minecraft.getMinecraft().player.capabilities.isCreativeMode
@@ -32,13 +32,10 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
 
     fun getColor(stack: ItemStack) = stack.itemDamage and 0xF
 
-    private fun getLife(stack: ItemStack?) = if (stack == null || stack.tagCompound == null)
-        32
-    else
-        stack.tagCompound.getInteger("life")
+    private fun getLife(stack: ItemStack?) = stack?.tagCompound?.getInteger("life") ?: 32
 
     fun setLife(stack: ItemStack, life: Int) {
-        stack.tagCompound.setInteger("life", life)
+        stack.tagCompound?.setInteger("life", life)
     }
 
     override fun getDefaultNBT(): NBTTagCompound? {
@@ -52,18 +49,18 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
 
         if (itemStack != null) {
             val creative = Minecraft.getMinecraft().player.capabilities.isCreativeMode
-            list.add(tr("Can paint %1$ blocks", if (creative) "infinite" else itemStack.tagCompound.getInteger("life")))
+            list.add(tr("Can paint %1$ blocks", if (creative) "infinite" else getLife(itemStack)))
         }
     }
 
     fun use(stack: ItemStack, entityPlayer: EntityPlayer): Boolean {
 
         val creative = entityPlayer.capabilities.isCreativeMode
-        var life = stack.tagCompound.getInteger("life")
+        var life = getLife(stack)
         return if (creative || life != 0) {
             if (!creative) {
                 --life
-                stack.tagCompound.setInteger("life", life)
+                setLife(stack, life)
             }
             true
         } else {

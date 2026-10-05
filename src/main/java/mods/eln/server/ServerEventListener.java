@@ -73,6 +73,9 @@ public class ServerEventListener {
         if (e.getWorld().isRemote) return;
         loadedWorlds.add(e.getWorld().provider.getDimension());
         FileNames fileNames = new FileNames(e);
+        if (!Files.exists(fileNames.worldSave) && !Files.exists(fileNames.backupSave)) {
+            return; // fresh world / dimension: nothing saved yet (1.12 port: no stack trace)
+        }
 
         try {
             readSave(fileNames.worldSave);

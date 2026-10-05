@@ -12,13 +12,16 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class LightBlockEntity extends TileEntity {
+public class LightBlockEntity extends TileEntity implements ITickable {
 
     ArrayList<LightHandle> lightList = new ArrayList<LightHandle>();
 
@@ -113,8 +116,14 @@ public class LightBlockEntity extends TileEntity {
 		}*/
     }
 
+    /** 1.7.10 kept the TE when only the meta (light level) changed; 1.12 would recreate it. */
     @Override
-    public void updateEntity() {
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
+    }
+
+    @Override
+    public void update() {
         if (world.isRemote) return;
 
         if (lightList.isEmpty()) {

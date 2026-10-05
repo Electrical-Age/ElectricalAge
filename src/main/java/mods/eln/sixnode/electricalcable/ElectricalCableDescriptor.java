@@ -91,7 +91,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
         this.electricalMaximalCurrent = electricalMaximalPower / electricalNominalVoltage;
 
-        voltageLevelColor = VoltageLevelColor.fromCable(this);
+        voltageLevelColor = voltageLevelColorOf(this);
     }
 
     @Override

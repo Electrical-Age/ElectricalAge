@@ -1,6 +1,7 @@
 package mods.eln.sixnode.wirelesssignal;
 
 import mods.eln.misc.Coordonate;
+import mods.eln.compat.WorldCompat;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -183,7 +184,7 @@ public class WirelessUtils {
 
                     virtualDistance +=
                         b.getDefaultState().isOpaqueCube() &&
-                        !b.isAir(w, c.x, c.y, c.z) ?
+                        !WorldCompat.isAir(w, c.x, c.y, c.z) ?
                         2.0 : 0.0;
                 }
             }
