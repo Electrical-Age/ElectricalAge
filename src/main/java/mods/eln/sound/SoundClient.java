@@ -10,12 +10,13 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 
 public class SoundClient {
-    /**
-     * 1.7.10 played sounds by name; 1.12 needs a registered SoundEvent. Unknown names are skipped.
-     * TODO(1.12 WP13): register every EA track (sounds.json + RegistryEvent.Register&lt;SoundEvent&gt;); category.
-     */
+    private static final java.util.Set<String> warned = new java.util.HashSet<>();
+
+    /** 1.7.10 played sounds by name; 1.12 needs a registered SoundEvent (ElnSounds). Unknown names are skipped. */
     static SoundEvent soundEvent(String track) {
-        return SoundEvent.REGISTRY.getObject(new ResourceLocation(track));
+        SoundEvent event = ElnSounds.event(track);
+        if (event == null && warned.add(track)) Utils.println("Electrical Age: no sound event for track " + track);
+        return event;
     }
 
     /*public static void playFromBlock(World world, int x, int y, int z, String track, float volume, float pitch, float rangeNominal, float rangeMax) {
@@ -46,7 +47,7 @@ public class SoundClient {
 
             SoundEvent event = soundEvent(p.track);
             if (event != null)
-                p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, event, SoundCategory.BLOCKS, p.volume, p.pitch, false);
+                p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, event, ElnSounds.category(p.track), p.volume, p.pitch, false);
         } else {
             for (int idx = 0; idx < trackCount; idx++) {
                 float bandVolume = p.volume;
@@ -57,7 +58,7 @@ public class SoundClient {
                 Utils.print(bandVolume + " ");
                 SoundEvent event = soundEvent(p.track + "_" + idx + "x");
                 if (event != null)
-                    p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, event, SoundCategory.BLOCKS, bandVolume, p.pitch, false);
+                    p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, event, ElnSounds.category(p.track), bandVolume, p.pitch, false);
             }
             Utils.println("");
         }

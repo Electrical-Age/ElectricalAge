@@ -8,10 +8,10 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundCategory
 
 // 1.12: ISound grew createAccessor/getSound/getCategory; PositionedSound provides them.
-// TODO(1.12 WP13): the sample must be a registered sound event (sounds.json); category BLOCKS assumed.
+// 1.12: the sample is resolved to a registered sound event (and its sounds.json category) by ElnSounds.
 abstract class LoopedSound(val sample: String, val coord: Coordonate,
                            val attentuationType: ISound.AttenuationType = ISound.AttenuationType.LINEAR) :
-    PositionedSound(ResourceLocation(sample), SoundCategory.BLOCKS), ITickableSound {
+    PositionedSound(ElnSounds.location(sample), ElnSounds.category(sample)), ITickableSound {
     var active = true
 
     override final fun getXPosF() = coord.x.toFloat() + 0.5f

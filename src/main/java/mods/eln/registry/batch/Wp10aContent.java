@@ -281,7 +281,7 @@ public class Wp10aContent implements ElnContent {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-            desc.setRunningSound("eln:Motor");
+            desc.setRunningSound("eln:motor");
         }
 
         {
@@ -300,7 +300,7 @@ public class Wp10aContent implements ElnContent {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-            desc.setRunningSound("eln:Motor");
+            desc.setRunningSound("eln:motor");
         }
     }
 }

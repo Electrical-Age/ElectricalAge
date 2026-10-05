@@ -201,6 +201,7 @@ public class Eln {
 
         // 1.12 port: the "electrical-age" SimpleNetworkWrapper only carried Waila and achievement packets (dropped).
         MinecraftForge.EVENT_BUS.register(GameRegistryCompat.EVENTS); // RegistryEvent.Register<Block/Item>
+        MinecraftForge.EVENT_BUS.register(mods.eln.sound.ElnSounds.EVENTS); // RegistryEvent.Register<SoundEvent> (sounds.json)
 
         ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
         // LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);

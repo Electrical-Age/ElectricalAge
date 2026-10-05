@@ -29,7 +29,7 @@ public class TransformerRender extends TransparentNodeElementRender {
     public TransformerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (TransformerDescriptor) descriptor;
-        addLoopedSound(new LoopedSound("eln:Transformer", coordonate(), ISound.AttenuationType.LINEAR) {
+        addLoopedSound(new LoopedSound("eln:transformer", coordonate(), ISound.AttenuationType.LINEAR) {
             @Override
             public float getVolume() {
                 if (load.getPosition() > TransformerRender.this.descriptor.minimalLoadToHum)
