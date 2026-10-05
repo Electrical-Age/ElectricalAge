@@ -30,7 +30,7 @@ import java.io.DataOutputStream
 
 class GeneratorDescriptor(
     name: String,
-    obj: Obj3D,
+    obj: Obj3D?,
     cable: ElectricalCableDescriptor,
     nominalRads: Float,
     nominalU: Float,
@@ -56,22 +56,12 @@ class GeneratorDescriptor(
     }
 
     override val obj = obj
-    override val static = arrayOf(
-        obj.getPart("Cowl"),
-        obj.getPart("Stand")
-    ).requireNoNulls()
-    override val rotating = arrayOf(obj.getPart("Shaft")).requireNoNulls()
-    val powerLights = arrayOf(
-        obj.getPart("LED_0"),
-        obj.getPart("LED_1"),
-        obj.getPart("LED_2"),
-        obj.getPart("LED_3"),
-        obj.getPart("LED_4"),
-        obj.getPart("LED_5"),
-        obj.getPart("LED_6")
-    ).requireNoNulls()
+    // requireNoNulls as in 1.7.10 (a missing part fails at registration), on the client only (obj null on a server)
+    override val static = objParts(obj, "Cowl", "Stand").requireNoNulls()
+    override val rotating = objParts(obj, "Shaft").requireNoNulls()
+    val powerLights = objParts(obj, "LED_0", "LED_1", "LED_2", "LED_3", "LED_4", "LED_5", "LED_6").requireNoNulls()
 
-    override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
+    override fun addInformation(stack: ItemStack, player: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
         list.add("Nominal usage ->")
         list.add(Utils.plotVolt("  Voltage out: ", nominalU.toDouble()))
@@ -84,7 +74,7 @@ class GeneratorDescriptor(
 class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
-    override val cableRender = Eln.instance.stdCableRender3200V
+    override val cableRender = Eln.stdCableRender3200V
     val desc = desc_ as GeneratorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
@@ -130,13 +120,13 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
                     color.green / 255f,
                     color.blue / 255f
                 )
-                desc.powerLights[i].draw()
+                desc.powerLights.getOrNull(i)?.draw()
             }
         }
     }
 
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu == LRDU.Down && side == front) return Eln.instance.stdCableRender3200V
+        if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
         return null
     }
 

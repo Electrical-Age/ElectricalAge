@@ -169,7 +169,7 @@ public class GridLink implements INBTTReady {
         as = Direction.readFromNBT(nbt, str + "as");
         bs = Direction.readFromNBT(nbt, str + "bs");
         rs = nbt.getDouble(str + "rs");
-        cable = ItemStack.loadItemStackFromNBT(nbt);
+        cable = new ItemStack(nbt);
     }
 
     @Override

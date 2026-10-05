@@ -11,27 +11,31 @@ import mods.eln.sim.ThermalLoad
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
+class JointHubDescriptor(baseName: String, obj: Obj3D?) : SimpleShaftDescriptor(baseName,
     JointHubElement::class, JointHubRender::class, EntityMetaTag.Basic) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
-    override val rotating = emptyArray<Obj3D.Obj3DPart>()
-    val staticOnAllSides = arrayOf(obj.getPart("Cap"))
-    val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
+    override val static = objParts(obj, "Stand", "Cowl")
+    override val rotating = emptyArray<Obj3D.Obj3DPart?>()
+    val staticOnAllSides = objParts(obj, "Cap")
+    val rotatingOnAllSides = objParts(obj, "Shaft")
 
+    @SideOnly(Side.CLIENT)
     override fun draw(angle: Double) {
         draw(angle, Direction.XP, DirectionSet());
     }
 
+    @SideOnly(Side.CLIENT)
     fun draw(angle: Double, front: Direction, connectedSides: DirectionSet) {
-        static.forEach { it.draw() }
+        static.forEach { it?.draw() }
 
         assert(rotatingOnAllSides.size > 0)
-        val bb = rotatingOnAllSides[0].boundingBox()
+        val bb = (rotatingOnAllSides.getOrNull(0) ?: return).boundingBox()
         val centre = bb.centre()
         val ox = centre.x
         val oy = centre.y
@@ -45,12 +49,12 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
                     GL11.glTranslated(ox, oy, oz)
                     GL11.glRotatef(((rotatingAngle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 1f, 0f, 0f)
                     GL11.glTranslated(-ox, -oy, -oz)
-                    rotatingOnAllSides.forEach { it.draw() }
+                    rotatingOnAllSides.forEach { it?.draw() }
                 }
             } else {
                 preserveMatrix {
                     direction.glRotateXnRef()
-                    staticOnAllSides.forEach { it.draw() }
+                    staticOnAllSides.forEach { it?.draw() }
                 }
             }
 

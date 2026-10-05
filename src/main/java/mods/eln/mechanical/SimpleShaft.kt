@@ -10,17 +10,24 @@ import mods.eln.sound.LoopedSound
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import mods.eln.compat.IItemRenderer
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.reflect.KClass
 
+/** The named parts of [obj] (entries null when a part is missing, as 1.7.10 getPart); empty when obj is null (server). */
+fun objParts(obj: Obj3D?, vararg names: String): Array<Obj3D.Obj3DPart?> =
+    if (obj == null) emptyArray() else Array(names.size) { obj.getPart(names[it]) }
+
 abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag) :
     TransparentNodeDescriptor(name, elm.java, render.java, tag) {
 
-    abstract val obj: Obj3D
-    abstract val static: Array<out Obj3D.Obj3DPart>
-    abstract val rotating: Array<out Obj3D.Obj3DPart>
+    // OBJ models are loaded on the client only (1.12 port): obj is null on a dedicated server, the part arrays empty.
+    abstract val obj: Obj3D?
+    abstract val static: Array<out Obj3D.Obj3DPart?>
+    abstract val rotating: Array<out Obj3D.Obj3DPart?>
     // If you set this you should also set volumeSetting in render.
     // (Otherwise it'll stick to 100% volume.)
     internal open val sound: String? = null
@@ -29,13 +36,14 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
+    @SideOnly(Side.CLIENT)
     open fun draw(angle: Double) {
         for (part in static) {
-            part.draw()
+            part?.draw()
         }
         preserveMatrix {
             assert(rotating.size > 0)
-            val bb = rotating[0].boundingBox()
+            val bb = (rotating.getOrNull(0) ?: return@preserveMatrix).boundingBox()
             val centre = bb.centre()
             val ox = centre.x
             val oy = centre.y
@@ -44,11 +52,12 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)
             for (part in rotating) {
-                part.draw()
+                part?.draw()
             }
         }
     }
 
+    @SideOnly(Side.CLIENT)
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
             super.renderItem(type, item, *data)
