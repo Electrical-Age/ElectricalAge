@@ -19,21 +19,28 @@ public class WaterTurbineSlowProcess implements IProcess, INBTTReady {
     double refreshTimeout = 0;
     double refreshPeriode = 0.2;
 
-    RcRcInterpolator filter = new RcRcInterpolator(2, 2);
+    // WP16b: 1.7.10 stepped this filter (taus 2 s, decay 0.5 /s) with one tick (0.05 s) once per refresh, i.e. every
+    // 5 ticks (refreshTimeout is reset, not decremented by the period), so its real time constants were 5x longer.
+    // Now stepped with the elapsed time, constants retuned to what players had: taus 10 s, decay 0.1 /s.
+    RcRcInterpolator filter = new RcRcInterpolator(10, 10);
+    double elapsed = 0;
 
     @Override
     public void process(double time) {
         WaterTurbineDescriptor d = turbine.descriptor;
 
+        elapsed += time;
         refreshTimeout -= time;
         if (refreshTimeout < 0) {
             refreshTimeout = refreshPeriode;
+            double dt = elapsed;
+            elapsed = 0;
             double waterFactor = getWaterFactor();
             if (waterFactor < 0) {
-                filter.setValue((float) (filter.get() * (1 - 0.5f * time)));
+                filter.setValue((float) (filter.get() * Math.max(0, 1 - 0.1 * dt)));
             } else {
                 filter.setTarget((float) (waterFactor * d.nominalPower));
-                filter.step((float) time);
+                filter.step((float) dt);
             }
 
             turbine.powerSource.setP(filter.get());
