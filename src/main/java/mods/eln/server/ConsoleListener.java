@@ -35,6 +35,7 @@ public class ConsoleListener extends CommandBase {
     private final String cmdNameStr_regenOre = "regenOre";
     private final String cmdNameStr_generateLangFileTemplate = "generateLangFileTemplate";
     private final String cmdNameStr_killMonstersAroundLamps = "killMonstersAroundLamps";
+    private final String cmdNameStr_selftest = "selftest";
 
     private final String strOffsetL0 = "  ";
     private final String strOffsetL1 = "    ";
@@ -55,7 +56,14 @@ public class ConsoleListener extends CommandBase {
         cmdVisibleList.add(cmdNameStr_regenOre);
         cmdVisibleList.add(cmdNameStr_generateLangFileTemplate);
         cmdVisibleList.add(cmdNameStr_killMonstersAroundLamps);
+        cmdVisibleList.add(cmdNameStr_selftest);
         java.util.Collections.sort(cmdVisibleList);
+    }
+
+    /** 1.12 port: level 2 so ops can run `/eln selftest` (RCON); the other subcommands still check level 4. */
+    @Override
+    public int getRequiredPermissionLevel() {
+        return 2;
     }
 
     @Override
@@ -118,6 +126,12 @@ public class ConsoleListener extends CommandBase {
 
         if (cmd.isEmpty()) { //Will normally never append.
             return;
+        } else if (cmd.equalsIgnoreCase(cmdNameStr_selftest)) {
+            mods.eln.selftest.SelfTest.command(server, ics, astring);
+        } else if (!cmd.equalsIgnoreCase(cmdNameStr_man) && !cmd.equalsIgnoreCase(cmdNameStr_listCmd)
+            && !cmd.equalsIgnoreCase(cmdNameStr_about) && !ics.canUseCommand(4, getName())) {
+            // 1.12 port: the command is level 2 for selftest; everything else keeps CommandBase's default level 4
+            cprint(ics, Color.COLOR_DARK_RED + "You need permission level 4 for \"/eln " + cmd + "\".");
         } else if (cmd.equalsIgnoreCase(cmdNameStr_man)) {
             if (astring.length == 1)
                 commandMan(ics, cmdNameStr_man);
