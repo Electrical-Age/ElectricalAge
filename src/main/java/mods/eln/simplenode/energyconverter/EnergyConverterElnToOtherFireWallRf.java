@@ -1,6 +1,6 @@
 package mods.eln.simplenode.energyconverter;
 
-import cofh.api.energy.IEnergyHandler;
+import cofh.redstoneflux.api.IEnergyHandler;
 import mods.eln.Other;
 import net.minecraft.tileentity.TileEntity;
 

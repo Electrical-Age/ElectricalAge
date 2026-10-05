@@ -1,7 +1,7 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
@@ -16,7 +16,7 @@ public class GenericCreativeTab extends CreativeTabs {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public Item getTabIconItem() {
+    public Item createIcon() {
         return (item);
     }
 }

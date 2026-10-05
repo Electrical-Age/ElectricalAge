@@ -1,7 +1,7 @@
 package mods.eln.node.six;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -19,10 +19,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -42,7 +42,7 @@ public class SixNodeBlock extends NodeBlock {
 
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
+    public ItemStack getPickBlock(RayTraceResult target, World world, int x, int y, int z, EntityPlayer player) {
         SixNodeEntity entity = (SixNodeEntity) world.getTileEntity(x, y, z);
         if (entity != null) {
             SixNodeElementRender render = entity.elementRenderList[Direction.fromIntMinecraftSide(target.sideHit).getInt()];
@@ -111,7 +111,7 @@ public class SixNodeBlock extends NodeBlock {
     }
 
     @Override
-    public boolean renderAsNormalBlock() {
+    public boolean isFullCube() {
         return true;
     }
 
@@ -151,8 +151,8 @@ public class SixNodeBlock extends NodeBlock {
             return blockIcon;
         }
 
-        // return Blocks.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
-        // return Blocks.stone.getIcon(w, x, y, z, side);
+        // return Blocks.SAND.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
+        // return Blocks.STONE.getIcon(w, x, y, z, side);
     }
 
     @Override
@@ -204,7 +204,7 @@ public class SixNodeBlock extends NodeBlock {
 
         SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
 
-        MovingObjectPosition MOP = collisionRayTrace(world, x, y, z, entityPlayer);
+        RayTraceResult MOP = collisionRayTrace(world, x, y, z, entityPlayer);
         if (MOP == null) return false;
 
         SixNode sixNode = (SixNode) tileEntity.getNode();
@@ -278,7 +278,7 @@ public class SixNodeBlock extends NodeBlock {
     boolean[] booltemp = new boolean[6];
 
     @Override
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 start, Vec3 end) {
+    public RayTraceResult collisionRayTrace(World world, int x, int y, int z, Vec3d start, Vec3d end) {
         if (nodeHasCache(world, x, y, z)) return super.collisionRayTrace(world, x, y, z, start, end);
         SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
         if (tileEntity == null) return null;
@@ -295,7 +295,7 @@ public class SixNodeBlock extends NodeBlock {
                 // setBlockBounds(0, 0, 0, 1, 1, 1);
                 if (element != null && element.sixNodeDescriptor.hasVolume()) {
 
-                    return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(0.5, 0.5, 0.5));
+                    return new RayTraceResult(x, y, z, Direction.YN.toSideValue(), new Vec3d(0.5, 0.5, 0.5));
                 }
             }
 
@@ -314,7 +314,7 @@ public class SixNodeBlock extends NodeBlock {
                 if (node != null && node instanceof SixNode) {
                     SixNodeElement element = ((SixNode) node).sideElementList[Direction.YN.getInt()];
                     if (element != null && element.sixNodeElementDescriptor.hasVolume())
-                        return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(0.5, 0.5, 0.5));
+                        return new RayTraceResult(x, y, z, Direction.YN.toSideValue(), new Vec3d(0.5, 0.5, 0.5));
                 }
             }
 
@@ -329,7 +329,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new MovingObjectPosition(x, y, z, Direction.XN.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
+                    return new RayTraceResult(x, y, z, Direction.XN.toSideValue(), new Vec3d(hitX, hitY, hitZ));
             }
         }
         // XP
@@ -341,7 +341,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new MovingObjectPosition(x, y, z, Direction.XP.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
+                    return new RayTraceResult(x, y, z, Direction.XP.toSideValue(), new Vec3d(hitX, hitY, hitZ));
             }
         }
         // YN
@@ -353,7 +353,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitX, x + w, x + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
+                    return new RayTraceResult(x, y, z, Direction.YN.toSideValue(), new Vec3d(hitX, hitY, hitZ));
             }
 
         }
@@ -366,7 +366,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitX, x + w, x + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new MovingObjectPosition(x, y, z, Direction.YP.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
+                    return new RayTraceResult(x, y, z, Direction.YP.toSideValue(), new Vec3d(hitX, hitY, hitZ));
             }
         }
         // ZN
@@ -378,7 +378,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitX, x + w, x + 1 - w))
-                    return new MovingObjectPosition(x, y, z, Direction.ZN.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
+                    return new RayTraceResult(x, y, z, Direction.ZN.toSideValue(), new Vec3d(hitX, hitY, hitZ));
             }
         }
         // ZP
@@ -390,7 +390,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitX, x + w, x + 1 - w))
-                    return new MovingObjectPosition(x, y, z, Direction.ZP.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
+                    return new RayTraceResult(x, y, z, Direction.ZP.toSideValue(), new Vec3d(hitX, hitY, hitZ));
             }
         }
 
@@ -402,15 +402,15 @@ public class SixNodeBlock extends NodeBlock {
         return false;
     }
 
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, EntityPlayer entityLiving) {
+    public RayTraceResult collisionRayTrace(World world, int x, int y, int z, EntityPlayer entityLiving) {
 
         // double distanceMax = (double)Minecraft.getMinecraft().playerController.getBlockReachDistance();
         double distanceMax = 5.0;
-        Vec3 start = Vec3.createVectorHelper(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
+        Vec3d start = new Vec3d(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
 
         if (!world.isRemote) start.yCoord += 1.62;
-        Vec3 var5 = entityLiving.getLook(0.5f);
-        Vec3 end = start.addVector(var5.xCoord * distanceMax, var5.yCoord * distanceMax, var5.zCoord * distanceMax);
+        Vec3d var5 = entityLiving.getLook(0.5f);
+        Vec3d end = start.add(var5.xCoord * distanceMax, var5.yCoord * distanceMax, var5.zCoord * distanceMax);
 
         return collisionRayTrace(world, x, y, z, start, end);
     }
@@ -475,7 +475,7 @@ public class SixNodeBlock extends NodeBlock {
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getSelectedBoundingBoxFromPool(World w, int x, int y, int z) {
         if (hasVolume(w, x, y, z)) return super.getSelectedBoundingBoxFromPool(w, x, y, z);
-        MovingObjectPosition col = collisionRayTrace(w, x, y, z, Minecraft.getMinecraft().thePlayer);
+        RayTraceResult col = collisionRayTrace(w, x, y, z, Minecraft.getMinecraft().player);
         double h = 0.2;
         double hn = 1 - h;
 

@@ -34,7 +34,7 @@ public class ElectricalCableRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
-        Minecraft.getMinecraft().mcProfiler.startSection("ECable");
+        Minecraft.getMinecraft().profiler.startSection("ECable");
 
         Utils.setGlColorFromDye(color, 1.0f);
 
@@ -42,7 +42,7 @@ public class ElectricalCableRender extends SixNodeElementRender {
         glListCall();
 
         GL11.glColor3f(1f, 1f, 1f);
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getMinecraft().profiler.endSection();
     }
 
     @Override

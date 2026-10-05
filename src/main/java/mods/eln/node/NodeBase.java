@@ -1,6 +1,6 @@
 package mods.eln.node;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.ghost.GhostBlock;
@@ -18,7 +18,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerManager;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
@@ -139,10 +139,10 @@ public abstract class NodeBase {
         if (block == Blocks.air) return true;
         if (block == Eln.sixNodeBlock) return true;
         if (block instanceof GhostBlock) return true;
-        if (block == Blocks.torch) return true;
-        if (block == Blocks.redstone_torch) return true;
-        if (block == Blocks.unlit_redstone_torch) return true;
-        if (block == Blocks.redstone_wire) return true;
+        if (block == Blocks.TORCH) return true;
+        if (block == Blocks.REDSTONE_TORCH) return true;
+        if (block == Blocks.UNLIT_REDSTONE_TORCH) return true;
+        if (block == Blocks.REDSTONE_WIRE) return true;
 
         return false;
     }
@@ -179,7 +179,7 @@ public abstract class NodeBase {
         initializeFromThat(front, entityLiving, itemStack);
 
         if (itemStack != null)
-            Utils.println("Node::constructor( meta = " + itemStack.getItemDamage() + ")");
+            Utils.println("Node::constructor( meta = " + itemStack.getMetadata() + ")");
     }
 
     abstract public void initializeFromThat(Direction front,
@@ -208,13 +208,13 @@ public abstract class NodeBase {
             if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
                 String str = multiMeterString(side);
                 if (str != null)
-                    Utils.addChatMessage(entityPlayer, str);
+                    Utils.sendMessage(entityPlayer, str);
                 return true;
             }
             if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
                 String str = thermoMeterString(side);
                 if (str != null)
-                    Utils.addChatMessage(entityPlayer, str);
+                    Utils.sendMessage(entityPlayer, str);
                 return true;
             }
             if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
@@ -226,7 +226,7 @@ public abstract class NodeBase {
                 if (str2 != null)
                     str += str2;
                 if (str.equals("") == false)
-                    Utils.addChatMessage(entityPlayer, str);
+                    Utils.sendMessage(entityPlayer, str);
                 return true;
             }
         }
@@ -492,8 +492,8 @@ public abstract class NodeBase {
         for (Object obj : server.getConfigurationManager().playerEntityList) {
 
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
+            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
+            PlayerChunkMap playerManager = worldServer.getPlayerManager();
             if (player.dimension != this.coordonate.dimention) continue;
             if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
             if (coordonate.distanceTo(player) > range) continue;
@@ -535,8 +535,8 @@ public abstract class NodeBase {
 
         for (Object obj : server.getConfigurationManager().playerEntityList) {
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
+            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
+            PlayerChunkMap playerManager = worldServer.getPlayerManager();
             if (player.dimension != this.coordonate.dimention) continue;
             if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
 
@@ -555,14 +555,14 @@ public abstract class NodeBase {
 
     public void dropItem(ItemStack itemStack) {
         if (itemStack == null) return;
-        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops")) {
+        if (coordonate.world().getGameRules().getBoolean("doTileDrops")) {
             float var6 = 0.7F;
             double var7 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var9 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             EntityItem var13 = new EntityItem(coordonate.world(), (double) coordonate.x + var7, (double) coordonate.y + var9, (double) coordonate.z + var11, itemStack);
-            var13.delayBeforeCanPickup = 10;
-            coordonate.world().spawnEntityInWorld(var13);
+            var13.pickupDelay = 10;
+            coordonate.world().spawnEntity(var13);
         }
     }
 

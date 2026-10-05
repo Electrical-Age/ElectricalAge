@@ -20,7 +20,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
     public TransparentNodeItem(Block b) {
         super(b);
         setHasSubtypes(true);
-        setUnlocalizedName("TransparentNodeItem");
+        setTranslationKey("TransparentNodeItem");
     }
 
 
@@ -45,7 +45,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
         String error;
         if ((error = descriptor.checkCanPlace(coord, front)) != null) {
-            Utils.addChatMessage(player, error);
+            Utils.sendMessage(player, error);
             return false;
         }
 
@@ -85,7 +85,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        Minecraft.getMinecraft().mcProfiler.startSection("TransparentNodeItem");
+        Minecraft.getMinecraft().profiler.startSection("TransparentNodeItem");
 
         if (shouldUseRenderHelperEln(type, item, null)) {
             switch (type) {
@@ -109,6 +109,6 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         }
         getDescriptor(item).renderItem(type, item, data);
 
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getMinecraft().profiler.endSection();
     }
 }

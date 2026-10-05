@@ -42,7 +42,7 @@ public class ItemStackFilter implements IItemStackFilter {
         final List<ItemStack> ores = OreDictionary.getOres(name);
         ItemStackFilter[] filters = new ItemStackFilter[ores.size()];
         for (int i = 0; i < ores.size(); i++) {
-            filters[i] = new ItemStackFilter(ores.get(i).getItem(), 0xff, ores.get(i).getItemDamage());
+            filters[i] = new ItemStackFilter(ores.get(i).getItem(), 0xff, ores.get(i).getMetadata());
         }
         return filters;
     }
@@ -51,7 +51,7 @@ public class ItemStackFilter implements IItemStackFilter {
     public boolean tryItemStack(ItemStack itemStack) {// caca1.5.1
         if (Utils.getItemId(itemStack) != itemId)
             return false;
-        if ((itemStack.getItemDamage() & damageMask) != damageValue)
+        if ((itemStack.getMetadata() & damageMask) != damageValue)
             return false;
         return true;
     }

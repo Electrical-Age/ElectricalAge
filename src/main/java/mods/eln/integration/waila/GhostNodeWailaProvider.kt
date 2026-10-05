@@ -1,7 +1,7 @@
 package mods.eln.integration.waila
 
 import com.google.common.cache.CacheLoader
-import cpw.mods.fml.common.Optional
+import net.minecraftforge.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
@@ -13,7 +13,7 @@ import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.MovingObjectPosition
+import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
@@ -23,7 +23,7 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
                                          val side: Direction? = null) : IWailaDataAccessor {
         override fun getPlayer() = accessor.player
         override fun getStack() = accessor.stack
-        override fun getPosition() = MovingObjectPosition(coord.x, coord.y, coord.z, accessor.position.sideHit,
+        override fun getPosition() = RayTraceResult(coord.x, coord.y, coord.z, accessor.position.sideHit,
             accessor.position.hitVec)
 
         override fun getSide() = if (side != null) side.toForge() else accessor.side

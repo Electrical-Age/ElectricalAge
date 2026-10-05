@@ -1,9 +1,9 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.LanguageRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -60,7 +60,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
             return defaultElement;
         if (itemStack.getItem() != this)
             return defaultElement;
-        return getDescriptor(itemStack.getItemDamage());
+        return getDescriptor(itemStack.getMetadata());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	*/
 
     @Override
-    public String getUnlocalizedName(ItemStack par1ItemStack) {
+    public String getTranslationKey(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
         if (desc != null && desc.name != null) {
             return desc.name.replaceAll("\\s+", "_");

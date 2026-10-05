@@ -1,8 +1,8 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
@@ -66,7 +66,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     public Descriptor getDescriptor(ItemStack itemStack) {
         if (itemStack == null) return defaultElement;
         if (itemStack.getItem() != this) return defaultElement;
-        return getDescriptor(itemStack.getItemDamage());
+        return getDescriptor(itemStack.getMetadata());
     }
 
 	/*
@@ -95,7 +95,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     }*/
 
     @Override
-    public String getUnlocalizedName(ItemStack par1ItemStack) {
+    public String getTranslationKey(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
         if (desc == null) {
             return this.getClass().getName();
@@ -140,7 +140,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     }
 
     public boolean onEntityItemUpdate(EntityItem entityItem) {
-        Descriptor desc = getDescriptor(entityItem.getEntityItem());
+        Descriptor desc = getDescriptor(entityItem.getItem());
         if (desc != null) return desc.onEntityItemUpdate(entityItem);
         return false;
     }

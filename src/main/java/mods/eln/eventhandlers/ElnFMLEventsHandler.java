@@ -1,7 +1,7 @@
 package mods.eln.eventhandlers;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import mods.eln.Eln;
 import mods.eln.packets.AchievePacket;
 
@@ -12,7 +12,7 @@ public class ElnFMLEventsHandler {
     @SubscribeEvent
     @SuppressWarnings("unused")
     public void onCraft(ItemCraftedEvent e) {
-        if (e.crafting.getUnlocalizedName().toLowerCase().equals("50v_macerator")) {
+        if (e.crafting.getTranslationKey().toLowerCase().equals("50v_macerator")) {
             Eln.elnNetwork.sendToServer(p);
         }
     }

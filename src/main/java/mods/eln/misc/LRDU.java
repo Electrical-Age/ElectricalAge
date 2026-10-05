@@ -1,7 +1,7 @@
 package mods.eln.misc;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
@@ -189,7 +189,7 @@ public enum LRDU {
         }
     }
 
-    public void rotateOnXnLeft(Vec3 v) {
+    public void rotateOnXnLeft(Vec3d v) {
         double y = v.yCoord;
         double z = v.zCoord;
         switch (this) {

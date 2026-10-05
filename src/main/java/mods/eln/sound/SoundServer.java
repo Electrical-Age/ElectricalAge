@@ -1,6 +1,6 @@
 package mods.eln.sound;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayerMP;

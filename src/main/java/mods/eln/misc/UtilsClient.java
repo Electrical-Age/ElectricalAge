@@ -1,27 +1,27 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -53,7 +53,7 @@ public class UtilsClient {
     }
 
     public static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
-        EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
 
         return (float) Math.sqrt((xCoord - player.posX) * (xCoord - player.posX)
             + (yCoord - player.posY) * (yCoord - player.posY)
@@ -64,8 +64,8 @@ public class UtilsClient {
         return distanceFromClientPlayer(tileEntity.getWorldObj(), tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
     }
 
-    public static EntityClientPlayerMP getClientPlayer() {
-        return Minecraft.getMinecraft().thePlayer;
+    public static EntityPlayerSP getClientPlayer() {
+        return Minecraft.getMinecraft().player;
     }
 
     public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
@@ -86,7 +86,7 @@ public class UtilsClient {
 
     public static void clientOpenGui(GuiScreen gui) {
         guiLastOpen = gui;
-        EntityClientPlayerMP clientPlayer = getClientPlayer();
+        EntityPlayerSP clientPlayer = getClientPlayer();
         clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
     }
 
@@ -129,10 +129,10 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
+        int light = getLight(e.worldObj, MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ));
         // light =
-        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
-        // MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
+        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
+        // MathHelper.floor(e.posY), MathHelper.floor(e.posZ),0);
         // Utils.println(light);
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
         halo.draw();
@@ -516,7 +516,7 @@ public class UtilsClient {
     public static double clientDistanceTo(Entity e) {
         if (e == null)
             return 100000000.0;
-        Entity c = Minecraft.getMinecraft().thePlayer;
+        Entity c = Minecraft.getMinecraft().player;
         double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
         return Math.sqrt(x * x + y * y + z * z);
     }
@@ -524,7 +524,7 @@ public class UtilsClient {
     public static double clientDistanceTo(TransparentNodeEntity t) {
         if (t == null)
             return 100000000.0;
-        Entity c = Minecraft.getMinecraft().thePlayer;
+        Entity c = Minecraft.getMinecraft().player;
         double x = (c.posX - t.xCoord), y = (c.posY - t.yCoord), z = (c.posZ - t.zCoord);
         return Math.sqrt(x * x + y * y + z * z);
     }
@@ -544,9 +544,9 @@ public class UtilsClient {
     }
 
     public static void sendPacketToServer(ByteArrayOutputStream bos) {
-        C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
+        CPacketCustomPayload packet = new CPacketCustomPayload(Eln.channelName, bos.toByteArray());
         Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
-        // Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
+        // Minecraft.getMinecraft().player.connection.sendPacket(new FMLProxyPacket(packet));
     }
 
     public static int getUuid() {

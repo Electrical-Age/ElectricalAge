@@ -15,8 +15,8 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -95,8 +95,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                 double randTarget = 1.0 / lampDescriptor.vegetableGrowRate * time * (1.0 * light / lampDescriptor.nominalLight / 15.0);
                 if (randTarget > Math.random()) {
                     boolean exit = false;
-                    Vec3 vv = Vec3.createVectorHelper(1, 0, 0);
-                    Vec3 vp = Vec3.createVectorHelper(myCoord().x + 0.5, myCoord().y + 0.5, myCoord().z + 0.5);
+                    Vec3d vv = new Vec3d(1, 0, 0);
+                    Vec3d vp = new Vec3d(myCoord().x + 0.5, myCoord().y + 0.5, myCoord().z + 0.5);
 
                     vv.rotateAroundZ((float) (alphaZ * Math.PI / 180.0));
 
@@ -266,7 +266,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     // ElectricalConnectionOneWay connection = null;
 
-    public void rotateAroundZ(Vec3 v, float par1) {
+    public void rotateAroundZ(Vec3d v, float par1) {
         float f1 = MathHelper.cos(par1);
         float f2 = MathHelper.sin(par1);
         double d0 = v.xCoord * (double) f1 + v.yCoord * (double) f2;
@@ -281,8 +281,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         boolean exit = false;
         if (!lbCoord.getBlockExist())
             return;
-        Vec3 vv = Vec3.createVectorHelper(1, 0, 0);
-        Vec3 vp = Utils.getVec05(myCoord());
+        Vec3d vv = new Vec3d(1, 0, 0);
+        Vec3d vp = Utils.getVec05(myCoord());
 
         rotateAroundZ(vv, (float) (alphaZ * Math.PI / 180.0));
 
@@ -333,7 +333,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public boolean isOpaque(Coordonate coord) {
         Block block = coord.getBlock();
         boolean isNotOpaque = block == Blocks.air || !block.isOpaqueCube();
-        if (block == Blocks.farmland)
+        if (block == Blocks.FARMLAND)
             isNotOpaque = false;
         return !isNotOpaque;
     }

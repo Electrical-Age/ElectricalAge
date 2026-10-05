@@ -126,18 +126,18 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
             Item item = currentItemStack.getItem();
             /*if (item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;
-				entityPlayer.addChatMessage("Wire color care " + colorCare);
+				entityPlayer.sendMessage("Wire color care " + colorCare);
 				sixNode.reconnect();
 			}
 			if (item == Eln.brushItem) {
-				if (currentItemStack.getItemDamage() < BrushItem.maximalUse) {
-					color = currentItemStack.getItemDamage() & 0xF;
+				if (currentItemStack.getMetadata() < BrushItem.maximalUse) {
+					color = currentItemStack.getMetadata() & 0xF;
 					
-					currentItemStack.setItemDamage(currentItemStack.getItemDamage() + 16);
+					currentItemStack.setItemDamage(currentItemStack.getMetadata() + 16);
 					
 					sixNode.reconnect();
 				} else {
-					entityPlayer.addChatMessage("Brush is empty");
+					entityPlayer.sendMessage("Brush is empty");
 				}
 			}*/
         }

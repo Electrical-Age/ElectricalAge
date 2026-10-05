@@ -1,7 +1,7 @@
 package mods.eln.node.six;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
@@ -84,7 +84,7 @@ public abstract class SixNodeElementRender {
     }
 
     public void draw() {
-        // Minecraft.getMinecraft().mcProfiler.startSection("SixNodeRender");
+        // Minecraft.getMinecraft().profiler.startSection("SixNodeRender");
         if (needRedraw) {
             needRedraw = false;
             connectionType = CableRender.connectionType(this, side);
@@ -112,7 +112,7 @@ public abstract class SixNodeElementRender {
         }
 
         GL11.glColor3f(1f, 1f, 1f);
-        // Minecraft.getMinecraft().mcProfiler.endSection();
+        // Minecraft.getMinecraft().profiler.endSection();
     }
 
     public boolean drawCableAuto() {

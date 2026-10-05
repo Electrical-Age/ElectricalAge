@@ -147,7 +147,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
         //	ItemStack stack = new ItemStack(Item.coal);
         //	EntityItem entity = new EntityItem(node.coordonate.world(), node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 1.5, stack);
-        //	node.coordonate.world().spawnEntityInWorld(entity);
+        //	node.coordonate.world().spawnEntity(entity);
 
         connect();
     }
@@ -200,7 +200,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
                 stream.writeShort(-1);
             } else {
                 stream.writeShort(Item.getIdFromItem(stack.getItem()));
-                stream.writeShort(stack.getItemDamage());
+                stream.writeShort(stack.getMetadata());
             }
 
             stream.writeShort((int) heatingCorpResistor.getP());

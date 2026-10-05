@@ -1,7 +1,7 @@
 package mods.eln.simplenode.computerprobe;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.simple.SimpleNodeBlock;
 import net.minecraft.block.material.Material;
@@ -15,7 +15,7 @@ public class ComputerProbeBlock extends SimpleNodeBlock {
     private IIcon[] icon = new IIcon[6];
 
     public ComputerProbeBlock() {
-        super(Material.packedIce);
+        super(Material.PACKED_ICE);
     }
 
     @Override

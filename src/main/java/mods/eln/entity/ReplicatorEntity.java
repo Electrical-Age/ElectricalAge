@@ -76,7 +76,7 @@ public class ReplicatorEntity extends EntityMob {
         hunger += 0.05 / hungerTime;
 
         if (hunger > 1 && Math.random() < 0.05 / 5) {
-            attackEntityFrom(DamageSource.starve, 1);
+            attackEntityFrom(DamageSource.STARVE, 1);
         }
         if (hunger < 0.5 && Math.random() * 10 < 0.05) {
             heal(1f);
@@ -86,7 +86,7 @@ public class ReplicatorEntity extends EntityMob {
             entityliving.setLocationAndAngles(this.posX, this.posY, this.posZ, 0f, 0f);
             entityliving.rotationYawHead = entityliving.rotationYaw;
             entityliving.renderYawOffset = entityliving.rotationYaw;
-            worldObj.spawnEntityInWorld(entityliving);
+            worldObj.spawnEntity(entityliving);
             entityliving.playLivingSound();
             hunger = 0;
         }
@@ -98,10 +98,10 @@ public class ReplicatorEntity extends EntityMob {
 
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0D);
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
-        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
         // this.getAttributeMap().func_111150_b(field_110186_bp).setAttribute(this.rand.nextDouble() * ForgeDummyContainer.zombieSummonBaseChance);
     }
 
@@ -126,7 +126,7 @@ public class ReplicatorEntity extends EntityMob {
     }
 
     protected int getDropItemId() {
-        return Item.getIdFromItem(Items.rotten_flesh);
+        return Item.getIdFromItem(Items.ROTTEN_FLESH);
     }*/
 
     @Override

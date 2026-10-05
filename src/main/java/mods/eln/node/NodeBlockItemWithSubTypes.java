@@ -7,12 +7,12 @@ public class NodeBlockItemWithSubTypes extends NodeBlockItem {
     public NodeBlockItemWithSubTypes(Block b) {
         super(b);
         setHasSubtypes(true);
-        setUnlocalizedName("NodeBlockItemWithSubTypes");
+        setTranslationKey("NodeBlockItemWithSubTypes");
     }
     /*//caca1.5.1
 	@Override
 	public String getItemNameIS(ItemStack itemstack) {
-		return getItemName() + "." + itemstack.getItemDamage();
+		return getItemName() + "." + itemstack.getMetadata();
 	}
 */
 }

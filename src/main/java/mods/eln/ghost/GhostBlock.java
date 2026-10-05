@@ -1,7 +1,7 @@
 package mods.eln.ghost;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -13,9 +13,9 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -29,7 +29,7 @@ public class GhostBlock extends Block {
     public static final int tLadder = 2;
 
     public GhostBlock() {
-        super(Material.iron);
+        super(Material.IRON);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class GhostBlock extends Block {
     }
 
     @Override
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startVec, Vec3 endVec) {
+    public RayTraceResult collisionRayTrace(World world, int x, int y, int z, Vec3d startVec, Vec3d endVec) {
         int meta = world.getBlockMetadata(x, y, z);
 
         switch (meta) {
@@ -95,7 +95,7 @@ public class GhostBlock extends Block {
                 break;
         }
 
-        MovingObjectPosition m = super.collisionRayTrace(world, x, y, z, startVec, endVec);
+        RayTraceResult m = super.collisionRayTrace(world, x, y, z, startVec, endVec);
 
         switch (meta) {
             case tFloor:
@@ -132,7 +132,7 @@ public class GhostBlock extends Block {
     }
 
     @Override
-    public boolean renderAsNormalBlock() {
+    public boolean isFullCube() {
         return false;
     }
 
@@ -142,7 +142,7 @@ public class GhostBlock extends Block {
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+    public ItemStack getPickBlock(RayTraceResult target, World world, int x, int y, int z) {
         return null;
     }
 

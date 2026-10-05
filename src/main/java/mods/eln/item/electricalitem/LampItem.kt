@@ -8,7 +8,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.potion.PotionEffect
-import net.minecraft.util.MathHelper
+import net.minecraft.util.math.MathHelper
 import net.minecraft.world.World
 
 abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
@@ -44,9 +44,9 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 y += v.yCoord
                 z += v.zCoord
 
-                val fx = MathHelper.floor_double(x)
-                val fy = MathHelper.floor_double(y)
-                val fz = MathHelper.floor_double(z)
+                val fx = MathHelper.floor(x)
+                val fy = MathHelper.floor(y)
+                val fz = MathHelper.floor(z)
                 val block = world.getBlock(fx, fy, fz)
                 if (!block.isAir(world, fx, fy, fz)) {
                     x -= v.xCoord
@@ -59,9 +59,9 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
 
             while (rCount > 0) {
                 var stride = 1
-                val fx = MathHelper.floor_double(x)
-                val fy = MathHelper.floor_double(y)
-                val fz = MathHelper.floor_double(z)
+                val fx = MathHelper.floor(x)
+                val fy = MathHelper.floor(y)
+                val fz = MathHelper.floor(z)
                 val block = world.getBlock(fx, fy, fz)
                 if (block.isAir(world, fx, fy, fz)) {
                     LightBlockEntity.addLight(world, fx, fy, fz, light, 5)

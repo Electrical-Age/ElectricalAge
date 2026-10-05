@@ -10,7 +10,7 @@ import mods.eln.sim.*;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableElement;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.util.DamageSource;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
                 if (isElectricalCableInterresting(cable) == false) continue;
 
 
-                PathEntity path = entity.getNavigator().getPathToXYZ(node.coordonate.x, node.coordonate.y, node.coordonate.z);
+                Path path = entity.getNavigator().getPathToXYZ(node.coordonate.x, node.coordonate.y, node.coordonate.z);
 
                 if (path == null/* || path.isFinished() == false*/) continue;
 
@@ -87,7 +87,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
     }
 
     @Override
-    public boolean continueExecuting() {
+    public boolean shouldContinueExecuting() {
         //Utils.println("Continue");
         return cableCoordonate != null;
     }
@@ -115,7 +115,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
             double u = cable.electricalLoad.getU();
             double nextRp = Math.pow(u / Eln.LVU, -0.3) * u * u / (50);
             if (resistorLoad.getR() < 0.8 * nextRp) {
-                entity.attackEntityFrom(DamageSource.magic, 5);
+                entity.attackEntityFrom(DamageSource.MAGIC, 5);
             } else {
                 entity.eatElectricity(resistorLoad.getP() * 0.05);
             }

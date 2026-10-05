@@ -1,7 +1,7 @@
 package mods.eln.integration.waila
 
 import com.google.common.cache.CacheLoader
-import cpw.mods.fml.common.Optional
+import net.minecraftforge.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider

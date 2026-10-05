@@ -45,8 +45,8 @@ public class TransparentNodeEntityWithSiededInv extends TransparentNodeEntity im
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int var1) {
-        return getSidedInventory().getStackInSlotOnClosing(var1);
+    public ItemStack removeStackFromSlot(int var1) {
+        return getSidedInventory().removeStackFromSlot(var1);
     }
 
     @Override
@@ -70,8 +70,8 @@ public class TransparentNodeEntityWithSiededInv extends TransparentNodeEntity im
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer var1) {
-        return getSidedInventory().isUseableByPlayer(var1);
+    public boolean isUsableByPlayer(EntityPlayer var1) {
+        return getSidedInventory().isUsableByPlayer(var1);
     }
 
     @Override

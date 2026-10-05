@@ -1,6 +1,6 @@
 package mods.eln.entity;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -19,7 +19,7 @@ public class ReplicatorPopProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
+        World world = FMLCommonHandler.instance().getMinecraftServerInstance().worlds[0];
 
         int replicatorCount = 0;
 
@@ -56,7 +56,7 @@ public class ReplicatorPopProcess implements IProcess {
                     entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
-                    world.spawnEntityInWorld(entityliving);
+                    world.spawnEntity(entityliving);
                     entityliving.playLivingSound();
                     entityliving.isSpawnedFromWeather = true;
                     Utils.println("Spawn Replicator at " + x + " " + y + " " + z);
@@ -65,7 +65,7 @@ public class ReplicatorPopProcess implements IProcess {
         }
     }
 }
-/*		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
+/*		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worlds[0];
 if (world.getWorldInfo().isThundering()) {
 
 if (Math.random() < time * popPerSecondPerChunk * world.getChunkProvider().getLoadedChunkCount()) {
@@ -94,7 +94,7 @@ if (Math.random() < time * popPerSecondPerChunk * world.getChunkProvider().getLo
 			entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
 			entityliving.rotationYawHead = entityliving.rotationYaw;
 			entityliving.renderYawOffset = entityliving.rotationYaw;
-			world.spawnEntityInWorld(entityliving);
+			world.spawnEntity(entityliving);
 			entityliving.playLivingSound();
 			entityliving.isSpawnedFromWeather = true;
 		//	Utils.println("Spawn Replicator at " + x + " " + y + " " + z);					

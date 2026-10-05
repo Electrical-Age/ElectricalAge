@@ -1,7 +1,7 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.block.Block;
@@ -108,7 +108,7 @@ public class GenericItemUsingDamageDescriptor {
     public boolean checkSameItemStack(ItemStack stack) {
         if (stack == null)
             return false;
-        if (stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage)
+        if (stack.getItem() != parentItem || stack.getMetadata() != parentItemDamage)
             return false;
         return true;
     }

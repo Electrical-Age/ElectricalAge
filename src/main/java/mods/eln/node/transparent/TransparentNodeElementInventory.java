@@ -60,7 +60,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot) {
+    public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
         if (stack != null) {
             setInventorySlotContents(slot, null);
@@ -88,7 +88,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(EntityPlayer player) {
 
 		/*
          * if(transparentNodeElement != null) { if(NodeManager.instance.getNodeFromCoordonate(transparentNodeElement.node.coordonate) != transparentNodeElement.node) return false; return player.getDistance(transparentNodeElement.node.coordonate.x + 0.5, transparentNodeElement.node.coordonate.y + 0.5, transparentNodeElement.node.coordonate.z + 0.5) < 10; }

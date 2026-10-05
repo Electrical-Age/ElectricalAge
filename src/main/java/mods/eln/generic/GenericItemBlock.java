@@ -16,7 +16,7 @@ public class GenericItemBlock extends ItemBlock {
         this.textureIdOffset = textureIdOffset;
         this.subNames = subNames;
         setHasSubtypes(true);
-        setUnlocalizedName("wireItemBlock");
+        setTranslationKey("wireItemBlock");
     }
 
 	/*
@@ -38,6 +38,6 @@ public class GenericItemBlock extends ItemBlock {
 	/*
 	@Override //caca1.5.1
 	public String getItemNameIS(ItemStack itemstack) {
-		return getItemName() + "." + subNames[itemstack.getItemDamage()];
+		return getItemName() + "." + subNames[itemstack.getMetadata()];
 	}*/
 }

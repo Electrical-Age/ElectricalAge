@@ -146,7 +146,7 @@ public class TransparentNode extends Node {
 			 * }
 			 */
 
-            int metadata = itemStack.getItemDamage();
+            int metadata = itemStack.getMetadata();
             elementId = metadata;
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
             element.initializeFromThat(side, entityLiving, itemStack.getTagCompound());

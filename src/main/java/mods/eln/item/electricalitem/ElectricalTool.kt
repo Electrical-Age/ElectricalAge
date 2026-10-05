@@ -104,5 +104,5 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
 
     override fun electricalItemUpdate(stack: ItemStack, time: Double) {}
 
-    val blocksEffectiveAgainst = arrayOf(Blocks.grass, Blocks.dirt, Blocks.sand, Blocks.gravel, Blocks.snow, Blocks.snow, Blocks.clay, Blocks.farmland, Blocks.soul_sand, Blocks.mycelium)
+    val blocksEffectiveAgainst = arrayOf(Blocks.GRASS, Blocks.DIRT, Blocks.SAND, Blocks.GRAVEL, Blocks.SNOW, Blocks.SNOW, Blocks.CLAY, Blocks.FARMLAND, Blocks.SOUL_SAND, Blocks.MYCELIUM)
 }

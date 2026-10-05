@@ -1,13 +1,13 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
@@ -57,10 +57,10 @@ public class Coordonate implements INBTTReady {
         //Minecraft m = Minecraft.getMinecraft();
 
 		
-		/*if(w == null) *///w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		/*if(w == null) *///w = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(worldDimension());
 
         if (w == null) {
-            return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+            return FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(worldDimension());
         }
         return w;
     }
@@ -213,7 +213,7 @@ public class Coordonate implements INBTTReady {
         this.z = (int) vp[2];
     }
 
-    public void setPosition(Vec3 vp) {
+    public void setPosition(Vec3d vp) {
         this.x = (int) vp.xCoord;
         this.y = (int) vp.yCoord;
         this.z = (int) vp.zCoord;

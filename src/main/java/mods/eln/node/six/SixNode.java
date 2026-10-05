@@ -86,14 +86,14 @@ public class SixNode extends Node {
         try {
             //Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
             //if((Boolean)bool == false) return false;
-            sideElementIdList[direction.getInt()] = itemStack.getItemDamage(); //Je sais c'est moche !
+            sideElementIdList[direction.getInt()] = itemStack.getMetadata(); //Je sais c'est moche !
             sideElementList[direction.getInt()] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, direction, descriptor);
             sideElementIdList[direction.getInt()] = 0;
 
             disconnect();
             sideElementList[direction.getInt()].front = descriptor.getFrontFromPlace(direction, player);
             sideElementList[direction.getInt()].initialize();
-            sideElementIdList[direction.getInt()] = itemStack.getItemDamage();
+            sideElementIdList[direction.getInt()] = itemStack.getMetadata();
 
             connect();
 
@@ -127,15 +127,15 @@ public class SixNode extends Node {
         protected void dropItem(ItemStack itemStack)
 	    {
 	    	
-	        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
+	        if (coordonate.world().getGameRules().getBoolean("doTileDrops"))
 	        {
 	            float var6 = 0.7F;
 	            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
-	            var13.delayBeforeCanPickup = 10;
-	            coordonate.world().spawnEntityInWorld(var13);
+	            var13.pickupDelay = 10;
+	            coordonate.world().spawnEntity(var13);
 	        }
 	    }*/
 

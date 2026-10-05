@@ -2,7 +2,7 @@ package mods.eln.server;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 import net.minecraft.world.storage.MapStorage;
 
 public class ElnWorldStorage extends WorldSavedData {
@@ -19,9 +19,9 @@ public class ElnWorldStorage extends WorldSavedData {
         // Retrieves the MyWorldData instance for the given world, creating it if necessary
         MapStorage storage = world.perWorldStorage;
         int dim = world.provider.dimensionId;
-        ElnWorldStorage result = (ElnWorldStorage) storage.loadData(ElnWorldStorage.class, key + dim);
+        ElnWorldStorage result = (ElnWorldStorage) storage.getOrLoadData(ElnWorldStorage.class, key + dim);
         if (result == null) {
-            result = (ElnWorldStorage) storage.loadData(ElnWorldStorage.class, key + dim + "back");
+            result = (ElnWorldStorage) storage.getOrLoadData(ElnWorldStorage.class, key + dim + "back");
         }
         if (result == null) {
             result = new ElnWorldStorage(key + dim);

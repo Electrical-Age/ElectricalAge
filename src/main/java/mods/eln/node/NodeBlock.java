@@ -60,7 +60,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
     }
 
     @Override
-    public boolean renderAsNormalBlock() {
+    public boolean isFullCube() {
         return false;
     }
 

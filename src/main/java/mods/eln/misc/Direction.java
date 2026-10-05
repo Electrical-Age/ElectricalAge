@@ -2,7 +2,7 @@ package mods.eln.misc;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
@@ -518,7 +518,7 @@ public enum Direction {
         }
     }
 
-    public void rotateFromXN(Vec3 p) {
+    public void rotateFromXN(Vec3d p) {
         double x = p.xCoord, y = p.yCoord, z = p.zCoord;
         switch (this) {
             case XN:

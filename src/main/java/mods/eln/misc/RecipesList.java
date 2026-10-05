@@ -116,5 +116,5 @@ public class RecipesList {
         return list;
     }
 }
-/*		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
+/*		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getMetadata(),
                 findItemStack("Copper ingot"), 0);*/

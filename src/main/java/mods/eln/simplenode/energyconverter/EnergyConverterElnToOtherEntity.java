@@ -1,9 +1,9 @@
 package mods.eln.simplenode.energyconverter;
 
-import cofh.api.energy.IEnergyHandler;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import cofh.redstoneflux.api.IEnergyHandler;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import ic2.api.energy.tile.IEnergySource;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
@@ -23,7 +23,7 @@ import java.io.IOException;
 
 @Optional.InterfaceList({
     @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
-    @Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
+    @Optional.Interface(iface = "cofh.redstoneflux.api.IEnergyHandler", modid = Other.modIdTe),
     @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)})
 public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     IEnergySource, Environment, IEnergyHandler /* ,SidedEnvironment, ISidedBatteryProvider, IPowerEmitter, IPipeConnection */ {
@@ -243,12 +243,12 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     }
 
     @Override
-    public void onChunkUnload() {
-        super.onChunkUnload();
+    public void onUnload() {
+        super.onUnload();
         if (Other.ic2Loaded)
-            EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
+            EnergyConverterElnToOtherFireWallIc2.onUnload(this);
         if (Other.ocLoaded)
-            getOc().onChunkUnload();
+            getOc().onUnload();
     }
 
     @Override

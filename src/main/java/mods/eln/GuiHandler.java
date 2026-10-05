@@ -1,6 +1,6 @@
 package mods.eln;
 
-import cpw.mods.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;

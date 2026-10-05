@@ -15,7 +15,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import java.io.ByteArrayOutputStream;
@@ -142,7 +142,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
             z = zCoord;
         }
         if (desc == null) {
-            AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(worldObj, x, y, z);
+            AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(worldObj, x, y, z);
             if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
         } else {
             desc.addCollisionBoxesToList(par5AxisAlignedBB, list, worldObj, x, y, z);
@@ -217,8 +217,8 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int var1) {
-        return getSidedInventory().getStackInSlotOnClosing(var1);
+    public ItemStack removeStackFromSlot(int var1) {
+        return getSidedInventory().removeStackFromSlot(var1);
     }
 
     @Override
@@ -242,8 +242,8 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer var1) {
-        return getSidedInventory().isUseableByPlayer(var1);
+    public boolean isUsableByPlayer(EntityPlayer var1) {
+        return getSidedInventory().isUsableByPlayer(var1);
     }
 
     @Override

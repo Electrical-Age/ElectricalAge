@@ -65,7 +65,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot) {
+    public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
         if (stack != null) {
             setInventorySlotContents(slot, null);
@@ -103,7 +103,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(EntityPlayer player) {
 
 		/*if(sixNodeElement != null)
 		{

@@ -1,7 +1,7 @@
 package mods.eln.simplenode.energyconverter;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Direction;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.simple.SimpleNodeBlock;
@@ -21,7 +21,7 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
     private IIcon sideIcon;
 
     public EnergyConverterElnToOtherBlock(EnergyConverterElnToOtherDescriptor descriptor) {
-        super(Material.packedIce);
+        super(Material.PACKED_ICE);
         this.descriptor = descriptor;
         setDescriptor(descriptor);
     }

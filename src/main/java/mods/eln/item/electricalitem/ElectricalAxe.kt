@@ -32,7 +32,7 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
 
     override fun getStrVsBlock(stack: ItemStack, block: Block?): Float {
         return when {
-            block != null && (block.material === Material.wood || block.material === Material.plants || block.material === Material.vine) -> getStrength(stack)
+            block != null && (block.material === Material.WOOD || block.material === Material.PLANTS || block.material === Material.VINE) -> getStrength(stack)
             else -> super.getStrVsBlock(stack, block)
         }
     }
@@ -55,7 +55,7 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
     private fun setCapitation(p: EntityPlayer?, stack: ItemStack, capitation: Boolean) {
         getNbt(stack).setBoolean("capitation", capitation)
         if (p != null) {
-            Utils.addChatMessage(p, "Set treecapitation to $capitation")
+            Utils.sendMessage(p, "Set treecapitation to $capitation")
         }
     }
 

@@ -13,8 +13,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
     boolean oldState = false;
     boolean state = false;
 
-    HashMap<Object, Vec3> lastEPos = new HashMap<Object, Vec3>();
+    HashMap<Object, Vec3d> lastEPos = new HashMap<Object, Vec3d>();
 
     public ElectricalEntitySensorSlowProcess(ElectricalEntitySensorElement element) {
         this.element = element;
@@ -68,7 +68,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 
             for (Object o : list) {
                 Entity e = (Entity) o;
-                Vec3 lastPos;
+                Vec3d lastPos;
                 if ((lastPos = lastEPos.get(e)) != null) {
                     double weight = 0.4;
                     List<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
@@ -97,7 +97,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
                     }
                 }
                 output = Math.min(1, output);
-                lastEPos.put(e, Vec3.createVectorHelper(e.posX, e.posY, e.posZ));
+                lastEPos.put(e, new Vec3d(e.posX, e.posY, e.posZ));
             }
             //Utils.println(output);
             rc1.setTarget((float) output);

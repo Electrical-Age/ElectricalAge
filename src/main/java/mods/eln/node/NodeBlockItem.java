@@ -10,7 +10,7 @@ public class NodeBlockItem extends ItemBlock {
 
     public NodeBlockItem(Block b) {
         super(b);
-        setUnlocalizedName("NodeBlockItem");
+        setTranslationKey("NodeBlockItem");
     }
 
 

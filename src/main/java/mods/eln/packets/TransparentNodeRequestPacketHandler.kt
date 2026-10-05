@@ -1,7 +1,7 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
-import cpw.mods.fml.common.network.simpleimpl.MessageContext
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 import mods.eln.misc.Utils
 import mods.eln.node.NodeManager
 import mods.eln.node.transparent.TransparentNode

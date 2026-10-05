@@ -9,7 +9,7 @@ import mods.eln.misc.Color;
 import mods.eln.misc.Version;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.text.TextComponentString;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,12 +55,12 @@ public class ConsoleListener extends CommandBase {
     }
 
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "eln";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getUsage(ICommandSender icommandsender) {
         //TODO Rewrite
         String str = Color.COLOR_DARK_CYAN + "ELN mod console." + Color.COLOR_BRIGHT_GREY + " Type \"\\eln \" + TAB";
         return str;
@@ -74,14 +74,14 @@ public class ConsoleListener extends CommandBase {
             case 1:
                 //Parse for probable commands
                 if (astring[0].isEmpty()) {
-                    icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_CYAN + "ELN >"));
-                    icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_listCmd + "\" to print the full command list."));
-                    icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_man + "\" + <command> for command usage (or command + TAB)."));
+                    icommandsender.sendMessage(new TextComponentString(Color.COLOR_DARK_CYAN + "ELN >"));
+                    icommandsender.sendMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_listCmd + "\" to print the full command list."));
+                    icommandsender.sendMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + "   \"" + cmdNameStr_man + "\" + <command> for command usage (or command + TAB)."));
                     List<String> ret = new ArrayList<String>();
                     ret.add(cmdNameStr_listCmd);
                     return ret;
                 }
-                //icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_GREY + "ELN > Console > Available commands :\n"));
+                //icommandsender.sendMessage(new TextComponentString(Color.COLOR_DARK_GREY + "ELN > Console > Available commands :\n"));
                 List<String> cmdl = new ArrayList<String>();
                 Iterator<String> iter = cmdVisibleList.iterator();
                 while (iter.hasNext()) {
@@ -359,7 +359,7 @@ public class ConsoleListener extends CommandBase {
     }
 
     private void cprint(ICommandSender ics, String text) {
-        ics.addChatMessage(new ChatComponentText(Color.COLOR_BRIGHT_GREY + text));
+        ics.sendMessage(new TextComponentString(Color.COLOR_BRIGHT_GREY + text));
     }
 }
 

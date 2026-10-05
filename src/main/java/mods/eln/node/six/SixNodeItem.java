@@ -21,7 +21,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     public SixNodeItem(Block b) {
         super(b);
         setHasSubtypes(true);
-        setUnlocalizedName("SixNodeItem");
+        setTranslationKey("SixNodeItem");
     }
 
     @Override
@@ -35,9 +35,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
         Block block = world.getBlock(x, y, z);
 
-        if ((block == Blocks.snow_layer) && ((world.getBlockMetadata(x, y, z) & 0x7) < 1)) {
+        if ((block == Blocks.SNOW_LAYER) && ((world.getBlockMetadata(x, y, z) & 0x7) < 1)) {
             side = 1;
-        } else if ((block != Blocks.vine) && (block != Blocks.tallgrass) && (block != Blocks.deadbush) && (!block.isReplaceable(world, x, y, z))) {
+        } else if ((block != Blocks.VINE) && (block != Blocks.TALLGRASS) && (block != Blocks.DEADBUSH) && (!block.isReplaceable(world, x, y, z))) {
             if (side == 0)
                 y--;
 
@@ -64,11 +64,11 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if ((y == 255) && (this.field_150939_a.getMaterial().isSolid()))
             return false;
 
-        int i1 = getMetadata(stack.getItemDamage());
+        int i1 = getMetadata(stack.getMetadata());
         int metadata = this.field_150939_a.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, i1);
 
         if (placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata)) {
-            world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, this.field_150939_a.stepSound.func_150496_b(), (this.field_150939_a.stepSound.getVolume() + 1.0F) / 2.0F, this.field_150939_a.stepSound.getPitch() * 0.8F);
+            world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, this.field_150939_a.blockSoundType.func_150496_b(), (this.field_150939_a.blockSoundType.getVolume() + 1.0F) / 2.0F, this.field_150939_a.blockSoundType.getPitch() * 0.8F);
             stack.stackSize -= 1;
         }
 
@@ -120,7 +120,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
             String error;
             if ((error = descriptor.checkCanPlace(coord, direction, LRDU.Up)) != null) {
-                Utils.addChatMessage(player, error);
+                Utils.sendMessage(player, error);
                 return false;
             }
 
@@ -187,7 +187,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if (!isStackValidToPlace(item))
             return;
 
-        Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
+        Minecraft.getMinecraft().profiler.startSection("SixNodeItem");
         if (shouldUseRenderHelperEln(type, item, null)) {
             switch (type) {
 
@@ -220,6 +220,6 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         }
         // GL11.glTranslatef(0, 1, 0);
         getDescriptor(item).renderItem(type, item, data);
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getMinecraft().profiler.endSection();
     }
 }

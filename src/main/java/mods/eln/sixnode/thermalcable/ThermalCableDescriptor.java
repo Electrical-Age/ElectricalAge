@@ -78,15 +78,15 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
     }
 
     public static ThermalCableDescriptor getDescriptorFrom(ItemStack itemStack) {
-        return list[(itemStack.getItemDamage() >> 8) & 0xFF];
+        return list[(itemStack.getMetadata() >> 8) & 0xFF];
     }
 
     /*
     static void setThermalLoadFrom(ItemStack itemStack, ThermalLoad thermalLoad) {
-        if (itemStack == null || itemStack.itemID != Eln.sixNodeBlock.blockID || (itemStack.getItemDamage() & 0xFF) != Eln.electricalCableId) {
+        if (itemStack == null || itemStack.itemID != Eln.sixNodeBlock.blockID || (itemStack.getMetadata() & 0xFF) != Eln.electricalCableId) {
             thermalLoad.setHighImpedance();
         } else {
-            ThermalCableDescriptor cableDescriptor = ThermalCableDescriptor.list[(itemStack.getItemDamage() >> 8) & 0xFF];
+            ThermalCableDescriptor cableDescriptor = ThermalCableDescriptor.list[(itemStack.getMetadata() >> 8) & 0xFF];
             thermalLoad.Rp = cableDescriptor.thermalRp;
             thermalLoad.Rs = cableDescriptor.thermalRs;
             thermalLoad.C = cableDescriptor.thermalC;

@@ -1,8 +1,8 @@
 package mods.eln;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
@@ -36,7 +36,7 @@ public class PacketHandler {
         FMLProxyPacket packet = event.packet;
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
         NetworkManager manager = event.manager;
-        EntityPlayer player = ((NetHandlerPlayServer) event.handler).playerEntity; // EntityPlayerMP
+        EntityPlayer player = ((NetHandlerPlayServer) event.handler).player; // EntityPlayerMP
 
         packetRx(stream, manager, player);
     }
@@ -230,7 +230,7 @@ public class PacketHandler {
             boolean state = stream.readBoolean();
 
             if (id == ClientKeyHandler.wrenchId) {
-                PlayerManager.PlayerMetadata metadata = Eln.playerManager.get(playerMP);
+                PlayerChunkMap.PlayerMetadata metadata = Eln.playerManager.get(playerMP);
                 metadata.setInteractEnable(state);
             }
         } catch (IOException e) {

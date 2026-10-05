@@ -24,7 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -77,13 +77,13 @@ public class EggIncubatorElement extends TransparentNodeElement {
                     EntityChicken chicken = new EntityChicken(node.coordonate.world());
                     chicken.setGrowingAge(-24000);
                     EntityLiving entityliving = (EntityLiving) chicken;
-                    entityliving.setLocationAndAngles(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
+                    entityliving.setLocationAndAngles(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, MathHelper.wrapDegrees(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
                     //entityliving.func_110161_a((EntityLivingData)null); 1.6.4
-                    node.coordonate.world().spawnEntityInWorld(entityliving);
+                    node.coordonate.world().spawnEntity(entityliving);
                     entityliving.playLivingSound();
-                    //node.coordonate.world().spawnEntityInWorld());
+                    //node.coordonate.world().spawnEntity());
                     resetEnergy();
 
                     needPublish();

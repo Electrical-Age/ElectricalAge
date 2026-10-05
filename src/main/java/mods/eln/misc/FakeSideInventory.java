@@ -28,7 +28,7 @@ public class FakeSideInventory implements ISidedInventory {
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int var1) {
+    public ItemStack removeStackFromSlot(int var1) {
         return null;
     }
 
@@ -58,7 +58,7 @@ public class FakeSideInventory implements ISidedInventory {
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer var1) {
+    public boolean isUsableByPlayer(EntityPlayer var1) {
         return false;
     }
 

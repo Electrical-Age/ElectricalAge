@@ -11,7 +11,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.DataOutputStream;
@@ -64,30 +64,30 @@ abstract public class GridElement extends TransparentNodeElement {
         }
         // Check if it's the *correct* cable descriptor.
         if (!cable.equals(desc.cableDescriptor)) {
-            Utils.addChatMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
+            Utils.sendMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
             return true;
         }
         if (other == null || other == this) {
-            Utils.addChatMessage(entityPlayer, "Setting starting point");
+            Utils.sendMessage(entityPlayer, "Setting starting point");
             pending.put(uuid, Pair.of(this.coordonate(), side));
         } else {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
             if (stack.stackSize < distance) {
-                Utils.addChatMessage(entityPlayer, "You need " + cableLength + " units of cable");
+                Utils.sendMessage(entityPlayer, "You need " + cableLength + " units of cable");
             } else if (distance > range) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
+                Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
             } else if (!this.canConnect(other)) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect these two objects");
+                Utils.sendMessage(entityPlayer, "Cannot connect these two objects");
             } else if (!this.validLOS(other)) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect, no line of sight");
+                Utils.sendMessage(entityPlayer, "Cannot connect, no line of sight");
             } else {
                 if (GridLink.addLink(this, other, side, p.getRight(), cable, cableLength)) {
-                    Utils.addChatMessage(entityPlayer, "Added connection");
+                    Utils.sendMessage(entityPlayer, "Added connection");
                     stack.splitStack(cableLength);
                 } else {
-                    Utils.addChatMessage(entityPlayer, "Already connected");
+                    Utils.sendMessage(entityPlayer, "Already connected");
                 }
             }
             pending.remove(uuid);
@@ -159,7 +159,7 @@ abstract public class GridElement extends TransparentNodeElement {
         final NBTTagCompound gridLinks = nbt.getCompoundTag("gridLinks");
         for (Integer i = 0; ; i++) {
             final NBTTagCompound linkTag = gridLinks.getCompoundTag(i.toString());
-            if (linkTag.hasNoTags())
+            if (linkTag.isEmpty())
                 break;
             gridLinksBooting.add(new GridLink(linkTag, ""));
         }
@@ -251,8 +251,8 @@ abstract public class GridElement extends TransparentNodeElement {
                 }
             }
             // The renderer needs to know, for each catenary:
-            // - Vec3 of the starting point.
-            // - Vec3 of the end point.
+            // - Vec3d of the starting point.
+            // - Vec3d of the end point.
             // There's a finite number of starting points, and a potentially unlimited number of endpoints...
             // But until we get protocol buffers or something, simple remains good.
             // So we'll just send pairs, even if there's some duplication.
@@ -264,11 +264,11 @@ abstract public class GridElement extends TransparentNodeElement {
                 // It's always the "a" side doing this.
                 Coordonate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
-                    final Vec3 start = getCablePoint(ourSide, i);
+                    final Vec3d start = getCablePoint(ourSide, i);
                     start.rotateAroundY((float) Math.toRadians(idealRenderingAngle));
-                    Vec3 end = target.getCablePoint(theirSide, i);
+                    Vec3d end = target.getCablePoint(theirSide, i);
                     end.rotateAroundY((float) Math.toRadians(target.idealRenderingAngle));
-                    end = end.addVector(offset.x, offset.y, offset.z);
+                    end = end.add(offset.x, offset.y, offset.z);
                     writeVec(stream, start);
                     writeVec(stream, end);
                 }
@@ -278,14 +278,14 @@ abstract public class GridElement extends TransparentNodeElement {
         }
     }
 
-    protected Vec3 getCablePoint(Direction side, int i) {
+    protected Vec3d getCablePoint(Direction side, int i) {
         if (i >= 2) throw new AssertionError("Invalid cable point index");
         Obj3D.Obj3DPart part = (i == 0 ? desc.plus : desc.gnd).get(0);
         BoundingBox bb = part.boundingBox();
         return bb.centre();
     }
 
-    private void writeVec(DataOutputStream stream, Vec3 sp) throws IOException {
+    private void writeVec(DataOutputStream stream, Vec3d sp) throws IOException {
         stream.writeFloat((float) sp.xCoord);
         stream.writeFloat((float) sp.yCoord);
         stream.writeFloat((float) sp.zCoord);

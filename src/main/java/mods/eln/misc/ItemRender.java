@@ -2,7 +2,7 @@ package mods.eln.misc;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
@@ -51,7 +51,7 @@ public class ItemRender implements IItemRenderer {
 
         // ====================== Render text ======================
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        String text = Integer.toString(itemStack.getItemDamage());
+        String text = Integer.toString(itemStack.getMetadata());
         //   fontRenderer.drawStringWithShadow(text, 1, 1, 0xFFFFFF);
     }
 }

@@ -1,9 +1,9 @@
 package mods.eln.server;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.ore.OreDescriptor;
@@ -61,8 +61,8 @@ public class OreRegenerate {
                 ChunkRef j = jobs.pollLast();
                 if (!Eln.instance.saveConfig.reGenOre && !Eln.instance.forceOreRegen) return;
 
-                WorldServer server = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(j.worldId);
-                Chunk chunk = server.getChunkFromChunkCoords(j.x, j.z);
+                WorldServer server = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(j.worldId);
+                Chunk chunk = server.getChunk(j.x, j.z);
 
                 for (int y = 0; y < 60; y += 2) {
                     for (int z = y & 1; z < 16; z += 2) {

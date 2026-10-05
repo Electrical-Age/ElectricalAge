@@ -142,7 +142,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
             sixNode.dropItem(Eln.treeResin.newItemStack(1));
         }
 
-        Utils.addChatMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
+        Utils.sendMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
         needPublish();
         return true;
     }

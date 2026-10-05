@@ -1,7 +1,7 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
@@ -27,14 +27,14 @@ import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -156,7 +156,7 @@ public class Utils {
             return Direction.YN;
         if (entityLiving.rotationPitch < -45)
             return Direction.YP;
-        int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int dirx = MathHelper.floor((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         if (dirx == 3)
             return Direction.XP;
         if (dirx == 0)
@@ -167,7 +167,7 @@ public class Utils {
     }
 
     public static Direction entityLivingHorizontalViewDirection(EntityLivingBase entityLiving) {
-        int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int dirx = MathHelper.floor((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         if (dirx == 3)
             return Direction.XP;
         if (dirx == 0)
@@ -187,7 +187,7 @@ public class Utils {
 	 * 
 	 * if (var3 == Block.woodSingleSlab) { return 150; }
 	 * 
-	 * if (var3.blockMaterial == Material.wood) { return 300; } }
+	 * if (var3.material == Material.WOOD) { return 300; } }
 	 * 
 	 * if (var2 instanceof ItemTool && ((ItemTool) var2).getToolMaterialName().equals("WOOD")) return 200; if (var2 instanceof ItemSword && ((ItemSword) var2).func_77825_f().equals("WOOD")) return 200; if (var2 instanceof ItemHoe && ((ItemHoe) var2).func_77842_f().equals("WOOD")) return 200; if (var1 == Item.stick.shiftedIndex) return 100; if (var1 == Item.coal.shiftedIndex) return 1600; if (var1 == Item.bucketLava.shiftedIndex) return 20000; if (var1 == Block.sapling.blockID) return 100; if (var1 == Item.blazeRod.shiftedIndex) return 2400; return GameRegistry.getFuelValue(par0ItemStack); } }
 	 */
@@ -407,8 +407,8 @@ public class Utils {
         // p.stop();
         // Utils.println(p);
 
-        S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-        player.playerNetServerHandler.sendPacket(packet);
+        SPacketCustomPayload packet = new SPacketCustomPayload(Eln.channelName, bos.toByteArray());
+        player.connection.sendPacket(packet);
 
         // FMLCommonHandler.instance().getMinecraftServerInstance().getEln.eventChannel.sendTo(new FMLProxyPacket(packet),player);
     }
@@ -416,14 +416,14 @@ public class Utils {
 	/*
 	 * public static void sendPacketToPlayer( ElnServerPacket packet, EntityPlayerMP player) {
 	 * 
-	 * Eln.eventChannel.sendTo(new FMLProxyPacket(packet), player); // player.playerNetServerHandler.sendPacket(new FMLProxyPacket(packet)); }
+	 * Eln.eventChannel.sendTo(new FMLProxyPacket(packet), player); // player.connection.sendPacket(new FMLProxyPacket(packet)); }
 	 */
 
     // private static Color[] dyeColors
 
     // public Color getDyeColor(ItemStack stack)
     // {
-    // ItemDye.dyeColors[stack.getItemDamage()];
+    // ItemDye.dyeColors[stack.getMetadata()];
     // }
 
     public static void setGlColorFromDye(int damage) {
@@ -559,7 +559,7 @@ public class Utils {
     }
 
     public static World getWorld(int dim) {
-        return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(dim);
+        return FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(dim);
     }
 
     public static boolean getWorldExist(int dim) {
@@ -571,28 +571,28 @@ public class Utils {
             return Math.max(0.0, Eln.instance.wind.getWind(y));
         } else {
             World world = getWorld(worldId);
-            float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
-            return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
+            float factor = 1f + world.getRainStrength(0) * 0.2f + world.getThunderStrength(0) * 0.2f;
+            return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getThunderStrength(0) * 2f);
         }
     }
 
     // public static double getWind(World world, int y)
     // {
-    // float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
-    // return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
+    // float factor = 1f + world.getRainStrength(0) * 0.2f + world.getThunderStrength(0) * 0.2f;
+    // return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getThunderStrength(0) * 2f);
     // }
 
     public static void dropItem(ItemStack itemStack, int x, int y, int z, World world) {
         if (itemStack == null)
             return;
-        if (world.getGameRules().getGameRuleBooleanValue("doTileDrops")) {
+        if (world.getGameRules().getBoolean("doTileDrops")) {
             float var6 = 0.7F;
             double var7 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var9 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             EntityItem var13 = new EntityItem(world, (double) x + var7, (double) y + var9, (double) z + var11, itemStack);
-            var13.delayBeforeCanPickup = 10;
-            world.spawnEntityInWorld(var13);
+            var13.pickupDelay = 10;
+            world.spawnEntity(var13);
         }
     }
 
@@ -632,7 +632,7 @@ public class Utils {
             ItemStack target = inventory.getStackInSlot(slot);
             if (target == null) {
                 int amount = Math.min(toPut, limit);
-                inventory.setInventorySlotContents(slot, new ItemStack(stack.getItem(), amount, stack.getItemDamage()));
+                inventory.setInventorySlotContents(slot, new ItemStack(stack.getItem(), amount, stack.getMetadata()));
                 toPut -= amount;
             } else {
                int space = limit - target.stackSize;
@@ -745,7 +745,7 @@ public class Utils {
             stream.writeShort(-1);
         } else {
             stream.writeShort(Item.getIdFromItem(stack.getItem()));
-            stream.writeShort(stack.getItemDamage());
+            stream.writeShort(stack.getMetadata());
         }
     }
 
@@ -766,7 +766,7 @@ public class Utils {
 
         } else {
             ItemDamage = stream.readShort();
-            if (old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
+            if (old == null || Item.getIdFromItem(old.getItem().getItem()) != itemId || old.getItem().getMetadata() != ItemDamage)
                 return new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
             else
                 return old;
@@ -942,7 +942,7 @@ public class Utils {
 
     public static boolean areSame(ItemStack stack, ItemStack output) {
         try {
-            if (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage()) return true;
+            if (stack.getItem() == output.getItem() && stack.getMetadata() == output.getMetadata()) return true;
             int[] stackIds = OreDictionary.getOreIDs(stack);
             int[] outputIds = OreDictionary.getOreIDs(output);
             // System.out.println(Arrays.toString(stackIds) + "   " + Arrays.toString(outputIds));
@@ -956,8 +956,8 @@ public class Utils {
         return false;
     }
 
-    public static Vec3 getVec05(Coordonate c) {
-        return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
+    public static Vec3d getVec05(Coordonate c) {
+        return new Vec3d(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
     }
 
     public static double getHeadPosY(Entity e) {
@@ -973,7 +973,7 @@ public class Utils {
 	 */
 
     public static boolean isCreative(EntityPlayerMP entityPlayer) {
-        return entityPlayer.theItemInWorldManager.isCreative();
+        return entityPlayer.interactionManager.isCreative();
 		/*
 		 * Minecraft m = Minecraft.getMinecraft(); return m.getIntegratedServer().getGameType().isCreative();
 		 */
@@ -1067,9 +1067,9 @@ public class Utils {
         float d = 0;
 
         while (d < rangeMax) {
-            float xFloor = MathHelper.floor_float(x);
-            float yFloor = MathHelper.floor_float(y);
-            float zFloor = MathHelper.floor_float(z);
+            float xFloor = MathHelper.floor(x);
+            float yFloor = MathHelper.floor(y);
+            float zFloor = MathHelper.floor(z);
 
             float dx = x - xFloor, dy = y - yFloor, dz = z - zFloor;
             dx = (vx > 0 ? (1 - dx) * vxInv : -dx * vxInv);
@@ -1108,11 +1108,11 @@ public class Utils {
     }
 
     public static boolean isBlockLoaded(World world, double x, double y, double z) {
-        return world.blockExists(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+        return world.blockExists(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
     }
 
     public static Block getBlock(World world, double x, double y, double z) {
-        Block block = world.getBlock(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+        Block block = world.getBlock(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
         return block;
     }
 
@@ -1280,11 +1280,11 @@ public class Utils {
 
     public static boolean isWater(Coordonate waterCoord) {
         Block block = waterCoord.getBlock();
-        return (block == Blocks.flowing_water || block == Blocks.water);
+        return (block == Blocks.FLOWING_WATER || block == Blocks.WATER);
     }
 
-    public static void addChatMessage(EntityPlayer entityPlayer, String string) {
-        entityPlayer.addChatMessage(new ChatComponentText(string));
+    public static void sendMessage(EntityPlayer entityPlayer, String string) {
+        entityPlayer.sendMessage(new TextComponentString(string));
     }
 
     public static ItemStack newItemStack(int i, int size, int damage) {

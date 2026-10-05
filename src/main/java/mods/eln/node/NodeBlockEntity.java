@@ -1,8 +1,8 @@
 package mods.eln.node;
 
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -14,9 +14,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.EnumSkyBlock;
 
 import java.io.ByteArrayOutputStream;
@@ -197,7 +197,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
     }
 
-    public void onChunkUnload() {
+    public void onUnload() {
         if (worldObj.isRemote) {
             destructor();
         }
@@ -259,7 +259,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public static NodeBlockEntity getEntity(int x, int y, int z) {
         TileEntity entity;
-        if ((entity = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z)) != null) {
+        if ((entity = Minecraft.getMinecraft().world.getTileEntity(x, y, z)) != null) {
             if (entity instanceof NodeBlockEntity) {
                 return (NodeBlockEntity) entity;
             }
@@ -275,7 +275,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
-        return new S3FPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
+        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
         //return null;
     }
 

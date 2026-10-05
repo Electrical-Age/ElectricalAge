@@ -25,7 +25,7 @@ public class BasicContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer player) {
-        return inventory.isUseableByPlayer(player);
+        return inventory.isUsableByPlayer(player);
     }
 
     protected void bindPlayerInventory(InventoryPlayer inventoryPlayer) {
@@ -45,7 +45,7 @@ public class BasicContainer extends Container {
 
     @Override
     protected Slot addSlotToContainer(Slot slot) {
-        // slot.xDisplayPosition = helper.
+        // slot.xPos = helper.
         return super.addSlotToContainer(slot);
     }
 
@@ -108,7 +108,7 @@ public class BasicContainer extends Container {
 
                 itemstack1 = slot.getStack();
 
-                if (slot.isItemValid(par1ItemStack) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
+                if (slot.isItemValid(par1ItemStack) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getMetadata() == itemstack1.getMetadata()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
                     int l = itemstack1.stackSize + par1ItemStack.stackSize;
                     int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
                     if (l <= maxSize) {
@@ -182,10 +182,10 @@ public class BasicContainer extends Container {
     public ItemStack slotClick(int arg0, int arg1, int arg2, EntityPlayer arg3) {
         if (arg0 >= this.inventorySlots.size()) {
             System.out.println("Damned !!! What happen ?");
-            Utils.addChatMessage(arg3, "Damn! Sorry, this is a debug");
-            Utils.addChatMessage(arg3, "message from Electrical age.");
-            Utils.addChatMessage(arg3, "Could you send me a message about that?");
-            Utils.addChatMessage(arg3, "Thanks :D");
+            Utils.sendMessage(arg3, "Damn! Sorry, this is a debug");
+            Utils.sendMessage(arg3, "message from Electrical age.");
+            Utils.sendMessage(arg3, "Could you send me a message about that?");
+            Utils.sendMessage(arg3, "Thanks :D");
             return null;
         }
         return super.slotClick(arg0, arg1, arg2, arg3);
