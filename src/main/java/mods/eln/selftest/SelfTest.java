@@ -377,16 +377,23 @@ public final class SelfTest implements SelfTestContext {
 
     @Override
     public SixNodeElement placeSix(int damage, BlockPos p) {
+        // as if clicking the top face of the platform block below: side 1 (up) -> element on the YN face
+        return placeSix(damage, p, Direction.YN);
+    }
+
+    @Override
+    public SixNodeElement placeSix(int damage, BlockPos p, Direction side) {
         SixNodeDescriptor d = Eln.sixNodeItem.getDescriptor(damage);
         if (d == null) throw new IllegalStateException("no six node descriptor " + damage);
         ItemStack stack = d.newItemStack();
-        // as if clicking the top face of the platform block below: side 1 (up) -> element on the YN face
-        boolean ok = Eln.sixNodeItem.placeBlockAt(stack, player, world, p.getX(), p.getY(), p.getZ(), 1, 0.5F, 1F, 0.5F, damage);
-        if (!ok) throw new IllegalStateException("placeBlockAt failed for " + d.name + " at " + p);
-        placed.add(p);
+        EnumFacing clicked = side.getInverse().toEnumFacing(); // face of the neighbour block at p + side
+        float hx = 0.5F + 0.5F * clicked.getXOffset(), hy = 0.5F + 0.5F * clicked.getYOffset(), hz = 0.5F + 0.5F * clicked.getZOffset();
+        boolean ok = Eln.sixNodeItem.placeBlockAt(stack, player, world, p.getX(), p.getY(), p.getZ(), clicked.getIndex(), hx, hy, hz, damage);
+        if (!ok) throw new IllegalStateException("placeBlockAt failed for " + d.name + " at " + p + " on " + side);
+        if (!placed.contains(p)) placed.add(p);
         NodeBase node = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p.getX(), p.getY(), p.getZ(), world));
         if (!(node instanceof SixNode)) throw new IllegalStateException("no SixNode at " + p);
-        return ((SixNode) node).getElement(Direction.YN);
+        return ((SixNode) node).getElement(side);
     }
 
     @Override

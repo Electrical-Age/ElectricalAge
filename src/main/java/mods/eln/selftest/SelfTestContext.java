@@ -17,6 +17,13 @@ public interface SelfTestContext {
     /** Place a six-node device (damage = subId + (id &lt;&lt; 6)) on the floor of p (as a player clicking the block below). */
     SixNodeElement placeSix(int damage, BlockPos p);
 
+    /**
+     * Place a six-node device in p on its {@code side} face (YN = floor, YP = ceiling, XN/XP/ZN/ZP = walls), as a
+     * player clicking the face of the neighbour block at p + side that points back at p. The neighbour must be solid.
+     * The node block is removed by the cleanup like the floor ones.
+     */
+    SixNodeElement placeSix(int damage, BlockPos p, mods.eln.misc.Direction side);
+
     /** Place a transparent-node device standing on the block below p. */
     TransparentNodeElement placeTransparent(int damage, BlockPos p);
 

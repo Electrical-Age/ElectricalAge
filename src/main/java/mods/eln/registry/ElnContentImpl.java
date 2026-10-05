@@ -84,33 +84,33 @@ public class ElnContentImpl implements ElnContent {
 
     @Override
     public void serverStarting() {
+        for (ElnContent b : BATCHES) b.serverStarting();
     }
 
     @Override
     public void serverStopped() {
         LightBlockEntity.observers.clear();
         LampSupplyElement.channelMap.clear();
-        for (ElnContent b : BATCHES) b.serverStarting();
         for (ElnContent b : BATCHES) b.serverStopped();
     }
 
     @Override
     public void serverTick() {
+        for (ElnContent b : BATCHES) b.serverTick();
     }
 
     @Override
     public void clientInit() {
-        for (ElnContent b : BATCHES) b.serverTick();
         for (ElnContent b : BATCHES) b.clientInit();
     }
 
     @Override
     public void clientConnected() {
+        for (ElnContent b : BATCHES) b.clientConnected();
     }
 
     @Override
     public void openWiki() {
-        for (ElnContent b : BATCHES) b.clientConnected();
         for (ElnContent b : BATCHES) b.openWiki();
     }
 }

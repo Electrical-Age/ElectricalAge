@@ -12,10 +12,11 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
-// TODO(1.12 wp12): restore wiki IPlugIn once wiki/ builds (imports, implements, top/bottom below)
-// import mods.eln.wiki.GuiItemStack;
-// import mods.eln.wiki.GuiVerticalExtender;
-// import mods.eln.wiki.ItemDefault.IPlugIn;
+import mods.eln.wiki.GuiItemStack;
+import mods.eln.wiki.GuiVerticalExtender;
+import mods.eln.wiki.ItemDefault.IPlugIn;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -25,7 +26,7 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalMachineDescriptor extends TransparentNodeDescriptor /* TODO(1.12 wp12): implements IPlugIn */ {
+public class ElectricalMachineDescriptor extends TransparentNodeDescriptor implements IPlugIn {
     public RecipesList recipe = new RecipesList();
 
     final double nominalU;
@@ -155,14 +156,14 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor /* TO
         return defaultHandle;
     }
 
-    // TODO(1.12 wp12): restore wiki IPlugIn once wiki/ builds
-    /*
     @Override
+    @SideOnly(Side.CLIENT) // wiki GUI
     public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
         return y;
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
         int counter = -1;
 
@@ -194,5 +195,4 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor /* TO
 
         return y;
     }
-    */
 }

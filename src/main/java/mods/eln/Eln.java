@@ -276,8 +276,11 @@ public class Eln {
         killMonstersAroundLampsRange = config.get("entity", "killMonstersAroundLampsRange", 9).getInt(9);
 
         forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
-        genCopper = config.get("mapGenerate", "copper", true).getBoolean(true);
-        genLead = config.get("mapGenerate", "lead", true).getBoolean(true);
+        // E36 defaults (wp12): copper and lead ores already generate from several pack mods (Thermal Foundation,
+        // IC2, Mekanism, IE, ...; oredict unified by UniDict/JAOPCA), so EA's own copper/lead veins default to off.
+        // Tungsten is EA-only (on); cinnabar is forced off below as in 1.7.10; EA has no tin ore.
+        genCopper = config.get("mapGenerate", "copper", false).getBoolean(false);
+        genLead = config.get("mapGenerate", "lead", false).getBoolean(false);
         genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
         genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
         genCinnabar = false;
@@ -668,10 +671,15 @@ public class Eln {
     public static int replicatorRegistrationId = -1;
 
 
-    static ItemStack findItemStack(String name, int stackSize) {
+    /** EA stack by name (registered custom stacks, then EA's ore dictionary entries); EMPTY (logged) if unknown. */
+    public static ItemStack findItemStack(String name, int stackSize) {
         ItemStack stack = GameRegistryCompat.findItemStack("Eln", name, stackSize);
         if (Utils.isEmpty(stack)) {
             stack = dictionnaryOreFromMod.get(name);
+            if (Utils.isEmpty(stack)) { // 1.7.10 NPE'd here
+                Utils.println("Electrical Age: findItemStack: no item named '" + name + "'");
+                return ItemStack.EMPTY;
+            }
             stack = Utils.newItemStack(Item.getIdFromItem(stack.getItem()), stackSize, stack.getMetadata());
         }
         return stack;
