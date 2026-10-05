@@ -25,8 +25,9 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void loadModels() {
+    public void preInit() {
         Eln.obj.loadAllElnModels();
+        MinecraftForge.EVENT_BUS.register(new mods.eln.client.render.ElnItemModels()); // ModelRegistryEvent/ModelBakeEvent
     }
 
     @Override

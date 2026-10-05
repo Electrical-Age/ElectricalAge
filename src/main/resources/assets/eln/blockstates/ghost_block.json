@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "normal": {
+      "model": "eln:particle_iron"
+    }
+  }
+}

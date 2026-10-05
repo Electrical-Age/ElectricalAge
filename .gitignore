@@ -21,6 +21,7 @@ eclipse
 *.ipr
 *.iws
 *.json
+!src/main/resources/**/*.json
 # kate
 *.kate-swp
 *.launch

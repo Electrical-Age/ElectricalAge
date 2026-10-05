@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
+/** Plain TESR (not FastTESR: EA draws immediate-mode GL11 / display lists). Bound in ClientProxy.registerRenderers. */
 public class SixNodeRender extends TileEntitySpecialRenderer<SixNodeEntity> {
     @Override
     public void render(SixNodeEntity entity, double x, double y, double z, float var8, int destroyStage, float alpha) {
@@ -15,6 +16,8 @@ public class SixNodeRender extends TileEntitySpecialRenderer<SixNodeEntity> {
         SixNodeEntity tileEntity = (SixNodeEntity) entity;
 
 
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_LIGHTING_BIT | GL11.GL_COLOR_BUFFER_BIT
+            | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT); // EA draws raw GL11; keep GlStateManager's cache true (no texture bit: EA binds via TextureManager)
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x + .5F, (float) y + .5F, (float) z + .5F);
         /*if(tileEntity.sixNodeCacheMapId >= 0)
@@ -39,6 +42,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer<SixNodeEntity> {
             idx++;
         }
         GL11.glPopMatrix();
+        GL11.glPopAttrib();
         //Utils.glDefaultColor();
         Minecraft.getMinecraft().profiler.endSection();
 

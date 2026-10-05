@@ -25,7 +25,7 @@ public class ElnContentImpl implements ElnContent {
         // PENDING(1.12 WP14): oreRegenerate = new OreRegenerate();
         // PENDING(1.12 WP14): oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setTranslationKey("OreEln");
         lightBlock = new LightBlock();
-        GameRegistryCompat.registerBlock(lightBlock, null, "ElnDeviceRegistry.lightBlock");
+        GameRegistryCompat.registerBlock(lightBlock, null, "Eln.lightBlock"); // eln:light_block
         // PENDING(1.12 WP14): GameRegistryCompat.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
         GameRegistry.registerTileEntity(LightBlockEntity.class, new ResourceLocation(MODID, "light_block_entity"));
         // PENDING(1.12 WP14): oreItem = (OreItem) GameRegistryCompat.getItemBlock(oreBlock);
