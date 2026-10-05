@@ -212,12 +212,16 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     override fun readFromNBT(nbt: NBTTagCompound?) {
         super.readFromNBT(nbt)
         tankLevel = nbt?.getDouble("tankLevel") ?: 0.0
+        // WP16: the fluid in the tank is saved too (1.7.10 reloaded every tank as lava)
+        val savedFluid = nbt?.getString("tankFluid") ?: ""
+        if (savedFluid in fuels) tankFluid = savedFluid
         on = nbt?.getBoolean("on") ?: false
     }
 
     override fun writeToNBT(nbt: NBTTagCompound?) {
         super.writeToNBT(nbt)
         nbt?.setDouble("tankLevel", tankLevel)
+        nbt?.setString("tankFluid", tankFluid)
         nbt?.setBoolean("on", on)
     }
 
