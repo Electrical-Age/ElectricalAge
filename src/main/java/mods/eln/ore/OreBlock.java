@@ -28,7 +28,7 @@ public class OreBlock extends Block {
     }
 	/*//caca1.5.1
 	public int getBlockTextureFromSideAndMetadata(int i,int j){
-		return ElnDeviceRegistry.oreItem.getDescriptor(j).getBlockIconId(i, j);
+		return mods.eln.registry.batch.Wp12Content.oreItem.getDescriptor(j).getBlockIconId(i, j);
 	}*/
 
     public int damageDropped(int i) { //Makes sure pick block works right
@@ -37,13 +37,13 @@ public class OreBlock extends Block {
 
     @Override
     public void getSubBlocks(Item i, CreativeTabs tab, List l) { //Puts all sub blocks into the creative inventory
-        ElnDeviceRegistry.oreItem.getSubItems(i, tab, l);
+        mods.eln.registry.batch.Wp12Content.oreItem.getSubItems(i, tab, l);
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int par1, int par2) {
-        OreDescriptor desc = ElnDeviceRegistry.oreItem.getDescriptor(par2);
+        OreDescriptor desc = mods.eln.registry.batch.Wp12Content.oreItem.getDescriptor(par2);
         if (desc == null) return null;
         return desc.getBlockIconId(par1, par2);
     }
@@ -60,7 +60,7 @@ public class OreBlock extends Block {
 		}
 		
 		return list; //Returns the finished list :)*/
-        OreDescriptor desc = ElnDeviceRegistry.oreItem.getDescriptor(meta);
+        OreDescriptor desc = mods.eln.registry.batch.Wp12Content.oreItem.getDescriptor(meta);
         if (desc == null) return new ArrayList<ItemStack>();
         return desc.getBlockDropped(fortune);
     }
@@ -78,7 +78,7 @@ public class OreBlock extends Block {
         if (par1World.isRemote) return;
 		/*
 		
-		ArrayList<ItemStack> list = ElnDeviceRegistry.oreItem.getDescriptor(par6).getBlockDropped(0);
+		ArrayList<ItemStack> list = mods.eln.registry.batch.Wp12Content.oreItem.getDescriptor(par6).getBlockDropped(0);
 		if(list == null) {
 			dropBlockAsItem_do(par1World, par2, par3, par4, new ItemStack(this, 1, par6));
 		} else {

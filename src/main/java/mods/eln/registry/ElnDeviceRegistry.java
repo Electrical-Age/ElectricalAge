@@ -94,6 +94,10 @@ public final class ElnDeviceRegistry {
     public static ElectricalCableDescriptor lowVoltageCableDescriptor;
     public static ElectricalCableDescriptor batteryCableDescriptor;
     public static ElectricalCableDescriptor meduimVoltageCableDescriptor;
+    // shared by batches: registered by Wp12 (registerTreeResinAndRubber / registerMiningPipe), used by Wp9c (resin
+    // collector) and Wp10a (autominer); null until registered
+    public static mods.eln.item.TreeResin treeResin;
+    public static mods.eln.item.MiningPipeDescriptor miningPipeDescriptor;
 
     public static void registerElectricalCable(int id) {
         int subId, completId;
@@ -461,7 +465,7 @@ public final class ElnDeviceRegistry {
             GroundCableDescriptor desc = new GroundCableDescriptor(name, obj.getObj("groundcable"));
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
-        // PENDING(1.12 WP9): subId 8 "Hub" (HubDescriptor, sixnode/hub)
+        // subId 8 "Hub": Wp9c (registry/batch/Wp9cContent, registerHub(2))
     }
 
     public static void registerElectricalSource(int id) {
@@ -629,7 +633,7 @@ public final class ElnDeviceRegistry {
 
         // TODO: Modern street light.
 
-        // PENDING(1.12 WP9): sub-UIDs 15/16 "50V/200V Emergency Lamp" (EmergencyLampDescriptor, sixnode/EmergencyLamp.kt)
+        // sub-UIDs 15/16 "50V/200V Emergency Lamp": Wp9c (registry/batch/Wp9cContent, registerEmergencyLamps(64))
     }
 
     public static void registerLampSupply(int id) {
@@ -834,7 +838,7 @@ public final class ElnDeviceRegistry {
             sharedItem.addElement(completId, element);
             allMeterElement = element;
         }
-        // PENDING(1.12 WP9): subId 8 "Wireless Analyser" (WirelessSignalAnalyserItemDescriptor, sixnode/wirelesssignal)
+        // subId 8 "Wireless Analyser": Wp9c (registry/batch/Wp9cContent, registerWirelessAnalyser(14))
 
     }
 

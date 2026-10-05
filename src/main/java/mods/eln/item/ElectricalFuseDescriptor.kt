@@ -24,7 +24,7 @@ class ElectricalFuseDescriptor(name: String, val cableDescriptor: ElectricalCabl
     init {
         if (cableDescriptor != null) {
             setDefaultIcon("electricalfuse")
-            voltageLevelColor = VoltageLevelColor.fromCable(cableDescriptor)
+            voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cableDescriptor)
         } else {
             setDefaultIcon("blownelectricalfuse")
             voltageLevelColor = VoltageLevelColor.Neutral

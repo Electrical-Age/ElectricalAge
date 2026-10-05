@@ -12,6 +12,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
@@ -62,7 +63,7 @@ import java.util.List;
  * RCON only returns what a command prints synchronously, so results go to the server log (logger "eln-selftest")
  * and are kept for `/eln selftest report`.
  */
-public final class SelfTest {
+public final class SelfTest implements SelfTestContext {
     private static final Logger LOG = LogManager.getLogger("eln-selftest");
 
     // damage values = subId + (registration id << 6), see ElnContentImpl / ElnDeviceRegistry
@@ -73,6 +74,22 @@ public final class SelfTest {
     static final int BATTERY = 0 + (16 << 6);     // Cost Oriented Battery
     static final double SOURCE_U = 50.0;
     static final double TOLERANCE = 0.01; // relative
+
+    /** Extra cases, one line per device batch (plain runs only; not keep/verify). */
+    static List<SelfTestCase> cases() {
+        List<SelfTestCase> c = new ArrayList<>();
+        mods.eln.selftest.cases.Wp9aCases.addTo(c);
+        mods.eln.selftest.cases.Wp9bCases.addTo(c);
+        mods.eln.selftest.cases.Wp9cCases.addTo(c);
+        mods.eln.selftest.cases.Wp10aCases.addTo(c);
+        mods.eln.selftest.cases.Wp10bCases.addTo(c);
+        mods.eln.selftest.cases.Wp11Cases.addTo(c);
+        mods.eln.selftest.cases.Wp12Cases.addTo(c);
+        return c;
+    }
+
+    /** Each extra case gets a platform row at origin + (0, 0, CASE_ROW * (index + 1)). */
+    static final int CASE_ROW = 5;
 
     private static SelfTest running;
     private static final List<String> lastReport = Collections.synchronizedList(new ArrayList<String>());
@@ -87,6 +104,9 @@ public final class SelfTest {
     private final List<BlockPos> platform = new ArrayList<>();
     private final List<BlockPos> placed = new ArrayList<>();
     private int pass = 0, fail = 0;
+    private final List<SelfTestCase> extra;
+    private BlockPos base; // at() origin: the slice's platform, or the current extra case's row
+    private FakePlayer player;
 
     private ElectricalSourceElement source;
     private SixNodeElement cable1, cable2;
@@ -98,6 +118,8 @@ public final class SelfTest {
 
     private SelfTest(ICommandSender sender, WorldServer world, BlockPos origin, int ticks, Mode mode) {
         this.mode = mode;
+        this.extra = mode == Mode.RUN ? cases() : new ArrayList<SelfTestCase>();
+        this.base = origin;
         this.sender = sender;
         this.world = world;
         this.origin = origin;
@@ -200,33 +222,47 @@ public final class SelfTest {
 
     // ------------------------------------------------------------------ steps
 
-    private void line(String s) {
+    @Override
+    public WorldServer world() {
+        return world;
+    }
+
+    @Override
+    public void line(String s) {
         report.add(s);
         LOG.info(s);
     }
 
-    private void check(String what, boolean ok, String detail) {
+    @Override
+    public void check(String what, boolean ok, String detail) {
         if (ok) pass++;
         else fail++;
         line((ok ? "PASS " : "FAIL ") + what + (detail.isEmpty() ? "" : ": " + detail));
     }
 
-    private void checkValue(String what, double measured, double expected) {
+    @Override
+    public void checkValue(String what, double measured, double expected) {
         double err = Math.abs(measured - expected) / Math.max(Math.abs(expected), 1e-9);
         boolean ok = !Double.isNaN(measured) && err <= TOLERANCE;
         check(what, ok, String.format("measured %.4f, expected %.4f (%.2f%%)", measured, expected, err * 100));
     }
 
-    private BlockPos at(int dx, int dy, int dz) {
-        return origin.add(dx, dy, dz);
+    @Override
+    public BlockPos at(int dx, int dy, int dz) {
+        return base.add(dx, dy, dz);
+    }
+
+    /** z extent of the whole test area (slice row + extra case rows). */
+    private int maxDz() {
+        return 3 + CASE_ROW * extra.size();
     }
 
     /** Area: platform x 0..6, z 0..2 at origin.y; devices at y+1. */
     private boolean setUp() {
         line("eln selftest at dim " + world.provider.getDimension() + " " + origin.getX() + " " + origin.getY() + " "
             + origin.getZ() + ", " + ticks + " ticks");
-        for (int dx = -1; dx <= 7; dx++)
-            for (int dz = -1; dz <= 3; dz++)
+        for (int dx = -1; dx <= 17; dx++)
+            for (int dz = -1; dz <= maxDz(); dz++)
                 for (int dy = 0; dy <= 3; dy++) {
                     BlockPos p = at(dx, dy, dz);
                     if (!world.isBlockLoaded(p)) {
@@ -246,12 +282,12 @@ public final class SelfTest {
             }
 
         try {
-            FakePlayer player = FakePlayerFactory.getMinecraft(world);
-            source = (ElectricalSourceElement) placeSix(SOURCE, at(0, 1, 1), player);
-            cable1 = placeSix(LV_CABLE, at(1, 1, 1), player);
-            cable2 = placeSix(LV_CABLE, at(2, 1, 1), player);
-            lamp = (LampSocketElement) placeSix(LAMP_SOCKET, at(3, 1, 1), player);
-            battery = (BatteryElement) placeTransparent(BATTERY, at(6, 1, 1), player);
+            player = FakePlayerFactory.getMinecraft(world);
+            source = (ElectricalSourceElement) placeSix(SOURCE, at(0, 1, 1));
+            cable1 = placeSix(LV_CABLE, at(1, 1, 1));
+            cable2 = placeSix(LV_CABLE, at(2, 1, 1));
+            lamp = (LampSocketElement) placeSix(LAMP_SOCKET, at(3, 1, 1));
+            battery = (BatteryElement) placeTransparent(BATTERY, at(6, 1, 1));
         } catch (RuntimeException e) {
             check("placement", false, e.toString());
             LOG.error("placement failed", e);
@@ -272,6 +308,25 @@ public final class SelfTest {
         lamp.getInventory().setInventorySlotContents(1, Eln.sixNodeItem.getDescriptor(LV_CABLE).newItemStack());
         lamp.getInventory().markDirty();
         lamp.networkUnserialize(stream(out -> out.writeByte(3))); // LampSocketElement.tooglePowerSupplyType
+
+        for (int i = 0; i < extra.size(); i++) {
+            SelfTestCase c = extra.get(i);
+            base = origin.add(0, 0, CASE_ROW * (i + 1));
+            try {
+                int w = Math.max(1, Math.min(16, c.width()));
+                for (int dx = 0; dx < w; dx++)
+                    for (int dz = 0; dz <= 2; dz++) {
+                        world.setBlockState(at(dx, 0, dz), Blocks.STONE.getDefaultState(), 3);
+                        platform.add(at(dx, 0, dz));
+                    }
+                line("case " + c.name() + " at " + base);
+                c.build(this);
+            } catch (RuntimeException e) {
+                check(c.name() + " build", false, e.toString());
+                LOG.error("case " + c.name() + " build failed", e);
+            }
+        }
+        base = origin;
         return true;
     }
 
@@ -320,7 +375,8 @@ public final class SelfTest {
         return ((SixNode) node).getElement(Direction.YN);
     }
 
-    private SixNodeElement placeSix(int damage, BlockPos p, FakePlayer player) {
+    @Override
+    public SixNodeElement placeSix(int damage, BlockPos p) {
         SixNodeDescriptor d = Eln.sixNodeItem.getDescriptor(damage);
         if (d == null) throw new IllegalStateException("no six node descriptor " + damage);
         ItemStack stack = d.newItemStack();
@@ -333,7 +389,8 @@ public final class SelfTest {
         return ((SixNode) node).getElement(Direction.YN);
     }
 
-    private Object placeTransparent(int damage, BlockPos p, FakePlayer player) {
+    @Override
+    public TransparentNodeElement placeTransparent(int damage, BlockPos p) {
         TransparentNodeDescriptor d = Eln.transparentNodeItem.getDescriptor(damage);
         if (d == null) throw new IllegalStateException("no transparent node descriptor " + damage);
         ItemStack stack = d.newItemStack();
@@ -346,11 +403,12 @@ public final class SelfTest {
         return ((TransparentNode) node).element;
     }
 
-    private interface Writer {
+    public interface Writer {
         void write(DataOutputStream out) throws IOException;
     }
 
-    private static DataInputStream stream(Writer w) {
+    @Override
+    public DataInputStream stream(Writer w) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try {
             w.write(new DataOutputStream(bytes));
@@ -371,6 +429,17 @@ public final class SelfTest {
             check("measure", false, ex.toString());
             LOG.error("measure failed", ex);
         }
+        for (int i = 0; i < extra.size(); i++) {
+            SelfTestCase c = extra.get(i);
+            base = origin.add(0, 0, CASE_ROW * (i + 1));
+            try {
+                c.measure(this);
+            } catch (RuntimeException ex) {
+                check(c.name() + " measure", false, ex.toString());
+                LOG.error("case " + c.name() + " measure failed", ex);
+            }
+        }
+        base = origin;
         finish();
     }
 
@@ -404,7 +473,7 @@ public final class SelfTest {
         int level = lamp.getLightValue();
         BlockPos lightPos = at(3, 1, 1);
         int lightBlocks = 0;
-        for (BlockPos p : BlockPos.getAllInBox(at(-12, -8, -12), at(18, 12, 14))) {
+        for (BlockPos p : BlockPos.getAllInBox(at(-12, -8, -12), at(28, 12, 14 + maxDz()))) {
             IBlockState s = world.getBlockState(p);
             if (s.getBlock() == ElnDeviceRegistry.lightBlock) {
                 lightBlocks++;
@@ -444,11 +513,11 @@ public final class SelfTest {
         try {
             world.getGameRules().setOrCreateGameRule("doTileDrops", "false");
             for (BlockPos p : placed) world.setBlockToAir(p);
-            for (BlockPos p : BlockPos.getAllInBox(at(-12, -8, -12), at(18, 12, 14))) {
+            for (BlockPos p : BlockPos.getAllInBox(at(-12, -8, -12), at(28, 12, 14 + maxDz()))) {
                 if (world.getBlockState(p).getBlock() == ElnDeviceRegistry.lightBlock) world.setBlockToAir(p);
             }
             for (BlockPos p : platform) world.setBlockToAir(p);
-            AxisAlignedBB box = new AxisAlignedBB(at(-2, -2, -2), at(9, 5, 5));
+            AxisAlignedBB box = new AxisAlignedBB(at(-2, -2, -2), at(19, 5, 3 + maxDz()));
             for (EntityItem item : world.getEntitiesWithinAABB(EntityItem.class, box)) item.setDead();
             boolean clean = true;
             for (BlockPos p : placed) {

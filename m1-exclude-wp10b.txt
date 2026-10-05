@@ -1,0 +1,16 @@
+# Device batch wp10b: excluded sources (delete a line to build it). See notes/core-log.md "Device batches".
+mods/eln/transparentnode/solarpanel/
+mods/eln/transparentnode/windturbine/
+mods/eln/transparentnode/waterturbine/
+mods/eln/transparentnode/turbine/
+mods/eln/transparentnode/heatfurnace/
+mods/eln/transparentnode/FuelGenerator.kt
+mods/eln/transparentnode/FuelHeatFurnace.kt
+mods/eln/transparentnode/LargeRheostat.kt
+mods/eln/transparentnode/thermaldissipatoractive/
+mods/eln/transparentnode/thermaldissipatorpassive/
+mods/eln/transparentnode/electricalantennarx/
+mods/eln/transparentnode/electricalantennatx/
+mods/eln/transparentnode/teleporter/
+mods/eln/transparentnode/turret/
+mods/eln/registry/pending/Wp10bPending.java

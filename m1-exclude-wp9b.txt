@@ -1,0 +1,16 @@
+# Device batch wp9b: excluded sources (delete a line to build it). See notes/core-log.md "Device batches".
+mods/eln/sixnode/electricallightsensor/
+mods/eln/sixnode/electricalweathersensor/
+mods/eln/sixnode/electricalwindsensor/
+mods/eln/sixnode/thermalsensor/
+mods/eln/sixnode/electricalentitysensor/
+mods/eln/sixnode/electricalfiredetector/
+mods/eln/sixnode/electricalsensor/
+mods/eln/sixnode/electricalvumeter/
+mods/eln/sixnode/electricalwatch/
+mods/eln/sixnode/electricalalarm/
+mods/eln/sixnode/electricalredstoneinput/
+mods/eln/sixnode/electricalredstoneoutput/
+mods/eln/sixnode/thermalcable/
+mods/eln/sixnode/Scanner.kt
+mods/eln/registry/pending/Wp9bPending.java

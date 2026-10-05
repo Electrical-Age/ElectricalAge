@@ -586,7 +586,7 @@ object OreColorMapping {
             }
         }
 
-        for (c in ElnDeviceRegistry.oreScannerConfig) {
+        for (c in mods.eln.registry.batch.Wp12Content.oreScannerConfig) {
             if (c.blockKey >= 0 && c.blockKey < blockKeyMapping.size)
                 blockKeyMapping[c.blockKey] = c.factor
         }

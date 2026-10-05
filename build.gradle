@@ -413,7 +413,8 @@ tasks.register('printCompileClasspath') { doLast { file("$buildDir/compile-class
 // EA port, milestone M1: core only. Device packages listed in m1-exclude.txt stay out of the main source set
 // (Java and Kotlin) until their work packages land. -PelnAll builds everything.
 if (!project.hasProperty('elnAll')) {
-    def elnExcludes = file('m1-exclude.txt').readLines()*.trim().findAll { it && !it.startsWith('#') }
+    // m1-exclude.txt (core leftovers) + m1-exclude-<batch>.txt (one per parallel device batch, see notes/core-log.md)
+    def elnExcludes = fileTree(projectDir) { include 'm1-exclude*.txt' }.files.sort().collectMany { it.readLines() }*.trim().findAll { it && !it.startsWith('#') }
         .collect { it.endsWith('/') ? it + '**' : it }
     sourceSets.main.java.exclude(elnExcludes)
     sourceSets.main.kotlin.exclude(elnExcludes)
