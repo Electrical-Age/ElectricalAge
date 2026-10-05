@@ -34,6 +34,23 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
         return state;
     }
 
+    boolean diode = false;
+
+    /**
+     * Marks this switch as an ideal diode (aPin = anode). The SubSystem then re-checks its state against the
+     * solution of the current step (on: current >= 0, off: voltage <= 0) and re-solves when it is inconsistent,
+     * so a diode never conducts backwards for a step after a polarity flip (1.7.10 switched only on the
+     * previous step's voltage). Set by DiodeProcess.
+     */
+    public void setDiode(boolean diode) {
+        this.diode = diode;
+        dirty();
+    }
+
+    public boolean isDiode() {
+        return diode;
+    }
+
     @Override
     public void readFromNBT(NBTTagCompound nbt, String str) {
         str += name;

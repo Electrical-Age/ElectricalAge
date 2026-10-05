@@ -1,13 +1,13 @@
 package mods.eln.sim;
 
 import mods.eln.sim.mna.RootSystem;
+import mods.eln.sim.mna.component.Capacitor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.component.Transformer;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -63,13 +63,11 @@ public class ElectricalDevicesTest {
     }
 
     /**
-     * A diode must never conduct backwards. EA decides the switch state from the PREVIOUS step's voltage, so
-     * when the source polarity flips the diode stays closed for one whole electrical step (50 ms) and passes
-     * the full reverse current -U/(R+Ron). Physically zero. Matters for anything that reverses polarity
-     * (batteries swapped, H-bridges, generators with reversing direction): a 50 ms reverse pulse per flip,
-     * which also heats the diode via DiodeHeatThermalLoad.
+     * A diode must never conduct backwards. 1.7.10 decided the switch state from the PREVIOUS step's voltage, so
+     * when the source polarity flipped the diode stayed closed for one whole electrical step (50 ms) and passed
+     * the full reverse current -U/(R+Ron) (and stayed open for a step after a flip to forward). Fixed in WP16:
+     * SubSystem.stepCalc re-solves the step when a diode's state contradicts the solution.
      */
-    @Ignore("EA bug: DiodeProcess uses last step's voltage, so a diode conducts in reverse for one step after polarity flips")
     @Test
     public void diodeNeverConductsBackwards() {
         ElectricalLoad a = load(), k = load();
@@ -84,6 +82,49 @@ public class ElectricalDevicesTest {
             // measure on the series load: the switch's own getCurrent() is evaluated with the R the
             // DiodeProcess has just set for the NEXT step, so it misreports (100 A / 1e-10 A) right after a flip
             assertTrue("tick " + t + ": reverse current " + rl.getCurrent(), rl.getCurrent() > -1e-6);
+            if (t % 4 < 2) assertEquals("tick " + t + ": forward current", 10 / 10.1, rl.getCurrent(), EPS);
+        }
+    }
+
+    /** Half-wave rectifier into a smoothing capacitor: when the source drops below the capacitor voltage the
+     *  diode blocks in that very step, so the capacitor never discharges back into the source. */
+    @Test
+    public void rectifierCapacitorDoesNotDischargeBackwards() {
+        ElectricalLoad a = load(), k = load();
+        VoltageSource v = new VoltageSource("v", a, null).setU(10);
+        h.sim.addElectricalComponent(v);
+        ResistorSwitch d = diode(a, k);
+        Capacitor c = new Capacitor(k, null);
+        c.setC(0.1);
+        h.sim.addElectricalComponent(c);
+        h.sim.addElectricalComponent(new Resistor(k, null).setR(1000));
+        for (int t = 0; t < 40; t++) {
+            v.setU(10 * Math.sin(2 * Math.PI * t / 10.0));
+            h.tick();
+            // current out of the source's + terminal is the diode current (into the anode)
+            assertTrue("tick " + t + ": source current " + v.getI(), v.getI() > -1e-6);
+        }
+        assertTrue(k.getU() > 8); // held near the peak
+    }
+
+    /** Full-wave bridge (4 diodes) from a reversing source: the load always sees |U| / (R + 2 Ron), in the same step. */
+    @Test
+    public void bridgeRectifierSwitchesInTheSameStep() {
+        ElectricalLoad p = load(), n = load(), out = load(), ret = load();
+        VoltageSource v = new VoltageSource("v", p, n).setU(10);
+        h.sim.addElectricalComponent(v);
+        h.sim.addElectricalComponent(new Resistor(n, null).setR(1e6)); // reference the floating source
+        diode(p, out);
+        diode(n, out);
+        diode(ret, p);
+        diode(ret, n);
+        Resistor rl = new Resistor(out, ret).setR(10);
+        h.sim.addElectricalComponent(rl);
+        double[] u = {10, 7, -10, -3, 5, -5, 0.5, -8};
+        for (int t = 0; t < u.length; t++) {
+            v.setU(u[t]);
+            h.tick();
+            assertEquals("tick " + t, Math.abs(u[t]) / 10.2, rl.getCurrent(), 1e-6);
         }
     }
 

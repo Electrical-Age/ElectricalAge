@@ -8,6 +8,7 @@ public class DiodeProcess implements IProcess {
 
     public DiodeProcess(ResistorSwitch resistor) {
         this.resistor = resistor;
+        resistor.setDiode(true); // in-step switching in SubSystem.stepCalc; this process stays as the fallback
     }
 
     @Override

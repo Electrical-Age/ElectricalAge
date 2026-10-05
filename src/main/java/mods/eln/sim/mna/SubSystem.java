@@ -5,6 +5,7 @@ import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.Delay;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.IDestructor;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
@@ -41,6 +42,11 @@ public class SubSystem {
     double[] Idata;
 
     double[] XtempData;
+
+    /** Diode switches of this SubSystem (ResistorSwitch.isDiode), collected by generateMatrix. */
+    ArrayList<ResistorSwitch> diodes = new ArrayList<ResistorSwitch>();
+    /** Re-solves per step allowed for diode switching (one flip per diode is the normal case). */
+    static final int DIODE_PASSES = 3;
 
     boolean breaked = false;
 
@@ -137,9 +143,12 @@ public class SubSystem {
             }
         }
 
+        ArrayList<ResistorSwitch> newDiodes = new ArrayList<ResistorSwitch>();
         for (Component c : component) {
             c.applyTo(this);
+            if (c instanceof ResistorSwitch && ((ResistorSwitch) c).isDiode()) newDiodes.add((ResistorSwitch) c);
         }
+        diodes = newDiodes;
 
         //	org.apache.commons.math3.linear.
 
@@ -214,17 +223,49 @@ public class SubSystem {
             }
             //	profiler.add("generateMatrix");
 
-            for (int idx2 = 0; idx2 < stateCount; idx2++) {
-                double stack = 0;
-                for (int idx = 0; idx < stateCount; idx++) {
-                    stack += AInvdata[idx2][idx] * Idata[idx];
-                }
-                XtempData[idx2] = stack;
-            }
+            multiplyAInvI();
             //Xtemp = Ainv.multiply(I);
+
+            // Ideal diodes: if this step's solution contradicts a diode's state (on and current < 0, or off and
+            // forward voltage > 0), flip it and solve the same step again. The RHS (history terms) only depends
+            // on the previous step's states, which are not flushed yet, so it stays valid; only A changes.
+            for (int pass = 0; pass < DIODE_PASSES && !diodes.isEmpty(); pass++) {
+                boolean flipped = false;
+                for (ResistorSwitch d : diodes) {
+                    double u = predicted(d.aPin) - predicted(d.bPin);
+                    boolean on = d.getState() ? u >= 0 : u > 0;
+                    if (on != d.getState()) {
+                        d.setState(on);
+                        flipped = true;
+                    }
+                }
+                if (!flipped) break;
+                if (!matrixValid) {
+                    double[] rhs = Idata; // generateMatrix reallocates Idata; the RHS itself is unchanged
+                    generateMatrix();
+                    if (singularMatrix || rhs.length != Idata.length) break;
+                    System.arraycopy(rhs, 0, Idata, 0, rhs.length);
+                }
+                multiplyAInvI();
+            }
         }
         profiler.stop();
         //Utils.println(profiler);
+    }
+
+    private void multiplyAInvI() {
+        for (int idx2 = 0; idx2 < stateCount; idx2++) {
+            double stack = 0;
+            for (int idx = 0; idx < stateCount; idx++) {
+                stack += AInvdata[idx2][idx] * Idata[idx];
+            }
+            XtempData[idx2] = stack;
+        }
+    }
+
+    /** This step's solution for a state of this SubSystem (before stepFlush); ground (null) = 0. */
+    private double predicted(State s) {
+        return s == null ? 0 : XtempData[s.getId()];
     }
 
     public double solve(State pin) {
