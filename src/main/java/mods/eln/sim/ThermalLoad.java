@@ -38,6 +38,13 @@ public class ThermalLoad {
      * Relative heat transfer during this simulator tick.
      */
     public double PcTemp;
+    /**
+     * Heat energy (J) deposited since this load's last thermal step, by moveEnergyTo. Folded into PcTemp as
+     * energy / dt when the load steps, so a caller running at any rate (electrical step, fast or slow thermal
+     * step) heats the load correctly. Use this, not movePowerTo, from a process that does not run exactly once
+     * per step of this load (movePowerTo adds a power for one step of the load: called N times per step it heats N x).
+     */
+    public double EnergyTemp;
 
     boolean isSlow;
 
@@ -106,10 +113,16 @@ public class ThermalLoad {
         to.PspTemp += absI;
     }
 
+    /** Heat power (W) into this load for ITS current step; call once per step of this load (see EnergyTemp). */
     public void movePowerTo(double power) {
         double absI = Math.abs(power);
         PcTemp += power;
         PspTemp += absI;
+    }
+
+    /** Heat energy (J) into this load, from a process running at any rate (see EnergyTemp). */
+    public void moveEnergyTo(double energy) {
+        EnergyTemp += energy;
     }
 
     public double getT() {
