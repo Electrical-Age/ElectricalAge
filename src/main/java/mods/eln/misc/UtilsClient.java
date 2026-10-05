@@ -398,8 +398,36 @@ public class UtilsClient {
         GL11.glTranslatef((float) x, (float) y, (float) z);
         GL11.glRotatef(roty, 0, 1, 0);
         GL11.glScalef(scale, scale, scale);
-        var10.doRender(entityItem, 0, 0, 0, 0, 0);
+        renderEntityKeepingLights(var10, entityItem);
         GL11.glPopMatrix();
+    }
+
+    private static final java.nio.FloatBuffer LIGHT0_POS = org.lwjgl.BufferUtils.createFloatBuffer(16);
+    private static final java.nio.FloatBuffer LIGHT1_POS = org.lwjgl.BufferUtils.createFloatBuffer(16);
+
+    /**
+     * 1.12 port: RenderEntityItem.doRender calls RenderHelper.enableStandardItemLighting(), which sets GL_LIGHT0/1
+     * positions under the CURRENT modelview, i.e. the spinning/rotated item frame of a TESR. The rest of the TESR (the
+     * battery charger body, a machine's casing) was then lit by those rotated lights and flickered dark/light with the
+     * item's angle. Save the eye-space light positions before and put them back after (positions only: enable flags
+     * stay as GlStateManager set them, so its cache is not desynced).
+     */
+    public static void renderEntityKeepingLights(Render render, Entity entity) {
+        LIGHT0_POS.clear();
+        LIGHT1_POS.clear();
+        GL11.glGetLight(GL11.GL_LIGHT0, GL11.GL_POSITION, LIGHT0_POS);
+        GL11.glGetLight(GL11.GL_LIGHT1, GL11.GL_POSITION, LIGHT1_POS);
+        try {
+            render.doRender(entity, 0, 0, 0, 0, 0);
+        } finally {
+            GL11.glPushMatrix();
+            GL11.glLoadIdentity(); // glGetLight returned eye coordinates
+            LIGHT0_POS.rewind();
+            LIGHT1_POS.rewind();
+            GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, LIGHT0_POS);
+            GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, LIGHT1_POS);
+            GL11.glPopMatrix();
+        }
     }
 
     static public void drawConnectionPinSixNode(float d, float w, float h) {

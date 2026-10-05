@@ -5,6 +5,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
@@ -81,7 +82,7 @@ public class BatteryChargerRender extends SixNodeElementRender {
         GL11.glRotatef(roty, 0, 1, 0);
         GL11.glScalef(scale, scale, scale);
         GL11.glTranslatef(0.0f, -0.25f, 0.0f);
-        var10.doRender(entityItem, 0, 0, 0, 0, 0);
+        UtilsClient.renderEntityKeepingLights(var10, entityItem); // was doRender: leaked rotated light positions (body flicker)
         GL11.glPopMatrix();
     }
 
