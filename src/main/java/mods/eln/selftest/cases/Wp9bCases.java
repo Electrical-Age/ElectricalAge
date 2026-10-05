@@ -24,7 +24,6 @@ import mods.eln.sixnode.thermalcable.ThermalCableElement;
 import mods.eln.sixnode.thermalsensor.ThermalSensorElement;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -187,6 +186,7 @@ public final class Wp9bCases {
             ctx.checkValue("vuMeter input [V]", vu.inputGate.getU(), svu);
             ctx.checkValue("alarm input [V]", pinLoad(alarm, FRONT).getU(), svu);
             ctx.check("V-to-R redstone = 15", out.isProvidingWeakPower() == 15, "redstone " + out.isProvidingWeakPower());
+            // core path (NodeBlock.getWeakPower vs shouldCheckWeakPower): if only this fails, it is a NodeBlock finding
             int world = ctx.world().getRedstonePowerFromNeighbors(ctx.at(4, 1, 1));
             ctx.check("world power next to V-to-R = 15", world == 15, "getRedstonePowerFromNeighbors " + world);
             ctx.check("alarm warm -> light 7", alarm.getLightValue() == 7, "light " + alarm.getLightValue());
@@ -343,7 +343,10 @@ public final class Wp9bCases {
             }
             ctx.line("daylight: sky light " + WorldCompat.getSavedLightValue(w, EnumSkyBlock.SKY, p.getX(), p.getY(), p.getZ())
                 + ", skylightSubtracted " + w.getSkylightSubtracted() + ", world time " + w.getWorldTime() + " -> level " + light);
-            ctx.checkValue("daylight sensor [V] (SVU*level/15)", sDay.getElectricalLoad(LRDU.Up).getU(), svu * light / 15.0);
+            // the sensor sampled up to one refresh period earlier: +-1 level (SVU/15), as the core lamp test
+            double ud = sDay.getElectricalLoad(LRDU.Up).getU();
+            ctx.check("daylight sensor = SVU*level/15 +-1 level", Math.abs(ud - svu * light / 15.0) <= svu / 15.0 * 1.01,
+                String.format("U = %.3f V, expected %.3f V", ud, svu * light / 15.0));
             double uw = sWeather.getElectricalLoad(LRDU.Up).getU();
             if (w.isRaining()) ctx.check("weather sensor > 0 V (raining)", uw > 0, String.format("U = %.3f V", uw));
             else ctx.check("weather sensor 0 V (clear)", Math.abs(uw) < 1e-3, String.format("U = %.4f V", uw));
