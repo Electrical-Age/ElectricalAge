@@ -31,19 +31,21 @@ import kotlin.experimental.and
 import kotlin.experimental.or
 
 @ExperimentalUnsignedTypes
-class PortableOreScannerItem(name: String, obj: Obj3D,
+class PortableOreScannerItem(name: String, private val obj: Obj3D?,
                              private var energyStorage: Double, internal var chargePower: Double, private var dischargePower: Double,
                              private var viewRange: Float, private var viewYAlpha: Float, private var resWidth: Int, private var resHeight: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
 
-    internal var base: Obj3DPart = obj.getPart("Base")
-    internal var led: Obj3DPart = obj.getPart("Led")
-    private var ledHalo: Obj3DPart = obj.getPart("LedHalo")
-    private var textBat: Array<Obj3DPart> = (0..3).map { obj.getPart("TextBat$it") }.toTypedArray()
-    private var textRun: Obj3DPart = obj.getPart("TextRun")
-    private var textInit: Obj3DPart = obj.getPart("TextInit")
-    internal var buttons: Obj3DPart = obj.getPart("Buttons")
-    private var screenDamage: Array<Obj3DPart> = (0..2).map { obj.getPart("ScreenDamageL" + (it + 1)) }.toTypedArray()
-    private var screenLuma: Obj3DPart = obj.getPart("ScreenLuma")
+    // 1.12: OBJ models are loaded on the client only (obj is null on a dedicated server), so the parts are resolved
+    // on first use, which is client rendering only.
+    internal val base: Obj3DPart by lazy { obj!!.getPart("Base") }
+    internal val led: Obj3DPart by lazy { obj!!.getPart("Led") }
+    private val ledHalo: Obj3DPart by lazy { obj!!.getPart("LedHalo") }
+    private val textBat: Array<Obj3DPart> by lazy { (0..3).map { obj!!.getPart("TextBat$it") }.toTypedArray() }
+    private val textRun: Obj3DPart by lazy { obj!!.getPart("TextRun") }
+    private val textInit: Obj3DPart by lazy { obj!!.getPart("TextInit") }
+    internal val buttons: Obj3DPart by lazy { obj!!.getPart("Buttons") }
+    private val screenDamage: Array<Obj3DPart> by lazy { (0..2).map { obj!!.getPart("ScreenDamageL" + (it + 1)) }.toTypedArray() }
+    private val screenLuma: Obj3DPart by lazy { obj!!.getPart("ScreenLuma") }
 
     private val damagePerBreakLevel = 3
 
@@ -110,7 +112,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
-        if (itemStack != null) {
+        if (itemStack != null && !itemStack.isEmpty) {
             list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))
         }
@@ -244,7 +246,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                 oRender = Eln.clientLiveDataManager.newData(item, RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1)
             val render = oRender as RenderStorage
 
-            render.generate(e!!.worldObj, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
+            render.generate(e!!.world, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
 
             val scale = 1f / resWidth * 0.50f
             GL11.glTranslatef(0.90668f, 0.163f, -0.25078f)
@@ -460,12 +462,9 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                                         val yLocal = yBlock and 0xF
                                         val zLocal = zBlock and 0xF
 
-                                        var blockId = storage.blockLSBArray[yLocal shl 8 or (zLocal shl 4) or xLocal].toUByte()
-                                        if (storage.blockMSBArray != null) {
-                                            blockId = blockId or ((storage.blockMSBArray.get(xLocal, yLocal, zLocal) shl 8).toUByte())
-                                        }
-
-                                        blockKey = (blockId + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal).toUInt() shl 12)).toUShort()
+                                        // 1.7.10 key = block id + (meta shl 12) == 1.12 Block.getStateId(state)
+                                        val stateId = Block.getStateId(storage.get(xLocal, yLocal, zLocal))
+                                        blockKey = if (stateId in 0 until 1024 * 64) stateId.toUShort() else 0U
                                     }
                                 }
                             }
@@ -562,8 +561,8 @@ private enum class State(val serialized: Byte) {
     }
 }
 
-private const val bootTime: Short = 4 * 20
-private const val stopTime: Short = 1 * 20
+private const val bootTime: Short = (4 * 20).toShort()
+private const val stopTime: Short = (1 * 20).toShort()
 
 @ExperimentalUnsignedTypes
 object OreColorMapping {

@@ -26,7 +26,7 @@ public class ConfigurableAiWander extends EntityAIBase {
      * Returns whether the EntityAIBase should begin execution.
      */
     public boolean shouldExecute() {
-        if (this.entity.getAge() >= 100) {
+        if (this.entity.getIdleTime() >= 100) {
             return false;
         } else if (this.entity.getRNG().nextInt(randLimit) != 0) {
             return false;

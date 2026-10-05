@@ -35,7 +35,7 @@ public class ReplicatorPopProcess implements IProcess {
             }
         }
 
-        if (world.difficultySetting == EnumDifficulty.PEACEFUL) return;
+        if (world.getDifficulty() == EnumDifficulty.PEACEFUL) return;
 
         if (world.getWorldInfo().isThundering()) {
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();

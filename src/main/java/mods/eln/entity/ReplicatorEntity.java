@@ -9,14 +9,17 @@ import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemMonsterPlacer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
-import java.util.Map.Entry;
 import java.util.Random;
 
 public class ReplicatorEntity extends EntityMob {
@@ -33,7 +36,7 @@ public class ReplicatorEntity extends EntityMob {
     public ReplicatorEntity(World par1World) {
         super(par1World);
 
-        func_110163_bv(); //persistenceRequired
+        enablePersistence(); //persistenceRequired
 
         this.setSize(0.3F, 0.7F);
 
@@ -42,9 +45,9 @@ public class ReplicatorEntity extends EntityMob {
 
         this.tasks.addTask(p++, new EntityAISwimming(this));
         // this.tasks.addTask(p++, new EntityAIBreakDoor(this));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityVillager.class, 1.0D, true));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, ReplicatorEntity.class, 1.0D, true));
+        this.tasks.addTask(p++, new AttackMeleeOfClass(this, EntityPlayer.class, 1.0D, false));
+        this.tasks.addTask(p++, new AttackMeleeOfClass(this, EntityVillager.class, 1.0D, true));
+        this.tasks.addTask(p++, new AttackMeleeOfClass(this, ReplicatorEntity.class, 1.0D, true));
         this.tasks.addTask(p++, replicatorIa);
         this.tasks.addTask(p++, new EntityAIMoveTowardsRestriction(this, 1.0D));
         this.tasks.addTask(p++, new EntityAIMoveThroughVillage(this, 1.0D, false));
@@ -53,8 +56,8 @@ public class ReplicatorEntity extends EntityMob {
         this.tasks.addTask(p++, new EntityAILookIdle(this));
         p = 1;
         this.targetTasks.addTask(p++, new EntityAIHurtByTarget(this, true));
-        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
-        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityVillager.class, 0, false));
+        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, 0, true, false, null));
+        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget<>(this, EntityVillager.class, 0, false, false, null));
         this.targetTasks.addTask(p++, new ReplicatorHungryAttack(this, ReplicatorEntity.class, 0, false));
         // this.targetTasks.addTask(p++, new EntityAINearestAttackableTarget(this, ReplicatorEntity.class, 0, false));
         // this.targetTasks.addTask(p++, replicatorIa);
@@ -70,8 +73,8 @@ public class ReplicatorEntity extends EntityMob {
     }
 
     @Override
-    protected void updateAITick() {
-        super.updateAITick();
+    protected void updateAITasks() { // 1.7.10 updateAITick (called from updateAITasks there)
+        super.updateAITasks();
         //setDead();
         hunger += 0.05 / hungerTime;
 
@@ -100,7 +103,7 @@ public class ReplicatorEntity extends EntityMob {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(8.0D);
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
         this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
         // this.getAttributeMap().func_111150_b(field_110186_bp).setAttribute(this.rand.nextDouble() * ForgeDummyContainer.zombieSummonBaseChance);
     }
@@ -109,16 +112,19 @@ public class ReplicatorEntity extends EntityMob {
         return true;
     }
 
-    protected String getLivingSound() {
-        return "mob.silverfish.say";
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.ENTITY_SILVERFISH_AMBIENT; // 1.7.10 "mob.silverfish.say"
     }
 
-    protected String getHurtSound() {
-        return "mob.silverfish.hit";
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.ENTITY_SILVERFISH_HURT; // "mob.silverfish.hit"
     }
 
-    protected String getDeathSound() {
-        return "mob.silverfish.kill";
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_SILVERFISH_DEATH; // "mob.silverfish.kill"
     }
 
     /*protected void playStepSound(int par1, int par2, int par3, int par4) {
@@ -135,12 +141,12 @@ public class ReplicatorEntity extends EntityMob {
 
         if (isSpawnedFromWeather) {
             if (Math.random() < 0.33) {
-                for (Object s : EntityList.IDtoClassMapping.entrySet()) {
-                    Entry e = (Entry) s;
-                    if (e.getValue() == ReplicatorEntity.class) {
-                        this.entityDropItem(new ItemStack((Item) Item.itemRegistry.getObject("spawn_egg"), 1, (Integer) e.getKey()), 0.5f);
-                        break;
-                    }
+                // 1.7.10: spawn egg with the replicator's global entity id as damage; 1.12: egg tagged with the entity id
+                ResourceLocation id = EntityList.getKey(ReplicatorEntity.class);
+                if (id != null) {
+                    ItemStack egg = new ItemStack(Items.SPAWN_EGG);
+                    ItemMonsterPlacer.applyEntityIdToItemStack(egg, id);
+                    this.entityDropItem(egg, 0.5f);
                 }
             }
         }

@@ -12,6 +12,10 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.DamageSource
 import net.minecraftforge.common.ISpecialArmor
+import net.minecraft.client.util.ITooltipFlag
+import net.minecraft.world.World
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 
 class ElectricalArmor(par2EnumArmorMaterial: ItemArmor.ArmorMaterial,
                       par3: Int,
@@ -61,15 +65,12 @@ class ElectricalArmor(par2EnumArmorMaterial: ItemArmor.ArmorMaterial,
     }
 
     private fun getNbt(stack: ItemStack): NBTTagCompound {
-        val nbt: NBTTagCompound? = stack.tagCompound
-        if (nbt == null) {
-            stack.tagCompound = defaultNBT
-        }
-        return stack.tagCompound
+        return stack.tagCompound ?: defaultNBT.also { stack.tagCompound = it }
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    @SideOnly(Side.CLIENT)
+    override fun addInformation(itemStack: ItemStack, world: World?, list: MutableList<String>, flag: ITooltipFlag) {
+        super.addInformation(itemStack, world, list, flag)
         list.add(tr("Charge power: %1\$W", chargePower.toInt()))
         list.add(tr("Stored energy: %1\$J (%2$%)", getEnergy(itemStack),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))

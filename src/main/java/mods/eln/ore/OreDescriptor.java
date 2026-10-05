@@ -9,10 +9,11 @@ import mods.eln.wiki.Data;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 
 import java.util.ArrayList;
@@ -35,9 +36,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
         this.spawnSizeMax = spawnSizeMax;
     }
 
-    public IIcon getBlockIconId(int side, int damage) {
-        return getIcon();
-    }
+    // TODO(1.12 WP6 icon): getBlockIconId(side, damage) removed (block textures: blockstates/ore.json).
 
     @Override
     public void setParent(Item item, int damage) {
@@ -53,7 +52,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 
     @Override
     public void generate(Random random, int chunkX, int chunkZ, World world,
-                         IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
+                         IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) {
         if (world.provider.isSurfaceWorld()) {
             generateSurface(random, chunkX * 16, chunkZ * 16, world); //This makes it gen overworld (the *16 is important)
         }
@@ -67,9 +66,19 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
             int posY = spawnHeightMin + random.nextInt(spawnHeightMax - spawnHeightMin); //Y coordinate less than 40 to gen at
             int posZ = z + random.nextInt(16); //Z coordinate to gen at
             int size = spawnSizeMin + random.nextInt(spawnSizeMax - spawnSizeMin);
-            new WorldGenMinable(mods.eln.registry.batch.Wp12Content.oreBlock, metadata, size, Blocks.STONE).generate(w, random, posX, posY, posZ); //The gen call
+            generateVein(w, random, posX, posY, posZ, size); //The gen call
         }
         //}
         //new WorldGenTrees(par1, par2, par3, par4, par5)
+    }
+
+    /** One vein (1.7.10 inline in generateSurface; split out for the selftest). */
+    public void generateVein(World w, Random random, int posX, int posY, int posZ, int size) {
+        // 1.7.10 target Blocks.stone; 1.12's default predicate = plain stone (not granite/diorite/andesite, as vanilla ores)
+        new WorldGenMinable(mods.eln.registry.batch.Wp12Content.oreBlock.getStateFromMeta(metadata), size).generate(w, random, new BlockPos(posX, posY, posZ));
+    }
+
+    public int getMetadata() {
+        return metadata;
     }
 }

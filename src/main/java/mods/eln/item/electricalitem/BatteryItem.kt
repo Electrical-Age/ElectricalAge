@@ -31,7 +31,7 @@ class BatteryItem(name: String, private var energyStorage: Double, internal var 
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Charge power: %1\$W", Utils.plotValue(chargePower)))
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
-        if (itemStack != null) {
+        if (itemStack != null && !itemStack.isEmpty) {
             list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                     (getEnergy(itemStack) / energyStorage * 100).toInt()))
         }

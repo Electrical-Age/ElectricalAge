@@ -19,8 +19,8 @@ import mods.eln.i18n.I18N.tr
 class ElectricalLampItem(name: String, private var lightMin: Int, private var rangeMin: Int, private var dischargeMin: Double, private var lightMax: Int,
                          private var rangeMax: Int, internal var dischargeMax: Double, internal var energyStorage: Double, internal var chargePower: Double) : LampItem(name), IItemEnergyBattery {
 
-    internal var on: ResourceLocation = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "on.png")
-    internal var off: ResourceLocation = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "off.png")
+    internal var on: ResourceLocation = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").lowercase() + "on.png")
+    internal var off: ResourceLocation = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").lowercase() + "off.png")
 
     init {
         setDefaultIcon(name + "off")
@@ -94,7 +94,7 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargeMin)))
-        if (itemStack != null) {
+        if (itemStack != null && !itemStack.isEmpty) {
             list.add(tr("Stored Energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))
             list.add(tr("State:") + " " + if (getLightState(itemStack) != 0) tr("On") else tr("Off"))

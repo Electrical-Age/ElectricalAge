@@ -60,7 +60,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
-        if (itemStack != null)
+        if (itemStack != null && !itemStack.isEmpty)
             list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))
     }

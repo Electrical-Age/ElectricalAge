@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "type=0": {
+      "model": "eln:ore_copperore"
+    },
+    "type=1": {
+      "model": "eln:ore_copperore"
+    },
+    "type=2": {
+      "model": "eln:ore_copperore"
+    },
+    "type=3": {
+      "model": "eln:ore_copperore"
+    },
+    "type=4": {
+      "model": "eln:ore_leadore"
+    },
+    "type=5": {
+      "model": "eln:ore_tungstenore"
+    },
+    "type=6": {
+      "model": "eln:ore_cinnabarore"
+    },
+    "type=7": {
+      "model": "eln:ore_copperore"
+    },
+    "type=8": {
+      "model": "eln:ore_copperore"
+    },
+    "type=9": {
+      "model": "eln:ore_copperore"
+    },
+    "type=10": {
+      "model": "eln:ore_copperore"
+    },
+    "type=11": {
+      "model": "eln:ore_copperore"
+    },
+    "type=12": {
+      "model": "eln:ore_copperore"
+    },
+    "type=13": {
+      "model": "eln:ore_copperore"
+    },
+    "type=14": {
+      "model": "eln:ore_copperore"
+    },
+    "type=15": {
+      "model": "eln:ore_copperore"
+    }
+  }
+}

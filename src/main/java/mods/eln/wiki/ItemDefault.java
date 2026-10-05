@@ -58,7 +58,7 @@ public class ItemDefault extends Default {
             List<IRecipe> recipeOutList = new ArrayList<IRecipe>();
             List<IRecipe> recipeInList = new ArrayList<IRecipe>();
             if (!Utils.isEmpty(stack)) {
-                List list = CraftingManager.getInstance().getRecipeList();
+                Iterable<IRecipe> list = net.minecraftforge.fml.common.registry.ForgeRegistries.RECIPES.getValuesCollection(); // 1.7.10 CraftingManager.getRecipeList()
                 for (Object o : list) {
                     try {
                         if (o instanceof IRecipe) {

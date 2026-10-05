@@ -1,16 +1,1 @@
 # Device batch wp12: excluded sources (delete a line to build it). See notes/core-log.md "Device batches".
-mods/eln/item/IInteract.java
-mods/eln/item/ItemAxeEln.java
-mods/eln/item/ItemPickaxeEln.java
-mods/eln/item/electricalitem/
-mods/eln/entity/
-mods/eln/ore/
-mods/eln/server/OreRegenerate.java
-mods/eln/wiki/Default.java
-mods/eln/wiki/GuiGroup.java
-mods/eln/wiki/GuiItemStack.java
-mods/eln/wiki/GuiVerticalExtender.java
-mods/eln/wiki/ItemDefault.java
-mods/eln/wiki/Root.java
-mods/eln/wiki/Search.java
-mods/eln/registry/pending/Wp12Pending.java
