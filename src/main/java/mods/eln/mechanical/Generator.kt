@@ -219,14 +219,24 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         override fun process(time: Double) {
             val p = electricalPowerSource.p
             powerFraction = (p / desc.nominalP).toFloat()
-            var E = p * time
+            val eff = desc.generationEfficiency
+            val electricalE = p * time // energy delivered to the circuit this step; < 0 when motoring
+            var E = electricalE
             if (E < 0)
                 E *= 0.75  // Not a very efficient motor.
             maybePublishE(E / time)
+            // WP16: generating, the shaft has to supply E / eff (1.7.10 took E * eff: 5 % of the output was free
+            // energy). Motoring keeps 1.7.10's shaft gain (0.75 * 0.95 of the absorbed energy); the rest is heat
+            // (1.7.10 moved a negative heat, i.e. motoring cooled the generator).
+            val shaftE = if (E >= 0) E / eff else E * eff
+            val lossE = if (E >= 0) shaftE - E else shaftE - electricalE
             // The Math.max makes the shaft harder to spin up without an auxilliary power source.
-            E += defaultDrag * Math.max(shaft.rads, 10.0)
-            shaft.energy -= (E * desc.generationEfficiency)
-            thermal.movePowerTo(E * (1 - desc.generationEfficiency))
+            val drag = defaultDrag * Math.max(shaft.rads, 10.0)
+            shaft.energy -= shaftE + drag * eff
+            // NOTE (left as 1.7.10, see notes/wp16-log.md): movePowerTo takes W but is given J per step, so the
+            // generator heats with 1/20 of its losses; with the true power it would sit at its warm limit (and
+            // the watchdog would blow it up) at nominal output.
+            thermal.movePowerTo(lossE + drag * (1 - eff))
         }
     }
 
