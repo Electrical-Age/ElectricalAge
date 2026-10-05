@@ -22,6 +22,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +107,11 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         if (silkTouch) {
                             itemsToDrop.add(new ItemStack(block, 1, meta));
                         } else {
-                            itemsToDrop.addAll(block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0));
+                            // 1.12: drops go into a NonNullList (was getDrops(world, x, y, z, meta, fortune 0))
+                            NonNullList<ItemStack> drops = NonNullList.create();
+                            BlockPos pos = new BlockPos(jobCoord.x, jobCoord.y, jobCoord.z);
+                            block.getDrops(drops, jobCoord.world(), pos, jobCoord.world().getBlockState(pos), 0);
+                            itemsToDrop.addAll(drops);
                         }
 
                         // Use cobblestone instead of air, everywhere except the mining shaft.
@@ -251,6 +257,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
             int index = itemsToDrop.size() - 1;
             if (drop(itemsToDrop.get(index))) {
                 itemsToDrop.remove(index);
+            } else {
+                break; // 1.12 port bug fix: 1.7.10 spun here forever (server hang) when the chest filled up; the rest
+                       // stays queued and the job below becomes chestFull until there is room
             }
         }
 
@@ -357,8 +366,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         if (block instanceof BlockOre) return true;
         if (block instanceof OreBlock) return true;
         if (block instanceof BlockRedstoneOre) return true;
-        return OreColorMapping.INSTANCE.getMap()[Block.getIdFromBlock(block) +
-            (WorldCompat.getMeta(coordonate.world(), coordonate.x, coordonate.y, coordonate.z) << 12)] != 0;
+        // 1.7.10 key = block id + (meta << 12) == 1.12 Block.getStateId; ids >= 4096 (JEID) are outside the table
+        int key = Block.getStateId(coordonate.world().getBlockState(new BlockPos(coordonate.x, coordonate.y, coordonate.z)));
+        float[] map = OreColorMapping.INSTANCE.getMap();
+        return key >= 0 && key < map.length && map[key] != 0;
     }
 
     public void onBreakElement() {

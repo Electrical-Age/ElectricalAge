@@ -1,10 +1,13 @@
 package mods.eln.registry.batch;
 
 import mods.eln.ElnContent;
+import mods.eln.ghost.GhostGroup;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.FunctionTableYProtect;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
 import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
@@ -24,10 +27,7 @@ import static mods.eln.i18n.I18N.*;
 /**
  * Device batch Wp10a (1.12 port): transparent-node power and machines: transformer, power capacitor/inductor, electrical machines (macerator, compressor, magnetizer, plate machine), electrical furnace, egg incubator, autominer.
  * Called from ElnContentImpl (one line), after the core slice, in every lifecycle phase.
- * Sources: m1-exclude-wp10a.txt (delete lines to build them). Not yet ported registrations:
- * registry/pending/Wp10aPending.java (excluded). To port a device: move its register method (and the fields it
- * sets) from Wp10aPending into this class, un-comment its PENDING line below, point device code at
- * Wp10aContent.&lt;field&gt;. Keep the ids (sub-UIDs) unchanged. Selftest cases: mods.eln.selftest.cases.Wp10aCases.
+ * All wp10a devices are ported (registry/pending/Wp10aPending.java is gone). Keep the ids (sub-UIDs) unchanged. Selftest cases: mods.eln.selftest.cases.Wp10aCases.
  */
 public class Wp10aContent implements ElnContent {
     @Override
@@ -40,7 +40,7 @@ public class Wp10aContent implements ElnContent {
         registerMagnetizer(36);
         registerPlateMachine(37);
         registerEggIncubator(41);
-        // PENDING(1.12 wp10a): registerAutoMiner(42); // blocked on wp12 (OreBlock, OreColorMapping, PortableOreScannerItem.RenderStorage)
+        registerAutoMiner(42);
     }
 
     public static ElectricalFurnaceDescriptor electricalFurnace;
@@ -301,6 +301,46 @@ public class Wp10aContent implements ElnContent {
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
             desc.setRunningSound("eln:motor");
+        }
+    }
+
+    public static void registerAutoMiner(int id) {
+        int subId, completId;
+        String name;
+        {
+            subId = 0;
+            name = TR_NAME(Type.NONE, "Auto Miner");
+
+            Coordonate[] powerLoad = new Coordonate[2];
+            powerLoad[0] = new Coordonate(-2, -1, 1, 0);
+            powerLoad[1] = new Coordonate(-2, -1, -1, 0);
+
+            Coordonate lightCoord = new Coordonate(-3, 0, 0, 0);
+
+            Coordonate miningCoord = new Coordonate(-1, 0, 1, 0);
+
+            AutoMinerDescriptor desc = new AutoMinerDescriptor(name,
+                obj.getObj("AutoMiner"),
+                powerLoad, lightCoord, miningCoord,
+                2, 1, 0,
+                highVoltageCableDescriptor,
+                1, 50// double pipeRemoveTime,double pipeRemoveEnergy
+            );
+
+            GhostGroup ghostGroup = new GhostGroup();
+
+            ghostGroup.addRectangle(-2, -1, -1, 0, -1, 1);
+            ghostGroup.addRectangle(1, 1, -1, 0, 1, 1);
+            ghostGroup.addRectangle(1, 1, -1, 0, -1, -1);
+            ghostGroup.addElement(1, 0, 0);
+            ghostGroup.addElement(0, 0, 1);
+            ghostGroup.addElement(0, 1, 0);
+            ghostGroup.addElement(0, 0, -1);
+            ghostGroup.removeElement(-1, -1, 0);
+
+            desc.setGhostGroup(ghostGroup);
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }
 }

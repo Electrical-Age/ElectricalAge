@@ -10,6 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -121,6 +123,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
         list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(boolean lampState, float[] buttonsState, boolean[] ledsAState, boolean[] ledsPState) {
         GL11.glRotatef(-90, 0, 1, 0);
         GL11.glTranslatef(0, -1.5f, 0);
@@ -158,6 +161,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {
             super.renderItem(type, item, data);
