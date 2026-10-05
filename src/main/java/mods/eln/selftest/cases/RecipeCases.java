@@ -1,0 +1,164 @@
+package mods.eln.selftest.cases;
+
+import mods.eln.Eln;
+import mods.eln.misc.Recipe;
+import mods.eln.misc.Utils;
+import mods.eln.registry.ElnRecipes;
+import mods.eln.selftest.SelfTestCase;
+import mods.eln.selftest.SelfTestContext;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
+
+/**
+ * WP15 recipes (registry/ElnRecipes), no world needed. Expected output (default config, E36 ore dictionary):
+ * <pre>
+ * PASS recipes crafting count: eln:* registered = recipe calls = expected (293 + utility poles max(k,1) + X-ray 1 + converters 3)
+ * PASS recipes smelting added: 12 (13 calls; Tree Resin's second recipe ignored, 1.12 keeps the first)
+ * PASS recipes machine lists: macerator 18 (+ AE2 mod ores), compressor 4, plate machine 6, magnetizer 2
+ * PASS recipes LV cable: rubber/copper ingot/rubber rows -> 6 Low Voltage Cable
+ * PASS recipes LV cable with a foreign ingotCopper (SKIP line if no other mod registers one)
+ * PASS recipes Cost Oriented Battery registered (eln:cost_oriented_battery)
+ * PASS recipes macerator EA copper ore -> 2 Copper Dust; same for a foreign oreCopper (SKIP line if none)
+ * PASS recipes furnace Copper Dust -> Copper Ingot (any ore:ingotCopper)
+ * INFO recipes: n 1.7.10 pattern quirks rewritten (unused keys dropped ...)
+ * </pre>
+ * k = how many of ingotAluminum, ingotAluminium, ingotSteel the ore dictionary has (one Utility Pole recipe each, else the
+ * 1.7.10 fallback). 293 = 245 single recipes + 32 brushes + 8 vuMeters + 8 2x3 solar panels.
+ */
+public final class RecipeCases {
+    private RecipeCases() {
+    }
+
+    public static void addTo(List<SelfTestCase> cases) {
+        cases.add(new Recipes());
+    }
+
+    static final class Recipes implements SelfTestCase {
+        @Override
+        public String name() {
+            return "recipes";
+        }
+
+        @Override
+        public int width() {
+            return 1;
+        }
+
+        @Override
+        public void build(SelfTestContext ctx) {
+        }
+
+        static int expectedCrafting() {
+            int poles = 0;
+            for (String o : new String[]{"ingotAluminum", "ingotAluminium", "ingotSteel"})
+                if (OreDictionary.doesOreNameExist(o)) poles++;
+            return 293 + Math.max(poles, 1) + (Eln.xRayScannerCanBeCrafted ? 1 : 0) + (Eln.ElnToOtherEnergyConverterEnable ? 3 : 0);
+        }
+
+        static ItemStack foreign(String ore) {
+            for (ItemStack s : OreDictionary.getOres(ore)) {
+                ResourceLocation n = s.getItem().getRegistryName();
+                if (n != null && !"eln".equals(n.getNamespace())) {
+                    ItemStack c = s.copy();
+                    if (c.getMetadata() == OreDictionary.WILDCARD_VALUE) c.setItemDamage(0);
+                    c.setCount(1);
+                    return c;
+                }
+            }
+            return ItemStack.EMPTY;
+        }
+
+        static boolean same(ItemStack a, ItemStack b) {
+            return !a.isEmpty() && !b.isEmpty() && a.getItem() == b.getItem() && a.getMetadata() == b.getMetadata() && a.getCount() == b.getCount();
+        }
+
+        static String str(ItemStack s) {
+            return s.isEmpty() ? "nothing" : s.getCount() + "x " + ElnRecipes.stackName(s);
+        }
+
+        /** 3x3 grid, rows of the given stacks (null = empty) -> CraftingManager result. */
+        static ItemStack craft(SelfTestContext ctx, ItemStack... grid) {
+            InventoryCrafting inv = new InventoryCrafting(new Container() {
+                @Override
+                public boolean canInteractWith(EntityPlayer playerIn) {
+                    return true;
+                }
+            }, 3, 3);
+            for (int i = 0; i < 9; i++) inv.setInventorySlotContents(i, grid[i] == null ? ItemStack.EMPTY : grid[i].copy());
+            IRecipe r = CraftingManager.findMatchingRecipe(inv, ctx.world());
+            return r == null ? ItemStack.EMPTY : r.getCraftingResult(inv);
+        }
+
+        static ItemStack ea(String name, int n) {
+            return mods.eln.Eln.findItemStack(name, n);
+        }
+
+        @Override
+        public void measure(SelfTestContext ctx) {
+            int registered = 0;
+            for (ResourceLocation k : ForgeRegistries.RECIPES.getKeys()) if ("eln".equals(k.getNamespace())) registered++;
+            int expected = expectedCrafting();
+            ctx.check("recipes crafting count (eln:* registered = recipe calls = expected " + expected + ")",
+                registered == expected && ElnRecipes.craftingAttempted == expected && ElnRecipes.craftingRegistered == expected,
+                "registry " + registered + ", registered " + ElnRecipes.craftingRegistered + ", calls " + ElnRecipes.craftingAttempted);
+
+            ctx.check("recipes smelting added: 12", ElnRecipes.smeltingAdded == 12, String.valueOf(ElnRecipes.smeltingAdded));
+
+            int mac = Eln.maceratorRecipes.getRecipes().size(), comp = Eln.compressorRecipes.getRecipes().size();
+            int plate = Eln.plateMachineRecipes.getRecipes().size(), mag = Eln.magnetiserRecipes.getRecipes().size();
+            ctx.check("recipes machine lists: macerator 18 (+" + ElnRecipes.maceratorModOreAdded + " AE2 mod ores), compressor 4, plate machine 6, magnetizer 2",
+                mac == 18 + ElnRecipes.maceratorModOreAdded && comp == 4 && plate == 6 && mag == 2,
+                "macerator " + mac + ", compressor " + comp + ", plate machine " + plate + ", magnetizer " + mag);
+
+            ItemStack rubber = ea("Rubber", 1), copper = ea("Copper Ingot", 1);
+            ItemStack lv = lowVoltageCableDescriptor.newItemStack(6);
+            ItemStack got = craft(ctx, rubber, rubber, rubber, copper, copper, copper, rubber, rubber, rubber);
+            ctx.check("recipes LV cable: rubber / 3 copper ingots / rubber -> 6 Low Voltage Cable", same(got, lv), str(got));
+            ItemStack fc = foreign("ingotCopper");
+            if (fc.isEmpty()) {
+                ctx.line("SKIP recipes LV cable with a foreign ingotCopper: no other mod registers ingotCopper");
+            } else {
+                got = craft(ctx, rubber, rubber, rubber, fc, fc, fc, rubber, rubber, rubber);
+                ctx.check("recipes LV cable with " + ElnRecipes.stackName(fc) + " (ore:ingotCopper)", same(got, lv), str(got));
+            }
+
+            IRecipe bat = ForgeRegistries.RECIPES.getValue(new ResourceLocation("eln", "cost_oriented_battery"));
+            ItemStack batOut = bat == null ? ItemStack.EMPTY : bat.getRecipeOutput();
+            ctx.check("recipes Cost Oriented Battery registered (eln:cost_oriented_battery)",
+                same(batOut, ea("Cost Oriented Battery", 1)), str(batOut));
+
+            ItemStack dust2 = ea("Copper Dust", 2);
+            Recipe m = Eln.maceratorRecipes.getRecipe(ea("Copper Ore", 1));
+            ctx.check("recipes macerator EA copper ore -> 2 Copper Dust",
+                m != null && m.output.length == 1 && same(m.output[0], dust2), m == null ? "no recipe" : Arrays.toString(m.output));
+            ItemStack fo = foreign("oreCopper");
+            if (fo.isEmpty()) {
+                ctx.line("SKIP recipes macerator foreign copper ore: no other mod registers oreCopper");
+            } else {
+                m = Eln.maceratorRecipes.getRecipe(fo);
+                ctx.check("recipes macerator " + ElnRecipes.stackName(fo) + " (ore:oreCopper) -> 2 Copper Dust",
+                    m != null && m.output.length == 1 && same(m.output[0], dust2), m == null ? "no recipe" : Arrays.toString(m.output));
+            }
+
+            ItemStack ingot = FurnaceRecipes.instance().getSmeltingResult(ea("Copper Dust", 1));
+            // ore-tolerant: a unifier (UniDict in E36) may swap furnace outputs for its preferred mod's ingotCopper
+            boolean isCopper = !ingot.isEmpty() && ingot.getCount() == 1 && OreDictionary.containsMatch(false, OreDictionary.getOres("ingotCopper"), ingot);
+            ctx.check("recipes furnace Copper Dust -> Copper Ingot (ore:ingotCopper)", isCopper, str(ingot));
+
+            ctx.line("INFO recipes: " + ElnRecipes.fixes.size() + " 1.7.10 quirk(s) rewritten for 1.12 (see config debug.dumpRecipes)");
+        }
+    }
+}
