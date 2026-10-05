@@ -81,6 +81,7 @@ public final class SelfTest {
     private final WorldServer world;
     private final BlockPos origin; // platform start (x, y, z); elements at y + 1
     private final int ticks;
+    private final Mode mode;
     private int tick = 0;
     private final List<String> report = new ArrayList<>();
     private final List<BlockPos> platform = new ArrayList<>();
@@ -92,7 +93,11 @@ public final class SelfTest {
     private LampSocketElement lamp;
     private BatteryElement battery;
 
-    private SelfTest(ICommandSender sender, WorldServer world, BlockPos origin, int ticks) {
+    /** RUN: build, measure, clean up. KEEP: build, measure, leave it (for a restart). VERIFY: re-measure a kept circuit, clean up. */
+    enum Mode {RUN, KEEP, VERIFY}
+
+    private SelfTest(ICommandSender sender, WorldServer world, BlockPos origin, int ticks, Mode mode) {
+        this.mode = mode;
         this.sender = sender;
         this.world = world;
         this.origin = origin;
@@ -112,6 +117,8 @@ public final class SelfTest {
         }
         if (args.length >= 2 && args[1].equalsIgnoreCase("help")) {
             say(sender, "/eln selftest [ticks] [dim x y z] : run (default 40 ticks, 24 blocks above world spawn in dim 0)");
+            say(sender, "/eln selftest keep [ticks] [dim x y z] : same, but leave the circuit in place (prints its position)");
+            say(sender, "/eln selftest verify dim x y z [ticks] : after a restart, re-measure a kept circuit, then clean up");
             say(sender, "/eln selftest report : print the last run's results (also in the server log, logger eln-selftest)");
             return;
         }
@@ -119,20 +126,44 @@ public final class SelfTest {
             say(sender, "eln selftest: already running (tick " + running.tick + "/" + running.ticks + ")");
             return;
         }
+        // tokens after "selftest": [keep|verify] then numbers
+        Mode mode = Mode.RUN;
+        int first = 1;
+        if (args.length >= 2 && args[1].equalsIgnoreCase("keep")) {
+            mode = Mode.KEEP;
+            first = 2;
+        } else if (args.length >= 2 && args[1].equalsIgnoreCase("verify")) {
+            mode = Mode.VERIFY;
+            first = 2;
+        }
+        int n = args.length - first;
         int ticks = 40;
         int dim = 0;
         BlockPos pos = null;
+        String usage = "usage: /eln selftest [keep] [ticks] [dim x y z] | verify dim x y z [ticks] | report | help";
         try {
-            if (args.length >= 2) ticks = Math.max(5, Math.min(1200, Integer.parseInt(args[1])));
-            if (args.length >= 6) {
-                dim = Integer.parseInt(args[2]);
-                pos = new BlockPos(Integer.parseInt(args[3]), Integer.parseInt(args[4]), Integer.parseInt(args[5]));
-            } else if (args.length != 2 && args.length != 1) {
-                say(sender, "usage: /eln selftest [ticks] [dim x y z] | report | help");
-                return;
+            if (mode == Mode.VERIFY) {
+                if (n != 4 && n != 5) {
+                    say(sender, usage);
+                    return;
+                }
+                dim = Integer.parseInt(args[first]);
+                pos = new BlockPos(Integer.parseInt(args[first + 1]), Integer.parseInt(args[first + 2]), Integer.parseInt(args[first + 3]));
+                if (n == 5) ticks = Integer.parseInt(args[first + 4]);
+            } else {
+                if (n != 0 && n != 1 && n != 5) {
+                    say(sender, usage);
+                    return;
+                }
+                if (n >= 1) ticks = Integer.parseInt(args[first]);
+                if (n == 5) {
+                    dim = Integer.parseInt(args[first + 1]);
+                    pos = new BlockPos(Integer.parseInt(args[first + 2]), Integer.parseInt(args[first + 3]), Integer.parseInt(args[first + 4]));
+                }
             }
+            ticks = Math.max(5, Math.min(1200, ticks));
         } catch (NumberFormatException e) {
-            say(sender, "usage: /eln selftest [ticks] [dim x y z] | report | help");
+            say(sender, usage);
             return;
         }
         WorldServer world = DimensionManager.getWorld(dim);
@@ -145,17 +176,21 @@ public final class SelfTest {
             int y = Math.min(world.getHeight() - 12, Math.max(world.getHeight(spawn).getY() + 24, 100));
             pos = new BlockPos(spawn.getX() + 4, y, spawn.getZ() + 4);
         }
-        SelfTest t = new SelfTest(sender, world, pos, ticks);
+        SelfTest t = new SelfTest(sender, world, pos, ticks, mode);
         synchronized (lastReport) {
             lastReport.clear();
         }
-        if (!t.setUp()) {
-            t.finish();
+        if (!(mode == Mode.VERIFY ? t.find() : t.setUp())) {
+            if (mode == Mode.VERIFY) t.done(); // leave a broken kept circuit for inspection
+            else {
+                t.cleanup();
+                t.done();
+            }
             return;
         }
         running = t;
         MinecraftForge.EVENT_BUS.register(t);
-        say(sender, "eln selftest: started at dim " + dim + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ()
+        say(sender, "eln selftest " + mode.name().toLowerCase() + ": started at dim " + dim + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ()
             + ", results in " + ticks + " ticks: /eln selftest report (and the server log)");
     }
 
@@ -238,6 +273,51 @@ public final class SelfTest {
         lamp.getInventory().markDirty();
         lamp.networkUnserialize(stream(out -> out.writeByte(3))); // LampSocketElement.tooglePowerSupplyType
         return true;
+    }
+
+    /** VERIFY: the circuit a KEEP run left at origin (after a save/restart): find its elements again. */
+    private boolean find() {
+        line("eln selftest verify at dim " + world.provider.getDimension() + " " + origin.getX() + " " + origin.getY()
+            + " " + origin.getZ() + ", " + ticks + " ticks");
+        world.getChunk(at(0, 1, 1));
+        world.getChunk(at(6, 1, 1));
+        for (int dx = 0; dx <= 6; dx++)
+            for (int dz = 0; dz <= 2; dz++)
+                if (world.getBlockState(at(dx, 0, dz)).getBlock() == Blocks.STONE) platform.add(at(dx, 0, dz));
+        try {
+            source = (ElectricalSourceElement) findSix(at(0, 1, 1));
+            cable1 = findSix(at(1, 1, 1));
+            cable2 = findSix(at(2, 1, 1));
+            lamp = (LampSocketElement) findSix(at(3, 1, 1));
+            NodeBase node = NodeManager.instance.getNodeFromCoordonate(coord(at(6, 1, 1)));
+            if (node instanceof TransparentNode && ((TransparentNode) node).element instanceof BatteryElement) {
+                battery = (BatteryElement) ((TransparentNode) node).element;
+                placed.add(at(6, 1, 1));
+            }
+        } catch (RuntimeException e) {
+            check("find kept circuit", false, e.toString());
+            LOG.error("find failed", e);
+            return false;
+        }
+        boolean ok = source != null && cable1 != null && cable2 != null && lamp != null && battery != null;
+        check("find kept circuit", ok, "source " + (source != null) + ", cables " + (cable1 != null) + "/" + (cable2 != null)
+            + ", lamp " + (lamp != null) + ", battery " + (battery != null) + ", platform blocks " + platform.size());
+        return ok;
+    }
+
+    private static Coordonate coord(BlockPos p, WorldServer w) {
+        return new Coordonate(p.getX(), p.getY(), p.getZ(), w);
+    }
+
+    private Coordonate coord(BlockPos p) {
+        return coord(p, world);
+    }
+
+    private SixNodeElement findSix(BlockPos p) {
+        NodeBase node = NodeManager.instance.getNodeFromCoordonate(coord(p));
+        if (!(node instanceof SixNode)) return null;
+        placed.add(p);
+        return ((SixNode) node).getElement(Direction.YN);
     }
 
     private SixNodeElement placeSix(int damage, BlockPos p, FakePlayer player) {
@@ -349,6 +429,17 @@ public final class SelfTest {
 
     /** Remove everything we placed, without drops; restore the platform to air. */
     private void finish() {
+        if (mode == Mode.KEEP && !placed.isEmpty()) {
+            line("kept: verify after a restart with /eln selftest verify " + world.provider.getDimension() + " "
+                + origin.getX() + " " + origin.getY() + " " + origin.getZ());
+            done();
+            return;
+        }
+        cleanup();
+        done();
+    }
+
+    private void cleanup() {
         boolean drops = world.getGameRules().getBoolean("doTileDrops");
         try {
             world.getGameRules().setOrCreateGameRule("doTileDrops", "false");
@@ -372,7 +463,10 @@ public final class SelfTest {
         } finally {
             world.getGameRules().setOrCreateGameRule("doTileDrops", Boolean.toString(drops));
         }
-        line("eln selftest " + (fail == 0 ? "PASSED" : "FAILED") + ": " + pass + " pass, " + fail + " fail");
+    }
+
+    private void done() {
+        line("eln selftest " + mode.name().toLowerCase() + " " + (fail == 0 ? "PASSED" : "FAILED") + ": " + pass + " pass, " + fail + " fail");
         synchronized (lastReport) {
             lastReport.clear();
             lastReport.addAll(report);
