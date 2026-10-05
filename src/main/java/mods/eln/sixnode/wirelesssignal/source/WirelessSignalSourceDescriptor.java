@@ -1,5 +1,8 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
@@ -26,6 +29,7 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float factor, float distance, TileEntity e) {
         render.draw(factor, distance, e);
     }

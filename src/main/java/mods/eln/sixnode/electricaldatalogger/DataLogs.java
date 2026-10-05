@@ -3,6 +3,8 @@ package mods.eln.sixnode.electricaldatalogger;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.PhysicalConstant;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -98,6 +100,7 @@ public class DataLogs implements INBTTReady {
         draw(log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
     }
 
+    @SideOnly(Side.CLIENT)
     static void draw(byte[] value, int size, float samplingPeriod, float maxValue, float minValue, byte unitType, float margeX, float margeY, String textHeader) {
         if (value == null) return;
         if (size < 2) return;
@@ -212,6 +215,7 @@ public class DataLogs implements INBTTReady {
         return str;
     }
 
+    @SideOnly(Side.CLIENT)
     public static void draw(NBTTagCompound nbt, float margeX, float margeY, String textHeader) {
         if (nbt == null) return;
         byte[] data = nbt.getByteArray("log");

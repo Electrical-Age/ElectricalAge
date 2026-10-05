@@ -1,5 +1,8 @@
 package mods.eln.sixnode.energymeter;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -39,7 +42,7 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
             }
         }
 
-        pinDistance = Utils.getSixNodePinDistance(base);
+        if (base != null) pinDistance = Utils.getSixNodePinDistance(base); // 1.12: no OBJ models on a dedicated server
 
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
@@ -81,6 +84,7 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
         // UtilsClient.disableCulling();
         base.draw();

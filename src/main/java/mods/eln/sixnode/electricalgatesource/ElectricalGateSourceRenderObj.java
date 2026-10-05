@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -52,6 +55,7 @@ public class ElectricalGateSourceRenderObj {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(float factor, float distance, TileEntity e) {
         switch (objType) {
             case Button:

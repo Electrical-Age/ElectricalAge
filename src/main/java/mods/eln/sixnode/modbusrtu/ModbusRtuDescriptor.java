@@ -1,5 +1,8 @@
 package mods.eln.sixnode.modbusrtu;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -66,6 +69,7 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float open, boolean activityLed, boolean errorLed) {
         if (main != null) main.draw();
         if (door != null) door.draw((1f - open) * alphaOff, 0f, 0f, 1f);

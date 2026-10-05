@@ -1,5 +1,8 @@
 package mods.eln.sixnode.tutorialsign;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -37,6 +40,7 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float factor) {
         //GL11.glColor3f(0.8f, 0.8f, 0.8f);
         if (main != null) main.draw();

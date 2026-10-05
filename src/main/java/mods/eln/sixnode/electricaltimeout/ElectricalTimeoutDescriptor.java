@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricaltimeout;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -50,6 +53,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float left) {
         if (main != null) main.draw();
         if (rot != null) {

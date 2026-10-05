@@ -1,5 +1,8 @@
 package mods.eln.sixnode.hub;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -35,6 +38,7 @@ public class HubDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(boolean[] connectionGrid) {
         if (main != null) main.draw();
         for (int idx = 0; idx < 6; idx++) {
