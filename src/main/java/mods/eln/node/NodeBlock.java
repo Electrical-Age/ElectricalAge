@@ -206,7 +206,8 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
             e.printStackTrace();
         }
-        while (true) ;
+        // 1.12 port, known bug fixed: was `while (true);` (hung the server thread forever)
+        throw new IllegalStateException("Electrical Age: cannot create tile entity " + tileEntityClass.getName() + " for " + getRegistryName() + " (reflection failed, see the stack trace above)");
     }
 
 

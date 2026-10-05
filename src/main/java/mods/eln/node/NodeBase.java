@@ -111,9 +111,11 @@ public abstract class NodeBase {
             direction.applyTo(vector, 1);
 
             Block b = WorldCompat.getBlock(world, vector[0], vector[1], vector[2]);
-            if (b.getDefaultState().isOpaqueCube())
-                ;
-            neighborOpaque |= 1 << direction.getInt();
+            // 1.12 port, known bug fixed: 1.7.10 had `if (b.isOpaqueCube()) ;` (empty statement), so every neighbour
+            // counted as opaque and TransparentNodeElement.checkCanStay never removed unsupported devices. Same rule as
+            // TransparentNodeDescriptor.checkCanPlace (default-state opaque cube; a hopper counts as a floor).
+            if (b.getDefaultState().isOpaqueCube() || (direction == Direction.YN && b instanceof net.minecraft.block.BlockHopper))
+                neighborOpaque |= 1 << direction.getInt();
             if (isBlockWrappable(b, world, coordonate.x, coordonate.y, coordonate.z))
                 neighborWrapable |= 1 << direction.getInt();
         }
@@ -499,7 +501,7 @@ public abstract class NodeBase {
             WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
             PlayerChunkMap playerManager = worldServer.getPlayerChunkMap();
             if (player.dimension != this.coordonate.dimention) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
+            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x >> 4, coordonate.z >> 4)) continue;
             if (coordonate.distanceTo(player) > range) continue;
 
             Utils.sendPacketToClient(bos, player);
@@ -542,7 +544,7 @@ public abstract class NodeBase {
             WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
             PlayerChunkMap playerManager = worldServer.getPlayerChunkMap();
             if (player.dimension != this.coordonate.dimention) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
+            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x >> 4, coordonate.z >> 4)) continue;
 
             Utils.sendPacketToClient(getPublishPacket(), player);
         }

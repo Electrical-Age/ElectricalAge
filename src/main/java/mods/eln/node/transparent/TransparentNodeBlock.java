@@ -158,7 +158,8 @@ public class TransparentNodeBlock extends NodeBlock {
         } catch (SecurityException e) {
             e.printStackTrace();
         }
-        while (true) ;
+        // 1.12 port, known bug fixed: was `while (true);` (hung the server thread forever)
+        throw new IllegalStateException("Electrical Age: cannot create the transparent node tile entity for meta " + getMetaFromState(state) + " (reflection failed, see the stack trace above)");
     }
 
     public String getNodeUuid() {
