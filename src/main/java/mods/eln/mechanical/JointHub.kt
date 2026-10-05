@@ -11,6 +11,8 @@ import mods.eln.sim.ThermalLoad
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -23,10 +25,12 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
     val staticOnAllSides = arrayOf(obj.getPart("Cap"))
     val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
 
+    @SideOnly(Side.CLIENT)
     override fun draw(angle: Double) {
         draw(angle, Direction.XP, DirectionSet());
     }
 
+    @SideOnly(Side.CLIENT)
     fun draw(angle: Double, front: Direction, connectedSides: DirectionSet) {
         static.forEach { it.draw() }
 

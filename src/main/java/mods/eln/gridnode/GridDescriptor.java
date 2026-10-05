@@ -5,6 +5,8 @@ import mods.eln.misc.Obj3D;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -43,6 +45,7 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         this.cableTexture = cableTexture;
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(float idealRenderingAngle) {
         final boolean fixed = rotationIsFixed();
         if (!fixed) {
@@ -61,6 +64,7 @@ public class GridDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {
             super.renderItem(type, item, data);

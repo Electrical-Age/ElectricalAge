@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "front=0": {
+      "model": "eln:energy_converter_front0"
+    },
+    "front=1": {
+      "model": "eln:energy_converter_front1"
+    },
+    "front=2": {
+      "model": "eln:energy_converter_front2"
+    },
+    "front=3": {
+      "model": "eln:energy_converter_front3"
+    },
+    "front=4": {
+      "model": "eln:energy_converter_front4"
+    },
+    "front=5": {
+      "model": "eln:energy_converter_front5"
+    },
+    "front=6": {
+      "model": "eln:energy_converter_front6"
+    }
+  }
+}

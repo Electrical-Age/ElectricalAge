@@ -264,10 +264,9 @@ abstract public class GridElement extends TransparentNodeElement {
                 // It's always the "a" side doing this.
                 Coordonate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
-                    final Vec3d start = getCablePoint(ourSide, i);
-                    start.rotateAroundY((float) Math.toRadians(idealRenderingAngle));
-                    Vec3d end = target.getCablePoint(theirSide, i);
-                    end.rotateAroundY((float) Math.toRadians(target.idealRenderingAngle));
+                    // 1.12: Vec3d is immutable (1.7.10 rotateAroundY rotated in place; rotateYaw is the same rotation)
+                    final Vec3d start = getCablePoint(ourSide, i).rotateYaw((float) Math.toRadians(idealRenderingAngle));
+                    Vec3d end = target.getCablePoint(theirSide, i).rotateYaw((float) Math.toRadians(target.idealRenderingAngle));
                     end = end.add(offset.x, offset.y, offset.z);
                     writeVec(stream, start);
                     writeVec(stream, end);

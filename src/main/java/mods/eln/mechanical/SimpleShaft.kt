@@ -10,6 +10,8 @@ import mods.eln.sound.LoopedSound
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import mods.eln.compat.IItemRenderer
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -29,6 +31,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
+    @SideOnly(Side.CLIENT)
     open fun draw(angle: Double) {
         for (part in static) {
             part.draw()
@@ -49,6 +52,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
     }
 
+    @SideOnly(Side.CLIENT)
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
             super.renderItem(type, item, *data)

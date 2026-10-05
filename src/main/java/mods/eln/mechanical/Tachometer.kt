@@ -125,7 +125,7 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     internal var maxRads = TachometerElement.DefaultMaxRads
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, Eln.instance.stdCableRenderSignal, connections, renderPreProcess)
+        renderPreProcess = drawCable(Direction.YN, Eln.stdCableRenderSignal, connections, renderPreProcess)
         super.draw()
     }
 

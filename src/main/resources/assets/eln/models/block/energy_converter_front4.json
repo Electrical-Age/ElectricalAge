@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "eln:blocks/elntoic2lvu_side",
+    "up": "eln:blocks/elntoic2lvu_side",
+    "north": "eln:blocks/elntoic2lvu_side",
+    "south": "eln:blocks/elntoic2lvu_side",
+    "west": "eln:blocks/elntoic2lvu_eln",
+    "east": "eln:blocks/elntoic2lvu_ic2",
+    "particle": "eln:blocks/elntoic2lvu_side"
+  }
+}

@@ -56,7 +56,7 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
         obj.getPart("Fan")
     )
 
-    override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
+    override fun addInformation(stack: ItemStack, player: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts ${fluidDescription} into mechanical energy.")
         list.add("Nominal usage ->")
         list.add("  ${fluidDescription.capitalize()} input: ${fluidConsumption} mB/s")
@@ -204,7 +204,7 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
 }
 
 class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
-    override val cableRender = Eln.instance.stdCableRenderSignal
+    override val cableRender = Eln.stdCableRenderSignal
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
