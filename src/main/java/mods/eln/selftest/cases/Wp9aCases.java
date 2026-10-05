@@ -4,6 +4,11 @@ import mods.eln.Eln;
 import mods.eln.item.ElectricalFuseDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Coordonate;
+import mods.eln.node.NodeBase;
+import mods.eln.node.NodeManager;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.selftest.SelfTestCase;
@@ -29,6 +34,9 @@ import net.minecraft.util.EnumHand;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.oredict.OreDictionary;
 
+import net.minecraft.util.math.BlockPos;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -499,15 +507,42 @@ public final class Wp9aCases {
         }
     }
 
-    /** z=0: 50V Power Socket with an LV cable in its slot, nothing plugged in (placed on the floor through
-     *  placeBlockAt, which does not apply the wall-only placeDirection a player gets): its node sits at the source
-     *  voltage and it is registered on the default channel. z=2: Weak 50V Battery Charger switched on through its
+    /** Wall lane (blocks z=3, y=0, on the side of the platform): Electrical Source + 50V Power Socket with an LV
+     *  cable in its slot, nothing plugged in: the socket node sits at the source voltage and it is registered on the
+     *  default channel. z=2: Weak 50V Battery Charger switched on through its
      *  GUI packet, no batteries: draws at most its nominal 200 W and fills
      *  its energy buffer (up to 2 s of nominal power). */
     static final class SocketChargerCase implements SelfTestCase {
         ElectricalSourceElement srcC;
         PowerSocketElement socket;
         BatteryChargerElement charger;
+        final List<BlockPos> wall = new ArrayList<>();
+
+        /** The socket only goes on walls (placeDirection XP/XN/ZP/ZN, checked by placeBlockAt): place like a player
+         *  clicking the +Z face (MC side 3) of the platform block at p - (0,0,1); element on the ZN face of p.
+         *  ctx.placeSix only does floors, so these blocks are removed by this case (removeWall), not by SelfTest. */
+        SixNodeElement placeOnWall(SelfTestContext ctx, int damage, BlockPos p) {
+            SixNodeDescriptor d = Eln.sixNodeItem.getDescriptor(damage);
+            boolean ok = Eln.sixNodeItem.placeBlockAt(d.newItemStack(), player(ctx), ctx.world(), p.getX(), p.getY(), p.getZ(), 3, 0.5F, 0.5F, 0F, damage);
+            if (!ok) throw new IllegalStateException("placeBlockAt (wall) failed for " + d.name + " at " + p);
+            wall.add(p);
+            NodeBase node = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p.getX(), p.getY(), p.getZ(), ctx.world()));
+            if (!(node instanceof SixNode)) throw new IllegalStateException("no SixNode at " + p);
+            SixNodeElement e = ((SixNode) node).getElement(Direction.ZN);
+            if (e == null) throw new IllegalStateException("no element on ZN at " + p);
+            return e;
+        }
+
+        void removeWall(SelfTestContext ctx) {
+            boolean clean = true;
+            for (BlockPos p : wall) {
+                ctx.world().setBlockToAir(p); // drops (socket + its cable) are item entities, killed by the cleanup
+                if (NodeManager.instance.getNodeFromCoordonate(new Coordonate(p.getX(), p.getY(), p.getZ(), ctx.world())) != null)
+                    clean = false;
+            }
+            ctx.check("wp9a power socket wall lane removed", clean && !wall.isEmpty(), wall.size() + " block(s)");
+            wall.clear();
+        }
 
         public String name() {
             return "wp9a power socket + battery charger";
@@ -518,8 +553,13 @@ public final class Wp9aCases {
         }
 
         public void build(SelfTestContext ctx) {
-            source(ctx, SOURCE, 0, 0, U);
-            socket = (PowerSocketElement) ctx.placeSix(SOCKET_50V, ctx.at(1, 1, 0));
+            // wall lane: both on the +Z side face of the platform's last row (z=2), in blocks (0..1, 0, 3)
+            ElectricalSourceElement srcS = (ElectricalSourceElement) placeOnWall(ctx, SOURCE, ctx.at(0, 0, 3));
+            srcS.networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat((float) U);
+            }));
+            socket = (PowerSocketElement) placeOnWall(ctx, SOCKET_50V, ctx.at(1, 0, 3));
             orient(socket, f -> f, Direction.XN);
             socket.getInventory().setInventorySlotContents(0, lvCable()); // PowerSocketContainer.cableSlotId
             socket.getInventory().markDirty();
@@ -531,9 +571,13 @@ public final class Wp9aCases {
         }
 
         public void measure(SelfTestContext ctx) {
-            ctx.checkValue("wp9a power socket voltage [V] (no plug: no current)", socket.powerLoad.getU(), U);
-            List<PowerSocketElement> ch = PowerSocketElement.channelMap.get(socket.channel);
-            ctx.check("wp9a power socket on channel", ch != null && ch.contains(socket), "channel '" + socket.channel + "'");
+            try {
+                ctx.checkValue("wp9a power socket voltage [V] (no plug: no current)", socket.powerLoad.getU(), U);
+                List<PowerSocketElement> ch = PowerSocketElement.channelMap.get(socket.channel);
+                ctx.check("wp9a power socket on channel", ch != null && ch.contains(socket), "channel '" + socket.channel + "'");
+            } finally {
+                removeWall(ctx);
+            }
             // current from the drop over the source/charger connection (Rs(source) + Rs(charger))
             double rLink = link(srcC, charger);
             double uC = charger.powerLoad.getU();
