@@ -321,7 +321,8 @@ public final class Wp9aCases {
 
         public void measure(SelfTestContext ctx) {
             double rSw = on.switchResistor.getR();
-            ctx.checkValue("wp9a switch closed resistance [ohm] (2 * LV cable Rs)", rSw, 2 * ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs);
+            // registration passes rs = 2 * LV cable Rs; the descriptor halves it (electricalRs = rs / 2, as in 1.7.10)
+            ctx.checkValue("wp9a switch closed resistance [ohm] (registered 2 * LV cable Rs, halved = LV cable Rs)", rSw, ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs);
             double rt = link(srcA, on) + rSw + link(on, rA) + rA.nominalRs + link(rA, gA);
             ctx.checkValue("wp9a switch closed current [A] (50 V / R_total)", current(rA), U / rt);
             double iOff = current(rB);

@@ -24,7 +24,11 @@ public interface SelfTestContext {
      */
     SixNodeElement placeSix(int damage, BlockPos p, mods.eln.misc.Direction side);
 
-    /** Place a transparent-node device standing on the block below p. */
+    /**
+     * Place a transparent-node device as a player clicking the top of the block below p. The node lands at p + the
+     * descriptor's spawn delta rotated by its front (0 for most devices; the autominer's is (2, 1, 0)); use
+     * element.node.coordonate for its real position. Ghost blocks are plotted around that node.
+     */
     TransparentNodeElement placeTransparent(int damage, BlockPos p);
 
     /** Bytes for an element's networkUnserialize (the GUI packet path), e.g. stream(out -> { out.writeByte(id); ... }). */

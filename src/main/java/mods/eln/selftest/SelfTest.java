@@ -402,11 +402,17 @@ public final class SelfTest implements SelfTestContext {
         if (d == null) throw new IllegalStateException("no transparent node descriptor " + damage);
         ItemStack stack = d.newItemStack();
         IBlockState state = Eln.transparentNodeBlock.getDefaultState();
+        // where TransparentNodeItem.placeBlockAt puts the node: p + the descriptor's spawn delta, rotated by the front
+        // it computes from the side (UP) and the player's view (autominer: (2, 1, 0) -> the node is not at p)
+        Direction front = d.getFrontFromPlace(Direction.fromIntMinecraftSide(EnumFacing.UP.getIndex()).getInverse(), player);
+        int[] v = new int[]{d.getSpawnDeltaX(), d.getSpawnDeltaY(), d.getSpawnDeltaZ()};
+        front.rotateFromXN(v);
+        BlockPos np = p.add(v[0], v[1], v[2]);
         boolean ok = Eln.transparentNodeItem.placeBlockAt(stack, player, world, p, EnumFacing.UP, 0.5F, 1F, 0.5F, state);
         if (!ok) throw new IllegalStateException("placeBlockAt failed for " + d.name + " at " + p);
-        placed.add(p);
-        NodeBase node = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p.getX(), p.getY(), p.getZ(), world));
-        if (!(node instanceof TransparentNode)) throw new IllegalStateException("no TransparentNode at " + p);
+        NodeBase node = NodeManager.instance.getNodeFromCoordonate(new Coordonate(np.getX(), np.getY(), np.getZ(), world));
+        if (node != null && !placed.contains(np)) placed.add(np);
+        if (!(node instanceof TransparentNode)) throw new IllegalStateException("no TransparentNode at " + np + " (placed at " + p + ")");
         return ((TransparentNode) node).element;
     }
 

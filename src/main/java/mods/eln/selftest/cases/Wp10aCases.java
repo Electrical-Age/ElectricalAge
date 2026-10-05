@@ -456,8 +456,11 @@ public final class Wp10aCases {
         }
 
         public void build(SelfTestContext ctx) {
-            pos = ctx.at(3, 3, 1);
-            miner = (AutoMinerElement) ctx.placeTransparent(AUTO_MINER, pos);
+            // placeBlockAt shifts the node by the spawn delta (2, 1, 0) rotated by the front: the node is not at the
+            // clicked position (1.7.10 behaviour), so take its coordinate from the node
+            miner = (AutoMinerElement) ctx.placeTransparent(AUTO_MINER, ctx.at(3, 3, 1));
+            mods.eln.misc.Coordonate c = miner.node.coordonate;
+            pos = new BlockPos(c.x, c.y, c.z);
         }
 
         int ghosts(SelfTestContext ctx) {
