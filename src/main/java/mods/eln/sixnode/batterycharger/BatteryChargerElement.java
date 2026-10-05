@@ -176,6 +176,16 @@ public class BatteryChargerElement extends SixNodeElement {
         }
     }
 
+    /** Read-only, for the selftest (1.12 port). */
+    public boolean isPowerOn() {
+        return powerOn;
+    }
+
+    /** Energy taken from the network not yet given to batteries [J] (read-only, for the selftest). */
+    public double getEnergyBuffer() {
+        return slowProcess.energyCounter;
+    }
+
     @Override
     public boolean hasGui() {
         return true;

@@ -26,10 +26,8 @@ import static mods.eln.registry.ElnDeviceRegistry.*;
 /**
  * Device batch Wp9a (1.12 port): six-node power components: switch, relay, breaker, fuse, diode, resistor, capacitor/inductor six, signal inductor, power socket, battery charger.
  * Called from ElnContentImpl (one line), after the core slice, in every lifecycle phase.
- * Sources: m1-exclude-wp9a.txt (delete lines to build them). Not yet ported registrations:
- * registry/pending/Wp9aPending.java (excluded). To port a device: move its register method (and the fields it
- * sets) from Wp9aPending into this class, un-comment its PENDING line below, point device code at
- * Wp9aContent.&lt;field&gt;. Keep the ids (sub-UIDs) unchanged. Selftest cases: mods.eln.selftest.cases.Wp9aCases.
+ * All wp9a registrations are ported here (1.12, ids unchanged); registry/pending/Wp9aPending.java is empty.
+ * Selftest cases: mods.eln.selftest.cases.Wp9aCases.
  */
 public class Wp9aContent implements ElnContent {
     @Override
