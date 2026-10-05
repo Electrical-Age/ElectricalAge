@@ -60,9 +60,9 @@ public class TopIntegration implements Function<ITheOneProbe, Void> {
     }
 
     /** A real device behind a ghost block: its item and its info lines (null when unknown). */
-    static final class GhostTarget {
-        final ItemStack stack;
-        final Map<String, String> waila;
+    public static final class GhostTarget {
+        public final ItemStack stack;
+        public final Map<String, String> waila;
 
         GhostTarget(ItemStack stack, Map<String, String> waila) {
             this.stack = stack;
@@ -72,7 +72,7 @@ public class TopIntegration implements Function<ITheOneProbe, Void> {
 
     /** 1.7.10 GhostNodeWailaRequestPacketHandler: the ghost's observer, transparent node or six-node element. */
     @Nullable
-    static GhostTarget ghostTarget(World world, Coordonate coord) {
+    public static GhostTarget ghostTarget(World world, Coordonate coord) {
         GhostElement ghost = Eln.ghostManager.getGhost(coord);
         Coordonate realCoord = ghost == null ? null : ghost.getObservatorCoordonate();
         if (realCoord == null) return null;
