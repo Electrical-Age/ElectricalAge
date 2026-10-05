@@ -6,13 +6,11 @@ public class EnergyConverterElnToOtherDescriptor extends DescriptorBase {
 
     public ElnDescriptor eln;
     public Ic2Descriptor ic2;
-    public OcDescriptor oc;
 
-    public EnergyConverterElnToOtherDescriptor(String key, ElnDescriptor eln, Ic2Descriptor ic2, OcDescriptor oc) {
+    public EnergyConverterElnToOtherDescriptor(String key, ElnDescriptor eln, Ic2Descriptor ic2) {
         super(key);
         this.eln = eln;
         this.ic2 = ic2;
-        this.oc = oc;
     }
 
     void applyTo(EnergyConverterElnToOtherNode node) {
@@ -40,14 +38,6 @@ public class EnergyConverterElnToOtherDescriptor extends DescriptorBase {
         public Ic2Descriptor(double outMax, int tier) {
             this.outMax = outMax;
             this.tier = tier;
-        }
-    }
-
-    public static class OcDescriptor {
-        public double outMax;
-
-        public OcDescriptor(double outMax) {
-            this.outMax = outMax;
         }
     }
 }

@@ -1,3 +1,2 @@
 # Device batch wp11: excluded sources (delete a line to build it). See notes/core-log.md "Device batches".
-mods/eln/simplenode/
 mods/eln/registry/pending/Wp11Pending.java
