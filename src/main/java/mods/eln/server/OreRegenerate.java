@@ -61,7 +61,7 @@ public class OreRegenerate {
         for (int idx = 0; idx < 1; idx++) {
             if (!jobs.isEmpty()) {
                 ChunkRef j = jobs.pollLast();
-                if (!Eln.instance.saveConfig.reGenOre && !Eln.instance.forceOreRegen) return;
+                if ((Eln.instance.saveConfig == null || !Eln.instance.saveConfig.reGenOre) && !Eln.instance.forceOreRegen) return; // 1.12: null guard as in chunkLoad
 
                 WorldServer server = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(j.worldId);
                 Chunk chunk = server.getChunk(j.x, j.z);

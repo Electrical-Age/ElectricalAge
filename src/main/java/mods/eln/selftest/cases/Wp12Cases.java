@@ -92,6 +92,9 @@ public final class Wp12Cases {
             List<String> missing = new ArrayList<>();
             for (String n : names) if (!ForgeRegistries.ITEMS.containsKey(new ResourceLocation("eln", n))) missing.add(n);
             ctx.check("wp12 item registry names", missing.isEmpty(), missing.isEmpty() ? "eln:copper_sword ... eln:ore" : "missing " + missing);
+            int oreId = net.minecraft.block.Block.getIdFromBlock(Wp12Content.oreBlock);
+            // X-ray scanner keys are block id + meta << 12 in a 65536 table (1.7.10 design): ids >= 4096 are not scanned
+            ctx.line((oreId < 4096 ? "INFO" : "WARN") + " wp12 ore block id " + oreId + " (X-ray scanner sees EA ores only if < 4096)");
             ResourceLocation rep = EntityList.getKey(ReplicatorEntity.class);
             ctx.check("wp12 replicator entity id", rep != null && rep.toString().equals("eln:replicator"), String.valueOf(rep));
         }
