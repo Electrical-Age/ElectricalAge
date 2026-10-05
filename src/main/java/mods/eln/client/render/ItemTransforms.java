@@ -54,14 +54,14 @@ public final class ItemTransforms {
                 + "translate 0 -0.2 0; rotate 90 0 1 0; translate -0.5 -0.5 -0.5",
             "icon items with the render helper, third person, in the 1.12 hand frame (no *_undo/third_person_arm; "
                 + "mirrored for the left hand): vanilla item/handheld pose, then EA's icon quad mapped onto the vanilla icon");
-        def("equipped_model_first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4; translate -0.5 -0.5 -0.5",
+        def("equipped_model_first_person", "translate -0.1 0.1 0; rotate 45 0 1 0; scale 0.25 0.25 0.25; translate -0.5 -0.5 -0.5",
             "OBJ-model items with the render helper (X-ray scanner, fuse), first person, after 1.12 "
                 + "transformSideFirstPerson: the 1.7.10 frame (rotate 45, scale 0.4) + Forge's helper translate");
         def("equipped_model_third_person", "translate 0 0.1875 -0.3125; rotate 20 1 0 0; rotate 45 0 1 0; "
                 + "scale -0.375 -0.375 0.375; translate -0.5 -0.5 -0.5",
             "OBJ-model items with the render helper, third person, after third_person_*_undo and third_person_arm: "
                 + "1.7.10 RenderPlayer block branch + Forge's helper translate");
-        def("node_first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4",
+        def("node_first_person", "translate -0.08 0.15 -0.08; rotate 45 0 1 0; scale 0.3 0.3 0.3",
             "transparent-node items (machines, batteries...), first person, after 1.12 transformSideFirstPerson: "
                 + "vanilla block/block pose (models are centred on the origin like the vanilla cube)");
         def("node_third_person", "translate 0 0.15625 0; rotate 75 1 0 0; rotate 45 0 1 0; scale 0.375 0.375 0.375",
@@ -97,6 +97,9 @@ public final class ItemTransforms {
         // client test 3 (AdventurAgent): cable tuning became the defaults
         SUPERSEDED.put("icon_first_person", "translate 0.070625 0.2 0.070625; rotate -90 0 1 0; rotate 25 0 0 1; scale 0.4 0.4 0.4");
         SUPERSEDED.put("icon_ground", "scale 0.5 0.5 0.5");
+        // client test 4 tuning (AdventurAgent)
+        SUPERSEDED.put("equipped_model_first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4; translate -0.5 -0.5 -0.5");
+        SUPERSEDED.put("node_first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4");
     }
 
     /** Keys no longer read; removed from the file on load (equipped_helper: split into the equipped_helper_* / equipped_model_* / node_* pairs). */
