@@ -125,7 +125,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
     public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, Coordonate blockCoord) {
         TransparentNodeDescriptor desc = null;
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             desc = elementRender == null ? null : elementRender.transparentNodedescriptor;
         } else {
             TransparentNode node = (TransparentNode) getNode();
@@ -137,15 +137,15 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
             y = blockCoord.y;
             z = blockCoord.z;
         } else {
-            x = xCoord;
-            y = yCoord;
-            z = zCoord;
+            x = pos.getX();
+            y = pos.getY();
+            z = pos.getZ();
         }
         if (desc == null) {
-            AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(worldObj, x, y, z);
+            AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
             if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
         } else {
-            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, worldObj, x, y, z);
+            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
         }
     }
 
@@ -181,7 +181,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     ISidedInventory getSidedInventory() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             if (elementRender == null) return FakeSideInventory.getInstance();
             IInventory i = elementRender.getInventory();
             if (i != null && i instanceof ISidedInventory) {

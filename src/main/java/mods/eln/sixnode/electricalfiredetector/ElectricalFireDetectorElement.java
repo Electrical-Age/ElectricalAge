@@ -118,7 +118,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
 
-        return inventory != null && inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+        return inventory != null && inventory.take(entityPlayer.getHeldItemMainhand(), this, false, true);
     }
 
     @Override

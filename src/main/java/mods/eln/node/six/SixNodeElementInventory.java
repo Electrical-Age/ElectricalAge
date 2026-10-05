@@ -117,7 +117,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 		
 /*		if(sixNodeElement != null)
 			return player.getDistanceSq(sixNodeElement.sixNode.coordonate.x + 0.5, sixNodeElement.sixNode.coordonate.y + 0.5, sixNodeElement.sixNode.coordonate.z + 0.5) < 18;
-		return player.getDistanceSq(sixnodeRender.tileEntity.xCoord + 0.5, sixnodeRender.tileEntity.yCoord + 0.5, sixnodeRender.tileEntity.zCoord + 0.5) < 18;
+		return player.getDistanceSq(sixnodeRender.tileEntity.getPos().getX() + 0.5, sixnodeRender.tileEntity.getPos().getY() + 0.5, sixnodeRender.tileEntity.getPos().getZ() + 0.5) < 18;
 */
     }
 

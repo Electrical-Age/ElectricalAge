@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 
 public class TransparentNodeEntityWithSiededInv extends TransparentNodeEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
     ISidedInventory getSidedInventory() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             if (elementRender == null) return FakeSideInventory.getInstance();
             IInventory i = elementRender.getInventory();
             if (i != null && i instanceof ISidedInventory) {

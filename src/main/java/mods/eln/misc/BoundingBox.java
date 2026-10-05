@@ -25,20 +25,20 @@ public class BoundingBox {
 
     public BoundingBox merge(BoundingBox other) {
         return new BoundingBox(
-            (float) Math.min(min.xCoord, other.min.xCoord),
-            (float) Math.max(max.xCoord, other.max.xCoord),
-            (float) Math.min(min.yCoord, other.min.yCoord),
-            (float) Math.max(max.yCoord, other.max.yCoord),
-            (float) Math.min(min.zCoord, other.min.zCoord),
-            (float) Math.max(max.zCoord, other.max.zCoord)
+            (float) Math.min(min.x, other.min.x),
+            (float) Math.max(max.x, other.max.x),
+            (float) Math.min(min.y, other.min.y),
+            (float) Math.max(max.y, other.max.y),
+            (float) Math.min(min.z, other.min.z),
+            (float) Math.max(max.z, other.max.z)
         );
     }
 
     public Vec3d centre() {
         return new Vec3d(
-            min.xCoord + (max.xCoord - min.xCoord) / 2,
-            min.yCoord + (max.yCoord - min.yCoord) / 2,
-            min.zCoord + (max.zCoord - min.zCoord) / 2
+            min.x + (max.x - min.x) / 2,
+            min.y + (max.y - min.y) / 2,
+            min.z + (max.z - min.z) / 2
         );
     }
 

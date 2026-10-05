@@ -30,7 +30,7 @@ public class SoundServer {
         try {
             stream.writeByte(Eln.packetPlaySound);
 
-            stream.writeByte(p.world.provider.dimensionId);
+            stream.writeByte(p.world.provider.getDimension());
 
             p.writeTo(stream);
 
@@ -38,7 +38,7 @@ public class SoundServer {
 
             for (Object obj : server.getConfigurationManager().playerEntityList) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
-                if (player.dimension == p.world.provider.dimensionId && player.getDistance(p.x, p.y, p.z) < p.rangeMax + 2)
+                if (player.dimension == p.world.provider.getDimension() && player.getDistance(p.x, p.y, p.z) < p.rangeMax + 2)
                     ;
                 Utils.sendPacketToClient(bos, player);
             }

@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.solarpanel;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -46,7 +48,7 @@ public class SolarPannelSlowProcess implements IProcess {
 
         Coordonate coordonate = solarPannel.node.coordonate;
         Vec3d v = Utils.getVec05(coordonate);
-        double x = v.xCoord + solarPannel.descriptor.solarOffsetX, y = v.yCoord + solarPannel.descriptor.solarOffsetY, z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
+        double x = v.x + solarPannel.descriptor.solarOffsetX, y = v.y + solarPannel.descriptor.solarOffsetY, z = v.z + solarPannel.descriptor.solarOffsetZ;
 
 
         double lightAlpha = solarPannel.panelAlpha - solarAlpha;
@@ -74,7 +76,7 @@ public class SolarPannelSlowProcess implements IProcess {
         int count = 0;
         ///world.getChunkProvider().chunkExists(var1, var2)
         while (world.getChunkProvider().chunkExists(((int) x) >> 4, ((int) z) >> 4)) {
-            double opacity = world.getBlockLightOpacity((int) x, (int) y, (int) z);
+            double opacity = WorldCompat.getBlockLightOpacity(world, (int) x, (int) y, (int) z);
             light *= (255 - opacity) / 255;
             if (light == 0.0) {
                 break;

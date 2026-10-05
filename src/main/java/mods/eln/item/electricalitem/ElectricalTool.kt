@@ -13,8 +13,8 @@ import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.world.World
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import mods.eln.compat.IItemRenderer.ItemRenderType
+import mods.eln.compat.IItemRenderer.ItemRendererHelper
 
 open class ElectricalTool(name: String, private var strengthOn: Float, private var strengthOff: Float,
                           private var energyStorage: Double, private var energyPerBlock: Double, internal var chargePower: Double) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
@@ -23,7 +23,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
     internal var range: Int = 0
 
     override fun onEntitySwing(entityLiving: EntityLivingBase, stack: ItemStack): Boolean {
-        if (entityLiving.worldObj.isRemote) return false
+        if (entityLiving.world.isRemote) return false
 
         Eln.itemEnergyInventoryProcess.addExclusion(this, 2.0)
         return super.onEntitySwing(entityLiving, stack)

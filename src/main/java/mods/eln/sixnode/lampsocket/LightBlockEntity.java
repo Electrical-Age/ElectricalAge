@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
@@ -66,7 +68,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
 	/*void removeLight(int light) {
-        //int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
+        //int meta = WorldCompat.getMeta(world, pos.getX(), pos.getY(), pos.getZ());
 		for (int idx = 0; idx < lightList.size(); idx++) {
 			if (lightList.get(idx) == light) {
 				lightList.remove(idx);
@@ -99,26 +101,26 @@ public class LightBlockEntity extends TileEntity {
 
     void lightManager() {
 		/*if (lightList.size() == 0) {
-			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+			WorldCompat.setBlock(world, pos.getX(), pos.getY(), pos.getZ(), 0);
 		} else {
 			int light = getLight();
-			if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-				worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+			if (light != WorldCompat.getMeta(world, pos.getX(), pos.getY(), pos.getZ())) {
+				WorldCompat.setMeta(world, pos.getX(), pos.getY(), pos.getZ(), light, 2);
+				WorldCompat.updateLightByType(world, EnumSkyBlock.BLOCK, pos.getX(), pos.getY(), pos.getZ());
 			}
 		}*/
     }
 
     @Override
     public void updateEntity() {
-        if (worldObj.isRemote) return;
+        if (world.isRemote) return;
 
         if (lightList.isEmpty()) {
-            //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
-            //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            //	WorldCompat.setMeta(world, pos.getX(), pos.getY(), pos.getZ(), 1, 2);
+            WorldCompat.setBlockToAir(world, pos.getX(), pos.getY(), pos.getZ());
+            //WorldCompat.updateLightByType(world, EnumSkyBlock.BLOCK, pos.getX(), pos.getY(), pos.getZ());
             //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " ");
+            Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
             return;
         }
 
@@ -135,21 +137,21 @@ public class LightBlockEntity extends TileEntity {
             }
         }
 
-        if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
+        if (light != WorldCompat.getMeta(world, pos.getX(), pos.getY(), pos.getZ())) {
 
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            WorldCompat.setMeta(world, pos.getX(), pos.getY(), pos.getZ(), light, 2);
+            WorldCompat.updateLightByType(world, EnumSkyBlock.BLOCK, pos.getX(), pos.getY(), pos.getZ());
         }
     }
 
     public static void addLight(World w, int x, int y, int z, int light, int timeout) {
-        Block block = w.getBlock(x, y, z);
+        Block block = WorldCompat.getBlock(w, x, y, z);
         if (block != Eln.lightBlock) {
-            if (block != Blocks.air) return;
-            w.setBlock(x, y, z, Eln.lightBlock, light, 2);
+            if (block != Blocks.AIR) return;
+            WorldCompat.setBlock(w, x, y, z, Eln.lightBlock, light, 2);
         }
 
-        TileEntity t = w.getTileEntity(x, y, z);
+        TileEntity t = WorldCompat.getTileEntity(w, x, y, z);
         if (t != null && t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else

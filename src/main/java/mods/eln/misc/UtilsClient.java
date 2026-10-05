@@ -25,7 +25,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import mods.eln.compat.IItemRenderer.ItemRenderType;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -52,16 +52,16 @@ public class UtilsClient {
     private UtilsClient() {
     }
 
-    public static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
+    public static float distanceFromClientPlayer(World world, int x, int y, int z) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
 
-        return (float) Math.sqrt((xCoord - player.posX) * (xCoord - player.posX)
-            + (yCoord - player.posY) * (yCoord - player.posY)
-            + (zCoord - player.posZ) * (zCoord - player.posZ));
+        return (float) Math.sqrt((x - player.posX) * (x - player.posX)
+            + (y - player.posY) * (y - player.posY)
+            + (z - player.posZ) * (z - player.posZ));
     }
 
     public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
-        return distanceFromClientPlayer(tileEntity.getWorldObj(), tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+        return distanceFromClientPlayer(tileEntity.getWorld(), tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ());
     }
 
     public static EntityPlayerSP getClientPlayer() {
@@ -87,7 +87,7 @@ public class UtilsClient {
     public static void clientOpenGui(GuiScreen gui) {
         guiLastOpen = gui;
         EntityPlayerSP clientPlayer = getClientPlayer();
-        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
+        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.world, 0, 0, 0);
     }
 
     public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
@@ -100,11 +100,11 @@ public class UtilsClient {
     }
 
     public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, TileEntity e, boolean bilinear) {
-        drawHaloNoLightSetup(halo, r, g, b, e.getWorldObj(), e.xCoord, e.yCoord, e.zCoord, bilinear);
+        drawHaloNoLightSetup(halo, r, g, b, e.getWorld(), e.getPos().getX(), e.getPos().getY(), e.getPos().getZ(), bilinear);
     }
 
     public static void drawHalo(Obj3DPart halo, float r, float g, float b, TileEntity e, boolean bilinear) {
-        drawHalo(halo, r, g, b, e.getWorldObj(), e.xCoord, e.yCoord, e.zCoord, bilinear);
+        drawHalo(halo, r, g, b, e.getWorld(), e.getPos().getX(), e.getPos().getY(), e.getPos().getZ(), bilinear);
     }
 
     public static void drawHaloNoLightSetup(Obj3DPart halo, float distance) {
@@ -129,9 +129,9 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ));
+        int light = getLight(e.world, MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ));
         // light =
-        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
+        // e.world.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
         // MathHelper.floor(e.posY), MathHelper.floor(e.posZ),0);
         // Utils.println(light);
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
@@ -525,13 +525,13 @@ public class UtilsClient {
         if (t == null)
             return 100000000.0;
         Entity c = Minecraft.getMinecraft().player;
-        double x = (c.posX - t.xCoord), y = (c.posY - t.yCoord), z = (c.posZ - t.zCoord);
+        double x = (c.posX - t.getPos().getX()), y = (c.posY - t.getPos().getY()), z = (c.posZ - t.getPos().getZ());
         return Math.sqrt(x * x + y * y + z * z);
     }
 
     public static int getLight(World w, int x, int y, int z) {
-        int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
-        int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
+        int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.BLOCK, x, y, z);
+        int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.SKY, x, y, z) - w.calculateSkylightSubtracted(0f);
         return Math.max(b, s);
     }
 

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
@@ -96,7 +98,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             for (int dx = -maxRangeHalf; dx <= maxRangeHalf; ++dx)
                 for (int dy = -maxRangeHalf; dy <= maxRangeHalf; ++dy)
                     for (int dz = -maxRangeHalf; dz <= maxRangeHalf; ++dz) {
-                        Block block = detectionBBCenter.world().getBlock(detectionBBCenter.x + dx, detectionBBCenter.y + dy,
+                        Block block = WorldCompat.getBlock(detectionBBCenter.world(), detectionBBCenter.x + dx, detectionBBCenter.y + dy,
                             detectionBBCenter.z + dz);
                         if (block.getClass() == BlockFire.class) {
                             fireDetected = true;

@@ -1,5 +1,7 @@
 package mods.eln.node;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Direction;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.EnumSkyBlock;
@@ -17,7 +19,7 @@ public abstract class Node extends NodeBase {
         if (light < 0) light = 0;
         if (lastLight != light) {
             lastLight = light;
-            coordonate.world().updateLightByType(EnumSkyBlock.Block, coordonate.x, coordonate.y, coordonate.z);
+            WorldCompat.updateLightByType(coordonate.world(), EnumSkyBlock.BLOCK, coordonate.x, coordonate.y, coordonate.z);
             setNeedPublish(true);
         }
 
@@ -59,7 +61,7 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
+        return (NodeBlockEntity) WorldCompat.getTileEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
     }
 
     public int isProvidingWeakPower(Direction side) {

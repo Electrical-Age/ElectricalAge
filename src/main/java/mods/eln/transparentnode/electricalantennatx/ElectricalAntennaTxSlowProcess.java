@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalantennatx;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
@@ -43,9 +45,9 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 coord.move(element.front);
                 distance++;
                 Block block;
-                if (element.placeBoot || element.rxCoord == null || coord.world().blockExists(coord.x, coord.y, coord.z)) {
+                if (element.placeBoot || element.rxCoord == null || WorldCompat.blockExists(coord.world(), coord.x, coord.y, coord.z)) {
                     //	a++;
-                    if ((block = coord.getBlock()) != Blocks.air && block != Blocks.fire) {
+                    if ((block = coord.getBlock()) != Blocks.AIR && block != Blocks.FIRE) {
                         if (block == Eln.transparentNodeBlock
                             && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordonate(coord)) != null
                             && (node.element instanceof ElectricalAntennaRxElement)) {
@@ -77,9 +79,9 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 Coordonate coordCpy = new Coordonate(coord);
                 coordCpy.move(element.front.getInverse());
                 if (element.powerResistor.getP() > 50) {
-                    if (coordCpy.world().blockExists(coordCpy.x, coordCpy.y, coordCpy.z)) {
-                        if (coordCpy.getBlock() == Blocks.air) {
-                            coordCpy.world().setBlock(coordCpy.x, coordCpy.y, coordCpy.z, Blocks.fire);
+                    if (WorldCompat.blockExists(coordCpy.world(), coordCpy.x, coordCpy.y, coordCpy.z)) {
+                        if (coordCpy.getBlock() == Blocks.AIR) {
+                            WorldCompat.setBlock(coordCpy.world(), coordCpy.x, coordCpy.y, coordCpy.z, Blocks.FIRE);
                         }
                     }
                 }

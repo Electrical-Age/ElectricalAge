@@ -146,7 +146,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return booterAccepter.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+        return booterAccepter.take(entityPlayer.getHeldItemMainhand(), this, false, true);
     }
 
     public void networkSerialize(java.io.DataOutputStream stream) {

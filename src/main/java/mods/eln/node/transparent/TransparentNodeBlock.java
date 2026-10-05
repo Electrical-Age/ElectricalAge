@@ -1,5 +1,7 @@
 package mods.eln.node.transparent;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
@@ -60,7 +62,7 @@ public class TransparentNodeBlock extends NodeBlock {
     @Override
     public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) {
         if (!world.isRemote) {
-            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
+            NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(world, x, y, z);
             if (entity != null) {
                 NodeBase nodeBase = entity.getNode();
                 if (nodeBase instanceof TransparentNode) {
@@ -78,16 +80,16 @@ public class TransparentNodeBlock extends NodeBlock {
     public int getDamageValue(World world, int x, int y, int z) {
         if (world == null)
             return 0;
-        TileEntity tile = world.getTileEntity(x, y, z);
+        TileEntity tile = WorldCompat.getTileEntity(world, x, y, z);
         if (tile != null && tile instanceof TransparentNodeEntity)
-            return ((TransparentNodeEntity) world.getTileEntity(x, y, z)).getDamageValue(world, x, y, z);
+            return ((TransparentNodeEntity) WorldCompat.getTileEntity(world, x, y, z)).getDamageValue(world, x, y, z);
         return 0;
     }
 
 
     @Override
     public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-        return (world.getBlockMetadata(x, y, z) & 3) << 6;
+        return (WorldCompat.getMeta(world, x, y, z) & 3) << 6;
     }
 
 
@@ -111,7 +113,7 @@ public class TransparentNodeBlock extends NodeBlock {
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
         //   this.setBlockBoundsBasedOnState(world,x, y, z);
         //  super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
-        TileEntity tileEntity = world.getTileEntity(x, y, z);
+        TileEntity tileEntity = WorldCompat.getTileEntity(world, x, y, z);
         if (tileEntity == null || (tileEntity instanceof TransparentNodeEntity == false)) {
             super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
         } else {

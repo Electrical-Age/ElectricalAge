@@ -89,7 +89,7 @@ public class OreRegenerate {
         //	if (e.world.isRemote == false) Utils.println("Chunk loaded!");
         if (e.world.isRemote || (Eln.instance.saveConfig != null && !Eln.instance.saveConfig.reGenOre)) return;
         Chunk c = e.getChunk();
-        ChunkRef ref = new ChunkRef(c.xPosition, c.zPosition, c.worldObj.provider.dimensionId);
+        ChunkRef ref = new ChunkRef(c.xPosition, c.zPosition, c.getWorld().provider.getDimension());
         if (alreadyLoadedChunks.contains(ref)) {
             Utils.println("Already regenerated!");
             return;

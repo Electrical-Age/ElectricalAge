@@ -78,10 +78,10 @@ public class SoundCommand {
     }
 
     public SoundCommand set(TileEntity c) {
-        world = c.getWorldObj();
-        x = c.xCoord + 0.5;
-        y = c.yCoord + 0.5;
-        z = c.zCoord + 0.5;
+        world = c.getWorld();
+        x = c.getPos().getX() + 0.5;
+        y = c.getPos().getY() + 0.5;
+        z = c.getPos().getZ() + 0.5;
         //mediumRange();
         return this;
     }

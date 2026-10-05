@@ -1,5 +1,7 @@
 package mods.eln.node;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemBlock;
@@ -35,7 +37,7 @@ public class NodeBlockItem extends ItemBlock {
     	NodeBase node = (NodeBase) getBlock().newNodeBase();
 		node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
 		
-		world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
+		WorldCompat.setBlock(world, x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
     	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);
     	
     	node.checkCanStay(true);

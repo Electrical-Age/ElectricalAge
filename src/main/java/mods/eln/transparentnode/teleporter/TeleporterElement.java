@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.teleporter;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -435,7 +437,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
                                 x = (int) (e.posX + (Math.random() * 2 - 1) * failDistance);
                                 z = (int) (e.posZ + (Math.random() * 2 - 1) * failDistance);
                                 y = 20;
-                                while (e.worldObj.getBlock(x, y, z) != Blocks.air && e.worldObj.getBlock(x, y + 1, z) != Blocks.air) {
+                                while (WorldCompat.getBlock(e.world, x, y, z) != Blocks.AIR && WorldCompat.getBlock(e.world, x, y + 1, z) != Blocks.AIR) {
                                     y++;
                                 }
                                 Utils.serverTeleport(e, x + 0.5, y, z + 0.5);

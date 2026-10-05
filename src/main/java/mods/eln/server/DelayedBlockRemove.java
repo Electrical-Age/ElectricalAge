@@ -31,6 +31,6 @@ public class DelayedBlockRemove implements ITask {
     @Override
     public void run() {
         blocks.remove(c);
-        c.setBlock(Blocks.air);
+        c.setBlock(Blocks.AIR);
     }
 }

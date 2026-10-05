@@ -1,5 +1,7 @@
 package mods.eln.node.transparent;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
@@ -11,7 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer;
+import mods.eln.compat.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class TransparentNodeItem extends GenericItemBlockUsingDamage<TransparentNodeDescriptor> implements IItemRenderer {
@@ -36,9 +38,9 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         y += v[1];
         z += v[2];
 
-        Block bb = world.getBlock(x, y, z);
+        Block bb = WorldCompat.getBlock(world, x, y, z);
         if (bb.isReplaceable(world, x, y, z)) ;
-        //if(world.getBlock(x, y, z) != Blocks.air) return false;
+        //if(WorldCompat.getBlock(world, x, y, z) != Blocks.AIR) return false;
 
         Coordonate coord = new Coordonate(x, y, z, world);
 
@@ -55,7 +57,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         TransparentNode node = new TransparentNode();
         node.onBlockPlacedBy(coord, front, player, stack);
 
-        world.setBlock(x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(), 0x03);//caca1.5.1
+        WorldCompat.setBlock(world, x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(), 0x03);//caca1.5.1
         ((NodeBlock) Block.getBlockFromItem(this)).onBlockPlacedBy(world, x, y, z, direction, player, metadata);
 
 

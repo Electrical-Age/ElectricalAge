@@ -75,7 +75,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     @Optional.Method(modid = Other.modIdIc2)
     @Override
     public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return false;
         SimpleNode n = getNode();
         if (n == null)
@@ -86,7 +86,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     @Optional.Method(modid = Other.modIdIc2)
     @Override
     public double getOfferedEnergy() {
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return 0;
         if (getNode() == null)
             return 0;
@@ -99,7 +99,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     @Optional.Method(modid = Other.modIdIc2)
     @Override
     public void drawEnergy(double amount) {
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return;
         if (getNode() == null)
             return;
@@ -150,7 +150,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
      * @Override
 	 * 
 	 * @Optional.Method(modid = Other.modIdOc) public Node
-	 * sidedNode(ForgeDirection side) { if(worldObj.isRemote){ if(front.back()
+	 * sidedNode(ForgeDirection side) { if(world.isRemote){ if(front.back()
 	 * == Direction.from(side)) return node(); return null; }else{
 	 * if(getNode().getFront().back() == Direction.from(side)) return node();
 	 * return null; } }
@@ -170,7 +170,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     public boolean canConnectEnergy(ForgeDirection from) {
         // Utils.println("*****canConnectEnergy*****");
         // return true;
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return false;
         if (getNode() == null)
             return false;
@@ -189,7 +189,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     @Optional.Method(modid = Other.modIdTe)
     public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
         // Utils.println("*****extractEnergy*****");
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return 0;
         if (getNode() == null)
             return 0;

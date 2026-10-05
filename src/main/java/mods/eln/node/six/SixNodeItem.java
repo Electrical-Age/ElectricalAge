@@ -1,5 +1,7 @@
 package mods.eln.node.six;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
@@ -13,7 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer;
+import mods.eln.compat.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> implements IItemRenderer {
@@ -33,9 +35,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-        Block block = world.getBlock(x, y, z);
+        Block block = WorldCompat.getBlock(world, x, y, z);
 
-        if ((block == Blocks.SNOW_LAYER) && ((world.getBlockMetadata(x, y, z) & 0x7) < 1)) {
+        if ((block == Blocks.SNOW_LAYER) && ((WorldCompat.getMeta(world, x, y, z) & 0x7) < 1)) {
             side = 1;
         } else if ((block != Blocks.VINE) && (block != Blocks.TALLGRASS) && (block != Blocks.DEADBUSH) && (!block.isReplaceable(world, x, y, z))) {
             if (side == 0)
@@ -90,7 +92,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordonate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
             return false;
         }
-        if (par1World.getBlock(vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
+        if (WorldCompat.getBlock(par1World, vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
             return true;
         if (super.func_150936_a(par1World, x, y, z, par5, par6EntityPlayer, par7ItemStack))
             return true;
@@ -110,9 +112,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
             return false;
 
         Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
-        Block blockOld = world.getBlock(x, y, z);
+        Block blockOld = WorldCompat.getBlock(world, x, y, z);
         SixNodeBlock block = (SixNodeBlock) Block.getBlockFromItem(this);
-        if (blockOld == Blocks.air || blockOld.isReplaceable(world, x, y, z)) {
+        if (blockOld == Blocks.AIR || blockOld.isReplaceable(world, x, y, z)) {
             // blockID = this.getBlockID();
 
             Coordonate coord = new Coordonate(x, y, z, world);
@@ -133,7 +135,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
                 sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);
                 sixNode.createSubBlock(stack, direction, player);
 
-                world.setBlock(x, y, z, block, metadata, 0x03);
+                WorldCompat.setBlock(world, x, y, z, block, metadata, 0x03);
                 block.getIfOtherBlockIsSolid(world, x, y, z, direction);
                 block.onBlockPlacedBy(world, x, y, z, Direction.fromIntMinecraftSide(side).getInverse(), player, metadata);
                 return true;
@@ -141,9 +143,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
             }
         } else if (blockOld == block) {
 
-            SixNode sixNode = (SixNode) ((SixNodeEntity) world.getTileEntity(x, y, z)).getNode();
+            SixNode sixNode = (SixNode) ((SixNodeEntity) WorldCompat.getTileEntity(world, x, y, z)).getNode();
             if (sixNode == null) {
-                world.setBlockToAir(x, y, z);
+                WorldCompat.setBlockToAir(world, x, y, z);
                 return false;
             }
             if (sixNode.getSideEnable(direction) == false && block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
@@ -153,9 +155,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
             }
 
         } else {
-            SixNode sixNode = (SixNode) ((SixNodeEntity) world.getTileEntity(x, y, z)).getNode();
+            SixNode sixNode = (SixNode) ((SixNodeEntity) WorldCompat.getTileEntity(world, x, y, z)).getNode();
             if (sixNode == null) {
-                world.setBlockToAir(x, y, z);
+                WorldCompat.setBlockToAir(world, x, y, z);
                 return false;
             }
         }

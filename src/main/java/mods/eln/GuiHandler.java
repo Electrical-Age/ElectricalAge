@@ -1,5 +1,7 @@
 package mods.eln;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -17,7 +19,7 @@ import java.io.IOException;
 public class GuiHandler implements IGuiHandler {
 
     INodeEntity getNodeEntity(World world, int x, int y, int z) {
-        TileEntity e = world.getTileEntity(x, y, z);
+        TileEntity e = WorldCompat.getTileEntity(world, x, y, z);
         if (e == null || false == e instanceof INodeEntity) return null;
         return (INodeEntity) e;
     }

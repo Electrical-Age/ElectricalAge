@@ -59,7 +59,7 @@ public class ServerEventListener {
     public double getLightningClosestTo(Coordonate c) {
         double best = 10000000;
         for (EntityLightningBolt l : lightningList) {
-            if (c.world() != l.worldObj) continue;
+            if (c.world() != l.world) continue;
             double d = l.getDistance(c.x, c.y, c.z);
             if (d < best) best = d;
         }
@@ -72,7 +72,7 @@ public class ServerEventListener {
     @SubscribeEvent
     public void onWorldLoad(Load e) {
         if (e.world.isRemote) return;
-        loadedWorlds.add(e.world.provider.dimensionId);
+        loadedWorlds.add(e.world.provider.getDimension());
         FileNames fileNames = new FileNames(e);
 
         try {
@@ -99,10 +99,10 @@ public class ServerEventListener {
     @SubscribeEvent
     public void onWorldUnload(Unload e) {
         if (e.world.isRemote) return;
-        loadedWorlds.remove(e.world.provider.dimensionId);
+        loadedWorlds.remove(e.world.provider.getDimension());
         try {
-            NodeManager.instance.unload(e.world.provider.dimensionId);
-            Eln.ghostManager.unload(e.world.provider.dimensionId);
+            NodeManager.instance.unload(e.world.provider.getDimension());
+            Eln.ghostManager.unload(e.world.provider.getDimension());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -112,13 +112,13 @@ public class ServerEventListener {
     @SubscribeEvent
     public void onWorldSave(Save e) {
         if (e.world.isRemote) return;
-        if (!loadedWorlds.contains(e.world.provider.dimensionId)) {
+        if (!loadedWorlds.contains(e.world.provider.getDimension())) {
             //System.out.println("I hate you minecraft");
             return;
         }
         try {
             NBTTagCompound nbt = new NBTTagCompound();
-            writeToEaWorldNBT(nbt, e.world.provider.dimensionId);
+            writeToEaWorldNBT(nbt, e.world.provider.getDimension());
 
             FileNames fileNames = new FileNames(e);
 
@@ -185,7 +185,7 @@ public class ServerEventListener {
         }
 
         private String getEaWorldSaveName(World w) {
-            return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId + ".dat";
+            return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.getDimension() + ".dat";
         }
     }
 }

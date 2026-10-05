@@ -1,6 +1,6 @@
 package mods.eln.sixnode.lampsocket;
 
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import mods.eln.compat.IItemRenderer.ItemRenderType;
 
 public interface LampSocketObjRender {
 

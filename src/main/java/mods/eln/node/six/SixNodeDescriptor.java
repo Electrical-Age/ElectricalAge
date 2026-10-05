@@ -6,7 +6,7 @@ import mods.eln.misc.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer;
+import mods.eln.compat.IItemRenderer;
 
 import static mods.eln.i18n.I18N.tr;
 

@@ -1,5 +1,7 @@
 package mods.eln.sim.process.destruct;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.six.SixNodeElement;
@@ -55,7 +57,7 @@ public class WorldExplosion implements IDestructable {
         if (Eln.instance.explosionEnable)
             c.world().createExplosion((Entity) null, c.x, c.y, c.z, strength, true);
         else
-            c.world().setBlock(c.x, c.y, c.z, Blocks.air);
+            WorldCompat.setBlock(c.world(), c.x, c.y, c.z, Blocks.AIR);
     }
 
     @Override

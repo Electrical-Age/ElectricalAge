@@ -22,11 +22,11 @@ public class NodeEntityClientSender {
         try {
             stream.writeByte(Eln.packetPublishForNode);
 
-            stream.writeInt(e.xCoord);
-            stream.writeInt(e.yCoord);
-            stream.writeInt(e.zCoord);
+            stream.writeInt(e.getPos().getX());
+            stream.writeInt(e.getPos().getY());
+            stream.writeInt(e.getPos().getZ());
 
-            stream.writeByte(e.getWorldObj().provider.dimensionId);
+            stream.writeByte(e.getWorld().provider.getDimension());
 
             stream.writeUTF(nodeUuid);
 

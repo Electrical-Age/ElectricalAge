@@ -1,5 +1,7 @@
 package mods.eln.node;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
@@ -85,7 +87,7 @@ public abstract class NodeBase {
     }
 
     public void notifyNeighbor() {
-        coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
+        WorldCompat.notifyNeighbours(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
     }
 
     //public abstract Block getBlock();
@@ -106,7 +108,7 @@ public abstract class NodeBase {
 
             direction.applyTo(vector, 1);
 
-            Block b = world.getBlock(vector[0], vector[1], vector[2]);
+            Block b = WorldCompat.getBlock(world, vector[0], vector[1], vector[2]);
             if (b.isOpaqueCube())
                 ;
             neighborOpaque |= 1 << direction.getInt();
@@ -136,7 +138,7 @@ public abstract class NodeBase {
 
     public static boolean isBlockWrappable(Block block, World w, int x, int y, int z) {
         if (block.isReplaceable(w, x, y, z)) return true;
-        if (block == Blocks.air) return true;
+        if (block == Blocks.AIR) return true;
         if (block == Eln.sixNodeBlock) return true;
         if (block instanceof GhostBlock) return true;
         if (block == Blocks.TORCH) return true;
@@ -162,7 +164,7 @@ public abstract class NodeBase {
         destructed = true;
         if (Eln.instance.explosionEnable == false) explosionStrength = 0;
         disconnect();
-        coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
+        WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
         NodeManager.instance.removeNode(this);
         if (explosionStrength != 0) {
             coordonate.world().createExplosion((Entity) null, coordonate.x, coordonate.y, coordonate.z, explosionStrength, true);
@@ -204,20 +206,20 @@ public abstract class NodeBase {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!entityPlayer.worldObj.isRemote && entityPlayer.getCurrentEquippedItem() != null) {
-            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (!entityPlayer.world.isRemote && entityPlayer.getHeldItemMainhand() != null) {
+            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = multiMeterString(side);
                 if (str != null)
                     Utils.sendMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = thermoMeterString(side);
                 if (str != null)
                     Utils.sendMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str1 = multiMeterString(side);
                 String str2 = thermoMeterString(side);
                 String str = "";

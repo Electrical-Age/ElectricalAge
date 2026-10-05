@@ -82,11 +82,11 @@ public class ReplicatorEntity extends EntityMob {
             heal(1f);
         }
         if (hunger < hungerToDuplicate) {
-            ReplicatorEntity entityliving = new ReplicatorEntity(this.worldObj);
+            ReplicatorEntity entityliving = new ReplicatorEntity(this.world);
             entityliving.setLocationAndAngles(this.posX, this.posY, this.posZ, 0f, 0f);
             entityliving.rotationYawHead = entityliving.rotationYaw;
             entityliving.renderYawOffset = entityliving.rotationYaw;
-            worldObj.spawnEntity(entityliving);
+            world.spawnEntity(entityliving);
             entityliving.playLivingSound();
             hunger = 0;
         }

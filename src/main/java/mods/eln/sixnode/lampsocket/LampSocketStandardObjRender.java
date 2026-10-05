@@ -6,7 +6,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import mods.eln.compat.IItemRenderer.ItemRenderType;
 import org.lwjgl.opengl.GL11;
 
 public class LampSocketStandardObjRender implements LampSocketObjRender {

@@ -94,7 +94,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
          * if(transparentNodeElement != null) { if(NodeManager.instance.getNodeFromCoordonate(transparentNodeElement.node.coordonate) != transparentNodeElement.node) return false; return player.getDistance(transparentNodeElement.node.coordonate.x + 0.5, transparentNodeElement.node.coordonate.y + 0.5, transparentNodeElement.node.coordonate.z + 0.5) < 10; }
 		 */
         return true;
-        // return player.getDistanceSq(transparentNodeRender.tileEntity.xCoord + 0.5, transparentNodeRender.tileEntity.yCoord + 0.5, transparentNodeRender.tileEntity.zCoord + 0.5) < 18;
+        // return player.getDistanceSq(transparentNodeRender.tileEntity.getPos().getX() + 0.5, transparentNodeRender.tileEntity.getPos().getY() + 0.5, transparentNodeRender.tileEntity.getPos().getZ() + 0.5) < 18;
     }
 
     @Override

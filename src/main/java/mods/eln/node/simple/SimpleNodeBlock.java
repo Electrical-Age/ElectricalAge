@@ -1,5 +1,7 @@
 package mods.eln.node.simple;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.DescriptorBase;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -47,7 +49,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 
 
     SimpleNode getNode(World world, int x, int y, int z) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
+        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
         if (entity != null) {
             return entity.getNode();
         }
@@ -55,7 +57,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     }
 
     public SimpleNodeEntity getEntity(World world, int x, int y, int z) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
+        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
         return entity;
     }
 
@@ -75,7 +77,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, Direction front, EntityLivingBase entityLiving, int metadata)
 	{
-		SimpleNodeEntity tileEntity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
+		SimpleNodeEntity tileEntity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
 		tileEntity.onBlockPlacedBy(front, entityLiving, metadata);
 	}*/
 
@@ -83,7 +85,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     @Override
     public void onBlockAdded(World par1World, int x, int y, int z) {
         if (par1World.isRemote == false) {
-            SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(x, y, z);
+            SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(par1World, x, y, z);
             entity.onBlockAdded();
         }
     }
@@ -91,7 +93,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     // server
     @Override
     public void breakBlock(World par1World, int x, int y, int z, Block par5, int par6) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(x, y, z);
+        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(par1World, x, y, z);
         entity.onBreakBlock();
         super.breakBlock(par1World, x, y, z, par5, par6);
 
@@ -100,7 +102,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
         if (Utils.isRemote(world) == false) {
-            SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
+            SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
             entity.onNeighborBlockChange();
         }
     }
@@ -108,7 +110,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     // client server
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float vx, float vy, float vz) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
+        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
         return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side), vx, vy, vz);
     }
 

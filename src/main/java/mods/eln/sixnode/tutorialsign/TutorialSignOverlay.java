@@ -1,5 +1,7 @@
 package mods.eln.sixnode.tutorialsign;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeBlock;
@@ -34,7 +36,7 @@ public class TutorialSignOverlay {
 
         int px = MathHelper.floor(player.posX), py = MathHelper.floor(player.posY), pz = MathHelper.floor(player.posZ);
         int r = 1;
-        World w = player.worldObj;
+        World w = player.world;
 
         TutorialSignRender best = null;
         double bestDistance = 10000;
@@ -42,8 +44,8 @@ public class TutorialSignOverlay {
         for (int x = px - r; x <= px + r; x++) {
             for (int y = py - r; y <= py + r; y++) {
                 for (int z = pz - r; z <= pz + r; z++) {
-                    if (w.getBlock(x, y, z) instanceof SixNodeBlock) {
-                        TileEntity e = w.getTileEntity(x, y, z);
+                    if (WorldCompat.getBlock(w, x, y, z) instanceof SixNodeBlock) {
+                        TileEntity e = WorldCompat.getTileEntity(w, x, y, z);
                         if (e instanceof SixNodeEntity) {
                             SixNodeEntity sne = (SixNodeEntity) e;
                             for (SixNodeElementRender render : sne.elementRenderList) {

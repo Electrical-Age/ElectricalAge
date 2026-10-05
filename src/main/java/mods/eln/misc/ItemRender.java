@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer;
+import mods.eln.compat.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class ItemRender implements IItemRenderer {

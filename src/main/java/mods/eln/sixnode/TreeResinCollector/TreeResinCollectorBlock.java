@@ -1,5 +1,7 @@
 package mods.eln.sixnode.TreeResinCollector;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -51,7 +53,7 @@ public class TreeResinCollectorBlock extends BlockContainer {
 
     @Override
     public int onBlockPlaced(World world, int x, int y, int z, int side, float par6, float par7, float par8, int par9) {
-        //	world.setBlockMetadataWithNotify(x, y, z, side, 0);
+        //	WorldCompat.setMeta(world, x, y, z, side, 0);
         //	((TreeResinCollectorTileEntity)world.getBlockTileEntity(x, y, z)).setWoodDirection(Direction.fromIntMinecraftSide(side));
         //return super.onBlockPlaced(world, x, y, z, side, par6, par7, par8,
         //		par9);
@@ -60,16 +62,16 @@ public class TreeResinCollectorBlock extends BlockContainer {
 
     @Override
     public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
-        return ((TreeResinCollectorTileEntity) par1World.getTileEntity(x, y, z)).onBlockActivated();
+        return ((TreeResinCollectorTileEntity) WorldCompat.getTileEntity(par1World, x, y, z)).onBlockActivated();
     }
 
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
         super.onNeighborBlockChange(world, x, y, z, b);
-        if (!canPlaceBlockOnSide(world, x, y, z, world.getBlockMetadata(x, y, z))) {
+        if (!canPlaceBlockOnSide(world, x, y, z, WorldCompat.getMeta(world, x, y, z))) {
             //Utils.println("WOOOOOOD down");
             dropBlockAsItem(world, x, y, z, new ItemStack(this));
-            world.setBlockToAir(x, y, z);
+            WorldCompat.setBlockToAir(world, x, y, z);
         }
     }
 }

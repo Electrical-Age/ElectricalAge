@@ -1,5 +1,7 @@
 package mods.eln.node.simple;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
@@ -26,15 +28,15 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     private SimpleNode node;
 
     public SimpleNode getNode() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             Utils.fatal();
             return null;
         }
-        if (this.worldObj == null) return null;
+        if (this.world == null) return null;
         if (node == null) {
-            node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+            node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos.getX(), pos.getY(), pos.getZ(), this.world));
             if (node == null) {
-                DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+                DelayedBlockRemove.add(new Coordonate(pos.getX(), pos.getY(), pos.getZ(), this.world));
                 return null;
             }
         }
@@ -50,15 +52,15 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 */
 
     public void onBlockAdded() {
-		/*if (!worldObj.isRemote){
+		/*if (!world.isRemote){
 			if (getNode() == null) {
-				worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+				WorldCompat.setBlockToAir(world, pos.getX(), pos.getY(), pos.getZ());
 			}
 		}*/
     }
 
     public void onBreakBlock() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onBreakBlock();
         }
@@ -66,7 +68,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     public void onChunkUnload() {
         super.onChunkUnload();
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
     }
@@ -78,14 +80,14 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     @Override
     public void invalidate() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
         super.invalidate();
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return false;
             getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
             return true;
@@ -94,7 +96,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     }
 
     public void onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onNeighborBlockChange();
         }
@@ -116,7 +118,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     public void serverPublishUnserialize(DataInputStream stream) {
         try {
             if (front != (front = Direction.fromInt(stream.readByte()))) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                WorldCompat.markBlockForUpdate(world, pos.getX(), pos.getY(), pos.getZ());
             }
         } catch (IOException e) {
             e.printStackTrace();

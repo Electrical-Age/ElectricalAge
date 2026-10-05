@@ -1,5 +1,7 @@
 package mods.eln.ghost;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
@@ -71,7 +73,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordonate.equals(observerCoordonate)) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordonate);
-                element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
+                WorldCompat.setBlockToAir(element.elementCoordonate.world(), element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
             }
         }
     }
@@ -84,7 +86,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordonate.equals(observerCoordonate) && element.getUUID() == uuid) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordonate);
-                element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
+                WorldCompat.setBlockToAir(element.elementCoordonate.world(), element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
             }
         }
     }
@@ -97,7 +99,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordonate.equals(observerCoordonate) && element.getUUID() != uuid) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordonate);
-                element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
+                WorldCompat.setBlockToAir(element.elementCoordonate.world(), element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
             }
         }
     }
@@ -110,7 +112,7 @@ public class GhostManager extends WorldSavedData {
 
     public void removeGhostAndBlock(Coordonate coordonate) {
         removeGhost(coordonate);
-        coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z); //caca1.5.1
+        WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z); //caca1.5.1
     }
 
     @Override
@@ -170,7 +172,7 @@ public class GhostManager extends WorldSavedData {
     public boolean canCreateGhostAt(World world, int x, int y, int z) {
         if (!world.getChunkProvider().chunkExists(x >> 4, z >> 4)) {
             return false;
-        } else if (world.getBlock(x, y, z) != Blocks.air && !world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
+        } else if (WorldCompat.getBlock(world, x, y, z) != Blocks.AIR && !WorldCompat.getBlock(world, x, y, z).isReplaceable(world, x, y, z)) {
             return false;
         } else return true;
     }
@@ -180,8 +182,8 @@ public class GhostManager extends WorldSavedData {
     }
 
     public void createGhost(Coordonate coordonate, Coordonate observerCoordonate, int UUID, Block block, int meta) {
-        coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
-        if (coordonate.world().setBlock(coordonate.x, coordonate.y, coordonate.z, block, meta, 3)) {
+        WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        if (WorldCompat.setBlock(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, block, meta, 3)) {
             coordonate = new Coordonate(coordonate);
             GhostElement element = new GhostElement(coordonate, observerCoordonate, UUID);
             ghostTable.put(element.elementCoordonate, element);

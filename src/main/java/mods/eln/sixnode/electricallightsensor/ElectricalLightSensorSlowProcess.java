@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricallightsensor;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -28,12 +30,12 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
 
             if (!element.sixNode.coordonate.getBlockExist()) return;
             Coordonate coord = element.sixNode.coordonate;
-            //int light = coord.world().getSavedLightValue(EnumSkyBlock.Sky, coord.x, coord.y, coord.z) - coord.world().skylightSubtracted;
+            //int light = WorldCompat.getSavedLightValue(coord.world(), EnumSkyBlock.SKY, coord.x, coord.y, coord.z) - coord.world().skylightSubtracted;
             //	Utils.println("Light : " + light);
             World world = coord.world();
             //if(element.descriptor.dayLightOnly) {
             if (!world.provider.nether) {
-                int i1 = world.getSavedLightValue(EnumSkyBlock.Sky, coord.x, coord.y, coord.z) - world.skylightSubtracted;
+                int i1 = WorldCompat.getSavedLightValue(world, EnumSkyBlock.SKY, coord.x, coord.y, coord.z) - world.skylightSubtracted;
                 i1 = Math.max(0, i1);
                 float f = world.getCelestialAngleRadians(1.0F);
 
@@ -57,9 +59,9 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
             }
             //}
             if (!element.descriptor.dayLightOnly) {
-                // light = Math.max(light, (int)(world.getBlockLightValue(coord.x, coord.y, coord.z)));
+                // light = Math.max(light, (int)(WorldCompat.getBlockLightValue(world, coord.x, coord.y, coord.z)));
                 //light = 0;
-                light = Math.max(light, Utils.getLight(world, EnumSkyBlock.Block, coord.x, coord.y, coord.z));
+                light = Math.max(light, Utils.getLight(world, EnumSkyBlock.BLOCK, coord.x, coord.y, coord.z));
             }
             element.outputGateProcess.setOutputNormalized(light / 15.0);
         }

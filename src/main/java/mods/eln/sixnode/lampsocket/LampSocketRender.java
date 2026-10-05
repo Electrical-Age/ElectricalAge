@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.LampDescriptor.Type;
@@ -84,7 +86,7 @@ public class LampSocketRender extends SixNodeElementRender {
 
             entityTimout -= dt;
             if (entityTimout < 0) {
-                entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord, tileEntity.yCoord - 2, tileEntity.zCoord, tileEntity.getWorldObj()).getAxisAlignedBB(2));
+                entityList = tileEntity.getWorld().getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.getPos().getX(), tileEntity.getPos().getY() - 2, tileEntity.getPos().getZ(), tileEntity.getWorld()).getAxisAlignedBB(2));
                 entityTimout = 0.1f;
             }
 
@@ -102,8 +104,8 @@ public class LampSocketRender extends SixNodeElementRender {
                 pertuVy += e.motionZ * eFactor * dt;
             }
 
-            if (tileEntity.getWorldObj().getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord) > 3) {
-                float weather = (float) UtilsClient.getWeather(tileEntity.getWorldObj()) * 0.9f + 0.1f;
+            if (WorldCompat.getSavedLightValue(tileEntity.getWorld(), EnumSkyBlock.SKY, tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ()) > 3) {
+                float weather = (float) UtilsClient.getWeather(tileEntity.getWorld()) * 0.9f + 0.1f;
 
                 weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
                 weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;

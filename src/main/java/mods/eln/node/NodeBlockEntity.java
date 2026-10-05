@@ -1,6 +1,8 @@
 package mods.eln.node;
 
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
@@ -54,7 +56,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             boolean newRedstone = (b & 0x10) != 0;
             if (redstone != newRedstone) {
                 redstone = newRedstone;
-                worldObj.notifyBlockChange(xCoord, yCoord, zCoord, getBlockType());
+                WorldCompat.notifyNeighbours(world, pos.getX(), pos.getY(), pos.getZ(), getBlockType());
             } else {
                 redstone = newRedstone;
             }
@@ -65,12 +67,12 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     /*	if(lastLight == 0xFF) //boot trololol
         {
 			lastLight = 15;
-			worldObj.updateLightByType(EnumSkyBlock.Block,xCoord,yCoord,zCoord);
+			WorldCompat.updateLightByType(world, EnumSkyBlock.BLOCK,pos.getX(),pos.getY(),pos.getZ());
 		}*/
 
         if (lastLight != light) {
             lastLight = light;
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            WorldCompat.updateLightByType(world, EnumSkyBlock.BLOCK, pos.getX(), pos.getY(), pos.getZ());
         }
 
 
@@ -87,7 +89,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public abstract int isProvidingWeakPower(Direction side);
     //{
-    //if(worldObj.isRemote) return 0;
+    //if(world.isRemote) return 0;
     //return getNode().isProvidingWeakPower(side);
     //}
 
@@ -112,7 +114,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
         if (cameraDrawOptimisation()) {
-            return AxisAlignedBB.getBoundingBox(xCoord - 1, yCoord - 1, zCoord - 1, xCoord + 1, yCoord + 1, zCoord + 1);
+            return new AxisAlignedBB(pos.getX() - 1, pos.getY() - 1, pos.getZ() - 1, pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
         } else {
             return INFINITE_EXTENT_AABB;
         }
@@ -123,7 +125,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public int getLightValue() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             if (lastLight == 0xFF) {
                 return 0;
             }
@@ -175,8 +177,8 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     public void updateEntity() {
         if (updateEntityFirst) {
             updateEntityFirst = false;
-            if (!worldObj.isRemote) {
-                // worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+            if (!world.isRemote) {
+                // WorldCompat.setBlock(world, pos.getX(), pos.getY(), pos.getZ(), 0);
             } else {
                 clientList.add(this);
             }
@@ -185,20 +187,20 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public void onBlockAdded() {
-        if (!worldObj.isRemote && getNode() == null) {
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+        if (!world.isRemote && getNode() == null) {
+            WorldCompat.setBlockToAir(world, pos.getX(), pos.getY(), pos.getZ());
         }
     }
 
     public void onBreakBlock() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onBreakBlock();
         }
     }
 
     public void onChunkUnload() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
     }
@@ -211,19 +213,19 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     @Override
     public void invalidate() {
 
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             destructor();
         }
         super.invalidate();
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return false;
             getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
             return true;
         }
-        //if(entityPlayer.getCurrentEquippedItem().getItem() instanceof ItemBlock)
+        //if(entityPlayer.getHeldItemMainhand().getItem() instanceof ItemBlock)
         {
             return true;
         }
@@ -231,7 +233,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public void onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             if (getNode() == null) return;
             getNode().onNeighborBlockChange();
         }
@@ -239,19 +241,19 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public Node getNode() {
-        if (worldObj.isRemote) {
+        if (world.isRemote) {
             Utils.fatal();
             return null;
         }
-        if (this.worldObj == null) return null;
+        if (this.world == null) return null;
         if (node == null) {
-            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, worldObj));
+            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos.getX(), pos.getY(), pos.getZ(), world));
             if (nodeFromCoordonate instanceof Node) {
                 node = (Node) nodeFromCoordonate;
             } else {
-                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordonate(xCoord, yCoord, zCoord, worldObj));
+                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordonate(pos.getX(), pos.getY(), pos.getZ(), world));
             }
-            if (node == null) DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+            if (node == null) DelayedBlockRemove.add(new Coordonate(pos.getX(), pos.getY(), pos.getZ(), this.world));
         }
         return node;
     }
@@ -259,7 +261,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public static NodeBlockEntity getEntity(int x, int y, int z) {
         TileEntity entity;
-        if ((entity = Minecraft.getMinecraft().world.getTileEntity(x, y, z)) != null) {
+        if ((entity = WorldCompat.getTileEntity(Minecraft.getMinecraft().world, x, y, z)) != null) {
             if (entity instanceof NodeBlockEntity) {
                 return (NodeBlockEntity) entity;
             }
@@ -284,11 +286,11 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         try {
             stream.writeByte(Eln.packetPublishForNode);
 
-            stream.writeInt(xCoord);
-            stream.writeInt(yCoord);
-            stream.writeInt(zCoord);
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
 
-            stream.writeByte(worldObj.provider.dimensionId);
+            stream.writeByte(world.provider.getDimension());
 
             stream.writeUTF(getNodeUuid());
 
@@ -314,7 +316,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
     public boolean canConnectRedstone(Direction xn) {
 
-        if (worldObj.isRemote)
+        if (world.isRemote)
             return redstone;
         else {
             if (getNode() == null) return false;

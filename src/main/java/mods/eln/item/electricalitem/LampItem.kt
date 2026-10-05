@@ -1,5 +1,7 @@
 package mods.eln.item.electricalitem
 
+
+import mods.eln.compat.WorldCompat
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.sixnode.lampsocket.LightBlockEntity
@@ -47,7 +49,7 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 val fx = MathHelper.floor(x)
                 val fy = MathHelper.floor(y)
                 val fz = MathHelper.floor(z)
-                val block = world.getBlock(fx, fy, fz)
+                val block = WorldCompat.getBlock(world, fx, fy, fz)
                 if (!block.isAir(world, fx, fy, fz)) {
                     x -= v.xCoord
                     y -= v.yCoord
@@ -62,7 +64,7 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 val fx = MathHelper.floor(x)
                 val fy = MathHelper.floor(y)
                 val fz = MathHelper.floor(z)
-                val block = world.getBlock(fx, fy, fz)
+                val block = WorldCompat.getBlock(world, fx, fy, fz)
                 if (block.isAir(world, fx, fy, fz)) {
                     LightBlockEntity.addLight(world, fx, fy, fz, light, 5)
                     stride = 3

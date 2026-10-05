@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import mods.eln.sixnode.lampsocket.LightBlockEntity.LightBlockObserver;
 import net.minecraft.block.Block;
@@ -61,10 +63,10 @@ public class LightBlock extends BlockContainer {
     @Override
     public int getLightValue(IBlockAccess world, int x, int y, int z) {
         /*if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-    		Utils.println("Light at " + x + ":" + y + ":" + z + " " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
+    		Utils.println("Light at " + x + ":" + y + ":" + z + " " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + WorldCompat.getMeta(world, x, y, z));
     	}*/
-        //	Utils.println("Light at " + x + ":" + y + ":" + z + " " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
-        return world.getBlockMetadata(x, y, z);
+        //	Utils.println("Light at " + x + ":" + y + ":" + z + " " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + WorldCompat.getMeta(world, x, y, z));
+        return WorldCompat.getMeta(world, x, y, z);
 
         //return ((LightBlockEntity)world.getBlockTileEntity(x, y, z)).getClientLight();
     }

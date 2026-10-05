@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.Block;
@@ -66,10 +68,10 @@ public class Coordonate implements INBTTReady {
     }
 
     public Coordonate(NodeBlockEntity entity) {
-        x = entity.xCoord;
-        y = entity.yCoord;
-        z = entity.zCoord;
-        dimention = entity.getWorldObj().provider.dimensionId;
+        x = entity.getPos().getX();
+        y = entity.getPos().getY();
+        z = entity.getPos().getZ();
+        dimention = entity.getWorld().provider.getDimension();
     }
 
     public Coordonate(int x, int y, int z, int dimention) {
@@ -83,18 +85,18 @@ public class Coordonate implements INBTTReady {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.dimention = world.provider.dimensionId;
+        this.dimention = world.provider.getDimension();
         if (world.isRemote)
             this.w = world;
     }
 
     public Coordonate(TileEntity entity) {
-        this.x = entity.xCoord;
-        this.y = entity.yCoord;
-        this.z = entity.zCoord;
-        this.dimention = entity.getWorldObj().provider.dimensionId;
-        if (entity.getWorldObj().isRemote)
-            this.w = entity.getWorldObj();
+        this.x = entity.getPos().getX();
+        this.y = entity.getPos().getY();
+        this.z = entity.getPos().getZ();
+        this.dimention = entity.getWorld().provider.getDimension();
+        if (entity.getWorld().isRemote)
+            this.w = entity.getWorld();
     }
 
     public Coordonate newWithOffset(int x, int y, int z) {
@@ -161,18 +163,18 @@ public class Coordonate implements INBTTReady {
     }
 
     public Block getBlock() {
-        return world().getBlock(x, y, z);
+        return WorldCompat.getBlock(world(), x, y, z);
     }
 
     public static AxisAlignedBB getAxisAlignedBB(Coordonate a, Coordonate b) {
-        AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(
+        AxisAlignedBB bb = new AxisAlignedBB(
             Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z),
             Math.max(a.x, b.x) + 1.0, Math.max(a.y, b.y) + 1.0, Math.max(a.z, b.z) + 1.0);
         return bb;
     }
 
     public AxisAlignedBB getAxisAlignedBB(int ray) {
-        AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(
+        AxisAlignedBB bb = new AxisAlignedBB(
             x - ray, y - ray, z - ray,
             x + ray + 1, y + ray + 1, z + ray + 1);
         return bb;
@@ -183,17 +185,17 @@ public class Coordonate implements INBTTReady {
     }
 	
 	/*public void setBlock(int id, int meta) {
-		world().setBlock(x, y, z, id, meta, 2);
+		WorldCompat.setBlock(world(), x, y, z, id, meta, 2);
 	}*/
 
     public int getMeta() {
-        return world().getBlockMetadata(x, y, z);
+        return WorldCompat.getMeta(world(), x, y, z);
     }
 
     public boolean getBlockExist() {
         World w = DimensionManager.getWorld(dimention);
         if (w == null) return false;
-        return w.blockExists(x, y, z);
+        return WorldCompat.blockExists(w, x, y, z);
     }
 
     public boolean getWorldExist() {
@@ -214,13 +216,13 @@ public class Coordonate implements INBTTReady {
     }
 
     public void setPosition(Vec3d vp) {
-        this.x = (int) vp.xCoord;
-        this.y = (int) vp.yCoord;
-        this.z = (int) vp.zCoord;
+        this.x = (int) vp.x;
+        this.y = (int) vp.y;
+        this.z = (int) vp.z;
     }
 
     public TileEntity getTileEntity() {
-        return world().getTileEntity(x, y, z);
+        return WorldCompat.getTileEntity(world(), x, y, z);
     }
 
     public void invalidate() {
@@ -260,18 +262,18 @@ public class Coordonate implements INBTTReady {
         z += coordonate.z;
     }
 
-    public void setWorld(World worldObj) {
-        if (worldObj.isRemote)
-            w = worldObj;
-        dimention = worldObj.provider.dimensionId;
+    public void setWorld(World world) {
+        if (world.isRemote)
+            w = world;
+        dimention = world.provider.getDimension();
     }
 
     public void setMetadata(int meta) {
-        world().setBlockMetadataWithNotify(x, y, z, meta, 0);
+        WorldCompat.setMeta(world(), x, y, z, meta, 0);
     }
 
     public void setBlock(Block b) {
-        world().setBlock(x, y, z, b);
+        WorldCompat.setBlock(world(), x, y, z, b);
     }
 
     public int compareTo(Coordonate o) {

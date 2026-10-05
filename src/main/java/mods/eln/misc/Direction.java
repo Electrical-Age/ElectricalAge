@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.Vec3d;
@@ -125,12 +127,12 @@ public enum Direction {
      */
     public TileEntity applyToTileEntity(TileEntity tileEntity) {
         if (tileEntity == null) return null;
-        int coords[] = {tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord};
+        int coords[] = {tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ()};
 
         coords[dir / 2] += getSign();
 
-        if (tileEntity.getWorldObj() != null && tileEntity.getWorldObj().blockExists(coords[0], coords[1], coords[2])) {
-            return tileEntity.getWorldObj().getTileEntity(coords[0], coords[1], coords[2]);
+        if (tileEntity.getWorld() != null && WorldCompat.blockExists(tileEntity.getWorld(), coords[0], coords[1], coords[2])) {
+            return WorldCompat.getTileEntity(tileEntity.getWorld(), coords[0], coords[1], coords[2]);
         } else {
             return null;
         }
@@ -443,7 +445,7 @@ public enum Direction {
                 break;
         }
 
-        return coordonate.world().getTileEntity(x, y, z);
+        return WorldCompat.getTileEntity(coordonate.world(), x, y, z);
     }
 
     public void writeToNBT(NBTTagCompound nbt, String name) {
@@ -519,31 +521,31 @@ public enum Direction {
     }
 
     public void rotateFromXN(Vec3d p) {
-        double x = p.xCoord, y = p.yCoord, z = p.zCoord;
+        double x = p.x, y = p.y, z = p.z;
         switch (this) {
             case XN:
                 break;
             case XP:
-                p.xCoord = -x;
-                p.zCoord = -z;
+                p.x = -x;
+                p.z = -z;
                 break;
             case YN:
-                p.xCoord = y;
-                p.yCoord = x;
-                p.zCoord = -z;
+                p.x = y;
+                p.y = x;
+                p.z = -z;
                 break;
             case YP:
-                p.xCoord = y;
-                p.yCoord = -x;
-                p.zCoord = z;
+                p.x = y;
+                p.y = -x;
+                p.z = z;
                 break;
             case ZN:
-                p.xCoord = -z;
-                p.zCoord = x;
+                p.x = -z;
+                p.z = x;
                 break;
             case ZP:
-                p.xCoord = z;
-                p.zCoord = -x;
+                p.x = z;
+                p.z = -x;
                 break;
             default:
                 break;

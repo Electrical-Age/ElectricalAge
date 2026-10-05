@@ -1,5 +1,7 @@
 package mods.eln.ghost;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
@@ -38,11 +40,11 @@ public class GhostBlock extends Block {
     }
 
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
-        int meta = world.getBlockMetadata(x, y, z);
+        int meta = WorldCompat.getMeta(world, x, y, z);
 
         switch (meta) {
             case tFloor:
-                AxisAlignedBB axisalignedbb1 = AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
+                AxisAlignedBB axisalignedbb1 = new AxisAlignedBB((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
                 if (axisalignedbb1 != null && par5AxisAlignedBB.intersectsWith(axisalignedbb1)) {
                     list.add(axisalignedbb1);
                 }
@@ -66,13 +68,13 @@ public class GhostBlock extends Block {
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getSelectedBoundingBoxFromPool(World w, int x, int y, int z) {
-        int meta = w.getBlockMetadata(x, y, z);
+        int meta = WorldCompat.getMeta(w, x, y, z);
 
         switch (meta) {
             case tFloor:
-                return AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
+                return new AxisAlignedBB((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
             case tLadder:
-                return AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 0, (double) y + 0.0, (double) z + 0);
+                return new AxisAlignedBB((double) x, (double) y, (double) z, (double) x + 0, (double) y + 0.0, (double) z + 0);
             default:
                 return super.getSelectedBoundingBoxFromPool(w, x, y, z);
         }
@@ -80,7 +82,7 @@ public class GhostBlock extends Block {
 
     @Override
     public RayTraceResult collisionRayTrace(World world, int x, int y, int z, Vec3d startVec, Vec3d endVec) {
-        int meta = world.getBlockMetadata(x, y, z);
+        int meta = WorldCompat.getMeta(world, x, y, z);
 
         switch (meta) {
             case tFloor:
@@ -115,7 +117,7 @@ public class GhostBlock extends Block {
 
     @Override
     public boolean isLadder(IBlockAccess world, int x, int y, int z, EntityLivingBase entity) {
-        return world.getBlockMetadata(x, y, z) == tLadder;
+        return WorldCompat.getMeta(world, x, y, z) == tLadder;
     }
 
 	/*

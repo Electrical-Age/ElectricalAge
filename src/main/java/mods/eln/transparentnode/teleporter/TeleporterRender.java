@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.teleporter;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -44,7 +46,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
         Coordonate lightCoordonate = new Coordonate(this.d.lightCoordonate);
         lightCoordonate.applyTransformation(front, c);
 
-        boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
+        boolean lightEnable = WorldCompat.getBlock(tileEntity.getWorld(), lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
 
 
         front.glRotateXnRef();
@@ -116,7 +118,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
             d.scr1_cables.draw();
             d.scr2_transporter.draw();
 
-            if (!tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).isEmpty())
+            if (!tileEntity.getWorld().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).isEmpty())
                 d.scr3_userin.draw();
 
             if (doorState)

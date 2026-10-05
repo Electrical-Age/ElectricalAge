@@ -1,5 +1,7 @@
 package mods.eln.item.electricalitem
 
+
+import mods.eln.compat.WorldCompat
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.i18n.I18N.tr
@@ -19,9 +21,9 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.math.MathHelper
 import net.minecraft.world.World
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import mods.eln.compat.IItemRenderer
+import mods.eln.compat.IItemRenderer.ItemRenderType
+import mods.eln.compat.IItemRenderer.ItemRendererHelper
 import org.lwjgl.opengl.GL11
 import kotlin.experimental.and
 import kotlin.experimental.or
@@ -174,7 +176,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
     }
 
     override fun onBlockStartBreak(itemstack: ItemStack, x: Int, y: Int, z: Int, player: EntityPlayer): Boolean {
-        if (!player.worldObj.isRemote) {
+        if (!player.world.isRemote) {
             setDamage(itemstack, (getDamage(itemstack) + 1).toByte())
         }
         return super.onBlockStartBreak(itemstack, x, y, z, player)
@@ -448,7 +450,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                             val zBlock = posZint + zFloor.toInt()
                             blockKey = 0U
                             if (yBlock in 0..255) {
-                                val chunk = w.getChunkFromBlockCoords(xBlock, zBlock)
+                                val chunk = WorldCompat.getChunkFromBlockCoords(w, xBlock, zBlock)
                                 if (chunk != null) {
                                     val storage = chunk.blockStorageArray[yBlock shr 4]
                                     if (storage != null) {
@@ -480,7 +482,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
 
                         stackGreen += blockKeyFactor[blockKey.toInt()] * dToStack
                         val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
-                        if (b !== Blocks.air && b !== Eln.lightBlock) {
+                        if (b !== Blocks.AIR && b !== Eln.lightBlock) {
                             stackRed += if (b.isOpaqueCube)
                                 0.2f * dToStack
                             else

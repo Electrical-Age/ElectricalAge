@@ -181,7 +181,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
         Coordonate[] temp = new Coordonate[powerCoord.length];
         for (int idx = 0; idx < temp.length; idx++) {
             temp[idx] = new Coordonate(powerCoord[idx]);
-            temp[idx].setDimention(w.provider.dimensionId);
+            temp[idx].setDimention(w.provider.getDimension());
         }
         return temp;
     }

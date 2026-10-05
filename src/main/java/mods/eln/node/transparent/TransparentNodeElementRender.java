@@ -230,7 +230,7 @@ public abstract class TransparentNodeElementRender {
 
     protected Coordonate coordonate() {
 
-        return new Coordonate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.getWorldObj());
+        return new Coordonate(tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ(), tileEntity.getWorld());
     }
 
 

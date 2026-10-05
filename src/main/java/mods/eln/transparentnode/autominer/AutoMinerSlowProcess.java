@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.autominer;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
@@ -96,8 +98,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case ore:
                         drillCount++;
 
-                        Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                        int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
+                        Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
+                        int meta = WorldCompat.getMeta(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
                         if (silkTouch) {
                             itemsToDrop.add(new ItemStack(block, 1, meta));
                         } else {
@@ -108,9 +110,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         // This is so mobs won't spawn excessively.
                         int xDist = jobCoord.x - miner.node.coordonate.x, zDist = jobCoord.z - miner.node.coordonate.z;
                         if (xDist * xDist + zDist * zDist > 25) {
-                            jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, Blocks.COBBLESTONE);
+                            WorldCompat.setBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, Blocks.COBBLESTONE);
                         } else {
-                            jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+                            WorldCompat.setBlockToAir(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
                         }
 
                         energyCounter -= energyTarget;
@@ -223,7 +225,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean isMinable(Block block) {
-        return block != Blocks.air
+        return block != Blocks.AIR
             && (block) != Blocks.FLOWING_WATER && (block) != Blocks.WATER
             && (block) != Blocks.FLOWING_LAVA && (block) != Blocks.LAVA
             && (block) != Blocks.OBSIDIAN && (block) != Blocks.BEDROCK;
@@ -282,7 +284,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         double dy = 0;
                         double dz = jobCoord.z - miner.node.coordonate.z;
                         double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                        Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
+                        Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
                         if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
                             jobFind = true;
                             setJob(jobType.ore);
@@ -302,8 +304,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     jobCoord.y--;
                     jobCoord.z = miner.node.coordonate.z;
 
-                    Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                    if (block != Blocks.air
+                    Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
+                    if (block != Blocks.AIR
                         && block != Blocks.FLOWING_WATER && block != Blocks.WATER
                         && block != Blocks.FLOWING_LAVA && block != Blocks.LAVA) {
                         if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK) {
@@ -349,12 +351,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean checkIsOre(Coordonate coordonate) {
-        Block block = coordonate.world().getBlock(coordonate.x, coordonate.y, coordonate.z);
+        Block block = WorldCompat.getBlock(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
         if (block instanceof BlockOre) return true;
         if (block instanceof OreBlock) return true;
         if (block instanceof BlockRedstoneOre) return true;
         return OreColorMapping.INSTANCE.getMap()[Block.getIdFromBlock(block) +
-            (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0;
+            (WorldCompat.getMeta(coordonate.world(), coordonate.x, coordonate.y, coordonate.z) << 12)] != 0;
     }
 
     public void onBreakElement() {

@@ -13,7 +13,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implements IFluidHandler {
 
     private IFluidHandler getFluidHandler() {
-        if (!worldObj.isRemote) {
+        if (!world.isRemote) {
             Node node = getNode();
             if (node != null && node instanceof TransparentNode) {
                 TransparentNode tn = (TransparentNode) node;

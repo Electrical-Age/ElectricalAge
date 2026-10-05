@@ -4695,7 +4695,7 @@ public class Eln {
         for (int idx = 0; idx < 16; idx++) {
             name = subNames[idx];
             addShapelessRecipe(findItemStack(name, 1),
-                new ItemStack(Items.dye, 1, idx),
+                new ItemStack(Items.DYE, 1, idx),
                 emptyStack.copy());
         }
 
@@ -6619,14 +6619,14 @@ public class Eln {
             "gc",
             " g",
             'g', new ItemStack(Blocks.GLASS_PANE),
-            'c', new ItemStack(Items.dye, 1, 2));
+            'c', new ItemStack(Items.DYE, 1, 2));
 
         addRecipe(findItemStack("Monster Filter"),
             " g",
             "gc",
             " g",
             'g', new ItemStack(Blocks.GLASS_PANE),
-            'c', new ItemStack(Items.dye, 1, 1));
+            'c', new ItemStack(Items.DYE, 1, 1));
 
         addRecipe(findItemStack("Casing", 8),
             "ppp",
@@ -6753,7 +6753,7 @@ public class Eln {
         compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.SAND),
             findItemStack("Dielectric"), 2000.0));
 
-        compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.log),
+        compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.LOG),
             findItemStack("Tree Resin"), 3000.0));
 
     }
@@ -7058,7 +7058,7 @@ public class Eln {
                 'W', new ItemStack(Blocks.PLANKS, 1, idx),
                 'R', new ItemStack(Items.REDSTONE),
                 'I', new ItemStack(Items.IRON_INGOT),
-                'r', new ItemStack(Items.dye, 1, 1),
+                'r', new ItemStack(Items.DYE, 1, 1),
                 'S', findItemStack("Signal Cable"));
         }
         for (int idx = 0; idx < 4; idx++) {

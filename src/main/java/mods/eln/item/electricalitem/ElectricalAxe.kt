@@ -1,5 +1,7 @@
 package mods.eln.item.electricalitem
 
+
+import mods.eln.compat.WorldCompat
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.Utils
 import mods.eln.sim.IProcess
@@ -146,7 +148,7 @@ object TreeCapitation : IProcess {
         if (world.isRemote)
             return
 
-        val dim = world.provider.dimensionId
+        val dim = world.provider.dimension
         blockSwappers[dim] = blockSwappers[dim]?.plus(swapper) ?: listOf(swapper)
     }
 
@@ -272,7 +274,7 @@ object TreeCapitation : IProcess {
                 // Then, go through all of the adjacent blocks and look if
                 // any of them are any good.
                 for (adj in adjacent(candidate.coordinates)) {
-                    val block = world.getBlock(adj.posX, adj.posY, adj.posZ)
+                    val block = WorldCompat.getBlock(world, adj.posX, adj.posY, adj.posZ)
 
                     val isWood = block.isWood(world, adj.posX, adj.posY, adj.posZ)
                     val isLeaf = block.isLeaves(world, adj.posX, adj.posY, adj.posZ)
@@ -364,11 +366,11 @@ object TreeCapitation : IProcess {
  * The bits below, however, are from ToolCommons.java. Mostly. Maybe about half, by now.
  */
 fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
-    if (world.isRemote || !world.blockExists(x, y, z))
+    if (world.isRemote || !WorldCompat.blockExists(world, x, y, z))
         return
 
-    val block = world.getBlock(x, y, z)
-    val meta = world.getBlockMetadata(x, y, z)
+    val block = WorldCompat.getBlock(world, x, y, z)
+    val meta = WorldCompat.getMeta(world, x, y, z)
 
     if (block != null && !block.isAir(world, x, y, z) && block.getPlayerRelativeBlockHardness(player, world, x, y, z) > 0) {
         if (!block.canHarvestBlock(player, meta))
@@ -379,7 +381,7 @@ fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: Item
             tool.subtractEnergyForBlockBreak(stack, block)
             val newEnergy = tool.getEnergy(stack)
             if (newEnergy > 0 && newEnergy < energy) {
-                val localMeta = world.getBlockMetadata(x, y, z)
+                val localMeta = WorldCompat.getMeta(world, x, y, z)
                 block.onBlockHarvested(world, x, y, z, localMeta, player)
 
                 if (block.removedByPlayer(world, player, x, y, z, true)) {
@@ -388,7 +390,7 @@ fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: Item
                 }
             }
         } else {
-            world.setBlockToAir(x, y, z)
+            WorldCompat.setBlockToAir(world, x, y, z)
         }
     }
 }

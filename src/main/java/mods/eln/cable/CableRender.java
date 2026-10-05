@@ -1,5 +1,7 @@
 package mods.eln.cable;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.cable.CableRenderType.CableRenderTypeMethodType;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -35,9 +37,9 @@ public class CableRender {
 
             Direction sideLrdu = side.applyLRDU(lrdu);
 
-            x2 = entity.xCoord;
-            y2 = entity.yCoord;
-            z2 = entity.zCoord;
+            x2 = entity.getPos().getX();
+            y2 = entity.getPos().getY();
+            z2 = entity.getPos().getZ();
 
             switch (sideLrdu) {
                 case XN:
@@ -63,7 +65,7 @@ public class CableRender {
             }
 
             //standardConnection
-            otherTileEntity = entity.getWorldObj().getTileEntity(x2, y2, z2);
+            otherTileEntity = WorldCompat.getTileEntity(entity.getWorld(), x2, y2, z2);
             if (otherTileEntity instanceof SixNodeEntity) {
                 SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
@@ -75,7 +77,7 @@ public class CableRender {
             }
 
             //no wrappeConection ?
-            if (!NodeBase.isBlockWrappable(entity.getWorldObj().getBlock(x2, y2, z2), entity.getWorldObj(), x2, y2, z2)) {
+            if (!NodeBase.isBlockWrappable(WorldCompat.getBlock(entity.getWorld(), x2, y2, z2), entity.getWorld(), x2, y2, z2)) {
                 continue;
             } else {
                 switch (side) {
@@ -101,7 +103,7 @@ public class CableRender {
                         break;
                 }
 
-                otherTileEntity = entity.getWorldObj().getTileEntity(x2, y2, z2);
+                otherTileEntity = WorldCompat.getTileEntity(entity.getWorld(), x2, y2, z2);
 
                 if (otherTileEntity instanceof NodeBlockEntity) {
 				/*
@@ -209,9 +211,9 @@ public class CableRender {
                 continue;
             }
 
-            x2 = element.tileEntity.xCoord;
-            y2 = element.tileEntity.yCoord;
-            z2 = element.tileEntity.zCoord;
+            x2 = element.tileEntity.getPos().getX();
+            y2 = element.tileEntity.getPos().getY();
+            z2 = element.tileEntity.getPos().getZ();
 
             switch (sideLrdu) {
                 case XN:
@@ -237,7 +239,7 @@ public class CableRender {
             }
 
             //standardConnection
-            otherTileEntity = element.tileEntity.getWorldObj().getTileEntity(x2, y2, z2);
+            otherTileEntity = WorldCompat.getTileEntity(element.tileEntity.getWorld(), x2, y2, z2);
             if (otherTileEntity instanceof SixNodeEntity) {
                 SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
@@ -248,7 +250,7 @@ public class CableRender {
             }
 
             //no wrappeConection ?
-            if (!NodeBase.isBlockWrappable(element.tileEntity.getWorldObj().getBlock(x2, y2, z2), element.tileEntity.getWorldObj(), x2, y2, z2)) {
+            if (!NodeBase.isBlockWrappable(WorldCompat.getBlock(element.tileEntity.getWorld(), x2, y2, z2), element.tileEntity.getWorld(), x2, y2, z2)) {
                 continue;
             } else {
                 switch (side) {
@@ -274,7 +276,7 @@ public class CableRender {
                         break;
                 }
 
-                otherTileEntity = element.tileEntity.getWorldObj().getTileEntity(x2, y2, z2);
+                otherTileEntity = WorldCompat.getTileEntity(element.tileEntity.getWorld(), x2, y2, z2);
 
                 if (otherTileEntity instanceof NodeBlockEntity) {
                     //Direction otherDirection = side.getInverse();

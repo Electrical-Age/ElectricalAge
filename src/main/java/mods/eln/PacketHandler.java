@@ -1,5 +1,7 @@
 package mods.eln;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
@@ -118,7 +120,7 @@ public class PacketHandler {
         try {
             if (stream.readByte() != player.dimension)
                 return;
-            SoundClient.play(SoundCommand.fromStream(stream, player.worldObj));
+            SoundClient.play(SoundCommand.fromStream(stream, player.world));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,7 +132,7 @@ public class PacketHandler {
         EntityPlayer clientPlayer = (EntityPlayer) player;
         try {
             clientPlayer.openGui(Eln.instance, stream.readInt(),
-                clientPlayer.worldObj, stream.readInt(), stream.readInt(),
+                clientPlayer.world, stream.readInt(), stream.readInt(),
                 stream.readInt());
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,7 +167,7 @@ public class PacketHandler {
 
 
             if (clientPlayer.dimension == dimention) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
+                TileEntity entity = WorldCompat.getTileEntity(clientPlayer.world, x, y, z);
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {
@@ -198,7 +200,7 @@ public class PacketHandler {
             dimention = stream.readByte();
 
             if (clientPlayer.dimension == dimention) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
+                TileEntity entity = WorldCompat.getTileEntity(clientPlayer.world, x, y, z);
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {

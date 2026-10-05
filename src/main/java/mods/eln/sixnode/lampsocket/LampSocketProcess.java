@@ -110,9 +110,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
                     for (int idx = 0; idx < lamp.socketDescriptor.range + light; idx++) {
                         // newCoord.move(lamp.side.getInverse());
-                        vp.xCoord += vv.xCoord;
-                        vp.yCoord += vv.yCoord;
-                        vp.zCoord += vv.zCoord;
+                        vp.x += vv.x;
+                        vp.y += vv.y;
+                        vp.z += vv.z;
 
                         c.setPosition(vp);
                         Block b = c.getBlock();
@@ -121,9 +121,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                             break;
                         }
                         if (isOpaque(c)) {
-                            vp.xCoord -= vv.xCoord;
-                            vp.yCoord -= vv.yCoord;
-                            vp.zCoord -= vv.zCoord;
+                            vp.x -= vv.x;
+                            vp.y -= vv.y;
+                            vp.z -= vv.z;
 
                             c.setPosition(vp);
                             b = c.getBlock();
@@ -134,7 +134,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     if (!exit) {
                         Block b = c.getBlock();
 
-                        if (b != Blocks.air) {
+                        if (b != Blocks.AIR) {
                             b.updateTick(c.world(), c.x, c.y, c.z, c.world().rand);
                         }
                     }
@@ -269,12 +269,12 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public void rotateAroundZ(Vec3d v, float par1) {
         float f1 = MathHelper.cos(par1);
         float f2 = MathHelper.sin(par1);
-        double d0 = v.xCoord * (double) f1 + v.yCoord * (double) f2;
-        double d1 = v.yCoord * (double) f1 - v.xCoord * (double) f2;
-        double d2 = v.zCoord;
-        v.xCoord = d0;
-        v.yCoord = d1;
-        v.zCoord = d2;
+        double d0 = v.x * (double) f1 + v.y * (double) f2;
+        double d1 = v.y * (double) f1 - v.x * (double) f2;
+        double d2 = v.z;
+        v.x = d0;
+        v.y = d1;
+        v.z = d2;
     }
 
     void placeSpot(int newLight) {
@@ -292,9 +292,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         Coordonate newCoord = new Coordonate(myCoord());
         for (int idx = 0; idx < lamp.socketDescriptor.range; idx++) {
             // newCoord.move(lamp.side.getInverse());
-            vp.xCoord += vv.xCoord;
-            vp.yCoord += vv.yCoord;
-            vp.zCoord += vv.zCoord;
+            vp.x += vv.x;
+            vp.y += vv.y;
+            vp.z += vv.z;
 
             newCoord.setPosition(vp);
             if (!newCoord.getBlockExist()) {
@@ -302,9 +302,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                 break;
             }
             if (isOpaque(newCoord)) {
-                vp.xCoord -= vv.xCoord;
-                vp.yCoord -= vv.yCoord;
-                vp.zCoord -= vv.zCoord;
+                vp.x -= vv.x;
+                vp.y -= vv.y;
+                vp.z -= vv.z;
 
                 newCoord.setPosition(vp);
                 break;
@@ -314,15 +314,15 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             int count = 0;
             while (!newCoord.equals(myCoord())) {
                 Block block = newCoord.getBlock();
-                if (block == Blocks.air || block == Eln.lightBlock) {
+                if (block == Blocks.AIR || block == Eln.lightBlock) {
                     count++;
                     if (count == 2)
                         break;
                 }
 
-                vp.xCoord -= vv.xCoord;
-                vp.yCoord -= vv.yCoord;
-                vp.zCoord -= vv.zCoord;
+                vp.x -= vv.x;
+                vp.y -= vv.y;
+                vp.z -= vv.z;
                 newCoord.setPosition(vp);
             }
         }
@@ -332,7 +332,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     public boolean isOpaque(Coordonate coord) {
         Block block = coord.getBlock();
-        boolean isNotOpaque = block == Blocks.air || !block.isOpaqueCube();
+        boolean isNotOpaque = block == Blocks.AIR || !block.isOpaqueCube();
         if (block == Blocks.FARMLAND)
             isNotOpaque = false;
         return !isNotOpaque;

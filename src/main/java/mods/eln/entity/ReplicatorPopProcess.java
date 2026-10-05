@@ -1,5 +1,7 @@
 package mods.eln.entity;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -39,16 +41,16 @@ public class ReplicatorPopProcess implements IProcess {
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
             for (Object obj : world.playerEntities) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
-                if (Math.random() * (world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {
+                if (Math.random() * (world.playerEntities.size()) < time * popPerSecondPerPlayer && player.world == world) {
                     int x, y, z;
                     x = (int) (player.posX + Utils.rand(-100, 100));
                     z = (int) (player.posZ + Utils.rand(-100, 100));
                     y = 2;
                     Utils.println("POP");
 
-                    if (world.blockExists(x, y, z) == false) break;
+                    if (WorldCompat.blockExists(world, x, y, z) == false) break;
 
-                    while (world.getBlock(x, y, z) != Blocks.air || Utils.getLight(world, EnumSkyBlock.Block, x, y, z) > 6) {
+                    while (WorldCompat.getBlock(world, x, y, z) != Blocks.AIR || Utils.getLight(world, EnumSkyBlock.BLOCK, x, y, z) > 6) {
                         y++;
                     }
 
@@ -85,9 +87,9 @@ if (Math.random() < time * popPerSecondPerChunk * world.getChunkProvider().getLo
 			
 			y = 2;
 			
-			if(world.blockExists(x, y, z) == false) break;
+			if(WorldCompat.blockExists(world, x, y, z) == false) break;
 			while (world.getBlockId(x, y, z) != 0 
-					|| world.getSkyBlockTypeBrightness(EnumSkyBlock.Block,x,y,z) > 6) {
+					|| world.getSkyBlockTypeBrightness(EnumSkyBlock.BLOCK,x,y,z) > 6) {
 				y++;
 			}
 			ReplicatorEntity entityliving = new ReplicatorEntity(world);

@@ -1,5 +1,7 @@
 package mods.eln.node.simple;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,13 +26,13 @@ public class SimpleNodeItem extends ItemBlock {
             node.onBlockPlacedBy(new Coordonate(x, y, z, world), block.getFrontForPlacement(player), player, stack);
         }
 
-        if (!world.setBlock(x, y, z, field_150939_a, metadata, 3)) {
+        if (!WorldCompat.setBlock(world, x, y, z, field_150939_a, metadata, 3)) {
             if (node != null) node.onBreakBlock();
             return false;
         }
 
 
-        if (world.getBlock(x, y, z) == field_150939_a) {
+        if (WorldCompat.getBlock(world, x, y, z) == field_150939_a) {
             field_150939_a.onBlockPlacedBy(world, x, y, z, player, stack);
             field_150939_a.onPostBlockPlaced(world, x, y, z, metadata);
         }

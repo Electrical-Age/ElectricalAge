@@ -3,8 +3,8 @@ package mods.eln.sixnode.electricaldatalogger;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+import mods.eln.compat.IItemRenderer.ItemRenderType;
+import mods.eln.compat.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {

@@ -58,9 +58,9 @@ public class NodeClient {
 
 		    for (NodeBlockEntity node : NodeBlockEntity.nodeAddedList)
 		    {
-		    	stream.writeShort((short) (node.xCoord - x));
-		    	stream.writeShort((short) (node.yCoord - y));
-		    	stream.writeShort((short) (node.zCoord - z));
+		    	stream.writeShort((short) (node.getPos().getX() - x));
+		    	stream.writeShort((short) (node.getPos().getY() - y));
+		    	stream.writeShort((short) (node.getPos().getZ() - z));
 		    }
 
 		    Packet250CustomPayload packet = new Packet250CustomPayload();

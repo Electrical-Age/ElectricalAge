@@ -9,7 +9,7 @@ import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
+import mods.eln.compat.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -37,9 +37,9 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             assert(rotating.size > 0)
             val bb = rotating[0].boundingBox()
             val centre = bb.centre()
-            val ox = centre.xCoord
-            val oy = centre.yCoord
-            val oz = centre.zCoord
+            val ox = centre.x
+            val oy = centre.y
+            val oz = centre.z
             GL11.glTranslated(ox, oy, oz)
             GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)

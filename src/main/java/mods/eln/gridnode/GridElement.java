@@ -45,7 +45,7 @@ abstract public class GridElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         // Check if user is holding an appropriate tool.
-        final ItemStack stack = entityPlayer.getCurrentEquippedItem();
+        final ItemStack stack = entityPlayer.getHeldItemMainhand();
         final GenericItemBlockUsingDamageDescriptor itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
         if (itemDesc instanceof ElectricalCableDescriptor) {
             return onTryGridConnect(entityPlayer, stack, (ElectricalCableDescriptor) itemDesc, side);
@@ -286,9 +286,9 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     private void writeVec(DataOutputStream stream, Vec3d sp) throws IOException {
-        stream.writeFloat((float) sp.xCoord);
-        stream.writeFloat((float) sp.yCoord);
-        stream.writeFloat((float) sp.zCoord);
+        stream.writeFloat((float) sp.x);
+        stream.writeFloat((float) sp.y);
+        stream.writeFloat((float) sp.z);
     }
 
     @Override

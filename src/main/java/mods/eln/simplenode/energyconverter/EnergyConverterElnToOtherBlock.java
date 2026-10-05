@@ -1,5 +1,7 @@
 package mods.eln.simplenode.energyconverter;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Direction;
@@ -39,7 +41,7 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(IBlockAccess w, int x, int y, int z, int side) {
-        SimpleNodeEntity e = (SimpleNodeEntity) w.getTileEntity(x, y, z);
+        SimpleNodeEntity e = (SimpleNodeEntity) WorldCompat.getTileEntity(w, x, y, z);
         Direction s = Direction.fromIntMinecraftSide(side);
         if (e == null) return sideIcon;
         if (e.front == null) return sideIcon;

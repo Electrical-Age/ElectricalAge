@@ -1,5 +1,7 @@
 package mods.eln.node;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
@@ -38,13 +40,13 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
     @Override
     public int isProvidingWeakPower(IBlockAccess block, int x, int y, int z, int side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(x, y, z);
+        NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(block, x, y, z);
         return entity.isProvidingWeakPower(Direction.fromIntMinecraftSide(side));
     }
 
     @Override
     public boolean canConnectRedstone(IBlockAccess block, int x, int y, int z, int side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(x, y, z);
+        NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(block, x, y, z);
         return entity.canConnectRedstone(Direction.XN);
     }
 
@@ -70,7 +72,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
     }
 
     public int getLightValue(IBlockAccess world, int x, int y, int z) {
-        final TileEntity entity = world.getTileEntity(x, y, z);
+        final TileEntity entity = WorldCompat.getTileEntity(world, x, y, z);
         if (entity == null || !(entity instanceof NodeBlockEntity)) return 0;
         NodeBlockEntity tileEntity = (NodeBlockEntity) entity;
         return tileEntity.getLightValue();
@@ -80,7 +82,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
     //client server
     public boolean onBlockPlacedBy(World world, int x, int y, int z, Direction front, EntityLivingBase entityLiving, int metadata) {
 
-        NodeBlockEntity tileEntity = (NodeBlockEntity) world.getTileEntity(x, y, z);
+        NodeBlockEntity tileEntity = (NodeBlockEntity) WorldCompat.getTileEntity(world, x, y, z);
 
         tileEntity.onBlockPlacedBy(front, entityLiving, metadata);
         return true;
@@ -89,7 +91,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
     //server   
     public void onBlockAdded(World par1World, int x, int y, int z) {
         if (par1World.isRemote == false) {
-            NodeBlockEntity entity = (NodeBlockEntity) par1World.getTileEntity(x, y, z);
+            NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(par1World, x, y, z);
             entity.onBlockAdded();
         }
     }
@@ -100,7 +102,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
         //if(par1World.isRemote == false)
         {
-            NodeBlockEntity entity = (NodeBlockEntity) par1World.getTileEntity(x, y, z);
+            NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(par1World, x, y, z);
             entity.onBreakBlock();
             super.breakBlock(par1World, x, y, z, par5, par6);
         }
@@ -109,7 +111,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
         if (Utils.isRemote(world) == false) {
-            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
+            NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(world, x, y, z);
             entity.onNeighborBlockChange();
         }
     }
@@ -129,7 +131,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
     //client server
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float vx, float vy, float vz) {
-        NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
+        NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(world, x, y, z);
 //    	entityPlayer.openGui( Eln.instance, 0,world,x ,y, z);
         return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side), vx, vy, vz);
     }

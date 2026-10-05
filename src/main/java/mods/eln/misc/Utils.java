@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+
+import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import mods.eln.Eln;
@@ -767,7 +769,7 @@ public class Utils {
         } else {
             ItemDamage = stream.readShort();
             if (old == null || Item.getIdFromItem(old.getItem().getItem()) != itemId || old.getItem().getMetadata() != ItemDamage)
-                return new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
+                return new EntityItem(tileEntity.getWorld(), tileEntity.getPos().getX() + 0.5, tileEntity.getPos().getY() + 0.5, tileEntity.getPos().getZ() + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
             else
                 return old;
         }
@@ -778,11 +780,11 @@ public class Utils {
     }
 
     public static int getLight(World w, EnumSkyBlock e, int x, int y, int z) {
-        return w.getSavedLightValue(e, x, y, z);
+        return WorldCompat.getSavedLightValue(w, e, x, y, z);
     }
 
 	/*
-	 * int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z); int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f); return Math.max(b, s); }
+	 * int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.BLOCK, x, y, z); int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.SKY, x, y, z) - w.calculateSkylightSubtracted(0f); return Math.max(b, s); }
 	 */
 
 	/*
@@ -798,72 +800,72 @@ public class Utils {
 	 */
 
     public static void notifyNeighbor(TileEntity t) {
-        int x = t.xCoord;
-        int y = t.yCoord;
-        int z = t.zCoord;
-        World w = t.getWorldObj();
+        int x = t.getPos().getX();
+        int y = t.getPos().getY();
+        int z = t.getPos().getZ();
+        World w = t.getWorld();
         TileEntity o;
-        o = w.getTileEntity(x + 1, y, z);
+        o = WorldCompat.getTileEntity(w, x + 1, y, z);
         if (o != null && o instanceof ITileEntitySpawnClient)
             ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x - 1, y, z);
+        o = WorldCompat.getTileEntity(w, x - 1, y, z);
         if (o != null && o instanceof ITileEntitySpawnClient)
             ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y + 1, z);
+        o = WorldCompat.getTileEntity(w, x, y + 1, z);
         if (o != null && o instanceof ITileEntitySpawnClient)
             ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y - 1, z);
+        o = WorldCompat.getTileEntity(w, x, y - 1, z);
         if (o != null && o instanceof ITileEntitySpawnClient)
             ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y, z + 1);
+        o = WorldCompat.getTileEntity(w, x, y, z + 1);
         if (o != null && o instanceof ITileEntitySpawnClient)
             ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y, z - 1);
+        o = WorldCompat.getTileEntity(w, x, y, z - 1);
         if (o != null && o instanceof ITileEntitySpawnClient)
             ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
     }
 
     public static boolean playerHasMeter(EntityPlayer entityPlayer) {
-        return Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
-            || Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
-            || Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem());
+        return Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())
+            || Eln.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())
+            || Eln.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand());
     }
 
     public static int getRedstoneLevelAround(Coordonate coord, Direction side) {
-        int level = coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z);
+        int level = WorldCompat.getStrongestIndirectPower(coord.world(), coord.x, coord.y, coord.z);
         if (level >= 15) return 15;
 
         side = side.getInverse();
         switch (side) {
             case YN:
             case YP:
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x + 1, coord.y, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x + 1, coord.y, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x - 1, coord.y, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x - 1, coord.y, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z + 1, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z + 1, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z - 1, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z - 1, side.toSideValue()));
 
             case XN:
             case XP:
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y + 1, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y + 1, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y - 1, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z + 1, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z + 1, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z - 1, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z - 1, side.toSideValue()));
 
             case ZN:
             case ZP:
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x + 1, coord.y, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x + 1, coord.y, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x - 1, coord.y, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x - 1, coord.y, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y + 1, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y + 1, coord.z, side.toSideValue()));
                 if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
+                level = Math.max(level, WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y - 1, coord.z, side.toSideValue()));
         }
 
         return level;
@@ -1082,10 +1084,10 @@ public class Utils {
             int yInt = (int) yFloor;
             int zInt = (int) zFloor;
 
-            Block block = Blocks.air;
+            Block block = Blocks.AIR;
 
-            if (w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
-                block = w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
+            if (WorldCompat.blockExists(w, xInt + posXint, yInt + posYint, zInt + posZint))
+                block = WorldCompat.getBlock(w, xInt + posXint, yInt + posYint, zInt + posZint);
 
             float dToStack;
 
@@ -1108,11 +1110,11 @@ public class Utils {
     }
 
     public static boolean isBlockLoaded(World world, double x, double y, double z) {
-        return world.blockExists(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+        return WorldCompat.blockExists(world, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
     }
 
     public static Block getBlock(World world, double x, double y, double z) {
-        Block block = world.getBlock(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+        Block block = WorldCompat.getBlock(world, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
         return block;
     }
 
@@ -1338,10 +1340,10 @@ public class Utils {
         chunk.func_150804_b(false);
     }
 
-    public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
-        worldObj.func_147451_t(xCoord, yCoord, zCoord);
+    public static void updateAllLightTypes(World world, int x, int y, int z) {
+        WorldCompat.updateAllLightTypes(world, x, y, z);
 
-        worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
+        world.markBlocksDirtyVertical(x, z, 0, 255);
     }
 
     public static int getItemId(ItemStack stack) {
