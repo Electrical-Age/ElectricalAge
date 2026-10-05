@@ -43,12 +43,24 @@ public final class ItemTransforms {
             "other items (1.7.10 item branch)");
         def("equipped_tail", "translate 0 -0.3 0; scale 1.5 1.5 1.5; rotate 50 0 1 0; rotate 335 0 0 1; translate -0.9375 -0.0625 0",
             "Forge 1.7.10 renderEquippedItem (non-helper), after first_person and third_person_*");
+        def("equipped_helper", "scale 1.5 1.5 1.5; translate -0.5 -0.5 -0.5",
+            "instead of equipped_tail when the item's shouldUseRenderHelper(type, EQUIPPED_BLOCK) is true (Forge 1.7.10 "
+                + "renderEquippedItem helper branch = translate -0.5 -0.5 -0.5; tools, flashlight, portable battery, "
+                + "X-ray scanner, transparent-node items). The scale keeps them as large as with equipped_tail");
         def("ground", "translate 0 -0.25 0", "dropped item: cancel 1.12's +0.25 lift (bob and spin stay)");
         def("fixed", "", "item frame");
         def("head", "translate 0 -0.25 0", "on a head");
         def("entity_six_node", "translate 0 -0.15 0; scale 0.4 0.4 0.4",
             "after ground/fixed/head: six-node items with a model (1.7.10 3D path)");
         def("entity_item", "scale 0.5 0.5 0.5", "after ground/fixed/head: other items");
+        // Icon-only six-node items (cables): their extruded icon model, with these matrices instead of vanilla
+        // item/generated's (a full-width rod there: oversized in first person, across the torso in third person)
+        def("icon_first_person", "translate 0.070625 0.2 0.070625; rotate -90 0 1 0; rotate 25 0 0 1; scale 0.4 0.4 0.4",
+            "icon-only six-node items (cables), first person: vanilla item/generated with scale 0.4 (was 0.68)");
+        def("icon_third_person", "translate 0 0.25 0.03125; rotate -90 0 1 0; rotate 55 0 0 1; scale 0.5 0.5 0.5",
+            "icon-only six-node items (cables), third person: held like a tool (vanilla item/handheld angles), scale 0.5");
+        def("icon_ground", "scale 0.5 0.5 0.5",
+            "icon-only six-node items (cables), dropped: vanilla item/generated without its +2/16 lift");
     }
 
     /**
@@ -69,6 +81,7 @@ public final class ItemTransforms {
     }
 
     private static final Map<String, float[][]> OPS = new LinkedHashMap<>();
+    private static final Map<String, javax.vecmath.Matrix4f> MATRICES = new java.util.HashMap<>();
     private static Configuration config;
 
     private ItemTransforms() {
@@ -79,6 +92,7 @@ public final class ItemTransforms {
         List<String> problems = new ArrayList<>();
         File file = new File(Loader.instance().getConfigDir(), "eln-render.cfg");
         config = new Configuration(file);
+        MATRICES.clear();
         config.load();
         config.setCategoryComment("transforms", "Electrical Age item render transforms (client). Ops: translate x y z; "
             + "rotate angle x y z; scale x y z. Reload in game: /elnclient reloadrender");
@@ -146,6 +160,40 @@ public final class ItemTransforms {
             else if (v[0] == 1) GL11.glRotatef(v[1], v[2], v[3], v[4]);
             else GL11.glScalef(v[1], v[2], v[3]);
         }
+    }
+
+    /**
+     * The ops of a key as one matrix (GL order: M = op1 * op2 * ...), for baked-model perspective transforms; null when
+     * the key has no ops.
+     */
+    public static synchronized javax.vecmath.Matrix4f matrix(String key) {
+        if (config == null) load();
+        if (MATRICES.containsKey(key)) return MATRICES.get(key);
+        float[][] ops = OPS.get(key);
+        javax.vecmath.Matrix4f m = null;
+        if (ops != null && ops.length > 0) {
+            m = new javax.vecmath.Matrix4f();
+            m.setIdentity();
+            for (float[] v : ops) {
+                javax.vecmath.Matrix4f op = new javax.vecmath.Matrix4f();
+                op.setIdentity();
+                if (v[0] == 0) {
+                    op.setTranslation(new javax.vecmath.Vector3f(v[1], v[2], v[3]));
+                } else if (v[0] == 1) {
+                    javax.vecmath.Vector3f axis = new javax.vecmath.Vector3f(v[2], v[3], v[4]);
+                    if (axis.length() == 0) continue;
+                    axis.normalize();
+                    op.set(new javax.vecmath.AxisAngle4f(axis, (float) Math.toRadians(v[1])));
+                } else {
+                    op.m00 = v[1];
+                    op.m11 = v[2];
+                    op.m22 = v[3];
+                }
+                m.mul(op);
+            }
+        }
+        MATRICES.put(key, m);
+        return m;
     }
 
     /** Current values, for `/elnclient showrender`. */

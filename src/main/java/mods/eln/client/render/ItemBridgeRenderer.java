@@ -82,7 +82,7 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
                 case EQUIPPED_FIRST_PERSON:
                     if (transform == TransformType.FIRST_PERSON_LEFT_HAND) ItemTransforms.apply("first_person_left");
                     ItemTransforms.apply("first_person");
-                    ItemTransforms.apply("equipped_tail");
+                    ItemTransforms.apply(helper(renderer, t, itemStack) ? "equipped_helper" : "equipped_tail");
                     data = new Object[]{null, entity};
                     break;
                 case EQUIPPED:
@@ -90,7 +90,7 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
                         ? "third_person_left_undo" : "third_person_right_undo");
                     ItemTransforms.apply("third_person_arm");
                     ItemTransforms.apply(six ? "third_person_six_node" : "third_person_item");
-                    ItemTransforms.apply("equipped_tail");
+                    ItemTransforms.apply(helper(renderer, t, itemStack) ? "equipped_helper" : "equipped_tail");
                     data = new Object[]{null, entity};
                     break;
                 case ENTITY:
@@ -117,5 +117,19 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
     }
 
     private static boolean warned = false;
+
+    /**
+     * Forge 1.7.10 renderEquippedItem: shouldUseRenderHelper(type, stack, EQUIPPED_BLOCK) chose translate(-0.5)^3
+     * instead of the item transform (equipped_tail). EA's tools, flashlight, portable battery, X-ray scanner and
+     * transparent-node items say true; their renderItem code expects that frame (the X-ray scanner model sat top-right
+     * with equipped_tail).
+     */
+    private static boolean helper(IItemRenderer renderer, ItemRenderType t, ItemStack s) {
+        try {
+            return renderer.shouldUseRenderHelper(t, s, IItemRenderer.ItemRendererHelper.EQUIPPED_BLOCK);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
 
 }
