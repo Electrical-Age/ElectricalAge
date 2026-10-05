@@ -27,7 +27,7 @@ class BatteryItem(name: String, private var energyStorage: Double, internal var 
         return nbt
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Charge power: %1\$W", Utils.plotValue(chargePower)))
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))

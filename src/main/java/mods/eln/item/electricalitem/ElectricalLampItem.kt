@@ -90,7 +90,7 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return s
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargeMin)))

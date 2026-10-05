@@ -57,7 +57,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
         return nbt
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         if (itemStack != null && !itemStack.isEmpty)

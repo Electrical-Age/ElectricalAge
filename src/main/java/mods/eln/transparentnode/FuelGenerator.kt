@@ -99,7 +99,7 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         }
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer,
+    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer?,
                                 list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
