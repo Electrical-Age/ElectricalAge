@@ -1,5 +1,7 @@
 package mods.eln.sixnode.batterycharger;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -61,6 +63,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
         Data.addUtilities(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(boolean[] presence, boolean[] charged) {
         if (main != null)
             main.draw();

@@ -1,6 +1,8 @@
 package mods.eln.sixnode.powercapacitorsix;
 
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
@@ -76,6 +78,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw() {
         if (null != Base) Base.draw();
         if (null != CapacitorCables) CapacitorCables.draw();

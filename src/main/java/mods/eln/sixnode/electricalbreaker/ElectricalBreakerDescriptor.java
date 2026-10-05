@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalbreaker;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -71,6 +73,7 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
             draw(0f, 0f);
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(float on, float distance) {
         if (main != null) main.draw();
         if (lever != null) {

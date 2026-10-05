@@ -2,6 +2,8 @@ package mods.eln.sixnode.powerinductorsix;
 
 
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Utils;
 import mods.eln.Eln;
@@ -72,6 +74,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw() {
         //UtilsClient.disableCulling();
         //UtilsClient.disableTexture();

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalrelay;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -52,7 +54,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
             }
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cable);
+        voltageLevelColor = mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.voltageLevelColorOf(cable);
     }
 
     void applyTo(ElectricalLoad load) {
@@ -99,6 +101,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float factor) {
         //UtilsClient.disableBlend();
         UtilsClient.disableCulling();
