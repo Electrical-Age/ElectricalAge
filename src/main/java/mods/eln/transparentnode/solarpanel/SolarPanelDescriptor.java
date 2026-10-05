@@ -9,6 +9,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -148,8 +149,9 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
             super.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
             return;
         }
-        AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
-        bb.maxY -= 0.5;
+        // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AxisAlignedBB is immutable now)
+        AxisAlignedBB bb = Block.FULL_BLOCK_AABB.offset(x, y, z);
+        bb = bb.setMaxY(bb.maxY - 0.5);
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

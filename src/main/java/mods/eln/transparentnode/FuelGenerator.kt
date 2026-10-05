@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import mods.eln.compat.IItemRenderer
-import net.minecraftforge.fluids.FluidContainerRegistry
+import mods.eln.compat.BucketCompat
 import net.minecraftforge.fluids.FluidRegistry
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
@@ -115,9 +115,9 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     internal var powerSource = PowerSource("powerSource", positiveLoad)
     internal var slowProcess = FuelGeneratorSlowProcess(this)
     internal var descriptor = descriptor_ as FuelGeneratorDescriptor
-    internal val fuels = FuelRegistry.fluidListToFluids(descriptor.fuels).map { it.id }
+    internal val fuels = FuelRegistry.fluidListToFluids(descriptor.fuels).map { it.name } // 1.12: fluids by name (no ids)
     internal var tankLevel = 0.0
-    internal var tankFluid = FluidRegistry.getFluid("lava").id
+    internal var tankFluid = FluidRegistry.getFluid("lava").name
     internal var on by published(false)
     internal var voltageGracePeriod = 0.0
 
@@ -169,17 +169,17 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
 
     override fun onBlockActivated(player: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (!(player?.world?.isRemote ?: true)) {
-            val bucket = player?.heldItemMainhand
-            if (FluidContainerRegistry.isBucket(bucket) && FluidContainerRegistry.isFilledContainer(bucket)) {
+            val bucket = player?.heldItemMainhand ?: ItemStack.EMPTY
+            val fluidStack = BucketCompat.filledBucketFluid(bucket) // 1.7.10 isBucket && isFilledContainer
+            if (fluidStack != null) {
                 val deltaLevel = 1.0 / FuelGeneratorDescriptor.TankCapacityInBuckets;
                 if (tankLevel <= 1.0 - deltaLevel) {
-                    val fluidStack = FluidContainerRegistry.getFluidForFilledItem(bucket)
-                    if (fluidStack != null && (fluidStack.fluidID == tankFluid || tankLevel <= 0.0) &&
-                        fluidStack.fluidID in fuels) {
-                        tankFluid = fluidStack.fluidID
+                    if ((fluidStack.fluid.name == tankFluid || tankLevel <= 0.0) &&
+                        fluidStack.fluid.name in fuels) {
+                        tankFluid = fluidStack.fluid.name
                         tankLevel += deltaLevel
                         if (player != null && !player.capabilities.isCreativeMode) {
-                            val emptyBucket = FluidContainerRegistry.drainFluidContainer(bucket);
+                            val emptyBucket = BucketCompat.emptyBucket();
                             val slot = player.inventory.currentItem
                             player.inventory.setInventorySlotContents(slot, emptyBucket)
                         }

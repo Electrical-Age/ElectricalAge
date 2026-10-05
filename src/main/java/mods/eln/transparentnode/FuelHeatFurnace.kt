@@ -34,13 +34,14 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: ThermalLoadInitializerByPowerDrop) :
+// 1.12: model nullable (OBJ models are client-only; a non-null Kotlin param would NPE in preInit on a dedicated server)
+class FuelHeatFurnaceDescriptor(name: String, model: Obj3D?, val thermal: ThermalLoadInitializerByPowerDrop) :
     TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, FuelHeatFurnaceRender::class.java,
         EntityMetaTag.Fluid) {
-    private val main = model.getPart("Main")
-    private val burners = arrayOf(model.getPart("BurnerA"), model.getPart("BurnerB"), model.getPart("BurnerC"))
-    private val powerLED = model.getPart("PowerLED")
-    private val heatLED = model.getPart("HeatLED")
+    private val main = model?.getPart("Main")
+    private val burners = arrayOf(model?.getPart("BurnerA"), model?.getPart("BurnerB"), model?.getPart("BurnerC"))
+    private val powerLED = model?.getPart("PowerLED")
+    private val heatLED = model?.getPart("HeatLED")
 
     init {
         thermal.setMaximalPower(2000.0)
@@ -254,10 +255,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun getInventory() = inventory_
 
     override fun inventoryChange(inventory: IInventory?) {
-        mainSwitch = mainSwitch && inventory_.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot) != null
+        mainSwitch = mainSwitch && !inventory_.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot).isEmpty
 
         val regulatorStack = inventory_.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot)
-        if (regulatorStack != null && !externalControlled) {
+        if (!regulatorStack.isEmpty && !externalControlled) {
             val regulator = Utils.getItemObject(regulatorStack) as IRegulatorDescriptor
             regulator.applyTo(controlProcess, 500.0, 20.0, 0.2, 0.1)
         } else {
@@ -370,12 +371,12 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
             mainSwitch.displayString = I18N.tr("Furnace is on")
         else
             mainSwitch.displayString = I18N.tr("Furnace is off")
-        mainSwitch.enabled = inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot) != null
+        mainSwitch.enabled = !inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot).isEmpty
 
         if (render.manualControl.pending) {
             manualControl.value = render.manualControl.value
         }
-        manualControl.setEnable(inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot) == null &&
+        manualControl.setEnable(inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot).isEmpty &&
             !render.externalControlled)
         manualControl.setComment(0, I18N.tr("Control value at %1$", Utils.plotPercent("", manualControl.value.toDouble())))
         manualControl.setComment(1, I18N.tr("Heat Power: %1$", Utils.plotPower("", render.heatPower.toDouble())))
@@ -383,7 +384,7 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
         if (render.setTemperature.pending) {
             setTemperature.value = render.setTemperature.value
         }
-        setTemperature.setEnable(inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot) != null &&
+        setTemperature.setEnable(!inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot).isEmpty &&
             !render.externalControlled)
         setTemperature.temperatureHit = Math.max(0f, render.actualTemperature)
         setTemperature.setComment(0, I18N.tr("Temperature"))
