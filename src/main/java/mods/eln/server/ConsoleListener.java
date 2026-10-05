@@ -9,6 +9,10 @@ import mods.eln.misc.Color;
 import mods.eln.misc.Version;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+
+import javax.annotation.Nullable;
 import net.minecraft.util.text.TextComponentString;
 
 import java.util.ArrayList;
@@ -67,7 +71,7 @@ public class ConsoleListener extends CommandBase {
     }
 
     @Override
-    public List addTabCompletionOptions(ICommandSender icommandsender, String[] astring) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender icommandsender, String[] astring, @Nullable BlockPos targetPos) {
         int argc = astring.length;
 
         switch (argc) {
@@ -99,11 +103,11 @@ public class ConsoleListener extends CommandBase {
                 commandMan(icommandsender, astring[0]);
                 break;
         }
-        return null;
+        return new ArrayList<String>(); // 1.12 callers iterate the result: never null
     }
 
     @Override
-    public void processCommand(ICommandSender ics, String[] astring) {
+    public void execute(MinecraftServer server, ICommandSender ics, String[] astring) {
         String cmd;
 
         if (astring.length >= 1) {

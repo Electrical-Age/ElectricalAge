@@ -5,8 +5,19 @@ import mods.eln.client.SoundLoader;
 import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 
 public class SoundClient {
+    /**
+     * 1.7.10 played sounds by name; 1.12 needs a registered SoundEvent. Unknown names are skipped.
+     * TODO(1.12 WP13): register every EA track (sounds.json + RegistryEvent.Register&lt;SoundEvent&gt;); category.
+     */
+    static SoundEvent soundEvent(String track) {
+        return SoundEvent.REGISTRY.getObject(new ResourceLocation(track));
+    }
+
     /*public static void playFromBlock(World world, int x, int y, int z, String track, float volume, float pitch, float rangeNominal, float rangeMax) {
 		play(world, x + 0.5, y + 0.5, z + 0.5, track, volume, pitch, rangeNominal, rangeMax);
 	}*/
@@ -33,7 +44,9 @@ public class SoundClient {
             p.volume *= distanceFactor;
             if (p.volume <= 0) return;
 
-            p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track, p.volume, p.pitch, false);
+            SoundEvent event = soundEvent(p.track);
+            if (event != null)
+                p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, event, SoundCategory.BLOCKS, p.volume, p.pitch, false);
         } else {
             for (int idx = 0; idx < trackCount; idx++) {
                 float bandVolume = p.volume;
@@ -42,7 +55,9 @@ public class SoundClient {
 
                 bandVolume -= ((trackCount - 1 - idx) / (trackCount - 1f) + 0.2) * normalizedBlockFactor;
                 Utils.print(bandVolume + " ");
-                p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
+                SoundEvent event = soundEvent(p.track + "_" + idx + "x");
+                if (event != null)
+                    p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, event, SoundCategory.BLOCKS, bandVolume, p.pitch, false);
             }
             Utils.println("");
         }

@@ -17,7 +17,7 @@ public class ElnWorldStorage extends WorldSavedData {
 
     public static ElnWorldStorage forWorld(World world) {
         // Retrieves the MyWorldData instance for the given world, creating it if necessary
-        MapStorage storage = world.perWorldStorage;
+        MapStorage storage = world.getPerWorldStorage();
         int dim = world.provider.getDimension();
         ElnWorldStorage result = (ElnWorldStorage) storage.getOrLoadData(ElnWorldStorage.class, key + dim);
         if (result == null) {
@@ -38,9 +38,10 @@ public class ElnWorldStorage extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setInteger("dim", dim);
         ServerEventListener.writeToEaWorldNBT(nbt, dim);
+        return nbt;
     }
 
     @Override

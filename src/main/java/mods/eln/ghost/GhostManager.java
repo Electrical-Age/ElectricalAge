@@ -129,7 +129,7 @@ public class GhostManager extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 	/*	int nodeCounter = 0;
 		
 		for(GhostElement ghost : ghostTable.values()) {
@@ -137,6 +137,7 @@ public class GhostManager extends WorldSavedData {
 			ghost.writeToNBT(nbtGhost, "");
 			nbt.setTag("n" + nodeCounter++, nbtGhost);
 		}*/
+        return nbt;
     }
 
     public void loadFromNBT(NBTTagCompound nbt) {
@@ -172,7 +173,7 @@ public class GhostManager extends WorldSavedData {
     }
 
     public boolean canCreateGhostAt(World world, int x, int y, int z) {
-        if (!world.getChunkProvider().chunkExists(x >> 4, z >> 4)) {
+        if (!WorldCompat.blockExists(world, x, y, z)) { // 1.7.10 chunkExists = chunk loaded
             return false;
         } else if (WorldCompat.getBlock(world, x, y, z) != Blocks.AIR && !WorldCompat.getBlock(world, x, y, z).isReplaceable(world, new BlockPos(x, y, z))) {
             return false;

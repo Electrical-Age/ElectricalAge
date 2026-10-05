@@ -7,14 +7,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import mods.eln.compat.IItemRenderer.ItemRenderType;
@@ -25,7 +23,6 @@ import java.util.List;
 public class GenericItemUsingDamageDescriptor {
 
     public String IconName;
-    private IIcon iconIndex;
     public String name;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -62,13 +59,10 @@ public class GenericItemUsingDamageDescriptor {
         list.add(stack);
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon(IconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
+    // TODO(1.12 WP6 icon): updateIcons/getIcon removed; IconName ("eln:<name>") is the texture of the item model.
+    /** What 1.7.10 getIconName() returned. */
+    public String getIconName() {
+        return IconName;
     }
 
     public String getName(ItemStack stack) {
@@ -132,13 +126,13 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
+        if (getIconName() == null)
             return;
 
         voltageLevelColor.drawIconBackground(type);
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
+        String icon = getIconName().substring(4);
         UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
     }
 

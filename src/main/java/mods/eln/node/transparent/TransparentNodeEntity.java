@@ -1,5 +1,7 @@
 package mods.eln.node.transparent;
 
+import net.minecraft.block.Block;
+
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Coordonate;
@@ -143,7 +145,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
             z = pos.getZ();
         }
         if (desc == null) {
-            AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
+            AxisAlignedBB bb = Block.FULL_BLOCK_AABB.offset(x, y, z); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
             if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
         } else {
             desc.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);

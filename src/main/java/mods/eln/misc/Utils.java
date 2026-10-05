@@ -1329,16 +1329,20 @@ public class Utils {
         return cmp;
     }
 
+    /**
+     * The world save directory, with a trailing '/'.
+     * 1.12 port, known bug: this was "saves/" + folder name, guessed from the server type; now it asks Forge.
+     */
     public static String getMapFolder() {
+        File root = DimensionManager.getCurrentSaveRootDirectory();
+        if (root != null) return root.getPath() + "/";
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         String savesAt = !server.isDedicatedServer() ? "saves/" : "";
         return savesAt + server.getFolderName() + "/";
     }
 
     public static File getMapFile(String name) {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        File f = server.getFile(getMapFolder() + name);
-        return f;
+        return new File(getMapFolder() + name);
     }
 
     public static String readMapFile(String name) throws IOException {

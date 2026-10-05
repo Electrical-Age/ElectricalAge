@@ -1,5 +1,7 @@
 package mods.eln.ore;
 
+import mods.eln.compat.GameRegistryCompat;
+
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import net.minecraft.block.Block;

@@ -1,13 +1,14 @@
 package mods.eln.i18n;
 
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
+import net.minecraft.util.text.translation.I18n;
 
 /**
  * Internationalization and localization helper class.
  */
 public class I18N {
-    private final static LanguageRegistry languageRegistry = LanguageRegistry.instance();
+    // 1.12: LanguageRegistry is gone; util.text.translation.I18n reads the language map on both sides
+    // (client: current language; dedicated server: en_us).
 
     public static String getCurrentLanguage() {
         return FMLCommonHandler.instance().getCurrentLanguage();
@@ -50,7 +51,9 @@ public class I18N {
      */
     public static String tr(final String text, Object... objects) {
         // Try to find the translation for the string using forge API.
-        String translation = languageRegistry.getStringLocalization(encodeLangKey(text));
+        String langKey = encodeLangKey(text);
+        @SuppressWarnings("deprecation")
+        String translation = I18n.canTranslate(langKey) ? I18n.translateToLocal(langKey) : null;
 
         // If no translation was found, just use the original text.
         if (translation == null || "".equals(translation)) {

@@ -59,13 +59,13 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
+        if (getIconName() == null)
             return;
 
         voltageLevelColor.drawIconBackground(type);
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
+        String icon = getIconName().substring(4);
         UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
     }
 
@@ -202,7 +202,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
     }
 
     public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
-        AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
+        AxisAlignedBB bb = Block.FULL_BLOCK_AABB.offset(x, y, z); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 

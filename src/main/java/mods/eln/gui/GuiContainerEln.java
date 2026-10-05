@@ -97,9 +97,9 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
     }
 
     @Override
-    protected void mouseMovedOrUp(int x, int y, int witch) {
+    protected void mouseReleased(int x, int y, int witch) { // 1.7.10 mouseMovedOrUp (called on release)
         helper.mouseMovedOrUp(x, y, witch);
-        super.mouseMovedOrUp(x, y, witch);
+        super.mouseReleased(x, y, witch);
     }
 
     public boolean doesGuiPauseGame() {

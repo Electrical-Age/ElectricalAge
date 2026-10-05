@@ -47,8 +47,8 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onNewEntity(EntityConstructing event) {
-        if (event.entity instanceof EntityLightningBolt) {
-            lightningListNext.add((EntityLightningBolt) event.entity);
+        if (event.getEntity() instanceof EntityLightningBolt) {
+            lightningListNext.add((EntityLightningBolt) event.getEntity());
         }
     }
 
@@ -71,8 +71,8 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onWorldLoad(Load e) {
-        if (e.world.isRemote) return;
-        loadedWorlds.add(e.world.provider.getDimension());
+        if (e.getWorld().isRemote) return;
+        loadedWorlds.add(e.getWorld().provider.getDimension());
         FileNames fileNames = new FileNames(e);
 
         try {
@@ -85,7 +85,7 @@ public class ServerEventListener {
             } catch (Exception ex2) {
                 ex2.printStackTrace();
                 System.out.println("Failed to read backup save!");
-                ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
+                ElnWorldStorage storage = ElnWorldStorage.forWorld(e.getWorld());
             }
         }
     }
@@ -98,11 +98,11 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onWorldUnload(Unload e) {
-        if (e.world.isRemote) return;
-        loadedWorlds.remove(e.world.provider.getDimension());
+        if (e.getWorld().isRemote) return;
+        loadedWorlds.remove(e.getWorld().provider.getDimension());
         try {
-            NodeManager.instance.unload(e.world.provider.getDimension());
-            Eln.ghostManager.unload(e.world.provider.getDimension());
+            NodeManager.instance.unload(e.getWorld().provider.getDimension());
+            Eln.ghostManager.unload(e.getWorld().provider.getDimension());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -111,14 +111,14 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onWorldSave(Save e) {
-        if (e.world.isRemote) return;
-        if (!loadedWorlds.contains(e.world.provider.getDimension())) {
+        if (e.getWorld().isRemote) return;
+        if (!loadedWorlds.contains(e.getWorld().provider.getDimension())) {
             //System.out.println("I hate you minecraft");
             return;
         }
         try {
             NBTTagCompound nbt = new NBTTagCompound();
-            writeToEaWorldNBT(nbt, e.world.provider.getDimension());
+            writeToEaWorldNBT(nbt, e.getWorld().provider.getDimension());
 
             FileNames fileNames = new FileNames(e);
 
@@ -178,7 +178,7 @@ public class ServerEventListener {
         final Path backupSave;
 
         FileNames(WorldEvent e) {
-            String saveName = getEaWorldSaveName(e.world);
+            String saveName = getEaWorldSaveName(e.getWorld());
             worldSave = FileSystems.getDefault().getPath(saveName);
             tempSave = FileSystems.getDefault().getPath(saveName + ".tmp");
             backupSave = FileSystems.getDefault().getPath(saveName + ".bak");

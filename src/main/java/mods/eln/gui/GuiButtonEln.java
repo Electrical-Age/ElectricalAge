@@ -2,6 +2,7 @@ package mods.eln.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -29,12 +30,12 @@ public class GuiButtonEln extends GuiButton implements IGuiObject {
     @Override
     public void idraw(int x, int y, float f) {
         GL11.glColor4f(1f, 1f, 1f, 1f);
-        drawButton(Minecraft.getMinecraft(), x, y);
+        drawButton(Minecraft.getMinecraft(), x, y, f);
     }
 
     @Override
     public int getYMax() {
-        return yPosition + height;
+        return y + height;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class GuiButtonEln extends GuiButton implements IGuiObject {
     @Override
     public void imouseClicked(int x, int y, int code) {
         if (mousePressed(Minecraft.getMinecraft(), x, y)) {
-            Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
+            Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onMouseClicked();
             if (observer != null) {
                 observer.guiObjectEvent(this);
@@ -66,14 +67,14 @@ public class GuiButtonEln extends GuiButton implements IGuiObject {
 
     @Override
     public void idraw2(int x, int y) {
-        if (helper != null && visible && x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height)
+        if (helper != null && visible && x >= this.x && y >= this.y && x < this.x + width && y < this.y + height)
             helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
     }
 
     @Override
     public void translate(int x, int y) {
-        this.xPosition += x;
-        this.yPosition += y;
+        this.x += x;
+        this.y += y;
     }
 
     ArrayList<String> comment = new ArrayList<String>();

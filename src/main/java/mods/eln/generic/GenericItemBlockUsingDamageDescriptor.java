@@ -5,20 +5,17 @@ import mods.eln.misc.Utils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
 
 import java.util.List;
 
 public class GenericItemBlockUsingDamageDescriptor {
 
     String iconName;
-    IIcon iconIndex;
     public String name;
 
     public Item parentItem;
@@ -51,13 +48,10 @@ public class GenericItemBlockUsingDamageDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<String> list, boolean par4) {
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
+    // TODO(1.12 WP6 icon): updateIcons/getIcon removed; "eln:" + iconName is the texture of the item model.
+    /** What 1.7.10 getIconName() returned. */
+    public String getIconName() {
+        return "eln:" + iconName;
     }
 
     public String getName(ItemStack stack) {

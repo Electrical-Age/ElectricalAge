@@ -33,7 +33,7 @@ public class SaveConfig extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel);
         nbt.setBoolean("electricalLampAging", electricalLampAging);
         nbt.setBoolean("batteryAging", batteryAging);
@@ -41,6 +41,7 @@ public class SaveConfig extends WorldSavedData {
         nbt.setBoolean("reGenOre", reGenOre);
 
         Eln.wind.writeToNBT(nbt, "wind");
+        return nbt;
     }
 
     @Override

@@ -42,13 +42,13 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
+        if (getIconName() == null)
             return;
 
         voltageLevelColor.drawIconBackground(type);
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
+        String icon = getIconName().substring(4);
         UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
     }
 

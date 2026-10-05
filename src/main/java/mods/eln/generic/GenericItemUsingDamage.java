@@ -1,21 +1,30 @@
 package mods.eln.generic;
 
+import mods.eln.compat.GameRegistryCompat;
+
 
 import mods.eln.misc.Utils;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import javax.annotation.Nullable;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -39,18 +48,17 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        ItemStack stack = new ItemStack(this, 1, damage);
-        LanguageRegistry.addName(stack, descriptor.name);
+        // TODO(1.12 WP13): LanguageRegistry.addName(stack, descriptor.name) is gone; display names come from
+        // lang keys "<getTranslationKey(stack)>.name".
         descriptor.setParent(this, damage);
     }
 
     public void addElement(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        ItemStack stack = new ItemStack(this, 1, damage);
-        LanguageRegistry.addName(stack, descriptor.name);
+        // TODO(1.12 WP13): LanguageRegistry.addName(stack, descriptor.name), see addWithoutRegistry
         orderList.add(damage);
         descriptor.setParent(this, damage);
-        GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
+        GameRegistryCompat.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
     }
 
     public Descriptor getDescriptor(int damage) {
@@ -65,12 +73,16 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         return getDescriptor(itemStack.getMetadata());
     }
 
+    /** 1.7.10 onItemRightClick(stack, world, player) returned the new held stack; PASS when unchanged. */
     @Override
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+    public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer p, EnumHand hand) {
+        ItemStack s = p.getHeldItem(hand);
         Descriptor desc = getDescriptor(s);
         if (desc == null)
-            return s;
-        return desc.onItemRightClick(s, w, p);
+            return new ActionResult<ItemStack>(EnumActionResult.PASS, s);
+        ItemStack result = desc.onItemRightClick(s, w, p);
+        if (result == null) result = ItemStack.EMPTY;
+        return new ActionResult<ItemStack>(result == s ? EnumActionResult.PASS : EnumActionResult.SUCCESS, result);
     }
 
 	/*//caca1.5.1
@@ -116,32 +128,23 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	}
 	*/
 
-    public IIcon getIconFromDamage(int damage) {
-        GenericItemUsingDamageDescriptor desc = getDescriptor(damage);
-        if (desc != null) {
-            return getDescriptor(damage).getIcon();
-        }
-        return null;
-    }
+    // TODO(1.12 WP6 icon): getIconFromDamage/registerIcons removed (item models instead).
 
     @Override
-    @SideOnly(value = Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        for (GenericItemUsingDamageDescriptor descriptor : subItemList.values()) {
-            descriptor.updateIcons(iconRegister);
-        }
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
+    public void getSubItems(CreativeTabs tabs, NonNullList<ItemStack> list) {
+        // 1.12 asks every item for every tab; 1.7.10 only asked for the item's own tab (and search).
+        if (!isInCreativeTab(tabs)) return;
         // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
         for (int id : orderList) {
             subItemList.get(id).getSubItems(list);
         }
     }
 
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack itemStack, @Nullable World world, List<String> list, ITooltipFlag flag) {
+        EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
+        boolean par4 = flag.isAdvanced();
 		/*Descriptor desc = getDescriptor(itemStack);
 		if (desc == null)
 			return;
@@ -159,11 +162,13 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float vx, float vy, float vz) {
+        ItemStack stack = player.getHeldItem(hand);
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
-            return false;
-        return d.onItemUse(stack, player, world, x, y, z, side, vx, vy, vz);
+            return EnumActionResult.PASS;
+        return d.onItemUse(stack, player, world, pos.getX(), pos.getY(), pos.getZ(), facing.getIndex(), vx, vy, vz)
+            ? EnumActionResult.SUCCESS : EnumActionResult.PASS;
     }
 
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
@@ -173,11 +178,12 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         return d.onEntitySwing(entityLiving, stack);
     }
 
-    public boolean onBlockStartBreak(ItemStack itemstack, int X, int Y, int Z, EntityPlayer player) {
+    @Override
+    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, EntityPlayer player) {
         GenericItemUsingDamageDescriptor d = getDescriptor(itemstack);
         if (d == null)
-            return super.onBlockStartBreak(itemstack, X, Y, Z, player);
-        return d.onBlockStartBreak(itemstack, X, Y, Z, player);
+            return super.onBlockStartBreak(itemstack, pos, player);
+        return d.onBlockStartBreak(itemstack, pos.getX(), pos.getY(), pos.getZ(), player);
     }
 
     public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
@@ -193,20 +199,22 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public float func_150893_a(ItemStack stack, Block block) { //getStrVsBlock
+    public float getDestroySpeed(ItemStack stack, IBlockState state) { //getStrVsBlock
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
             return 0.2f;
-        return d.getStrVsBlock(stack, block);
+        return d.getStrVsBlock(stack, state.getBlock());
     }
 
     @Override
-    public boolean canHarvestBlock(Block par1Block, ItemStack item) {
+    public boolean canHarvestBlock(IBlockState state, ItemStack item) {
         return true;
     }
 
     @Override
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, World w, IBlockState state, BlockPos pos, EntityLivingBase entity) {
+        Block block = state.getBlock();
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
         if (w.isRemote) {
             return false;
         }

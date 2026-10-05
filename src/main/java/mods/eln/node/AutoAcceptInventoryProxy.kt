@@ -24,7 +24,7 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
     private open class ItemAcceptorIfEmpty(index: Int, val acceptedItems: Array<out Class<out Any>>)
         : ItemAcceptor(index) {
         override fun take(itemStack: ItemStack?, inventory: IInventory): Boolean {
-            if (inventory.getStackInSlot(index) == null) {
+            if (inventory.getStackInSlot(index).isEmpty) { // 1.12: never null
                 GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
                     if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
                         val newItemStack = desc.newItemStack()

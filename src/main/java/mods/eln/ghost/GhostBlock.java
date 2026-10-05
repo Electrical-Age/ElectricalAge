@@ -1,7 +1,7 @@
 package mods.eln.ghost;
 
 
-import mods.eln.compat.WorldCompat;
+import mods.eln.compat.BlockMeta;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
@@ -10,6 +10,15 @@ import mods.eln.misc.Direction;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
@@ -34,13 +43,31 @@ public class GhostBlock extends Block {
         super(Material.IRON);
     }
 
+    // "meta" block state (porting guide rule 2): tCube / tFloor / tLadder
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return null;
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, BlockMeta.META);
     }
 
-    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
-        int meta = WorldCompat.getMeta(world, x, y, z);
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+        return getDefaultState().withProperty(BlockMeta.META, meta & 15);
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        return state.getValue(BlockMeta.META);
+    }
+
+    @Override
+    public Item getItemDropped(IBlockState state, Random p_149650_2_, int p_149650_3_) {
+        return Items.AIR;
+    }
+
+    @Override
+    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB par5AxisAlignedBB, List<AxisAlignedBB> list, Entity entity, boolean isActualState) {
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
+        int meta = getMetaFromState(state);
 
         switch (meta) {
             case tFloor:
@@ -59,7 +86,7 @@ public class GhostBlock extends Block {
                 if (te != null && te instanceof TransparentNodeEntity) {
                     ((TransparentNodeEntity) te).addCollisionBoxesToList(par5AxisAlignedBB, list, element.elementCoordonate);
                 } else {
-                    super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
+                    super.addCollisionBoxToList(state, world, pos, par5AxisAlignedBB, list, entity, isActualState);
                 }
                 break;
         }
@@ -67,8 +94,9 @@ public class GhostBlock extends Block {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(World w, int x, int y, int z) {
-        int meta = WorldCompat.getMeta(w, x, y, z);
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World w, BlockPos pos) {
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
+        int meta = getMetaFromState(state);
 
         switch (meta) {
             case tFloor:
@@ -76,48 +104,29 @@ public class GhostBlock extends Block {
             case tLadder:
                 return new AxisAlignedBB((double) x, (double) y, (double) z, (double) x + 0, (double) y + 0.0, (double) z + 0);
             default:
-                return super.getSelectedBoundingBoxFromPool(w, x, y, z);
+                return super.getSelectedBoundingBox(state, w, pos);
+        }
+    }
+
+    private static final AxisAlignedBB FLOOR_AABB = new AxisAlignedBB(0, 0, 0, 1, 0.0625, 1);
+    private static final AxisAlignedBB LADDER_AABB = new AxisAlignedBB(0, 0, 0, 0.01, 0.01, 0.01);
+
+    /** 1.7.10 temporarily shrank the block bounds (maxX/Y/Z) around super.collisionRayTrace. */
+    @Override
+    public RayTraceResult collisionRayTrace(IBlockState state, World world, BlockPos pos, Vec3d startVec, Vec3d endVec) {
+        switch (getMetaFromState(state)) {
+            case tFloor:
+                return rayTrace(pos, startVec, endVec, FLOOR_AABB);
+            case tLadder:
+                return rayTrace(pos, startVec, endVec, LADDER_AABB);
+            default:
+                return super.collisionRayTrace(state, world, pos, startVec, endVec);
         }
     }
 
     @Override
-    public RayTraceResult collisionRayTrace(World world, int x, int y, int z, Vec3d startVec, Vec3d endVec) {
-        int meta = WorldCompat.getMeta(world, x, y, z);
-
-        switch (meta) {
-            case tFloor:
-                this.maxY = 0.0625;
-                break;
-            case tLadder:
-                this.maxX = 0.01;
-                this.maxY = 0.01;
-                this.maxZ = 0.01;
-                break;
-            default:
-                break;
-        }
-
-        RayTraceResult m = super.collisionRayTrace(world, x, y, z, startVec, endVec);
-
-        switch (meta) {
-            case tFloor:
-                this.maxY = 1;
-                break;
-            case tLadder:
-                this.maxX = 1;
-                this.maxY = 1;
-                this.maxZ = 1;
-                break;
-            default:
-                break;
-        }
-
-        return m;
-    }
-
-    @Override
-    public boolean isLadder(IBlockAccess world, int x, int y, int z, EntityLivingBase entity) {
-        return WorldCompat.getMeta(world, x, y, z) == tLadder;
+    public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity) {
+        return getMetaFromState(state) == tLadder;
     }
 
 	/*
@@ -129,43 +138,48 @@ public class GhostBlock extends Block {
 	 */
 
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
 
     @Override
-    public int getRenderType() {
-        return -1;
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.INVISIBLE;
     }
 
     @Override
-    public ItemStack getPickBlock(RayTraceResult target, World world, int x, int y, int z) {
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         return ItemStack.EMPTY;
     }
 
-    public boolean isBlockSolid(IBlockAccess blockAccess, int x, int y, int z, int side) {
-        return false;
+    /** 1.7.10 isBlockSolid(..) = false: nothing attaches to ghost blocks. */
+    @Override
+    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
+        return BlockFaceShape.UNDEFINED;
     }
 
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block par5, int par6) {
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
         if (world.isRemote == false) {
-            GhostElement element = getElement(world, x, y, z);
+            GhostElement element = getElement(world, pos.getX(), pos.getY(), pos.getZ());
             if (element != null) element.breakBlock();
         }
-        super.breakBlock(world, x, y, z, par5, par6);
+        super.breakBlock(world, pos, state);
     }
 
-    public boolean onBlockActivated(World world, int x, int y, int z, net.minecraft.entity.player.EntityPlayer player, int side, float vx, float vy, float vz) {
+    @Override
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float vx, float vy, float vz) {
+        // 1.7.10 had one hand: only react once (main hand)
+        if (hand != EnumHand.MAIN_HAND) return true;
         if (world.isRemote == false) {
-            GhostElement element = getElement(world, x, y, z);
+            GhostElement element = getElement(world, pos.getX(), pos.getY(), pos.getZ());
             if (element != null)
-                return element.onBlockActivated(player, Direction.fromIntMinecraftSide(side), vx, vy, vz);
+                return element.onBlockActivated(player, Direction.fromIntMinecraftSide(side.getIndex()), vx, vy, vz);
         }
         return true;
     }
@@ -175,7 +189,7 @@ public class GhostBlock extends Block {
     }
 
     @Override
-    public float getBlockHardness(World par1World, int par2, int par3, int par4) {
+    public float getBlockHardness(IBlockState state, World par1World, BlockPos pos) {
         return 0.5f;
     }
 
