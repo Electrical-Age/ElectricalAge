@@ -16,7 +16,7 @@ import static mods.eln.registry.ElnDeviceRegistry.*;
  * This class runs the ported core slice (ElnDeviceRegistry) and then, one line each, the device batches
  * (mods.eln.registry.batch.WpXContent; their unported registrations are in registry/pending, excluded).
  * Batch agents edit only their own batch files, never this class. Sub-UIDs must not change (rule 6).
- * Recipes (ElnRecipes) are all pending: TODO(1.12 WP15).
+ * Recipes: ElnRecipes (registered on RegistryEvent.Register<IRecipe>, before init; AE2 macerator ores in modsLoaded).
  */
 public class ElnContentImpl implements ElnContent {
     /** Device batches (parallel porting work packages), one line each; called after the core slice in every phase. */
@@ -60,18 +60,18 @@ public class ElnContentImpl implements ElnContent {
         //
         registerMeter(14);
         for (ElnContent b : BATCHES) b.preInit();
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(ElnRecipes.EVENTS); // all recipes (WP15)
     }
 
     @Override
     public void modsLoaded() {
-        // PENDING(1.12 WP15): recipeMaceratorModOres();
+        ElnRecipes.registerModOres(); // 1.7.10 recipeMaceratorModOres (AE2 ore dictionary)
         for (ElnContent b : BATCHES) b.modsLoaded();
     }
 
     @Override
     public void init() {
-        // PENDING(1.12 WP15): all recipes (ElnRecipes: recipeEnergyConverter() ... recipeGridDevices(oreNames)),
-        // in the 1.7.10 order of ElnContentImpl before the WP8 slice (git show ddb6a583:src/main/java/mods/eln/registry/ElnContentImpl.java).
+        // recipes: already registered by ElnRecipes on RegistryEvent.Register<IRecipe> (fired just before init)
         for (ElnContent b : BATCHES) b.init();
     }
 
@@ -84,6 +84,7 @@ public class ElnContentImpl implements ElnContent {
 
     @Override
     public void serverStarting() {
+        ElnRecipes.dumpIfEnabled(); // config debug.dumpRecipes
         for (ElnContent b : BATCHES) b.serverStarting();
     }
 

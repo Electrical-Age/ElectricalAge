@@ -1050,7 +1050,7 @@ public class Wp12Content implements ElnContent {
             whiteDesc = desc;
         }
 
-        // PENDING(1.12 WP15): 1.7.10 setLife(White Brush stack, 0) + 16 shapeless wool/dye brush recipes (verbatim in eln/src Eln.java registerBrush).
+        // 1.7.10 setLife(White Brush, 0) + the 32 wool/dye brush recipes: registry.ElnRecipes.recipeBrush (WP15).
     }
 
     public static void registerElectricalTool(int id) {

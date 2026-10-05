@@ -170,6 +170,7 @@ public class Eln {
     public static boolean explosionEnable;
 
     public static boolean debugEnabled = false;  // Read from configuration file. Default is `false`.
+    public static boolean dumpRecipes = false;   // config debug.dumpRecipes (registry.ElnRecipes.dumpIfEnabled)
 
     public static double heatTurbinePowerFactor = 1;
     public static double solarPanelPowerFactor = 1;
@@ -243,6 +244,8 @@ public class Eln {
 
 
         debugEnabled = config.get("debug", "enable", false).getBoolean(false);
+        dumpRecipes = config.get("debug", "dumpRecipes", false,
+            "Write every Electrical Age recipe to config/eln-recipes-dump.txt on server start").getBoolean(false);
 
         explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
 

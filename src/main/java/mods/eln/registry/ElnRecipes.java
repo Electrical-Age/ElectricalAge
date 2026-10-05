@@ -1,185 +1,472 @@
 package mods.eln.registry;
 
+import mods.eln.Eln;
 import mods.eln.compat.GameRegistryCompat;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.event.*;
-import net.minecraftforge.fml.common.network.FMLEventChannel;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientKeyHandler;
-import mods.eln.client.SoundLoader;
-import mods.eln.entity.ReplicatorEntity;
-import mods.eln.entity.ReplicatorPopProcess;
-import mods.eln.generic.*;
-import mods.eln.generic.genericArmorItem.ArmourType;
-import mods.eln.ghost.GhostBlock;
-import mods.eln.ghost.GhostGroup;
-import mods.eln.ghost.GhostManager;
-import mods.eln.ghost.GhostManagerNbt;
-import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
-import mods.eln.i18n.I18N;
-import mods.eln.item.*;
-import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
-import mods.eln.item.electricalitem.*;
-import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScannerConfigElement;
-import mods.eln.item.regulator.IRegulatorDescriptor;
-import mods.eln.item.regulator.RegulatorAnalogDescriptor;
-import mods.eln.item.regulator.RegulatorOnOffDescriptor;
-import mods.eln.mechanical.*;
-import mods.eln.misc.*;
-import mods.eln.misc.series.SerieEE;
-import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.NodeManager;
-import mods.eln.node.NodeManagerNbt;
-import mods.eln.node.NodeServer;
-import mods.eln.node.simple.SimpleNodeItem;
-import mods.eln.node.six.*;
-import mods.eln.node.transparent.*;
-import mods.eln.ore.OreBlock;
-import mods.eln.ore.OreDescriptor;
-import mods.eln.ore.OreItem;
-import mods.eln.server.*;
-import mods.eln.signalinductor.SignalInductorDescriptor;
-import mods.eln.sim.Simulator;
-import mods.eln.sim.ThermalLoadInitializer;
-import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
-import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.OcDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
-import mods.eln.simplenode.test.TestBlock;
-import mods.eln.sixnode.*;
-import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
-import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
-import mods.eln.sixnode.diode.DiodeDescriptor;
-import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
-import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
-import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
-import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
-import mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor;
-import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
-import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
-import mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor;
-import mods.eln.sixnode.electricalmath.ElectricalMathDescriptor;
-import mods.eln.sixnode.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
-import mods.eln.sixnode.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor;
-import mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor;
-import mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor;
-import mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor;
-import mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor;
-import mods.eln.sixnode.electricaltimeout.ElectricalTimeoutDescriptor;
-import mods.eln.sixnode.electricalvumeter.ElectricalVuMeterDescriptor;
-import mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor;
-import mods.eln.sixnode.electricalweathersensor.ElectricalWeatherSensorDescriptor;
-import mods.eln.sixnode.electricalwindsensor.ElectricalWindSensorDescriptor;
-import mods.eln.sixnode.energymeter.EnergyMeterDescriptor;
-import mods.eln.sixnode.groundcable.GroundCableDescriptor;
-import mods.eln.sixnode.hub.HubDescriptor;
-import mods.eln.sixnode.lampsocket.*;
-import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
-import mods.eln.sixnode.lampsupply.LampSupplyElement;
-import mods.eln.sixnode.logicgate.*;
-import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
-import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
-import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
-import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
-import mods.eln.sixnode.powersocket.PowerSocketElement;
-import mods.eln.sixnode.resistor.ResistorDescriptor;
-import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
-import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
-import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
-import mods.eln.sixnode.tutorialsign.TutorialSignElement;
-import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
-import mods.eln.sixnode.wirelesssignal.repeater.WirelessSignalRepeaterDescriptor;
-import mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor;
-import mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor;
-import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor;
-import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
-import mods.eln.sound.SoundCommand;
-import mods.eln.transparentnode.FuelGeneratorDescriptor;
-import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
-import mods.eln.transparentnode.LargeRheostatDescriptor;
-import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
-import mods.eln.transparentnode.battery.BatteryDescriptor;
-import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
-import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
-import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
-import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
-import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
-import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
-import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
-import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
-import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
-import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
-import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
-import mods.eln.transparentnode.solarpanel.SolarPanelDescriptor;
-import mods.eln.transparentnode.teleporter.TeleporterDescriptor;
-import mods.eln.transparentnode.teleporter.TeleporterElement;
-import mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
-import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
-import mods.eln.transparentnode.transformer.TransformerDescriptor;
-import mods.eln.transparentnode.turbine.TurbineDescriptor;
-import mods.eln.transparentnode.turret.TurretDescriptor;
-import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
-import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
-import mods.eln.wiki.Data;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.command.ICommandManager;
-import net.minecraft.command.ServerCommandManager;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.player.EntityPlayer;
+import mods.eln.generic.GenericItemBlockUsingDamage;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.BrushDescriptor;
+import mods.eln.misc.Recipe;
+import mods.eln.misc.RecipesList;
+import mods.eln.misc.Utils;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.*;
-import net.minecraft.item.Item.ToolMaterial;
-import net.minecraft.item.ItemArmor.ArmorMaterial;
-import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.launchwrapper.Launch;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.launchwrapper.LogWrapper;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import java.util.*;
-import static mods.eln.i18n.I18N.*;
-import mods.eln.Eln;
+import net.minecraftforge.registries.IForgeRegistry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import static mods.eln.Eln.*;
 import static mods.eln.registry.ElnDeviceRegistry.*;
-import static mods.eln.registry.ElnRecipes.*;
+import static mods.eln.registry.batch.Wp11Content.elnToOtherBlockHvu;
+import static mods.eln.registry.batch.Wp11Content.elnToOtherBlockLvu;
+import static mods.eln.registry.batch.Wp11Content.elnToOtherBlockMvu;
 
 /**
- * Crafting/machine recipes moved verbatim out of Eln.java (1.12 port, core agent). Unqualified Eln fields/helpers resolve through
- * `import static mods.eln.Eln.*`. TODO(1.12 WP9/WP10): re-enable per device batch; split further per area.
+ * Electrical Age recipes (WP15). The recipe methods below are the 1.7.10 Eln.java ones, unchanged except the
+ * brush recipes (moved here from registerBrush) and smelting through the counting {@link #addSmelting}.
+ * <ul>
+ * <li>All of them run on RegistryEvent.Register&lt;IRecipe&gt; ({@link #EVENTS}, registered in ElnContentImpl.preInit),
+ * which Forge fires after every mod's preInit and before init, in the 1.7.10 order. Crafting recipes become
+ * ShapedOreRecipe / ShapelessOreRecipe named eln:&lt;snake_case output name&gt;[_n]; machine recipes go into EA's
+ * RecipesList (macerator, compressor, plate machine, magnetizer); smelting into FurnaceRecipes. The AE2 macerator
+ * recipes need other mods' ore dictionary and stay in postInit ({@link #recipeMaceratorModOres}).</li>
+ * <li>EA items are looked up by descriptor name ({@link #findItemStack}: the TR_NAME key a descriptor registers with,
+ * not a translated name). Every miss, null ingredient or rejected recipe is collected; after the last recipe the
+ * whole list is thrown (startup fails, listing all of them).</li>
+ * <li>1.12's parser rejects two things 1.7.10 accepted: keys that the pattern does not use (dropped) and pattern
+ * symbols without a key (1.7.10: empty slot; here replaced by ' '). Each rewrite is logged and listed in {@link #fixes}.</li>
+ * <li>ItemStack ingredients match regardless of NBT (Ingredient.fromStacks), as 1.7.10's OreDictionary.itemMatches did.
+ * Machine recipes match any item sharing an ore dictionary name with the input (Utils.areSame), so other mods'
+ * oreCopper / oreLead / ingotCopper work in EA's macerator and plate machine.</li>
+ * <li>config debug.dumpRecipes=true: {@link #dumpIfEnabled} writes config/eln-recipes-dump.txt on server start.</li>
+ * </ul>
  */
 @SuppressWarnings({"SameParameterValue", "PointlessArithmeticExpression", "unused"})
 public final class ElnRecipes {
     private ElnRecipes() {
     }
 
+    /** Forge event bus listener (Register&lt;IRecipe&gt;). */
+    public static final ElnRecipes EVENTS = new ElnRecipes();
+    private static final Logger LOG = LogManager.getLogger("eln-recipes");
+
+    /** Crafting recipe calls made / registered (eln:*); smelting entries added; macerator entries from mod ores. */
+    public static int craftingAttempted, craftingRegistered, smeltingAdded, maceratorModOreAdded;
+    /** Registry path -> the recipe as written (pattern + keys / ingredients), for the dump. */
+    public static final Map<String, String> descriptions = new LinkedHashMap<String, String>();
+    /** Smelting entries added by EA: "input -> output". */
+    public static final List<String> smeltings = new ArrayList<String>();
+    /** 1.7.10 pattern quirks rewritten for 1.12's parser. */
+    public static final List<String> fixes = new ArrayList<String>();
+    private static final List<String> problems = new ArrayList<String>();
+    private static final Map<String, Integer> nameUse = new HashMap<String, Integer>();
+    private static IForgeRegistry<IRecipe> registry;
+    private static String section = "?";
+
+    @SubscribeEvent
+    public void onRegisterRecipes(RegistryEvent.Register<IRecipe> event) {
+        registerAll(event.getRegistry());
+    }
+
+    /** The 1.7.10 Eln.load() recipe sequence (+ registerBrush's recipes first; recipeComputerProbe dropped, rule 8). */
+    static void registerAll(IForgeRegistry<IRecipe> r) {
+        registry = r;
+        final HashSet<String> oreNames = new HashSet<String>(Arrays.asList(OreDictionary.getOreNames()));
+        run("recipeBrush", ElnRecipes::recipeBrush);
+        run("recipeEnergyConverter", ElnRecipes::recipeEnergyConverter);
+        run("recipeArmor", ElnRecipes::recipeArmor);
+        run("recipeTool", ElnRecipes::recipeTool);
+        run("recipeGround", ElnRecipes::recipeGround);
+        run("recipeElectricalSource", ElnRecipes::recipeElectricalSource);
+        run("recipeElectricalCable", ElnRecipes::recipeElectricalCable);
+        run("recipeThermalCable", ElnRecipes::recipeThermalCable);
+        run("recipeLampSocket", ElnRecipes::recipeLampSocket);
+        run("recipeLampSupply", ElnRecipes::recipeLampSupply);
+        run("recipePowerSocket", ElnRecipes::recipePowerSocket);
+        run("recipePassiveComponent", ElnRecipes::recipePassiveComponent);
+        run("recipeSwitch", ElnRecipes::recipeSwitch);
+        run("recipeWirelessSignal", ElnRecipes::recipeWirelessSignal);
+        run("recipeElectricalRelay", ElnRecipes::recipeElectricalRelay);
+        run("recipeElectricalDataLogger", ElnRecipes::recipeElectricalDataLogger);
+        run("recipeElectricalGateSource", ElnRecipes::recipeElectricalGateSource);
+        run("recipeElectricalBreaker", ElnRecipes::recipeElectricalBreaker);
+        run("recipeFuses", ElnRecipes::recipeFuses);
+        run("recipeElectricalVuMeter", ElnRecipes::recipeElectricalVuMeter);
+        run("recipeElectricalEnvironmentalSensor", ElnRecipes::recipeElectricalEnvironmentalSensor);
+        run("recipeElectricalRedstone", ElnRecipes::recipeElectricalRedstone);
+        run("recipeElectricalGate", ElnRecipes::recipeElectricalGate);
+        run("recipeElectricalAlarm", ElnRecipes::recipeElectricalAlarm);
+        run("recipeSixNodeCache", ElnRecipes::recipeSixNodeCache);
+        run("recipeElectricalSensor", ElnRecipes::recipeElectricalSensor);
+        run("recipeThermalSensor", ElnRecipes::recipeThermalSensor);
+        run("recipeSixNodeMisc", ElnRecipes::recipeSixNodeMisc);
+        run("recipeTurret", ElnRecipes::recipeTurret);
+        run("recipeMachine", ElnRecipes::recipeMachine);
+        run("recipeChips", ElnRecipes::recipeChips);
+        run("recipeTransformer", ElnRecipes::recipeTransformer);
+        run("recipeHeatFurnace", ElnRecipes::recipeHeatFurnace);
+        run("recipeTurbine", ElnRecipes::recipeTurbine);
+        run("recipeBattery", ElnRecipes::recipeBattery);
+        run("recipeElectricalFurnace", ElnRecipes::recipeElectricalFurnace);
+        run("recipeAutoMiner", ElnRecipes::recipeAutoMiner);
+        run("recipeSolarPanel", ElnRecipes::recipeSolarPanel);
+        run("recipeThermalDissipatorPassiveAndActive", ElnRecipes::recipeThermalDissipatorPassiveAndActive);
+        run("recipeElectricalAntenna", ElnRecipes::recipeElectricalAntenna);
+        run("recipeEggIncubator", ElnRecipes::recipeEggIncubator);
+        run("recipeBatteryCharger", ElnRecipes::recipeBatteryCharger);
+        run("recipeTransporter", ElnRecipes::recipeTransporter);
+        run("recipeWindTurbine", ElnRecipes::recipeWindTurbine);
+        run("recipeFuelGenerator", ElnRecipes::recipeFuelGenerator);
+        run("recipeGeneral", ElnRecipes::recipeGeneral);
+        run("recipeHeatingCorp", ElnRecipes::recipeHeatingCorp);
+        run("recipeRegulatorItem", ElnRecipes::recipeRegulatorItem);
+        run("recipeLampItem", ElnRecipes::recipeLampItem);
+        run("recipeProtection", ElnRecipes::recipeProtection);
+        run("recipeCombustionChamber", ElnRecipes::recipeCombustionChamber);
+        run("recipeFerromagneticCore", ElnRecipes::recipeFerromagneticCore);
+        run("recipeIngot", ElnRecipes::recipeIngot);
+        run("recipeDust", ElnRecipes::recipeDust);
+        run("recipeElectricalMotor", ElnRecipes::recipeElectricalMotor);
+        run("recipeSolarTracker", ElnRecipes::recipeSolarTracker);
+        run("recipeDynamo", ElnRecipes::recipeDynamo);
+        run("recipeWindRotor", ElnRecipes::recipeWindRotor);
+        run("recipeMeter", ElnRecipes::recipeMeter);
+        run("recipeElectricalDrill", ElnRecipes::recipeElectricalDrill);
+        run("recipeOreScanner", ElnRecipes::recipeOreScanner);
+        run("recipeMiningPipe", ElnRecipes::recipeMiningPipe);
+        run("recipeTreeResinAndRubber", ElnRecipes::recipeTreeResinAndRubber);
+        run("recipeRawCable", ElnRecipes::recipeRawCable);
+        run("recipeMiscItem", ElnRecipes::recipeMiscItem);
+        run("recipeBatteryItem", ElnRecipes::recipeBatteryItem);
+        run("recipeElectricalTool", ElnRecipes::recipeElectricalTool);
+        run("recipePortableCapacitor", ElnRecipes::recipePortableCapacitor);
+        run("recipeFurnace", ElnRecipes::recipeFurnace);
+        run("recipeMacerator", ElnRecipes::recipeMacerator);
+        run("recipeCompressor", ElnRecipes::recipeCompressor);
+        run("recipePlateMachine", ElnRecipes::recipePlateMachine);
+        run("recipeMagnetizer", ElnRecipes::recipeMagnetizer);
+        run("recipeFuelBurnerItem", ElnRecipes::recipeFuelBurnerItem);
+        run("recipeECoal", ElnRecipes::recipeECoal);
+        run("recipeGridDevices", () -> recipeGridDevices(oreNames));
+        section = "?";
+        registry = null;
+        LOG.info("Electrical Age recipes: crafting " + craftingRegistered + "/" + craftingAttempted + ", smelting "
+            + smeltingAdded + ", macerator " + maceratorRecipes.getRecipes().size() + ", compressor "
+            + compressorRecipes.getRecipes().size() + ", plate machine " + plateMachineRecipes.getRecipes().size()
+            + ", magnetizer " + magnetiserRecipes.getRecipes().size() + "; 1.7.10 pattern fixes " + fixes.size());
+        if (!problems.isEmpty()) {
+            StringBuilder b = new StringBuilder("Electrical Age: " + problems.size() + " recipe problem(s) (WP15):");
+            for (String p : problems) b.append("\n  ").append(p);
+            LOG.error(b.toString());
+            throw new IllegalStateException(b.toString());
+        }
+    }
+
+    private static void run(String name, Runnable recipes) {
+        section = name;
+        try {
+            recipes.run();
+        } catch (RuntimeException e) {
+            problems.add(name + ": " + e);
+        }
+    }
+
+    // ------------------------------------------------------------------ lookups
+
+    /** EA stack by descriptor name (or EA ore dictionary name); a miss is recorded (startup fails after all recipes). */
+    public static ItemStack findItemStack(String name, int stackSize) {
+        ItemStack stack = Eln.findItemStack(name, stackSize);
+        if (Utils.isEmpty(stack)) {
+            problems.add(section + ": no EA item named '" + name + "'");
+            return ItemStack.EMPTY;
+        }
+        return stack;
+    }
+
+    public static ItemStack findItemStack(String name) {
+        return findItemStack(name, 1);
+    }
+
+    /** Descriptor name of an EA stack, else the item's registry path (+ @meta when not 0). */
+    public static String stackName(ItemStack s) {
+        if (Utils.isEmpty(s)) return "EMPTY";
+        Item it = s.getItem();
+        if (it instanceof GenericItemUsingDamage) {
+            Object d = ((GenericItemUsingDamage<?>) it).getDescriptor(s);
+            if (d != null) return ((GenericItemUsingDamageDescriptor) d).name;
+        }
+        if (it instanceof GenericItemBlockUsingDamage) {
+            Object d = ((GenericItemBlockUsingDamage<?>) it).getDescriptor(s);
+            if (d != null) return ((GenericItemBlockUsingDamageDescriptor) d).name;
+        }
+        String n = it.getRegistryName() == null ? String.valueOf(it) : it.getRegistryName().toString();
+        return s.getMetadata() == 0 ? n : n + "@" + s.getMetadata();
+    }
+
+    private static String describe(Object o) {
+        if (o instanceof String) return "ore:" + o;
+        if (o instanceof ItemStack) {
+            ItemStack s = (ItemStack) o;
+            return (s.getCount() != 1 ? s.getCount() + "x " : "") + stackName(s);
+        }
+        return String.valueOf(o);
+    }
+
+    // ------------------------------------------------------------------ registration
+
+    private static String nextName(ItemStack output) {
+        String base = GameRegistryCompat.registryName(stackName(output).replaceFirst("^[a-z0-9_]+:", ""));
+        if (base.isEmpty()) base = "recipe";
+        int n = nameUse.containsKey(base) ? nameUse.get(base) + 1 : 1;
+        nameUse.put(base, n);
+        return n == 1 ? base : base + "_" + n;
+    }
+
+    /** @return false (and records the problem) when the output or an ingredient is missing. */
+    private static boolean complete(String name, ItemStack output, Object[] params) {
+        if (Utils.isEmpty(output)) return false; // the lookup miss is already listed
+        for (Object o : params) {
+            if (o == null) {
+                problems.add(section + ": " + name + ": null ingredient");
+                return false;
+            }
+            if (o instanceof ItemStack && ((ItemStack) o).isEmpty()) return false; // listed by the lookup
+        }
+        return true;
+    }
+
+    private static void register(String name, IRecipe recipe, String description) {
+        recipe.setRegistryName(new ResourceLocation(MODID, name));
+        registry.register(recipe);
+        descriptions.put(name, description);
+        craftingRegistered++;
+    }
+
+    /** Shaped ore recipe (1.7.10 GameRegistry.addRecipe(new ShapedOreRecipe(output, params))). */
+    public static void addRecipe(ItemStack output, Object... params) {
+        craftingAttempted++;
+        String name = nextName(output);
+        try {
+            if (!complete(name, output, params)) return;
+            Object[] p = sanitizeShaped(name, params);
+            StringBuilder d = new StringBuilder("shaped    ");
+            int i = 0;
+            for (; i < p.length && p[i] instanceof String; i++) d.append(i == 0 ? "" : "/").append('[').append(p[i]).append(']');
+            for (; i + 1 < p.length; i += 2) d.append(' ').append(p[i]).append('=').append(describe(p[i + 1]));
+            register(name, new ShapedOreRecipe(null, output, p), d.toString());
+        } catch (RuntimeException e) {
+            problems.add(section + ": " + name + ": " + e);
+        }
+    }
+
+    /** Shapeless ore recipe (1.7.10 GameRegistry.addRecipe(new ShapelessOreRecipe(output, params))). */
+    public static void addShapelessRecipe(ItemStack output, Object... params) {
+        craftingAttempted++;
+        String name = nextName(output);
+        try {
+            if (!complete(name, output, params)) return;
+            StringBuilder d = new StringBuilder("shapeless");
+            for (Object o : params) d.append(' ').append(describe(o)).append(',');
+            d.setLength(d.length() - 1);
+            register(name, new ShapelessOreRecipe(null, output, params), d.toString());
+        } catch (RuntimeException e) {
+            problems.add(section + ": " + name + ": " + e);
+        }
+    }
+
+    /**
+     * 1.7.10's ShapedOreRecipe ignored keys the pattern does not use and left symbols without a key empty; 1.12's
+     * CraftingHelper.parseShaped throws for both. Same recipe, expressed so 1.12 accepts it.
+     */
+    static Object[] sanitizeShaped(String name, Object[] params) {
+        List<String> rows = new ArrayList<String>();
+        int i = 0;
+        while (i < params.length && params[i] instanceof String) rows.add((String) params[i++]);
+        LinkedHashMap<Character, Object> keys = new LinkedHashMap<Character, Object>();
+        for (; i < params.length; i += 2) {
+            if (!(params[i] instanceof Character) || i + 1 >= params.length)
+                throw new IllegalArgumentException("malformed shaped recipe at argument " + i + ": " + params[i]);
+            keys.put((Character) params[i], params[i + 1]);
+        }
+        HashSet<Character> used = new HashSet<Character>();
+        for (String r : rows) for (char c : r.toCharArray()) if (c != ' ') used.add(c);
+        for (Character k : new ArrayList<Character>(keys.keySet())) {
+            if (!used.contains(k)) {
+                keys.remove(k);
+                fix(name + ": key '" + k + "' is not in the pattern " + rows + ": dropped");
+            }
+        }
+        for (Character c : used) {
+            if (!keys.containsKey(c)) {
+                for (int r = 0; r < rows.size(); r++) rows.set(r, rows.get(r).replace(c.charValue(), ' '));
+                fix(name + ": pattern symbol '" + c + "' has no key (1.7.10: empty slot): now ' '");
+            }
+        }
+        List<Object> out = new ArrayList<Object>(rows);
+        for (Map.Entry<Character, Object> e : keys.entrySet()) {
+            out.add(e.getKey());
+            out.add(e.getValue());
+        }
+        return out.toArray();
+    }
+
+    private static void fix(String s) {
+        fixes.add(s);
+        LOG.info("1.7.10 recipe rewritten for 1.12: " + s);
+    }
+
+    /** Utils.addSmelting, counted; a missing input/output is already listed by the lookup. */
+    public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack result) {
+        addSmelting(parentItem, parentItemDamage, result, 0.3f);
+    }
+
+    /**
+     * 1.12 FurnaceRecipes keeps the first recipe for an input and ignores later ones (1.7.10 kept both in a HashMap and
+     * used whichever its iteration met first): Tree Resin is smelted by recipeGeneral (1 Rubber) and recipeFurnace (2).
+     */
+    public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack result, float xp) {
+        if (parentItem == null || parentItem == Items.AIR || Utils.isEmpty(result)) return;
+        ItemStack in = new ItemStack(parentItem, 1, parentItemDamage);
+        ItemStack old = FurnaceRecipes.instance().getSmeltingResult(in);
+        if (!old.isEmpty()) {
+            fix("smelting " + stackName(in) + " -> " + describe(result) + ": input already smelts to " + describe(old) + " (kept)");
+            return;
+        }
+        Utils.addSmelting(parentItem, parentItemDamage, result, xp);
+        smeltingAdded++;
+        smeltings.add(stackName(in) + " -> " + describe(result));
+    }
+
+    // ------------------------------------------------------------------ dump (config debug.dumpRecipes)
+
+    /** Server start: write every EA recipe to config/eln-recipes-dump.txt when debug.dumpRecipes is true. */
+    public static void dumpIfEnabled() {
+        if (!dumpRecipes) return;
+        File f = new File(Loader.instance().getConfigDir(), "eln-recipes-dump.txt");
+        try (PrintWriter w = new PrintWriter(f, "UTF-8")) {
+            dump(w);
+            LOG.info("Electrical Age recipes dumped to " + f);
+        } catch (IOException e) {
+            LOG.error("cannot write " + f, e);
+        }
+    }
+
+    static void dump(PrintWriter w) {
+        w.println("# Electrical Age recipes (config debug.dumpRecipes). Crafting: registry name, output, recipe as written.");
+        w.println("# '!! no items' marks an ingredient nothing in this pack matches (e.g. an ore name no mod registers).");
+        TreeMap<String, IRecipe> crafting = new TreeMap<String, IRecipe>();
+        for (Map.Entry<ResourceLocation, IRecipe> e : ForgeRegistries.RECIPES.getEntries())
+            if (MODID.equals(e.getKey().getNamespace())) crafting.put(e.getKey().getPath(), e.getValue());
+        w.println();
+        w.println("## crafting: " + crafting.size() + " registered (" + craftingAttempted + " recipe calls)");
+        for (Map.Entry<String, IRecipe> e : crafting.entrySet()) {
+            IRecipe r = e.getValue();
+            StringBuilder dead = new StringBuilder();
+            int slot = 0;
+            for (Ingredient ing : r.getIngredients()) {
+                if (ing != Ingredient.EMPTY && ing.getMatchingStacks().length == 0) dead.append(" ").append(slot);
+                slot++;
+            }
+            String d = descriptions.containsKey(e.getKey()) ? descriptions.get(e.getKey()) : r.getClass().getSimpleName();
+            w.println("eln:" + e.getKey() + " -> " + describe(r.getRecipeOutput()) + " | " + d
+                + (dead.length() > 0 ? " | !! no items for slot(s)" + dead : ""));
+        }
+        w.println();
+        w.println("## 1.7.10 pattern quirks rewritten for 1.12: " + fixes.size());
+        for (String s : fixes) w.println(s);
+        w.println();
+        w.println("## smelting added by EA: " + smeltings.size());
+        for (String s : smeltings) w.println(s);
+        w.println();
+        w.println("## furnace recipes producing EA items or smelting EA items (all mods)");
+        for (Map.Entry<ItemStack, ItemStack> e : FurnaceRecipes.instance().getSmeltingList().entrySet()) {
+            if (isEln(e.getKey()) || isEln(e.getValue()))
+                w.println(describe(e.getKey()) + " -> " + describe(e.getValue()));
+        }
+        dumpList(w, "macerator", maceratorRecipes);
+        dumpList(w, "compressor", compressorRecipes);
+        dumpList(w, "plate machine", plateMachineRecipes);
+        dumpList(w, "magnetizer", magnetiserRecipes);
+        w.println();
+        w.println("## machine inputs match any item sharing an ore dictionary name with the listed input (Utils.areSame)");
+    }
+
+    private static boolean isEln(ItemStack s) {
+        return !Utils.isEmpty(s) && s.getItem().getRegistryName() != null && MODID.equals(s.getItem().getRegistryName().getNamespace());
+    }
+
+    private static void dumpList(PrintWriter w, String name, RecipesList list) {
+        w.println();
+        w.println("## " + name + ": " + list.getRecipes().size());
+        for (Recipe r : list.getRecipes()) {
+            StringBuilder b = new StringBuilder(describe(r.input)).append(" ->");
+            for (ItemStack o : r.output) b.append(' ').append(describe(o));
+            int[] ids = Utils.isEmpty(r.input) ? new int[0] : OreDictionary.getOreIDs(r.input);
+            if (ids.length > 0) {
+                b.append("  (also:");
+                for (int id : ids) b.append(" ore:").append(OreDictionary.getOreName(id));
+                b.append(')');
+            }
+            w.println(b.append("  ").append(Math.round(r.energy)).append(" J"));
+        }
+    }
+
+    // ------------------------------------------------------------------ recipes (1.7.10)
+
+    /** 1.7.10 registerBrush: empty white brush from wool + iron, coloured brushes from dye + empty white brush. */
+    public static void recipeBrush() {
+        String[] subNames = {"Black Brush", "Red Brush", "Green Brush", "Brown Brush", "Blue Brush", "Purple Brush",
+            "Cyan Brush", "Silver Brush", "Gray Brush", "Pink Brush", "Lime Brush", "Yellow Brush", "Light Blue Brush",
+            "Magenta Brush", "Orange Brush", "White Brush"};
+        ItemStack emptyStack = findItemStack("White Brush");
+        if (!emptyStack.isEmpty()) ((BrushDescriptor) sharedItem.getDescriptor(emptyStack)).setLife(emptyStack, 0);
+
+        for (int idx = 0; idx < 16; idx++) {
+            addShapelessRecipe(emptyStack.copy(),
+                new ItemStack(Blocks.WOOL, 1, idx),
+                new ItemStack(Items.IRON_INGOT));
+        }
+
+        for (int idx = 0; idx < 16; idx++) {
+            addShapelessRecipe(findItemStack(subNames[idx], 1),
+                new ItemStack(Items.DYE, 1, idx),
+                emptyStack.copy());
+        }
+    }
+
+    /** postInit (1.7.10 modsLoaded): AE2 macerator recipes from other mods' ore dictionary entries. */
+    public static void registerModOres() {
+        int before = maceratorRecipes.getRecipes().size();
+        recipeMaceratorModOres();
+        maceratorModOreAdded = maceratorRecipes.getRecipes().size() - before;
+    }
 
     public static void recipeGround() {
         addRecipe(findItemStack("Ground Cable"),
@@ -1145,7 +1432,7 @@ public final class ElnRecipes {
     }
 
     public static void recipeGeneral() {
-        Utils.addSmelting(treeResin.parentItem,
+        addSmelting(treeResin.parentItem,
             treeResin.parentItemDamage, findItemStack("Rubber", 1), 0f);
 
     }
@@ -1413,10 +1700,6 @@ public final class ElnRecipes {
             "dustCoal",
             dictTungstenDust);
 
-    }
-
-    public static void addShapelessRecipe(ItemStack output, Object... params) {
-        GameRegistry.addRecipe(new ShapelessOreRecipe(output, params));
     }
 
     public static void recipeElectricalMotor() {
@@ -1824,8 +2107,8 @@ public final class ElnRecipes {
             LogWrapper.info("No entries for oredict: " + outputName);
             return;
         }
-        ArrayList<ItemStack> inOres = OreDictionary.getOres(inputName);
-        ArrayList<ItemStack> outOres = OreDictionary.getOres(outputName);
+        List<ItemStack> inOres = OreDictionary.getOres(inputName);
+        List<ItemStack> outOres = OreDictionary.getOres(outputName);
         if (inOres.size() == 0) {
             LogWrapper.info("No ores in oredict entry: " + inputName);
         }
@@ -1917,49 +2200,49 @@ public final class ElnRecipes {
         ItemStack in;
 
         in = findItemStack("Copper Ore");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Copper Ingot"));
         in = findItemStack("dustCopper");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Copper Ingot"));
         in = findItemStack("Lead Ore");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("ingotLead"));
         in = findItemStack("dustLead");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("ingotLead"));
         in = findItemStack("Tungsten Ore");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Tungsten Ingot"));
         in = findItemStack("Tungsten Dust");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Tungsten Ingot"));
         in = findItemStack("ingotAlloy");
-        // Utils.addSmelting(in.getItem().itemID, in.getMetadata(),
+        // addSmelting(in.getItem().itemID, in.getMetadata(),
         // findItemStack("Ferrite Ingot"));
         in = findItemStack("dustIron");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             new ItemStack(Items.IRON_INGOT));
 
         in = findItemStack("dustGold");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             new ItemStack(Items.GOLD_INGOT));
 
         in = findItemStack("Tree Resin");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Rubber", 2));
 
         in = findItemStack("Alloy Dust");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Alloy Ingot"));
 
         in = findItemStack("Silicon Dust");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Silicon Ingot"));
 
         // in = findItemStack("Purified Cinnabar Dust");
         in = findItemStack("dustCinnabar");
-        Utils.addSmelting(in.getItem(), in.getMetadata(),
+        addSmelting(in.getItem(), in.getMetadata(),
             findItemStack("Mercury"));
 
     }
@@ -2495,10 +2778,6 @@ public final class ElnRecipes {
             "C C",
             "C C",
             'C', "ingotCopper");
-    }
-
-    public static void addRecipe(ItemStack output, Object... params) {
-        GameRegistry.addRecipe(new ShapedOreRecipe(output, params));
     }
 
     public static void recipeTool() {
