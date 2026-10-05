@@ -79,6 +79,8 @@ public final class ElnRecipes {
 
     /** Crafting recipe calls made / registered (eln:*); smelting entries added; macerator entries from mod ores. */
     public static int craftingAttempted, craftingRegistered, smeltingAdded, maceratorModOreAdded;
+    /** recipeGridDevices: ore names (of ingotAluminum/ingotAluminium/ingotSteel) present at registration, one pole recipe each. */
+    public static int utilityPoleVariants;
     /** Registry path -> the recipe as written (pattern + keys / ingredients), for the dump. */
     public static final Map<String, String> descriptions = new LinkedHashMap<String, String>();
     /** Smelting entries added by EA: "input -> output". */
@@ -99,6 +101,9 @@ public final class ElnRecipes {
     static void registerAll(IForgeRegistry<IRecipe> r) {
         registry = r;
         final HashSet<String> oreNames = new HashSet<String>(Arrays.asList(OreDictionary.getOreNames()));
+        utilityPoleVariants = 0;
+        for (String o : new String[]{"ingotAluminum", "ingotAluminium", "ingotSteel"})
+            if (oreNames.contains(o)) utilityPoleVariants++;
         run("recipeBrush", ElnRecipes::recipeBrush);
         run("recipeEnergyConverter", ElnRecipes::recipeEnergyConverter);
         run("recipeArmor", ElnRecipes::recipeArmor);

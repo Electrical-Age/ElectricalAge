@@ -62,10 +62,8 @@ public final class RecipeCases {
         }
 
         static int expectedCrafting() {
-            int poles = 0;
-            for (String o : new String[]{"ingotAluminum", "ingotAluminium", "ingotSteel"})
-                if (OreDictionary.doesOreNameExist(o)) poles++;
-            return 293 + Math.max(poles, 1) + (Eln.xRayScannerCanBeCrafted ? 1 : 0) + (Eln.ElnToOtherEnergyConverterEnable ? 3 : 0);
+            // pole variants as seen at registration (ore names queried later, e.g. by scripts, would inflate a fresh count)
+            return 293 + Math.max(ElnRecipes.utilityPoleVariants, 1) + (Eln.xRayScannerCanBeCrafted ? 1 : 0) + (Eln.ElnToOtherEnergyConverterEnable ? 3 : 0);
         }
 
         static ItemStack foreign(String ore) {
