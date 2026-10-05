@@ -3,11 +3,18 @@ package mods.eln.misc;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
 import java.util.*;
 
+/**
+ * OBJ model: parsing, parts, bounding boxes and the .txt properties are common (the server uses the geometry, e.g.
+ * Utils.getSixNodePinDistance in descriptor constructors). Only the GL drawing (display lists, texture binds) is
+ * client-only (@SideOnly), and display lists are built lazily at first draw.
+ */
 public class Obj3D {
     private Timer updateTimer = null;
     private boolean locked = false;
@@ -25,6 +32,7 @@ public class Obj3D {
 
     private String dirPath;
 
+    @SideOnly(Side.CLIENT)
     public void bindTexture(String texFilename) {
         ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
         UtilsClient.bindTexture(textureResource);
@@ -37,6 +45,7 @@ public class Obj3D {
         boolean listReady = false;
         int glList;
 
+        @SideOnly(Side.CLIENT)
         public void bindTexture() {
             UtilsClient.bindTexture(textureResource);
         }
@@ -64,6 +73,7 @@ public class Obj3D {
             return new BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
         }
 
+        @SideOnly(Side.CLIENT)
         public void draw() {
             if (textureResource != null) {
                 bindTexture();
@@ -75,10 +85,12 @@ public class Obj3D {
             }
         }
 
+        @SideOnly(Side.CLIENT)
         private void drawVertex() {
             drawVertex(0, 0);
         }
 
+        @SideOnly(Side.CLIENT)
         private void drawVertex(float offsetX, float offsetY) {
             int mode = 0;
 
@@ -116,6 +128,7 @@ public class Obj3D {
                 GL11.glEnd();
         }
 
+        @SideOnly(Side.CLIENT)
         public void drawNoBind() {
             if (!listReady) {
                 listReady = true;
@@ -178,6 +191,7 @@ public class Obj3D {
             return nameToFloatHash.getOrDefault(name, 0f);
         }
 
+        @SideOnly(Side.CLIENT)
         public void draw(float angle, float x, float y, float z) {
             if (locked) return;
 
@@ -191,6 +205,7 @@ public class Obj3D {
             GL11.glPopMatrix();
         }
 
+        @SideOnly(Side.CLIENT)
         public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
             if (locked) return;
 
@@ -204,6 +219,7 @@ public class Obj3D {
             GL11.glPopMatrix();
         }
 
+        @SideOnly(Side.CLIENT)
         public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
             if (locked) return;
 
@@ -220,6 +236,7 @@ public class Obj3D {
             GL11.glPopMatrix();
         }
 
+        @SideOnly(Side.CLIENT)
         public void drawNoBind(float angle, float x, float y, float z) {
             if (locked) return;
 
@@ -233,6 +250,7 @@ public class Obj3D {
             GL11.glPopMatrix();
         }
 
+        @SideOnly(Side.CLIENT)
         public void drawNoBind() {
             if (locked) return;
 
@@ -241,6 +259,7 @@ public class Obj3D {
             }
         }
 
+        @SideOnly(Side.CLIENT)
         public void draw() {
             if (locked) return;
 
@@ -251,6 +270,7 @@ public class Obj3D {
             //	Minecraft.getMinecraft().profiler.endSection();
         }
 
+        @SideOnly(Side.CLIENT)
         public void draw(float texOffsetX, float texOffsetY) {
             if (locked) return;
 
@@ -592,6 +612,7 @@ public class Obj3D {
         return nameToPartHash.get(part);
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(String part) {
         Obj3DPart partPtr = getPart(part);
         if (partPtr != null)

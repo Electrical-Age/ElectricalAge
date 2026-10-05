@@ -31,21 +31,19 @@ import kotlin.experimental.and
 import kotlin.experimental.or
 
 @ExperimentalUnsignedTypes
-class PortableOreScannerItem(name: String, private val obj: Obj3D?,
+class PortableOreScannerItem(name: String, obj: Obj3D,
                              private var energyStorage: Double, internal var chargePower: Double, private var dischargePower: Double,
                              private var viewRange: Float, private var viewYAlpha: Float, private var resWidth: Int, private var resHeight: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
 
-    // 1.12: OBJ models are loaded on the client only (obj is null on a dedicated server), so the parts are resolved
-    // on first use, which is client rendering only.
-    internal val base: Obj3DPart by lazy { obj!!.getPart("Base") }
-    internal val led: Obj3DPart by lazy { obj!!.getPart("Led") }
-    private val ledHalo: Obj3DPart by lazy { obj!!.getPart("LedHalo") }
-    private val textBat: Array<Obj3DPart> by lazy { (0..3).map { obj!!.getPart("TextBat$it") }.toTypedArray() }
-    private val textRun: Obj3DPart by lazy { obj!!.getPart("TextRun") }
-    private val textInit: Obj3DPart by lazy { obj!!.getPart("TextInit") }
-    internal val buttons: Obj3DPart by lazy { obj!!.getPart("Buttons") }
-    private val screenDamage: Array<Obj3DPart> by lazy { (0..2).map { obj!!.getPart("ScreenDamageL" + (it + 1)) }.toTypedArray() }
-    private val screenLuma: Obj3DPart by lazy { obj!!.getPart("ScreenLuma") }
+    internal var base: Obj3DPart = obj.getPart("Base")
+    internal var led: Obj3DPart = obj.getPart("Led")
+    private var ledHalo: Obj3DPart = obj.getPart("LedHalo")
+    private var textBat: Array<Obj3DPart> = (0..3).map { obj.getPart("TextBat$it") }.toTypedArray()
+    private var textRun: Obj3DPart = obj.getPart("TextRun")
+    private var textInit: Obj3DPart = obj.getPart("TextInit")
+    internal var buttons: Obj3DPart = obj.getPart("Buttons")
+    private var screenDamage: Array<Obj3DPart> = (0..2).map { obj.getPart("ScreenDamageL" + (it + 1)) }.toTypedArray()
+    private var screenLuma: Obj3DPart = obj.getPart("ScreenLuma")
 
     private val damagePerBreakLevel = 3
 

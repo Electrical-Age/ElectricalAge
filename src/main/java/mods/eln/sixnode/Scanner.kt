@@ -28,11 +28,10 @@ import java.io.DataOutputStream
 /**
  * A comparator-alike. It doesn't "compare" anything, though.
  */
-class ScannerDescriptor(name: String, obj: Obj3D?) : SixNodeDescriptor(name, ScannerElement::class.java, ScannerRender::class.java) {
+class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, ScannerElement::class.java, ScannerRender::class.java) {
 
-    // obj is null on a dedicated server (OBJ models load on the client only)
-    val main = obj?.getPart("main")
-    val leds = obj?.let { o -> arrayOf("LED_0", "LED_1").map { o.getPart(it) }.requireNoNulls() }
+    val main = obj.getPart("main")!!
+    val leds = arrayOf("LED_0", "LED_1").map { obj.getPart(it) }.requireNoNulls()
 
     init {
         voltageLevelColor = VoltageLevelColor.SignalVoltage
@@ -40,8 +39,8 @@ class ScannerDescriptor(name: String, obj: Obj3D?) : SixNodeDescriptor(name, Sca
 
     @SideOnly(Side.CLIENT)
     fun draw(mode: ScanMode) {
-        main?.draw()
-        leds?.get(mode.value.toInt())?.draw()
+        main.draw()
+        leds[mode.value.toInt()].draw()
     }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {

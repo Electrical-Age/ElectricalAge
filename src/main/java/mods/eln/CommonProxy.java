@@ -5,7 +5,7 @@ public class CommonProxy {
     public static final String CABLENODE_PNG = "/mods/eln/sprites/CABLENODE.PNG";
     public static final String THERMALCABLE_PNG = "/mods/eln/sprites/TEX_THERMALCABLEBASE.PNG";
 
-    /** preInit, before the device descriptors are created: OBJ models and item/block models are client-only (rule 4). */
+    /** preInit, before the device descriptors are created: client item/block model hooks (OBJ models load in Eln.preInit). */
     public void preInit() {
     }
 

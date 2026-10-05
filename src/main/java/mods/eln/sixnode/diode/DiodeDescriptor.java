@@ -55,11 +55,9 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         this.stdI = stdI;
         this.stdU = stdU;
 
-        if (obj != null) { // 1.12: OBJ models are loaded on the client only (null on a dedicated server)
-            base = obj.getPart("Base");
-            diodeCables = obj.getPart("DiodeCables");
-            diodeCore = obj.getPart("DiodeCore");
-        }
+        base = obj.getPart("Base");
+        diodeCables = obj.getPart("DiodeCables");
+        diodeCore = obj.getPart("DiodeCore");
 
         if (cable.signalWire) {
             voltageLevelColor = VoltageLevelColor.SignalVoltage;

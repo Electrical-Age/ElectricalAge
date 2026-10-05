@@ -28,13 +28,12 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D?) :
+class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
     SixNodeDescriptor(name, ElectricalFuseHolderElement::class.java, ElectricalFuseHolderRender::class.java) {
-    // 1.12: OBJ models are loaded on the client only (obj is null on a dedicated server)
-    private val case = obj?.getPart("Case")
-    private val fuse = obj?.getPart("Fuse")
-    private val fuseType = obj?.getPart("FuseType")
-    private val fuseOk = obj?.getPart("FuseOk")
+    private val case = obj.getPart("Case")
+    private val fuse = obj.getPart("Fuse")
+    private val fuseType = obj.getPart("FuseType")
+    private val fuseOk = obj.getPart("FuseOk")
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
