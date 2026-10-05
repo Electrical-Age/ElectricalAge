@@ -452,7 +452,7 @@ public class Simulator /* ,IPacketHandler */ {
 			for (Object obj : server.getConfigurationManager().playerEntityList) {
 				EntityPlayerMP player = (EntityPlayerMP) obj;
 				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
-				PlayerChunkMap playerManager = worldServer.getPlayerManager();
+				PlayerManager playerManager = worldServer.getPlayerManager();
 				Utils.sendPacketToClient(bos, player);
 			}
 			//SPacketCustomPayload packet = new SPacketCustomPayload(Eln.channelName, bos.toByteArray());

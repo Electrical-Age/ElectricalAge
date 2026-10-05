@@ -33,17 +33,17 @@ public class EnergyConverterElnToOtherFireWallIc2 {
 
     /**
      * Forward for the base TileEntity's invalidate(), used for destroying the energy net link.
-     * Both invalidate and onUnload have to be used.
+     * Both invalidate and onChunkUnload have to be used.
      */
     public static void invalidate(EnergyConverterElnToOtherEntity e) {
-        e.onUnload();
+        e.onChunkUnload();
     }
 
     /**
-     * Forward for the base TileEntity's onUnload(), used for destroying the energy net link.
-     * Both invalidate and onUnload have to be used.
+     * Forward for the base TileEntity's onChunkUnload(), used for destroying the energy net link.
+     * Both invalidate and onChunkUnload have to be used.
      */
-    public static void onUnload(EnergyConverterElnToOtherEntity e) {
+    public static void onChunkUnload(EnergyConverterElnToOtherEntity e) {
         if (e.addedToEnet && Info.isIc2Available()) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(e));
 

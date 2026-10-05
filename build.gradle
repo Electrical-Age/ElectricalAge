@@ -407,3 +407,5 @@ apply from: 'gradle/scripts/extra.gradle'
 tasks.withType(JavaCompile).configureEach { options.compilerArgs += ['-Xmaxerrs', '100000'] }
 // EA port: the Kotlin plugin also adds Kotlin tasks to RFG's internal source sets
 tasks.matching { it.name in ['compilePatchedMcKotlin', 'compileMcLauncherKotlin', 'compileInjectedTagsKotlin'] }.configureEach { it.enabled = false }
+// EA port: classpath dump for standalone javac error census (eln/tools/javac-census.sh)
+tasks.register('printCompileClasspath') { doLast { file("$buildDir/compile-classpath.txt").text = sourceSets.main.compileClasspath.asPath } }

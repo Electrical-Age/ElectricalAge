@@ -62,11 +62,11 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 Vec3d tplus = readVec(stream);
                 Vec3d sgnd = readVec(stream);
                 Vec3d tgnd = readVec(stream);
-                Vec3d dplus = splus.subtract(tplus).normalize();
-                Vec3d dgnd = sgnd.subtract(tgnd).normalize();
+                Vec3d dplus = splus.subtractReverse(tplus).normalize();
+                Vec3d dgnd = sgnd.subtractReverse(tgnd).normalize();
                 double straightV = dplus.dotProduct(dgnd);
-                dplus = splus.subtract(tgnd).normalize();
-                dgnd = sgnd.subtract(tplus).normalize();
+                dplus = splus.subtractReverse(tgnd).normalize();
+                dgnd = sgnd.subtractReverse(tplus).normalize();
                 double crossV = dplus.dotProduct(dgnd);
                 if (crossV < straightV) {
                     catenaries.add(new Catenary(splus, tplus));
@@ -134,7 +134,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
                     previous = next;
                 }
                 // Finally, at the ending pole. We'll just translate the second-to-last points to fit.
-                Vec3d last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
+                Vec3d last[] = translate(previous, catenary[catenary.length - 2].subtractReverse(catenary[catenary.length - 1]));
                 drawBox(previous, last);
             }
             glEnd();
@@ -175,7 +175,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
             // We want to draw a box-shaped cable following the catenary.
             // To start with, compute a vector perpendicular to the first
             // catenary segment, then rotate it around the catenary to form four points.
-            final Vec3d delta = b.subtract(a);
+            final Vec3d delta = b.subtractReverse(a);
             // This is just to copy.
             // We don't care what r is, so long as it's linearly independent of delta.
             final Vec3d r = delta.normalize();
@@ -191,7 +191,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
         }
 
         private Vec3d negate(Vec3d v) {
-            return v.subtract(origin);
+            return v.subtractReverse(origin);
         }
 
         Vec3d multiply(Vec3d a, double b) {

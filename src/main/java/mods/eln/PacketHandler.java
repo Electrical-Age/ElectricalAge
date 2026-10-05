@@ -230,7 +230,7 @@ public class PacketHandler {
             boolean state = stream.readBoolean();
 
             if (id == ClientKeyHandler.wrenchId) {
-                PlayerChunkMap.PlayerMetadata metadata = Eln.playerManager.get(playerMP);
+                PlayerManager.PlayerMetadata metadata = Eln.playerManager.get(playerMP);
                 metadata.setInteractEnable(state);
             }
         } catch (IOException e) {

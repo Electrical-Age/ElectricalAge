@@ -12,11 +12,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class PlayerChunkMap {
+public class PlayerManager {
 
     private Map<EntityPlayerMP, PlayerMetadata> metadataHash = new Hashtable<EntityPlayerMP, PlayerMetadata>();
 
-    public PlayerChunkMap() {
+    public PlayerManager() {
         FMLCommonHandler.instance().bus().register(this);
     }
 

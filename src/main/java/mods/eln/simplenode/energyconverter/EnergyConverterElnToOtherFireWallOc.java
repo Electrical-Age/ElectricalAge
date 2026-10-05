@@ -43,7 +43,7 @@ public class EnergyConverterElnToOtherFireWallOc {
         }
     }
 
-    public void onUnload() {
+    public void onChunkUnload() {
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
         if (e.getWorldObj().isRemote) return;

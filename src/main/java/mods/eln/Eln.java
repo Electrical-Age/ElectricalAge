@@ -215,7 +215,7 @@ public class Eln {
     public static GhostManager ghostManager;
     public static GhostManagerNbt ghostManagerNbt;
     private static NodeManager nodeManager;
-    public static PlayerChunkMap playerManager;
+    public static PlayerManager playerManager;
     public static ModbusTcpServer modbusServer;
     public static NodeManagerNbt nodeManagerNbt;
     public static Simulator simulator = null;
@@ -474,7 +474,7 @@ public class Eln {
         ghostManager = new GhostManager("caca2");
         delayedTask = new DelayedTaskManager();
 
-        playerManager = new PlayerChunkMap();
+        playerManager = new PlayerManager();
         //tileEntityDestructor = new TileEntityDestructor();
 
         oreRegenerate = new OreRegenerate();

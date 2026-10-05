@@ -197,7 +197,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
     }
 
-    public void onUnload() {
+    public void onChunkUnload() {
         if (worldObj.isRemote) {
             destructor();
         }

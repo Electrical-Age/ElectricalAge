@@ -243,12 +243,12 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     }
 
     @Override
-    public void onUnload() {
-        super.onUnload();
+    public void onChunkUnload() {
+        super.onChunkUnload();
         if (Other.ic2Loaded)
-            EnergyConverterElnToOtherFireWallIc2.onUnload(this);
+            EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
         if (Other.ocLoaded)
-            getOc().onUnload();
+            getOc().onChunkUnload();
     }
 
     @Override
