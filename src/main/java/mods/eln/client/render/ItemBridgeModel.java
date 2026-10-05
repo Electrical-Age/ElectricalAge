@@ -98,6 +98,23 @@ public class ItemBridgeModel implements IBakedModel {
         });
     }
 
+    /** ItemTransforms icon_* key matrix for icon-only six-node items (cables), null = vanilla item/generated. */
+    @Nullable
+    static Matrix4f iconMatrix(TransformType t) {
+        switch (t) {
+            case FIRST_PERSON_LEFT_HAND:
+            case FIRST_PERSON_RIGHT_HAND:
+                return ItemTransforms.matrix("icon_first_person");
+            case THIRD_PERSON_LEFT_HAND:
+            case THIRD_PERSON_RIGHT_HAND:
+                return ItemTransforms.matrix("icon_third_person");
+            case GROUND:
+                return ItemTransforms.matrix("icon_ground");
+            default:
+                return null;
+        }
+    }
+
     // --- the item-level model: only used to reach the overrides ---
 
     @Override
@@ -172,7 +189,11 @@ public class ItemBridgeModel implements IBakedModel {
                 ItemBridgeRenderer.prepare(type, cameraTransformType, stack, entity);
                 return Pair.of(this, null);
             }
-            if (icon != null) return icon.handlePerspective(cameraTransformType);
+            if (icon != null) {
+                Matrix4f m = iconOnly && stack.getItem() == mods.eln.Eln.sixNodeItem ? iconMatrix(cameraTransformType) : null;
+                if (m != null) return Pair.of(icon, m);
+                return icon.handlePerspective(cameraTransformType);
+            }
             ItemBridgeRenderer.prepare(null, cameraTransformType, stack, entity); // nothing to draw
             return Pair.of(this, null);
         }
@@ -204,8 +225,14 @@ public class ItemBridgeModel implements IBakedModel {
             return icon != null ? icon.getParticleTexture() : ItemBridgeModel.this.getParticleTexture();
         }
 
+        /**
+         * RenderEntityItem lifts a dropped item by 0.25 * this GROUND scale.y before the perspective transform: when the
+         * icon model draws it, use the icon's (vanilla 0.5) so it does not float; the bridge's own "ground" key cancels
+         * the full 0.25 of DEFAULT.
+         */
         @Override
         public ItemCameraTransforms getItemCameraTransforms() {
+            if (icon != null && !handles(ItemRenderType.ENTITY)) return icon.getItemCameraTransforms();
             return ItemCameraTransforms.DEFAULT;
         }
 
