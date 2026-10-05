@@ -1,7 +1,7 @@
 package mods.eln.sixnode.electricalwatch;
 
 import mods.eln.i18n.I18N;
-import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.compat.BatteryItemRef;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -28,7 +28,7 @@ public class ElectricalWatchElement extends SixNodeElement {
     public ElectricalWatchSlowProcess slowProcess = new ElectricalWatchSlowProcess(this);
 
     private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
-        .acceptIfEmpty(0, BatteryItem.class);
+        .acceptIfEmpty(0, BatteryItemRef.CLASS);
 
     public ElectricalWatchElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);

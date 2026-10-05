@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalwatch;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -49,6 +51,7 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float hour, float min, boolean isEnergyAvailable) {
         if (kind == Kind.ANALOG) {
             if (base != null) base.draw();
@@ -118,6 +121,7 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
         return type != ItemRenderType.INVENTORY;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {

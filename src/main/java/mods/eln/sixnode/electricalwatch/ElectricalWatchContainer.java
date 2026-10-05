@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricalwatch;
 
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
-import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.compat.BatteryItemRef;
 import mods.eln.misc.BasicContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -16,7 +16,7 @@ public class ElectricalWatchContainer extends BasicContainer {
 
     public ElectricalWatchContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{
-            new GenericItemUsingDamageSlot(inventory, batteryId, 184 / 2 - 12, 8, 1, BatteryItem.class, SlotSkin.medium,
+            new GenericItemUsingDamageSlot(inventory, batteryId, 184 / 2 - 12, 8, 1, BatteryItemRef.CLASS, SlotSkin.medium,
                 new String[]{tr("Portable battery slot")})});
     }
 }
