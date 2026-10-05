@@ -135,7 +135,7 @@ public class TopIntegration implements Function<ITheOneProbe, Void> {
         }
     }
 
-    /** Ghost blocks pick as EMPTY: show the real device's item and name instead of TOP's standard header. */
+    /** Ghost blocks pick as EMPTY: show the real device's item and name instead of TOP's standard header (called from TOP's default provider). */
     static final class GhostHeader implements IBlockDisplayOverride {
         @Override
         public boolean overrideStandardInfo(ProbeMode mode, IProbeInfo info, EntityPlayer player, World world, IBlockState state, IProbeHitData data) {
@@ -147,8 +147,7 @@ public class TopIntegration implements Function<ITheOneProbe, Void> {
                 .vertical()
                 .itemLabel(target.stack)
                 .text(TextStyleClass.MODNAME + Eln.NAME);
-            addLines(info, target.waila);
-            return true;
+            return true; // the body lines come from Provider (TOP still runs every provider after an override)
         }
     }
 }
