@@ -17,26 +17,31 @@ import net.minecraft.inventory.ISidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
-import net.minecraftforge.common.util.ForgeDirection
-import net.minecraftforge.fluids.IFluidHandler
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.EnumFacing
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
 /**
  * A comparator-alike. It doesn't "compare" anything, though.
  */
-class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, ScannerElement::class.java, ScannerRender::class.java) {
+class ScannerDescriptor(name: String, obj: Obj3D?) : SixNodeDescriptor(name, ScannerElement::class.java, ScannerRender::class.java) {
 
-    val main = obj.getPart("main")!!
-    val leds = arrayOf("LED_0", "LED_1").map { obj.getPart(it) }.requireNoNulls()
+    // obj is null on a dedicated server (OBJ models load on the client only)
+    val main = obj?.getPart("main")
+    val leds = obj?.let { o -> arrayOf("LED_0", "LED_1").map { o.getPart(it) }.requireNoNulls() }
 
     init {
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
 
+    @SideOnly(Side.CLIENT)
     fun draw(mode: ScanMode) {
-        main.draw()
-        leds[mode.value.toInt()].draw()
+        main?.draw()
+        leds?.get(mode.value.toInt())?.draw()
     }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
@@ -69,7 +74,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         val scannedCoord = Coordonate(coordonate).apply {
             move(appliedLRDU)
         }
-        val targetSide: ForgeDirection = appliedLRDU.inverse.toEnumFacing()
+        val targetSide: EnumFacing = appliedLRDU.inverse.toEnumFacing()
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
         var out: Double? = null
@@ -88,49 +93,55 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         slowProcessList.add(updater)
     }
 
-    private fun scanBlock(scannedCoord: Coordonate, targetSide: ForgeDirection): Double {
-        val block = scannedCoord.block
-        if (block.hasComparatorInputOverride()) {
-            return block.getComparatorInputOverride(scannedCoord.world(), scannedCoord.x, scannedCoord.y, scannedCoord.z, targetSide.ordinal) / 15.0
-        } else if (block.defaultState.isOpaqueCube) {
+    private fun scanBlock(scannedCoord: Coordonate, targetSide: EnumFacing): Double {
+        val world = scannedCoord.world()
+        val pos = BlockPos(scannedCoord.x, scannedCoord.y, scannedCoord.z)
+        val state = world.getBlockState(pos)
+        // 1.12: comparator input has no side parameter any more (1.7.10 passed targetSide)
+        if (state.hasComparatorInputOverride()) {
+            return state.getComparatorInputOverride(world, pos) / 15.0
+        } else if (state.isOpaqueCube) {
             return 1.0
-        } else if (block.isAir(scannedCoord.world(), scannedCoord.x, scannedCoord.y, scannedCoord.z)) {
+        } else if (state.block.isAir(state, world, pos)) {
             return 0.0
         } else {
             return 1.0/3.0
         }
     }
 
-    private fun scanTileEntity(te: TileEntity, targetSide: ForgeDirection): Double? {
-        if (te is IFluidHandler) {
-            val info = te.getTankInfo(targetSide)
-            return info.sumByDouble {
-                (it.fluid?.amount ?: 0).toDouble() / it.capacity
+    private fun scanTileEntity(te: TileEntity, targetSide: EnumFacing): Double? {
+        // 1.7.10: `te is IFluidHandler` + getTankInfo(side); 1.12: the side's fluid handler capability
+        val fluids = if (te.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, targetSide))
+            te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, targetSide) else null
+        if (fluids != null) {
+            val info = fluids.tankProperties
+            return info.sumOf {
+                (it.contents?.amount ?: 0).toDouble() / it.capacity
             } / info.size
         } else if (te is ISidedInventory) {
             var sum = 0
             var limit = 0
-            val slots = te.getAccessibleSlotsFromSide(targetSide.ordinal)
+            val slots = te.getSlotsForFace(targetSide)
             when (mode) {
                 ScanMode.SIMPLE -> slots.forEach {
-                        sum += te.getStackInSlot(it)?.count ?: 0
+                        sum += te.getStackInSlot(it).count
                         limit += te.inventoryStackLimit
                     }
 
                 ScanMode.SLOTS -> slots.forEach {
-                    sum += if ((te.getStackInSlot(it)?.count ?: 0) > 0) 1 else 0
+                    sum += if (te.getStackInSlot(it).count > 0) 1 else 0
                     limit += 1
                 }
             }
             return sum.toDouble() / limit
         } else if (te is IInventory) {
             val sum = when (mode) {
-                ScanMode.SIMPLE -> (0..te.sizeInventory - 1).sumBy {
-                    te.getStackInSlot(it)?.count ?: 0
+                ScanMode.SIMPLE -> (0..te.sizeInventory - 1).sumOf {
+                    te.getStackInSlot(it).count
                 }.toDouble()
 
                 ScanMode.SLOTS -> (0..te.sizeInventory - 1).count {
-                    (te.getStackInSlot(it)?.count ?: 0) > 0
+                    te.getStackInSlot(it).count > 0
                 }.toDouble() * te.inventoryStackLimit
             }
             return sum / te.inventoryStackLimit / te.sizeInventory
@@ -159,7 +170,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     }
 
     override fun multiMeterString(): String {
-        return "Mode: ${tr(mode.name.toLowerCase().capitalize())}, Value: ${Utils.plotPercent("", outputProcess.outputNormalized)}"
+        return "Mode: ${tr(mode.name.lowercase().replaceFirstChar { it.uppercase() })}, Value: ${Utils.plotPercent("", outputProcess.outputNormalized)}"
     }
 
     override fun thermoMeterString() = ""
