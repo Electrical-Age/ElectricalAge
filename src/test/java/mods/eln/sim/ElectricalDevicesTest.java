@@ -79,8 +79,8 @@ public class ElectricalDevicesTest {
         for (int t = 0; t < 20; t++) {
             v.setU(t % 4 < 2 ? 10 : -10);
             h.tick();
-            // measure on the series load: the switch's own getCurrent() is evaluated with the R the
-            // DiodeProcess has just set for the NEXT step, so it misreports (100 A / 1e-10 A) right after a flip
+            // measured on the plain series load (1.7.10's switch also misreported its own current on a flip step,
+            // being read with the R set for the next step)
             assertTrue("tick " + t + ": reverse current " + rl.getCurrent(), rl.getCurrent() > -1e-6);
             if (t % 4 < 2) assertEquals("tick " + t + ": forward current", 10 / 10.1, rl.getCurrent(), EPS);
         }

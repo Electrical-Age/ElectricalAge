@@ -224,12 +224,13 @@ public class RootSystem {
             // Left over = straddles two SubSystems (size limit, or a private/non-private boundary). Any resistor can
             // be split into two half-resistors + delay sources (exact for DC). 1.7.10 cast everything to Resistor
             // (ClassCastException on e.g. a capacitor across a private boundary); such a component is now left
-            // out of the simulation (open circuit) with a log line instead of crashing the tick.
+            // out of the simulation (open circuit) until its device is re-added, with a log line, instead of
+            // crashing the tick.
             if (c instanceof Resistor) {
                 new InterSystemAbstraction(this, (Resistor) c);
             } else {
                 Utils.println("ELN generateInterSystems: " + c.getClass().getSimpleName()
-                    + " straddles two SubSystems and is not a resistor; left unsimulated");
+                    + " straddles two SubSystems and is not a resistor; left unsimulated until re-added");
             }
 
             ic.remove();
