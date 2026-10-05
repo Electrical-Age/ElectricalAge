@@ -95,6 +95,9 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                     break;
             }
 
+            // WP16: the break below used to leave only the dz loop, so a later fire hidden behind a block reset
+            // fireDetected to false; stop the whole scan at the first visible fire.
+            scan:
             for (int dx = -maxRangeHalf; dx <= maxRangeHalf; ++dx)
                 for (int dy = -maxRangeHalf; dy <= maxRangeHalf; ++dy)
                     for (int dz = -maxRangeHalf; dz <= maxRangeHalf; ++dz) {
@@ -114,7 +117,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                                 }
 
                             if (fireDetected) {
-                                break;
+                                break scan;
                             }
                         }
                     }
