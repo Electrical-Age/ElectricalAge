@@ -65,6 +65,9 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
             AxisAlignedBB bb = coord.getAxisAlignedBB((int) rayMax);
             List list = world.getEntitiesWithinAABB(filterClass, bb);
             double output = 0;
+            // WP16: only entities seen in this scan are remembered (1.7.10 never evicted any: the map grew with
+            // every entity that ever passed, and kept dead ones alive).
+            HashMap<Object, Vec3d> seen = new HashMap<Object, Vec3d>();
 
             for (Object o : list) {
                 Entity e = (Entity) o;
@@ -97,8 +100,9 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
                     }
                 }
                 output = Math.min(1, output);
-                lastEPos.put(e, new Vec3d(e.posX, e.posY, e.posZ));
+                seen.put(e, new Vec3d(e.posX, e.posY, e.posZ));
             }
+            lastEPos = seen;
             //Utils.println(output);
             rc1.setTarget((float) output);
         }
