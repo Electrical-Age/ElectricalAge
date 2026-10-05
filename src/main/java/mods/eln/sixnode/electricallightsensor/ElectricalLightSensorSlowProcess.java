@@ -34,8 +34,8 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
             //	Utils.println("Light : " + light);
             World world = coord.world();
             //if(element.descriptor.dayLightOnly) {
-            if (!world.provider.nether) {
-                int i1 = WorldCompat.getSavedLightValue(world, EnumSkyBlock.SKY, coord.x, coord.y, coord.z) - world.skylightSubtracted;
+            if (world.provider.hasSkyLight()) { // 1.7.10 !hasNoSky
+                int i1 = WorldCompat.getSavedLightValue(world, EnumSkyBlock.SKY, coord.x, coord.y, coord.z) - world.getSkylightSubtracted();
                 i1 = Math.max(0, i1);
                 float f = world.getCelestialAngleRadians(1.0F);
 

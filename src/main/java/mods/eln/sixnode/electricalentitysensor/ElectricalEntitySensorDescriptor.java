@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalentitysensor;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -38,6 +40,7 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(boolean state, EntitySensorFilterDescriptor filter) {
         if (detector != null) detector.draw();
         if (state) {
@@ -78,6 +81,7 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
         return type != ItemRenderType.INVENTORY;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {

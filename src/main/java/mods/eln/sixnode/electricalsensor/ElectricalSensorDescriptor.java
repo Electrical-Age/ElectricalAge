@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalsensor;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -30,6 +32,7 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw() {
         if (main != null) main.draw();
     }

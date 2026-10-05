@@ -1,5 +1,7 @@
 package mods.eln.sixnode.thermalsensor;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -58,6 +60,7 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(boolean renderAdapter) {
         if (main != null) main.draw();
         if (renderAdapter && adapter != null) adapter.draw();
