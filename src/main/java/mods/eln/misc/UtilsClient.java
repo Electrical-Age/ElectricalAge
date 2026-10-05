@@ -283,6 +283,10 @@ public class UtilsClient {
     }
 
     public static void drawEnergyBare(ItemRenderType type, float e) {
+        // 1.12 port fix: clamp. An item holding more than its max energy (NBT-given, e.g. {energy:100000d} on a
+        // 6 kJ flashlight) drew a bar e*12 px tall, i.e. a yellow line far up the screen from its slot.
+        if (!(e > 0f)) e = 0f; // also NaN (max energy 0)
+        if (e > 1f) e = 1f;
         drawIcon(type, portableBatteryOverlayResource);
 
         float x = 13f, y = 14f - e * 12f;
