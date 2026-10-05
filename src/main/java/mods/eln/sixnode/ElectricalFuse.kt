@@ -113,7 +113,9 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
             T += P / cable.thermalC * time
         }
-        if (T > (cable?.thermalWarmLimit ?: 0.0) * 0.8) { // WP16: was `?: 0.0 * 0.8` (precedence: 0.8 never applied)
+        // WP16: was `?: 0.0 * 0.8` (precedence: the factor never applied). WP16b (Baughn: 0.8 = 1.02 x Inom is too
+        // twitchy): steady T = warm (I / 1.2 Inom)^2 / 0.9, so factor f trips at I = 1.2 sqrt(0.9 f) Inom; 0.9 -> 1.08 x.
+        if (T > (cable?.thermalWarmLimit ?: 0.0) * 0.9) {
             installedFuse = ElectricalFuseDescriptor.BlownFuse
         }
     }
