@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalwindsensor;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -43,6 +45,7 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float alpha) {
         if (baseWall != null) baseWall.draw();
         if (anemometer != null) {
@@ -80,6 +83,7 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
         return type != ItemRenderType.INVENTORY;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {

@@ -2,7 +2,8 @@ package mods.eln.sixnode.electricalwatch;
 
 
 import mods.eln.misc.Utils;
-import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.compat.BatteryItemRef;
+import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 import net.minecraft.item.ItemStack;
@@ -21,7 +22,7 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
 
     double getBatteryLevel() {
         ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalWatchContainer.batteryId);
-        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+        IItemEnergyBattery battery = BatteryItemRef.get(batteryStack);
         if (battery != null) {
             return battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack);
         } else {
@@ -32,7 +33,7 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
     @Override
     public void process(double time) {
         ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalWatchContainer.batteryId);
-        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+        IItemEnergyBattery battery = BatteryItemRef.get(batteryStack);
         double energy;
         if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.powerConsumtion * time * 4) {
             if (upToDate) {

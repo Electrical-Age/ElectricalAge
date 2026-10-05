@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalalarm;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -59,6 +61,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         Data.addUtilities(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(boolean warm, float rotAlpha) {
         if (warm) UtilsClient.bindTexture(onTexture);
         else UtilsClient.bindTexture(offTexture);
@@ -93,6 +96,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         return true;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {

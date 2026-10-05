@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricallightsensor;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -36,6 +38,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw() {
         if (main != null) main.draw();
     }
@@ -72,6 +75,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
         return type != ItemRenderType.INVENTORY;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {

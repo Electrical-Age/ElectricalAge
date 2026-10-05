@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -48,6 +50,7 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(boolean firePresent) {
         if (detector != null) detector.draw();
         if (led != null) {
@@ -87,6 +90,7 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
         return type != ItemRenderType.INVENTORY;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {

@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricalfiredetector;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
-import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.compat.BatteryItemRef;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -56,7 +56,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
         } else {
             powered = false;
             inventory = new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this))
-                .acceptIfEmpty(0, BatteryItem.class);
+                .acceptIfEmpty(0, BatteryItemRef.CLASS);
         }
 
         slowProcessList.add(slowProcess);

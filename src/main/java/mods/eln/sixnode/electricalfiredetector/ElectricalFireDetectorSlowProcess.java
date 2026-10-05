@@ -2,7 +2,8 @@ package mods.eln.sixnode.electricalfiredetector;
 
 
 import mods.eln.compat.WorldCompat;
-import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.compat.BatteryItemRef;
+import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
@@ -31,7 +32,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
 
     double getBatteryLevel() {
         ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalWatchContainer.batteryId);
-        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+        IItemEnergyBattery battery = BatteryItemRef.get(batteryStack);
         if (battery != null) {
             return battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack);
         } else {
@@ -43,7 +44,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
     public void process(double time) {
         if (element.descriptor.batteryPowered) {
             ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalFireDetectorContainer.Companion.getBatteryId());
-            BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+            IItemEnergyBattery battery = BatteryItemRef.get(batteryStack);
             double energy;
             if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.PowerComsumption * time * 4) {
                 boolean changed = element.powered;
