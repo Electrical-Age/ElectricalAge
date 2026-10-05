@@ -66,14 +66,14 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
     public TurretDescriptor(String name, String modelName) {
         super(name, TurretElement.class, TurretRender.class);
 
-        final Obj3D obj = Eln.obj.getObj(modelName); // 1.12: null on a dedicated server (OBJ models are client-only)
-        turret = obj != null ? obj.getPart("Turret") : null;
-        holder = obj != null ? obj.getPart("Holder") : null;
-        joint = obj != null ? obj.getPart("Joint") : null;
-        leftGun = obj != null ? obj.getPart("LeftGun") : null;
-        rightGun = obj != null ? obj.getPart("RightGun") : null;
-        sensor = obj != null ? obj.getPart("Sensor") : null;
-        fire = obj != null ? obj.getPart("Fire") : null;
+        final Obj3D obj = Eln.obj.getObj(modelName);
+        turret = obj.getPart("Turret");
+        holder = obj.getPart("Holder");
+        joint = obj.getPart("Joint");
+        leftGun = obj.getPart("LeftGun");
+        rightGun = obj.getPart("RightGun");
+        sensor = obj.getPart("Sensor");
+        fire = obj.getPart("Fire");
 
         properties = new Properties();
         voltageLevelColor = VoltageLevelColor.HighVoltage;

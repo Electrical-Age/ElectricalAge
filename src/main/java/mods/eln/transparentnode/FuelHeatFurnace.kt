@@ -34,14 +34,13 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-// 1.12: model nullable (OBJ models are client-only; a non-null Kotlin param would NPE in preInit on a dedicated server)
-class FuelHeatFurnaceDescriptor(name: String, model: Obj3D?, val thermal: ThermalLoadInitializerByPowerDrop) :
+class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: ThermalLoadInitializerByPowerDrop) :
     TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, FuelHeatFurnaceRender::class.java,
         EntityMetaTag.Fluid) {
-    private val main = model?.getPart("Main")
-    private val burners = arrayOf(model?.getPart("BurnerA"), model?.getPart("BurnerB"), model?.getPart("BurnerC"))
-    private val powerLED = model?.getPart("PowerLED")
-    private val heatLED = model?.getPart("HeatLED")
+    private val main = model.getPart("Main")
+    private val burners = arrayOf(model.getPart("BurnerA"), model.getPart("BurnerB"), model.getPart("BurnerC"))
+    private val powerLED = model.getPart("PowerLED")
+    private val heatLED = model.getPart("HeatLED")
 
     init {
         thermal.setMaximalPower(2000.0)

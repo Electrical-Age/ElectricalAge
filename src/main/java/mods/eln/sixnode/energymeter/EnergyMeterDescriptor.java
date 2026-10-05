@@ -42,7 +42,7 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
             }
         }
 
-        if (base != null) pinDistance = Utils.getSixNodePinDistance(base); // 1.12: no OBJ models on a dedicated server
+        pinDistance = Utils.getSixNodePinDistance(base);
 
         voltageLevelColor = VoltageLevelColor.Neutral;
     }

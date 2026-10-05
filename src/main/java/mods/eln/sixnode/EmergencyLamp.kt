@@ -26,32 +26,24 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor, val batteryCapacity: Double,
-                              val chargePower: Double, val consumption: Double, val lightLevel: Int, model: Obj3D?)
+                              val chargePower: Double, val consumption: Double, val lightLevel: Int, model: Obj3D)
     : SixNodeDescriptor(name, EmergencyLampElement::class.java, EmergencyLampRender::class.java) {
 
-    val mainCeiling: Obj3D.Obj3DPart? = model?.getPart("coreCeil")
-    val panelCeiling: Obj3D.Obj3DPart? = model?.getPart("panelCeil")
-    val lightCeiling: Obj3D.Obj3DPart? = model?.getPart("lightCeil")
-    val mainWall: Obj3D.Obj3DPart? = model?.getPart("coreWall")
-    val mainWallR: Obj3D.Obj3DPart? = model?.getPart("coreWallR")
-    val mainWallL: Obj3D.Obj3DPart? = model?.getPart("coreWallL")
-    val lightWall: Obj3D.Obj3DPart? = model?.getPart("lightWall")
+    val mainCeiling: Obj3D.Obj3DPart = model.getPart("coreCeil")
+    val panelCeiling: Obj3D.Obj3DPart = model.getPart("panelCeil")
+    val lightCeiling: Obj3D.Obj3DPart = model.getPart("lightCeil")
+    val mainWall: Obj3D.Obj3DPart = model.getPart("coreWall")
+    val mainWallR: Obj3D.Obj3DPart = model.getPart("coreWallR")
+    val mainWallL: Obj3D.Obj3DPart = model.getPart("coreWallL")
+    val lightWall: Obj3D.Obj3DPart = model.getPart("lightWall")
 
     init {
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable)
         setDefaultIcon("emergencylamp")
     }
 
-    // 1.12 port: OBJ models are loaded on the client only, so the parts are null on a dedicated server.
     @SideOnly(Side.CLIENT)
     fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
-        val mainCeiling = mainCeiling ?: return
-        val panelCeiling = panelCeiling ?: return
-        val lightCeiling = lightCeiling ?: return
-        val mainWall = mainWall ?: return
-        val mainWallR = mainWallR ?: return
-        val mainWallL = mainWallL ?: return
-        val lightWall = lightWall ?: return
         if (onCeiling) {
             mainCeiling.draw()
 
