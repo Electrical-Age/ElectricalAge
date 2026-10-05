@@ -70,60 +70,34 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
         try {
             GL11.glTranslatef(0.5F, 0.5F, 0.5F); // undo RenderItem.renderItem's translate(-0.5, -0.5, -0.5)
             Object[] data;
+            // The per-type ops live in config/eln-render.cfg (ItemTransforms; /elnclient reloadrender), defaults =
+            // the 1.7.10 frames described in core-log "WP5 item transforms".
+            boolean six = itemStack.getItem() == Eln.sixNodeItem; // SixNodeBlock had render type 0 (3D item paths)
             switch (t) {
                 case INVENTORY:
-                    // 1.12 GUI: unit = 16 px, y up, origin at the slot centre. 1.7.10 (non-helper): pixels, y down,
-                    // origin at the slot's top-left corner, lighting off.
-                    GL11.glTranslatef(-0.5F, 0.5F, 0F);
-                    GL11.glScalef(1F / 16F, -1F / 16F, 1F / 16F);
-                    GL11.glDisable(GL11.GL_LIGHTING);
+                    ItemTransforms.apply("inventory");
+                    GL11.glDisable(GL11.GL_LIGHTING); // 1.7.10 non-helper inventory path
                     data = new Object[]{null};
                     break;
                 case EQUIPPED_FIRST_PERSON:
-                    // 1.12 ItemRenderer.transformSideFirstPerson == 1.7.10's translate(0.7*0.8, -0.65*0.8, -0.9*0.8);
-                    // then 1.7.10: rotate 45 Y, scale 0.4, renderEquippedItem.
-                    if (transform == TransformType.FIRST_PERSON_LEFT_HAND) GL11.glScalef(-1F, 1F, 1F); // TODO(1.12 M2): left hand
-                    GL11.glRotatef(45F, 0F, 1F, 0F);
-                    GL11.glScalef(0.4F, 0.4F, 0.4F);
-                    equippedItem();
+                    if (transform == TransformType.FIRST_PERSON_LEFT_HAND) ItemTransforms.apply("first_person_left");
+                    ItemTransforms.apply("first_person");
+                    ItemTransforms.apply("equipped_tail");
                     data = new Object[]{null, entity};
                     break;
-                case EQUIPPED: {
-                    // undo 1.12 LayerHeldItem (after the arm's postRender): rot -90 X, rot 180 Y, translate(+-1/16, 0.125, -0.625)
-                    boolean left = transform == TransformType.THIRD_PERSON_LEFT_HAND;
-                    GL11.glTranslatef(left ? 1F / 16F : -1F / 16F, -0.125F, 0.625F);
-                    GL11.glRotatef(-180F, 0F, 1F, 0F);
-                    GL11.glRotatef(90F, 1F, 0F, 0F);
-                    // 1.7.10 RenderPlayer.renderEquippedItems after bipedRightArm.postRender
-                    GL11.glTranslatef(-0.0625F, 0.4375F, 0.0625F);
-                    if (itemStack.getItem() == Eln.sixNodeItem) {
-                        // SixNodeBlock had render type 0: RenderBlocks.renderItemIn3d -> block branch
-                        float f = 0.5F * 0.75F;
-                        GL11.glTranslatef(0.0F, 0.1875F, -0.3125F);
-                        GL11.glRotatef(20.0F, 1.0F, 0.0F, 0.0F);
-                        GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-                        GL11.glScalef(-f, -f, f);
-                    } else {
-                        float f = 0.375F;
-                        GL11.glTranslatef(0.25F, 0.1875F, -0.1875F);
-                        GL11.glScalef(f, f, f);
-                        GL11.glRotatef(60.0F, 0.0F, 0.0F, 1.0F);
-                        GL11.glRotatef(-90.0F, 1.0F, 0.0F, 0.0F);
-                        GL11.glRotatef(20.0F, 0.0F, 0.0F, 1.0F);
-                    }
-                    equippedItem();
+                case EQUIPPED:
+                    ItemTransforms.apply(transform == TransformType.THIRD_PERSON_LEFT_HAND
+                        ? "third_person_left_undo" : "third_person_right_undo");
+                    ItemTransforms.apply("third_person_arm");
+                    ItemTransforms.apply(six ? "third_person_six_node" : "third_person_item");
+                    ItemTransforms.apply("equipped_tail");
                     data = new Object[]{null, entity};
                     break;
-                }
                 case ENTITY:
                 default:
-                    // 1.12 RenderEntityItem: entity pos + bob + 0.25, spinning (1.7.10 EA items neither bobbed nor
-                    // spun: kept the 1.12 motion). 1.7.10 then: SixNode item (render type 0) 3D path scale 0.25,
-                    // others scale 0.5 (+ a camera-facing turn we don't reproduce).
-                    GL11.glTranslatef(0F, -0.25F, 0F);
-                    if (transform == TransformType.FIXED) GL11.glTranslatef(0F, 0.25F, 0F); // item frame: centred
-                    float s = itemStack.getItem() == Eln.sixNodeItem ? 0.25F : 0.5F;
-                    GL11.glScalef(s, s, s);
+                    ItemTransforms.apply(transform == TransformType.FIXED ? "fixed"
+                        : transform == TransformType.HEAD ? "head" : "ground");
+                    ItemTransforms.apply(six ? "entity_six_node" : "entity_item");
                     data = new Object[]{null, null};
                     break;
             }
@@ -144,12 +118,4 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
 
     private static boolean warned = false;
 
-    /** Forge 1.7.10 ForgeHooksClient.renderEquippedItem, non-helper branch. */
-    private static void equippedItem() {
-        GL11.glTranslatef(0.0F, -0.3F, 0.0F);
-        GL11.glScalef(1.5F, 1.5F, 1.5F);
-        GL11.glRotatef(50.0F, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(335.0F, 0.0F, 0.0F, 1.0F);
-        GL11.glTranslatef(-0.9375F, -0.0625F, 0.0F);
-    }
 }

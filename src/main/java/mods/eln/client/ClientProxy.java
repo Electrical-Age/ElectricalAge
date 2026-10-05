@@ -28,6 +28,8 @@ public class ClientProxy extends CommonProxy {
     public void preInit() {
         Eln.obj.loadAllElnModels();
         MinecraftForge.EVENT_BUS.register(new mods.eln.client.render.ElnItemModels()); // ModelRegistryEvent/ModelBakeEvent
+        mods.eln.client.render.ItemTransforms.load(); // config/eln-render.cfg
+        net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new mods.eln.client.render.ElnClientCommand());
     }
 
     @Override
