@@ -141,12 +141,8 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        if (Eln.modbusEnable) {
-            info.put(I18N.tr("Modbus TCP"), Eln.modbusServer.getHost() + ":" + Eln.modbusServer.getPort());
-            info.put(I18N.tr("Modbus Unit ID"), String.valueOf(station));
-        } else {
-            info.put("X_X", I18N.tr("Modbus is disabled, enable it in Eln.cfg"));
-        }
+        // 1.12 port: the Modbus TCP server is dropped (rule 8), so modbus is always disabled.
+        info.put("X_X", I18N.tr("Modbus is disabled, enable it in Eln.cfg"));
         return info;
     }
 
@@ -503,15 +499,11 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
         return true;
     }
 
+    // 1.12 port: no Modbus TCP server (rule 8); the element is never registered with one.
     void addToServer() {
-        if (station != -1) {
-            addedOnServer = Eln.modbusServer.add(this);
-        }
     }
 
     void removeFromServer() {
-        if (addedOnServer)
-            Eln.modbusServer.remove(this);
         addedOnServer = false;
     }
 

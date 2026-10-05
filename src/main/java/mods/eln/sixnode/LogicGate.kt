@@ -32,6 +32,8 @@ import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 
 open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>,
                                elementClass: Class<out LogicGateElement>, renderClass: Class<out LogicGateRender>) :
@@ -53,6 +55,7 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         this(name, obj, functionName, functionClass, LogicGateElement::class.java, LogicGateRender::class.java) {
     }
 
+    @SideOnly(Side.CLIENT)
     fun draw() {
         pins.forEach { it?.draw() }
         case?.draw()

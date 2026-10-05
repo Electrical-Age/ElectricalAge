@@ -1,5 +1,8 @@
 package mods.eln.sixnode.TreeResinCollector;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -38,6 +41,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float factor) {
         if (main != null) main.draw();
         if (fill != null) {

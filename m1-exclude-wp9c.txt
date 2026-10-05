@@ -1,16 +1,2 @@
 # Device batch wp9c: excluded sources (delete a line to build it). See notes/core-log.md "Device batches".
-mods/eln/sixnode/LogicGate.kt
-mods/eln/sixnode/AnalogChips.kt
-mods/eln/sixnode/electricalmath/
-mods/eln/sixnode/electricaltimeout/
-mods/eln/sixnode/electricalgatesource/
-mods/eln/sixnode/hub/
-mods/eln/sixnode/electricaldatalogger/
-mods/eln/sixnode/energymeter/
-mods/eln/sixnode/wirelesssignal/source/
-mods/eln/sixnode/modbusrtu/
-mods/eln/sixnode/rs485cable/
-mods/eln/sixnode/tutorialsign/
-mods/eln/sixnode/TreeResinCollector/
-mods/eln/sixnode/EmergencyLamp.kt
 mods/eln/registry/pending/Wp9cPending.java

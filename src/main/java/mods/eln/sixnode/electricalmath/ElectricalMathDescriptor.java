@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricalmath;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -57,6 +60,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
         Data.addSignal(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float open, boolean ledOn[]) {
         if (main != null) main.draw();
         if (door != null) door.draw((1f - open) * alphaOff, 0f, 1f, 0f);

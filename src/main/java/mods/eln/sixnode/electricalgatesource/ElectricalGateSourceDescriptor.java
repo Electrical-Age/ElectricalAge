@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.VoltageLevelColor;
@@ -47,6 +50,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
         autoReset = true;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float factor, float distance, TileEntity e) {
         render.draw(factor, distance, e);
     }

@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -68,6 +71,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
         if (onFloor || side.isY()) front.glRotateOnX();
         if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
