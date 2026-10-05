@@ -245,7 +245,10 @@ public class UtilsClient {
             GL11.glEnd();
             enableCulling();
         } else if (type == ItemRenderType.ENTITY) {
-
+            // 1.12 port: no glNormal here, so with lighting on the quad took whatever normal the previous draw left
+            // (inside a TESR, e.g. the battery charger's bay, that rendered it black). Lit by the lightmap only.
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
+            GL11.glDisable(GL11.GL_LIGHTING);
             disableCulling();
             GL11.glBegin(GL11.GL_QUADS);
             GL11.glTexCoord2f(1f, 1f);
@@ -258,6 +261,7 @@ public class UtilsClient {
             GL11.glVertex3f(0.0f, 1f, 0.5f);
             GL11.glEnd();
             enableCulling();
+            GL11.glPopAttrib();
         } else {
             GL11.glTranslatef(0.5f, -0.3f, 0.5f);
 
