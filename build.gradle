@@ -420,3 +420,5 @@ if (!project.hasProperty('elnAll')) {
     sourceSets.main.kotlin.exclude(elnExcludes)
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { exclude(elnExcludes) }
 }
+// EA port: sim tests run standalone via eln/tools/simtest.sh (they need stubs), not through gradle
+tasks.matching { it.name in ['compileTestJava', 'compileTestKotlin', 'test'] }.configureEach { it.enabled = false }
