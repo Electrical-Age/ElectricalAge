@@ -38,9 +38,9 @@ public class SoundServer {
 
             for (Object obj : server.getPlayerList().getPlayers()) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
+                // WP16: 1.7.10 had an empty `;` body here, so every sound went to every player (any dimension)
                 if (player.dimension == p.world.provider.getDimension() && player.getDistance(p.x, p.y, p.z) < p.rangeMax + 2)
-                    ;
-                Utils.sendPacketToClient(bos, player);
+                    Utils.sendPacketToClient(bos, player);
             }
         } catch (IOException e) {
             e.printStackTrace();
