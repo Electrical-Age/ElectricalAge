@@ -369,6 +369,8 @@ public class Obj3D {
     @Nullable
     private BufferedReader getResourceAsStream(String filePath, boolean trySource) {
         BufferedReader reader = null;
+        // 1.12 port: asset files are lower case (ResourceLocation lower-cases paths); .obj/.mtl references keep their case
+        filePath = filePath.toLowerCase(java.util.Locale.ROOT);
         if (trySource) {
             final String path = "../src/main/resources/assets/eln/" + filePath;
             try {

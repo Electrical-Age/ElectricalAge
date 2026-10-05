@@ -80,6 +80,7 @@ public class Obj3DFolder {
         if (obj.loadFile(modelPath)) {
             String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
             tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
+            tag = tag.toLowerCase(java.util.Locale.ROOT); // 1.12 port: asset names are lower case, lookups too
             if (nameToObjHash.containsKey(tag)) {
                 Utils.println("Double load of model " + tag);
             }
@@ -91,7 +92,7 @@ public class Obj3DFolder {
     }
 
     public Obj3D getObj(String obj3DName) {
-        return nameToObjHash.get(obj3DName);
+        return nameToObjHash.get(obj3DName.toLowerCase(java.util.Locale.ROOT));
     }
 
     public Obj3DPart getPart(String objName, String partName) {
