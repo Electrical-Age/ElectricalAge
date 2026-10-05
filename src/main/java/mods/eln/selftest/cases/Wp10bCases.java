@@ -403,7 +403,8 @@ public final class Wp10bCases {
     /**
      * Wind Turbine: P = PfW(wind) with wind = |Eln wind at the rotor height| * environment factor (1 - 0.07 per block
      * around the rotor beyond 2); checked against its own getWind() at measure time; 7 ghost blocks (mast + blades).
-     * Water Turbine without water (its water block is the stone platform): water factor -1 -> power stays 0.
+     * Water Turbine without water (its water block, the platform stone under x7, is made air: placement needs air/water): water
+     * factor -1 -> power stays 0.
      */
     static final class WindWaterCase implements SelfTestCase {
         WindTurbineElement wind;
@@ -419,7 +420,14 @@ public final class Wp10bCases {
 
         public void build(SelfTestContext ctx) {
             wind = (WindTurbineElement) ctx.placeTransparent(WIND_TURBINE, ctx.at(2, 1, 1));
-            water = (WaterTurbineElement) placeFacing(ctx, WATER_TURBINE, ctx.at(6, 1, 1), Direction.XN);
+            // WaterTurbineDescriptor.checkCanPlaceWater: the water block (waterCoord rotated by the front, here
+            // (1,-1,0) = the platform stone under x7) must be air or water, else placement is refused. Make it air.
+            BlockPos wp = ctx.at(6, 1, 1);
+            mods.eln.misc.Coordonate wc = field(Eln.transparentNodeItem.getDescriptor(WATER_TURBINE), "waterCoord");
+            int[] v = {wc.x, wc.y, wc.z};
+            Direction.XN.rotateFromXN(v);
+            ctx.world().setBlockToAir(wp.add(v[0], v[1], v[2]));
+            water = (WaterTurbineElement) placeFacing(ctx, WATER_TURBINE, wp, Direction.XN);
         }
 
         public void measure(SelfTestContext ctx) {

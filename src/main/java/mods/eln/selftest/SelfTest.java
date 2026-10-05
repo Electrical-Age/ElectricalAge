@@ -94,6 +94,8 @@ public final class SelfTest implements SelfTestContext {
     private static SelfTest running;
     private static final List<String> lastReport = Collections.synchronizedList(new ArrayList<String>());
 
+    /** Cases whose build threw: their measure is skipped (it would only NPE on the missing devices). */
+    private final java.util.Set<SelfTestCase> buildFailed = new java.util.HashSet<>();
     private final ICommandSender sender;
     private final WorldServer world;
     private final BlockPos origin; // platform start (x, y, z); elements at y + 1
@@ -336,6 +338,7 @@ public final class SelfTest implements SelfTestContext {
             } catch (RuntimeException e) {
                 check(c.name() + " build", false, e.toString());
                 LOG.error("case " + c.name() + " build failed", e);
+                buildFailed.add(c);
             }
         }
         base = origin;
@@ -457,6 +460,10 @@ public final class SelfTest implements SelfTestContext {
         for (int i = 0; i < extra.size(); i++) {
             SelfTestCase c = extra.get(i);
             base = origin.add(0, 0, CASE_ROW * (i + 1));
+            if (buildFailed.contains(c)) {
+                line("SKIP " + c.name() + " measure (build failed)");
+                continue;
+            }
             try {
                 c.measure(this);
             } catch (RuntimeException ex) {
