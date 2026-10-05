@@ -2,6 +2,7 @@ package mods.eln.registry.batch;
 
 import mods.eln.ElnContent;
 import mods.eln.compat.GameRegistryCompat;
+import mods.eln.compat.top.TopIntegration;
 import mods.eln.node.NodeManager;
 import mods.eln.node.simple.SimpleNodeItem;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
@@ -11,6 +12,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.I
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
@@ -41,7 +43,8 @@ public class Wp11Content implements ElnContent {
         registerEnergyConverter();
         registerTurbine(4); // mechanical sub-UIDs (steam/gas turbine, generator, joints, flywheel, tachometer)
         registerGridDevices(123);
-        // PENDING(1.12 wp11): TODO(1.12 WP11): TheOneProbe provider (replaces Waila; Element getWaila() data)
+        // TheOneProbe info (replaces 1.7.10 Waila): node getWaila() lines, ghost blocks resolved to the real device
+        if (Loader.isModLoaded(TopIntegration.MODID_TOP)) TopIntegration.register();
     }
 
     public static void registerTestBlock() {
