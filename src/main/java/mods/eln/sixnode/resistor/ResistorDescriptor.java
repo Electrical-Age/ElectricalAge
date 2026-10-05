@@ -1,6 +1,8 @@
 package mods.eln.sixnode.resistor;
 
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
@@ -67,6 +69,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
+    @SideOnly(Side.CLIENT)
     void draw(float wiperPos) {
         //UtilsClient.disableCulling();
         //UtilsClient.disableTexture();

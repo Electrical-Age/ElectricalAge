@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalswitch;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -145,6 +147,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw(float on, float distance, TileEntity e) {
         switch (objType) {
             case Button:

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powersocket;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -54,6 +56,7 @@ public class PowerSocketDescriptor extends SixNodeDescriptor {
         Data.addLight(newItemStack(1));
     }
 
+    @SideOnly(Side.CLIENT)
     public void draw() {
         //GL11.glRotatef(90.f,1.f,0.f,0.f);
         if (base != null)

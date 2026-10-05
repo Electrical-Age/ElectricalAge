@@ -1,5 +1,7 @@
 package mods.eln.sixnode.diode;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -53,9 +55,11 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         this.stdI = stdI;
         this.stdU = stdU;
 
-        base = obj.getPart("Base");
-        diodeCables = obj.getPart("DiodeCables");
-        diodeCore = obj.getPart("DiodeCore");
+        if (obj != null) { // 1.12: OBJ models are loaded on the client only (null on a dedicated server)
+            base = obj.getPart("Base");
+            diodeCables = obj.getPart("DiodeCables");
+            diodeCore = obj.getPart("DiodeCore");
+        }
 
         if (cable.signalWire) {
             voltageLevelColor = VoltageLevelColor.SignalVoltage;
@@ -119,6 +123,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         Collections.addAll(list, tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\\\n"));
     }
 
+    @SideOnly(Side.CLIENT)
     void draw() {
         if (base != null) base.draw();
         if (diodeCables != null) diodeCables.draw();

@@ -22,16 +22,19 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import mods.eln.compat.IItemRenderer
 import org.lwjgl.opengl.GL11
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
+class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D?) :
     SixNodeDescriptor(name, ElectricalFuseHolderElement::class.java, ElectricalFuseHolderRender::class.java) {
-    private val case = obj.getPart("Case")
-    private val fuse = obj.getPart("Fuse")
-    private val fuseType = obj.getPart("FuseType")
-    private val fuseOk = obj.getPart("FuseOk")
+    // 1.12: OBJ models are loaded on the client only (obj is null on a dedicated server)
+    private val case = obj?.getPart("Case")
+    private val fuse = obj?.getPart("Fuse")
+    private val fuseType = obj?.getPart("FuseType")
+    private val fuseOk = obj?.getPart("FuseOk")
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
@@ -60,10 +63,11 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
         }
     }
 
+    @SideOnly(Side.CLIENT)
     fun draw(installedFuse: ElectricalFuseDescriptor?) {
         case?.draw()
         if (installedFuse != null) {
-            VoltageLevelColor.fromCable(installedFuse.cableDescriptor).setGLColor()
+            mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.voltageLevelColorOf(installedFuse.cableDescriptor).setGLColor()
             fuseType?.draw()
             GL11.glColor3f(1f, 1f, 1f)
             if (installedFuse.cableDescriptor != null) {
@@ -131,8 +135,8 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
             val fuseCompound = nbt.getTag("fuse") as? NBTTagCompound
             if (fuseCompound != null) {
-                val fuseStack = ItemStack.loadItemStackFromNBT(fuseCompound)
-                if (fuseStack != null) {
+                val fuseStack = ItemStack(fuseCompound)
+                if (!fuseStack.isEmpty) {
                     installedFuse = GenericItemUsingDamageDescriptorUpgrade.getDescriptor(fuseStack) as? ElectricalFuseDescriptor
                 }
             }
@@ -210,7 +214,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         var takenOutFuse: ElectricalFuseDescriptor? = null
         val itemStack = entityPlayer?.heldItemMainhand
         val fuseDescriptor = GenericItemUsingDamageDescriptorUpgrade.getDescriptor(itemStack) as? ElectricalFuseDescriptor
-        if (itemStack != null) {
+        if (itemStack != null && !itemStack.isEmpty) { // 1.12: an empty hand is ItemStack.EMPTY, not null
             if (fuseDescriptor != null && itemStack.count > 0) {
                 // The player puts in a new lead fuse.
                 itemStack.count--
