@@ -31,7 +31,8 @@ public final class ItemTransforms {
             "GUI slot: 1.12 GUI frame -> 1.7.10 pixel frame (origin top-left, y down). Lighting is off for this type.");
         def("first_person_left", "scale -1 1 1", "extra ops before first_person for the left hand");
         def("first_person", "translate -0.15 -0.02 0; rotate 45 0 1 0; scale 0.2 0.2 0.2",
-            "first person, after 1.12 transformSideFirstPerson (== 1.7.10's), before equipped_tail");
+            "first person, after 1.12 transformSideFirstPerson (== 1.7.10's), before equipped_tail: six-node items and "
+                + "items without the render helper only");
         def("third_person_right_undo", "translate -0.0625 -0.125 0.625; rotate -180 0 1 0; rotate 90 1 0 0",
             "undo 1.12 LayerHeldItem, right hand");
         def("third_person_left_undo", "translate 0.0625 -0.125 0.625; rotate -180 0 1 0; rotate 90 1 0 0",
@@ -43,10 +44,29 @@ public final class ItemTransforms {
             "other items (1.7.10 item branch)");
         def("equipped_tail", "translate 0 -0.3 0; scale 1.5 1.5 1.5; rotate 50 0 1 0; rotate 335 0 0 1; translate -0.9375 -0.0625 0",
             "Forge 1.7.10 renderEquippedItem (non-helper), after first_person and third_person_*");
-        def("equipped_helper", "scale 1.5 1.5 1.5; translate -0.5 -0.5 -0.5",
-            "instead of equipped_tail when the item's shouldUseRenderHelper(type, EQUIPPED_BLOCK) is true (Forge 1.7.10 "
-                + "renderEquippedItem helper branch = translate -0.5 -0.5 -0.5; tools, flashlight, portable battery, "
-                + "X-ray scanner, transparent-node items). The scale keeps them as large as with equipped_tail");
+        // Held items whose shouldUseRenderHelper(type, EQUIPPED_BLOCK) is true (1.7.10: Forge's translate -0.5 -0.5 -0.5
+        // helper frame instead of equipped_tail, and RenderPlayer's block branch in third person). Six-node items are
+        // not in these groups (first_person / third_person_six_node + equipped_tail). Math: core-log "Client test 3".
+        def("equipped_helper_first_person", "translate -0.15 -0.02 0; rotate 45 0 1 0; scale 0.2 0.2 0.2; translate -0.5 -0.5 -0.5",
+            "icon items with the render helper (tools, flashlight, portable battery, brush), first person, after 1.12 "
+                + "transformSideFirstPerson: first_person + the helper translate (client test 3 tuning)");
+        def("equipped_helper_third_person", "translate 0 0.25 0.03125; rotate -90 0 1 0; rotate 55 0 0 1; scale 0.85 0.85 0.85; "
+                + "translate 0 -0.2 0; rotate 90 0 1 0; translate -0.5 -0.5 -0.5",
+            "icon items with the render helper, third person, in the 1.12 hand frame (no *_undo/third_person_arm; "
+                + "mirrored for the left hand): vanilla item/handheld pose, then EA's icon quad mapped onto the vanilla icon");
+        def("equipped_model_first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4; translate -0.5 -0.5 -0.5",
+            "OBJ-model items with the render helper (X-ray scanner, fuse), first person, after 1.12 "
+                + "transformSideFirstPerson: the 1.7.10 frame (rotate 45, scale 0.4) + Forge's helper translate");
+        def("equipped_model_third_person", "translate 0 0.1875 -0.3125; rotate 20 1 0 0; rotate 45 0 1 0; "
+                + "scale -0.375 -0.375 0.375; translate -0.5 -0.5 -0.5",
+            "OBJ-model items with the render helper, third person, after third_person_*_undo and third_person_arm: "
+                + "1.7.10 RenderPlayer block branch + Forge's helper translate");
+        def("node_first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4",
+            "transparent-node items (machines, batteries...), first person, after 1.12 transformSideFirstPerson: "
+                + "vanilla block/block pose (models are centred on the origin like the vanilla cube)");
+        def("node_third_person", "translate 0 0.15625 0; rotate 75 1 0 0; rotate 45 0 1 0; scale 0.375 0.375 0.375",
+            "transparent-node items, third person, in the 1.12 hand frame (mirrored for the left hand): vanilla "
+                + "block/block pose");
         def("ground", "translate 0 -0.25 0", "dropped item: cancel 1.12's +0.25 lift (bob and spin stay)");
         def("fixed", "", "item frame");
         def("head", "translate 0 -0.25 0", "on a head");
@@ -55,12 +75,12 @@ public final class ItemTransforms {
         def("entity_item", "scale 0.5 0.5 0.5", "after ground/fixed/head: other items");
         // Icon-only six-node items (cables): their extruded icon model, with these matrices instead of vanilla
         // item/generated's (a full-width rod there: oversized in first person, across the torso in third person)
-        def("icon_first_person", "translate 0.070625 0.2 0.070625; rotate -90 0 1 0; rotate 25 0 0 1; scale 0.4 0.4 0.4",
-            "icon-only six-node items (cables), first person: vanilla item/generated with scale 0.4 (was 0.68)");
+        def("icon_first_person", "translate -0.05 0.25 0.070625; rotate -90 0 1 0; rotate 45 0 0 1; scale 0.25 0.25 0.25",
+            "icon-only six-node items (cables), first person (client test 3 tuning)");
         def("icon_third_person", "translate 0 0.25 0.03125; rotate -90 0 1 0; rotate 55 0 0 1; scale 0.5 0.5 0.5",
             "icon-only six-node items (cables), third person: held like a tool (vanilla item/handheld angles), scale 0.5");
-        def("icon_ground", "scale 0.5 0.5 0.5",
-            "icon-only six-node items (cables), dropped: vanilla item/generated without its +2/16 lift");
+        def("icon_ground", "translate 0 -0.12 0; scale 0.5 0.5 0.5",
+            "icon-only six-node items (cables), dropped (client test 3 tuning: stands on its shadow)");
     }
 
     /**
@@ -74,7 +94,13 @@ public final class ItemTransforms {
         SUPERSEDED.put("first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4");
         SUPERSEDED.put("third_person_six_node", "translate 0 0.1875 -0.3125; rotate 20 1 0 0; rotate 45 0 1 0; scale -0.375 -0.375 0.375");
         SUPERSEDED.put("entity_six_node", "scale 0.25 0.25 0.25");
+        // client test 3 (AdventurAgent): cable tuning became the defaults
+        SUPERSEDED.put("icon_first_person", "translate 0.070625 0.2 0.070625; rotate -90 0 1 0; rotate 25 0 0 1; scale 0.4 0.4 0.4");
+        SUPERSEDED.put("icon_ground", "scale 0.5 0.5 0.5");
     }
+
+    /** Keys no longer read; removed from the file on load (equipped_helper: split into the equipped_helper_* / equipped_model_* / node_* pairs). */
+    private static final String[] OBSOLETE = {"equipped_helper"};
 
     private static void def(String key, String ops, String comment) {
         DEFAULTS.put(key, new String[]{ops, comment});
@@ -105,6 +131,12 @@ public final class ItemTransforms {
             } catch (IllegalArgumentException ex) {
                 problems.add(e.getKey() + ": " + ex.getMessage() + " (kept the previous value)");
                 if (!OPS.containsKey(e.getKey())) OPS.put(e.getKey(), parse(e.getValue()[0]));
+            }
+        }
+        for (String key : OBSOLETE) {
+            if (config.getCategory("transforms").containsKey(key)) {
+                config.getCategory("transforms").remove(key);
+                config.save();
             }
         }
         if (config.hasChanged()) config.save();

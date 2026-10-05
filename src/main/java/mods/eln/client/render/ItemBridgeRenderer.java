@@ -73,6 +73,8 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
             // The per-type ops live in config/eln-render.cfg (ItemTransforms; /elnclient reloadrender), defaults =
             // the 1.7.10 frames described in core-log "WP5 item transforms".
             boolean six = itemStack.getItem() == Eln.sixNodeItem; // SixNodeBlock had render type 0 (3D item paths)
+            Held held = t == ItemRenderType.EQUIPPED || t == ItemRenderType.EQUIPPED_FIRST_PERSON
+                ? held(renderer, t, itemStack, six) : Held.PLAIN;
             switch (t) {
                 case INVENTORY:
                     ItemTransforms.apply("inventory");
@@ -81,16 +83,40 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
                     break;
                 case EQUIPPED_FIRST_PERSON:
                     if (transform == TransformType.FIRST_PERSON_LEFT_HAND) ItemTransforms.apply("first_person_left");
-                    ItemTransforms.apply("first_person");
-                    ItemTransforms.apply(helper(renderer, t, itemStack) ? "equipped_helper" : "equipped_tail");
+                    switch (held) {
+                        case TOOL:
+                            ItemTransforms.apply("equipped_helper_first_person");
+                            break;
+                        case MODEL:
+                            ItemTransforms.apply("equipped_model_first_person");
+                            break;
+                        case NODE:
+                            ItemTransforms.apply("node_first_person");
+                            break;
+                        default:
+                            ItemTransforms.apply("first_person");
+                            ItemTransforms.apply("equipped_tail");
+                    }
                     data = new Object[]{null, entity};
                     break;
                 case EQUIPPED:
-                    ItemTransforms.apply(transform == TransformType.THIRD_PERSON_LEFT_HAND
-                        ? "third_person_left_undo" : "third_person_right_undo");
-                    ItemTransforms.apply("third_person_arm");
-                    ItemTransforms.apply(six ? "third_person_six_node" : "third_person_item");
-                    ItemTransforms.apply(helper(renderer, t, itemStack) ? "equipped_helper" : "equipped_tail");
+                    boolean left = transform == TransformType.THIRD_PERSON_LEFT_HAND;
+                    if (held == Held.TOOL || held == Held.NODE) {
+                        // keys in the 1.12 LayerHeldItem frame (vanilla item/handheld, block/block poses); left hand =
+                        // mirrored like ForgeHooksClient.handleCameraTransforms' leftHandHackery
+                        if (left) GL11.glScalef(-1F, 1F, 1F);
+                        ItemTransforms.apply(held == Held.TOOL ? "equipped_helper_third_person" : "node_third_person");
+                        if (left) GL11.glScalef(-1F, 1F, 1F);
+                    } else {
+                        ItemTransforms.apply(left ? "third_person_left_undo" : "third_person_right_undo");
+                        ItemTransforms.apply("third_person_arm");
+                        if (held == Held.MODEL) {
+                            ItemTransforms.apply("equipped_model_third_person");
+                        } else {
+                            ItemTransforms.apply(six ? "third_person_six_node" : "third_person_item");
+                            ItemTransforms.apply("equipped_tail");
+                        }
+                    }
                     data = new Object[]{null, entity};
                     break;
                 case ENTITY:
@@ -119,17 +145,36 @@ public final class ItemBridgeRenderer extends TileEntityItemStackRenderer {
     private static boolean warned = false;
 
     /**
-     * Forge 1.7.10 renderEquippedItem: shouldUseRenderHelper(type, stack, EQUIPPED_BLOCK) chose translate(-0.5)^3
-     * instead of the item transform (equipped_tail). EA's tools, flashlight, portable battery, X-ray scanner and
-     * transparent-node items say true; their renderItem code expects that frame (the X-ray scanner model sat top-right
-     * with equipped_tail).
+     * How a held item is framed (eln-render.cfg keys; math in core-log "Client test 3 fixes").
+     * PLAIN: no render helper (equipped_tail after first_person / third_person_item).
+     * SIX_NODE: six-node items, helper or not: first_person / third_person_six_node + equipped_tail, as tuned at client
+     * test 1 (c5d81cee had moved the helper ones, most of them, to the helper frame untested).
+     * TOOL: helper items that draw their flat icon (UtilsClient.drawIcon: tools, flashlight, portable battery, brush).
+     * MODEL: helper items that draw an OBJ model tuned against the 1.7.10 helper frame (X-ray scanner, fuse).
+     * NODE: transparent-node items (block-sized OBJ models centred on the origin).
      */
-    private static boolean helper(IItemRenderer renderer, ItemRenderType t, ItemStack s) {
+    enum Held {PLAIN, SIX_NODE, TOOL, MODEL, NODE}
+
+    /**
+     * Forge 1.7.10 renderEquippedItem: shouldUseRenderHelper(type, stack, EQUIPPED_BLOCK) chose translate(-0.5)^3
+     * instead of the item transform (equipped_tail); RenderPlayer's BLOCK_3D query (same answer for EA's items) chose
+     * the block branch in third person.
+     */
+    private static Held held(IItemRenderer renderer, ItemRenderType t, ItemStack s, boolean six) {
+        if (six) return Held.SIX_NODE;
+        boolean helper;
         try {
-            return renderer.shouldUseRenderHelper(t, s, IItemRenderer.ItemRendererHelper.EQUIPPED_BLOCK);
+            helper = renderer.shouldUseRenderHelper(t, s, IItemRenderer.ItemRendererHelper.EQUIPPED_BLOCK);
         } catch (RuntimeException e) {
-            return false;
+            helper = false;
         }
+        if (!helper) return Held.PLAIN;
+        if (s.getItem() instanceof mods.eln.node.transparent.TransparentNodeItem) return Held.NODE;
+        Object d = s.getItem() instanceof mods.eln.generic.GenericItemUsingDamage
+            ? ((mods.eln.generic.GenericItemUsingDamage<?>) s.getItem()).getDescriptor(s) : null;
+        if (d instanceof mods.eln.item.electricalitem.PortableOreScannerItem
+            || d instanceof mods.eln.item.ElectricalFuseDescriptor) return Held.MODEL;
+        return Held.TOOL;
     }
 
 }
