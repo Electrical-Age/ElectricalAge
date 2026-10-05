@@ -221,11 +221,16 @@ public class RootSystem {
         Iterator<Component> ic = addComponents.iterator();
         while (ic.hasNext()) {
             Component c = ic.next();
-            if (!c.canBeReplacedByInterSystem()) {
-                System.out.println("ELN generateInterSystems ERROR");
+            // Left over = straddles two SubSystems (size limit, or a private/non-private boundary). Any resistor can
+            // be split into two half-resistors + delay sources (exact for DC). 1.7.10 cast everything to Resistor
+            // (ClassCastException on e.g. a capacitor across a private boundary); such a component is now left
+            // out of the simulation (open circuit) with a log line instead of crashing the tick.
+            if (c instanceof Resistor) {
+                new InterSystemAbstraction(this, (Resistor) c);
+            } else {
+                Utils.println("ELN generateInterSystems: " + c.getClass().getSimpleName()
+                    + " straddles two SubSystems and is not a resistor; left unsimulated");
             }
-
-            new InterSystemAbstraction(this, (Resistor) c);
 
             ic.remove();
         }
