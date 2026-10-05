@@ -75,7 +75,7 @@ public class SolarPannelSlowProcess implements IProcess {
         }
         int count = 0;
         ///world.getChunkProvider().chunkExists(var1, var2)
-        while (world.getChunkProvider().chunkExists(((int) x) >> 4, ((int) z) >> 4)) {
+        while (world.getChunkProvider().getLoadedChunk(((int) x) >> 4, ((int) z) >> 4) != null) { // 1.7.10 chunkExists = loaded
             double opacity = WorldCompat.getBlockLightOpacity(world, (int) x, (int) y, (int) z);
             light *= (255 - opacity) / 255;
             if (light == 0.0) {

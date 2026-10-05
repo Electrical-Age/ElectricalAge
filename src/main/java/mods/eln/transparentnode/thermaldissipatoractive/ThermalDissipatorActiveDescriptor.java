@@ -56,7 +56,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
             rot = obj.getPart("rot");
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cableDescriptor);
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cableDescriptor);
     }
 
     double warmLimit, coolLimit;

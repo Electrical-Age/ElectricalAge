@@ -100,7 +100,7 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
             if (stack.getCount() != 0)
                 stack.shrink(1);
             else
-                entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, null);
+                entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, ItemStack.EMPTY);
             return true;
         }
         return false;
