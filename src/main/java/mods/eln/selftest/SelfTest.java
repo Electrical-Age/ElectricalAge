@@ -261,6 +261,18 @@ public final class SelfTest implements SelfTestContext {
     private boolean setUp() {
         line("eln selftest at dim " + world.provider.getDimension() + " " + origin.getX() + " " + origin.getY() + " "
             + origin.getZ() + ", " + ticks + " ticks");
+        // the case rows reach maxDz() blocks along +Z (5 per case); load chunks nobody is watching (a run takes a few
+        // seconds, unwatched chunks are only dropped at the next autosave)
+        int loadedNow = 0;
+        for (int dx = -1; dx <= 17; dx++)
+            for (int dz = -1; dz <= maxDz(); dz++) {
+                BlockPos p = at(dx, 0, dz);
+                if (!world.isBlockLoaded(p)) {
+                    world.getChunk(p);
+                    loadedNow++;
+                }
+            }
+        if (loadedNow > 0) line("loaded " + loadedNow + " chunk(s) of the test area");
         for (int dx = -1; dx <= 17; dx++)
             for (int dz = -1; dz <= maxDz(); dz++)
                 for (int dy = 0; dy <= 3; dy++) {
