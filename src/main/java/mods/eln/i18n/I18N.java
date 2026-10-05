@@ -14,6 +14,15 @@ public class I18N {
         return FMLCommonHandler.instance().getCurrentLanguage();
     }
 
+    /**
+     * Lang key of a descriptor name (item names: "<key>.name"). Whitespace runs -> '_' as in 1.7.10, plus '/' -> '_'
+     * like encodeLangKey (the lang files were generated with it: "On/OFF Regulator" -> On_OFF_Regulator...). 1.7.10
+     * left the '/' in, so those names were never translated.
+     */
+    public static String langKey(String name) {
+        return name == null ? null : name.replaceAll("\\s+", "_").replace("/", "_");
+    }
+
     static String encodeLangKey(final String key) {
         return encodeLangKey(key, true);
     }

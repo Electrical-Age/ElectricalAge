@@ -1,5 +1,7 @@
 package mods.eln.generic;
 
+import mods.eln.i18n.I18N;
+
 import mods.eln.compat.GameRegistryCompat;
 
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -108,7 +110,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         if (desc == null) {
             return this.getClass().getName();
         } else {
-            return desc.name.replaceAll("\\s+", "_");
+            return I18N.langKey(desc.name);
         }
     }
 

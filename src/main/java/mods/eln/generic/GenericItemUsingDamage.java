@@ -1,5 +1,7 @@
 package mods.eln.generic;
 
+import mods.eln.i18n.I18N;
+
 import mods.eln.compat.GameRegistryCompat;
 
 
@@ -112,7 +114,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     public String getTranslationKey(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
         if (desc != null && desc.name != null) {
-            return desc.name.replaceAll("\\s+", "_");
+            return I18N.langKey(desc.name);
         } else {
             return null;
         }
