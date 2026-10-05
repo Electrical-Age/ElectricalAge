@@ -47,13 +47,22 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
+    /** Steady temperature at nominal output, as a fraction of the thermal warm limit. */
+    val nominalHeatFraction = 0.65
     override val sound = "eln:generator"
 
     init {
-        thermalLoadInitializer.setMaximalPower(nominalP.toDouble() * (1 - generationEfficiency))
+        // WP16b: sized from the heat the generator really makes at nominal output (loss P(1/eff - 1) plus the
+        // drag share), so that it sits at nominalHeatFraction of its warm limit there and overheats only on
+        // overload (~1.6 x nominal). 1.7.10 sized it at P(1 - eff) but heated it with 1/20 of its loss.
+        thermalLoadInitializer.setMaximalPower(nominalHeatPower() / nominalHeatFraction)
 
         voltageLevelColor = VoltageLevelColor.VeryHighVoltage
     }
+
+    /** Heat (W) at nominal power and speed: electrical loss + drag heat (+ ~0.3 W cable I^2 R, ignored). */
+    fun nominalHeatPower() = nominalP.toDouble() * (1 / generationEfficiency - 1) +
+        defaultDrag * 20 * nominalRads * (1 - generationEfficiency)
 
     override val obj = obj
     override val static = arrayOf(
@@ -181,7 +190,9 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         thermalLoadWatchDog.set(thermal).set(WorldExplosion(this).machineExplosion())
 
         heater = ElectricalLoadHeatThermalLoad(inputLoad, thermal)
-        thermalFastProcessList.add(heater)
+        // WP16b: slow list (like poles/downlinks): the heater moves a power for one step of the load, and the
+        // thermal load is slow. 1.7.10 had it on the fast list, i.e. 20 x the cable's I^2 R per tick.
+        slowProcessList.add(heater)
 
         // TODO: Add running lights. (More. Electrical sparks, perhaps?)
         // TODO: Add the thermal explosions—there should be some.
@@ -231,12 +242,13 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
             val shaftE = if (E >= 0) E / eff else E * eff
             val lossE = if (E >= 0) shaftE - E else shaftE - electricalE
             // The Math.max makes the shaft harder to spin up without an auxilliary power source.
-            val drag = defaultDrag * Math.max(shaft.rads, 10.0)
+            // defaultDrag is J per tick (1/20 s) per rad/s; WP16b: scaled by the step length (1.7.10 applied it
+            // per electrical step, which is a tick only at the default electricalFrequency of 20 Hz).
+            val drag = defaultDrag * Math.max(shaft.rads, 10.0) * time * 20
             shaft.energy -= shaftE + drag * eff
-            // NOTE (left as 1.7.10, see notes/wp16-log.md): movePowerTo takes W but is given J per step, so the
-            // generator heats with 1/20 of its losses; with the true power it would sit at its warm limit (and
-            // the watchdog would blow it up) at nominal output.
-            thermal.movePowerTo(lossE + drag * (1 - eff))
+            // WP16b: energy (J) of this step. 1.7.10 passed these joules to movePowerTo (W), i.e. heated with
+            // 1/20 of the loss; moveEnergyTo is right for a process at any rate (this one is electrical).
+            thermal.moveEnergyTo(lossE + drag * (1 - eff))
         }
     }
 
