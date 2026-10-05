@@ -3,14 +3,17 @@ package mods.eln.sim;
 public class ThermalLoad {
 
     /**
-     * Current temperature, in celsius.
+     * Current temperature as a difference to ambient, in K (= degrees C above PhysicalConstant.Tamb, 20 C).
+     * The thermal step relaxes it to 0 through Rp; GUIs that show absolute temperatures add Tamb.
      */
     public double Tc;
+    /** Thermal resistance to ambient, K/W. */
     public double Rp;
     /**
-     * Thermal resistance, analogous to ohms.
+     * Thermal resistance (K/W) of this load's half of a ThermalConnection (a connection conducts dT/(Rs1+Rs2)).
      */
     public double Rs;
+    /** Heat capacity, J/K. */
     public double C;
     /**
      * Current thermal power, in watts, of this load.
@@ -65,7 +68,12 @@ public class ThermalLoad {
         Rp = 1000000000.0;
     }
 
-    public static final ThermalLoad externalLoad = new ThermalLoad(0, 0, 0, 0);
+    /**
+     * Ambient as an infinite heat reservoir (other end of e.g. the electrical furnace's ThermalResistor): Tc stays 0
+     * whatever flows in. 1.7.10 had Rp = 0 and C = 0, so Tc/Rp (getPower, or the thermal step if it was ever put on
+     * a load list) was NaN.
+     */
+    public static final ThermalLoad externalLoad = new ThermalLoad(0, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY);
 
     public void setRp(double Rp) {
         this.Rp = Rp;
