@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalfurnace;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
@@ -29,7 +31,7 @@ public class ElectricalFurnaceProcess implements IProcess {
     public void process(double time) {
         ItemStack itemStack = inventory.getStackInSlot(furnace.thermalIsolatorSlotId);
 
-        if (itemStack == null) {
+        if (Utils.isEmpty(itemStack)) {
             furnace.descriptor.refreshTo(furnace.thermalLoad, 1);
         } else {
             ThermalIsolatorElement element = ((GenericItemUsingDamage<ThermalIsolatorElement>) itemStack.getItem()).getDescriptor(itemStack);
@@ -94,14 +96,14 @@ public class ElectricalFurnaceProcess implements IProcess {
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
     private boolean smeltCan() {
-        if (inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId) == null) {
+        if (Utils.isEmpty(inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId))) {
             return false;
         } else {
             ItemStack var1 = getSmeltResult();
-            if (var1 == null) return false;
-            if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId) == null) return true;
+            if (Utils.isEmpty(var1)) return false;
+            if (Utils.isEmpty(inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId))) return true;
             if (!inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isItemEqual(var1)) return false;
-            int result = inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).stackSize + var1.stackSize;
+            int result = inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).getCount() + var1.getCount();
 
             //energyNeeded = 1000.0;
             return (result <= inventory.getInventoryStackLimit() && result <= var1.getMaxStackSize());
@@ -119,15 +121,15 @@ public class ElectricalFurnaceProcess implements IProcess {
         if (this.smeltCan()) {
             ItemStack var1 = getSmeltResult();
 
-            if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId) == null) {
+            if (Utils.isEmpty(inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId))) {
                 inventory.setInventorySlotContents(1, var1.copy());
             } else if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isItemEqual(var1)) {
-                inventory.decrStackSize(ElectricalFurnaceElement.outSlotId, -var1.stackSize);
+                inventory.decrStackSize(ElectricalFurnaceElement.outSlotId, -var1.getCount());
             }
 
-            /*--this.furnaceItemStacks[0].stackSize;
+            /*--this.furnaceItemStacks[0].getCount();
 
-            if (this.furnaceItemStacks[0].stackSize <= 0) {
+            if (this.furnaceItemStacks[0].getCount() <= 0) {
                 this.furnaceItemStacks[0] = null;
             }*/
             inventory.decrStackSize(ElectricalFurnaceElement.inSlotId, 1);

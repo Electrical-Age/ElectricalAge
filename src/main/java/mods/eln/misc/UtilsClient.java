@@ -19,7 +19,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.PacketBuffer;
+import io.netty.buffer.Unpooled;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -383,7 +385,7 @@ public class UtilsClient {
         entityItem.motionZ = 0.0;
 
         Render var10;
-        var10 = RenderManager.instance.getEntityRenderObject(entityItem);
+        var10 = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entityItem);
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x, (float) y, (float) z);
         GL11.glRotatef(roty, 0, 1, 0);
@@ -455,7 +457,7 @@ public class UtilsClient {
 
     static RenderItem getItemRender() {
         if (itemRenderer == null)
-            itemRenderer = new RenderItem();
+            itemRenderer = Minecraft.getMinecraft().getRenderItem();
         return itemRenderer;
     }
 
@@ -484,7 +486,7 @@ public class UtilsClient {
         itemRenderer.zLevel = 400.0F;
         // ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
         FontRenderer font = null;
-        if (par1ItemStack != null) {
+        if (!Utils.isEmpty(par1ItemStack)) {
             Item i = par1ItemStack.getItem();
             if (i == null)
                 return;
@@ -492,7 +494,7 @@ public class UtilsClient {
         }
         if (font == null)
             font = mc().fontRenderer;
-        itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
+        itemRenderer.renderItemAndEffectIntoGUI(par1ItemStack, x, y); // font: only used by the (commented) overlay
         // itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
 
         itemRenderer.zLevel = 0.0F;
@@ -502,12 +504,12 @@ public class UtilsClient {
             GL11.glDisable(32826);
         }
 
-        if (par1ItemStack.stackSize > 1) {
+        if (par1ItemStack.getCount() > 1) {
             disableDepthTest();
             // GL11.glPushMatrix();
             // GL
             // GL11.glScalef(0.5f, 0.5f, 0.5f);
-            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.stackSize, x + 10, y + 9, 0xFFFFFFFF);
+            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.getCount(), x + 10, y + 9, 0xFFFFFFFF);
             // GL11.glPopMatrix();
             enableDepthTest();
         }
@@ -530,8 +532,9 @@ public class UtilsClient {
     }
 
     public static int getLight(World w, int x, int y, int z) {
-        int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.BLOCK, x, y, z);
-        int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.SKY, x, y, z) - w.calculateSkylightSubtracted(0f);
+        BlockPos pos = new BlockPos(x, y, z);
+        int b = w.getLightFromNeighborsFor(EnumSkyBlock.BLOCK, pos);
+        int s = w.getLightFromNeighborsFor(EnumSkyBlock.SKY, pos) - w.calculateSkylightSubtracted(0f);
         return Math.max(b, s);
     }
 
@@ -544,8 +547,7 @@ public class UtilsClient {
     }
 
     public static void sendPacketToServer(ByteArrayOutputStream bos) {
-        CPacketCustomPayload packet = new CPacketCustomPayload(Eln.channelName, bos.toByteArray());
-        Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
+        Eln.eventChannel.sendToServer(new FMLProxyPacket(new PacketBuffer(Unpooled.wrappedBuffer(bos.toByteArray())), Eln.channelName));
         // Minecraft.getMinecraft().player.connection.sendPacket(new FMLProxyPacket(packet));
     }
 

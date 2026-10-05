@@ -183,7 +183,7 @@ public class LampSocketElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
+        if (Utils.isEmpty(acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId))) return null;
         if (poweredByLampSupply) return null;
 
         if (grounded) return positiveLoad;
@@ -197,7 +197,7 @@ public class LampSocketElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
+        if (Utils.isEmpty(acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId))) return 0;
         if (poweredByLampSupply) return 0;
         if (grounded) return NodeBase.maskElectricalPower;
 
@@ -227,7 +227,7 @@ public class LampSocketElement extends SixNodeElement {
             }
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", positiveLoad.getU()));
             ItemStack lampStack = acceptingInventory.getInventory().getStackInSlot(0);
-            if (lampStack != null && lampDescriptor != null) {
+            if (!Utils.isEmpty(lampStack) && lampDescriptor != null) {
                 info.put(I18N.tr("Life"), Utils.plotValue(lampDescriptor.getLifeInTag(lampStack)));
             }
 
@@ -297,7 +297,7 @@ public class LampSocketElement extends SixNodeElement {
         }
 
         ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
-        if (currentItemStack != null) {
+        if (!Utils.isEmpty(currentItemStack)) {
             GenericItemUsingDamageDescriptor itemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(currentItemStack);
             if (itemDescriptor != null) {
                 if (itemDescriptor instanceof BrushDescriptor) {

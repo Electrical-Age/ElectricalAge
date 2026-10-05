@@ -16,7 +16,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.EnumSkyBlock;
@@ -28,7 +33,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 
-public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient, INodeEntity {
+public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient, INodeEntity, ITickable {
 
     public static final LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
 
@@ -147,8 +152,14 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     /**
      * Writes a tile entity to NBT.
      */
-    public void writeToNBT(NBTTagCompound nbt) {
-        super.writeToNBT(nbt);
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        return super.writeToNBT(nbt);
+    }
+
+    /** 1.7.10 kept the TE when only the metadata changed; 1.12 would recreate it on any state change. */
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
     }
 
 
@@ -165,16 +176,11 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
 
-    @Override
-    public boolean canUpdate() {
-
-        return true;
-    }
-
     boolean updateEntityFirst = true;
 
+    // 1.7.10 updateEntity() (canUpdate() was true): ITickable.update() in 1.12
     @Override
-    public void updateEntity() {
+    public void update() {
         if (updateEntityFirst) {
             updateEntityFirst = false;
             if (!world.isRemote) {
@@ -259,6 +265,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
 
+    @SideOnly(Side.CLIENT)
     public static NodeBlockEntity getEntity(int x, int y, int z) {
         TileEntity entity;
         if ((entity = WorldCompat.getTileEntity(Minecraft.getMinecraft().world, x, y, z)) != null) {
@@ -270,16 +277,43 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
 
+    /**
+     * 1.7.10 getDescriptionPacket() sent the node's publish packet (EA byte protocol) as a custom payload.
+     * 1.12 only syncs TEs through NBT, so the same bytes ride in the update tag / update packet and are fed to
+     * the client packet handler on arrival (both handlers run on the client main thread).
+     */
     @Override
-    public Packet getDescriptionPacket() {
+    public NBTTagCompound getUpdateTag() {
+        NBTTagCompound tag = super.getUpdateTag();
+        if (world == null || world.isRemote) return tag;
         Node node = getNode(); //TO DO NULL POINTER
         if (node == null) {
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
-            return null;
+            return tag;
         }
-        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
-        //return null;
+        tag.setByteArray(DESCRIPTION_KEY, node.getPublishPacket().toByteArray());
+        return tag;
     }
+
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        NBTTagCompound tag = getUpdateTag();
+        if (!tag.hasKey(DESCRIPTION_KEY)) return null;
+        return new SPacketUpdateTileEntity(pos, 0, tag);
+    }
+
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        super.handleUpdateTag(tag);
+        if (tag.hasKey(DESCRIPTION_KEY)) Eln.proxy.handleDescriptionPacket(tag.getByteArray(DESCRIPTION_KEY));
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        handleUpdateTag(pkt.getNbtCompound());
+    }
+
+    public static final String DESCRIPTION_KEY = "elnDescription";
 
 
     public void preparePacketForServer(DataOutputStream stream) {
@@ -290,7 +324,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             stream.writeInt(pos.getY());
             stream.writeInt(pos.getZ());
 
-            stream.writeByte(world.provider.getDimension());
+            stream.writeInt(world.provider.getDimension()); // 1.12 port: dimension as int (was byte)
 
             stream.writeUTF(getNodeUuid());
 

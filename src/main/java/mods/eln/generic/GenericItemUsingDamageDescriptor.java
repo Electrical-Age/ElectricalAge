@@ -1,5 +1,7 @@
 package mods.eln.generic;
 
+
+import mods.eln.misc.Utils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
@@ -74,7 +76,7 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
-        if (stack == null)
+        if (Utils.isEmpty(stack))
             return null;
         if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
             return null;
@@ -106,7 +108,7 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public boolean checkSameItemStack(ItemStack stack) {
-        if (stack == null)
+        if (Utils.isEmpty(stack))
             return false;
         if (stack.getItem() != parentItem || stack.getMetadata() != parentItemDamage)
             return false;

@@ -14,24 +14,27 @@ import mods.eln.node.transparent.TransparentNodeRender;
 import mods.eln.sixnode.tutorialsign.TutorialSignOverlay;
 import mods.eln.sound.SoundClientEventListener;
 import net.minecraft.client.model.ModelSilverfish;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 
 public class ClientProxy extends CommonProxy {
 
     public static UuidManager uuidManager;
     public static SoundClientEventListener soundClientEventListener;
+    public static ClientPacketHandler clientPacketHandler;
+
+    @Override
+    public void handleDescriptionPacket(byte[] data) {
+        if (clientPacketHandler != null) clientPacketHandler.packetRx(data, null);
+    }
 
     @Override
     public void registerRenderers() {
-        new ClientPacketHandler();
+        clientPacketHandler = new ClientPacketHandler();
         ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
         ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
 
-        MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
+        // TODO(1.12 WP5): IItemRenderer bridge (TEISR + perspective-capturing IBakedModel) for transparentNodeItem,
+        // sixNodeItem, sharedItem, sharedItemStackOne (were MinecraftForgeClient.registerItemRenderer).
 
         RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(), (float) 0.3));
 
@@ -40,12 +43,6 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
         uuidManager = new UuidManager();
         soundClientEventListener = new SoundClientEventListener(uuidManager);
-
-        if (Eln.versionCheckEnabled)
-            FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
-
-        if (Eln.analyticsEnabled)
-            FMLCommonHandler.instance().bus().register(AnalyticsHandler.getInstance());
 
         new FrameTime();
         new ConnectionListener();

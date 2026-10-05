@@ -1,6 +1,8 @@
 package mods.eln.node.transparent;
 
 
+
+import net.minecraft.util.math.BlockPos;
 import mods.eln.compat.WorldCompat;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
@@ -9,6 +11,8 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -27,8 +31,11 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
 
     @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
+    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, IBlockState newState) {
         if (world.isRemote) return false;
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
+        int side = facing.getIndex();
+        int metadata = getMetadata(stack.getMetadata()); // 1.7.10 passed the item meta through, unclamped
         TransparentNodeDescriptor descriptor = getDescriptor(stack);
         Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
         Direction front = descriptor.getFrontFromPlace(direction, player);
@@ -39,7 +46,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         z += v[2];
 
         Block bb = WorldCompat.getBlock(world, x, y, z);
-        if (bb.isReplaceable(world, x, y, z)) ;
+        if (bb.isReplaceable(world, new BlockPos(x, y, z))) ;
         //if(WorldCompat.getBlock(world, x, y, z) != Blocks.AIR) return false;
 
         Coordonate coord = new Coordonate(x, y, z, world);

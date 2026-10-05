@@ -1,6 +1,8 @@
 package mods.eln.node.six;
 
 
+
+import net.minecraft.util.math.BlockPos;
 import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
@@ -10,6 +12,14 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -34,12 +44,16 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     /**
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+    @Override
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        ItemStack stack = player.getHeldItem(hand);
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
+        int side = facing.getIndex();
         Block block = WorldCompat.getBlock(world, x, y, z);
 
         if ((block == Blocks.SNOW_LAYER) && ((WorldCompat.getMeta(world, x, y, z) & 0x7) < 1)) {
             side = 1;
-        } else if ((block != Blocks.VINE) && (block != Blocks.TALLGRASS) && (block != Blocks.DEADBUSH) && (!block.isReplaceable(world, x, y, z))) {
+        } else if ((block != Blocks.VINE) && (block != Blocks.TALLGRASS) && (block != Blocks.DEADBUSH) && (!block.isReplaceable(world, new BlockPos(x, y, z)))) {
             if (side == 0)
                 y--;
 
@@ -59,22 +73,25 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
                 x++;
         }
 
-        if (stack.stackSize == 0)
-            return false;
-        if (!player.canPlayerEdit(x, y, z, side, stack))
-            return false;
-        if ((y == 255) && (this.field_150939_a.getMaterial().isSolid()))
-            return false;
+        if (stack.getCount() == 0)
+            return EnumActionResult.FAIL;
+        BlockPos placePos = new BlockPos(x, y, z);
+        if (!player.canPlayerEdit(placePos, EnumFacing.byIndex(side), stack))
+            return EnumActionResult.FAIL;
+        if ((y == 255) && (this.block.getDefaultState().getMaterial().isSolid()))
+            return EnumActionResult.FAIL;
 
         int i1 = getMetadata(stack.getMetadata());
-        int metadata = this.field_150939_a.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, i1);
+        int metadata = i1; // 1.7.10: block.onBlockPlaced(...) returned the item meta (not overridden by EA)
 
         if (placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata)) {
-            world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, this.field_150939_a.blockSoundType.func_150496_b(), (this.field_150939_a.blockSoundType.getVolume() + 1.0F) / 2.0F, this.field_150939_a.blockSoundType.getPitch() * 0.8F);
-            stack.stackSize -= 1;
+            IBlockState placed = world.getBlockState(placePos);
+            SoundType soundType = this.block.getSoundType(placed, world, placePos, player);
+            world.playSound(null, x + 0.5F, y + 0.5F, z + 0.5F, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+            stack.shrink(1);
         }
 
-        return true;
+        return EnumActionResult.SUCCESS;
     }
 
     /**
@@ -83,7 +100,10 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
     // func_150936_a <= canPlaceItemBlockOnSide
     @Override
-    public boolean func_150936_a(World par1World, int x, int y, int z, int par5, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack) {
+    @SideOnly(Side.CLIENT)
+    public boolean canPlaceBlockOnSide(World par1World, BlockPos pos, EnumFacing side, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack) {
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
+        int par5 = side.getIndex();
         if (!isStackValidToPlace(par7ItemStack))
             return false;
         int[] vect = new int[]{x, y, z};
@@ -94,7 +114,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         }
         if (WorldCompat.getBlock(par1World, vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
             return true;
-        if (super.func_150936_a(par1World, x, y, z, par5, par6EntityPlayer, par7ItemStack))
+        if (super.canPlaceBlockOnSide(par1World, pos, side, par6EntityPlayer, par7ItemStack))
             return true;
 
         return false;
@@ -114,7 +134,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
         Block blockOld = WorldCompat.getBlock(world, x, y, z);
         SixNodeBlock block = (SixNodeBlock) Block.getBlockFromItem(this);
-        if (blockOld == Blocks.AIR || blockOld.isReplaceable(world, x, y, z)) {
+        if (blockOld == Blocks.AIR || blockOld.isReplaceable(world, new BlockPos(x, y, z))) {
             // blockID = this.getBlockID();
 
             Coordonate coord = new Coordonate(x, y, z, world);

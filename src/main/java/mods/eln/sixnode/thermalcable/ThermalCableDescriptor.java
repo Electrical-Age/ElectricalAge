@@ -83,7 +83,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
 
     /*
     static void setThermalLoadFrom(ItemStack itemStack, ThermalLoad thermalLoad) {
-        if (itemStack == null || itemStack.itemID != Eln.sixNodeBlock.blockID || (itemStack.getMetadata() & 0xFF) != Eln.electricalCableId) {
+        if (Utils.isEmpty(itemStack) || itemStack.itemID != Eln.sixNodeBlock.blockID || (itemStack.getMetadata() & 0xFF) != Eln.electricalCableId) {
             thermalLoad.setHighImpedance();
         } else {
             ThermalCableDescriptor cableDescriptor = ThermalCableDescriptor.list[(itemStack.getMetadata() >> 8) & 0xFF];

@@ -1,46 +1,54 @@
 package mods.eln;
 
 
-import mods.eln.compat.WorldCompat;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
-import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.buffer.ByteBuf;
 import mods.eln.client.ClientKeyHandler;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
-import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.server.PlayerManager;
-import mods.eln.sound.SoundClient;
-import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 
 import java.io.*;
 
-@Sharable
+/**
+ * Server side of EA's byte protocol (client -> server packets). Client-bound packets are handled by
+ * mods.eln.client.ClientPacketHandler (1.12 port: split by direction, rule 4).
+ * Packets are copied off the netty buffer and processed on the server thread (rule 5; known bug: EA mutated
+ * world state on the netty thread).
+ */
 public class PacketHandler {
 
     public PacketHandler() {
         Eln.eventChannel.register(this);
     }
 
+    /** Copy the readable bytes of a payload (the buffer may be pooled, sliced or direct). */
+    public static byte[] payloadBytes(ByteBuf payload) {
+        byte[] data = new byte[payload.readableBytes()];
+        payload.getBytes(payload.readerIndex(), data);
+        return data;
+    }
 
     @SubscribeEvent
     public void onServerPacket(ServerCustomPacketEvent event) {
-        FMLProxyPacket packet = event.packet;
-        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
-        NetworkManager manager = event.manager;
-        EntityPlayer player = ((NetHandlerPlayServer) event.handler).player; // EntityPlayerMP
-
-        packetRx(stream, manager, player);
+        final byte[] data = payloadBytes(event.getPacket().payload());
+        final NetworkManager manager = event.getManager();
+        final EntityPlayerMP player = ((NetHandlerPlayServer) event.getHandler()).player;
+        FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(new Runnable() {
+            @Override
+            public void run() {
+                packetRx(new DataInputStream(new ByteArrayInputStream(data)), manager, player);
+            }
+        });
     }
 
 
@@ -50,29 +58,11 @@ public class PacketHandler {
                 case Eln.packetPlayerKey:
                     packetPlayerKey(stream, manager, player);
                     break;
-                case Eln.packetNodeSingleSerialized:
-                    packetNodeSingleSerialized(stream, manager, player);
-                    break;
                 case Eln.packetPublishForNode:
                     packetForNode(stream, manager, player);
                     break;
-                case Eln.packetForClientNode:
-                    packetForClientNode(stream, manager, player);
-                    break;
-                case Eln.packetOpenLocalGui:
-                    packetOpenLocalGui(stream, manager, player);
-                    break;
-                case Eln.packetPlaySound:
-                    packetPlaySound(stream, manager, player);
-                    break;
-                case Eln.packetDestroyUuid:
-                    packetDestroyUuid(stream, manager, player);
-                    break;
                 case Eln.packetClientToServerConnection:
                     packetNewClient(manager, player);
-                    break;
-                case Eln.packetServerToClientInfo:
-                    packetServerInfo(stream, manager, player);
                     break;
             }
         } catch (IOException e) {
@@ -98,126 +88,16 @@ public class PacketHandler {
         Utils.sendPacketToClient(bos, (EntityPlayerMP) player);
     }
 
-    private void packetServerInfo(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        for (IConfigSharing c : Eln.instance.configShared) {
-            try {
-                c.deserialize(stream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void packetDestroyUuid(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        try {
-            ClientProxy.uuidManager.kill(stream.readInt());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    void packetPlaySound(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        try {
-            if (stream.readByte() != player.dimension)
-                return;
-            SoundClient.play(SoundCommand.fromStream(stream, player.world));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    void packetOpenLocalGui(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        EntityPlayer clientPlayer = (EntityPlayer) player;
-        try {
-            clientPlayer.openGui(Eln.instance, stream.readInt(),
-                clientPlayer.world, stream.readInt(), stream.readInt(),
-                stream.readInt());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     void packetForNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         try {
             Coordonate coordonate = new Coordonate(stream.readInt(),
-                stream.readInt(), stream.readInt(), stream.readByte());
+                stream.readInt(), stream.readInt(), stream.readInt());
 
             NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
             if (node != null && node.getNodeUuid().equals(stream.readUTF())) {
                 node.networkUnserialize(stream, (EntityPlayerMP) player);
             } else {
                 Utils.println("packetForNode node found");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    void packetForClientNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        EntityPlayer clientPlayer = (EntityPlayer) player;
-        int x, y, z, dimention;
-        try {
-
-            x = stream.readInt();
-            y = stream.readInt();
-            z = stream.readInt();
-            dimention = stream.readByte();
-
-
-            if (clientPlayer.dimension == dimention) {
-                TileEntity entity = WorldCompat.getTileEntity(clientPlayer.world, x, y, z);
-                if (entity != null && entity instanceof INodeEntity) {
-                    INodeEntity node = (INodeEntity) entity;
-                    if (node.getNodeUuid().equals(stream.readUTF())) {
-                        node.serverPacketUnserialize(stream);
-                        if (0 != stream.available()) {
-                            Utils.println("0 != stream.available()");
-                        }
-                    } else {
-                        Utils.println("Wrong node UUID warning");
-                        int dataSkipLength = stream.readByte();
-                        for (int idx = 0; idx < dataSkipLength; idx++) {
-                            stream.readByte();
-                        }
-                    }
-                }
-            } else
-                Utils.println("No node found for " + x + " " + y + " " + z);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    void packetNodeSingleSerialized(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
-        try {
-            EntityPlayer clientPlayer = player;
-            int x, y, z, dimention;
-            x = stream.readInt();
-            y = stream.readInt();
-            z = stream.readInt();
-            dimention = stream.readByte();
-
-            if (clientPlayer.dimension == dimention) {
-                TileEntity entity = WorldCompat.getTileEntity(clientPlayer.world, x, y, z);
-                if (entity != null && entity instanceof INodeEntity) {
-                    INodeEntity node = (INodeEntity) entity;
-                    if (node.getNodeUuid().equals(stream.readUTF())) {
-                        node.serverPublishUnserialize(stream);
-                        if (0 != stream.available()) {
-                            Utils.println("0 != stream.available()");
-
-                        }
-                    } else {
-                        Utils.println("Wrong node UUID warning");
-                        int dataSkipLength = stream.readByte();
-                        for (int idx = 0; idx < dataSkipLength; idx++) {
-                            stream.readByte();
-                        }
-                    }
-                } else
-                    Utils.println("No node found for " + x + " " + y + " " + z);
             }
         } catch (IOException e) {
             e.printStackTrace();

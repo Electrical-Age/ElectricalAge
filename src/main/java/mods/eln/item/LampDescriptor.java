@@ -118,7 +118,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
         list.add(tr("Power: %1$W", Utils.plotValue(nominalP)));
         list.add(tr("Resistance: %1$\u2126", Utils.plotValue(getR())));
         list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
-        if (itemStack != null) {
+        if (!Utils.isEmpty(itemStack)) {
             if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))
                 list.add(tr("Condition:") + " " + tr("New"));
             else if (getLifeInTag(itemStack) > 0.5)

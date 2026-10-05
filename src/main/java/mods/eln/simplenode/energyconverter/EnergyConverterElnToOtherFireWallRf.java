@@ -16,6 +16,6 @@ public class EnergyConverterElnToOtherFireWallRf {
         IEnergyHandler energyHandler = (IEnergyHandler) tileEntity;
 
         double pMax = node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio());
-        node.drawEnergy(energyHandler.receiveEnergy(node.getFront().toForge(), (int) pMax, false), Other.getElnToTeConversionRatio());
+        node.drawEnergy(energyHandler.receiveEnergy(node.getFront().toEnumFacing(), (int) pMax, false), Other.getElnToTeConversionRatio());
     }
 }

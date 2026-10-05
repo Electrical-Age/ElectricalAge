@@ -46,9 +46,10 @@ public class NodeManager extends WorldSavedData {
     public void addNode(NodeBase node) {
         // nodeArray.add(node);
         if (node.coordonate == null) {
-            Utils.println("Null coordonate addnode");
-            while (true)
-                ;
+            // 1.12 port, known bug: this used to hang the server thread forever (while (true);).
+            Utils.println("Null coordonate addnode: node not added");
+            new Throwable("Null coordonate addnode").printStackTrace();
+            return;
         }
         NodeBase old = nodesMap.put(node.coordonate, node);
         if (old != null) {
@@ -97,12 +98,13 @@ public class NodeManager extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		/*
 		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
 		 * 
 		 * }
 		 */
+        return nbt;
     }
 
     public NodeBase getNodeFromCoordonate(Coordonate nodeCoordonate) {

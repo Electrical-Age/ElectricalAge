@@ -63,9 +63,9 @@ public class ElectricalStackMachineProcess implements IProcess {
     public void process(double time) {
         ItemStack itemStackIn = inventory.getStackInSlot(inputSlotId);
 
-        boolean itemTypeChanged = itemStackIn == null && itemStackInOld != null ||
-            itemStackIn != null && itemStackInOld == null ||
-            itemStackIn != null && itemStackInOld != null && !itemStackIn.getTranslationKey().equals(itemStackInOld.getTranslationKey());
+        boolean itemTypeChanged = Utils.isEmpty(itemStackIn) && !Utils.isEmpty(itemStackInOld) ||
+            !Utils.isEmpty(itemStackIn) && Utils.isEmpty(itemStackInOld) ||
+            !Utils.isEmpty(itemStackIn) && !Utils.isEmpty(itemStackInOld) && !itemStackIn.getTranslationKey().equals(itemStackInOld.getTranslationKey());
 
         if (itemTypeChanged || (!smeltCan()) || !smeltInProcess) {
             smeltInit();
@@ -110,7 +110,7 @@ public class ElectricalStackMachineProcess implements IProcess {
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
     public boolean smeltCan() {
-        if (inventory.getStackInSlot(inputSlotId) == null) {
+        if (Utils.isEmpty(inventory.getStackInSlot(inputSlotId))) {
             return false;
         } else {
             ItemStack[] output = getSmeltResult();
@@ -132,7 +132,7 @@ public class ElectricalStackMachineProcess implements IProcess {
         if (this.smeltCan()) {
             Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
             Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory, outSlotIdList);
-            inventory.decrStackSize(inputSlotId, recipe.input.stackSize);
+            inventory.decrStackSize(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);
         }
     }

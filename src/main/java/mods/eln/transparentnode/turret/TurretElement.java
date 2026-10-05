@@ -238,7 +238,7 @@ public class TurretElement extends TransparentNodeElement {
         info.put(I18N.tr("Charge power"), Utils.plotPower("", chargePower));
 
         ItemStack filterStack = acceptingInventory.getInventory().getStackInSlot(TurretContainer.filterId);
-        if (filterStack != null) {
+        if (!Utils.isEmpty(filterStack)) {
             GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
             if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
                 EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;

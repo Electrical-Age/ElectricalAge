@@ -1,7 +1,6 @@
 package mods.eln.fluid
 
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.common.util.ForgeDirection
 
 class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) {
     private var fixup = 0.0
@@ -18,7 +17,7 @@ class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) 
 
     fun drain(demand: Double): Double {
         val drain = Math.ceil(demand - fixup)
-        val drained = drain(ForgeDirection.DOWN, drain.toInt(), true)?.amount?.toDouble() ?: 0.0
+        val drained = drain(drain.toInt(), true)?.amount?.toDouble() ?: 0.0
         val available = fixup + drained
         val actual = Math.min(demand, available)
         fixup = Math.max(0.0, available - demand)

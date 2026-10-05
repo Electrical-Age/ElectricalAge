@@ -62,7 +62,7 @@ public class PowerSocketRender extends SixNodeElementRender {
             channel = stream.readUTF();
 
             ItemStack cableStack = Utils.unserialiseItemStack(stream);
-            if (cableStack != null) {
+            if (!Utils.isEmpty(cableStack)) {
                 ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
                 cableRender = desc.render;
             } else {

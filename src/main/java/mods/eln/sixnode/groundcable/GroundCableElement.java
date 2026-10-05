@@ -82,7 +82,7 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        //if (inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
+        //if (Utils.isEmpty(inventory.getStackInSlot(GroundCableContainer.cableSlotId))) return 0;
         return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
     }
 
@@ -126,7 +126,7 @@ public class GroundCableElement extends SixNodeElement {
             colorCare = colorCare ^ 1;
             Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
-        } else if (currentItemStack != null) {
+        } else if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
 
             GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);

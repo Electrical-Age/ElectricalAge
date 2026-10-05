@@ -90,7 +90,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
         //drawString(8, 6, Utils.plotPower("Consummation", render.heatingCorpResistorP));
 
         ItemStack stack = render.inventory.getStackInSlot(ElectricalFurnaceElement.heatingCorpSlotId);
-        if (stack == null) {
+        if (Utils.isEmpty(stack)) {
             supplyBar.setEnabled(false);
         } else {
             supplyBar.setEnabled(true);

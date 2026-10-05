@@ -30,13 +30,13 @@ public class SoundServer {
         try {
             stream.writeByte(Eln.packetPlaySound);
 
-            stream.writeByte(p.world.provider.getDimension());
+            stream.writeInt(p.world.provider.getDimension()); // 1.12 port: dimension as int (was byte)
 
             p.writeTo(stream);
 
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-            for (Object obj : server.getConfigurationManager().playerEntityList) {
+            for (Object obj : server.getPlayerList().getPlayers()) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
                 if (player.dimension == p.world.provider.getDimension() && player.getDistance(p.x, p.y, p.z) < p.rangeMax + 2)
                     ;

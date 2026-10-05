@@ -182,7 +182,7 @@ public class WirelessUtils {
                     World w = c.world();
 
                     virtualDistance +=
-                        b.isOpaqueCube() &&
+                        b.getDefaultState().isOpaqueCube() &&
                         !b.isAir(w, c.x, c.y, c.z) ?
                         2.0 : 0.0;
                 }

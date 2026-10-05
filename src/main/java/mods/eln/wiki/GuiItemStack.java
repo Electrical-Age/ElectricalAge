@@ -1,5 +1,7 @@
 package mods.eln.wiki;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.UtilsClient;
@@ -39,7 +41,7 @@ public class GuiItemStack extends Gui implements IGuiObject {
             UtilsClient.bindTexture(slotSkin);
             drawTexturedModalRect(posX - 1, posY - 1, 55, 16, 73 - 55, 34 - 16);
 
-            if (stack != null) {
+            if (!Utils.isEmpty(stack)) {
                 //	RenderHelper.enableStandardItemLighting();
                 RenderHelper.enableStandardItemLighting();
                 RenderHelper.enableGUIStandardItemLighting();
@@ -96,7 +98,7 @@ public class GuiItemStack extends Gui implements IGuiObject {
 
     @Override
     public void idraw2(int x, int y) {
-        if (stack == null) return;
+        if (Utils.isEmpty(stack)) return;
         if ((x >= posX && y >= posY && x < posX + w && y < posY + h)) {
             int px, py;
             px = posX;
@@ -115,7 +117,7 @@ public class GuiItemStack extends Gui implements IGuiObject {
     @Override
     public void imouseClicked(int x, int y, int code) {
         if (x >= posX && y >= posY && x < posX + w && y < posY + h) {
-            if (stack != null) {
+            if (!Utils.isEmpty(stack)) {
                 UtilsClient.clientOpenGui(new ItemDefault(stack, helper.screen));
             }
 			/*if(observer != null){

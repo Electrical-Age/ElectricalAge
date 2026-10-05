@@ -80,7 +80,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
         SimpleNode n = getNode();
         if (n == null)
             return false;
-        return n.getFront().back() == Direction.from(direction);
+        return n.getFront().back() == Direction.fromEnumFacing(direction);
     }
 
     @Optional.Method(modid = Other.modIdIc2)
@@ -151,8 +151,8 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	 * 
 	 * @Optional.Method(modid = Other.modIdOc) public Node
 	 * sidedNode(ForgeDirection side) { if(world.isRemote){ if(front.back()
-	 * == Direction.from(side)) return node(); return null; }else{
-	 * if(getNode().getFront().back() == Direction.from(side)) return node();
+	 * == Direction.fromEnumFacing(side)) return node(); return null; }else{
+	 * if(getNode().getFront().back() == Direction.fromEnumFacing(side)) return node();
 	 * return null; } }
 	 * 
 	 * @Override
@@ -161,7 +161,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	 * 
 	 * @Optional.Method(modid = Other.modIdOc) public boolean
 	 * canConnect(ForgeDirection side) { if(front == null) return false;
-	 * if(front.back() == Direction.from(side)) return true; return false; }
+	 * if(front.back() == Direction.fromEnumFacing(side)) return true; return false; }
 	 */
 
     // *************** RF **************
@@ -175,7 +175,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
         if (getNode() == null)
             return false;
         SimpleNode n = getNode();
-        return n.getFront().back() == Direction.from(from);
+        return n.getFront().back() == Direction.fromEnumFacing(from);
     }
 
     @Override
@@ -218,8 +218,8 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     // ***************** Bridges ****************
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
         if (Other.ic2Loaded)
             EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
         if (Other.ocLoaded)

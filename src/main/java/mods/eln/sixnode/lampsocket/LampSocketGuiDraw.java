@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.gui.*;
 import mods.eln.node.six.SixNodeElementInventory;
 import net.minecraft.client.gui.GuiButton;
@@ -97,7 +99,7 @@ public class LampSocketGuiDraw extends GuiContainerEln {
         if (lampRender.poweredByLampSupply) {
             buttonSupplyType.displayString = tr("Powered by Lamp Supply");
             channel.setVisible(true);
-            if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null)
+            if (Utils.isEmpty(inventory.getStackInSlot(LampSocketContainer.cableSlotId)))
                 channel.setComment(1, "§4" + tr("Cable slot empty"));
             else if (lampRender.isConnectedToLampSupply)
                 channel.setComment(1, "§2" + tr("connected to " + lampRender.channel));

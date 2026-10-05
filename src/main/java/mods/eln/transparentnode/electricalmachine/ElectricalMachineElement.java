@@ -133,8 +133,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
         int boosterCount = 0;
         stack = getInventory().getStackInSlot(boosterSlotId);
-        if (stack != null) {
-            boosterCount = stack.stackSize;
+        if (!Utils.isEmpty(stack)) {
+            boosterCount = stack.getCount();
         }
         double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount);
         slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));

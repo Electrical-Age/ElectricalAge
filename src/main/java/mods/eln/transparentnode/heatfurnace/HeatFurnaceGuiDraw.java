@@ -76,10 +76,10 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
         takeFuel.enabled = !render.controleExternal;
 
 
-        vuMeterGain.setEnable(inventory.getStackInSlot(HeatFurnaceContainer.regulatorId) == null && !render.controleExternal);
+        vuMeterGain.setEnable(Utils.isEmpty(inventory.getStackInSlot(HeatFurnaceContainer.regulatorId)) && !render.controleExternal);
         if (render.gainSyncNew) syncVumeterGain();
 
-        vuMeterHeat.setEnable(inventory.getStackInSlot(HeatFurnaceContainer.regulatorId) != null && !render.controleExternal);
+        vuMeterHeat.setEnable(!Utils.isEmpty(inventory.getStackInSlot(HeatFurnaceContainer.regulatorId)) && !render.controleExternal);
         if (render.temperatureTargetSyncNew) syncVumeterHeat();
 
         vuMeterHeat.temperatureHit = (float) render.temperature;

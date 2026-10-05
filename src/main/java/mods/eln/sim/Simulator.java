@@ -449,10 +449,10 @@ public class Simulator /* ,IPacketHandler */ {
 			}
 			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-			for (Object obj : server.getConfigurationManager().playerEntityList) {
+			for (Object obj : server.getPlayerList().getPlayers()) {
 				EntityPlayerMP player = (EntityPlayerMP) obj;
-				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
-				PlayerManager playerManager = worldServer.getPlayerManager();
+				WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
+				PlayerManager playerManager = worldServer.getPlayerChunkMap();
 				Utils.sendPacketToClient(bos, player);
 			}
 			//SPacketCustomPayload packet = new SPacketCustomPayload(Eln.channelName, bos.toByteArray());

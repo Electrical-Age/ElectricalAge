@@ -40,7 +40,7 @@ public class ThermalCableRender extends SixNodeElementRender {
         //	GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 /*
-        if (i != null && i.getItem() == Eln.thermoMeterHelmet) {
+        if (!Utils.isEmpty(i) && i.getItem() == Eln.thermoMeterHelmet) {
 			double factor = temperature  *MeterItemArmor.getBlockRenderColorFactor(i);
 			GL11.glColor4d(factor, 1.0 - factor, 0.0, 1.0);
 			GL11.glDisable(GL11.GL_LIGHTING);

@@ -26,7 +26,7 @@ public class NodeEntityClientSender {
             stream.writeInt(e.getPos().getY());
             stream.writeInt(e.getPos().getZ());
 
-            stream.writeByte(e.getWorld().provider.getDimension());
+            stream.writeInt(e.getWorld().provider.getDimension()); // 1.12 port: dimension as int (was byte)
 
             stream.writeUTF(nodeUuid);
 

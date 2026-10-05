@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.powercapacitor;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
@@ -41,20 +43,20 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
     public double getCValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerCapacitorContainer.redId);
         ItemStack diel = inventory.getStackInSlot(PowerCapacitorContainer.dielectricId);
-        if (core == null || diel == null)
+        if (Utils.isEmpty(core) || Utils.isEmpty(diel))
             return getCValue(0, 0);
         else {
-            return getCValue(core.stackSize, getUNominalValue(inventory));
+            return getCValue(core.getCount(), getUNominalValue(inventory));
         }
     }
 
     public double getUNominalValue(IInventory inventory) {
         ItemStack diel = inventory.getStackInSlot(PowerCapacitorContainer.dielectricId);
-        if (diel == null)
+        if (Utils.isEmpty(diel))
             return 10000;
         else {
             DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-            return desc.uNominal * diel.stackSize;
+            return desc.uNominal * diel.getCount();
         }
     }
 

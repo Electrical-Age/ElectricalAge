@@ -1,5 +1,6 @@
 package mods.eln.node.six;
 
+import mods.eln.compat.IInventoryCompat;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -7,7 +8,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class SixNodeElementInventory implements IInventory, INBTTReady {
+public class SixNodeElementInventory implements IInventoryCompat, INBTTReady {
     SixNodeElementRender sixnodeRender = null;
     SixNodeElement sixNodeElement = null;
 
@@ -15,12 +16,14 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
     public SixNodeElementInventory(int size, int stackLimit, SixNodeElementRender sixnodeRender) {
         inv = new ItemStack[size];
+        java.util.Arrays.fill(inv, ItemStack.EMPTY);
         this.stackLimit = stackLimit;
         this.sixnodeRender = sixnodeRender;
     }
 
     public SixNodeElementInventory(int size, int stackLimit, SixNodeElement sixNodeElement) {
         inv = new ItemStack[size];
+        java.util.Arrays.fill(inv, ItemStack.EMPTY);
         this.stackLimit = stackLimit;
         this.sixNodeElement = sixNodeElement;
     }
@@ -42,7 +45,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     @Override
     public ItemStack getStackInSlot(int slot) {
 
-        if (slot >= getInv().length) return null;
+        if (slot >= getInv().length) return ItemStack.EMPTY;
         return getInv()[slot];
     }
 
@@ -50,13 +53,13 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     @Override
     public ItemStack decrStackSize(int slot, int amt) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            if (stack.stackSize <= amt) {
-                setInventorySlotContents(slot, null);
+        if (!Utils.isEmpty(stack)) {
+            if (stack.getCount() <= amt) {
+                setInventorySlotContents(slot, ItemStack.EMPTY);
             } else {
                 stack = stack.splitStack(amt);
-                if (stack.stackSize == 0) {
-                    setInventorySlotContents(slot, null);
+                if (stack.getCount() == 0) {
+                    setInventorySlotContents(slot, ItemStack.EMPTY);
                 }
             }
         }
@@ -67,8 +70,8 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     @Override
     public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            setInventorySlotContents(slot, null);
+        if (!Utils.isEmpty(stack)) {
+            setInventorySlotContents(slot, ItemStack.EMPTY);
         }
         return stack;
     }
@@ -77,9 +80,9 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack) {
         try {
-            getInv()[slot] = stack;
-            if (stack != null && stack.stackSize > getInventoryStackLimit()) {
-                stack.stackSize = getInventoryStackLimit();
+            getInv()[slot] = stack == null ? ItemStack.EMPTY : stack; // never store null (1.12)
+            if (!Utils.isEmpty(stack) && stack.getCount() > getInventoryStackLimit()) {
+                stack.setCount(getInventoryStackLimit());
             }
         } catch (Exception e) {
             // TODO: handle exception

@@ -137,10 +137,10 @@ public class TransformerElement extends TransparentNodeElement {
         ItemStack core = inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId);
         ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
 
-        if (primaryCable != null) {
+        if (!Utils.isEmpty(primaryCable)) {
             primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
         }
-        if (secondaryCable != null) {
+        if (!Utils.isEmpty(secondaryCable)) {
             secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
         }
 
@@ -161,7 +161,7 @@ public class TransformerElement extends TransparentNodeElement {
             coreFactor = coreDescriptor.cableMultiplicator;
         }
 
-        if (primaryCable == null || core == null) {
+        if (Utils.isEmpty(primaryCable) || core == null) {
             primaryLoad.highImpedance();
             primaryMaxCurrent = 0;
         } else {
@@ -169,7 +169,7 @@ public class TransformerElement extends TransparentNodeElement {
             primaryMaxCurrent = (float) primaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (secondaryCable == null || core == null) {
+        if (Utils.isEmpty(secondaryCable) || core == null) {
             secondaryLoad.highImpedance();
             secondaryMaxCurrent = 0;
         } else {
@@ -177,9 +177,9 @@ public class TransformerElement extends TransparentNodeElement {
             secondaryMaxCurrent = (float) secondaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (primaryCable != null && secondaryCable != null) {
-            transformer.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
-            interSystemProcess.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
+        if (!Utils.isEmpty(primaryCable) && !Utils.isEmpty(secondaryCable)) {
+            transformer.setRatio(1.0 * secondaryCable.getCount() / primaryCable.getCount());
+            interSystemProcess.setRatio(1.0 * secondaryCable.getCount() / primaryCable.getCount());
         } else {
             transformer.setRatio(1);
             interSystemProcess.setRatio(1);
@@ -264,14 +264,14 @@ public class TransformerElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (inventory.getStackInSlot(0) == null)
+            if (Utils.isEmpty(inventory.getStackInSlot(0)))
                 stream.writeByte(0);
             else
-                stream.writeByte(inventory.getStackInSlot(0).stackSize);
-            if (inventory.getStackInSlot(1) == null)
+                stream.writeByte(inventory.getStackInSlot(0).getCount());
+            if (Utils.isEmpty(inventory.getStackInSlot(1)))
                 stream.writeByte(0);
             else
-                stream.writeByte(inventory.getStackInSlot(1).stackSize);
+                stream.writeByte(inventory.getStackInSlot(1).getCount());
 
             Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
             Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.primaryCableSlotId));
@@ -286,7 +286,7 @@ public class TransformerElement extends TransparentNodeElement {
                     secondaryLoad.getI() / secondaryMaxCurrent), 0f, 1f);
             }
             stream.writeFloat(load);
-            stream.writeBoolean(inventory.getStackInSlot(3) != null);
+            stream.writeBoolean(!Utils.isEmpty(inventory.getStackInSlot(3)));
 
         } catch (IOException e) {
 

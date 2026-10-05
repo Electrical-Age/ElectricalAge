@@ -45,7 +45,7 @@ public class GhostBlock extends Block {
         switch (meta) {
             case tFloor:
                 AxisAlignedBB axisalignedbb1 = new AxisAlignedBB((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
-                if (axisalignedbb1 != null && par5AxisAlignedBB.intersectsWith(axisalignedbb1)) {
+                if (axisalignedbb1 != null && par5AxisAlignedBB.intersects(axisalignedbb1)) {
                     list.add(axisalignedbb1);
                 }
                 break;
@@ -145,7 +145,7 @@ public class GhostBlock extends Block {
 
     @Override
     public ItemStack getPickBlock(RayTraceResult target, World world, int x, int y, int z) {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     public boolean isBlockSolid(IBlockAccess blockAccess, int x, int y, int z, int side) {

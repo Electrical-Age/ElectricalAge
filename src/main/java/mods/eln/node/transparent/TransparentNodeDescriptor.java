@@ -108,20 +108,20 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             Coordonate temp = new Coordonate(coord);
             temp.move(Direction.YN);
             block = temp.getBlock();
-            if (block == null || ((!block.isOpaqueCube()) && block instanceof BlockHopper == false))
+            if (block == null || ((!block.getDefaultState().isOpaqueCube()) && block instanceof BlockHopper == false))
                 return tr("You can't place this block at this side");
         }
         if (mustHaveCeiling()) {
             Coordonate temp = new Coordonate(coord);
             temp.move(Direction.YP);
             block = temp.getBlock();
-            if (block == null || !block.isOpaqueCube()) return tr("You can't place this block at this side");
+            if (block == null || !block.getDefaultState().isOpaqueCube()) return tr("You can't place this block at this side");
         }
         if (mustHaveWallFrontInverse()) {
             Coordonate temp = new Coordonate(coord);
             temp.move(front.getInverse());
             block = temp.getBlock();
-            if (block == null || !block.isOpaqueCube()) return tr("You can't place this block at this side");
+            if (block == null || !block.getDefaultState().isOpaqueCube()) return tr("You can't place this block at this side");
         }
         if (mustHaveWall()) {
             Coordonate temp;
@@ -129,19 +129,19 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             temp = new Coordonate(coord);
             temp.move(Direction.XN);
             block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
             temp = new Coordonate(coord);
             temp.move(Direction.XP);
             block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
             temp = new Coordonate(coord);
             temp.move(Direction.ZN);
             block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
             temp = new Coordonate(coord);
             temp.move(Direction.ZP);
             block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
 
             if (!wall) return tr("You can't place this block at this side");
         }
@@ -203,7 +203,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 
     public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
         AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 
     public void setGhostGroup(GhostGroup ghostGroup) {

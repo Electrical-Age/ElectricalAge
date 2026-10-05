@@ -106,20 +106,20 @@ public class PowerSocketElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return null;
+        if (Utils.isEmpty(inventory.getStackInSlot(PowerSocketContainer.cableSlotId))) return null;
         if (front == lrdu) return powerLoad;
         return null;
     }
 
     @Override
     public ThermalLoad getThermalLoad(LRDU lrdu) {
-        if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return null;
+        if (Utils.isEmpty(inventory.getStackInSlot(PowerSocketContainer.cableSlotId))) return null;
         return null;
     }
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return 0;
+        if (Utils.isEmpty(inventory.getStackInSlot(PowerSocketContainer.cableSlotId))) return 0;
         if (front == lrdu) return NodeBase.maskElectricalPower;
         return 0;
     }
@@ -182,7 +182,7 @@ public class PowerSocketElement extends SixNodeElement {
 
     void setupFromInventory() {
         ItemStack cableStack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
-        if (cableStack != null) {
+        if (!Utils.isEmpty(cableStack)) {
             ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
             desc.applyTo(powerLoad);
             voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
@@ -236,7 +236,7 @@ public class PowerSocketElement extends SixNodeElement {
 
     private int getRange(PowerSocketDescriptor desc, SixNodeElementInventory inventory2) {
         ItemStack stack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
-        if (stack == null) return desc.range;
-        return desc.range + stack.stackSize;
+        if (Utils.isEmpty(stack)) return desc.range;
+        return desc.range + stack.getCount();
     }
 }

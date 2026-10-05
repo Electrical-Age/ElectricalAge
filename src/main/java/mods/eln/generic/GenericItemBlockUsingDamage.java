@@ -64,7 +64,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     }
 
     public Descriptor getDescriptor(ItemStack itemStack) {
-        if (itemStack == null) return defaultElement;
+        if (Utils.isEmpty(itemStack)) return defaultElement;
         if (itemStack.getItem() != this) return defaultElement;
         return getDescriptor(itemStack.getMetadata());
     }

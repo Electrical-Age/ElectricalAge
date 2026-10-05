@@ -483,7 +483,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                         stackGreen += blockKeyFactor[blockKey.toInt()] * dToStack
                         val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
                         if (b !== Blocks.AIR && b !== Eln.lightBlock) {
-                            stackRed += if (b.isOpaqueCube)
+                            stackRed += if (b.defaultState.isOpaqueCube)
                                 0.2f * dToStack
                             else
                                 0.1f * dToStack

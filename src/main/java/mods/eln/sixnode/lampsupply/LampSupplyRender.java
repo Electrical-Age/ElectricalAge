@@ -87,7 +87,7 @@ public class LampSupplyRender extends SixNodeElementRender {
             }
 
             ItemStack cableStack = Utils.unserialiseItemStack(stream);
-            if (cableStack != null) {
+            if (!Utils.isEmpty(cableStack)) {
                 ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
                 cableRender = desc.render;
             } else {

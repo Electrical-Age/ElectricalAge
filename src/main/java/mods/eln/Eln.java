@@ -1,5 +1,7 @@
 package mods.eln;
 
+
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -929,7 +931,7 @@ public class Eln {
     }
 
     private boolean recipeExists(ItemStack stack) {
-        if (stack == null)
+        if (Utils.isEmpty(stack))
             return false;
         List list = CraftingManager.getInstance().getRecipeList();
         for (Object o : list) {
@@ -1063,7 +1065,7 @@ public class Eln {
         }
 
         {
-            MinecraftServer s = MinecraftServer.getServer();
+            MinecraftServer s = FMLCommonHandler.instance().getMinecraftServerInstance();
             ICommandManager command = s.getCommandManager();
             ServerCommandManager manager = (ServerCommandManager) command;
             manager.registerCommand(new ConsoleListener());
@@ -6709,7 +6711,7 @@ public class Eln {
             return;
         }
         ItemStack output = outOres.get(0).copy();
-        output.stackSize = outputCount;
+        output.setCount(outputCount);
         LogWrapper.info("Adding mod recipe from " + inputName + " to " + outputName);
         for (ItemStack input : inOres) {
             maceratorRecipes.addRecipe(new Recipe(input, output, f));
@@ -7507,7 +7509,7 @@ public class Eln {
 
     static ItemStack findItemStack(String name, int stackSize) {
         ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);
-        if (stack == null) {
+        if (Utils.isEmpty(stack)) {
             stack = dictionnaryOreFromMod.get(name);
             stack = Utils.newItemStack(Item.getIdFromItem(stack.getItem()), stackSize, stack.getMetadata());
         }

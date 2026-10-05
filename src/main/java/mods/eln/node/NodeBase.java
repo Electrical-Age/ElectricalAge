@@ -1,6 +1,8 @@
 package mods.eln.node;
 
 
+
+import net.minecraft.util.math.BlockPos;
 import mods.eln.compat.WorldCompat;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
@@ -109,7 +111,7 @@ public abstract class NodeBase {
             direction.applyTo(vector, 1);
 
             Block b = WorldCompat.getBlock(world, vector[0], vector[1], vector[2]);
-            if (b.isOpaqueCube())
+            if (b.getDefaultState().isOpaqueCube())
                 ;
             neighborOpaque |= 1 << direction.getInt();
             if (isBlockWrappable(b, world, coordonate.x, coordonate.y, coordonate.z))
@@ -137,7 +139,7 @@ public abstract class NodeBase {
     }
 
     public static boolean isBlockWrappable(Block block, World w, int x, int y, int z) {
-        if (block.isReplaceable(w, x, y, z)) return true;
+        if (block.isReplaceable(w, new BlockPos(x, y, z))) return true;
         if (block == Blocks.AIR) return true;
         if (block == Eln.sixNodeBlock) return true;
         if (block instanceof GhostBlock) return true;
@@ -180,7 +182,7 @@ public abstract class NodeBase {
 
         initializeFromThat(front, entityLiving, itemStack);
 
-        if (itemStack != null)
+        if (!Utils.isEmpty(itemStack))
             Utils.println("Node::constructor( meta = " + itemStack.getMetadata() + ")");
     }
 
@@ -206,7 +208,7 @@ public abstract class NodeBase {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!entityPlayer.world.isRemote && entityPlayer.getHeldItemMainhand() != null) {
+        if (!entityPlayer.world.isRemote && !Utils.isEmpty(entityPlayer.getHeldItemMainhand())) {
             if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = multiMeterString(side);
                 if (str != null)
@@ -467,7 +469,7 @@ public abstract class NodeBase {
             stream.writeInt(coordonate.y);
             stream.writeInt(coordonate.z);
 
-            stream.writeByte(coordonate.dimention);
+            stream.writeInt(coordonate.dimention); // 1.12 port: dimension as int (was byte)
 
             stream.writeUTF(getNodeUuid());
 
@@ -491,11 +493,11 @@ public abstract class NodeBase {
 
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-        for (Object obj : server.getConfigurationManager().playerEntityList) {
+        for (Object obj : server.getPlayerList().getPlayers()) {
 
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
-            PlayerChunkMap playerManager = worldServer.getPlayerManager();
+            WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
+            PlayerChunkMap playerManager = worldServer.getPlayerChunkMap();
             if (player.dimension != this.coordonate.dimention) continue;
             if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
             if (coordonate.distanceTo(player) > range) continue;
@@ -517,7 +519,7 @@ public abstract class NodeBase {
             stream.writeInt(coordonate.x);
             stream.writeInt(coordonate.y);
             stream.writeInt(coordonate.z);
-            stream.writeByte(coordonate.dimention);
+            stream.writeInt(coordonate.dimention); // 1.12 port: dimension as int (was byte)
 
             stream.writeUTF(getNodeUuid());
 
@@ -535,10 +537,10 @@ public abstract class NodeBase {
     public void publishToAllPlayer() {
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-        for (Object obj : server.getConfigurationManager().playerEntityList) {
+        for (Object obj : server.getPlayerList().getPlayers()) {
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().getWorld(player.dimension);
-            PlayerChunkMap playerManager = worldServer.getPlayerManager();
+            WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
+            PlayerChunkMap playerManager = worldServer.getPlayerChunkMap();
             if (player.dimension != this.coordonate.dimention) continue;
             if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
 
@@ -556,14 +558,14 @@ public abstract class NodeBase {
     }
 
     public void dropItem(ItemStack itemStack) {
-        if (itemStack == null) return;
+        if (Utils.isEmpty(itemStack)) return;
         if (coordonate.world().getGameRules().getBoolean("doTileDrops")) {
             float var6 = 0.7F;
             double var7 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var9 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             EntityItem var13 = new EntityItem(coordonate.world(), (double) coordonate.x + var7, (double) coordonate.y + var9, (double) coordonate.z + var11, itemStack);
-            var13.pickupDelay = 10;
+            var13.setPickupDelay(10);
             coordonate.world().spawnEntity(var13);
         }
     }

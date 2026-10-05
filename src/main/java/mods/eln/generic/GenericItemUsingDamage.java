@@ -1,5 +1,7 @@
 package mods.eln.generic;
 
+
+import mods.eln.misc.Utils;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.LanguageRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -56,7 +58,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     public Descriptor getDescriptor(ItemStack itemStack) {
-        if (itemStack == null)
+        if (Utils.isEmpty(itemStack))
             return defaultElement;
         if (itemStack.getItem() != this)
             return defaultElement;

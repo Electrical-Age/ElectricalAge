@@ -52,7 +52,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 
             Class filterClass = EntityLivingBase.class;
 
-            if (filterStack != null) {
+            if (!Utils.isEmpty(filterStack)) {
                 GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
                 if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
                     EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
@@ -75,7 +75,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
                     boolean view = true;
 
                     for (Block b : blockList) {
-                        if (b.isOpaqueCube()) {
+                        if (b.getDefaultState().isOpaqueCube()) {
                             view = false;
                             break;
                         }

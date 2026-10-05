@@ -7,6 +7,13 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,31 +45,31 @@ public class TransparentNodeBlock extends NodeBlock {
 	}
 */
 
-    //@SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
-        Eln.transparentNodeItem.getSubItems(par1, tab, subItems);
+    @Override
+    public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> subItems) {
+        Eln.transparentNodeItem.getSubItems(tab, subItems);
     }
 
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
 
     @Override
-    public int getRenderType() {
-        return -1;
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.INVISIBLE;
     }
 
 
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) {
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer entityPlayer, boolean willHarvest) {
         if (!world.isRemote) {
-            NodeBlockEntity entity = (NodeBlockEntity) WorldCompat.getTileEntity(world, x, y, z);
+            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
             if (entity != null) {
                 NodeBase nodeBase = entity.getNode();
                 if (nodeBase instanceof TransparentNode) {
@@ -72,7 +79,7 @@ public class TransparentNodeBlock extends NodeBlock {
             }
         }
 
-        return super.removedByPlayer(world, entityPlayer, x, y, z);
+        return super.removedByPlayer(state, world, pos, entityPlayer, willHarvest);
 
     }
 
@@ -88,15 +95,15 @@ public class TransparentNodeBlock extends NodeBlock {
 
 
     @Override
-    public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-        return (WorldCompat.getMeta(world, x, y, z) & 3) << 6;
+    public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return (getMetaFromState(state) & 3) << 6;
     }
 
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
+    public Item getItemDropped(IBlockState state, Random p_149650_2_,
                                int p_149650_3_) {
-        return null;
+        return Items.AIR;
     }
 
     public int quantityDropped(Random par1Random) {
@@ -105,17 +112,18 @@ public class TransparentNodeBlock extends NodeBlock {
 
 
     @Override
-    public boolean canPlaceBlockOnSide(World par1World, int par2, int par3, int par4, int par5) {
+    public boolean canPlaceBlockOnSide(World par1World, BlockPos pos, EnumFacing side) {
         return true;
     }
 
 
-    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
+    @Override
+    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB par5AxisAlignedBB, List<AxisAlignedBB> list, Entity entity, boolean isActualState) {
         //   this.setBlockBoundsBasedOnState(world,x, y, z);
         //  super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
-        TileEntity tileEntity = WorldCompat.getTileEntity(world, x, y, z);
+        TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity == null || (tileEntity instanceof TransparentNodeEntity == false)) {
-            super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
+            super.addCollisionBoxToList(state, world, pos, par5AxisAlignedBB, list, entity, isActualState);
         } else {
             ((TransparentNodeEntity) tileEntity).addCollisionBoxesToList(par5AxisAlignedBB, list, null);
         }
@@ -123,7 +131,8 @@ public class TransparentNodeBlock extends NodeBlock {
     }
 
     @Override
-    public TileEntity createTileEntity(World var1, int meta) {
+    public TileEntity createTileEntity(World var1, IBlockState state) {
+        int meta = getMetaFromState(state);
         try {
             for (EntityMetaTag tag : EntityMetaTag.values()) {
                 if (tag.meta == meta) {

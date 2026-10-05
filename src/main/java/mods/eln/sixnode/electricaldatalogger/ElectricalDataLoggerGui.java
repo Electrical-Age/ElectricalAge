@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
@@ -186,8 +188,8 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         else
             pause.displayString = Color.COLOR_BRIGHT_GREEN + "Running";
 
-        boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack() != null;
-        boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack() == null;
+        boolean a = !Utils.isEmpty(inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack());
+        boolean b = Utils.isEmpty(inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack());
         printBt.enabled = a && b;
     }
 

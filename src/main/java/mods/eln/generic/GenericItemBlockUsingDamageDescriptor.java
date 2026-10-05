@@ -1,5 +1,7 @@
 package mods.eln.generic;
 
+
+import mods.eln.misc.Utils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
@@ -76,7 +78,7 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack) {
-        if (stack == null) return null;
+        if (Utils.isEmpty(stack)) return null;
         Item item = stack.getItem();
         if (item instanceof GenericItemBlockUsingDamage == false) return null;
         GenericItemBlockUsingDamage genItem = (GenericItemBlockUsingDamage) item;

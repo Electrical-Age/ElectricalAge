@@ -127,7 +127,7 @@ public class ThermalCableElement extends SixNodeElement {
             colorCare = colorCare ^ 1;
             Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
-        } else if (currentItemStack != null) {
+        } else if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
 
             GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);

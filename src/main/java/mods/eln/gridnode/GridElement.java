@@ -74,7 +74,7 @@ abstract public class GridElement extends TransparentNodeElement {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
-            if (stack.stackSize < distance) {
+            if (stack.getCount() < distance) {
                 Utils.sendMessage(entityPlayer, "You need " + cableLength + " units of cable");
             } else if (distance > range) {
                 Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");

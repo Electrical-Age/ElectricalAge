@@ -60,13 +60,13 @@ public class RecipesList {
 
     public static ArrayList<Recipe> getGlobalRecipeWithOutput(ItemStack output) {
         output = output.copy();
-        output.stackSize = 1;
+        output.setCount(1);
         ArrayList<Recipe> list = new ArrayList<Recipe>();
         for (RecipesList recipesList : listOfList) {
             list.addAll(recipesList.getRecipeFromOutput(output));
         }
 
-        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+        FurnaceRecipes furnaceRecipes = FurnaceRecipes.instance();
 
         {
             Iterator it = furnaceRecipes.getSmeltingList().entrySet().iterator();
@@ -91,7 +91,7 @@ public class RecipesList {
 
     public static ArrayList<Recipe> getGlobalRecipeWithInput(ItemStack input) {
         input = input.copy();
-        input.stackSize = 64;
+        input.setCount(64);
         ArrayList<Recipe> list = new ArrayList<Recipe>();
         for (RecipesList recipesList : listOfList) {
             Recipe r = recipesList.getRecipe(input);
@@ -99,13 +99,13 @@ public class RecipesList {
                 list.add(r);
         }
 
-        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+        FurnaceRecipes furnaceRecipes = FurnaceRecipes.instance();
         ItemStack smeltResult = furnaceRecipes.getSmeltingResult(input);
         Recipe smeltRecipe;
-        if (smeltResult != null) {
+        if (!smeltResult.isEmpty()) {
             try {
                 ItemStack input1 = input.copy();
-                input1.stackSize = 1;
+                input1.setCount(1);
                 list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
                 smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
             } catch (Exception e) {
@@ -116,5 +116,5 @@ public class RecipesList {
         return list;
     }
 }
-/*		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getMetadata(),
+/*		FurnaceRecipes.instance().addSmelting(in.itemID, in.getMetadata(),
                 findItemStack("Copper ingot"), 0);*/

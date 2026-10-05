@@ -39,7 +39,7 @@ public class ItemDefault extends Default {
         super.initGui();
         try {
 
-            if (stack == null) return;
+            if (Utils.isEmpty(stack)) return;
             int y = 6;
 
             Object desc = Utils.getItemObject(stack);
@@ -57,7 +57,7 @@ public class ItemDefault extends Default {
 
             List<IRecipe> recipeOutList = new ArrayList<IRecipe>();
             List<IRecipe> recipeInList = new ArrayList<IRecipe>();
-            if (stack != null) {
+            if (!Utils.isEmpty(stack)) {
                 List list = CraftingManager.getInstance().getRecipeList();
                 for (Object o : list) {
                     try {
@@ -65,12 +65,12 @@ public class ItemDefault extends Default {
                             IRecipe r = (IRecipe) o;
 
                             ItemStack out = r.getRecipeOutput();
-                            if (out != null && out.getItem() == stack.getItem() && out.getMetadata() == stack.getMetadata()) {
+                            if (!Utils.isEmpty(out) && out.getItem() == stack.getItem() && out.getMetadata() == stack.getMetadata()) {
                                 recipeOutList.add(r);
                             }
 
                             for (ItemStack rStack : Utils.getRecipeInputs(r)) {
-                                if (rStack != null && rStack.getItem() == stack.getItem() && rStack.getMetadata() == stack.getMetadata()) {
+                                if (!Utils.isEmpty(rStack) && rStack.getItem() == stack.getItem() && rStack.getMetadata() == stack.getMetadata()) {
                                     recipeInList.add(r);
                                     break;
                                 }

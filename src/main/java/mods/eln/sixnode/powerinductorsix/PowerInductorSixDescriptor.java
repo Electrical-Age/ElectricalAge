@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powerinductorsix;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
@@ -46,16 +48,16 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
     public double getlValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.cableId);
-        if (core == null)
+        if (Utils.isEmpty(core))
             return getlValue(0);
         else
-            return getlValue(core.stackSize);
+            return getlValue(core.getCount());
     }
 
     public double getRsValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
 
-        if (core == null) return MnaConst.highImpedance;
+        if (Utils.isEmpty(core)) return MnaConst.highImpedance;
         FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
         double coreFactor = coreDescriptor.cableMultiplicator;

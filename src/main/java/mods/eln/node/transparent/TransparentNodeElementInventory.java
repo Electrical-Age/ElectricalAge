@@ -1,5 +1,6 @@
 package mods.eln.node.transparent;
 
+import mods.eln.compat.ISidedInventoryCompat;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -7,7 +8,7 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class TransparentNodeElementInventory implements ISidedInventory, INBTTReady {
+public class TransparentNodeElementInventory implements ISidedInventoryCompat, INBTTReady {
     protected TransparentNodeElementRender transparentNodeRender = null;
     protected TransparentNodeElement transparentNodeElement = null;
 
@@ -15,12 +16,14 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
 
     public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
         inv = new ItemStack[size];
+        java.util.Arrays.fill(inv, ItemStack.EMPTY);
         this.stackLimit = stackLimit;
         this.transparentNodeRender = TransparentnodeRender;
     }
 
     public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
         inv = new ItemStack[size];
+        java.util.Arrays.fill(inv, ItemStack.EMPTY);
         this.stackLimit = stackLimit;
         this.transparentNodeElement = TransparentNodeElement;
     }
@@ -46,13 +49,13 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     @Override
     public ItemStack decrStackSize(int slot, int amt) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            if (stack.stackSize <= amt) {
-                setInventorySlotContents(slot, null);
+        if (!Utils.isEmpty(stack)) {
+            if (stack.getCount() <= amt) {
+                setInventorySlotContents(slot, ItemStack.EMPTY);
             } else {
                 stack = stack.splitStack(amt);
-                if (stack.stackSize == 0) {
-                    setInventorySlotContents(slot, null);
+                if (stack.getCount() == 0) {
+                    setInventorySlotContents(slot, ItemStack.EMPTY);
                 }
             }
         }
@@ -62,17 +65,17 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     @Override
     public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
-        if (stack != null) {
-            setInventorySlotContents(slot, null);
+        if (!Utils.isEmpty(stack)) {
+            setInventorySlotContents(slot, ItemStack.EMPTY);
         }
         return stack;
     }
 
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack) {
-        getInv()[slot] = stack;
-        if (stack != null && stack.stackSize > getInventoryStackLimit()) {
-            stack.stackSize = getInventoryStackLimit();
+        getInv()[slot] = stack == null ? ItemStack.EMPTY : stack; // never store null (1.12)
+        if (!Utils.isEmpty(stack) && stack.getCount() > getInventoryStackLimit()) {
+            stack.setCount(getInventoryStackLimit());
         }
     }
 

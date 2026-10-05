@@ -150,7 +150,7 @@ public class TurretSlowProcess extends StateMachine {
 
             Class filterClass = null;
             ItemStack filterStack = element.getInventory().getStackInSlot(TurretContainer.filterId);
-            if (filterStack != null) {
+            if (!Utils.isEmpty(filterStack)) {
                 GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
                 if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
                     EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
@@ -200,7 +200,7 @@ public class TurretSlowProcess extends StateMachine {
                         entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
                     boolean visible = true;
                     for (Block b : blockList)
-                        if (b.isOpaqueCube()) {
+                        if (b.getDefaultState().isOpaqueCube()) {
                             visible = false;
                             break;
                         }
@@ -241,7 +241,7 @@ public class TurretSlowProcess extends StateMachine {
 
             Class filterClass = null;
             ItemStack filterStack = element.getInventory().getStackInSlot(TurretContainer.filterId);
-            if (filterStack != null) {
+            if (!Utils.isEmpty(filterStack)) {
                 GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
                 if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
                     EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
@@ -295,7 +295,7 @@ public class TurretSlowProcess extends StateMachine {
             List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
                 target.posX, target.posY + target.getEyeHeight(), target.posZ);
             for (Block b : blockList)
-                if (b.isOpaqueCube())
+                if (b.getDefaultState().isOpaqueCube())
                     return new SeekingState();
 
             if (element.getGunPosition() == 1 && element.isTargetReached() &&

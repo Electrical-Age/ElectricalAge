@@ -56,7 +56,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public void process(double time) {
         ItemStack lampStack = lamp.getInventory().getStackInSlot(0);
 
-        if (!lamp.poweredByLampSupply || lamp.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) {
+        if (!lamp.poweredByLampSupply || Utils.isEmpty(lamp.getInventory().getStackInSlot(LampSocketContainer.cableSlotId))) {
             lamp.setIsConnectedToLampSupply(false);
             oldLampSupply = null;
         } else {
@@ -74,7 +74,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                 }
             }
             if (best != null && best.element.getChannelState(best.id)) {
-                if (lampStack != null) {
+                if (!Utils.isEmpty(lampStack)) {
                     LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
                     best.element.addToRp(lampDescriptor.getR());
                 }
@@ -88,7 +88,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             lamp.setIsConnectedToLampSupply(best != null);
         }
 
-        if (lampStack != null) {
+        if (!Utils.isEmpty(lampStack)) {
             LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
 
             if (lamp.getCoordonate().getBlockExist() && lampDescriptor.vegetableGrowRate != 0.0) {
@@ -98,13 +98,13 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     Vec3d vv = new Vec3d(1, 0, 0);
                     Vec3d vp = new Vec3d(myCoord().x + 0.5, myCoord().y + 0.5, myCoord().z + 0.5);
 
-                    vv.rotateAroundZ((float) (alphaZ * Math.PI / 180.0));
+                    vv = vv.rotateAroundZ((float) (alphaZ * Math.PI / 180.0));
 
-                    vv.rotateAroundY((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
-                    vv.rotateAroundZ((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
+                    vv = vv.rotateAroundY((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
+                    vv = vv.rotateAroundZ((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
 
-                    lamp.front.rotateOnXnLeft(vv);
-                    lamp.side.rotateFromXN(vv);
+                    vv = lamp.front.rotateOnXnLeft(vv);
+                    vv = lamp.side.rotateFromXN(vv);
 
                     Coordonate c = new Coordonate(myCoord());
 
@@ -152,11 +152,11 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         int oldLight = light;
         int newLight = 0;
 
-        if (!boot && (lampStack != lampStackLast || lampStack == null)) {
+        if (!boot && (lampStack != lampStackLast || Utils.isEmpty(lampStack))) {
             stableProb = 0;
         }
 
-        if (lampStack != null) {
+        if (!Utils.isEmpty(lampStack)) {
             LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
 
             if (stableProb < 0)
@@ -286,8 +286,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
         rotateAroundZ(vv, (float) (alphaZ * Math.PI / 180.0));
 
-        lamp.front.rotateOnXnLeft(vv);
-        lamp.side.rotateFromXN(vv);
+        vv = lamp.front.rotateOnXnLeft(vv);
+        vv = lamp.side.rotateFromXN(vv);
 
         Coordonate newCoord = new Coordonate(myCoord());
         for (int idx = 0; idx < lamp.socketDescriptor.range; idx++) {
@@ -332,7 +332,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     public boolean isOpaque(Coordonate coord) {
         Block block = coord.getBlock();
-        boolean isNotOpaque = block == Blocks.AIR || !block.isOpaqueCube();
+        boolean isNotOpaque = block == Blocks.AIR || !block.getDefaultState().isOpaqueCube();
         if (block == Blocks.FARMLAND)
             isNotOpaque = false;
         return !isNotOpaque;

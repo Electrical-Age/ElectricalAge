@@ -1,6 +1,6 @@
 package mods.eln.misc;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.Vec3d;
 
 
@@ -44,7 +44,7 @@ public class BoundingBox {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
             .add("min", min)
             .add("max", max)
             .toString();

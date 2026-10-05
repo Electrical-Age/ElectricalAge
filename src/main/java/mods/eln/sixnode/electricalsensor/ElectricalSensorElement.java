@@ -135,7 +135,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        boolean cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
+        boolean cable = !Utils.isEmpty(getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId));
         if (!descriptor.voltageOnly) {
             if (front.left() == lrdu && cable) return NodeBase.maskElectricalAll;
             if (front.right() == lrdu && cable) return NodeBase.maskElectricalAll;

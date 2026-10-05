@@ -5,7 +5,7 @@ import mods.eln.compat.WorldCompat;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -520,35 +520,24 @@ public enum Direction {
         }
     }
 
-    public void rotateFromXN(Vec3d p) {
+    /** 1.12: Vec3d is immutable, so this returns the rotated vector (callers assign it). */
+    public Vec3d rotateFromXN(Vec3d p) {
         double x = p.x, y = p.y, z = p.z;
         switch (this) {
             case XN:
-                break;
+                return p;
             case XP:
-                p.x = -x;
-                p.z = -z;
-                break;
+                return new Vec3d(-x, y, -z);
             case YN:
-                p.x = y;
-                p.y = x;
-                p.z = -z;
-                break;
+                return new Vec3d(y, x, -z);
             case YP:
-                p.x = y;
-                p.y = -x;
-                p.z = z;
-                break;
+                return new Vec3d(y, -x, z);
             case ZN:
-                p.x = -z;
-                p.z = x;
-                break;
+                return new Vec3d(-z, y, x);
             case ZP:
-                p.x = z;
-                p.z = -x;
-                break;
+                return new Vec3d(z, y, -x);
             default:
-                break;
+                return p;
         }
     }
 
@@ -609,7 +598,8 @@ public enum Direction {
         }
     }
 
-    public static Direction from(ForgeDirection direction) {
+    public static Direction fromEnumFacing(EnumFacing direction) {
+        if (direction == null) return YN;
         switch (direction) {
             case DOWN:
                 return YN;
@@ -628,22 +618,23 @@ public enum Direction {
         }
     }
 
-    public ForgeDirection toForge() {
+    /** Was toForge(); ForgeDirection.UNKNOWN -> null. */
+    public EnumFacing toEnumFacing() {
         switch (this) {
             case YN:
-                return ForgeDirection.DOWN;
+                return EnumFacing.DOWN;
             case XP:
-                return ForgeDirection.EAST;
+                return EnumFacing.EAST;
             case ZN:
-                return ForgeDirection.NORTH;
+                return EnumFacing.NORTH;
             case ZP:
-                return ForgeDirection.SOUTH;
+                return EnumFacing.SOUTH;
             case YP:
-                return ForgeDirection.UP;
+                return EnumFacing.UP;
             case XN:
-                return ForgeDirection.WEST;
+                return EnumFacing.WEST;
             default:
-                return ForgeDirection.UNKNOWN;
+                return null;
         }
     }
 

@@ -11,6 +11,11 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class SimpleNodeBlock extends BlockContainer {
@@ -61,15 +66,21 @@ public abstract class SimpleNodeBlock extends BlockContainer {
         return entity;
     }
 
+    /** 1.7.10 BlockContainer rendered as a normal block; 1.12's defaults to INVISIBLE. TODO(1.12 WP6): models. */
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z, boolean willHarvest) {
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return EnumBlockRenderType.MODEL;
+    }
+
+    @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer entityPlayer, boolean willHarvest) {
         if (!world.isRemote) {
-            SimpleNode node = getNode(world, x, y, z);
+            SimpleNode node = getNode(world, pos.getX(), pos.getY(), pos.getZ());
             if (node != null) {
                 node.removedByPlayer = (EntityPlayerMP) entityPlayer;
             }
         }
-        return super.removedByPlayer(world, entityPlayer, x, y, z, willHarvest);
+        return super.removedByPlayer(state, world, pos, entityPlayer, willHarvest);
     }
 
     // client server
@@ -83,35 +94,37 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 
     // server
     @Override
-    public void onBlockAdded(World par1World, int x, int y, int z) {
+    public void onBlockAdded(World par1World, BlockPos pos, IBlockState state) {
         if (par1World.isRemote == false) {
-            SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(par1World, x, y, z);
+            SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(pos);
             entity.onBlockAdded();
         }
     }
 
     // server
     @Override
-    public void breakBlock(World par1World, int x, int y, int z, Block par5, int par6) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(par1World, x, y, z);
+    public void breakBlock(World par1World, BlockPos pos, IBlockState state) {
+        SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(pos);
         entity.onBreakBlock();
-        super.breakBlock(par1World, x, y, z, par5, par6);
+        super.breakBlock(par1World, pos, state);
 
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block b, BlockPos fromPos) {
         if (Utils.isRemote(world) == false) {
-            SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
+            SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
             entity.onNeighborBlockChange();
         }
     }
 
     // client server
     @Override
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float vx, float vy, float vz) {
-        SimpleNodeEntity entity = (SimpleNodeEntity) WorldCompat.getTileEntity(world, x, y, z);
-        return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side), vx, vy, vz);
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer entityPlayer, EnumHand hand, EnumFacing side, float vx, float vy, float vz) {
+        // 1.7.10 had one hand; EA code reads the main hand, so only react once (main hand).
+        if (hand != EnumHand.MAIN_HAND) return false;
+        SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(pos);
+        return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side.getIndex()), vx, vy, vz);
     }
 
 }

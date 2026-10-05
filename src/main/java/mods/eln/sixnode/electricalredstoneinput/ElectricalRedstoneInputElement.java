@@ -122,7 +122,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
         ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
-        if (currentItemStack != null) {
+        if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
             /*if (item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;

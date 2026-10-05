@@ -209,9 +209,9 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         val itemStack = entityPlayer?.heldItemMainhand
         val fuseDescriptor = GenericItemUsingDamageDescriptorUpgrade.getDescriptor(itemStack) as? ElectricalFuseDescriptor
         if (itemStack != null) {
-            if (fuseDescriptor != null && itemStack.stackSize > 0) {
+            if (fuseDescriptor != null && itemStack.count > 0) {
                 // The player puts in a new lead fuse.
-                itemStack.stackSize--
+                itemStack.count--
                 takenOutFuse = installedFuse
                 installedFuse = fuseDescriptor
             }

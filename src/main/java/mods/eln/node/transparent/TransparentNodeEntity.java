@@ -15,6 +15,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
@@ -143,7 +144,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         }
         if (desc == null) {
             AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
-            if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+            if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
         } else {
             desc.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
         }
@@ -227,13 +228,13 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public String getInventoryName() {
-        return getSidedInventory().getInventoryName();
+    public String getName() {
+        return getSidedInventory().getName();
     }
 
     @Override
-    public boolean hasCustomInventoryName() {
-        return getSidedInventory().hasCustomInventoryName();
+    public boolean hasCustomName() {
+        return getSidedInventory().hasCustomName();
     }
 
     @Override
@@ -247,13 +248,13 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public void openInventory() {
-        getSidedInventory().openInventory();
+    public void openInventory(EntityPlayer player) {
+        getSidedInventory().openInventory(player);
     }
 
     @Override
-    public void closeInventory() {
-        getSidedInventory().closeInventory();
+    public void closeInventory(EntityPlayer player) {
+        getSidedInventory().closeInventory(player);
     }
 
     @Override
@@ -262,17 +263,42 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1) {
-        return getSidedInventory().getAccessibleSlotsFromSide(var1);
+    public int[] getSlotsForFace(EnumFacing var1) {
+        return getSidedInventory().getSlotsForFace(var1);
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
+    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing var3) {
         return getSidedInventory().canInsertItem(var1, var2, var3);
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int var3) {
+    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing var3) {
         return getSidedInventory().canExtractItem(var1, var2, var3);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getSidedInventory().isEmpty();
+    }
+
+    @Override
+    public int getField(int id) {
+        return getSidedInventory().getField(id);
+    }
+
+    @Override
+    public void setField(int id, int value) {
+        getSidedInventory().setField(id, value);
+    }
+
+    @Override
+    public int getFieldCount() {
+        return getSidedInventory().getFieldCount();
+    }
+
+    @Override
+    public void clear() {
+        getSidedInventory().clear();
     }
 }

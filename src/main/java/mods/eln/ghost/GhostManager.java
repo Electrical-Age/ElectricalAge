@@ -1,6 +1,8 @@
 package mods.eln.ghost;
 
 
+
+import net.minecraft.util.math.BlockPos;
 import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
@@ -172,7 +174,7 @@ public class GhostManager extends WorldSavedData {
     public boolean canCreateGhostAt(World world, int x, int y, int z) {
         if (!world.getChunkProvider().chunkExists(x >> 4, z >> 4)) {
             return false;
-        } else if (WorldCompat.getBlock(world, x, y, z) != Blocks.AIR && !WorldCompat.getBlock(world, x, y, z).isReplaceable(world, x, y, z)) {
+        } else if (WorldCompat.getBlock(world, x, y, z) != Blocks.AIR && !WorldCompat.getBlock(world, x, y, z).isReplaceable(world, new BlockPos(x, y, z))) {
             return false;
         } else return true;
     }

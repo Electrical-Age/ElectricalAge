@@ -126,7 +126,7 @@ public class ElectricalSourceElement extends SixNodeElement {
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
         ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
-        if (currentItemStack != null) {
+        if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
 
             GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);

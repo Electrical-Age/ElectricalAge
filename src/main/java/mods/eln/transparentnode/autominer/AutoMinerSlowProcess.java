@@ -65,7 +65,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         IInventory i = getDropInventory();
         if (i == null) return false;
         for (int idx = 0; idx < i.getSizeInventory(); idx++) {
-            if (i.getStackInSlot(idx) == null)
+            if (Utils.isEmpty(i.getStackInSlot(idx)))
                 return true;
         }
         return false;
@@ -132,7 +132,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case pipeRemove:
                         // miner.pushLog("Pipe " + pipeLength + " removed");
                         Eln.ghostManager.removeGhostAndBlock(jobCoord);
-                        if (miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId) == null) {
+                        if (Utils.isEmpty(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId))) {
                             miner.getInventory().setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
                         } else {
                             miner.getInventory().decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
@@ -260,7 +260,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         } else if (drill == null) {
             if (jobCoord.y != miner.node.coordonate.y) {
                 ItemStack pipeStack = miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
-                if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.getInventory().getInventoryStackLimit())) {
+                if (Utils.isEmpty(pipeStack) || (pipeStack.getCount() != pipeStack.getMaxStackSize() && pipeStack.getCount() != miner.getInventory().getInventoryStackLimit())) {
                     jobFind = true;
                     setJob(jobType.pipeRemove);
                 } else {

@@ -113,6 +113,6 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
         AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
         bb.maxY -= 0.5;
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

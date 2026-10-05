@@ -136,7 +136,7 @@ public class SixNode extends Node {
 	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
-	            var13.pickupDelay = 10;
+	            var13.setPickupDelay(10);
 	            coordonate.world().spawnEntity(var13);
 	        }
 	    }*/
@@ -494,12 +494,12 @@ public class SixNode extends Node {
             ItemStack stack = entityPlayer.getHeldItemMainhand();
 
             Block b = Blocks.AIR;
-            if (stack != null)
+            if (!Utils.isEmpty(stack))
                 b = Block.getBlockFromItem(stack.getItem());
 
             boolean accepted = false;
 
-            if (Eln.playerManager.get(entityPlayer).getInteractEnable() && stack != null) {
+            if (Eln.playerManager.get(entityPlayer).getInteractEnable() && !Utils.isEmpty(stack)) {
                 for (ISixNodeCache a : sixNodeCacheList) {
                     if (a.accept(stack)) {
                         accepted = true;

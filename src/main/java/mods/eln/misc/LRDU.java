@@ -189,24 +189,19 @@ public enum LRDU {
         }
     }
 
-    public void rotateOnXnLeft(Vec3d v) {
+    /** 1.12: Vec3d is immutable, so this returns the rotated vector (callers assign it). */
+    public Vec3d rotateOnXnLeft(Vec3d v) {
         double y = v.y;
         double z = v.z;
         switch (this) {
-            case Left:
-                break;
             case Up:
-                v.y = -z;
-                v.z = y;
-                break;
+                return new Vec3d(v.x, -z, y);
             case Right:
-                v.y = -y;
-                v.z = -z;
-                break;
+                return new Vec3d(v.x, -y, -z);
             case Down:
-                v.y = z;
-                v.z = -y;
-                break;
+                return new Vec3d(v.x, z, -y);
+            default:
+                return v;
         }
     }
 

@@ -161,7 +161,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
     }
 
     public static CableRenderDescriptor getCableRender(ItemStack cable) {
-        if (cable == null) return null;
+        if (Utils.isEmpty(cable)) return null;
         GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
         if (desc instanceof ElectricalCableDescriptor)
             return ((ElectricalCableDescriptor) desc).render;

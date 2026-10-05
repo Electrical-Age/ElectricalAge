@@ -108,7 +108,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                                 detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
 
                             for (Block b : blockList)
-                                if (b.isOpaqueCube()) {
+                                if (b.getDefaultState().isOpaqueCube()) {
                                     fireDetected = false;
                                     break;
                                 }

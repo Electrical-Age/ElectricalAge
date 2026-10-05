@@ -4,6 +4,7 @@ import mods.eln.node.ISixNodeCache;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumBlockRenderType;
 
 public class SixNodeCacheStd implements ISixNodeCache {
 
@@ -13,7 +14,7 @@ public class SixNodeCacheStd implements ISixNodeCache {
         Block b = Block.getBlockFromItem(stack.getItem());
         if (b == null) return false;
         if (b instanceof BlockContainer) return false;
-        return b.getRenderType() == 0 && stack.getItem() instanceof SixNodeItem == false;
+        return b.getDefaultState().getRenderType() == EnumBlockRenderType.MODEL && stack.getItem() instanceof SixNodeItem == false;
     }
 
     @Override

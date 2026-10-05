@@ -1,5 +1,7 @@
 package mods.eln.sixnode.resistor;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -55,8 +57,8 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     public double getRsValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(ResistorContainer.coreId);
 
-        if (core == null) return series.getValue(0);
-        return series.getValue(core.stackSize);
+        if (Utils.isEmpty(core)) return series.getValue(0);
+        return series.getValue(core.getCount());
     }
 
     @Override

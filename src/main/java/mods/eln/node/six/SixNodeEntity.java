@@ -102,7 +102,7 @@ public class SixNodeEntity extends NodeBlockEntity {
         //	WorldCompat.setLightValue(world, EnumSkyBlock.SKY, pos.getX(),pos.getY(),pos.getZ(),15);
         if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
             Chunk chunk = WorldCompat.getChunkFromBlockCoords(world, pos.getX(), pos.getZ());
-            chunk.generateHeightMap();
+            // 1.12: Chunk.generateHeightMap() is protected; generateSkylightMap() below recomputes the height map too.
             Utils.updateSkylight(chunk);
             chunk.generateSkylightMap();
             Utils.updateAllLightTypes(world, pos.getX(), pos.getY(), pos.getZ());

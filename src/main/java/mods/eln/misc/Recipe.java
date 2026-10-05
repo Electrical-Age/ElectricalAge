@@ -23,8 +23,8 @@ public class Recipe {
     }
 
     public boolean canBeCraftedBy(ItemStack stack) {
-        if (stack == null) return false;
-        return input.stackSize <= stack.stackSize && Utils.areSame(stack, input);
+        if (Utils.isEmpty(stack)) return false;
+        return input.getCount() <= stack.getCount() && Utils.areSame(stack, input);
     }
 
     public ItemStack[] getOutputCopy() {

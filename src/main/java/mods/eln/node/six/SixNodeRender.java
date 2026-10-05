@@ -7,10 +7,9 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
-public class SixNodeRender extends TileEntitySpecialRenderer {
+public class SixNodeRender extends TileEntitySpecialRenderer<SixNodeEntity> {
     @Override
-    public void renderTileEntityAt(TileEntity entity, double x, double y,
-                                   double z, float var8) {
+    public void render(SixNodeEntity entity, double x, double y, double z, float var8, int destroyStage, float alpha) {
         Minecraft.getMinecraft().profiler.startSection("SixNode");
 
         SixNodeEntity tileEntity = (SixNodeEntity) entity;

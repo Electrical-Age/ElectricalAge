@@ -67,7 +67,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         val scannedCoord = Coordonate(coordonate).apply {
             move(appliedLRDU)
         }
-        val targetSide: ForgeDirection = appliedLRDU.inverse.toForge()
+        val targetSide: ForgeDirection = appliedLRDU.inverse.toEnumFacing()
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
         var out: Double? = null
@@ -90,7 +90,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         val block = scannedCoord.block
         if (block.hasComparatorInputOverride()) {
             return block.getComparatorInputOverride(scannedCoord.world(), scannedCoord.x, scannedCoord.y, scannedCoord.z, targetSide.ordinal) / 15.0
-        } else if (block.isOpaqueCube) {
+        } else if (block.defaultState.isOpaqueCube) {
             return 1.0
         } else if (block.isAir(scannedCoord.world(), scannedCoord.x, scannedCoord.y, scannedCoord.z)) {
             return 0.0
@@ -111,12 +111,12 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
             val slots = te.getAccessibleSlotsFromSide(targetSide.ordinal)
             when (mode) {
                 ScanMode.SIMPLE -> slots.forEach {
-                        sum += te.getStackInSlot(it)?.stackSize ?: 0
+                        sum += te.getStackInSlot(it)?.count ?: 0
                         limit += te.inventoryStackLimit
                     }
 
                 ScanMode.SLOTS -> slots.forEach {
-                    sum += if ((te.getStackInSlot(it)?.stackSize ?: 0) > 0) 1 else 0
+                    sum += if ((te.getStackInSlot(it)?.count ?: 0) > 0) 1 else 0
                     limit += 1
                 }
             }
@@ -124,11 +124,11 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         } else if (te is IInventory) {
             val sum = when (mode) {
                 ScanMode.SIMPLE -> (0..te.sizeInventory - 1).sumBy {
-                    te.getStackInSlot(it)?.stackSize ?: 0
+                    te.getStackInSlot(it)?.count ?: 0
                 }.toDouble()
 
                 ScanMode.SLOTS -> (0..te.sizeInventory - 1).count {
-                    (te.getStackInSlot(it)?.stackSize ?: 0) > 0
+                    (te.getStackInSlot(it)?.count ?: 0) > 0
                 }.toDouble() * te.inventoryStackLimit
             }
             return sum / te.inventoryStackLimit / te.sizeInventory

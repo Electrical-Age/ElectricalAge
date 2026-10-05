@@ -25,11 +25,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.crafting.IShapedRecipe;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraft.network.PacketBuffer;
+import io.netty.buffer.Unpooled;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -43,8 +47,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -183,7 +185,7 @@ public class Utils {
      * Returns the number of ticks that the supplied fuel item will keep the furnace burning, or 0 if the item isn't fuel
      */
     /*
-	 * public static int getItemBurnTime(ItemStack par0ItemStack) { if (par0ItemStack == null) { return 0; } else { int var1 = par0ItemStack.getItem().shiftedIndex; Item var2 = par0ItemStack.getItem();
+	 * public static int getItemBurnTime(ItemStack par0ItemStack) { if (Utils.isEmpty(par0ItemStack)) { return 0; } else { int var1 = par0ItemStack.getItem().shiftedIndex; Item var2 = par0ItemStack.getItem();
 	 * 
 	 * if (par0ItemStack.getItem() instanceof ItemBlock && Block.blocksList[var1] != null) { Block var3 = Block.blocksList[var1];
 	 * 
@@ -379,7 +381,7 @@ public class Utils {
             int var5 = var4.getByte("Slot") & 255;
 
             if (var5 >= 0 && var5 < inventory.getSizeInventory()) {
-                inventory.setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
+                inventory.setInventorySlotContents(var5, new ItemStack(var4));
             }
         }
     }
@@ -388,7 +390,7 @@ public class Utils {
         NBTTagList var2 = new NBTTagList();
 
         for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3) {
-            if (inventory.getStackInSlot(var3) != null) {
+            if (!Utils.isEmpty(inventory.getStackInSlot(var3))) {
                 NBTTagCompound var4 = new NBTTagCompound();
                 var4.setByte("Slot", (byte) var3);
                 inventory.getStackInSlot(var3).writeToNBT(var4);
@@ -409,8 +411,7 @@ public class Utils {
         // p.stop();
         // Utils.println(p);
 
-        SPacketCustomPayload packet = new SPacketCustomPayload(Eln.channelName, bos.toByteArray());
-        player.connection.sendPacket(packet);
+        Eln.eventChannel.sendTo(new FMLProxyPacket(new PacketBuffer(Unpooled.wrappedBuffer(bos.toByteArray())), Eln.channelName), player);
 
         // FMLCommonHandler.instance().getMinecraftServerInstance().getEln.eventChannel.sendTo(new FMLProxyPacket(packet),player);
     }
@@ -428,10 +429,12 @@ public class Utils {
     // ItemDye.dyeColors[stack.getMetadata()];
     // }
 
+    @SideOnly(Side.CLIENT)
     public static void setGlColorFromDye(int damage) {
         setGlColorFromDye(damage, 1.0f);
     }
 
+    @SideOnly(Side.CLIENT)
     public static void setGlColorFromDye(int damage, float gain) {
         switch (damage) {
             default:
@@ -489,6 +492,7 @@ public class Utils {
         // GL11.glColor3f(((color >> 16) & 0xFF) / 255f, ((color >> 7) & 0xFF) / 255f, ((color >> 0) & 0xFF) / 255f);
     }
 
+    @SideOnly(Side.CLIENT)
     public static void setGlColorFromLamp(int colorIdx) {
         switch (colorIdx) {
             default:
@@ -585,7 +589,7 @@ public class Utils {
     // }
 
     public static void dropItem(ItemStack itemStack, int x, int y, int z, World world) {
-        if (itemStack == null)
+        if (Utils.isEmpty(itemStack))
             return;
         if (world.getGameRules().getBoolean("doTileDrops")) {
             float var6 = 0.7F;
@@ -593,7 +597,7 @@ public class Utils {
             double var9 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             EntityItem var13 = new EntityItem(world, (double) x + var7, (double) y + var9, (double) z + var11, itemStack);
-            var13.pickupDelay = 10;
+            var13.setPickupDelay(10);
             world.spawnEntity(var13);
         }
     }
@@ -608,16 +612,16 @@ public class Utils {
 
         // First, make a list of possible target slots.
         ArrayList<Integer> slots = new ArrayList<>(4);
-        int need = stack.stackSize;
+        int need = stack.getCount();
         for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
             ItemStack slot = inventory.getStackInSlot(i);
-            if (slot != null && slot.stackSize < limit && slot.isItemEqual(stack)) {
+            if (!Utils.isEmpty(slot) && slot.getCount() < limit && slot.isItemEqual(stack)) {
                 slots.add(i);
-                need -= limit - slot.stackSize;
+                need -= limit - slot.getCount();
             }
         }
         for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
-            if (inventory.getStackInSlot(i) == null) {
+            if (Utils.isEmpty(inventory.getStackInSlot(i))) {
                 slots.add(i);
                 need -= limit;
             }
@@ -629,17 +633,17 @@ public class Utils {
         }
 
         // Yes. Proceed.
-        int toPut = stack.stackSize;
+        int toPut = stack.getCount();
         for (Integer slot : slots) {
             ItemStack target = inventory.getStackInSlot(slot);
-            if (target == null) {
+            if (Utils.isEmpty(target)) {
                 int amount = Math.min(toPut, limit);
                 inventory.setInventorySlotContents(slot, new ItemStack(stack.getItem(), amount, stack.getMetadata()));
                 toPut -= amount;
             } else {
-               int space = limit - target.stackSize;
+               int space = limit - target.getCount();
                int amount = Math.min(toPut, space);
-               target.stackSize += amount;
+               target.grow(amount);
                toPut -= amount;
             }
             if (toPut <= 0) break;
@@ -655,7 +659,7 @@ public class Utils {
         ItemStack[] inputStack = new ItemStack[stackList.length];
 
         for (int idx = 0; idx < outputStack.length; idx++) {
-            if (inventory.getStackInSlot(slotsIdList[idx]) != null)
+            if (!Utils.isEmpty(inventory.getStackInSlot(slotsIdList[idx])))
                 outputStack[idx] = inventory.getStackInSlot(slotsIdList[idx]).copy();
         }
         for (int idx = 0; idx < stackList.length; idx++) {
@@ -664,27 +668,27 @@ public class Utils {
 
         boolean oneStackDone;
         for (ItemStack stack : inputStack) {
-            // if(stack == null) continue;
+            // if(Utils.isEmpty(stack)) continue;
             oneStackDone = false;
             for (int idx = 0; idx < slotsIdList.length; idx++) {
                 ItemStack targetStack = outputStack[idx];
 
-                if (targetStack == null) {
+                if (Utils.isEmpty(targetStack)) {
                     outputStack[idx] = stack;
                     oneStackDone = true;
                     break;
                 } else if (targetStack.isItemEqual(stack)) {
-                    // inventory.decrStackSize(idx, -stack.stackSize);
-                    int transferMax = limit - targetStack.stackSize;
+                    // inventory.decrStackSize(idx, -stack.getCount());
+                    int transferMax = limit - targetStack.getCount();
                     if (transferMax > 0) {
-                        int transfer = stack.stackSize;
+                        int transfer = stack.getCount();
                         if (transfer > transferMax)
                             transfer = transferMax;
-                        outputStack[idx].stackSize += transfer;
-                        stack.stackSize -= transfer;
+                        outputStack[idx].grow(transfer);
+                        stack.shrink(transfer);
                     }
 
-                    if (stack.stackSize == 0) {
+                    if (stack.getCount() == 0) {
                         oneStackDone = true;
                         break;
                     }
@@ -704,22 +708,22 @@ public class Utils {
         for (ItemStack stack : stackList) {
             for (int idx = 0; idx < slotsIdList.length; idx++) {
                 ItemStack targetStack = inventory.getStackInSlot(slotsIdList[idx]);
-                if (targetStack == null) {
+                if (Utils.isEmpty(targetStack)) {
                     inventory.setInventorySlotContents(slotsIdList[idx], stack.copy());
-                    stack.stackSize = 0;
+                    stack.setCount(0);
                     break;
                 } else if (targetStack.isItemEqual(stack)) {
-                    // inventory.decrStackSize(idx, -stack.stackSize);
-                    int transferMax = limit - targetStack.stackSize;
+                    // inventory.decrStackSize(idx, -stack.getCount());
+                    int transferMax = limit - targetStack.getCount();
                     if (transferMax > 0) {
-                        int transfer = stack.stackSize;
+                        int transfer = stack.getCount();
                         if (transfer > transferMax)
                             transfer = transferMax;
                         inventory.decrStackSize(slotsIdList[idx], -transfer);
-                        stack.stackSize -= transfer;
+                        stack.shrink(transfer);
                     }
 
-                    if (stack.stackSize == 0) {
+                    if (stack.getCount() == 0) {
                         break;
                     }
                 }
@@ -742,7 +746,7 @@ public class Utils {
 	 */
 
     public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException {
-        if (stack == null) {
+        if (Utils.isEmpty(stack)) {
             stream.writeShort(-1);
             stream.writeShort(-1);
         } else {
@@ -756,7 +760,7 @@ public class Utils {
         id = stream.readShort();
         damage = stream.readShort();
         if (id == -1)
-            return null;
+            return ItemStack.EMPTY;
         return Utils.newItemStack(id, 1, damage);
     }
 
@@ -775,6 +779,7 @@ public class Utils {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     public static boolean isGameInPause() {
         return Minecraft.getMinecraft().isGamePaused();
     }
@@ -876,7 +881,7 @@ public class Utils {
     }
 
     public static Object getItemObject(ItemStack stack) {
-        if (stack == null)
+        if (Utils.isEmpty(stack))
             return null;
         Item i = stack.getItem();
         if (i instanceof GenericItemUsingDamage) {
@@ -895,14 +900,14 @@ public class Utils {
 	 */
 
     static public void getItemStack(String name, List list) {
-        Iterator aitem = Item.itemRegistry.iterator();
-        List<ItemStack> tempList = new ArrayList<ItemStack>(3000);
+        Iterator aitem = Item.REGISTRY.iterator();
+        NonNullList<ItemStack> tempList = NonNullList.create();
         Item item;
 
         while (aitem.hasNext()) {
             item = (Item) aitem.next();
             if (item != null && item.getCreativeTab() != null) {
-                item.getSubItems(item, (CreativeTabs) null, tempList);
+                item.getSubItems(item.getCreativeTab(), tempList);
             }
         }
 
@@ -962,6 +967,7 @@ public class Utils {
         return new Vec3d(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
     }
 
+    @SideOnly(Side.CLIENT)
     public static double getHeadPosY(Entity e) {
         if (e instanceof EntityOtherPlayerMP)
             return e.posY + e.getEyeHeight();
@@ -1035,7 +1041,7 @@ public class Utils {
         public float getWeight(Block block) {
             if (block == null)
                 return 0;
-            return block.isOpaqueCube() ? 1f : 0f;
+            return block.isOpaqueCube(block.getDefaultState()) ? 1f : 0f;
         }
     }
 
@@ -1162,112 +1168,52 @@ public class Utils {
         return 0;
     }
 
+    /** First stack an ingredient matches, or null for an empty slot (callers check null, as in 1.7.10). */
+    private static ItemStack firstStack(Ingredient ingredient) {
+        ItemStack[] matching = ingredient.getMatchingStacks();
+        return matching.length > 0 ? matching[0] : null;
+    }
+
+    /** 3x3 display grid of a crafting recipe (null = empty cell); null if the recipe has no ingredient list. */
     public static ItemStack[][] getItemStackGrid(IRecipe r) {
         ItemStack[][] stacks = new ItemStack[3][3];
         try {
-            if (r instanceof ShapedRecipes) {
-                ShapedRecipes s = (ShapedRecipes) r;
+            NonNullList<Ingredient> ingredients = r.getIngredients();
+            if (ingredients.isEmpty()) return null;
+            if (r instanceof IShapedRecipe) {
+                IShapedRecipe s = (IShapedRecipe) r;
+                int width = s.getRecipeWidth(), height = s.getRecipeHeight();
                 for (int idx2 = 0; idx2 < 3; idx2++) {
                     for (int idx = 0; idx < 3; idx++) {
                         ItemStack rStack = null;
-                        if (idx < s.recipeWidth && idx2 < s.recipeHeight) {
-                            rStack = s.recipeItems[idx + idx2 * s.recipeWidth];
+                        if (idx < width && idx2 < height) {
+                            rStack = firstStack(ingredients.get(idx + idx2 * width));
                         }
                         stacks[idx2][idx] = rStack;
                     }
                 }
                 return stacks;
             }
-            if (r instanceof ShapedOreRecipe) {
-                ShapedOreRecipe s = (ShapedOreRecipe) r;
-                int width = readPrivateInt(s, "width");
-                int height = readPrivateInt(s, "height");
-                Object[] inputs = s.getInput();
-
-                for (int idx2 = 0; idx2 < height; idx2++) {
-                    for (int idx = 0; idx < width; idx++) {
-                        Object o = inputs[idx + idx2 * width];
-                        ItemStack stack = null;
-                        if (o instanceof List) {
-                            if (o instanceof List && !((List) o).isEmpty())
-                                stack = (ItemStack) ((List) o).get(0);
-                        }
-
-                        if (o instanceof ItemStack) {
-                            stack = (ItemStack) o;
-                        }
-                        stacks[idx2][idx] = stack;
-                    }
-                }
-
-                return stacks;
+            int idx = 0;
+            for (Ingredient ingredient : ingredients) {
+                if (idx >= 9) break;
+                stacks[idx / 3][idx % 3] = firstStack(ingredient);
+                idx++;
             }
-            if (r instanceof ShapelessRecipes) {
-                ShapelessRecipes s = (ShapelessRecipes) r;
-                int idx = 0;
-                for (Object o : s.recipeItems) {
-                    ItemStack stack = (ItemStack) o;
-                    stacks[idx / 3][idx % 3] = stack;
-                    idx++;
-                }
-                return stacks;
-            }
-            if (r instanceof ShapelessOreRecipe) {
-                ShapelessOreRecipe s = (ShapelessOreRecipe) r;
-                int idx = 0;
-                for (Object o : s.getInput()) {
-                    ItemStack stack = null;
-                    if (o instanceof List && !((List) o).isEmpty()) {
-                        stack = (ItemStack) ((List) o).get(0);
-                    }
-
-                    if (o instanceof ItemStack) {
-                        stack = (ItemStack) o;
-                    }
-                    stacks[idx / 3][idx % 3] = stack;
-                    idx++;
-                }
-                return stacks;
-            }
+            return stacks;
         } catch (Exception e) {
             // TODO: handle exception
         }
         return null;
     }
 
+    /** All stacks that can go into a recipe (every ore-dictionary alternative, as the 1.7.10 version did). */
     public static ArrayList<ItemStack> getRecipeInputs(IRecipe r) {
         try {
             ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
-            if (r instanceof ShapedRecipes) {
-                for (ItemStack stack : ((ShapedRecipes) r).recipeItems) {
-                    stacks.add(stack);
-                }
-            }
-            if (r instanceof ShapelessRecipes) {
-                for (Object stack : ((ShapelessRecipes) r).recipeItems) {
-                    stacks.add((ItemStack) stack);
-                }
-            }
-            if (r instanceof ShapedOreRecipe) {
-                for (Object o : ((ShapedOreRecipe) r).getInput()) {
-                    if (o instanceof List) {
-                        stacks.addAll((List) o);
-                    }
-
-                    if (o instanceof ItemStack) {
-                        stacks.add((ItemStack) o);
-                    }
-                }
-            }
-            if (r instanceof ShapelessOreRecipe) {
-                for (Object o : ((ShapelessOreRecipe) r).getInput()) {
-                    if (o instanceof List) {
-                        stacks.addAll((List) o);
-                    }
-
-                    if (o instanceof ItemStack) {
-                        stacks.add((ItemStack) o);
-                    }
+            for (Ingredient ingredient : r.getIngredients()) {
+                for (ItemStack stack : ingredient.getMatchingStacks()) {
+                    if (!stack.isEmpty()) stacks.add(stack);
                 }
             }
             return stacks;
@@ -1289,6 +1235,11 @@ public class Utils {
         entityPlayer.sendMessage(new TextComponentString(string));
     }
 
+    /** Null-or-empty check for stacks that may come from 1.7.10-style code paths (porting guide rule 3). */
+    public static boolean isEmpty(ItemStack stack) {
+        return stack == null || stack.isEmpty();
+    }
+
     public static ItemStack newItemStack(int i, int size, int damage) {
         return new ItemStack(Item.getItemById(i), size, damage);
     }
@@ -1298,7 +1249,7 @@ public class Utils {
     }
 
     public static List<NBTTagCompound> getTags(NBTTagCompound nbt) {
-        Object[] set = nbt.func_150296_c().toArray();
+        Object[] set = nbt.getKeySet().toArray();
 
         ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();
 
@@ -1337,7 +1288,7 @@ public class Utils {
     }
 
     public static void updateSkylight(Chunk chunk) {
-        chunk.func_150804_b(false);
+        chunk.onTick(false);
     }
 
     public static void updateAllLightTypes(World world, int x, int y, int z) {
@@ -1357,11 +1308,11 @@ public class Utils {
     // public static RecipesList smeltRecipeList = new RecipesList();
 
     public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack, float f) {
-        FurnaceRecipes.smelting().func_151394_a(newItemStack(parentItem, 1, parentItemDamage), findItemStack, f);
+        FurnaceRecipes.instance().addSmeltingRecipe(newItemStack(parentItem, 1, parentItemDamage), findItemStack, f);
     }
 
     public static void addSmelting(Block parentBlock, int parentItemDamage, ItemStack findItemStack, float f) {
-        FurnaceRecipes.smelting().func_151394_a(newItemStack(Item.getItemFromBlock(parentBlock), 1, parentItemDamage), findItemStack, f);
+        FurnaceRecipes.instance().addSmeltingRecipe(newItemStack(Item.getItemFromBlock(parentBlock), 1, parentItemDamage), findItemStack, f);
     }
 
     public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack) {
@@ -1427,7 +1378,7 @@ public class Utils {
         if (player == null) return false;
         if (Eln.playerManager.get(player).getInteractEnable()) return true;
         ItemStack stack = player.inventory.getCurrentItem();
-        if (stack == null) return false;
+        if (Utils.isEmpty(stack)) return false;
         return isWrench(stack);
     }
 

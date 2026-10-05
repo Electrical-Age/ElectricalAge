@@ -163,7 +163,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
         ItemStack itemStack;
         heatingCorpResistor.setState(powerOn);
         itemStack = inventory.getStackInSlot(heatingCorpSlotId);
-        if (itemStack == null) {
+        if (Utils.isEmpty(itemStack)) {
             thermalRegulator.setRmin(MnaConst.highImpedance);
             voltageWatchdog.setUNominal(100000);
         } else {
@@ -173,7 +173,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
         }
 
         itemStack = inventory.getStackInSlot(thermalRegulatorSlotId);
-        if (itemStack == null) {
+        if (Utils.isEmpty(itemStack)) {
             thermalRegulator.setNone();
         } else {
             IRegulatorDescriptor element = ((GenericItemUsingDamage<IRegulatorDescriptor>) itemStack.getItem()).getDescriptor(itemStack);
@@ -265,7 +265,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
-        if (inventory.getStackInSlot(heatingCorpSlotId) != null) {
+        if (!Utils.isEmpty(inventory.getStackInSlot(heatingCorpSlotId))) {
             info.put(I18N.tr("Heating element"), inventory.getStackInSlot(heatingCorpSlotId).getDisplayName());
         } else {
             info.put(I18N.tr("Heating element"), I18N.tr("None"));
