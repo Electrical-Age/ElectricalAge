@@ -18,7 +18,7 @@ import net.minecraft.nbt.NBTTagCompound
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-abstract class TurbineDescriptor(baseName: String, obj: Obj3D?) :
+abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
     // Overall time for steam input changes to take effect, in seconds.
     abstract val inertia: Float
@@ -47,8 +47,14 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D?) :
     }
 
     override val obj = obj
-    override val static = objParts(obj, "Cowl", "Stand")
-    override val rotating = objParts(obj, "Shaft", "Fan")
+    override val static = arrayOf(
+        obj.getPart("Cowl"),
+        obj.getPart("Stand")
+    )
+    override val rotating = arrayOf(
+        obj.getPart("Shaft"),
+        obj.getPart("Fan")
+    )
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts ${fluidDescription} into mechanical energy.")
@@ -66,7 +72,7 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D?) :
     }
 }
 
-class SteamTurbineDescriptor(baseName: String, obj: Obj3D?) :
+class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     TurbineDescriptor(baseName, obj) {
     // Steam turbines are for baseload.
     override val inertia = 20f
@@ -82,7 +88,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D?) :
     override val sound = "eln:steam_turbine"
 }
 
-class GasTurbineDescriptor(basename: String, obj: Obj3D?) :
+class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     TurbineDescriptor(basename, obj) {
     // The main benefit of gas turbines.
     override val inertia = 5f

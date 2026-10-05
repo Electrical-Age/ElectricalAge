@@ -10,7 +10,6 @@ import mods.eln.mechanical.JointHubDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
 import mods.eln.mechanical.StraightJointDescriptor;
 import mods.eln.mechanical.TachometerDescriptor;
-import mods.eln.misc.Obj3D;
 
 import static mods.eln.Eln.*;
 import static mods.eln.i18n.I18N.*;
@@ -32,18 +31,6 @@ public class Wp11Content implements ElnContent {
         registerTurbine(4); // mechanical sub-UIDs (steam/gas turbine, generator, joints, flywheel, tachometer)
         registerGridDevices(123);
         // PENDING(1.12 wp11): TODO(1.12 WP11): TheOneProbe provider (replaces Waila; Element getWaila() data)
-    }
-
-    /**
-     * A model the SERVER needs too: grid nodes compute their cable attachment points from the OBJ part bounding
-     * boxes in networkSerialize (server side). Core loads OBJ models on the client only (Eln.obj stays empty on a
-     * dedicated server), so on the server the grid models are parsed here (geometry only; nothing is drawn).
-     */
-    static Obj3D serverSideObj(String name, String path) {
-        Obj3D o = obj.getObj(name);
-        if (o != null) return o;
-        o = new Obj3D();
-        return o.loadFile(path) ? o : null;
     }
 
     public static void registerTestBlock() {
@@ -143,11 +130,10 @@ public class Wp11Content implements ElnContent {
 //			descriptor.setGhostGroup(g);
 //			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
-        Obj3D utilityPole = serverSideObj("UtilityPole", "powerpole/utilitypole.obj");
         {
             subId = 4;
             ElectricalPoleDescriptor descriptor =
-                new ElectricalPoleDescriptor("Utility Pole", utilityPole, "textures/wire.png", highVoltageCableDescriptor, false);
+                new ElectricalPoleDescriptor("Utility Pole", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, false);
             GhostGroup g = new GhostGroup();
             g.addElement(0, 1, 0);
             g.addElement(0, 2, 0);
@@ -159,7 +145,7 @@ public class Wp11Content implements ElnContent {
         {
             subId = 5;
             ElectricalPoleDescriptor descriptor =
-                new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", utilityPole, "textures/wire.png", highVoltageCableDescriptor, true);
+                new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
             GhostGroup g = new GhostGroup();
             g.addElement(0, 1, 0);
             g.addElement(0, 2, 0);

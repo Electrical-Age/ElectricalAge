@@ -6,11 +6,11 @@ import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 
-class FlywheelDescriptor(baseName: String, obj: Obj3D?) : SimpleShaftDescriptor(baseName,
+class FlywheelDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     FlyWheelElement::class, ShaftRender::class, EntityMetaTag.Basic) {
     override val obj = obj
-    override val static = objParts(obj, "Stand", "Cowl")
-    override val rotating = objParts(obj, "Flywheel", "Shaft")
+    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
+    override val rotating = arrayOf(obj.getPart("Flywheel"), obj.getPart("Shaft"))
 }
 
 class FlyWheelElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : StraightJointElement(node, desc_) {

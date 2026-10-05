@@ -33,11 +33,11 @@ import java.io.IOException
 import java.text.NumberFormat
 import java.text.ParseException
 
-class TachometerDescriptor(baseName: String, obj: Obj3D?) : SimpleShaftDescriptor(baseName,
+class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
     override val obj = obj
-    override val static = objParts(obj, "Stand", "Cowl")
-    override val rotating = objParts(obj, "Shaft")
+    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
+    override val rotating = arrayOf(obj.getPart("Shaft"))
 }
 
 open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
