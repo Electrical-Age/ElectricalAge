@@ -76,7 +76,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
         Iterator<Exclusion> ie = exclude.iterator();
         while (ie.hasNext()) {
             Exclusion e = ie.next();
-            e.timeout -= 0.05;
+            e.timeout -= time; // WP16b: was 0.05 (the slow-process time, so no change)
             if (e.timeout < 0) {
                 ie.remove();
             }

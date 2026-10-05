@@ -511,6 +511,11 @@ public class Simulator /* ,IPacketHandler */ {
             }
         }
         for (ThermalLoad load : loadList) {
+            if (load.EnergyTemp != 0) { // moveEnergyTo: joules since the last step of this load -> watts over dt
+                load.PcTemp += load.EnergyTemp / dt;
+                load.PspTemp += Math.abs(load.EnergyTemp) / dt;
+                load.EnergyTemp = 0;
+            }
             load.PcTemp -= load.Tc / load.Rp;
 
             load.Tc += load.PcTemp * dt / load.C;
