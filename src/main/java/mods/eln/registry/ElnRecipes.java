@@ -83,6 +83,12 @@ public final class ElnRecipes {
     public static int utilityPoleVariants;
     /** Registry path -> the recipe as written (pattern + keys / ingredients), for the dump. */
     public static final Map<String, String> descriptions = new LinkedHashMap<String, String>();
+    /**
+     * Every EA smelting call as {input, wanted output} (13 with the default config), whether it was added or the input
+     * already smelted (another mod's ore-dictionary dust smelting, or EA's own Tree Resin recipe): the selftest checks
+     * that each input smelts to its output's item or an ore-dictionary equivalent.
+     */
+    public static final List<ItemStack[]> smeltingCalls = new ArrayList<ItemStack[]>();
     /** Smelting entries added by EA: "input -> output". */
     public static final List<String> smeltings = new ArrayList<String>();
     /** 1.7.10 pattern quirks rewritten for 1.12's parser. */
@@ -359,6 +365,7 @@ public final class ElnRecipes {
     public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack result, float xp) {
         if (parentItem == null || parentItem == Items.AIR || Utils.isEmpty(result)) return;
         ItemStack in = new ItemStack(parentItem, 1, parentItemDamage);
+        smeltingCalls.add(new ItemStack[]{in, result.copy()});
         ItemStack old = FurnaceRecipes.instance().getSmeltingResult(in);
         if (!old.isEmpty()) {
             fix("smelting " + stackName(in) + " -> " + describe(result) + ": input already smelts to " + describe(old) + " (kept)");

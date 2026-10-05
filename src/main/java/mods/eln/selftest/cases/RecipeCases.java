@@ -26,7 +26,8 @@ import static mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
  * WP15 recipes (registry/ElnRecipes), no world needed. Expected output (default config, E36 ore dictionary):
  * <pre>
  * PASS recipes crafting count: eln:* registered = recipe calls = expected (293 + utility poles max(k,1) + X-ray 1 + converters 3)
- * PASS recipes smelting added: 12 (13 calls; Tree Resin's second recipe ignored, 1.12 keeps the first)
+ * PASS recipes smelting: 13 EA inputs smelt to their outputs (n added by EA; E36: 10, Iron/Gold Dust already smelt
+ *      via another mod, Tree Resin's second recipe ignored since 1.12 keeps the first)
  * PASS recipes machine lists: macerator 18 (+ AE2 mod ores), compressor 4, plate machine 6, magnetizer 2
  * PASS recipes LV cable: rubber/copper ingot/rubber rows -> 6 Low Voltage Cable
  * PASS recipes LV cable with a foreign ingotCopper (SKIP line if no other mod registers one)
@@ -83,6 +84,15 @@ public final class RecipeCases {
             return !a.isEmpty() && !b.isEmpty() && a.getItem() == b.getItem() && a.getMetadata() == b.getMetadata() && a.getCount() == b.getCount();
         }
 
+        /** Same item+meta, or both share an ore dictionary name (a unifier may swap outputs); count ignored. */
+        static boolean sameOrOre(ItemStack got, ItemStack want) {
+            if (got.isEmpty() || want.isEmpty()) return false;
+            if (got.getItem() == want.getItem() && got.getMetadata() == want.getMetadata()) return true;
+            for (int id : OreDictionary.getOreIDs(want))
+                for (int id2 : OreDictionary.getOreIDs(got)) if (id == id2) return true;
+            return false;
+        }
+
         static String str(ItemStack s) {
             return s.isEmpty() ? "nothing" : s.getCount() + "x " + ElnRecipes.stackName(s);
         }
@@ -113,7 +123,19 @@ public final class RecipeCases {
                 registered == expected && ElnRecipes.craftingAttempted == expected && ElnRecipes.craftingRegistered == expected,
                 "registry " + registered + ", registered " + ElnRecipes.craftingRegistered + ", calls " + ElnRecipes.craftingAttempted);
 
-            ctx.check("recipes smelting added: 12", ElnRecipes.smeltingAdded == 12, String.valueOf(ElnRecipes.smeltingAdded));
+            // Count of EA's 13 smelting inputs that smelt to the wanted item (or an ore-dictionary equivalent; count
+            // ignored: Tree Resin keeps recipeGeneral's 1 Rubber). "added" alone depends on the pack: in E36 another mod
+            // already smelts EA's Iron Dust and Gold Dust (ore:dustIron/dustGold) to the vanilla ingots -> added 10.
+            int smeltOk = 0;
+            StringBuilder smeltBad = new StringBuilder();
+            for (ItemStack[] c : ElnRecipes.smeltingCalls) {
+                ItemStack res = FurnaceRecipes.instance().getSmeltingResult(c[0]);
+                if (sameOrOre(res, c[1])) smeltOk++;
+                else smeltBad.append("; ").append(ElnRecipes.stackName(c[0])).append(" -> ").append(str(res));
+            }
+            ctx.check("recipes smelting: 13 EA inputs smelt to their outputs (" + ElnRecipes.smeltingAdded + " added by EA, rest pre-existing)",
+                ElnRecipes.smeltingCalls.size() == 13 && smeltOk == 13,
+                "calls " + ElnRecipes.smeltingCalls.size() + ", ok " + smeltOk + smeltBad);
 
             int mac = Eln.maceratorRecipes.getRecipes().size(), comp = Eln.compressorRecipes.getRecipes().size();
             int plate = Eln.plateMachineRecipes.getRecipes().size(), mag = Eln.magnetiserRecipes.getRecipes().size();
