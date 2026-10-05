@@ -69,6 +69,35 @@ public class ItemBridgeModel implements IBakedModel {
         }
     }
 
+    /** Base-class renderItem implementations that only draw the descriptor's icon (UtilsClient.drawIcon). */
+    private static final List<Class<?>> ICON_ONLY_RENDERERS = java.util.Arrays.asList(
+        mods.eln.node.six.SixNodeDescriptor.class, mods.eln.node.transparent.TransparentNodeDescriptor.class,
+        mods.eln.generic.GenericItemUsingDamageDescriptor.class);
+    private static final Map<Class<?>, Boolean> iconOnlyCache = new java.util.HashMap<>();
+
+    /**
+     * True when the stack's descriptor does not override the base icon-only renderItem: 1.7.10 drew those in hand and
+     * on the ground as one single-sided quad (invisible edge-on, e.g. cables); 1.12 uses the vanilla generated
+     * (extruded) item model of the same icon there, and the bridge only for the GUI (voltage-level background).
+     */
+    static boolean isIconOnly(ItemStack stack) {
+        Object d = null;
+        if (stack.getItem() instanceof mods.eln.generic.GenericItemBlockUsingDamage)
+            d = ((mods.eln.generic.GenericItemBlockUsingDamage<?>) stack.getItem()).getDescriptor(stack);
+        else if (stack.getItem() instanceof mods.eln.generic.GenericItemUsingDamage)
+            d = ((mods.eln.generic.GenericItemUsingDamage<?>) stack.getItem()).getDescriptor(stack);
+        if (d == null) return false;
+        return iconOnlyCache.computeIfAbsent(d.getClass(), c -> {
+            try {
+                Class<?> owner = c.getMethod("renderItem", ItemRenderType.class, ItemStack.class, Object[].class)
+                    .getDeclaringClass();
+                return ICON_ONLY_RENDERERS.contains(owner);
+            } catch (NoSuchMethodException e) {
+                return false;
+            }
+        });
+    }
+
     // --- the item-level model: only used to reach the overrides ---
 
     @Override
@@ -115,16 +144,20 @@ public class ItemBridgeModel implements IBakedModel {
         @Nullable
         final IBakedModel icon;
         final boolean guiHandled;
+        /** Descriptor only draws its flat icon (1.7.10 single quad): outside the GUI use the icon's item model. */
+        final boolean iconOnly;
 
         Stack(ItemStack stack, @Nullable EntityLivingBase entity) {
             this.stack = stack;
             this.entity = entity;
             this.icon = icons.get(stack.getItemDamage());
+            this.iconOnly = icon != null && isIconOnly(stack);
             this.guiHandled = handles(ItemRenderType.INVENTORY);
         }
 
         boolean handles(@Nullable ItemRenderType type) {
             if (type == null || !(stack.getItem() instanceof IItemRenderer)) return false;
+            if (iconOnly && type != ItemRenderType.INVENTORY) return false;
             try {
                 return ((IItemRenderer) stack.getItem()).handleRenderType(stack, type);
             } catch (RuntimeException e) {
@@ -157,6 +190,7 @@ public class ItemBridgeModel implements IBakedModel {
         /** GUI lighting (RenderItem.setupGuiTransform) and ground-item style: the icon's when the icon is drawn. */
         @Override
         public boolean isGui3d() {
+            if (iconOnly) return icon.isGui3d();
             return guiHandled || icon == null || icon.isGui3d();
         }
 

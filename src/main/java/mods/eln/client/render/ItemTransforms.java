@@ -30,15 +30,15 @@ public final class ItemTransforms {
         def("inventory", "translate -0.5 0.5 0; scale 0.0625 -0.0625 0.0625",
             "GUI slot: 1.12 GUI frame -> 1.7.10 pixel frame (origin top-left, y down). Lighting is off for this type.");
         def("first_person_left", "scale -1 1 1", "extra ops before first_person for the left hand");
-        def("first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4",
+        def("first_person", "translate -0.15 -0.02 0; rotate 45 0 1 0; scale 0.2 0.2 0.2",
             "first person, after 1.12 transformSideFirstPerson (== 1.7.10's), before equipped_tail");
         def("third_person_right_undo", "translate -0.0625 -0.125 0.625; rotate -180 0 1 0; rotate 90 1 0 0",
             "undo 1.12 LayerHeldItem, right hand");
         def("third_person_left_undo", "translate 0.0625 -0.125 0.625; rotate -180 0 1 0; rotate 90 1 0 0",
             "undo 1.12 LayerHeldItem, left hand");
         def("third_person_arm", "translate -0.0625 0.4375 0.0625", "1.7.10 RenderPlayer after bipedRightArm.postRender");
-        def("third_person_six_node", "translate 0 0.1875 -0.3125; rotate 20 1 0 0; rotate 45 0 1 0; scale -0.375 -0.375 0.375",
-            "six-node items (1.7.10 block branch)");
+        def("third_person_six_node", "translate 0 0.8 -0.3125; rotate 20 1 0 0; rotate 45 0 1 0; scale -0.375 -0.375 0.375",
+            "six-node items with a model (1.7.10 block branch); +y moves the item down here");
         def("third_person_item", "translate 0.25 0.1875 -0.1875; scale 0.375 0.375 0.375; rotate 60 0 0 1; rotate -90 1 0 0; rotate 20 0 0 1",
             "other items (1.7.10 item branch)");
         def("equipped_tail", "translate 0 -0.3 0; scale 1.5 1.5 1.5; rotate 50 0 1 0; rotate 335 0 0 1; translate -0.9375 -0.0625 0",
@@ -46,8 +46,22 @@ public final class ItemTransforms {
         def("ground", "translate 0 -0.25 0", "dropped item: cancel 1.12's +0.25 lift (bob and spin stay)");
         def("fixed", "", "item frame");
         def("head", "translate 0 -0.25 0", "on a head");
-        def("entity_six_node", "scale 0.25 0.25 0.25", "after ground/fixed/head: six-node items (1.7.10 3D path)");
+        def("entity_six_node", "translate 0 -0.15 0; scale 0.4 0.4 0.4",
+            "after ground/fixed/head: six-node items with a model (1.7.10 3D path)");
         def("entity_item", "scale 0.5 0.5 0.5", "after ground/fixed/head: other items");
+    }
+
+    /**
+     * Earlier defaults, replaced by the client test 1 tuning (AdventurAgent, 2026-10-05): a cfg value still equal
+     * to one of these is updated to the current default. Icon-only items (cables...) no longer use these keys
+     * outside the GUI: they render with their vanilla generated item model (ItemBridgeModel.isIconOnly).
+     */
+    private static final Map<String, String> SUPERSEDED = new LinkedHashMap<>();
+
+    static {
+        SUPERSEDED.put("first_person", "rotate 45 0 1 0; scale 0.4 0.4 0.4");
+        SUPERSEDED.put("third_person_six_node", "translate 0 0.1875 -0.3125; rotate 20 1 0 0; rotate 45 0 1 0; scale -0.375 -0.375 0.375");
+        SUPERSEDED.put("entity_six_node", "scale 0.25 0.25 0.25");
     }
 
     private static void def(String key, String ops, String comment) {
@@ -70,6 +84,8 @@ public final class ItemTransforms {
             + "rotate angle x y z; scale x y z. Reload in game: /elnclient reloadrender");
         for (Map.Entry<String, String[]> e : DEFAULTS.entrySet()) {
             Property p = config.get("transforms", e.getKey(), e.getValue()[0], e.getValue()[1]);
+            if (p.getString().trim().equals(SUPERSEDED.get(e.getKey()))) p.set(e.getValue()[0]);
+            p.setComment(e.getValue()[1]);
             try {
                 OPS.put(e.getKey(), parse(p.getString()));
             } catch (IllegalArgumentException ex) {
