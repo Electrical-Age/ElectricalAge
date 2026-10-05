@@ -27,7 +27,8 @@ import static mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
  * <pre>
  * PASS recipes crafting count: eln:* registered = recipe calls = expected (293 + utility poles max(k,1) + X-ray 1 + converters 3)
  * PASS recipes smelting: 13 EA inputs smelt to their outputs (n added by EA; E36: 10, Iron/Gold Dust already smelt
- *      via another mod, Tree Resin's second recipe ignored since 1.12 keeps the first)
+ *      via another mod, Tree Resin's second recipe ignored since 1.12 keeps the first; E36's CraftTweaker scripts remove
+ *      furnace recipes of every oreCopper/oreLead, listed as "removed by the pack" and counted ok)
  * PASS recipes machine lists: macerator 18 (+ AE2 mod ores), compressor 4, plate machine 6, magnetizer 2
  * PASS recipes LV cable: rubber/copper ingot/rubber rows -> 6 Low Voltage Cable
  * PASS recipes LV cable with a foreign ingotCopper (SKIP line if no other mod registers one)
@@ -97,6 +98,27 @@ public final class RecipeCases {
             return s.isEmpty() ? "nothing" : s.getCount() + "x " + ElnRecipes.stackName(s);
         }
 
+        /**
+         * The ore* dictionary name of an input none of whose members smelts (a pack-wide furnace.remove for that ore), or
+         * null. A lone missing EA recipe (the other members still smelt) stays a failure.
+         */
+        static String oreRemovedByPack(ItemStack in) {
+            for (int id : OreDictionary.getOreIDs(in)) {
+                String name = OreDictionary.getOreName(id);
+                if (!name.startsWith("ore")) continue;
+                boolean any = false;
+                for (ItemStack o : OreDictionary.getOres(name)) {
+                    ItemStack q = o.getMetadata() == OreDictionary.WILDCARD_VALUE ? new ItemStack(o.getItem(), 1, 0) : o;
+                    if (!FurnaceRecipes.instance().getSmeltingResult(q).isEmpty()) {
+                        any = true;
+                        break;
+                    }
+                }
+                if (!any) return name;
+            }
+            return null;
+        }
+
         /** 3x3 grid, rows of the given stacks (null = empty) -> CraftingManager result. */
         static ItemStack craft(SelfTestContext ctx, ItemStack... grid) {
             InventoryCrafting inv = new InventoryCrafting(new Container() {
@@ -126,14 +148,23 @@ public final class RecipeCases {
             // Count of EA's 13 smelting inputs that smelt to the wanted item (or an ore-dictionary equivalent; count
             // ignored: Tree Resin keeps recipeGeneral's 1 Rubber). "added" alone depends on the pack: in E36 another mod
             // already smelts EA's Iron Dust and Gold Dust (ore:dustIron/dustGold) to the vanilla ingots -> added 10.
+            // Ores whose smelting the pack removed for every member of their ore* entry (E36: CraftTweaker
+            // MineTweakerRecipeMaker.zs furnace.remove(<*>, <ore:oreCopper>) / <ore:oreLead>, an expert-mode rule for all
+            // mods' ores) count as ok: EA registered them (smeltingCalls), the pack took them out afterwards.
             int smeltOk = 0;
             StringBuilder smeltBad = new StringBuilder();
+            StringBuilder packRemoved = new StringBuilder();
             for (ItemStack[] c : ElnRecipes.smeltingCalls) {
                 ItemStack res = FurnaceRecipes.instance().getSmeltingResult(c[0]);
+                String ore = res.isEmpty() ? oreRemovedByPack(c[0]) : null;
                 if (sameOrOre(res, c[1])) smeltOk++;
-                else smeltBad.append("; ").append(ElnRecipes.stackName(c[0])).append(" -> ").append(str(res));
+                else if (ore != null) {
+                    smeltOk++;
+                    packRemoved.append(packRemoved.length() == 0 ? "" : ", ").append(ElnRecipes.stackName(c[0])).append(" (ore:").append(ore).append(")");
+                } else smeltBad.append("; ").append(ElnRecipes.stackName(c[0])).append(" -> ").append(str(res));
             }
-            ctx.check("recipes smelting: 13 EA inputs smelt to their outputs (" + ElnRecipes.smeltingAdded + " added by EA, rest pre-existing)",
+            ctx.check("recipes smelting: 13 EA inputs smelt to their outputs (" + ElnRecipes.smeltingAdded + " added by EA, rest pre-existing"
+                    + (packRemoved.length() == 0 ? "" : "; removed by the pack for every " + packRemoved + " ore") + ")",
                 ElnRecipes.smeltingCalls.size() == 13 && smeltOk == 13,
                 "calls " + ElnRecipes.smeltingCalls.size() + ", ok " + smeltOk + smeltBad);
 
