@@ -1,5 +1,7 @@
 package mods.eln.item.electricalitem
 
+
+import mods.eln.registry.ElnDeviceRegistry
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.i18n.I18N.tr
@@ -25,7 +27,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
     override fun onEntitySwing(entityLiving: EntityLivingBase, stack: ItemStack): Boolean {
         if (entityLiving.world.isRemote) return false
 
-        Eln.itemEnergyInventoryProcess.addExclusion(this, 2.0)
+        ElnDeviceRegistry.itemEnergyInventoryProcess.addExclusion(this, 2.0)
         return super.onEntitySwing(entityLiving, stack)
     }
 

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -314,7 +316,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             int count = 0;
             while (!newCoord.equals(myCoord())) {
                 Block block = newCoord.getBlock();
-                if (block == Blocks.AIR || block == Eln.lightBlock) {
+                if (block == Blocks.AIR || block == ElnDeviceRegistry.lightBlock) {
                     count++;
                     if (count == 2)
                         break;

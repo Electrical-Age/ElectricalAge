@@ -1,5 +1,7 @@
 package mods.eln.sixnode.energymeter;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -313,7 +315,7 @@ public class EnergyMeterElement extends SixNodeElement {
             }
 
             if (highImp) shunt.ultraImpedance();
-            else Eln.applySmallRs(shunt);
+            else ElnDeviceRegistry.applySmallRs(shunt);
 
             publishTimeout -= time;
             if (publishTimeout < 0) {

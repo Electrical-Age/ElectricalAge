@@ -1,6 +1,8 @@
 package mods.eln.sixnode.electricaldatalogger;
 
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.sim.IProcess;
@@ -34,8 +36,8 @@ public class ElectricalDataLoggerProcess implements IProcess {
             ItemStack printStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.printSlotId);
             if (!Utils.isEmpty(paperStack) && Utils.isEmpty(printStack)) {
                 e.inventory.decrStackSize(ElectricalDataLoggerContainer.paperSlotId, 1);
-                ItemStack print = Eln.instance.dataLogsPrintDescriptor.newItemStack(1);
-                Eln.instance.dataLogsPrintDescriptor.initializeStack(print, e.logs);
+                ItemStack print = ElnDeviceRegistry.dataLogsPrintDescriptor.newItemStack(1);
+                ElnDeviceRegistry.dataLogsPrintDescriptor.initializeStack(print, e.logs);
                 e.inventory.setInventorySlotContents(ElectricalDataLoggerContainer.printSlotId, print);
             }
             e.printToDo = false;

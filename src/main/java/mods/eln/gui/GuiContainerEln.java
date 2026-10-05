@@ -87,13 +87,21 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
     protected void keyTyped(char key, int code) {
         helper.keyTyped(key, code);
         if (code == Keyboard.KEY_ESCAPE) {
-            super.keyTyped(key, code);
+            try { // 1.12: GuiScreen declares IOException; EA subclasses override without it
+                super.keyTyped(key, code);
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
         }
     }
 
     protected void mouseClicked(int x, int y, int code) {
         helper.mouseClicked(x, y, code);
-        super.mouseClicked(x, y, code);
+        try { // 1.12: GuiScreen declares IOException; EA subclasses override without it
+            super.mouseClicked(x, y, code);
+        } catch (java.io.IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
     }
 
     @Override

@@ -55,7 +55,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
         resistorR = nominalU * nominalU / nominalP;
         this.recipe = recipe;
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cable);
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
     }
 
     public ElectricalMachineDescriptor setRunningSound(String runningSound) {

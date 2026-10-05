@@ -1,5 +1,7 @@
 package mods.eln.sixnode.hub;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -123,7 +125,7 @@ public class HubElement extends SixNodeElement {
     public void initialize() {
         setup();
         for (int idx = 0; idx < 4; idx++) {
-            Eln.applySmallRs(electricalLoad[idx]);
+            ElnDeviceRegistry.applySmallRs(electricalLoad[idx]);
         }
     }
 

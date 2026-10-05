@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powercapacitorsix;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -120,8 +122,8 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.applySmallRs(positiveLoad);
-        Eln.applySmallRs(negativeLoad);
+        ElnDeviceRegistry.applySmallRs(positiveLoad);
+        ElnDeviceRegistry.applySmallRs(negativeLoad);
 
         setupPhysical();
     }

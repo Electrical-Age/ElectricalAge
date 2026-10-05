@@ -1,5 +1,7 @@
 package mods.eln.server;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -67,7 +69,7 @@ public class OreRegenerate {
                 for (int y = 0; y < 60; y += 2) {
                     for (int z = y & 1; z < 16; z += 2) {
                         for (int x = y & 1; x < 16; x += 2) {
-                            if (chunk.getBlockState(x, y, z).getBlock() == Eln.oreBlock) {
+                            if (chunk.getBlockState(x, y, z).getBlock() == ElnDeviceRegistry.oreBlock) {
                                 //	Utils.println("NO Regenrate ore ! left " + jobs.size());
                                 return;
                             }
@@ -76,7 +78,7 @@ public class OreRegenerate {
                 }
 
                 Utils.println("Regenerated! " + jobs.size());
-                for (OreDescriptor d : Eln.oreItem.descriptors) {
+                for (OreDescriptor d : ElnDeviceRegistry.oreItem.descriptors) {
                     d.generate(server.rand, chunk.x, chunk.z, server, null, null);
                 }
                 //Utils.println("Regenrate ore! left " + jobs.size());

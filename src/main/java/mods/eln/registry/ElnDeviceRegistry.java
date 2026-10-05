@@ -177,6 +177,30 @@ import static mods.eln.registry.ElnRecipes.*;
  */
 @SuppressWarnings({"SameParameterValue", "PointlessArithmeticExpression", "unused"})
 public final class ElnDeviceRegistry {
+    // Device-typed fields moved from Eln (1.12 port, M1 split); device code refers to ElnDeviceRegistry.<field>.
+    public static ItemEnergyInventoryProcess itemEnergyInventoryProcess;
+    public static OreBlock oreBlock;
+    public static LightBlock lightBlock;
+    public static OreItem oreItem;
+    public static CopperCableDescriptor copperCableDescriptor;
+    public static ElectricalCableDescriptor veryHighVoltageCableDescriptor;
+    public static ElectricalCableDescriptor highVoltageCableDescriptor;
+    public static ElectricalCableDescriptor signalCableDescriptor;
+    public static ElectricalCableDescriptor lowVoltageCableDescriptor;
+    public static ElectricalCableDescriptor batteryCableDescriptor;
+    public static ElectricalCableDescriptor meduimVoltageCableDescriptor;
+    public static OreRegenerate oreRegenerate;
+    public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
+    public static EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
+    public static EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
+    public static EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
+    public static TestBlock testBlock;
+    public static ElectricalFurnaceDescriptor electricalFurnace;
+    public static OreDescriptor oreTin, oreCopper, oreSilver;
+    public static TreeResin treeResin;
+    public static MiningPipeDescriptor miningPipeDescriptor;
+    public static DataLogsPrintDescriptor dataLogsPrintDescriptor;
+
     private ElnDeviceRegistry() {
     }
 
@@ -4258,5 +4282,18 @@ public final class ElnDeviceRegistry {
         oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(oreBlock) + (4 << 12), 20 / 100f));
         oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(oreBlock) + (5 << 12), 20 / 100f));
         oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(oreBlock) + (6 << 12), 20 / 100f));
+    }
+
+    // moved from Eln (they read the low-voltage cable descriptor)
+    public static double getSmallRs() {
+        return ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs;
+    }
+
+    public static void applySmallRs(NbtElectricalLoad aLoad) {
+        ElnDeviceRegistry.lowVoltageCableDescriptor.applyTo(aLoad);
+    }
+
+    public static void applySmallRs(Resistor r) {
+        ElnDeviceRegistry.lowVoltageCableDescriptor.applyTo(r);
     }
 }

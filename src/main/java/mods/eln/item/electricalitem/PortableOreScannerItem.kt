@@ -1,6 +1,8 @@
 package mods.eln.item.electricalitem
 
 
+
+import mods.eln.registry.ElnDeviceRegistry
 import mods.eln.compat.WorldCompat
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
@@ -482,7 +484,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
 
                         stackGreen += blockKeyFactor[blockKey.toInt()] * dToStack
                         val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
-                        if (b !== Blocks.AIR && b !== Eln.lightBlock) {
+                        if (b !== Blocks.AIR && b !== ElnDeviceRegistry.lightBlock) {
                             stackRed += if (b.defaultState.isOpaqueCube)
                                 0.2f * dToStack
                             else
@@ -584,7 +586,7 @@ object OreColorMapping {
             }
         }
 
-        for (c in Eln.oreScannerConfig) {
+        for (c in ElnDeviceRegistry.oreScannerConfig) {
             if (c.blockKey >= 0 && c.blockKey < blockKeyMapping.size)
                 blockKeyMapping[c.blockKey] = c.factor
         }

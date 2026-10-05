@@ -1,5 +1,7 @@
 package mods.eln.entity;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
@@ -39,7 +41,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
     public ReplicatoCableAI(ReplicatorEntity entity) {
         load.setAsPrivate();
         this.entity = entity;
-        Eln.instance.highVoltageCableDescriptor.applyTo(load);
+        ElnDeviceRegistry.highVoltageCableDescriptor.applyTo(load);
         load.setRs(load.getRs() * 10);
         this.setMutexBits(1);
     }

@@ -6,7 +6,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
+import mods.eln.node.simple.SimpleNode;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 
@@ -34,7 +34,8 @@ public class WorldExplosion implements IDestructable {
         origine = e;
     }
 
-    public WorldExplosion(EnergyConverterElnToOtherNode e) {
+    /** Was WorldExplosion(EnergyConverterElnToOtherNode e); generalised to its core superclass (1.12 port, M1 split). */
+    public WorldExplosion(SimpleNode e) {
         this.c = e.coordonate;
         this.type = e.toString();
         origine = e;

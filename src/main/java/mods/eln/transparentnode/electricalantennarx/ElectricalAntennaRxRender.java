@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalantennarx;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
@@ -70,7 +72,7 @@ public class ElectricalAntennaRxRender extends TransparentNodeElementRender {
         if (front.getInverse() != side.applyLRDU(lrdu)) return null;
 
         if (side == front.applyLRDU(rot.left())) return descriptor.cable.render;
-        if (side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
+        if (side == front.applyLRDU(rot.right())) return ElnDeviceRegistry.signalCableDescriptor.render;
         return null;
     }
 

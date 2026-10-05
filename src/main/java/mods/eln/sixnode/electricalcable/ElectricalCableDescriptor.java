@@ -172,4 +172,18 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
     public void bindCableTexture() {
         this.render.bindCableTexture();
     }
+
+    /** Was VoltageLevelColor.fromCable (moved here so core does not depend on this device class). */
+    public static VoltageLevelColor voltageLevelColorOf(ElectricalCableDescriptor descriptor) {
+        if (descriptor != null) {
+            if (descriptor.signalWire) {
+                return VoltageLevelColor.SignalVoltage;
+            } else {
+                return VoltageLevelColor.fromVoltage(descriptor.electricalNominalVoltage);
+            }
+        } else {
+            return VoltageLevelColor.None;
+        }
+    }
+
 }

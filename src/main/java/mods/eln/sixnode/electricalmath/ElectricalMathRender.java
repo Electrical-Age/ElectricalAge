@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalmath;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -110,6 +112,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return ElnDeviceRegistry.signalCableDescriptor.render;
     }
 }

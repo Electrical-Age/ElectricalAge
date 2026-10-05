@@ -1,5 +1,6 @@
 package mods.eln;
 
+
 import net.minecraft.util.ResourceLocation;
 
 import mods.eln.compat.GameRegistryCompat;
@@ -19,24 +20,13 @@ import net.minecraftforge.fml.relauncher.Side;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
-import mods.eln.entity.ReplicatorEntity;
-import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.generic.*;
 import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
-import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.i18n.I18N;
-import mods.eln.item.*;
-import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
-import mods.eln.item.electricalitem.*;
-import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScannerConfigElement;
-import mods.eln.item.regulator.IRegulatorDescriptor;
-import mods.eln.item.regulator.RegulatorAnalogDescriptor;
-import mods.eln.item.regulator.RegulatorOnOffDescriptor;
-import mods.eln.mechanical.*;
 import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
@@ -46,102 +36,13 @@ import mods.eln.node.NodeServer;
 import mods.eln.node.simple.SimpleNodeItem;
 import mods.eln.node.six.*;
 import mods.eln.node.transparent.*;
-import mods.eln.ore.OreBlock;
-import mods.eln.ore.OreDescriptor;
-import mods.eln.ore.OreItem;
 import mods.eln.server.*;
-import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.OcDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
-import mods.eln.simplenode.test.TestBlock;
-import mods.eln.sixnode.*;
-import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
-import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
-import mods.eln.sixnode.diode.DiodeDescriptor;
-import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
-import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
-import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
-import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
-import mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor;
-import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
-import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
-import mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor;
-import mods.eln.sixnode.electricalmath.ElectricalMathDescriptor;
-import mods.eln.sixnode.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
-import mods.eln.sixnode.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor;
-import mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor;
-import mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor;
-import mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor;
-import mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor;
-import mods.eln.sixnode.electricaltimeout.ElectricalTimeoutDescriptor;
-import mods.eln.sixnode.electricalvumeter.ElectricalVuMeterDescriptor;
-import mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor;
-import mods.eln.sixnode.electricalweathersensor.ElectricalWeatherSensorDescriptor;
-import mods.eln.sixnode.electricalwindsensor.ElectricalWindSensorDescriptor;
-import mods.eln.sixnode.energymeter.EnergyMeterDescriptor;
-import mods.eln.sixnode.groundcable.GroundCableDescriptor;
-import mods.eln.sixnode.hub.HubDescriptor;
-import mods.eln.sixnode.lampsocket.*;
-import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
-import mods.eln.sixnode.lampsupply.LampSupplyElement;
-import mods.eln.sixnode.logicgate.*;
-import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
-import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
-import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
-import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
-import mods.eln.sixnode.powersocket.PowerSocketElement;
-import mods.eln.sixnode.resistor.ResistorDescriptor;
-import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
-import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
-import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
-import mods.eln.sixnode.tutorialsign.TutorialSignElement;
-import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
-import mods.eln.sixnode.wirelesssignal.repeater.WirelessSignalRepeaterDescriptor;
-import mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor;
-import mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor;
-import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor;
-import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.sound.SoundCommand;
-import mods.eln.transparentnode.FuelGeneratorDescriptor;
-import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
-import mods.eln.transparentnode.LargeRheostatDescriptor;
-import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
-import mods.eln.transparentnode.battery.BatteryDescriptor;
-import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
-import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
-import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
-import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
-import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
-import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
-import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
-import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
-import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
-import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
-import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
-import mods.eln.transparentnode.solarpanel.SolarPanelDescriptor;
-import mods.eln.transparentnode.teleporter.TeleporterDescriptor;
-import mods.eln.transparentnode.teleporter.TeleporterElement;
-import mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
-import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
-import mods.eln.transparentnode.transformer.TransformerDescriptor;
-import mods.eln.transparentnode.turbine.TurbineDescriptor;
-import mods.eln.transparentnode.turret.TurretDescriptor;
-import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
-import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
-import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.ICommandManager;
@@ -172,8 +73,6 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import java.util.*;
 
 import static mods.eln.i18n.I18N.*;
-import static mods.eln.registry.ElnDeviceRegistry.*;
-import static mods.eln.registry.ElnRecipes.*;
 
 @SuppressWarnings({"SameParameterValue", "PointlessArithmeticExpression"})
 @Mod(modid = Eln.MODID, name = Eln.NAME, version = "@VERSION@")
@@ -218,7 +117,6 @@ public class Eln {
     public static NodeManagerNbt nodeManagerNbt;
     public static Simulator simulator = null;
     public static DelayedTaskManager delayedTask;
-    public static ItemEnergyInventoryProcess itemEnergyInventoryProcess;
     public static CreativeTabs creativeTab;
 
     public static Item swordCopper, hoeCopper, shovelCopper, pickaxeCopper, axeCopper;
@@ -231,13 +129,10 @@ public class Eln {
     public static ItemStack wrenchItemStack;
     public static SixNodeBlock sixNodeBlock;
     public static TransparentNodeBlock transparentNodeBlock;
-    public static OreBlock oreBlock;
     public static GhostBlock ghostBlock;
-    public static LightBlock lightBlock;
 
     public static SixNodeItem sixNodeItem;
     public static TransparentNodeItem transparentNodeItem;
-    public static OreItem oreItem;
 
     // The instance of your mod that Forge uses.
     @Instance(MODID)
@@ -247,19 +142,15 @@ public class Eln {
     @SidedProxy(clientSide = "mods.eln.client.ClientProxy", serverSide = "mods.eln.CommonProxy")
     public static CommonProxy proxy;
 
+    /** Device content (1.12 port, M1 split): see ElnContent. */
+    public static final ElnContent content = ElnContent.load();
+    public static double replicatorPopPerSecondPerPlayer;
+
     public static double electricalFrequency, thermalFrequency;
     public static int electricalInterSystemOverSampling;
 
-    public static CopperCableDescriptor copperCableDescriptor;
 
-    public static ElectricalCableDescriptor veryHighVoltageCableDescriptor;
-    public static ElectricalCableDescriptor highVoltageCableDescriptor;
-    public static ElectricalCableDescriptor signalCableDescriptor;
-    public static ElectricalCableDescriptor lowVoltageCableDescriptor;
-    public static ElectricalCableDescriptor batteryCableDescriptor;
-    public static ElectricalCableDescriptor meduimVoltageCableDescriptor;
 
-    public static OreRegenerate oreRegenerate;
 
     public static final Obj3DFolder obj = new Obj3DFolder();
 
@@ -267,7 +158,6 @@ public class Eln {
     public static boolean genCopper, genLead, genTungsten, genCinnabar;
     public static String dictTungstenOre, dictTungstenDust, dictTungstenIngot;
     public static String dictCheapChip, dictAdvancedChip;
-    public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
     public static boolean modbusEnable = false; // 1.12 port: Modbus TCP server dropped (rule 8); RTU devices stay off
 
     public static float xRayScannerRange;
@@ -379,7 +269,7 @@ public class Eln {
         ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
         replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
-        ReplicatorPopProcess.popPerSecondPerPlayer = config.get("entity", "replicatorPopWhenThunderPerSecond", 1.0 / 120).getDouble(1.0 / 120);
+        replicatorPopPerSecondPerPlayer = config.get("entity", "replicatorPopWhenThunderPerSecond", 1.0 / 120).getDouble(1.0 / 120);
         replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
         killMonstersAroundLamps = config.get("entity", "killMonstersAroundLamps", true).getBoolean(true);
         killMonstersAroundLampsRange = config.get("entity", "killMonstersAroundLampsRange", 9).getInt(9);
@@ -453,7 +343,6 @@ public class Eln {
         playerManager = new PlayerManager();
         //tileEntityDestructor = new TileEntityDestructor();
 
-        oreRegenerate = new OreRegenerate();
         nodeServer = new NodeServer();
         clientLiveDataManager = new LiveDataManager();
 
@@ -468,7 +357,6 @@ public class Eln {
         GameRegistryCompat.registerItem(itemCreativeTab, "eln.itemCreativeTab");
         creativeTab = new GenericCreativeTab("Eln", itemCreativeTab);
 
-        oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setTranslationKey("OreEln");
 
         sharedItem = (SharedItem) new SharedItem()
             .setCreativeTab(creativeTab).setMaxStackSize(64)
@@ -487,7 +375,6 @@ public class Eln {
             .setCreativeTab(creativeTab); // TODO(1.12 WP5): was setBlockTextureName("iron_block")
 
         ghostBlock = new GhostBlock(); // TODO(1.12 WP5): was setBlockTextureName("iron_block")
-        lightBlock = (LightBlock) new LightBlock();
 
         obj.loadAllElnModels();
 
@@ -495,15 +382,12 @@ public class Eln {
         GameRegistryCompat.registerItem(sharedItem, "Eln.sharedItem");
         GameRegistryCompat.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
         GameRegistryCompat.registerBlock(ghostBlock, null, "Eln.ghostBlock"); // 1.7.10 also made an (unused) ItemBlock
-        GameRegistryCompat.registerBlock(lightBlock, null, "Eln.lightBlock");
         GameRegistryCompat.registerBlock(sixNodeBlock, SixNodeItem.class, "Eln.SixNode");
         GameRegistryCompat.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
-        GameRegistryCompat.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
         GameRegistry.registerTileEntity(TransparentNodeEntity.class, new ResourceLocation(MODID, "transparent_node_entity"));
         GameRegistry.registerTileEntity(TransparentNodeEntityWithFluid.class, new ResourceLocation(MODID, "transparent_node_entity_wf"));
         // TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
         GameRegistry.registerTileEntity(SixNodeEntity.class, new ResourceLocation(MODID, "six_node_entity"));
-        GameRegistry.registerTileEntity(LightBlockEntity.class, new ResourceLocation(MODID, "light_block_entity"));
 
         NodeManager.registerUuid(sixNodeBlock.getNodeUuid(), SixNode.class);
         NodeManager.registerUuid(transparentNodeBlock.getNodeUuid(), TransparentNode.class);
@@ -511,7 +395,6 @@ public class Eln {
         sixNodeItem = (SixNodeItem) GameRegistryCompat.getItemBlock(sixNodeBlock);
         transparentNodeItem = (TransparentNodeItem) GameRegistryCompat.getItemBlock(transparentNodeBlock);
 
-        oreItem = (OreItem) GameRegistryCompat.getItemBlock(oreBlock);
         /*
          *
 		 * int id = 0,subId = 0,completId; String name;
@@ -519,101 +402,7 @@ public class Eln {
 
         SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-        registerTestBlock();
-        registerEnergyConverter();
-        // registerComputer(): OpenComputers/ComputerCraft probe dropped (rule 8)
-
-        registerArmor();
-        registerTool();
-        registerOre();
-
-        //SIX NODE REGISTRATION
-        //Sub-UID must be unique in this section only.
-        //============================================
-        registerGround(2);
-        registerElectricalSource(3);
-        registerElectricalCable(32);
-        registerThermalCable(48);
-        registerLampSocket(64);
-        registerLampSupply(65);
-        registerBatteryCharger(66);
-        registerPowerSocket(67);
-
-        registerWirelessSignal(92);
-        registerElectricalDataLogger(93);
-        registerElectricalRelay(94);
-        registerElectricalGateSource(95);
-        registerPassiveComponent(96);
-        registerSwitch(97);
-        registerElectricalManager(98);
-        registerElectricalSensor(100);
-        registerThermalSensor(101);
-        registerElectricalVuMeter(102);
-        registerElectricalAlarm(103);
-        registerElectricalEnvironmentalSensor(104);
-        registerElectricalRedstone(108);
-        registerElectricalGate(109);
-        registerTreeResinCollector(116);
-        registerSixNodeMisc(117);
-        registerLogicalGates(118);
-        registerAnalogChips(124);
-
-        //TRANSPARENT NODE REGISTRATION
-        //Sub-UID must be unique in this section only.
-        //============================================
-        registerPowerComponent(1);
-        registerTransformer(2);
-        registerHeatFurnace(3);
-        registerTurbine(4);
-        registerElectricalAntenna(7);
-        registerBattery(16);
-        registerElectricalFurnace(32);
-        registerMacerator(33);
-        registerCompressor(35);
-        registerMagnetizer(36);
-        registerPlateMachine(37);
-        registerEggIncubator(41);
-        registerAutoMiner(42);
-        registerSolarPanel(48);
-        registerWindTurbine(49);
-        registerThermalDissipatorPassiveAndActive(64);
-        registerTransparentNodeMisc(65);
-        registerTurret(66);
-        registerFuelGenerator(67);
-        registerGridDevices(123);
-
-
-        //ITEM REGISTRATION
-        //Sub-UID must be unique in this section only.
-        //============================================
-        registerHeatingCorp(1);
-        // registerThermalIsolator(2);
-        registerRegulatorItem(3);
-        registerLampItem(4);
-        registerProtection(5);
-        registerCombustionChamber(6);
-        registerFerromagneticCore(7);
-        registerIngot(8);
-        registerDust(9);
-        registerElectricalMotor(10);
-        registerSolarTracker(11);
-        //
-        registerMeter(14);
-        registerElectricalDrill(15);
-        registerOreScanner(16);
-        registerMiningPipe(17);
-        registerTreeResinAndRubber(64);
-        registerRawCable(65);
-        registerBrush(119);
-        registerMiscItem(120);
-        registerElectricalTool(121);
-        registerPortableItem(122);
-        registerFuelBurnerItem(124);
-
-        // Register WIP items only on development runs!
-        if (isDevelopmentRun()) {
-            registerWipItems();
-        }
+        content.preInit(); // device blocks/items/descriptors (mods.eln.registry.ElnContentImpl)
     }
 
     public static FMLEventChannel eventChannel;
@@ -627,105 +416,12 @@ public class Eln {
     @EventHandler
     public void modsLoaded(FMLPostInitializationEvent event) {
         Other.check();
-        recipeMaceratorModOres();
+        content.modsLoaded();
     }
 
     @EventHandler
     public void load(FMLInitializationEvent event) {
-        HashSet<String> oreNames = new HashSet<String>();
-        {
-            final String[] names = OreDictionary.getOreNames();
-            Collections.addAll(oreNames, names);
-        }
-
-        //
-        registerReplicator();
-        //
-
-        recipeEnergyConverter();
-
-        recipeArmor();
-        recipeTool();
-
-        recipeGround();
-        recipeElectricalSource();
-        recipeElectricalCable();
-        recipeThermalCable();
-        recipeLampSocket();
-        recipeLampSupply();
-        recipePowerSocket();
-        recipePassiveComponent();
-        recipeSwitch();
-        recipeWirelessSignal();
-        recipeElectricalRelay();
-        recipeElectricalDataLogger();
-        recipeElectricalGateSource();
-        recipeElectricalBreaker();
-        recipeFuses();
-        recipeElectricalVuMeter();
-        recipeElectricalEnvironmentalSensor();
-        recipeElectricalRedstone();
-        recipeElectricalGate();
-        recipeElectricalAlarm();
-        recipeSixNodeCache();
-        recipeElectricalSensor();
-        recipeThermalSensor();
-        recipeSixNodeMisc();
-
-
-        recipeTurret();
-        recipeMachine();
-        recipeChips();
-        recipeTransformer();
-        recipeHeatFurnace();
-        recipeTurbine();
-        recipeBattery();
-        recipeElectricalFurnace();
-        recipeAutoMiner();
-        recipeSolarPanel();
-
-        recipeThermalDissipatorPassiveAndActive();
-        recipeElectricalAntenna();
-        recipeEggIncubator();
-        recipeBatteryCharger();
-        recipeTransporter();
-        recipeWindTurbine();
-        recipeFuelGenerator();
-
-        recipeGeneral();
-        recipeHeatingCorp();
-        recipeRegulatorItem();
-        recipeLampItem();
-        recipeProtection();
-        recipeCombustionChamber();
-        recipeFerromagneticCore();
-        recipeIngot();
-        recipeDust();
-        recipeElectricalMotor();
-        recipeSolarTracker();
-        recipeDynamo();
-        recipeWindRotor();
-        recipeMeter();
-        recipeElectricalDrill();
-        recipeOreScanner();
-        recipeMiningPipe();
-        recipeTreeResinAndRubber();
-        recipeRawCable();
-        recipeMiscItem();
-        recipeBatteryItem();
-        recipeElectricalTool();
-        recipePortableCapacitor();
-
-        recipeFurnace();
-        recipeMacerator();
-        recipeCompressor();
-        recipePlateMachine();
-        recipeMagnetizer();
-        recipeFuelBurnerItem();
-
-        recipeECoal();
-
-        recipeGridDevices(oreNames);
+        content.init(); // replicator + recipes
 
         proxy.registerRenderers();
 
@@ -738,13 +434,9 @@ public class Eln {
         Utils.println("Electrical age init done");
     }
 
-    public static EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
-    public static EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
-    public static EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
 
 
 
-    public static TestBlock testBlock;
 
     private void checkRecipe() {
         Utils.println("No recipe for ");
@@ -810,13 +502,9 @@ public class Eln {
     @EventHandler
 	/* Remember to use the right event! */
     public void onServerStopped(FMLServerStoppedEvent ev) {
-        TutorialSignElement.resetBalise();
 
 
-        LightBlockEntity.observers.clear();
         NodeBlockEntity.clientList.clear();
-        TeleporterElement.teleporterList.clear();
-        IWirelessSignalSpot.spots.clear();
         playerManager.clear();
 
 
@@ -824,7 +512,6 @@ public class Eln {
         nodeManager.clear();
         ghostManager.clear();
         saveConfig = null;
-        oreRegenerate.clear();
 
 
         delayedTask.clear();
@@ -837,10 +524,9 @@ public class Eln {
 
         simulator.stop();
 
+        content.serverStopped();
+
         //tileEntityDestructor.clear();
-        LampSupplyElement.channelMap.clear();
-        PowerSocketElement.channelMap.clear();
-        WirelessSignalTxElement.channelMap.clear();
 
     }
 
@@ -850,20 +536,11 @@ public class Eln {
 
     @EventHandler
     public void onServerStart(FMLServerAboutToStartEvent ev) {
-        TeleporterElement.teleporterList.clear();
-        //tileEntityDestructor.clear();
-        LightBlockEntity.observers.clear();
-        WirelessSignalTxElement.channelMap.clear();
-        LampSupplyElement.channelMap.clear();
-        PowerSocketElement.channelMap.clear();
         playerManager.clear();
         clientLiveDataManager.start();
         simulator.init();
         simulator.addSlowProcess(wind = new WindProcess());
-
-        if (replicatorPop)
-            simulator.addSlowProcess(new ReplicatorPopProcess());
-        simulator.addSlowProcess(itemEnergyInventoryProcess = new ItemEnergyInventoryProcess());
+        content.serverAboutToStart(); // device static state + replicator / item energy processes
     }
 
     @EventHandler
@@ -908,7 +585,7 @@ public class Eln {
             manager.registerCommand(new ConsoleListener());
         }
 
-        regenOreScannerFactors();
+        content.serverStarting(); // ore scanner factors
     }
 
 
@@ -955,7 +632,6 @@ public class Eln {
 
     public static ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
 
-    public static ElectricalFurnaceDescriptor electricalFurnace;
     public static RecipesList maceratorRecipes = new RecipesList();
 
     public static RecipesList compressorRecipes = new RecipesList();
@@ -969,7 +645,6 @@ public class Eln {
     public static double ledLampLife;
     public static boolean ledLampInfiniteLife = false;
 
-    public static OreDescriptor oreTin, oreCopper, oreSilver;
 
     public static GenericItemUsingDamageDescriptorWithComment dustTin,
         dustCopper, dustSilver;
@@ -984,25 +659,11 @@ public class Eln {
     static public GenericItemUsingDamageDescriptor multiMeterElement,
         thermometerElement, allMeterElement;
 
-    public static TreeResin treeResin;
 
-    public static MiningPipeDescriptor miningPipeDescriptor;
 
-    public static DataLogsPrintDescriptor dataLogsPrintDescriptor;
 
     public static int replicatorRegistrationId = -1;
 
-    public static double getSmallRs() {
-        return instance.lowVoltageCableDescriptor.electricalRs;
-    }
-
-    public static void applySmallRs(NbtElectricalLoad aLoad) {
-        instance.lowVoltageCableDescriptor.applyTo(aLoad);
-    }
-
-    public static void applySmallRs(Resistor r) {
-        instance.lowVoltageCableDescriptor.applyTo(r);
-    }
 
     static ItemStack findItemStack(String name, int stackSize) {
         ItemStack stack = GameRegistryCompat.findItemStack("Eln", name, stackSize);

@@ -1,14 +1,15 @@
 [
     {
-        "modid":"Eln",
-        "version": "${version}",
-        "mcversion": "${mcversion}",
-        "name":"Electrical Age",
-        "url":"http://electrical-age.net/",
-		"credits": "The Electrical Age Team",
+        "modid": "${mod_id}",
+        "version": "${mod_version}",
+        "mcversion": "1.12.2",
+        "name": "${mod_name}",
+        "description": "${mod_description}",
+        "url": "http://electrical-age.net/",
+        "credits": "The Electrical Age Team; 1.12.2 port: ${mod_authors}",
         "logoFile": "assets/eln/logo.png",
-        "requiredMods":[
-            "Forge"
+        "requiredMods": [
+            "forge"
         ]
     }
 ]

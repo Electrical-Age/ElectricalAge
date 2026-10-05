@@ -5,7 +5,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
-import mods.eln.item.electricalitem.TreeCapitation;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
@@ -42,7 +41,7 @@ public class ServerEventListener {
         lightningList = lightningListNext;
         lightningListNext = new LinkedList<EntityLightningBolt>();
 
-        TreeCapitation.INSTANCE.process(0.05);
+        Eln.content.serverTick(); // TreeCapitation.INSTANCE.process(0.05)
     }
 
     @SubscribeEvent

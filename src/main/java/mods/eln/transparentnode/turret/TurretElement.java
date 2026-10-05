@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.turret;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
@@ -61,7 +63,7 @@ public class TurretElement extends TransparentNodeElement {
         simulation = new TurretMechanicsSimulation((TurretDescriptor) descriptor);
         slowProcessList.add(simulation);
 
-        Eln.instance.highVoltageCableDescriptor.applyTo(load);
+        ElnDeviceRegistry.highVoltageCableDescriptor.applyTo(load);
         electricalLoadList.add(load);
         electricalComponentList.add(powerResistor);
 

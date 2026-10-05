@@ -26,7 +26,7 @@ public class ConnectionListener {
     @SubscribeEvent
     public void onConnectedToServerEvent(ClientConnectedToServerEvent event) {
         Utils.println("Connected to server " + FMLCommonHandler.instance().getEffectiveSide());
-        mods.eln.registry.ElnDeviceRegistry.regenOreScannerFactors();
+        Eln.content.clientConnected(); // ore scanner factors
 
         timer = 20;
         newConnection = true;

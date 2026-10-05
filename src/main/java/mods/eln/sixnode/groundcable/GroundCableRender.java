@@ -1,5 +1,7 @@
 package mods.eln.sixnode.groundcable;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -56,7 +58,7 @@ public class GroundCableRender extends SixNodeElementRender {
             ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
 
             if (desc == null)
-                cableRender = Eln.instance.lowVoltageCableDescriptor.render;
+                cableRender = ElnDeviceRegistry.lowVoltageCableDescriptor.render;
             else
                 cableRender = desc.render;
         } catch (IOException e) {

@@ -1,5 +1,7 @@
 package mods.eln.simplenode.energyconverter;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -66,7 +68,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
         electricalProcessList.add(electricalProcess);
         slowProcessList.add(watchdog);
 
-        Eln.applySmallRs(load);
+        ElnDeviceRegistry.applySmallRs(load);
 
         load.setAsPrivate();
 

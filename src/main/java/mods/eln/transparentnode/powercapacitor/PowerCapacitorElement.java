@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.powercapacitor;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -100,8 +102,8 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        Eln.applySmallRs(positiveLoad);
-        Eln.applySmallRs(negativeLoad);
+        ElnDeviceRegistry.applySmallRs(positiveLoad);
+        ElnDeviceRegistry.applySmallRs(negativeLoad);
 
         setupPhysical();
 

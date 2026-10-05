@@ -63,7 +63,7 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
     internal val fuels = FuelRegistry.gasolineList
 
     init {
-        voltageLevelColor = VoltageLevelColor.fromCable(cable)
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable)
     }
 
     override fun setParent(item: net.minecraft.item.Item, damage: Int) {

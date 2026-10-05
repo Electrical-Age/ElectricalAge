@@ -7,7 +7,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
 import mods.eln.misc.UtilsClient;
-import mods.eln.wiki.Root;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.text.translation.I18n;
@@ -16,8 +15,7 @@ import org.lwjgl.input.Keyboard;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-//import mods.eln.wiki.Root;
-
+//
 public class ClientKeyHandler {
 
     static public final int openWikiId = 0;
@@ -69,7 +67,7 @@ public class ClientKeyHandler {
         states[id] = state;
 
         if (id == openWikiId) {
-            UtilsClient.clientOpenGui(new Root(null));
+            Eln.content.openWiki(); // was UtilsClient.clientOpenGui(new Root(null))
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream(64);

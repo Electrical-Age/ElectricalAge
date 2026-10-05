@@ -1,6 +1,8 @@
 package mods.eln.sixnode.lampsocket;
 
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
@@ -146,9 +148,9 @@ public class LightBlockEntity extends TileEntity {
 
     public static void addLight(World w, int x, int y, int z, int light, int timeout) {
         Block block = WorldCompat.getBlock(w, x, y, z);
-        if (block != Eln.lightBlock) {
+        if (block != ElnDeviceRegistry.lightBlock) {
             if (block != Blocks.AIR) return;
-            WorldCompat.setBlock(w, x, y, z, Eln.lightBlock, light, 2);
+            WorldCompat.setBlock(w, x, y, z, ElnDeviceRegistry.lightBlock, light, 2);
         }
 
         TileEntity t = WorldCompat.getTileEntity(w, x, y, z);

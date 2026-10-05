@@ -1,6 +1,8 @@
 package mods.eln.transparentnode.powerinductor;
 
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
@@ -53,7 +55,7 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
         double coreFactor = coreDescriptor.cableMultiplicator;
 
-        return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
+        return ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs * coreFactor;
     }
 
     public void setParent(net.minecraft.item.Item item, int damage) {

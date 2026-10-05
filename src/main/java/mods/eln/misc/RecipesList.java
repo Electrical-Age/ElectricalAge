@@ -1,7 +1,6 @@
 package mods.eln.misc;
 
 import mods.eln.Eln;
-import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
@@ -11,6 +10,9 @@ import java.util.Map;
 //import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
 
 public class RecipesList {
+    /** Was ElectricalFurnaceProcess.energyNeededPerSmelt (device); that constant now refers to this one. */
+    public static final double electricalFurnaceEnergyPerSmelt = 1000;
+
 
     public static final ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();
 
@@ -77,7 +79,7 @@ public class RecipesList {
                     ItemStack stack = (ItemStack) pairs.getValue();
                     ItemStack li = (ItemStack) pairs.getKey();
                     if (Utils.areSame(output, stack)) {
-                        list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+                        list.add(recipe = new Recipe(li.copy(), output, electricalFurnaceEnergyPerSmelt));
                         recipe.setMachineList(Eln.instance.furnaceList);
                     }
                 } catch (Exception e) {
@@ -106,7 +108,7 @@ public class RecipesList {
             try {
                 ItemStack input1 = input.copy();
                 input1.setCount(1);
-                list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
+                list.add(smeltRecipe = new Recipe(input1, smeltResult, electricalFurnaceEnergyPerSmelt));
                 smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
             } catch (Exception e) {
                 // TODO: handle exception

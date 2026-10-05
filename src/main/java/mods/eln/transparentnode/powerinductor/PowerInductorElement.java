@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.powerinductor;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -70,8 +72,8 @@ public class PowerInductorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        //Eln.applySmallRs(positiveLoad);
-        //Eln.applySmallRs(negativeLoad);
+        //ElnDeviceRegistry.applySmallRs(positiveLoad);
+        //ElnDeviceRegistry.applySmallRs(negativeLoad);
 
         setupPhysical();
 

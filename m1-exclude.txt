@@ -1,0 +1,26 @@
+# EA 1.12 port, milestone M1 (core only): source paths excluded from the main source set (java + kotlin).
+# Build everything with: gradlew build -PelnAll. Remove lines as device work packages land.
+mods/eln/sixnode/
+mods/eln/transparentnode/
+mods/eln/simplenode/
+mods/eln/gridnode/
+mods/eln/mechanical/
+mods/eln/item/
+mods/eln/registry/
+mods/eln/entity/
+mods/eln/ore/
+mods/eln/wiki/
+mods/eln/signalinductor/
+mods/eln/integration/
+mods/eln/sim/RegulatorProcess.java
+mods/eln/sim/RegulatorThermalLoadToElectricalResistor.java
+mods/eln/sim/RegulatorFurnaceProcess.java
+mods/eln/sim/ResistorProcess.java
+mods/eln/sim/MonsterPopFreeProcess.java
+mods/eln/sim/process/destruct/Mechanical.kt
+mods/eln/sim/nbt/NbtElectricalGateInputOutput.java
+mods/eln/sim/nbt/NbtElectricalGateInput.java
+mods/eln/sim/nbt/NbtElectricalGateOutput.java
+mods/eln/sim/NodeElectricalGateInputHysteresisProcess.java
+mods/eln/node/AutoAcceptInventoryProxy.kt
+mods/eln/server/OreRegenerate.java

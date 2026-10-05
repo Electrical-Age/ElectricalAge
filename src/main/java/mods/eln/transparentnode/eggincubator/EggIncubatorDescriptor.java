@@ -51,7 +51,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
             lampf = obj.getPart("lampf");
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cable);
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
     }
 
     @Override

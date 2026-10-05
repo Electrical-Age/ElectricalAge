@@ -1,6 +1,8 @@
 package mods.eln.transparentnode.autominer;
 
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
@@ -133,7 +135,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         // miner.pushLog("Pipe " + pipeLength + " removed");
                         Eln.ghostManager.removeGhostAndBlock(jobCoord);
                         if (Utils.isEmpty(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId))) {
-                            miner.getInventory().setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
+                            miner.getInventory().setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, ElnDeviceRegistry.miningPipeDescriptor.newItemStack(1));
                         } else {
                             miner.getInventory().decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
                         }
@@ -373,7 +375,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     private void dropPipe() {
         Coordonate coord = new Coordonate(miner.node.coordonate);
         for (coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength; coord.y--) {
-            Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
+            Utils.dropItem(ElnDeviceRegistry.miningPipeDescriptor.newItemStack(1), coord);
         }
     }
 

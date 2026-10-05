@@ -1,7 +1,6 @@
 package mods.eln.misc;
 
 import mods.eln.Eln;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.util.ResourceLocation;
 import mods.eln.compat.IItemRenderer;
 import org.lwjgl.opengl.GL11;
@@ -42,18 +41,6 @@ public enum VoltageLevelColor {
             return HighVoltage;
         } else if (voltage <= 2 * Eln.VVU) {
             return VeryHighVoltage;
-        } else {
-            return None;
-        }
-    }
-
-    public static VoltageLevelColor fromCable(ElectricalCableDescriptor descriptor) {
-        if (descriptor != null) {
-            if (descriptor.signalWire) {
-                return SignalVoltage;
-            } else {
-                return fromVoltage(descriptor.electricalNominalVoltage);
-            }
         } else {
             return None;
         }
