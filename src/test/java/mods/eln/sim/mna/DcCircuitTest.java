@@ -131,13 +131,12 @@ public class DcCircuitTest {
 
     /**
      * Superposition: two 1 A and 2 A sources into one node of 5 ohm must give 15 V.
-     * EA BUG: SubSystem.addToI assigns (Idata[id] = v) instead of accumulating (+=), so the second
+     * Was an EA bug (fixed in WP16): SubSystem.addToI assigned (Idata[id] = v) instead of accumulating (+=), so the second
      * right-hand-side contribution to a node overwrites the first. Every ISubSystemProcessI writes through
      * addToI (Capacitor and Delay history terms on voltage nodes; VoltageSource/Inductor only on their own
      * private current state, which is why ordinary circuits don't notice). See also
      * TransientTest.parallelCapacitorsAddUp.
      */
-    @Ignore("EA bug: SubSystem.addToI overwrites instead of accumulating; two RHS injections into one node lose one")
     @Test
     public void twoCurrentSourcesIntoOneNodeSuperpose() {
         VoltageState a = node();

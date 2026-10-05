@@ -160,11 +160,10 @@ public class TransientTest {
 
     /**
      * Two capacitors in parallel behave as one of C1 + C2.
-     * EA BUG: both write their history current into the same node through SubSystem.addToI, which assigns
+     * Was an EA bug (fixed in WP16): both write their history current into the same node through SubSystem.addToI, which assigns
      * instead of accumulating; the matrix has (C1+C2)/dt but the RHS only C2's history (C2/dt * V_prev),
      * so the node voltage sags as if C1 leaked away every step (wrong time constant, energy not conserved).
      */
-    @Ignore("EA bug: SubSystem.addToI overwrites; parallel capacitors on one node lose all but one history term")
     @Test
     public void parallelCapacitorsAddUp() {
         RootSystem single = new RootSystem(DT, 1);

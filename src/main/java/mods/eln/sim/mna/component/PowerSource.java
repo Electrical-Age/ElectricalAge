@@ -46,9 +46,8 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 
     @Override
     public void addedTo(SubSystem s) {
-        super.addedTo(s);
-        getSubSystem().getRoot().addProcess(this);
-        s.addProcess(this);
+        super.addedTo(s); // VoltageSource.addedTo registers the RHS process (1.7.10 added it a second time here,
+        getSubSystem().getRoot().addProcess(this); // harmless only while SubSystem.addToI overwrote)
     }
 
     @Override

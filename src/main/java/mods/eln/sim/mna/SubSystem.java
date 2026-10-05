@@ -175,8 +175,9 @@ public class SubSystem {
 
     public void addToI(State s, double v) {
         if (s == null) return;
-        Idata[s.getId()] = v;
-        //Idata[s.getId()][0] += v;
+        // Right-hand-side injections superpose (KCL). 1.7.10 assigned here (`= v`), so of two components
+        // injecting into one node only the last counted. Idata is zeroed before every stepCalc/solve.
+        Idata[s.getId()] += v;
     }
 
 	/*
