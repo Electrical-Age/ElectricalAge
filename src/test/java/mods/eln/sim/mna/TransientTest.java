@@ -6,7 +6,6 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
 import net.minecraft.nbt.NBTTagCompound;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -143,7 +142,6 @@ public class TransientTest {
     }
 
     /** A capacitor charged through R carries the same current as R: i = C dV/dt. */
-    @Ignore("EA bug: Capacitor.getCurrent() always returns 0, so ElectricalLoad.getI()/multimeters ignore capacitor current")
     @Test
     public void capacitorReportsItsCurrent() {
         VoltageState a = node(), b = node();

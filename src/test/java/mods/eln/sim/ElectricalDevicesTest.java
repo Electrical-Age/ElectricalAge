@@ -112,6 +112,11 @@ public class ElectricalDevicesTest {
             assertEquals("n=" + n, v.getP(), load.getP() + v.getI() * v.getI() * 1, 1e-9 * v.getP());
             // transformer itself neither stores nor dissipates: Va*Ia + Vb*Ib = 0
             assertEquals(0, p.getU() * t.aCurrentState.state + s.getU() * t.bCurrentState.state, 1e-9 * v.getP());
+            // ElectricalLoad.getI() (multimeter, cable heating, TransformerElement load) sees each winding's own
+            // current (1.7.10: Transformer.getCurrent() = 0, so both read half the true current)
+            assertEquals("n=" + n, Math.abs(v.getI()), p.getI(), 1e-9 * Math.abs(v.getI()));
+            assertEquals("n=" + n, Math.abs(load.getCurrent()), s.getI(), 1e-9 * Math.abs(load.getCurrent()));
+            assertEquals("n=" + n, v.getI(), t.getCurrent(), 1e-9 * Math.abs(v.getI()));
         }
     }
 

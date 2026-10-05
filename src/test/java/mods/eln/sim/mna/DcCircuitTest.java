@@ -7,7 +7,6 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.TestCurrentSource;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
