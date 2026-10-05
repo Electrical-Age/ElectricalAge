@@ -49,7 +49,8 @@ import java.util.List;
  * Rs = rs = Rs(LV cable).
  * Items owned by wp12 (ferromagnetic core, dielectric, copper cable, heating corp) are looked up by their 1.7.10
  * damage ids; while wp12 isn't merged they are missing and the checks that need them print SKIP (no PASS/FAIL).
- * Not tested: autominer (not ported, blocked on wp12); machine processing (recipes are WP15, so the machines idle).
+ * Not tested: autominer mining (only placement, ghosts, power nodes, idle and removal); machine processing (recipes are
+ * WP15, so the machines idle).
  */
 public final class Wp10aCases {
     private Wp10aCases() {
