@@ -12,9 +12,10 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
-import mods.eln.wiki.GuiItemStack;
-import mods.eln.wiki.GuiVerticalExtender;
-import mods.eln.wiki.ItemDefault.IPlugIn;
+// TODO(1.12 wp12): restore wiki IPlugIn once wiki/ builds (imports, implements, top/bottom below)
+// import mods.eln.wiki.GuiItemStack;
+// import mods.eln.wiki.GuiVerticalExtender;
+// import mods.eln.wiki.ItemDefault.IPlugIn;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -24,7 +25,7 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalMachineDescriptor extends TransparentNodeDescriptor implements IPlugIn {
+public class ElectricalMachineDescriptor extends TransparentNodeDescriptor /* TODO(1.12 wp12): implements IPlugIn */ {
     public RecipesList recipe = new RecipesList();
 
     final double nominalU;
@@ -154,6 +155,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
         return defaultHandle;
     }
 
+    // TODO(1.12 wp12): restore wiki IPlugIn once wiki/ builds
+    /*
     @Override
     public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
         return y;
@@ -191,4 +194,5 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
         return y;
     }
+    */
 }

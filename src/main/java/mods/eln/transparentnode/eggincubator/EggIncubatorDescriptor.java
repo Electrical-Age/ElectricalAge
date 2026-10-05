@@ -10,6 +10,7 @@ import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
+import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -111,8 +112,9 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
-        AxisAlignedBB bb = Blocks.STONE.getCollisionBoundingBoxFromPool(world, x, y, z);
-        bb.maxY -= 0.5;
+        // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AxisAlignedBB is immutable now)
+        AxisAlignedBB bb = Block.FULL_BLOCK_AABB.offset(x, y, z);
+        bb = bb.setMaxY(bb.maxY - 0.5);
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }
