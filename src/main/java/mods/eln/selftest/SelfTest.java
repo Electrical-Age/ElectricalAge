@@ -30,6 +30,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -314,18 +315,29 @@ public final class SelfTest {
         checkValue("lamp current [A]", Math.abs(lamp.lampResistor.getCurrent()), i);
         checkValue("lamp power [W]", Math.abs(lamp.lampResistor.getCurrent() * lamp.lampResistor.getU()), i * i * rLamp);
 
-        // light: the lamp emits (element light > 0) and placed a light block carrying that level in its META
-        int light = lamp.getLightValue();
-        int lightBlockMax = 0, lightBlocks = 0;
+        // light: LampSocketProcess turns the lamp voltage into a level (incandescent: nominalLight * 16 *
+        // (U - Umin) / (Unom - Umin), capped at 14) and puts it either on the lamp's own block (node light value) or
+        // on a LightBlock (META = level) up to `range` blocks away. Check the level and that the world lights it.
+        double uLamp = Math.abs(lamp.lampResistor.getU());
+        int expectedLight = (int) Math.max(0, Math.min(14,
+            bulb.nominalLight * 16 * (uLamp - bulb.minimalU) / (bulb.nominalU - bulb.minimalU)));
+        int level = lamp.getLightValue();
+        BlockPos lightPos = at(3, 1, 1);
+        int lightBlocks = 0;
         for (BlockPos p : BlockPos.getAllInBox(at(-12, -8, -12), at(18, 12, 14))) {
             IBlockState s = world.getBlockState(p);
             if (s.getBlock() == ElnDeviceRegistry.lightBlock) {
                 lightBlocks++;
-                lightBlockMax = Math.max(lightBlockMax, s.getValue(BlockMeta.META));
+                if (s.getValue(BlockMeta.META) > level) {
+                    level = s.getValue(BlockMeta.META);
+                    lightPos = p.toImmutable();
+                }
             }
         }
-        check("lamp light", light > 0, "element light " + light + " (nominal light " + String.format("%.2f", bulb.nominalLight * 15) + ")");
-        check("light block", lightBlocks > 0 && lightBlockMax > 0, lightBlocks + " light block(s), max level " + lightBlockMax);
+        check("lamp light level", expectedLight > 0 && Math.abs(level - expectedLight) <= 1,
+            "level " + level + " (expected " + expectedLight + "), " + lightBlocks + " light block(s), at " + lightPos);
+        int worldLight = world.getLightFor(EnumSkyBlock.BLOCK, lightPos);
+        check("world block light", worldLight >= level - 1 && level > 0, "block light " + worldLight + " at " + lightPos);
 
         // battery, open circuit: U(+) - U(-) = voltageFunction(charge) * U nominal
         BatteryDescriptor bd = battery.descriptor;
