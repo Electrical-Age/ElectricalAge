@@ -188,6 +188,8 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         thermal.setAsSlow()
         thermalLoadList.add(thermal)
         thermalLoadWatchDog.set(thermal).set(WorldExplosion(this).machineExplosion())
+        // Baughn 2026-10-05: enable the watchdog (1.7.10 created it but never ran it, so overheating did nothing)
+        slowProcessList.add(thermalLoadWatchDog)
 
         heater = ElectricalLoadHeatThermalLoad(inputLoad, thermal)
         // WP16b: slow list (like poles/downlinks): the heater moves a power for one step of the load, and the
@@ -234,10 +236,10 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
             val electricalE = p * time // energy delivered to the circuit this step; < 0 when motoring
             var E = electricalE
             if (E < 0)
-                E *= 0.75  // Not a very efficient motor.
+                E *= 0.9  // Not a very efficient motor. (Baughn 2026-10-05: 0.75 -> 0.9, so motoring up to ~58% of nominal stays under the warm limit now that the watchdog runs)
             maybePublishE(E / time)
             // WP16: generating, the shaft has to supply E / eff (1.7.10 took E * eff: 5 % of the output was free
-            // energy). Motoring keeps 1.7.10's shaft gain (0.75 * 0.95 of the absorbed energy); the rest is heat
+            // energy). Motoring: shaft gain 0.9 * 0.95 (1.7.10: 0.75 * 0.95 of the absorbed energy); the rest is heat
             // (1.7.10 moved a negative heat, i.e. motoring cooled the generator).
             val shaftE = if (E >= 0) E / eff else E * eff
             val lossE = if (E >= 0) shaftE - E else shaftE - electricalE

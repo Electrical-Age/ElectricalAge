@@ -37,7 +37,9 @@ public class ElectricalBreakerCutProcess implements IProcess, INBTTReady {
                 idx++;
             }
             T += P / cable.thermalC * time;
-            Tmax = cable.thermalWarmLimit * 0.8;
+            // Baughn 2026-10-05: trip at ~1.05 x nominal (1.7.10 0.8 -> ~1.02 x). Steady T = warm (I / 1.2 Inom)^2 / 0.9,
+            // so factor f trips at I = 1.2 sqrt(0.9 f) Inom; 0.85 -> 1.0496 x. (A breaker should trip before the fuse, 1.08 x.)
+            Tmax = cable.thermalWarmLimit * 0.85;
         }
         //Utils.println(T);
 
