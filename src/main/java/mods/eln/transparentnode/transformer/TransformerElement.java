@@ -155,13 +155,13 @@ public class TransformerElement extends TransparentNodeElement {
             voltageSecondaryWatchdog.setUNominal(1000000);
 
         double coreFactor = 1;
-        if (core != null) {
+        if (!Utils.isEmpty(core)) {
             FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
             coreFactor = coreDescriptor.cableMultiplicator;
         }
 
-        if (Utils.isEmpty(primaryCable) || core == null) {
+        if (Utils.isEmpty(primaryCable) || Utils.isEmpty(core)) {
             primaryLoad.highImpedance();
             primaryMaxCurrent = 0;
         } else {
@@ -169,7 +169,7 @@ public class TransformerElement extends TransparentNodeElement {
             primaryMaxCurrent = (float) primaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (Utils.isEmpty(secondaryCable) || core == null) {
+        if (Utils.isEmpty(secondaryCable) || Utils.isEmpty(core)) {
             secondaryLoad.highImpedance();
             secondaryMaxCurrent = 0;
         } else {
