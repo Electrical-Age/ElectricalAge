@@ -13,6 +13,7 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.mna.component.VoltageSource
+import mods.eln.sim.mna.misc.DroopLaw
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
@@ -47,6 +48,12 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
+    /**
+     * Most power the generator draws when motoring, as a fraction of nominalP (a starter's current limit; the
+     * droop law alone would let a stiff supply push k (U - E), ~76 kW at 189 rad/s from 3.2 kV). 0.5 keeps
+     * sustained motoring under the warm limit (14.5 % of it is heat; the limit is ~58 % of nominalP).
+     */
+    val motorPowerLimit = 0.5
     /** Steady temperature at nominal output, as a fraction of the thermal warm limit. */
     val nominalHeatFraction = 0.65
     override val sound = "eln:generator"
@@ -204,20 +211,13 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         override fun process(time: Double) {
             val targetU = desc.RtoU.getValue(shaft.rads)
 
-            // Most things below were copied from TurbineElectricalProcess.
-            // Some comments on what math is going on would be great.
+            // P = k (E - U) both ways (see DroopLaw). 1.7.10 motored with Ut = 0.999 th.U + 0.001 E, i.e. a current
+            // 0.001 (th.U - E) / th.R set by the network's resistance, not the machine's: through an ideal (non-isolating)
+            // transformer the source side's R is reflected x n^2, and the motor drew next to nothing (2026-10-09,
+            // notes/xfmr-dual-source.md). Generating is unchanged.
             val th = positiveLoad.getSubSystem().getTh(positiveLoad, electricalPowerSource)
-            var Ut: Double
-            if (targetU < th.U) {
-                Ut = th.U * 0.999 + targetU * 0.001
-            } else if (th.isHighImpedance()) {
-                Ut = targetU
-            } else {
-                val a = 1 / th.R
-                val b = desc.powerOutPerDeltaU - th.U / th.R
-                val c = -desc.powerOutPerDeltaU * targetU
-                Ut = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a)
-            }
+            var Ut = DroopLaw.terminalU(th, targetU, desc.powerOutPerDeltaU.toDouble())
+            if (targetU < th.U) Ut = DroopLaw.limitAbsorbed(th, Ut, desc.nominalP * desc.motorPowerLimit)
             electricalPowerSource.setU(Ut)
         }
 
