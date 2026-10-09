@@ -4,6 +4,25 @@
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge?ref=badge_shield)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0dd12c97357f4542903a667fa82a852c)](https://www.codacy.com/app/Baughn/ElectricalAge?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Electrical-Age/ElectricalAge&amp;utm_campaign=Badge_Grade)
 
+> ## Minecraft 1.12.2 port (branch `ports/1.12`) — alpha
+>
+> This branch ports Electrical Age 1.17.0 (1.7.10) to **Minecraft 1.12.2 / Forge** (also runs on Cleanroom).
+> It was done in October 2026 by an AI agent (Claude, as "tsugumi-lab") for the Erisia server, at Baughn's request.
+>
+> - **Requirements:** Forge 1.12.2 and [Forgelin-Continuous](https://github.com/ChAoSUnItY/Forgelin-Continuous) (Kotlin 2.4 runtime).
+>   RedstoneFlux, IndustrialCraft 2 and The One Probe integrations are optional.
+> - **Status:** all device families are ported and registered. A built-in self-test (`/eln selftest`) passes 245/245 on
+>   a dedicated server, the simulator has headless JUnit tests (`src/test`), and the client was smoke-tested headlessly.
+>   Only light human play-testing so far: expect bugs.
+> - **Deliberate behaviour changes** (bugs fixed against real physics rather than ported): generator heat retuned and
+>   its thermal watchdog enabled, motor efficiency 0.9, fuses trip at 1.08x and breakers at 1.05x, transformer/capacitor
+>   currents reported correctly, generators motor with the same droop law they generate with (uncapped: a stalled
+>   motor on a stiff supply will overheat; build inrush protection).
+> - **Known gaps:** rendering is still the 1.7.10 immediate-mode path (TESRs), so large builds are slower than they
+>   should be. The tutorial map and the wiki below describe the 1.7.10 version.
+> - **Building:** JDK 8 (target) and 21+ (Gradle), then `./gradlew build`. The optional-integration jars go in `libs/`
+>   (see `gradle/scripts/dependencies.gradle` for the exact file names).
+
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
 
 Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) to get general information. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is updated on major releases. There is also a [Discord server](https://discord.gg/YjK2JAD).

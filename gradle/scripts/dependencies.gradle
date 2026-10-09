@@ -35,11 +35,11 @@ configurations {
 }
 
 dependencies {
-    // Electrical Age port: pack jars (deobfed by RFG), Kotlin provided at runtime by Forgelin-Continuous
+    // Electrical Age port: optional-integration jars in libs/ (see README; deobfed by RFG), Kotlin provided at runtime by Forgelin-Continuous
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib:2.4.10'
-    compileOnly rfg.deobf(files('/var/lib/mclab/agent/eln/deps/RedstoneFlux-1.12-2.1.1.1-universal.jar'))
-    compileOnly rfg.deobf(files('/var/lib/mclab/agent/eln/deps/industrialcraft-2-2.8.222-ex112.jar'))
-    compileOnly rfg.deobf(files('/var/lib/mclab/agent/eln/deps/TheOneProbe-CE-1.12-1.4.0.jar'))
+    compileOnly rfg.deobf(files(rootProject.file('libs/RedstoneFlux-1.12-2.1.1.1-universal.jar')))
+    compileOnly rfg.deobf(files(rootProject.file('libs/industrialcraft-2-2.8.222-ex112.jar')))
+    compileOnly rfg.deobf(files(rootProject.file('libs/TheOneProbe-CE-1.12-1.4.0.jar')))
     shade 'org.apache.commons:commons-math3:3.3'
     // Include StripLatestForgeRequirements by default for the dev env, saves everyone a hassle
     runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
