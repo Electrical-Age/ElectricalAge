@@ -23,17 +23,5 @@ public final class DroopLaw {
         double c = -k * E;
         return (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
     }
-
-    /**
-     * Limits the power the source absorbs from the network to pMax (> 0): if U would make it absorb more, returns
-     * the higher voltage at which it absorbs exactly pMax (or th.U when the network can't supply pMax at all).
-     */
-    public static double limitAbsorbed(SubSystem.Th th, double U, double pMax) {
-        if (th.isHighImpedance()) return U;
-        double absorbed = U * (th.U - U) / th.R;
-        if (absorbed <= pMax) return U;
-        double disc = th.U * th.U - 4 * pMax * th.R;
-        if (disc < 0) return U; // the network's maximum transfer (at th.U / 2) is below pMax; U is already above it
-        return Math.max(U, (th.U + Math.sqrt(disc)) / 2);
-    }
 }
+

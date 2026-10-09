@@ -91,7 +91,6 @@ public class XfmrDualSourceTest {
             double Ut;
             if (!legacy) {
                 Ut = DroopLaw.terminalU(th, targetU, GEN_K);
-                if (targetU < th.U) Ut = DroopLaw.limitAbsorbed(th, Ut, GEN_NOMP * 0.5);
             } else if (targetU < th.U) {
                 Ut = th.U * 0.999 + targetU * 0.001;
             } else if (th.isHighImpedance()) {
@@ -287,7 +286,7 @@ public class XfmrDualSourceTest {
         }
     }
 
-    /** Motoring from a stiff 3.2 kV supply: legacy vs fixed (fixed is capped at 0.5 nominalP). */
+    /** Motoring from a stiff 3.2 kV supply: legacy vs fixed (fixed follows P = k (E - U), uncapped). */
     @Test
     public void stiffSupplyMotoring() {
         for (double rSupply : new double[]{0.01, 1, 10, 100}) {
@@ -306,7 +305,7 @@ public class XfmrDualSourceTest {
                 h.ticks(1);
                 System.out.println(String.format("stiff supply R=%.2f %s: gen U=%.1f P=%.1f", rSupply,
                     legacy == 1 ? "legacy" : "fixed ", g.src.getU(), g.src.getP()));
-                if (legacy == 0) assertEquals(-2000, g.src.getP(), 1);
+                if (legacy == 0) assertEquals(GEN_K * (189 * GEN_U_PER_RAD - g.src.getU()), g.src.getP(), 1e-6 * Math.abs(g.src.getP()));
             }
         }
     }

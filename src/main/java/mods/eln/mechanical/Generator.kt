@@ -48,12 +48,6 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
-    /**
-     * Most power the generator draws when motoring, as a fraction of nominalP (a starter's current limit; the
-     * droop law alone would let a stiff supply push k (U - E), ~76 kW at 189 rad/s from 3.2 kV). 0.5 keeps
-     * sustained motoring under the warm limit (14.5 % of it is heat; the limit is ~58 % of nominalP).
-     */
-    val motorPowerLimit = 0.5
     /** Steady temperature at nominal output, as a fraction of the thermal warm limit. */
     val nominalHeatFraction = 0.65
     override val sound = "eln:generator"
@@ -215,9 +209,10 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
             // 0.001 (th.U - E) / th.R set by the network's resistance, not the machine's: through an ideal (non-isolating)
             // transformer the source side's R is reflected x n^2, and the motor drew next to nothing (2026-10-09,
             // notes/xfmr-dual-source.md). Generating is unchanged.
+            // Motoring is deliberately uncapped (Baughn 2026-10-09): a stalled motor on a stiff supply draws k (U - E) and
+            // overheats; inrush protection is the player's job.
             val th = positiveLoad.getSubSystem().getTh(positiveLoad, electricalPowerSource)
-            var Ut = DroopLaw.terminalU(th, targetU, desc.powerOutPerDeltaU.toDouble())
-            if (targetU < th.U) Ut = DroopLaw.limitAbsorbed(th, Ut, desc.nominalP * desc.motorPowerLimit)
+            val Ut = DroopLaw.terminalU(th, targetU, desc.powerOutPerDeltaU.toDouble())
             electricalPowerSource.setU(Ut)
         }
 
