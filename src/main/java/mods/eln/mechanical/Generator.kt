@@ -13,6 +13,7 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.mna.component.VoltageSource
+import mods.eln.sim.mna.misc.DroopLaw
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
@@ -204,20 +205,14 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         override fun process(time: Double) {
             val targetU = desc.RtoU.getValue(shaft.rads)
 
-            // Most things below were copied from TurbineElectricalProcess.
-            // Some comments on what math is going on would be great.
+            // P = k (E - U) both ways (see DroopLaw). 1.7.10 motored with Ut = 0.999 th.U + 0.001 E, i.e. a current
+            // 0.001 (th.U - E) / th.R set by the network's resistance, not the machine's: through an ideal (non-isolating)
+            // transformer the source side's R is reflected x n^2, and the motor drew next to nothing (2026-10-09,
+            // notes/xfmr-dual-source.md). Generating is unchanged.
+            // Motoring is deliberately uncapped (Baughn 2026-10-09): a stalled motor on a stiff supply draws k (U - E) and
+            // overheats; inrush protection is the player's job.
             val th = positiveLoad.getSubSystem().getTh(positiveLoad, electricalPowerSource)
-            var Ut: Double
-            if (targetU < th.U) {
-                Ut = th.U * 0.999 + targetU * 0.001
-            } else if (th.isHighImpedance()) {
-                Ut = targetU
-            } else {
-                val a = 1 / th.R
-                val b = desc.powerOutPerDeltaU - th.U / th.R
-                val c = -desc.powerOutPerDeltaU * targetU
-                Ut = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a)
-            }
+            val Ut = DroopLaw.terminalU(th, targetU, desc.powerOutPerDeltaU.toDouble())
             electricalPowerSource.setU(Ut)
         }
 
