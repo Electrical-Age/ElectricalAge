@@ -222,11 +222,6 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // BatteryContainer: menus come with P4
-    }
-
-    @Override
     public void onGroundedChangedByClient() {
         super.onGroundedChangedByClient();
 

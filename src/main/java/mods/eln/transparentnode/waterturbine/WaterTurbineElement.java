@@ -116,12 +116,6 @@ public class WaterTurbineElement extends TransparentNodeElement {
         return false;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-
-        return null; // WaterTurbineContainer: menus come with P4
-    }
-
 
     @Override
     public void networkSerialize(DataOutputStream stream) {

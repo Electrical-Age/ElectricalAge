@@ -148,11 +148,6 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // HeatFurnaceContainer: menus come with P4
-    }
-
-    @Override
     public Container getInventory() {
         return inventory;
     }

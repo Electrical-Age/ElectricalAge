@@ -135,10 +135,4 @@ public abstract class SimpleNodeEntity extends BlockEntity implements INodeEntit
     public void onDataPacket(Connection net, ValueInput input) {
         handleUpdateTag(input);
     }
-
-    //*********************** GUI ***************************
-    @Override
-    public AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null;
-    }
 }

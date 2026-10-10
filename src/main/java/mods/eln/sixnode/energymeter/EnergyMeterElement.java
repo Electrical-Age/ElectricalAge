@@ -255,11 +255,6 @@ public class EnergyMeterElement extends SixNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // EnergyMeterContainer: menus come with P4
-    }
-
-    @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 

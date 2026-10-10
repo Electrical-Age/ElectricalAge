@@ -51,7 +51,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public static final byte unserializeGroundedId = -127;
     public static final byte unserializeNulldId = -128;
-    TransparentNodeDescriptor transparentNodeDescriptor;
+    public TransparentNodeDescriptor transparentNodeDescriptor;
 
     public TransparentNodeDescriptor getDescriptor() {
         return transparentNodeDescriptor;
@@ -172,10 +172,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     private void sendPacketToAllClient(ByteArrayOutputStream bos) {
         node.sendPacketToAllClient(bos);
-    }
-
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null;
     }
 
     public TransparentNodeElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {

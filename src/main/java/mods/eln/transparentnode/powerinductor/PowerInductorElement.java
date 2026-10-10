@@ -160,10 +160,4 @@ public class PowerInductorElement extends TransparentNodeElement {
     public boolean hasGui() {
         return true;
     }
-
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // PowerInductorContainer: menus come with P4
-    }
-
 }

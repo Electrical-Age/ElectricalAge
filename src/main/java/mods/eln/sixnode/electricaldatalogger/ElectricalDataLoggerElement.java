@@ -236,11 +236,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         return true;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ElectricalDataLoggerContainer: menus come with P4
-    }
-
     public void sampleStackReset() {
         sampleStack = 0;
         sampleStackNbr = 0;

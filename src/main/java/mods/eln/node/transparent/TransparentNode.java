@@ -196,11 +196,6 @@ public class TransparentNode extends Node {
         return element.getInventory();
     }
 
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        if (element == null) return null;
-        return element.newContainer(side, player);
-    }
-
     @Override
     public int getBlockMetadata() {
         return element.transparentNodeDescriptor.tileEntityMetaTag.meta;

@@ -84,11 +84,6 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ElectricalMachineContainer: menus come with P4
-    }
-
-    @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         return electricalLoad;
     }

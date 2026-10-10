@@ -94,11 +94,6 @@ public class LampSupplyElement extends SixNodeElement {
             return null;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // LampSupplyContainer: menus come with P4
-    }
-
     public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         this.descriptor = (LampSupplyDescriptor) descriptor;

@@ -14,3 +14,10 @@ Behaviour reference for porting Electrical Age to new Minecraft versions (plan: 
   some vanilla items).
 
 A port regenerates both with the same commands and diffs them against these files; every difference must be explained.
+
+## Known differences (26.x port)
+
+`golden_slots` (GoldenSlotsCase.KNOWN_MISSING) accepts these, and reports each as an INFO line:
+- Coal dust slots (resistor, rheostat, thermistor, large rheostat) refuse Mercury and Gold Plate. 1.12's
+  `ItemStackFilter.OreDict` masked the damage to 8 bits, so shared items 520 and 7688 passed as Coal Dust (8). A bug.
+- The stone heat furnace's fuel slot refuses paper. The E36 pack made paper a furnace fuel; vanilla 26.x has none.

@@ -226,11 +226,6 @@ public class SolarPanelElement extends TransparentNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // SolarPanelContainer: menus come with P4
-    }
-
-    @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"));

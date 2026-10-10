@@ -87,11 +87,6 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
         return redstone;
     }
 
-    @Override
-    public AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null;
-    }
-
     public boolean cameraDrawOptimisation() {
         return true;
     }

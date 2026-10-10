@@ -41,6 +41,10 @@ public final class ElnRegistry {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Eln.MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
         DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Eln.MODID);
+    public static final DeferredRegister<net.minecraft.world.inventory.MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, Eln.MODID);
+    /** Every EA device GUI (P4): ElnNodeMenu, rebuilt on the client from its open data. */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.gui.ElnNodeMenu>> NODE_MENU =
+        MENUS.register("node", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.gui.ElnNodeMenu::fromNetwork));
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
 
     /** Every EA item, in 1.12 id order (creative tab, tests). */
@@ -214,6 +218,7 @@ public final class ElnRegistry {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         ENTITY_TYPES.register(modBus);
+        MENUS.register(modBus);
         TABS.register(modBus);
     }
 }

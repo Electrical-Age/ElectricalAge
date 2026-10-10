@@ -57,11 +57,6 @@ public class PowerSocketElement extends SixNodeElement {
         return inventory;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // PowerSocketContainer: menus come with P4
-    }
-
     public PowerSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         electricalLoadList.add(powerLoad);

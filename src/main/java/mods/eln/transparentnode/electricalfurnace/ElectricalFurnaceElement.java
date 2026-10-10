@@ -98,11 +98,6 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ElectricalFurnaceContainer: menus come with P4
-    }
-
-    @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         return electricalLoad;
     }

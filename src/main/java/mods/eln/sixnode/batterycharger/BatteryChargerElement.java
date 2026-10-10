@@ -69,11 +69,6 @@ public class BatteryChargerElement extends SixNodeElement {
             return null;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // BatteryChargerContainer: menus come with P4
-    }
-
     public BatteryChargerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         this.descriptor = (BatteryChargerDescriptor) descriptor;

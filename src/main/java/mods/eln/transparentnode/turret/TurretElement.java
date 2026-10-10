@@ -201,11 +201,6 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // TurretContainer: menus come with P4
-    }
-
-    @Override
     public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
         needPublish();

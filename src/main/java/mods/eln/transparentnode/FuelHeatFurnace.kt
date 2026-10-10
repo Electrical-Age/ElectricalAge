@@ -233,7 +233,6 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         }
     }
 
-    override fun newContainer(side: Direction?, player: Player): net.minecraft.world.inventory.AbstractContainerMenu? = null // FuelHeatFurnaceContainer: menus come with P4
 }
 
 // 26.x port: class FuelHeatFurnaceRender removed (client; redone in P3/P4)

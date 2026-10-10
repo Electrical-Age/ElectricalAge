@@ -172,11 +172,6 @@ public class LampSocketElement extends SixNodeElement {
         return true;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // LampSocketContainer: menus come with P4
-    }
-
     public static boolean canBePlacedOnSide(Direction side, int type) {
         return true;
     }

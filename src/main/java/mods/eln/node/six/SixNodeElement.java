@@ -144,10 +144,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return null;
     }
 
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null;
-    }
-
     public SixNodeElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         this.sixNode = sixNode;
         this.side = side;

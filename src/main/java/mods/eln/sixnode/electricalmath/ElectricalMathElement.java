@@ -219,11 +219,6 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ElectricalMathContainer: menus come with P4
-    }
-
-    @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putString("expression", expression);

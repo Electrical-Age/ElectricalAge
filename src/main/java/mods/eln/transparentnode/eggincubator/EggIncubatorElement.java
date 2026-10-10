@@ -156,11 +156,6 @@ public class EggIncubatorElement extends TransparentNodeElement {
         return true;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // EggIncubatorContainer: menus come with P4
-    }
-
     public float getLightOpacity() {
         return 1.0f;
     }

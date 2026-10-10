@@ -16,6 +16,4 @@ public interface INodeEntity {
     void serverPublishUnserialize(DataInputStream stream);
 
     void serverPacketUnserialize(DataInputStream stream);
-
-    AbstractContainerMenu newContainer(Direction side, Player player);
 }

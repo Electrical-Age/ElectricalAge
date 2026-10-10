@@ -220,7 +220,7 @@ public abstract class NodeBase {
             }
         }
         if (hasGui(side)) {
-            // 26.x: menus come with P4 (NodeMenus.open); 1.12 opened GuiHandler.nodeBaseOpen + side
+            // 1.12 opened GuiHandler.nodeBaseOpen + side; 26.x: the eln:node menu (P4)
             return NodeMenus.open(this, entityPlayer, side);
         }
 

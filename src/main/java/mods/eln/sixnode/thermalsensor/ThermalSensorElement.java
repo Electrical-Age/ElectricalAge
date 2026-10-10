@@ -262,9 +262,4 @@ public class ThermalSensorElement extends SixNodeElement {
     public boolean hasGui() {
         return true;
     }
-
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ThermalSensorContainer: menus come with P4
-    }
 }

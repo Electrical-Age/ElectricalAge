@@ -150,9 +150,4 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
         super.inventoryChanged();
         needPublish();
     }
-
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ElectricalFireDetectorContainer: menus come with P4
-    }
 }

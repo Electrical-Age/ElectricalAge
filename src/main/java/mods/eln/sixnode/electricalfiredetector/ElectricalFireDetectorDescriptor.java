@@ -18,7 +18,7 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 
     private Obj3DPart detector;
     private Obj3DPart led;
-    boolean batteryPowered;
+    public boolean batteryPowered;
     double maxRange;
     public float[] pinDistance;
     final double updateInterval = 0.5;

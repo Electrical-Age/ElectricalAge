@@ -154,9 +154,4 @@ public class GroundCableElement extends SixNodeElement {
     public boolean hasGui() {
         return true;
     }
-
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // GroundCableContainer: menus come with P4
-    }
 }

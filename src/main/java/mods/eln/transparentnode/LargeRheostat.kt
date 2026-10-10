@@ -167,7 +167,6 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun hasGui() = true
     override fun getInventory() = inventory
     override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
-    override fun newContainer(side: Direction?, player: Player?): net.minecraft.world.inventory.AbstractContainerMenu? = null // ResistorContainer: menus come with P4
 
     override fun getWaila(): Map<String, String> = mutableMapOf(
         Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),

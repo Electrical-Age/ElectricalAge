@@ -17,7 +17,7 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 
-    boolean voltageOnly;
+    public boolean voltageOnly;
     Obj3DPart main;
 
     public ElectricalSensorDescriptor(

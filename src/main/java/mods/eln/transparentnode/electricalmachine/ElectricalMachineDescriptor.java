@@ -27,7 +27,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
     final double nominalP;
     private final ThermalLoadInitializer thermal;
     final ElectricalCableDescriptor cable;
-    final int outStackCount;
+    public final int outStackCount;
 
     private final double resistorR;
 

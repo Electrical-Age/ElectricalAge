@@ -191,9 +191,4 @@ public class PowerCapacitorSixElement extends SixNodeElement {
     public boolean hasGui() {
         return true;
     }
-
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // PowerCapacitorSixContainer: menus come with P4
-    }
 }

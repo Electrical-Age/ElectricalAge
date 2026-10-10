@@ -26,7 +26,7 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
 
     double nominalPower;
     double nominalCombustibleEnergy;
-    int combustionChamberMax;
+    public int combustionChamberMax;
     double combustionChamberPower;
     ThermalLoadInitializerByPowerDrop thermal;
 

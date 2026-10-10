@@ -142,11 +142,6 @@ public class AutoMinerElement extends TransparentNodeElement {
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // AutoMinerContainer: menus come with P4
-    }
-
-    @Override
     public Container getInventory() {
         return inventory.getInventory();
     }

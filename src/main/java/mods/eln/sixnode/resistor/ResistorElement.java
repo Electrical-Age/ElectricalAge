@@ -168,11 +168,6 @@ public class ResistorElement extends SixNodeElement {
         return true;
     }
 
-    @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
-        return null; // ResistorContainer: menus come with P4
-    }
-
     /** A burnt resistor/diode is simply replaced. */
     @Override
     public net.minecraft.world.item.ItemStack getRepairPart() {
