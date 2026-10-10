@@ -36,7 +36,7 @@ public class Wp12cContent implements ElnContent {
             );
             oreCopper = desc;
             ores.addDescriptor(id, desc);
-            // P5 (item tags): addToOre("oreCopper", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("oreCopper", desc);
         }
 
         {
@@ -46,7 +46,7 @@ public class Wp12cContent implements ElnContent {
                 8 * (genLead ? 1 : 0), 3, 9, 0, 24
             );
             ores.addDescriptor(id, desc);
-            // P5 (item tags): addToOre("oreLead", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("oreLead", desc);
         }
 
         {
@@ -56,7 +56,7 @@ public class Wp12cContent implements ElnContent {
                 6 * (genTungsten ? 1 : 0), 3, 9, 0, 32
             );
             ores.addDescriptor(id, desc);
-            // P5 (item tags): addToOre(dictTungstenOre, desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre(dictTungstenOre, desc);
         }
 
         {
@@ -66,7 +66,7 @@ public class Wp12cContent implements ElnContent {
                 3 * (genCinnabar ? 1 : 0), 3, 9, 0, 32
             );
             ores.addDescriptor(id, desc);
-            // P5 (item tags): addToOre("oreCinnabar", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("oreCinnabar", desc);
         }
     }
 }

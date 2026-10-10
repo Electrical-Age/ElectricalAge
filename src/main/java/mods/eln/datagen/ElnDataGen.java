@@ -18,5 +18,6 @@ public final class ElnDataGen {
 
     static void gather(GatherDataEvent.Client event) {
         event.createProvider(ElnLang::new);
+        event.createProvider(ElnItemTags::new);
     }
 }

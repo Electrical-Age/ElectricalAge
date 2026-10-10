@@ -55,6 +55,13 @@ public class Eln {
     /** 1.12 config mapGenerate.* defaults (production too): only tungsten; 1.12 forced cinnabar off in code. */
     public static boolean genCopper = false, genLead = false, genTungsten = true, genCinnabar = false;
 
+    /**
+     * 1.12 config dictionary.tungsten (false: EA-private oreElnTungsten ...) and dictionary.chips (true: circuitBasic /
+     * circuitAdvanced, shared with other mods): the ore names, mapped to tags by OreDictTags.
+     */
+    public static String dictTungstenOre = "oreElnTungsten", dictTungstenDust = "dustElnTungsten", dictTungstenIngot = "ingotElnTungsten";
+    public static String dictCheapChip = "circuitBasic", dictAdvancedChip = "circuitAdvanced";
+
     /** 1.12 config balancing.autominerRange (10): maximum horizontal mining distance. */
     public static int autominerRange = 10;
 

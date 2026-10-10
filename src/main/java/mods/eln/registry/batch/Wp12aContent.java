@@ -314,7 +314,7 @@ public class Wp12aContent implements ElnContent {
             // element.newItemStack(1));
             copperIngot = element;
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("ingotCopper", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("ingotCopper", element);
         }
 
         {
@@ -330,7 +330,7 @@ public class Wp12aContent implements ElnContent {
             // element.newItemStack(1));
             plumbIngot = element;
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("ingotLead", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("ingotLead", element);
 
         }
 
@@ -347,7 +347,7 @@ public class Wp12aContent implements ElnContent {
             // element.newItemStack(1));
             tungstenIngot = element;
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre(dictTungstenIngot, element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre(dictTungstenIngot, element);
         }
 
         {
@@ -363,7 +363,7 @@ public class Wp12aContent implements ElnContent {
             // element.newItemStack(1));
 
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("ingotFerrite", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("ingotFerrite", element);
         }
 
         {
@@ -379,7 +379,7 @@ public class Wp12aContent implements ElnContent {
             // element.newItemStack(1));
 
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("ingotAlloy", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("ingotAlloy", element);
         }
 
         {
@@ -395,7 +395,7 @@ public class Wp12aContent implements ElnContent {
             // element.newItemStack(1));
 
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("quicksilver", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("quicksilver", element);
         }
     }
 
@@ -415,7 +415,7 @@ public class Wp12aContent implements ElnContent {
             dustCopper = element;
             sharedItem.addElement(completId, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustCopper", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustCopper", element);
         }
         {
             subId = 2;
@@ -428,7 +428,7 @@ public class Wp12aContent implements ElnContent {
             dustCopper = element;
             sharedItem.addElement(completId, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustIron", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustIron", element);
         }
 
         {
@@ -441,7 +441,7 @@ public class Wp12aContent implements ElnContent {
                 new String[]{});
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustLead", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustLead", element);
         }
         {
             id = 6;
@@ -453,7 +453,7 @@ public class Wp12aContent implements ElnContent {
                 new String[]{});
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre(dictTungstenDust, element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre(dictTungstenDust, element);
         }
 
         {
@@ -465,7 +465,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustGold", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustGold", element);
         }
 
         {
@@ -478,7 +478,7 @@ public class Wp12aContent implements ElnContent {
                 new String[]{});
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustCoal", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustCoal", element);
         }
         {
             id = 9;
@@ -490,7 +490,7 @@ public class Wp12aContent implements ElnContent {
                 new String[]{});
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustAlloy", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustAlloy", element);
         }
 
         {
@@ -503,7 +503,7 @@ public class Wp12aContent implements ElnContent {
                 new String[]{});
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
-            // P5 (item tags): addToOre("dustCinnabar", element.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustCinnabar", element);
         }
 
     }
@@ -651,7 +651,7 @@ public class Wp12aContent implements ElnContent {
 
             sharedItem.addElement(completId, descriptor);
             treeResin = descriptor;
-            // P5 (item tags): addToOre("materialResin", descriptor.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("materialResin", descriptor);
         }
         {
             GenericItemUsingDamageDescriptor descriptor;
@@ -661,7 +661,7 @@ public class Wp12aContent implements ElnContent {
 
             descriptor = new GenericItemUsingDamageDescriptor(name);
             sharedItem.addElement(completId, descriptor);
-            // P5 (item tags): addToOre("itemRubber", descriptor.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("itemRubber", descriptor);
         }
     }
 
@@ -743,7 +743,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): OreDictionary.registerOre(dictCheapChip, desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre(dictCheapChip, desc);
         }
         {
             subId = 1;
@@ -752,7 +752,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): OreDictionary.registerOre(dictAdvancedChip, desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre(dictAdvancedChip, desc);
         }
         {
             subId = 2;
@@ -761,7 +761,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("casingMachine", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("casingMachine", desc);
         }
         {
             subId = 3;
@@ -786,7 +786,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateCopper", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateCopper", desc);
         }
         {
             subId = 7;
@@ -795,7 +795,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateIron", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateIron", desc);
         }
         {
             subId = 8;
@@ -804,7 +804,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateGold", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateGold", desc);
         }
         {
             subId = 9;
@@ -813,7 +813,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateLead", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateLead", desc);
         }
         {
             subId = 10;
@@ -822,7 +822,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateSilicon", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateSilicon", desc);
         }
         {
             subId = 11;
@@ -831,7 +831,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateAlloy", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateAlloy", desc);
         }
         {
             subId = 12;
@@ -840,7 +840,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("plateCoal", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("plateCoal", desc);
         }
         {
             subId = 16;
@@ -849,7 +849,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("dustSilicon", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("dustSilicon", desc);
         }
         {
             subId = 17;
@@ -858,7 +858,7 @@ public class Wp12aContent implements ElnContent {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("ingotSilicon", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("ingotSilicon", desc);
         }
         {
             subId = 22;
@@ -872,7 +872,7 @@ public class Wp12aContent implements ElnContent {
                 TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{}); // TODO: Description.
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
-            // P5 (item tags): addToOre("casingMachineAdvanced", desc.newItemStack());
+            mods.eln.misc.OreDictTags.addToOre("casingMachineAdvanced", desc);
         }
         {
             subId = 28;
