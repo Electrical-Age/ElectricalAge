@@ -1,4 +1,4 @@
-// 26.3	2026-10-10T18:00:25.938511085	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-10T18:08:24.949226254	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -277,7 +277,7 @@ f10a9eefb44cbdb04d4d1f0ca0507bbb07418460 data/eln/advancement/recipes/misc/tree_
 36537e9727f2e9657a1580b66d45dac30567da2f data/eln/advancement/recipes/misc/tungsten_cable.json
 61ab3d5995c6865bb5ee2c140f3156fd26e60b8d data/eln/advancement/recipes/misc/utility_pole.json
 45da0cd5f829bf7dcb0e5bfecc984c9067178cc3 data/eln/advancement/recipes/misc/utility_pole_2.json
-b4f552be846b7239233f90fa01a5e1804e485b8f data/eln/advancement/recipes/misc/utility_pole_3.json
+036bce211a26d4b14a24a799461b4d1e26a834f4 data/eln/advancement/recipes/misc/utility_pole_3.json
 aa8fd0f6d50cf3c54d56d97003bfc2ce7a1673bf data/eln/advancement/recipes/misc/utility_pole_w_dc_dc_converter.json
 71ae4dcc4d2fc3bba3565e539206485515305e6d data/eln/advancement/recipes/misc/very_high_voltage_cable.json
 6893fed10d74884eb15363bba761e76e78435764 data/eln/advancement/recipes/misc/very_high_voltage_relay.json
@@ -595,7 +595,7 @@ d3c9be2a659332bf91a00ce7d8970f72a6fbd853 data/eln/recipe/temperature_probe.json
 a704b9c15054e9a198a998bb306bf5ce8407501a data/eln/recipe/tungsten_cable.json
 651d22f75e6b8295b7992f229776b4292dffcc6b data/eln/recipe/utility_pole.json
 b204e479cbae894349308593acaaac469f4941ab data/eln/recipe/utility_pole_2.json
-854d4d76545d1a33c06a0579cc4c963ce13b8552 data/eln/recipe/utility_pole_3.json
+fdb6dd720302e6dca9aafb6aa3bf07a3b7b35a8f data/eln/recipe/utility_pole_3.json
 dac1cc7568c77d968ce729665085384428966fb2 data/eln/recipe/utility_pole_w_dc_dc_converter.json
 55fdfab7dcdd516966fdbd904c59ffcf6fd4575d data/eln/recipe/very_high_voltage_cable.json
 61c0db9640b8a7e996ef7a9d8ccbe11c01299164 data/eln/recipe/very_high_voltage_relay.json

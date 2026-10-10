@@ -862,12 +862,15 @@ public final class ElnRecipes extends ElnRecipesBase {
                 'I', t
             );
         }
-        // Really? (1.12: with neither, iron; its 'W' had no key, so the 1.7.10 rule made it an empty slot)
+        // Really? (1.12: with neither, iron.) 1.7.10 forgot the 'W' key here, which made two iron ingots a pole; the E36
+        // pack never loaded this fallback (it had aluminium). On 26.x without those mods it is the default, so the
+        // logs the other variants use are keyed in (26.x port fix).
         addRecipeIf(findItemStack("Utility Pole"),
             new ICondition[]{new TagEmptyCondition<>(aluminum), new TagEmptyCondition<>(steel)},
             "WWW",
             "IWI",
             " W ",
+            'W', "logWood",
             'I', "ingotIron"
         );
         addRecipe(findItemStack("Utility Pole w/DC-DC Converter"),
