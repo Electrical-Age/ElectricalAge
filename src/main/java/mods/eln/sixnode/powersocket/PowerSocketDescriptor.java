@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powersocket;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -54,7 +56,13 @@ public class PowerSocketDescriptor extends SixNodeDescriptor {
         Data.addLight(newItemStack(1));
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw() {
+        //GL11.glRotatef(90.f,1.f,0.f,0.f);
+        if (base != null)
+            base.draw();
+        if (socket != null)
+            socket.draw();
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

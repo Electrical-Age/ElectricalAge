@@ -1,5 +1,9 @@
 package mods.eln.transparentnode.electricalmachine;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -8,7 +12,6 @@ import mods.eln.misc.RecipesList;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.world.entity.item.ItemEntity;
-import org.lwjgl.opengl.GL11;
 
 public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
     private Obj3DPart main;
@@ -35,9 +38,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
     }
 
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     // 26.x port: refresh() removed (client rendering; redone in P3)
-
     @Override
     public boolean drawCable() {
         return true;

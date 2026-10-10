@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalvumeter;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -9,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.util.List;
@@ -60,7 +63,6 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);

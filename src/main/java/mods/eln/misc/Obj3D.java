@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.gl.GL11;
+
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,9 +29,7 @@ public class Obj3D {
     public float dimMax, dimMaxInv;
 
     private String dirPath;
-
-    // 26.x port: bindTexture() removed (client rendering; redone in P3)
-
+// 26.x port: bindTexture() removed (client rendering; redone in P3)
     public static class FaceGroup {
         String mtlName = null;
         public Identifier textureResource;
@@ -37,7 +37,9 @@ public class Obj3D {
         boolean listReady = false;
         int glList;
 
-        // 26.x port: bindTexture() removed (client rendering; redone in P3)
+        public void bindTexture() {
+            UtilsClient.bindTexture(textureResource);
+        }
 
         public BoundingBox boundingBox() {
             float xMin = 0, xMax = 0, yMin = 0, yMax = 0, zMin = 0, zMax = 0;
@@ -62,13 +64,70 @@ public class Obj3D {
             return new BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
         }
 
-        // 26.x port: draw() removed (client rendering; redone in P3)
+        public void draw() {
+            if (textureResource != null) {
+                bindTexture();
+                drawNoBind();
+            } else {
+                GL11.glDisable(GL11.GL_TEXTURE_2D);
+                drawNoBind();
+                GL11.glEnable(GL11.GL_TEXTURE_2D);
+            }
+        }
 
-        // 26.x port: drawVertex() removed (client rendering; redone in P3)
+        private void drawVertex() {
+            drawVertex(0, 0);
+        }
 
-        // 26.x port: drawVertex() removed (client rendering; redone in P3)
+        private void drawVertex(float offsetX, float offsetY) {
+            int mode = 0;
 
-        // 26.x port: drawNoBind() removed (client rendering; redone in P3)
+            for (Face f : face) {
+                if (f.vertexNbr != mode) {
+                    if (mode != 0)
+                        GL11.glEnd();
+                    switch (f.vertexNbr) {
+                        case 3:
+                            GL11.glBegin(GL11.GL_TRIANGLES);
+                            break;
+                        case 4:
+                            GL11.glBegin(GL11.GL_QUADS);
+                            break;
+                        case 6:
+                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                            break;
+                        case 8:
+                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                            break;
+                    }
+
+                    mode = f.vertexNbr;
+                }
+
+                GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
+                for (int idx = 0; idx < mode; idx++) {
+                    if (f.uv[idx] != null)
+                        GL11.glTexCoord2f(f.uv[idx].u + offsetX, f.uv[idx].v + offsetY);
+                    GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
+                }
+            }
+
+            if (mode != 0)
+                GL11.glEnd();
+        }
+
+        public void drawNoBind() {
+            if (!listReady) {
+                listReady = true;
+                glList = GL11.glGenLists(1);
+
+                GL11.glNewList(glList, GL11.GL_COMPILE);
+                drawVertex();
+                GL11.glEndList();
+            }
+
+            GL11.glCallList(glList);
+        }
     }
 
     public class Obj3DPart {
@@ -119,19 +178,88 @@ public class Obj3D {
             return nameToFloatHash.getOrDefault(name, 0f);
         }
 
-        // 26.x port: draw() removed (client rendering; redone in P3)
+        public void draw(float angle, float x, float y, float z) {
+            if (locked) return;
 
-        // 26.x port: draw() removed (client rendering; redone in P3)
+            GL11.glPushMatrix();
 
-        // 26.x port: draw() removed (client rendering; redone in P3)
+            GL11.glTranslatef(ox, oy, oz);
+            GL11.glRotatef(angle, x, y, z);
+            GL11.glTranslatef(-ox, -oy, -oz);
+            draw();
 
-        // 26.x port: drawNoBind() removed (client rendering; redone in P3)
+            GL11.glPopMatrix();
+        }
 
-        // 26.x port: drawNoBind() removed (client rendering; redone in P3)
+        public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
+            if (locked) return;
 
-        // 26.x port: draw() removed (client rendering; redone in P3)
+            GL11.glPushMatrix();
 
-        // 26.x port: draw() removed (client rendering; redone in P3)
+            GL11.glTranslatef(ox, oy, oz);
+            GL11.glRotatef(angle, x, y, z);
+            GL11.glTranslatef(-ox, -oy, -oz);
+            draw(texOffsetX, texOffsetY);
+
+            GL11.glPopMatrix();
+        }
+
+        public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
+            if (locked) return;
+
+            GL11.glPushMatrix();
+
+            GL11.glTranslatef(ox, oy, oz);
+            GL11.glRotatef(angle, x, y, z);
+            GL11.glTranslatef(ox2, oy2, oz2);
+            GL11.glRotatef(angle2, x2, y2, z2);
+            GL11.glTranslatef(-ox2, -oy2, -oz2);
+            GL11.glTranslatef(-ox, -oy, -oz);
+            draw();
+
+            GL11.glPopMatrix();
+        }
+
+        public void drawNoBind(float angle, float x, float y, float z) {
+            if (locked) return;
+
+            GL11.glPushMatrix();
+
+            GL11.glTranslatef(ox, oy, oz);
+            GL11.glRotatef(angle, x, y, z);
+            GL11.glTranslatef(-ox, -oy, -oz);
+            drawNoBind();
+
+            GL11.glPopMatrix();
+        }
+
+        public void drawNoBind() {
+            if (locked) return;
+
+            for (FaceGroup fg : faceGroup) {
+                fg.drawNoBind();
+            }
+        }
+
+        public void draw() {
+            if (locked) return;
+
+            //	Minecraft.getMinecraft().profiler.startSection("OBJ");
+            for (FaceGroup fg : faceGroup) {
+                fg.draw();
+            }
+            //	Minecraft.getMinecraft().profiler.endSection();
+        }
+
+        public void draw(float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
+            //	Minecraft.getMinecraft().profiler.startSection("OBJ");
+            for (FaceGroup fg : faceGroup) {
+                fg.drawVertex(texOffsetX, texOffsetY);
+            }
+            //	Minecraft.getMinecraft().profiler.endSection();
+        }
 
         // Returns the bounding box of the vertices we'd draw.
         public BoundingBox boundingBox() {
@@ -470,7 +598,11 @@ public class Obj3D {
         return nameToPartHash.get(part);
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(String part) {
+        Obj3DPart partPtr = getPart(part);
+        if (partPtr != null)
+            partPtr.draw();
+    }
 
     public String getString(String name) {
         return nameToStringHash.get(name); // Property read from the txt file

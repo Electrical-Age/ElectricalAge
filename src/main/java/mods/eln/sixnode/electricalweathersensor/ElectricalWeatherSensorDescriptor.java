@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalweathersensor;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -8,7 +10,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,11 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw() {
+        UtilsClient.disableCulling();
+        if (main != null) main.draw();
+        UtilsClient.enableCulling();
+    }
 
     @Override
     public void setParent(Item item, int damage) {

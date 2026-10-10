@@ -56,7 +56,12 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(float on, float distance) {
+        if (main != null) main.draw();
+        if (lever != null) {
+            lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
+        }
+    }
 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {

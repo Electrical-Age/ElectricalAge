@@ -1,5 +1,9 @@
 package mods.eln.sixnode.batterycharger;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -10,7 +14,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +64,22 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
         Data.addUtilities(newItemStack());
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(boolean[] presence, boolean[] charged) {
+        if (main != null)
+            main.draw();
+
+        int idx = 0;
+        for (Obj3DPart led : leds) {
+            if (presence != null && presence[idx]) {
+                UtilsClient.ledOnOffColor(charged[idx]);
+                UtilsClient.drawLight(led);
+            } else {
+                GL11.glColor3f(0.2f, 0.2f, 0.2f);
+                led.draw();
+            }
+            idx++;
+        }
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalsource;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
@@ -8,7 +12,6 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +44,20 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
     public boolean isSignalSource() {
         return signalSource;
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    void draw(boolean ledOn) {
+        if (main != null) main.draw();
+        if (led != null) {
+            if (ledOn)
+                UtilsClient.drawLight(led);
+            else {
+                GL11.glPushMatrix();
+                GL11.glColor3f(0.1f, 0.1f, 0.1f);
+                led.draw();
+                GL11.glPopMatrix();
+            }
+        }
+    }
 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {

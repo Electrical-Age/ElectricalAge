@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalwatch;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -7,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Locale;
 
@@ -49,7 +52,6 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);

@@ -1,11 +1,14 @@
 package mods.eln.transparentnode.electricalmachine;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.world.entity.item.ItemEntity;
-import org.lwjgl.opengl.GL11;
 
 public class CompressorDescriptor extends ElectricalMachineDescriptor {
     private float tyOn;
@@ -49,9 +52,7 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
     }
 
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     // 26.x port: refresh() removed (client rendering; redone in P3)
-
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

@@ -82,7 +82,12 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
         cableDescriptor.applyTo(load);
         r.setR(electricalRp);
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+
+    void draw(float alpha) {
+        if (main != null) main.draw();
+        if (rot != null) rot.draw(alpha, 0f, 1f, 0f);
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

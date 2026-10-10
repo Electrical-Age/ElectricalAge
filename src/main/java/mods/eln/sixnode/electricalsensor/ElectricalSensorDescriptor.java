@@ -29,7 +29,9 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw() {
+        if (main != null) main.draw();
+    }
 
     @Override
     public void setParent(Item item, int damage) {

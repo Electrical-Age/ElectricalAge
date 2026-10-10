@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalswitch;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -14,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -127,9 +130,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-
-    // 26.x port: draw() removed (client rendering; redone in P3)
-
+// 26.x port: draw() removed (client rendering; redone in P3)
     public int getNodeMask() {
         if (signalSwitch)
             return NodeBase.maskElectricalGate;

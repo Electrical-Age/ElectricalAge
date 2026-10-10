@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalmachine;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ThermalLoadInitializer;
@@ -34,9 +36,7 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
     }
 
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     // 26.x port: refresh() removed (client rendering; redone in P3)
-
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

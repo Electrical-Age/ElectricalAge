@@ -106,7 +106,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
     }
 // 26.x port: draw() removed (client rendering; redone in P3)
 // 26.x port: refresh() removed (client rendering; redone in P3)
-
     public boolean powerLrdu(Direction side, Direction front) {
         return true;
     }
@@ -130,8 +129,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
             defaultHandle = newDrawHandle();
         return defaultHandle;
     }
-
-    // 26.x port: top() removed (client rendering; redone in P3)
-
+// 26.x port: top() removed (client rendering; redone in P3)
     // 26.x port: bottom() removed (client rendering; redone in P3)
 }

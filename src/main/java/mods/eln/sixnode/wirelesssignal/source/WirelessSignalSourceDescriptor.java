@@ -8,7 +8,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.lwjgl.opengl.GL11;
 
 public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
 
@@ -27,7 +26,6 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     @Override

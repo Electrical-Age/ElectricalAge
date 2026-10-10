@@ -14,7 +14,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -100,5 +99,9 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         Collections.addAll(list, tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\\\n"));
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw() {
+        if (base != null) base.draw();
+        if (diodeCables != null) diodeCables.draw();
+        if (diodeCore != null) diodeCore.draw();
+    }
 }

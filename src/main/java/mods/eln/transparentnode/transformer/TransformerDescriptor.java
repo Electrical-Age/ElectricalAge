@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.transformer;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -8,7 +10,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,5 +64,39 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
+        if (main != null) main.draw();
+        if (fero != null) {
+            fero.draw();
+            if (priCableNbr != 0) {
+                GL11.glPushMatrix();
+                float y = (priCableNbr - 1) * 1f / 16f;
+                GL11.glTranslatef(0f, -y, 0f);
+                for (int idx = 0; idx < priCableNbr; idx++) {
+                    sbire.draw();
+                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                }
+                GL11.glPopMatrix();
+            }
+            if (secCableNbr != 0) {
+                GL11.glPushMatrix();
+                GL11.glRotatef(180, 0f, 1f, 0f);
+                float y = (secCableNbr - 1) * 1f / 16f;
+                GL11.glTranslatef(0f, -y, 0f);
+                for (int idx = 0; idx < secCableNbr; idx++) {
+                    sbire.draw();
+                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                }
+                GL11.glPopMatrix();
+            }
+
+        }
+
+        if (hasCasing) {
+            if (casing != null) casing.draw();
+            if (casingDoorR != null) casingDoorR.draw(doorOpen * 90, 0f, 1f, 0f);
+            if (casingDoorL != null) casingDoorL.draw(-doorOpen * 90, 0f, 1f, 0f);
+        }
+    }
 }

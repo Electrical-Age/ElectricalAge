@@ -65,7 +65,11 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
         list.add("  " + tr("Temperature: %1$°C", Utils.plotValue(nominalT)));
         list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+
+    public void draw() {
+        if (main != null) main.draw();
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

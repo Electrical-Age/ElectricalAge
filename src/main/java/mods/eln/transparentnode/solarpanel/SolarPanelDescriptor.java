@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.solarpanel;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
@@ -14,7 +16,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -102,7 +103,16 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
             return super.getFrontFromPlace(side, entityLiving);
         }
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    void draw(float alpha, Direction front) {
+        front.glRotateZnRef();
+        GL11.glTranslatef(0, 0, main.getFloat("offZ"));
+        if (main != null) main.draw();
+        if (panel != null) {
+            front.glRotateZnRefInv();
+            panel.draw(alpha, 0f, 0f, 1f);
+        }
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

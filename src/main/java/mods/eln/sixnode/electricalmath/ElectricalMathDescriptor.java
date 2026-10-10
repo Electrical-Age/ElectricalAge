@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalmath;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -52,7 +56,23 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float open, boolean ledOn[]) {
+        if (main != null) main.draw();
+        if (door != null) door.draw((1f - open) * alphaOff, 0f, 1f, 0f);
+
+        for (int idx = 0; idx < 8; idx++) {
+            if (ledOn[idx]) {
+                if ((idx & 3) == 0)
+                    GL11.glColor3f(0.8f, 0f, 0f);
+                else
+                    GL11.glColor3f(0f, 0.8f, 0f);
+                UtilsClient.drawLight(led[idx]);
+            } else {
+                GL11.glColor3f(0.3f, 0.3f, 0.3f);
+                led[idx].draw();
+            }
+        }
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
@@ -69,6 +89,5 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     }
 
     // 26.x port: top() removed (client rendering; redone in P3)
-
     // 26.x port: bottom() removed (client rendering; redone in P3)
 }

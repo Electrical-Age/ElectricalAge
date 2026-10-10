@@ -1,5 +1,9 @@
 package mods.eln.sixnode.energymeter;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -9,7 +13,6 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
@@ -58,5 +61,134 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
+        // UtilsClient.disableCulling();
+        base.draw();
+        powerDisk.draw(-(float) energy, 0f, 1f, 0f);
+
+        {// render energy
+            float ox = 0.20859f, oy = 0.15625f, oz = 0;
+            double delta = 0;
+            boolean propagate = true;
+            double oldRot = 0;
+
+            if (drawAll) {
+                {
+                    double rot;
+                    if (energy > 0.5)
+                        rot = 0;
+                    else if (energy < -0.5)
+                        rot = 1;
+                    else
+                        rot = 0.5 - energy;
+                    rot *= 36;
+                    GL11.glPushMatrix();
+                    GL11.glTranslatef(ox, oy, oz);
+                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
+                    GL11.glTranslatef(-ox, -oy, -oz);
+                    energySignWheel.draw();
+                    GL11.glPopMatrix();
+                }
+                if (energyUnitWheel != null) {
+                    double rot = energyUnit * 36;
+                    GL11.glPushMatrix();
+                    GL11.glTranslatef(ox, oy, oz);
+                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
+                    GL11.glTranslatef(-ox, -oy, -oz);
+                    energyUnitWheel.draw();
+                    GL11.glPopMatrix();
+                }
+
+                energy = Math.max(0.0, Math.abs(energy));
+                if (energy < 5) propagate = false;
+
+                for (int idx = 0; idx < energyNumberWheel.length; idx++) {
+                    double rot = ((energy) % 10) + 0.0;
+                    rot += 0.00;
+
+                    if (idx == 1) {
+                        delta = ((rot) % 1) * 2 - 1;
+                        delta *= delta * delta;
+                        delta *= 0.5;
+                    }
+                    if (idx != 0) {
+                        if (propagate) {
+                            if (rot < 9.5 && rot > 0.5) {
+                                propagate = false;
+                            }
+                            rot = (int) (rot) + delta;
+                        } else
+                            rot = (int) (rot);
+                    }
+
+                    oldRot = rot;
+                    rot *= 36;
+                    GL11.glPushMatrix();
+                    GL11.glTranslatef(ox, oy, oz);
+                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
+                    GL11.glTranslatef(-ox, -oy, -oz);
+                    energyNumberWheel[idx].draw();
+                    GL11.glPopMatrix();
+
+                    energy /= 10.0;
+                }
+            }
+        }
+
+        if (energyNumberWheel.length != 0) { // Render Times
+            float ox = 0.20859f, oy = 0.03125f, oz = 0;
+            double delta = 0;
+            boolean propagate = true;
+            double oldRot = 0;
+
+            if (drawAll) {
+                if (timeUnitWheel != null) {
+                    double rot = timeUnit * 36;
+                    GL11.glPushMatrix();
+                    GL11.glTranslatef(ox, oy, oz);
+                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
+                    GL11.glTranslatef(-ox, -oy, -oz);
+                    timeUnitWheel.draw();
+                    GL11.glPopMatrix();
+                }
+
+                time = Math.max(0.0, Math.abs(time));
+                if (time < 5) propagate = false;
+
+                for (int idx = 0; idx < timeNumberWheel.length; idx++) {
+                    double rot = ((time) % 10) + 0.0;
+                    rot += 0.00;
+
+                    if (idx == 1) {
+                        delta = ((rot) % 1) * 2 - 1;
+                        delta *= delta * delta;
+                        delta *= delta * delta;
+                        delta *= delta * delta;
+                        delta *= 0.5;
+                    }
+                    if (idx != 0) {
+                        if (propagate) {
+                            if (rot < 9.5 && rot > 0.5) {
+                                propagate = false;
+                            }
+                            rot = (int) (rot) + delta;
+                        } else
+                            rot = (int) (rot);
+                    }
+
+                    oldRot = rot;
+                    rot *= 36;
+                    GL11.glPushMatrix();
+                    GL11.glTranslatef(ox, oy, oz);
+                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
+                    GL11.glTranslatef(-ox, -oy, -oz);
+                    timeNumberWheel[idx].draw();
+                    GL11.glPopMatrix();
+
+                    time /= 10.0;
+                }
+            }
+        }
+        // UtilsClient.enableCulling();
+    }
 }

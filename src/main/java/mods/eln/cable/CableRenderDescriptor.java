@@ -1,5 +1,7 @@
 package mods.eln.cable;
 
+import mods.eln.misc.UtilsClient;
+
 import net.minecraft.resources.Identifier;
 
 public class CableRenderDescriptor {
@@ -17,5 +19,8 @@ public class CableRenderDescriptor {
     }
 
     public Identifier cableTexture;
-// 26.x port: bindCableTexture() removed (client rendering; redone in P3)
+
+    public void bindCableTexture() {
+        UtilsClient.bindTexture(cableTexture);
+    }
 }

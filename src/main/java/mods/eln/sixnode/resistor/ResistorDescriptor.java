@@ -1,5 +1,9 @@
 package mods.eln.sixnode.resistor;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.Utils;
 import mods.eln.Eln;
@@ -13,7 +17,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Created by svein on 05/08/15.
@@ -66,7 +69,26 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float wiperPos) {
+        //UtilsClient.disableCulling();
+        //UtilsClient.disableTexture();
+        //GL11.glRotatef(90, 1, 0, 0);
+
+
+        if (null != Base) Base.draw();
+        if (null != ResistorBaseExtension) ResistorBaseExtension.draw();
+        if (null != ResistorCore) ResistorCore.draw();
+        if (null != Cables) Cables.draw();
+
+        if (isRheostat) {
+            final float wiperSpread = 0.238f;
+            wiperPos = (wiperPos - 0.5f) * wiperSpread * 2;
+            ResistorTrack.draw();
+            GL11.glTranslatef(0, 0, wiperPos);
+            ResistorWiper.draw();
+            // GL11.glTranslatef(-wiperPos, 0, 0);
+        }
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

@@ -100,7 +100,14 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
     }
 
     public ElectricalCableDescriptor cable;
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+
+    public void draw() {
+        if (main != null) main.draw();
+        if (ext_control != null) ext_control.draw();
+        if (ext_power != null) ext_power.draw();
+        if (door_out != null) door_out.draw();
+    }
 
     Coordonate[] powerCoordonate;
 

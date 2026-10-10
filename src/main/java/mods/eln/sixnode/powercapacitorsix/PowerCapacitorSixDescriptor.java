@@ -15,7 +15,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
@@ -76,7 +75,11 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw() {
+        if (null != Base) Base.draw();
+        if (null != CapacitorCables) CapacitorCables.draw();
+        if (null != CapacitorCore) CapacitorCore.draw();
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

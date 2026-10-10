@@ -1,5 +1,7 @@
 package mods.eln.node.transparent;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
@@ -47,7 +49,18 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: objItemScale() removed (client rendering; redone in P3)
+
+    public void objItemScale(Obj3D obj) {
+        if (obj == null) return;
+        float factor = obj.yDim * 0.6f;
+        //factor = obj.dimMaxInv*1.0f;
+        factor = Math.max(factor, (Math.max(obj.zMax, -obj.xMin) + Math.max(obj.xMax, -obj.zMin)) * 0.7f);
+        factor = 1f / factor;
+
+        GL11.glScalef(factor, factor, factor);
+        //GL11.glTranslatef((Math.max(obj.zMax,-obj.xMin) - Math.max(obj.xMax,-obj.zMin))*0.5f,-((obj.yMax + Math.max(-obj.xMin,obj.zMax)*0.3f) + (obj.yMin + Math.min(obj.zMin,-obj.xMax)*0.3f))*0.4f,0.0f);
+        GL11.glTranslatef((Math.min(obj.zMin, obj.xMin) + Math.max(obj.xMax, obj.zMax)) / 2 - (obj.xMax + obj.xMin) / 2, 1.0f - (obj.xMax + obj.xMin) / 2 - (obj.zMax + obj.zMin) / 2 - (obj.yMax + obj.yMin) / 2, 0.0f);
+    }
 
     public FrontType getFrontType() {
         return FrontType.PlayerViewHorizontal;

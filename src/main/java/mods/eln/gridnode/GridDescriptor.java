@@ -1,11 +1,12 @@
 package mods.eln.gridnode;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
@@ -42,7 +43,22 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         }
         this.cableTexture = cableTexture;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(float idealRenderingAngle) {
+        final boolean fixed = rotationIsFixed();
+        if (!fixed) {
+            glPushMatrix();
+            glRotatef(idealRenderingAngle, 0, 1, 0);
+        }
+        for (Obj3D.Obj3DPart part : rotating_parts) {
+            part.draw();
+        }
+        if (!fixed) {
+            glPopMatrix();
+        }
+        for (Obj3D.Obj3DPart part : static_parts) {
+            part.draw();
+        }
+    }
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
 

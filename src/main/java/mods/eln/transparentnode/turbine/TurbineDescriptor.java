@@ -81,7 +81,10 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
     public void applyTo(ElectricalLoad load) {
         load.setRs(electricalRs);
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    void draw() {
+        if (main != null) main.draw();
+    }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 

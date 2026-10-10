@@ -1,5 +1,7 @@
 package mods.eln.sixnode.hub;
 
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -11,7 +13,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,18 @@ public class HubDescriptor extends SixNodeDescriptor {
         }
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(boolean[] connectionGrid) {
+        if (main != null) main.draw();
+        for (int idx = 0; idx < 6; idx++) {
+            if (connectionGrid[idx])
+                GL11.glColor3f(40 / 255f, 40 / 255f, 40 / 255f);
+            else
+                GL11.glColor3f(150 / 255f, 150 / 255f, 150 / 255f);
+
+            if (connection[idx] != null) connection[idx].draw();
+        }
+        GL11.glColor3f(1, 1, 1);
+    }
 
 /*	@Override
 	// 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)

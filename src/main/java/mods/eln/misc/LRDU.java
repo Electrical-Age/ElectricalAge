@@ -1,8 +1,9 @@
 package mods.eln.misc;
 
+import mods.eln.gl.GL11;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

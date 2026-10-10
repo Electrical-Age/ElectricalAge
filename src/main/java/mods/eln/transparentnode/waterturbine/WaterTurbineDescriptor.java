@@ -69,7 +69,12 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
 
     public FunctionTable PfW;
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw(float alpha) {
+        if (support != null) support.draw();
+        if (generator != null) generator.draw();
+        if (wheel != null) wheel.draw(alpha, 1f, 0f, 0f);
+    }
 
     @Override
     public Direction getFrontFromPlace(Direction side,

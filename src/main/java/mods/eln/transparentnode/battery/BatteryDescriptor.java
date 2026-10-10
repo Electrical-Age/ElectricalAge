@@ -56,7 +56,22 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     public static final BatteryDescriptor[] list = new BatteryDescriptor[8];
 
     public double currentDropVoltage = 1000000, currentDropFactor = 0;
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw(boolean plus, boolean minus) {
+        switch (renderType) {
+            case 0:
+                if (modelPart == null) return;
+                modelPart.draw();
+                break;
+            case 1:
+                if (main != null) main.draw();
+                if (plugPlus != null && plus) plugPlus.draw();
+                if (plusMinus != null && minus) plusMinus.draw();
+                //if(cables != null) cables.draw();
+                if (battery != null) battery.draw();
+                break;
+        }
+    }
 
     public BatteryDescriptor(String name, String modelName,
                              ElectricalCableDescriptor cable,

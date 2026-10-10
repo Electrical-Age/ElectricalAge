@@ -1,5 +1,9 @@
 package mods.eln.transparentnode.eggincubator;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -16,7 +20,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -65,7 +68,25 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    void draw(int eggStackSize, float powerFactor) {
+        if (eggStackSize == 0) powerFactor = 0f;
+        UtilsClient.disableCulling();
+        if (main != null) main.draw();
+        if (lampf != null) {
+            GL11.glColor3f(0.1f, 0.1f, 0.1f);
+            lampf.draw();
+        }
+        if (lamp != null) {
+            UtilsClient.disableLight();
+            UtilsClient.enableBlend();
+            GL11.glColor4f(1f, 0.2f, 0.0f, powerFactor * powerFactor * 0.5f);
+            lamp.draw();
+            UtilsClient.disableBlend();
+            UtilsClient.enableLight();
+        }
+        UtilsClient.enableCulling();
+    }
 
     public void applyTo(NbtElectricalLoad powerLoad) {
         cable.applyTo(powerLoad);

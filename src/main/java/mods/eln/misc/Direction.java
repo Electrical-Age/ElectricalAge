@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.gl.GL11;
+
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -176,7 +178,79 @@ public enum Direction {
     private int getSign() {
         return (dir % 2) * 2 - 1;
     }
-// 26.x port: renderBlockFace() removed (client rendering; redone in P3)
+
+    public void renderBlockFace(int x, int y, float spriteDim) {
+        switch (this) {
+            case XN:
+                GL11.glNormal3f(-1.0f, 0.0f, 0.0f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
+                break;
+            case XP:
+                GL11.glNormal3f(1.0f, 0.0f, 0.0f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(0.5F, 0.5F, -0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(0.5F, 0.5F, 0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(0.5F, -0.5F, 0.5f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(0.5F, -0.5F, -0.5f);
+                break;
+            case YN:
+                GL11.glNormal3f(0.0f, -1.0f, 0.0f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(0.5F, -0.5f, -0.5F);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(0.5F, -0.5f, 0.5F);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(-0.5F, -0.5f, 0.5F);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(-0.5F, -0.5f, -0.5F);
+                break;
+            case YP:
+                GL11.glNormal3f(0.0f, 1.0f, 0.0f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(-0.5F, 0.5f, -0.5F);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(-0.5F, 0.5f, 0.5F);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(0.5F, 0.5f, 0.5F);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(0.5F, 0.5f, -0.5F);
+                break;
+            case ZN:
+                GL11.glNormal3f(0.0f, 0.0f, -1.0f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(0.5F, 0.5F, -0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(0.5F, -0.5F, -0.5f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
+                break;
+            case ZP:
+                GL11.glNormal3f(0.0f, 0.0f, 1.0f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(0.5F, 0.5F, 0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
+                GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
+                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
+                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
+                GL11.glVertex3f(0.5F, -0.5F, 0.5f);
+                break;
+            default:
+                break;
+        }
+    }
 
     static public Direction fromInt(int idx) {
         for (Direction direction : Direction.values()) {
@@ -263,9 +337,88 @@ public enum Direction {
         }
         return null;
     }
-// 26.x port: glRotateXnRef() removed (client rendering; redone in P3)
-// 26.x port: glRotateXnRefInv() removed (client rendering; redone in P3)
-// 26.x port: glRotateZnRef() removed (client rendering; redone in P3)
+
+    public void glRotateXnRef() {
+        //toCheck
+        switch (this) {
+            case XN:
+                break;
+            case XP:
+                //GL11.glScalef(-1f, 1, -1f);
+                GL11.glRotatef(180, 0f, 1f, 0f);
+                break;
+            case YN:
+                GL11.glRotatef(90f, 0f, 0f, 1f);
+                GL11.glScalef(1f, -1f, -1f);
+                break;
+            case YP:
+                GL11.glRotatef(90f, 0f, 0f, -1f);
+                break;
+            case ZN:
+                GL11.glRotatef(270f, 0f, 1f, 0f);
+                break;
+            case ZP:
+                GL11.glRotatef(90f, 0f, 1f, 0f);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void glRotateXnRefInv() {
+        //toCheck
+        switch (this) {
+            case XN:
+                break;
+            case XP:
+                //GL11.glScalef(-1f, 1, -1f);
+                GL11.glRotatef(180, 0f, -1f, 0f);
+                break;
+            case YN:
+                GL11.glScalef(1f, -1f, -1f);
+                GL11.glRotatef(90f, 0f, 0f, -1f);
+                break;
+            case YP:
+                GL11.glRotatef(90f, 0f, 0f, 1f);
+                break;
+            case ZN:
+                GL11.glRotatef(270f, 0f, -1f, 0f);
+                break;
+            case ZP:
+                GL11.glRotatef(90f, 0f, -1f, 0f);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void glRotateZnRef() {
+        //toCheck
+        switch (this) {
+            case XN:
+                GL11.glRotatef(90f, 0f, 1f, 0f);
+                break;
+            case XP:
+                GL11.glRotatef(90f, 0f, -1f, 0f);
+                break;
+            case YN:
+                GL11.glRotatef(90f, 1f, 0f, 0f);
+                GL11.glScalef(1f, -1, 1f);
+                break;
+            case YP:
+                GL11.glRotatef(90f, 1f, 0f, 0f);
+                GL11.glScalef(1f, 1f, 1f);
+                break;
+            case ZN:
+                //GL11.glRotatef(90f, 0f, -1f, 0f);
+                break;
+            case ZP:
+                GL11.glRotatef(180f, 0f, 1f, 0f);
+                break;
+            default:
+                break;
+        }
+    }
 
     public BlockEntity getTileEntity(Coordonate coordonate) {
         int x = coordonate.x, y = coordonate.y, z = coordonate.z;
@@ -419,7 +572,31 @@ public enum Direction {
                 break;
         }
     }
-// 26.x port: glTranslate() removed (client rendering; redone in P3)
+
+    public void glTranslate(float v) {
+        switch (this) {
+            case XN:
+                GL11.glTranslatef(-v, 0f, 0f);
+                break;
+            case XP:
+                GL11.glTranslatef(v, 0f, 0f);
+                break;
+            case YN:
+                GL11.glTranslatef(0f, -v, 0f);
+                break;
+            case YP:
+                GL11.glTranslatef(0f, v, 0f);
+                break;
+            case ZN:
+                GL11.glTranslatef(0f, 0f, -v);
+                break;
+            case ZP:
+                GL11.glTranslatef(0f, 0f, v);
+                break;
+            default:
+                break;
+        }
+    }
 
     public static Direction fromEnumFacing(net.minecraft.core.Direction direction) {
         if (direction == null) return YN;
@@ -460,5 +637,31 @@ public enum Direction {
                 return null;
         }
     }
-// 26.x port: glRotateZnRefInv() removed (client rendering; redone in P3)
+
+    public void glRotateZnRefInv() {
+        switch (this) {
+            case XN:
+                GL11.glRotatef(-90f, 0f, 1f, 0f);
+                break;
+            case XP:
+                GL11.glRotatef(-90f, 0f, -1f, 0f);
+                break;
+            case YN:
+                GL11.glRotatef(-90f, 1f, 0f, 0f);
+                GL11.glScalef(1f, -1, 1f);
+                break;
+            case YP:
+                GL11.glRotatef(-90f, 1f, 0f, 0f);
+                GL11.glScalef(1f, 1f, 1f);
+                break;
+            case ZN:
+                //GL11.glRotatef(90f, 0f, -1f, 0f);
+                break;
+            case ZP:
+                GL11.glRotatef(-180f, 0f, 1f, 0f);
+                break;
+            default:
+                break;
+        }
+    }
 }

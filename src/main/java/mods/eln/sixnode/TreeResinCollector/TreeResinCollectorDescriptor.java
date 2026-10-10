@@ -1,5 +1,7 @@
 package mods.eln.sixnode.TreeResinCollector;
 
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -9,7 +11,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +38,16 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float factor) {
+        if (main != null) main.draw();
+        if (fill != null) {
+            if (factor > 1f) factor = 1f;
+            factor = (1f - factor);
+            GL11.glTranslatef(0f, 0f, factor * emptyT);
+            GL11.glScalef(1f - factor * (1f - emptyS), 1f - factor * (1f - emptyS), 1f);
+            fill.draw();
+        }
+    }
 
     @Override
     public void setParent(Item item, int damage) {

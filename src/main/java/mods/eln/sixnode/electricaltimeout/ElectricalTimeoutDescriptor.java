@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricaltimeout;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -8,7 +12,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +53,17 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float left) {
+        if (main != null) main.draw();
+        if (rot != null) {
+            rot.draw(rotEnd + (rotStart - rotEnd) * left, 1f, 0f, 0f);
+        }
+        if (led != null) {
+            UtilsClient.ledOnOffColor(left != 0f);
+            UtilsClient.drawLight(led);
+            GL11.glColor3f(1f, 1f, 1f);
+        }
+    }
 
     public ElectricalTimeoutDescriptor setTickSound(String tickSound, float tickVolume) {
         this.tickSound = tickSound;

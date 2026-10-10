@@ -1,5 +1,9 @@
 package mods.eln.transparentnode.windturbine;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -9,7 +13,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -82,7 +85,23 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
         blockMalusSubCount += ghostGroup.size();
         this.ghostGroup = ghostGroup;
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw(float alpha, boolean haloState) {
+        if (main != null) main.draw();
+        if (rot != null) rot.draw(alpha, 1f, 0f, 0f);
+        if (halo != null) {
+            if (haloState) {
+                UtilsClient.disableLight();
+                UtilsClient.enableBlend();
+                UtilsClient.disableCulling();
+                GL11.glColor3f(1.f, 0.f, 0.f);
+                halo.draw();
+                UtilsClient.enableCulling();
+                UtilsClient.disableBlend();
+                UtilsClient.enableLight();
+            }
+        }
+    }
 
     @Override
     public Direction getFrontFromPlace(Direction side,

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalwindsensor;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -7,7 +9,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,14 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float alpha) {
+        if (baseWall != null) baseWall.draw();
+        if (anemometer != null) {
+            UtilsClient.disableCulling();
+            anemometer.draw(alpha, 0, 1, 0);
+            UtilsClient.enableCulling();
+        }
+    }
 
     @Override
     public void setParent(Item item, int damage) {

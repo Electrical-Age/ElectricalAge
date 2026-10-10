@@ -86,5 +86,9 @@ public class Obj3DFolder {
         return obj.getPart(partName);
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw(String objName, String partName) {
+        Obj3DPart part = getPart(objName, partName);
+        if (part != null) part.draw();
+    }
 }

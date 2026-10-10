@@ -1,5 +1,9 @@
 package mods.eln.transparentnode.autominer;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -10,7 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -120,7 +123,41 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
         Collections.addAll(list, tr("Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.").split("\n"));
         list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(boolean lampState, float[] buttonsState, boolean[] ledsAState, boolean[] ledsPState) {
+        GL11.glRotatef(-90, 0, 1, 0);
+        GL11.glTranslatef(0, -1.5f, 0);
+
+        for (int idx = 0; idx < buttonsCount; idx++) {
+            GL11.glPushMatrix();
+            GL11.glTranslatef(0, (1 - buttonsState[idx]) * 0.01f, 0);
+            if (buttons[idx] != null) buttons[idx].draw();
+            GL11.glPopMatrix();
+        }
+
+        UtilsClient.disableLight();
+        for (int idx = 0; idx < ledsACount; idx++) {
+            GL11.glColor3f(0, ledsAState[idx] ? 0 : 1, 0);
+            if (ledsA[idx] != null) ledsA[idx].draw();
+        }
+
+        for (int idx = 0; idx < ledsPCount; idx++) {
+            GL11.glColor3f(0, ledsPState[idx] ? 0 : 1, 0);
+            if (ledsP[idx] != null) ledsP[idx].draw();
+        }
+        UtilsClient.enableLight();
+        GL11.glColor3f(1, 1, 1);
+
+        UtilsClient.disableCulling();
+        core.draw();
+        gui.draw();
+        buttonFixed.draw();
+        lampSocket.draw();
+        if (lampState)
+            lampOff.draw();
+        else
+            lampOn.draw();
+        UtilsClient.enableCulling();
+    }
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
 

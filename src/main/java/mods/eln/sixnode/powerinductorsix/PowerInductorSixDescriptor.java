@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powerinductorsix;
 
+import mods.eln.misc.UtilsClient;
+
 
 
 import mods.eln.registry.ElnDeviceRegistry;
@@ -18,7 +20,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
@@ -72,7 +73,14 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw() {
+        //UtilsClient.disableCulling();
+        //UtilsClient.disableTexture();
+        if (null != Base) Base.draw();
+        if (null != InductorBaseExtention) InductorBaseExtention.draw();
+        if (null != InductorCables) InductorCables.draw();
+        if (null != InductorCore) InductorCore.draw();
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

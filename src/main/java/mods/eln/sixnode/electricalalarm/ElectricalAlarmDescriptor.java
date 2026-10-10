@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalalarm;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -8,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +61,24 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addUtilities(newItemStack());
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(boolean warm, float rotAlpha) {
+        if (warm) UtilsClient.bindTexture(onTexture);
+        else UtilsClient.bindTexture(offTexture);
+        if (main != null) main.drawNoBind();
+        if (rot != null) {
+            GL11.glDisable(GL11.GL_CULL_FACE);
+            GL11.glColor3f(1.0f, 1.0f, 1.0f);
+            if (warm) UtilsClient.disableLight();
+            else GL11.glDisable(GL11.GL_LIGHTING);
+            rot.drawNoBind(rotAlpha, 1f, 0f, 0f);
+            if (warm) UtilsClient.enableLight();
+            else GL11.glEnable(GL11.GL_LIGHTING);
+            GL11.glEnable(GL11.GL_CULL_FACE);
+        }
+        if (lightPart != null) {
+            UtilsClient.drawLightNoBind(lightPart);
+        }
+    }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 

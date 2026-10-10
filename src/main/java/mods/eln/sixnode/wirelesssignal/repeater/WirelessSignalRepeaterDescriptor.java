@@ -1,5 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.repeater;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -10,7 +12,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
 
@@ -45,7 +46,15 @@ public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw() {
+        if (main != null) main.draw();
+
+		/*if (led != null) {
+			UtilsClient.ledOnOffColor(connection);
+			UtilsClient.drawLight(led);
+		}*/
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

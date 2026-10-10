@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.Eln;
 
 public enum VoltageLevelColor {
@@ -36,6 +38,34 @@ public enum VoltageLevelColor {
             return None;
         }
     }
-// 26.x port: setGLColor() removed (client rendering; redone in P3)
+
+    public void setGLColor() {
+        switch (this) {
+            case None:
+            case Neutral:
+                break;
+
+            case SignalVoltage:
+                GL11.glColor3f(.80f, .87f, .82f);
+                break;
+
+            case LowVoltage:
+                GL11.glColor3f(.55f, .84f, .68f);
+                break;
+
+            case MediumVoltage:
+                GL11.glColor3f(.55f, .74f, .85f);
+                break;
+
+            case HighVoltage:
+                GL11.glColor3f(.96f, .80f, .56f);
+                break;
+
+            case VeryHighVoltage:
+                GL11.glColor3f(.86f, .58f, .55f);
+                break;
+
+        }
+    }
 }
 

@@ -1,10 +1,11 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.opengl.GL11;
 
 public class DataLogs implements INBTTReady {
 
@@ -93,7 +94,6 @@ public class DataLogs implements INBTTReady {
     }
 // 26.x port: draw() removed (client rendering; redone in P3)
     // 26.x port: draw() removed (client rendering; redone in P3)
-
     public static String getYstring(float factor, float maxValue, float minValue, byte unitType) {
         String str = "";
 

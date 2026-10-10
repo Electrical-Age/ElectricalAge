@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -7,7 +11,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +50,18 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(boolean firePresent) {
+        if (detector != null) detector.draw();
+        if (led != null) {
+            if (firePresent) {
+                UtilsClient.drawLight(led);
+            } else {
+                GL11.glColor3f(0.5f, 0.5f, 0.5f);
+                led.draw();
+                GL11.glColor3f(1, 1, 1);
+            }
+        }
+    }
 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {

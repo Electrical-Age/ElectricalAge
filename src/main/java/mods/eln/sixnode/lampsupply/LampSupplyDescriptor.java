@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsupply;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -44,7 +46,6 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         Data.addLight(newItemStack(1));
     }
 // 26.x port: draw() removed (client rendering; redone in P3)
-
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

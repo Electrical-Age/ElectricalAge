@@ -57,7 +57,10 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
         Data.addThermal(newItemStack());
         Data.addSignal(newItemStack());
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(boolean renderAdapter) {
+        if (main != null) main.draw();
+        if (renderAdapter && adapter != null) adapter.draw();
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

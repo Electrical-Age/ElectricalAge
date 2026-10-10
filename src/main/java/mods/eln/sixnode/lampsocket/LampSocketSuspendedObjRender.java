@@ -1,10 +1,13 @@
 package mods.eln.sixnode.lampsocket;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.opengl.GL11;
 
 public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 
@@ -35,5 +38,70 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
     // 26.x port: draw() removed (client rendering; redone in P3)
 
     // 26.x port: draw() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(LRDU front, float alphaZ, byte light, float pertuPy, float pertuPz, double distanceToPlayer) {
+        // front.glRotateOnX();
+        pertuPy /= length;
+        pertuPz /= length;
+
+        base.draw();
+
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        GL11.glTranslatef(baseLength, 0, 0);
+
+        for (int idx = 0; idx < length; idx++) {
+            GL11.glRotatef(pertuPy, 0, 1, 0);
+            GL11.glRotatef(pertuPz, 0, 0, 1);
+            chain.draw();
+            GL11.glTranslatef(chainLength, 0, 0);
+        }
+        GL11.glRotatef(pertuPy, 0, 1, 0);
+        GL11.glRotatef(pertuPz, 0, 0, 1);
+
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        if (!onOffModel) {
+            socket.draw();
+        } else {
+            if (light > 8) {
+                float l = (light) / 14f;
+                GL11.glColor3f(l, l, l);
+
+                UtilsClient.bindTexture(tOn);
+            } else
+                UtilsClient.bindTexture(tOff);
+            socket.drawNoBind();
+
+            if (light > 8) {
+                UtilsClient.disableLight();
+
+            }
+
+            if (socket != null) socket.drawNoBind();
+
+            if (light > 8) {
+                UtilsClient.enableLight();
+                GL11.glColor3f(1f, 1f, 1f);
+            }
+        }
+
+        GL11.glDisable(GL11.GL_CULL_FACE);
+
+        if (lightAlphaPlaneNoDepth != null) {
+            //Beautiful effect, but overlay the whole render (i.e. through wall) : so distance limited.
+            float coeff = /*1.5f*/2.0f - (float) distanceToPlayer;
+            if (coeff > 0.0f) {
+                UtilsClient.enableBlend();
+                UtilsClient.disableLight();
+                UtilsClient.disableDepthTest();
+
+                GL11.glColor4f(1.f, 1.f, 1.f, light * 0.06667f * coeff);
+                lightAlphaPlaneNoDepth.draw();
+
+                UtilsClient.enableDepthTest();
+                UtilsClient.enableLight();
+                UtilsClient.disableBlend();
+            }
+        }
+
+
+    }
 }

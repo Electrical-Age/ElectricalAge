@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalantennatx;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -11,7 +13,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -84,7 +85,12 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw() {
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        if (main != null) main.draw();
+        GL11.glEnable(GL11.GL_CULL_FACE);
+    }
 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
