@@ -60,6 +60,8 @@ final class GoldenCase implements TestCase {
         int compared = 0;
         for (Map.Entry<Integer, ?> e : Eln.sixNodeItem.all().entrySet()) compared += compare(ctx, golden, "eln:six_node@" + e.getKey(), e.getValue());
         for (Map.Entry<Integer, ?> e : Eln.transparentNodeItem.all().entrySet()) compared += compare(ctx, golden, "eln:transparent_node@" + e.getKey(), e.getValue());
+        for (Map.Entry<Integer, ?> e : Eln.sharedItem.all().entrySet()) compared += compare(ctx, golden, "eln:shared_item@" + e.getKey(), e.getValue());
+        for (Map.Entry<Integer, ?> e : Eln.sharedItemStackOne.all().entrySet()) compared += compare(ctx, golden, "eln:shared_item_stack_one@" + e.getKey(), e.getValue());
         ctx.check("golden: descriptors compared with 1.12", compared > 0, compared + " descriptor(s)");
     }
 

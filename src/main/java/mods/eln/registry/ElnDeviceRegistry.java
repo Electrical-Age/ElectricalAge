@@ -27,6 +27,9 @@ import mods.eln.misc.Utils;
  */
 @SuppressWarnings({"SameParameterValue", "PointlessArithmeticExpression", "unused"})
 public final class ElnDeviceRegistry {
+    /** Registered by Wp12a. */
+    public static mods.eln.item.MiningPipeDescriptor miningPipeDescriptor;
+
     /** eln:light (1.12 ElnDeviceRegistry.lightBlock); set at common setup. */
     public static net.minecraft.world.level.block.Block lightBlock;
 

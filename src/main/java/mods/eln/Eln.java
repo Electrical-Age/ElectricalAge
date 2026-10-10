@@ -36,6 +36,13 @@ public class Eln {
 
     public static mods.eln.server.ServerEventListener serverEventListener;
 
+    /** Ingots and dusts (1.12 Eln statics; registered by Wp12a). */
+    public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment tinIngot, copperIngot, silverIngot, plumbIngot, tungstenIngot;
+    public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment dustTin, dustCopper, dustSilver;
+
+    /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10). */
+    public static float xRayScannerRange = 5f;
+
     /** Items shown as "furnace" machines for smelting recipes (vanilla furnace, EA electrical furnaces). */
     public static java.util.ArrayList<net.minecraft.world.item.ItemStack> furnaceList = new java.util.ArrayList<>();
 
@@ -64,7 +71,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp9cContent(),
         new mods.eln.registry.batch.Wp10aContent(),
         new mods.eln.registry.batch.Wp10bContent(),
-        new mods.eln.registry.batch.Wp11Content());
+        new mods.eln.registry.batch.Wp11Content(),
+        new mods.eln.registry.batch.Wp12aContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
