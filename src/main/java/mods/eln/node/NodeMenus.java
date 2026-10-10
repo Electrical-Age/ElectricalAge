@@ -79,10 +79,14 @@ public final class NodeMenus {
         return new ElnNodeMenu(containerId, player.getInventory(), inventory, spec, node, node.coordonate.pos(), side, kind, id, key);
     }
 
+    /** GameTests: told of every menu opened (a FakePlayer's openMenu does nothing). */
+    public static java.util.function.BiConsumer<Player, ElnNodeMenu> openedHook;
+
     public static boolean open(NodeBase node, Player player, Direction side) {
         if (!(player instanceof ServerPlayer sp)) return true; // the client waits for the server's open packet
         ElnNodeMenu probe = menu(0, player, node, side);
         if (probe == null) return false;
+        if (openedHook != null) openedHook.accept(player, probe);
         sp.openMenu(new SimpleMenuProvider((id, inv, p) -> menu(id, p, node, side), Component.literal(node.getNodeUuid())),
             probe::writeOpenData);
         return true;

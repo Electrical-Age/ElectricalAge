@@ -1,0 +1,89 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Electrical Probe"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "button": "voltage",
+       "sample": "Voltage",
+       "fill": true
+      },
+      {
+       "button": "current",
+       "sample": "Current",
+       "fill": true
+      },
+      {
+       "button": "power",
+       "sample": "Power",
+       "fill": true
+      },
+      {
+       "button": "dir",
+       "sample": [
+        "A <=> B"
+       ],
+       "fill": true
+      }
+     ],
+     "gap": 2
+    },
+    {
+     "column": [
+      {
+       "row": [
+        {
+         "text": "hl",
+         "sample": "100%"
+        },
+        {
+         "field": "high",
+         "chars": 7
+        }
+       ]
+      },
+      {
+       "row": [
+        {
+         "text": "ll",
+         "sample": "0%"
+        },
+        {
+         "field": "low",
+         "chars": 7
+        }
+       ]
+      },
+      {
+       "button": "validate",
+       "sample": "Validate",
+       "fill": true
+      }
+     ],
+     "gap": 4
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

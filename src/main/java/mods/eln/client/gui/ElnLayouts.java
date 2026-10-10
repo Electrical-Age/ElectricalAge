@@ -23,17 +23,22 @@ public final class ElnLayouts {
     private ElnLayouts() {
     }
 
-    static final Map<Class<?>, String> NAMES = new HashMap<>();
+    static final Map<Class<?>, java.util.function.Function<Object, String>> NAMES = new HashMap<>();
 
     public static void register(Class<?> descriptor, String name) {
+        NAMES.put(descriptor, d -> name);
+    }
+
+    /** A layout chosen by the descriptor (variants: a voltage probe has no sensor-type buttons). */
+    public static void register(Class<?> descriptor, java.util.function.Function<Object, String> name) {
         NAMES.put(descriptor, name);
     }
 
     static String name(Object descriptor) {
         if (descriptor == null) return null;
         for (Class<?> c = descriptor.getClass(); c != null; c = c.getSuperclass()) {
-            String n = NAMES.get(c);
-            if (n != null) return n;
+            var n = NAMES.get(c);
+            if (n != null) return n.apply(descriptor);
         }
         return null;
     }

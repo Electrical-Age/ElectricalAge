@@ -81,6 +81,13 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
         return addRenderableWidget(new EaGauge(leftPos + r.x(), topPos + r.y(), r.w(), r.h(), fraction, text, amberFrom, redFrom));
     }
 
+    /** An area drawn by the screen (screen coordinates passed to the painter). */
+    protected void canvas(String id, java.util.function.BiConsumer<GuiGraphicsExtractor, mods.eln.gui.layout.Layout.Rect> painter) {
+        var r = rect("canvas", id);
+        var abs = new mods.eln.gui.layout.Layout.Rect(leftPos + r.x(), topPos + r.y(), r.w(), r.h());
+        drawers.add(() -> painter.accept(drawing, abs));
+    }
+
     /** A live text line at its layout place. */
     protected void text(String id, java.util.function.Supplier<String> s) {
         text(id, s, () -> LABEL);
@@ -102,6 +109,13 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
             int w = (int) Math.ceil(24 * Math.max(0, Math.min(1, f.getAsDouble())));
             if (w > 0) drawing.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW, 24, 16, 0, 0, ax, ay, w, 16);
         });
+    }
+
+    /** The item in a device slot (its index in the device inventory), or EMPTY. */
+    protected net.minecraft.world.item.ItemStack deviceItem(int index) {
+        for (Slot s : menu.slots)
+            if (s instanceof mods.eln.gui.ElnSlot && s.getContainerSlot() == index) return s.getItem();
+        return net.minecraft.world.item.ItemStack.EMPTY;
     }
 
     /** Refresh labels and values from the device (client tick). */

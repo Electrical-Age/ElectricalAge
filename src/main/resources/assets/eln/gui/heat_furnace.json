@@ -1,0 +1,76 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Stone Heat Furnace"
+  },
+  {
+   "row": [
+    {
+     "button": "external",
+     "sample": [
+      "Internal control",
+      "External control"
+     ],
+     "fill": true
+    },
+    {
+     "button": "fuel",
+     "sample": [
+      "Take fuel",
+      "Decline fuel"
+     ],
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "gain",
+   "sample": "Control gauge at 100%  (power 9999W)"
+  },
+  {
+   "slider": "gain",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "text": "heat",
+   "sample": "Set point 1000°C  (actual 1000°C)"
+  },
+  {
+   "slider": "heat",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "slot": "1"
+    },
+    {
+     "slot": "3"
+    },
+    {
+     "slot": "2"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

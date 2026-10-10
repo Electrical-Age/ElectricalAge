@@ -1,0 +1,66 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Fuel Heat Furnace"
+  },
+  {
+   "row": [
+    {
+     "button": "external",
+     "sample": [
+      "Internal control",
+      "External control"
+     ],
+     "fill": true
+    },
+    {
+     "button": "main",
+     "sample": [
+      "Furnace is on",
+      "Furnace is off"
+     ],
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "manual",
+   "sample": "Control value at 100%  (heat 99.9kW)"
+  },
+  {
+   "slider": "manual",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "text": "temp",
+   "sample": "Set point 1000°C  (actual 1000°C)"
+  },
+  {
+   "slider": "temp",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "slot": "1"
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

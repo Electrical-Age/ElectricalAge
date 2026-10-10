@@ -23,6 +23,7 @@ import java.util.Map;
  * {"gauge": "supply", "width": 60, "height": 12}   a bar
  * {"progress": "process"}                          the furnace arrow (24x16)
  * {"inventory": true}                              the player inventory (162x76)
+ * {"canvas": "grid", "width": 80, "height": 80}    an area the screen draws itself (the hub's connection grid)
  * {"space": 4} / {"space": [w, h]}                 empty room
  * </pre>
  * Any node can say "fill": true (takes the spare width of its row; in a column it spans the column's width) and
@@ -118,7 +119,7 @@ public final class Layout {
                 row = false;
                 gap = 0;
                 String k = null;
-                for (String cand : new String[]{"slot", "text", "button", "slider", "field", "gauge", "progress", "inventory", "space"})
+                for (String cand : new String[]{"slot", "text", "button", "slider", "field", "gauge", "progress", "inventory", "canvas", "space"})
                     if (o.has(cand)) {
                         k = cand;
                         break;
@@ -196,6 +197,10 @@ public final class Layout {
                 case "inventory" -> {
                     w = 162;
                     h = 76;
+                }
+                case "canvas" -> {
+                    w = 0; // its "width"/"height"
+                    h = 0;
                 }
                 case "space" -> {
                     JsonElement v = json.get("space");

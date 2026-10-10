@@ -42,6 +42,16 @@ final class ClientScreens {
         layout("sixnode.electricalwatch.ElectricalWatchDescriptor", "electrical_watch");
         layout("sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor", "entity_sensor");
         layout("sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor", "fire_detector");
+        layout("sixnode.lampsupply.LampSupplyDescriptor", "lamp_supply");
+        layout("sixnode.hub.HubDescriptor", "hub");
+        layout("transparentnode.heatfurnace.HeatFurnaceDescriptor", "heat_furnace");
+        layout("transparentnode.FuelHeatFurnaceDescriptor", "fuel_heat_furnace");
+        mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class,
+            d -> mods.eln.sixnode.lampsocket.LampSocketScreen.fixedLayout(d) ? "lamp_socket_fixed" : "lamp_socket");
+        mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class,
+            d -> ((mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor) d).voltageOnly ? "voltage_probe" : "electrical_sensor");
+        mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class,
+            d -> ((mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor) d).temperatureOnly ? "temperature_probe" : "thermal_sensor");
         ElnScreens.register(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class,
             mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceScreen::new);
         ElnScreens.register(mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor.class,
@@ -65,6 +75,14 @@ final class ClientScreens {
         reg(mods.eln.transparentnode.turret.TurretDescriptor.class, mods.eln.transparentnode.turret.TurretScreen::new);
         reg(mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor.class, mods.eln.transparentnode.eggincubator.EggIncubatorScreen::new);
         reg(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, mods.eln.transparentnode.electricalmachine.ElectricalMachineScreen::new);
+        // S1d
+        reg(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class, mods.eln.sixnode.lampsocket.LampSocketScreen::new);
+        reg(mods.eln.sixnode.lampsupply.LampSupplyDescriptor.class, mods.eln.sixnode.lampsupply.LampSupplyScreen::new);
+        reg(mods.eln.sixnode.hub.HubDescriptor.class, mods.eln.sixnode.hub.HubScreen::new);
+        reg(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, mods.eln.sixnode.electricalsensor.ElectricalSensorScreen::new);
+        reg(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, mods.eln.sixnode.thermalsensor.ThermalSensorScreen::new);
+        reg(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceScreen::new);
+        reg(mods.eln.transparentnode.FuelHeatFurnaceDescriptor.class, mods.eln.transparentnode.FuelHeatFurnaceScreen::new);
         // value lines from the slots (1.12 drew them over the panel)
         info(mods.eln.sixnode.resistor.ResistorDescriptor.class, (d, inv) -> java.util.List.of(
             tr("Resistance: %1$\u2126", Utils.plotValue(((mods.eln.sixnode.resistor.ResistorDescriptor) d).getRsValue(inv)))));
