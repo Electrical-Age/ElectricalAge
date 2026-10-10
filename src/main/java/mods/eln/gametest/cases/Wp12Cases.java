@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Selftest cases of device batch Wp12 (1.12 Wp12Cases), as its parts are ported: Wp12b's electrical axe so far.
- * Still in legacy/ (with their Wp12 steps): Registration (ore dictionary, ore item, replicator id), OreVein, Replicator.
+ * Still in legacy/ (with their Wp12 steps): Registration (ore dictionary, replicator id), Replicator.
  */
 public final class Wp12Cases {
     private Wp12Cases() {
@@ -28,6 +28,8 @@ public final class Wp12Cases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new TreeCapitationCase());
         cases.add(new ForgeEnergy());
+        cases.add(new OreVein());
+        cases.add(new OreWorldgen());
     }
 
     /**
@@ -150,6 +152,106 @@ public final class Wp12Cases {
             ItemStack ingot = Eln.findItemStack("Copper Ingot", 1);
             ctx.check("wp12 no FE on plain items", net.neoforged.neoforge.transfer.access.ItemAccess.forStack(ingot)
                 .getCapability(net.neoforged.neoforge.capabilities.Capabilities.Energy.ITEM) == null, "Copper Ingot");
+        }
+    }
+
+    /**
+     * Ore worldgen code path: fills x 0..7, y 1..3, z 0..2 with stone, places a Copper Ore vein (the ore feature on
+     * plain stone, size 10, seeded) centred on x 4, y 2, z 1. Expected: copper ore inside the stone only, floor included
+     * (> 0 inside, 0 in the air around) and the block drops one Copper Ore item (loot table).
+     */
+    static final class OreVein implements TestCase {
+        @Override
+        public String name() {
+            return "wp12 ore vein";
+        }
+
+        @Override
+        public int height() {
+            return 6;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            ServerLevel w = ctx.world();
+            for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(ctx.at(0, 1, 0), ctx.at(7, 3, 2)))
+                if (!w.getBlockState(p).isAir()) throw new IllegalStateException("not empty: " + p);
+            for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(ctx.at(0, 1, 0), ctx.at(7, 3, 2)))
+                w.setBlock(p, Blocks.STONE.defaultBlockState(), 2);
+            net.minecraft.core.BlockPos c = ctx.at(4, 2, 1);
+            // 26.x ore features centre the vein on the origin (1.12 WorldGenMinable: pos + 8)
+            mods.eln.registry.batch.Wp12cContent.oreCopper.generateVein(w, net.minecraft.util.RandomSource.create(1234567), c.getX(), c.getY(), c.getZ(), 10);
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            ServerLevel w = ctx.world();
+            net.minecraft.world.level.block.Block ore = mods.eln.registry.batch.Wp12cContent.oreCopper.block;
+            int inside = 0, outside = 0;
+            net.minecraft.core.BlockPos samplePos = null;
+            try {
+                for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(ctx.at(-1, 0, 0), ctx.at(8, 5, 2))) {
+                    if (w.getBlockState(p).getBlock() != ore) continue;
+                    boolean in = p.getX() >= ctx.at(0, 0, 0).getX() && p.getX() <= ctx.at(7, 0, 0).getX()
+                        && p.getY() >= ctx.at(0, 0, 0).getY() && p.getY() <= ctx.at(0, 3, 0).getY() // the floor is stone too (1.12 same)
+                        && p.getZ() >= ctx.at(0, 0, 0).getZ() && p.getZ() <= ctx.at(0, 0, 2).getZ();
+                    if (in) inside++;
+                    else outside++;
+                    if (samplePos == null) samplePos = p.immutable();
+                }
+                ctx.check("wp12 ore vein in stone", inside > 0 && outside == 0,
+                    inside + " copper ore block(s) in the stone (expected > 0), " + outside + " outside (expected 0)");
+                if (samplePos != null) {
+                    List<ItemStack> drops = net.minecraft.world.level.block.Block.getDrops(w.getBlockState(samplePos), w, samplePos, null);
+                    ctx.check("wp12 copper ore drop", drops.size() == 1 && drops.get(0).getItem() == ore.asItem() && drops.get(0).getCount() == 1,
+                        drops + " (expected 1x copper ore)");
+                }
+            } finally {
+                for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(ctx.at(0, 1, 0), ctx.at(7, 3, 2))) w.removeBlock(p, false);
+            }
+        }
+    }
+
+    /**
+     * World generation data (26.x, no 1.12 counterpart): eln:tungsten_ore is a placed feature added to overworld biomes
+     * by the biome modifier (1.12 defaults: only tungsten generates), copper/lead/cinnabar have none, and the ores
+     * are pickaxe-mineable and need a tool.
+     */
+    static final class OreWorldgen implements TestCase {
+        @Override
+        public String name() {
+            return "wp12 ore worldgen data";
+        }
+
+        @Override
+        public int width() {
+            return 1;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            ServerLevel w = ctx.world();
+            var placed = w.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE);
+            var tungsten = placed.get(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.PLACED_FEATURE,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tungsten_ore")));
+            ctx.check("worldgen: placed feature eln:tungsten_ore", tungsten.isPresent(), "");
+            boolean others = placed.get(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.PLACED_FEATURE,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "copper_ore"))).isPresent();
+            ctx.check("worldgen: no copper/lead/cinnabar features (1.12 defaults)", !others, "");
+            if (tungsten.isPresent()) {
+                var plains = w.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BIOME)
+                    .getOrThrow(net.minecraft.world.level.biome.Biomes.PLAINS).value();
+                boolean found = false;
+                for (var set : plains.getGenerationSettings().features())
+                    for (var h : set) if (h.value() == tungsten.get().value()) found = true;
+                ctx.check("worldgen: plains generate tungsten ore (biome modifier)", found, "");
+            }
+            net.minecraft.world.level.block.state.BlockState ore = mods.eln.registry.batch.Wp12cContent.oreCopper.block.defaultBlockState();
+            ctx.check("ores: pickaxe-mineable, need a tool", ore.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE) && ore.requiresCorrectToolForDrops(), "");
         }
     }
 }

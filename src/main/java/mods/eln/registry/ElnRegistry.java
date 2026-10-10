@@ -163,6 +163,24 @@ public final class ElnRegistry {
                 return item;
             }));
         }
+        for (Map.Entry<Integer, mods.eln.ore.OreDescriptor> e : mods.eln.registry.batch.Wp12cContent.ores.all().entrySet()) {
+            int id = e.getKey();
+            mods.eln.ore.OreDescriptor d = e.getValue();
+            String name = nameOf("eln:ore", id);
+            // 1.12 OreBlock: Material.ROCK, hardness 3, resistance 5 (pickaxe, any level: data tag mineable/pickaxe)
+            DeferredBlock<mods.eln.ore.OreBlock> block = BLOCKS.registerBlock(name, p -> {
+                mods.eln.ore.OreBlock b = new mods.eln.ore.OreBlock(p, d);
+                d.block = b;
+                return b;
+            }, p -> p.mapColor(MapColor.STONE).strength(3.0f, 5.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
+            ALL_ITEMS.add(ITEMS.registerItem(name, p -> {
+                mods.eln.ore.OreItem item = new mods.eln.ore.OreItem(block.get(), p);
+                d.parentItem = item;
+                d.parentItemDamage = id;
+                Eln.itemsByName.put(d.name, item);
+                return item;
+            }));
+        }
         registerShared(Eln.sharedItem, "eln:shared_item", 64);
         registerShared(Eln.sharedItemStackOne, "eln:shared_item_stack_one", 1);
         TABS.register("eln", () -> CreativeModeTab.builder()

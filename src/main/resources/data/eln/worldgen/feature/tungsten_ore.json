@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:ore",
+  "discard_chance_on_air_exposure": 0.0,
+  "size": 6,
+  "targets": [
+    {
+      "state": "eln:tungsten_ore",
+      "target": {
+        "predicate_type": "minecraft:block_match",
+        "block": "minecraft:stone"
+      }
+    }
+  ]
+}

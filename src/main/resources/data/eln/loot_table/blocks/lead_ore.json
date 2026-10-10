@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eln:lead_ore"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "eln:blocks/lead_ore"
+}
