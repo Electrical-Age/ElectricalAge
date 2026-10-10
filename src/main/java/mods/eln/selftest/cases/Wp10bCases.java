@@ -395,8 +395,9 @@ public final class Wp10bCases {
             double light = (double) Wp9cCases.call(process, "getSolarLight");
             double pmax = field(field(panel, "descriptor"), "electricalPmax");
             PowerSourceBipole src = field(panel, "powerSource");
+            // + 0.5% of Pmax: the light is sampled every 0.1..0.2 s, and at dawn/dusk it moves that much in between
             within(ctx, f("wp10b solar panel power [W] (Pmax %.1f * light %.4f)", pmax, light), src.getP(), pmax * light,
-                0.01 * pmax * light + 1e-9);
+                0.01 * pmax * light + 0.005 * pmax);
         }
     }
 

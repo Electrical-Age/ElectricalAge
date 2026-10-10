@@ -87,6 +87,7 @@ public final class SelfTest implements SelfTestContext {
         mods.eln.selftest.cases.Wp12Cases.addTo(c);
         mods.eln.selftest.cases.RecipeCases.addTo(c);
         mods.eln.selftest.cases.FailureCases.addTo(c);
+        mods.eln.selftest.cases.SmokeCases.addTo(c);
         return c;
     }
 
@@ -399,6 +400,12 @@ public final class SelfTest implements SelfTestContext {
         if (!(node instanceof SixNode)) return null;
         placed.add(p);
         return ((SixNode) node).getElement(Direction.YN);
+    }
+
+    @Override
+    public void floor(BlockPos p) {
+        world.setBlockState(p, Blocks.STONE.getDefaultState(), 2);
+        if (!platform.contains(p)) platform.add(p.toImmutable());
     }
 
     @Override

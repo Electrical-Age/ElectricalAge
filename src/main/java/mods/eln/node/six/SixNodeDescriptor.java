@@ -92,6 +92,12 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         return -1;
     }
 
+    /** Faces this device may be placed on (null = any). */
+    @javax.annotation.Nullable
+    public Direction[] getPlaceDirection() {
+        return placeDirection;
+    }
+
     public void setPlaceDirection(Direction d) {
         placeDirection = new Direction[]{d};
     }

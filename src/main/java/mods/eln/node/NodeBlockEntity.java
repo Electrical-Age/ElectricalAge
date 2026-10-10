@@ -246,6 +246,11 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
 
+    /** Selftest reload (selftest/Reload): drop the cached node so the next getNode() looks it up again. */
+    public void forgetNode() {
+        node = null;
+    }
+
     public Node getNode() {
         if (world.isRemote) {
             Utils.fatal();

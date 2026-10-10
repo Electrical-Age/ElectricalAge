@@ -40,4 +40,7 @@ public interface SelfTestContext {
 
     /** PASS when |measured - expected| <= 1% of |expected|. */
     void checkValue(String what, double measured, double expected);
+
+    /** Put a platform block (stone) at p, removed by the cleanup. For cases that build outside their own row. */
+    void floor(BlockPos p);
 }
