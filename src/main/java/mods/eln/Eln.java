@@ -232,6 +232,8 @@ public class Eln {
                     if (!(node instanceof mods.eln.node.transparent.TransparentNode tn)) return null;
                     return tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h ? h : null;
                 }));
+        // FE on EA's energy items (batteries, tools, lamps)
+        modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, mods.eln.item.electricalitem.ItemEnergyCapability::register);
         // energy converters: FE out of their back face (1.12: CapabilityEnergy.ENERGY on the entity)
         modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
             e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Energy.BLOCK,
