@@ -73,7 +73,7 @@ class LayoutTest {
     /** Every layout shipped in assets/eln/gui must be sound with the fixed-width measure. */
     @Test
     void everyShippedLayoutIsSound() throws IOException {
-        Path dir = Path.of("src/main/resources/assets/eln/gui");
+        Path dir = Path.of(System.getProperty("eln.guiDir", "src/main/resources/assets/eln/gui"));
         assertTrue(Files.isDirectory(dir), "no " + dir.toAbsolutePath());
         List<String> problems = new ArrayList<>();
         int n = 0;

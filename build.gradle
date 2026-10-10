@@ -84,6 +84,8 @@ test {
     useJUnitPlatform()
     // Utils.rand returns the midpoint (the 1.12 sim tests were written against that)
     systemProperty 'eln.deterministic', 'true'
+    // LayoutTest checks every shipped screen layout (assets/eln/gui)
+    systemProperty 'eln.guiDir', file('src/main/resources/assets/eln/gui').absolutePath
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
