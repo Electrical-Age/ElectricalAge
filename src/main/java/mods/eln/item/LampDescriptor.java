@@ -7,10 +7,10 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.lampsocket.LampSocketType;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -67,7 +67,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
                 break;
         }
 
-        Eln.instance.configShared.add(this);
+        // 1.12 Eln.configShared (lamp life synced to clients): with the client in P3/P4
         voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU);
     }
 
@@ -82,22 +82,22 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
     }
 
     public double getLifeInTag(ItemStack stack) {
-        if (!stack.hasTagCompound())
-            stack.setTagCompound(getDefaultNBT());
-        if (stack.getTagCompound().hasKey("life"))
-            return stack.getTagCompound().getDouble("life");
+        if (!mods.eln.generic.ItemNbt.has(stack))
+            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
+        if (mods.eln.generic.ItemNbt.get(stack).contains("life"))
+            return mods.eln.generic.ItemNbt.get(stack).getDoubleOr("life", 0.0);
         return Utils.rand(0.75, 1.50);
     }
 
     public void setLifeInTag(ItemStack stack, double life) {
-        if (!stack.hasTagCompound())
-            stack.setTagCompound(getDefaultNBT());
-        stack.getTagCompound().setDouble("life", life);
+        if (!mods.eln.generic.ItemNbt.has(stack))
+            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
+        mods.eln.generic.ItemNbt.get(stack).putDouble("life", life);
     }
 
     @Override
-    public NBTTagCompound getDefaultNBT() {
-        return new NBTTagCompound();
+    public CompoundTag getDefaultNBT() {
+        return new CompoundTag();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Technology: %1$", type));
@@ -119,7 +119,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
         list.add(tr("Resistance: %1$\u2126", Utils.plotValue(getR())));
         list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
         if (!Utils.isEmpty(itemStack)) {
-            if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))
+            if (!mods.eln.generic.ItemNbt.has(itemStack) || !mods.eln.generic.ItemNbt.get(itemStack).contains("life"))
                 list.add(tr("Condition:") + " " + tr("New"));
             else if (getLifeInTag(itemStack) > 0.5)
                 list.add(tr("Condition:") + " " + tr("Good"));

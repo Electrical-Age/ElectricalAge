@@ -9,6 +9,14 @@ import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.solarpanel.SolarPanelDescriptor;
 import mods.eln.ghost.GhostGroup;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.LampDescriptor;
+import mods.eln.misc.Direction;
+import mods.eln.sixnode.lampsocket.LampSocketDescriptor;
+import mods.eln.sixnode.lampsocket.LampSocketStandardObjRender;
+import mods.eln.sixnode.lampsocket.LampSocketSuspendedObjRender;
+import mods.eln.sixnode.lampsocket.LampSocketType;
+import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
@@ -67,6 +75,10 @@ public final class ElnDeviceRegistry {
         // resistors (96): Wp9aContent.registerPassiveComponent, with the rest of that group
         registerBattery(16);
         registerSolarPanel(48);
+        registerLampSocket(64);
+        registerLampSupply(65);
+        registerLampItem(4);
+        registerMeter(14);
     }
 
     public static void registerElectricalCable(int id) {
@@ -600,5 +612,361 @@ public final class ElnDeviceRegistry {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+    }
+
+    // ---- lamps and meters (1.12 ElnDeviceRegistry, ported with the lamp step) ----
+
+    public static void registerLampSocket(int id) {
+        int subId, completId;
+        String name;
+
+        {
+            subId = 0;
+
+            name = TR_NAME(Type.NONE, "Lamp Socket A");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"), false),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                4, 0, 0, 0);
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 1;
+
+            name = TR_NAME(Type.NONE, "Lamp Socket B Projector");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"), false),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                10, -90, 90, 0);
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 4;
+
+            name = TR_NAME(Type.NONE, "Robust Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("RobustLamp"), true),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                3, 0, 0, 0);
+            desc.setInitialOrientation(-90.f);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 5;
+
+            name = TR_NAME(Type.NONE, "Flat Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FlatLamp"), true),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                3, 0, 0, 0);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 6;
+
+            name = TR_NAME(Type.NONE, "Simple Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("SimpleLamp"), true),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                3, 0, 0, 0);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 7;
+
+            name = TR_NAME(Type.NONE, "Fluorescent Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FluorescentLamp"), true),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                4, 0, 0, 0);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+
+
+            desc.cableLeft = false;
+            desc.cableRight = false;
+        }
+        {
+            subId = 8;
+
+            name = TR_NAME(Type.NONE, "Street Light");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("StreetLight"), true),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                0, 0, 0, 0);
+            desc.setPlaceDirection(Direction.YN);
+            GhostGroup g = new GhostGroup();
+            g.addElement(1, 0, 0);
+            g.addElement(2, 0, 0);
+            desc.setGhostGroup(g);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            desc.cameraOpt = false;
+        }
+        {
+            subId = 9;
+
+            name = TR_NAME(Type.NONE, "Sconce Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("SconceLamp"), true),
+                LampSocketType.Douille, // LampSocketType
+                true,
+                3, 0, 0, 0);
+            desc.setPlaceDirection(new Direction[]{Direction.XP, Direction.XN, Direction.ZP, Direction.ZN});
+            desc.setInitialOrientation(-90.f);
+            desc.setUserRotationLibertyDegrees(true);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 12;
+
+            name = TR_NAME(Type.NONE, "Suspended Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name,
+                new LampSocketSuspendedObjRender(obj.getObj("RobustLampSuspended"), true, 3),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                3, 0, 0, 0);
+            desc.setPlaceDirection(Direction.YP);
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            desc.cameraOpt = false;
+        }
+        {
+            subId = 13;
+
+            name = TR_NAME(Type.NONE, "Long Suspended Lamp Socket");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name,
+                new LampSocketSuspendedObjRender(obj.getObj("RobustLampSuspended"), true, 7),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                4, 0, 0, 0);
+            desc.setPlaceDirection(Direction.YP);
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            desc.cameraOpt = false;
+        }
+
+        // TODO: Modern street light.
+
+        // sub-UIDs 15/16 "50V/200V Emergency Lamp": Wp9c (registry/batch/Wp9cContent, registerEmergencyLamps(64))
+    }
+
+    public static void registerLampSupply(int id) {
+        int subId, completId;
+        String name;
+
+        {
+            subId = 0;
+
+            name = TR_NAME(Type.NONE, "Lamp Supply");
+
+            LampSupplyDescriptor desc = new LampSupplyDescriptor(
+                name, obj.getObj("DistributionBoard"),
+                32
+            );
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+    }
+
+    public static void registerLampItem(int id) {
+        int subId, completId;
+        double[] lightPower = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            15, 20, 25, 30, 40};
+        double[] lightLevel = new double[16];
+        double economicPowerFactor = 0.5;
+        double standardGrowRate = 0.0;
+        for (int idx = 0; idx < 16; idx++) {
+            lightLevel[idx] = (idx + 0.49) / 15.0;
+        }
+        LampDescriptor element;
+        {
+            subId = 0;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Incandescent Light Bulb"),
+                "incandescentironlamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, LVU, lightPower[12], // nominalU,
+                // nominalP
+                lightLevel[12], incandescentLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 1;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Incandescent Light Bulb"),
+                "incandescentironlamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, LVU, lightPower[14], // nominalU,
+                // nominalP
+                lightLevel[14], incandescentLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 2;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "200V Incandescent Light Bulb"),
+                "incandescentironlamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, MVU, lightPower[14], // nominalU,
+                // nominalP
+                lightLevel[14], incandescentLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+
+        {
+            subId = 4;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(
+                TR_NAME(Type.NONE, "Small 50V Carbon Incandescent Light Bulb"),
+                "incandescentcarbonlamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, LVU, lightPower[11], // nominalU,
+                // nominalP
+                lightLevel[11], carbonLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 5;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Carbon Incandescent Light Bulb"),
+                "incandescentcarbonlamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, LVU, lightPower[13], // nominalU,
+                // nominalP
+                lightLevel[13], carbonLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+
+        {
+            subId = 16;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Economic Light Bulb"),
+                "fluorescentlamp", LampDescriptor.Type.eco,
+                LampSocketType.Douille, LVU, lightPower[12]
+                * economicPowerFactor, // nominalU, nominalP
+                lightLevel[12], economicLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 17;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Economic Light Bulb"),
+                "fluorescentlamp", LampDescriptor.Type.eco,
+                LampSocketType.Douille, LVU, lightPower[14]
+                * economicPowerFactor, // nominalU, nominalP
+                lightLevel[14], economicLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 18;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "200V Economic Light Bulb"),
+                "fluorescentlamp", LampDescriptor.Type.eco,
+                LampSocketType.Douille, MVU, lightPower[14]
+                * economicPowerFactor, // nominalU, nominalP
+                lightLevel[14], economicLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+
+        {
+            subId = 32;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Farming Lamp"),
+                "farminglamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, LVU, 120, // nominalU, nominalP
+                lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 36;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "200V Farming Lamp"),
+                "farminglamp", LampDescriptor.Type.Incandescent,
+                LampSocketType.Douille, MVU, 120, // nominalU, nominalP
+                lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 37;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "50V LED Bulb"),
+                "ledlamp", LampDescriptor.Type.LED,
+                LampSocketType.Douille, LVU, lightPower[14] / 2, // nominalU, nominalP
+                lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 38;
+            completId = subId + (id << 6);
+            element = new LampDescriptor(TR_NAME(Type.NONE, "200V LED Bulb"),
+                "ledlamp", LampDescriptor.Type.LED,
+                LampSocketType.Douille, MVU, lightPower[14] / 2, // nominalU, nominalP
+                lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
+                // nominalLife
+            );
+            sharedItem.addElement(completId, element);
+        }
+
+    }
+
+    public static void registerMeter(int id) {
+        int subId, completId;
+
+        GenericItemUsingDamageDescriptor element;
+        {
+            subId = 0;
+            completId = subId + (id << 6);
+            element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "MultiMeter"));
+            sharedItem.addElement(completId, element);
+            final GenericItemUsingDamageDescriptor multi = element;
+            mods.eln.node.MeterItems.multiMeter = st -> Utils.getItemObject(st) == multi;
+        }
+        {
+            subId = 1;
+            completId = subId + (id << 6);
+            element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "Thermometer"));
+            sharedItem.addElement(completId, element);
+            final GenericItemUsingDamageDescriptor thermo = element;
+            mods.eln.node.MeterItems.thermometer = st -> Utils.getItemObject(st) == thermo;
+        }
+        {
+            subId = 2;
+            completId = subId + (id << 6);
+            element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "AllMeter"));
+            sharedItem.addElement(completId, element);
+            final GenericItemUsingDamageDescriptor all = element;
+            mods.eln.node.MeterItems.allMeter = st -> Utils.getItemObject(st) == all;
+        }
+        // subId 8 "Wireless Analyser": Wp9c (registry/batch/Wp9cContent, registerWirelessAnalyser(14))
+
     }
 }

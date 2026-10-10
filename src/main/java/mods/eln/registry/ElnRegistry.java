@@ -45,17 +45,17 @@ public final class ElnRegistry {
 
     public static final DeferredBlock<SixNodeBlock> SIX_NODE_BLOCK = BLOCKS.registerBlock("six_node", SixNodeBlock::new,
         p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
-    public static final DeferredBlock<GhostBlock> GHOST_BLOCK = BLOCKS.registerBlock("ghost", GhostBlock::new,
+    public static final DeferredBlock<GhostBlock> GHOST_BLOCK = BLOCKS.registerBlock("ghost_block", GhostBlock::new,
         p -> p.mapColor(MapColor.METAL).strength(0.5f).noOcclusion().noLootTable());
 
     /** Lamp/turret/teleporter light (1.12 LightBlock): level in META, no shape, no drops, replaceable. */
-    public static final DeferredBlock<mods.eln.sixnode.lampsocket.LightBlock> LIGHT_BLOCK = BLOCKS.registerBlock("light",
+    public static final DeferredBlock<mods.eln.sixnode.lampsocket.LightBlock> LIGHT_BLOCK = BLOCKS.registerBlock("light_block",
         mods.eln.sixnode.lampsocket.LightBlock::new,
         p -> p.noCollision().replaceable().noLootTable().noOcclusion()
             .lightLevel(s -> s.getValue(mods.eln.compat.BlockMeta.META)));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.sixnode.lampsocket.LightBlockEntity>> LIGHT_ENTITY =
-        BLOCK_ENTITIES.register("light", () -> new BlockEntityType<>(mods.eln.sixnode.lampsocket.LightBlockEntity::new, LIGHT_BLOCK.get()));
+        BLOCK_ENTITIES.register("light_block", () -> new BlockEntityType<>(mods.eln.sixnode.lampsocket.LightBlockEntity::new, LIGHT_BLOCK.get()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SixNodeEntity>> SIX_NODE_ENTITY =
         BLOCK_ENTITIES.register("six_node", () -> new BlockEntityType<>(SixNodeEntity::new, SIX_NODE_BLOCK.get()));

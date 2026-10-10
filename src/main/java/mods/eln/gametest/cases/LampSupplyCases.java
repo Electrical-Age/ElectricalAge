@@ -1,17 +1,17 @@
-package mods.eln.selftest.cases;
+package mods.eln.gametest.cases;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.selftest.SelfTestCase;
-import mods.eln.selftest.SelfTestContext;
+import mods.eln.gametest.TestCase;
+import mods.eln.gametest.TestContext;
 import mods.eln.sixnode.lampsocket.LampSocketElement;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 
 import java.util.List;
 
-import static mods.eln.selftest.cases.Wp9aCases.orient;
-import static mods.eln.selftest.cases.Wp9aCases.source;
+import static mods.eln.gametest.cases.Wp9aCases.orient;
+import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * Lamp supply powering lamp sockets by channel (no cable between them). Port step T3 (notes/port26/PLAN.md).
@@ -24,11 +24,11 @@ public final class LampSupplyCases {
     private LampSupplyCases() {
     }
 
-    public static void addTo(List<SelfTestCase> cases) {
+    public static void addTo(List<TestCase> cases) {
         cases.add(new LampSupplyCase());
     }
 
-    static final class LampSupplyCase implements SelfTestCase {
+    static final class LampSupplyCase implements TestCase {
         LampSocketElement on, off;
         LampSupplyElement supply;
         String ch;
@@ -41,11 +41,11 @@ public final class LampSupplyCases {
             return 9;
         }
 
-        LampSocketElement socket(SelfTestContext ctx, int x, String channel) {
+        LampSocketElement socket(TestContext ctx, int x, String channel) {
             LampSocketElement l = (LampSocketElement) ctx.placeSix(Wp10aCases.LAMP_SOCKET, ctx.at(x, 1, 1));
-            l.getInventory().setInventorySlotContents(0, Eln.sharedItem.getDescriptor(Wp10aCases.LAMP_BULB).newItemStack());
-            l.getInventory().setInventorySlotContents(1, Wp10aCases.lvCables(1));
-            l.getInventory().markDirty();
+            l.getInventory().setItem(0, Eln.sharedItem.getDescriptor(Wp10aCases.LAMP_BULB).newItemStack());
+            l.getInventory().setItem(1, Wp10aCases.lvCables(1));
+            l.getInventory().setChanged();
             l.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(4); // LampSocketElement.setChannel (package-private)
                 o.writeUTF(channel);
@@ -53,14 +53,14 @@ public final class LampSupplyCases {
             return l;
         }
 
-        public void build(SelfTestContext ctx) {
+        public void build(TestContext ctx) {
             ch = "eln selftest lamps " + System.nanoTime();
             source(ctx, Wp9aCases.SOURCE, 0, 1, 50);
             ctx.placeSix(Wp9aCases.LV_CABLE, ctx.at(1, 1, 1));
             supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN); // its power pin is the front
-            supply.getInventory().setInventorySlotContents(0, Wp10aCases.lvCables(1)); // LampSupplyContainer.cableSlotId
-            supply.getInventory().markDirty();
+            supply.getInventory().setItem(0, Wp10aCases.lvCables(1)); // LampSupplyContainer.cableSlotId
+            supply.getInventory().setChanged();
             supply.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(LampSupplyElement.setPowerName);
                 o.writeByte(0);
@@ -76,7 +76,7 @@ public final class LampSupplyCases {
             return v;
         }
 
-        public void measure(SelfTestContext ctx) {
+        public void measure(TestContext ctx) {
             ctx.check("lamp supply: socket on its channel lights up", light(on) > 0, "light " + light(on)
                 + ", supply U " + supply.powerLoad.getU() + ", socket U " + on.positiveLoad.getU());
             ctx.check("lamp supply: socket on another channel stays dark", light(off) == 0, "light " + light(off));

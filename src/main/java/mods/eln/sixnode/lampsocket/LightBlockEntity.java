@@ -94,7 +94,7 @@ public class LightBlockEntity extends BlockEntity {
             WorldCompat.setBlock(w, x, y, z, ElnDeviceRegistry.lightBlock, light, 2);
         }
 
-        BlockEntity t = WorldCompat.getTileEntity(w, x, y, z);
+        BlockEntity t = WorldCompat.getBlockEntity(w, x, y, z);
         if (t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else

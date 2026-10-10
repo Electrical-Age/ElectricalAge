@@ -1,6 +1,8 @@
 package mods.eln.gametest.cases;
 
 import mods.eln.Eln;
+import mods.eln.item.LampDescriptor;
+import mods.eln.sixnode.lampsocket.LampSocketElement;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.DielectricItem;
 import mods.eln.item.FerromagneticCoreDescriptor;
@@ -80,6 +82,7 @@ public final class Wp10aCases {
         cases.add(new MachinesCase());
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
+        cases.add(new InductorCase());
     }
 
     // ---- helpers ----
@@ -385,7 +388,57 @@ public final class Wp10aCases {
         }
     }
 
-    // InductorCase: deferred until lamps are ported (legacy/.../selftest/cases/Wp10aInductorCase.java.txt)
+    /**
+     * Power inductor in series between the fed cable and a cable + robust lamp socket (50V bulb). 1 copper cable
+     * (wp12): L = E12(-1)[0] = 0.1 H; optimal core (wp12, factor 1): Rs of both windings = rs. DC steady state
+     * (L/R = 0.8 ms): I = U / (Rs chain + Rlamp), chain = src-c1 2rs, c1-L 2rs, L-c2 2rs, c2-lamp 2rs.
+     */
+    static final class InductorCase implements TestCase {
+        PowerInductorElement ind;
+        LampSocketElement lamp;
+        boolean items;
+
+        public String name() {
+            return "wp10a power inductor";
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            BlockPos p = ctx.at(3, 1, 1);
+            ind = (PowerInductorElement) l.device(POWER_INDUCTOR, 3);
+            l.feed(p, ind.front.left());
+            BlockPos c2 = off(p, ind.front.right());
+            l.six(LV_CABLE, c2);
+            lamp = (LampSocketElement) l.six(LAMP_SOCKET, l.next(c2, ind.front.right()));
+            lamp.getInventory().setItem(0, Eln.sharedItem.getDescriptor(LAMP_BULB).newItemStack());
+            lamp.getInventory().setItem(1, lvCables(1));
+            lamp.getInventory().setChanged();
+            lamp.networkUnserialize(ctx.stream(out -> out.writeByte(3))); // LampSocketElement.tooglePowerSupplyType
+            ItemStack copper = shared(COPPER_CABLE, mods.eln.item.CopperCableDescriptor.class, 1);
+            ItemStack core = shared(CORE_OPTIMAL, FerromagneticCoreDescriptor.class, 1);
+            items = !copper.isEmpty() && !core.isEmpty();
+            if (items) {
+                ind.getInventory().setItem(0, copper); // PowerInductorContainer.cableId
+                ind.getInventory().setItem(1, core);   // coreId
+                ind.getInventory().setChanged();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            if (!items) {
+                ctx.line("SKIP wp10a power inductor: Copper Cable / Optimal Ferromagnetic Core not registered (wp12); placement only");
+                ctx.check("wp10a power inductor placed", ind != null, "");
+                return;
+            }
+            Inductor l = field(ind, "inductor");
+            double rLamp = ((LampDescriptor) Eln.sharedItem.getDescriptor(LAMP_BULB)).getR();
+            double i = U / (8 * rs() + rLamp);
+            ctx.line(String.format("wp10a inductor model: L = 0.1 H, Rlamp = %.3f ohm, I = U/(8Rs+Rlamp) = %.5f A", rLamp, i));
+            ctx.checkValue("wp10a power inductor L [H]", l.getL(), 0.1);
+            ctx.checkValue("wp10a power inductor current [A]", Math.abs(l.getCurrent()), i);
+            ctx.checkValue("wp10a lamp current through the inductor [A]", Math.abs(lamp.lampResistor.getCurrent()), i);
+        }
+    }
 
 
     // AutoMinerCase: deferred with the autominer (legacy/.../selftest/cases/Wp10aAutoMinerCase.java.txt)

@@ -651,4 +651,15 @@ public class Utils {
     public static boolean isAirBlock(net.minecraft.world.level.block.Block block) {
         return block != null && block.defaultBlockState().isAir();
     }
+
+    public static final double voltageMageFactor = 0.1;
+
+    public static double voltageMargeFactorSub(double value) {
+        if (value > 1 + voltageMageFactor) {
+            return value - voltageMageFactor;
+        } else if (value > 1) {
+            return 1;
+        }
+        return value;
+    }
 }

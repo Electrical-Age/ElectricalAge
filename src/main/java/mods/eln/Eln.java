@@ -40,6 +40,14 @@ public class Eln {
     public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment tinIngot, copperIngot, silverIngot, plumbIngot, tungstenIngot;
     public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment dustTin, dustCopper, dustSilver;
 
+    /** Lamp lifetimes [s] (1.12 config lamp.*LifeInHours: 16, 64, 6, 512 h). */
+    public static double incandescentLampLife = 16.0 * 3600, economicLampLife = 64.0 * 3600, carbonLampLife = 6.0 * 3600,
+        ledLampLife = 512.0 * 3600;
+    public static boolean ledLampInfiniteLife = false;
+    /** 1.12 config entity.killMonstersAroundLamps (true) / killMonstersAroundLampsRange (9). */
+    public static boolean killMonstersAroundLamps = true;
+    public static int killMonstersAroundLampsRange = 9;
+
     /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10). */
     public static float xRayScannerRange = 5f;
 

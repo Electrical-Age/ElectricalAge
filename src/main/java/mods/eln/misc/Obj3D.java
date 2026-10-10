@@ -229,6 +229,7 @@ public class Obj3D {
     }
 
     public Identifier getModelResourceLocation(String name) {
+        if (name == null) return null; // 1.12 built "model/<dir>/null" for a missing key; nothing to load either way
         // 26.x: resource paths must be lower case (the asset files are), and some MTL files name textures by an
         // absolute Windows path of the original author's machine: keep the file name only (1.12 was lenient)
         String file = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\')) + 1);
