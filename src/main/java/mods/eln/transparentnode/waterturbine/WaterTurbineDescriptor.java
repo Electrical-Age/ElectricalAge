@@ -118,7 +118,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
         Coordonate water = new Coordonate(waterCoord);
         water.applyTransformation(front, coord);
         if (coord.getBlockExist() == false) return true;
-        if (water.getBlock() == Blocks.AIR || Utils.isWater(water)) return true;
+        if (Utils.isAirBlock(water.getBlock()) || Utils.isWater(water)) return true;
         return false;
     }
 }

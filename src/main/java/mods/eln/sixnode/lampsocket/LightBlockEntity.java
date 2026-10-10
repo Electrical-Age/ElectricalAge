@@ -90,7 +90,7 @@ public class LightBlockEntity extends BlockEntity {
     public static void addLight(Level w, int x, int y, int z, int light, int timeout) {
         Block block = WorldCompat.getBlock(w, x, y, z);
         if (block != ElnDeviceRegistry.lightBlock) {
-            if (block != Blocks.AIR) return;
+            if (!Utils.isAirBlock(block)) return; // 26.x: also cave/void air
             WorldCompat.setBlock(w, x, y, z, ElnDeviceRegistry.lightBlock, light, 2);
         }
 

@@ -437,7 +437,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
                                 x = (int) (e.getX() + (Math.random() * 2 - 1) * failDistance);
                                 z = (int) (e.getZ() + (Math.random() * 2 - 1) * failDistance);
                                 y = 20;
-                                while (WorldCompat.getBlock(e.level(), x, y, z) != Blocks.AIR && WorldCompat.getBlock(e.level(), x, y + 1, z) != Blocks.AIR) {
+                                while (!Utils.isAirBlock(WorldCompat.getBlock(e.level(), x, y, z)) && !Utils.isAirBlock(WorldCompat.getBlock(e.level(), x, y + 1, z))) {
                                     y++;
                                 }
                                 Utils.serverTeleport(e, x + 0.5, y, z + 0.5);

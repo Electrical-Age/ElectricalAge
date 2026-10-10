@@ -12,7 +12,10 @@ public class Utils {
     static final boolean DETERMINISTIC = Boolean.getBoolean("eln.deterministic");
 
     public static void println(Object str) {
-        Eln.LOG.debug(String.valueOf(str));
+        String s = String.valueOf(str);
+        // 1.12 code reports broken invariants as println("ASSERT ..."): make those visible (tools/gt-summary.sh)
+        if (s.startsWith("ASSERT")) Eln.LOG.warn(s);
+        else Eln.LOG.debug(s);
     }
 
     public static void print(String format, Object... data) {
@@ -642,5 +645,10 @@ public class Utils {
             ((net.minecraft.server.level.ServerPlayer) e).teleportTo(x, y, z);
         else
             e.setPos(x, y, z);
+    }
+
+    /** 1.12 `block == Blocks.AIR`: on 26.x also cave_air and void_air. */
+    public static boolean isAirBlock(net.minecraft.world.level.block.Block block) {
+        return block != null && block.defaultBlockState().isAir();
     }
 }
