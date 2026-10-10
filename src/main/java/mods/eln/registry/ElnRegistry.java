@@ -212,7 +212,9 @@ public final class ElnRegistry {
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> ALL_ITEMS.isEmpty() ? ItemStack.EMPTY : new ItemStack(ALL_ITEMS.get(0).get()))
-            .displayItems((params, out) -> ALL_ITEMS.forEach(i -> out.accept(i.get())))
+            .displayItems((params, out) -> ALL_ITEMS.forEach(i -> {
+                if (!mods.eln.node.DescriptorRegistry.isHiddenItem(i.get())) out.accept(i.get()); // 1.12 addWithoutRegistry
+            }))
             .build());
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
