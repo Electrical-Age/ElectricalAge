@@ -31,7 +31,7 @@ public final class ElnScreens {
     }
 
     /** The descriptor of the menu's device (from the open data), or null. */
-    static Object descriptor(ElnNodeMenu menu) {
+    public static Object descriptor(ElnNodeMenu menu) {
         return switch (menu.kind) {
             case ElnNodeMenu.SIX -> Eln.sixNodeItem.getDescriptor(menu.descriptorId);
             case ElnNodeMenu.TRANSPARENT -> Eln.transparentNodeItem.getDescriptor(menu.descriptorId);
