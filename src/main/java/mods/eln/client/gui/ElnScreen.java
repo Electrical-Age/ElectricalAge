@@ -106,6 +106,8 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int xm, int ym) {
+        // 1.12's small panels (inventory near the top) had no labels: there is no room for them
+        if (menu.spec.playerInventory() && menu.spec.inventoryY() < 60) return;
         g.text(font, title, titleLabelX, titleLabelY, LABEL, false);
         if (menu.spec.playerInventory()) g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, LABEL, false);
     }

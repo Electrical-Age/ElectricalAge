@@ -37,6 +37,8 @@ public class ElnLang extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("key.eln.wrench", "Wrench (hold to open a switch's screen)");
+        add("key.category.eln.keys", "Electrical Age");
         for (var h : ElnRegistry.ALL_ITEMS) {
             Item item = h.get();
             String path = BuiltInRegistries.ITEM.getKey(item).getPath();

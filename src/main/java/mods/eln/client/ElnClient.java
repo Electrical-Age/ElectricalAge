@@ -32,6 +32,8 @@ public final class ElnClient {
         });
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
         ClientScreens.registerAll();
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent.class, ClientKeys::register);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, ClientKeys::tick);
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent.class,
             e -> e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent.class,

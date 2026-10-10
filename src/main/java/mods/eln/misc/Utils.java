@@ -201,7 +201,7 @@ public class Utils {
     }
 
     /** The player holds an EA wrench (filled when the wrench item is ported). */
-    public static java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrenchCheck = p -> false;
+    public static java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrenchCheck = mods.eln.server.PlayerKeys::usingWrench;
 
     public static boolean isPlayerUsingWrench(net.minecraft.world.entity.player.Player player) {
         return player != null && wrenchCheck.test(player);

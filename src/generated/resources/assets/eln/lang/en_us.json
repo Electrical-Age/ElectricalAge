@@ -374,5 +374,7 @@
   "item.eln.xnor_chip": "XNOR Chip",
   "item.eln.xor_chip": "XOR Chip",
   "item.eln.yellow_brush": "Yellow Brush",
-  "itemGroup.eln": "Electrical Age"
+  "itemGroup.eln": "Electrical Age",
+  "key.category.eln.keys": "Electrical Age",
+  "key.eln.wrench": "Wrench (hold to open a switch's screen)"
 }

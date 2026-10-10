@@ -29,7 +29,12 @@ public final class ServerPacketHandler {
     public static void handle(byte[] bytes, ServerPlayer player) {
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(bytes));
         try {
-            if (stream.readByte() != Eln.packetPublishForNode) return; // wrench key etc.: later
+            byte type = stream.readByte();
+            if (type == Eln.packetPlayerKey) {
+                mods.eln.server.PlayerKeys.set(player, stream.readByte(), stream.readBoolean());
+                return;
+            }
+            if (type != Eln.packetPublishForNode) return;
             Coordonate c = new Coordonate(stream.readInt(), stream.readInt(), stream.readInt(), stream.readInt());
             NodeBase node = NodeManager.instance.getNodeFromCoordonate(c);
             if (node == null || !node.getNodeUuid().equals(stream.readUTF())) {
