@@ -129,13 +129,14 @@ public final class MenuSpecs {
         put(mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.transparentnode.eggincubator.EggIncubatorContainer.EggSlotId, 176 / 2 - 8, 7, 64, item(Items.EGG),
                 MEDIUM, tr("Egg slot"))).publishing(1));
+        // P4b layout (ElectricalFurnaceScreen): input -> arrow -> output, heater and regulator to the right
         put(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, d -> MenuSpec.of(
-            any(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.outSlotId, 84, 58, BIG),
-            any(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId, 7, 58, MEDIUM),
-            descriptor(2, 70, 6 + 20 + 6, 1, HeatingCorpElement.class, MEDIUM, tr("Heating corp slot")),
+            any(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.outSlotId, 86, 25, BIG),
+            any(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId, 28, 25, MEDIUM, tr("Input")),
+            descriptor(2, 130, 25, 1, HeatingCorpElement.class, MEDIUM, tr("Heating element slot")),
             descriptor(3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot")),
-            regulator(4, 70 + 18, 6 + 20 + 6, 1, new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM,
-                tr("Regulator slot"))).publishing(1));
+            regulator(4, 150, 25, 1, new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM,
+                tr("Regulator slot"))).publishing(1).inventoryAt(122));
         put(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, d -> {
             SlotSpec[] s = new SlotSpec[2 + d.outStackCount];
             for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = any(idx, 130 - 32 + idx * 18, 12, MEDIUM);

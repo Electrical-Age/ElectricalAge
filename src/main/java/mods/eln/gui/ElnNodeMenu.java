@@ -52,9 +52,10 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         for (SlotSpec s : spec.slots()) addSlot(new ElnSlot(deviceInventory, s));
         deviceSlots = spec.slots().size();
         if (spec.playerInventory()) {
+            int y0 = spec.inventoryY();
             for (int i = 0; i < 3; i++)
-                for (int j = 0; j < 9; j++) addSlot(new Slot(playerInventory, j + i * 9 + 9, j * 18, i * 18));
-            for (int i = 0; i < 9; i++) addSlot(new Slot(playerInventory, i, i * 18, 58));
+                for (int j = 0; j < 9; j++) addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, y0 + i * 18));
+            for (int i = 0; i < 9; i++) addSlot(new Slot(playerInventory, i, 8 + i * 18, y0 + 58));
         }
     }
 

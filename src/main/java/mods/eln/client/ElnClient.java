@@ -30,6 +30,9 @@ public final class ElnClient {
             e.registerBlockEntityRenderer(ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), ctx -> new TransparentNodeRender());
         });
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
+        ClientScreens.registerAll();
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent.class,
+            e -> e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent.class,
             e -> mods.eln.client.render.ElnPipelines.ALL.forEach(e::registerPipeline));
     }
