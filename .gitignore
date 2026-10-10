@@ -37,3 +37,8 @@ run
 /saves
 .settings
 /libs/
+build/
+.gradle/
+run/
+runs/
+repo/

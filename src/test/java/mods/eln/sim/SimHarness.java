@@ -1,7 +1,6 @@
 package mods.eln.sim;
 
 import mods.eln.Eln;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /** A Simulator configured like Eln's defaults (Eln.java: 20 Hz electrical, oversampling 50, 400 Hz fast thermal). */
 public class SimHarness {
@@ -17,7 +16,7 @@ public class SimHarness {
     }
 
     public void tick() {
-        sim.tick(new TickEvent.ServerTickEvent(TickEvent.Phase.START));
+        sim.tick();
     }
 
     public void ticks(int n) {

@@ -1,0 +1,18 @@
+package mods.eln.sim;
+
+import mods.eln.sim.mna.component.ResistorSwitch;
+
+public class DiodeProcess implements IProcess {
+
+    ResistorSwitch resistor;
+
+    public DiodeProcess(ResistorSwitch resistor) {
+        this.resistor = resistor;
+        resistor.setDiode(true); // in-step switching in SubSystem.stepCalc; this process stays as the fallback
+    }
+
+    @Override
+    public void process(double time) {
+        resistor.setState(resistor.getU() > 0);
+    }
+}

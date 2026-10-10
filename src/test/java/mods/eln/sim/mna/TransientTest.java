@@ -5,7 +5,7 @@ import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -201,7 +201,7 @@ public class TransientTest {
         root.addComponent(ind);
         for (int n = 0; n < 5; n++) root.step();
         double i = ind.getCurrent();
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundTag nbt = new CompoundTag();
         ind.writeToNBT(nbt, "x");
 
         Inductor fresh = new Inductor("l");

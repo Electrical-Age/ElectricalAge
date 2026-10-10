@@ -6,7 +6,7 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
 import mods.eln.sim.nbt.NbtResistor;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -48,7 +48,7 @@ public class AuditFixesTest {
         NbtResistor a = new NbtResistor("a", null, null), b = new NbtResistor("b", null, null);
         a.setR(3);
         b.setR(7);
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundTag nbt = new CompoundTag();
         for (int i = 0; i < 3; i++) { // repeated saves must write the same keys
             a.writeToNBT(nbt, "dev");
             b.writeToNBT(nbt, "dev");

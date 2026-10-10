@@ -3,7 +3,7 @@ package mods.eln.sim.mna.component;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.state.State;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class ResistorSwitch extends Resistor implements INBTTReady {
 
@@ -52,21 +52,21 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         str += name;
-        setR(nbt.getDouble(str + "R"));
+        setR(nbt.getDoubleOr(str + "R", 0.0));
         if (Double.isNaN(baseR) || baseR == 0) {
             if (ultraImpedance) ultraImpedance();
             else highImpedance();
         }
-        setState(nbt.getBoolean(str + "State"));
+        setState(nbt.getBooleanOr(str + "State", false));
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
         str += name;
-        nbt.setDouble(str + "R", baseR);
-        nbt.setBoolean(str + "State", getState());
+        nbt.putDouble(str + "R", baseR);
+        nbt.putBoolean(str + "State", getState());
     }
 
     public void mustUseUltraImpedance() {

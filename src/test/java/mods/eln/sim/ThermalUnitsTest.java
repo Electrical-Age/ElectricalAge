@@ -55,8 +55,7 @@ public class ThermalUnitsTest {
             sim.addSlowProcess(ss);
             sim.addElectricalProcess(fe);
             sim.addThermalFastProcess(ff);
-            for (int i = 0; i < 200; i++) sim.tick(new net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent(
-                net.minecraftforge.fml.common.gameevent.TickEvent.Phase.START));
+            for (int i = 0; i < 200; i++) sim.tick();
             String at = " (electrical " + electricalHz + " Hz)";
             // T = deposited energy / C, exactly, whatever the caller's rate (the electrical loop may run one step
             // more than 20 Hz x 10 s, see SimulatorTimingTest, so compare with what was deposited)

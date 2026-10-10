@@ -1,9 +1,5 @@
 package mods.eln.sim;
 
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
@@ -75,7 +71,6 @@ public class Simulator /* ,IPacketHandler */ {
         this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
         this.thermalPeriod = thermalPeriod;
 
-        FMLCommonHandler.instance().bus().register(this);
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
 
@@ -367,9 +362,8 @@ public class Simulator /* ,IPacketHandler */ {
 
     public boolean pleaseCrash = false;
 
-    @SubscribeEvent
-    public void tick(ServerTickEvent event) {
-        if (event.phase != Phase.START) return;
+    /** One server tick (50 ms). 26.x: called by Eln's ServerTickEvent.Pre listener (1.12: START phase). */
+    public void tick() {
         if (pleaseCrash) throw new StackOverflowError();
         long stackStart;
 

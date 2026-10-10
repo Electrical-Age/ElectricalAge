@@ -3,7 +3,7 @@ package mods.eln.sim.nbt;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.state.State;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class NbtResistor extends Resistor implements INBTTReady {
 
@@ -19,14 +19,14 @@ public class NbtResistor extends Resistor implements INBTTReady {
     // the other INBTTReady sim parts; a missing/zero value (worlds saved before) falls back to high impedance
     // (the three users re-set R every tick anyway).
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        double r = nbt.getDouble(str + name + "R");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        double r = nbt.getDoubleOr(str + name + "R", 0.0);
         if (Double.isNaN(r) || r <= 0) highImpedance();
         else setR(r);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setDouble(str + name + "R", getR());
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putDouble(str + name + "R", getR());
     }
 }
