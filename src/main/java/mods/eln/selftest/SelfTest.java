@@ -88,6 +88,7 @@ public final class SelfTest implements SelfTestContext {
         mods.eln.selftest.cases.RecipeCases.addTo(c);
         mods.eln.selftest.cases.FailureCases.addTo(c);
         mods.eln.selftest.cases.SmokeCases.addTo(c);
+        mods.eln.selftest.cases.LogicTruthCases.addTo(c);
         return c;
     }
 
