@@ -1,7 +1,6 @@
 package mods.eln.client.render;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -30,18 +29,22 @@ public final class BurntRender {
 
     private static final Random rand = new Random();
 
-    /** Call right after the normal draw, with the same transform. */
+    /**
+     * Call right after the normal draw, with the same transform. Raw GL11 only, inside a push/popAttrib, like the
+     * rest of EA's drawing, so GlStateManager's cache stays true. Texture env and the active texture unit aren't
+     * covered by the pushed bits and are restored by hand.
+     */
     public static void overlay(Runnable draw) {
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_CURRENT_BIT
             | GL11.GL_LIGHTING_BIT);
         GL11.glPushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GL11.GL_DST_COLOR, GL11.GL_ZERO);
-        GlStateManager.depthFunc(GL11.GL_LEQUAL);
-        GlStateManager.depthMask(false);
-        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_ZERO);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+        GL11.glDepthMask(false);
+        GL13.glActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL13.glActiveTexture(OpenGlHelper.defaultTexUnit);
         GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL13.GL_COMBINE);
         GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_COMBINE_RGB, GL11.GL_REPLACE);
         GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_SOURCE0_RGB, GL13.GL_CONSTANT);
@@ -53,15 +56,9 @@ public final class BurntRender {
             draw.run();
         } finally {
             GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-            OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-            GlStateManager.enableTexture2D();
-            OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
-            GlStateManager.depthMask(true);
-            GlStateManager.depthFunc(GL11.GL_LEQUAL);
-            GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GlStateManager.disableBlend();
+            GL13.glActiveTexture(OpenGlHelper.defaultTexUnit);
             GL11.glPopMatrix();
-            GL11.glPopAttrib();
+            GL11.glPopAttrib(); // re-enables the lightmap texture, blend/depth state as before
         }
     }
 
