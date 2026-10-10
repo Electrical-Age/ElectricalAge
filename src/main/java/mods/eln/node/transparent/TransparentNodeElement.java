@@ -174,7 +174,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         node.sendPacketToAllClient(bos);
     }
 
-    public Container newContainer(Direction side, Player player) {
+    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
         return null;
     }
 

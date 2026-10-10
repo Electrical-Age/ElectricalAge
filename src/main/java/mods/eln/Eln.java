@@ -27,6 +27,10 @@ public class Eln {
 
     public static Simulator simulator;
 
+    /** Device batches ported from 1.12 (registry/batch), in the 1.12 order. */
+    public static final java.util.List<ElnContent> CONTENT = java.util.List.of(
+        new mods.eln.registry.batch.Wp9aContent());
+
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
     public static final byte packetNodeSingleSerialized = 15;
@@ -89,6 +93,9 @@ public class Eln {
     public static double solarPanelPowerFactor = 1.0;
     public static final double solarPanelBasePower = 65.0;
 
+    /** config general.noSymbols (1.12: device textures without electrical symbols) */
+    public static boolean noSymbols = false;
+
     /** config gameplay.explosion (1.12 meaning: the remaining real explosions; see Failure). */
     public static boolean explosionEnable = true;
 
@@ -114,6 +121,12 @@ public class Eln {
         return findItemStack(name, 1);
     }
 
+    /** Plain item descriptors by 1.12 id (1.12: Eln.sharedItem / sharedItemStackOne, items with damage sub-items). */
+    public static final mods.eln.node.DescriptorRegistry<mods.eln.generic.GenericItemUsingDamageDescriptor> sharedItem =
+        new mods.eln.node.DescriptorRegistry<>(mods.eln.generic.GenericItemUsingDamageDescriptor.class);
+    public static final mods.eln.node.DescriptorRegistry<mods.eln.generic.GenericItemUsingDamageDescriptor> sharedItemStackOne =
+        new mods.eln.node.DescriptorRegistry<>(mods.eln.generic.GenericItemUsingDamageDescriptor.class);
+
     /** Device descriptors by 1.12 id (1.12: Eln.sixNodeItem / transparentNodeItem). */
     public static final mods.eln.node.DescriptorRegistry<mods.eln.node.six.SixNodeDescriptor> sixNodeItem =
         new mods.eln.node.DescriptorRegistry<>(mods.eln.node.six.SixNodeDescriptor.class);
@@ -131,9 +144,11 @@ public class Eln {
             // item components are bound only once the server's registries are: ItemStacks can be made from here on
             mods.eln.registry.ElnRegistry.afterRegistration();
             simulator.init();
+            for (ElnContent c : CONTENT) c.serverAboutToStart();
         });
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, e -> {
             simulator.stop();
+            for (ElnContent c : CONTENT) c.serverStopped();
             nodeManager.clear();
             ghostManager.clear();
         });
@@ -141,6 +156,7 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
         obj.loadAllElnModels();
         mods.eln.registry.ElnDeviceRegistry.registerBatch1();
+        for (ElnContent c : CONTENT) c.preInit();
         mods.eln.registry.ElnRegistry.register(modBus);
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {

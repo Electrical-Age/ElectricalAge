@@ -87,6 +87,23 @@ public final class ElnRegistry {
             e.getValue().setParent(e.getValue().parentItem, e.getKey());
         for (Map.Entry<Integer, mods.eln.node.transparent.TransparentNodeDescriptor> e : Eln.transparentNodeItem.all().entrySet())
             e.getValue().setParent(e.getValue().parentItem, e.getKey());
+        for (var reg : List.of(Eln.sharedItem, Eln.sharedItemStackOne))
+            for (Map.Entry<Integer, mods.eln.generic.GenericItemUsingDamageDescriptor> e : reg.all().entrySet())
+                e.getValue().setParent(e.getValue().parentItem, e.getKey());
+    }
+
+    static void registerShared(mods.eln.node.DescriptorRegistry<mods.eln.generic.GenericItemUsingDamageDescriptor> reg, String legacy, int stack) {
+        for (Map.Entry<Integer, mods.eln.generic.GenericItemUsingDamageDescriptor> e : reg.all().entrySet()) {
+            int id = e.getKey();
+            mods.eln.generic.GenericItemUsingDamageDescriptor d = e.getValue();
+            ALL_ITEMS.add(ITEMS.registerItem(nameOf(legacy, id), p -> {
+                mods.eln.generic.ElnItem item = new mods.eln.generic.ElnItem(p, d);
+                d.parentItem = item;
+                d.parentItemDamage = id;
+                Eln.itemsByName.put(d.name, item);
+                return item;
+            }, p -> p.stacksTo(stack)));
+        }
     }
 
     public static void register(IEventBus modBus) {
@@ -119,6 +136,8 @@ public final class ElnRegistry {
                 return item;
             }));
         }
+        registerShared(Eln.sharedItem, "eln:shared_item", 64);
+        registerShared(Eln.sharedItemStackOne, "eln:shared_item_stack_one", 1);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> ALL_ITEMS.isEmpty() ? ItemStack.EMPTY : new ItemStack(ALL_ITEMS.get(0).get()))

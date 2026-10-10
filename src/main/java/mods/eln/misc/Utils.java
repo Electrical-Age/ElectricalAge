@@ -363,4 +363,16 @@ public class Utils {
         return world.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.SUN_ANGLE, net.minecraft.core.BlockPos.ZERO)
             * Math.PI / 180.0;
     }
+
+    /** The EA descriptor behind a stack (1.12: of a damage sub-item), else the Item itself; null for empty stacks. */
+    public static Object getItemObject(net.minecraft.world.item.ItemStack stack) {
+        if (isEmpty(stack)) return null;
+        net.minecraft.world.item.Item i = stack.getItem();
+        if (i instanceof mods.eln.generic.IDescriptorItem) return ((mods.eln.generic.IDescriptorItem) i).getEaDescriptor();
+        return i;
+    }
+
+    public static float[] getSixNodePinDistance(Obj3D.Obj3DPart obj) {
+        return new float[]{Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16)};
+    }
 }

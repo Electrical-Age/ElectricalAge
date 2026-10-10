@@ -534,7 +534,7 @@ public class SixNode extends Node {
         return sideElementList[side.getInt()].getInventory();
     }
 
-    public Container newContainer(Direction side, Player player) {
+    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
         if (sideElementList[side.getInt()] == null)
             return null;
         return sideElementList[side.getInt()].newContainer(side, player);

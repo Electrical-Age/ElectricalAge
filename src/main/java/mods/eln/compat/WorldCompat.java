@@ -37,6 +37,11 @@ public final class WorldCompat {
         return world.getBlockEntity(pos(x, y, z));
     }
 
+    /** Same as getTileEntity (26.x name). */
+    public static BlockEntity getBlockEntity(BlockGetter world, int x, int y, int z) {
+        return getTileEntity(world, x, y, z);
+    }
+
     public static boolean isAir(BlockGetter world, int x, int y, int z) {
         return world.getBlockState(pos(x, y, z)).isAir();
     }

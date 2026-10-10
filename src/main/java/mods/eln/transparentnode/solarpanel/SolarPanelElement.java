@@ -226,7 +226,7 @@ public class SolarPanelElement extends TransparentNodeElement {
     }
 
     @Override
-    public Container newContainer(Direction side, Player player) {
+    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
         return null; // SolarPanelContainer: menus come with P4
     }
 

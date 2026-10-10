@@ -1,0 +1,278 @@
+package mods.eln.sixnode.batterycharger;
+
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
+import mods.eln.item.MachineBoosterDescriptor;
+import mods.eln.item.electricalinterface.IItemEnergyBattery;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.NodeBase;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.IProcess;
+import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class BatteryChargerElement extends SixNodeElement {
+
+    public BatteryChargerDescriptor descriptor;
+
+    public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
+    public BatteryChargerSlowProcess slowProcess = new BatteryChargerSlowProcess();
+    Resistor powerResistor = new Resistor(powerLoad, null);
+
+    AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(5, 64, this)))
+        .acceptIfEmpty(0, IItemEnergyBattery.class)
+        .acceptIfEmpty(1, IItemEnergyBattery.class)
+        .acceptIfEmpty(2, IItemEnergyBattery.class)
+        .acceptIfEmpty(3, IItemEnergyBattery.class)
+        .acceptIfIncrement(4, 5, MachineBoosterDescriptor.class);
+
+    VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
+    ResistorPowerWatchdog powerWatchDog = new ResistorPowerWatchdog();
+
+    public String channel = "Default channel";
+
+    boolean invChanged = false;
+
+    boolean powerOn = false;
+
+    public static final byte toogleCharge = 1;
+
+    byte charged, presence;
+
+    @Override
+    public Container getInventory() {
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
+    }
+
+    @Override
+    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
+        return null; // BatteryChargerContainer: menus come with P4
+    }
+
+    public BatteryChargerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+        this.descriptor = (BatteryChargerDescriptor) descriptor;
+
+        electricalLoadList.add(powerLoad);
+        electricalComponentList.add(powerResistor);
+        slowProcessList.add(slowProcess);
+
+        Failure exp = new Failure(this).electronics();
+        slowProcessList.add(voltageWatchDog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
+        //slowProcessList.add(powerWatchDog.set(powerResistor).setPmax(this.descriptor.nominalPower * 3).set(exp));
+    }
+
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (front == lrdu) return powerLoad;
+        return null;
+    }
+
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
+
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (front == lrdu) return NodeBase.maskElectricalPower;
+        return 0;
+    }
+
+    @Override
+    public String multiMeterString() {
+        return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
+    }
+
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Charge Current"), Utils.plotAmpere("", powerLoad.getCurrent()));
+        if (Eln.wailaEasyMode) {
+            info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
+            info.put(I18N.tr("Power"), Utils.plotPower("", powerLoad.getI() * powerLoad.getU()));
+        }
+        return info;
+    }
+
+    @Override
+    public String thermoMeterString() {
+        return null;
+    }
+
+    @Override
+    public void initialize() {
+        descriptor.applyTo(powerLoad);
+    }
+
+    @Override
+    protected void inventoryChanged() {
+        super.inventoryChanged();
+        //needPublish();
+        invChanged = true;
+    }
+
+    @Override
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (onBlockActivatedRotate(entityPlayer)) {
+            return true;
+        } else {
+            return inventory.take(entityPlayer.getMainHandItem(), this, false, true);
+        }
+    }
+
+    @Override
+    public void writeToNBT(CompoundTag nbt) {
+        super.writeToNBT(nbt);
+        nbt.putBoolean("powerOn", powerOn);
+        nbt.putDouble("energyCounter", slowProcess.energyCounter);
+    }
+
+    @Override
+    public void readFromNBT(CompoundTag nbt) {
+        super.readFromNBT(nbt);
+        powerOn = nbt.getBooleanOr("powerOn", false);
+        slowProcess.energyCounter = nbt.getDoubleOr("energyCounter", 0.0);
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
+
+        try {
+            switch (stream.readByte()) {
+                case toogleCharge:
+                    powerOn = !powerOn;
+                    needPublish();
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Read-only, for the selftest (1.12 port). */
+    public boolean isPowerOn() {
+        return powerOn;
+    }
+
+    /** Energy taken from the network not yet given to batteries [J] (read-only, for the selftest). */
+    public double getEnergyBuffer() {
+        return slowProcess.energyCounter;
+    }
+
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
+
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeBoolean(powerOn);
+            stream.writeFloat((float) powerLoad.getU());
+            Utils.serialiseItemStack(stream, getInventory().getItem(0));
+            Utils.serialiseItemStack(stream, getInventory().getItem(1));
+            Utils.serialiseItemStack(stream, getInventory().getItem(2));
+            Utils.serialiseItemStack(stream, getInventory().getItem(3));
+
+            stream.writeByte(charged);
+            stream.writeByte(presence);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    class BatteryChargerSlowProcess implements IProcess {
+        double energyCounter = 0;
+        double timeout = 0;
+
+        @Override
+        public void process(double time) {
+            timeout -= time;
+            if (timeout > 0) return;
+            timeout = 1;
+            time = 1;
+
+            byte oldCharged = charged;
+            charged = 0;
+            presence = 0;
+            if (!powerOn) {
+                descriptor.setRp(powerResistor, false);
+            } else {
+                ItemStack booster = (getInventory().getItem(BatteryChargerContainer.boosterSlotId));
+                double boost = 1.0;
+                double eff = 1.0;
+                if (!Utils.isEmpty(booster)) {
+                    boost = Math.pow(1.25, booster.getCount());
+                    eff = Math.pow(0.9, booster.getCount());
+                }
+
+                energyCounter += powerResistor.getP() * time * eff;
+
+                for (int idx = 0; idx < 4; idx++) {
+                    ItemStack stack = getInventory().getItem(idx);
+                    Object o = Utils.getItemObject(stack);
+                    if (o instanceof IItemEnergyBattery) {
+                        IItemEnergyBattery b = (IItemEnergyBattery) o;
+                        double e = Math.min(Math.min(energyCounter, b.getChargePower(stack) * time * boost), b.getEnergyMax(stack) - b.getEnergy(stack));
+                        b.setEnergy(stack, b.getEnergy(stack) + e);
+                        energyCounter -= e;
+                    }
+                }
+
+                if (energyCounter < descriptor.nominalPower * time * 2 * boost) {
+                    //double target = descriptor.nominalPower * time * 2;
+                    double power = Math.min(descriptor.nominalPower * boost, (descriptor.nominalPower * time * 2 * boost - energyCounter) / time);
+                    powerResistor.setR(Math.max(powerLoad.getU() * powerLoad.getU() / power, descriptor.Rp / boost));
+                } else {
+                    descriptor.setRp(powerResistor, false);
+                }
+            }
+            for (int idx = 0; idx < 4; idx++) {
+                ItemStack stack = getInventory().getItem(idx);
+                Object o = Utils.getItemObject(stack);
+                if (o instanceof IItemEnergyBattery) {
+                    IItemEnergyBattery b = (IItemEnergyBattery) o;
+                    if (b.getEnergy(stack) == b.getEnergyMax(stack)) {
+                        charged += 1 << idx;
+                    }
+                    presence += 1 << idx;
+                }
+            }
+
+            if (charged != oldCharged)
+                needPublish();
+            if (invChanged) {
+                invChanged = false;
+                needPublish();
+            }
+        }
+    }
+}

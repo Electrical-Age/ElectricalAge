@@ -31,6 +31,11 @@ public final class DescriptorRegistry<D> {
         add(legacyDamage, descriptor);
     }
 
+    /** 1.12 SharedItem.addElement: same as addDescriptor. */
+    public void addElement(int legacyDamage, D descriptor) {
+        add(legacyDamage, descriptor);
+    }
+
     /** 1.12 addWithoutRegistry: a hidden descriptor (no creative tab entry); still an item on 26.x. */
     public void addWithoutRegistry(int legacyDamage, D descriptor) {
         add(legacyDamage, descriptor);

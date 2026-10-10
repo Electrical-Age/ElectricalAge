@@ -33,6 +33,7 @@ public final class ElnGameTests {
         java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase()));
         l.addAll(mods.eln.gametest.cases.Batch1Cases.cases());
         l.addAll(mods.eln.gametest.cases.SolarCases.cases());
+        mods.eln.gametest.cases.Wp9aCases.addTo(l);
         return l;
     }
 
@@ -56,7 +57,7 @@ public final class ElnGameTests {
         }
         // the stone floor (y = 0) of the 1.12 selftest rows; laid here, the structure only gives the empty box
         for (int x = 0; x < c.width(); x++)
-            for (int z = 0; z < c.depth(); z++) ctx.floor(ctx.at(x, 0, z));
+            for (int z = 0; z < c.floorDepth(); z++) ctx.floor(ctx.at(x, 0, z));
         try {
             c.build(ctx);
         } catch (RuntimeException e) {

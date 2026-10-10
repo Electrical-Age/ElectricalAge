@@ -91,7 +91,8 @@ final class GoldenCase implements TestCase {
     static boolean same(JsonElement a, JsonElement b) {
         if (a.isJsonPrimitive() && b.isJsonPrimitive() && a.getAsJsonPrimitive().isNumber() && b.getAsJsonPrimitive().isNumber()) {
             double x = a.getAsDouble(), y = b.getAsDouble();
-            return x == y || Math.abs(x - y) <= 1e-9 * Math.max(Math.abs(x), Math.abs(y));
+            // float fields went through float -> JSON -> double in 1.12: compare at float precision
+            return x == y || Math.abs(x - y) <= 1e-6 * Math.max(Math.abs(x), Math.abs(y));
         }
         return a.equals(b);
     }

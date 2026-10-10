@@ -196,7 +196,7 @@ public class TransparentNode extends Node {
         return element.getInventory();
     }
 
-    public Container newContainer(Direction side, Player player) {
+    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(Direction side, Player player) {
         if (element == null) return null;
         return element.newContainer(side, player);
     }

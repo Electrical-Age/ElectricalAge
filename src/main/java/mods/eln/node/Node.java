@@ -62,7 +62,7 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        net.minecraft.world.level.block.entity.BlockEntity e = WorldCompat.getTileEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        net.minecraft.world.level.block.entity.BlockEntity e = WorldCompat.getBlockEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
         return e instanceof NodeBlockEntity ? (NodeBlockEntity) e : null;
     }
 
