@@ -647,9 +647,13 @@ public class Utils {
             e.setPos(x, y, z);
     }
 
-    /** 1.12 `block == Blocks.AIR`: on 26.x also cave_air and void_air. */
+    /**
+     * 1.12 `block == Blocks.AIR` / isAirBlock: on 26.x also cave_air and void_air, and EA's light block (1.12
+     * LightBlock was Material.AIR, so lamps and flashlights saw through it).
+     */
     public static boolean isAirBlock(net.minecraft.world.level.block.Block block) {
-        return block != null && block.defaultBlockState().isAir();
+        return block != null && (block.defaultBlockState().isAir()
+            || (mods.eln.registry.ElnDeviceRegistry.lightBlock != null && block == mods.eln.registry.ElnDeviceRegistry.lightBlock));
     }
 
     public static final double voltageMageFactor = 0.1;

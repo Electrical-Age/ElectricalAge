@@ -84,7 +84,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp10aContent(),
         new mods.eln.registry.batch.Wp10bContent(),
         new mods.eln.registry.batch.Wp11Content(),
-        new mods.eln.registry.batch.Wp12aContent());
+        new mods.eln.registry.batch.Wp12aContent(),
+        new mods.eln.registry.batch.Wp12bContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;

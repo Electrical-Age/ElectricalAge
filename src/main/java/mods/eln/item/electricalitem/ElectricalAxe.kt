@@ -6,14 +6,13 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.misc.Utils
 import mods.eln.sim.IProcess
 import mods.eln.wiki.Data
-import net.minecraft.block.Block
-import net.minecraft.block.material.Material
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.util.math.BlockPos
-import net.minecraft.world.World
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.Level
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -27,20 +26,21 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Cuts down trees. Right-click to make it act like a regular axe."))
     }
 
     override fun getStrVsBlock(stack: ItemStack, block: Block?): Float {
         return when {
-            block != null && block.defaultState.material.let { it === Material.WOOD || it === Material.PLANTS || it === Material.VINE } -> getStrength(stack)
+            // 1.12 materials WOOD, PLANTS, VINE -> 26.x: axe-mineable blocks, leaves, vines
+            block != null && block.defaultBlockState().let { it.`is`(net.minecraft.tags.BlockTags.MINEABLE_WITH_AXE) || it.`is`(net.minecraft.tags.BlockTags.LEAVES) || it.`is`(net.minecraft.world.level.block.Blocks.VINE) } -> getStrength(stack)
             else -> super.getStrVsBlock(stack, block)
         }
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer?): ItemStack {
-        if (!w.isRemote) {
+    override fun onItemRightClick(s: ItemStack, w: Level, p: Player?): ItemStack {
+        if (!w.isClientSide()) {
             setCapitation(p, s, !getCapitation(s))
         }
         return s
@@ -48,21 +48,21 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
 
     private fun getCapitation(stack: ItemStack): Boolean {
         val nbt = getNbt(stack)
-        if (!nbt.hasKey("capitation")) {
-            nbt.setBoolean("capitation", true)
+        if (!nbt.contains("capitation")) {
+            editNbt(stack) { it.putBoolean("capitation", true) }
         }
-        return nbt.getBoolean("capitation")
+        return nbt.getBooleanOr("capitation", true)
     }
 
-    private fun setCapitation(p: EntityPlayer?, stack: ItemStack, capitation: Boolean) {
-        getNbt(stack).setBoolean("capitation", capitation)
+    private fun setCapitation(p: Player?, stack: ItemStack, capitation: Boolean) {
+        editNbt(stack) { it.putBoolean("capitation", capitation) }
         if (p != null) {
             Utils.sendMessage(p, "Set treecapitation to $capitation")
         }
     }
 
-    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: EntityLivingBase): Boolean {
-        return if (entity is EntityPlayer && getCapitation(stack)) {
+    override fun onBlockDestroyed(stack: ItemStack, w: Level, block: Block, x: Int, y: Int, z: Int, entity: LivingEntity): Boolean {
+        return if (entity is Player && getCapitation(stack)) {
             TreeCapitation.addBlockSwapper(
                 world = w,
                 player = entity,
@@ -141,14 +141,14 @@ object TreeCapitation : IProcess {
      * documentation).
      * @return The created block swapper.
      */
-    fun addBlockSwapper(world: World, player: EntityPlayer, tool: ElectricalTool, origCoords: BlockPos, leaves: Boolean, stack: ItemStack) {
+    fun addBlockSwapper(world: Level, player: Player, tool: ElectricalTool, origCoords: BlockPos, leaves: Boolean, stack: ItemStack) {
         val swapper = BlockSwapper(world, player, tool, origCoords, BLOCK_RANGE, leaves, stack)
 
         // Block swapper registration should only occur on the server
-        if (world.isRemote)
+        if (world.isClientSide())
             return
 
-        val dim = world.provider.dimension
+        val dim = mods.eln.misc.Dimensions.id(world)
         blockSwappers[dim] = blockSwappers[dim]?.plus(swapper) ?: listOf(swapper)
     }
 
@@ -182,11 +182,11 @@ object TreeCapitation : IProcess {
         /**
          * The world the block swapper is doing the swapping in.
          */
-        private val world: World,
+        private val world: Level,
         /**
          * The player the swapper is swapping for.
          */
-        private val player: EntityPlayer,
+        private val player: Player,
         /**
          * The Terra Truncator which created this swapper.
          */
@@ -277,8 +277,8 @@ object TreeCapitation : IProcess {
                     val adjState = world.getBlockState(adj)
                     val block = adjState.block
 
-                    val isWood = block.isWood(world, adj)
-                    val isLeaf = block.isLeaves(adjState, world, adj)
+                    val isWood = adjState.`is`(net.minecraft.tags.BlockTags.LOGS)
+                    val isLeaf = adjState.`is`(net.minecraft.tags.BlockTags.LEAVES)
 
                     // If it's not wood or a leaf, we aren't interested.
                     if (!isWood && !isLeaf)
@@ -311,7 +311,7 @@ object TreeCapitation : IProcess {
                         if (dx == 0 && dy == 0 && dz == 0)
                             continue
 
-                        coords.add(original.add(dx, dy, dz))
+                        coords.add(original.offset(dx, dy, dz))
                     }
 
             return coords
@@ -366,30 +366,31 @@ object TreeCapitation : IProcess {
 /**
  * The bits below, however, are from ToolCommons.java. Mostly. Maybe about half, by now.
  */
-fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
-    if (world.isRemote || !WorldCompat.blockExists(world, x, y, z))
+fun removeBlockWithDrops(player: Player, tool: ElectricalTool, stack: ItemStack, world: Level, x: Int, y: Int, z: Int) {
+    if (world.isClientSide() || !WorldCompat.blockExists(world, x, y, z))
         return
 
     val pos = BlockPos(x, y, z)
     val state = world.getBlockState(pos)
     val block = state.block
 
-    if (!block.isAir(state, world, pos) && state.getPlayerRelativeBlockHardness(player, world, pos) > 0) {
-        if (!block.canHarvestBlock(world, pos, player))
+    if (!state.isAir && state.getDestroyProgress(player, world, pos) > 0) {
+        if (!state.canHarvestBlock(world, pos, player))
             return
 
-        if (!player.capabilities.isCreativeMode) {
+        if (!player.isCreative) {
             val energy = tool.getEnergy(stack)
             tool.subtractEnergyForBlockBreak(stack, block)
             val newEnergy = tool.getEnergy(stack)
             if (newEnergy > 0 && newEnergy < energy) {
-                val localState = world.getBlockState(pos)
-                val te = world.getTileEntity(pos)
-                block.onBlockHarvested(world, pos, localState, player)
-
-                if (block.removedByPlayer(localState, world, pos, player, true)) {
-                    block.onPlayerDestroy(world, pos, localState)
-                    block.harvestBlock(world, player, pos, localState, te, stack)
+                // 1.12 onBlockHarvested / removedByPlayer / onPlayerDestroy / harvestBlock; not gameMode.destroyBlock,
+                // which would call the tool's mineBlock again (the drill's 3x3 would cascade)
+                val te = world.getBlockEntity(pos)
+                val localState = block.playerWillDestroy(world, pos, world.getBlockState(pos), player)
+                if (localState.onDestroyedByPlayer(world, pos, player, stack, true, world.getFluidState(pos))) {
+                    block.destroy(world, pos, localState)
+                    if (world is net.minecraft.server.level.ServerLevel && player is net.minecraft.server.level.ServerPlayer)
+                        block.playerDestroy(world, player, pos, localState, te, stack)
                 }
             }
         } else {

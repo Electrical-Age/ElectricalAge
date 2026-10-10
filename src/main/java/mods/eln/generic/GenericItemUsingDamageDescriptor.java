@@ -118,6 +118,13 @@ public class GenericItemUsingDamageDescriptor {
         return nbt;
     }
 
+    /** Change the stack's EA tag (created from getDefaultNBT() when missing) and store it back (see ItemNbt.edit). */
+    protected void editNbt(ItemStack stack, java.util.function.Consumer<CompoundTag> edit) {
+        CompoundTag nbt = getNbt(stack);
+        edit.accept(nbt);
+        ItemNbt.set(stack, nbt);
+    }
+
     public float getStrVsBlock(ItemStack stack, Block block) {
         return 0.2f;
     }

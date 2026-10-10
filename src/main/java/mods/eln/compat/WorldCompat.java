@@ -42,8 +42,9 @@ public final class WorldCompat {
         return getTileEntity(world, x, y, z);
     }
 
+    /** 1.12 isAirBlock: air, cave/void air and EA's light block (see Utils.isAirBlock). */
     public static boolean isAir(BlockGetter world, int x, int y, int z) {
-        return world.getBlockState(pos(x, y, z)).isAir();
+        return mods.eln.misc.Utils.isAirBlock(world.getBlockState(pos(x, y, z)).getBlock());
     }
 
     /** 1.7.10 blockExists: the chunk is loaded. */

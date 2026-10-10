@@ -19,9 +19,20 @@ import net.minecraft.world.level.Level;
 public class ElnItem extends Item implements IDescriptorItem {
     public final GenericItemUsingDamageDescriptor descriptor;
 
+    /** The descriptor is a mining tool (overrides getStrVsBlock: electrical pickaxe / axe). */
+    private final boolean tool;
+
     public ElnItem(Properties properties, GenericItemUsingDamageDescriptor descriptor) {
         super(properties);
         this.descriptor = descriptor;
+        boolean t;
+        try {
+            t = descriptor.getClass().getMethod("getStrVsBlock", ItemStack.class, net.minecraft.world.level.block.Block.class)
+                .getDeclaringClass() != GenericItemUsingDamageDescriptor.class;
+        } catch (NoSuchMethodException e) {
+            t = false;
+        }
+        tool = t;
     }
 
     @Override
@@ -54,5 +65,35 @@ public class ElnItem extends Item implements IDescriptorItem {
     @Override
     public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
         descriptor.onUpdate(stack, level, entity, slot == null ? -1 : slot.getIndex(), slot == EquipmentSlot.MAINHAND);
+    }
+
+    // ---- mining (1.12 GenericItemUsingDamage). 1.12 gave every EA item dig speed 0.2 and harvest rights on every
+    // block; 26.x: only the tools (descriptors that override getStrVsBlock) do, other EA items mine like a hand. ----
+
+    @Override
+    public float getDestroySpeed(ItemStack stack, net.minecraft.world.level.block.state.BlockState state) {
+        return tool ? descriptor.getStrVsBlock(stack, state.getBlock()) : super.getDestroySpeed(stack, state);
+    }
+
+    @Override
+    public boolean isCorrectToolForDrops(ItemStack stack, net.minecraft.world.level.block.state.BlockState state) {
+        return tool || super.isCorrectToolForDrops(stack, state);
+    }
+
+    @Override
+    public boolean mineBlock(ItemStack stack, Level level, net.minecraft.world.level.block.state.BlockState state,
+                             net.minecraft.core.BlockPos pos, net.minecraft.world.entity.LivingEntity owner) {
+        if (level.isClientSide()) return false;
+        return descriptor.onBlockDestroyed(stack, level, state.getBlock(), pos.getX(), pos.getY(), pos.getZ(), owner);
+    }
+
+    @Override
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
+        return descriptor.onDroppedByPlayer(item, player);
+    }
+
+    @Override
+    public boolean onEntitySwing(ItemStack stack, net.minecraft.world.entity.LivingEntity entity, InteractionHand hand) {
+        return descriptor.onEntitySwing(entity, stack);
     }
 }

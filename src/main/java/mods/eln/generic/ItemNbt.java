@@ -30,4 +30,15 @@ public final class ItemNbt {
         if (tag == null) stack.remove(DataComponents.CUSTOM_DATA);
         else stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
+
+    /**
+     * Change the stack's EA tag: 1.12 code mutated getTagCompound() in place; on 26.x the tag is a copy of the
+     * immutable CUSTOM_DATA, so edits must be written back. Starts from an empty tag when the stack has none.
+     */
+    public static void edit(ItemStack stack, java.util.function.Consumer<CompoundTag> edit) {
+        CompoundTag tag = get(stack);
+        if (tag == null) tag = new CompoundTag();
+        edit.accept(tag);
+        set(stack, tag);
+    }
 }

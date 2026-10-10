@@ -5,13 +5,12 @@ import mods.eln.compat.WorldCompat
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.sixnode.lampsocket.LightBlockEntity
-import net.minecraft.entity.Entity
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
-import net.minecraft.potion.PotionEffect
-import net.minecraft.util.math.MathHelper
-import net.minecraft.world.World
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.item.ItemStack
+import net.minecraft.util.Mth
+import net.minecraft.world.level.Level
 
 abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
 
@@ -21,18 +20,18 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
 
     internal abstract fun getLight(stack: ItemStack): Int
 
-    override fun onUpdate(stack: ItemStack, world: World, entity: Entity, par4: Int, par5: Boolean) {
-        if (world.isRemote) return
+    override fun onUpdate(stack: ItemStack, world: Level, entity: Entity, par4: Int, par5: Boolean) {
+        if (world.isClientSide()) return
         if (getLightState(stack) == 0) return
         val light = getLight(stack)
         if (light == 0) return
 
         for (yOffset in 0..1) {
-            var x = entity.posX
-            var y = entity.posY + 1.62 - yOffset
-            var z = entity.posZ
+            var x = entity.getX()
+            var y = entity.getY() + 1.62 - yOffset
+            var z = entity.getZ()
 
-            val v = entity.lookVec.scale(0.25) // Vec3d is immutable in 1.12
+            val v = entity.lookAngle.scale(0.25) // Vec3d is immutable in 1.12
 
             val range = getRange(stack) + 1
             var rCount = 0
@@ -42,9 +41,9 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 y += v.y
                 z += v.z
 
-                val fx = MathHelper.floor(x)
-                val fy = MathHelper.floor(y)
-                val fz = MathHelper.floor(z)
+                val fx = Mth.floor(x)
+                val fy = Mth.floor(y)
+                val fz = Mth.floor(z)
                 if (!WorldCompat.isAir(world, fx, fy, fz)) {
                     x -= v.x
                     y -= v.y
@@ -56,9 +55,9 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
 
             while (rCount > 0) {
                 var stride = 1
-                val fx = MathHelper.floor(x)
-                val fy = MathHelper.floor(y)
-                val fz = MathHelper.floor(z)
+                val fx = Mth.floor(x)
+                val fy = Mth.floor(y)
+                val fz = Mth.floor(z)
                 if (WorldCompat.isAir(world, fx, fy, fz)) {
                     LightBlockEntity.addLight(world, fx, fy, fz, light, 5)
                     stride = 3

@@ -1,11 +1,10 @@
 package mods.eln.item.electricalinterface;
 
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;
@@ -89,15 +88,19 @@ public class ItemEnergyInventoryProcess implements IProcess {
         energyUpdateTimout += energyUpdatePeriod;
         time = energyUpdatePeriod;
 
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server == null) return;
 
         ArrayList<Element> list = new ArrayList<Element>();
 
         for (Object obj : server.getPlayerList().getPlayers()) {
-            EntityPlayerMP player = (EntityPlayerMP) obj;
+            ServerPlayer player = (ServerPlayer) obj;
             list.clear();
 
-            for (ItemStack stack : player.inventory.armorInventory) {
+            for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[]{
+                net.minecraft.world.entity.EquipmentSlot.FEET, net.minecraft.world.entity.EquipmentSlot.LEGS,
+                net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.HEAD}) {
+                ItemStack stack = player.getItemBySlot(slot); // 1.12 armorInventory (feet..head)
 
                 Object o = Utils.getItemObject(stack);
 
@@ -108,7 +111,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
                 }
             }
 
-            for (ItemStack stack : player.inventory.mainInventory) {
+            for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
                 Object o = Utils.getItemObject(stack);
 
                 if (o instanceof IItemEnergyBattery) {
@@ -122,7 +125,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
                 e.i.electricalItemUpdate(e.stack, energyUpdatePeriod);
             }
 
-            if (Eln.saveConfig.infinitePortableBattery) {
+            if (mods.eln.server.SaveConfig.instance.infinitePortableBattery) {
                 for (Element e : list) {
                     double chargePower = e.i.getChargePower(e.stack);
                     double energy = Math.min(e.i.getEnergyMax(e.stack), e.i.getEnergy(e.stack) + e.i.getChargePower(e.stack) * time);

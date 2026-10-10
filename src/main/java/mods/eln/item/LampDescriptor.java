@@ -92,7 +92,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
     public void setLifeInTag(ItemStack stack, double life) {
         if (!mods.eln.generic.ItemNbt.has(stack))
             mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
-        mods.eln.generic.ItemNbt.get(stack).putDouble("life", life);
+        mods.eln.generic.ItemNbt.edit(stack, t -> t.putDouble("life", life));
     }
 
     @Override
