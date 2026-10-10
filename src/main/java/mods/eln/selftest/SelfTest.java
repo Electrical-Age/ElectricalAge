@@ -146,6 +146,10 @@ public final class SelfTest implements SelfTestContext {
             }
             return;
         }
+        if (args.length >= 2 && args[1].equalsIgnoreCase("recipes")) {
+            RecipeDump.command(sender);
+            return;
+        }
         if (args.length >= 2 && args[1].equalsIgnoreCase("inventory")) {
             Inventory.command(sender);
             return;
@@ -154,6 +158,7 @@ public final class SelfTest implements SelfTestContext {
             say(sender, "/eln selftest [ticks] [dim x y z] : run (default 40 ticks, 24 blocks above world spawn in dim 0)");
             say(sender, "/eln selftest keep [ticks] [dim x y z] : same, but leave the circuit in place (prints its position)");
             say(sender, "/eln selftest verify dim x y z [ticks] : after a restart, re-measure a kept circuit, then clean up");
+            say(sender, "/eln selftest recipes : write every EA recipe to eln-recipes.json");
             say(sender, "/eln selftest inventory : write every EA block/item/descriptor to eln-inventory.json");
             say(sender, "/eln selftest report : print the last run's results (also in the server log, logger eln-selftest)");
             return;
