@@ -45,9 +45,15 @@ public class Utils {
      * Same item, or both in a common tag (1.12: same item + meta, or a shared ore dictionary name). Without damage
      * metadata on 26.x, item identity replaces item + meta.
      */
+    /**
+     * 1.12: the same item, or sharing an ore dictionary name. 26.x: the same item, or sharing a specific c: convention
+     * tag (c:group/material, the ore dictionary's successor). Broad tags (c:ingots, minecraft:logs...) don't count:
+     * every ingot would be "the same" as every other.
+     */
     public static boolean areSame(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.ItemStack output) {
+        if (isEmpty(stack) || isEmpty(output)) return false;
         if (stack.getItem() == output.getItem()) return true;
-        return stack.typeHolder().tags().anyMatch(output::is);
+        return stack.typeHolder().tags().anyMatch(t -> t.location().getNamespace().equals("c") && t.location().getPath().contains("/") && output.is(t));
     }
 
     public static void sendPacketToClient(java.io.ByteArrayOutputStream bos, net.minecraft.server.level.ServerPlayer player) {

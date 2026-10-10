@@ -65,6 +65,9 @@ public class Eln {
     /** 1.12 config balancing.autominerRange (10): maximum horizontal mining distance. */
     public static int autominerRange = 10;
 
+    /** 1.12 config balancing.platesPerIngot (1). */
+    public static int plateConversionRatio = 1;
+
     /** 1.12 config entity.replicatorPop (true) and replicatorPopWhenThunderPerSecond (1/120). */
     public static boolean replicatorPop = true;
     public static double replicatorPopPerSecondPerPlayer = 1.0 / 120;
@@ -223,6 +226,7 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(ServerAboutToStartEvent.class, e -> {
             // item components are bound only once the server's registries are: ItemStacks can be made from here on
             mods.eln.registry.ElnRegistry.afterRegistration();
+            mods.eln.registry.ElnMachineRecipes.registerAll();
             simulator.init();
             simulator.addSlowProcess(wind = new mods.eln.misc.WindProcess());
             for (ElnContent c : CONTENT) c.serverAboutToStart();

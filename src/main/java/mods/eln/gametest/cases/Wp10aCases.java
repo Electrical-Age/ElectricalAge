@@ -81,6 +81,7 @@ public final class Wp10aCases {
         cases.add(new EggIncubatorCase());
         cases.add(new FurnaceCase());
         cases.add(new MachinesCase());
+        cases.add(new MaceratorProcessCase());
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
@@ -306,8 +307,46 @@ public final class Wp10aCases {
             ctx.check("wp10a machines placed", ok == MACHINES.length, ok + "/" + MACHINES.length + (s.length() > 0 ? ", wrong:" + s : ""));
             ElectricalLoad load = field(machines[0], "electricalLoad");
             Resistor res = field(machines[0], "electricalResistor");
-            ctx.checkValue("wp10a idle macerator node voltage [V] (no recipes until WP15, resistor open)", load.getU(), U);
+            ctx.checkValue("wp10a idle macerator node voltage [V] (empty input: resistor open)", load.getU(), U);
             ctx.check("wp10a idle macerator draws no power", Math.abs(res.getP()) < 0.01, String.format("P = %.6f W", res.getP()));
+        }
+    }
+
+    /**
+     * 50V macerator (200 W) fed at 50 V with a vanilla copper ingot (26.x port, P5 step 4: the machine recipes run):
+     * the 1.12 recipe is EA Copper Ingot -> 1 Copper Dust for 0.5 * 4000 J, and its input matches c:ingots/copper as
+     * 1.12 matched oreDictionary ingotCopper. Expected after 260 ticks (13 s; 2000 J at up to 200 W takes >= 10 s):
+     * input slot empty, one Copper Dust in the output slot.
+     */
+    static final class MaceratorProcessCase implements TestCase {
+        ElectricalMachineElement macerator;
+
+        public String name() {
+            return "wp10a macerator processes copper";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return 260;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            macerator = (ElectricalMachineElement) l.device(MACHINES[0], 2, 1);
+            l.feed(ctx.at(2, 1, 1), macerator.front.left());
+            macerator.getInventory().setItem(macerator.inSlotId, new ItemStack(Items.COPPER_INGOT));
+            macerator.getInventory().setChanged();
+        }
+
+        public void measure(TestContext ctx) {
+            ItemStack in = macerator.getInventory().getItem(macerator.inSlotId);
+            ItemStack out = macerator.getInventory().getItem(macerator.outSlotId);
+            ItemStack dust = Eln.findItemStack("Copper Dust");
+            ctx.check("macerator: vanilla copper ingot (c:ingots/copper) -> 1 EA Copper Dust", in.isEmpty()
+                && out.getItem() == dust.getItem() && out.getCount() == 1, "in " + in + ", out " + out);
         }
     }
 

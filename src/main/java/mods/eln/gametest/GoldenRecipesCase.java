@@ -264,5 +264,40 @@ final class GoldenRecipesCase implements TestCase {
         }
         ctx.check("golden recipes: smelting as 1.12 (first call per input)", smeltFail.isEmpty(),
             smelts + " ok" + (smeltFail.isEmpty() ? "" : ", failed: " + smeltFail));
+
+        // machine lists (runtime, ElnMachineRecipes)
+        Map<String, mods.eln.misc.RecipesList> lists = Map.of("macerator", mods.eln.Eln.maceratorRecipes,
+            "compressor", mods.eln.Eln.compressorRecipes, "plateMachine", mods.eln.Eln.plateMachineRecipes,
+            "magnetizer", mods.eln.Eln.magnetiserRecipes);
+        for (Map.Entry<String, mods.eln.misc.RecipesList> l : lists.entrySet()) {
+            List<String> fail = new ArrayList<>();
+            int ok = 0, modOres = 0;
+            for (JsonElement e : golden.getAsJsonArray(l.getKey())) {
+                JsonObject g = e.getAsJsonObject();
+                JsonObject inJ = g.getAsJsonObject("input");
+                Item in = map(inJ, unknown);
+                if (in == null) {
+                    modOres++;
+                    continue;
+                }
+                int inCount = inJ.has("count") ? inJ.get("count").getAsInt() : 1;
+                mods.eln.misc.Recipe r = l.getValue().getRecipe(new ItemStack(in, 64));
+                boolean good = r != null && r.input.getCount() == inCount && Math.abs(r.energy - g.get("energy").getAsDouble()) < 1e-6;
+                if (good) {
+                    JsonArray outs = g.getAsJsonArray("output");
+                    good = outs.size() == r.output.length;
+                    for (int k = 0; good && k < outs.size(); k++) {
+                        JsonObject o = outs.get(k).getAsJsonObject();
+                        Item oi = map(o, unknown);
+                        int oc = o.has("count") ? o.get("count").getAsInt() : 1;
+                        good = r.output[k].getItem() == oi && r.output[k].getCount() == oc;
+                    }
+                }
+                if (good) ok++;
+                else fail.add(inJ.get("name").getAsString() + (r == null ? " (no recipe)" : ""));
+            }
+            ctx.check("golden recipes: " + l.getKey() + " list as 1.12", fail.isEmpty(),
+                ok + " ok, " + modOres + " from other mods' ores (not in the test server)" + (fail.isEmpty() ? "" : ", failed: " + fail));
+        }
     }
 }
