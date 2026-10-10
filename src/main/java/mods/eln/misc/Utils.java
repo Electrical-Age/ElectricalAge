@@ -504,4 +504,87 @@ public class Utils {
     public static String readMapFile(String name) throws java.io.IOException {
         return new String(java.nio.file.Files.readAllBytes(getMapFile(name).toPath()), java.nio.charset.StandardCharsets.UTF_8);
     }
+
+    /** Smelting result of a single input item (1.12 FurnaceRecipes.getSmeltingResult); EMPTY without a server/recipe. */
+    public static net.minecraft.world.item.ItemStack smeltResult(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack input) {
+        if (isEmpty(input) || !(level instanceof net.minecraft.server.level.ServerLevel sl)) return net.minecraft.world.item.ItemStack.EMPTY;
+        net.minecraft.world.item.crafting.SingleRecipeInput in = new net.minecraft.world.item.crafting.SingleRecipeInput(input);
+        return sl.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.SMELTING, in, sl)
+            .map(r -> r.value().assemble(in))
+            .orElse(net.minecraft.world.item.ItemStack.EMPTY);
+    }
+
+    /** Per-slot limit: the container's, capped by the item's own max stack size (1.12 used the container's only). */
+    static int slotLimit(net.minecraft.world.Container inventory, net.minecraft.world.item.ItemStack stack) {
+        return Math.min(inventory.getMaxStackSize(), stack.getMaxStackSize());
+    }
+
+    public static boolean canPutStackInInventory(net.minecraft.world.item.ItemStack[] stackList, net.minecraft.world.Container inventory, int[] slotsIdList) {
+        net.minecraft.world.item.ItemStack[] outputStack = new net.minecraft.world.item.ItemStack[slotsIdList.length];
+        net.minecraft.world.item.ItemStack[] inputStack = new net.minecraft.world.item.ItemStack[stackList.length];
+
+        for (int idx = 0; idx < outputStack.length; idx++) {
+            if (!Utils.isEmpty(inventory.getItem(slotsIdList[idx])))
+                outputStack[idx] = inventory.getItem(slotsIdList[idx]).copy();
+        }
+        for (int idx = 0; idx < stackList.length; idx++) {
+            inputStack[idx] = stackList[idx].copy();
+        }
+
+        boolean oneStackDone;
+        for (net.minecraft.world.item.ItemStack stack : inputStack) {
+            oneStackDone = false;
+            for (int idx = 0; idx < slotsIdList.length; idx++) {
+                net.minecraft.world.item.ItemStack targetStack = outputStack[idx];
+
+                if (Utils.isEmpty(targetStack)) {
+                    outputStack[idx] = stack;
+                    oneStackDone = true;
+                    break;
+                } else if (net.minecraft.world.item.ItemStack.isSameItemSameComponents(targetStack, stack)) {
+                    int transferMax = slotLimit(inventory, targetStack) - targetStack.getCount();
+                    if (transferMax > 0) {
+                        int transfer = Math.min(stack.getCount(), transferMax);
+                        outputStack[idx].grow(transfer);
+                        stack.shrink(transfer);
+                    }
+
+                    if (stack.getCount() == 0) {
+                        oneStackDone = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!oneStackDone)
+                return false;
+        }
+        return true;
+    }
+
+    public static boolean tryPutStackInInventory(net.minecraft.world.item.ItemStack[] stackList, net.minecraft.world.Container inventory, int[] slotsIdList) {
+        for (net.minecraft.world.item.ItemStack stack : stackList) {
+            for (int idx = 0; idx < slotsIdList.length; idx++) {
+                net.minecraft.world.item.ItemStack targetStack = inventory.getItem(slotsIdList[idx]);
+                if (Utils.isEmpty(targetStack)) {
+                    inventory.setItem(slotsIdList[idx], stack.copy());
+                    stack.setCount(0);
+                    break;
+                } else if (net.minecraft.world.item.ItemStack.isSameItemSameComponents(targetStack, stack)) {
+                    int transferMax = slotLimit(inventory, targetStack) - targetStack.getCount();
+                    if (transferMax > 0) {
+                        int transfer = Math.min(stack.getCount(), transferMax);
+                        targetStack.grow(transfer); // 1.12: decrStackSize(slot, -transfer)
+                        inventory.setChanged();
+                        stack.shrink(transfer);
+                    }
+
+                    if (stack.getCount() == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

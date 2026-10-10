@@ -25,6 +25,15 @@ public class Eln {
 
     public static mods.eln.server.ServerEventListener serverEventListener;
 
+    /** Items shown as "furnace" machines for smelting recipes (vanilla furnace, EA electrical furnaces). */
+    public static java.util.ArrayList<net.minecraft.world.item.ItemStack> furnaceList = new java.util.ArrayList<>();
+
+    /** Machine recipes (1.12 Eln; filled by ElnRecipes, P5). */
+    public static mods.eln.misc.RecipesList maceratorRecipes = new mods.eln.misc.RecipesList();
+    public static mods.eln.misc.RecipesList compressorRecipes = new mods.eln.misc.RecipesList();
+    public static mods.eln.misc.RecipesList plateMachineRecipes = new mods.eln.misc.RecipesList();
+    public static mods.eln.misc.RecipesList magnetiserRecipes = new mods.eln.misc.RecipesList();
+
     public static mods.eln.misc.WindProcess wind = new mods.eln.misc.WindProcess();
 
     public static final String MODID = "eln";
@@ -41,7 +50,8 @@ public class Eln {
     public static final java.util.List<ElnContent> CONTENT = java.util.List.of(
         new mods.eln.registry.batch.Wp9aContent(),
         new mods.eln.registry.batch.Wp9bContent(),
-        new mods.eln.registry.batch.Wp9cContent());
+        new mods.eln.registry.batch.Wp9cContent(),
+        new mods.eln.registry.batch.Wp10aContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -173,6 +183,7 @@ public class Eln {
         mods.eln.registry.ElnDeviceRegistry.registerBatch1();
         for (ElnContent c : CONTENT) c.preInit();
         mods.eln.registry.ElnRegistry.register(modBus);
+        mods.eln.sound.ElnSounds.register(modBus);
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {
             sixNodeBlock = mods.eln.registry.ElnRegistry.SIX_NODE_BLOCK.get();

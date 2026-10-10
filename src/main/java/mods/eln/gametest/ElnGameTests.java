@@ -39,6 +39,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.LogicTruthCases.addTo(l);
         mods.eln.gametest.cases.ChipMoreCases.addTo(l);
         mods.eln.gametest.cases.WirelessMoreCases.addTo(l);
+        mods.eln.gametest.cases.Wp10aCases.addTo(l);
         return l;
     }
 
