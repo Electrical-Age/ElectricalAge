@@ -235,6 +235,7 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
 
     /** The publish packet in the update tag: packet id, x, y, z, dimension, node uuid, then the node's data. */
     void applyDescription(byte[] a) {
+        if (level != null && level.isClientSide()) clientList.add(this); // in case onLoad didn't run on this side
         try {
             DataInputStream stream = new DataInputStream(new java.io.ByteArrayInputStream(a));
             if (stream.readByte() != Eln.packetNodeSingleSerialized) return;
