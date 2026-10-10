@@ -71,7 +71,13 @@ public final class ElnPipelines {
         return TYPES.computeIfAbsent((long) i, k -> new HashMap<>()).computeIfAbsent(texture, t -> {
             RenderSetup.RenderSetupBuilder s = RenderSetup.builder(PIPES[i]).withTexture("Sampler0", t).useLightmap().useOverlay();
             if (blend == 0) s.affectsCrumbling();
-            else s.sortOnUpload();
+            else {
+                // "Improved Transparency" draws blended types through order-independent transparency: they need OIT
+                // pipelines (vanilla's entity sets; unlit and additive parts use the emissive one)
+                s.sortOnUpload();
+                if (blend == 1 && key.lit()) s.setOitPipelines(key.cull() ? RenderPipelines.OIT_ENTITY_CULL : RenderPipelines.OIT_ENTITY);
+                else s.setOitPipelines(RenderPipelines.OIT_ENTITY_EMISSIVE);
+            }
             return RenderType.create("eln_node_" + i, s.createRenderSetup());
         });
     }
