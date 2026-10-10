@@ -100,7 +100,7 @@ public final class MenuSpecs {
                 MEDIUM, tr("Copper cable slot"), tr("(Increases inductance)")),
             descriptor(mods.eln.sixnode.powerinductorsix.PowerInductorSixContainer.coreId, 132 + 20, 8, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot"))).panel(176, 112, 8, 30));
-        put(mods.eln.sixnode.powersocket.PowerSocketDescriptor.class, d -> MenuSpec.of());
+        put(mods.eln.sixnode.powersocket.PowerSocketDescriptor.class, d -> MenuSpec.of().panel(176, 144, 8, 60));
         put(mods.eln.sixnode.resistor.ResistorDescriptor.class, d -> resistor());
         put(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, d -> MenuSpec.of(
             // 1.12 passed temperatureOnly as "accepts electrical cable" (ThermalSensorElement.newContainer): kept

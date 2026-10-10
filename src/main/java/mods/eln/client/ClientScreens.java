@@ -22,6 +22,18 @@ final class ClientScreens {
         reg(mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor.class, mods.eln.sixnode.electricalrelay.ElectricalRelayScreen::new);
         reg(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor.class, mods.eln.sixnode.electricalgatesource.ElectricalGateSourceScreen::new);
         reg(mods.eln.sixnode.electricaltimeout.ElectricalTimeoutDescriptor.class, mods.eln.sixnode.electricaltimeout.ElectricalTimeoutScreen::new);
+        // S1c
+        reg(mods.eln.sixnode.electricalmath.ElectricalMathDescriptor.class, mods.eln.sixnode.electricalmath.ElectricalMathScreen::new);
+        reg(mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor.class, mods.eln.sixnode.electricalbreaker.ElectricalBreakerScreen::new);
+        reg(mods.eln.sixnode.batterycharger.BatteryChargerDescriptor.class, mods.eln.sixnode.batterycharger.BatteryChargerScreen::new);
+        reg(mods.eln.sixnode.powersocket.PowerSocketDescriptor.class, mods.eln.sixnode.powersocket.PowerSocketScreen::new);
+        reg(mods.eln.transparentnode.battery.BatteryDescriptor.class, mods.eln.transparentnode.battery.BatteryScreen::new);
+        reg(mods.eln.transparentnode.transformer.TransformerDescriptor.class, mods.eln.transparentnode.transformer.TransformerScreen::new);
+        reg(mods.eln.transparentnode.autominer.AutoMinerDescriptor.class, mods.eln.transparentnode.autominer.AutoMinerScreen::new);
+        reg(mods.eln.transparentnode.solarpanel.SolarPanelDescriptor.class, mods.eln.transparentnode.solarpanel.SolarPanelScreen::new);
+        reg(mods.eln.transparentnode.turret.TurretDescriptor.class, mods.eln.transparentnode.turret.TurretScreen::new);
+        reg(mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor.class, mods.eln.transparentnode.eggincubator.EggIncubatorScreen::new);
+        reg(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, mods.eln.transparentnode.electricalmachine.ElectricalMachineScreen::new);
         // value lines from the slots (1.12 drew them over the panel)
         info(mods.eln.sixnode.resistor.ResistorDescriptor.class, (d, inv) -> java.util.List.of(
             tr("Resistance: %1$\u2126", Utils.plotValue(((mods.eln.sixnode.resistor.ResistorDescriptor) d).getRsValue(inv)))));
