@@ -26,6 +26,15 @@ public final class NodeMenus {
     private NodeMenus() {
     }
 
+    /** The device descriptor for open data, or null (simple nodes). */
+    public static Object descriptor(byte kind, int descriptorId) {
+        return switch (kind) {
+            case ElnNodeMenu.SIX -> Eln.sixNodeItem.getDescriptor(descriptorId);
+            case ElnNodeMenu.TRANSPARENT -> Eln.transparentNodeItem.getDescriptor(descriptorId);
+            default -> null;
+        };
+    }
+
     /** The menu spec for open data (both sides: no node needed). */
     public static MenuSpec spec(byte kind, int descriptorId, String simpleKey) {
         Object d = switch (kind) {

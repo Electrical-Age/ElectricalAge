@@ -1,0 +1,77 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "DC-DC Converter"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "text": "pl",
+       "sample": "Primary"
+      },
+      {
+       "slot": "0"
+      }
+     ]
+    },
+    {
+     "column": [
+      {
+       "text": "cl",
+       "sample": "Core"
+      },
+      {
+       "slot": "2"
+      }
+     ]
+    },
+    {
+     "column": [
+      {
+       "text": "sl",
+       "sample": "Secondary"
+      },
+      {
+       "slot": "1"
+      }
+     ]
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "column": [
+      {
+       "text": "casl",
+       "sample": "Casing"
+      },
+      {
+       "slot": "3"
+      }
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "button": "isolator",
+   "sample": [
+    "Isolated",
+    "Not isolated"
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

@@ -59,6 +59,12 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         }
     }
 
+    /**
+     * Client: slot and inventory positions from the device's screen layout (P4b; set by the client). The server keeps
+     * MenuSpec's positions: it never uses them.
+     */
+    public static java.util.function.BiFunction<MenuSpec, Object, MenuSpec> clientLayout = (s, d) -> s;
+
     /** Client side: rebuilt from the open data; the device inventory is a stand-in the server keeps in sync. */
     public static ElnNodeMenu fromNetwork(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
@@ -66,7 +72,7 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         byte kind = buf.readByte();
         int id = buf.readInt();
         String key = buf.readUtf();
-        MenuSpec spec = NodeMenus.spec(kind, id, key);
+        MenuSpec spec = clientLayout.apply(NodeMenus.spec(kind, id, key), NodeMenus.descriptor(kind, id));
         return new ElnNodeMenu(containerId, playerInventory, new SimpleContainer(Math.max(1, spec.inventorySize())), spec, null,
             pos, side, kind, id, key);
     }

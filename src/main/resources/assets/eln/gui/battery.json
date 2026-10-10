@@ -1,0 +1,61 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Capacity Oriented Battery"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "text": "l1",
+       "sample": "Life: 100%"
+      },
+      {
+       "text": "l2",
+       "sample": "Energy: 999.9kJ/999.9kJ"
+      },
+      {
+       "text": "l3",
+       "sample": "Power out: 9.99kW/9.99kW"
+      },
+      {
+       "text": "l4",
+       "sample": "Discharge 99h 59m"
+      },
+      {
+       "gauge": "energy",
+       "sample": "100%",
+       "fill": true
+      }
+     ],
+     "gap": 2
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "column": [
+      {
+       "slot": "0"
+      },
+      {
+       "slot": "1"
+      }
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

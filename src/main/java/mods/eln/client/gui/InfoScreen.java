@@ -20,8 +20,16 @@ public class InfoScreen extends ElnScreen {
 
     @Override
     protected void extractDevice(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
+        List<String> ls = lines.apply(menu.deviceInventory);
+        if (layout != null) {
+            for (int i = 0; i < ls.size(); i++) {
+                var r = layout.get("text", "line" + i);
+                if (r != null) label(g, r.x(), r.y(), ls.get(i));
+            }
+            return;
+        }
         int y = menu.spec.inventoryY() < 60 ? 6 : 18; // 1.12 drew them at the top of the small panels
-        for (String l : lines.apply(menu.deviceInventory)) {
+        for (String l : ls) {
             label(g, 8, y, l);
             y += 10;
         }

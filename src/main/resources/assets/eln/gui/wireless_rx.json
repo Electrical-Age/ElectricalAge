@@ -1,0 +1,50 @@
+{
+ "column": [
+  {
+   "row": [
+    {
+     "text": "title",
+     "sample": "Wireless Signal Receiver"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "text": "connection",
+     "sample": [
+      "Not connected",
+      "Connected"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "field": "channel",
+   "chars": 30,
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "button": "0",
+     "sample": "> Biggest",
+     "fill": true
+    },
+    {
+     "button": "1",
+     "sample": "> Smallest",
+     "fill": true
+    },
+    {
+     "button": "2",
+     "sample": "> Toggle",
+     "fill": true
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

@@ -1,0 +1,47 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "200V Plate Machine"
+  },
+  {
+   "row": [
+    {
+     "slot": "5"
+    },
+    {
+     "slot": "4"
+    },
+    {
+     "progress": "process"
+    },
+    {
+     "slot": "0"
+    },
+    {
+     "slot": "1"
+    },
+    {
+     "slot": "2"
+    },
+    {
+     "slot": "3"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "gauge": "supply",
+   "sample": "",
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

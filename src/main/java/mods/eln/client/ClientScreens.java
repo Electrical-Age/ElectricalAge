@@ -11,6 +11,33 @@ final class ClientScreens {
     }
 
     static void registerAll() {
+        // screen layouts (assets/eln/gui/<name>.json)
+        layout("transparentnode.electricalfurnace.ElectricalFurnaceDescriptor", "electrical_furnace");
+        layout("sixnode.electricalsource.ElectricalSourceDescriptor", "electrical_source");
+        layout("sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor", "wireless_tx");
+        layout("sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor", "wireless_source");
+        layout("sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor", "wireless_rx");
+        layout("sixnode.electricalalarm.ElectricalAlarmDescriptor", "electrical_alarm");
+        layout("sixnode.electricalrelay.ElectricalRelayDescriptor", "electrical_relay");
+        layout("sixnode.electricalgatesource.ElectricalGateSourceDescriptor", "gate_source");
+        layout("sixnode.electricaltimeout.ElectricalTimeoutDescriptor", "electrical_timeout");
+        layout("sixnode.electricalmath.ElectricalMathDescriptor", "electrical_math");
+        layout("sixnode.electricalbreaker.ElectricalBreakerDescriptor", "electrical_breaker");
+        layout("sixnode.batterycharger.BatteryChargerDescriptor", "battery_charger");
+        layout("sixnode.powersocket.PowerSocketDescriptor", "power_socket");
+        layout("transparentnode.battery.BatteryDescriptor", "battery");
+        layout("transparentnode.transformer.TransformerDescriptor", "transformer");
+        layout("transparentnode.autominer.AutoMinerDescriptor", "auto_miner");
+        layout("transparentnode.solarpanel.SolarPanelDescriptor", "solar_panel");
+        layout("transparentnode.turret.TurretDescriptor", "turret");
+        layout("transparentnode.eggincubator.EggIncubatorDescriptor", "egg_incubator");
+        layout("transparentnode.electricalmachine.ElectricalMachineDescriptor", "electrical_machine");
+        layout("sixnode.resistor.ResistorDescriptor", "resistor");
+        layout("transparentnode.LargeRheostatDescriptor", "resistor");
+        layout("sixnode.powercapacitorsix.PowerCapacitorSixDescriptor", "power_capacitor");
+        layout("transparentnode.powercapacitor.PowerCapacitorDescriptor", "power_capacitor");
+        layout("sixnode.powerinductorsix.PowerInductorSixDescriptor", "power_inductor");
+        layout("transparentnode.powerinductor.PowerInductorDescriptor", "power_inductor");
         ElnScreens.register(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class,
             mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceScreen::new);
         ElnScreens.register(mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor.class,
@@ -57,6 +84,14 @@ final class ClientScreens {
     static void info(Class<?> descriptor, java.util.function.BiFunction<Object, net.minecraft.world.Container, java.util.List<String>> lines) {
         ElnScreens.register(descriptor, (m, i, t, r) -> new mods.eln.client.gui.InfoScreen(m, i, t,
             inv -> lines.apply(ElnScreens.descriptor(m), inv)));
+    }
+
+    static void layout(String descriptorClass, String name) {
+        try {
+            mods.eln.client.gui.ElnLayouts.register(Class.forName("mods.eln." + descriptorClass), name);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     static void reg(Class<?> descriptor, ElnScreens.Factory f) {

@@ -1,0 +1,62 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "50V Battery Charger"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "row": [
+        {
+         "slot": "0"
+        },
+        {
+         "slot": "1"
+        }
+       ],
+       "gap": 0
+      },
+      {
+       "row": [
+        {
+         "slot": "2"
+        },
+        {
+         "slot": "3"
+        }
+       ],
+       "gap": 0
+      }
+     ],
+     "gap": 0
+    },
+    {
+     "slot": "4"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "charge",
+     "sample": [
+      "Charging",
+      "Off"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

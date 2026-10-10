@@ -1,0 +1,14 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Signal Trimmer"
+  },
+  {
+   "slider": "level",
+   "sample": "Output: 100%",
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

@@ -1,0 +1,21 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "200V Power Socket"
+  },
+  {
+   "field": "channel",
+   "chars": 26,
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

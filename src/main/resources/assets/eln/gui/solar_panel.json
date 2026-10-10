@@ -1,0 +1,40 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "2x3 Rotating Solar Panel"
+  },
+  {
+   "row": [
+    {
+     "slider": "angle",
+     "sample": "Panel angle: -90°",
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "sun",
+   "sample": [
+    "It is night",
+    "Sun angle: -90°"
+   ]
+  },
+  {
+   "text": "tracker",
+   "sample": "The tracker steers the panel"
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

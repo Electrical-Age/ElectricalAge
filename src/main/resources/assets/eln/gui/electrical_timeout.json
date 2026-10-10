@@ -1,0 +1,40 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Electrical Timer"
+  },
+  {
+   "row": [
+    {
+     "text": "hold",
+     "sample": "Hold time"
+    },
+    {
+     "field": "time",
+     "chars": 8
+    },
+    {
+     "text": "unit",
+     "sample": "s"
+    }
+   ]
+  },
+  {
+   "row": [
+    {
+     "button": "set",
+     "sample": "Set",
+     "fill": true
+    },
+    {
+     "button": "reset",
+     "sample": "Reset",
+     "fill": true
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

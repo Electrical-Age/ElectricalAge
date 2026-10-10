@@ -1,0 +1,17 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Medium Voltage Relay"
+  },
+  {
+   "button": "default",
+   "sample": [
+    "Normally closed",
+    "Normally open"
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

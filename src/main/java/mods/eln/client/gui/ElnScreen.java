@@ -23,14 +23,80 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     public static final Identifier SLOT = Identifier.withDefaultNamespace("container/slot");
     public static final int LABEL = 0xFF404040;
 
+    /** The device's laid-out screen (assets/eln/gui), or null: then the screen places things itself. */
+    protected final mods.eln.gui.layout.Layout.Result layout;
+
     public ElnScreen(ElnNodeMenu menu, Inventory inventory, Component title) {
-        this(menu, inventory, title, menu.spec.width(), menu.spec.playerInventory() ? Math.max(menu.spec.height(), menu.spec.inventoryY() + 82) : 40);
+        this(menu, inventory, title, menu.spec.width(), sizeFor(menu));
+    }
+
+    static int sizeFor(ElnNodeMenu menu) {
+        if (ElnLayouts.layout(ElnScreens.descriptor(menu)) != null) return menu.spec.height();
+        return menu.spec.playerInventory() ? Math.max(menu.spec.height(), menu.spec.inventoryY() + 82) : 40;
     }
 
     public ElnScreen(ElnNodeMenu menu, Inventory inventory, Component title, int width, int height) {
         super(menu, inventory, title, width, height);
+        this.layout = ElnLayouts.layout(ElnScreens.descriptor(menu));
         this.inventoryLabelY = menu.spec.inventoryY() - 11;
         this.inventoryLabelX = menu.spec.inventoryX();
+    }
+
+    // ---- builders by layout id (the layout file says where; the screen says what)
+
+    private final java.util.List<Runnable> drawers = new java.util.ArrayList<>();
+    private GuiGraphicsExtractor drawing;
+
+    protected mods.eln.gui.layout.Layout.Rect rect(String kind, String id) {
+        var r = layout == null ? null : layout.get(kind, id);
+        if (r == null) throw new IllegalStateException("screen layout has no " + kind + " '" + id + "'");
+        return r;
+    }
+
+    protected net.minecraft.client.gui.components.Button button(String id, java.util.function.Supplier<String> label, Runnable press,
+                                                                String... tooltip) {
+        var r = rect("button", id);
+        return button(r.x(), r.y(), r.w(), label, press, tooltip);
+    }
+
+    protected EaField field(String id, java.util.function.Supplier<String> value, java.util.function.Consumer<String> commit, String... tooltip) {
+        var r = rect("field", id);
+        return field(r.x(), r.y(), r.w(), value, commit, tooltip);
+    }
+
+    protected EaSlider slider(String id, double min, double max, double step, double initial,
+                              java.util.function.DoubleFunction<Component> label, java.util.function.DoubleConsumer commit) {
+        var r = rect("slider", id);
+        return addRenderableWidget(new EaSlider(leftPos + r.x(), topPos + r.y(), r.w(), min, max, step, initial, label, commit));
+    }
+
+    protected EaGauge gauge(String id, java.util.function.DoubleSupplier fraction, java.util.function.Supplier<Component> text,
+                            double amberFrom, double redFrom) {
+        var r = rect("gauge", id);
+        return addRenderableWidget(new EaGauge(leftPos + r.x(), topPos + r.y(), r.w(), r.h(), fraction, text, amberFrom, redFrom));
+    }
+
+    /** A live text line at its layout place. */
+    protected void text(String id, java.util.function.Supplier<String> s) {
+        text(id, s, () -> LABEL);
+    }
+
+    protected void text(String id, java.util.function.Supplier<String> s, java.util.function.IntSupplier color) {
+        var r = rect("text", id);
+        drawers.add(() -> drawing.text(font, s.get(), leftPos + r.x(), topPos + r.y(), color.getAsInt(), false));
+    }
+
+    static final net.minecraft.resources.Identifier ARROW = net.minecraft.resources.Identifier.withDefaultNamespace("container/furnace/burn_progress");
+
+    /** The furnace arrow, filled to the fraction. */
+    protected void progress(String id, java.util.function.DoubleSupplier f) {
+        var r = rect("progress", id);
+        drawers.add(() -> {
+            int ax = leftPos + r.x(), ay = topPos + r.y();
+            drawing.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW, ax, ay, 24, 16, 0.25f);
+            int w = (int) Math.ceil(24 * Math.max(0, Math.min(1, f.getAsDouble())));
+            if (w > 0) drawing.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW, 24, 16, 0, 0, ax, ay, w, 16);
+        });
     }
 
     /** Refresh labels and values from the device (client tick). */
@@ -49,6 +115,7 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     @Override
     protected void init() {
         refreshers.clear();
+        drawers.clear();
         super.init();
     }
 
@@ -97,6 +164,8 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
             if (big) g.blitSprite(RenderPipelines.GUI_TEXTURED, INSET, leftPos + s.x - 5, topPos + s.y - 5, 26, 26);
             else g.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, leftPos + s.x - 1, topPos + s.y - 1, 18, 18);
         }
+        drawing = g;
+        for (Runnable d : drawers) d.run();
         extractDevice(g, mouseX, mouseY, a);
     }
 
@@ -106,6 +175,13 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int xm, int ym) {
+        if (layout != null) {
+            var t = layout.get("text", "title");
+            if (t != null) g.text(font, title, t.x(), t.y(), LABEL, false);
+            var i = layout.get("text", "inventory");
+            if (i != null) g.text(font, playerInventoryTitle, i.x(), i.y(), LABEL, false);
+            return;
+        }
         // 1.12's small panels (inventory near the top) had no labels: there is no room for them
         if (menu.spec.playerInventory() && menu.spec.inventoryY() < 60) return;
         g.text(font, title, titleLabelX, titleLabelY, LABEL, false);

@@ -1,0 +1,14 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Wireless Switch"
+  },
+  {
+   "field": "channel",
+   "chars": 30,
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

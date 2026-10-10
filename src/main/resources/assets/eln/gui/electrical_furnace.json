@@ -1,0 +1,13 @@
+{
+  "column": [
+    {"text": "title", "sample": "Electrical Furnace"},
+    {"row": [{"slot": "0"}, {"progress": "process"}, {"slot": "1", "big": true}, {"space": 0, "fill": true}, {"slot": "2"}, {"slot": "4"}], "fill": true},
+    {"slider": "target", "sample": "Target 1000°C  (now 1000°C)", "fill": true},
+    {"gauge": "supply", "sample": "200V / 200V  9.99kW", "fill": true},
+    {"row": [{"button": "heater", "sample": ["Heater: on", "Heater: off"], "fill": true},
+             {"button": "autostop", "sample": ["Auto stop: on", "Auto stop: off"], "fill": true}], "fill": true},
+    {"text": "inventory", "sample": "Inventory"},
+    {"inventory": true}
+  ],
+  "gap": 4
+}
