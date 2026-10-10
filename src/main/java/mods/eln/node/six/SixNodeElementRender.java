@@ -116,6 +116,14 @@ public abstract class SixNodeElementRender {
         // Minecraft.getMinecraft().profiler.endSection();
     }
 
+    /**
+     * Draw the burnt look yourself (true), or let SixNodeRender draw the soot overlay (false). Cables: burnt through,
+     * since they can be any colour (Baughn).
+     */
+    public boolean drawBurnt() {
+        return false;
+    }
+
     public boolean drawCableAuto() {
         return true;
     }

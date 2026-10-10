@@ -49,6 +49,10 @@ public class SixNodeRender implements BlockEntityRenderer<SixNodeEntity, SixNode
                 GL11.glPushMatrix();
                 Direction.fromInt(idx).glRotateXnRef();
                 GL11.glTranslatef(-0.5f, 0f, 0f);
+                if (render.burnt && render.drawBurnt()) {
+                    GL11.glPopMatrix();
+                    continue;
+                }
                 render.draw();
                 GL11.glPopMatrix();
                 if (render.burnt) {

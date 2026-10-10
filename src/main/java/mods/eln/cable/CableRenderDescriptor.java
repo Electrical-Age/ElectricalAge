@@ -6,7 +6,7 @@ import net.minecraft.resources.Identifier;
 
 public class CableRenderDescriptor {
 
-    float width, height, widthDiv2;
+    public float width, height, widthDiv2;
     float widthPixel, heightPixel;
 
     public CableRenderDescriptor(String modName, String cableTexture, float width, float height) {
