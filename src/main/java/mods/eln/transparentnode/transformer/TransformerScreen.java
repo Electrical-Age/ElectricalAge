@@ -34,6 +34,6 @@ public class TransformerScreen extends ElnScreen {
         // slots: primary (58,30), core (79,30), secondary (100,30), casing (130,74)
         g.text(font, tr("Primary"), leftPos + 66 - font.width(tr("Primary")), topPos + 50, LABEL, false);
         g.text(font, tr("Secondary"), leftPos + 100, topPos + 50, LABEL, false);
-        label(g, 130 - 4 - font.width(tr("Casing")), 79, tr("Casing"));
+        label(g, 128, 63, tr("Casing"));
     }
 }
