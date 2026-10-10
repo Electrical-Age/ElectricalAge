@@ -10,10 +10,10 @@ import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.nbt.NbtThermalLoad;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public abstract class SimpleNode extends NodeBase {
 
-    public EntityPlayerMP removedByPlayer;
+    public ServerPlayer removedByPlayer;
     String descriptorKey = "";
 
     protected void setDescriptorKey(String key) {
@@ -50,7 +50,7 @@ public abstract class SimpleNode extends NodeBase {
     }
 
     @Override
-    public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void initializeFromThat(Direction front, LivingEntity entityLiving, ItemStack itemStack) {
         setFront(front);
         initialize();
     }
@@ -121,12 +121,12 @@ public abstract class SimpleNode extends NodeBase {
         Eln.simulator.removeAllThermalSlowProcess(thermalSlowProcessList);
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         front = Direction.readFromNBT(nbt, "SNfront");
 
-        setDescriptorKey(nbt.getString("SNdescriptorKey"));
+        setDescriptorKey(nbt.getStringOr("SNdescriptorKey", ""));
 
         for (State electricalLoad : electricalLoadList) {
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
@@ -154,12 +154,12 @@ public abstract class SimpleNode extends NodeBase {
         }
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
         front.writeToNBT(nbt, "SNfront");
 
-        nbt.setString("SNdescriptorKey", descriptorKey == null ? "" : descriptorKey);
+        nbt.putString("SNdescriptorKey", descriptorKey == null ? "" : descriptorKey);
 
         for (State electricalLoad : electricalLoadList) {
             if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");

@@ -46,4 +46,17 @@ public class Utils {
         if (stack.getItem() == output.getItem()) return true;
         return stack.typeHolder().tags().anyMatch(output::is);
     }
+
+    public static void sendPacketToClient(java.io.ByteArrayOutputStream bos, net.minecraft.server.level.ServerPlayer player) {
+        mods.eln.network.ElnNet.sendToPlayer(player, bos);
+    }
+
+    public static void sendMessage(net.minecraft.world.entity.player.Player player, String text) {
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal(text));
+    }
+
+    public static void notifyNeighbours(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        net.minecraft.world.level.block.state.BlockState s = level.getBlockState(pos);
+        level.updateNeighborsAt(pos, s.getBlock());
+    }
 }

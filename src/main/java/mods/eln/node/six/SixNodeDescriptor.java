@@ -3,9 +3,9 @@ package mods.eln.node.six;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 import mods.eln.compat.IItemRenderer;
 
 import static mods.eln.i18n.I18N.tr;
@@ -49,18 +49,18 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
         String icon = getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
+        UtilsClient.drawIcon(type, new Identifier("eln", "textures/blocks/" + icon + ".png"));
     }
 
     public boolean hasVolume() {
         return false;
     }
 
-    public boolean canBePlacedOnSide(EntityPlayer player, Coordonate c, Direction side) {
+    public boolean canBePlacedOnSide(Player player, Coordonate c, Direction side) {
         return canBePlacedOnSide(player, side);
     }
 
-    public boolean canBePlacedOnSide(EntityPlayer player, Direction side) {
+    public boolean canBePlacedOnSide(Player player, Direction side) {
         if (placeDirection != null) {
             for (Direction d : placeDirection) {
                 if (d == side)
@@ -126,7 +126,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         return null;
     }
 
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         switch (side) {
             case YN:
             case YP:

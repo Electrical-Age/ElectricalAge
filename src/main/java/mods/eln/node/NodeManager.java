@@ -4,7 +4,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeElement;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.storage.WorldSavedData;
 
 import java.util.*;
@@ -81,11 +81,11 @@ public class NodeManager extends WorldSavedData {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         int i = 0;
         i++;
         /*
-		 * for(Object o : Utils.getTags(nbt)) { NBTTagCompound tag = (NBTTagCompound) o; Class nodeClass = UUIDToClass.get(tag.getString("tag")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
+		 * for(Object o : Utils.getTags(nbt)) { CompoundTag tag = (CompoundTag) o; Class nodeClass = UUIDToClass.get(tag.getStringOr("tag", "")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
 		 * 
 		 * } catch (Exception e) { e.printStackTrace(); }
 		 * 
@@ -98,9 +98,9 @@ public class NodeManager extends WorldSavedData {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
 		/*
-		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
+		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; CompoundTag nbtNode = new CompoundTag(); nbtNode.putString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.put("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
 		 * 
 		 * }
 		 */
@@ -135,11 +135,11 @@ public class NodeManager extends WorldSavedData {
     }
 
 
-    public void loadFromNbt(NBTTagCompound nbt) {
+    public void loadFromNbt(CompoundTag nbt) {
         List<NodeBase> addedNode = new ArrayList<NodeBase>();
         for (Object o : Utils.getTags(nbt)) {
-            NBTTagCompound tag = (NBTTagCompound) o;
-            Class nodeClass = UUIDToClass.get(tag.getString("tag"));
+            CompoundTag tag = (CompoundTag) o;
+            Class nodeClass = UUIDToClass.get(tag.getStringOr("tag", ""));
             try {
                 NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
                 node.readFromNBT(tag);
@@ -156,7 +156,7 @@ public class NodeManager extends WorldSavedData {
         }
     }
 
-    public void saveToNbt(NBTTagCompound nbt, int dim) {
+    public void saveToNbt(CompoundTag nbt, int dim) {
         int nodeCounter = 0;
         List<NodeBase> nodesCopy = new ArrayList<NodeBase>();
         nodesCopy.addAll(nodes);
@@ -164,10 +164,10 @@ public class NodeManager extends WorldSavedData {
             try {
                 if (node.mustBeSaved() == false) continue;
                 if (dim != Integer.MIN_VALUE && node.coordonate.dimention != dim) continue;
-                NBTTagCompound nbtNode = new NBTTagCompound();
-                nbtNode.setString("tag", node.getNodeUuid());
+                CompoundTag nbtNode = new CompoundTag();
+                nbtNode.putString("tag", node.getNodeUuid());
                 node.writeToNBT(nbtNode);
-                nbt.setTag("n" + nodeCounter++, nbtNode);
+                nbt.put("n" + nodeCounter++, nbtNode);
             } catch (Exception e) {
                 e.printStackTrace();
             }

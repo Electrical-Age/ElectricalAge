@@ -1,7 +1,7 @@
 package mods.eln.ghost;
 
 import mods.eln.Eln;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.storage.WorldSavedData;
 
 public class GhostManagerNbt extends WorldSavedData {
@@ -15,12 +15,12 @@ public class GhostManagerNbt extends WorldSavedData {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         Eln.ghostManager.loadFromNBT(nbt);
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         //Eln.ghostManager.saveToNbt(nbt, Integer.MIN_VALUE);
         return nbt;
     }

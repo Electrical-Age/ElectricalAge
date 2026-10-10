@@ -6,15 +6,15 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.Level;
 import mods.eln.compat.IItemRenderer.ItemRenderType;
 import mods.eln.compat.IItemRenderer.ItemRendererHelper;
 
@@ -42,15 +42,15 @@ public class GenericItemUsingDamageDescriptor {
         this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
     }
 
-    public NBTTagCompound getDefaultNBT() {
+    public CompoundTag getDefaultNBT() {
         return null;
     }
 
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
 
     }
 
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+    public ItemStack onItemRightClick(ItemStack s, Level w, Player p) {
         return s;
     }
 
@@ -113,7 +113,7 @@ public class GenericItemUsingDamageDescriptor {
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
+    public boolean onItemUse(ItemStack stack, Player player, Level world, int x, int y, int z, int side, float vx, float vy, float vz) {
         return false;
     }
 
@@ -133,14 +133,14 @@ public class GenericItemUsingDamageDescriptor {
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
         String icon = getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
+        UtilsClient.drawIcon(type, new Identifier("eln", "textures/items/" + icon + ".png"));
     }
 
-    public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
+    public void onUpdate(ItemStack stack, Level world, Entity entity, int par4, boolean par5) {
     }
 
-    protected NBTTagCompound getNbt(ItemStack stack) {
-        NBTTagCompound nbt = stack.getTagCompound();
+    protected CompoundTag getNbt(ItemStack stack) {
+        CompoundTag nbt = stack.getTagCompound();
         if (nbt == null) {
             stack.setTagCompound(nbt = getDefaultNBT());
         }
@@ -151,19 +151,19 @@ public class GenericItemUsingDamageDescriptor {
         return 0.2f;
     }
 
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, Level w, Block block, int x, int y, int z, LivingEntity entity) {
         return false;
     }
 
-    public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
         return true;
     }
 
-    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+    public boolean onEntitySwing(LivingEntity entityLiving, ItemStack stack) {
         return false;
     }
 
-    public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, EntityPlayer player) {
+    public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, Player player) {
         return false;
     }
 }

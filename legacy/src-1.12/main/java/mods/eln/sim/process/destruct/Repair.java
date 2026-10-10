@@ -2,12 +2,12 @@ package mods.eln.sim.process.destruct;
 
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
 
 /** Repairing burnt devices: right-click with the repair part. */
 public final class Repair {
@@ -53,16 +53,16 @@ public final class Repair {
      * Right-click on a burnt device. With the repair part in hand: consume one, repair, return true.
      * Otherwise say what's wrong and return false, so the usual action (GUI, so its contents can be taken out) runs.
      */
-    public static boolean onActivated(IBurnable b, EntityPlayer player) {
-        if (player.world.isRemote || !b.isBurnt()) return false;
+    public static boolean onActivated(IBurnable b, Player player) {
+        if (player.world.isClientSide() || !b.isBurnt()) return false;
         ItemStack part = b.getRepairPart();
         ItemStack held = player.getHeldItemMainhand();
         if (!Utils.isEmpty(part) && !Utils.isEmpty(held) && ItemStack.areItemsEqual(held, part)) {
-            boolean creative = player instanceof EntityPlayerMP && Utils.isCreative((EntityPlayerMP) player);
+            boolean creative = player instanceof ServerPlayer && Utils.isCreative((ServerPlayer) player);
             if (!creative) held.shrink(1);
             b.repair();
             BlockPos pos = new BlockPos(b.getBurnableCoordonate().x, b.getBurnableCoordonate().y, b.getBurnableCoordonate().z);
-            player.world.playSound(null, pos, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 0.5f, 1.4f);
+            player.world.playSound(null, pos, SoundEvents.BLOCK_ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
             Utils.sendMessage(player, "Repaired.");
             return true;
         }

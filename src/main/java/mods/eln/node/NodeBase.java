@@ -2,29 +2,24 @@ package mods.eln.node;
 
 
 
-import net.minecraft.util.math.BlockPos;
-import mods.eln.compat.WorldCompat;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.core.BlockPos;
 import mods.eln.Eln;
-import mods.eln.GuiHandler;
-import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNode;
 import mods.eln.sim.*;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerChunkMap;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -84,12 +79,12 @@ public abstract class NodeBase {
         return 0;
     }
 
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
 
     }
 
     public void notifyNeighbor() {
-        WorldCompat.notifyNeighbours(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
+        Utils.notifyNeighbours(coordonate.world(), coordonate.pos());
     }
 
     //public abstract Block getBlock();
@@ -99,7 +94,7 @@ public abstract class NodeBase {
 
     public void neighborBlockRead() {
         int[] vector = new int[3];
-        World world = coordonate.world();
+        Level world = coordonate.world();
 
         neighborOpaque = 0;
         neighborWrapable = 0;
@@ -110,13 +105,15 @@ public abstract class NodeBase {
 
             direction.applyTo(vector, 1);
 
-            Block b = WorldCompat.getBlock(world, vector[0], vector[1], vector[2]);
+            BlockPos np = new BlockPos(vector[0], vector[1], vector[2]);
+            net.minecraft.world.level.block.state.BlockState bs = world.getBlockState(np);
+            Block b = bs.getBlock();
             // 1.12 port, known bug fixed: 1.7.10 had `if (b.isOpaqueCube()) ;` (empty statement), so every neighbour
             // counted as opaque and TransparentNodeElement.checkCanStay never removed unsupported devices. Same rule as
             // TransparentNodeDescriptor.checkCanPlace (default-state opaque cube; a hopper counts as a floor).
-            if (b.getDefaultState().isOpaqueCube() || (direction == Direction.YN && b instanceof net.minecraft.block.BlockHopper))
+            if (bs.isSolidRender() || (direction == Direction.YN && b instanceof net.minecraft.world.level.block.HopperBlock))
                 neighborOpaque |= 1 << direction.getInt();
-            if (isBlockWrappable(b, world, coordonate.x, coordonate.y, coordonate.z))
+            if (isBlockWrappable(bs, world, np))
                 neighborWrapable |= 1 << direction.getInt();
         }
     }
@@ -140,14 +137,14 @@ public abstract class NodeBase {
         return ((neighborOpaque >> direction.getInt()) & 1) != 0;
     }
 
-    public static boolean isBlockWrappable(Block block, World w, int x, int y, int z) {
-        if (block.isReplaceable(w, new BlockPos(x, y, z))) return true;
-        if (block == Blocks.AIR) return true;
+    public static boolean isBlockWrappable(net.minecraft.world.level.block.state.BlockState state, Level w, BlockPos pos) {
+        Block block = state.getBlock();
+        if (state.canBeReplaced()) return true;
+        if (state.isAir()) return true;
         if (block == Eln.sixNodeBlock) return true;
-        if (block instanceof GhostBlock) return true;
-        if (block == Blocks.TORCH) return true;
-        if (block == Blocks.REDSTONE_TORCH) return true;
-        if (block == Blocks.UNLIT_REDSTONE_TORCH) return true;
+        if (block == Eln.ghostBlock) return true;
+        if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) return true;
+        if (block == Blocks.REDSTONE_TORCH || block == Blocks.REDSTONE_WALL_TORCH) return true; // 26.x: lit is a state
         if (block == Blocks.REDSTONE_WIRE) return true;
 
         return false;
@@ -166,17 +163,17 @@ public abstract class NodeBase {
     public void physicalSelfDestruction(float explosionStrength) {
         if (destructed == true) return;
         destructed = true;
-        if (Eln.instance.explosionEnable == false) explosionStrength = 0;
+        if (!Eln.explosionEnable) explosionStrength = 0;
         disconnect();
-        WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        coordonate.world().removeBlock(coordonate.pos(), false);
         NodeManager.instance.removeNode(this);
         if (explosionStrength != 0) {
-            coordonate.world().createExplosion((Entity) null, coordonate.x, coordonate.y, coordonate.z, explosionStrength, true);
+            coordonate.world().explode(null, coordonate.x, coordonate.y, coordonate.z, explosionStrength, Level.ExplosionInteraction.BLOCK);
         }
     }
 
     // NodeBaseTodo
-    public void onBlockPlacedBy(Coordonate coordonate, Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void onBlockPlacedBy(Coordonate coordonate, Direction front, LivingEntity entityLiving, ItemStack itemStack) {
         // this.entity = entity;
         this.coordonate = coordonate;
         neighborBlockRead();
@@ -185,11 +182,11 @@ public abstract class NodeBase {
         initializeFromThat(front, entityLiving, itemStack);
 
         if (!Utils.isEmpty(itemStack))
-            Utils.println("Node::constructor( meta = " + itemStack.getMetadata() + ")");
+            Utils.println("Node::constructor( " + itemStack + ")");
     }
 
     abstract public void initializeFromThat(Direction front,
-                                            EntityLivingBase entityLiving, ItemStack itemStack);
+                                            LivingEntity entityLiving, ItemStack itemStack);
 
     public NodeBase getNeighbor(Direction direction) {
         int[] position = new int[3];
@@ -209,39 +206,29 @@ public abstract class NodeBase {
         Utils.println("Node::onBreakBlock()");
     }
 
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!entityPlayer.world.isRemote && !Utils.isEmpty(entityPlayer.getHeldItemMainhand())) {
-            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
-                String str = multiMeterString(side);
-                if (str != null)
-                    Utils.sendMessage(entityPlayer, str);
-                return true;
-            }
-            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
-                String str = thermoMeterString(side);
-                if (str != null)
-                    Utils.sendMessage(entityPlayer, str);
-                return true;
-            }
-            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
-                String str1 = multiMeterString(side);
-                String str2 = thermoMeterString(side);
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack held = entityPlayer.getMainHandItem();
+        if (!entityPlayer.level().isClientSide() && !Utils.isEmpty(held)) {
+            // meters (MeterItems is filled when the meter items are ported)
+            boolean multi = MeterItems.isMultiMeter(held), thermo = MeterItems.isThermometer(held), all = MeterItems.isAllMeter(held);
+            if (multi || thermo || all) {
                 String str = "";
-                if (str1 != null)
-                    str += str1;
-                if (str2 != null)
-                    str += str2;
-                if (str.equals("") == false)
-                    Utils.sendMessage(entityPlayer, str);
+                if (multi || all) str += nullToEmpty(multiMeterString(side));
+                if (thermo || all) str += nullToEmpty(thermoMeterString(side));
+                if (!str.isEmpty()) Utils.sendMessage(entityPlayer, str);
                 return true;
             }
         }
         if (hasGui(side)) {
-            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
-            return true;
+            // 26.x: menus come with P4 (NodeMenus.open); 1.12 opened GuiHandler.nodeBaseOpen + side
+            return NodeMenus.open(this, entityPlayer, side);
         }
 
         return false;
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
     }
 
     public void reconnect() {
@@ -413,24 +400,24 @@ public abstract class NodeBase {
         return true;
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
 
         coordonate.readFromNBT(nbt, "c");
 
-        neighborOpaque = nbt.getByte("NBOpaque");
-        neighborWrapable = nbt.getByte("NBWrap");
+        neighborOpaque = nbt.getByteOr("NBOpaque", (byte) 0);
+        neighborWrapable = nbt.getByteOr("NBWrap", (byte) 0);
 
         initialized = true;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
 
         coordonate.writeToNBT(nbt, "c");
 
         int idx;
 
-        nbt.setByte("NBOpaque", neighborOpaque);
-        nbt.setByte("NBWrap", neighborWrapable);
+        nbt.putByte("NBOpaque", neighborOpaque);
+        nbt.putByte("NBWrap", neighborWrapable);
 
     }
 
@@ -481,7 +468,7 @@ public abstract class NodeBase {
         }
     }
 
-    public void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {
+    public void sendPacketToClient(ByteArrayOutputStream bos, ServerPlayer player) {
         Utils.sendPacketToClient(bos, player);
     }
 
@@ -491,22 +478,14 @@ public abstract class NodeBase {
     }
 
     public void sendPacketToAllClient(ByteArrayOutputStream bos, double range) {
-        //Profiler p = new Profiler();
-
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-        for (Object obj : server.getPlayerList().getPlayers()) {
-
-            EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
-            PlayerChunkMap playerManager = worldServer.getPlayerChunkMap();
-            if (player.dimension != this.coordonate.dimention) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x >> 4, coordonate.z >> 4)) continue;
+        // 1.12: every player in the dimension who watches the chunk and is within range
+        Level w = coordonate.world();
+        if (!(w instanceof ServerLevel)) return;
+        for (ServerPlayer player : ((ServerLevel) w).players()) {
             if (coordonate.distanceTo(player) > range) continue;
-
+            if (!((ServerLevel) w).getChunkSource().chunkMap.isChunkTracked(player, coordonate.x >> 4, coordonate.z >> 4)) continue;
             Utils.sendPacketToClient(bos, player);
         }
-
     }
 
     public ByteArrayOutputStream getPublishPacket() {
@@ -537,16 +516,10 @@ public abstract class NodeBase {
     }
 
     public void publishToAllPlayer() {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-        for (Object obj : server.getPlayerList().getPlayers()) {
-            EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
-            PlayerChunkMap playerManager = worldServer.getPlayerChunkMap();
-            if (player.dimension != this.coordonate.dimention) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x >> 4, coordonate.z >> 4)) continue;
-
-            Utils.sendPacketToClient(getPublishPacket(), player);
+        Level w = coordonate.world();
+        if (w instanceof ServerLevel) {
+            ByteArrayOutputStream bos = getPublishPacket();
+            if (bos != null) mods.eln.network.ElnNet.sendToTracking((ServerLevel) w, coordonate.x, coordonate.z, bos);
         }
         if (needNotify) {
             needNotify = false;
@@ -555,27 +528,22 @@ public abstract class NodeBase {
         needPublish = false;
     }
 
-    public void publishToPlayer(EntityPlayerMP player) {
+    public void publishToPlayer(ServerPlayer player) {
         Utils.sendPacketToClient(getPublishPacket(), player);
     }
 
     public void dropItem(ItemStack itemStack) {
         if (Utils.isEmpty(itemStack)) return;
-        if (coordonate.world().getGameRules().getBoolean("doTileDrops")) {
-            float var6 = 0.7F;
-            double var7 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            double var9 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            double var11 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            EntityItem var13 = new EntityItem(coordonate.world(), (double) coordonate.x + var7, (double) coordonate.y + var9, (double) coordonate.z + var11, itemStack);
-            var13.setPickupDelay(10);
-            coordonate.world().spawnEntity(var13);
+        Level w = coordonate.world();
+        if (w instanceof ServerLevel && ((ServerLevel) w).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.BLOCK_DROPS)) {
+            net.minecraft.world.level.block.Block.popResource(w, coordonate.pos(), itemStack);
         }
     }
 
-    public void dropInventory(IInventory inventory) {
+    public void dropInventory(Container inventory) {
         if (inventory == null) return;
-        for (int idx = 0; idx < inventory.getSizeInventory(); idx++) {
-            dropItem(inventory.getStackInSlot(idx));
+        for (int idx = 0; idx < inventory.getContainerSize(); idx++) {
+            dropItem(inventory.getItem(idx));
         }
     }
 

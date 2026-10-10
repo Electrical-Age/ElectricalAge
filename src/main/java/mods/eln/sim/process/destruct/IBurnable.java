@@ -1,7 +1,7 @@
 package mods.eln.sim.process.destruct;
 
 import mods.eln.misc.Coordonate;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 

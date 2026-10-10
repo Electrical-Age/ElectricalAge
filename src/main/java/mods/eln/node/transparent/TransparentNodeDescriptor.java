@@ -4,14 +4,14 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockHopper;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.Level;
 import mods.eln.compat.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
@@ -66,7 +66,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
         String icon = getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
+        UtilsClient.drawIcon(type, new Identifier("eln", "textures/blocks/" + icon + ".png"));
     }
 
     public void objItemScale(Obj3D obj) {
@@ -152,7 +152,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
     }
 
 
-    public Direction getFrontFromPlace(Direction side, EntityLivingBase entityLiving) {
+    public Direction getFrontFromPlace(Direction side, LivingEntity entityLiving) {
         Direction front = Direction.XN;
         switch (getFrontType()) {
             case BlockSide:
@@ -201,8 +201,8 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return 0;
     }
 
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
-        AxisAlignedBB bb = Block.FULL_BLOCK_AABB.offset(x, y, z); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
+    public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
+        AABB bb = Block.FULL_BLOCK_AABB.offset(x, y, z); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 

@@ -7,19 +7,19 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.transparent.TransparentNodeElement;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import javax.annotation.Nullable;
 import java.util.function.DoubleSupplier;
@@ -147,8 +147,8 @@ public class Failure implements IDestructable {
         pendingCause = null;
         if (target != null && target.isBurnt()) return;
         if (node != null && node.isDestructing()) return;
-        World w = c.world();
-        if (w == null || w.isRemote) return;
+        Level w = c.world();
+        if (w == null || w.isClientSide()) return;
         Utils.print("%s fails: %s (%s, %.0f)", describe(), kind, cause, value);
         apply(w, cause, value);
     }
@@ -186,7 +186,7 @@ public class Failure implements IDestructable {
         return (float) Math.max(1, Math.min(4, Math.sqrt(Math.max(0, energyJ) / 15000)));
     }
 
-    private void apply(World w, FailureCause cause, double value) {
+    private void apply(Level w, FailureCause cause, double value) {
         double e = energy != null ? energy.getAsDouble() : 0;
         Outcome outcome = outcome(kind, cause, value, e);
         if (outcome == Outcome.EXPLODE && !Eln.explosionEnable) outcome = Outcome.BURN_FIRE;
@@ -216,24 +216,24 @@ public class Failure implements IDestructable {
         if (outcome == Outcome.BURN_FIRE_WIDE) ignite(w, pos, true);
     }
 
-    private void burnOut(World w, BlockPos pos, FailureCause cause) {
+    private void burnOut(Level w, BlockPos pos, FailureCause cause) {
         if (target != null) {
             target.burn(cause, kind);
         } else if (node != null) {
             node.physicalSelfDestruction(0);
         }
-        particles(w, pos, EnumParticleTypes.SMOKE_LARGE, 12, 0.3);
+        particles(w, pos, ParticleTypes.SMOKE_LARGE, 12, 0.3);
         if (cause == FailureCause.OVERVOLTAGE) {
-            particles(w, pos, EnumParticleTypes.CRIT, 20, 0.5);
+            particles(w, pos, ParticleTypes.CRIT, 20, 0.5);
             sound(w, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.6f);
         } else {
-            particles(w, pos, EnumParticleTypes.LAVA, 4, 0.2);
+            particles(w, pos, ParticleTypes.LAVA, 4, 0.2);
             sound(w, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, 0.8f, 0.8f);
         }
     }
 
     /** Set fire to air next to the device where there's something to burn; wide = oil fire, burns even on stone. */
-    static void ignite(World w, BlockPos pos, boolean wide) {
+    static void ignite(Level w, BlockPos pos, boolean wide) {
         for (BlockPos p : BlockPos.getAllInBox(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
             if (!w.isAirBlock(p)) continue;
             boolean fuel = wide && p.getY() >= pos.getY() && w.isSideSolid(p.down(), EnumFacing.UP);
@@ -251,13 +251,13 @@ public class Failure implements IDestructable {
     }
 
     /** A flash and a bang; everything nearby gets burnt. Strength grows with the voltage. */
-    private static void arcFlash(World w, BlockPos pos, double voltage) {
+    private static void arcFlash(Level w, BlockPos pos, double voltage) {
         double r = Math.min(8, 2 + Math.abs(voltage) / ARC_FLASH_VOLTAGE);
         sound(w, pos, SoundEvents.ENTITY_LIGHTNING_THUNDER, 1.5f, 1.8f);
-        particles(w, pos, EnumParticleTypes.FIREWORKS_SPARK, 60, 0.8);
-        particles(w, pos, EnumParticleTypes.FLAME, 30, 0.6);
-        AxisAlignedBB box = new AxisAlignedBB(pos).grow(r);
-        for (EntityLivingBase ent : w.getEntitiesWithinAABB(EntityLivingBase.class, box)) {
+        particles(w, pos, ParticleTypes.FIREWORKS_SPARK, 60, 0.8);
+        particles(w, pos, ParticleTypes.FLAME, 30, 0.6);
+        AABB box = new AABB(pos).grow(r);
+        for (LivingEntity ent : w.getEntitiesWithinAABB(LivingEntity.class, box)) {
             double d = Math.sqrt(ent.getDistanceSq(pos));
             if (d > r) continue;
             ent.setFire((int) Math.ceil(8 * (1 - d / r)) + 1);
@@ -265,14 +265,14 @@ public class Failure implements IDestructable {
         }
     }
 
-    private static void particles(World w, BlockPos pos, EnumParticleTypes type, int n, double spread) {
-        if (w instanceof WorldServer) {
-            ((WorldServer) w).spawnParticle(type, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, n, spread, spread, spread, 0.02);
+    private static void particles(Level w, BlockPos pos, ParticleTypes type, int n, double spread) {
+        if (w instanceof ServerLevel) {
+            ((ServerLevel) w).spawnParticle(type, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, n, spread, spread, spread, 0.02);
         }
     }
 
-    private static void sound(World w, BlockPos pos, SoundEvent s, float volume, float pitch) {
-        w.playSound(null, pos, s, SoundCategory.BLOCKS, volume, pitch);
+    private static void sound(Level w, BlockPos pos, SoundEvent s, float volume, float pitch) {
+        w.playSound(null, pos, s, SoundSource.BLOCKS, volume, pitch);
     }
 
     @Override

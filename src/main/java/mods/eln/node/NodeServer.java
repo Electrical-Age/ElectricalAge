@@ -4,7 +4,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 
 public class NodeServer {
@@ -38,7 +38,7 @@ public class NodeServer {
             }
 
             for (Object obj : server.getPlayerList().getPlayers()) {
-                EntityPlayerMP player = (EntityPlayerMP) obj;
+                ServerPlayer player = (ServerPlayer) obj;
 
                 NodeBase openContainerNode = null;
                 INodeContainer container = null;

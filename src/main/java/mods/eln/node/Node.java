@@ -3,7 +3,7 @@ package mods.eln.node;
 
 import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Direction;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.EnumSkyBlock;
 
 import java.io.DataOutputStream;
@@ -30,16 +30,16 @@ public abstract class Node extends NodeBase {
     }
 
 
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
-        lastLight = nbt.getByte("lastLight");
+        lastLight = nbt.getByteOr("lastLight", (byte) 0);
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("lastLight", (byte) lastLight);
+        nbt.putByte("lastLight", (byte) lastLight);
     }
 
     boolean oldSendedRedstone = false;
@@ -61,7 +61,7 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        return (NodeBlockEntity) WorldCompat.getTileEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        return (NodeBlockEntity) WorldCompat.getBlockEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
     }
 
     public int isProvidingWeakPower(Direction side) {

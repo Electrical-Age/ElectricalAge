@@ -3,10 +3,10 @@ package mods.eln.node.transparent;
 import mods.eln.compat.ISidedInventoryCompat;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 public class TransparentNodeElementInventory implements ISidedInventoryCompat, INBTTReady {
     protected TransparentNodeElementRender transparentNodeRender = null;
@@ -91,13 +91,13 @@ public class TransparentNodeElementInventory implements ISidedInventoryCompat, I
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(Player player) {
 
 		/*
          * if(transparentNodeElement != null) { if(NodeManager.instance.getNodeFromCoordonate(transparentNodeElement.node.coordonate) != transparentNodeElement.node) return false; return player.getDistance(transparentNodeElement.node.coordonate.x + 0.5, transparentNodeElement.node.coordonate.y + 0.5, transparentNodeElement.node.coordonate.z + 0.5) < 10; }
 		 */
         return true;
-        // return player.getDistanceSq(transparentNodeRender.tileEntity.getPos().getX() + 0.5, transparentNodeRender.tileEntity.getPos().getY() + 0.5, transparentNodeRender.tileEntity.getPos().getZ() + 0.5) < 18;
+        // return player.getDistanceSq(transparentNodeRender.tileEntity.getBlockPos().getX() + 0.5, transparentNodeRender.tileEntity.getBlockPos().getY() + 0.5, transparentNodeRender.tileEntity.getBlockPos().getZ() + 0.5) < 18;
     }
 
     @Override
@@ -118,13 +118,13 @@ public class TransparentNodeElementInventory implements ISidedInventoryCompat, I
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
 
         Utils.readFromNBT(nbt, str, this);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
 
         Utils.writeToNBT(nbt, str, this);
     }
