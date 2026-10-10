@@ -43,6 +43,9 @@ public final class ElnRegistry {
         DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Eln.MODID);
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
 
+    /** Every EA item, in 1.12 id order (creative tab, tests). */
+    public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
+
     public static final DeferredBlock<SixNodeBlock> SIX_NODE_BLOCK = BLOCKS.registerBlock("six_node", SixNodeBlock::new,
         p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
     public static final DeferredBlock<GhostBlock> GHOST_BLOCK = BLOCKS.registerBlock("ghost_block", GhostBlock::new,
@@ -97,10 +100,15 @@ public final class ElnRegistry {
 
     /** 1.12 dropped a vanilla spawn egg tagged eln:replicator; 26.x eggs are per entity type. */
     public static final DeferredItem<net.minecraft.world.item.SpawnEggItem> REPLICATOR_SPAWN_EGG =
-        ITEMS.registerItem("replicator_spawn_egg", net.minecraft.world.item.SpawnEggItem::new, p -> p.spawnEgg(REPLICATOR.get()));
+        registerListed("replicator_spawn_egg", net.minecraft.world.item.SpawnEggItem::new, p -> p.spawnEgg(REPLICATOR.get()));
 
-    /** Every EA item, in 1.12 id order (creative tab, tests). */
-    public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
+    private static <I extends Item> DeferredItem<I> registerListed(String name, java.util.function.Function<Item.Properties, I> f,
+                                                                   java.util.function.UnaryOperator<Item.Properties> props) {
+        DeferredItem<I> i = ITEMS.registerItem(name, f, props);
+        ALL_ITEMS.add(i);
+        return i;
+    }
+
 
     static JsonObject ids;
 
