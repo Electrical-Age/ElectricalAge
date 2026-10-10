@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Selftest cases of device batch Wp12 (1.12 Wp12Cases), as its parts are ported: Wp12b's electrical axe so far.
- * Still in legacy/ (with their Wp12 steps): Registration (ore dictionary, replicator id), Replicator.
+ * Not ported: 1.12 Registration (ore dictionary: item tags come with P5).
  */
 public final class Wp12Cases {
     private Wp12Cases() {
@@ -32,6 +32,7 @@ public final class Wp12Cases {
         cases.add(new OreVein());
         cases.add(new OreWorldgen());
         cases.add(new ECoalArmor());
+        cases.add(new Replicator());
     }
 
     /**
@@ -306,6 +307,60 @@ public final class Wp12Cases {
                     && helmet.getMaxDamage() == 15 * 11, "sword durability " + new ItemStack(sword).getMaxDamage() + ", helmet " + helmet.getMaxDamage());
             } finally {
                 pig.discard();
+            }
+        }
+    }
+
+    /**
+     * Replicator entity (1.12 case): spawned in its box with its AI off (1.12 put it 24 blocks from the row so it could
+     * not reach the other cases' cables; GameTest boxes are closer). Expected after the run: alive (persistent), max
+     * health 8, attack damage 3, follow range 8, movement speed 0.23 (1.7.10 attributes); the entity id is
+     * eln:replicator and it has a spawn egg. Peaceful difficulty would remove it: skipped then.
+     */
+    static final class Replicator implements TestCase {
+        private mods.eln.entity.ReplicatorEntity entity;
+
+        @Override
+        public String name() {
+            return "wp12 replicator";
+        }
+
+        @Override
+        public int width() {
+            return 3;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            ServerLevel w = ctx.world();
+            if (w.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return;
+            entity = mods.eln.registry.ElnRegistry.REPLICATOR.get().create(w, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+            net.minecraft.core.BlockPos s = ctx.at(1, 1, 1);
+            entity.snapTo(s.getX() + 0.5, s.getY(), s.getZ() + 0.5, 0f, 0f);
+            entity.setNoAi(true);
+            w.addFreshEntity(entity);
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            ServerLevel w = ctx.world();
+            if (w.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
+                ctx.line("SKIP wp12 replicator: peaceful difficulty");
+                return;
+            }
+            try {
+                ctx.check("wp12 replicator alive", entity != null && entity.isAlive() && !entity.isRemoved(),
+                    entity == null ? "not spawned" : "at " + entity.blockPosition());
+                if (entity != null) {
+                    ctx.checkValue("wp12 replicator max health", entity.getMaxHealth(), 8);
+                    ctx.checkValue("wp12 replicator attack damage", entity.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE), 3);
+                    ctx.checkValue("wp12 replicator follow range", entity.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE), 8);
+                    ctx.checkValue("wp12 replicator movement speed", entity.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED), 0.23000000417232513);
+                    ctx.check("wp12 replicator id and spawn egg", net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString().equals("eln:replicator")
+                        && mods.eln.registry.ElnRegistry.REPLICATOR_SPAWN_EGG.get() != null, String.valueOf(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType())));
+                }
+            } finally {
+                if (entity != null) entity.discard();
             }
         }
     }

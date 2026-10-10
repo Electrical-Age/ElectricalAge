@@ -85,6 +85,20 @@ public final class ElnRegistry {
         return block;
     }
 
+    public static final DeferredRegister<net.minecraft.world.entity.EntityType<?>> ENTITY_TYPES =
+        DeferredRegister.create(Registries.ENTITY_TYPE, Eln.MODID);
+
+    /** The replicator (1.12 eln:replicator, size 0.3 x 0.7, tracked 80 blocks every 3 ticks). */
+    public static final DeferredHolder<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.entity.EntityType<mods.eln.entity.ReplicatorEntity>> REPLICATOR =
+        ENTITY_TYPES.register("replicator", () -> net.minecraft.world.entity.EntityType.Builder
+            .<mods.eln.entity.ReplicatorEntity>of(mods.eln.entity.ReplicatorEntity::new, net.minecraft.world.entity.MobCategory.MONSTER)
+            .sized(0.3f, 0.7f).clientTrackingRange(5).updateInterval(3)
+            .build(net.minecraft.resources.ResourceKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "replicator"))));
+
+    /** 1.12 dropped a vanilla spawn egg tagged eln:replicator; 26.x eggs are per entity type. */
+    public static final DeferredItem<net.minecraft.world.item.SpawnEggItem> REPLICATOR_SPAWN_EGG =
+        ITEMS.registerItem("replicator_spawn_egg", net.minecraft.world.item.SpawnEggItem::new, p -> p.spawnEgg(REPLICATOR.get()));
+
     /** Every EA item, in 1.12 id order (creative tab, tests). */
     public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
 
@@ -191,6 +205,7 @@ public final class ElnRegistry {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
+        ENTITY_TYPES.register(modBus);
         TABS.register(modBus);
     }
 }

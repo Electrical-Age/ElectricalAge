@@ -58,6 +58,10 @@ public class Eln {
     /** 1.12 config balancing.autominerRange (10): maximum horizontal mining distance. */
     public static int autominerRange = 10;
 
+    /** 1.12 config entity.replicatorPop (true) and replicatorPopWhenThunderPerSecond (1/120). */
+    public static boolean replicatorPop = true;
+    public static double replicatorPopPerSecondPerPlayer = 1.0 / 120;
+
     /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10). */
     public static float xRayScannerRange = 5f;
 
@@ -93,7 +97,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp12aContent(),
         new mods.eln.registry.batch.Wp12bContent(),
         new mods.eln.registry.batch.Wp12cContent(),
-        new mods.eln.registry.batch.Wp12dContent());
+        new mods.eln.registry.batch.Wp12dContent(),
+        new mods.eln.registry.batch.Wp12eContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -242,6 +247,8 @@ public class Eln {
                     if (!(node instanceof mods.eln.node.transparent.TransparentNode tn)) return null;
                     return tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h ? h : null;
                 }));
+        modBus.addListener(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent.class, e ->
+            e.put(mods.eln.registry.ElnRegistry.REPLICATOR.get(), mods.eln.entity.ReplicatorEntity.createAttributes().build()));
         // FE on EA's energy items (batteries, tools, lamps)
         modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, mods.eln.item.electricalitem.ItemEnergyCapability::register);
         // energy converters: FE out of their back face (1.12: CapabilityEnergy.ENERGY on the entity)
