@@ -34,12 +34,12 @@ public class FuelHeatFurnaceScreen extends ElnScreen {
         main = button("main", () -> render.getMainSwitch() ? tr("Furnace is on") : tr("Furnace is off"),
             () -> render.clientSendId(E.getMainSwitchToggleEvent()));
         manual = slider("manual", 0, 1, 0.01, render.getManualControl().getValue(),
-            v -> Component.literal(tr("Control value at %1$", Utils.plotPercent("", v)) + "  ("
-                + tr("Heat Power: %1$", Utils.plotPower("", render.getHeatPower())) + ")"),
+            v -> Component.literal(tr("Control value at %1$", Utils.plotPercent("", v).trim()) + "  ("
+                + tr("Heat Power: %1$", Utils.plotPower("", render.getHeatPower()).trim()) + ")"),
             v -> render.clientSendFloat(E.getSetManualControlValueEvent(), (float) v));
         temp = slider("temp", 0, 900, 10, render.getSetTemperature().getValue(),
-            v -> Component.literal(tr("Set point: %1$", Utils.plotCelsius("", v)) + "  ("
-                + tr("Actual: %1$", Utils.plotCelsius("", render.getActualTemperature())) + ")"),
+            v -> Component.literal(tr("Set point: %1$", Utils.plotCelsius("", v).trim()) + "  ("
+                + tr("Actual: %1$", Utils.plotCelsius("", render.getActualTemperature()).trim()) + ")"),
             v -> render.clientSendFloat(E.getSetTemperatureEvent(), (float) v));
         update();
     }

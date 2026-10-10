@@ -21,112 +21,73 @@
    "row": [
     {
      "field": "p0",
-     "chars": 15,
+     "chars": 12,
      "fill": true
     },
     {
      "field": "w0",
-     "chars": 15,
+     "chars": 12,
      "fill": true
+    },
+    {
+     "button": "a0",
+     "sample": [
+      "Biggest",
+      "Smallest",
+      "Toggle"
+     ]
     }
    ],
    "fill": true,
    "gap": 4
-  },
-  {
-   "row": [
-    {
-     "button": "a0_0",
-     "sample": "> Biggest",
-     "fill": true
-    },
-    {
-     "button": "a0_1",
-     "sample": "> Smallest",
-     "fill": true
-    },
-    {
-     "button": "a0_2",
-     "sample": "> Toggle",
-     "fill": true
-    }
-   ],
-   "fill": true,
-   "gap": 2
   },
   {
    "row": [
     {
      "field": "p1",
-     "chars": 15,
+     "chars": 12,
      "fill": true
     },
     {
      "field": "w1",
-     "chars": 15,
+     "chars": 12,
      "fill": true
+    },
+    {
+     "button": "a1",
+     "sample": [
+      "Biggest",
+      "Smallest",
+      "Toggle"
+     ]
     }
    ],
    "fill": true,
    "gap": 4
-  },
-  {
-   "row": [
-    {
-     "button": "a1_0",
-     "sample": "> Biggest",
-     "fill": true
-    },
-    {
-     "button": "a1_1",
-     "sample": "> Smallest",
-     "fill": true
-    },
-    {
-     "button": "a1_2",
-     "sample": "> Toggle",
-     "fill": true
-    }
-   ],
-   "fill": true,
-   "gap": 2
   },
   {
    "row": [
     {
      "field": "p2",
-     "chars": 15,
+     "chars": 12,
      "fill": true
     },
     {
      "field": "w2",
-     "chars": 15,
+     "chars": 12,
      "fill": true
+    },
+    {
+     "button": "a2",
+     "sample": [
+      "Biggest",
+      "Smallest",
+      "Toggle"
+     ]
     }
    ],
    "fill": true,
    "gap": 4
-  },
-  {
-   "row": [
-    {
-     "button": "a2_0",
-     "sample": "> Biggest",
-     "fill": true
-    },
-    {
-     "button": "a2_1",
-     "sample": "> Smallest",
-     "fill": true
-    },
-    {
-     "button": "a2_2",
-     "sample": "> Toggle",
-     "fill": true
-    }
-   ],
-   "fill": true,
-   "gap": 2
   },
   {
    "row": [

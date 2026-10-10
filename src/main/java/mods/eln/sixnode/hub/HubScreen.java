@@ -2,18 +2,22 @@ package mods.eln.sixnode.hub;
 
 import mods.eln.client.gui.ElnScreen;
 import mods.eln.gui.ElnNodeMenu;
-import mods.eln.gui.layout.Layout;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 /**
- * Hub (P4b; layout gui/hub.json): the 80x80 connection grid between the four cable slots, as in 1.12. Each of the
- * six links (four corners, two straights) is clicked to toggle; connected ones are dark, the one under the mouse lit.
+ * Hub (P4b; layout gui/hub.json): the 80x80 connection grid between the four cable slots, as in 1.12. Each of the six
+ * links (four corners, two straights) is a widget: a corner is clicked anywhere in its quadrant, a straight anywhere on
+ * its arm. Connected links are dark, open ones light; the one under the mouse is highlighted.
  */
 public class HubScreen extends ElnScreen {
     final HubRender render;
-    Layout.Rect grid;
 
     public HubScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
         super(menu, inventory, title);
@@ -24,7 +28,7 @@ public class HubScreen extends ElnScreen {
     static final int W = 5, W2 = (80 - 5 * W) / 2;
     static final int[] P = {0, W2, W2 + W, W2 + 2 * W, W2 + 3 * W, W2 + 4 * W, W2 + 5 * W, 80};
 
-    /** The link's rectangles (x0, y0, x1, y1 in grid coordinates). */
+    /** The link's drawn rectangles (x0, y0, x1, y1 in grid coordinates). */
     static int[][] rects(int id) {
         return switch (id) {
             case 0 -> new int[][]{{P[5], P[5], P[6], P[7]}, {P[5], P[5], P[7], P[6]}};
@@ -36,48 +40,71 @@ public class HubScreen extends ElnScreen {
         };
     }
 
-    int linkAt(double mx, double my) {
-        if (grid == null) return -1;
-        int x = (int) Math.floor(mx - grid.x()), y = (int) Math.floor(my - grid.y());
-        for (int id = 0; id < 6; id++)
-            for (int[] r : rects(id)) if (x >= r[0] && x < r[2] && y >= r[1] && y < r[3]) return id;
-        return -1;
+    /** Click area: a corner's quadrant, or a straight's arm band without the centre square. */
+    static int[] area(int id) {
+        return switch (id) {
+            case 0 -> new int[]{P[5], P[5], P[7], P[7]};
+            case 1 -> new int[]{P[0], P[0], P[2], P[2]};
+            case 2 -> new int[]{P[0], P[5], P[2], P[7]};
+            case 3 -> new int[]{P[5], P[0], P[7], P[2]};
+            case 4 -> new int[]{P[0], P[2], P[7], P[5]};
+            default -> new int[]{P[2], P[0], P[5], P[7]};
+        };
     }
 
-    int mouseX, mouseY;
+    static final String[] NAMES = {"right and bottom", "left and top", "left and bottom", "right and top", "left and right",
+        "top and bottom"};
+
+    class Link extends AbstractWidget {
+        final int id, gx, gy;
+
+        Link(int id, int gx, int gy) {
+            super(gx + area(id)[0], gy + area(id)[1], area(id)[2] - area(id)[0], area(id)[3] - area(id)[1], Component.empty());
+            this.id = id;
+            this.gx = gx;
+            this.gy = gy;
+            setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(tr("Connects %1$", tr(NAMES[id])))));
+        }
+
+        boolean inCentre(double mx, double my) {
+            return mx >= gx + P[2] && mx < gx + P[5] && my >= gy + P[2] && my < gy + P[5];
+        }
+
+        @Override
+        public boolean isMouseOver(double mx, double my) {
+            return super.isMouseOver(mx, my) && !inCentre(mx, my);
+        }
+
+        @Override
+        public void onClick(MouseButtonEvent event, boolean doubleClick) {
+            render.clientSetByte(HubElement.clientConnectionGridToggle, (byte) id);
+        }
+
+        @Override
+        protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mx, int my, float a) {
+            boolean hover = isMouseOver(mx, my) || isFocused();
+            boolean on = render.connectionGrid[id];
+            if (hover && id < 4) g.fill(getX(), getY(), getX() + width, getY() + height, 0x30FFFFFF);
+            int color = on ? (hover ? 0xFF4A4A4A : 0xFF202020) : (hover ? 0xFFEFEFEF : 0xFFB8B8B8);
+            for (int[] q : rects(id)) g.fill(gx + q[0], gy + q[1], gx + q[2], gy + q[3], color);
+            // where the straights cross, a connected one stays on top
+            int other = id == 4 ? 5 : id == 5 ? 4 : -1;
+            if (other >= 0 && !on && render.connectionGrid[other])
+                g.fill(gx + P[3], gy + P[3], gx + P[4], gy + P[4], 0xFF202020);
+        }
+
+        @Override
+        protected void updateWidgetNarration(NarrationElementOutput output) {
+            defaultButtonNarrationText(output);
+        }
+    }
 
     @Override
     protected void init() {
         super.init();
-        canvas("grid", (g, r) -> {
-            grid = r;
-            g.fill(r.x(), r.y(), r.x() + r.w(), r.y() + r.h(), 0xFF8B8B8B);
-            int hover = linkAt(mouseX, mouseY);
-            // unconnected first, so connected bars cover them where they cross
-            for (int pass = 0; pass < 2; pass++)
-                for (int id = 0; id < 6; id++) {
-                    boolean on = render.connectionGrid[id];
-                    if (on != (pass == 1)) continue;
-                    int color = on ? (id == hover ? 0xFF505050 : 0xFF202020) : (id == hover ? 0xFFE0E0E0 : 0xFFB8B8B8);
-                    for (int[] q : rects(id)) g.fill(r.x() + q[0], r.y() + q[1], r.x() + q[2], r.y() + q[3], color);
-                }
-        });
-    }
-
-    @Override
-    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor g, int mx, int my, float a) {
-        mouseX = mx;
-        mouseY = my;
-        super.extractRenderState(g, mx, my, a);
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        int id = linkAt(event.x(), event.y());
-        if (id >= 0 && event.button() == 0) {
-            render.clientSetByte(HubElement.clientConnectionGridToggle, (byte) id);
-            return true;
-        }
-        return super.mouseClicked(event, doubleClick);
+        var r = rect("canvas", "grid");
+        int gx = leftPos + r.x(), gy = topPos + r.y();
+        canvas("grid", (g, q) -> g.fill(q.x(), q.y(), q.x() + q.w(), q.y() + q.h(), 0xFF8B8B8B));
+        for (int id = 0; id < 6; id++) addRenderableWidget(new Link(id, gx, gy));
     }
 }

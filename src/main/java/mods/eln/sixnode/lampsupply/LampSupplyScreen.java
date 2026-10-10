@@ -55,12 +55,17 @@ public class LampSupplyScreen extends ElnScreen {
                 tr("Power channel name"));
             field("w" + c, () -> render.entries.get(c).wirelessChannel, v -> send(LampSupplyElement.setWirelessName, c, s -> s.writeUTF(v)),
                 tr("Wireless channel name"));
-            for (int i = 0; i < 3; i++) {
-                final byte a = (byte) i;
-                var b = button("a" + c + "_" + i, () -> render.entries.get(c).aggregator == a ? "> " + tr(AGGREGATORS[a]) : tr(AGGREGATORS[a]),
-                    () -> send(LampSupplyElement.setSelectedAggregator, c, s -> s.writeByte(a)), tr(AGGREGATOR_HELP[a]).split("\n"));
-                enabling.add(() -> b.active = render.entries.get(c).aggregator != a);
-            }
+            var b = button("a" + c, () -> tr(AGGREGATORS[render.entries.get(c).aggregator]),
+                () -> send(LampSupplyElement.setSelectedAggregator, c, s -> s.writeByte((render.entries.get(c).aggregator + 1) % 3)));
+            int[] shown = {-1};
+            enabling.add(() -> {
+                int a = render.entries.get(c).aggregator;
+                if (a != shown[0]) {
+                    shown[0] = a;
+                    b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                        tr("Click to change.") + "\n" + tr(AGGREGATOR_HELP[a]))));
+                }
+            });
         }
         update();
     }

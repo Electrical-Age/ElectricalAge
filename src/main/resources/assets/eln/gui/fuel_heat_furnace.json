@@ -27,7 +27,7 @@
   },
   {
    "text": "manual",
-   "sample": "Control value at 100%  (heat 99.9kW)"
+   "sample": "Control value at 100%  (Heat Power: 99.99kW)"
   },
   {
    "slider": "manual",
@@ -36,7 +36,7 @@
   },
   {
    "text": "temp",
-   "sample": "Set point 1000°C  (actual 1000°C)"
+   "sample": "Set point: 1000°C  (Actual: 1000°C)"
   },
   {
    "slider": "temp",

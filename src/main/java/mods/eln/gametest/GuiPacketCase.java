@@ -116,6 +116,17 @@ final class GuiPacketCase implements TestCase {
             boolean consumed = ws.onBlockActivated(fp, Direction.YN, 0.5f, 0.1f, 0.5f);
             ctx.check("wrench key: the wireless switch doesn't toggle", !consumed && (boolean) field(ws, "state") == before, "consumed " + consumed);
             mods.eln.server.PlayerKeys.set(fp, mods.eln.server.PlayerKeys.WRENCH, false);
+            // hub: the grid toggle (HubScreen click)
+            ctx.floor(ctx.at(3, 0, 2));
+            var hubNode = ctx.placeSix(LabCommands.sixId("Hub"), ctx.at(3, 1, 2), Direction.YN).sixNode;
+            var hub = hubNode.getElement(Direction.YN);
+            boolean[] grid = (boolean[]) field(hub, "connectionGrid");
+            boolean g0 = grid[0];
+            ServerPacketHandler.handle(packet(hubNode, true, Direction.YN, (short) hub.sixNodeElementDescriptor.parentItemDamage, o -> {
+                o.writeByte(mods.eln.sixnode.hub.HubElement.clientConnectionGridToggle);
+                o.writeByte(0);
+            }), fp);
+            ctx.check("hub: link 0 toggled by packet", ((boolean[]) field(hub, "connectionGrid"))[0] != g0, "");
         } catch (Exception e) {
             ctx.check("gui packets", false, e.toString());
         }

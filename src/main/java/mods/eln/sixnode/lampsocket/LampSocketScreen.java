@@ -53,7 +53,8 @@ public class LampSocketScreen extends ElnScreen {
 
     @Override
     protected void update() {
-        channel.visible = render.poweredByLampSupply;
+        channel.active = render.poweredByLampSupply;
+        channel.setEditable(render.poweredByLampSupply);
         if (alpha != null) alpha.setFromDevice(render.alphaZ);
     }
 }
