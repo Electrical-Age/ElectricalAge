@@ -18,7 +18,7 @@ import static mods.eln.selftest.cases.Wp9cCases.*;
  * lowpass filter, sawtooth/sine VCOs. Port step T3 (notes/port26/PLAN.md). Lanes along +X at z=1, 4 blocks each:
  * Signal Source on the back pin (input 0), chip with its output +X into a signal cable, optional sources on the left
  * (input 1) and right (input 2) pins. Not here: the oscillator chip (its toggle rate depends on the process rate) and
- * the PID regulator (closed loop); the PAL is in its own case.
+ * the PID regulator (closed loop).
  */
 public final class ChipMoreCases {
     private ChipMoreCases() {
@@ -79,6 +79,42 @@ public final class ChipMoreCases {
     public static void addTo(List<SelfTestCase> cases) {
         for (int i = 0; i < LANES.length; i += 4)
             cases.add(new LanesCase(i / 4 + 1, Arrays.copyOfRange(LANES, i, Math.min(LANES.length, i + 4))));
+        cases.add(new PalCase());
+    }
+
+    /**
+     * PAL: only truth-table entry 7 set (GUI packet TruthTablePositionClickedEvent = 1 + int). The table is indexed
+     * in0*4 + in2*2 + (in2 xor in1) (Gray-code columns of PalGui's grid), so entry 7 is (in0, in1, in2) = (1, 0, 1).
+     * Lanes: (1,0,1) -> 1; (1,1,1) -> entry 6 -> 0; (0,0,1) -> entry 3 -> 0; (1,0,0) -> entry 4 -> 0.
+     */
+    static final class PalCase implements SelfTestCase {
+        static final double[][] IN = {{SVU, 0, SVU}, {SVU, SVU, SVU}, {0, 0, SVU}, {SVU, 0, 0}};
+        static final double[] EXPECT = {SVU, 0, 0, 0};
+        final SixNodeElement[] pals = new SixNodeElement[4];
+
+        public String name() {
+            return "chips PAL";
+        }
+
+        public int width() {
+            return 16;
+        }
+
+        public void build(SelfTestContext ctx) {
+            for (int i = 0; i < 4; i++) {
+                pals[i] = chip(ctx, lane("PAL Chip", "PAL", IN[i][0], IN[i][1], IN[i][2], 0), 1 + 4 * i);
+                pals[i].networkUnserialize(ctx.stream(o -> {
+                    o.writeByte(1); // PalElement.TruthTablePositionClickedEvent
+                    o.writeInt(7);
+                }));
+            }
+        }
+
+        public void measure(SelfTestContext ctx) {
+            for (int i = 0; i < 4; i++)
+                within(ctx, String.format("chip PAL (only entry 7 set) inputs (%d, %d, %d) output [V]",
+                    IN[i][0] > 0 ? 1 : 0, IN[i][1] > 0 ? 1 : 0, IN[i][2] > 0 ? 1 : 0), out(pals[i]), EXPECT[i], 0.01 * SVU);
+        }
     }
 
     static SixNodeElement chip(SelfTestContext ctx, Lane l, int x) {

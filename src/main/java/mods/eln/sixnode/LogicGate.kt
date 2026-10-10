@@ -499,6 +499,9 @@ class PalGui(val render: PalRender) : GuiScreenEln() {
 }
 
 class Pal : LogicFunction() {
+    // Its truth table is per chip: without this, LogicGateElement shared the descriptor's one instance, so every PAL in
+    // the world had the same table (toggling one toggled all; on load the last chip read won). Found by the port26 selftest.
+    override val hasState = true
     override val inputCount = 3
     override val infos =
         tr("A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.")

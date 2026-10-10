@@ -478,10 +478,14 @@ public final class Wp10bCases {
             Object found = field(tx, "rxElement");
             ctx.check("wp10b antenna tx found the rx 4 blocks ahead", found == rx, String.valueOf(found));
             double eff = 1 - ((1 - 0.9) + (0.9 - 0.7) / 200 * 4);
-            if (ctx.world().getWorldInfo().isRaining()) eff *= 0.707;
-            if (ctx.world().getWorldInfo().isThundering()) eff *= 0.707;
             double measured = field(tx, "powerEfficency");
-            ctx.checkValue("wp10b antenna link efficiency (1 - 0.1 - 0.001 * 4, weather)", measured, eff);
+            // x 0.707 for rain, x 0.707 more for thunder, as sampled by the antenna's last update: the weather can
+            // change between that and now, so accept any of the three factors
+            double factor = measured / eff;
+            boolean ok = false;
+            for (double w : new double[]{1, 0.707, 0.707 * 0.707}) ok |= Math.abs(factor - w) < 0.01 * w;
+            ctx.check("wp10b antenna link efficiency (1 - 0.1 - 0.001 * 4) x weather (1 / 0.707 / 0.5)", ok,
+                String.format("measured %.4f = %.4f x %.4f", measured, eff, factor));
         }
     }
 
