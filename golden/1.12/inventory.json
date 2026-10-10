@@ -1,0 +1,6113 @@
+{
+  "blocks": [
+    {
+      "id": "eln:energy_converter_eln_to_other_lvublock",
+      "class": "mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock"
+    },
+    {
+      "id": "eln:transparent_node",
+      "class": "mods.eln.node.transparent.TransparentNodeBlock"
+    },
+    {
+      "id": "eln:energy_converter_eln_to_other_mvublock",
+      "class": "mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock"
+    },
+    {
+      "id": "eln:ghost_block",
+      "class": "mods.eln.ghost.GhostBlock"
+    },
+    {
+      "id": "eln:energy_converter_eln_to_other_hvublock",
+      "class": "mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock"
+    },
+    {
+      "id": "eln:ore",
+      "class": "mods.eln.ore.OreBlock"
+    },
+    {
+      "id": "eln:six_node",
+      "class": "mods.eln.node.six.SixNodeBlock"
+    },
+    {
+      "id": "eln:light_block",
+      "class": "mods.eln.sixnode.lampsocket.LightBlock"
+    }
+  ],
+  "items": [
+    {
+      "id": "eln:copper_pickaxe",
+      "damage": 0,
+      "name": "Copper Pickaxe",
+      "itemClass": "mods.eln.item.ItemPickaxeEln"
+    },
+    {
+      "id": "eln:e_coal_leggings",
+      "damage": 0,
+      "name": "E-Coal Leggings",
+      "itemClass": "mods.eln.item.electricalitem.ElectricalArmor"
+    },
+    {
+      "id": "eln:copper_helmet",
+      "damage": 0,
+      "name": "Copper Helmet",
+      "itemClass": "mods.eln.generic.genericArmorItem"
+    },
+    {
+      "id": "eln:copper_shovel",
+      "damage": 0,
+      "name": "Copper Shovel",
+      "itemClass": "net.minecraft.item.ItemSpade"
+    },
+    {
+      "id": "eln:copper_boots",
+      "damage": 0,
+      "name": "Copper Boots",
+      "itemClass": "mods.eln.generic.genericArmorItem"
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 5,
+      "subId": 5,
+      "groupId": 0,
+      "name": "Lead Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:leaddust",
+        "name": "Lead Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 5
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 6,
+      "subId": 6,
+      "groupId": 0,
+      "name": "Tungsten Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:tungstendust",
+        "name": "Tungsten Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 6
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7,
+      "subId": 7,
+      "groupId": 0,
+      "name": "Gold Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:golddust",
+        "name": "Gold Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 8,
+      "subId": 8,
+      "groupId": 0,
+      "name": "Coal Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:coaldust",
+        "name": "Coal Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 8
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 9,
+      "subId": 9,
+      "groupId": 0,
+      "name": "Alloy Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:alloydust",
+        "name": "Alloy Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 9
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 10,
+      "subId": 10,
+      "groupId": 0,
+      "name": "Cinnabar Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:cinnabardust",
+        "name": "Cinnabar Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 10
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 64,
+      "subId": 0,
+      "groupId": 1,
+      "name": "Small 50V Copper Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 50.0,
+        "electricalNominalP": 150.0,
+        "electricalMaximalP": 190.0,
+        "electricalR": 16.666666666666668,
+        "Umax": 56.27314338711378,
+        "IconName": "eln:small50vcopperheatingcorp",
+        "name": "Small 50V Copper Heating Corp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 64
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 65,
+      "subId": 1,
+      "groupId": 1,
+      "name": "50V Copper Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 50.0,
+        "electricalNominalP": 250.0,
+        "electricalMaximalP": 320.0,
+        "electricalR": 10.0,
+        "Umax": 56.568542494923804,
+        "IconName": "eln:50vcopperheatingcorp",
+        "name": "50V Copper Heating Corp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 65
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 66,
+      "subId": 2,
+      "groupId": 1,
+      "name": "Small 200V Copper Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 200.0,
+        "electricalNominalP": 400.0,
+        "electricalMaximalP": 500.0,
+        "electricalR": 100.0,
+        "Umax": 223.60679774997897,
+        "IconName": "eln:small200vcopperheatingcorp",
+        "name": "Small 200V Copper Heating Corp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 66
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 67,
+      "subId": 3,
+      "groupId": 1,
+      "name": "200V Copper Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 200.0,
+        "electricalNominalP": 600.0,
+        "electricalMaximalP": 750.0,
+        "electricalR": 66.66666666666667,
+        "Umax": 223.60679774997897,
+        "IconName": "eln:200vcopperheatingcorp",
+        "name": "200V Copper Heating Corp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 67
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 68,
+      "subId": 4,
+      "groupId": 1,
+      "name": "Small 50V Iron Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 50.0,
+        "electricalNominalP": 180.0,
+        "electricalMaximalP": 225.0,
+        "electricalR": 13.88888888888889,
+        "Umax": 55.90169943749474,
+        "IconName": "eln:small50vironheatingcorp",
+        "name": "Small 50V Iron Heating Corp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 68
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 69,
+      "subId": 5,
+      "groupId": 1,
+      "name": "50V Iron Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 50.0,
+        "electricalNominalP": 375.0,
+        "electricalMaximalP": 480.0,
+        "electricalR": 6.666666666666667,
+        "Umax": 56.568542494923804,
+        "IconName": "eln:50vironheatingcorp",
+        "name": "50V Iron Heating Corp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 69
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 70,
+      "subId": 6,
+      "groupId": 1,
+      "name": "Small 200V Iron Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 200.0,
+        "electricalNominalP": 600.0,
+        "electricalMaximalP": 750.0,
+        "electricalR": 66.66666666666667,
+        "Umax": 223.60679774997897,
+        "IconName": "eln:small200vironheatingcorp",
+        "name": "Small 200V Iron Heating Corp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 70
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 71,
+      "subId": 7,
+      "groupId": 1,
+      "name": "200V Iron Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 200.0,
+        "electricalNominalP": 900.0,
+        "electricalMaximalP": 1050.0,
+        "electricalR": 44.44444444444444,
+        "Umax": 216.02468994692867,
+        "IconName": "eln:200vironheatingcorp",
+        "name": "200V Iron Heating Corp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 71
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 72,
+      "subId": 8,
+      "groupId": 1,
+      "name": "Small 50V Tungsten Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 50.0,
+        "electricalNominalP": 240.0,
+        "electricalMaximalP": 300.0,
+        "electricalR": 10.416666666666666,
+        "Umax": 55.90169943749474,
+        "IconName": "eln:small50vtungstenheatingcorp",
+        "name": "Small 50V Tungsten Heating Corp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 72
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 73,
+      "subId": 9,
+      "groupId": 1,
+      "name": "50V Tungsten Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 50.0,
+        "electricalNominalP": 500.0,
+        "electricalMaximalP": 640.0,
+        "electricalR": 5.0,
+        "Umax": 56.568542494923804,
+        "IconName": "eln:50vtungstenheatingcorp",
+        "name": "50V Tungsten Heating Corp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 73
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 74,
+      "subId": 10,
+      "groupId": 1,
+      "name": "Small 200V Tungsten Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 200.0,
+        "electricalNominalP": 800.0,
+        "electricalMaximalP": 1000.0,
+        "electricalR": 50.0,
+        "Umax": 223.60679774997897,
+        "IconName": "eln:small200vtungstenheatingcorp",
+        "name": "Small 200V Tungsten Heating Corp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 74
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 75,
+      "subId": 11,
+      "groupId": 1,
+      "name": "200V Tungsten Heating Corp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.HeatingCorpElement",
+      "fields": {
+        "electricalNominalU": 200.0,
+        "electricalNominalP": 1200.0,
+        "electricalMaximalP": 1500.0,
+        "electricalR": 33.333333333333336,
+        "Umax": 223.60679774997897,
+        "IconName": "eln:200vtungstenheatingcorp",
+        "name": "200V Tungsten Heating Corp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 75
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 192,
+      "subId": 0,
+      "groupId": 3,
+      "name": "On/off regulator 1%",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.regulator.RegulatorOnOffDescriptor",
+      "fields": {
+        "hysteresis": 0.01,
+        "IconName": "eln:onoffregulator",
+        "name": "On/OFF Regulator 1 Percent",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 192
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 193,
+      "subId": 1,
+      "groupId": 3,
+      "name": "On/off regulator 10%",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.regulator.RegulatorOnOffDescriptor",
+      "fields": {
+        "hysteresis": 0.1,
+        "IconName": "eln:onoffregulator",
+        "name": "On/OFF Regulator 10 Percent",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 193
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 200,
+      "subId": 8,
+      "groupId": 3,
+      "name": "Analogic Regulator",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.regulator.RegulatorAnalogDescriptor",
+      "fields": {
+        "IconName": "eln:analogicregulator",
+        "name": "Analogic Regulator",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 200
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 256,
+      "subId": 0,
+      "groupId": 4,
+      "name": "Small 50V Incandescent Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 20.0,
+        "nominalLight": 0.8326666666666667,
+        "nominalLife": 57600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:incandescentironlamp",
+        "name": "Small 50V Incandescent Light Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 256
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 257,
+      "subId": 1,
+      "groupId": 4,
+      "name": "50V Incandescent Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 30.0,
+        "nominalLight": 0.966,
+        "nominalLife": 57600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:incandescentironlamp",
+        "name": "50V Incandescent Light Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 257
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 258,
+      "subId": 2,
+      "groupId": 4,
+      "name": "200V Incandescent Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 30.0,
+        "nominalLight": 0.966,
+        "nominalLife": 57600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 200.0,
+        "minimalU": 100.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:incandescentironlamp",
+        "name": "200V Incandescent Light Bulb",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 258
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 260,
+      "subId": 4,
+      "groupId": 4,
+      "name": "Small 50V Carbon Incandescent Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 15.0,
+        "nominalLight": 0.766,
+        "nominalLife": 21600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:incandescentcarbonlamp",
+        "name": "Small 50V Carbon Incandescent Light Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 260
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 261,
+      "subId": 5,
+      "groupId": 4,
+      "name": "50V Carbon Incandescent Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 25.0,
+        "nominalLight": 0.8993333333333333,
+        "nominalLife": 21600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:incandescentcarbonlamp",
+        "name": "50V Carbon Incandescent Light Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 261
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 272,
+      "subId": 16,
+      "groupId": 4,
+      "name": "Small 50V Economic Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 10.0,
+        "nominalLight": 0.8326666666666667,
+        "nominalLife": 230400.0,
+        "type": "eco",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 37.5,
+        "stableUNormalised": 0.75,
+        "stableTime": 4.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:fluorescentlamp",
+        "name": "Small 50V Economic Light Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 272
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 273,
+      "subId": 17,
+      "groupId": 4,
+      "name": "50V Economic Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 15.0,
+        "nominalLight": 0.966,
+        "nominalLife": 230400.0,
+        "type": "eco",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 37.5,
+        "stableUNormalised": 0.75,
+        "stableTime": 4.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:fluorescentlamp",
+        "name": "50V Economic Light Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 273
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 274,
+      "subId": 18,
+      "groupId": 4,
+      "name": "200V Economic Light Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 15.0,
+        "nominalLight": 0.966,
+        "nominalLife": 230400.0,
+        "type": "eco",
+        "socket": "Douille",
+        "nominalU": 200.0,
+        "minimalU": 100.0,
+        "stableU": 150.0,
+        "stableUNormalised": 0.75,
+        "stableTime": 4.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:fluorescentlamp",
+        "name": "200V Economic Light Bulb",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 274
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 288,
+      "subId": 32,
+      "groupId": 4,
+      "name": "50V Farming Lamp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 120.0,
+        "nominalLight": 1.0326666666666666,
+        "nominalLife": 57600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 25.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.5,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:farminglamp",
+        "name": "50V Farming Lamp",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 288
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 292,
+      "subId": 36,
+      "groupId": 4,
+      "name": "200V Farming Lamp",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 120.0,
+        "nominalLight": 1.0326666666666666,
+        "nominalLife": 57600.0,
+        "type": "Incandescent",
+        "socket": "Douille",
+        "nominalU": 200.0,
+        "minimalU": 100.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.5,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:farminglamp",
+        "name": "200V Farming Lamp",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 292
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 293,
+      "subId": 37,
+      "groupId": 4,
+      "name": "50V LED Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 15.0,
+        "nominalLight": 0.966,
+        "nominalLife": 1843200.0,
+        "type": "LED",
+        "socket": "Douille",
+        "nominalU": 50.0,
+        "minimalU": 37.5,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:ledlamp",
+        "name": "50V LED Bulb",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 293
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 294,
+      "subId": 38,
+      "groupId": 4,
+      "name": "200V LED Bulb",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.LampDescriptor",
+      "fields": {
+        "nominalP": 15.0,
+        "nominalLight": 0.966,
+        "nominalLife": 1843200.0,
+        "type": "LED",
+        "socket": "Douille",
+        "nominalU": 200.0,
+        "minimalU": 150.0,
+        "stableU": 0.0,
+        "stableUNormalised": 0.0,
+        "stableTime": 0.0,
+        "vegetableGrowRate": 0.0,
+        "serverNominalLife": 0.0,
+        "IconName": "eln:ledlamp",
+        "name": "200V LED Bulb",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 294
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 320,
+      "subId": 0,
+      "groupId": 5,
+      "name": "Overheating Protection",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.OverHeatingProtectionDescriptor",
+      "fields": {
+        "IconName": "eln:overheatingprotection",
+        "name": "Overheating Protection",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 320
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 321,
+      "subId": 1,
+      "groupId": 5,
+      "name": "Overvoltage Protection",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.OverVoltageProtectionDescriptor",
+      "fields": {
+        "IconName": "eln:overvoltageprotection",
+        "name": "Overvoltage Protection",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 321
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 384,
+      "subId": 0,
+      "groupId": 6,
+      "name": "Combustion Chamber",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.CombustionChamber",
+      "fields": {
+        "IconName": "eln:combustionchamber",
+        "name": "Combustion Chamber",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 384
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 385,
+      "subId": 1,
+      "groupId": 6,
+      "name": "Thermal Insulation",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ThermalIsolatorElement",
+      "fields": {
+        "conductionFactor": 0.5,
+        "Tmax": 500.0,
+        "IconName": "eln:thermalinsulation",
+        "name": "Thermal Insulation",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 385
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 448,
+      "subId": 0,
+      "groupId": 7,
+      "name": "Cheap Ferromagnetic Core",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.FerromagneticCoreDescriptor",
+      "fields": {
+        "cableMultiplicator": 10.0,
+        "IconName": "eln:cheapferromagneticcore",
+        "name": "Cheap Ferromagnetic Core",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 448
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 449,
+      "subId": 1,
+      "groupId": 7,
+      "name": "Average Ferromagnetic Core",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.FerromagneticCoreDescriptor",
+      "fields": {
+        "cableMultiplicator": 4.0,
+        "IconName": "eln:averageferromagneticcore",
+        "name": "Average Ferromagnetic Core",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 449
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 450,
+      "subId": 2,
+      "groupId": 7,
+      "name": "Optimal Ferromagnetic Core",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.FerromagneticCoreDescriptor",
+      "fields": {
+        "cableMultiplicator": 1.0,
+        "IconName": "eln:optimalferromagneticcore",
+        "name": "Optimal Ferromagnetic Core",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 450
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 513,
+      "subId": 1,
+      "groupId": 8,
+      "name": "Copper Ingot",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:copperingot",
+        "name": "Copper Ingot",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 513
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 516,
+      "subId": 4,
+      "groupId": 8,
+      "name": "Lead Ingot",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:leadingot",
+        "name": "Lead Ingot",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 516
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 517,
+      "subId": 5,
+      "groupId": 8,
+      "name": "Tungsten Ingot",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:tungsteningot",
+        "name": "Tungsten Ingot",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 517
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 518,
+      "subId": 6,
+      "groupId": 8,
+      "name": "Ferrite Ingot",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:ferriteingot",
+        "name": "Ferrite Ingot",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 518
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 519,
+      "subId": 7,
+      "groupId": 8,
+      "name": "Alloy Ingot",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:alloyingot",
+        "name": "Alloy Ingot",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 519
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 520,
+      "subId": 8,
+      "groupId": 8,
+      "name": "Mercury",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:mercury",
+        "name": "Mercury",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 520
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 577,
+      "subId": 1,
+      "groupId": 9,
+      "name": "Copper Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:copperdust",
+        "name": "Copper Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 577
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 578,
+      "subId": 2,
+      "groupId": 9,
+      "name": "Iron Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:irondust",
+        "name": "Iron Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 578
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 640,
+      "subId": 0,
+      "groupId": 10,
+      "name": "Electrical Motor",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:electricalmotor",
+        "name": "Electrical Motor",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 640
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 641,
+      "subId": 1,
+      "groupId": 10,
+      "name": "Advanced Electrical Motor",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:advancedelectricalmotor",
+        "name": "Advanced Electrical Motor",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 641
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 704,
+      "subId": 0,
+      "groupId": 11,
+      "name": "Solar Tracker",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.SolarTrackerDescriptor",
+      "fields": {
+        "IconName": "eln:solartracker",
+        "name": "Solar Tracker",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 704
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 896,
+      "subId": 0,
+      "groupId": 14,
+      "name": "Multimeter",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptor",
+      "fields": {
+        "IconName": "eln:multimeter",
+        "name": "MultiMeter",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 896
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 897,
+      "subId": 1,
+      "groupId": 14,
+      "name": "Thermometer",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptor",
+      "fields": {
+        "IconName": "eln:thermometer",
+        "name": "Thermometer",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 897
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 898,
+      "subId": 2,
+      "groupId": 14,
+      "name": "Universal-Meter",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptor",
+      "fields": {
+        "IconName": "eln:allmeter",
+        "name": "AllMeter",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 898
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 904,
+      "subId": 8,
+      "groupId": 14,
+      "name": "Wireless Analyzer",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor",
+      "fields": {
+        "IconName": "eln:wirelessanalyser",
+        "name": "Wireless Analyser",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 904
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 960,
+      "subId": 0,
+      "groupId": 15,
+      "name": "Cheap Electrical Drill",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalDrillDescriptor",
+      "fields": {
+        "nominalPower": 500.0,
+        "operationTime": 8.0,
+        "OperationEnergy": 4000.0,
+        "IconName": "eln:cheapelectricaldrill",
+        "name": "Cheap Electrical Drill",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 960
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 961,
+      "subId": 1,
+      "groupId": 15,
+      "name": "Average Electrical Drill",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalDrillDescriptor",
+      "fields": {
+        "nominalPower": 1000.0,
+        "operationTime": 5.0,
+        "OperationEnergy": 5000.0,
+        "IconName": "eln:averageelectricaldrill",
+        "name": "Average Electrical Drill",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 961
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 962,
+      "subId": 2,
+      "groupId": 15,
+      "name": "Fast Electrical Drill",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalDrillDescriptor",
+      "fields": {
+        "nominalPower": 2000.0,
+        "operationTime": 3.0,
+        "OperationEnergy": 6000.0,
+        "IconName": "eln:fastelectricaldrill",
+        "name": "Fast Electrical Drill",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 962
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 1024,
+      "subId": 0,
+      "groupId": 16,
+      "name": "Ore Scanner",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.OreScanner",
+      "fields": {
+        "IconName": "eln:orescanner",
+        "name": "Ore Scanner",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 1024
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 1088,
+      "subId": 0,
+      "groupId": 17,
+      "name": "Mining Pipe",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.MiningPipeDescriptor",
+      "fields": {
+        "IconName": "eln:miningpipe",
+        "name": "Mining Pipe",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 1088
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 4096,
+      "subId": 0,
+      "groupId": 64,
+      "name": "Tree Resin",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.TreeResin",
+      "fields": {
+        "IconName": "eln:treeresin",
+        "name": "Tree Resin",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 4096
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 4097,
+      "subId": 1,
+      "groupId": 64,
+      "name": "Rubber",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptor",
+      "fields": {
+        "IconName": "eln:rubber",
+        "name": "Rubber",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 4097
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 4160,
+      "subId": 0,
+      "groupId": 65,
+      "name": "Copper Cable",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.CopperCableDescriptor",
+      "fields": {
+        "IconName": "eln:coppercable",
+        "name": "Copper Cable",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 4160
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 4161,
+      "subId": 1,
+      "groupId": 65,
+      "name": "Iron Cable",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptor",
+      "fields": {
+        "IconName": "eln:ironcable",
+        "name": "Iron Cable",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 4161
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 4162,
+      "subId": 2,
+      "groupId": 65,
+      "name": "Tungsten Cable",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptor",
+      "fields": {
+        "IconName": "eln:tungstencable",
+        "name": "Tungsten Cable",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 4162
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 6279,
+      "subId": 7,
+      "groupId": 98,
+      "name": "Lead Fuse for low voltage cables",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalFuseDescriptor",
+      "fields": {
+        "IconName": "eln:electricalfuse",
+        "name": "Lead Fuse for low voltage cables",
+        "voltageLevelColor": "LowVoltage",
+        "parentItemDamage": 6279
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 6280,
+      "subId": 8,
+      "groupId": 98,
+      "name": "Lead Fuse for medium voltage cables",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalFuseDescriptor",
+      "fields": {
+        "IconName": "eln:electricalfuse",
+        "name": "Lead Fuse for medium voltage cables",
+        "voltageLevelColor": "MediumVoltage",
+        "parentItemDamage": 6280
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 6281,
+      "subId": 9,
+      "groupId": 98,
+      "name": "Lead Fuse for high voltage cables",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalFuseDescriptor",
+      "fields": {
+        "IconName": "eln:electricalfuse",
+        "name": "Lead Fuse for high voltage cables",
+        "voltageLevelColor": "HighVoltage",
+        "parentItemDamage": 6281
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 6282,
+      "subId": 10,
+      "groupId": 98,
+      "name": "Lead Fuse for very high voltage cables",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalFuseDescriptor",
+      "fields": {
+        "IconName": "eln:electricalfuse",
+        "name": "Lead Fuse for very high voltage cables",
+        "voltageLevelColor": "VeryHighVoltage",
+        "parentItemDamage": 6282
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 6283,
+      "subId": 11,
+      "groupId": 98,
+      "name": "Blown Lead Fuse",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.ElectricalFuseDescriptor",
+      "fields": {
+        "IconName": "eln:blownelectricalfuse",
+        "name": "Blown Lead Fuse",
+        "voltageLevelColor": "Neutral",
+        "parentItemDamage": 6283
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7616,
+      "subId": 0,
+      "groupId": 119,
+      "name": "Black Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:blackbrush",
+        "name": "Black Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7616
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7617,
+      "subId": 1,
+      "groupId": 119,
+      "name": "Red Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:redbrush",
+        "name": "Red Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7617
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7618,
+      "subId": 2,
+      "groupId": 119,
+      "name": "Green Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:greenbrush",
+        "name": "Green Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7618
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7619,
+      "subId": 3,
+      "groupId": 119,
+      "name": "Brown Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:brownbrush",
+        "name": "Brown Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7619
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7620,
+      "subId": 4,
+      "groupId": 119,
+      "name": "Blue Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:bluebrush",
+        "name": "Blue Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7620
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7621,
+      "subId": 5,
+      "groupId": 119,
+      "name": "Purple Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:purplebrush",
+        "name": "Purple Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7621
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7622,
+      "subId": 6,
+      "groupId": 119,
+      "name": "Cyan Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:cyanbrush",
+        "name": "Cyan Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7622
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7623,
+      "subId": 7,
+      "groupId": 119,
+      "name": "Silver Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:silverbrush",
+        "name": "Silver Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7623
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7624,
+      "subId": 8,
+      "groupId": 119,
+      "name": "Gray Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:graybrush",
+        "name": "Gray Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7624
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7625,
+      "subId": 9,
+      "groupId": 119,
+      "name": "Pink Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:pinkbrush",
+        "name": "Pink Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7625
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7626,
+      "subId": 10,
+      "groupId": 119,
+      "name": "Lime Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:limebrush",
+        "name": "Lime Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7626
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7627,
+      "subId": 11,
+      "groupId": 119,
+      "name": "Yellow Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:yellowbrush",
+        "name": "Yellow Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7627
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7628,
+      "subId": 12,
+      "groupId": 119,
+      "name": "Light Blue Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:lightbluebrush",
+        "name": "Light Blue Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7628
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7629,
+      "subId": 13,
+      "groupId": 119,
+      "name": "Magenta Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:magentabrush",
+        "name": "Magenta Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7629
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7630,
+      "subId": 14,
+      "groupId": 119,
+      "name": "Orange Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:orangebrush",
+        "name": "Orange Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7630
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7631,
+      "subId": 15,
+      "groupId": 119,
+      "name": "White Brush",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.BrushDescriptor",
+      "fields": {
+        "IconName": "eln:whitebrush",
+        "name": "White Brush",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7631
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7680,
+      "subId": 0,
+      "groupId": 120,
+      "name": "Cheap Chip",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:cheapchip",
+        "name": "Cheap Chip",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7680
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7681,
+      "subId": 1,
+      "groupId": 120,
+      "name": "Advanced Chip",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:advancedchip",
+        "name": "Advanced Chip",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7681
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7682,
+      "subId": 2,
+      "groupId": 120,
+      "name": "Machine Block",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:machineblock",
+        "name": "Machine Block",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7682
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7683,
+      "subId": 3,
+      "groupId": 120,
+      "name": "Electrical Probe Chip",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:electricalprobechip",
+        "name": "Electrical Probe Chip",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7683
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7684,
+      "subId": 4,
+      "groupId": 120,
+      "name": "Thermal Probe Chip",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:thermalprobechip",
+        "name": "Thermal Probe Chip",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7684
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7686,
+      "subId": 6,
+      "groupId": 120,
+      "name": "Copper Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:copperplate",
+        "name": "Copper Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7686
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7687,
+      "subId": 7,
+      "groupId": 120,
+      "name": "Iron Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:ironplate",
+        "name": "Iron Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7687
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7688,
+      "subId": 8,
+      "groupId": 120,
+      "name": "Gold Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:goldplate",
+        "name": "Gold Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7688
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7689,
+      "subId": 9,
+      "groupId": 120,
+      "name": "Lead Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:leadplate",
+        "name": "Lead Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7689
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7690,
+      "subId": 10,
+      "groupId": 120,
+      "name": "Silicon Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:siliconplate",
+        "name": "Silicon Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7690
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7691,
+      "subId": 11,
+      "groupId": 120,
+      "name": "Alloy Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:alloyplate",
+        "name": "Alloy Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7691
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7692,
+      "subId": 12,
+      "groupId": 120,
+      "name": "Coal Plate",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:coalplate",
+        "name": "Coal Plate",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7692
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7696,
+      "subId": 16,
+      "groupId": 120,
+      "name": "Silicon Dust",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:silicondust",
+        "name": "Silicon Dust",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7696
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7697,
+      "subId": 17,
+      "groupId": 120,
+      "name": "Silicon Ingot",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:siliconingot",
+        "name": "Silicon Ingot",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7697
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7702,
+      "subId": 22,
+      "groupId": 120,
+      "name": "Machine Booster",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.MachineBoosterDescriptor",
+      "fields": {
+        "IconName": "eln:machinebooster",
+        "name": "Machine Booster",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7702
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7703,
+      "subId": 23,
+      "groupId": 120,
+      "name": "Advanced Machine Block",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:advancedmachineblock",
+        "name": "Advanced Machine Block",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7703
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7708,
+      "subId": 28,
+      "groupId": 120,
+      "name": "Basic Magnet",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:basicmagnet",
+        "name": "Basic Magnet",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7708
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7709,
+      "subId": 29,
+      "groupId": 120,
+      "name": "Advanced Magnet",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:advancedmagnet",
+        "name": "Advanced Magnet",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7709
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7712,
+      "subId": 32,
+      "groupId": 120,
+      "name": "Data Logger Print",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor",
+      "fields": {
+        "IconName": "eln:empty-texture",
+        "name": "Data Logger Print",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7712
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7713,
+      "subId": 33,
+      "groupId": 120,
+      "name": "Signal Antenna",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:signalantenna",
+        "name": "Signal Antenna",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7713
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7720,
+      "subId": 40,
+      "groupId": 120,
+      "name": "Player Filter",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.EntitySensorFilterDescriptor",
+      "fields": {
+        "r": 0.0,
+        "g": 1.0,
+        "b": 0.0,
+        "IconName": "eln:playerfilter",
+        "name": "Player Filter",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7720
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7721,
+      "subId": 41,
+      "groupId": 120,
+      "name": "Monster Filter",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.EntitySensorFilterDescriptor",
+      "fields": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0,
+        "IconName": "eln:monsterfilter",
+        "name": "Monster Filter",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7721
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7722,
+      "subId": 42,
+      "groupId": 120,
+      "name": "Animal Filter",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.EntitySensorFilterDescriptor",
+      "fields": {
+        "r": 0.3,
+        "g": 0.3,
+        "b": 1.0,
+        "IconName": "eln:animalfilter",
+        "name": "Animal Filter",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7722
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7728,
+      "subId": 48,
+      "groupId": 120,
+      "name": "Wrench",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.generic.GenericItemUsingDamageDescriptorWithComment",
+      "fields": {
+        "IconName": "eln:wrench",
+        "name": "Wrench",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7728
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7732,
+      "subId": 52,
+      "groupId": 120,
+      "name": "Dielectric",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.DielectricItem",
+      "fields": {
+        "uNominal": 50.0,
+        "IconName": "eln:dielectric",
+        "name": "Dielectric",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7732
+      }
+    },
+    {
+      "id": "eln:shared_item",
+      "damage": 7733,
+      "subId": 53,
+      "groupId": 120,
+      "name": "Casing",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.CaseItemDescriptor",
+      "fields": {
+        "IconName": "eln:casing",
+        "name": "Casing",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7733
+      }
+    },
+    {
+      "id": "eln:item_creative_tab",
+      "damage": 0,
+      "name": "Electrical Age",
+      "itemClass": "net.minecraft.item.Item"
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7744,
+      "subId": 0,
+      "groupId": 121,
+      "name": "Small Flashlight",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.ElectricalLampItem",
+      "fields": {
+        "lightMin": 10,
+        "rangeMin": 6,
+        "dischargeMin": 20.0,
+        "lightMax": 12,
+        "rangeMax": 8,
+        "dischargeMax": 50.0,
+        "energyStorage": 6000.0,
+        "chargePower": 100.0,
+        "IconName": "eln:smallflashlightoff",
+        "name": "Small Flashlight",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7744
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7745,
+      "subId": 1,
+      "groupId": 121,
+      "name": "Improved Flashlight",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.ElectricalLampItem",
+      "fields": {
+        "lightMin": 15,
+        "rangeMin": 8,
+        "dischargeMin": 20.0,
+        "lightMax": 15,
+        "rangeMax": 12,
+        "dischargeMax": 50.0,
+        "energyStorage": 24000.0,
+        "chargePower": 400.0,
+        "IconName": "eln:improvedflashlightoff",
+        "name": "Improved Flashlight",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7745
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7752,
+      "subId": 8,
+      "groupId": 121,
+      "name": "Portable Electrical Mining Drill",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.ElectricalPickaxe",
+      "fields": {
+        "strengthOn": 8.0,
+        "strengthOff": 3.0,
+        "energyStorage": 120000.0,
+        "energyPerBlock": 200.0,
+        "chargePower": 2400.0,
+        "light": 0,
+        "range": 0,
+        "IconName": "eln:portableelectricalminingdrill",
+        "name": "Portable Electrical Mining Drill",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7752
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7756,
+      "subId": 12,
+      "groupId": 121,
+      "name": "Portable Electrical Axe",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.ElectricalAxe",
+      "fields": {
+        "strengthOn": 8.0,
+        "strengthOff": 3.0,
+        "energyStorage": 40000.0,
+        "energyPerBlock": 200.0,
+        "chargePower": 800.0,
+        "light": 0,
+        "range": 0,
+        "IconName": "eln:portableelectricalaxe",
+        "name": "Portable Electrical Axe",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7756
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7808,
+      "subId": 0,
+      "groupId": 122,
+      "name": "Portable Battery",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.BatteryItem",
+      "fields": {
+        "energyStorage": 40000.0,
+        "chargePower": 500.0,
+        "dischargePower": 100.0,
+        "priority": 2,
+        "IconName": "eln:portablebattery",
+        "name": "Portable Battery",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7808
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7809,
+      "subId": 1,
+      "groupId": 122,
+      "name": "Portable Battery Pack",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.BatteryItem",
+      "fields": {
+        "energyStorage": 120000.0,
+        "chargePower": 1500.0,
+        "dischargePower": 300.0,
+        "priority": 2,
+        "IconName": "eln:portablebatterypack",
+        "name": "Portable Battery Pack",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7809
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7824,
+      "subId": 16,
+      "groupId": 122,
+      "name": "Portable Capacitor",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.BatteryItem",
+      "fields": {
+        "energyStorage": 5000.0,
+        "chargePower": 2000.0,
+        "dischargePower": 500.0,
+        "priority": 1,
+        "IconName": "eln:portablecondensator",
+        "name": "Portable Condensator",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7824
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7825,
+      "subId": 17,
+      "groupId": 122,
+      "name": "Portable Capacitor Pack",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.BatteryItem",
+      "fields": {
+        "energyStorage": 15000.0,
+        "chargePower": 6000.0,
+        "dischargePower": 1500.0,
+        "priority": 1,
+        "IconName": "eln:portablecondensatorpack",
+        "name": "Portable Condensator Pack",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7825
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7840,
+      "subId": 32,
+      "groupId": 122,
+      "name": "X-Ray Scanner",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.electricalitem.PortableOreScannerItem",
+      "fields": {
+        "energyStorage": 10000.0,
+        "chargePower": 400.0,
+        "dischargePower": 300.0,
+        "viewRange": 5.0,
+        "viewYAlpha": 1.5707964,
+        "resWidth": 32,
+        "resHeight": 20,
+        "damagePerBreakLevel": 3,
+        "IconName": "eln:x-rayscanner",
+        "name": "X-Ray Scanner",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7840
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7936,
+      "subId": 0,
+      "groupId": 124,
+      "name": "Small Fuel Burner",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.FuelBurnerDescriptor",
+      "fields": {
+        "producedHeatPower": 5000.0,
+        "type": 2,
+        "soundPitch": 1.6,
+        "IconName": "eln:smallfuelburner",
+        "name": "Small Fuel Burner",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7936
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7937,
+      "subId": 1,
+      "groupId": 124,
+      "name": "Medium Fuel Burner",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.FuelBurnerDescriptor",
+      "fields": {
+        "producedHeatPower": 10000.0,
+        "type": 1,
+        "soundPitch": 1.4,
+        "IconName": "eln:mediumfuelburner",
+        "name": "Medium Fuel Burner",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7937
+      }
+    },
+    {
+      "id": "eln:shared_item_stack_one",
+      "damage": 7938,
+      "subId": 2,
+      "groupId": 124,
+      "name": "Big Fuel Burner",
+      "itemClass": "mods.eln.generic.SharedItem",
+      "descriptorClass": "mods.eln.item.FuelBurnerDescriptor",
+      "fields": {
+        "producedHeatPower": 25000.0,
+        "type": 0,
+        "soundPitch": 1.0,
+        "IconName": "eln:bigfuelburner",
+        "name": "Big Fuel Burner",
+        "voltageLevelColor": "None",
+        "parentItemDamage": 7938
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 128,
+      "subId": 0,
+      "groupId": 2,
+      "name": "Ground Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.groundcable.GroundCableDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "iconName": "groundcable",
+        "name": "Ground Cable",
+        "parentItemDamage": 128
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 136,
+      "subId": 8,
+      "groupId": 2,
+      "name": "Hub",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.hub.HubDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "iconName": "hub",
+        "name": "Hub",
+        "parentItemDamage": 136
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 192,
+      "subId": 0,
+      "groupId": 3,
+      "name": "Electrical Source",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor",
+      "fields": {
+        "signalSource": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "electricalsource",
+        "name": "Electrical Source",
+        "parentItemDamage": 192
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 193,
+      "subId": 1,
+      "groupId": 3,
+      "name": "Signal Source",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor",
+      "fields": {
+        "signalSource": true,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "signalsource",
+        "name": "Signal Source",
+        "parentItemDamage": 193
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 2048,
+      "subId": 0,
+      "groupId": 32,
+      "name": "Signal Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalcable.ElectricalCableDescriptor",
+      "fields": {
+        "electricalNominalRs": 5.0,
+        "electricalNominalVoltage": 50.0,
+        "electricalNominalPower": 5.0,
+        "electricalNominalPowerDropFactor": 0.02,
+        "signalWire": true,
+        "electricalMaximalVoltage": 65.0,
+        "electricalMaximalCurrent": 0.12,
+        "electricalRp": 1.0E9,
+        "electricalRs": 5.0,
+        "electricalC": 1.0,
+        "thermalRp": 902.7777777777778,
+        "thermalRs": 15.0462962962963,
+        "thermalC": 0.03323076923076922,
+        "thermalWarmLimit": 130.0,
+        "thermalCoolLimit": -100.0,
+        "electricalMaximalI": 0.12,
+        "electricalRsMin": 5.0,
+        "electricalRsPerCelcius": 0.0,
+        "dielectricBreakOhmPerVolt": 0.95,
+        "dielectricBreakOhm": 8450.0,
+        "dielectricVoltage": 65.0,
+        "dielectricBreakOhmMin": 8450.0,
+        "description": "For signal transmission.",
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "signalcable",
+        "name": "Signal Cable",
+        "parentItemDamage": 2048
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 2052,
+      "subId": 4,
+      "groupId": 32,
+      "name": "Low Voltage Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalcable.ElectricalCableDescriptor",
+      "fields": {
+        "electricalNominalRs": 0.0125,
+        "electricalNominalVoltage": 50.0,
+        "electricalNominalPower": 1000.0,
+        "electricalNominalPowerDropFactor": 0.01,
+        "signalWire": false,
+        "electricalMaximalVoltage": 65.0,
+        "electricalMaximalCurrent": 24.0,
+        "electricalRp": 1.0E9,
+        "electricalRs": 0.0125,
+        "electricalC": 1.0,
+        "thermalRp": 9.027777777777777,
+        "thermalRs": 0.07523148148148148,
+        "thermalC": 3.3230769230769233,
+        "thermalWarmLimit": 130.0,
+        "thermalCoolLimit": -100.0,
+        "electricalMaximalI": 24.0,
+        "electricalRsMin": 0.0125,
+        "electricalRsPerCelcius": 0.0,
+        "dielectricBreakOhmPerVolt": 0.95,
+        "dielectricBreakOhm": 211.25,
+        "dielectricVoltage": 65.0,
+        "dielectricBreakOhmMin": 211.25,
+        "description": "For low voltage with high current.",
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "lowvoltagecable",
+        "name": "Low Voltage Cable",
+        "parentItemDamage": 2052
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 2056,
+      "subId": 8,
+      "groupId": 32,
+      "name": "Medium Voltage Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalcable.ElectricalCableDescriptor",
+      "fields": {
+        "electricalNominalRs": 0.05,
+        "electricalNominalVoltage": 200.0,
+        "electricalNominalPower": 2000.0,
+        "electricalNominalPowerDropFactor": 0.005,
+        "signalWire": false,
+        "electricalMaximalVoltage": 260.0,
+        "electricalMaximalCurrent": 12.0,
+        "electricalRp": 1.0E9,
+        "electricalRs": 0.05,
+        "electricalC": 1.0,
+        "thermalRp": 9.027777777777777,
+        "thermalRs": 0.07523148148148148,
+        "thermalC": 3.3230769230769233,
+        "thermalWarmLimit": 130.0,
+        "thermalCoolLimit": -100.0,
+        "electricalMaximalI": 12.0,
+        "electricalRsMin": 0.05,
+        "electricalRsPerCelcius": 0.0,
+        "dielectricBreakOhmPerVolt": 0.95,
+        "dielectricBreakOhm": 2253.3333333333335,
+        "dielectricVoltage": 260.0,
+        "dielectricBreakOhmMin": 2253.3333333333335,
+        "description": "miaou",
+        "voltageLevelColor": "MediumVoltage",
+        "iconName": "mediumvoltagecable",
+        "name": "Medium Voltage Cable",
+        "parentItemDamage": 2056
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 2060,
+      "subId": 12,
+      "groupId": 32,
+      "name": "High Voltage Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalcable.ElectricalCableDescriptor",
+      "fields": {
+        "electricalNominalRs": 0.1,
+        "electricalNominalVoltage": 800.0,
+        "electricalNominalPower": 5000.0,
+        "electricalNominalPowerDropFactor": 0.0015625,
+        "signalWire": false,
+        "electricalMaximalVoltage": 1040.0,
+        "electricalMaximalCurrent": 7.5,
+        "electricalRp": 1.0E9,
+        "electricalRs": 0.1,
+        "electricalC": 1.0,
+        "thermalRp": 11.555555555555555,
+        "thermalRs": 0.0962962962962963,
+        "thermalC": 2.5961538461538463,
+        "thermalWarmLimit": 130.0,
+        "thermalCoolLimit": -100.0,
+        "electricalMaximalI": 7.5,
+        "electricalRsMin": 0.1,
+        "electricalRsPerCelcius": 0.0,
+        "dielectricBreakOhmPerVolt": 0.95,
+        "dielectricBreakOhm": 27040.0,
+        "dielectricVoltage": 1040.0,
+        "dielectricBreakOhmMin": 27040.0,
+        "description": "miaou2",
+        "voltageLevelColor": "HighVoltage",
+        "iconName": "highvoltagecable",
+        "name": "High Voltage Cable",
+        "parentItemDamage": 2060
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 2064,
+      "subId": 16,
+      "groupId": 32,
+      "name": "Very High Voltage Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalcable.ElectricalCableDescriptor",
+      "fields": {
+        "electricalNominalRs": 0.06666666666666667,
+        "electricalNominalVoltage": 3200.0,
+        "electricalNominalPower": 15000.0,
+        "electricalNominalPowerDropFactor": 1.953125E-4,
+        "signalWire": false,
+        "electricalMaximalVoltage": 4160.0,
+        "electricalMaximalCurrent": 5.625,
+        "electricalRp": 1.0E9,
+        "electricalRs": 0.06666666666666667,
+        "electricalC": 1.0,
+        "thermalRp": 30.814814814814813,
+        "thermalRs": 0.25679012345679014,
+        "thermalC": 0.9735576923076923,
+        "thermalWarmLimit": 130.0,
+        "thermalCoolLimit": -100.0,
+        "electricalMaximalI": 5.625,
+        "electricalRsMin": 0.06666666666666667,
+        "electricalRsPerCelcius": 0.0,
+        "dielectricBreakOhmPerVolt": 0.95,
+        "dielectricBreakOhm": 432640.0,
+        "dielectricVoltage": 4160.0,
+        "dielectricBreakOhmMin": 432640.0,
+        "description": "miaou2",
+        "voltageLevelColor": "VeryHighVoltage",
+        "iconName": "veryhighvoltagecable",
+        "name": "Very High Voltage Cable",
+        "parentItemDamage": 2064
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 3072,
+      "subId": 0,
+      "groupId": 48,
+      "name": "Removed_from_mod_Copper_Thermal_Cable.name",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.thermalcable.ThermalCableDescriptor",
+      "fields": {
+        "addToDataEnabled": false,
+        "thermalRp": 1.25,
+        "thermalRs": 5.0E-4,
+        "thermalC": 15.006,
+        "thermalWarmLimit": 980.0,
+        "thermalCoolLimit": -200.0,
+        "thermalStdT": 500.0,
+        "thermalStdPower": 2000.0,
+        "thermalStdDrop": 2.0,
+        "thermalStdLost": 400.0,
+        "thermalTao": 0.1,
+        "description": "Miaou !",
+        "voltageLevelColor": "Thermal",
+        "iconName": "empty-texture",
+        "name": "Removed from mod Copper Thermal Cable",
+        "parentItemDamage": 3072
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 3073,
+      "subId": 1,
+      "groupId": 48,
+      "name": "Copper Thermal Cable",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.thermalcable.ThermalCableDescriptor",
+      "fields": {
+        "addToDataEnabled": true,
+        "thermalRp": 50.0,
+        "thermalRs": 5.0E-4,
+        "thermalC": 15.000149999999998,
+        "thermalWarmLimit": 980.0,
+        "thermalCoolLimit": -200.0,
+        "thermalStdT": 500.0,
+        "thermalStdPower": 2000.0,
+        "thermalStdDrop": 2.0,
+        "thermalStdLost": 10.0,
+        "thermalTao": 0.1,
+        "description": "Miaou !",
+        "voltageLevelColor": "Thermal",
+        "iconName": "copperthermalcable",
+        "name": "Copper Thermal Cable",
+        "parentItemDamage": 3073
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4096,
+      "subId": 0,
+      "groupId": 64,
+      "name": "Lamp Socket A",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 4,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "lampsocketa",
+        "name": "Lamp Socket A",
+        "parentItemDamage": 4096
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4097,
+      "subId": 1,
+      "groupId": 64,
+      "name": "Lamp Socket B Projector",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 10,
+        "alphaZMin": -90.0,
+        "alphaZMax": 90.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "lampsocketbprojector",
+        "name": "Lamp Socket B Projector",
+        "parentItemDamage": 4097
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4100,
+      "subId": 4,
+      "groupId": 64,
+      "name": "Robust Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 3,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": -90.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "robustlampsocket",
+        "name": "Robust Lamp Socket",
+        "parentItemDamage": 4100
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4101,
+      "subId": 5,
+      "groupId": 64,
+      "name": "Flat Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 3,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "flatlampsocket",
+        "name": "Flat Lamp Socket",
+        "parentItemDamage": 4101
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4102,
+      "subId": 6,
+      "groupId": 64,
+      "name": "Simple Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 3,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "simplelampsocket",
+        "name": "Simple Lamp Socket",
+        "parentItemDamage": 4102
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4103,
+      "subId": 7,
+      "groupId": 64,
+      "name": "Fluorescent Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 4,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": false,
+        "cableRight": false,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "fluorescentlampsocket",
+        "name": "Fluorescent Lamp Socket",
+        "parentItemDamage": 4103
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4104,
+      "subId": 8,
+      "groupId": 64,
+      "name": "Streetlight",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": false,
+        "range": 0,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "streetlight",
+        "name": "Street Light",
+        "parentItemDamage": 4104
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4105,
+      "subId": 9,
+      "groupId": 64,
+      "name": "Sconce Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": true,
+        "range": 3,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": -90.0,
+        "rotateOnlyBy180Deg": true,
+        "paintable": true,
+        "voltageLevelColor": "Neutral",
+        "iconName": "sconcelampsocket",
+        "name": "Sconce Lamp Socket",
+        "parentItemDamage": 4105
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4108,
+      "subId": 12,
+      "groupId": 64,
+      "name": "Suspended Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": false,
+        "range": 3,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "suspendedlampsocket",
+        "name": "Suspended Lamp Socket",
+        "parentItemDamage": 4108
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4109,
+      "subId": 13,
+      "groupId": 64,
+      "name": "Long Suspended Lamp Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsocket.LampSocketDescriptor",
+      "fields": {
+        "socketType": "Douille",
+        "cameraOpt": false,
+        "range": 4,
+        "alphaZMin": 0.0,
+        "alphaZMax": 0.0,
+        "alphaZBoot": 0.0,
+        "cableFront": true,
+        "cableLeft": true,
+        "cableRight": true,
+        "cableBack": true,
+        "initialRotateDeg": 0.0,
+        "rotateOnlyBy180Deg": false,
+        "paintable": false,
+        "voltageLevelColor": "Neutral",
+        "iconName": "longsuspendedlampsocket",
+        "name": "Long Suspended Lamp Socket",
+        "parentItemDamage": 4109
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4111,
+      "subId": 15,
+      "groupId": 64,
+      "name": "50V Emergency Lamp",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.EmergencyLampDescriptor",
+      "fields": {
+        "batteryCapacity": 6000.0,
+        "chargePower": 10.0,
+        "consumption": 5.0,
+        "lightLevel": 6,
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "emergencylamp",
+        "name": "50V Emergency Lamp",
+        "parentItemDamage": 4111
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4112,
+      "subId": 16,
+      "groupId": 64,
+      "name": "200V Emergency Lamp",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.EmergencyLampDescriptor",
+      "fields": {
+        "batteryCapacity": 12000.0,
+        "chargePower": 25.0,
+        "consumption": 10.0,
+        "lightLevel": 8,
+        "voltageLevelColor": "MediumVoltage",
+        "iconName": "emergencylamp",
+        "name": "200V Emergency Lamp",
+        "parentItemDamage": 4112
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4160,
+      "subId": 0,
+      "groupId": 65,
+      "name": "Lamp Supply",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.lampsupply.LampSupplyDescriptor",
+      "fields": {
+        "windowOpenAngle": 100.0,
+        "isWireless": false,
+        "range": 32,
+        "channelCount": 3,
+        "voltageLevelColor": "Neutral",
+        "iconName": "lampsupply",
+        "name": "Lamp Supply",
+        "parentItemDamage": 4160
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4224,
+      "subId": 0,
+      "groupId": 66,
+      "name": "Weak 50V Battery Charger",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.batterycharger.BatteryChargerDescriptor",
+      "fields": {
+        "nominalVoltage": 50.0,
+        "nominalPower": 200.0,
+        "Rp": 12.5,
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "batterycharger",
+        "name": "Weak 50V Battery Charger",
+        "parentItemDamage": 4224
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4225,
+      "subId": 1,
+      "groupId": 66,
+      "name": "50V Battery Charger",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.batterycharger.BatteryChargerDescriptor",
+      "fields": {
+        "nominalVoltage": 50.0,
+        "nominalPower": 400.0,
+        "Rp": 6.25,
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "batterycharger",
+        "name": "50V Battery Charger",
+        "parentItemDamage": 4225
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4228,
+      "subId": 4,
+      "groupId": 66,
+      "name": "200V Battery Charger",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.batterycharger.BatteryChargerDescriptor",
+      "fields": {
+        "nominalVoltage": 200.0,
+        "nominalPower": 1000.0,
+        "Rp": 40.0,
+        "voltageLevelColor": "MediumVoltage",
+        "iconName": "batterycharger",
+        "name": "200V Battery Charger",
+        "parentItemDamage": 4228
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4289,
+      "subId": 1,
+      "groupId": 67,
+      "name": "50V Power Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.powersocket.PowerSocketDescriptor",
+      "fields": {
+        "subID": 1,
+        "range": 10,
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "50vpowersocket",
+        "name": "50V Power Socket",
+        "parentItemDamage": 4289
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 4290,
+      "subId": 2,
+      "groupId": 67,
+      "name": "200V Power Socket",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.powersocket.PowerSocketDescriptor",
+      "fields": {
+        "subID": 2,
+        "range": 10,
+        "voltageLevelColor": "MediumVoltage",
+        "iconName": "200vpowersocket",
+        "name": "200V Power Socket",
+        "parentItemDamage": 4290
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 5888,
+      "subId": 0,
+      "groupId": 92,
+      "name": "Wireless Signal Receiver",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "wirelesssignalreceiver",
+        "name": "Wireless Signal Receiver",
+        "parentItemDamage": 5888
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 5896,
+      "subId": 8,
+      "groupId": 92,
+      "name": "Wireless Signal Transmitter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor",
+      "fields": {
+        "range": 32,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "wirelesssignaltransmitter",
+        "name": "Wireless Signal Transmitter",
+        "parentItemDamage": 5896
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 5904,
+      "subId": 16,
+      "groupId": 92,
+      "name": "Wireless Signal Repeater",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.wirelesssignal.repeater.WirelessSignalRepeaterDescriptor",
+      "fields": {
+        "range": 32,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "wirelesssignalrepeater",
+        "name": "Wireless Signal Repeater",
+        "parentItemDamage": 5904
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 5952,
+      "subId": 0,
+      "groupId": 93,
+      "name": "Data Logger",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor",
+      "fields": {
+        "sx": 0.46666,
+        "sy": 0.46666,
+        "sz": 1.0,
+        "tx": 0.78,
+        "ty": -0.34,
+        "tz": -0.4,
+        "rx": 0.0,
+        "ry": 0.0,
+        "rz": 1.0,
+        "ra": 90.0,
+        "mx": 1.15,
+        "my": 1.2,
+        "cr": 1.0,
+        "cg": 0.5,
+        "cb": 0.0,
+        "reflc": 0.8,
+        "onFloor": true,
+        "textColor": "§6",
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "datalogger",
+        "name": "Data Logger",
+        "parentItemDamage": 5952
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 5953,
+      "subId": 1,
+      "groupId": 93,
+      "name": "Modern Data Logger",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor",
+      "fields": {
+        "sx": 0.46666,
+        "sy": 0.35,
+        "sz": 1.0,
+        "tx": 0.81,
+        "ty": -0.33,
+        "tz": -0.075,
+        "rx": -0.052,
+        "ry": -0.052,
+        "rz": 0.997,
+        "ra": 90.157,
+        "mx": 1.15,
+        "my": 1.2,
+        "cr": 0.0,
+        "cg": 1.0,
+        "cb": 0.0,
+        "reflc": 0.4,
+        "onFloor": true,
+        "textColor": "§a",
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "moderndatalogger",
+        "name": "Modern Data Logger",
+        "parentItemDamage": 5953
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 5954,
+      "subId": 2,
+      "groupId": 93,
+      "name": "Industrial Data Logger",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor",
+      "fields": {
+        "sx": 0.45,
+        "sy": 0.39,
+        "sz": 1.0,
+        "tx": 0.068,
+        "ty": 0.31,
+        "tz": -0.31,
+        "rx": 0.577,
+        "ry": -0.577,
+        "rz": -0.577,
+        "ra": 120.0,
+        "mx": 1.15,
+        "my": 1.2,
+        "cr": 0.25,
+        "cg": 0.5,
+        "cb": 1.0,
+        "reflc": 0.4,
+        "onFloor": false,
+        "textColor": "§f",
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "industrialdatalogger",
+        "name": "Industrial Data Logger",
+        "parentItemDamage": 5954
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6016,
+      "subId": 0,
+      "groupId": 94,
+      "name": "Low Voltage Relay",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor",
+      "fields": {
+        "r0rOff": 0.0,
+        "r0rOn": 10.0,
+        "r1rOff": 0.0,
+        "r1rOn": -10.0,
+        "speed": 0.1,
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "lowvoltagerelay",
+        "name": "Low Voltage Relay",
+        "parentItemDamage": 6016
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6017,
+      "subId": 1,
+      "groupId": 94,
+      "name": "Medium Voltage Relay",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor",
+      "fields": {
+        "r0rOff": 0.0,
+        "r0rOn": 10.0,
+        "r1rOff": 0.0,
+        "r1rOn": -10.0,
+        "speed": 0.1,
+        "voltageLevelColor": "MediumVoltage",
+        "iconName": "mediumvoltagerelay",
+        "name": "Medium Voltage Relay",
+        "parentItemDamage": 6017
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6018,
+      "subId": 2,
+      "groupId": 94,
+      "name": "High Voltage Relay",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor",
+      "fields": {
+        "r0rOff": 0.0,
+        "r0rOn": 10.0,
+        "r1rOff": 0.0,
+        "r1rOn": -10.0,
+        "speed": 0.1,
+        "voltageLevelColor": "HighVoltage",
+        "iconName": "highvoltagerelay",
+        "name": "High Voltage Relay",
+        "parentItemDamage": 6018
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6019,
+      "subId": 3,
+      "groupId": 94,
+      "name": "Very High Voltage Relay",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor",
+      "fields": {
+        "r0rOff": 0.0,
+        "r0rOn": 10.0,
+        "r1rOff": 0.0,
+        "r1rOn": -10.0,
+        "speed": 0.1,
+        "voltageLevelColor": "VeryHighVoltage",
+        "iconName": "veryhighvoltagerelay",
+        "name": "Very High Voltage Relay",
+        "parentItemDamage": 6019
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6020,
+      "subId": 4,
+      "groupId": 94,
+      "name": "Signal Relay",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor",
+      "fields": {
+        "r0rOff": 0.0,
+        "r0rOn": 10.0,
+        "r1rOff": 0.0,
+        "r1rOn": -10.0,
+        "speed": 0.1,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "signalrelay",
+        "name": "Signal Relay",
+        "parentItemDamage": 6020
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6080,
+      "subId": 0,
+      "groupId": 95,
+      "name": "Signal Trimmer",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor",
+      "fields": {
+        "onOffOnly": false,
+        "autoReset": false,
+        "leverTx": 0.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "trimmer",
+        "name": "Signal Trimmer",
+        "parentItemDamage": 6080
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6081,
+      "subId": 1,
+      "groupId": 95,
+      "name": "Signal Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor",
+      "fields": {
+        "onOffOnly": true,
+        "autoReset": false,
+        "leverTx": 0.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "switch",
+        "name": "Signal Switch",
+        "parentItemDamage": 6081
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6088,
+      "subId": 8,
+      "groupId": 95,
+      "name": "Signal Button",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor",
+      "fields": {
+        "onOffOnly": true,
+        "autoReset": true,
+        "leverTx": 0.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "button",
+        "name": "Signal Button",
+        "parentItemDamage": 6088
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6092,
+      "subId": 12,
+      "groupId": 95,
+      "name": "Wireless Button",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor",
+      "fields": {
+        "range": 32,
+        "autoReset": true,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "wirelessbutton",
+        "name": "Wireless Button",
+        "parentItemDamage": 6092
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6096,
+      "subId": 16,
+      "groupId": 95,
+      "name": "Wireless Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor",
+      "fields": {
+        "range": 32,
+        "autoReset": false,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "wirelessswitch",
+        "name": "Wireless Switch",
+        "parentItemDamage": 6096
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6144,
+      "subId": 0,
+      "groupId": 96,
+      "name": "10A Diode",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.diode.DiodeDescriptor",
+      "fields": {
+        "stdI": 10.0,
+        "stdU": 1.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "10adiode",
+        "name": "10A Diode",
+        "parentItemDamage": 6144
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6145,
+      "subId": 1,
+      "groupId": 96,
+      "name": "25A Diode",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.diode.DiodeDescriptor",
+      "fields": {
+        "stdI": 25.0,
+        "stdU": 1.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "25adiode",
+        "name": "25A Diode",
+        "parentItemDamage": 6145
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6152,
+      "subId": 8,
+      "groupId": 96,
+      "name": "Signal Diode",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.diode.DiodeDescriptor",
+      "fields": {
+        "stdI": 0.1,
+        "stdU": 1.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "signaldiode",
+        "name": "Signal Diode",
+        "parentItemDamage": 6152
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6160,
+      "subId": 16,
+      "groupId": 96,
+      "name": "Signal 20H inductor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.signalinductor.SignalInductorDescriptor",
+      "fields": {
+        "henri": 20.0,
+        "voltageLevelColor": "None",
+        "iconName": "empty-texture",
+        "name": "Signal 20H inductor",
+        "parentItemDamage": 6160
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6176,
+      "subId": 32,
+      "groupId": 96,
+      "name": "Power Capacitor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor",
+      "fields": {
+        "dischargeTao": 120000.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "powercapacitor",
+        "name": "Power Capacitor",
+        "parentItemDamage": 6176
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6178,
+      "subId": 34,
+      "groupId": 96,
+      "name": "Power Inductor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "iconName": "powerinductor",
+        "name": "Power Inductor",
+        "parentItemDamage": 6178
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6180,
+      "subId": 36,
+      "groupId": 96,
+      "name": "Power Resistor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.resistor.ResistorDescriptor",
+      "fields": {
+        "isRheostat": false,
+        "thermalCoolLimit": -100.0,
+        "thermalWarmLimit": 130.0,
+        "thermalMaximalPowerDissipated": 1000.0,
+        "thermalNominalHeatTime": 120.0,
+        "thermalConductivityTao": 0.5,
+        "tempCoef": 0.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "powerresistor",
+        "name": "Power Resistor",
+        "parentItemDamage": 6180
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6181,
+      "subId": 37,
+      "groupId": 96,
+      "name": "Rheostat",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.resistor.ResistorDescriptor",
+      "fields": {
+        "isRheostat": true,
+        "thermalCoolLimit": -100.0,
+        "thermalWarmLimit": 130.0,
+        "thermalMaximalPowerDissipated": 1000.0,
+        "thermalNominalHeatTime": 120.0,
+        "thermalConductivityTao": 0.5,
+        "tempCoef": 0.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "rheostat",
+        "name": "Rheostat",
+        "parentItemDamage": 6181
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6182,
+      "subId": 38,
+      "groupId": 96,
+      "name": "Thermistor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.resistor.ResistorDescriptor",
+      "fields": {
+        "isRheostat": false,
+        "thermalCoolLimit": -100.0,
+        "thermalWarmLimit": 130.0,
+        "thermalMaximalPowerDissipated": 1000.0,
+        "thermalNominalHeatTime": 120.0,
+        "thermalConductivityTao": 0.5,
+        "tempCoef": -0.01,
+        "voltageLevelColor": "Neutral",
+        "iconName": "thermistor",
+        "name": "Thermistor",
+        "parentItemDamage": 6182
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6208,
+      "subId": 0,
+      "groupId": 97,
+      "name": "High Voltage Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor",
+      "fields": {
+        "speed": 0.2,
+        "alphaOn": 0.0,
+        "alphaOff": 45.0,
+        "leverTx": 0.0,
+        "objType": "Lever",
+        "signalSwitch": false,
+        "electricalRs": 0.1,
+        "nominalVoltage": 800.0,
+        "nominalPower": 5000.0,
+        "maximalVoltage": 1200.0,
+        "maximalPower": 6000.0,
+        "voltageLevelColor": "HighVoltage",
+        "iconName": "switch",
+        "name": "High Voltage Switch",
+        "parentItemDamage": 6208
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6209,
+      "subId": 1,
+      "groupId": 97,
+      "name": "Low Voltage Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor",
+      "fields": {
+        "speed": 0.1,
+        "alphaOn": -20.0,
+        "alphaOff": 20.0,
+        "leverTx": 0.0,
+        "objType": "Lever",
+        "signalSwitch": false,
+        "electricalRs": 0.0125,
+        "nominalVoltage": 50.0,
+        "nominalPower": 1000.0,
+        "maximalVoltage": 75.0,
+        "maximalPower": 1200.0,
+        "voltageLevelColor": "LowVoltage",
+        "iconName": "switch",
+        "name": "Low Voltage Switch",
+        "parentItemDamage": 6209
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6210,
+      "subId": 2,
+      "groupId": 97,
+      "name": "Medium Voltage Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor",
+      "fields": {
+        "speed": 0.1,
+        "alphaOn": -20.0,
+        "alphaOff": 20.0,
+        "leverTx": 0.0,
+        "objType": "Lever",
+        "signalSwitch": false,
+        "electricalRs": 0.05,
+        "nominalVoltage": 200.0,
+        "nominalPower": 2000.0,
+        "maximalVoltage": 300.0,
+        "maximalPower": 2400.0,
+        "voltageLevelColor": "MediumVoltage",
+        "iconName": "switch",
+        "name": "Medium Voltage Switch",
+        "parentItemDamage": 6210
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6211,
+      "subId": 3,
+      "groupId": 97,
+      "name": "Signal Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor",
+      "fields": {
+        "speed": 0.1,
+        "alphaOn": -20.0,
+        "alphaOff": 20.0,
+        "leverTx": 0.0,
+        "objType": "Lever",
+        "signalSwitch": true,
+        "electricalRs": 0.01,
+        "nominalVoltage": 50.0,
+        "nominalPower": 5.0,
+        "maximalVoltage": 75.0,
+        "maximalPower": 6.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "switch",
+        "name": "Signal Switch",
+        "parentItemDamage": 6211
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6212,
+      "subId": 4,
+      "groupId": 97,
+      "name": "Very High Voltage Switch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor",
+      "fields": {
+        "speed": 0.2,
+        "alphaOn": 0.0,
+        "alphaOff": 45.0,
+        "leverTx": 0.0,
+        "objType": "Lever",
+        "signalSwitch": false,
+        "electricalRs": 0.06666666666666667,
+        "nominalVoltage": 3200.0,
+        "nominalPower": 15000.0,
+        "maximalVoltage": 4800.0,
+        "maximalPower": 18000.0,
+        "voltageLevelColor": "VeryHighVoltage",
+        "iconName": "switch",
+        "name": "Very High Voltage Switch",
+        "parentItemDamage": 6212
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6216,
+      "subId": 8,
+      "groupId": 97,
+      "name": "Signal Switch with LED",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor",
+      "fields": {
+        "speed": 0.11,
+        "alphaOn": 0.0,
+        "alphaOff": 0.0,
+        "leverTx": -0.04,
+        "objType": "Button",
+        "signalSwitch": true,
+        "electricalRs": 0.01,
+        "nominalVoltage": 50.0,
+        "nominalPower": 5.0,
+        "maximalVoltage": 75.0,
+        "maximalPower": 6.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "switch",
+        "name": "Signal Switch with LED",
+        "parentItemDamage": 6216
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6272,
+      "subId": 0,
+      "groupId": 98,
+      "name": "Electrical Breaker",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor",
+      "fields": {
+        "alphaOff": 45.0,
+        "alphaOn": -45.0,
+        "speed": 0.05,
+        "voltageLevelColor": "Neutral",
+        "iconName": "electricalbreaker",
+        "name": "Electrical Breaker",
+        "parentItemDamage": 6272
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6276,
+      "subId": 4,
+      "groupId": 98,
+      "name": "Energy Meter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.energymeter.EnergyMeterDescriptor",
+      "fields": {
+        "alphaOff": 0.0,
+        "alphaOn": 0.0,
+        "speed": 0.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "energymeter",
+        "name": "Energy Meter",
+        "parentItemDamage": 6276
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6277,
+      "subId": 5,
+      "groupId": 98,
+      "name": "Advanced Energy Meter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.energymeter.EnergyMeterDescriptor",
+      "fields": {
+        "alphaOff": 0.0,
+        "alphaOn": 0.0,
+        "speed": 0.0,
+        "voltageLevelColor": "Neutral",
+        "iconName": "advancedenergymeter",
+        "name": "Advanced Energy Meter",
+        "parentItemDamage": 6277
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6278,
+      "subId": 6,
+      "groupId": 98,
+      "name": "Electrical Fuse Holder",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.ElectricalFuseHolderDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "iconName": "electricalfuseholder",
+        "name": "Electrical Fuse Holder",
+        "parentItemDamage": 6278
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6400,
+      "subId": 0,
+      "groupId": 100,
+      "name": "Electrical Probe",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor",
+      "fields": {
+        "voltageOnly": false,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalprobe",
+        "name": "Electrical Probe",
+        "parentItemDamage": 6400
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6401,
+      "subId": 1,
+      "groupId": 100,
+      "name": "Voltage Probe",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor",
+      "fields": {
+        "voltageOnly": true,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "voltageprobe",
+        "name": "Voltage Probe",
+        "parentItemDamage": 6401
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6464,
+      "subId": 0,
+      "groupId": 101,
+      "name": "Thermal Probe",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor",
+      "fields": {
+        "temperatureOnly": false,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "thermalprobe",
+        "name": "Thermal Probe",
+        "parentItemDamage": 6464
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6465,
+      "subId": 1,
+      "groupId": 101,
+      "name": "Temperature Probe",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor",
+      "fields": {
+        "temperatureOnly": true,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "temperatureprobe",
+        "name": "Temperature Probe",
+        "parentItemDamage": 6465
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6528,
+      "subId": 0,
+      "groupId": 102,
+      "name": "Analog Gauge",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalvumeter.ElectricalVuMeterDescriptor",
+      "fields": {
+        "objType": "Rot",
+        "onOffOnly": false,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "analogvumeter",
+        "name": "Analog vuMeter",
+        "parentItemDamage": 6528
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6536,
+      "subId": 8,
+      "groupId": 102,
+      "name": "LED vuMeter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalvumeter.ElectricalVuMeterDescriptor",
+      "fields": {
+        "objType": "LedOnOff",
+        "onOffOnly": true,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "ledvumeter",
+        "name": "LED vuMeter",
+        "parentItemDamage": 6536
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6592,
+      "subId": 0,
+      "groupId": 103,
+      "name": "Nuclear Alarm",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor",
+      "fields": {
+        "light": 7,
+        "soundName": "eln:alarma",
+        "soundTime": 11.0,
+        "soundLevel": 1.0,
+        "rotSpeed": 360.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalalarm",
+        "name": "Nuclear Alarm",
+        "parentItemDamage": 6592
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6593,
+      "subId": 1,
+      "groupId": 103,
+      "name": "Standard Alarm",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor",
+      "fields": {
+        "light": 7,
+        "soundName": "eln:smallalarm_critical",
+        "soundTime": 1.2,
+        "soundLevel": 2.0,
+        "rotSpeed": 360.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalalarm",
+        "name": "Standard Alarm",
+        "parentItemDamage": 6593
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6656,
+      "subId": 0,
+      "groupId": 104,
+      "name": "Electrical Daylight Sensor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor",
+      "fields": {
+        "dayLightOnly": true,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricaldaylightsensor",
+        "name": "Electrical Daylight Sensor",
+        "parentItemDamage": 6656
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6657,
+      "subId": 1,
+      "groupId": 104,
+      "name": "Electrical Light Sensor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor",
+      "fields": {
+        "dayLightOnly": false,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricallightsensor",
+        "name": "Electrical Light Sensor",
+        "parentItemDamage": 6657
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6660,
+      "subId": 4,
+      "groupId": 104,
+      "name": "Electrical Weather Sensor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalweathersensor.ElectricalWeatherSensorDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalweathersensor",
+        "name": "Electrical Weather Sensor",
+        "parentItemDamage": 6660
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6664,
+      "subId": 8,
+      "groupId": 104,
+      "name": "Electrical Anemometer Sensor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalwindsensor.ElectricalWindSensorDescriptor",
+      "fields": {
+        "windMax": 25.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalanemometersensor",
+        "name": "Electrical Anemometer Sensor",
+        "parentItemDamage": 6664
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6668,
+      "subId": 12,
+      "groupId": 104,
+      "name": "Electrical Entity Sensor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor",
+      "fields": {
+        "useEntitySpeed": true,
+        "speedFactor": 10.0,
+        "maxRange": 10.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalentitysensor",
+        "name": "Electrical Entity Sensor",
+        "parentItemDamage": 6668
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6669,
+      "subId": 13,
+      "groupId": 104,
+      "name": "Electrical Fire Detector",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor",
+      "fields": {
+        "batteryPowered": false,
+        "maxRange": 15.0,
+        "updateInterval": 0.5,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricalfiredetector",
+        "name": "Electrical Fire Detector",
+        "parentItemDamage": 6669
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6670,
+      "subId": 14,
+      "groupId": 104,
+      "name": "Electrical Fire Buzzer",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor",
+      "fields": {
+        "batteryPowered": true,
+        "maxRange": 15.0,
+        "updateInterval": 0.5,
+        "voltageLevelColor": "Neutral",
+        "iconName": "electricalfirebuzzer",
+        "name": "Electrical Fire Buzzer",
+        "parentItemDamage": 6670
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6671,
+      "subId": 15,
+      "groupId": 104,
+      "name": "Scanner",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.ScannerDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "scanner",
+        "name": "Scanner",
+        "parentItemDamage": 6671
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6912,
+      "subId": 0,
+      "groupId": 108,
+      "name": "Redstone-to-Voltage Converter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalredstoneinput.ElectricalRedstoneInputDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "redstone-to-voltageconverter",
+        "name": "Redstone-to-Voltage Converter",
+        "parentItemDamage": 6912
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6913,
+      "subId": 1,
+      "groupId": 108,
+      "name": "Voltage-to-Redstone Converter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "voltage-to-redstoneconverter",
+        "name": "Voltage-to-Redstone Converter",
+        "parentItemDamage": 6913
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6976,
+      "subId": 0,
+      "groupId": 109,
+      "name": "Electrical Timer",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricaltimeout.ElectricalTimeoutDescriptor",
+      "fields": {
+        "rotStart": 360.0,
+        "rotEnd": 0.0,
+        "tickSound": "eln:timer",
+        "tickVolume": 0.01,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "electricaltimer",
+        "name": "Electrical Timer",
+        "parentItemDamage": 6976
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 6980,
+      "subId": 4,
+      "groupId": 109,
+      "name": "Signal Processor",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalmath.ElectricalMathDescriptor",
+      "fields": {
+        "alphaOff": 90.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "signalprocessor",
+        "name": "Signal Processor",
+        "parentItemDamage": 6980
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7424,
+      "subId": 0,
+      "groupId": 116,
+      "name": "Tree Resin Collector",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor",
+      "fields": {
+        "emptyS": 0.8,
+        "emptyT": -0.3,
+        "voltageLevelColor": "Neutral",
+        "iconName": "treeresincollector",
+        "name": "Tree Resin Collector",
+        "parentItemDamage": 7424
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7488,
+      "subId": 0,
+      "groupId": 117,
+      "name": "Modbus RTU.name",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor",
+      "fields": {
+        "alphaOff": 90.0,
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "modbusrtu",
+        "name": "Modbus RTU",
+        "parentItemDamage": 7488
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7492,
+      "subId": 4,
+      "groupId": 117,
+      "name": "Analog watch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor",
+      "fields": {
+        "kind": "ANALOG",
+        "powerConsumtion": 0.1388888888888889,
+        "voltageLevelColor": "Neutral",
+        "iconName": "analogwatch",
+        "name": "Analog Watch",
+        "parentItemDamage": 7492
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7493,
+      "subId": 5,
+      "groupId": 117,
+      "name": "Digital Watch",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor",
+      "fields": {
+        "kind": "DIGITAL",
+        "powerConsumtion": 0.37037037037037035,
+        "voltageLevelColor": "Neutral",
+        "iconName": "digitalwatch",
+        "name": "Digital Watch",
+        "parentItemDamage": 7493
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7496,
+      "subId": 8,
+      "groupId": 117,
+      "name": "Tutorial Sign",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.tutorialsign.TutorialSignDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "iconName": "tutorialsign",
+        "name": "Tutorial Sign",
+        "parentItemDamage": 7496
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7552,
+      "subId": 0,
+      "groupId": 118,
+      "name": "NOT Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "notchip",
+        "name": "NOT Chip",
+        "parentItemDamage": 7552
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7553,
+      "subId": 1,
+      "groupId": 118,
+      "name": "AND Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "andchip",
+        "name": "AND Chip",
+        "parentItemDamage": 7553
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7554,
+      "subId": 2,
+      "groupId": 118,
+      "name": "NAND Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "nandchip",
+        "name": "NAND Chip",
+        "parentItemDamage": 7554
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7555,
+      "subId": 3,
+      "groupId": 118,
+      "name": "OR Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "orchip",
+        "name": "OR Chip",
+        "parentItemDamage": 7555
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7556,
+      "subId": 4,
+      "groupId": 118,
+      "name": "NOR Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "norchip",
+        "name": "NOR Chip",
+        "parentItemDamage": 7556
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7557,
+      "subId": 5,
+      "groupId": 118,
+      "name": "XOR Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "xorchip",
+        "name": "XOR Chip",
+        "parentItemDamage": 7557
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7558,
+      "subId": 6,
+      "groupId": 118,
+      "name": "XNOR Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "xnorchip",
+        "name": "XNOR Chip",
+        "parentItemDamage": 7558
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7559,
+      "subId": 7,
+      "groupId": 118,
+      "name": "PAL Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.PalDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "palchip",
+        "name": "PAL Chip",
+        "parentItemDamage": 7559
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7560,
+      "subId": 8,
+      "groupId": 118,
+      "name": "Schmitt Trigger Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "schmitttriggerchip",
+        "name": "Schmitt Trigger Chip",
+        "parentItemDamage": 7560
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7561,
+      "subId": 9,
+      "groupId": 118,
+      "name": "D Flip Flop Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "dflipflopchip",
+        "name": "D Flip Flop Chip",
+        "parentItemDamage": 7561
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7562,
+      "subId": 10,
+      "groupId": 118,
+      "name": "Oscillator Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "oscillatorchip",
+        "name": "Oscillator Chip",
+        "parentItemDamage": 7562
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7563,
+      "subId": 11,
+      "groupId": 118,
+      "name": "JK Flip Flop Chip",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.logicgate.LogicGateDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "jkflipflopchip",
+        "name": "JK Flip Flop Chip",
+        "parentItemDamage": 7563
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7936,
+      "subId": 0,
+      "groupId": 124,
+      "name": "OpAmp",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "opamp",
+        "name": "OpAmp",
+        "parentItemDamage": 7936
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7937,
+      "subId": 1,
+      "groupId": 124,
+      "name": "PID Regulator",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "pidregulator",
+        "name": "PID Regulator",
+        "parentItemDamage": 7937
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7938,
+      "subId": 2,
+      "groupId": 124,
+      "name": "Voltage controlled sawtooth oscillator",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "voltagecontrolledsawtoothoscillator",
+        "name": "Voltage controlled sawtooth oscillator",
+        "parentItemDamage": 7938
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7939,
+      "subId": 3,
+      "groupId": 124,
+      "name": "Voltage controlled sine oscillator",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "voltagecontrolledsineoscillator",
+        "name": "Voltage controlled sine oscillator",
+        "parentItemDamage": 7939
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7940,
+      "subId": 4,
+      "groupId": 124,
+      "name": "Amplifier",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "amplifier",
+        "name": "Amplifier",
+        "parentItemDamage": 7940
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7941,
+      "subId": 5,
+      "groupId": 124,
+      "name": "Voltage controlled amplifier",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "voltagecontrolledamplifier",
+        "name": "Voltage controlled amplifier",
+        "parentItemDamage": 7941
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7942,
+      "subId": 6,
+      "groupId": 124,
+      "name": "Configurable summing unit",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "configurablesummingunit",
+        "name": "Configurable summing unit",
+        "parentItemDamage": 7942
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7943,
+      "subId": 7,
+      "groupId": 124,
+      "name": "Sample and hold",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "sampleandhold",
+        "name": "Sample and hold",
+        "parentItemDamage": 7943
+      }
+    },
+    {
+      "id": "eln:six_node",
+      "damage": 7944,
+      "subId": 8,
+      "groupId": 124,
+      "name": "Lowpass filter",
+      "itemClass": "mods.eln.node.six.SixNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.sixnode.AnalogChipDescriptor",
+      "fields": {
+        "voltageLevelColor": "SignalVoltage",
+        "iconName": "lowpassfilter",
+        "name": "Lowpass filter",
+        "parentItemDamage": 7944
+      }
+    },
+    {
+      "id": "eln:copper_axe",
+      "damage": 0,
+      "name": "Copper Axe",
+      "itemClass": "mods.eln.item.ItemAxeEln"
+    },
+    {
+      "id": "eln:copper_hoe",
+      "damage": 0,
+      "name": "Copper Hoe",
+      "itemClass": "net.minecraft.item.ItemHoe"
+    },
+    {
+      "id": "eln:energy_converter_eln_to_other_lvublock",
+      "damage": 0,
+      "name": "50V Electrical Age to other energy exporter",
+      "itemClass": "mods.eln.node.simple.SimpleNodeItem"
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 80,
+      "subId": 16,
+      "groupId": 1,
+      "name": "Power inductor",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.powerinductor.PowerInductorDescriptor",
+      "fields": {
+        "voltageLevelColor": "None",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "powerinductor",
+        "name": "Power inductor",
+        "parentItemDamage": 80
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 84,
+      "subId": 20,
+      "groupId": 1,
+      "name": "Power capacitor",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor",
+      "fields": {
+        "dischargeTao": 300.0,
+        "voltageLevelColor": "None",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "powercapacitor",
+        "name": "Power capacitor",
+        "parentItemDamage": 84
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 128,
+      "subId": 0,
+      "groupId": 2,
+      "name": "DC-DC Converter",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.transformer.TransformerDescriptor",
+      "fields": {
+        "minimalLoadToHum": 0.5,
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "dc-dcconverter",
+        "name": "DC-DC Converter",
+        "parentItemDamage": 128
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 192,
+      "subId": 0,
+      "groupId": 3,
+      "name": "Stone Heat Furnace",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor",
+      "fields": {
+        "alphaClose": 0.0,
+        "alphaOpen": 55.0,
+        "nominalPower": 1000.0,
+        "nominalCombustibleEnergy": 53333.333333333336,
+        "combustionChamberMax": 2,
+        "combustionChamberPower": 500.0,
+        "flameStartX": -0.10000000149011612,
+        "flameStartY": -0.4000000059604645,
+        "flameStartZ": -0.30000001192092896,
+        "flameEndX": 0.30000001192092896,
+        "flameEndY": 0.0,
+        "flameEndZ": 0.30000001192092896,
+        "flameDeltaX": 0.4000000134110451,
+        "flameDeltaY": 0.4000000059604645,
+        "flameDeltaZ": 0.6000000238418579,
+        "flamePopRate": 2.0,
+        "voltageLevelColor": "Thermal",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "stoneheatfurnace",
+        "name": "Stone Heat Furnace",
+        "parentItemDamage": 192
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 193,
+      "subId": 1,
+      "groupId": 3,
+      "name": "Fuel Heat Furnace",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.FuelHeatFurnaceDescriptor",
+      "fields": {
+        "voltageLevelColor": "Thermal",
+        "tileEntityMetaTag": "Fluid",
+        "iconName": "fuelheatfurnace",
+        "name": "Fuel Heat Furnace",
+        "parentItemDamage": 193
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 257,
+      "subId": 1,
+      "groupId": 4,
+      "name": "50V Turbine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.turbine.TurbineDescriptor",
+      "fields": {
+        "powerOutPerDeltaU": 150.0,
+        "nominalDeltaT": 250.0,
+        "nominalU": 50.0,
+        "nominalP": 300.0,
+        "thermalC": 25.0,
+        "thermalRs": 0.009589125164932953,
+        "thermalRp": 33.333333333333336,
+        "electricalRs": 0.0012500000000000002,
+        "soundFile": "eln:heat_turbine_50v",
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50vturbine",
+        "name": "50V Turbine",
+        "parentItemDamage": 257
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 264,
+      "subId": 8,
+      "groupId": 4,
+      "name": "200V Turbine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.turbine.TurbineDescriptor",
+      "fields": {
+        "powerOutPerDeltaU": 62.5,
+        "nominalDeltaT": 350.0,
+        "nominalU": 200.0,
+        "nominalP": 500.0,
+        "thermalC": 50.0,
+        "thermalRs": 0.009523439322086606,
+        "thermalRp": 28.0,
+        "electricalRs": 0.005000000000000001,
+        "soundFile": "eln:heat_turbine_200v",
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vturbine",
+        "name": "200V Turbine",
+        "parentItemDamage": 264
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 265,
+      "subId": 9,
+      "groupId": 4,
+      "name": "Steam Turbine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.mechanical.SteamTurbineDescriptor",
+      "fields": {
+        "inertia": 20.0,
+        "fluidConsumption": 7200.0,
+        "fluidDescription": "steam",
+        "efficiencyCurve": 1.1,
+        "sound": "eln:steam_turbine",
+        "efficiencyCutoff": 0.0,
+        "optimalRads": 800.000011920929,
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Fluid",
+        "iconName": "steamturbine",
+        "name": "Steam Turbine",
+        "parentItemDamage": 265
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 266,
+      "subId": 10,
+      "groupId": 4,
+      "name": "Generator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.mechanical.GeneratorDescriptor",
+      "fields": {
+        "powerOutPerDeltaU": 31.25,
+        "nominalRads": 800.0,
+        "nominalP": 4000.0,
+        "nominalU": 3200.0,
+        "generationEfficiency": 0.95,
+        "nominalHeatFraction": 0.65,
+        "sound": "eln:generator",
+        "voltageLevelColor": "VeryHighVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "generator",
+        "name": "Generator",
+        "parentItemDamage": 266
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 267,
+      "subId": 11,
+      "groupId": 4,
+      "name": "Gas Turbine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.mechanical.GasTurbineDescriptor",
+      "fields": {
+        "inertia": 5.0,
+        "fluidConsumption": 4.0,
+        "fluidDescription": "gasoline",
+        "efficiencyCurve": 0.5,
+        "efficiencyCutoff": 0.5,
+        "sound": "eln:gas_turbine",
+        "optimalRads": 800.000011920929,
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Fluid",
+        "iconName": "gasturbine",
+        "name": "Gas Turbine",
+        "parentItemDamage": 267
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 268,
+      "subId": 12,
+      "groupId": 4,
+      "name": "Joint",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.mechanical.StraightJointDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "joint",
+        "name": "Joint",
+        "parentItemDamage": 268
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 269,
+      "subId": 13,
+      "groupId": 4,
+      "name": "Joint hub",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.mechanical.JointHubDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "jointhub",
+        "name": "Joint hub",
+        "parentItemDamage": 269
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 270,
+      "subId": 14,
+      "groupId": 4,
+      "name": "Flywheel",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.mechanical.FlywheelDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "flywheel",
+        "name": "Flywheel",
+        "parentItemDamage": 270
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 271,
+      "subId": 15,
+      "groupId": 4,
+      "name": "Tachometer",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.mechanical.TachometerDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "tachometer",
+        "name": "Tachometer",
+        "parentItemDamage": 271
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 448,
+      "subId": 0,
+      "groupId": 7,
+      "name": "Low Power Transmitter Antenna",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor",
+      "fields": {
+        "rangeMax": 200,
+        "electricalPowerRatioEffStart": 0.9,
+        "electricalPowerRatioEffEnd": 0.7,
+        "electricalPowerRatioLostOffset": 0.09999999999999998,
+        "electricalPowerRatioLostPerBlock": 0.0010000000000000002,
+        "electricalNominalVoltage": 50.0,
+        "electricalNominalPower": 250.0,
+        "electricalMaximalVoltage": 65.0,
+        "electricalMaximalPower": 325.0,
+        "electricalNominalInputR": 10.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalantennatx",
+        "name": "Low Power Transmitter Antenna",
+        "parentItemDamage": 448
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 449,
+      "subId": 1,
+      "groupId": 7,
+      "name": "Low Power Receiver Antenna",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor",
+      "fields": {
+        "electricalNominalVoltage": 50.0,
+        "electricalNominalPower": 250.0,
+        "electricalMaximalVoltage": 65.0,
+        "electricalMaximalPower": 325.0,
+        "electricalNominalInputR": 0.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalantennarx",
+        "name": "Low Power Receiver Antenna",
+        "parentItemDamage": 449
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 450,
+      "subId": 2,
+      "groupId": 7,
+      "name": "Medium Power Transmitter Antenna",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor",
+      "fields": {
+        "rangeMax": 250,
+        "electricalPowerRatioEffStart": 0.9,
+        "electricalPowerRatioEffEnd": 0.75,
+        "electricalPowerRatioLostOffset": 0.09999999999999998,
+        "electricalPowerRatioLostPerBlock": 6.000000000000001E-4,
+        "electricalNominalVoltage": 200.0,
+        "electricalNominalPower": 1000.0,
+        "electricalMaximalVoltage": 260.0,
+        "electricalMaximalPower": 1300.0,
+        "electricalNominalInputR": 40.0,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalantennatx",
+        "name": "Medium Power Transmitter Antenna",
+        "parentItemDamage": 450
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 451,
+      "subId": 3,
+      "groupId": 7,
+      "name": "Medium Power Receiver Antenna",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor",
+      "fields": {
+        "electricalNominalVoltage": 200.0,
+        "electricalNominalPower": 1000.0,
+        "electricalMaximalVoltage": 260.0,
+        "electricalMaximalPower": 1300.0,
+        "electricalNominalInputR": 0.0,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalantennarx",
+        "name": "Medium Power Receiver Antenna",
+        "parentItemDamage": 451
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 452,
+      "subId": 4,
+      "groupId": 7,
+      "name": "High Power Transmitter Antenna",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor",
+      "fields": {
+        "rangeMax": 300,
+        "electricalPowerRatioEffStart": 0.95,
+        "electricalPowerRatioEffEnd": 0.8,
+        "electricalPowerRatioLostOffset": 0.050000000000000044,
+        "electricalPowerRatioLostPerBlock": 4.999999999999997E-4,
+        "electricalNominalVoltage": 800.0,
+        "electricalNominalPower": 2000.0,
+        "electricalMaximalVoltage": 1040.0,
+        "electricalMaximalPower": 2600.0,
+        "electricalNominalInputR": 320.0,
+        "voltageLevelColor": "HighVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalantennatx",
+        "name": "High Power Transmitter Antenna",
+        "parentItemDamage": 452
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 453,
+      "subId": 5,
+      "groupId": 7,
+      "name": "High Power Receiver Antenna",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor",
+      "fields": {
+        "electricalNominalVoltage": 800.0,
+        "electricalNominalPower": 2000.0,
+        "electricalMaximalVoltage": 1040.0,
+        "electricalMaximalPower": 2600.0,
+        "electricalNominalInputR": 0.0,
+        "voltageLevelColor": "HighVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalantennarx",
+        "name": "High Power Receiver Antenna",
+        "parentItemDamage": 453
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1024,
+      "subId": 0,
+      "groupId": 16,
+      "name": "Cost Oriented Battery",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 50.0,
+        "electricalDischargeRate": 0.0,
+        "electricalStdP": 250.0,
+        "electricalStdDischargeTime": 240.0,
+        "electricalStdHalfLife": 2880.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 300.0,
+        "electricalStdEnergy": 60000.0,
+        "electricalStdI": 5.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 1352.1126760563384,
+        "electricalRs": 0.20000000000000018,
+        "electricalRp": 1.0E9,
+        "thermalC": 3.600000000000003,
+        "thermalRp": 4.166666666666663,
+        "thermalPMax": 14.400000000000013,
+        "lifeNominalCurrent": 5.0,
+        "lifeNominalLost": 1.7361111111111112E-4,
+        "startCharge": 0.5,
+        "isRechargable": true,
+        "description": "Cheap battery",
+        "IMax": 15.0,
+        "lifeEnable": true,
+        "renderType": 1,
+        "renderSpec": "lowcost",
+        "currentDropVoltage": 60.0,
+        "currentDropFactor": 250.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "costorientedbattery",
+        "name": "Cost Oriented Battery",
+        "parentItemDamage": 1024
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1025,
+      "subId": 1,
+      "groupId": 16,
+      "name": "Capacity Oriented Battery",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 12.5,
+        "electricalDischargeRate": 0.0,
+        "electricalStdP": 125.0,
+        "electricalStdDischargeTime": 1920.0,
+        "electricalStdHalfLife": 2880.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 150.0,
+        "electricalStdEnergy": 240000.0,
+        "electricalStdI": 10.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 21633.802816901414,
+        "electricalRs": 0.025000000000000022,
+        "electricalRp": 1.0E9,
+        "thermalC": 1.8000000000000016,
+        "thermalRp": 8.333333333333327,
+        "thermalPMax": 7.200000000000006,
+        "lifeNominalCurrent": 10.0,
+        "lifeNominalLost": 1.7361111111111112E-4,
+        "startCharge": 0.5,
+        "isRechargable": true,
+        "description": "the battery",
+        "IMax": 30.0,
+        "lifeEnable": true,
+        "renderType": 1,
+        "renderSpec": "capacity",
+        "currentDropVoltage": 15.0,
+        "currentDropFactor": 125.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "capacityorientedbattery",
+        "name": "Capacity Oriented Battery",
+        "parentItemDamage": 1025
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1026,
+      "subId": 2,
+      "groupId": 16,
+      "name": "Voltage Oriented Battery",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 200.0,
+        "electricalDischargeRate": 0.0,
+        "electricalStdP": 250.0,
+        "electricalStdDischargeTime": 240.0,
+        "electricalStdHalfLife": 2880.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 300.0,
+        "electricalStdEnergy": 60000.0,
+        "electricalStdI": 1.25,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 338.0281690140846,
+        "electricalRs": 3.200000000000003,
+        "electricalRp": 1.0E9,
+        "thermalC": 3.600000000000003,
+        "thermalRp": 4.166666666666663,
+        "thermalPMax": 14.400000000000013,
+        "lifeNominalCurrent": 1.25,
+        "lifeNominalLost": 1.7361111111111112E-4,
+        "startCharge": 0.5,
+        "isRechargable": true,
+        "description": "the battery",
+        "IMax": 3.75,
+        "lifeEnable": true,
+        "renderType": 1,
+        "renderSpec": "highvoltage",
+        "currentDropVoltage": 240.0,
+        "currentDropFactor": 250.0,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "voltageorientedbattery",
+        "name": "Voltage Oriented Battery",
+        "parentItemDamage": 1026
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1027,
+      "subId": 3,
+      "groupId": 16,
+      "name": "Current Oriented Battery",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 50.0,
+        "electricalDischargeRate": 0.0,
+        "electricalStdP": 1000.0,
+        "electricalStdDischargeTime": 40.0,
+        "electricalStdHalfLife": 2880.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 1200.0,
+        "electricalStdEnergy": 40000.0,
+        "electricalStdI": 20.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 901.4084507042256,
+        "electricalRs": 0.050000000000000044,
+        "electricalRp": 1.0E9,
+        "thermalC": 14.400000000000013,
+        "thermalRp": 1.0416666666666659,
+        "thermalPMax": 57.60000000000005,
+        "lifeNominalCurrent": 20.0,
+        "lifeNominalLost": 1.7361111111111112E-4,
+        "startCharge": 0.5,
+        "isRechargable": true,
+        "description": "the battery",
+        "IMax": 60.0,
+        "lifeEnable": true,
+        "renderType": 1,
+        "renderSpec": "current",
+        "currentDropVoltage": 60.0,
+        "currentDropFactor": 1000.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "currentorientedbattery",
+        "name": "Current Oriented Battery",
+        "parentItemDamage": 1027
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1028,
+      "subId": 4,
+      "groupId": 16,
+      "name": "Life Oriented Battery",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 50.0,
+        "electricalDischargeRate": 0.0,
+        "electricalStdP": 250.0,
+        "electricalStdDischargeTime": 240.0,
+        "electricalStdHalfLife": 23040.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 300.0,
+        "electricalStdEnergy": 60000.0,
+        "electricalStdI": 5.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 1352.1126760563384,
+        "electricalRs": 0.20000000000000018,
+        "electricalRp": 1.0E9,
+        "thermalC": 3.600000000000003,
+        "thermalRp": 4.166666666666663,
+        "thermalPMax": 14.400000000000013,
+        "lifeNominalCurrent": 5.0,
+        "lifeNominalLost": 2.170138888888889E-5,
+        "startCharge": 0.5,
+        "isRechargable": true,
+        "description": "the battery",
+        "IMax": 15.0,
+        "lifeEnable": true,
+        "renderType": 1,
+        "renderSpec": "life",
+        "currentDropVoltage": 60.0,
+        "currentDropFactor": 250.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "lifeorientedbattery",
+        "name": "Life Oriented Battery",
+        "parentItemDamage": 1028
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1029,
+      "subId": 5,
+      "groupId": 16,
+      "name": "Single-use Battery",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 50.0,
+        "electricalDischargeRate": 0.0,
+        "electricalStdP": 500.0,
+        "electricalStdDischargeTime": 240.0,
+        "electricalStdHalfLife": 23040.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 600.0,
+        "electricalStdEnergy": 120000.0,
+        "electricalStdI": 10.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 2704.225352112677,
+        "electricalRs": 0.10000000000000009,
+        "electricalRp": 1.0E9,
+        "thermalC": 7.200000000000006,
+        "thermalRp": 2.0833333333333317,
+        "thermalPMax": 28.800000000000026,
+        "lifeNominalCurrent": 10.0,
+        "lifeNominalLost": 2.170138888888889E-5,
+        "startCharge": 1.0,
+        "isRechargable": false,
+        "description": "the battery",
+        "IMax": 30.0,
+        "lifeEnable": false,
+        "renderType": 1,
+        "renderSpec": "coal",
+        "currentDropVoltage": 1000000.0,
+        "currentDropFactor": 0.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "single-usebattery",
+        "name": "Single-use Battery",
+        "parentItemDamage": 1029
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1056,
+      "subId": 32,
+      "groupId": 16,
+      "name": "50V Capacitor",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 50.0,
+        "electricalDischargeRate": 0.005,
+        "electricalStdP": 2000.0,
+        "electricalStdDischargeTime": 4.0,
+        "electricalStdHalfLife": 2880.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 2400.0,
+        "electricalStdEnergy": 8000.0,
+        "electricalStdI": 40.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 195.1219512195122,
+        "electricalRs": 0.025000000000000022,
+        "electricalRp": 250.0,
+        "thermalC": 28.800000000000026,
+        "thermalRp": 0.5208333333333329,
+        "thermalPMax": 115.2000000000001,
+        "lifeNominalCurrent": 40.0,
+        "lifeNominalLost": 1.7361111111111112E-4,
+        "startCharge": 0.0,
+        "isRechargable": true,
+        "description": "Obselete, must be deleted",
+        "IMax": 120.0,
+        "lifeEnable": false,
+        "renderType": 0,
+        "currentDropVoltage": 60.0,
+        "currentDropFactor": 4000.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "empty-texture",
+        "name": "50V Condensator",
+        "parentItemDamage": 1056
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 1060,
+      "subId": 36,
+      "groupId": 16,
+      "name": "200V Capacitor",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.battery.BatteryDescriptor",
+      "fields": {
+        "electricalU": 200.0,
+        "electricalDischargeRate": 0.005,
+        "electricalStdP": 2000.0,
+        "electricalStdDischargeTime": 4.0,
+        "electricalStdHalfLife": 2880.0,
+        "electricalStdEfficiency": 0.96,
+        "electricalPMax": 3000.0,
+        "electricalStdEnergy": 8000.0,
+        "electricalStdI": 10.0,
+        "thermalHeatTime": 30.0,
+        "thermalWarmLimit": 60.0,
+        "thermalCoolLimit": -100.0,
+        "electricalQ": 48.78048780487805,
+        "electricalRs": 0.40000000000000036,
+        "electricalRp": 4000.0,
+        "thermalC": 45.00000000000004,
+        "thermalRp": 0.33333333333333304,
+        "thermalPMax": 180.00000000000017,
+        "lifeNominalCurrent": 10.0,
+        "lifeNominalLost": 1.7361111111111112E-4,
+        "startCharge": 0.0,
+        "isRechargable": true,
+        "description": "the battery",
+        "IMax": 30.0,
+        "lifeEnable": false,
+        "renderType": 0,
+        "currentDropVoltage": 240.0,
+        "currentDropFactor": 4000.0,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "empty-texture",
+        "name": "200V Condensator",
+        "parentItemDamage": 1060
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2048,
+      "subId": 0,
+      "groupId": 32,
+      "name": "Electrical Furnace",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor",
+      "fields": {
+        "thermalC": 40.0,
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "electricalfurnace",
+        "name": "Electrical Furnace",
+        "parentItemDamage": 2048
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2112,
+      "subId": 0,
+      "groupId": 33,
+      "name": "50V Macerator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.MaceratorDescriptor",
+      "fields": {
+        "nominalU": 50.0,
+        "nominalP": 200.0,
+        "outStackCount": 4,
+        "resistorR": 12.5,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:macerator",
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50vmacerator",
+        "name": "50V Macerator",
+        "parentItemDamage": 2112
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2116,
+      "subId": 4,
+      "groupId": 33,
+      "name": "200V Macerator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.MaceratorDescriptor",
+      "fields": {
+        "nominalU": 200.0,
+        "nominalP": 2000.0,
+        "outStackCount": 4,
+        "resistorR": 20.0,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:macerator",
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vmacerator",
+        "name": "200V Macerator",
+        "parentItemDamage": 2116
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2240,
+      "subId": 0,
+      "groupId": 35,
+      "name": "50V Compressor",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.CompressorDescriptor",
+      "fields": {
+        "tyOn": -0.125,
+        "tyOff": 0.0,
+        "nominalU": 50.0,
+        "nominalP": 200.0,
+        "outStackCount": 4,
+        "resistorR": 12.5,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:compressor_run",
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50vcompressor",
+        "name": "50V Compressor",
+        "parentItemDamage": 2240
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2244,
+      "subId": 4,
+      "groupId": 35,
+      "name": "200V Compressor",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.CompressorDescriptor",
+      "fields": {
+        "tyOn": -0.125,
+        "tyOff": 0.0,
+        "nominalU": 200.0,
+        "nominalP": 2000.0,
+        "outStackCount": 4,
+        "resistorR": 20.0,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:compressor_run",
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vcompressor",
+        "name": "200V Compressor",
+        "parentItemDamage": 2244
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2304,
+      "subId": 0,
+      "groupId": 36,
+      "name": "50V Magnetizer",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor",
+      "fields": {
+        "nominalU": 50.0,
+        "nominalP": 200.0,
+        "outStackCount": 4,
+        "resistorR": 12.5,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:motor",
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50vmagnetizer",
+        "name": "50V Magnetizer",
+        "parentItemDamage": 2304
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2308,
+      "subId": 4,
+      "groupId": 36,
+      "name": "200V Magnetizer",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor",
+      "fields": {
+        "nominalU": 200.0,
+        "nominalP": 2000.0,
+        "outStackCount": 4,
+        "resistorR": 20.0,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:motor",
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vmagnetizer",
+        "name": "200V Magnetizer",
+        "parentItemDamage": 2308
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2368,
+      "subId": 0,
+      "groupId": 37,
+      "name": "50V Plate Machine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor",
+      "fields": {
+        "nominalU": 50.0,
+        "nominalP": 200.0,
+        "outStackCount": 4,
+        "resistorR": 12.5,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:plate_machine",
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50vplatemachine",
+        "name": "50V Plate Machine",
+        "parentItemDamage": 2368
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2372,
+      "subId": 4,
+      "groupId": 37,
+      "name": "200V Plate Machine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor",
+      "fields": {
+        "nominalU": 200.0,
+        "nominalP": 2000.0,
+        "outStackCount": 4,
+        "resistorR": 20.0,
+        "boosterEfficiency": 0.9090909090909091,
+        "boosterSpeedUp": 1.375,
+        "runningSound": "eln:plate_machine",
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vplatemachine",
+        "name": "200V Plate Machine",
+        "parentItemDamage": 2372
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2624,
+      "subId": 0,
+      "groupId": 41,
+      "name": "50V Egg Incubator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor",
+      "fields": {
+        "nominalVoltage": 50.0,
+        "nominalPower": 50.0,
+        "Rp": 50.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50veggincubator",
+        "name": "50V Egg Incubator",
+        "parentItemDamage": 2624
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 2688,
+      "subId": 0,
+      "groupId": 42,
+      "name": "Auto Miner",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.autominer.AutoMinerDescriptor",
+      "fields": {
+        "buttonsCount": 5,
+        "ledsACount": 11,
+        "ledsPCount": 8,
+        "deltaX": 2,
+        "deltaY": 1,
+        "deltaZ": 0,
+        "nominalVoltage": 800.0,
+        "pipeOperationEnergy": 50.0,
+        "pipeOperationPower": 50.0,
+        "pipeOperationRp": 12800.0,
+        "voltageLevelColor": "HighVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "autominer",
+        "name": "Auto Miner",
+        "parentItemDamage": 2688
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 3073,
+      "subId": 1,
+      "groupId": 48,
+      "name": "Small Solar Panel",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.solarpanel.SolarPanelDescriptor",
+      "fields": {
+        "basicModel": true,
+        "electricalUmax": 14.75,
+        "electricalPmax": 65.0,
+        "solarOffsetX": 0,
+        "solarOffsetY": 1,
+        "solarOffsetZ": 0,
+        "alphaMin": 1.5707963267948966,
+        "alphaMax": 1.5707963267948966,
+        "electricalRs": 0.016735576923076922,
+        "canRotate": false,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "smallsolarpanel",
+        "name": "Small Solar Panel",
+        "parentItemDamage": 3073
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 3074,
+      "subId": 2,
+      "groupId": 48,
+      "name": "Small Rotating Solar Panel",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.solarpanel.SolarPanelDescriptor",
+      "fields": {
+        "basicModel": true,
+        "electricalUmax": 14.75,
+        "electricalPmax": 65.0,
+        "solarOffsetX": 0,
+        "solarOffsetY": 1,
+        "solarOffsetZ": 0,
+        "alphaMin": 0.7853981633974483,
+        "alphaMax": 2.356194490192345,
+        "electricalRs": 0.016735576923076922,
+        "canRotate": true,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "smallrotatingsolarpanel",
+        "name": "Small Rotating Solar Panel",
+        "parentItemDamage": 3074
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 3075,
+      "subId": 3,
+      "groupId": 48,
+      "name": "2x3 Solar Panel",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.solarpanel.SolarPanelDescriptor",
+      "fields": {
+        "basicModel": true,
+        "electricalUmax": 118.0,
+        "electricalPmax": 520.0,
+        "solarOffsetX": 1,
+        "solarOffsetY": 1,
+        "solarOffsetZ": 0,
+        "alphaMin": 1.5707963267948966,
+        "alphaMax": 1.5707963267948966,
+        "electricalRs": 0.13388461538461538,
+        "canRotate": false,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "2x3solarpanel",
+        "name": "2x3 Solar Panel",
+        "parentItemDamage": 3075
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 3076,
+      "subId": 4,
+      "groupId": 48,
+      "name": "2x3 Rotating Solar Panel",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.solarpanel.SolarPanelDescriptor",
+      "fields": {
+        "basicModel": true,
+        "electricalUmax": 118.0,
+        "electricalPmax": 520.0,
+        "solarOffsetX": 1,
+        "solarOffsetY": 1,
+        "solarOffsetZ": 1,
+        "alphaMin": 1.1780972450961724,
+        "alphaMax": 1.9634954084936207,
+        "electricalRs": 0.13388461538461538,
+        "canRotate": true,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "2x3rotatingsolarpanel",
+        "name": "2x3 Rotating Solar Panel",
+        "parentItemDamage": 3076
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 3136,
+      "subId": 0,
+      "groupId": 49,
+      "name": "Wind Turbine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.windturbine.WindTurbineDescriptor",
+      "fields": {
+        "nominalPower": 160.0,
+        "maxVoltage": 59.0,
+        "maxWind": 22.0,
+        "offY": 3,
+        "rayX": 7,
+        "rayY": 2,
+        "rayZ": 2,
+        "blockMalusSubCount": 11,
+        "blockMalus": 0.07,
+        "soundName": "eln:WINDTURBINE_BIG_SF",
+        "nominalVolume": 1.0,
+        "speed": 300.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "windturbine",
+        "name": "Wind Turbine",
+        "parentItemDamage": 3136
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 3152,
+      "subId": 16,
+      "groupId": 49,
+      "name": "Water Turbine",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor",
+      "fields": {
+        "nominalPower": 30.0,
+        "maxVoltage": 59.0,
+        "speed": 60.0,
+        "soundName": "eln:water_turbine",
+        "nominalVolume": 1.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "waterturbine",
+        "name": "Water Turbine",
+        "parentItemDamage": 3152
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4096,
+      "subId": 0,
+      "groupId": 64,
+      "name": "Small Passive Thermal Dissipator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor",
+      "fields": {
+        "thermalRs": 0.004,
+        "thermalRp": 0.12,
+        "thermalC": 83.33333333333333,
+        "warmLimit": 200.0,
+        "coolLimit": -100.0,
+        "nominalP": 250.0,
+        "nominalT": 30.0,
+        "voltageLevelColor": "Thermal",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "smallpassivethermaldissipator",
+        "name": "Small Passive Thermal Dissipator",
+        "parentItemDamage": 4096
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4128,
+      "subId": 32,
+      "groupId": 64,
+      "name": "Small Active Thermal Dissipator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor",
+      "fields": {
+        "nominalP": 200.0,
+        "nominalT": 30.0,
+        "warmLimit": 130.0,
+        "coolLimit": -100.0,
+        "nominalElectricalU": 50.0,
+        "nominalElectricalCoolingPower": 800.0,
+        "thermalRs": 0.001,
+        "thermalRp": 0.15,
+        "thermalC": 333.3333333333333,
+        "electricalRp": 50.0,
+        "electricalToThermalRp": 0.0375,
+        "electricalNominalP": 50.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "smallactivethermaldissipator",
+        "name": "Small Active Thermal Dissipator",
+        "parentItemDamage": 4128
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4130,
+      "subId": 34,
+      "groupId": 64,
+      "name": "200V Active Thermal Dissipator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor",
+      "fields": {
+        "nominalP": 200.0,
+        "nominalT": 30.0,
+        "warmLimit": 130.0,
+        "coolLimit": -100.0,
+        "nominalElectricalU": 200.0,
+        "nominalElectricalCoolingPower": 1200.0,
+        "thermalRs": 7.142857142857143E-4,
+        "thermalRp": 0.15,
+        "thermalC": 466.6666666666667,
+        "electricalRp": 666.6666666666666,
+        "electricalToThermalRp": 0.025,
+        "electricalNominalP": 60.0,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vactivethermaldissipator",
+        "name": "200V Active Thermal Dissipator",
+        "parentItemDamage": 4130
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4160,
+      "subId": 0,
+      "groupId": 65,
+      "name": "Experimental Transporter",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.teleporter.TeleporterDescriptor",
+      "fields": {
+        "areaH": 2,
+        "chargeSound": "eln:transporter",
+        "chargeVolume": 0.5,
+        "voltageLevelColor": "HighVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "experimentaltransporter",
+        "name": "Experimental Transporter",
+        "parentItemDamage": 4160
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4224,
+      "subId": 0,
+      "groupId": 66,
+      "name": "800V Defence Turret",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.turret.TurretDescriptor",
+      "fields": {
+        "voltageLevelColor": "HighVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "800vdefenceturret",
+        "name": "800V Defence Turret",
+        "parentItemDamage": 4224
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4289,
+      "subId": 1,
+      "groupId": 67,
+      "name": "50V Fuel Generator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.FuelGeneratorDescriptor",
+      "fields": {
+        "nominalPower": 300.0,
+        "maxVoltage": 52.5,
+        "tankEnergyCapacity": 360000.0,
+        "voltageLevelColor": "LowVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "50vfuelgenerator",
+        "name": "50V Fuel Generator",
+        "parentItemDamage": 4289
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 4290,
+      "subId": 2,
+      "groupId": 67,
+      "name": "200V Fuel Generator",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": false,
+      "descriptorClass": "mods.eln.transparentnode.FuelGeneratorDescriptor",
+      "fields": {
+        "nominalPower": 1500.0,
+        "maxVoltage": 210.0,
+        "tankEnergyCapacity": 1800000.0,
+        "voltageLevelColor": "MediumVoltage",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "200vfuelgenerator",
+        "name": "200V Fuel Generator",
+        "parentItemDamage": 4290
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 6183,
+      "subId": 39,
+      "groupId": 96,
+      "name": "Large Rheostat",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.transparentnode.LargeRheostatDescriptor",
+      "fields": {
+        "voltageLevelColor": "Neutral",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "largerheostat",
+        "name": "Large Rheostat",
+        "parentItemDamage": 6183
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 7876,
+      "subId": 4,
+      "groupId": 123,
+      "name": "Utility Pole",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor",
+      "fields": {
+        "minimalLoadToHum": 0.2,
+        "includeTransformer": false,
+        "cableTexture": "textures/wire.png",
+        "voltageLevelColor": "Grid",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "utilitypole",
+        "name": "Utility Pole",
+        "parentItemDamage": 7876
+      }
+    },
+    {
+      "id": "eln:transparent_node",
+      "damage": 7877,
+      "subId": 5,
+      "groupId": 123,
+      "name": "Utility Pole w/DC-DC Converter",
+      "itemClass": "mods.eln.node.transparent.TransparentNodeItem",
+      "selftestPlaced": true,
+      "descriptorClass": "mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor",
+      "fields": {
+        "minimalLoadToHum": 0.2,
+        "includeTransformer": true,
+        "cableTexture": "textures/wire.png",
+        "voltageLevelColor": "Grid",
+        "tileEntityMetaTag": "Basic",
+        "iconName": "utilitypolewdc-dcconverter",
+        "name": "Utility Pole w/DC-DC Converter",
+        "parentItemDamage": 7877
+      }
+    },
+    {
+      "id": "eln:copper_sword",
+      "damage": 0,
+      "name": "Copper Sword",
+      "itemClass": "net.minecraft.item.ItemSword"
+    },
+    {
+      "id": "eln:e_coal_boots",
+      "damage": 0,
+      "name": "E-Coal Boots",
+      "itemClass": "mods.eln.item.electricalitem.ElectricalArmor"
+    },
+    {
+      "id": "eln:e_coal_helmet",
+      "damage": 0,
+      "name": "E-Coal Helmet",
+      "itemClass": "mods.eln.item.electricalitem.ElectricalArmor"
+    },
+    {
+      "id": "eln:copper_chestplate",
+      "damage": 0,
+      "name": "Copper Chestplate",
+      "itemClass": "mods.eln.generic.genericArmorItem"
+    },
+    {
+      "id": "eln:energy_converter_eln_to_other_mvublock",
+      "damage": 0,
+      "name": "200V Electrical Age to other energy exporter",
+      "itemClass": "mods.eln.node.simple.SimpleNodeItem"
+    },
+    {
+      "id": "eln:e_coal_chestplate",
+      "damage": 0,
+      "name": "E-Coal Chestplate",
+      "itemClass": "mods.eln.item.electricalitem.ElectricalArmor"
+    },
+    {
+      "id": "eln:copper_leggings",
+      "damage": 0,
+      "name": "Copper Leggings",
+      "itemClass": "mods.eln.generic.genericArmorItem"
+    },
+    {
+      "id": "eln:energy_converter_eln_to_other_hvublock",
+      "damage": 0,
+      "name": "800V Electrical Age to other energy exporter",
+      "itemClass": "mods.eln.node.simple.SimpleNodeItem"
+    },
+    {
+      "id": "eln:ore",
+      "damage": 1,
+      "subId": 1,
+      "groupId": 0,
+      "name": "Copper Ore",
+      "itemClass": "mods.eln.ore.OreItem",
+      "descriptorClass": "mods.eln.ore.OreDescriptor",
+      "fields": {
+        "metadata": 1,
+        "spawnRate": 0,
+        "spawnSizeMax": 10,
+        "spawnSizeMin": 6,
+        "spawnHeightMin": 0,
+        "spawnHeightMax": 80,
+        "iconName": "copperore",
+        "name": "Copper Ore",
+        "parentItemDamage": 1
+      }
+    },
+    {
+      "id": "eln:ore",
+      "damage": 4,
+      "subId": 4,
+      "groupId": 0,
+      "name": "Lead Ore",
+      "itemClass": "mods.eln.ore.OreItem",
+      "descriptorClass": "mods.eln.ore.OreDescriptor",
+      "fields": {
+        "metadata": 4,
+        "spawnRate": 0,
+        "spawnSizeMax": 9,
+        "spawnSizeMin": 3,
+        "spawnHeightMin": 0,
+        "spawnHeightMax": 24,
+        "iconName": "leadore",
+        "name": "Lead Ore",
+        "parentItemDamage": 4
+      }
+    },
+    {
+      "id": "eln:ore",
+      "damage": 5,
+      "subId": 5,
+      "groupId": 0,
+      "name": "Tungsten Ore",
+      "itemClass": "mods.eln.ore.OreItem",
+      "descriptorClass": "mods.eln.ore.OreDescriptor",
+      "fields": {
+        "metadata": 5,
+        "spawnRate": 6,
+        "spawnSizeMax": 9,
+        "spawnSizeMin": 3,
+        "spawnHeightMin": 0,
+        "spawnHeightMax": 32,
+        "iconName": "tungstenore",
+        "name": "Tungsten Ore",
+        "parentItemDamage": 5
+      }
+    },
+    {
+      "id": "eln:ore",
+      "damage": 6,
+      "subId": 6,
+      "groupId": 0,
+      "name": "Cinnabar Ore",
+      "itemClass": "mods.eln.ore.OreItem",
+      "descriptorClass": "mods.eln.ore.OreDescriptor",
+      "fields": {
+        "metadata": 6,
+        "spawnRate": 0,
+        "spawnSizeMax": 9,
+        "spawnSizeMin": 3,
+        "spawnHeightMin": 0,
+        "spawnHeightMax": 32,
+        "iconName": "cinnabarore",
+        "name": "Cinnabar Ore",
+        "parentItemDamage": 6
+      }
+    }
+  ]
+}
