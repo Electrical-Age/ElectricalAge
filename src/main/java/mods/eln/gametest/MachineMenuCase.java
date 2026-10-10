@@ -42,6 +42,17 @@ final class MachineMenuCase implements TestCase {
         for (var item : new net.minecraft.world.item.Item[]{Items.IRON_ORE, Items.DEEPSLATE_IRON_ORE, Items.RAW_IRON, Items.RAW_GOLD,
             Items.RAW_COPPER, Items.COPPER_ORE, Items.DEEPSLATE_GOLD_ORE})
             ctx.check("macerator recipe for " + item, mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(item)) != null, "");
+        // ore -> chunks about like Fortune II (mean 1.75), chunk -> dust with a 20% chance of two (mean 1.2)
+        java.util.Random rnd = new java.util.Random(1);
+        double ore = 0, chunk = 0;
+        var ro = mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(Items.IRON_ORE));
+        var rc = mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(Items.RAW_IRON));
+        for (int i = 0; i < 4000; i++) {
+            ore += ro.getOutputCopy(rnd)[0].getCount();
+            chunk += rc.getOutputCopy(rnd)[0].getCount();
+        }
+        ctx.check("iron ore -> raw iron, mean about 1.75", ro.output[0].is(Items.RAW_IRON) && Math.abs(ore / 4000 - 1.75) < 0.05, "mean " + ore / 4000);
+        ctx.check("raw iron -> iron dust, mean about 1.2", Math.abs(chunk / 4000 - 1.2) < 0.03, "mean " + chunk / 4000);
         ctx.check("macerator: iron ore still in the input after 5 ticks",
             node.element.getInventory().getItem(4).is(Items.IRON_ORE), "input holds " + node.element.getInventory().getItem(4));
     }

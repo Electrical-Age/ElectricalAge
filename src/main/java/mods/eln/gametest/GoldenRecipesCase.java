@@ -58,6 +58,9 @@ final class GoldenRecipesCase implements TestCase {
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
 
+    /** Macerator inputs 26.x changes on purpose: vanilla ores give raw chunks (Baughn, 2026-10-10; golden/README.md). */
+    static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore");
+
     static final String[] COLORS = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
         "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"};
     static final String[] WOODS = {"oak", "spruce", "birch", "jungle", "acacia", "dark_oak"};
@@ -271,10 +274,14 @@ final class GoldenRecipesCase implements TestCase {
             "magnetizer", mods.eln.Eln.magnetiserRecipes);
         for (Map.Entry<String, mods.eln.misc.RecipesList> l : lists.entrySet()) {
             List<String> fail = new ArrayList<>();
-            int ok = 0, modOres = 0;
+            int ok = 0, modOres = 0, changed = 0;
             for (JsonElement e : golden.getAsJsonArray(l.getKey())) {
                 JsonObject g = e.getAsJsonObject();
                 JsonObject inJ = g.getAsJsonObject("input");
+                if (l.getKey().equals("macerator") && ORES_TO_CHUNKS.contains(inJ.get("name").getAsString())) {
+                    changed++;
+                    continue;
+                }
                 Item in = map(inJ, unknown);
                 if (in == null) {
                     modOres++;
@@ -297,7 +304,8 @@ final class GoldenRecipesCase implements TestCase {
                 else fail.add(inJ.get("name").getAsString() + (r == null ? " (no recipe)" : ""));
             }
             ctx.check("golden recipes: " + l.getKey() + " list as 1.12", fail.isEmpty(),
-                ok + " ok, " + modOres + " from other mods' ores (not in the test server)" + (fail.isEmpty() ? "" : ", failed: " + fail));
+                ok + " ok, " + modOres + " from other mods' ores (not in the test server), " + changed
+                    + " changed on purpose (golden/README.md)" + (fail.isEmpty() ? "" : ", failed: " + fail));
         }
     }
 }

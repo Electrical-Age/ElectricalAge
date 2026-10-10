@@ -119,10 +119,12 @@ public class ElectricalStackMachineProcess implements IProcess {
         }
     }
 
+    static final java.util.Random RANDOM = new java.util.Random();
+
     public ItemStack[] getSmeltResult() {
         Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
         if (recipe == null) return null;
-        return recipe.output;
+        return recipe.maxOutput();
     }
 
     /**
@@ -131,7 +133,7 @@ public class ElectricalStackMachineProcess implements IProcess {
     public void smeltItem() {
         if (this.smeltCan()) {
             Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
-            Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory, outSlotIdList);
+            Utils.tryPutStackInInventory(recipe.getOutputCopy(RANDOM), inventory, outSlotIdList);
             inventory.removeItem(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);
         }
