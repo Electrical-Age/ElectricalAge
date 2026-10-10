@@ -17,7 +17,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,7 +51,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
 
         this.descriptor = (EggIncubatorDescriptor) descriptor;
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
         slowProcessList.add(voltageWatchdog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
     }
 

@@ -23,4 +23,9 @@ public class BipoleVoltageWatchdog extends ValueWatchdog {
     double getValue() {
         return bipole.getU();
     }
+
+    @Override
+    FailureCause cause() {
+        return FailureCause.OVERVOLTAGE;
+    }
 }

@@ -100,6 +100,10 @@ public class GridLink implements INBTTReady {
         if (a == null || b == null || connected) {
             return false;
         }
+        // A burnt pole is out of the simulation; the line stays up but carries nothing.
+        if (a.isBurnt() || b.isBurnt()) {
+            return false;
+        }
 
         // Add link to simulator.
         ElectricalLoad aLoad = a.getGridElectricalLoad(as);

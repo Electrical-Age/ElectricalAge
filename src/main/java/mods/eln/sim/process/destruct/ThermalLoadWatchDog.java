@@ -45,4 +45,9 @@ public class ThermalLoadWatchDog extends ValueWatchdog {
         this.timeoutReset = max * 0.1 * 10;
         return this;
     }
+
+    @Override
+    FailureCause cause() {
+        return FailureCause.OVERHEAT;
+    }
 }

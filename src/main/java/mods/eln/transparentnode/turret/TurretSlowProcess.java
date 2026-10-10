@@ -7,7 +7,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
@@ -88,7 +88,7 @@ public class TurretSlowProcess extends StateMachine {
     private class DamageState implements State {
         @Override
         public void enter() {
-            WorldExplosion explosion = new WorldExplosion(element).machineExplosion();
+            Failure explosion = new Failure(element).machine();
             explosion.destructImpl();
         }
 

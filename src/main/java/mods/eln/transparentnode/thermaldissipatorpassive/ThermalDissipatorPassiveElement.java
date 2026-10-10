@@ -13,7 +13,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -40,7 +40,7 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setTMax(this.descriptor.warmLimit)
-            .set(new WorldExplosion(this).machineExplosion());
+            .set(new Failure(this).machine());
     }
 
 

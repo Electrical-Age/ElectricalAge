@@ -5,7 +5,7 @@ import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
 import mods.eln.misc.*
 import mods.eln.node.transparent.*
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sound.LoopedSound
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -171,7 +171,7 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
     override var shaft = ShaftNetwork(this)
 
     init {
-        val exp = WorldExplosion(this).machineExplosion()
+        val exp = Failure(this).rotating { shaft.energy }
         slowProcessList.add(createShaftWatchdog(this).set(exp));
     }
 

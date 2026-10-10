@@ -12,7 +12,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -74,7 +74,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
         descriptor.applyTo(this);
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
         watchdog.set(load).setUNominal(inStdVoltage).set(exp);
 
         connect();

@@ -36,4 +36,9 @@ public class VoltageStateWatchDog extends ValueWatchdog {
         this.timeoutReset = uNominal * 0.05 * 5;
         return this;
     }
+
+    @Override
+    FailureCause cause() {
+        return FailureCause.OVERVOLTAGE;
+    }
 }

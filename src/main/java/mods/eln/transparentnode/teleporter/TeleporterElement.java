@@ -17,7 +17,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.Entity;
@@ -59,7 +59,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
         teleporterList.add(this);
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
         slowProcessList.add(voltageWatchdog.set(powerLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp));
 
     }

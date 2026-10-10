@@ -23,7 +23,7 @@ import mods.eln.sim.nbt.NbtBatterySlowProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -56,6 +56,7 @@ public class BatteryElement extends TransparentNodeElement {
     double syncronizedPositiveUc, syncronizedNegativeUc, syncronizedCurrent, syncronizedTc;
 
     NbtBatterySlowProcess batterySlowProcess = new NbtBatterySlowProcess(node, batteryProcess, thermalLoad);
+    private final Failure failure = new Failure(this).battery(() -> batteryProcess.getEnergy());
 
     AutoAcceptInventoryProxy inventory =
         (new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(2, 64, this)))
@@ -103,7 +104,8 @@ public class BatteryElement extends TransparentNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setTMax(this.descriptor.thermalWarmLimit)
-            .set(new WorldExplosion(this).machineExplosion());
+            .set(failure);
+        batterySlowProcess.failure = failure;
     }
 
     @Override

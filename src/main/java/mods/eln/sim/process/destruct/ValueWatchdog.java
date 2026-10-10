@@ -43,7 +43,7 @@ public abstract class ValueWatchdog implements IProcess {
             Utils.print("%s destroying %s",
                 getClass().getName(),
                 destructable.describe());
-            destructable.destructImpl();
+            destructable.fail(cause(), value);
         }
     }
 
@@ -53,6 +53,8 @@ public abstract class ValueWatchdog implements IProcess {
     }
 
     abstract double getValue();
+
+    abstract FailureCause cause();
 
     public void disable() {
         this.max = 100000000;

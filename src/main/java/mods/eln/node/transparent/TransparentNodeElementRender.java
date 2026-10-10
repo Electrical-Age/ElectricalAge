@@ -68,11 +68,15 @@ public abstract class TransparentNodeElementRender {
 
     public abstract void draw();
 
+    /** The element burnt out (see TransparentNodeElement.burn); TransparentNodeRender scorches it. */
+    public boolean burnt;
+
     public void networkUnserialize(DataInputStream stream) {
         try {
             byte b = stream.readByte();
             front = Direction.fromInt(b & 0x7);
             grounded = (b & 8) != 0;
+            burnt = (b & TransparentNodeElement.HEADER_BURNT) != 0;
         } catch (IOException e) {
 
             e.printStackTrace();

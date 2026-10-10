@@ -1,5 +1,6 @@
 package mods.eln.node.six;
 
+import mods.eln.client.render.BurntRender;
 import mods.eln.misc.Direction;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
@@ -37,6 +38,10 @@ public class SixNodeRender extends TileEntitySpecialRenderer<SixNodeEntity> {
                 Direction.fromInt(idx).glRotateXnRef();
                 GL11.glTranslatef(-0.5F, 0f, 0f);
                 render.draw();
+                if (render.burnt) {
+                    BurntRender.overlay(render::draw);
+                    BurntRender.smoke(tileEntity.getWorld(), tileEntity.getPos());
+                }
                 GL11.glPopMatrix();
             }
             idx++;

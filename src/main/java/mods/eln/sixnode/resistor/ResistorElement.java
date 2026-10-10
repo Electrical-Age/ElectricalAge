@@ -19,7 +19,7 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -74,7 +74,7 @@ public class ResistorElement extends SixNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).electronics());
 
         resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
         if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
@@ -168,5 +168,11 @@ public class ResistorElement extends SixNodeElement {
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
         return new ResistorContainer(player, inventory);
+    }
+
+    /** A burnt resistor/diode is simply replaced. */
+    @Override
+    public net.minecraft.item.ItemStack getRepairPart() {
+        return mods.eln.sim.process.destruct.Repair.sameItem(this);
     }
 }

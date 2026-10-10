@@ -17,7 +17,7 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtFurnaceProcess;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -77,7 +77,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(this.descriptor.thermal)
-            .set(new WorldExplosion(this).machineExplosion());
+            .set(new Failure(this).machine());
     }
 
     @Override

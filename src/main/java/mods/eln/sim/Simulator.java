@@ -32,6 +32,11 @@ public class Simulator /* ,IPacketHandler */ {
 
     boolean run;
 
+    /** Run d.destructImpl() at the end of this slow tick. */
+    public void queueDestruct(IDestructable d) {
+        destructableSet.add(d);
+    }
+
     public double electricalPeriod, thermalPeriod, callPeriod;
     int electricalInterSystemOverSampling;
     int nodeCount = 0;
@@ -428,10 +433,14 @@ public class Simulator /* ,IPacketHandler */ {
             process.process(0.05);
         }
 
-        for (IDestructable d : destructableSet) {
-            d.destructImpl();
+        if (!destructableSet.isEmpty()) {
+            // Failures queued by watchdogs during this tick; run here, where changing the simulation is safe.
+            IDestructable[] queued = destructableSet.toArray(new IDestructable[0]);
+            destructableSet.clear();
+            for (IDestructable d : queued) {
+                d.destructImpl();
+            }
         }
-        destructableSet.clear();
 
         slowNsStack += System.nanoTime() - stackStart;
         avgTickTime += 1.0 / 20 * ((int) (System.nanoTime() - startTime) / 1000);

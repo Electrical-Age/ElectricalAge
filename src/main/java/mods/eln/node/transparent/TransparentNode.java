@@ -1,5 +1,6 @@
 package mods.eln.node.transparent;
 
+import mods.eln.sim.process.destruct.Repair;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -87,11 +88,13 @@ public class TransparentNode extends Node {
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        if (element.isBurnt()) return null;
         return element.getElectricalLoad(side, lrdu);
     }
 
     @Override
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+        if (element.isBurnt()) return null;
         return element.getThermalLoad(side, lrdu);
     }
 
@@ -178,6 +181,7 @@ public class TransparentNode extends Node {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (element.isBurnt() && Repair.onActivated(element, entityPlayer)) return true;
         if (element.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true;
         return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
     }
@@ -223,13 +227,14 @@ public class TransparentNode extends Node {
     @Override
     public void connectJob() {
         super.connectJob();
-        element.connectJob();
+        // A burnt element stays out of the simulation (see TransparentNodeElement.burn).
+        if (!element.isBurnt()) element.connectJob();
     }
 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
-        element.disconnectJob();
+        if (!element.isBurnt()) element.disconnectJob();
     }
 
     @Override
@@ -240,7 +245,8 @@ public class TransparentNode extends Node {
     }
 
     public void dropElement(EntityPlayerMP entityPlayer) {
-        if (element != null)
+        // A burnt device is slag: its contents drop, the device itself doesn't.
+        if (element != null && !element.isBurnt())
             if (Utils.mustDropItem(entityPlayer))
                 dropItem(element.getDropItemStack());
     }

@@ -14,7 +14,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -48,7 +48,7 @@ public class ThermalCableElement extends SixNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).cable());
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {

@@ -17,7 +17,7 @@ import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -139,8 +139,7 @@ public class HubElement extends SixNodeElement {
 
     void setup() {
         slowProcessList.clear();
-        WorldExplosion exp = new WorldExplosion(this);
-        exp.cableExplosion();
+        Failure exp = new Failure(this).cable();
 
         for (Component c : electricalComponentList) {
             Resistor r = (Resistor) c;

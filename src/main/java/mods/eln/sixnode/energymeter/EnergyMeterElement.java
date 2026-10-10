@@ -19,7 +19,7 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
@@ -83,7 +83,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
         slowProcessList.add(slowProcess);
 
-        WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+        Failure exp = new Failure(this).electronics();
 
         // slowProcessList.add(currentWatchDog);
         slowProcessList.add(voltageWatchDogA);

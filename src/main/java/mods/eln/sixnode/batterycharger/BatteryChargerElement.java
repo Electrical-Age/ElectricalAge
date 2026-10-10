@@ -20,7 +20,7 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -82,7 +82,7 @@ public class BatteryChargerElement extends SixNodeElement {
         electricalComponentList.add(powerResistor);
         slowProcessList.add(slowProcess);
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).electronics();
         slowProcessList.add(voltageWatchDog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
         //slowProcessList.add(powerWatchDog.set(powerResistor).setPmax(this.descriptor.nominalPower * 3).set(exp));
     }

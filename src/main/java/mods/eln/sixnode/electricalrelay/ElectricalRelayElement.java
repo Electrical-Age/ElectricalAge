@@ -15,7 +15,7 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
@@ -65,7 +65,7 @@ public class ElectricalRelayElement extends SixNodeElement {
         slowProcessList.add(voltageWatchDogA);
         slowProcessList.add(voltageWatchDogB);
 
-        WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+        Failure exp = new Failure(this).electronics();
 
         //currentWatchDog.set(switchResistor).setIAbsMax(this.descriptor.cable.electricalMaximalCurrent).set(exp);
         voltageWatchDogA.set(aLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp);

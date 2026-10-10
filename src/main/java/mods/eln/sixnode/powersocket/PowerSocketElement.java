@@ -14,7 +14,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -73,7 +73,7 @@ public class PowerSocketElement extends SixNodeElement {
         slowProcessList.add(voltageWatchdog);
         voltageWatchdog
             .set(powerLoad)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).electronics());
 
         channelRegister(this);
     }

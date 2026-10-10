@@ -17,7 +17,7 @@ import mods.eln.sim.mna.component.Capacitor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.BipoleVoltageWatchdog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -48,7 +48,7 @@ public class PowerCapacitorElement extends TransparentNodeElement {
         electricalProcessList.add(punkProcess);
         slowProcessList.add(watchdog);
 
-        watchdog.set(new WorldExplosion(this).machineExplosion());
+        watchdog.set(new Failure(this).capacitor());
         positiveLoad.setAsMustBeFarFromInterSystem();
     }
 

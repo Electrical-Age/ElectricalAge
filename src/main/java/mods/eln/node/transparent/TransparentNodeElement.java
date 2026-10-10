@@ -11,6 +11,10 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.Failure;
+import mods.eln.sim.process.destruct.FailureCause;
+import mods.eln.sim.process.destruct.IBurnable;
+import mods.eln.sim.process.destruct.ValueWatchdog;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
@@ -24,6 +28,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -32,7 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TransparentNodeElement implements GhostObserver, IPlayer, INodeElement {
+public abstract class TransparentNodeElement implements GhostObserver, IPlayer, INodeElement, IBurnable {
 
     public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
@@ -280,9 +285,12 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public abstract String thermoMeterString(Direction side);
 
 
+    /** Bit in the header byte of networkSerialize: the element is burnt out. */
+    public static final int HEADER_BURNT = 0x10;
+
     public void networkSerialize(DataOutputStream stream) {
         try {
-            stream.writeByte(front.getInt() + (grounded ? 8 : 0));
+            stream.writeByte(front.getInt() + (grounded ? 8 : 0) + (isBurnt() ? HEADER_BURNT : 0));
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -349,11 +357,18 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         byte b = nbt.getByte("others");
         front = Direction.fromInt(b & 0x7);
         grounded = (b & 8) != 0;
+        burnt = nbt.hasKey("burnt") ? FailureCause.fromOrdinal(nbt.getByte("burnt") - 1) : null;
+        burntKind = burnt != null ? Failure.Kind.fromOrdinal(nbt.getByte("burntKind")) : null;
     }
 
 
     public void writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
+
+        if (burnt != null) {
+            nbt.setByte("burnt", (byte) (burnt.ordinal() + 1));
+            nbt.setByte("burntKind", (byte) burntKind.ordinal());
+        }
 
         IInventory inv = getInventory();
         if (inv != null) {
@@ -472,6 +487,54 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 		return hasSidedInventory() ? 0x4 : 0;
 	}
 	*/
+
+    /** Set when the device burnt out (see Failure); null while it works. */
+    @Nullable
+    private FailureCause burnt;
+    @Nullable
+    private Failure.Kind burntKind;
+
+    @Override
+    @Nullable
+    public Failure.Kind getBurntKind() {
+        return burntKind;
+    }
+
+    @Override
+    @Nullable
+    public FailureCause getBurnt() {
+        return burnt;
+    }
+
+    @Override
+    public Coordonate getBurnableCoordonate() {
+        return coordonate();
+    }
+
+    /** Burn out: stay in the world but leave the simulation (TransparentNode skips burnt elements) until repaired. */
+    @Override
+    public void burn(FailureCause cause, Failure.Kind kind) {
+        if (burnt != null) return;
+        node.disconnect();
+        burnt = cause;
+        burntKind = kind;
+        node.connect();
+        needPublish();
+    }
+
+    @Override
+    public void repair() {
+        if (burnt == null) return;
+        node.disconnect();
+        burnt = null;
+        burntKind = null;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : thermalFastProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        node.connect();
+        needPublish();
+    }
 
     public Map<String, String> getWaila() {
         Map<String, String> wailaList = new HashMap<String, String>();

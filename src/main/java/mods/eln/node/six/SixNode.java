@@ -1,6 +1,7 @@
 package mods.eln.node.six;
 
 
+import mods.eln.sim.process.destruct.Repair;
 import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
@@ -263,7 +264,7 @@ public class SixNode extends Node {
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
-        if (element == null)
+        if (element == null || element.isBurnt())
             return null;
         return element.getElectricalLoad(elementSide.getLRDUGoingTo(side));
     }
@@ -272,7 +273,7 @@ public class SixNode extends Node {
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
-        if (element == null)
+        if (element == null || element.isBurnt())
             return null;
         return element.getThermalLoad(elementSide.getLRDUGoingTo(side));
     }
@@ -365,8 +366,9 @@ public class SixNode extends Node {
     public void connectJob() {
 
         super.connectJob();
+        // Burnt elements stay out of the simulation (see SixNodeElement.burn).
         for (SixNodeElement element : sideElementList) {
-            if (element != null) {
+            if (element != null && !element.isBurnt()) {
                 element.connectJob();
             }
         }
@@ -421,7 +423,7 @@ public class SixNode extends Node {
     public void disconnectJob() {
         super.disconnectJob();
         for (SixNodeElement element : sideElementList) {
-            if (element != null) {
+            if (element != null && !element.isBurnt()) {
                 element.disconnectJob();
             }
         }
@@ -434,6 +436,8 @@ public class SixNode extends Node {
         if (compareConnectionMask(element.getConnectionMask(lrdu), otherElement.getConnectionMask(otherLRDU))) {
             lrduElementMask.set(side, lrdu, true);
             lrduElementMask.set(otherSide, otherLRDU, true);
+            // A burnt element keeps its (visual) connection but carries nothing.
+            if (element.isBurnt() || otherElement.isBurnt()) return;
             ElectricalLoad eLoad;
             if ((eLoad = element.getElectricalLoad(lrdu)) != null) {
                 ElectricalLoad otherELoad = otherElement.getElectricalLoad(otherLRDU);
@@ -536,6 +540,8 @@ public class SixNode extends Node {
                 SixNodeElement element = sideElementList[side.getInt()];
                 if (element == null)
                     return false;
+                if (element.isBurnt() && Repair.onActivated(element, entityPlayer))
+                    return true;
                 if (element.onBlockActivated(entityPlayer, side, vx, vy, vz))
                     return true;
                 return super.onBlockActivated(entityPlayer, side, vx, vy, vz);

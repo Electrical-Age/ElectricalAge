@@ -19,7 +19,7 @@ import mods.eln.sim.ThermalLoadInitializerByPowerDrop
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sound.LoopedSound
 import mods.eln.wiki.Data
 import net.minecraft.client.gui.GuiButton
@@ -155,7 +155,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         tank.setFilter(FuelRegistry.fluidListToFluids(FuelRegistry.gasolineList + FuelRegistry.dieselList))
 
         thermalWatchdog.set(thermalLoad).setLimit((descriptor as FuelHeatFurnaceDescriptor).thermal)
-            .set(WorldExplosion(this).machineExplosion())
+            .set(Failure(this).machine())
     }
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?) = when {

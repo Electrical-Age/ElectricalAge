@@ -4,7 +4,7 @@ import mods.eln.server.SaveConfig;
 
 public abstract class BatterySlowProcess implements IProcess {
 
-    BatteryProcess batteryProcess;
+    protected BatteryProcess batteryProcess;
 
     ThermalLoad thermalLoad;
 

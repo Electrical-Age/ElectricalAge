@@ -10,4 +10,6 @@ class ShaftSpeedWatchdog(shaftElement: ShaftElement, max: Double) : ValueWatchdo
     }
 
     override fun getValue(): Double = shaftElement.shaft.rads
+
+    override fun cause(): FailureCause = FailureCause.OVERSPEED
 }

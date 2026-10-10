@@ -18,7 +18,7 @@ import mods.eln.sim.mna.misc.IRootSystemPreStepProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.entity.player.EntityPlayer
@@ -188,7 +188,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         desc.thermalLoadInitializer.applyTo(thermalLoadWatchDog)
         thermal.setAsSlow()
         thermalLoadList.add(thermal)
-        thermalLoadWatchDog.set(thermal).set(WorldExplosion(this).machineExplosion())
+        thermalLoadWatchDog.set(thermal).set(Failure(this).rotating { shaft.energy })
         // Baughn 2026-10-05: enable the watchdog (1.7.10 created it but never ran it, so overheating did nothing)
         slowProcessList.add(thermalLoadWatchDog)
 

@@ -25,6 +25,8 @@ public abstract class SixNodeElementRender {
     public Direction side;
     // public SixNodeDescriptor descriptor;
     public LRDUMask connectedSide = new LRDUMask();
+    /** The element burnt out (see SixNodeElement.burn); SixNodeRender scorches it. */
+    public boolean burnt;
     int glList, cableList[];
     boolean cableListReady[] = {false, false, false, false};
     boolean glListReady = false;
@@ -152,6 +154,7 @@ public abstract class SixNodeElementRender {
             byte b = stream.readByte();
             connectedSide.set(b & 0xF);
             front = front.fromInt((b >> 4) & 0x3);
+            burnt = (b & SixNodeElement.HEADER_BURNT) != 0;
 
             needRedraw = true;
 

@@ -8,6 +8,8 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.sim.IProcess;
+import mods.eln.sim.process.destruct.Failure;
+import mods.eln.sim.process.destruct.FailureCause;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxElement;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -18,6 +20,8 @@ import java.util.List;
 
 public class ElectricalAntennaTxSlowProcess implements IProcess {
 
+    private final Failure failure;
+
     ElectricalAntennaTxElement element;
 
     double timeCounter = 0;
@@ -25,6 +29,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 
     public ElectricalAntennaTxSlowProcess(ElectricalAntennaTxElement element) {
         this.element = element;
+        this.failure = new Failure(element).electronics();
     }
 
     @Override
@@ -103,10 +108,10 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
         }
 
         if (element.powerResistor.getP() > element.descriptor.electricalMaximalPower) {
-            element.node.physicalSelfDestruction(2.0f);
+            failure.fail(FailureCause.OVERHEAT, element.powerResistor.getP());
         }
         if (element.powerIn.getU() > element.descriptor.electricalMaximalVoltage) {
-            element.node.physicalSelfDestruction(2.0f);
+            failure.fail(FailureCause.OVERVOLTAGE, element.powerIn.getU());
         }
 
         element.placeBoot = false;

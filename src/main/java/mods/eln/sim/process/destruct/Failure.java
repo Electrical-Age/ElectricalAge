@@ -1,0 +1,282 @@
+package mods.eln.sim.process.destruct;
+
+import mods.eln.Eln;
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
+import mods.eln.node.NodeBase;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.simple.SimpleNode;
+import mods.eln.node.transparent.TransparentNodeElement;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+
+import javax.annotation.Nullable;
+import java.util.function.DoubleSupplier;
+
+/**
+ * What happens when a watchdog trips. Replaces 1.7.10's WorldExplosion, where everything exploded.
+ * Most devices burn out in place (see IBurnable): they leave the simulation, look scorched and wait for repair.
+ * The outcome depends on the kind of device and the cause; see notes/failure-modes.md for the table.
+ * Only a shaft overspeed (and a big battery's thermal runaway) is a real explosion.
+ */
+public class Failure implements IDestructable {
+    public enum Kind {
+        CABLE, ELECTRONICS, MACHINE, TRANSFORMER, CAPACITOR, BATTERY, ROTATING, HV_LINE;
+
+        public static Kind fromOrdinal(int i) {
+            Kind[] v = values();
+            return i >= 0 && i < v.length ? v[i] : MACHINE;
+        }
+    }
+
+    /** Faults on HV equipment at or above this voltage cause an arc flash. */
+    public static final double ARC_FLASH_VOLTAGE = 3200;
+
+    private final Coordonate c;
+    private final String type;
+    @Nullable
+    private final IBurnable target;
+    @Nullable
+    private final NodeBase node;
+    private Kind kind = Kind.MACHINE;
+    @Nullable
+    private DoubleSupplier energy;
+
+    @Nullable
+    private FailureCause pendingCause;
+    private double pendingValue;
+
+    public Failure(SixNodeElement e) {
+        this.c = e.getCoordonate();
+        this.type = e.toString();
+        this.target = e;
+        this.node = e.sixNode;
+    }
+
+    public Failure(TransparentNodeElement e) {
+        this.c = e.coordonate();
+        this.type = e.toString();
+        this.target = e;
+        this.node = e.node;
+    }
+
+    /** Simple nodes can't burn out; they are removed (quietly, with smoke) instead. */
+    public Failure(SimpleNode e) {
+        this.c = e.coordonate;
+        this.type = e.toString();
+        this.target = null;
+        this.node = e;
+    }
+
+    public Failure cable() {
+        kind = Kind.CABLE;
+        return this;
+    }
+
+    public Failure electronics() {
+        kind = Kind.ELECTRONICS;
+        return this;
+    }
+
+    public Failure machine() {
+        kind = Kind.MACHINE;
+        return this;
+    }
+
+    public Failure transformer() {
+        kind = Kind.TRANSFORMER;
+        return this;
+    }
+
+    public Failure capacitor() {
+        kind = Kind.CAPACITOR;
+        return this;
+    }
+
+    /** @param storedEnergy energy in J at the moment of failure; a big battery explodes. */
+    public Failure battery(DoubleSupplier storedEnergy) {
+        kind = Kind.BATTERY;
+        energy = storedEnergy;
+        return this;
+    }
+
+    /** @param shaftEnergy kinetic energy of the shaft in J; scales an overspeed burst. */
+    public Failure rotating(DoubleSupplier shaftEnergy) {
+        kind = Kind.ROTATING;
+        energy = shaftEnergy;
+        return this;
+    }
+
+    public Failure hvLine() {
+        kind = Kind.HV_LINE;
+        return this;
+    }
+
+    public Kind getKind() {
+        return kind;
+    }
+
+    /**
+     * Watchdogs call this from inside simulator steps, so the failure itself is queued and runs at the end of the
+     * slow tick (Simulator.queueDestruct), where it is safe to change the simulation.
+     */
+    @Override
+    public void fail(FailureCause cause, double value) {
+        if (pendingCause != null) return;
+        pendingCause = cause;
+        pendingValue = value;
+        Eln.simulator.queueDestruct(this);
+    }
+
+    /** Direct callers (not watchdogs) without a cause: treated as an overheat. */
+    @Override
+    public void destructImpl() {
+        FailureCause cause = pendingCause != null ? pendingCause : FailureCause.OVERHEAT;
+        double value = pendingValue;
+        pendingCause = null;
+        if (target != null && target.isBurnt()) return;
+        if (node != null && node.isDestructing()) return;
+        World w = c.world();
+        if (w == null || w.isRemote) return;
+        Utils.print("%s fails: %s (%s, %.0f)", describe(), kind, cause, value);
+        apply(w, cause, value);
+    }
+
+    /** The outcome table. Public outcome per (kind, cause); see the class comment. */
+    public enum Outcome {BURN, BURN_FIRE, BURN_FIRE_WIDE, POP, ARC_FLASH, EXPLODE}
+
+    public static Outcome outcome(Kind kind, FailureCause cause, double value, double energy) {
+        switch (kind) {
+            case CABLE:
+            case ELECTRONICS:
+            case MACHINE:
+                return cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
+            case TRANSFORMER:
+                return Outcome.BURN_FIRE_WIDE;
+            case CAPACITOR:
+                return cause == FailureCause.OVERVOLTAGE ? Outcome.POP : Outcome.BURN_FIRE;
+            case BATTERY:
+                return energy >= BATTERY_EXPLOSION_ENERGY ? Outcome.EXPLODE : Outcome.BURN_FIRE;
+            case ROTATING:
+                return cause == FailureCause.OVERSPEED ? Outcome.EXPLODE
+                    : cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
+            case HV_LINE:
+                if (cause == FailureCause.OVERVOLTAGE && Math.abs(value) >= ARC_FLASH_VOLTAGE) return Outcome.ARC_FLASH;
+                return cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
+        }
+        return Outcome.BURN;
+    }
+
+    /** Stored energy above which a failing battery explodes instead of only venting and burning (J). */
+    public static final double BATTERY_EXPLOSION_ENERGY = 1e6;
+
+    /** Explosion strength for a burst holding this much energy: 1 (small) .. 4 (TNT). */
+    public static float explosionStrength(double energyJ) {
+        return (float) Math.max(1, Math.min(4, Math.sqrt(Math.max(0, energyJ) / 15000)));
+    }
+
+    private void apply(World w, FailureCause cause, double value) {
+        double e = energy != null ? energy.getAsDouble() : 0;
+        Outcome outcome = outcome(kind, cause, value, e);
+        if (outcome == Outcome.EXPLODE && !Eln.explosionEnable) outcome = Outcome.BURN_FIRE;
+        BlockPos pos = new BlockPos(c.x, c.y, c.z);
+
+        switch (outcome) {
+            case EXPLODE:
+                if (node != null) {
+                    node.physicalSelfDestruction(explosionStrength(e));
+                } else {
+                    w.createExplosion((Entity) null, c.x + .5, c.y + .5, c.z + .5, explosionStrength(e), true);
+                }
+                return;
+            case POP:
+                // A capacitor bursting: a bang and a shove, no crater.
+                w.createExplosion((Entity) null, c.x + .5, c.y + .5, c.z + .5, 1.0f, false);
+                break;
+            case ARC_FLASH:
+                arcFlash(w, pos, value);
+                break;
+            default:
+                break;
+        }
+
+        burnOut(w, pos, cause);
+        if (outcome == Outcome.BURN_FIRE || outcome == Outcome.ARC_FLASH) ignite(w, pos, false);
+        if (outcome == Outcome.BURN_FIRE_WIDE) ignite(w, pos, true);
+    }
+
+    private void burnOut(World w, BlockPos pos, FailureCause cause) {
+        if (target != null) {
+            target.burn(cause, kind);
+        } else if (node != null) {
+            node.physicalSelfDestruction(0);
+        }
+        particles(w, pos, EnumParticleTypes.SMOKE_LARGE, 12, 0.3);
+        if (cause == FailureCause.OVERVOLTAGE) {
+            particles(w, pos, EnumParticleTypes.CRIT, 20, 0.5);
+            sound(w, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.6f);
+        } else {
+            particles(w, pos, EnumParticleTypes.LAVA, 4, 0.2);
+            sound(w, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, 0.8f, 0.8f);
+        }
+    }
+
+    /** Set fire to air next to the device where there's something to burn; wide = oil fire, burns even on stone. */
+    static void ignite(World w, BlockPos pos, boolean wide) {
+        for (BlockPos p : BlockPos.getAllInBox(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
+            if (!w.isAirBlock(p)) continue;
+            boolean fuel = wide && p.getY() >= pos.getY() && w.isSideSolid(p.down(), EnumFacing.UP);
+            if (!fuel) {
+                for (EnumFacing f : EnumFacing.values()) {
+                    BlockPos n = p.offset(f);
+                    if (w.getBlockState(n).getBlock().isFlammable(w, n, f.getOpposite())) {
+                        fuel = true;
+                        break;
+                    }
+                }
+            }
+            if (fuel) w.setBlockState(p, Blocks.FIRE.getDefaultState(), 11);
+        }
+    }
+
+    /** A flash and a bang; everything nearby gets burnt. Strength grows with the voltage. */
+    private static void arcFlash(World w, BlockPos pos, double voltage) {
+        double r = Math.min(8, 2 + Math.abs(voltage) / ARC_FLASH_VOLTAGE);
+        sound(w, pos, SoundEvents.ENTITY_LIGHTNING_THUNDER, 1.5f, 1.8f);
+        particles(w, pos, EnumParticleTypes.FIREWORKS_SPARK, 60, 0.8);
+        particles(w, pos, EnumParticleTypes.FLAME, 30, 0.6);
+        AxisAlignedBB box = new AxisAlignedBB(pos).grow(r);
+        for (EntityLivingBase ent : w.getEntitiesWithinAABB(EntityLivingBase.class, box)) {
+            double d = Math.sqrt(ent.getDistanceSq(pos));
+            if (d > r) continue;
+            ent.setFire((int) Math.ceil(8 * (1 - d / r)) + 1);
+            ent.attackEntityFrom(DamageSource.IN_FIRE, (float) (10 * (1 - d / r)) + 1);
+        }
+    }
+
+    private static void particles(World w, BlockPos pos, EnumParticleTypes type, int n, double spread) {
+        if (w instanceof WorldServer) {
+            ((WorldServer) w).spawnParticle(type, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, n, spread, spread, spread, 0.02);
+        }
+    }
+
+    private static void sound(World w, BlockPos pos, SoundEvent s, float volume, float pitch) {
+        w.playSound(null, pos, s, SoundCategory.BLOCKS, volume, pitch);
+    }
+
+    @Override
+    public String describe() {
+        return String.format("%s (%s)", this.type, this.c.toString());
+    }
+}

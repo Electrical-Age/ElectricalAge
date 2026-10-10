@@ -17,7 +17,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 
 import java.io.DataOutputStream;
@@ -57,17 +57,17 @@ public class ElectricalPoleElement extends GridElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).cable());
 
         slowProcessList.add(voltageWatchdog);
         // Electrical poles can handle higher voltages, due to air insulation.
         // This puts utility poles at 4 * Very High Voltage.
         // There'll be a second tier of pole later, handling 16x.
-        WorldExplosion exp;
+        Failure exp;
         if (desc.includeTransformer) {
-            exp = new WorldExplosion(this).machineExplosion();
+            exp = new Failure(this).hvLine();
         } else {
-            exp = new WorldExplosion(this).cableExplosion();
+            exp = new Failure(this).hvLine();
         }
         voltageWatchdog
             .set(electricalLoad)

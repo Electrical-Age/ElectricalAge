@@ -19,7 +19,7 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -65,7 +65,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
         aLoad = new NbtElectricalLoad("aLoad");
         electricalLoadList.add(aLoad);
-        WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+        Failure exp = new Failure(this).electronics();
 
         if (!this.descriptor.voltageOnly) {
             bLoad = new NbtElectricalLoad("bLoad");

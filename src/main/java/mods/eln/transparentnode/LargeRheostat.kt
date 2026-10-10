@@ -18,7 +18,7 @@ import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.resistor.ResistorContainer
@@ -93,7 +93,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         thermalFastProcessList.add(heater)
         slowProcessList.add(thermalWatchdog)
         thermalWatchdog.set(thermalLoad).setTMax(desc.dissipator.warmLimit)
-            .set(WorldExplosion(this).machineExplosion())
+            .set(Failure(this).machine())
     }
 
     inner class ControlProcess() : IProcess {

@@ -11,6 +11,10 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.Failure;
+import mods.eln.sim.process.destruct.FailureCause;
+import mods.eln.sim.process.destruct.IBurnable;
+import mods.eln.sim.process.destruct.ValueWatchdog;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeElement {
+public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeElement, IBurnable {
     //private static Class[] idToClass = new Class[256];
     //private static Class[] idToRenderClass = new Class[256];
 
@@ -172,10 +176,13 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     private int itemStackDamageId;
 
+    /** Bit in the header byte of networkSerialize: the element is burnt out. */
+    public static final int HEADER_BURNT = 0x40;
+
     public void networkSerialize(DataOutputStream stream) {
 
         try {
-            stream.writeByte(sixNode.lrduElementMask.get(side).mask + (front.dir << 4));
+            stream.writeByte(sixNode.lrduElementMask.get(side).mask + (front.dir << 4) + (isBurnt() ? HEADER_BURNT : 0));
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -219,7 +226,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
         sixNode.dropInventory(getInventory());
         //	getCoordonate().world().getWorldInfo().
-        if (Utils.mustDropItem(entityPlayer))
+        // A burnt device is slag: its contents drop, the device itself doesn't.
+        if (Utils.mustDropItem(entityPlayer) && !isBurnt())
             sixNode.dropItem(getDropItemStack());
     }
 
@@ -253,6 +261,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         int idx;
 
         front = front.readFromNBT(nbt, "sixFront");
+        burnt = nbt.hasKey("burnt") ? FailureCause.fromOrdinal(nbt.getByte("burnt") - 1) : null;
+        burntKind = burnt != null ? Failure.Kind.fromOrdinal(nbt.getByte("burntKind")) : null;
 
         IInventory inv = getInventory();
         if (inv != null) {
@@ -296,6 +306,10 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         int idx;
 
         front.writeToNBT(nbt, "sixFront");
+        if (burnt != null) {
+            nbt.setByte("burnt", (byte) (burnt.ordinal() + 1));
+            nbt.setByte("burntKind", (byte) burntKind.ordinal());
+        }
 
         IInventory inv = getInventory();
         if (inv != null) {
@@ -412,6 +426,54 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     public boolean playerAskToBreak() {
         return true;
+    }
+
+    /** Set when the device burnt out (see Failure); null while it works. */
+    @Nullable
+    private FailureCause burnt;
+    @Nullable
+    private Failure.Kind burntKind;
+
+    @Override
+    @Nullable
+    public Failure.Kind getBurntKind() {
+        return burntKind;
+    }
+
+    @Override
+    @Nullable
+    public FailureCause getBurnt() {
+        return burnt;
+    }
+
+    @Override
+    public Coordonate getBurnableCoordonate() {
+        return getCoordonate();
+    }
+
+    /** Burn out: stay in the world but leave the simulation (SixNode skips burnt elements) until repaired. */
+    @Override
+    public void burn(FailureCause cause, Failure.Kind kind) {
+        if (burnt != null) return;
+        sixNode.disconnect();
+        burnt = cause;
+        burntKind = kind;
+        sixNode.connect();
+        needPublish();
+    }
+
+    @Override
+    public void repair() {
+        if (burnt == null) return;
+        sixNode.disconnect();
+        burnt = null;
+        burntKind = null;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : thermalSlowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        sixNode.connect();
+        needPublish();
     }
 
     @Nullable

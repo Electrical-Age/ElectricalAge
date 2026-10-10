@@ -1,5 +1,7 @@
 package mods.eln.compat.top;
 
+import mods.eln.sim.process.destruct.IBurnable;
+import mods.eln.sim.process.destruct.Repair;
 import mcjty.theoneprobe.api.IBlockDisplayOverride;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -101,6 +103,10 @@ public class TopIntegration implements Function<ITheOneProbe, Void> {
         }
     }
 
+    static void burnt(IProbeInfo info, @Nullable IBurnable b) {
+        if (b != null && b.isBurnt()) info.text(TextFormatting.RED + Repair.describe(b));
+    }
+
     static void addLines(IProbeInfo info, @Nullable Map<String, String> lines) {
         if (lines == null) return;
         for (Map.Entry<String, String> e : lines.entrySet()) {
@@ -121,12 +127,18 @@ public class TopIntegration implements Function<ITheOneProbe, Void> {
             Coordonate coord = new Coordonate(data.getPos().getX(), data.getPos().getY(), data.getPos().getZ(), world);
             if (block instanceof TransparentNodeBlock) {
                 NodeBase node = NodeManager.instance.getNodeFromCoordonate(coord);
-                if (node instanceof TransparentNode) addLines(info, waila((TransparentNode) node));
+                if (node instanceof TransparentNode) {
+                    burnt(info, ((TransparentNode) node).element);
+                    addLines(info, waila((TransparentNode) node));
+                }
             } else if (block instanceof SixNodeBlock) {
                 NodeBase node = NodeManager.instance.getNodeFromCoordonate(coord);
                 if (node instanceof SixNode && data.getSideHit() != null) {
                     SixNodeElement element = ((SixNode) node).getElement(Direction.fromEnumFacing(data.getSideHit()));
-                    if (element != null) addLines(info, element.getWaila());
+                    if (element != null) {
+                        burnt(info, element);
+                        addLines(info, element.getWaila());
+                    }
                 }
             } else if (block instanceof GhostBlock) {
                 GhostTarget target = ghostTarget(world, coord);

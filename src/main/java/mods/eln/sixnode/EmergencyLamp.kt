@@ -12,7 +12,7 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.mna.component.ResistorSwitch
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.lampsupply.LampSupplyElement
 import net.minecraft.client.gui.GuiButton
@@ -165,7 +165,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         slowProcessList.add(process)
         slowProcessList.add(NodePeriodicPublishProcess(sixNode, 2.0, 0.5))
         slowProcessList.add(VoltageStateWatchDog().set(load).setUNominal(desc.cable.electricalNominalVoltage)
-            .set(WorldExplosion(this).cableExplosion()))
+            .set(Failure(this).electronics()))
     }
 
     override fun getConnectionMask(lrdu: LRDU) = when {
