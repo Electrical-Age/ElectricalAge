@@ -92,7 +92,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp11Content(),
         new mods.eln.registry.batch.Wp12aContent(),
         new mods.eln.registry.batch.Wp12bContent(),
-        new mods.eln.registry.batch.Wp12cContent());
+        new mods.eln.registry.batch.Wp12cContent(),
+        new mods.eln.registry.batch.Wp12dContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -222,6 +223,8 @@ public class Eln {
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
         serverEventListener = new mods.eln.server.ServerEventListener();
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent.class,
+            mods.eln.item.electricalitem.ElectricalArmor::onIncomingDamage);
         obj.loadAllElnModels();
         mods.eln.registry.ElnDeviceRegistry.registerBatch1();
         for (ElnContent c : CONTENT) c.preInit();

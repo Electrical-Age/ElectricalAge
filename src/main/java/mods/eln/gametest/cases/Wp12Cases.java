@@ -7,6 +7,7 @@ import mods.eln.item.electricalitem.ElectricalTool;
 import mods.eln.item.electricalitem.TreeCapitation;
 import mods.eln.misc.Utils;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -30,6 +31,7 @@ public final class Wp12Cases {
         cases.add(new ForgeEnergy());
         cases.add(new OreVein());
         cases.add(new OreWorldgen());
+        cases.add(new ECoalArmor());
     }
 
     /**
@@ -252,6 +254,59 @@ public final class Wp12Cases {
             }
             net.minecraft.world.level.block.state.BlockState ore = mods.eln.registry.batch.Wp12cContent.oreCopper.block.defaultBlockState();
             ctx.check("ores: pickaxe-mineable, need a tool", ore.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE) && ore.requiresCorrectToolForDrops(), "");
+        }
+    }
+
+    /**
+     * E-Coal chestplate on a pig, charged to its full 4000 J ((6 + 2) * 500), then 10 cactus damage (armour applies). 1.12 ISpecialArmor
+     * maths: ratio = min(1, 4000 / 3000) * 6 / 20 = 0.3; absorbed = min(250 * 0.3, AbsorbMax 4000 / 500 * 25 = 200)
+     * = 75 (1/25 units) -> 3 damage points -> 1500 J used; the pig takes 7 (health 10 -> 3). Also: the copper tools and
+     * armour exist with the iron stats.
+     */
+    static final class ECoalArmor implements TestCase {
+        net.minecraft.world.entity.animal.pig.Pig pig;
+        ItemStack plate;
+        float healthAfter;
+
+        @Override
+        public String name() {
+            return "wp12 e-coal armour";
+        }
+
+        @Override
+        public int width() {
+            return 3;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            ServerLevel w = ctx.world();
+            pig = net.minecraft.world.entity.EntityTypes.PIG.create(w, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+            pig.snapTo(ctx.at(1, 1, 1).getX() + 0.5, ctx.at(1, 1, 1).getY(), ctx.at(1, 1, 1).getZ() + 0.5, 0, 0);
+            pig.setNoAi(true);
+            w.addFreshEntity(pig);
+            plate = new ItemStack(mods.eln.registry.batch.Wp12dContent.plateECoal.get());
+            ((mods.eln.item.electricalitem.ElectricalArmor) plate.getItem()).setEnergy(plate, 4000);
+            pig.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, plate);
+            pig.hurtServer(w, w.damageSources().cactus(), 10f); // generic damage bypasses armour on 26.x
+            healthAfter = pig.getHealth();
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            try {
+                ItemStack worn = pig.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
+                double e = ((mods.eln.item.electricalitem.ElectricalArmor) worn.getItem()).getEnergy(worn);
+                ctx.checkValue("e-coal armour: pig health after 10 damage (10 - 7)", healthAfter, 3.0);
+                ctx.checkValue("e-coal armour: energy left [J] (4000 - 3 * 500)", e, 2500.0);
+                ctx.check("e-coal armour: no armour points", pig.getArmorValue() == 0, "armor " + pig.getArmorValue());
+                Item sword = mods.eln.registry.batch.Wp12dContent.swordCopper.get();
+                ItemStack helmet = new ItemStack(mods.eln.registry.batch.Wp12dContent.helmetCopper.get());
+                ctx.check("copper tools and armour registered (iron stats)", new ItemStack(sword).getMaxDamage() == 250
+                    && helmet.getMaxDamage() == 15 * 11, "sword durability " + new ItemStack(sword).getMaxDamage() + ", helmet " + helmet.getMaxDamage());
+            } finally {
+                pig.discard();
+            }
         }
     }
 }

@@ -51,7 +51,8 @@ public final class ItemEnergyCapability {
         List<Item> items = new ArrayList<>();
         for (var h : mods.eln.registry.ElnRegistry.ALL_ITEMS) {
             Item item = h.get();
-            if (item instanceof mods.eln.generic.IDescriptorItem d && d.getEaDescriptor() instanceof IItemEnergyBattery) items.add(item);
+            if (item instanceof IItemEnergyBattery
+                || item instanceof mods.eln.generic.IDescriptorItem d && d.getEaDescriptor() instanceof IItemEnergyBattery) items.add(item);
         }
         if (!items.isEmpty())
             e.registerItem(Capabilities.Energy.ITEM, (stack, access) -> new Handler(access), items.toArray(new Item[0]));
