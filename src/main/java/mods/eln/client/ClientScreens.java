@@ -38,6 +38,10 @@ final class ClientScreens {
         layout("transparentnode.powercapacitor.PowerCapacitorDescriptor", "power_capacitor");
         layout("sixnode.powerinductorsix.PowerInductorSixDescriptor", "power_inductor");
         layout("transparentnode.powerinductor.PowerInductorDescriptor", "power_inductor");
+        layout("sixnode.groundcable.GroundCableDescriptor", "ground_cable");
+        layout("sixnode.electricalwatch.ElectricalWatchDescriptor", "electrical_watch");
+        layout("sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor", "entity_sensor");
+        layout("sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor", "fire_detector");
         ElnScreens.register(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class,
             mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceScreen::new);
         ElnScreens.register(mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor.class,

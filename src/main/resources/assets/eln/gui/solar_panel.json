@@ -5,10 +5,16 @@
    "sample": "2x3 Rotating Solar Panel"
   },
   {
+   "text": "angle",
+   "sample": "Panel angle: -90°"
+  },
+  {
    "row": [
     {
      "slider": "angle",
-     "sample": "Panel angle: -90°",
+     "sample": [
+      "    "
+     ],
      "fill": true
     },
     {

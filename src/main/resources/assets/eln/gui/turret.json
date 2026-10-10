@@ -21,8 +21,14 @@
    "fill": true
   },
   {
+   "text": "charge",
+   "sample": "Recharge power: 5000W"
+  },
+  {
    "slider": "charge",
-   "sample": "Recharge power: 5000W",
+   "sample": [
+    "    "
+   ],
    "fill": true
   },
   {

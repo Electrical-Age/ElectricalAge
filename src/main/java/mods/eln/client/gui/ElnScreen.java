@@ -67,7 +67,12 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     protected EaSlider slider(String id, double min, double max, double step, double initial,
                               java.util.function.DoubleFunction<Component> label, java.util.function.DoubleConsumer commit) {
         var r = rect("slider", id);
-        return addRenderableWidget(new EaSlider(leftPos + r.x(), topPos + r.y(), r.w(), min, max, step, initial, label, commit));
+        // a text line of the same id above the slider takes the label (the knob would cover it)
+        var t = layout.get("text", id);
+        EaSlider s = addRenderableWidget(new EaSlider(leftPos + r.x(), topPos + r.y(), r.w(), min, max, step, initial,
+            t == null ? label : v -> Component.empty(), commit));
+        if (t != null) drawers.add(() -> drawing.text(font, label.apply(s.get()), leftPos + t.x(), topPos + t.y(), LABEL, false));
+        return s;
     }
 
     protected EaGauge gauge(String id, java.util.function.DoubleSupplier fraction, java.util.function.Supplier<Component> text,

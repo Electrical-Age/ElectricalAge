@@ -15,7 +15,8 @@
       {
        "slot": "0"
       }
-     ]
+     ],
+     "align": "center"
     },
     {
      "column": [
@@ -26,7 +27,8 @@
       {
        "slot": "2"
       }
-     ]
+     ],
+     "align": "center"
     },
     {
      "column": [
@@ -37,7 +39,8 @@
       {
        "slot": "1"
       }
-     ]
+     ],
+     "align": "center"
     },
     {
      "space": 0,
@@ -52,7 +55,8 @@
       {
        "slot": "3"
       }
-     ]
+     ],
+     "align": "center"
     }
    ],
    "fill": true

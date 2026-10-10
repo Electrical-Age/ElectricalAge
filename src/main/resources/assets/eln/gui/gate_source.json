@@ -5,8 +5,14 @@
    "sample": "Signal Trimmer"
   },
   {
+   "text": "level",
+   "sample": "Output: 100%"
+  },
+  {
    "slider": "level",
-   "sample": "Output: 100%",
+   "sample": [
+    "    "
+   ],
    "fill": true
   }
  ],
