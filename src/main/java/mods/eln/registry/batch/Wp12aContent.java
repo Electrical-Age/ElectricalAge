@@ -926,9 +926,9 @@ public class Wp12aContent implements ElnContent {
             // 1.12 Eln.wrenchItemStack + Utils.isWrench: this item, or any item named "...wrench..."
             final GenericItemUsingDamageDescriptorWithComment wrench = desc;
             Utils.wrenchCheck = p -> {
+                if (mods.eln.server.PlayerKeys.usingWrench(p)) return true; // the wrench key, or an item named a wrench
                 ItemStack held = p.getMainHandItem();
-                return !held.isEmpty() && (Utils.getItemObject(held) == wrench
-                    || held.getHoverName().getString().toLowerCase().contains("wrench"));
+                return !held.isEmpty() && Utils.getItemObject(held) == wrench;
             };
         }
         {

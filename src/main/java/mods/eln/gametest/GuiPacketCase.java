@@ -102,6 +102,20 @@ final class GuiPacketCase implements TestCase {
                 o.writeFloat(200f);
             }), fp);
             ctx.checkValue("source: a far player's packet is ignored", vs.getU(), 50);
+            // the wrench key (packetPlayerKey): a held key makes a switch open its screen instead of toggling
+            fp.setPos(sourceAt.getX() + 0.5, sourceAt.getY() + 1, sourceAt.getZ() + 2);
+            var ws = ctx.placeSix(LabCommands.sixId("Wireless Switch"), ctx.at(2, 1, 2), Direction.YN);
+            boolean before = (boolean) field(ws, "state");
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(bos);
+            out.writeByte(Eln.packetPlayerKey);
+            out.writeByte(mods.eln.server.PlayerKeys.WRENCH);
+            out.writeBoolean(true);
+            ServerPacketHandler.handle(bos.toByteArray(), fp);
+            ctx.check("wrench key: the player counts as using a wrench", mods.eln.misc.Utils.isPlayerUsingWrench(fp), "");
+            boolean consumed = ws.onBlockActivated(fp, Direction.YN, 0.5f, 0.1f, 0.5f);
+            ctx.check("wrench key: the wireless switch doesn't toggle", !consumed && (boolean) field(ws, "state") == before, "consumed " + consumed);
+            mods.eln.server.PlayerKeys.set(fp, mods.eln.server.PlayerKeys.WRENCH, false);
         } catch (Exception e) {
             ctx.check("gui packets", false, e.toString());
         }
