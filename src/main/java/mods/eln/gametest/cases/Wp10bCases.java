@@ -90,6 +90,7 @@ public final class Wp10bCases {
         cases.add(new DissipatorCase());
         cases.add(new LargeRheostatCase());
         cases.add(new TurbineCase());
+        cases.add(new FuelGeneratorCase());
         cases.add(new SolarCase());
         cases.add(new WindWaterCase());
         cases.add(new AntennaCase());
@@ -296,7 +297,71 @@ public final class Wp10bCases {
         }
     }
 
-    // FuelGeneratorCase: deferred (Wp10bFuelGeneratorCase.java.txt)
+    /**
+     * 50V Fuel Generator (nominal 300 W * fuelGeneratorPowerFactor, Umax = 52.5 V, tank 2 buckets, tank energy =
+     * tank seconds * nominal P). Lava is no fuel: a lava bucket is refused (tank 0, bucket kept). A bucket of a
+     * registered gasoline fuel (if any and bucketable) fills half the tank and comes back empty. With fuel, a click
+     * starts it: open circuit -> U = Umax; tank drains at the minimum load 0.1 * P_nom with efficiency factor 1.375:
+     * dLevel/dt = 1.375 * 0.1 * P_nom / tank energy.
+     */
+    static final class FuelGeneratorCase implements TestCase {
+        TransparentNodeElement gen;
+        ItemStack afterLava, afterFuel;
+        String fuelName;
+        double level0, lavaLevel;
+        long t0;
+
+        public String name() {
+            return "wp10b fuel generator";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            gen = ctx.placeTransparent(FUEL_GENERATOR_50V, ctx.at(2, 1, 1));
+            afterLava = click(ctx, gen, new ItemStack(Items.LAVA_BUCKET));
+            lavaLevel = field(gen, "tankLevel");
+            for (net.minecraft.world.level.material.Fluid fl : mods.eln.fluid.FuelRegistry.INSTANCE.fluidListToFluids(mods.eln.fluid.FuelRegistry.INSTANCE.getGasolineList())) {
+                String name = mods.eln.fluid.FuelRegistry.INSTANCE.fluidName(fl);
+                ItemStack bucket = new ItemStack(fl.getBucket()); // 26.x: the fluid's bucket item (AIR if none)
+                if (bucket.isEmpty()) continue;
+                fuelName = name;
+                afterFuel = click(ctx, gen, bucket);
+                break;
+            }
+            level0 = field(gen, "tankLevel");
+            if (fuelName == null) {
+                level0 = 0.5;
+                setField(gen, "tankLevel", level0);
+            }
+            click(ctx, gen, ItemStack.EMPTY); // switch on
+            t0 = ctx.world().getGameTime();
+        }
+
+        public void measure(TestContext ctx) {
+            double t = elapsed(ctx, t0);
+            ctx.check("wp10b fuel generator refuses lava (not a fuel): tank empty, bucket kept", lavaLevel == 0
+                && afterLava.getItem() == Items.LAVA_BUCKET, "level " + lavaLevel + ", hand " + afterLava);
+            if (fuelName == null) {
+                ctx.line("wp10b fuel generator: SKIP bucket fill (no bucketable gasoline fuel registered); tank set to 0.5");
+            } else {
+                ctx.check("wp10b fuel generator takes a bucket of " + fuelName + ": half tank, empty bucket back",
+                    Math.abs(level0 - 0.5) < 1e-9 && afterFuel.getItem() == Items.BUCKET, "level " + level0 + ", hand " + afterFuel);
+            }
+            boolean on = (Boolean) callPrefix(gen, "getOn");
+            double umax = 50 * 1.05;
+            ElectricalLoad pos = field(gen, "positiveLoad");
+            ctx.check("wp10b fuel generator running", on, "on " + on);
+            ctx.checkValue("wp10b fuel generator open-circuit voltage [V] (Umax = 1.05 * 50)", pos.getU(), umax);
+            double pNom = 300 * Eln.fuelGeneratorPowerFactor;
+            double rate = 1.375 * 0.1 * pNom / (Eln.fuelGeneratorTankCapacity * pNom);
+            double level = field(gen, "tankLevel");
+            within(ctx, f("wp10b fuel generator fuel used in %.2f s (1.375 * 0.1 P_nom / tank energy * t)", t), level0 - level, rate * t,
+                rate * 1.5 * TICK + rate * t * 0.01);
+        }
+    }
 
 
     /**
@@ -474,13 +539,15 @@ public final class Wp10bCases {
         public void build(TestContext ctx) {
             turret = (TurretElement) ctx.placeTransparent(TURRET, ctx.at(0, 1, 1));
             furnace = (HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, ctx.at(3, 1, 1));
-            // fuel heat furnace: deferred with the fluid devices (26.x port)
+            fuelFurnace = ctx.placeTransparent(FUEL_HEAT_FURNACE, ctx.at(6, 1, 1));
         }
 
         public void measure(TestContext ctx) {
             ctx.check("wp10b turret idle without power: energy buffer 0", turret.energyBuffer == 0,
                 f("buffer %.3f J, charge power %.1f W", turret.energyBuffer, turret.chargePower));
             within(ctx, "wp10b stone heat furnace without fuel stays at ambient [K]", furnace.thermalLoad.Tc, 0, 1e-6);
+            ctx.check("wp10b fuel heat furnace placed", fuelFurnace instanceof mods.eln.transparentnode.FuelHeatFurnaceElement,
+                String.valueOf(fuelFurnace));
         }
     }
 }

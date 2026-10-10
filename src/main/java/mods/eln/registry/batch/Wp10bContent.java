@@ -9,6 +9,8 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Utils;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
+import mods.eln.transparentnode.FuelGeneratorDescriptor;
+import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
 import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
@@ -46,7 +48,7 @@ public class Wp10bContent implements ElnContent {
         registerThermalDissipatorPassiveAndActive(64);
         registerTransparentNodeMisc(65); // teleporter
         registerTurret(66);
-        // registerFuelGenerator(67): 26.x port, deferred with the fluid devices
+        registerFuelGenerator(67);
         registerPassiveComponentRheostat(96); // large rheostat (uses a passive dissipator)
     }
 
@@ -109,7 +111,6 @@ public class Wp10bContent implements ElnContent {
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
-        /* 26.x port: deferred with the fluid devices (FuelRegistry, fluid handlers on the NeoForge transfer API)
         {
             subId = 1;
             name = TR_NAME(Type.NONE, "Fuel Heat Furnace");
@@ -118,7 +119,6 @@ public class Wp10bContent implements ElnContent {
                 obj.getObj("FuelHeater"), new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
-        */
 
     }
 
@@ -222,7 +222,6 @@ public class Wp10bContent implements ElnContent {
 
     }
 
-    /* 26.x port: deferred with the fluid devices
     public static void registerFuelGenerator(int id) {
         int subId;
         {
@@ -241,7 +240,6 @@ public class Wp10bContent implements ElnContent {
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
     }
-    */
 
     public static void registerThermalDissipatorPassiveAndActive(int id) {
         int subId, completId;

@@ -25,6 +25,12 @@ public class Eln {
     public static double heatTurbinePowerFactor = 1;
     public static double windTurbinePowerFactor = 1;
     public static double waterTurbinePowerFactor = 1;
+    public static double fuelGeneratorPowerFactor = 1;
+    public static double fuelHeatFurnacePowerFactor = 1;
+    /** 1.12 config fuelGeneratorTankCapacity [s of nominal power]. */
+    public static double fuelGeneratorTankCapacity = 20 * 60;
+    /** 1.12 config balancing.fuelHeatValueFactor: J per mB of fuel = factor * real heating value per litre. */
+    public static double fuelHeatValueFactor = 0.0000675;
 
     public static boolean modbusEnable = false; // 1.12 port: Modbus TCP server dropped; RTU devices stay off
 
@@ -191,6 +197,16 @@ public class Eln {
         mods.eln.registry.ElnRegistry.register(modBus);
         mods.eln.sound.ElnSounds.register(modBus);
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
+        // fluid devices (fuel generator, turbines...): the element's tank as the block's fluid capability (1.12:
+        // TransparentNodeEntityWithFluid); server side only, elements live there
+        modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
+            e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK,
+                mods.eln.registry.ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), (be, side) -> {
+                    if (be.getLevel() == null || be.getLevel().isClientSide()) return null;
+                    mods.eln.node.NodeBase node = be.getNode();
+                    if (!(node instanceof mods.eln.node.transparent.TransparentNode tn)) return null;
+                    return tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h ? h : null;
+                }));
         modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {
             sixNodeBlock = mods.eln.registry.ElnRegistry.SIX_NODE_BLOCK.get();
             ghostBlock = mods.eln.registry.ElnRegistry.GHOST_BLOCK.get();

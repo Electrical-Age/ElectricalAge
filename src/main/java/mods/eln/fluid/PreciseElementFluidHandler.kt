@@ -1,23 +1,23 @@
 package mods.eln.fluid
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 
 class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) {
     private var fixup = 0.0
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String?) {
+    override fun readFromNBT(nbt: CompoundTag, str: String?) {
         super.readFromNBT(nbt, str)
-        fixup = nbt.getDouble(str + "fixup")
+        fixup = nbt.getDoubleOr(str + "fixup", 0.0)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String?) {
+    override fun writeToNBT(nbt: CompoundTag, str: String?) {
         super.writeToNBT(nbt, str)
-        nbt.setDouble(str + "fixup", fixup)
+        nbt.putDouble(str + "fixup", fixup)
     }
 
     fun drain(demand: Double): Double {
         val drain = Math.ceil(demand - fixup)
-        val drained = drain(drain.toInt(), true)?.amount?.toDouble() ?: 0.0
+        val drained = drain(drain.toInt(), true).amount.toDouble()
         val available = fixup + drained
         val actual = Math.min(demand, available)
         fixup = Math.max(0.0, available - demand)
@@ -25,7 +25,8 @@ class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) 
     }
 
     fun drainEnergy(energy: Double): Double {
-        val heatValue = FuelRegistry.heatEnergyPerMilliBucket(tank.fluid?.getFluid())
+        val f = fluid
+        val heatValue = if (f.isEmpty) 0.0 else FuelRegistry.heatEnergyPerMilliBucket(f.fluid)
         return if (heatValue > 0)
             heatValue * drain(energy / heatValue)
         else

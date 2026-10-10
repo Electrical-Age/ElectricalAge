@@ -28,6 +28,7 @@ public final class PortHelperCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new FuelSmeltCase());
         cases.add(new LightCase());
+        cases.add(new FluidCase());
     }
 
     /** 1.12 burn times: coal 1600 ticks (80 kJ), lava bucket 20000; cobblestone smelts to stone, dirt to nothing. */
@@ -96,6 +97,52 @@ public final class PortHelperCases {
             // leave the box clean
             ctx.world().removeBlock(lasting, false);
             ctx.world().removeBlock(cave, false);
+        }
+    }
+
+    /**
+     * ElementFluidHandler on the transfer API: simulate vs commit, whitelist, drain, NBT round trip; and the fuel heat
+     * furnace's tank reachable as the block's fluid capability (what pipes use).
+     */
+    static final class FluidCase implements TestCase {
+        mods.eln.node.transparent.TransparentNodeElement furnace;
+
+        public String name() {
+            return "port26 fluid handler";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public void build(TestContext ctx) {
+            furnace = ctx.placeTransparent(Ids.transparent("Fuel Heat Furnace"), ctx.at(1, 1, 1));
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.fluid.ElementFluidHandler h = new mods.eln.fluid.ElementFluidHandler(1000);
+            net.neoforged.neoforge.fluids.FluidStack water = new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, 600);
+            int sim = h.fill(water, false);
+            int simAmount = h.getFluidAmount();
+            int put = h.fill(water, true);
+            int put2 = h.fill(water, true);
+            ctx.check("fluid tank: simulate 600 (tank stays 0), fill 600, then 400 more (capacity 1000)",
+                sim == 600 && simAmount == 0 && put == 600 && put2 == 400 && h.getFluidAmount() == 1000,
+                "sim " + sim + "/" + simAmount + ", fill " + put + " + " + put2 + " -> " + h.getFluidAmount());
+            net.neoforged.neoforge.fluids.FluidStack out = h.drain(250, true);
+            ctx.check("fluid tank: drain 250 water", out.getAmount() == 250 && out.getFluid() == net.minecraft.world.level.material.Fluids.WATER
+                && h.getFluidAmount() == 750, out + ", left " + h.getFluidAmount());
+            net.minecraft.nbt.CompoundTag nbt = new net.minecraft.nbt.CompoundTag();
+            h.writeToNBT(nbt, "t");
+            mods.eln.fluid.ElementFluidHandler h2 = new mods.eln.fluid.ElementFluidHandler(1000);
+            h2.readFromNBT(nbt, "t");
+            ctx.check("fluid tank: NBT round trip", h2.getFluidAmount() == 750 && h2.getFluid().getFluid() == net.minecraft.world.level.material.Fluids.WATER,
+                String.valueOf(h2.getFluid()));
+            mods.eln.fluid.ElementFluidHandler lavaOnly = new mods.eln.fluid.ElementFluidHandler(1000);
+            lavaOnly.setFilter(new net.minecraft.world.level.material.Fluid[]{net.minecraft.world.level.material.Fluids.LAVA});
+            ctx.check("fluid tank: a lava-only filter refuses water", lavaOnly.fill(water, true) == 0 && lavaOnly.getFluidAmount() == 0, "");
+            Object cap = ctx.world().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.at(1, 1, 1), net.minecraft.core.Direction.UP);
+            ctx.check("fuel heat furnace exposes its tank as the fluid capability", cap != null && cap == furnace.getFluidHandler(), String.valueOf(cap));
         }
     }
 }

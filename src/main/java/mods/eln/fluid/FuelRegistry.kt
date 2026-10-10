@@ -1,8 +1,9 @@
 package mods.eln.fluid
 
 import mods.eln.Eln
-import net.minecraftforge.fluids.Fluid
-import net.minecraftforge.fluids.FluidRegistry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.world.level.material.Fluid
+import net.minecraft.world.level.material.Fluids
 
 object FuelRegistry {
     /**
@@ -68,9 +69,17 @@ object FuelRegistry {
     // All fuels together.
     private val allFuels = dieselFuels + gasolineFuels + gasFuels + steam
 
-    fun fluidListToFluids(fluidNames: Array<String>) =
-        fluidNames.map { FluidRegistry.getFluid(it) }.filterNotNull().toTypedArray()
+    /**
+     * 1.12 Forge fluid name: on 26.x the registry path of the (source) fluid, any namespace ("mymod:diesel" -> "diesel").
+     * Several mods may register the same name; all of them count.
+     */
+    fun fluidName(fluid: Fluid?): String =
+        if (fluid == null || fluid == Fluids.EMPTY) "" else BuiltInRegistries.FLUID.getKey(fluid).path
+
+    fun fluidListToFluids(fluidNames: Array<String>): Array<Fluid> =
+        BuiltInRegistries.FLUID.filter { it != Fluids.EMPTY && it.isSource(it.defaultFluidState()) && fluidName(it) in fluidNames }
+            .toTypedArray()
 
     fun heatEnergyPerMilliBucket(fuelName: String): Double = Eln.fuelHeatValueFactor * (allFuels[fuelName] ?: 0.0)
-    fun heatEnergyPerMilliBucket(fluid: Fluid?): Double = heatEnergyPerMilliBucket(fluid?.name ?: "")
+    fun heatEnergyPerMilliBucket(fluid: Fluid?): Double = heatEnergyPerMilliBucket(fluidName(fluid))
 }
