@@ -30,7 +30,7 @@ public final class ElnGameTests {
 
     /** The cases; ported 1.12 selftest cases are added here batch by batch. */
     static List<TestCase> cases() {
-        return List.of(new SimTickCase());
+        return List.of(new SimTickCase(), new KotlinRuntimeCase());
     }
 
     public static void register(IEventBus modBus) {
