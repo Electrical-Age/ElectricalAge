@@ -130,7 +130,52 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+    public void draw(float on, float distance, BlockEntity e) {
+        switch (objType) {
+            case Button:
+                if (main != null) main.draw();
+
+                GL11.glTranslatef(leverTx * on, 0f, 0f);
+                if (lever != null) lever.draw();
+
+                if (on < 0.5f) {
+                    GL11.glColor3f(234f / 255f, 80 / 255f, 0f);
+                    UtilsClient.disableLight();
+                    if (led != null) led.draw();
+                    UtilsClient.enableBlend();
+
+                    if (halo != null) {
+                        if (e == null)
+                            UtilsClient.drawLight(halo);
+                        else
+                            UtilsClient.drawHaloNoLightSetup(halo, 234f / 255f, 80 / 255f, 0f, e, false);
+                    }
+
+                    UtilsClient.disableBlend();
+                    UtilsClient.enableLight();
+                } else {
+                    if (led != null) led.draw();
+                }
+                break;
+            case Lever:
+                GL11.glPushMatrix();
+                if (nominalVoltage <= Eln.MVU) {
+                    GL11.glScaled(0.5f, 0.5f, 0.5f);
+                }
+
+                if (main != null)
+                    main.draw();
+
+                if (lever != null)
+                    lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
+
+                GL11.glPopMatrix();
+                break;
+
+            default:
+                break;
+        }
+    }
     public int getNodeMask() {
         if (signalSwitch)
             return NodeBase.maskElectricalGate;

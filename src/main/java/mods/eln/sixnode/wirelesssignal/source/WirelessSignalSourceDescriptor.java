@@ -25,7 +25,9 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float factor, float distance, BlockEntity e) {
+        render.draw(factor, distance, e);
+    }
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     @Override

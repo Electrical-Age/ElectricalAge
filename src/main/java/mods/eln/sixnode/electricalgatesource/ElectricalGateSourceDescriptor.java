@@ -46,7 +46,9 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
     public void setWithAutoReset() {
         autoReset = true;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float factor, float distance, BlockEntity e) {
+        render.draw(factor, distance, e);
+    }
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);

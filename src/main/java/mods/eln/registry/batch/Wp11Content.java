@@ -1,5 +1,7 @@
 package mods.eln.registry.batch;
 
+import net.minecraft.world.level.block.entity.BlockEntity;
+
 import mods.eln.ElnContent;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
@@ -40,7 +42,7 @@ public class Wp11Content implements ElnContent {
     public static void registerTestBlock() {
         // 1.7.10: commented out (TestBlock/TestEntity/TestNode never registered); kept as it was.
 		/*
-		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistryCompat.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
+		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistryCompat.registerBlock(testBlock, "Eln.TestBlock"); BlockEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
 		 *
 		 * GameRegistryCompat.registerCustomItemStack("Test Block", new ItemStack(testBlock));
 		 */

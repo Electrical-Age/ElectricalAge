@@ -1,25 +1,24 @@
 package mods.eln.node.six;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.*;
-import mods.eln.sound.LoopedSound;
-import mods.eln.sound.LoopedSoundManager;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import mods.eln.gl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * Client state and drawing of one six-node element (1.12, on the GL11 shim since P3). Server-safe on purpose: the
+ * block entity holds these, so no client classes here; device subclasses are created only on the client (ElnRenders).
+ * Looped sounds (R4) and GUI screens (P4b) are not here yet.
+ */
 public abstract class SixNodeElementRender {
     public SixNodeEntity tileEntity;
     public Direction side;
@@ -183,15 +182,10 @@ public abstract class SixNodeElementRender {
     }
 
     public void play(SoundCommand s) {
-        s.addUuid(getUuid());
-        s.set(tileEntity);
-        s.play();
+        // R4: client sounds
     }
 
     public void destructor() {
-        if (usedUuid())
-            ClientProxy.uuidManager.kill(uuid);
-
         if (glListEnable()) {
             UtilsClient.glDeleteListsSafe(glList);
         }
@@ -200,14 +194,9 @@ public abstract class SixNodeElementRender {
         UtilsClient.glDeleteListsSafe(cableList[2]);
         UtilsClient.glDeleteListsSafe(cableList[3]);
 
-        loopedSoundManager.dispose();
     }
 
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return null;
-    }
-
-    public IInventory getInventory() {
+    public Container getInventory() {
         return null;
     }
 
@@ -374,14 +363,6 @@ public abstract class SixNodeElementRender {
         needRedraw = true;
     }
 
-    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
-
-    @SideOnly(Side.CLIENT)
-    protected void addLoopedSound(final LoopedSound loopedSound) {
-        loopedSoundManager.add(loopedSound);
-    }
-
     public void refresh(float deltaT) {
-        loopedSoundManager.process(deltaT);
     }
 }

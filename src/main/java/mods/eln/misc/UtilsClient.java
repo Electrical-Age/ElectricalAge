@@ -32,6 +32,11 @@ public final class UtilsClient {
             return 15;
         }
 
+        /** The game is paused (single player menu): animations stop. */
+        default boolean isGameInPause() {
+            return false;
+        }
+
         /** Draw an item entity at the current GL11 matrix (1.12 drawEntityItem). */
         default void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {
         }
@@ -198,5 +203,99 @@ public final class UtilsClient {
     public static void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {
         if (entityItem == null) return;
         hooks.drawEntityItem(entityItem, x, y, z, roty, scale);
+    }
+
+    public static boolean isGameInPause() {
+        return hooks.isGameInPause();
+    }
+
+    public static float distanceFromClientPlayer(Level world, int x, int y, int z) {
+        return hooks.distanceFromClientPlayer(x + 0.5, y + 0.5, z + 0.5);
+    }
+
+    public static float distanceFromClientPlayer(BlockEntity e) {
+        BlockPos p = e.getBlockPos();
+        return hooks.distanceFromClientPlayer(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5);
+    }
+
+    public static double clientDistanceTo(BlockEntity e) {
+        return distanceFromClientPlayer(e);
+    }
+
+    public static double clientDistanceTo(Entity e) {
+        return hooks.distanceFromClientPlayer(e.getX(), e.getY(), e.getZ());
+    }
+
+    private static int uuid = Integer.MIN_VALUE;
+
+    /** Client-side ids for sounds and the like (1.12: negative, never clashing with the server's). */
+    public static int getUuid() {
+        if (uuid > -1) uuid = Integer.MIN_VALUE;
+        return uuid++;
+    }
+
+    public static int glGenListsSafe() {
+        return GL11.glGenLists(1);
+    }
+
+    public static void glDeleteListsSafe(int id) {
+        GL11.glDeleteLists(id, 1);
+    }
+
+    public static void drawConnectionPinSixNode(float d, float w, float h) {
+        d += 0.1f;
+        d *= 0.0625f;
+        w *= 0.0625f;
+        h *= 0.0625f;
+        float w2 = w * 0.5f;
+        disableTexture();
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glVertex3f(-w2, d, 0);
+        GL11.glVertex3f(w2, d, 0);
+        GL11.glVertex3f(w2, d, h);
+        GL11.glVertex3f(-w2, d, h);
+        GL11.glEnd();
+        enableTexture();
+    }
+
+    public static void drawConnectionPinSixNode(LRDU front, float[] dList, float w, float h) {
+        float d = dList[front.toInt()];
+        d += 0.04f;
+        d *= 0.0625f;
+        w *= 0.0625f;
+        h *= 0.0625f;
+        float w2 = w * 0.5f;
+        disableTexture();
+        GL11.glBegin(GL11.GL_QUADS);
+        switch (front) {
+            case Left:
+                GL11.glVertex3f(0, -w2, -d);
+                GL11.glVertex3f(0, w2, -d);
+                GL11.glVertex3f(h, w2, -d);
+                GL11.glVertex3f(h, -w2, -d);
+                break;
+            case Right:
+                GL11.glVertex3f(h, -w2, d);
+                GL11.glVertex3f(h, w2, d);
+                GL11.glVertex3f(0, w2, d);
+                GL11.glVertex3f(0, -w2, d);
+                break;
+            case Down:
+                GL11.glVertex3f(h, -d, -w2);
+                GL11.glVertex3f(h, -d, w2);
+                GL11.glVertex3f(0, -d, w2);
+                GL11.glVertex3f(0, -d, -w2);
+                break;
+            case Up:
+                GL11.glVertex3f(0, d, -w2);
+                GL11.glVertex3f(0, d, w2);
+                GL11.glVertex3f(h, d, w2);
+                GL11.glVertex3f(h, d, -w2);
+                break;
+            default:
+                break;
+        }
+        GL11.glEnd();
+        enableTexture();
     }
 }

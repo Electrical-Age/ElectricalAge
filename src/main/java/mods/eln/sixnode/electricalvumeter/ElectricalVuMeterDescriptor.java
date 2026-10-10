@@ -62,7 +62,34 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(float factor, float distance, BlockEntity entity) {
+        if (factor < 0.0) factor = 0.0f;
+        if (factor > 1.0) factor = 1.0f;
+        switch (objType) {
+            case LedOnOff:
+                main.draw();
+                boolean s = factor > 0.5;
+                Color c = UtilsClient.ledOnOffColorC(s);
+                GL11.glColor3f(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);
+                UtilsClient.drawLight(led);
+                //Utils.enableBilinear();
+                if (entity != null)
+                    UtilsClient.drawHalo(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, entity, false);
+                else
+                    UtilsClient.drawLight(halo);
+                //Utils.disableBilinear();
+                break;
+            case Rot:
+                vumeter.draw();
+                float alphaOff, alphaOn;
+                alphaOff = pointer.getFloat("alphaOff");
+                alphaOn = pointer.getFloat("alphaOn");
+                pointer.draw((factor * (alphaOn - alphaOff) + alphaOff), 1.0f, 0, 0);
+                break;
+            default:
+                break;
+        }
+    }
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);

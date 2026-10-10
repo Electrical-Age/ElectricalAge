@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalfurnace;
 
+import net.minecraft.world.entity.item.ItemEntity;
+
 
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
@@ -142,7 +144,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
 
         //	ItemStack stack = new ItemStack(Item.coal);
-        //	EntityItem entity = new EntityItem(node.coordonate.world(), node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 1.5, stack);
+        //	ItemEntity entity = new ItemEntity(node.coordonate.world(), node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 1.5, stack);
         //	node.coordonate.world().spawnEntity(entity);
 
         connect();

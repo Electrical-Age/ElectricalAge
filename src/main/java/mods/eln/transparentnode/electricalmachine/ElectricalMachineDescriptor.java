@@ -104,8 +104,14 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
     Object newDrawHandle() {
         return null;
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
-// 26.x port: refresh() removed (client rendering; redone in P3)
+
+    void draw(ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity,
+              float powerFactor, float processState) {
+    }
+
+    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity,
+                 ItemEntity outEntity, float powerFactor, float processState) {
+    }
     public boolean powerLrdu(Direction side, Direction front) {
         return true;
     }
@@ -129,6 +135,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
             defaultHandle = newDrawHandle();
         return defaultHandle;
     }
-// 26.x port: top() removed (client rendering; redone in P3)
+    // 26.x port: top() removed (client rendering; redone in P3)
     // 26.x port: bottom() removed (client rendering; redone in P3)
 }

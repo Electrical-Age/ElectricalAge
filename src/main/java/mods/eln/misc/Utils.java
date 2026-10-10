@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.Eln;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -181,6 +183,16 @@ public class Utils {
         if (key == null) return net.minecraft.world.item.ItemStack.EMPTY;
         return net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(key)
             .map(net.minecraft.world.item.ItemStack::new).orElse(net.minecraft.world.item.ItemStack.EMPTY);
+    }
+
+    /** Client: an item shown on a device (furnace, machine), kept while it stays the same item (1.12). */
+    public static net.minecraft.world.entity.item.ItemEntity unserializeItemStackToEntityItem(java.io.DataInputStream stream,
+            net.minecraft.world.entity.item.ItemEntity old, net.minecraft.world.level.block.entity.BlockEntity be) throws java.io.IOException {
+        net.minecraft.world.item.ItemStack stack = unserialiseItemStack(stream);
+        if (stack.isEmpty() || be.getLevel() == null) return null;
+        if (old != null && old.getItem().getItem() == stack.getItem()) return old;
+        net.minecraft.core.BlockPos p = be.getBlockPos();
+        return new net.minecraft.world.entity.item.ItemEntity(be.getLevel(), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 1.2, stack);
     }
 
     /** The player holds an EA wrench (filled when the wrench item is ported). */
@@ -724,5 +736,121 @@ public class Utils {
     public static void dropItem(net.minecraft.world.item.ItemStack itemStack, Coordonate coordonate) {
         if (isEmpty(itemStack)) return;
         net.minecraft.world.level.block.Block.popResource(coordonate.world(), coordonate.pos(), itemStack);
+    }
+
+    // ---- draw colours (P3: on the GL11 shim)
+    public static void setGlColorFromDye(int damage) {
+        setGlColorFromDye(damage, 1.0f);
+    }
+
+    public static void setGlColorFromDye(int damage, float gain) {
+        switch (damage) {
+            default:
+                GL11.glColor3f(0.05f * gain, 0.05f * gain, 0.05f * gain);
+                break;
+            case 0:
+                GL11.glColor3f(0.2f * gain, 0.2f * gain, 0.2f * gain);
+                break; // black
+            case 1:
+                GL11.glColor3f(1.0f * gain, 0.05f * gain, 0.05f * gain);
+                break; // red
+            case 2:
+                GL11.glColor3f(0.2f * gain, 0.5f * gain, 0.1f * gain);
+                break; // green
+            case 3:
+                GL11.glColor3f(0.3f * gain, 0.2f * gain, 0.1f * gain);
+                break; // brown
+            case 4:
+                GL11.glColor3f(0.2f * gain, 0.2f * gain, 1.0f * gain);
+                break; // blue
+            case 5:
+                GL11.glColor3f(0.7f * gain, 0.05f * gain, 1.0f * gain);
+                break; // purple
+            case 6:
+                GL11.glColor3f(0.2f * gain, 0.7f * gain, 0.9f * gain);
+                break;
+            case 7:
+                GL11.glColor3f(0.7f * gain, 0.7f * gain, 0.7f * gain);
+                break;
+            case 8:
+                GL11.glColor3f(0.4f * gain, 0.4f * gain, 0.4f * gain);
+                break;
+            case 9:
+                GL11.glColor3f(1.0f * gain, 0.5f * gain, 0.5f * gain);
+                break;
+            case 10:
+                GL11.glColor3f(0.05f * gain, 1.0f * gain, 0.05f * gain);
+                break;
+            case 11:
+                GL11.glColor3f(0.9f * gain, 0.8f * gain, 0.1f * gain);
+                break;
+            case 12:
+                GL11.glColor3f(0.4f * gain, 0.5f * gain, 1.0f * gain);
+                break;
+            case 13:
+                GL11.glColor3f(0.9f * gain, 0.3f * gain, 0.9f * gain);
+                break;
+            case 14:
+                GL11.glColor3f(1.0f * gain, 0.6f * gain, 0.3f * gain);
+                break;
+            case 15:
+                GL11.glColor3f(1.0f * gain, 1.0f * gain, 1.0f * gain);
+                break;
+        }
+        // GL11.glColor3f(((color >> 16) & 0xFF) / 255f, ((color >> 7) & 0xFF) / 255f, ((color >> 0) & 0xFF) / 255f);
+    }
+
+    public static void setGlColorFromLamp(int colorIdx) {
+        switch (colorIdx) {
+            default:
+            case 15: //White
+                GL11.glColor3f(1.0f, 1.0f, 1.0f);
+                break;
+            case 0: //Black
+                GL11.glColor3f(0.25f, 0.25f, 0.25f);
+                break;
+            case 1: //Red
+                GL11.glColor3f(1.0f, 0.5f, 0.5f);
+                break;
+            case 2: //Green
+                GL11.glColor3f(0.5f, 1.0f, 0.5f);
+                break;
+            case 3: //Brown
+                GL11.glColor3f(0.5647f, 0.36f, 0.36f);
+                break;
+            case 4: //Blue
+                GL11.glColor3f(0.5f, 0.5f, 1.0f);
+                break;
+            case 5: //Purple
+                GL11.glColor3f(0.78125f, 0.46666f, 1.0f);
+                break;
+            case 6: //Cyan
+                GL11.glColor3f(0.5f, 1.0f, 1.0f);
+                break;
+            case 7: //Silver
+                GL11.glColor3f(0.75f, 0.75f, 0.75f);
+                break;
+            case 8: //Gray
+                GL11.glColor3f(0.5f, 0.5f, 0.5f);
+                break;
+            case 9: //Pink
+                GL11.glColor3f(1.0f, 0.5f, 0.65882f);
+                break;
+            case 10: //Lime
+                GL11.glColor3f(0.75f, 1.0f, 0.5f);
+                break;
+            case 11: //Yellow
+                GL11.glColor3f(1.0f, 1.0f, 0.5f);
+                break;
+            case 12: //Light Blue
+                GL11.glColor3f(0.5f, 0.75f, 1.0f);
+                break;
+            case 13: //Magenta
+                GL11.glColor3f(1.0f, 0.5f, 1.0f);
+                break;
+            case 14: //Orange
+                GL11.glColor3f(1.0f, 0.80f, 0.5f);
+                break;
+        }
     }
 }

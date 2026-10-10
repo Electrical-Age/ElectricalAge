@@ -29,7 +29,7 @@ public class Obj3D {
     public float dimMax, dimMaxInv;
 
     private String dirPath;
-// 26.x port: bindTexture() removed (client rendering; redone in P3)
+    // 26.x port: bindTexture() removed (client rendering; redone in P3)
     public static class FaceGroup {
         String mtlName = null;
         public Identifier textureResource;

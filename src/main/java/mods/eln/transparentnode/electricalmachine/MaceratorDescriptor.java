@@ -38,8 +38,33 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         return new MaceratorDescriptorHandle();
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
-    // 26.x port: refresh() removed (client rendering; redone in P3)
+    @Override
+    void draw(ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity,
+              float powerFactor, float processState) {
+        MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
+
+        main.draw();
+        rot1.draw(handle.counter, 0f, 0f, -1f);
+        rot2.draw(handle.counter, 0f, 0f, 1f);
+
+        //UtilsClient.enableDepthTest();
+        GL11.glScalef(0.7f, 0.7f, 0.7f);
+        UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);
+        UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);
+    }
+    @Override
+    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity,
+                 ItemEntity outEntity, float powerFactor, float processState) {
+        MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
+
+        handle.interpolator.setTarget(powerFactor);
+        handle.interpolator.step(deltaT);
+        handle.counter += deltaT * handle.interpolator.get() * 180;
+        while (handle.counter >= 360f) handle.counter -= 360;
+
+        handle.itemCounter += deltaT * 90;
+        while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+    }
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

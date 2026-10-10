@@ -1,26 +1,24 @@
 package mods.eln.node.transparent;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.*;
-import mods.eln.sound.LoopedSound;
-import mods.eln.sound.LoopedSoundManager;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import mods.eln.gl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * Client state and drawing of a transparent-node element (1.12, on the GL11 shim since P3). Server-safe on purpose
+ * (see SixNodeElementRender). Looped sounds (R4) and GUI screens (P4b) are not here yet.
+ */
 public abstract class TransparentNodeElementRender {
     public TransparentNodeEntity tileEntity;
     public Direction front;
@@ -32,18 +30,18 @@ public abstract class TransparentNodeElementRender {
         this.transparentNodedescriptor = descriptor;
     }
 
-    protected EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old) throws IOException {
+    protected ItemEntity unserializeItemStackToEntityItem(DataInputStream stream, ItemEntity old) throws IOException {
         return Utils.unserializeItemStackToEntityItem(stream, old, tileEntity);
 
     }
 
-    public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {/*
+    public void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {/*
         if(entityItem == null) return;
 		
 
 
 		entityItem.hoverStart = 0.0f;
-		entityItem.rotationYaw = 0.0f;
+		entityItem.setYRot(0.0f);
 		entityItem.motionX = 0.0;
 		entityItem.motionY = 0.0;
 		entityItem.motionZ =0.0;
@@ -83,11 +81,7 @@ public abstract class TransparentNodeElementRender {
         }
     }
 
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return null;
-    }
-
-    public IInventory getInventory() {
+    public Container getInventory() {
         return null;
     }
 
@@ -234,7 +228,7 @@ public abstract class TransparentNodeElementRender {
 
     protected Coordonate coordonate() {
 
-        return new Coordonate(tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ(), tileEntity.getWorld());
+        return new Coordonate(tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ(), tileEntity.getLevel());
     }
 
 
@@ -253,26 +247,13 @@ public abstract class TransparentNodeElementRender {
 
 
     public void play(SoundCommand s) {
-        s.addUuid(getUuid());
-        s.set(tileEntity);
-        s.play();
+        // R4: client sounds
     }
 
-    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
-
-    @SideOnly(Side.CLIENT)
-    protected void addLoopedSound(final LoopedSound loopedSound) {
-        loopedSoundManager.add(loopedSound);
-    }
 
     public void destructor() {
-        if (usedUuid())
-            ClientProxy.uuidManager.kill(uuid);
-
-        loopedSoundManager.dispose();
     }
 
     public void refresh(float deltaT) {
-        loopedSoundManager.process(deltaT);
     }
 }

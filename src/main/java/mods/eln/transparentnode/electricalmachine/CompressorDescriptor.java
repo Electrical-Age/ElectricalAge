@@ -51,8 +51,27 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
             return super.volumeForRunningSound(processState, powerFactor);
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
-    // 26.x port: refresh() removed (client rendering; redone in P3)
+    @Override
+    void draw(ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity,
+              float powerFactor, float processState) {
+        CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
+
+        UtilsClient.drawEntityItem(inEntity, -0.35f, 0.04f, 0.3f, handle.itemCounter, 1f);
+        UtilsClient.drawEntityItem(outEntity, 0.35f, 0.04f, 0.3f, -handle.itemCounter + 139f, 1f);
+
+        main.draw();
+        GL11.glTranslatef(0f, tyOff + (float) Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);
+        move.draw();
+    }
+    @Override
+    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
+        CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
+        handle.interpolator.setTarget(processState);
+        handle.interpolator.step(deltaT);
+
+        handle.itemCounter += deltaT * 90;
+        while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+    }
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

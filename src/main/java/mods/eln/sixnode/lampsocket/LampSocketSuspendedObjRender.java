@@ -37,7 +37,7 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 
     // 26.x port: draw() removed (client rendering; redone in P3)
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+
     public void draw(LRDU front, float alphaZ, byte light, float pertuPy, float pertuPz, double distanceToPlayer) {
         // front.glRotateOnX();
         pertuPy /= length;
@@ -104,4 +104,5 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 
 
     }
+    // 26.x port: draw() removed (client rendering; redone in P3)
 }

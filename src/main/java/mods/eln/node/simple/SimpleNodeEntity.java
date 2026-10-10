@@ -127,7 +127,7 @@ public abstract class SimpleNodeEntity extends BlockEntity implements INodeEntit
         input.read(NodeBlockEntity.DESCRIPTION_KEY, com.mojang.serialization.Codec.BYTE_BUFFER).ifPresent(b -> {
             byte[] a = new byte[b.remaining()];
             b.get(a);
-            NodeBlockEntity.clientDescriptionHandler.accept(a);
+            // client: simple nodes have no render; their GUI data comes with P4b
         });
     }
 

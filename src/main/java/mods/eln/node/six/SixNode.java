@@ -1,5 +1,7 @@
 package mods.eln.node.six;
 
+import net.minecraft.world.entity.item.ItemEntity;
+
 
 import mods.eln.sim.process.destruct.Repair;
 import mods.eln.compat.WorldCompat;
@@ -136,7 +138,7 @@ public class SixNode extends Node {
 	            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
+	            ItemEntity var13 = new ItemEntity(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
 	            var13.setPickupDelay(10);
 	            coordonate.world().spawnEntity(var13);
 	        }

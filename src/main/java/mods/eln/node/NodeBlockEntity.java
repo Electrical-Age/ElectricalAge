@@ -36,9 +36,9 @@ import java.util.function.Consumer;
 public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity {
     public static final String DESCRIPTION_KEY = "elnDescription";
 
-    /** Client: hands the description bytes to the client packet handler (set by the client setup, P3). */
-    public static Consumer<byte[]> clientDescriptionHandler = b -> {
-    };
+    /** Client: every loaded node block entity, refreshed once per frame (1.12 clientList, FrameTime). */
+    public static final java.util.Set<NodeBlockEntity> clientList = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+    private byte[] pendingDescription;
 
     boolean redstone = false;
     int lastLight = 0xFF;
@@ -122,8 +122,39 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
         chunkUnloading = true;
     }
 
+    // ---- client: refresh and teardown (P3)
+
+    /** Client, once per frame: animations and sounds (1.12 FrameTime). */
+    public void clientRefresh(float deltaT) {
+    }
+
+    /** Client: a neighbour block entity appeared (cables reconnect their drawing). */
+    public void tileEntityNeighborSpawn() {
+    }
+
+    /** Client: the block entity goes away; renders free what they hold. */
+    public void clientDestroy() {
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level != null && level.isClientSide()) {
+            clientList.add(this);
+            if (pendingDescription != null) {
+                byte[] d = pendingDescription;
+                pendingDescription = null;
+                applyDescription(d);
+            }
+        }
+    }
+
     @Override
     public void setRemoved() {
+        if (level != null && level.isClientSide()) {
+            clientList.remove(this);
+            clientDestroy();
+        }
         // The block is gone (broken, replaced, cleared by a GameTest...), not just unloaded: remove the node, so it
         // can't stay in the simulation and connect to whatever is built here next.
         if (!chunkUnloading && level != null && !level.isClientSide()) {
@@ -188,8 +219,25 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
         input.read(DESCRIPTION_KEY, com.mojang.serialization.Codec.BYTE_BUFFER).ifPresent(b -> {
             byte[] a = new byte[b.remaining()];
             b.get(a);
-            clientDescriptionHandler.accept(a);
+            if (level == null) pendingDescription = a; // applied in onLoad
+            else applyDescription(a);
         });
+    }
+
+    /** The publish packet in the update tag: packet id, x, y, z, dimension, node uuid, then the node's data. */
+    void applyDescription(byte[] a) {
+        try {
+            DataInputStream stream = new DataInputStream(new java.io.ByteArrayInputStream(a));
+            if (stream.readByte() != Eln.packetNodeSingleSerialized) return;
+            stream.readInt();
+            stream.readInt();
+            stream.readInt();
+            stream.readInt();
+            if (!getNodeUuid().equals(stream.readUTF())) return;
+            serverPublishUnserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -212,6 +260,11 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
         mods.eln.network.ElnNet.sendToServer(bos);
+    }
+
+    /** Client: how a cable leaving this block at (side, lrdu) is drawn, or null (1.12). */
+    public mods.eln.cable.CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+        return null;
     }
 
     public int getCableDry(Direction side, LRDU lrdu) {
