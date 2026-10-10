@@ -71,6 +71,8 @@ public class Eln {
 
     /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10). */
     public static float xRayScannerRange = 5f;
+    /** 1.12 config xrayscannerconfig.canBeCrafted (true). */
+    public static boolean xRayScannerCanBeCrafted = true;
 
     /** Items shown as "furnace" machines for smelting recipes (vanilla furnace, EA electrical furnaces). */
     public static java.util.ArrayList<net.minecraft.world.item.ItemStack> furnaceList = new java.util.ArrayList<>();

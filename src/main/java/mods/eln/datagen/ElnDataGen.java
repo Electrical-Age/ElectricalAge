@@ -14,6 +14,8 @@ public final class ElnDataGen {
 
     public static void register(IEventBus modBus) {
         modBus.addListener(GatherDataEvent.Client.class, ElnDataGen::gather);
+        modBus.addListener(net.neoforged.neoforge.data.event.GatherDataRegistryEntriesEvent.class,
+            e -> e.add(net.minecraft.data.recipes.RecipeProvider.asBootstrap(ElnRecipeProvider::new)));
     }
 
     static void gather(GatherDataEvent.Client event) {
