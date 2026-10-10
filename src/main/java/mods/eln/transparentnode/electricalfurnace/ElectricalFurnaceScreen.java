@@ -91,7 +91,7 @@ public class ElectricalFurnaceScreen extends ElnScreen {
         target.refreshLabel();
         power.setMessage(Component.literal(render.getPowerOn() ? tr("Heater: on") : tr("Heater: off")));
         power.active = !render.autoShutDown;
-        autoShutdown.setMessage(Component.literal(render.autoShutDown ? tr("Auto shutdown") : tr("Manual shutdown")));
+        autoShutdown.setMessage(Component.literal(render.autoShutDown ? tr("Auto stop: on") : tr("Auto stop: off")));
     }
 
     @Override
