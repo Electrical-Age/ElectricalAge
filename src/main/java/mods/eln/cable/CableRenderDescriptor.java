@@ -1,7 +1,6 @@
 package mods.eln.cable;
 
-import mods.eln.misc.UtilsClient;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class CableRenderDescriptor {
 
@@ -14,12 +13,9 @@ public class CableRenderDescriptor {
         this.width = width / 16;
         this.height = height / 16;
         this.widthDiv2 = width / 16 / 2;
-        this.cableTexture = new ResourceLocation(modName, cableTexture);
+        this.cableTexture = Identifier.fromNamespaceAndPath(modName, cableTexture.toLowerCase(java.util.Locale.ROOT));
     }
 
-    public ResourceLocation cableTexture;
-
-    public void bindCableTexture() {
-        UtilsClient.bindTexture(cableTexture);
-    }
+    public Identifier cableTexture;
+// 26.x port: bindCableTexture() removed (client rendering; redone in P3)
 }

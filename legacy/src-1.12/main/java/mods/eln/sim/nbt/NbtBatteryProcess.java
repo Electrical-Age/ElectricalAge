@@ -5,7 +5,7 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.sim.BatteryProcess;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
 
@@ -14,17 +14,17 @@ public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbttagcompound, String str) {
-        Q = nbttagcompound.getDouble(str + "NBP" + "Q");
+    public void readFromNBT(CompoundTag nbttagcompound, String str) {
+        Q = nbttagcompound.getDoubleOr(str + "NBP" + "Q", 0.0);
         if (Double.isNaN(Q)) Q = 0;
-        life = nbttagcompound.getDouble(str + "NBP" + "life");
+        life = nbttagcompound.getDoubleOr(str + "NBP" + "life", 0.0);
         if (Double.isNaN(life)) life = 1;
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbttagcompound, String str) {
-        nbttagcompound.setDouble(str + "NBP" + "Q", Q);
-        nbttagcompound.setDouble(str + "NBP" + "life", life);
+    public void writeToNBT(CompoundTag nbttagcompound, String str) {
+        nbttagcompound.putDouble(str + "NBP" + "Q", Q);
+        nbttagcompound.putDouble(str + "NBP" + "life", life);
     }
 
     public void setIMax(double iMax) {

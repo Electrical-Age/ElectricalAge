@@ -4,14 +4,14 @@ import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Resistor;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class ElectricalStackMachineProcess implements IProcess {
 
     ElectricalStackMachineProcessObserver observer;
 
-    public IInventory inventory;
+    public Container inventory;
     int inputSlotId, OutputSlotId, outputSlotNbr;
     Resistor electricalResistor;
     double resistorValue;
@@ -33,7 +33,7 @@ public class ElectricalStackMachineProcess implements IProcess {
         this.observer = observer;
     }
 
-    public ElectricalStackMachineProcess(IInventory inventory, int inputSlotId, int OutputSlotId, int outputSlotNbr,
+    public ElectricalStackMachineProcess(Container inventory, int inputSlotId, int OutputSlotId, int outputSlotNbr,
                                          Resistor electricalResistor, double resistorValue, RecipesList recipesList) {
         this.inventory = inventory;
         this.inputSlotId = inputSlotId;
@@ -61,7 +61,7 @@ public class ElectricalStackMachineProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        ItemStack itemStackIn = inventory.getStackInSlot(inputSlotId);
+        ItemStack itemStackIn = inventory.getItem(inputSlotId);
 
         boolean itemTypeChanged = Utils.isEmpty(itemStackIn) && !Utils.isEmpty(itemStackInOld) ||
             !Utils.isEmpty(itemStackIn) && Utils.isEmpty(itemStackInOld) ||
@@ -95,7 +95,7 @@ public class ElectricalStackMachineProcess implements IProcess {
             electricalResistor.highImpedance();
         } else {
             smeltInProcess = true;
-            energyNeeded = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId)).energy;
+            energyNeeded = recipesList.getRecipe(inventory.getItem(inputSlotId)).energy;
             energyCounter = 0.0;
             electricalResistor.setR(resistorValue / speedUp);
         }
@@ -110,7 +110,7 @@ public class ElectricalStackMachineProcess implements IProcess {
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
     public boolean smeltCan() {
-        if (Utils.isEmpty(inventory.getStackInSlot(inputSlotId))) {
+        if (Utils.isEmpty(inventory.getItem(inputSlotId))) {
             return false;
         } else {
             ItemStack[] output = getSmeltResult();
@@ -120,7 +120,7 @@ public class ElectricalStackMachineProcess implements IProcess {
     }
 
     public ItemStack[] getSmeltResult() {
-        Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
+        Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
         if (recipe == null) return null;
         return recipe.output;
     }
@@ -130,7 +130,7 @@ public class ElectricalStackMachineProcess implements IProcess {
      */
     public void smeltItem() {
         if (this.smeltCan()) {
-            Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
+            Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
             Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory, outSlotIdList);
             inventory.decrStackSize(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);

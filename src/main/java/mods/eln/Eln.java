@@ -70,6 +70,15 @@ public class Eln {
     public static final mods.eln.sim.ThermalLoadInitializer sixNodeThermalLoadInitializer = new mods.eln.sim.ThermalLoadInitializer(
         cableWarmLimit, -100, cableHeatingTime, 1000);
 
+    /** config balancing.wailaEasyMode: more detailed probe info on some machines */
+    public static boolean wailaEasyMode = false;
+
+    /** EA's OBJ models (assets/eln/model), loaded at mod construction like 1.12 preInit: descriptors take parts. */
+    public static mods.eln.misc.Obj3DFolder obj = new mods.eln.misc.Obj3DFolder();
+
+    public static mods.eln.cable.CableRenderDescriptor stdCableRenderSignal, stdCableRender50V, stdCableRender200V,
+        stdCableRender800V, stdCableRender3200V;
+
     /** config gameplay.explosion (1.12 meaning: the remaining real explosions; see Failure). */
     public static boolean explosionEnable = true;
 
@@ -108,7 +117,11 @@ public class Eln {
         mods.eln.server.ElnWorldSaves.register();
         mods.eln.node.NodeManager.registerUuid("s", mods.eln.node.six.SixNode.class);
         mods.eln.node.NodeManager.registerUuid("t", mods.eln.node.transparent.TransparentNode.class);
-        NeoForge.EVENT_BUS.addListener(ServerAboutToStartEvent.class, e -> simulator.init());
+        NeoForge.EVENT_BUS.addListener(ServerAboutToStartEvent.class, e -> {
+            // item components are bound only once the server's registries are: ItemStacks can be made from here on
+            mods.eln.registry.ElnRegistry.afterRegistration();
+            simulator.init();
+        });
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, e -> {
             simulator.stop();
             nodeManager.clear();
@@ -116,6 +129,14 @@ public class Eln {
         });
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
+        obj.loadAllElnModels();
+        mods.eln.registry.ElnDeviceRegistry.registerBatch1();
+        mods.eln.registry.ElnRegistry.register(modBus);
+        mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
+        modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {
+            sixNodeBlock = mods.eln.registry.ElnRegistry.SIX_NODE_BLOCK.get();
+            ghostBlock = mods.eln.registry.ElnRegistry.GHOST_BLOCK.get();
+        });
         mods.eln.network.ElnNet.register(modBus);
         mods.eln.gametest.ElnGameTests.register(modBus);
         LOG.info("Electrical Age (26.x port, P0) loaded");

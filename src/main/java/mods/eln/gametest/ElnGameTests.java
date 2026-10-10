@@ -30,7 +30,9 @@ public final class ElnGameTests {
 
     /** The cases; ported 1.12 selftest cases are added here batch by batch. */
     static List<TestCase> cases() {
-        return List.of(new SimTickCase(), new KotlinRuntimeCase());
+        java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase()));
+        l.addAll(mods.eln.gametest.cases.Batch1Cases.cases());
+        return l;
     }
 
     public static void register(IEventBus modBus) {
@@ -41,6 +43,9 @@ public final class ElnGameTests {
 
     static void run(GameTestHelper helper, TestCase c) {
         GameTestContext ctx = new GameTestContext(helper, c.id());
+        // the stone floor (y = 0) of the 1.12 selftest rows; laid here, the structure only gives the empty box
+        for (int x = 0; x < c.width(); x++)
+            for (int z = 0; z < c.depth(); z++) ctx.floor(ctx.at(x, 0, z));
         try {
             c.build(ctx);
         } catch (RuntimeException e) {

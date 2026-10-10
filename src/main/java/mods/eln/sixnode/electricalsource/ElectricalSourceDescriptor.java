@@ -6,8 +6,8 @@ import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -23,7 +23,7 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
     private boolean signalSource = false;
 
     public ElectricalSourceDescriptor(String name, Obj3D obj, boolean signalSource) {
-        super(name, ElectricalSourceElement.class, ElectricalSourceRender.class);
+        super(name, ElectricalSourceElement.class, null);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
@@ -41,23 +41,10 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
     public boolean isSignalSource() {
         return signalSource;
     }
-
-    void draw(boolean ledOn) {
-        if (main != null) main.draw();
-        if (led != null) {
-            if (ledOn)
-                UtilsClient.drawLight(led);
-            else {
-                GL11.glPushMatrix();
-                GL11.glColor3f(0.1f, 0.1f, 0.1f);
-                led.draw();
-                GL11.glPopMatrix();
-            }
-        }
-    }
+// 26.x port: draw() removed (client rendering; redone in P3)
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an ideal voltage source\nwithout energy or power limitation.").split("\\\n"));
         list.add("");
@@ -66,39 +53,12 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
         list.add(tr("Creative block."));
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        switch (type) {
-            case ENTITY:
-                draw(false);
-                break;
-
-            case EQUIPPED:
-            case EQUIPPED_FIRST_PERSON:
-                GL11.glPushMatrix();
-                GL11.glTranslatef(0.8f, 0.3f, 0.2f);
-                GL11.glRotatef(150, 0, 0, 1);
-                draw(false);
-                GL11.glPopMatrix();
-                break;
-
-            case INVENTORY:
-            case FIRST_PERSON_MAP:
-                if (signalSource) {
-                    VoltageLevelColor.SignalVoltage.drawIconBackground(type);
-                }
-                super.renderItem(type, item, data);
-                break;
-        }
-    }
-
-    @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         if (signalSource) {
             return super.getFrontFromPlace(side, player).left();
         } else {

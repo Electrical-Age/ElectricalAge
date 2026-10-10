@@ -1,11 +1,7 @@
 package mods.eln.misc;
 
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 
 import java.io.*;
 import java.util.*;
@@ -32,23 +28,16 @@ public class Obj3D {
 
     private String dirPath;
 
-    @SideOnly(Side.CLIENT)
-    public void bindTexture(String texFilename) {
-        ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
-        UtilsClient.bindTexture(textureResource);
-    }
+    // 26.x port: bindTexture() removed (client rendering; redone in P3)
 
     public static class FaceGroup {
         String mtlName = null;
-        public ResourceLocation textureResource;
+        public Identifier textureResource;
         List<Face> face = new ArrayList<Face>();
         boolean listReady = false;
         int glList;
 
-        @SideOnly(Side.CLIENT)
-        public void bindTexture() {
-            UtilsClient.bindTexture(textureResource);
-        }
+        // 26.x port: bindTexture() removed (client rendering; redone in P3)
 
         public BoundingBox boundingBox() {
             float xMin = 0, xMax = 0, yMin = 0, yMax = 0, zMin = 0, zMax = 0;
@@ -73,74 +62,13 @@ public class Obj3D {
             return new BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
         }
 
-        @SideOnly(Side.CLIENT)
-        public void draw() {
-            if (textureResource != null) {
-                bindTexture();
-                drawNoBind();
-            } else {
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                drawNoBind();
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-            }
-        }
+        // 26.x port: draw() removed (client rendering; redone in P3)
 
-        @SideOnly(Side.CLIENT)
-        private void drawVertex() {
-            drawVertex(0, 0);
-        }
+        // 26.x port: drawVertex() removed (client rendering; redone in P3)
 
-        @SideOnly(Side.CLIENT)
-        private void drawVertex(float offsetX, float offsetY) {
-            int mode = 0;
+        // 26.x port: drawVertex() removed (client rendering; redone in P3)
 
-            for (Face f : face) {
-                if (f.vertexNbr != mode) {
-                    if (mode != 0)
-                        GL11.glEnd();
-                    switch (f.vertexNbr) {
-                        case 3:
-                            GL11.glBegin(GL11.GL_TRIANGLES);
-                            break;
-                        case 4:
-                            GL11.glBegin(GL11.GL_QUADS);
-                            break;
-                        case 6:
-                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-                            break;
-                        case 8:
-                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-                            break;
-                    }
-
-                    mode = f.vertexNbr;
-                }
-
-                GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
-                for (int idx = 0; idx < mode; idx++) {
-                    if (f.uv[idx] != null)
-                        GL11.glTexCoord2f(f.uv[idx].u + offsetX, f.uv[idx].v + offsetY);
-                    GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
-                }
-            }
-
-            if (mode != 0)
-                GL11.glEnd();
-        }
-
-        @SideOnly(Side.CLIENT)
-        public void drawNoBind() {
-            if (!listReady) {
-                listReady = true;
-                glList = GL11.glGenLists(1);
-
-                GL11.glNewList(glList, GL11.GL_COMPILE);
-                drawVertex();
-                GL11.glEndList();
-            }
-
-            GL11.glCallList(glList);
-        }
+        // 26.x port: drawNoBind() removed (client rendering; redone in P3)
     }
 
     public class Obj3DPart {
@@ -191,95 +119,19 @@ public class Obj3D {
             return nameToFloatHash.getOrDefault(name, 0f);
         }
 
-        @SideOnly(Side.CLIENT)
-        public void draw(float angle, float x, float y, float z) {
-            if (locked) return;
+        // 26.x port: draw() removed (client rendering; redone in P3)
 
-            GL11.glPushMatrix();
+        // 26.x port: draw() removed (client rendering; redone in P3)
 
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            draw();
+        // 26.x port: draw() removed (client rendering; redone in P3)
 
-            GL11.glPopMatrix();
-        }
+        // 26.x port: drawNoBind() removed (client rendering; redone in P3)
 
-        @SideOnly(Side.CLIENT)
-        public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
-            if (locked) return;
+        // 26.x port: drawNoBind() removed (client rendering; redone in P3)
 
-            GL11.glPushMatrix();
+        // 26.x port: draw() removed (client rendering; redone in P3)
 
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            draw(texOffsetX, texOffsetY);
-
-            GL11.glPopMatrix();
-        }
-
-        @SideOnly(Side.CLIENT)
-        public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
-            if (locked) return;
-
-            GL11.glPushMatrix();
-
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(ox2, oy2, oz2);
-            GL11.glRotatef(angle2, x2, y2, z2);
-            GL11.glTranslatef(-ox2, -oy2, -oz2);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            draw();
-
-            GL11.glPopMatrix();
-        }
-
-        @SideOnly(Side.CLIENT)
-        public void drawNoBind(float angle, float x, float y, float z) {
-            if (locked) return;
-
-            GL11.glPushMatrix();
-
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            drawNoBind();
-
-            GL11.glPopMatrix();
-        }
-
-        @SideOnly(Side.CLIENT)
-        public void drawNoBind() {
-            if (locked) return;
-
-            for (FaceGroup fg : faceGroup) {
-                fg.drawNoBind();
-            }
-        }
-
-        @SideOnly(Side.CLIENT)
-        public void draw() {
-            if (locked) return;
-
-            //	Minecraft.getMinecraft().profiler.startSection("OBJ");
-            for (FaceGroup fg : faceGroup) {
-                fg.draw();
-            }
-            //	Minecraft.getMinecraft().profiler.endSection();
-        }
-
-        @SideOnly(Side.CLIENT)
-        public void draw(float texOffsetX, float texOffsetY) {
-            if (locked) return;
-
-            //	Minecraft.getMinecraft().profiler.startSection("OBJ");
-            for (FaceGroup fg : faceGroup) {
-                fg.drawVertex(texOffsetX, texOffsetY);
-            }
-            //	Minecraft.getMinecraft().profiler.endSection();
-        }
+        // 26.x port: draw() removed (client rendering; redone in P3)
 
         // Returns the bounding box of the vertices we'd draw.
         public BoundingBox boundingBox() {
@@ -376,8 +228,13 @@ public class Obj3D {
         public int vertexNbr;
     }
 
-    public ResourceLocation getModelResourceLocation(String name) {
-        return new ResourceLocation("eln", "model/" + dirPath + "/" + name);
+    public Identifier getModelResourceLocation(String name) {
+        // 26.x: resource paths must be lower case (the asset files are), and some MTL files name textures by an
+        // absolute Windows path of the original author's machine: keep the file name only (1.12 was lenient)
+        String file = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\')) + 1);
+        Identifier id = Identifier.tryBuild("eln", ("model/" + dirPath + "/" + file).toLowerCase(java.util.Locale.ROOT));
+        if (id == null) mods.eln.Eln.LOG.warn("Electrical Age: bad texture name '{}' in model {}", name, dirPath);
+        return id;
     }
 
     /**
@@ -389,7 +246,7 @@ public class Obj3D {
     @Nullable
     private BufferedReader getResourceAsStream(String filePath, boolean trySource) {
         BufferedReader reader = null;
-        // 1.12 port: asset files are lower case (ResourceLocation lower-cases paths); .obj/.mtl references keep their case
+        // 1.12 port: asset files are lower case (Identifier lower-cases paths); .obj/.mtl references keep their case
         filePath = filePath.toLowerCase(java.util.Locale.ROOT);
         if (trySource) {
             final String path = "../src/main/resources/assets/eln/" + filePath;
@@ -583,7 +440,7 @@ public class Obj3D {
                             }, refresh, refresh);
                         }
                     } else {
-                        FMLLog.warning("Invalid syntax in EA model text file %1$s on line %2$d: %3$s",
+                        mods.eln.Eln.LOG.warn("Invalid syntax in EA model text file {} on line {}: {}",
                             txtPath, lineNumber, line);
                     }
                 }
@@ -612,12 +469,7 @@ public class Obj3D {
         return nameToPartHash.get(part);
     }
 
-    @SideOnly(Side.CLIENT)
-    public void draw(String part) {
-        Obj3DPart partPtr = getPart(part);
-        if (partPtr != null)
-            partPtr.draw();
-    }
+    // 26.x port: draw() removed (client rendering; redone in P3)
 
     public String getString(String name) {
         return nameToStringHash.get(name); // Property read from the txt file

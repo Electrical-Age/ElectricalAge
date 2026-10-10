@@ -26,6 +26,16 @@ public final class DescriptorRegistry<D> {
         byId.put(legacyDamage, descriptor);
     }
 
+    /** 1.12 GenericItemBlockUsingDamage.addDescriptor: registered, gets an item. */
+    public void addDescriptor(int legacyDamage, D descriptor) {
+        add(legacyDamage, descriptor);
+    }
+
+    /** 1.12 addWithoutRegistry: a hidden descriptor (no creative tab entry); still an item on 26.x. */
+    public void addWithoutRegistry(int legacyDamage, D descriptor) {
+        add(legacyDamage, descriptor);
+    }
+
     @Nullable
     public D getDescriptor(int legacyDamage) {
         return byId.get(legacyDamage);

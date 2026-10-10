@@ -62,4 +62,30 @@ public final class GameTestContext implements TestContext {
         if (failures.isEmpty()) helper.succeed();
         else helper.fail(String.join("\n", failures));
     }
+
+    @Override
+    public mods.eln.node.six.SixNodeElement placeSix(int damage, BlockPos p, mods.eln.misc.Direction side) {
+        mods.eln.node.six.SixNodeDescriptor d = mods.eln.Eln.sixNodeItem.getDescriptor(damage);
+        if (d == null) throw new IllegalStateException("no six node descriptor " + damage);
+        net.minecraft.server.level.ServerLevel level = level();
+        net.minecraft.world.entity.player.Player player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        boolean ok = ((mods.eln.node.six.SixNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, side);
+        if (!ok) throw new IllegalStateException("placing " + d.name + " at " + p + " on " + side + " failed: here "
+            + level.getBlockState(p) + ", support " + level.getBlockState(p.relative(side.toEnumFacing())) + ", checkCanPlace "
+            + d.checkCanPlace(new mods.eln.misc.Coordonate(p, level), side, mods.eln.misc.LRDU.Up));
+        mods.eln.node.NodeBase node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
+        if (!(node instanceof mods.eln.node.six.SixNode)) throw new IllegalStateException("no SixNode at " + p);
+        return ((mods.eln.node.six.SixNode) node).getElement(side);
+    }
+
+    @Override
+    public java.io.DataInputStream stream(Writer writer) {
+        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+        try {
+            writer.write(new java.io.DataOutputStream(bos));
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray()));
+    }
 }

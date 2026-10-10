@@ -2,7 +2,7 @@ package mods.eln.sim;
 
 import mods.eln.item.regulator.IRegulatorDescriptor.RegulatorType;
 import mods.eln.misc.INBTTReady;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public abstract class RegulatorProcess implements IProcess, INBTTReady {
 
@@ -108,15 +108,15 @@ public abstract class RegulatorProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        errorIntegrated = nbt.getDouble(str + name + "errorIntegrated");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        errorIntegrated = nbt.getDoubleOr(str + name + "errorIntegrated", 0.0);
         if (Double.isNaN(errorIntegrated)) errorIntegrated = 0;
-        setTarget(nbt.getDouble(str + name + "target"));
+        setTarget(nbt.getDoubleOr(str + name + "target", 0.0));
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setDouble(str + name + "errorIntegrated", errorIntegrated);
-        nbt.setDouble(str + name + "target", target);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putDouble(str + name + "errorIntegrated", errorIntegrated);
+        nbt.putDouble(str + name + "target", target);
     }
 }

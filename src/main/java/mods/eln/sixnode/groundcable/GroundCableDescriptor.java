@@ -7,9 +7,9 @@ import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,17 +22,14 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
     Obj3DPart main;
 
     public GroundCableDescriptor(String name, Obj3D obj) {
-        super(name, GroundCableElement.class, GroundCableRender.class);
+        super(name, GroundCableElement.class, null);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
         }
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
-
-    void draw() {
-        if (main != null) main.draw();
-    }
+// 26.x port: draw() removed (client rendering; redone in P3)
 
     @Override
     public void setParent(Item item, int damage) {
@@ -41,7 +38,7 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Provides a zero volt reference."));
         Collections.addAll(list, tr("Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.").split("\n"));
@@ -49,7 +46,7 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
 }

@@ -1,0 +1,107 @@
+package mods.eln.registry;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import mods.eln.Eln;
+import mods.eln.ghost.GhostBlock;
+import mods.eln.node.six.SixNodeBlock;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeEntity;
+import mods.eln.node.six.SixNodeItem;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.material.MapColor;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * EA's 26.x registry entries. Device items come from the descriptor registries (Eln.sixNodeItem / transparentNodeItem,
+ * filled by ElnDeviceRegistry with 1.12 ids); each gets its registry name from eln-ids.json ("eln:six_node@<id>").
+ */
+public final class ElnRegistry {
+    private ElnRegistry() {
+    }
+
+    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Eln.MODID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Eln.MODID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+        DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Eln.MODID);
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
+
+    public static final DeferredBlock<SixNodeBlock> SIX_NODE_BLOCK = BLOCKS.registerBlock("six_node", SixNodeBlock::new,
+        p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
+    public static final DeferredBlock<GhostBlock> GHOST_BLOCK = BLOCKS.registerBlock("ghost", GhostBlock::new,
+        p -> p.mapColor(MapColor.METAL).strength(0.5f).noOcclusion().noLootTable());
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SixNodeEntity>> SIX_NODE_ENTITY =
+        BLOCK_ENTITIES.register("six_node", () -> new BlockEntityType<>(SixNodeEntity::new, SIX_NODE_BLOCK.get()));
+
+    /** Every EA item, in 1.12 id order (creative tab, tests). */
+    public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
+
+    static JsonObject ids;
+
+    /** The 26.x registry name of a 1.12 item ("eln:six_node", damage), from eln-ids.json. */
+    public static String nameOf(String legacyItem, int damage) {
+        if (ids == null) {
+            try (Reader r = new InputStreamReader(ElnRegistry.class.getResourceAsStream("/eln-ids.json"), StandardCharsets.UTF_8)) {
+                ids = JsonParser.parseReader(r).getAsJsonObject();
+            } catch (Exception e) {
+                throw new IllegalStateException("eln-ids.json", e);
+            }
+        }
+        JsonObject o = ids.getAsJsonObject(legacyItem + "@" + damage);
+        if (o == null) throw new IllegalStateException("no registry name for " + legacyItem + "@" + damage + " in eln-ids.json");
+        return o.get("name").getAsString();
+    }
+
+    private static boolean parentsSet;
+
+    /** Server about to start: the descriptors' setParent hooks (1.12 ran them at addDescriptor), once. */
+    public static void afterRegistration() {
+        if (parentsSet) return;
+        parentsSet = true;
+        for (Map.Entry<Integer, SixNodeDescriptor> e : Eln.sixNodeItem.all().entrySet())
+            e.getValue().setParent(e.getValue().parentItem, e.getKey());
+    }
+
+    public static void register(IEventBus modBus) {
+        for (Map.Entry<Integer, SixNodeDescriptor> e : Eln.sixNodeItem.all().entrySet()) {
+            int id = e.getKey();
+            SixNodeDescriptor d = e.getValue();
+            ALL_ITEMS.add(ITEMS.registerItem(nameOf("eln:six_node", id), p -> {
+                SixNodeItem item = new SixNodeItem(p, d);
+                // only the fields here: setParent overrides make ItemStacks (wiki entries...), which can't exist
+                // during registration; they run in afterRegistration()
+                d.parentItem = item;
+                d.parentItemDamage = id;
+                Eln.itemsByName.put(d.name, item);
+                return item;
+            }));
+        }
+        TABS.register("eln", () -> CreativeModeTab.builder()
+            .title(Component.literal("Electrical Age"))
+            .icon(() -> ALL_ITEMS.isEmpty() ? ItemStack.EMPTY : new ItemStack(ALL_ITEMS.get(0).get()))
+            .displayItems((params, out) -> ALL_ITEMS.forEach(i -> out.accept(i.get())))
+            .build());
+        BLOCKS.register(modBus);
+        ITEMS.register(modBus);
+        BLOCK_ENTITIES.register(modBus);
+        TABS.register(modBus);
+    }
+}

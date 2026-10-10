@@ -180,4 +180,171 @@ public class Utils {
     public static boolean isPlayerUsingWrench(net.minecraft.world.entity.player.Player player) {
         return player != null && wrenchCheck.test(player);
     }
+
+    // ---- 1.12 text formatting (meters, waila, tooltips) ----
+    public static String plotValue(double value) {
+        double valueAbs = Math.abs(value);
+        if (valueAbs < 0.0001) {
+            return "0";
+        } else if (valueAbs < 0.000999) {
+            return String.format("%1.2fµ",value * 10000);
+        } else if (valueAbs < 0.00999) {
+            return String.format("%1.2fm", value * 1000);
+        } else if (valueAbs < 0.0999) {
+            return String.format("%2.1fm", value * 1000);
+        } else if (valueAbs < 0.999) {
+            return String.format("%3.0fm", value * 1000);
+        } else if (valueAbs < 9.99) {
+            return String.format("%1.2f", value);
+        } else if (valueAbs < 99.9) {
+            return String.format("%2.1f", value);
+        } else if (valueAbs < 999) {
+            return String.format("%3.0f", value);
+        } else if (valueAbs < 9999) {
+            return String.format("%1.2fk", value / 1000.0);
+        } else if (valueAbs < 99999) {
+            return String.format("%2.1fk", value / 1000.0);
+        } else { // if(value < 1000000)
+            return String.format("%3.0fk", value / 1000.0);
+        }
+    }
+
+    public static String plotValue(double value, String unit) {
+        return plotValue(value) + unit;
+    }
+
+    public static String plotVolt(double value) {
+        return plotValue(value, "V  ");
+    }
+
+    public static String plotVolt(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotVolt(value);
+    }
+
+    public static String plotAmpere(double value) {
+        return plotValue(value, "A  ");
+    }
+
+    public static String plotAmpere(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotAmpere(value);
+    }
+
+    public static String plotCelsius(String header, double value) {
+        value += mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
+        if (!header.equals(""))
+            header += " ";
+        return header + plotValue(value, "\u00B0C ");
+    }
+
+    public static String plotPercent(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        if (value >= 1.0)
+            return header + String.format("%3.0f", value * 100.0) + "%   ";
+        else
+            return header + String.format("%3.1f", value * 100.0) + "%   ";
+    }
+
+    public static String plotEnergy(double value) {
+        return plotValue(value, "J  ");
+    }
+
+    public static String plotEnergy(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotEnergy(value);
+    }
+
+    public static String plotRads(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotValue(value, "rad/s ");
+    }
+
+    public static String plotER(double E, double R) {
+        return plotEnergy("E", E) + plotRads("R", R);
+    }
+
+    public static String plotPower(double value) {
+        return plotValue(value, "W  ");
+    }
+
+    public static String plotPower(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotPower(value);
+    }
+
+    public static String plotOhm(double value) {
+        return plotValue(value, "\u2126 ");
+    }
+
+    public static String plotOhm(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotOhm(value);
+    }
+
+    public static String plotUIP(double U, double I) {
+        return plotVolt("U", U) + plotAmpere("I", I) + plotPower("P", Math.abs(U * I));
+    }
+
+    public static String plotTime(double value) {
+        String str = "";
+        int h, mn, s;
+
+        if (value == 0.0)
+            return str + "0''";
+
+        h = (int) (value / 3600);
+        value = value % 3600;
+        mn = (int) (value / 60);
+        value = value % 60;
+        s = (int) (value / 1);
+
+        if (h != 0)
+            str += h + "h";
+        if (mn != 0)
+            str += mn + "'";
+        if (s != 0)
+            str += s + "''";
+        return str;
+    }
+
+    public static String plotTime(String header, double value) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotTime(value);
+    }
+
+    public static String plotBuckets(String header, double buckets) {
+        if (!header.equals(""))
+            header += " ";
+        return header + plotValue(buckets, "B ");
+    }
+
+    public static String plotSignal(double U, double I) {
+        return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U / Eln.SVU);
+    }
+
+    public static float limit(float value, float min, float max) {
+        return Math.max(Math.min(value, max), min);
+    }
+
+    public static double limit(double value, double min, double max) {
+        return Math.max(Math.min(value, max), min);
+    }
+
+    public static void printFunction(FunctionTable func, double start, double end, double step) {
+        Utils.println("********");
+        double x;
+        for (int idx = 0; (x = start + step * idx) < end + 0.00001; idx++) {
+            Utils.println(func.getValue(x));
+        }
+        Utils.println("********");
+    }
 }

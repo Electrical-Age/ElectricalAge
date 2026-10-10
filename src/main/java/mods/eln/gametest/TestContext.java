@@ -16,6 +16,21 @@ public interface TestContext {
     /** Put a stone block at the absolute position p (support for a device outside the floor). */
     void floor(BlockPos p);
 
+    /** Place a six-node device (1.12 id) at p on its floor face (as a player clicking the block below). */
+    default mods.eln.node.six.SixNodeElement placeSix(int damage, BlockPos p) {
+        return placeSix(damage, p, mods.eln.misc.Direction.YN);
+    }
+
+    /** Place a six-node device at p on face `side`; the block at p + side must be solid. */
+    mods.eln.node.six.SixNodeElement placeSix(int damage, BlockPos p, mods.eln.misc.Direction side);
+
+    /** Bytes for an element's networkUnserialize (the GUI packet path). */
+    java.io.DataInputStream stream(Writer writer);
+
+    interface Writer {
+        void write(java.io.DataOutputStream out) throws java.io.IOException;
+    }
+
     void line(String text);
 
     void check(String what, boolean ok, String detail);

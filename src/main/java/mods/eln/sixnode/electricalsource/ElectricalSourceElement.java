@@ -1,4 +1,4 @@
-package mods.eln.sixnode.groundcable;
+package mods.eln.sixnode.electricalsource;
 
 
 import mods.eln.registry.ElnDeviceRegistry;
@@ -13,48 +13,45 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GroundCableElement extends SixNodeElement {
+public class ElectricalSourceElement extends SixNodeElement {
 
     NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
-    VoltageSource ground = new VoltageSource("ground", electricalLoad, null);
-    //ElectricalSourceRefGroundProcess groundProcess = new ElectricalSourceRefGroundProcess(electricalLoad, 0);
+    VoltageSource voltageSource = new VoltageSource("voltSrc", electricalLoad, null);
+
+    public static final int setVoltageId = 1;
 
     int color = 0;
     int colorCare = 0;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-
-    public GroundCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+    public ElectricalSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
-
         electricalLoadList.add(electricalLoad);
-        electricalComponentList.add(ground);
-        ground.setU(0);
+        electricalComponentList.add(voltageSource);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte b = nbt.getByte("color");
+        byte b = nbt.getByteOr("color", (byte) 0);
         color = b & 0xF;
         colorCare = (b >> 4) & 1;
+
+        voltageSource.setU(nbt.getDoubleOr("voltage", 0.0));
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -62,14 +59,11 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("color", (byte) (color + (colorCare << 4)));
-    }
+        nbt.putByte("color", (byte) (color + (colorCare << 4)));
 
-    @Override
-    public IInventory getInventory() {
-        return inventory;
+        nbt.putDouble("voltage", voltageSource.getU());
     }
 
     @Override
@@ -84,19 +78,28 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        //if (Utils.isEmpty(inventory.getStackInSlot(GroundCableContainer.cableSlotId))) return 0;
-        return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+        if (((ElectricalSourceDescriptor) sixNodeElementDescriptor).isSignalSource()) {
+            return NodeBase.maskElectricalGate + (color << NodeBase.maskColorShift) +
+                (colorCare << NodeBase.maskColorCareShift);
+        } else {
+            return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) +
+                (colorCare << NodeBase.maskColorCareShift);
+        }
     }
 
     @Override
     public String multiMeterString() {
-        return Utils.plotVolt("U:", electricalLoad.getU()) + Utils.plotAmpere("I:", electricalLoad.getCurrent());
+        return Utils.plotUIP(electricalLoad.getU(), voltageSource.getI());
     }
 
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
+        info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+        info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getCurrent()));
+        if (Eln.wailaEasyMode) {
+            info.put(I18N.tr("Power"), Utils.plotPower("", electricalLoad.getU() * electricalLoad.getI()));
+        }
         return info;
     }
 
@@ -109,8 +112,8 @@ public class GroundCableElement extends SixNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            stream.writeByte(color << 4);
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
+            stream.writeByte((color << 4));
+            stream.writeFloat((float) voltageSource.getU());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,13 +125,10 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            colorCare = colorCare ^ 1;
-            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
-            sixNode.reconnect();
-        } else if (!Utils.isEmpty(currentItemStack)) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (onBlockActivatedRotate(entityPlayer)) return true;
+        ItemStack currentItemStack = entityPlayer.getMainHandItem();
+        if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
 
             GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
@@ -145,18 +145,22 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    protected void inventoryChanged() {
-        super.inventoryChanged();
-        reconnect();
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
+        try {
+            switch (stream.readByte()) {
+                case setVoltageId:
+                    voltageSource.setU(stream.readFloat());
+                    needPublish();
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public boolean hasGui() {
         return true;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new GroundCableContainer(player, inventory);
     }
 }
