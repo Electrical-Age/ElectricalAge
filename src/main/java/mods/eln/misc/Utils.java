@@ -28,4 +28,22 @@ public class Utils {
         if (DETERMINISTIC) return (min + max) / 2;
         return min + ThreadLocalRandom.current().nextDouble() * (max - min);
     }
+
+    public static boolean isTheClass(Object o, Class c) {
+        for (Class k = o.getClass(); k != null; k = k.getSuperclass()) if (k == c) return true;
+        return false;
+    }
+
+    public static boolean isEmpty(net.minecraft.world.item.ItemStack stack) {
+        return stack == null || stack.isEmpty();
+    }
+
+    /**
+     * Same item, or both in a common tag (1.12: same item + meta, or a shared ore dictionary name). Without damage
+     * metadata on 26.x, item identity replaces item + meta.
+     */
+    public static boolean areSame(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.ItemStack output) {
+        if (stack.getItem() == output.getItem()) return true;
+        return stack.typeHolder().tags().anyMatch(output::is);
+    }
 }

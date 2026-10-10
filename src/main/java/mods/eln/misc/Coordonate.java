@@ -1,17 +1,14 @@
 package mods.eln.misc;
 
 
-import mods.eln.compat.WorldCompat;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import mods.eln.node.NodeBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 public class Coordonate implements INBTTReady {
 
@@ -31,7 +28,7 @@ public class Coordonate implements INBTTReady {
         dimention = coord.dimention;
     }
 
-    public Coordonate(NBTTagCompound nbt, String str) {
+    public Coordonate(CompoundTag nbt, String str) {
         readFromNBT(nbt, str);
     }
 
@@ -45,9 +42,9 @@ public class Coordonate implements INBTTReady {
         return dimention;
     }
 
-    private World w = null;
+    private Level w = null;
 
-    public World world() {
+    public Level world() {
         //	Side sideCS = FMLCommonHandler.instance().getEffectiveSide();
         //	if (sideCS == Side.CLIENT) return null;
 
@@ -62,16 +59,17 @@ public class Coordonate implements INBTTReady {
 		/*if(w == null) *///w = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(worldDimension());
 
         if (w == null) {
-            return FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(worldDimension());
+            return Dimensions.level(worldDimension());
         }
         return w;
     }
 
-    public Coordonate(NodeBlockEntity entity) {
-        x = entity.getPos().getX();
-        y = entity.getPos().getY();
-        z = entity.getPos().getZ();
-        dimention = entity.getWorld().provider.getDimension();
+    public BlockPos pos() {
+        return new BlockPos(x, y, z);
+    }
+
+    public Coordonate(BlockPos p, Level world) {
+        this(p.getX(), p.getY(), p.getZ(), world);
     }
 
     public Coordonate(int x, int y, int z, int dimention) {
@@ -81,22 +79,17 @@ public class Coordonate implements INBTTReady {
         this.dimention = dimention;
     }
 
-    public Coordonate(int x, int y, int z, World world) {
+    public Coordonate(int x, int y, int z, Level world) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.dimention = world.provider.getDimension();
-        if (world.isRemote)
+        this.dimention = Dimensions.id(world);
+        if (world.isClientSide())
             this.w = world;
     }
 
-    public Coordonate(TileEntity entity) {
-        this.x = entity.getPos().getX();
-        this.y = entity.getPos().getY();
-        this.z = entity.getPos().getZ();
-        this.dimention = entity.getWorld().provider.getDimension();
-        if (entity.getWorld().isRemote)
-            this.w = entity.getWorld();
+    public Coordonate(BlockEntity entity) {
+        this(entity.getBlockPos(), entity.getLevel());
     }
 
     public Coordonate newWithOffset(int x, int y, int z) {
@@ -111,19 +104,19 @@ public class Coordonate implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        x = nbt.getInteger(str + "x");
-        y = nbt.getInteger(str + "y");
-        z = nbt.getInteger(str + "z");
-        dimention = nbt.getInteger(str + "d");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        x = nbt.getIntOr(str + "x", 0);
+        y = nbt.getIntOr(str + "y", 0);
+        z = nbt.getIntOr(str + "z", 0);
+        dimention = nbt.getIntOr(str + "d", 0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setInteger(str + "x", x);
-        nbt.setInteger(str + "y", y);
-        nbt.setInteger(str + "z", z);
-        nbt.setInteger(str + "d", dimention);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putInt(str + "x", x);
+        nbt.putInt(str + "y", y);
+        nbt.putInt(str + "z", z);
+        nbt.putInt(str + "d", dimention);
     }
 
     @Override
@@ -163,43 +156,40 @@ public class Coordonate implements INBTTReady {
     }
 
     public Block getBlock() {
-        return WorldCompat.getBlock(world(), x, y, z);
+        return world().getBlockState(pos()).getBlock();
     }
 
-    public static AxisAlignedBB getAxisAlignedBB(Coordonate a, Coordonate b) {
-        AxisAlignedBB bb = new AxisAlignedBB(
+    public static AABB getAxisAlignedBB(Coordonate a, Coordonate b) {
+        AABB bb = new AABB(
             Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z),
             Math.max(a.x, b.x) + 1.0, Math.max(a.y, b.y) + 1.0, Math.max(a.z, b.z) + 1.0);
         return bb;
     }
 
-    public AxisAlignedBB getAxisAlignedBB(int ray) {
-        AxisAlignedBB bb = new AxisAlignedBB(
+    public AABB getAxisAlignedBB(int ray) {
+        AABB bb = new AABB(
             x - ray, y - ray, z - ray,
             x + ray + 1, y + ray + 1, z + ray + 1);
         return bb;
     }
 
     public double distanceTo(Entity e) {
-        return Math.abs(e.posX - (x + 0.5)) + Math.abs(e.posY - (y + 0.5)) + Math.abs(e.posZ - (z + 0.5));
+        return Math.abs(e.getX() - (x + 0.5)) + Math.abs(e.getY() - (y + 0.5)) + Math.abs(e.getZ() - (z + 0.5));
     }
 	
 	/*public void setBlock(int id, int meta) {
 		WorldCompat.setBlock(world(), x, y, z, id, meta, 2);
 	}*/
 
-    public int getMeta() {
-        return WorldCompat.getMeta(world(), x, y, z);
-    }
-
+    /** The block's chunk is loaded (1.12: blockExists): nodes simulate everywhere, but touch the world only here. */
     public boolean getBlockExist() {
-        World w = DimensionManager.getWorld(dimention);
+        Level w = world();
         if (w == null) return false;
-        return WorldCompat.blockExists(w, x, y, z);
+        return w.isLoaded(pos());
     }
 
     public boolean getWorldExist() {
-        return DimensionManager.getWorld(dimention) != null;
+        return world() != null;
     }
 
     public void copyTo(double[] v) {
@@ -215,25 +205,25 @@ public class Coordonate implements INBTTReady {
         this.z = (int) vp[2];
     }
 
-    public void setPosition(Vec3d vp) {
+    public void setPosition(Vec3 vp) {
         this.x = (int) vp.x;
         this.y = (int) vp.y;
         this.z = (int) vp.z;
     }
 
-    public TileEntity getTileEntity() {
-        return WorldCompat.getTileEntity(world(), x, y, z);
+    public BlockEntity getTileEntity() {
+        return world().getBlockEntity(pos());
     }
 
     public void invalidate() {
         x = -1;
         y = -1;
         z = -1;
-        dimention = -5123;
+        dimention = Dimensions.INVALID;
     }
 
     public boolean isValid() {
-        return dimention != -5123;
+        return dimention != Dimensions.INVALID;
     }
 
     public double trueDistanceTo(Coordonate c) {
@@ -262,18 +252,14 @@ public class Coordonate implements INBTTReady {
         z += coordonate.z;
     }
 
-    public void setWorld(World world) {
-        if (world.isRemote)
+    public void setWorld(Level world) {
+        if (world.isClientSide())
             w = world;
-        dimention = world.provider.getDimension();
-    }
-
-    public void setMetadata(int meta) {
-        WorldCompat.setMeta(world(), x, y, z, meta, 0);
+        dimention = Dimensions.id(world);
     }
 
     public void setBlock(Block b) {
-        WorldCompat.setBlock(world(), x, y, z, b);
+        world().setBlockAndUpdate(pos(), b.defaultBlockState());
     }
 
     public int compareTo(Coordonate o) {

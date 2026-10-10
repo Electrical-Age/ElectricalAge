@@ -1,15 +1,15 @@
 package mods.eln.misc;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 
 public class BoundingBox {
-    public final Vec3d min, max;
+    public final Vec3 min, max;
 
     public BoundingBox(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax) {
-        min = new Vec3d(xMin, yMin, zMin);
-        max = new Vec3d(xMax, yMax, zMax);
+        min = new Vec3(xMin, yMin, zMin);
+        max = new Vec3(xMax, yMax, zMax);
     }
 
     public static BoundingBox mergeIdentity() {
@@ -34,8 +34,8 @@ public class BoundingBox {
         );
     }
 
-    public Vec3d centre() {
-        return new Vec3d(
+    public Vec3 centre() {
+        return new Vec3(
             min.x + (max.x - min.x) / 2,
             min.y + (max.y - min.y) / 2,
             min.z + (max.z - min.z) / 2

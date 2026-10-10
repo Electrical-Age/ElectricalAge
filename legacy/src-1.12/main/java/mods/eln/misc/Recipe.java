@@ -1,6 +1,6 @@
 package mods.eln.misc;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 

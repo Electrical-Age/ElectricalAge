@@ -1,12 +1,9 @@
 package mods.eln.misc;
 
 
-import mods.eln.compat.WorldCompat;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.EnumFacing;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Represents the 6 possible directions along the axis of a block.
@@ -125,22 +122,23 @@ public enum Direction {
      * @param tileEntity tile entity to check
      * @return Adjacent tile entity or null if none exists
      */
-    public TileEntity applyToTileEntity(TileEntity tileEntity) {
+    public BlockEntity applyToTileEntity(BlockEntity tileEntity) {
         if (tileEntity == null) return null;
-        int coords[] = {tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ()};
+        int coords[] = {tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ()};
 
         coords[dir / 2] += getSign();
 
-        if (tileEntity.getWorld() != null && WorldCompat.blockExists(tileEntity.getWorld(), coords[0], coords[1], coords[2])) {
-            return WorldCompat.getTileEntity(tileEntity.getWorld(), coords[0], coords[1], coords[2]);
+        net.minecraft.core.BlockPos p = new net.minecraft.core.BlockPos(coords[0], coords[1], coords[2]);
+        if (tileEntity.getLevel() != null && tileEntity.getLevel().isLoaded(p)) {
+            return tileEntity.getLevel().getBlockEntity(p);
         } else {
             return null;
         }
     }
 
-    public TileEntity applyToTileEntityAndSameClassThan(TileEntity tileEntity, Class c) {
+    public BlockEntity applyToTileEntityAndSameClassThan(BlockEntity tileEntity, Class c) {
         if (tileEntity == null) return null;
-        TileEntity findedEntity = applyToTileEntity(tileEntity);
+        BlockEntity findedEntity = applyToTileEntity(tileEntity);
         if (findedEntity == null) return null;
         if (!Utils.isTheClass(findedEntity, c)) return null;
         return findedEntity;
@@ -178,79 +176,7 @@ public enum Direction {
     private int getSign() {
         return (dir % 2) * 2 - 1;
     }
-
-    public void renderBlockFace(int x, int y, float spriteDim) {
-        switch (this) {
-            case XN:
-                GL11.glNormal3f(-1.0f, 0.0f, 0.0f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
-                break;
-            case XP:
-                GL11.glNormal3f(1.0f, 0.0f, 0.0f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(0.5F, 0.5F, -0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(0.5F, 0.5F, 0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(0.5F, -0.5F, 0.5f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(0.5F, -0.5F, -0.5f);
-                break;
-            case YN:
-                GL11.glNormal3f(0.0f, -1.0f, 0.0f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(0.5F, -0.5f, -0.5F);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(0.5F, -0.5f, 0.5F);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(-0.5F, -0.5f, 0.5F);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(-0.5F, -0.5f, -0.5F);
-                break;
-            case YP:
-                GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(-0.5F, 0.5f, -0.5F);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(-0.5F, 0.5f, 0.5F);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(0.5F, 0.5f, 0.5F);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(0.5F, 0.5f, -0.5F);
-                break;
-            case ZN:
-                GL11.glNormal3f(0.0f, 0.0f, -1.0f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(0.5F, 0.5F, -0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(0.5F, -0.5F, -0.5f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
-                break;
-            case ZP:
-                GL11.glNormal3f(0.0f, 0.0f, 1.0f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(0.5F, 0.5F, 0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim);
-                GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
-                GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
-                GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim);
-                GL11.glVertex3f(0.5F, -0.5F, 0.5f);
-                break;
-            default:
-                break;
-        }
-    }
+// 26.x port: renderBlockFace() removed (client rendering; redone in P3)
 
     static public Direction fromInt(int idx) {
         for (Direction direction : Direction.values()) {
@@ -337,90 +263,11 @@ public enum Direction {
         }
         return null;
     }
+// 26.x port: glRotateXnRef() removed (client rendering; redone in P3)
+// 26.x port: glRotateXnRefInv() removed (client rendering; redone in P3)
+// 26.x port: glRotateZnRef() removed (client rendering; redone in P3)
 
-    public void glRotateXnRef() {
-        //toCheck
-        switch (this) {
-            case XN:
-                break;
-            case XP:
-                //GL11.glScalef(-1f, 1, -1f);
-                GL11.glRotatef(180, 0f, 1f, 0f);
-                break;
-            case YN:
-                GL11.glRotatef(90f, 0f, 0f, 1f);
-                GL11.glScalef(1f, -1f, -1f);
-                break;
-            case YP:
-                GL11.glRotatef(90f, 0f, 0f, -1f);
-                break;
-            case ZN:
-                GL11.glRotatef(270f, 0f, 1f, 0f);
-                break;
-            case ZP:
-                GL11.glRotatef(90f, 0f, 1f, 0f);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void glRotateXnRefInv() {
-        //toCheck
-        switch (this) {
-            case XN:
-                break;
-            case XP:
-                //GL11.glScalef(-1f, 1, -1f);
-                GL11.glRotatef(180, 0f, -1f, 0f);
-                break;
-            case YN:
-                GL11.glScalef(1f, -1f, -1f);
-                GL11.glRotatef(90f, 0f, 0f, -1f);
-                break;
-            case YP:
-                GL11.glRotatef(90f, 0f, 0f, 1f);
-                break;
-            case ZN:
-                GL11.glRotatef(270f, 0f, -1f, 0f);
-                break;
-            case ZP:
-                GL11.glRotatef(90f, 0f, -1f, 0f);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void glRotateZnRef() {
-        //toCheck
-        switch (this) {
-            case XN:
-                GL11.glRotatef(90f, 0f, 1f, 0f);
-                break;
-            case XP:
-                GL11.glRotatef(90f, 0f, -1f, 0f);
-                break;
-            case YN:
-                GL11.glRotatef(90f, 1f, 0f, 0f);
-                GL11.glScalef(1f, -1, 1f);
-                break;
-            case YP:
-                GL11.glRotatef(90f, 1f, 0f, 0f);
-                GL11.glScalef(1f, 1f, 1f);
-                break;
-            case ZN:
-                //GL11.glRotatef(90f, 0f, -1f, 0f);
-                break;
-            case ZP:
-                GL11.glRotatef(180f, 0f, 1f, 0f);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public TileEntity getTileEntity(Coordonate coordonate) {
+    public BlockEntity getTileEntity(Coordonate coordonate) {
         int x = coordonate.x, y = coordonate.y, z = coordonate.z;
         switch (this) {
             case XN:
@@ -445,15 +292,15 @@ public enum Direction {
                 break;
         }
 
-        return WorldCompat.getTileEntity(coordonate.world(), x, y, z);
+        return coordonate.world().getBlockEntity(new net.minecraft.core.BlockPos(x, y, z));
     }
 
-    public void writeToNBT(NBTTagCompound nbt, String name) {
-        nbt.setByte(name, (byte) getInt());
+    public void writeToNBT(CompoundTag nbt, String name) {
+        nbt.putByte(name, (byte) getInt());
     }
 
-    static public Direction readFromNBT(NBTTagCompound nbt, String name) {
-        return Direction.fromInt(nbt.getByte(name));
+    static public Direction readFromNBT(CompoundTag nbt, String name) {
+        return Direction.fromInt(nbt.getByteOr(name, (byte) 0));
     }
 
     public void rotateFromXN(double[] p) {
@@ -520,22 +367,22 @@ public enum Direction {
         }
     }
 
-    /** 1.12: Vec3d is immutable, so this returns the rotated vector (callers assign it). */
-    public Vec3d rotateFromXN(Vec3d p) {
+    /** 1.12: Vec3 is immutable, so this returns the rotated vector (callers assign it). */
+    public Vec3 rotateFromXN(Vec3 p) {
         double x = p.x, y = p.y, z = p.z;
         switch (this) {
             case XN:
                 return p;
             case XP:
-                return new Vec3d(-x, y, -z);
+                return new Vec3(-x, y, -z);
             case YN:
-                return new Vec3d(y, x, -z);
+                return new Vec3(y, x, -z);
             case YP:
-                return new Vec3d(y, -x, z);
+                return new Vec3(y, -x, z);
             case ZN:
-                return new Vec3d(-z, y, x);
+                return new Vec3(-z, y, x);
             case ZP:
-                return new Vec3d(z, y, -x);
+                return new Vec3(z, y, -x);
             default:
                 return p;
         }
@@ -572,33 +419,9 @@ public enum Direction {
                 break;
         }
     }
+// 26.x port: glTranslate() removed (client rendering; redone in P3)
 
-    public void glTranslate(float v) {
-        switch (this) {
-            case XN:
-                GL11.glTranslatef(-v, 0f, 0f);
-                break;
-            case XP:
-                GL11.glTranslatef(v, 0f, 0f);
-                break;
-            case YN:
-                GL11.glTranslatef(0f, -v, 0f);
-                break;
-            case YP:
-                GL11.glTranslatef(0f, v, 0f);
-                break;
-            case ZN:
-                GL11.glTranslatef(0f, 0f, -v);
-                break;
-            case ZP:
-                GL11.glTranslatef(0f, 0f, v);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public static Direction fromEnumFacing(EnumFacing direction) {
+    public static Direction fromEnumFacing(net.minecraft.core.Direction direction) {
         if (direction == null) return YN;
         switch (direction) {
             case DOWN:
@@ -619,49 +442,23 @@ public enum Direction {
     }
 
     /** Was toForge(); ForgeDirection.UNKNOWN -> null. */
-    public EnumFacing toEnumFacing() {
+    public net.minecraft.core.Direction toEnumFacing() {
         switch (this) {
             case YN:
-                return EnumFacing.DOWN;
+                return net.minecraft.core.Direction.DOWN;
             case XP:
-                return EnumFacing.EAST;
+                return net.minecraft.core.Direction.EAST;
             case ZN:
-                return EnumFacing.NORTH;
+                return net.minecraft.core.Direction.NORTH;
             case ZP:
-                return EnumFacing.SOUTH;
+                return net.minecraft.core.Direction.SOUTH;
             case YP:
-                return EnumFacing.UP;
+                return net.minecraft.core.Direction.UP;
             case XN:
-                return EnumFacing.WEST;
+                return net.minecraft.core.Direction.WEST;
             default:
                 return null;
         }
     }
-
-    public void glRotateZnRefInv() {
-        switch (this) {
-            case XN:
-                GL11.glRotatef(-90f, 0f, 1f, 0f);
-                break;
-            case XP:
-                GL11.glRotatef(-90f, 0f, -1f, 0f);
-                break;
-            case YN:
-                GL11.glRotatef(-90f, 1f, 0f, 0f);
-                GL11.glScalef(1f, -1, 1f);
-                break;
-            case YP:
-                GL11.glRotatef(-90f, 1f, 0f, 0f);
-                GL11.glScalef(1f, 1f, 1f);
-                break;
-            case ZN:
-                //GL11.glRotatef(90f, 0f, -1f, 0f);
-                break;
-            case ZP:
-                GL11.glRotatef(-180f, 0f, 1f, 0f);
-                break;
-            default:
-                break;
-        }
-    }
+// 26.x port: glRotateZnRefInv() removed (client rendering; redone in P3)
 }

@@ -1,7 +1,7 @@
 package mods.eln.misc;
 
 import mods.eln.Eln;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
 import java.util.ArrayList;
