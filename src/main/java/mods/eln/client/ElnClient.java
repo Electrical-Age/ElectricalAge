@@ -30,6 +30,8 @@ public final class ElnClient {
             e.registerBlockEntityRenderer(ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), ctx -> new TransparentNodeRender());
         });
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent.class,
+            e -> mods.eln.client.render.ElnPipelines.ALL.forEach(e::registerPipeline));
     }
 
     static final class ClientHooks implements UtilsClient.Hooks {

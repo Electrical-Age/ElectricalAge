@@ -26,10 +26,9 @@ import java.util.function.Consumer;
 public final class GlFrame {
     /**
      * What selects the RenderType of a vertex batch. texture null = untextured (drawn with a white texture);
-     * fullBright = the 1.12 lightmap override (drawn at full light). GL_LIGHTING off only flattens the shading (normals
-     * point up).
+     * fullBright = the 1.12 lightmap override (drawn at full light); lit = GL_LIGHTING (directional shading).
      */
-    public record Key(Identifier texture, Blend blend, boolean cull, boolean fullBright) {
+    public record Key(Identifier texture, Blend blend, boolean cull, boolean fullBright, boolean lit) {
     }
 
     /** LINES: a line batch (GL_LINES and strips); u holds the line width, the normal the line's direction. */
@@ -375,8 +374,8 @@ public final class GlFrame {
         Identifier t = texture2d ? texture : null;
         Blend bl = blend ? blendMode : Blend.NONE;
         Key k = lastKey;
-        if (k == null || k.texture != t || k.blend != bl || k.cull != cull || k.fullBright != fullBright) {
-            k = new Key(t, bl, cull, fullBright);
+        if (k == null || k.texture != t || k.blend != bl || k.cull != cull || k.fullBright != fullBright || k.lit != lighting) {
+            k = new Key(t, bl, cull, fullBright, lighting);
             Batch b = batches.get(k);
             if (b == null) {
                 b = acquire();
@@ -510,7 +509,7 @@ public final class GlFrame {
 
     /** Lines: transformed pairs into the line batch; u = width, normal = direction. */
     private void emitLines(float[] q, int floats, boolean colored) {
-        Key k = new Key(null, Blend.LINES, false, fullBright);
+        Key k = new Key(null, Blend.LINES, false, fullBright, false);
         Batch out = batches.get(k);
         if (out == null) {
             out = acquire();

@@ -19,13 +19,8 @@ public final class GlSubmit {
     }
 
     public static RenderType renderType(GlFrame.Key key) {
-        Identifier tex = key.texture() != null ? key.texture() : UtilsClient.WHITE;
-        return switch (key.blend()) {
-            case NONE -> key.cull() ? RenderTypes.entityCutoutCull(tex) : RenderTypes.entityCutout(tex);
-            case ALPHA, MULTIPLY -> key.cull() ? RenderTypes.entityTranslucentCull(tex) : RenderTypes.entityTranslucent(tex);
-            case ADDITIVE -> RenderTypes.entityTranslucentEmissive(tex); // R4: a real additive pipeline
-            case LINES -> RenderTypes.lines();
-        };
+        if (key.blend() == GlFrame.Blend.LINES) return RenderTypes.lines();
+        return ElnPipelines.type(key, key.texture() != null ? key.texture() : UtilsClient.WHITE);
     }
 
     /** Open a frame based on the renderer's pose (vertices come out in pose space). */
