@@ -33,6 +33,7 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'eln.golden', file('golden/1.12').absolutePath
         }
         configureEach {
             logLevel = org.slf4j.event.Level.INFO

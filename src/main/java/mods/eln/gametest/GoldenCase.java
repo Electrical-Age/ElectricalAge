@@ -1,0 +1,130 @@
+package mods.eln.gametest;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import mods.eln.Eln;
+
+import java.io.Reader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Every ported device's descriptor numbers against golden/1.12/inventory.json (port step T4): a value changed while
+ * porting (a constructor argument shuffled by an edit...) is invisible to behaviour cases unless asserted, this
+ * catches it. Golden dir: system property eln.golden (set by the gameTestServer run). Fields that only described 1.12
+ * items or renders are ignored.
+ */
+final class GoldenCase implements TestCase {
+    /** 1.12-only or render-only fields: no meaning on 26.x. */
+    static final Set<String> IGNORED = Set.of("iconName", "IconName", "parentItemDamage", "voltageLevelColor");
+
+    public String id() {
+        return "golden_descriptors";
+    }
+
+    public int width() {
+        return 3;
+    }
+
+    public int ticks() {
+        return 1;
+    }
+
+    public void build(TestContext ctx) {
+    }
+
+    public void measure(TestContext ctx) {
+        String dir = System.getProperty("eln.golden");
+        if (dir == null) {
+            ctx.line("INFO golden: eln.golden not set, skipped");
+            return;
+        }
+        Map<String, JsonObject> golden = new HashMap<>();
+        try (Reader r = Files.newBufferedReader(Paths.get(dir, "inventory.json"))) {
+            for (JsonElement e : JsonParser.parseReader(r).getAsJsonObject().getAsJsonArray("items")) {
+                JsonObject o = e.getAsJsonObject();
+                golden.put(o.get("id").getAsString() + "@" + o.get("damage").getAsInt(), o);
+            }
+        } catch (Exception e) {
+            ctx.check("golden: read inventory.json", false, e.toString());
+            return;
+        }
+        int compared = 0;
+        for (Map.Entry<Integer, ?> e : Eln.sixNodeItem.all().entrySet()) compared += compare(ctx, golden, "eln:six_node@" + e.getKey(), e.getValue());
+        for (Map.Entry<Integer, ?> e : Eln.transparentNodeItem.all().entrySet()) compared += compare(ctx, golden, "eln:transparent_node@" + e.getKey(), e.getValue());
+        ctx.check("golden: descriptors compared with 1.12", compared > 0, compared + " descriptor(s)");
+    }
+
+    static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
+        JsonObject g = golden.get(key);
+        if (g == null) {
+            ctx.check("golden " + key + ": known in 1.12", false, "no such item in golden/1.12/inventory.json");
+            return 0;
+        }
+        String name = g.get("name").getAsString();
+        if (!g.has("descriptorClass") || !g.get("descriptorClass").getAsString().endsWith("." + descriptor.getClass().getSimpleName())) {
+            ctx.check("golden " + name + ": same descriptor class", false,
+                (g.has("descriptorClass") ? g.get("descriptorClass").getAsString() : "none") + " vs " + descriptor.getClass().getName());
+            return 1;
+        }
+        JsonObject now = fields(descriptor);
+        JsonObject was = g.getAsJsonObject("fields");
+        StringBuilder diff = new StringBuilder();
+        for (String f : was.keySet()) {
+            if (IGNORED.contains(f)) continue;
+            JsonElement a = was.get(f), b = now.get(f);
+            if (b == null) diff.append(f).append(" missing; ");
+            else if (!same(a, b)) diff.append(f).append(": ").append(a).append(" -> ").append(b).append("; ");
+        }
+        ctx.check("golden " + name + ": descriptor numbers as in 1.12", diff.length() == 0, diff.toString());
+        return 1;
+    }
+
+    static boolean same(JsonElement a, JsonElement b) {
+        if (a.isJsonPrimitive() && b.isJsonPrimitive() && a.getAsJsonPrimitive().isNumber() && b.getAsJsonPrimitive().isNumber()) {
+            double x = a.getAsDouble(), y = b.getAsDouble();
+            return x == y || Math.abs(x - y) <= 1e-9 * Math.max(Math.abs(x), Math.abs(y));
+        }
+        return a.equals(b);
+    }
+
+    /** Primitive, String, enum and primitive-array fields of the descriptor and its superclasses (as 1.12 Inventory). */
+    static JsonObject fields(Object d) {
+        JsonObject f = new JsonObject();
+        for (Class<?> c = d.getClass(); c != null && c != Object.class; c = c.getSuperclass()) {
+            for (Field fl : c.getDeclaredFields()) {
+                if (Modifier.isStatic(fl.getModifiers()) || f.has(fl.getName())) continue;
+                Class<?> t = fl.getType();
+                try {
+                    fl.setAccessible(true);
+                    Object v = fl.get(d);
+                    if (v == null) continue;
+                    if (v instanceof Boolean) f.addProperty(fl.getName(), (Boolean) v);
+                    else if (v instanceof Character) f.addProperty(fl.getName(), v.toString());
+                    else if (t.isPrimitive() || v instanceof Number) f.addProperty(fl.getName(), (Number) v);
+                    else if (v instanceof String || t.isEnum()) f.addProperty(fl.getName(), v.toString());
+                    else if (v instanceof double[]) {
+                        JsonArray a = new JsonArray();
+                        for (double x : (double[]) v) a.add(x);
+                        f.add(fl.getName(), a);
+                    } else if (v instanceof int[]) {
+                        JsonArray a = new JsonArray();
+                        for (int x : (int[]) v) a.add(x);
+                        f.add(fl.getName(), a);
+                    }
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    // inaccessible: skip
+                }
+            }
+        }
+        return f;
+    }
+}
