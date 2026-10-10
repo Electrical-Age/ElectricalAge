@@ -46,6 +46,11 @@ public class EaSlider extends AbstractSliderButton {
         updateMessage();
     }
 
+    /** Re-read the label (it may show live values too). */
+    public void refreshLabel() {
+        updateMessage();
+    }
+
     @Override
     protected void updateMessage() {
         setMessage(label.apply(get()));

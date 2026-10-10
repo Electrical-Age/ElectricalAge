@@ -44,7 +44,8 @@ public class ElectricalFurnaceScreen extends ElnScreen {
         int x = leftPos, y = topPos;
         target = addRenderableWidget(new EaSlider(x + 8, y + 50, 160, 0, 800, 10,
             render.temperatureTargetSyncValue < -1000 ? 0 : render.temperatureTargetSyncValue,
-            v -> Component.literal(tr("Target: %1$", celsius(v))), v -> render.clientSetTemperatureTarget((float) v)));
+            v -> Component.literal(tr("Target %1$  (now %2$)", celsius(v), celsius(render.temperature))),
+            v -> render.clientSetTemperatureTarget((float) v)));
         target.setTooltip(Tooltip.create(Component.literal(tr("Temperature the regulator keeps"))));
         addRenderableWidget(new EaGauge(x + 8, y + 74, 160, 12, this::supplyFraction, this::supplyText, 1.0, 1.2));
         power = addRenderableWidget(Button.builder(Component.empty(), b -> render.clientSetPowerOn(!render.getPowerOn()))
@@ -87,6 +88,7 @@ public class ElectricalFurnaceScreen extends ElnScreen {
             target.setFromDevice(render.temperatureTargetSyncValue);
             render.temperatureTargetSyncNew = false;
         }
+        target.refreshLabel();
         power.setMessage(Component.literal(render.getPowerOn() ? tr("Heater: on") : tr("Heater: off")));
         power.active = !render.autoShutDown;
         autoShutdown.setMessage(Component.literal(render.autoShutDown ? tr("Auto shutdown") : tr("Manual shutdown")));
@@ -98,8 +100,5 @@ public class ElectricalFurnaceScreen extends ElnScreen {
         g.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW, ax, ay, 24, 16, 0.25f);
         int w = (int) Math.ceil(24 * Math.max(0, Math.min(1, render.processState)));
         if (w > 0) g.blitSprite(RenderPipelines.GUI_TEXTURED, ARROW, 24, 16, 0, 0, ax, ay, w, 16);
-        // actual temperature, right-aligned on the title line
-        String t = tr("Actual: %1$", celsius(render.temperature));
-        g.text(font, t, leftPos + imageWidth - 8 - font.width(t), topPos + 6, LABEL, false);
     }
 }

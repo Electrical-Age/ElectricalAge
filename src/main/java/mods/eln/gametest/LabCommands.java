@@ -51,12 +51,12 @@ public final class LabCommands {
                         .executes(c -> machines(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))));
     }
 
-    static int sixId(String name) {
+    public static int sixId(String name) {
         for (var e : Eln.sixNodeItem.all().entrySet()) if (e.getValue().name.equals(name)) return e.getKey();
         throw new IllegalStateException("no six-node device " + name);
     }
 
-    static int transparentId(String name) {
+    public static int transparentId(String name) {
         for (var e : Eln.transparentNodeItem.all().entrySet()) if (e.getValue().name.equals(name)) return e.getKey();
         throw new IllegalStateException("no transparent device " + name);
     }
