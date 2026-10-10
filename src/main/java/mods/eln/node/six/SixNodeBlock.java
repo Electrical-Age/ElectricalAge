@@ -50,6 +50,27 @@ public class SixNodeBlock extends NodeBlock {
         return s.isEmpty() ? Shapes.block() : s;
     }
 
+    /**
+     * The element clicked is the one whose plate holds the hit point (1.12's collisionRayTrace reported the element's
+     * side as the hit side; 26.x reports the face of the shape that was hit: the top of a floor plate says UP).
+     */
+    @Override
+    protected net.minecraft.world.InteractionResult activate(net.minecraft.world.level.Level level, BlockPos pos,
+            net.minecraft.world.entity.player.Player player, net.minecraft.world.phys.BlockHitResult hit) {
+        SixNodeEntity e = tileAt(level, pos, SixNodeEntity.class);
+        if (e == null) return net.minecraft.world.InteractionResult.PASS;
+        double x = hit.getLocation().x - pos.getX(), y = hit.getLocation().y - pos.getY(), z = hit.getLocation().z - pos.getZ();
+        int mask = e.getSideMask();
+        Direction side = null;
+        Direction facing = Direction.fromIntMinecraftSide(hit.getDirection().getOpposite().get3DDataValue());
+        if ((mask & (1 << facing.getInt())) != 0 && PLATES[facing.getInt()].bounds().inflate(0.002).contains(x, y, z)) side = facing;
+        for (int i = 0; side == null && i < 6; i++)
+            if ((mask & (1 << i)) != 0 && PLATES[i].bounds().inflate(0.002).contains(x, y, z)) side = Direction.fromInt(i);
+        if (side == null) return net.minecraft.world.InteractionResult.PASS;
+        return e.onBlockActivated(player, side, (float) x, (float) y, (float) z)
+            ? net.minecraft.world.InteractionResult.SUCCESS : net.minecraft.world.InteractionResult.PASS;
+    }
+
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();

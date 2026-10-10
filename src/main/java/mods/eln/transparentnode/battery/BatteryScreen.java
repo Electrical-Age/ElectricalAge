@@ -24,7 +24,7 @@ public class BatteryScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        addRenderableWidget(new EaGauge(leftPos + 8, topPos + 64, 116, 12, this::fill,
+        addRenderableWidget(new EaGauge(leftPos + 8, topPos + 58, 116, 11, this::fill,
             () -> Component.literal(Utils.plotPercent("", fill()).trim()), 2, 2));
     }
 
@@ -48,17 +48,17 @@ public class BatteryScreen extends ElnScreen {
             s1 = tr("Charge");
             s2 = Utils.plotTime("", -miss / p);
         } else s1 = tr("Charged");
-        int x2 = 64, y = 18;
+        int x2 = 64, y = 16;
         if (render.descriptor.lifeEnable) {
             label(g, 8, y, tr("Life:"));
             label(g, x2, y, Utils.plotPercent("", render.life));
-            y += 10;
+            y += 9;
         }
         label(g, 8, y, tr("Energy:"));
         label(g, x2, y, Utils.plotValue(render.energy, "J/") + Utils.plotValue(full(), "J"));
-        label(g, 8, y + 10, p >= 0 ? tr("Power out:") : tr("Power in:"));
-        label(g, x2, y + 10, Utils.plotValue(Math.abs(p), "W/") + Utils.plotValue(render.descriptor.electricalStdP, "W"));
-        label(g, 8, y + 20, s1);
-        label(g, x2, y + 20, s2);
+        label(g, 8, y + 9, p >= 0 ? tr("Power out:") : tr("Power in:"));
+        label(g, x2, y + 9, Utils.plotValue(Math.abs(p), "W/") + Utils.plotValue(render.descriptor.electricalStdP, "W"));
+        label(g, 8, y + 18, s1);
+        label(g, x2, y + 18, s2);
     }
 }

@@ -26,7 +26,7 @@ public class TurretScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        button(8, 6, 106, () -> render.filterIsSpare ? tr("Do not attack:") : tr("Attack:"), render::clientToggleFilterMeaning,
+        button(8, 6, 106, () -> render.filterIsSpare ? tr("Spares the filtered") : tr("Attacks the filtered"), render::clientToggleFilterMeaning,
             tr("What happens to the entities the filter in the slot matches"));
         charge = addRenderableWidget(new EaSlider(leftPos + 8, topPos + 28, 160, 100, 5000, 100, render.chargePower,
             v -> Component.literal(tr("Recharge power: %1$W", (int) v)), v -> render.clientSetChargePower((float) v)));

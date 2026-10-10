@@ -31,9 +31,9 @@ public class TransformerScreen extends ElnScreen {
 
     @Override
     protected void extractDevice(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
-        g.centeredText(font, tr("Primary"), leftPos + 66, topPos + 20, LABEL);
-        g.centeredText(font, tr("Core"), leftPos + 88, topPos + 50, LABEL);
-        g.centeredText(font, tr("Secondary"), leftPos + 108, topPos + 20, LABEL);
-        label(g, 104, 80, tr("Casing"));
+        // slots: primary (58,30), core (79,30), secondary (100,30), casing (130,74)
+        g.text(font, tr("Primary"), leftPos + 66 - font.width(tr("Primary")), topPos + 50, LABEL, false);
+        g.text(font, tr("Secondary"), leftPos + 100, topPos + 50, LABEL, false);
+        label(g, 130 - 4 - font.width(tr("Casing")), 92, tr("Casing"));
     }
 }
