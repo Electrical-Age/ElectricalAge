@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import mods.eln.gl.GL11
+
 
 import mods.eln.registry.ElnDeviceRegistry
 import mods.eln.Eln
@@ -49,7 +51,18 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
     // 26.x port: renderItem() removed (client rendering; redone in P3)
 
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(installedFuse: ElectricalFuseDescriptor?) {
+        case?.draw()
+        if (installedFuse != null) {
+            mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.voltageLevelColorOf(installedFuse.cableDescriptor).setGLColor()
+            fuseType?.draw()
+            GL11.glColor3f(1f, 1f, 1f)
+            if (installedFuse.cableDescriptor != null) {
+                fuseOk?.draw()
+            }
+            fuse?.draw()
+        }
+    }
 
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>?, par4: Boolean) {
@@ -211,5 +224,21 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 }
 
-// 26.x port: class ElectricalFuseHolderRender removed (client; redone in P3/P4)
+class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElementRender(tileEntity, side, descriptor) {
+    private val descriptor = descriptor as ElectricalFuseHolderDescriptor
+    private var installedFuse: ElectricalFuseDescriptor? = null
+
+    override fun draw() {
+        front.right().glRotateOnX()
+        descriptor.draw(installedFuse)
+    }
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        if (stream != null) {
+            installedFuse = GenericItemUsingDamageDescriptor.getDescriptor(Utils.unserialiseItemStack(stream)) as? ElectricalFuseDescriptor
+        }
+    }
+}
 

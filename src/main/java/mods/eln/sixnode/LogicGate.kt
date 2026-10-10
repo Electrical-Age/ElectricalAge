@@ -45,7 +45,11 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>) :
         this(name, obj, functionName, functionClass, LogicGateElement::class.java, null) {
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw() {
+        pins.forEach { it?.draw() }
+        case?.draw()
+        top?.draw()
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
@@ -153,7 +157,24 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
     override fun initialize() {}
 }
 
-// 26.x port: class LogicGateRender removed (client; redone in P3/P4)
+open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElementRender(entity, side, descriptor) {
+    private val descriptor = descriptor as LogicGateDescriptor
+
+    override fun draw() {
+        super.draw()
+        front.glRotateOnX()
+        descriptor.draw()
+    }
+
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when (lrdu) {
+        front -> ElnDeviceRegistry.signalCableDescriptor.render
+        front.inverse() -> if (descriptor.function.inputCount >= 1) ElnDeviceRegistry.signalCableDescriptor.render else null
+        front.left() -> if (descriptor.function.inputCount >= 2) ElnDeviceRegistry.signalCableDescriptor.render else null
+        front.right() -> if (descriptor.function.inputCount >= 3) ElnDeviceRegistry.signalCableDescriptor.render else null
+        else -> null
+    }
+}
 
 
 abstract class LogicFunction : INBTTReady {
@@ -398,7 +419,21 @@ class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor) 
     }
 }
 
-// 26.x port: class PalRender removed (client; redone in P3/P4)
+class PalRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    LogicGateRender(entity, side, descriptor) {
+    val truthTable = Array(8, { false })
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            for (i in 0..7) {
+                truthTable[i] = stream?.readBoolean() ?: false
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
 
 
 // 26.x port: class PalGui removed (client; redone in P3/P4)

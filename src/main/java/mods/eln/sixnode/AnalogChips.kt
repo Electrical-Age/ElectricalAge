@@ -47,7 +47,11 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out AnalogFunction>) :
         this(name, obj, functionName, functionClass, AnalogChipElement::class.java, null)
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw() {
+        pins.forEach { it?.draw() }
+        case?.draw()
+        top?.draw()
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
@@ -153,7 +157,24 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
     override fun initialize() {}
 }
 
-// 26.x port: class AnalogChipRender removed (client; redone in P3/P4)
+open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElementRender(entity, side, descriptor) {
+    private val descriptor = descriptor as AnalogChipDescriptor
+
+    override fun draw() {
+        super.draw()
+        front.glRotateOnX()
+        descriptor.draw()
+    }
+
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when (lrdu) {
+        front -> ElnDeviceRegistry.signalCableDescriptor.render
+        front.inverse() -> if (descriptor.function.inputCount >= 1) ElnDeviceRegistry.signalCableDescriptor.render else null
+        front.left() -> if (descriptor.function.inputCount >= 2) ElnDeviceRegistry.signalCableDescriptor.render else null
+        front.right() -> if (descriptor.function.inputCount >= 3) ElnDeviceRegistry.signalCableDescriptor.render else null
+        else -> null
+    }
+}
 
 
 abstract class AnalogFunction : INBTTReady {
@@ -272,7 +293,23 @@ class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: Six
     }
 }
 
-// 26.x port: class PIDRegulatorRender removed (client; redone in P3/P4)
+class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
+    internal var Kp = 1f
+    internal var Ki = 0f
+    internal var Kd = 0f
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            Kp = stream?.readFloat() ?: 1f
+            Ki = stream?.readFloat() ?: 0f
+            Kd = stream?.readFloat() ?: 0f
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
 
 
 // 26.x port: class PIDRegulatorGui removed (client; redone in P3/P4)
@@ -366,7 +403,19 @@ class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNod
     }
 }
 
-// 26.x port: class AmplifierRender removed (client; redone in P3/P4)
+class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
+    internal var gain = 1f
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            gain = stream?.readFloat() ?: 1f
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
 
 
 // 26.x port: class AmplifierGui removed (client; redone in P3/P4)
@@ -453,7 +502,21 @@ class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixN
     }
 }
 
-// 26.x port: class SummingUnitRender removed (client; redone in P3/P4)
+class SummingUnitRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
+    internal var gains = floatArrayOf(1f, 1f, 1f)
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            for (i in gains.indices) {
+                gains[i] = stream?.readFloat() ?: 1f
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
 
 
 // 26.x port: class SummingUnitGui removed (client; redone in P3/P4)
@@ -552,7 +615,19 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
     }
 }
 
-// 26.x port: class FilterRender removed (client; redone in P3/P4)
+class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
+    internal var cutOffFrequency = Synchronizable(Eln.electricalFrequency.toFloat() / 4f)
+
+    override fun publishUnserialize(stream: DataInputStream) {
+        super.publishUnserialize(stream)
+        try {
+            cutOffFrequency.value = stream.readFloat()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
 
 
 // 26.x port: class FilterGui removed (client; redone in P3/P4)

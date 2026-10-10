@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import mods.eln.gl.GL11
+
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
@@ -36,7 +38,35 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable)
         setDefaultIcon("emergencylamp")
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
+        if (onCeiling) {
+            mainCeiling.draw()
+
+            if (on) {
+                preserveMatrix {
+                    UtilsClient.drawLight(panelCeiling)
+                    GL11.glColor3f(0.3f, 0.3f, 0.3f)
+                    UtilsClient.drawLight(lightCeiling)
+                }
+            } else {
+                panelCeiling.draw()
+            }
+        } else {
+            if (on) {
+                preserveMatrix {
+                    UtilsClient.drawLight(mainWall)
+                    UtilsClient.drawLight(if (mirrorSign) mainWallL else mainWallR)
+                    GL11.glColor3f(0.3f, 0.3f, 0.3f)
+                    UtilsClient.drawLight(lightWall)
+                }
+            } else {
+                preserveMatrix {
+                    mainWall.draw()
+                    (if (mirrorSign) mainWallL else mainWallR).draw()
+                }
+            }
+        }
+    }
 
 
     override fun getFrontFromPlace(side: Direction?, player: Player?)
@@ -194,7 +224,37 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
     override fun hasGui() = true
 }
 
-// 26.x port: class EmergencyLampRender removed (client; redone in P3/P4)
+class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor)
+    : SixNodeElementRender(entity, side, descriptor) {
+
+    val desc = descriptor as EmergencyLampDescriptor
+    var charge = 0f
+    var on = false
+    var poweredByCable = false
+    var channel = "Default channel"
+    var isConnectedToLampSupply = false
+
+    override fun draw() {
+        super.draw()
+        front.glRotateOnX()
+        desc.draw(side == Direction.YP, on, front == LRDU.Up)
+    }
+
+    override fun publishUnserialize(stream: DataInputStream) {
+        super.publishUnserialize(stream)
+        charge = stream.readFloat()
+        on = stream.readBoolean()
+        poweredByCable = stream.readBoolean()
+        channel = stream.readUTF()
+        isConnectedToLampSupply = stream.readBoolean()
+    }
+
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = if (poweredByCable) when {
+        side == Direction.YP -> desc.cable.render
+        lrdu == front.left() || lrdu == front.right() -> desc.cable.render
+        else -> null
+    } else null
+}
 
 
 // 26.x port: class EmergencyLampGui removed (client; redone in P3/P4)

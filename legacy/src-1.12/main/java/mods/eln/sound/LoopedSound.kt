@@ -1,11 +1,8 @@
 package mods.eln.sound
 
 import mods.eln.misc.Coordonate
-import net.minecraft.client.audio.ISound
-import net.minecraft.client.audio.ITickableSound
-import net.minecraft.client.audio.PositionedSound
-import net.minecraft.util.ResourceLocation
-import net.minecraft.util.SoundCategory
+import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundSource
 
 // 1.12: ISound grew createAccessor/getSound/getCategory; PositionedSound provides them.
 // 1.12: the sample is resolved to a registered sound event (and its sounds.json category) by ElnSounds.

@@ -1,5 +1,11 @@
 package mods.eln.mechanical
 
+import mods.eln.cable.CableRender
+
+import mods.eln.sound.LoopedSound
+
+import mods.eln.gl.GL11
+
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
 import mods.eln.misc.*
@@ -24,7 +30,25 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    open fun draw(angle: Double) {
+        for (part in static) {
+            part.draw()
+        }
+        preserveMatrix {
+            assert(rotating.size > 0)
+            val bb = rotating[0].boundingBox()
+            val centre = bb.centre()
+            val ox = centre.x
+            val oy = centre.y
+            val oz = centre.z
+            GL11.glTranslated(ox, oy, oz)
+            GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
+            GL11.glTranslated(-ox, -oy, -oz)
+            for (part in rotating) {
+                part.draw()
+            }
+        }
+    }
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
 
@@ -33,7 +57,98 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 }
 
-// 26.x port: class ShaftRender removed (client; redone in P3/P4)
+open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
+    private val desc = desc as SimpleShaftDescriptor
+    var rads = 0.0
+    var logRads = 0.0
+    var angle = 0.0
+    // Cable drawing:
+    val eConn = LRDUMask()
+    val mask = LRDUMask()
+    var connectionType: CableRenderType? = null
+    open val cableRender: CableRenderDescriptor? = null
+    var cableRefresh = true
+    // Sound:
+    private val soundLooper: ShaftSoundLooper?
+    val volumeSetting = SlewLimiter(0.5f)
+
+    inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
+        override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
+        override fun getVolume() = volumeSetting.position
+    }
+
+    init {
+        volumeSetting.target = 1f
+        volumeSetting.position = 0f
+        val sound = this.desc.sound
+        if (sound != null) {
+            soundLooper = ShaftSoundLooper(sound, coordonate())
+            
+        } else {
+            soundLooper = null
+        }
+    }
+
+    init {
+        mask.set(LRDU.Down, true)
+    }
+
+    /**
+     * By default, call the descriptor's draw function and nothing else.
+     */
+    override fun draw() {
+        draw {}
+    }
+
+    /**
+     * But, optionally, do some more drawing in the block context.
+     */
+    fun draw(extra: () -> Unit) {
+        preserveMatrix {
+            front.glRotateXnRef()
+            if (front == Direction.XP || front == Direction.ZP)
+                desc.draw(angle)
+            else
+                desc.draw(-angle);
+
+            extra()
+        }
+
+        if (cableRender != null) {
+            preserveMatrix {
+                if (cableRefresh) {
+                    cableRefresh = false;
+                    connectionType = CableRender.connectionType(tileEntity, eConn, front.down())
+                }
+
+                glCableTransforme(front.down());
+                cableRender!!.bindCableTexture();
+
+                for (lrdu in LRDU.values()) {
+                    Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
+                    if (!eConn.get(lrdu)) continue
+                    if (lrdu != front.down().getLRDUGoingTo(front) && lrdu.inverse() != front.down().getLRDUGoingTo(front)) continue
+                    mask.set(1.shl(lrdu.ordinal))
+                    CableRender.drawCable(cableRender, mask, connectionType)
+                }
+            }
+        }
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        angle += logRads * deltaT
+        volumeSetting.step(deltaT)
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        rads = stream.readFloat().toDouble()
+        logRads = Math.log(rads + 1) / Math.log(1.2)
+        eConn.deserialize(stream)
+        cableRefresh = true
+    }
+}
 
 
 abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :

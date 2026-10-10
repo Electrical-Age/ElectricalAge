@@ -111,7 +111,26 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
     }
 }
 
-// 26.x port: class TachometerRender removed (client; redone in P3/P4)
+class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+    override val cableRender: CableRenderDescriptor? = null
+    private var renderPreProcess: CableRenderType? = null
+    private val connections = LRDUMask()
+    internal var minRads = TachometerElement.DefaultMinRads
+    internal var maxRads = TachometerElement.DefaultMaxRads
+
+    override fun draw() {
+        renderPreProcess = drawCable(Direction.YN, Eln.stdCableRenderSignal, connections, renderPreProcess)
+        super.draw()
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        connections.deserialize(stream)
+        minRads = stream.readFloat()
+        maxRads = stream.readFloat()
+    }
+
+}
 
 
 // 26.x port: class TachometerGui removed (client; redone in P3/P4)

@@ -33,7 +33,10 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
     init {
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(mode: ScanMode) {
+        main.draw()
+        leds[mode.value.toInt()].draw()
+    }
 
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
@@ -175,5 +178,21 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
 }
 
 
-// 26.x port: class ScannerRender removed (client; redone in P3/P4)
+class ScannerRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElementRender(entity, side, descriptor) {
+    val desc = descriptor as ScannerDescriptor
+    var mode = ScanMode.SIMPLE
+
+    override fun draw() {
+        super.draw()
+        front.glRotateOnX()
+        desc.draw(mode)
+    }
+
+    override fun publishUnserialize(stream: DataInputStream) {
+        super.publishUnserialize(stream)
+        mode = ScanMode.fromByte(stream.readByte())!!
+    }
+
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor = ElnDeviceRegistry.signalCableDescriptor.render
+}
 

@@ -203,5 +203,12 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     }
 }
 
-// 26.x port: class TurbineRender removed (client; redone in P3/P4)
+class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+    override val cableRender = Eln.stdCableRenderSignal
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        volumeSetting.target = stream.readFloat()
+    }
+}
 

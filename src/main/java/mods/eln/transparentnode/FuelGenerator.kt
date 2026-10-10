@@ -1,5 +1,7 @@
 package mods.eln.transparentnode
 
+import mods.eln.sound.LoopedSound
+
 import mods.eln.Eln
 import mods.eln.cable.CableRenderType
 import mods.eln.fluid.FuelRegistry
@@ -66,7 +68,14 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         Data.addEnergy(newItemStack())
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(on: Boolean = false) {
+        main?.draw()
+        if (on) {
+            UtilsClient.drawLight(switch)
+        } else {
+            switch?.draw()
+        }
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
@@ -206,7 +215,48 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     )
 }
 
-// 26.x port: class FuelGeneratorRender removed (client; redone in P3/P4)
+class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
+    TransparentNodeElementRender(tileEntity, descriptor) {
+    internal var descriptor: FuelGeneratorDescriptor
+    private var renderPreProcess: CableRenderType? = null
+    private val eConn = LRDUMask()
+    private var on = false
+    private var voltageRatio = SlewLimiter(1f)
+    private val sound = object : LoopedSound("eln:FuelGenerator", coordonate(), LoopedSound.Attenuation.LINEAR) {
+        override fun getVolume() = if (on) 0.2f else 0f
+        override fun getPitch() = 0.75f + 1f * voltageRatio.position
+    }
+
+    init {
+        this.descriptor = descriptor as FuelGeneratorDescriptor
+        
+    }
+
+    override fun draw() {
+        renderPreProcess = drawCable(Direction.YN, descriptor.cableRenderDescriptor, eConn, renderPreProcess)
+        front.glRotateZnRef()
+        descriptor.draw(on)
+    }
+
+    override fun cameraDrawOptimisation(): Boolean = false
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        eConn.deserialize(stream)
+        val on_ = stream.readBoolean()
+        voltageRatio.target = stream.readFloat()
+        if (on_ != on) {
+            voltageRatio.position = voltageRatio.target
+        }
+        on = on_
+        renderPreProcess = null
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        voltageRatio.step(deltaT)
+    }
+}
 
 
 class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement) : IProcess {

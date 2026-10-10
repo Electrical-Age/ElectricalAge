@@ -254,6 +254,13 @@ public abstract class TransparentNodeElementRender {
     public void destructor() {
     }
 
+    /** Looped sounds of this render (1.12 LoopedSoundManager); the client plays them (R4). */
+    public final java.util.List<mods.eln.sound.LoopedSound> loopedSounds = new java.util.ArrayList<>();
+
+    protected void addLoopedSound(mods.eln.sound.LoopedSound sound) {
+        loopedSounds.add(sound);
+    }
+
     public void refresh(float deltaT) {
     }
 }

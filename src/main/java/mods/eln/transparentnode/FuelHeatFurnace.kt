@@ -1,5 +1,9 @@
 package mods.eln.transparentnode
 
+import mods.eln.sound.LoopedSound
+
+import mods.eln.gl.GL11
+
 import mods.eln.Eln
 import mods.eln.fluid.FuelRegistry
 import mods.eln.fluid.PreciseElementFluidHandler
@@ -44,7 +48,29 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         Data.addThermal(newItemStack())
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(installedBurner: Int? = null, on: Boolean = false, heating: Boolean = false) {
+        main?.draw()
+        if (installedBurner != null) {
+            burners[installedBurner]?.draw()
+        }
+
+        if (on) {
+            GL11.glColor3f(0f, 1f, 0f)
+            UtilsClient.drawLight(powerLED)
+        } else {
+            GL11.glColor3f(0f, 0.5f, 0f)
+            powerLED?.draw()
+        }
+
+        if (heating) {
+            GL11.glColor3f(1f, 0f, 0f)
+            UtilsClient.drawLight(heatLED)
+        } else {
+            GL11.glColor3f(0.5f, 0f, 0f)
+            heatLED?.draw()
+        }
+        GL11.glColor3f(1f, 1f, 1f)
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
@@ -235,7 +261,51 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
 }
 
-// 26.x port: class FuelHeatFurnaceRender removed (client; redone in P3/P4)
+class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
+    TransparentNodeElementRender(tileEntity, descriptor) {
+
+
+    var type: Int? = null
+    var externalControlled = false
+    var mainSwitch = false
+
+    var manualControl = Synchronizable(0f)
+    var setTemperature = Synchronizable(0f)
+
+    var heatPower = 0f
+    var actualTemperature = 0f
+
+    val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
+        override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
+        override fun getVolume() = if (heatPower > 0) 0.01f + 0.00001f * heatPower else 0f
+    }
+
+    init {
+        
+    }
+
+    override fun draw() {
+        front.glRotateXnRef()
+        (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(type, mainSwitch, heatPower != 0f)
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        externalControlled = stream.readBoolean()
+        mainSwitch = stream.readBoolean()
+        manualControl.value = stream.readFloat()
+        setTemperature.value = stream.readFloat()
+        heatPower = stream.readFloat()
+        actualTemperature = stream.readFloat()
+        type = stream.readInt().let { type ->
+            when (type) {
+                -1 -> null
+                else -> type
+            }
+        }
+    }
+
+}
 
 
 // 26.x port: the menu comes with P4; until then only the slot ids.

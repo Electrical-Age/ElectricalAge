@@ -1,5 +1,7 @@
 package mods.eln.transparentnode
 
+import mods.eln.gl.GL11
+
 import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
@@ -42,7 +44,11 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         return series.getValue(core.count)
     }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(position: Float = 0f) {
+        dissipator.draw()
+        GL11.glRotatef((1f - position) * 300f, 0f, 1f, 0f)
+        dissipator.obj.getPart("wiper")?.draw()
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
@@ -175,7 +181,53 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     )
 }
 
-// 26.x port: class LargeRheostatRender removed (client; redone in P3/P4)
+class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :
+    TransparentNodeElementRender(entity, desc) {
+    val desc = desc as LargeRheostatDescriptor
+
+
+    override fun getInventory(): Container {
+        return inventory
+    }
+
+    val baseColor = BlackBodyColor(1f, 1f, 1f)
+    var color = BlackBodyTemperature(0f)
+    val positionAnimator = SlewLimiter(0.3f)
+
+    init {
+        positionAnimator.target = -1f
+    }
+
+    override fun draw() {
+        front.glRotateZnRef()
+        // TODO: Get this thing *really* glowing.
+        // glColor doesn't let me exceed 1.0, the way I'd quite like to do.
+        GL11.glColor3f(color.red, color.green, color.blue)
+        desc.draw(positionAnimator.position)
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        positionAnimator.step(deltaT)
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        val temp = stream.readFloat() + 273
+        val c = BlackBodyTemperature(temp)
+        val p = BlackBodyPower(temp)
+        var bbc = c * (p / desc.dissipator.nominalP.toFloat())
+        color = (bbc + baseColor).normalize()
+
+        if (positionAnimator.target == -1f) {
+            positionAnimator.target = stream.readFloat()
+            positionAnimator.position = positionAnimator.target
+        } else {
+            positionAnimator.target = stream.readFloat()
+        }
+    }
+
+}
 
 
 // 26.x port: class LargeRheostatGUI removed (client; redone in P3/P4)

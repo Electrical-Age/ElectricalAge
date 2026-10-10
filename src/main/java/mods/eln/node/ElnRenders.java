@@ -29,10 +29,16 @@ public final class ElnRenders {
     }
 
     private static final Map<Class<?>, Six> SIX = new HashMap<>();
+    /** By element class, for descriptor classes shared by devices with different renders (chips: 1.12 passed both). */
+    private static final Map<Class<?>, Six> SIX_BY_ELEMENT = new HashMap<>();
     private static final Map<Class<?>, Transparent> TRANSPARENT = new HashMap<>();
 
     public static void six(Class<? extends SixNodeDescriptor> descriptor, Six factory) {
         SIX.put(descriptor, factory);
+    }
+
+    public static void sixByElement(Class<?> elementClass, Six factory) {
+        SIX_BY_ELEMENT.put(elementClass, factory);
     }
 
     public static void transparent(Class<? extends TransparentNodeDescriptor> descriptor, Transparent factory) {
@@ -41,6 +47,10 @@ public final class ElnRenders {
 
     /** The factory for this descriptor's class (or the closest registered superclass), or null. */
     public static Six six(SixNodeDescriptor d) {
+        if (d.ElementClass != null) {
+            Six e = SIX_BY_ELEMENT.get(d.ElementClass);
+            if (e != null) return e;
+        }
         for (Class<?> c = d.getClass(); c != null; c = c.getSuperclass()) {
             Six f = SIX.get(c);
             if (f != null) return f;
@@ -57,6 +67,6 @@ public final class ElnRenders {
     }
 
     public static int registered() {
-        return SIX.size() + TRANSPARENT.size();
+        return SIX.size() + SIX_BY_ELEMENT.size() + TRANSPARENT.size();
     }
 }

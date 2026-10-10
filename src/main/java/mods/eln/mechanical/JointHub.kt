@@ -1,5 +1,7 @@
 package mods.eln.mechanical
 
+import mods.eln.gl.GL11
+
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.transparent.EntityMetaTag
@@ -21,9 +23,40 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
     val staticOnAllSides = arrayOf(obj.getPart("Cap"))
     val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    override fun draw(angle: Double) {
+        draw(angle, Direction.XP, DirectionSet());
+    }
 
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    fun draw(angle: Double, front: Direction, connectedSides: DirectionSet) {
+        static.forEach { it.draw() }
+
+        assert(rotatingOnAllSides.size > 0)
+        val bb = rotatingOnAllSides[0].boundingBox()
+        val centre = bb.centre()
+        val ox = centre.x
+        val oy = centre.y
+        val oz = centre.z
+        var direction = front;
+        for (i in 0..3) {
+            if (connectedSides.contains(direction)) {
+                val rotatingAngle = if (direction == Direction.XP || direction == Direction.ZN) angle else -angle
+                preserveMatrix {
+                    direction.glRotateXnRef()
+                    GL11.glTranslated(ox, oy, oz)
+                    GL11.glRotatef(((rotatingAngle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 1f, 0f, 0f)
+                    GL11.glTranslated(-ox, -oy, -oz)
+                    rotatingOnAllSides.forEach { it.draw() }
+                }
+            } else {
+                preserveMatrix {
+                    direction.glRotateXnRef()
+                    staticOnAllSides.forEach { it.draw() }
+                }
+            }
+
+            direction = direction.left();
+        }
+    }
 
 
     override fun getFrontFromPlace(side: Direction?, entityLiving: LivingEntity?): Direction? = Direction.XP
@@ -80,5 +113,19 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     }
 }
 
-// 26.x port: class JointHubRender removed (client; redone in P3/P4)
+class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+    override val cableRender: CableRenderDescriptor? = null
+    val desc = desc as JointHubDescriptor
+    val connectedSides = DirectionSet()
+
+    override fun draw() {
+        front.glRotateXnRef()
+        desc.draw(angle, front, connectedSides);
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        connectedSides.deserialize(stream)
+    }
+}
 

@@ -73,5 +73,27 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.turret.TurretDescriptor.class, mods.eln.transparentnode.turret.TurretRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor.class, mods.eln.transparentnode.waterturbine.WaterTurbineRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.windturbine.WindTurbineDescriptor.class, mods.eln.transparentnode.windturbine.WindTurbineRender::new);
+        // Kotlin devices (1.12: the RenderClass argument; chips by element class, their descriptor class is shared)
+        ElnRenders.sixByElement(mods.eln.sixnode.AnalogChipElement.class, mods.eln.sixnode.AnalogChipRender::new);
+        ElnRenders.sixByElement(mods.eln.sixnode.PIDRegulatorElement.class, mods.eln.sixnode.PIDRegulatorRender::new);
+        ElnRenders.sixByElement(mods.eln.sixnode.AmplifierElement.class, mods.eln.sixnode.AmplifierRender::new);
+        ElnRenders.sixByElement(mods.eln.sixnode.SummingUnitElement.class, mods.eln.sixnode.SummingUnitRender::new);
+        ElnRenders.sixByElement(mods.eln.sixnode.FilterElement.class, mods.eln.sixnode.FilterRender::new);
+        ElnRenders.sixByElement(mods.eln.sixnode.logicgate.LogicGateElement.class, mods.eln.sixnode.logicgate.LogicGateRender::new);
+        ElnRenders.sixByElement(mods.eln.sixnode.logicgate.PalElement.class, mods.eln.sixnode.logicgate.PalRender::new);
+        ElnRenders.six(mods.eln.sixnode.ScannerDescriptor.class, mods.eln.sixnode.ScannerRender::new);
+        ElnRenders.six(mods.eln.sixnode.EmergencyLampDescriptor.class, mods.eln.sixnode.EmergencyLampRender::new);
+        ElnRenders.six(mods.eln.sixnode.ElectricalFuseHolderDescriptor.class, mods.eln.sixnode.ElectricalFuseHolderRender::new);
+        ElnRenders.six(mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor.class,
+            mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.FuelGeneratorDescriptor.class, mods.eln.transparentnode.FuelGeneratorRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.FuelHeatFurnaceDescriptor.class, mods.eln.transparentnode.FuelHeatFurnaceRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.LargeRheostatDescriptor.class, mods.eln.transparentnode.LargeRheostatRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.StraightJointDescriptor.class, mods.eln.mechanical.ShaftRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.FlywheelDescriptor.class, mods.eln.mechanical.ShaftRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.JointHubDescriptor.class, mods.eln.mechanical.JointHubRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.TachometerDescriptor.class, mods.eln.mechanical.TachometerRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.GeneratorDescriptor.class, mods.eln.mechanical.GeneratorRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.TurbineDescriptor.class, mods.eln.mechanical.TurbineRender::new);
     }
 }

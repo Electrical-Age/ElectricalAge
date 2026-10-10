@@ -1,5 +1,7 @@
 package mods.eln.mechanical
 
+import mods.eln.gl.GL11
+
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
@@ -90,7 +92,72 @@ class GeneratorDescriptor(
     }
 }
 
-// 26.x port: class GeneratorRender removed (client; redone in P3/P4)
+class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
+    val entity = entity
+
+    override val cableRender = Eln.stdCableRender3200V
+    val desc = desc_ as GeneratorDescriptor
+
+    val ledColors: Array<Color> = arrayOf(
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black
+    )
+    val ledColorBase: Array<HSLColor> = arrayOf(
+        GREEN,
+        GREEN,
+        GREEN,
+        GREEN,
+        YELLOW,
+        RED,
+        RED
+    )
+
+    fun calcPower(power: Double) {
+        if (power < 0) {
+            for (i in 1..6) {
+                ledColors[i] = Color.black
+            }
+            ledColors[0] = RED.adjustLuminanceClamped((-power / desc.nominalP * 4 * 100).toFloat(), 0f, 60f)
+        } else {
+            val slice = desc.nominalP / 5
+            var remainder = power
+            for (i in 0..6) {
+                ledColors[i] = ledColorBase[i].adjustLuminanceClamped((remainder / slice * 100).toFloat(), 0f, 65f)
+                remainder -= slice
+            }
+        }
+    }
+
+    override fun draw() {
+        draw {
+            ledColors.forEachIndexed { i, color ->
+                GL11.glColor3f(
+                    color.red / 255f,
+                    color.green / 255f,
+                    color.blue / 255f
+                )
+                desc.powerLights[i].draw()
+            }
+        }
+    }
+
+    override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
+        if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
+        return null
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        val power = stream.readDouble()
+        calcPower(power)
+        volumeSetting.target = 0.05f + Math.abs(power / desc.nominalP).toFloat() / 4f
+    }
+}
 
 
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :

@@ -11,8 +11,7 @@ import mods.eln.node.six.SixNodeElementInventory
 import mods.eln.node.six.SixNodeElementRender
 import mods.eln.node.six.SixNodeEntity
 import mods.eln.sound.LoopedSound
-import net.minecraft.client.audio.ISound
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.player.Player
 import java.io.DataInputStream
 import java.io.IOException
 
@@ -23,21 +22,6 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
     var powered = false
     var firePresent = false
     var ledOn = false
-
-    val inventory: SixNodeElementInventory?
-
-    init {
-        if (this.descriptor.batteryPowered) {
-            inventory = SixNodeElementInventory(1, 64, this)
-            addLoopedSound(object : LoopedSound("eln:firealarm",
-                Coordonate(tileEntity.pos.x, tileEntity.pos.y, tileEntity.pos.z, tileEntity.world),
-                ISound.AttenuationType.LINEAR) {
-                override fun getVolume() = if (firePresent) 1f else 0f
-            })
-        } else {
-            inventory = null
-        }
-    }
 
     override fun draw() {
         super.draw()
@@ -77,6 +61,4 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
 
     override fun getCableRender(lrdu: LRDU) = ElnDeviceRegistry.signalCableDescriptor.render!!
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer) = if (inventory != null)
-        ElectricalFireDetectorGui(player, inventory, this) else null
 }
