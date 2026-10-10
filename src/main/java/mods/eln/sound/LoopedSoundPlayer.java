@@ -44,6 +44,12 @@ public final class LoopedSoundPlayer {
             tick();
         }
 
+        /** A loop starts silent (machine idle) and rises: the engine must not drop it at volume 0. */
+        @Override
+        public boolean canStartSilent() {
+            return true;
+        }
+
         @Override
         public void tick() {
             if (!loop.getActive() || owner.isRemoved()) {

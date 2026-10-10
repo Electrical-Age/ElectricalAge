@@ -30,10 +30,14 @@ public final class ElnMachineRecipes {
     }
 
     /** Forge 1.12's vanilla ore dictionary names, as 26.x tags. */
-    static final Map<Item, String> VANILLA_ORE_NAMES = Map.of(
-        Items.IRON_ORE, "c:ores/iron", Items.GOLD_ORE, "c:ores/gold", Items.COAL_ORE, "c:ores/coal",
-        Items.IRON_INGOT, "c:ingots/iron", Items.GOLD_INGOT, "c:ingots/gold", Items.COBBLESTONE, "c:cobblestones",
-        Items.SAND, "c:sands", Items.OAK_LOG, "minecraft:logs", Items.GRAVEL, "c:gravels", Items.DIAMOND, "c:gems/diamond");
+    static final Map<Item, String> VANILLA_ORE_NAMES = Map.ofEntries(
+        Map.entry(Items.IRON_ORE, "c:ores/iron"), Map.entry(Items.GOLD_ORE, "c:ores/gold"), Map.entry(Items.COAL_ORE, "c:ores/coal"),
+        Map.entry(Items.IRON_INGOT, "c:ingots/iron"), Map.entry(Items.GOLD_INGOT, "c:ingots/gold"),
+        Map.entry(Items.COBBLESTONE, "c:cobblestones"), Map.entry(Items.SAND, "c:sands"), Map.entry(Items.OAK_LOG, "minecraft:logs"),
+        Map.entry(Items.GRAVEL, "c:gravels"), Map.entry(Items.DIAMOND, "c:gems/diamond"),
+        // 26.x raw ore chunks (no 1.12 name)
+        Map.entry(Items.RAW_IRON, "c:raw_materials/iron"), Map.entry(Items.RAW_GOLD, "c:raw_materials/gold"),
+        Map.entry(Items.RAW_COPPER, "c:raw_materials/copper"));
 
     public static int maceratorModOreAdded;
 
@@ -98,6 +102,10 @@ public final class ElnMachineRecipes {
             new ItemStack[]{findItemStack("Iron Dust", 2)}, 1.5 * f));
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.GOLD_ORE),
             new ItemStack[]{findItemStack("Gold Dust", 2)}, 3.0 * f));
+        // 26.x: ore blocks drop raw chunks (one per block), so a chunk macerates like its ore (Baughn, 2026-10-10)
+        add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_IRON), new ItemStack[]{findItemStack("Iron Dust", 2)}, 1.5 * f));
+        add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_GOLD), new ItemStack[]{findItemStack("Gold Dust", 2)}, 3.0 * f));
+        add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_COPPER), new ItemStack[]{findItemStack("Copper Dust", 2)}, 1.0 * f));
         add(maceratorRecipes, new Recipe(findItemStack("Lead Ore"),
             new ItemStack[]{findItemStack("Lead Dust", 2)}, 2.0 * f));
         add(maceratorRecipes, new Recipe(findItemStack("Tungsten Ore"),
