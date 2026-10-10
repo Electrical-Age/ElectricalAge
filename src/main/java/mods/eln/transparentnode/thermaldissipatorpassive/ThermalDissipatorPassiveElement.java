@@ -1,0 +1,119 @@
+package mods.eln.transparentnode.thermaldissipatorpassive;
+
+
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
+    ThermalDissipatorPassiveDescriptor descriptor;
+    NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+
+
+    public ThermalDissipatorPassiveElement(TransparentNode transparentNode,
+                                           TransparentNodeDescriptor descriptor) {
+        super(transparentNode, descriptor);
+
+        thermalLoadList.add(thermalLoad);
+        this.descriptor = (ThermalDissipatorPassiveDescriptor) descriptor;
+
+        slowProcessList.add(thermalWatchdog);
+
+        thermalWatchdog
+            .set(thermalLoad)
+            .setTMax(this.descriptor.warmLimit)
+            .set(new Failure(this).machine());
+    }
+
+
+    ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+
+    @Override
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+
+        return null;
+    }
+
+    @Override
+    public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+
+        if (side == Direction.YN || side == Direction.YP || lrdu != lrdu.Down) return null;
+        return thermalLoad;
+    }
+
+    @Override
+    public int getConnectionMask(Direction side, LRDU lrdu) {
+
+        if (side == Direction.YN || side == Direction.YP || lrdu != lrdu.Down) return 0;
+        return node.maskThermal;
+    }
+
+    @Override
+    public String multiMeterString(Direction side) {
+
+        return "";
+    }
+
+    @Override
+    public String thermoMeterString(Direction side) {
+
+        return Utils.plotCelsius("T : ", thermalLoad.Tc) + Utils.plotPower("P : ", thermalLoad.getPower());
+    }
+
+    @Override
+    public void initialize() {
+        descriptor.applyTo(thermalLoad);
+        connect();
+    }
+
+    @Override
+    public boolean onBlockActivated(Player entityPlayer, Direction side,
+                                    float vx, float vy, float vz) {
+        ItemStack stack = entityPlayer.getMainHandItem();
+        if (Utils.isEmpty(stack)) return false;
+        if (stack.getItem() == Items.WATER_BUCKET) {
+            thermalLoad.Tc *= 0.5;
+
+            entityPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
+            return true;
+        }
+        if (stack.getItem() == Items.ICE) {
+            thermalLoad.Tc *= 0.2;
+            if (stack.getCount() != 0)
+                stack.shrink(1);
+            else
+                entityPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
+        if (Eln.wailaEasyMode) {
+            info.put(I18N.tr("Thermal power"), Utils.plotPower("", thermalLoad.getPower()));
+        }
+        return info;
+    }
+
+}

@@ -1,0 +1,109 @@
+package mods.eln.transparentnode.turret;
+
+import mods.eln.Eln;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.wiki.Data;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
+
+public class TurretDescriptor extends TransparentNodeDescriptor {
+    class Properties {
+        public final float actionAngle;
+        public final float detectionDistance;
+        public final float aimDistance;
+        public final float impulseEnergy;
+        public final float gunMinElevation;
+        public final float gunMaxElevation;
+        public final float turretSeekAnimationSpeed;
+        public final float turretAimAnimationSpeed;
+        public final float gunArmAnimationSpeed;
+        public final float gunDisarmAnimationSpeed;
+        public final float gunAimAnimationSpeed;
+        public final double minimalVoltage;
+        public final double minimalVoltageHysteresisFactor;
+        public final double maximalVoltage;
+        public final double basePower;
+        public final double chargePower;
+        public final double entityDetectionInterval;
+
+        public Properties() {
+            actionAngle = 70;
+            detectionDistance = 12;
+            aimDistance = 15;
+            impulseEnergy = 1000;
+            gunMinElevation = -40;
+            gunMaxElevation = 70;
+            turretSeekAnimationSpeed = 40;
+            turretAimAnimationSpeed = 70;
+            gunArmAnimationSpeed = 3;
+            gunDisarmAnimationSpeed = 0.5f;
+            gunAimAnimationSpeed = 100;
+            minimalVoltage = 600;
+            minimalVoltageHysteresisFactor = 0.1;
+            maximalVoltage = 1050;
+            basePower = 25;
+            chargePower = 1000;
+            entityDetectionInterval = 0.25;
+        }
+    }
+
+    private final Obj3DPart turret, holder, joint, leftGun, rightGun, sensor, fire;
+
+    private final Properties properties;
+
+    public TurretDescriptor(String name, String modelName) {
+        super(name, TurretElement.class, null);
+
+        final Obj3D obj = Eln.obj.getObj(modelName);
+        turret = obj.getPart("Turret");
+        holder = obj.getPart("Holder");
+        joint = obj.getPart("Joint");
+        leftGun = obj.getPart("LeftGun");
+        rightGun = obj.getPart("RightGun");
+        sensor = obj.getPart("Sensor");
+        fire = obj.getPart("Fire");
+
+        properties = new Properties();
+        voltageLevelColor = VoltageLevelColor.HighVoltage;
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addMachine(newItemStack());
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        Collections.addAll(list, tr("Scans for entities and shoots if the\nentity matches the configurable filter criteria.").split("\n"));
+        list.add(tr("Nominal voltage: %1$V", 800));
+        list.add(tr("Standby power: %1$W", Utils.plotValue(getProperties().basePower)));
+        list.add(tr("Laser charge power: %1$W...%2$kW", 100, 10));
+        list.add(tr("CAUTION: Cables can get quite hot!"));
+    }
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
+
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
+// 26.x port: draw() removed (client rendering; redone in P3)
+}

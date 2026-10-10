@@ -21,6 +21,11 @@ public class Eln {
     /** Wireless signal transmitter range (1.12 config wireless.txRange, default 32). */
     public static int wirelessTxRange = 32;
 
+    /** 1.12 config balancing.heatTurbinePowerFactor (default 1). */
+    public static double heatTurbinePowerFactor = 1;
+    public static double windTurbinePowerFactor = 1;
+    public static double waterTurbinePowerFactor = 1;
+
     public static boolean modbusEnable = false; // 1.12 port: Modbus TCP server dropped; RTU devices stay off
 
     public static mods.eln.server.ServerEventListener serverEventListener;
@@ -51,7 +56,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp9aContent(),
         new mods.eln.registry.batch.Wp9bContent(),
         new mods.eln.registry.batch.Wp9cContent(),
-        new mods.eln.registry.batch.Wp10aContent());
+        new mods.eln.registry.batch.Wp10aContent(),
+        new mods.eln.registry.batch.Wp10bContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -188,6 +194,7 @@ public class Eln {
         modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {
             sixNodeBlock = mods.eln.registry.ElnRegistry.SIX_NODE_BLOCK.get();
             ghostBlock = mods.eln.registry.ElnRegistry.GHOST_BLOCK.get();
+            mods.eln.registry.ElnDeviceRegistry.lightBlock = mods.eln.registry.ElnRegistry.LIGHT_BLOCK.get();
         });
         mods.eln.network.ElnNet.register(modBus);
         mods.eln.gametest.ElnGameTests.register(modBus);

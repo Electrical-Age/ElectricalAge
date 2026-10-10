@@ -97,7 +97,11 @@ public final class GameTestContext implements TestContext {
         net.minecraft.world.entity.player.Player player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         mods.eln.node.transparent.TransparentNode node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem)
             .placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
-        if (node == null) throw new IllegalStateException("placing " + d.name + " at " + p + " failed");
+        if (node == null) {
+            mods.eln.misc.Direction front = d.getFrontFromPlace(mods.eln.misc.Direction.YN, player);
+            throw new IllegalStateException("placing " + d.name + " at " + p + " failed: here " + level.getBlockState(p)
+                + ", checkCanPlace " + d.checkCanPlace(new mods.eln.misc.Coordonate(p, level), front));
+        }
         return node.element;
     }
 }

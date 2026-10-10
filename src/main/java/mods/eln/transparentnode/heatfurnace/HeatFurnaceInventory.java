@@ -1,0 +1,27 @@
+package mods.eln.transparentnode.heatfurnace;
+
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import net.minecraft.world.item.ItemStack;
+
+public class HeatFurnaceInventory extends TransparentNodeElementInventory {
+    public HeatFurnaceInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
+        super(size, stackLimit, TransparentNodeElement);
+    }
+// 26.x port: HeatFurnaceInventory() removed (client rendering; redone in P3)
+
+    @Override
+    public int[] getAccessibleSlotsFromSide(int side) {
+        return new int[]{HeatFurnaceContainer.combustibleId};
+    }
+
+    @Override
+    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
+        return true;
+    }
+
+    @Override
+    public boolean canExtractItem(int var1, ItemStack var2, int var3) {
+        return false;
+    }
+}

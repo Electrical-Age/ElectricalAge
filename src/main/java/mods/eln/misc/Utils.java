@@ -587,4 +587,60 @@ public class Utils {
         }
         return true;
     }
+
+    /** 1.12: WATER or FLOWING_WATER; 26.x has one water block (flowing is a state). */
+    public static boolean isWater(Coordonate waterCoord) {
+        return waterCoord.getBlock() == net.minecraft.world.level.block.Blocks.WATER;
+    }
+
+    public static final double burnTimeToEnergyFactor = 1.0;
+
+    /** Fuel energy of a stack [J] (1.12: 80 kJ per 1600 ticks of furnace burn time). 26.x: the COOKING_FUEL component. */
+    public static double getItemEnergie(net.minecraft.world.item.ItemStack stack) {
+        return burnTimeToEnergyFactor * 80000.0 / 1600 * burnTime(stack);
+    }
+
+    public static double getCoalEnergyReference() {
+        return burnTimeToEnergyFactor * 80000.0;
+    }
+
+    /** Furnace burn time in ticks (0 if not a fuel). */
+    public static int burnTime(net.minecraft.world.item.ItemStack stack) {
+        if (isEmpty(stack)) return 0;
+        net.minecraft.world.item.component.CookingFuel fuel = stack.get(net.minecraft.core.component.DataComponents.COOKING_FUEL);
+        if (fuel == null) return 0;
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server == null) return 0;
+        try {
+            net.minecraft.world.level.storage.loot.LootContext ctx = new net.minecraft.world.level.storage.loot.LootContext.Builder(
+                new net.minecraft.world.level.storage.loot.LootParams.Builder(server.overworld())
+                    .create(net.minecraft.world.level.storage.loot.parameters.LootContextParamSets.EMPTY))
+                .create(java.util.Optional.empty());
+            return fuel.burnTime().get(ctx, 0);
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
+    /** Day fraction 0..1 (1.12: world time / 23999). */
+    public static double getWorldTime(net.minecraft.world.level.Level world) {
+        return world.getOverworldClockTime() / (23999.0);
+    }
+
+    public static double getWeatherNoLoad(int dim) {
+        net.minecraft.world.level.Level world = Dimensions.level(dim);
+        if (world == null) return 0.0;
+        if (world.isThundering())
+            return 1.0;
+        if (world.isRaining())
+            return 0.5;
+        return 0.0;
+    }
+
+    public static void serverTeleport(net.minecraft.world.entity.Entity e, double x, double y, double z) {
+        if (e instanceof net.minecraft.server.level.ServerPlayer)
+            ((net.minecraft.server.level.ServerPlayer) e).teleportTo(x, y, z);
+        else
+            e.setPos(x, y, z);
+    }
 }
