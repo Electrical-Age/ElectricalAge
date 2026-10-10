@@ -235,6 +235,7 @@ public class Eln {
         for (ElnContent c : CONTENT) c.preInit();
         mods.eln.registry.ElnRegistry.register(modBus);
         mods.eln.sound.ElnSounds.register(modBus);
+        mods.eln.datagen.ElnDataGen.register(modBus);
         if (mods.eln.gametest.TestFluids.enabled()) mods.eln.gametest.TestFluids.register(modBus);
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         // fluid devices (fuel generator, turbines...): the element's tank as the block's fluid capability (1.12:

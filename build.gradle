@@ -16,6 +16,9 @@ repositories {
     mavenCentral()
 }
 
+// datagen output (P5) is part of the mod's resources
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 neoForge {
     version = project.neo_version
 
@@ -35,6 +38,13 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'eln.golden', file('golden/1.12').absolutePath
             systemProperty 'eln.testfluids', 'true'
+        }
+        // Datagen (P5): lang, item tags, recipes -> src/generated/resources (committed)
+        clientData {
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all',
+                '--output', file('src/generated/resources/').getAbsolutePath(),
+                '--existing', file('src/main/resources/').getAbsolutePath()
         }
         configureEach {
             logLevel = org.slf4j.event.Level.INFO
