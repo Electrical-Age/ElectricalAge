@@ -511,7 +511,41 @@ public final class SelfTest implements SelfTestContext {
             }
         }
         base = origin;
+        if (mode == Mode.RUN) persistence();
         finish();
+    }
+
+    /**
+     * After every case has measured: save/load round trip (Reload) of every node still standing, in the state the cases
+     * left it (set voltages, inventories, channels, programmed chips, burnt devices...). The smoke case only covers
+     * fresh, unconnected devices, where a field that load forgets still matches its default.
+     */
+    private void persistence() {
+        int ok = 0, total = 0, transientOnly = 0;
+        for (BlockPos p : new ArrayList<>(placed)) {
+            NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p.getX(), p.getY(), p.getZ(), world));
+            if (n == null || n.isDestructing()) continue;
+            total++;
+            try {
+                Reload r = Reload.node(world, p);
+                List<String> hard = new ArrayList<>(), soft = new ArrayList<>();
+                for (String d : r.differences()) (Reload.isTransient(d) ? soft : hard).add(d);
+                if (!hard.isEmpty()) {
+                    check("persistence " + n.getClass().getSimpleName() + " at " + p, false, "NBT: " + String.join("; ", hard));
+                    continue;
+                }
+                ok++;
+                if (!soft.isEmpty() || !r.publishEqual()) {
+                    transientOnly++;
+                    line("INFO persistence " + Reload.describe(r.fresh) + " at " + p + ": only live state differs (recomputed"
+                        + " next tick): " + String.join("; ", soft) + (r.publishEqual() ? "" : " client packet byte " + r.firstPublishDifference()));
+                }
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                check("persistence at " + p, false, e.toString());
+            }
+        }
+        check("persistence: every node keeps its saved state after the run", ok == total,
+            ok + "/" + total + " (" + transientOnly + " differ only in live sim state)");
     }
 
     private void measure() {

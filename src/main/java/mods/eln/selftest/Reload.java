@@ -109,4 +109,31 @@ public final class Reload {
             }
         }
     }
+
+    /**
+     * Live simulation state the simulator recomputes on the next tick, so a difference right after a load is not lost
+     * data: node voltages (...Uc) and switch-resistor states (...State).
+     */
+    public static boolean isTransient(String difference) {
+        String key = difference.split(":")[0].trim();
+        key = key.substring(key.lastIndexOf('/') + 1);
+        return key.endsWith("Uc") || key.endsWith("State");
+    }
+
+    public int firstPublishDifference() {
+        int n = Math.min(publishBefore.length, publishAfter.length);
+        for (int i = 0; i < n; i++) if (publishBefore[i] != publishAfter[i]) return i;
+        return n;
+    }
+
+    public static String describe(NodeBase n) {
+        if (n instanceof SixNode) {
+            StringBuilder b = new StringBuilder("SixNode[");
+            for (SixNodeElement e : ((SixNode) n).sideElementList)
+                if (e != null) b.append(e.sixNodeElementDescriptor.name).append(' ');
+            return b.toString().trim() + "]";
+        }
+        if (n instanceof TransparentNode) return ((TransparentNode) n).element.getDescriptor().name;
+        return n.getClass().getSimpleName();
+    }
 }
