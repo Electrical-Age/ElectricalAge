@@ -64,7 +64,7 @@ import java.util.List;
  * and are kept for `/eln selftest report`.
  */
 public final class SelfTest implements SelfTestContext {
-    private static final Logger LOG = LogManager.getLogger("eln-selftest");
+    static final Logger LOG = LogManager.getLogger("eln-selftest");
 
     // damage values = subId + (registration id << 6), see ElnContentImpl / ElnDeviceRegistry
     static final int SOURCE = 0 + (3 << 6);       // Electrical Source

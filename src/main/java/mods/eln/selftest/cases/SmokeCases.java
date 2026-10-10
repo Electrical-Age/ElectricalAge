@@ -12,6 +12,7 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.selftest.Reload;
+import mods.eln.selftest.SlotsDump;
 import mods.eln.selftest.SelfTestCase;
 import mods.eln.selftest.SelfTestContext;
 import mods.eln.sim.process.destruct.IBurnable;
@@ -114,6 +115,8 @@ public final class SmokeCases {
         }
 
         public void measure(SelfTestContext ctx) {
+            java.util.Map<String, com.google.gson.JsonObject> slots = new java.util.TreeMap<>();
+            net.minecraft.entity.player.EntityPlayer player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(ctx.world());
             for (Device d : devices) {
                 String what = "smoke " + (d.six ? "six " : "transparent ") + d.damage + " " + d.name;
                 if (d.placeError != null) {
@@ -129,6 +132,16 @@ public final class SmokeCases {
                 ctx.check(what + ": placed, survives unconnected", alive && b != null && !b.isBurnt(),
                     n == null ? "node gone" : b == null ? "no element" : b.isBurnt() ? "burnt: " + b.getBurnt() : "");
                 if (!alive) continue;
+                // GUI slot rules (golden eln-slots.json) of devices with a GUI, from the element as placed, before the reload
+                com.google.gson.JsonObject sl = null;
+                if (n instanceof SixNode) {
+                    SixNodeElement e = ((SixNode) n).getElement(d.side);
+                    if (e.hasGui()) sl = SlotsDump.record(d.name, e::newContainer, d.side, player);
+                } else if (n instanceof TransparentNode) {
+                    TransparentNodeElement e = ((TransparentNode) n).element;
+                    if (e.hasGui()) sl = SlotsDump.record(d.name, e::newContainer, Direction.YP, player);
+                }
+                if (sl != null) slots.put(String.format("%s %05d %s", d.six ? "six" : "transparent", d.damage, d.name), sl);
                 try {
                     Reload r = Reload.node(ctx.world(), d.at);
                     ctx.check(what + ": save/load keeps the NBT", r.tagsEqual(), String.join("; ", r.differences()));
@@ -138,6 +151,8 @@ public final class SmokeCases {
                     ctx.check(what + ": save/load", false, ex.toString());
                 }
             }
+            SlotsDump.write(slots);
+            ctx.line("INFO smoke: GUI slot rules of " + slots.size() + " devices written to eln-slots.json");
         }
     }
 }

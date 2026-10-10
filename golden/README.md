@@ -9,4 +9,8 @@ Behaviour reference for porting Electrical Age to new Minecraft versions (plan: 
   smelting, and the macerator/compressor/plate machine/magnetizer lists. Taken in the E36 pack, so ore-dictionary
   ingredients include other mods' items.
 
+- `1.12/slots.json`: written by the selftest's smoke case (`/eln selftest`). For every device with a GUI, each of its
+  container slots: the class, stack limit, and which probe items it accepts (every EA shared item, every six-node item,
+  some vanilla items).
+
 A port regenerates both with the same commands and diffs them against these files; every difference must be explained.
