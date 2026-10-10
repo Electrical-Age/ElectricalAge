@@ -9,10 +9,10 @@ import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.player.Player
 
 open class StraightJointDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    StraightJointElement::class, ShaftRender::class, EntityMetaTag.Basic) {
+    StraightJointElement::class, null, EntityMetaTag.Basic) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
@@ -29,7 +29,7 @@ open class StraightJointElement(node: TransparentNode, desc_: TransparentNodeDes
 
     override fun thermoMeterString(side: Direction?): String? = null
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
 
     override fun getWaila(): Map<String, String> {

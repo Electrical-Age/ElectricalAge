@@ -21,9 +21,8 @@ import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.Failure
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import org.lwjgl.opengl.GL11
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import java.awt.Color
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -38,7 +37,7 @@ class GeneratorDescriptor(
     powerOutPerDeltaU: Float,
     nominalP: Float,
     thermalLoadInitializer: ThermalLoadInitializer) :
-    SimpleShaftDescriptor(name, GeneratorElement::class, GeneratorRender::class, EntityMetaTag.Basic) {
+    SimpleShaftDescriptor(name, GeneratorElement::class, null, EntityMetaTag.Basic) {
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
     val cable = cable
@@ -81,7 +80,7 @@ class GeneratorDescriptor(
         obj.getPart("LED_6")
     ).requireNoNulls()
 
-    override fun addInformation(stack: ItemStack, player: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
+    override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
         list.add("Nominal usage ->")
         list.add(Utils.plotVolt("  Voltage out: ", nominalU.toDouble()))
@@ -91,72 +90,8 @@ class GeneratorDescriptor(
     }
 }
 
-class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
-    val entity = entity
+// 26.x port: class GeneratorRender removed (client; redone in P3/P4)
 
-    override val cableRender = Eln.stdCableRender3200V
-    val desc = desc_ as GeneratorDescriptor
-
-    val ledColors: Array<Color> = arrayOf(
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black
-    )
-    val ledColorBase: Array<HSLColor> = arrayOf(
-        GREEN,
-        GREEN,
-        GREEN,
-        GREEN,
-        YELLOW,
-        RED,
-        RED
-    )
-
-    fun calcPower(power: Double) {
-        if (power < 0) {
-            for (i in 1..6) {
-                ledColors[i] = Color.black
-            }
-            ledColors[0] = RED.adjustLuminanceClamped((-power / desc.nominalP * 4 * 100).toFloat(), 0f, 60f)
-        } else {
-            val slice = desc.nominalP / 5
-            var remainder = power
-            for (i in 0..6) {
-                ledColors[i] = ledColorBase[i].adjustLuminanceClamped((remainder / slice * 100).toFloat(), 0f, 65f)
-                remainder -= slice
-            }
-        }
-    }
-
-    override fun draw() {
-        draw {
-            ledColors.forEachIndexed { i, color ->
-                GL11.glColor3f(
-                    color.red / 255f,
-                    color.green / 255f,
-                    color.blue / 255f
-                )
-                desc.powerLights[i].draw()
-            }
-        }
-    }
-
-    override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
-        return null
-    }
-
-    override fun networkUnserialize(stream: DataInputStream) {
-        super.networkUnserialize(stream)
-        val power = stream.readDouble()
-        calcPower(power)
-        volumeSetting.target = 0.05f + Math.abs(power / desc.nominalP).toFloat() / 4f
-    }
-}
 
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     SimpleShaftElement(node, desc_) {
@@ -289,7 +224,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
 
     override fun thermoMeterString(side: Direction?) = Utils.plotCelsius("T", thermal.getT())
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 

@@ -12,14 +12,14 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
 abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
-    SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
+    SimpleShaftDescriptor(baseName, TurbineElement::class, null, EntityMetaTag.Fluid) {
     // Overall time for steam input changes to take effect, in seconds.
     abstract val inertia: Float
     // Optimal fluid consumed per second, mB.
@@ -56,7 +56,7 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
         obj.getPart("Fan")
     )
 
-    override fun addInformation(stack: ItemStack, player: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
+    override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts ${fluidDescription} into mechanical energy.")
         list.add("Nominal usage ->")
         list.add("  ${fluidDescription.capitalize()} input: ${fluidConsumption} mB/s")
@@ -146,11 +146,11 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             volume = power / desc.maxFluidPower.toFloat()
         }
 
-        override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        override fun readFromNBT(nbt: CompoundTag?, str: String?) {
             rc.readFromNBT(nbt, str)
         }
 
-        override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        override fun writeToNBT(nbt: CompoundTag?, str: String?) {
             rc.writeToNBT(nbt, str)
         }
     }
@@ -170,17 +170,17 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         return 0
     }
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 
     override fun thermoMeterString(side: Direction?) = Utils.plotPercent(" Eff:", efficiency.toDouble()) + fluidRate.toString() + "mB/s"
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         tank.writeToNBT(nbt, "tank")
         turbineSlowProcess.writeToNBT(nbt, "proc")
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         tank.readFromNBT(nbt, "tank")
         turbineSlowProcess.readFromNBT(nbt, "proc")
@@ -203,11 +203,5 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     }
 }
 
-class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
-    override val cableRender = Eln.stdCableRenderSignal
+// 26.x port: class TurbineRender removed (client; redone in P3/P4)
 
-    override fun networkUnserialize(stream: DataInputStream) {
-        super.networkUnserialize(stream)
-        volumeSetting.target = stream.readFloat()
-    }
-}

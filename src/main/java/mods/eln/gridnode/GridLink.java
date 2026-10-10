@@ -10,8 +10,9 @@ import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.misc.Utils;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class GridLink implements INBTTReady {
         this.cable = cable;
     }
 
-    public GridLink(NBTTagCompound nbt, String str) {
+    public GridLink(CompoundTag nbt, String str) {
         readFromNBT(nbt, str);
     }
 
@@ -167,23 +168,26 @@ public class GridLink implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         a.readFromNBT(nbt, str + "a");
         b.readFromNBT(nbt, str + "b");
         as = Direction.readFromNBT(nbt, str + "as");
         bs = Direction.readFromNBT(nbt, str + "bs");
-        rs = nbt.getDouble(str + "rs");
-        cable = new ItemStack(nbt);
+        rs = nbt.getDoubleOr(str + "rs", 0.0);
+        // 1.12 kept the cable stack in this compound's root keys; 26.x: under str + "cable"
+        net.minecraft.nbt.Tag t = nbt.get(str + "cable");
+        cable = t == null ? ItemStack.EMPTY : Utils.loadItem(t);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
         a.writeToNBT(nbt, str + "a");
         b.writeToNBT(nbt, str + "b");
         as.writeToNBT(nbt, str + "as");
         bs.writeToNBT(nbt, str + "bs");
-        nbt.setDouble(str + "rs", rs);
-        cable.writeToNBT(nbt);
+        nbt.putDouble(str + "rs", rs);
+        net.minecraft.nbt.Tag t = Utils.saveItem(cable);
+        if (t != null) nbt.put(str + "cable", t);
     }
 
     public void selfDestroy() {

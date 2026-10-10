@@ -1,0 +1,84 @@
+package mods.eln.mechanical
+
+import mods.eln.cable.CableRenderDescriptor
+import mods.eln.misc.*
+import mods.eln.node.transparent.EntityMetaTag
+import mods.eln.node.transparent.TransparentNode
+import mods.eln.node.transparent.TransparentNodeDescriptor
+import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.sim.ElectricalLoad
+import mods.eln.sim.ThermalLoad
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.nbt.CompoundTag
+import java.io.DataInputStream
+import java.io.DataOutputStream
+
+class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
+    JointHubElement::class, null, EntityMetaTag.Basic) {
+    override val obj = obj
+    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
+    override val rotating = emptyArray<Obj3D.Obj3DPart>()
+    val staticOnAllSides = arrayOf(obj.getPart("Cap"))
+    val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
+    // 26.x port: draw() removed (client rendering; redone in P3)
+
+    // 26.x port: draw() removed (client rendering; redone in P3)
+
+
+    override fun getFrontFromPlace(side: Direction?, entityLiving: LivingEntity?): Direction? = Direction.XP
+}
+
+class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
+    override val shaftMass = 0.5
+    private var connectedSides = DirectionSet()
+
+    override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? = null
+
+    override fun getThermalLoad(side: Direction?, lrdu: LRDU?): ThermalLoad? = null
+
+    override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int = 0
+
+    override fun thermoMeterString(side: Direction?): String? = null
+
+    override val shaftConnectivity: Array<Direction>
+        get() = arrayOf(Direction.XP, Direction.ZP, Direction.XN, Direction.ZN)
+
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float,
+                                  vz: Float): Boolean = false
+
+    override fun connectedOnSide(direction: Direction) {
+        connectedSides.add(direction)
+        needPublish()
+    }
+
+    override fun disconnectedOnSide(direction: Direction) {
+        connectedSides.remove(direction)
+        needPublish()
+    }
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        connectedSides.serialize(stream)
+    }
+
+    override fun writeToNBT(nbt: CompoundTag) {
+        super.writeToNBT(nbt)
+        connectedSides.writeToNBT(nbt, "connectedSides")
+    }
+
+    override fun readFromNBT(nbt: CompoundTag) {
+        super.readFromNBT(nbt)
+        connectedSides.readFromNBT(nbt, "connectedSides")
+    }
+
+    override fun getWaila(): Map<String, String> {
+        var info = mutableMapOf<String, String>()
+        info.put("Speed", Utils.plotRads("", shaft.rads))
+        info.put("Energy", Utils.plotEnergy("", shaft.energy))
+        return info
+    }
+}
+
+// 26.x port: class JointHubRender removed (client; redone in P3/P4)
+

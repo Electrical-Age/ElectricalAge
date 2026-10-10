@@ -63,7 +63,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp9bContent(),
         new mods.eln.registry.batch.Wp9cContent(),
         new mods.eln.registry.batch.Wp10aContent(),
-        new mods.eln.registry.batch.Wp10bContent());
+        new mods.eln.registry.batch.Wp10bContent(),
+        new mods.eln.registry.batch.Wp11Content());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -196,6 +197,7 @@ public class Eln {
         for (ElnContent c : CONTENT) c.preInit();
         mods.eln.registry.ElnRegistry.register(modBus);
         mods.eln.sound.ElnSounds.register(modBus);
+        if (mods.eln.gametest.TestFluids.enabled()) mods.eln.gametest.TestFluids.register(modBus);
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         // fluid devices (fuel generator, turbines...): the element's tank as the block's fluid capability (1.12:
         // TransparentNodeEntityWithFluid); server side only, elements live there

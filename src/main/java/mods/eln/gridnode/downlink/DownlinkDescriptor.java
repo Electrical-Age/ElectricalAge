@@ -9,6 +9,6 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
  */
 public class DownlinkDescriptor extends GridDescriptor {
     public DownlinkDescriptor(String name, Obj3D obj, String cableTexture, ElectricalCableDescriptor cableDescriptor) {
-        super(name, obj, DownlinkElement.class, DownlinkRender.class, cableTexture, cableDescriptor);
+        super(name, obj, DownlinkElement.class, null, cableTexture, cableDescriptor);
     }
 }

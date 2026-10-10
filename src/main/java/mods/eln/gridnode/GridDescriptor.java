@@ -4,9 +4,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -44,51 +42,13 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         }
         this.cableTexture = cableTexture;
     }
+    // 26.x port: draw() removed (client rendering; redone in P3)
 
-    @SideOnly(Side.CLIENT)
-    public void draw(float idealRenderingAngle) {
-        final boolean fixed = rotationIsFixed();
-        if (!fixed) {
-            glPushMatrix();
-            glRotatef(idealRenderingAngle, 0, 1, 0);
-        }
-        for (Obj3D.Obj3DPart part : rotating_parts) {
-            part.draw();
-        }
-        if (!fixed) {
-            glPopMatrix();
-        }
-        for (Obj3D.Obj3DPart part : static_parts) {
-            part.draw();
-        }
-    }
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glPushMatrix();
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            GL11.glTranslatef(0, -1, 0);
-            GL11.glScalef(0.6f, 0.6f, 0.6f);
-            draw(0);
-            GL11.glPopMatrix();
-        }
-    }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     public boolean rotationIsFixed() {
         return false;

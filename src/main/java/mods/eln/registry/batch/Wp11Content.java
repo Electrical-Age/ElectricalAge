@@ -1,19 +1,7 @@
 package mods.eln.registry.batch;
 
 import mods.eln.ElnContent;
-import mods.eln.compat.GameRegistryCompat;
-import mods.eln.compat.top.TopIntegration;
 import mods.eln.node.NodeManager;
-import mods.eln.node.simple.SimpleNodeItem;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.mechanical.FlywheelDescriptor;
@@ -38,11 +26,11 @@ public class Wp11Content implements ElnContent {
     @Override
     public void preInit() {
         registerTestBlock();
-        registerEnergyConverter();
+        // registerEnergyConverter(): 26.x port, step Wp11c (simple-node framework + FE capability)
         registerTurbine(4); // mechanical sub-UIDs (steam/gas turbine, generator, joints, flywheel, tachometer)
         registerGridDevices(123);
         // TheOneProbe info (replaces 1.7.10 Waila): node getWaila() lines, ghost blocks resolved to the real device
-        if (Loader.isModLoaded(TopIntegration.MODID_TOP)) TopIntegration.register();
+        // TheOneProbe: 26.x port, when a TOP build for 26.x exists (P6)
     }
 
     public static void registerTestBlock() {
@@ -54,14 +42,15 @@ public class Wp11Content implements ElnContent {
 		 */
     }
 
+    /* 26.x port: energy converters come with step Wp11c (simple nodes, FE capability; IC2 has no 26.x port)
     public static EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
     public static EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
     public static EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
 
-    /** EA -> FE/RF/IC2 exporters (1.12: OpenComputers part dropped). */
+    /** EA -> FE/RF/IC2 exporters (1.12: OpenComputers part dropped). * /
     public static void registerEnergyConverter() {
         if (ElnToOtherEnergyConverterEnable) {
-            GameRegistry.registerTileEntity(EnergyConverterElnToOtherEntity.class, new ResourceLocation(MODID, "energy_converter_eln_to_other_entity"));
+            GameRegistry.registerTileEntity(EnergyConverterElnToOtherEntity.class, new Identifier(MODID, "energy_converter_eln_to_other_entity"));
             NodeManager.registerUuid(EnergyConverterElnToOtherNode.getNodeUuidStatic(), EnergyConverterElnToOtherNode.class);
 
             elnToOtherBlockLvu = energyConverter("eln.EnergyConverterElnToOtherLVUBlock", "EnergyConverterElnToOtherLVU",
@@ -81,6 +70,8 @@ public class Wp11Content implements ElnContent {
         GameRegistryCompat.registerBlock(block, SimpleNodeItem.class, blockName);
         return block;
     }
+
+    */
 
     /** Mechanical sub-UIDs of id 4 (the electrical turbines of id 4 are wp10b's registerTurbineElectrical). */
     public static void registerTurbine(int id) {

@@ -8,10 +8,10 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.DataOutputStream;
@@ -43,9 +43,9 @@ abstract public class GridElement extends TransparentNodeElement {
 
     /* Connect one GridNode to another. */
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         // Check if user is holding an appropriate tool.
-        final ItemStack stack = entityPlayer.getHeldItemMainhand();
+        final ItemStack stack = entityPlayer.getMainHandItem();
         final GenericItemBlockUsingDamageDescriptor itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
         if (itemDesc instanceof ElectricalCableDescriptor) {
             return onTryGridConnect(entityPlayer, stack, (ElectricalCableDescriptor) itemDesc, side);
@@ -54,9 +54,9 @@ abstract public class GridElement extends TransparentNodeElement {
         return false;
     }
 
-    private boolean onTryGridConnect(EntityPlayer entityPlayer, ItemStack stack, ElectricalCableDescriptor cable, Direction side) {
+    private boolean onTryGridConnect(Player entityPlayer, ItemStack stack, ElectricalCableDescriptor cable, Direction side) {
         // First node, or second node?
-        UUID uuid = entityPlayer.getPersistentID();
+        UUID uuid = entityPlayer.getUUID();
         Pair<Coordonate, Direction> p = pending.get(uuid);
         GridElement other = null;
         if (p != null) {
@@ -85,7 +85,7 @@ abstract public class GridElement extends TransparentNodeElement {
             } else {
                 if (GridLink.addLink(this, other, side, p.getRight(), cable, cableLength)) {
                     Utils.sendMessage(entityPlayer, "Added connection");
-                    stack.splitStack(cableLength);
+                    stack.split(cableLength);
                 } else {
                     Utils.sendMessage(entityPlayer, "Already connected");
                 }
@@ -140,11 +140,11 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
         Integer i = 0;
-        NBTTagCompound gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks");
+        CompoundTag gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks");
         for (GridLink link : gridLinkList) {
             link.writeToNBT(Utils.newNbtTagCompund(gridLinks, i.toString()), "");
             i++;
@@ -152,13 +152,13 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         assert gridLinkList.isEmpty();
-        final NBTTagCompound gridLinks = nbt.getCompoundTag("gridLinks");
+        final CompoundTag gridLinks = nbt.getCompoundOrEmpty("gridLinks");
         for (Integer i = 0; ; i++) {
-            final NBTTagCompound linkTag = gridLinks.getCompoundTag(i.toString());
+            final CompoundTag linkTag = gridLinks.getCompoundOrEmpty(i.toString());
             if (linkTag.isEmpty())
                 break;
             gridLinksBooting.add(new GridLink(linkTag, ""));
@@ -251,8 +251,8 @@ abstract public class GridElement extends TransparentNodeElement {
                 }
             }
             // The renderer needs to know, for each catenary:
-            // - Vec3d of the starting point.
-            // - Vec3d of the end point.
+            // - Vec3 of the starting point.
+            // - Vec3 of the end point.
             // There's a finite number of starting points, and a potentially unlimited number of endpoints...
             // But until we get protocol buffers or something, simple remains good.
             // So we'll just send pairs, even if there's some duplication.
@@ -264,9 +264,9 @@ abstract public class GridElement extends TransparentNodeElement {
                 // It's always the "a" side doing this.
                 Coordonate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
-                    // 1.12: Vec3d is immutable (1.7.10 rotateAroundY rotated in place; rotateYaw is the same rotation)
-                    final Vec3d start = getCablePoint(ourSide, i).rotateYaw((float) Math.toRadians(idealRenderingAngle));
-                    Vec3d end = target.getCablePoint(theirSide, i).rotateYaw((float) Math.toRadians(target.idealRenderingAngle));
+                    // 1.12: Vec3 is immutable (1.7.10 rotateAroundY rotated in place; rotateYaw is the same rotation)
+                    final Vec3 start = getCablePoint(ourSide, i).yRot((float) Math.toRadians(idealRenderingAngle));
+                    Vec3 end = target.getCablePoint(theirSide, i).yRot((float) Math.toRadians(target.idealRenderingAngle));
                     end = end.add(offset.x, offset.y, offset.z);
                     writeVec(stream, start);
                     writeVec(stream, end);
@@ -277,14 +277,14 @@ abstract public class GridElement extends TransparentNodeElement {
         }
     }
 
-    protected Vec3d getCablePoint(Direction side, int i) {
+    protected Vec3 getCablePoint(Direction side, int i) {
         if (i >= 2) throw new AssertionError("Invalid cable point index");
         Obj3D.Obj3DPart part = (i == 0 ? desc.plus : desc.gnd).get(0);
         BoundingBox bb = part.boundingBox();
         return bb.centre();
     }
 
-    private void writeVec(DataOutputStream stream, Vec3d sp) throws IOException {
+    private void writeVec(DataOutputStream stream, Vec3 sp) throws IOException {
         stream.writeFloat((float) sp.x);
         stream.writeFloat((float) sp.y);
         stream.writeFloat((float) sp.z);

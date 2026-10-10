@@ -1,0 +1,139 @@
+// Wp11Cases.EnergyConverterCase (1.12), deferred on 26.x until step Wp11c (simple nodes, FE capability).
+    /**
+     * 50V energy converter (LVU) fed by source + LV cable on its front, GUI input-power factor set to 0.2. While the
+     * buffer is below half of its max (2 * LVP J), the input resistor is R = U^2 / (factor(1) * LVP * 0.2); the circuit
+     * is U / (src-cable 2rs + cable-converter 2rs + R). The buffer integrates the resistor power over the elapsed
+     * ticks (0.05 s each). Forge Energy on the back face (only): stored = buffer * ratio (ElnToThermalExpansion,
+     * FE per J); extracting N FE removes N / ratio J; front face has no capability; receive is refused.
+     * With RedstoneFlux / IC2 loaded: RF extract (simulated) and IC2 offered EU = min(buffer * ic2 ratio, 32), tier 1.
+     * The converter is a simple node (not tracked by the selftest cleanup): this case removes it at the end of measure.
+     */
+    static final class EnergyConverterCase implements SelfTestCase {
+        BlockPos pos;
+        EnergyConverterElnToOtherNode node;
+        long builtAt;
+
+        public String name() {
+            return "wp11 energy converter";
+        }
+
+        public void build(SelfTestContext ctx) {
+            pos = ctx.at(1, 1, 1);
+            feed(ctx, ctx.at(2, 1, 1), ctx.at(3, 1, 1));
+            EnergyConverterElnToOtherBlock block = Wp11Content.elnToOtherBlockLvu;
+            if (block == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
+            // front = player view inverse: yaw 90 (looking -X) -> front XP, towards the cable at x = 2
+            FakePlayer player = FakePlayerFactory.getMinecraft(ctx.world());
+            float yaw = player.rotationYaw, pitch = player.rotationPitch;
+            player.rotationYaw = 90f;
+            player.rotationPitch = 0f;
+            try {
+                ItemBlock item = (ItemBlock) net.minecraft.item.Item.getItemFromBlock(block);
+                boolean ok = item.placeBlockAt(new ItemStack(item), player, ctx.world(), pos, EnumFacing.UP, 0.5F, 1F, 0.5F, block.getDefaultState());
+                if (!ok) throw new IllegalStateException("placeBlockAt failed for the energy converter at " + pos);
+            } finally {
+                player.rotationYaw = yaw;
+                player.rotationPitch = pitch;
+            }
+            NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos.getX(), pos.getY(), pos.getZ(), ctx.world()));
+            if (!(n instanceof EnergyConverterElnToOtherNode)) throw new IllegalStateException("no converter node at " + pos);
+            node = (EnergyConverterElnToOtherNode) n;
+            node.networkUnserialize(ctx.stream(out -> {
+                out.writeByte(EnergyConverterElnToOtherNode.setInPowerFactor);
+                out.writeFloat(0.2f);
+            }), null);
+            builtAt = ctx.world().getTotalWorldTime();
+        }
+
+        public void measure(SelfTestContext ctx) {
+            try {
+                measureConverter(ctx);
+            } finally {
+                boolean drops = ctx.world().getGameRules().getBoolean("doTileDrops");
+                ctx.world().getGameRules().setOrCreateGameRule("doTileDrops", "false");
+                try {
+                    ctx.world().setBlockToAir(pos);
+                } finally {
+                    ctx.world().getGameRules().setOrCreateGameRule("doTileDrops", Boolean.toString(drops));
+                }
+                boolean gone = ctx.world().isAirBlock(pos)
+                    && NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos.getX(), pos.getY(), pos.getZ(), ctx.world())) == null;
+                ctx.check("wp11 energy converter removed (own cleanup)", gone, "");
+            }
+        }
+
+        void measureConverter(SelfTestContext ctx) {
+            double lvp = Eln.LVP(), r = rs(), ratio = Other.getElnToTeConversionRatio();
+            ctx.check("wp11 converter front faces the feed cable (XP)", node.getFront() == Direction.XP, String.valueOf(node.getFront()));
+            ctx.checkValue("wp11 converter input power factor (GUI packet)", node.inPowerFactor, 0.2);
+            Resistor in = field(node, "powerInResistor");
+            double buffer = node.energyBuffer, max = node.energyBufferMax;
+            ctx.checkValue("wp11 converter buffer max [J] (2 * LVP)", max, 2 * lvp);
+            double factor = Math.min(1, (max - buffer) / max * 2);
+            double rExp = U * U / (factor * lvp * 0.2);
+            double i = U / (4 * r + rExp);
+            double p = i * i * rExp;
+            ctx.line(String.format("wp11 converter model: LVP = %.1f W, factor %.3f, R = U^2/(factor*LVP*0.2) = %.4f ohm, I = %.5f A, P = %.3f W, FE/t at that power = P*%.4f/20 = %.2f",
+                lvp, factor, rExp, i, p, ratio, p * ratio / 20));
+            if (factor >= 1) {
+                ctx.checkValue("wp11 converter input resistor [ohm]", in.getR(), rExp);
+                ctx.checkValue("wp11 converter input power [W]", in.getP(), p);
+                long ticks = ctx.world().getTotalWorldTime() - builtAt;
+                double lo = p * 0.05 * (ticks - 2), hi = p * 0.05 * (ticks + 1);
+                ctx.check("wp11 converter buffer = P * elapsed time [J]", buffer >= lo && buffer <= hi,
+                    String.format("%.2f J, expected %.2f..%.2f (%d ticks of %.3f W)", buffer, lo, hi, ticks, p));
+            } else {
+                ctx.check("wp11 converter input resistor [ohm] (buffer above half: factor < 1, +-5%)", Math.abs(in.getR() - rExp) <= 0.05 * rExp,
+                    String.format("%.4f, expected %.4f", in.getR(), rExp));
+            }
+
+            TileEntity te = ctx.world().getTileEntity(pos);
+            if (!(te instanceof EnergyConverterElnToOtherEntity)) {
+                ctx.check("wp11 converter tile entity", false, String.valueOf(te));
+                return;
+            }
+            EnergyConverterElnToOtherEntity e = (EnergyConverterElnToOtherEntity) te;
+            EnumFacing back = Direction.XN.toEnumFacing(), frontFace = Direction.XP.toEnumFacing();
+            IEnergyStorage fe = e.getCapability(CapabilityEnergy.ENERGY, back);
+            ctx.check("wp11 converter FE capability on the back face only", fe != null && e.hasCapability(CapabilityEnergy.ENERGY, back)
+                && !e.hasCapability(CapabilityEnergy.ENERGY, frontFace) && e.getCapability(CapabilityEnergy.ENERGY, EnumFacing.UP) == null, "");
+            if (fe == null) return;
+            ctx.check("wp11 converter FE extract only", fe.canExtract() && !fe.canReceive() && fe.receiveEnergy(1000, false) == 0, "");
+            buffer = node.energyBuffer;
+            int stored = fe.getEnergyStored();
+            ctx.check("wp11 converter FE stored = (int)(buffer J * " + ratio + ")", stored == (int) (buffer * ratio), stored + " FE, buffer " + buffer + " J");
+            int n = stored / 2;
+            int sim = fe.extractEnergy(n, true);
+            ctx.check("wp11 converter FE simulated extract leaves the buffer", sim == n && node.energyBuffer == buffer, sim + " FE");
+            int got = fe.extractEnergy(n, false);
+            ctx.check("wp11 converter FE extract returns the request (below stored)", got == n, got + " of " + n + " FE");
+            ctx.checkValue("wp11 converter buffer after FE extract [J] (- N/ratio)", node.energyBuffer, buffer - n / ratio);
+            int all = fe.extractEnergy(Integer.MAX_VALUE, true);
+            ctx.check("wp11 converter FE extract capped by the buffer", all == (int) (node.energyBuffer * ratio), all + " FE");
+
+            if (Loader.isModLoaded(EnergyConverterElnToOtherEntity.MODID_RF)) RfCheck.run(ctx, e, node, back, frontFace, ratio);
+            else ctx.line("SKIP wp11 converter RF: redstoneflux not loaded");
+            if (Loader.isModLoaded(EnergyConverterElnToOtherEntity.MODID_IC2)) Ic2Check.run(ctx, e, node);
+            else ctx.line("SKIP wp11 converter IC2: ic2 not loaded");
+        }
+    }
+
+    /** Separate classes: they reference RF / IC2 API types, loaded only when those mods are present. */
+    static final class RfCheck {
+        static void run(TestContext ctx, EnergyConverterElnToOtherEntity e, EnergyConverterElnToOtherNode node, EnumFacing back, EnumFacing frontFace, double ratio) {
+            IEnergyProvider rf = e;
+            int rfSim = rf.extractEnergy(back, 10, true);
+            ctx.check("wp11 converter RF: connects on the back only, extract (simulated) 10 RF",
+                rf.canConnectEnergy(back) && !rf.canConnectEnergy(frontFace) && rfSim == Math.min(10, (int) (node.energyBuffer * ratio)), rfSim + " RF");
+        }
+    }
+
+    static final class Ic2Check {
+        static void run(TestContext ctx, EnergyConverterElnToOtherEntity e, EnergyConverterElnToOtherNode node) {
+            IEnergySource eu = e;
+            double offered = eu.getOfferedEnergy();
+            double exp = Math.min(node.energyBuffer * Other.getElnToIc2ConversionRatio(), 32);
+            ctx.check("wp11 converter IC2: tier 1, offered EU = min(buffer * " + Other.getElnToIc2ConversionRatio() + ", 32)",
+                eu.getSourceTier() == 1 && Math.abs(offered - exp) <= 1e-6 * Math.max(1, exp), String.format("%.4f EU, expected %.4f", offered, exp));
+        }
+    }

@@ -13,7 +13,7 @@ public class GridTransformerDescriptor extends GridDescriptor {
     public SoundCommand highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
 
     public GridTransformerDescriptor(String name, Obj3D obj, String cableTexture, ElectricalCableDescriptor cableDescriptor) {
-        super(name, obj, GridTransformerElement.class, GridTransformerRender.class, cableTexture, cableDescriptor);
+        super(name, obj, GridTransformerElement.class, null, cableTexture, cableDescriptor);
     }
 
     @Override
