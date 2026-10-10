@@ -1,25 +1,23 @@
 package mods.eln.generic;
 
-
 import mods.eln.misc.Utils;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
-import mods.eln.compat.IItemRenderer.ItemRenderType;
-import mods.eln.compat.IItemRenderer.ItemRendererHelper;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
+/**
+ * Descriptor of a plain EA item (1.12: a sub-item of SharedItem, item + damage). On 26.x each descriptor has its own
+ * Item ({@link #parentItem}, an {@link IDescriptorItem}); damage values are gone. Item renders (1.12 IItemRenderer)
+ * move to item models in P3.
+ */
 public class GenericItemUsingDamageDescriptor {
 
     public String IconName;
@@ -27,6 +25,7 @@ public class GenericItemUsingDamageDescriptor {
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
     public Item parentItem;
+    /** The 1.12 damage value (for eln-ids.json lookups and golden data); no meaning in game. */
     public int parentItemDamage;
 
     public GenericItemUsingDamageDescriptor(String name) {
@@ -47,7 +46,6 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
-
     }
 
     public ItemStack onItemRightClick(ItemStack s, Level w, Player p) {
@@ -55,11 +53,9 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public void getSubItems(List list) {
-        ItemStack stack = newItemStack(1);
-        list.add(stack);
+        list.add(newItemStack(1));
     }
 
-    // TODO(1.12 WP6 icon): updateIcons/getIcon removed; IconName ("eln:<name>") is the texture of the item model.
     /** What 1.7.10 getIconName() returned. */
     public String getIconName() {
         return IconName;
@@ -70,19 +66,18 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
-        if (Utils.isEmpty(stack))
-            return null;
-        if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
-            return null;
-        return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) stack.getItem()).getDescriptor(stack);
+        if (Utils.isEmpty(stack)) return null;
+        if (stack.getItem() instanceof IDescriptorItem) {
+            Object d = ((IDescriptorItem) stack.getItem()).getEaDescriptor();
+            if (d instanceof GenericItemUsingDamageDescriptor) return (GenericItemUsingDamageDescriptor) d;
+        }
+        return null;
     }
 
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
         GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
-        if (desc == null)
-            return null;
-        if (extendClass.isAssignableFrom(desc.getClass()) == false)
-            return null;
+        if (desc == null) return null;
+        if (!extendClass.isAssignableFrom(desc.getClass())) return null;
         return desc;
     }
 
@@ -92,8 +87,8 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public ItemStack newItemStack(int size) {
-        ItemStack stack = new ItemStack(parentItem, size, parentItemDamage);
-        stack.setTagCompound(getDefaultNBT());
+        ItemStack stack = new ItemStack(parentItem, size);
+        ItemNbt.set(stack, getDefaultNBT());
         return stack;
     }
 
@@ -102,47 +97,23 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public boolean checkSameItemStack(ItemStack stack) {
-        if (Utils.isEmpty(stack))
-            return false;
-        if (stack.getItem() != parentItem || stack.getMetadata() != parentItemDamage)
-            return false;
-        return true;
+        return !Utils.isEmpty(stack) && stack.getItem() == parentItem;
     }
 
-    /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-     */
+    /** Right-click on a block with the item; true if something happened (1.12 onItemUse). */
     public boolean onItemUse(ItemStack stack, Player player, Level world, int x, int y, int z, int side, float vx, float vy, float vz) {
         return false;
-    }
-
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
-
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIconName() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIconName().substring(4);
-        UtilsClient.drawIcon(type, new Identifier("eln", "textures/items/" + icon + ".png"));
     }
 
     public void onUpdate(ItemStack stack, Level world, Entity entity, int par4, boolean par5) {
     }
 
+    /** The stack's EA tag, created from getDefaultNBT() when missing (1.12 semantics: the stack gets the tag). */
     protected CompoundTag getNbt(ItemStack stack) {
-        CompoundTag nbt = stack.getTagCompound();
+        CompoundTag nbt = ItemNbt.get(stack);
         if (nbt == null) {
-            stack.setTagCompound(nbt = getDefaultNBT());
+            nbt = getDefaultNBT();
+            ItemNbt.set(stack, nbt);
         }
         return nbt;
     }

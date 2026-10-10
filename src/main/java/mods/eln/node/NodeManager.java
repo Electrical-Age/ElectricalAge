@@ -5,11 +5,10 @@ import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeElement;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.storage.WorldSavedData;
 
 import java.util.*;
 
-public class NodeManager extends WorldSavedData {
+public class NodeManager {
     public static NodeManager instance = null;
 
     private HashMap<Coordonate, NodeBase> nodesMap;
@@ -36,7 +35,6 @@ public class NodeManager extends WorldSavedData {
     // private ArrayList<Node> nodeArray = new ArrayList<Node>();
 
     public NodeManager(String par1Str) {
-        super(par1Str);
         nodesMap = new HashMap<Coordonate, NodeBase>();
         nodes = new ArrayList<NodeBase>();
         instance = this;
@@ -75,37 +73,8 @@ public class NodeManager extends WorldSavedData {
         Utils.println("NodeManager has " + nodesMap.size() + "node");
     }
 
-    @Override
-    public boolean isDirty() {
-        return true;
-    }
 
-    @Override
-    public void readFromNBT(CompoundTag nbt) {
-        int i = 0;
-        i++;
-        /*
-		 * for(Object o : Utils.getTags(nbt)) { CompoundTag tag = (CompoundTag) o; Class nodeClass = UUIDToClass.get(tag.getStringOr("tag", "")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
-		 * 
-		 * } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 * 
-		 * 
-		 * 
-		 * for(NodeBase node : nodes){ node.globalBoot(); }
-		 */
-    }
 
-    @Override
-    public CompoundTag writeToNBT(CompoundTag nbt) {
-		/*
-		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; CompoundTag nbtNode = new CompoundTag(); nbtNode.putString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.put("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 */
-        return nbt;
-    }
 
     public NodeBase getNodeFromCoordonate(Coordonate nodeCoordonate) {
         int idx = 0;

@@ -41,7 +41,7 @@ public abstract class SimpleNode extends NodeBase {
     public void setFront(Direction front) {
         this.front = front;
         if (applayFrontToMetadata()) {
-            coordonate.setMetadata(front.getInt());
+            // 1.12 stored the front in the block metadata; 26.x: a FACING state when simple-node blocks are ported (P2)
         }
     }
 

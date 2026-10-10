@@ -45,7 +45,7 @@ public final class Repair {
         if (Utils.isEmpty(s)) return ItemStack.EMPTY;
         s = s.copy();
         s.setCount(1);
-        s.setTagCompound(null);
+        mods.eln.generic.ItemNbt.set(s, null);
         return s;
     }
 
@@ -54,15 +54,15 @@ public final class Repair {
      * Otherwise say what's wrong and return false, so the usual action (GUI, so its contents can be taken out) runs.
      */
     public static boolean onActivated(IBurnable b, Player player) {
-        if (player.world.isClientSide() || !b.isBurnt()) return false;
+        if (player.level().isClientSide() || !b.isBurnt()) return false;
         ItemStack part = b.getRepairPart();
-        ItemStack held = player.getHeldItemMainhand();
-        if (!Utils.isEmpty(part) && !Utils.isEmpty(held) && ItemStack.areItemsEqual(held, part)) {
+        ItemStack held = player.getMainHandItem();
+        if (!Utils.isEmpty(part) && !Utils.isEmpty(held) && ItemStack.isSameItem(held, part)) {
             boolean creative = player instanceof ServerPlayer && Utils.isCreative((ServerPlayer) player);
             if (!creative) held.shrink(1);
             b.repair();
             BlockPos pos = new BlockPos(b.getBurnableCoordonate().x, b.getBurnableCoordonate().y, b.getBurnableCoordonate().z);
-            player.world.playSound(null, pos, SoundEvents.BLOCK_ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
+            player.level().playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
             Utils.sendMessage(player, "Repaired.");
             return true;
         }
@@ -72,7 +72,7 @@ public final class Repair {
 
     public static String describe(IBurnable b) {
         ItemStack part = b.getRepairPart();
-        String what = Utils.isEmpty(part) ? "?" : part.getDisplayName();
+        String what = Utils.isEmpty(part) ? "?" : part.getHoverName().getString();
         return "Burnt out (" + b.getBurnt().text + "). Repair: right-click with 1 " + what + ".";
     }
 }

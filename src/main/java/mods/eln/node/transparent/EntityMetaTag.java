@@ -6,16 +6,15 @@ package mods.eln.node.transparent;
  * they have.
  */
 public enum EntityMetaTag {
-    Fluid(1, TransparentNodeEntityWithFluid.class),
+    // 1.12 picked the TileEntity subclass from this; 26.x has one block-entity type per kind (registry, P1 step 2)
+    Fluid(1),
 
     // 3, because this is the default value used in pre-metatag worlds.
-    Basic(3, TransparentNodeEntity.class);
+    Basic(3);
 
     public final int meta;
-    public final Class cls;
 
-    EntityMetaTag(int meta, Class cls) {
+    EntityMetaTag(int meta) {
         this.meta = meta;
-        this.cls = cls;
     }
 }

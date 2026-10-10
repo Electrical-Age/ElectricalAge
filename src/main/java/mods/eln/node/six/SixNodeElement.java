@@ -253,7 +253,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 	}*/
 
     public ItemStack getDropItemStack() {
-        return new ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId); //sixNode.sideElementIdList[side.getInt()]
+        return sixNodeElementDescriptor.newItemStack();
     }
 
     public void readFromNBT(CompoundTag nbt) {

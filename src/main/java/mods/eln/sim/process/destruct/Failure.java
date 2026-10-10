@@ -12,7 +12,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
@@ -197,12 +198,12 @@ public class Failure implements IDestructable {
                 if (node != null) {
                     node.physicalSelfDestruction(explosionStrength(e));
                 } else {
-                    w.createExplosion((Entity) null, c.x + .5, c.y + .5, c.z + .5, explosionStrength(e), true);
+                    w.explode(null, c.x + .5, c.y + .5, c.z + .5, explosionStrength(e), Level.ExplosionInteraction.BLOCK);
                 }
                 return;
             case POP:
                 // A capacitor bursting: a bang and a shove, no crater.
-                w.createExplosion((Entity) null, c.x + .5, c.y + .5, c.z + .5, 1.0f, false);
+                w.explode(null, c.x + .5, c.y + .5, c.z + .5, 1.0f, Level.ExplosionInteraction.NONE);
                 break;
             case ARC_FLASH:
                 arcFlash(w, pos, value);
@@ -222,52 +223,54 @@ public class Failure implements IDestructable {
         } else if (node != null) {
             node.physicalSelfDestruction(0);
         }
-        particles(w, pos, ParticleTypes.SMOKE_LARGE, 12, 0.3);
+        particles(w, pos, ParticleTypes.LARGE_SMOKE, 12, 0.3);
         if (cause == FailureCause.OVERVOLTAGE) {
             particles(w, pos, ParticleTypes.CRIT, 20, 0.5);
-            sound(w, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.6f);
+            sound(w, pos, SoundEvents.FIRE_EXTINGUISH, 1.0f, 1.6f);
         } else {
             particles(w, pos, ParticleTypes.LAVA, 4, 0.2);
-            sound(w, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, 0.8f, 0.8f);
+            sound(w, pos, SoundEvents.FIRE_EXTINGUISH, 0.8f, 0.8f);
         }
     }
 
     /** Set fire to air next to the device where there's something to burn; wide = oil fire, burns even on stone. */
     static void ignite(Level w, BlockPos pos, boolean wide) {
-        for (BlockPos p : BlockPos.getAllInBox(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
-            if (!w.isAirBlock(p)) continue;
-            boolean fuel = wide && p.getY() >= pos.getY() && w.isSideSolid(p.down(), EnumFacing.UP);
+        for (BlockPos p : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
+            if (!w.isEmptyBlock(p)) continue;
+            boolean fuel = wide && p.getY() >= pos.getY() && w.getBlockState(p.below()).isFaceSturdy(w, p.below(), Direction.UP);
             if (!fuel) {
-                for (EnumFacing f : EnumFacing.values()) {
-                    BlockPos n = p.offset(f);
-                    if (w.getBlockState(n).getBlock().isFlammable(w, n, f.getOpposite())) {
+                for (Direction f : Direction.values()) {
+                    BlockPos n = p.relative(f);
+                    if (w.getBlockState(n).isFlammable(w, n, f.getOpposite())) {
                         fuel = true;
                         break;
                     }
                 }
             }
-            if (fuel) w.setBlockState(p, Blocks.FIRE.getDefaultState(), 11);
+            if (fuel) w.setBlock(p.immutable(), Blocks.FIRE.defaultBlockState(), 11);
         }
     }
 
     /** A flash and a bang; everything nearby gets burnt. Strength grows with the voltage. */
     private static void arcFlash(Level w, BlockPos pos, double voltage) {
         double r = Math.min(8, 2 + Math.abs(voltage) / ARC_FLASH_VOLTAGE);
-        sound(w, pos, SoundEvents.ENTITY_LIGHTNING_THUNDER, 1.5f, 1.8f);
-        particles(w, pos, ParticleTypes.FIREWORKS_SPARK, 60, 0.8);
+        sound(w, pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 1.5f, 1.8f);
+        particles(w, pos, ParticleTypes.FIREWORK, 60, 0.8);
         particles(w, pos, ParticleTypes.FLAME, 30, 0.6);
-        AABB box = new AABB(pos).grow(r);
-        for (LivingEntity ent : w.getEntitiesWithinAABB(LivingEntity.class, box)) {
-            double d = Math.sqrt(ent.getDistanceSq(pos));
+        AABB box = new AABB(pos).inflate(r);
+        if (!(w instanceof ServerLevel)) return;
+        ServerLevel sl = (ServerLevel) w;
+        for (LivingEntity ent : w.getEntitiesOfClass(LivingEntity.class, box)) {
+            double d = Math.sqrt(ent.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5));
             if (d > r) continue;
-            ent.setFire((int) Math.ceil(8 * (1 - d / r)) + 1);
-            ent.attackEntityFrom(DamageSource.IN_FIRE, (float) (10 * (1 - d / r)) + 1);
+            ent.igniteForSeconds((float) Math.ceil(8 * (1 - d / r)) + 1);
+            ent.hurtServer(sl, w.damageSources().inFire(), (float) (10 * (1 - d / r)) + 1);
         }
     }
 
-    private static void particles(Level w, BlockPos pos, ParticleTypes type, int n, double spread) {
+    private static void particles(Level w, BlockPos pos, ParticleOptions type, int n, double spread) {
         if (w instanceof ServerLevel) {
-            ((ServerLevel) w).spawnParticle(type, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, n, spread, spread, spread, 0.02);
+            ((ServerLevel) w).sendParticles(type, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, n, spread, spread, spread, 0.02);
         }
     }
 

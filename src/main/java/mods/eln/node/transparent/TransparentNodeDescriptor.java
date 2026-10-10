@@ -5,21 +5,19 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.block.BlockHopper;
+import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
-import mods.eln.compat.IItemRenderer;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
+public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public Class ElementClass, RenderClass;
     protected VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -43,43 +41,13 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         this(name, ElementClass, RenderClass, EntityMetaTag.Basic);
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+// 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIconName() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIconName().substring(4);
-        UtilsClient.drawIcon(type, new Identifier("eln", "textures/blocks/" + icon + ".png"));
-    }
-
-    public void objItemScale(Obj3D obj) {
-        if (obj == null) return;
-        float factor = obj.yDim * 0.6f;
-        //factor = obj.dimMaxInv*1.0f;
-        factor = Math.max(factor, (Math.max(obj.zMax, -obj.xMin) + Math.max(obj.xMax, -obj.zMin)) * 0.7f);
-        factor = 1f / factor;
-
-        GL11.glScalef(factor, factor, factor);
-        //GL11.glTranslatef((Math.max(obj.zMax,-obj.xMin) - Math.max(obj.xMax,-obj.zMin))*0.5f,-((obj.yMax + Math.max(-obj.xMin,obj.zMax)*0.3f) + (obj.yMin + Math.min(obj.zMin,-obj.xMax)*0.3f))*0.4f,0.0f);
-        GL11.glTranslatef((Math.min(obj.zMin, obj.xMin) + Math.max(obj.xMax, obj.zMax)) / 2 - (obj.xMax + obj.xMin) / 2, 1.0f - (obj.xMax + obj.xMin) / 2 - (obj.zMax + obj.zMin) / 2 - (obj.yMax + obj.yMin) / 2, 0.0f);
-    }
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
+// 26.x port: objItemScale() removed (client rendering; redone in P3)
 
     public FrontType getFrontType() {
         return FrontType.PlayerViewHorizontal;
@@ -108,20 +76,20 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             Coordonate temp = new Coordonate(coord);
             temp.move(Direction.YN);
             block = temp.getBlock();
-            if (block == null || ((!block.getDefaultState().isOpaqueCube()) && block instanceof BlockHopper == false))
+            if (block == null || ((!block.defaultBlockState().isSolidRender()) && block instanceof HopperBlock == false))
                 return tr("You can't place this block at this side");
         }
         if (mustHaveCeiling()) {
             Coordonate temp = new Coordonate(coord);
             temp.move(Direction.YP);
             block = temp.getBlock();
-            if (block == null || !block.getDefaultState().isOpaqueCube()) return tr("You can't place this block at this side");
+            if (block == null || !block.defaultBlockState().isSolidRender()) return tr("You can't place this block at this side");
         }
         if (mustHaveWallFrontInverse()) {
             Coordonate temp = new Coordonate(coord);
             temp.move(front.getInverse());
             block = temp.getBlock();
-            if (block == null || !block.getDefaultState().isOpaqueCube()) return tr("You can't place this block at this side");
+            if (block == null || !block.defaultBlockState().isSolidRender()) return tr("You can't place this block at this side");
         }
         if (mustHaveWall()) {
             Coordonate temp;
@@ -129,19 +97,19 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             temp = new Coordonate(coord);
             temp.move(Direction.XN);
             block = temp.getBlock();
-            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
+            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
             temp = new Coordonate(coord);
             temp.move(Direction.XP);
             block = temp.getBlock();
-            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
+            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
             temp = new Coordonate(coord);
             temp.move(Direction.ZN);
             block = temp.getBlock();
-            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
+            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
             temp = new Coordonate(coord);
             temp.move(Direction.ZP);
             block = temp.getBlock();
-            if (block != null && block.getDefaultState().isOpaqueCube()) wall = true;
+            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
 
             if (!wall) return tr("You can't place this block at this side");
         }
@@ -202,7 +170,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
     }
 
     public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
-        AABB bb = Block.FULL_BLOCK_AABB.offset(x, y, z); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
+        AABB bb = new AABB(x, y, z, x + 1, y + 1, z + 1); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 

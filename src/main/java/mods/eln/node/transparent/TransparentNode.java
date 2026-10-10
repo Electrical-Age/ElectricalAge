@@ -15,7 +15,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -113,7 +112,8 @@ public class TransparentNode extends Node {
         return element.thermoMeterString(side);
     }
 
-    public IFluidHandler getFluidHandler() {
+    /** Fluid handler of the element (26.x fluid capability; fluid devices are ported with their batch). */
+    public Object getFluidHandler() {
         return element.getFluidHandler();
     }
 
@@ -149,10 +149,9 @@ public class TransparentNode extends Node {
 			 * }
 			 */
 
-            int metadata = itemStack.getMetadata();
-            elementId = metadata;
+            elementId = descriptor.parentItemDamage; // the 1.12 id, as in node NBT and client packets
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
-            element.initializeFromThat(side, entityLiving, itemStack.getTagCompound());
+            element.initializeFromThat(side, entityLiving, mods.eln.generic.ItemNbt.get(itemStack));
         } catch (InstantiationException e) {
 
             e.printStackTrace();
@@ -254,7 +253,7 @@ public class TransparentNode extends Node {
     @Override
     public String getNodeUuid() {
 
-        return Eln.transparentNodeBlock.getNodeUuid();
+        return "t";
     }
 
     @Override

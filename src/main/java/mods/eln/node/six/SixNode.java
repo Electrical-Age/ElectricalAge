@@ -89,14 +89,14 @@ public class SixNode extends Node {
         try {
             //Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
             //if((Boolean)bool == false) return false;
-            sideElementIdList[direction.getInt()] = itemStack.getMetadata(); //Je sais c'est moche !
+            sideElementIdList[direction.getInt()] = descriptor.parentItemDamage; //Je sais c'est moche !
             sideElementList[direction.getInt()] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, direction, descriptor);
             sideElementIdList[direction.getInt()] = 0;
 
             disconnect();
             sideElementList[direction.getInt()].front = descriptor.getFrontFromPlace(direction, player);
             sideElementList[direction.getInt()].initialize();
-            sideElementIdList[direction.getInt()] = itemStack.getMetadata();
+            sideElementIdList[direction.getInt()] = descriptor.parentItemDamage;
 
             connect();
 
@@ -187,7 +187,8 @@ public class SixNode extends Node {
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt.getCompoundOrEmpty("node"));
 
-        sixNodeCacheBlock = Block.getBlockById(nbt.getIntOr("cacheBlockId", 0));
+        // six-node cover blocks ("cache"): not ported yet (P2); 1.12 saved a numeric block id
+        sixNodeCacheBlock = Blocks.AIR;
         sixNodeCacheBlockMeta = nbt.getByteOr("cacheBlockMeta", (byte) 0);
         int idx;
         for (idx = 0; idx < 6; idx++) {
@@ -236,7 +237,7 @@ public class SixNode extends Node {
 
     public void writeToNBT(CompoundTag nbt) {
         int idx = 0;
-        nbt.putInt("cacheBlockId", Block.getIdFromBlock(sixNodeCacheBlock));
+        nbt.putInt("cacheBlockId", 0);
         nbt.putByte("cacheBlockMeta", sixNodeCacheBlockMeta);
 
         for (SixNodeElement sideElement : sideElementList) {
@@ -309,7 +310,7 @@ public class SixNode extends Node {
         super.publishSerialize(stream);
         try {
             int idx = 0;
-            stream.writeInt(Block.getIdFromBlock(sixNodeCacheBlock));
+            stream.writeInt(0); // cover block: not ported yet
             stream.writeByte(sixNodeCacheBlockMeta);
             for (SixNodeElement sideElement : sideElementList) {
                 if (sideElement == null) {
@@ -495,24 +496,10 @@ public class SixNode extends Node {
             return false;
         } else {
 
-            ItemStack stack = entityPlayer.getHeldItemMainhand();
+            ItemStack stack = entityPlayer.getMainHandItem();
 
-            Block b = Blocks.AIR;
-            if (!Utils.isEmpty(stack))
-                b = Block.getBlockFromItem(stack.getItem());
-
+            // 1.12: with the interact key, a block in hand became the node's cover ("cache"); not ported yet (P2)
             boolean accepted = false;
-
-            if (Eln.playerManager.get(entityPlayer).getInteractEnable() && !Utils.isEmpty(stack)) {
-                for (ISixNodeCache a : sixNodeCacheList) {
-                    if (a.accept(stack)) {
-                        accepted = true;
-                        sixNodeCacheBlock = b;
-                        sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
-                        break;
-                    }
-                }
-            }
 			
 
 			/*if(entityPlayer.isSneaking() == false){
@@ -520,21 +507,6 @@ public class SixNode extends Node {
 			}*/
 
             if (accepted) {
-                Utils.println("ACACAC");
-
-
-                setNeedPublish(true);
-                if (Utils.isCreative((ServerPlayer) entityPlayer) == false)
-                    entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
-
-                //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
-                {
-                    LevelChunk chunk = WorldCompat.getChunkFromBlockCoords(coordonate.world(), coordonate.x, coordonate.z);
-                    Utils.generateHeightMap(chunk);
-                    Utils.updateSkylight(chunk);
-                    chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
-                }
                 return true;
             } else {
                 SixNodeElement element = sideElementList[side.getInt()];
@@ -615,7 +587,7 @@ public class SixNode extends Node {
     @Override
     public String getNodeUuid() {
 
-        return Eln.sixNodeBlock.getNodeUuid();
+        return "s";
     }
 
     @Override

@@ -4,22 +4,14 @@ import mods.eln.compat.ISidedInventoryCompat;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 
 public class TransparentNodeElementInventory implements ISidedInventoryCompat, INBTTReady {
-    protected TransparentNodeElementRender transparentNodeRender = null;
     protected TransparentNodeElement transparentNodeElement = null;
 
     int stackLimit;
 
-    public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
-        inv = new ItemStack[size];
-        java.util.Arrays.fill(inv, ItemStack.EMPTY);
-        this.stackLimit = stackLimit;
-        this.transparentNodeRender = TransparentnodeRender;
-    }
 
     public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
         inv = new ItemStack[size];
@@ -53,7 +45,7 @@ public class TransparentNodeElementInventory implements ISidedInventoryCompat, I
             if (stack.getCount() <= amt) {
                 setInventorySlotContents(slot, ItemStack.EMPTY);
             } else {
-                stack = stack.splitStack(amt);
+                stack = stack.split(amt);
                 if (stack.getCount() == 0) {
                     setInventorySlotContents(slot, ItemStack.EMPTY);
                 }

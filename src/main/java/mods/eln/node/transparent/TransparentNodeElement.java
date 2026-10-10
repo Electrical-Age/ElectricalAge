@@ -26,7 +26,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -185,7 +184,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         if (descriptor.hasGhostGroup()) Eln.ghostManager.addObserver(this);
     }
 
-    public IFluidHandler getFluidHandler() {
+    /** The element's fluid handler (26.x fluid capability), null if none; fluid devices come with their batch. */
+    public Object getFluidHandler() {
         return null;
     }
 
@@ -263,8 +263,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     public ItemStack getDropItemStack() {
-        ItemStack itemStack = new ItemStack(Eln.transparentNodeBlock, 1, node.elementId);
-        itemStack.setTagCompound(getItemStackNBT());
+        ItemStack itemStack = transparentNodeDescriptor.newItemStack();
+        mods.eln.generic.ItemNbt.set(itemStack, getItemStackNBT());
         return itemStack;
     }
 

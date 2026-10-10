@@ -13,16 +13,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.storage.WorldSavedData;
 
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class GhostManager extends WorldSavedData {
+public class GhostManager {
     public GhostManager(String par1Str) {
-        super(par1Str);
     }
 
     Map<Coordonate, GhostElement> ghostTable = new Hashtable<Coordonate, GhostElement>();
@@ -36,10 +34,6 @@ public class GhostManager extends WorldSavedData {
     public void init() {
     }
 
-    @Override
-    public boolean isDirty() {
-        return true;
-    }
 
 	/*
     public void addGhost(GhostElement element) {
@@ -117,28 +111,7 @@ public class GhostManager extends WorldSavedData {
         WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z); //caca1.5.1
     }
 
-    @Override
-    public void readFromNBT(CompoundTag nbt) {
-		/*for(CompoundTag o : Utils.getTags(nbt)) {
-			CompoundTag tag = (CompoundTag) o;
 
-			GhostElement ghost = new GhostElement();
-			ghost.readFromNBT(tag, "");
-			ghostTable.put(ghost.elementCoordonate, ghost);
-		}*/
-    }
-
-    @Override
-    public CompoundTag writeToNBT(CompoundTag nbt) {
-	/*	int nodeCounter = 0;
-		
-		for(GhostElement ghost : ghostTable.values()) {
-			CompoundTag nbtGhost = new CompoundTag();
-			ghost.writeToNBT(nbtGhost, "");
-			nbt.put("n" + nodeCounter++, nbtGhost);
-		}*/
-        return nbt;
-    }
 
     public void loadFromNBT(CompoundTag nbt) {
         for (CompoundTag o : Utils.getTags(nbt)) {
@@ -175,7 +148,7 @@ public class GhostManager extends WorldSavedData {
     public boolean canCreateGhostAt(Level world, int x, int y, int z) {
         if (!WorldCompat.blockExists(world, x, y, z)) { // 1.7.10 chunkExists = chunk loaded
             return false;
-        } else if (WorldCompat.getBlock(world, x, y, z) != Blocks.AIR && !WorldCompat.getBlock(world, x, y, z).isReplaceable(world, new BlockPos(x, y, z))) {
+        } else if (!world.getBlockState(new BlockPos(x, y, z)).canBeReplaced()) {
             return false;
         } else return true;
     }

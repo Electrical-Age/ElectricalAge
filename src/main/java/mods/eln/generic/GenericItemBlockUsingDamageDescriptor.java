@@ -1,24 +1,25 @@
 package mods.eln.generic;
 
-
 import mods.eln.misc.Utils;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import mods.eln.Eln;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 
+/**
+ * Descriptor of an EA device item (six-node and transparent-node devices; 1.12: a sub-item of SixNodeItem /
+ * TransparentNodeItem). On 26.x each has its own Item ({@link #parentItem}, an {@link IDescriptorItem}).
+ */
 public class GenericItemBlockUsingDamageDescriptor {
 
     String iconName;
     public String name;
 
     public Item parentItem;
+    /** The 1.12 damage value (eln-ids.json, golden data); no meaning in game. */
     public int parentItemDamage;
 
     public GenericItemBlockUsingDamageDescriptor(String name) {
@@ -31,14 +32,8 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public void setDefaultIcon(String name) {
-        String iconName = name.replaceAll(" ", "").toLowerCase();
-
-        if (Eln.noSymbols &&
-            getClass().getClassLoader().getResource("assets/eln/textures/blocks/" + iconName + "-ni.png") != null) {
-            this.iconName = iconName + "-ni";
-        } else {
-            this.iconName = iconName;
-        }
+        // 1.12 also had a no-symbols texture variant (config noSymbols): textures come back in P3
+        this.iconName = name.replaceAll(" ", "").toLowerCase();
     }
 
     public CompoundTag getDefaultNBT() {
@@ -48,7 +43,6 @@ public class GenericItemBlockUsingDamageDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List<String> list, boolean par4) {
     }
 
-    // TODO(1.12 WP6 icon): updateIcons/getIcon removed; "eln:" + iconName is the texture of the item model.
     /** What 1.7.10 getIconName() returned. */
     public String getIconName() {
         return "eln:" + iconName;
@@ -64,26 +58,33 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public ItemStack newItemStack(int size) {
-        return new ItemStack(parentItem, size, parentItemDamage);
+        ItemStack stack = new ItemStack(parentItem, size);
+        ItemNbt.set(stack, getDefaultNBT());
+        return stack;
     }
 
     public ItemStack newItemStack() {
-        return new ItemStack(parentItem, 1, parentItemDamage);
+        return newItemStack(1);
     }
 
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack) {
         if (Utils.isEmpty(stack)) return null;
-        Item item = stack.getItem();
-        if (item instanceof GenericItemBlockUsingDamage == false) return null;
-        GenericItemBlockUsingDamage genItem = (GenericItemBlockUsingDamage) item;
-        return genItem.getDescriptor(stack);
+        if (stack.getItem() instanceof IDescriptorItem) {
+            Object d = ((IDescriptorItem) stack.getItem()).getEaDescriptor();
+            if (d instanceof GenericItemBlockUsingDamageDescriptor) return (GenericItemBlockUsingDamageDescriptor) d;
+        }
+        return null;
     }
 
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
         GenericItemBlockUsingDamageDescriptor desc = getDescriptor(stack);
         if (desc == null) return null;
-        if (extendClass.isAssignableFrom(desc.getClass()) == false) return null;
+        if (!extendClass.isAssignableFrom(desc.getClass())) return null;
         return desc;
+    }
+
+    public boolean checkSameItemStack(ItemStack stack) {
+        return !Utils.isEmpty(stack) && stack.getItem() == parentItem;
     }
 
     public boolean onEntityItemUpdate(ItemEntity entityItem) {

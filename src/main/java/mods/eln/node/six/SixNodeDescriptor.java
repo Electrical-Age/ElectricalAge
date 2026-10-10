@@ -6,11 +6,10 @@ import mods.eln.misc.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.Identifier;
-import mods.eln.compat.IItemRenderer;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
+public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public Class ElementClass, RenderClass;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -26,31 +25,12 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         this.RenderClass = RenderClass;
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+// 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIconName() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIconName().substring(4);
-        UtilsClient.drawIcon(type, new Identifier("eln", "textures/blocks/" + icon + ".png"));
-    }
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
 
     public boolean hasVolume() {
         return false;

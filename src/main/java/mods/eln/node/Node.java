@@ -4,7 +4,7 @@ package mods.eln.node;
 import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.level.LightLayer;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,7 +19,8 @@ public abstract class Node extends NodeBase {
         if (light < 0) light = 0;
         if (lastLight != light) {
             lastLight = light;
-            WorldCompat.updateLightByType(coordonate.world(), EnumSkyBlock.BLOCK, coordonate.x, coordonate.y, coordonate.z);
+            // 26.x: the block's light emission comes from the BE (NodeBlock.getLightEmission); re-check it
+            if (coordonate.getBlockExist()) coordonate.world().getLightEngine().checkBlock(coordonate.pos());
             setNeedPublish(true);
         }
 
@@ -61,7 +62,8 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        return (NodeBlockEntity) WorldCompat.getBlockEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        net.minecraft.world.level.block.entity.BlockEntity e = WorldCompat.getTileEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        return e instanceof NodeBlockEntity ? (NodeBlockEntity) e : null;
     }
 
     public int isProvidingWeakPower(Direction side) {

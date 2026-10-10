@@ -1,8 +1,8 @@
 package mods.eln.sound;
 
 import mods.eln.misc.Coordonate;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.Level;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class SoundCommand {
 
-    World world;
+    Level world;
     double x, y, z;
     String track;
     double trackLength;
@@ -63,9 +63,13 @@ public class SoundCommand {
         return c;
     }
 
+    /** Client-side playback; set by the client setup (1.12: SoundClient.play). */
+    public static java.util.function.Consumer<SoundCommand> clientPlayer = c -> {
+    };
+
     public void play() {
-        if (world.isRemote)
-            SoundClient.play(this);
+        if (world.isClientSide())
+            clientPlayer.accept(this); // the client sound engine (set by the client setup, P3)
         else
             SoundServer.play(this);
     }
@@ -77,11 +81,11 @@ public class SoundCommand {
         z = c.z + 0.5;
     }
 
-    public SoundCommand set(TileEntity c) {
-        world = c.getWorld();
-        x = c.getPos().getX() + 0.5;
-        y = c.getPos().getY() + 0.5;
-        z = c.getPos().getZ() + 0.5;
+    public SoundCommand set(BlockEntity c) {
+        world = c.getLevel();
+        x = c.getBlockPos().getX() + 0.5;
+        y = c.getBlockPos().getY() + 0.5;
+        z = c.getBlockPos().getZ() + 0.5;
         //mediumRange();
         return this;
     }
@@ -140,7 +144,7 @@ public class SoundCommand {
         return this;
     }
 
-    public static SoundCommand fromStream(DataInputStream stream, World w) throws IOException {
+    public static SoundCommand fromStream(DataInputStream stream, Level w) throws IOException {
         SoundCommand p = new SoundCommand();
         p.world = w;
 

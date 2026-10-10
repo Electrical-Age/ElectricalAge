@@ -1,7 +1,6 @@
 package mods.eln.i18n;
 
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.locale.Language;
 
 /**
  * Internationalization and localization helper class.
@@ -11,7 +10,7 @@ public class I18N {
     // (client: current language; dedicated server: en_us).
 
     public static String getCurrentLanguage() {
-        return FMLCommonHandler.instance().getCurrentLanguage();
+        return "en_us"; // 26.x: only the client knows the player's language
     }
 
     /**
@@ -61,8 +60,9 @@ public class I18N {
     public static String tr(final String text, Object... objects) {
         // Try to find the translation for the string using forge API.
         String langKey = encodeLangKey(text);
-        @SuppressWarnings("deprecation")
-        String translation = I18n.canTranslate(langKey) ? I18n.translateToLocal(langKey) : null;
+        // 26.x: the current Language (en_us on a dedicated server, the player's language on the client)
+        Language lang = Language.getInstance();
+        String translation = lang.has(langKey) ? lang.getOrDefault(langKey) : null;
 
         // If no translation was found, just use the original text.
         if (translation == null || "".equals(translation)) {

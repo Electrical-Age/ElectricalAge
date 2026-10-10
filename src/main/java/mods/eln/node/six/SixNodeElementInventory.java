@@ -9,17 +9,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 
 public class SixNodeElementInventory implements IInventoryCompat, INBTTReady {
-    SixNodeElementRender sixnodeRender = null;
     SixNodeElement sixNodeElement = null;
 
     int stackLimit;
 
-    public SixNodeElementInventory(int size, int stackLimit, SixNodeElementRender sixnodeRender) {
-        inv = new ItemStack[size];
-        java.util.Arrays.fill(inv, ItemStack.EMPTY);
-        this.stackLimit = stackLimit;
-        this.sixnodeRender = sixnodeRender;
-    }
 
     public SixNodeElementInventory(int size, int stackLimit, SixNodeElement sixNodeElement) {
         inv = new ItemStack[size];
@@ -57,7 +50,7 @@ public class SixNodeElementInventory implements IInventoryCompat, INBTTReady {
             if (stack.getCount() <= amt) {
                 setInventorySlotContents(slot, ItemStack.EMPTY);
             } else {
-                stack = stack.splitStack(amt);
+                stack = stack.split(amt);
                 if (stack.getCount() == 0) {
                     setInventorySlotContents(slot, ItemStack.EMPTY);
                 }
