@@ -40,7 +40,7 @@ public final class SmokeCases {
 
     static final int SPACING = 10, COLUMNS = 14, X0 = 40;
 
-    static final class Device {
+    public static final class Device {
         final boolean six;
         final int damage;
         final String name;
@@ -52,6 +52,48 @@ public final class SmokeCases {
             this.six = six;
             this.damage = damage;
             this.name = name;
+        }
+    }
+
+    /** One entry per descriptor (aliases share a descriptor), six-node then transparent, in damage order. */
+    static List<Device> allDevices() {
+        List<Device> out = new ArrayList<>();
+        Map<Object, Boolean> seen = new IdentityHashMap<>();
+        for (Map.Entry<Integer, SixNodeDescriptor> e : new TreeMap<>(Eln.sixNodeItem.subItemList).entrySet())
+            if (seen.put(e.getValue(), true) == null) out.add(new Device(true, e.getKey(), e.getValue().name));
+        for (Map.Entry<Integer, TransparentNodeDescriptor> e : new TreeMap<>(Eln.transparentNodeItem.subItemList).entrySet())
+            if (seen.put(e.getValue(), true) == null) out.add(new Device(false, e.getKey(), e.getValue().name));
+        return out;
+    }
+
+    /** Place d at p with its support block(s); sets d.at/d.side, or d.placeError. */
+    static void place(SelfTestContext ctx, Device d, BlockPos p) {
+        try {
+            if (d.six) {
+                // the first face it may sit on: floor unless the descriptor says otherwise (wall/ceiling sockets)
+                Direction[] faces = Eln.sixNodeItem.getDescriptor(d.damage).getPlaceDirection();
+                Direction side = faces == null || faces.length == 0 ? Direction.YN : faces[0];
+                ctx.floor(p.add(side.toEnumFacing().getDirectionVec()));
+                ctx.placeSix(d.damage, p, side);
+                d.side = side;
+                d.at = p;
+            } else {
+                // floor under the clicked block and under the node (spawn delta, for front XN as placed below;
+                // teleporter: (4, 0, 0)). No more: the water turbine's ghosts reach down.
+                TransparentNodeDescriptor td = Eln.transparentNodeItem.getDescriptor(d.damage);
+                ctx.floor(p.down());
+                ctx.floor(p.add(td.getSpawnDeltaX(), td.getSpawnDeltaY() - 1, td.getSpawnDeltaZ()));
+                // facing XN like the per-family cases (the player's view otherwise picks the front)
+                TransparentNodeElement e;
+                try {
+                    e = Wp10bCases.placeFacing(ctx, d.damage, p, Direction.XN);
+                } catch (IllegalStateException noSuchFront) {
+                    e = ctx.placeTransparent(d.damage, p);
+                }
+                d.at = new BlockPos(e.node.coordonate.x, e.node.coordonate.y, e.node.coordonate.z);
+            }
+        } catch (RuntimeException ex) {
+            d.placeError = ex.toString();
         }
     }
 
@@ -67,12 +109,7 @@ public final class SmokeCases {
         }
 
         public void build(SelfTestContext ctx) {
-            // one entry per descriptor (aliases share a descriptor), in damage order
-            Map<Object, Boolean> seen = new IdentityHashMap<>();
-            for (Map.Entry<Integer, SixNodeDescriptor> e : new TreeMap<>(Eln.sixNodeItem.subItemList).entrySet())
-                if (seen.put(e.getValue(), true) == null) devices.add(new Device(true, e.getKey(), e.getValue().name));
-            for (Map.Entry<Integer, TransparentNodeDescriptor> e : new TreeMap<>(Eln.transparentNodeItem.subItemList).entrySet())
-                if (seen.put(e.getValue(), true) == null) devices.add(new Device(false, e.getKey(), e.getValue().name));
+            devices.addAll(allDevices());
 
             // six-node devices on a 10-block grid; transparent ones (multiblocks, spawn deltas up to 4) 16 apart behind them
             int i = 0, t = 0, sixRows = 0;
@@ -84,33 +121,7 @@ public final class SmokeCases {
                     : ctx.at(X0 + (t % COLUMNS) * 16, 1, sixRows * SPACING + 8 + (t / COLUMNS) * 16);
                 if (d.six) i++;
                 else t++;
-                try {
-                    if (d.six) {
-                        // the first face it may sit on: floor unless the descriptor says otherwise (wall/ceiling sockets)
-                        Direction[] faces = Eln.sixNodeItem.getDescriptor(d.damage).getPlaceDirection();
-                        Direction side = faces == null || faces.length == 0 ? Direction.YN : faces[0];
-                        ctx.floor(p.add(side.toEnumFacing().getDirectionVec()));
-                        ctx.placeSix(d.damage, p, side);
-                        d.side = side;
-                        d.at = p;
-                    } else {
-                        // floor under the clicked block and under the node (spawn delta, for front XN as placed below;
-                        // teleporter: (4, 0, 0)). No more: the water turbine's ghosts reach down.
-                        TransparentNodeDescriptor td = Eln.transparentNodeItem.getDescriptor(d.damage);
-                        ctx.floor(p.down());
-                        ctx.floor(p.add(td.getSpawnDeltaX(), td.getSpawnDeltaY() - 1, td.getSpawnDeltaZ()));
-                        // facing XN like the per-family cases (the player's view otherwise picks the front)
-                        TransparentNodeElement e;
-                        try {
-                            e = Wp10bCases.placeFacing(ctx, d.damage, p, Direction.XN);
-                        } catch (IllegalStateException noSuchFront) {
-                            e = ctx.placeTransparent(d.damage, p);
-                        }
-                        d.at = new BlockPos(e.node.coordonate.x, e.node.coordonate.y, e.node.coordonate.z);
-                    }
-                } catch (RuntimeException ex) {
-                    d.placeError = ex.toString();
-                }
+                place(ctx, d, p);
             }
         }
 

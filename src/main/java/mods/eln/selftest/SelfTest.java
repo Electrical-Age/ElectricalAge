@@ -124,12 +124,16 @@ public final class SelfTest implements SelfTestContext {
     private LampSocketElement lamp;
     private BatteryElement battery;
 
-    /** RUN: build, measure, clean up. KEEP: build, measure, leave it (for a restart). VERIFY: re-measure a kept circuit, clean up. */
-    enum Mode {RUN, KEEP, VERIFY}
+    /**
+     * RUN: build, measure, clean up. KEEP: build, measure, leave it (for a restart). VERIFY: re-measure a kept circuit,
+     * clean up. GALLERY: build the device gallery (cases.GalleryCase) and leave it, for screenshots.
+     */
+    enum Mode {RUN, KEEP, VERIFY, GALLERY}
 
     private SelfTest(ICommandSender sender, WorldServer world, BlockPos origin, int ticks, Mode mode) {
         this.mode = mode;
         this.extra = mode == Mode.RUN ? cases() : new ArrayList<SelfTestCase>();
+        if (mode == Mode.GALLERY) this.extra.add(new mods.eln.selftest.cases.GalleryCase());
         this.base = origin;
         this.sender = sender;
         this.world = world;
@@ -164,6 +168,7 @@ public final class SelfTest implements SelfTestContext {
             say(sender, "/eln selftest [ticks] [dim x y z] : run (default 40 ticks, 24 blocks above world spawn in dim 0)");
             say(sender, "/eln selftest keep [ticks] [dim x y z] : same, but leave the circuit in place (prints its position)");
             say(sender, "/eln selftest verify dim x y z [ticks] : after a restart, re-measure a kept circuit, then clean up");
+            say(sender, "/eln selftest gallery [ticks] [dim x y z] : build every device in rows and keep it; cameras -> eln-gallery.json");
             say(sender, "/eln selftest recipes : write every EA recipe to eln-recipes.json");
             say(sender, "/eln selftest inventory : write every EA block/item/descriptor to eln-inventory.json");
             say(sender, "/eln selftest report : print the last run's results (also in the server log, logger eln-selftest)");
@@ -181,6 +186,9 @@ public final class SelfTest implements SelfTestContext {
             first = 2;
         } else if (args.length >= 2 && args[1].equalsIgnoreCase("verify")) {
             mode = Mode.VERIFY;
+            first = 2;
+        } else if (args.length >= 2 && args[1].equalsIgnoreCase("gallery")) {
+            mode = Mode.GALLERY;
             first = 2;
         }
         int n = args.length - first;
@@ -561,6 +569,11 @@ public final class SelfTest implements SelfTestContext {
 
     /** Remove everything we placed, without drops; restore the platform to air. */
     private void finish() {
+        if (mode == Mode.GALLERY) {
+            line("gallery kept at " + origin + "; cameras in eln-gallery.json");
+            done();
+            return;
+        }
         if (mode == Mode.KEEP && !placed.isEmpty()) {
             line("kept: verify after a restart with /eln selftest verify " + world.provider.getDimension() + " "
                 + origin.getX() + " " + origin.getY() + " " + origin.getZ());
