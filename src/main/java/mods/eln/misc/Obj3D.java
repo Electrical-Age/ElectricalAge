@@ -29,7 +29,10 @@ public class Obj3D {
     public float dimMax, dimMaxInv;
 
     private String dirPath;
-    // 26.x port: bindTexture() removed (client rendering; redone in P3)
+    /** Bind a texture from this model's folder (screens, reflections). */
+    public void bindTexture(String texFilename) {
+        mods.eln.gl.GL11.bindTexture(Identifier.fromNamespaceAndPath("eln", ("model/" + dirPath + "/" + texFilename).toLowerCase(java.util.Locale.ROOT)));
+    }
     public static class FaceGroup {
         String mtlName = null;
         public Identifier textureResource;

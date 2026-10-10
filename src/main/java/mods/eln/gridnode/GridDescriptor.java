@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 
-import static org.lwjgl.opengl.GL11.*;
+import static mods.eln.gl.GL11.*;
 
 /**
  * Created by svein on 22/08/15.

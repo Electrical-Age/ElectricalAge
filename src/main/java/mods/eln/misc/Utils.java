@@ -195,6 +195,11 @@ public class Utils {
         return new net.minecraft.world.entity.item.ItemEntity(be.getLevel(), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 1.2, stack);
     }
 
+    /** A player is inside the box (1.12: renders skip work nobody sees). */
+    public static boolean isPlayerAround(net.minecraft.world.level.Level level, net.minecraft.world.phys.AABB box) {
+        return level != null && !level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class, box).isEmpty();
+    }
+
     /** The player holds an EA wrench (filled when the wrench item is ported). */
     public static java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrenchCheck = p -> false;
 

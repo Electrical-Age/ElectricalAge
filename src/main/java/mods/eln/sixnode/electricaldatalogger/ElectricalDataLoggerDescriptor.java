@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricaldatalogger;
 
-import mods.eln.misc.UtilsClient;
 
 import mods.eln.gl.GL11;
 
@@ -70,7 +69,43 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
+        if (onFloor || side.isY()) front.glRotateOnX();
+        if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
+        //GL11.glDisable(GL11.GL_TEXTURE_2D);
+        if (main != null) main.draw();
+        //GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+        //Glass (reflections)
+        UtilsClient.enableBlend();
+        obj.bindTexture("Reflection.png");
+        float rotYaw = UtilsClient.clientPlayerYaw() / 360.f;
+        float rotPitch = UtilsClient.clientPlayerPitch() / 180.f;
+        float pos = (((float) UtilsClient.clientPlayerX()) - ((float) (objPosMX * 2)) + ((float) UtilsClient.clientPlayerZ()) - ((float) (objPosMZ * 2))) / 24.f;
+        GL11.glColor4f(1, 1, 1, reflc);
+        reflection.draw(rotYaw + pos, rotPitch * 0.857f);
+        UtilsClient.disableBlend();
+
+        //Plot
+        if (log != null) {
+            UtilsClient.disableLight();
+            // GL11.glPushMatrix();
+            UtilsClient.ledOnOffColor(true);
+            if (led != null) led.draw();
+
+            UtilsClient.glDefaultColor();
+
+            GL11.glTranslatef(tx, ty, tz);
+            GL11.glRotatef(ra, rx, ry, rz);
+            GL11.glScalef(sx, sy, sz);
+            GL11.glColor4f(cr, cg, cb, 1);
+            log.draw(mx, my, textColor);
+
+            UtilsClient.glDefaultColor();
+
+            UtilsClient.enableLight();
+        }
+    }
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);

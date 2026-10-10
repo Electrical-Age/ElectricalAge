@@ -15,5 +15,15 @@ public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescript
         this.b = b;
     }
 
-    // 26.x port: glColor/glInverseColor removed (client rendering; redone in P3)
+    public void glColor() {
+        mods.eln.gl.GL11.glColor3f(r, g, b);
+    }
+
+    public void glColor(float intensity) {
+        mods.eln.gl.GL11.glColor3f(r * intensity, g * intensity, b * intensity);
+    }
+
+    public void glInverseColor(float intensity) {
+        mods.eln.gl.GL11.glColor3f(1.0f - r * intensity, 1 - 0f - g * intensity, 1.0f - b * intensity);
+    }
 }

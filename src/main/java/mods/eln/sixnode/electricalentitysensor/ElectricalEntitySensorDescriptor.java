@@ -1,6 +1,5 @@
 package mods.eln.sixnode.electricalentitysensor;
 
-import mods.eln.misc.UtilsClient;
 
 import mods.eln.gl.GL11;
 
@@ -40,7 +39,17 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-    // 26.x port: draw() removed (client rendering; redone in P3)
+    void draw(boolean state, EntitySensorFilterDescriptor filter) {
+        if (detector != null) detector.draw();
+        if (state) {
+            if (filter == null) {
+                GL11.glColor3f(1f, 1f, 0f);
+            } else {
+                filter.glColor();
+            }
+            UtilsClient.drawLight(haloMask);
+        }
+    }
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);

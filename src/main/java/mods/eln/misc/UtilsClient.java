@@ -37,6 +37,28 @@ public final class UtilsClient {
             return false;
         }
 
+        /** The client player's yaw, pitch (degrees) and position (reflection effects on screens and glass). */
+        default float playerYaw() {
+            return 0;
+        }
+
+        default float playerPitch() {
+            return 0;
+        }
+
+        default double playerX() {
+            return 0;
+        }
+
+        default double playerZ() {
+            return 0;
+        }
+
+        /** The client player's helmet (signal inductor: goggles). */
+        default net.minecraft.world.item.ItemStack playerHelmet() {
+            return net.minecraft.world.item.ItemStack.EMPTY;
+        }
+
         /** Draw an item entity at the current GL11 matrix (1.12 drawEntityItem). */
         default void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {
         }
@@ -137,6 +159,14 @@ public final class UtilsClient {
         part.draw(angle, x, y, z);
         enableLight();
         disableBlend();
+    }
+
+    /** 1.12: 1 thundering, 0.5 raining, else 0. */
+    public static double getWeather(Level world) {
+        if (world == null) return 0;
+        if (world.isThundering()) return 1.0;
+        if (world.isRaining()) return 0.5;
+        return 0.0;
     }
 
     public static int getLight(Level w, int x, int y, int z) {
@@ -297,5 +327,29 @@ public final class UtilsClient {
         }
         GL11.glEnd();
         enableTexture();
+    }
+
+    public static float clientPlayerYaw() {
+        return hooks.playerYaw();
+    }
+
+    public static float clientPlayerPitch() {
+        return hooks.playerPitch();
+    }
+
+    public static double clientPlayerX() {
+        return hooks.playerX();
+    }
+
+    public static double clientPlayerZ() {
+        return hooks.playerZ();
+    }
+
+    public static net.minecraft.world.item.ItemStack clientPlayerHelmet() {
+        return hooks.playerHelmet();
+    }
+
+    /** Text in the world at the current GL11 matrix (1.12 FontRenderer.drawString in a TESR); R4. */
+    public static void drawString(String text, int x, int y, int color) {
     }
 }

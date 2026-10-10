@@ -48,6 +48,36 @@ public final class ElnClient {
         }
 
         @Override
+        public float playerYaw() {
+            var p = Minecraft.getInstance().player;
+            return p == null ? 0 : p.getYRot();
+        }
+
+        @Override
+        public float playerPitch() {
+            var p = Minecraft.getInstance().player;
+            return p == null ? 0 : p.getXRot();
+        }
+
+        @Override
+        public double playerX() {
+            var p = Minecraft.getInstance().player;
+            return p == null ? 0 : p.getX();
+        }
+
+        @Override
+        public double playerZ() {
+            var p = Minecraft.getInstance().player;
+            return p == null ? 0 : p.getZ();
+        }
+
+        @Override
+        public net.minecraft.world.item.ItemStack playerHelmet() {
+            var p = Minecraft.getInstance().player;
+            return p == null ? net.minecraft.world.item.ItemStack.EMPTY : p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD);
+        }
+
+        @Override
         public boolean isGameInPause() {
             return Minecraft.getInstance().isPaused();
         }

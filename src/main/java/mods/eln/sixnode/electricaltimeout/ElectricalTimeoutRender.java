@@ -1,0 +1,71 @@
+package mods.eln.sixnode.electricaltimeout;
+
+
+import mods.eln.registry.ElnDeviceRegistry;
+import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
+import net.minecraft.world.entity.player.Player;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+
+public class ElectricalTimeoutRender extends SixNodeElementRender {
+
+    ElectricalTimeoutDescriptor descriptor;
+    long time;
+
+    float timeoutValue = 0, timeoutCounter = 0;
+    boolean inputState;
+
+    public ElectricalTimeoutRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalTimeoutDescriptor) descriptor;
+        time = System.currentTimeMillis();
+    }
+
+    //PhysicalInterpolator interpolator = new PhysicalInterpolator(0.2f, 2.0f, 1.5f, 0.2f);
+
+    @Override
+    public void draw() {
+        super.draw();
+        front.glRotateOnX();
+
+        descriptor.draw(timeoutCounter / timeoutValue);
+    }
+
+    @Override
+    public void refresh(float deltaT) {
+        if (!inputState) {
+            timeoutCounter -= deltaT;
+            if (timeoutCounter < 0f) timeoutCounter = 0f;
+        }
+    }
+
+    @Override
+    public boolean cameraDrawOptimisation() {
+        return false;
+    }
+
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            timeoutValue = stream.readFloat();
+            timeoutCounter = stream.readFloat();
+            inputState = stream.readBoolean();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return ElnDeviceRegistry.signalCableDescriptor.render;
+    }
+
+}

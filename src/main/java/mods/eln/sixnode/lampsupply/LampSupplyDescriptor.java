@@ -1,6 +1,5 @@
 package mods.eln.sixnode.lampsupply;
 
-import mods.eln.misc.UtilsClient;
 
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -45,7 +44,23 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addLight(newItemStack(1));
     }
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw(float openFactor) {
+        if (base != null) base.draw();
+        //UtilsClient.drawLight(led);
+        UtilsClient.disableCulling();
+        //UtilsClient.disableDepthTest();
+        UtilsClient.enableBlend();
+        obj.bindTexture("Glass.png");
+        float rotYaw = UtilsClient.clientPlayerYaw() / 360.f;
+        float rotPitch = UtilsClient.clientPlayerPitch() / 180.f;
+        float pos = (((float) UtilsClient.clientPlayerX()) + ((float) UtilsClient.clientPlayerZ())) / 64.f;
+        if (window != null)
+            window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
+        UtilsClient.disableBlend();
+        //UtilsClient.enableDepthTest();
+        UtilsClient.enableCulling();
+    }
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

@@ -20,6 +20,11 @@ public final class FrameTime {
         return UtilsClient.isGameInPause() ? 0f : Math.min(0.1f, deltaT);
     }
 
+    /** 1.12 name. */
+    public static float getNotCaped2() {
+        return get();
+    }
+
     public static void onFrame(RenderFrameEvent.Pre event) {
         mods.eln.gl.GlFrame.beginRenderFrame();
         long now = System.nanoTime();

@@ -208,6 +208,7 @@ public final class GL11 {
     }
 
     public static void glLineWidth(float width) {
+        f().lineWidth(width);
     }
 
     public static void glPointSize(float size) {

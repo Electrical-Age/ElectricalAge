@@ -32,7 +32,8 @@ public final class GlFrame {
     public record Key(Identifier texture, Blend blend, boolean cull, boolean fullBright) {
     }
 
-    public enum Blend {NONE, ALPHA, ADDITIVE, MULTIPLY}
+    /** LINES: a line batch (GL_LINES and strips); u holds the line width, the normal the line's direction. */
+    public enum Blend {NONE, ALPHA, ADDITIVE, MULTIPLY, LINES}
 
     /** Vertex layout in a batch: x y z u v argb(bits) nx ny nz. */
     public static final int STRIDE = 9;
@@ -154,7 +155,7 @@ public final class GlFrame {
     }
 
     // ---- display lists: state calls as ops, primitives as quads in list space
-    private record Prim(float[] quads, int floats, boolean colored) {
+    private record Prim(float[] quads, int floats, boolean colored, boolean lines) {
     }
 
     private static final Map<Integer, List<Object>> LISTS = new HashMap<>();
@@ -204,7 +205,10 @@ public final class GlFrame {
         }
         if (ops == null) return;
         for (Object op : ops) {
-            if (op instanceof Prim p) replay(p);
+            if (op instanceof Prim p) {
+                if (p.lines) emitLines(p.quads, p.floats, p.colored);
+                else replay(p);
+            }
             else ((Consumer<GlFrame>) op).accept(this);
         }
     }
@@ -293,6 +297,13 @@ public final class GlFrame {
     void texture(Identifier t) {
         if (record(f -> f.texture(t))) return;
         texture = t;
+    }
+
+    private float lineWidth = 1;
+
+    void lineWidth(float w) {
+        if (record(f -> f.lineWidth(w))) return;
+        lineWidth = w;
     }
 
     void fullBright(boolean on) {
@@ -417,6 +428,13 @@ public final class GlFrame {
         mode = -1;
         if (m < 0) return;
         int n = primFloats / STRIDE;
+        if (m == GL11.GL_LINES || m == GL11.GL_LINE_STRIP || m == GL11.GL_LINE_LOOP) {
+            toLines(m, n);
+            if (quadFloats == 0) return;
+            if (rec != null) rec.add(new Prim(Arrays.copyOf(quadBuf, quadFloats), quadFloats, ccolored, true));
+            else if (!discard) emitLines(quadBuf, quadFloats, true);
+            return;
+        }
         float[] quads = toQuads(m, n);
         int qf = quadFloats;
         if (quads == null) {
@@ -424,7 +442,7 @@ public final class GlFrame {
             return;
         }
         if (rec != null) {
-            rec.add(new Prim(Arrays.copyOf(quads, qf), qf, ccolored));
+            rec.add(new Prim(Arrays.copyOf(quads, qf), qf, ccolored, false));
             return;
         }
         if (discard) return;
@@ -470,6 +488,66 @@ public final class GlFrame {
         System.arraycopy(prim, i2 * STRIDE, quadBuf, quadFloats + 2 * STRIDE, STRIDE);
         System.arraycopy(prim, i3 * STRIDE, quadBuf, quadFloats + 3 * STRIDE, STRIDE);
         quadFloats += 4 * STRIDE;
+    }
+
+    /** The current line primitive as vertex pairs. */
+    private void toLines(int m, int n) {
+        quadFloats = 0;
+        if (m == GL11.GL_LINES) {
+            for (int i = 0; i + 1 < n; i += 2) pair(i, i + 1);
+        } else {
+            for (int i = 0; i + 1 < n; i++) pair(i, i + 1);
+            if (m == GL11.GL_LINE_LOOP && n > 2) pair(n - 1, 0);
+        }
+    }
+
+    private void pair(int i0, int i1) {
+        if (quadFloats + 2 * STRIDE > quadBuf.length) quadBuf = Arrays.copyOf(quadBuf, quadBuf.length * 2);
+        System.arraycopy(prim, i0 * STRIDE, quadBuf, quadFloats, STRIDE);
+        System.arraycopy(prim, i1 * STRIDE, quadBuf, quadFloats + STRIDE, STRIDE);
+        quadFloats += 2 * STRIDE;
+    }
+
+    /** Lines: transformed pairs into the line batch; u = width, normal = direction. */
+    private void emitLines(float[] q, int floats, boolean colored) {
+        Key k = new Key(null, Blend.LINES, false, fullBright);
+        Batch out = batches.get(k);
+        if (out == null) {
+            out = acquire();
+            batches.put(k, out);
+        }
+        out.ensure(floats);
+        float[] d = out.data;
+        int o = out.floats;
+        Matrix4f m = stack[depth];
+        float col = Float.intBitsToFloat(argb(r, g, b, a));
+        for (int i = 0; i + 2 * STRIDE <= floats; i += 2 * STRIDE) {
+            float x0 = q[i], y0 = q[i + 1], z0 = q[i + 2], x1 = q[i + STRIDE], y1 = q[i + STRIDE + 1], z1 = q[i + STRIDE + 2];
+            float ax = m.m00() * x0 + m.m10() * y0 + m.m20() * z0 + m.m30(), ay = m.m01() * x0 + m.m11() * y0 + m.m21() * z0 + m.m31(),
+                az = m.m02() * x0 + m.m12() * y0 + m.m22() * z0 + m.m32();
+            float bx = m.m00() * x1 + m.m10() * y1 + m.m20() * z1 + m.m30(), by = m.m01() * x1 + m.m11() * y1 + m.m21() * z1 + m.m31(),
+                bz = m.m02() * x1 + m.m12() * y1 + m.m22() * z1 + m.m32();
+            float dx = bx - ax, dy = by - ay, dz = bz - az, len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (len > 0) {
+                dx /= len;
+                dy /= len;
+                dz /= len;
+            }
+            for (int v = 0; v < 2; v++) {
+                int src = i + v * STRIDE;
+                d[o] = v == 0 ? ax : bx;
+                d[o + 1] = v == 0 ? ay : by;
+                d[o + 2] = v == 0 ? az : bz;
+                d[o + 3] = lineWidth;
+                d[o + 4] = 0;
+                d[o + 5] = colored ? q[src + 5] : col;
+                d[o + 6] = dx;
+                d[o + 7] = dy;
+                d[o + 8] = dz;
+                o += STRIDE;
+            }
+        }
+        out.floats = o;
     }
 
     private void replay(Prim p) {

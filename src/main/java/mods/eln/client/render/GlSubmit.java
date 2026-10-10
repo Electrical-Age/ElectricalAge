@@ -24,6 +24,7 @@ public final class GlSubmit {
             case NONE -> key.cull() ? RenderTypes.entityCutoutCull(tex) : RenderTypes.entityCutout(tex);
             case ALPHA, MULTIPLY -> key.cull() ? RenderTypes.entityTranslucentCull(tex) : RenderTypes.entityTranslucent(tex);
             case ADDITIVE -> RenderTypes.entityTranslucentEmissive(tex); // R4: a real additive pipeline
+            case LINES -> RenderTypes.lines();
         };
     }
 
@@ -42,6 +43,14 @@ public final class GlSubmit {
             float[] d = b.data;
             int n = b.floats;
             // the frame was opened with this pose: vertices and normals are already in its space
+            if (e.getKey().blend() == GlFrame.Blend.LINES) {
+                collector.submitCustomGeometry(poseStack, RenderTypes.lines(), (PoseStack.Pose pose, VertexConsumer vc) -> {
+                    for (int i = 0; i < n; i += GlFrame.STRIDE)
+                        vc.addVertex(d[i], d[i + 1], d[i + 2]).setColor(Float.floatToRawIntBits(d[i + 5]))
+                            .setNormal(d[i + 6], d[i + 7], d[i + 8]).setLineWidth(d[i + 3]);
+                });
+                continue;
+            }
             collector.submitCustomGeometry(poseStack, renderType(e.getKey()), (PoseStack.Pose pose, VertexConsumer vc) -> {
                 for (int i = 0; i < n; i += GlFrame.STRIDE) {
                     vc.addVertex(d[i], d[i + 1], d[i + 2])

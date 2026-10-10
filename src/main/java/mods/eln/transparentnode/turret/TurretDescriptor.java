@@ -2,6 +2,7 @@ package mods.eln.transparentnode.turret;
 
 import mods.eln.misc.UtilsClient;
 
+
 import mods.eln.gl.GL11;
 
 import mods.eln.Eln;
@@ -108,5 +109,45 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     // 26.x port: renderItem() removed (client rendering; redone in P3)
-// 26.x port: draw() removed (client rendering; redone in P3)
+
+    public void draw(TurretRender render) {
+        float turretAngle = render != null ? render.getTurretAngle() : 0;
+        float gunPosition = render != null ? render.getGunPosition() : 0;
+        float gunAngle = render != null ? -render.getGunElevation() : 0;
+        boolean shooting = render != null && render.isShooting();
+        boolean enabled = render == null || render.isEnabled();
+
+        if (holder != null) holder.draw();
+        if (joint != null) joint.draw();
+        GL11.glPushMatrix();
+        GL11.glRotatef(turretAngle, 0f, 1f, 0f);
+        if (turret != null) turret.draw();
+        if (sensor != null) {
+            if (enabled) {
+                if (render != null && render.filter != null)
+                    if (render.filterIsSpare)
+                        render.filter.glInverseColor(0.5f + 0.5f * gunPosition);
+                    else
+                        render.filter.glColor(0.5f + 0.5f * gunPosition);
+                else
+                    GL11.glColor3f(0.5f, 0.5f, 0.5f);
+                UtilsClient.drawLight(sensor);
+                GL11.glColor3f(1f, 1f, 1f);
+            } else {
+                GL11.glColor3f(0.5f, 0.5f, 0.5f);
+                sensor.draw();
+            }
+        }
+        GL11.glRotatef(gunAngle, 0f, 0f, 1f);
+
+        GL11.glColor4f(.6f, .8f, 1f, .4f);
+        if (shooting && fire != null) UtilsClient.drawLight(fire);
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+
+        GL11.glTranslatef(0f, 0f, gunPosition / 4f);
+        if (leftGun != null) leftGun.draw();
+        GL11.glTranslatef(0f, 0f, -gunPosition / 2f);
+        if (rightGun != null) rightGun.draw();
+        GL11.glPopMatrix();
+    }
 }

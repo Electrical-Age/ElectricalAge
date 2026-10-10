@@ -30,7 +30,7 @@ public final class ElnGameTests {
 
     /** The cases; ported 1.12 selftest cases are added here batch by batch. */
     static List<TestCase> cases() {
-        java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase(), new GoldenRecipesCase(), new GoldenSlotsCase(), new RenderSmokeCase()));
+        java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase(), new GoldenRecipesCase(), new GoldenSlotsCase(), new PublishRenderCase()));
         l.addAll(mods.eln.gametest.cases.Batch1Cases.cases());
         l.addAll(mods.eln.gametest.cases.SolarCases.cases());
         mods.eln.gametest.cases.Wp9aCases.addTo(l);

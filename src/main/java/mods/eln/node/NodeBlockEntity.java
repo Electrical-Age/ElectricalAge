@@ -259,6 +259,7 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
     }
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
+        if (level == null || !level.isClientSide()) return; // a test's stand-in client entity on the server
         mods.eln.network.ElnNet.sendToServer(bos);
     }
 

@@ -155,6 +155,12 @@ public class Coordonate implements INBTTReady {
         return moved;
     }
 
+    /** 1.12 block metadata, as far as EA used it: a liquid's level (0 = source .. 7), else 0. */
+    public int getMeta() {
+        net.minecraft.world.level.block.state.BlockState st = world().getBlockState(pos());
+        return st.hasProperty(net.minecraft.world.level.block.LiquidBlock.LEVEL) ? st.getValue(net.minecraft.world.level.block.LiquidBlock.LEVEL) : 0;
+    }
+
     public Block getBlock() {
         return world().getBlockState(pos()).getBlock();
     }
