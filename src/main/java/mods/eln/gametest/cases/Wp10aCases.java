@@ -1,6 +1,7 @@
 package mods.eln.gametest.cases;
 
 import mods.eln.Eln;
+import mods.eln.transparentnode.autominer.AutoMinerElement;
 import mods.eln.item.LampDescriptor;
 import mods.eln.sixnode.lampsocket.LampSocketElement;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -83,6 +84,7 @@ public final class Wp10aCases {
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
+        cases.add(new AutoMinerCase());
     }
 
     // ---- helpers ----
@@ -441,6 +443,75 @@ public final class Wp10aCases {
     }
 
 
-    // AutoMinerCase: deferred with the autominer (legacy/.../selftest/cases/Wp10aAutoMinerCase.java.txt)
+    /**
+     * Auto miner (id 42): a multiblock (19 ghost blocks around the core, two power-input nodes on ghost positions).
+     * Placed in the air (y = 3; it needs no floor) so the ghosts don't hit the platform. Unpowered, no drill/pipes:
+     * job "none", power resistor open (P = 0). Then broken here: ghosts and power nodes must go with it.
+     * Not covered: mining itself (needs an 800 V supply on the power nodes, drill, pipes and a chest).
+     */
+    static final class AutoMinerCase implements TestCase {
+        AutoMinerElement miner;
+        BlockPos pos;
+
+        public String name() {
+            return "wp10a auto miner";
+        }
+
+        /** The miner and its ghosts stand above the clicked block (GameTest boxes are closed by barriers). */
+        public int height() {
+            return 7;
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        /** Room for the ghost group whatever the front (1.12 placed it on an open row). */
+        public int depth() {
+            return 7;
+        }
+
+        public void build(TestContext ctx) {
+            // placeBlockAt shifts the node by the spawn delta (2, 1, 0) rotated by the front: the node is not at the
+            // clicked position (1.7.10 behaviour), so take its coordinate from the node
+            miner = (AutoMinerElement) ctx.placeTransparent(AUTO_MINER, ctx.at(4, 3, 3));
+            mods.eln.misc.Coordonate c = miner.node.coordonate;
+            pos = new BlockPos(c.x, c.y, c.z);
+        }
+
+        int ghosts(TestContext ctx) {
+            int n = 0;
+            for (BlockPos p : BlockPos.betweenClosed(pos.offset(-3, -3, -3), pos.offset(3, 3, 3)))
+                if (ctx.world().getBlockState(p).getBlock() == Eln.ghostBlock) n++;
+            return n;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("wp10a auto miner placed", miner != null && miner.getDescriptor() == Eln.transparentNodeItem.getDescriptor(AUTO_MINER),
+                String.valueOf(miner));
+            if (miner == null) return;
+            GhostGroup group = field(miner.getDescriptor(), "ghostGroup");
+            int expected = group.size();
+            int found = ghosts(ctx);
+            ctx.check("wp10a auto miner ghost blocks", expected == 19 && found == expected, found + " of " + expected + " (19 by its GhostGroup)");
+            List<NodeBase> power = new ArrayList<>(Wp10aCases.<List<NodeBase>>field(miner, "powerNodeList")); // cleared on break
+            int registered = 0;
+            for (NodeBase n : power) if (NodeManager.instance.getNodeFromCoordonate(n.coordonate) == n) registered++;
+            ctx.check("wp10a auto miner power nodes registered", power.size() == 2 && registered == 2, registered + "/" + power.size());
+            Object job = field(field(miner, "slowProcess"), "job");
+            Resistor res = field(miner, "powerResistor");
+            ctx.check("wp10a auto miner idle (no power, no drill): job none, P = 0",
+                "none".equals(String.valueOf(job)) && Math.abs(res.getP()) < 1e-6, "job " + job + String.format(", P = %.6f W", res.getP()));
+
+            // break it (as the cleanup does): the ghosts and the power nodes go too
+            ctx.world().removeBlock(pos, false);
+            int left = ghosts(ctx);
+            int nodesLeft = 0;
+            for (NodeBase n : power) if (NodeManager.instance.getNodeFromCoordonate(n.coordonate) != null) nodesLeft++;
+            ctx.check("wp10a auto miner removed with its ghosts and power nodes", left == 0 && nodesLeft == 0
+                && NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos.getX(), pos.getY(), pos.getZ(), ctx.world())) == null,
+                left + " ghost(s), " + nodesLeft + " power node(s) left");
+        }
+    }
 
 }

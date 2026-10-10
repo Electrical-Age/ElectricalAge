@@ -666,4 +666,57 @@ public class Utils {
         }
         return value;
     }
+
+    /** 1.12 tryPutStackInInventory(stack, inventory): all of the stack or nothing (autominer drops into its chest). */
+    public static boolean tryPutStackInInventory(net.minecraft.world.item.ItemStack stack, net.minecraft.world.Container inventory) {
+        if (inventory == null) return false;
+        int limit = slotLimit(inventory, stack);
+
+        // First, make a list of possible target slots.
+        java.util.ArrayList<Integer> slots = new java.util.ArrayList<>(4);
+        int need = stack.getCount();
+        for (int i = 0; i < inventory.getContainerSize() && need > 0; i++) {
+            net.minecraft.world.item.ItemStack slot = inventory.getItem(i);
+            if (!isEmpty(slot) && slot.getCount() < limit && net.minecraft.world.item.ItemStack.isSameItemSameComponents(slot, stack)) {
+                slots.add(i);
+                need -= limit - slot.getCount();
+            }
+        }
+        for (int i = 0; i < inventory.getContainerSize() && need > 0; i++) {
+            if (isEmpty(inventory.getItem(i))) {
+                slots.add(i);
+                need -= limit;
+            }
+        }
+
+        // Is there space enough?
+        if (need > 0) {
+            return false;
+        }
+
+        // Yes. Proceed.
+        int toPut = stack.getCount();
+        for (Integer slot : slots) {
+            net.minecraft.world.item.ItemStack target = inventory.getItem(slot);
+            if (isEmpty(target)) {
+                int amount = Math.min(toPut, limit);
+                inventory.setItem(slot, stack.copyWithCount(amount));
+                toPut -= amount;
+            } else {
+                int space = limit - target.getCount();
+                int amount = Math.min(toPut, space);
+                target.grow(amount);
+                toPut -= amount;
+            }
+            if (toPut <= 0) break;
+        }
+        inventory.setChanged();
+        return true;
+    }
+
+    /** 1.12 dropItem: spawn the stack as an item entity at the block (respects the doTileDrops rule via popResource). */
+    public static void dropItem(net.minecraft.world.item.ItemStack itemStack, Coordonate coordonate) {
+        if (isEmpty(itemStack)) return;
+        net.minecraft.world.level.block.Block.popResource(coordonate.world(), coordonate.pos(), itemStack);
+    }
 }

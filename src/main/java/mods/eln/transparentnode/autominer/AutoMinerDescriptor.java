@@ -6,12 +6,10 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -53,7 +51,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     public AutoMinerDescriptor(String name, Obj3D obj, Coordonate[] powerCoord, Coordonate lightCoord,
                                Coordonate miningCoord, int deltaX, int deltaY, int deltaZ,
                                ElectricalCableDescriptor cable, double pipeOperationTime, double pipeOperationEnergy) {
-        super(name, AutoMinerElement.class, AutoMinerRender.class);
+        super(name, AutoMinerElement.class, null);
         this.nominalVoltage = cable.electricalNominalVoltage;
         this.pipeOperationEnergy = pipeOperationEnergy;
         pipeOperationPower = pipeOperationEnergy / pipeOperationTime;
@@ -117,75 +115,24 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.").split("\n"));
         list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
     }
+    // 26.x port: draw() removed (client rendering; redone in P3)
 
-    @SideOnly(Side.CLIENT)
-    void draw(boolean lampState, float[] buttonsState, boolean[] ledsAState, boolean[] ledsPState) {
-        GL11.glRotatef(-90, 0, 1, 0);
-        GL11.glTranslatef(0, -1.5f, 0);
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
 
-        for (int idx = 0; idx < buttonsCount; idx++) {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0, (1 - buttonsState[idx]) * 0.01f, 0);
-            if (buttons[idx] != null) buttons[idx].draw();
-            GL11.glPopMatrix();
-        }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-        UtilsClient.disableLight();
-        for (int idx = 0; idx < ledsACount; idx++) {
-            GL11.glColor3f(0, ledsAState[idx] ? 0 : 1, 0);
-            if (ledsA[idx] != null) ledsA[idx].draw();
-        }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-        for (int idx = 0; idx < ledsPCount; idx++) {
-            GL11.glColor3f(0, ledsPState[idx] ? 0 : 1, 0);
-            if (ledsP[idx] != null) ledsP[idx].draw();
-        }
-        UtilsClient.enableLight();
-        GL11.glColor3f(1, 1, 1);
-
-        UtilsClient.disableCulling();
-        core.draw();
-        gui.draw();
-        buttonFixed.draw();
-        lampSocket.draw();
-        if (lampState)
-            lampOff.draw();
-        else
-            lampOn.draw();
-        UtilsClient.enableCulling();
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glScalef(0.18f, 0.18f, 0.18f);
-            draw(false, buttonsStateDefault, ledsAStateDefault, ledsPStateDefault);
-        }
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    public Coordonate[] getPowerCoordonate(World w) {
+    public Coordonate[] getPowerCoordonate(Level w) {
         Coordonate[] temp = new Coordonate[powerCoord.length];
         for (int idx = 0; idx < temp.length; idx++) {
             temp[idx] = new Coordonate(powerCoord[idx]);
-            temp[idx].setDimention(w.provider.getDimension());
+            temp[idx].setDimention(mods.eln.misc.Dimensions.id(w));
         }
         return temp;
     }

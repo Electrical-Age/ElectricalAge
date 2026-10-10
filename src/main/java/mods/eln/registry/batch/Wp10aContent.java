@@ -1,6 +1,7 @@
 package mods.eln.registry.batch;
 
 import mods.eln.ElnContent;
+import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.FunctionTableYProtect;
@@ -39,7 +40,7 @@ public class Wp10aContent implements ElnContent {
         registerMagnetizer(36);
         registerPlateMachine(37);
         registerEggIncubator(41);
-        // registerAutoMiner(42): 26.x port, comes with the ores and lamps it depends on (see below)
+        registerAutoMiner(42);
     }
 
     public static ElectricalFurnaceDescriptor electricalFurnace;
@@ -308,7 +309,6 @@ public class Wp10aContent implements ElnContent {
         }
     }
 
-    /* 26.x port: deferred until mods.eln.ore and the lamp socket (LightBlockEntity) are ported.
     public static void registerAutoMiner(int id) {
         int subId, completId;
         String name;
@@ -348,5 +348,4 @@ public class Wp10aContent implements ElnContent {
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }
-    */
 }

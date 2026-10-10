@@ -55,6 +55,9 @@ public class Eln {
     /** 1.12 config mapGenerate.* defaults (production too): only tungsten; 1.12 forced cinnabar off in code. */
     public static boolean genCopper = false, genLead = false, genTungsten = true, genCinnabar = false;
 
+    /** 1.12 config balancing.autominerRange (10): maximum horizontal mining distance. */
+    public static int autominerRange = 10;
+
     /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10). */
     public static float xRayScannerRange = 5f;
 

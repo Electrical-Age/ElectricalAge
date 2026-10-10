@@ -5,8 +5,8 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.GhostNode;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 public class AutoMinerPowerNode extends GhostNode {
     private Direction front;
@@ -14,7 +14,7 @@ public class AutoMinerPowerNode extends GhostNode {
     private AutoMinerElement element;
 
     @Override
-    public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void initializeFromThat(Direction front, LivingEntity entityLiving, ItemStack itemStack) {
         this.front = front;
 
         connect();
@@ -47,11 +47,11 @@ public class AutoMinerPowerNode extends GhostNode {
         this.element = e;
     }
 
-    public void writeToNBT(net.minecraft.nbt.NBTTagCompound nbt, String str) {
+    public void writeToNBT(net.minecraft.nbt.CompoundTag nbt, String str) {
         front.writeToNBT(nbt, str + "front");
     }
 
-    public void readFromNBT(net.minecraft.nbt.NBTTagCompound nbt, String str) {
+    public void readFromNBT(net.minecraft.nbt.CompoundTag nbt, String str) {
         front = Direction.readFromNBT(nbt, str + "front");
     }
 }
