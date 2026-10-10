@@ -23,6 +23,7 @@ import net.neoforged.neoforge.common.NeoForge;
 public final class ElnClient {
     public ElnClient(IEventBus modBus) {
         ElnNet.clientHandler = ClientPacketHandler::packetRx;
+        mods.eln.sound.SoundCommand.clientPlayer = mods.eln.sound.SoundClient::play;
         UtilsClient.hooks = new ClientHooks();
         ClientRenders.registerAll();
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {

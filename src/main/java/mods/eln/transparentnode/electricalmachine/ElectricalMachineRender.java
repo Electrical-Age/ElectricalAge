@@ -37,7 +37,17 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
         drawHandle = this.descriptor.newDrawHandle();
 
         if (this.descriptor.runningSound != null) {
-            /* R4: looped sound */
+            addLoopedSound(new mods.eln.sound.LoopedSound(this.descriptor.runningSound, coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
+                @Override
+                public float getPitch() {
+                    return powerFactor;
+                }
+
+                @Override
+                public float getVolume() {
+                    return ElectricalMachineRender.this.descriptor.volumeForRunningSound(processState, powerFactor);
+                }
+            });
         }
     }
 

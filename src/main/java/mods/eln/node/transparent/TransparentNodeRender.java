@@ -40,7 +40,15 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             UtilsClient.glDefaultColor();
+            GL11.glPushMatrix();
             state.render.draw();
+            GL11.glPopMatrix();
+            if (state.render.burnt) {
+                frame.soot = true;
+                UtilsClient.glDefaultColor();
+                state.render.draw();
+                frame.soot = false;
+            }
         } catch (RuntimeException e) {
             ElnRenderErrors.report("transparent-node", e);
         } finally {

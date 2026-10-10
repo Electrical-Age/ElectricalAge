@@ -230,9 +230,15 @@ public final class UtilsClient {
         disableBlend();
     }
 
+    /** An item on a machine (1.12 drawEntityItem: an EntityItem rendered at x, y, z, turned by roty, scaled). */
     public static void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {
-        if (entityItem == null) return;
-        hooks.drawEntityItem(entityItem, x, y, z, roty, scale);
+        if (entityItem == null || entityItem.getItem().isEmpty()) return;
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float) x, (float) y, (float) z);
+        GL11.glRotatef(roty, 0, 1, 0);
+        GL11.glScalef(scale, scale, scale);
+        mods.eln.gl.GlFrame.current().extra(entityItem.getItem());
+        GL11.glPopMatrix();
     }
 
     public static boolean isGameInPause() {
@@ -351,5 +357,6 @@ public final class UtilsClient {
 
     /** Text in the world at the current GL11 matrix (1.12 FontRenderer.drawString in a TESR); R4. */
     public static void drawString(String text, int x, int y, int color) {
+        mods.eln.gl.GlFrame.current().text(text, x, y, color);
     }
 }

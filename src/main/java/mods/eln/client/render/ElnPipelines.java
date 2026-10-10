@@ -21,27 +21,27 @@ import java.util.Map;
  * EA's own entity pipelines (P3): the vanilla entity shader with 1.12's fixed-function choices. Shading from vertex
  * normals (vanilla's no-cull entity pipelines shade per face), GL_LIGHTING off = no directional lighting
  * (NO_CARDINAL_LIGHTING), blending off / alpha / additive (halos: SRC_ALPHA, ONE, no depth write), culling on or off.
- * Alpha-test cutoff 0.1 as 1.12's glAlphaFunc(GREATER, 0.1).
+ * Alpha-test cutoff 0.1 as 1.12's glAlphaFunc(GREATER, 0.1). Multiply (DST_COLOR, ZERO): the burnt overlay.
  */
 public final class ElnPipelines {
     private ElnPipelines() {
     }
 
-    static final RenderPipeline[] PIPES = new RenderPipeline[12];
+    static final RenderPipeline[] PIPES = new RenderPipeline[16];
     public static final List<RenderPipeline> ALL = new ArrayList<>();
 
     static int index(boolean cull, boolean lit, int blend) {
-        return (cull ? 6 : 0) + (lit ? 3 : 0) + blend;
+        return (cull ? 8 : 0) + (lit ? 4 : 0) + blend;
     }
 
     static {
         for (int c = 0; c < 2; c++)
             for (int l = 0; l < 2; l++)
-                for (int b = 0; b < 3; b++) {
+                for (int b = 0; b < 4; b++) {
                     boolean cull = c == 1, lit = l == 1;
                     RenderPipeline.Builder p = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
                         .withLocation(Identifier.fromNamespaceAndPath("eln", "pipeline/node_" + (cull ? "cull" : "nocull")
-                            + (lit ? "_lit" : "_unlit") + "_" + new String[]{"opaque", "alpha", "additive"}[b]))
+                            + (lit ? "_lit" : "_unlit") + "_" + new String[]{"opaque", "alpha", "additive", "multiply"}[b]))
                         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
                         .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
                         .withCull(cull);
@@ -49,7 +49,10 @@ public final class ElnPipelines {
                     switch (b) {
                         case 0 -> p.withColorTargetState(ColorTargetState.DEFAULT);
                         case 1 -> p.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT));
-                        default -> p.withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
+                        case 2 -> p.withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
+                            .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false));
+                        default -> p.withColorTargetState(new ColorTargetState(new BlendFunction(
+                                com.mojang.renderpearl.api.pipeline.BlendFactor.DST_COLOR, com.mojang.renderpearl.api.pipeline.BlendFactor.ZERO)))
                             .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false));
                     }
                     RenderPipeline built = p.build();
@@ -64,7 +67,8 @@ public final class ElnPipelines {
     public static RenderType type(GlFrame.Key key, Identifier texture) {
         int blend = switch (key.blend()) {
             case NONE -> 0;
-            case ALPHA, MULTIPLY -> 1;
+            case ALPHA -> 1;
+            case MULTIPLY -> 3;
             default -> 2;
         };
         int i = index(key.cull(), key.lit(), blend);

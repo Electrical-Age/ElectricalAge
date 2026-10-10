@@ -31,6 +31,7 @@ public final class GlSubmit {
 
     /** Submit every batch of the frame (call after GlFrame.close()); light = the block's packed light coords. */
     public static void submit(GlFrame frame, PoseStack poseStack, SubmitNodeCollector collector, int light) {
+        submitExtras(frame, collector, light);
         for (Map.Entry<GlFrame.Key, GlFrame.Batch> e : frame.batches().entrySet()) {
             GlFrame.Batch b = e.getValue();
             if (b.floats == 0) continue;
@@ -56,6 +57,28 @@ public final class GlSubmit {
                         .setNormal(d[i + 6], d[i + 7], d[i + 8]);
                 }
             });
+        }
+    }
+
+    /** Text and items the frame recorded, each at its own matrix (already in pose space). */
+    static void submitExtras(GlFrame frame, SubmitNodeCollector collector, int light) {
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        for (GlFrame.Extra e : frame.extras()) {
+            PoseStack ps = new PoseStack();
+            ps.last().pose().set(e.matrix());
+            ps.last().normal().set(new org.joml.Matrix3f(e.matrix()).invert().transpose());
+            if (e.payload() instanceof GlFrame.Text t) {
+                int argb = (t.color() & 0xFF000000) == 0 ? t.color() | 0xFF000000 : t.color();
+                collector.submitText(ps, t.x(), t.y(), net.minecraft.network.chat.Component.literal(t.text()).getVisualOrderText(), false,
+                    net.minecraft.client.gui.Font.DisplayMode.POLYGON_OFFSET, t.fullBright() ? LightCoordsUtil.FULL_BRIGHT : light, argb, 0, 0);
+            } else if (e.payload() instanceof net.minecraft.world.item.ItemStack stack) {
+                // 1.12 drew an EntityItem: half a block, bottom at the origin
+                ps.translate(0, 0.125f, 0);
+                ps.scale(0.5f, 0.5f, 0.5f);
+                var state = new net.minecraft.client.renderer.item.ItemStackRenderState();
+                mc.getItemModelResolver().updateForTopItem(state, stack, net.minecraft.world.item.ItemDisplayContext.GROUND, mc.level, null, 0);
+                state.submit(ps, collector, light, OverlayTexture.NO_OVERLAY, 0);
+            }
         }
     }
 }

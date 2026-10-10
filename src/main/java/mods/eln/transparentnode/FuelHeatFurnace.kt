@@ -281,7 +281,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     }
 
     init {
-        
+        addLoopedSound(sound)
     }
 
     override fun draw() {

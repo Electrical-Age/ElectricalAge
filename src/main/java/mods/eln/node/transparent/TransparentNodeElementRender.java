@@ -247,11 +247,14 @@ public abstract class TransparentNodeElementRender {
 
 
     public void play(SoundCommand s) {
-        // R4: client sounds
+        s.addUuid(getUuid());
+        s.set(tileEntity);
+        s.play();
     }
 
 
     public void destructor() {
+        for (mods.eln.sound.LoopedSound l : loopedSounds) l.setActive(false);
     }
 
     /** Looped sounds of this render (1.12 LoopedSoundManager); the client plays them (R4). */

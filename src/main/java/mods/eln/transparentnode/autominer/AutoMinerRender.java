@@ -59,7 +59,17 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             ledsPState[idx] = Math.random() > 0.5;
         }
 
-        /* R4: looped sound */
+        addLoopedSound(new mods.eln.sound.LoopedSound("eln:autominer", coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
+            @Override
+            public float getVolume() {
+                if (powerOk &&
+                    (job == AutoMinerSlowProcess.jobType.ore || job == AutoMinerSlowProcess.jobType.pipeAdd ||
+                        job == AutoMinerSlowProcess.jobType.pipeRemove))
+                    return 2.13f;
+                else
+                    return 0f;
+            }
+        });
     }
 
     private void pushLog(String string) {

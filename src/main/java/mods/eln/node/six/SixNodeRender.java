@@ -51,6 +51,17 @@ public class SixNodeRender implements BlockEntityRenderer<SixNodeEntity, SixNode
                 GL11.glTranslatef(-0.5f, 0f, 0f);
                 render.draw();
                 GL11.glPopMatrix();
+                if (render.burnt) {
+                    // 1.12 BurntRender.overlay: the same draw again, multiplied in soot
+                    frame.soot = true;
+                    UtilsClient.glDefaultColor();
+                    GL11.glPushMatrix();
+                    Direction.fromInt(idx).glRotateXnRef();
+                    GL11.glTranslatef(-0.5f, 0f, 0f);
+                    render.draw();
+                    GL11.glPopMatrix();
+                    frame.soot = false;
+                }
             }
         } catch (RuntimeException e) {
             ElnRenderErrors.report("six-node", e);

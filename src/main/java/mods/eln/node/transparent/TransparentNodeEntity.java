@@ -91,7 +91,10 @@ public class TransparentNodeEntity extends NodeBlockEntity {
 
     @Override
     public void clientRefresh(float deltaT) {
-        if (elementRender != null) elementRender.refresh(deltaT);
+        if (elementRender != null) {
+            elementRender.refresh(deltaT);
+            if (elementRender.burnt) burntSmoke();
+        }
     }
 
     @Override

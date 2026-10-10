@@ -23,6 +23,14 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
     var firePresent = false
     var ledOn = false
 
+    init {
+        if (this.descriptor.batteryPowered) {
+            addLoopedSound(object : LoopedSound("eln:firealarm", Coordonate(tileEntity.blockPos, tileEntity.level), LoopedSound.Attenuation.LINEAR) {
+                override fun getVolume() = if (firePresent) 1f else 0f
+            })
+        }
+    }
+
     override fun draw() {
         super.draw()
 

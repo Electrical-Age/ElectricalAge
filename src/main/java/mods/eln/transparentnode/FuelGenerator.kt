@@ -229,7 +229,7 @@ class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
 
     init {
         this.descriptor = descriptor as FuelGeneratorDescriptor
-        
+        addLoopedSound(sound)
     }
 
     override fun draw() {

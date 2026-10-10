@@ -40,5 +40,6 @@ public final class FrameTime {
             }
             e.clientRefresh(dt);
         }
+        mods.eln.sound.LoopedSoundPlayer.update(dt);
     }
 }

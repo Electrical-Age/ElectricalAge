@@ -50,6 +50,37 @@ public final class GlFrame {
         }
     }
 
+    /**
+     * Something a renderer submits itself at the matrix of the moment (pose space): in-world text, an item. Payload:
+     * {@link Text} or an ItemStack (as 1.12's entity-item drawing: spinning on machines).
+     */
+    public record Extra(Matrix4f matrix, Object payload) {
+    }
+
+    public record Text(String text, int x, int y, int color, boolean fullBright) {
+    }
+
+    private final ArrayList<Extra> extras = new ArrayList<>();
+
+    /** Burnt overlay (1.12 BurntRender): everything drawn while set is multiplied into the frame in a soot colour. */
+    public boolean soot;
+    static final float SOOT = Float.intBitsToFloat(0xFF4D4238); // 0.30, 0.26, 0.22
+
+    public List<Extra> extras() {
+        return extras;
+    }
+
+    /** Record an extra at the current matrix (dropped when compiling a display list or in the discarding frame). */
+    public void extra(Object payload) {
+        if (discard || rec != null) return;
+        extras.add(new Extra(new Matrix4f(stack[depth]), payload));
+    }
+
+    /** In-world text at the current matrix (1.12 FontRenderer.drawString in a TESR). */
+    public void text(String text, int x, int y, int color) {
+        extra(new Text(text, x, y, color, fullBright || !lighting));
+    }
+
     private static final GlFrame DISCARD = new GlFrame(true);
     private static final GlFrame FRAME = new GlFrame(false);
     private static GlFrame current = DISCARD;
@@ -142,6 +173,8 @@ public final class GlFrame {
         blendMode = Blend.ALPHA;
         attribs.clear();
         batches.clear();
+        extras.clear();
+        soot = false;
         droppedVertices = 0;
         rec = null;
         mode = -1;
@@ -372,7 +405,7 @@ public final class GlFrame {
     /** The batch for the current state (cached while the state doesn't change). */
     private Batch batch() {
         Identifier t = texture2d ? texture : null;
-        Blend bl = blend ? blendMode : Blend.NONE;
+        Blend bl = soot ? Blend.MULTIPLY : blend ? blendMode : Blend.NONE;
         Key k = lastKey;
         if (k == null || k.texture != t || k.blend != bl || k.cull != cull || k.fullBright != fullBright || k.lit != lighting) {
             k = new Key(t, bl, cull, fullBright, lighting);
@@ -509,6 +542,7 @@ public final class GlFrame {
 
     /** Lines: transformed pairs into the line batch; u = width, normal = direction. */
     private void emitLines(float[] q, int floats, boolean colored) {
+        if (soot) return;
         Key k = new Key(null, Blend.LINES, false, fullBright, false);
         Batch out = batches.get(k);
         if (out == null) {
@@ -577,7 +611,8 @@ public final class GlFrame {
         }
         float n00 = normalMatrix.m00, n01 = normalMatrix.m01, n02 = normalMatrix.m02, n10 = normalMatrix.m10,
             n11 = normalMatrix.m11, n12 = normalMatrix.m12, n20 = normalMatrix.m20, n21 = normalMatrix.m21, n22 = normalMatrix.m22;
-        float col = Float.intBitsToFloat(argb(r, g, b, a));
+        float col = soot ? SOOT : Float.intBitsToFloat(argb(r, g, b, a));
+        if (soot) colored = false;
         for (int i = 0; i < floats; i += STRIDE) {
             float x = q[i], y = q[i + 1], z = q[i + 2];
             d[o] = m00 * x + m10 * y + m20 * z + m30;

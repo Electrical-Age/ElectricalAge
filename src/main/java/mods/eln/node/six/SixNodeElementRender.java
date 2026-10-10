@@ -182,10 +182,13 @@ public abstract class SixNodeElementRender {
     }
 
     public void play(SoundCommand s) {
-        // R4: client sounds
+        s.addUuid(getUuid());
+        s.set(tileEntity);
+        s.play();
     }
 
     public void destructor() {
+        for (mods.eln.sound.LoopedSound l : loopedSounds) l.setActive(false);
         if (glListEnable()) {
             UtilsClient.glDeleteListsSafe(glList);
         }

@@ -26,7 +26,17 @@ public class TurbineRender extends TransparentNodeElementRender {
     public TurbineRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (TurbineDescriptor) descriptor;
-        /* R4: looped sound */
+        addLoopedSound(new mods.eln.sound.LoopedSound(this.descriptor.soundFile, coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
+            @Override
+            public float getVolume() {
+                return 0.1f * factorLimiter.getPosition();
+            }
+
+            @Override
+            public float getPitch() {
+                return 0.9f + 0.2f * factorLimiter.getPosition();
+            }
+        });
     }
 
     @Override

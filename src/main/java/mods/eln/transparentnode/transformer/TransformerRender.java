@@ -25,7 +25,16 @@ public class TransformerRender extends TransparentNodeElementRender {
     public TransformerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (TransformerDescriptor) descriptor;
-        /* R4: looped sound */
+        addLoopedSound(new mods.eln.sound.LoopedSound("eln:transformer", coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
+            @Override
+            public float getVolume() {
+                if (load.getPosition() > TransformerRender.this.descriptor.minimalLoadToHum)
+                    return 0.1f * (load.getPosition() - TransformerRender.this.descriptor.minimalLoadToHum) /
+                        (1 - TransformerRender.this.descriptor.minimalLoadToHum);
+                else
+                    return 0f;
+            }
+        });
 
         coordinate = new Coordonate(tileEntity);
         doorOpen = new PhysicalInterpolator(0.4f, 4.0f, 0.9f, 0.05f);

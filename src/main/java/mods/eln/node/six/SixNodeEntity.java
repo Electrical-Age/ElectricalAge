@@ -131,7 +131,11 @@ public class SixNodeEntity extends NodeBlockEntity {
 
     @Override
     public void clientRefresh(float deltaT) {
-        for (SixNodeElementRender e : elementRenderList) if (e != null) e.refresh(deltaT);
+        for (SixNodeElementRender e : elementRenderList) {
+            if (e == null) continue;
+            e.refresh(deltaT);
+            if (e.burnt) burntSmoke();
+        }
     }
 
     @Override

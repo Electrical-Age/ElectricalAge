@@ -31,6 +31,10 @@ public final class ClientPacketHandler {
                 switch (stream.readByte()) {
                     case Eln.packetNodeSingleSerialized -> forNode(stream, level, true);
                     case Eln.packetForClientNode -> forNode(stream, level, false);
+                    case Eln.packetPlaySound -> {
+                        if (stream.readInt() == Dimensions.id(level))
+                            mods.eln.sound.SoundClient.play(mods.eln.sound.SoundCommand.fromStream(stream, level));
+                    }
                     default -> {
                     }
                 }

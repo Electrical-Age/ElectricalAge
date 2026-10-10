@@ -83,7 +83,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
         val sound = this.desc.sound
         if (sound != null) {
             soundLooper = ShaftSoundLooper(sound, coordonate())
-            
+            addLoopedSound(soundLooper)
         } else {
             soundLooper = null
         }

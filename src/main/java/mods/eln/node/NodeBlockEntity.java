@@ -128,6 +128,15 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
     public void clientRefresh(float deltaT) {
     }
 
+    private static final java.util.Random SMOKE_RANDOM = new java.util.Random();
+
+    /** A wisp of smoke from a burnt device now and then (1.12 BurntRender.smoke: about every 3 s at 60 fps). */
+    protected void burntSmoke() {
+        if (level == null || SMOKE_RANDOM.nextInt(180) != 0) return;
+        level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, worldPosition.getX() + 0.3 + SMOKE_RANDOM.nextDouble() * 0.4,
+            worldPosition.getY() + 0.5 + SMOKE_RANDOM.nextDouble() * 0.3, worldPosition.getZ() + 0.3 + SMOKE_RANDOM.nextDouble() * 0.4, 0, 0.03, 0);
+    }
+
     /** Client: a neighbour block entity appeared (cables reconnect their drawing). */
     public void tileEntityNeighborSpawn() {
     }
