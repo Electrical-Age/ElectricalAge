@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "c": "eln:low_voltage_cable"
+  },
+  "pattern": [
+    "RIR",
+    "III",
+    "RcR"
+  ],
+  "result": {
+    "id": "eln:weak_50v_battery_charger"
+  }
+}

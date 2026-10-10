@@ -23,6 +23,7 @@ eclipse
 *.json
 !src/main/resources/**/*.json
 !golden/**/*.json
+!src/generated/**/*.json
 # kate
 *.kate-swp
 *.launch

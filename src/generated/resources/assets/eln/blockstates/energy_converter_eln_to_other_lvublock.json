@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "eln:block/energy_converter"
+      }
+    }
+  ]
+}

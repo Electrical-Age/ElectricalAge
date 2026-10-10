@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "eln:alloy_plate",
+    "C": "eln:low_voltage_cable",
+    "R": "#c:rubbers",
+    "U": "eln:copper_plate"
+  },
+  "pattern": [
+    "RUR",
+    "ACA"
+  ],
+  "result": {
+    "count": 16,
+    "id": "eln:50v_power_socket"
+  }
+}

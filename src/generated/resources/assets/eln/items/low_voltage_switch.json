@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "eln:item/low_voltage_switch"
+  }
+}

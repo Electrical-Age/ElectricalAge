@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "eln:small_solar_panel"
+  },
+  "pattern": [
+    "ISI",
+    "I I"
+  ],
+  "result": {
+    "id": "eln:small_rotating_solar_panel"
+  }
+}

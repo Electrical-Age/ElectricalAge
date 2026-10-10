@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:portable_battery",
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot",
+    "L": "eln:50v_incandescent_light_bulb"
+  },
+  "pattern": [
+    "GLG",
+    "IBI",
+    " I "
+  ],
+  "result": {
+    "id": "eln:small_flashlight"
+  }
+}

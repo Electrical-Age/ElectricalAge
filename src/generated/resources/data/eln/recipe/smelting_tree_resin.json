@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "ingredient": "eln:tree_resin",
+  "result": {
+    "id": "eln:rubber"
+  }
+}

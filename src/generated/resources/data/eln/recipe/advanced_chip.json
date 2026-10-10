@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "L": "#c:ingots/silicon",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "LRL",
+    "RCR",
+    "LRL"
+  ],
+  "result": {
+    "id": "eln:advanced_chip"
+  }
+}

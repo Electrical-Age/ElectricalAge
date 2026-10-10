@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "D": "#c:plates/alloy",
+    "M": "eln:advanced_machine_block",
+    "c": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "DCD",
+    "DMD",
+    "DcD"
+  ],
+  "result": {
+    "id": "eln:200v_plate_machine"
+  }
+}

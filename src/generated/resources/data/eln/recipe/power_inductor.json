@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "P": "#c:plates/iron",
+    "c": "eln:copper_cable"
+  },
+  "pattern": [
+    " P ",
+    "cIc",
+    "IPI"
+  ],
+  "result": {
+    "id": "eln:power_inductor"
+  }
+}

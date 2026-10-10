@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "I": "#c:plates/iron"
+  },
+  "pattern": [
+    "I  ",
+    " IC",
+    "I  "
+  ],
+  "result": {
+    "id": "eln:medium_power_receiver_antenna"
+  }
+}

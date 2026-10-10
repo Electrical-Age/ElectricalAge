@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:signal_cable",
+    "S": "eln:electrical_probe_chip"
+  },
+  "pattern": [
+    "SC"
+  ],
+  "result": {
+    "id": "eln:voltage_probe"
+  }
+}

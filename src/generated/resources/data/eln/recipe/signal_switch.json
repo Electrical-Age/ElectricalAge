@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "R": "minecraft:redstone",
+    "c": "eln:signal_cable",
+    "r": "#c:rubbers"
+  },
+  "pattern": [
+    " r ",
+    "rRr",
+    " c "
+  ],
+  "result": {
+    "count": 3,
+    "id": "eln:signal_switch"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:dusts/coal",
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "GCG",
+    "GIG"
+  ],
+  "result": {
+    "count": 2,
+    "id": "eln:sconce_lamp_socket"
+  }
+}

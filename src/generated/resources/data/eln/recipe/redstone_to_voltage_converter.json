@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "S": "eln:signal_cable",
+    "T": "minecraft:redstone_torch"
+  },
+  "pattern": [
+    "TCS"
+  ],
+  "result": {
+    "id": "eln:redstone_to_voltage_converter"
+  }
+}

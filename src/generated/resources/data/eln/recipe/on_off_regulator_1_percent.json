@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "RRR",
+    " I "
+  ],
+  "result": {
+    "id": "eln:on_off_regulator_1"
+  }
+}

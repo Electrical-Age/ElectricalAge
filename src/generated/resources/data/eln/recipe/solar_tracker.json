@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "Q": "minecraft:quartz",
+    "R": "minecraft:redstone",
+    "V": "minecraft:glass_pane"
+  },
+  "pattern": [
+    "VVV",
+    "RQR",
+    "III"
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:solar_tracker"
+  }
+}

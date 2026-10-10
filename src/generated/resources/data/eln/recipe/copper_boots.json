@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:ingots/copper"
+  },
+  "pattern": [
+    "C C",
+    "C C"
+  ],
+  "result": {
+    "id": "eln:copper_boots"
+  }
+}

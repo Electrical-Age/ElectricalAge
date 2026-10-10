@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "I": "#c:ingots/alloy",
+    "M": "eln:advanced_machine_block",
+    "c": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "ICI",
+    "cMc",
+    "III"
+  ],
+  "result": {
+    "id": "eln:200v_magnetizer"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:small_200v_iron_heating_corp"
+  },
+  "pattern": [
+    "CC"
+  ],
+  "result": {
+    "id": "eln:200v_iron_heating_corp"
+  }
+}

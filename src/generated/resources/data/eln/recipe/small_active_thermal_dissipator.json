@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "eln:small_passive_thermal_dissipator",
+    "M": "eln:electrical_motor",
+    "R": "#c:rubbers"
+  },
+  "pattern": [
+    "RMR",
+    " D "
+  ],
+  "result": {
+    "id": "eln:small_active_thermal_dissipator"
+  }
+}

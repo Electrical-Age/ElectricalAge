@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "L": "minecraft:iron_ingot",
+    "c": "eln:copper_cable"
+  },
+  "pattern": [
+    "LLL",
+    "LcL",
+    "LLL"
+  ],
+  "result": {
+    "id": "eln:machine_block"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "c": "eln:low_voltage_cable",
+    "r": "eln:rubber"
+  },
+  "pattern": [
+    "rcr"
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:lead_fuse_for_low_voltage_cables"
+  }
+}

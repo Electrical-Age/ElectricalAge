@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "eln:item/cheap_ferromagnetic_core"
+  }
+}

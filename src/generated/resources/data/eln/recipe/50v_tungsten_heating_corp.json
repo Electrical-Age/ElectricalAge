@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:tungsten_ingot"
+  },
+  "pattern": [
+    "C C",
+    "CCC",
+    "C C"
+  ],
+  "result": {
+    "id": "eln:50v_tungsten_heating_corp"
+  }
+}

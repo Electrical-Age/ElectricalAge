@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:portable_battery",
+    "I": "minecraft:iron_ingot",
+    "M": "eln:electrical_motor",
+    "T": "minecraft:iron_axe"
+  },
+  "pattern": [
+    " T ",
+    "IMI",
+    "IBI"
+  ],
+  "result": {
+    "id": "eln:portable_electrical_axe"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:redstone",
+    "R": "#c:rubbers",
+    "c": "#c:plates/copper",
+    "w": "eln:copper_cable"
+  },
+  "pattern": [
+    "RcR",
+    "wCw",
+    "RcR"
+  ],
+  "result": {
+    "id": "eln:portable_capacitor"
+  }
+}

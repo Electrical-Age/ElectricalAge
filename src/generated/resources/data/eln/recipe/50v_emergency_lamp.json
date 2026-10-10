@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "b": "eln:portable_battery_pack",
+    "c": "eln:low_voltage_cable",
+    "g": "minecraft:glass_pane",
+    "l": "eln:50v_led_bulb"
+  },
+  "pattern": [
+    "cbc",
+    " l ",
+    " g "
+  ],
+  "result": {
+    "id": "eln:50v_emergency_lamp"
+  }
+}

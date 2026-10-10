@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:ingots/copper"
+  },
+  "pattern": [
+    "III"
+  ],
+  "result": {
+    "count": 6,
+    "id": "eln:copper_cable"
+  }
+}

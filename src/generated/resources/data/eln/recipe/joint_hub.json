@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/iron"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "i": "#c:ingots/iron",
+    "m": "eln:machine_block"
+  },
+  "pattern": [
+    " i ",
+    "iii",
+    " m "
+  ],
+  "result": {
+    "id": "eln:joint_hub"
+  }
+}

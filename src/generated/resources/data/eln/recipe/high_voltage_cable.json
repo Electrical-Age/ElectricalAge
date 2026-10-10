@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:medium_voltage_cable",
+    "R": "#c:rubbers"
+  },
+  "pattern": [
+    "R",
+    "C"
+  ],
+  "result": {
+    "id": "eln:high_voltage_cable"
+  }
+}

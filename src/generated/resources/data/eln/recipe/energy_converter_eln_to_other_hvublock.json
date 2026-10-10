@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:gold_ingot",
+    "c": "eln:high_voltage_cable"
+  },
+  "pattern": [
+    "III",
+    "cCR",
+    "III"
+  ],
+  "result": {
+    "id": "eln:energy_converter_eln_to_other_hvublock"
+  }
+}

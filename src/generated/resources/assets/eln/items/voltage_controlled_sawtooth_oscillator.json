@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "eln:item/voltage_controlled_sawtooth_oscillator"
+  }
+}

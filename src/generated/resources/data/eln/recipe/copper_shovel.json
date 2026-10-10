@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "i": "#c:ingots/copper",
+    "s": "minecraft:stick"
+  },
+  "pattern": [
+    "i",
+    "s",
+    "s"
+  ],
+  "result": {
+    "id": "eln:copper_shovel"
+  }
+}

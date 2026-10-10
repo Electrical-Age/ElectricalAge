@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "#c:rubbers",
+    "C": "eln:very_high_voltage_cable",
+    "I": "eln:copper_cable"
+  },
+  "pattern": [
+    "AAI",
+    "AIA",
+    "CAC"
+  ],
+  "result": {
+    "id": "eln:very_high_voltage_switch"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_cable"
+  },
+  "pattern": [
+    " C ",
+    " C ",
+    "CCC"
+  ],
+  "result": {
+    "id": "eln:ground_cable"
+  }
+}

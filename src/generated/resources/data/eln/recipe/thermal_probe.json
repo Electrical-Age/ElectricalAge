@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:signal_cable",
+    "S": "eln:thermal_probe_chip"
+  },
+  "pattern": [
+    "SCS"
+  ],
+  "result": {
+    "id": "eln:thermal_probe"
+  }
+}

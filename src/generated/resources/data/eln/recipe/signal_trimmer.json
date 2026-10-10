@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "R": "minecraft:redstone",
+    "c": "eln:signal_cable",
+    "r": "#c:rubbers",
+    "s": "minecraft:stick"
+  },
+  "pattern": [
+    "RsR",
+    "rRr",
+    " c "
+  ],
+  "result": {
+    "id": "eln:signal_trimmer"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "a": "#c:circuits/advanced",
+    "p": "#c:plates/copper",
+    "r": "#c:rubbers"
+  },
+  "pattern": [
+    "rar",
+    "p p",
+    "r r"
+  ],
+  "result": {
+    "id": "eln:electrical_fire_buzzer"
+  }
+}

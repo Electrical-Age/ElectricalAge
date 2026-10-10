@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "P": "#c:plates/copper",
+    "c": "eln:copper_cable",
+    "s": "#c:dusts/silicon"
+  },
+  "pattern": [
+    " P ",
+    "csc",
+    "IPI"
+  ],
+  "result": {
+    "id": "eln:thermistor"
+  }
+}

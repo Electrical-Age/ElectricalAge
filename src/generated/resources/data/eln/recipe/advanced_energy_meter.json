@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "eln:iron_plate",
+    "R": "#c:circuits/advanced",
+    "c": "eln:copper_cable"
+  },
+  "pattern": [
+    " c ",
+    "PRP",
+    " c "
+  ],
+  "result": {
+    "id": "eln:advanced_energy_meter"
+  }
+}

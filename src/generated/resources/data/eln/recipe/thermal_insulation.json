@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "S": "minecraft:stone",
+    "W": "minecraft:white_wool"
+  },
+  "pattern": [
+    "WSW",
+    "SWS",
+    "WSW"
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:thermal_insulation"
+  }
+}

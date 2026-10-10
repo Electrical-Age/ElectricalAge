@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    " I ",
+    "I I"
+  ],
+  "result": {
+    "count": 3,
+    "id": "eln:fluorescent_lamp_socket"
+  }
+}

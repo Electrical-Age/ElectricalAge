@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:gray_wool",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "life": 0
+      }
+    },
+    "id": "eln:white_brush"
+  }
+}

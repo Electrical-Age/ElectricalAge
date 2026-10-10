@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:multimeter",
+    "eln:thermometer"
+  ],
+  "result": {
+    "id": "eln:universal_meter"
+  }
+}

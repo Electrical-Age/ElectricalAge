@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "#c:rubbers",
+    "I": "eln:iron_cable",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " RB",
+    "IIR",
+    " RB"
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:signal_diode"
+  }
+}

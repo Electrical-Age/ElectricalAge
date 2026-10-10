@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:high_voltage_cable",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    " R ",
+    "RCR",
+    " R "
+  ],
+  "result": {
+    "id": "eln:electrical_probe_chip"
+  }
+}

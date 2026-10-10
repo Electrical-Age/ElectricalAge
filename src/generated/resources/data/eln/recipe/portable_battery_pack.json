@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:portable_battery",
+    "eln:portable_battery",
+    "eln:portable_battery"
+  ],
+  "result": {
+    "id": "eln:portable_battery_pack"
+  }
+}

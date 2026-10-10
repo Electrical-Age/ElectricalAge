@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "I": "#c:plates/iron",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "i  ",
+    " IC",
+    "i  "
+  ],
+  "result": {
+    "id": "eln:low_power_receiver_antenna"
+  }
+}

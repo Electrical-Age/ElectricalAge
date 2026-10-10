@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "c": "eln:copper_cable",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    " cr",
+    "cCc",
+    " c "
+  ],
+  "result": {
+    "id": "eln:configurable_summing_unit"
+  }
+}

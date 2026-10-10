@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:portable_capacitor",
+    "eln:portable_capacitor",
+    "eln:portable_capacitor"
+  ],
+  "result": {
+    "id": "eln:portable_capacitor_pack"
+  }
+}

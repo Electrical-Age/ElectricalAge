@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:portable_battery",
+    "I": "minecraft:iron_ingot",
+    "T": "eln:average_electrical_drill"
+  },
+  "pattern": [
+    " T ",
+    "IBI",
+    " I "
+  ],
+  "result": {
+    "id": "eln:portable_electrical_mining_drill"
+  }
+}

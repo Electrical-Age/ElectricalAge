@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_cable"
+  },
+  "pattern": [
+    "C C",
+    "CCC",
+    "C C"
+  ],
+  "result": {
+    "id": "eln:small_50v_copper_heating_corp"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "G": "minecraft:gold_ingot",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IGI",
+    "RCR",
+    "IGI"
+  ],
+  "result": {
+    "id": "eln:ore_scanner"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "L": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "LLL",
+    "L  ",
+    "LLL"
+  ],
+  "result": {
+    "id": "eln:cheap_ferromagnetic_core"
+  }
+}

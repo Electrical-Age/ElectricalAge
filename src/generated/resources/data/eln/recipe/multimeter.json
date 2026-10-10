@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:electrical_probe_chip",
+    "E": "minecraft:redstone",
+    "G": "minecraft:glass_pane",
+    "R": "#c:rubbers"
+  },
+  "pattern": [
+    "RGR",
+    "RER",
+    "RCR"
+  ],
+  "result": {
+    "id": "eln:multimeter"
+  }
+}

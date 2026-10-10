@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:cost_oriented_battery",
+    "P": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "PPP",
+    "PBP",
+    "PPP"
+  ],
+  "result": {
+    "id": "eln:voltage_oriented_battery"
+  }
+}
