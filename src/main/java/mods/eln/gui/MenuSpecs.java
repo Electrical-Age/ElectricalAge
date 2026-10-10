@@ -162,7 +162,7 @@ public final class MenuSpecs {
                 MEDIUM, tr("Copper cable slot"), tr("(Increases inductance)")),
             descriptor(mods.eln.transparentnode.powerinductor.PowerInductorContainer.coreId, 132 + 20, 8, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot"))));
-        put(mods.eln.transparentnode.solarpanel.SolarPanelDescriptor.class, d -> MenuSpec.of(
+        put(mods.eln.transparentnode.solarpanel.SolarPanelDescriptor.class, d -> !d.canRotate ? MenuSpec.SCREEN_ONLY : MenuSpec.of(
             descriptor(mods.eln.transparentnode.solarpanel.SolarPanelContainer.trackerSlotId, 176 / 2 - 20, 35, 1,
                 SolarTrackerDescriptor.class, MEDIUM, tr("Solar tracker slot"))).publishing(0));
         put(mods.eln.transparentnode.transformer.TransformerDescriptor.class, d -> MenuSpec.of(

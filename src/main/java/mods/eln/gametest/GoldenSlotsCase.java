@@ -227,6 +227,12 @@ final class GoldenSlotsCase implements TestCase {
         for (String k : known) ctx.line("INFO golden slots: known difference: " + k);
         ctx.check("golden slots: devices", devices == golden.size(), devices + " of " + golden.size());
         ctx.check("golden slots: slots match", slotsOk == slotsAll, slotsOk + " of " + slotsAll);
+        // every descriptor with slots is a golden device: a subclass inheriting a spec 1.12 didn't give it would show here
+        Set<String> goldenNames = new HashSet<>();
+        for (JsonElement e : golden) goldenNames.add(e.getAsJsonObject().get("device").getAsString());
+        for (var e : byName.entrySet())
+            if (MenuSpecs.of(e.getValue()) != MenuSpec.SCREEN_ONLY && !goldenNames.contains(e.getKey()))
+                ctx.check("golden slots: " + e.getKey() + " has no 1.12 container", false, "spec from " + MenuSpecs.registeredClass(e.getValue()).getSimpleName());
         // a spec the 1.12 dump doesn't know would be a container 1.12 didn't have
         for (Class<?> c : MenuSpecs.registered())
             ctx.check("golden slots: " + c.getSimpleName() + " in the 1.12 dump", seen.contains(c), "spec without a 1.12 container");

@@ -80,7 +80,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     //double efficiency;
     double electricalRs;
 
-    boolean canRotate;
+    public boolean canRotate;
 
     public void applyTo(ElectricalLoad load) {
         load.setRs(electricalRs);
