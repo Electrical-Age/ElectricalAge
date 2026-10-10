@@ -27,6 +27,9 @@ import mods.eln.misc.Utils;
  */
 @SuppressWarnings({"SameParameterValue", "PointlessArithmeticExpression", "unused"})
 public final class ElnDeviceRegistry {
+    /** Registered with the shared items (1.12 Wp12); null until then. */
+    public static mods.eln.item.TreeResin treeResin;
+
     private ElnDeviceRegistry() {
     }
 

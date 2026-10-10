@@ -18,6 +18,13 @@ import org.slf4j.LoggerFactory;
 @Mod(Eln.MODID)
 public class Eln {
     /** Global wind state (1.12: Eln.wind); saved with the overworld. */
+    /** Wireless signal transmitter range (1.12 config wireless.txRange, default 32). */
+    public static int wirelessTxRange = 32;
+
+    public static boolean modbusEnable = false; // 1.12 port: Modbus TCP server dropped; RTU devices stay off
+
+    public static mods.eln.server.ServerEventListener serverEventListener;
+
     public static mods.eln.misc.WindProcess wind = new mods.eln.misc.WindProcess();
 
     public static final String MODID = "eln";
@@ -33,7 +40,8 @@ public class Eln {
     /** Device batches ported from 1.12 (registry/batch), in the 1.12 order. */
     public static final java.util.List<ElnContent> CONTENT = java.util.List.of(
         new mods.eln.registry.batch.Wp9aContent(),
-        new mods.eln.registry.batch.Wp9bContent());
+        new mods.eln.registry.batch.Wp9bContent(),
+        new mods.eln.registry.batch.Wp9cContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -154,11 +162,13 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, e -> {
             simulator.stop();
             for (ElnContent c : CONTENT) c.serverStopped();
+            serverEventListener.clear();
             nodeManager.clear();
             ghostManager.clear();
         });
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
+        serverEventListener = new mods.eln.server.ServerEventListener();
         obj.loadAllElnModels();
         mods.eln.registry.ElnDeviceRegistry.registerBatch1();
         for (ElnContent c : CONTENT) c.preInit();

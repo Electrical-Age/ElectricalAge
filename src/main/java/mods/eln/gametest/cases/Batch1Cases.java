@@ -183,6 +183,11 @@ public final class Batch1Cases {
 
     /** Reflection read of a (private) field, as the 1.12 cases' field() helper. */
     @SuppressWarnings("unchecked")
+    /** p moved one block toward d. */
+    static net.minecraft.core.BlockPos off(net.minecraft.core.BlockPos p, mods.eln.misc.Direction d) {
+        return p.relative(d.toEnumFacing());
+    }
+
     static <T> T field(Object o, String name) {
         for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
             try {

@@ -478,4 +478,30 @@ public class Utils {
         double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
         return norm;
     }
+
+    public static short modbusToShort(double outputNormalized, int i) {
+        int bit = Float.floatToRawIntBits((float) outputNormalized);
+        if (i == 1)
+            return (short) bit;
+        else
+            return (short) (bit >>> 16);
+    }
+    public static float modbusToFloat(short first, short second) {
+        int bit = ((((int) first) & 0xFFFF) << 16) + (((int) second) & 0xFFFF);
+        return Float.intBitsToFloat(bit);
+    }
+
+    /** The world save folder, with a trailing slash (1.12: DimensionManager save root). */
+    public static String getMapFolder() {
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        return server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).toString() + "/";
+    }
+
+    public static java.io.File getMapFile(String name) {
+        return new java.io.File(getMapFolder() + name);
+    }
+
+    public static String readMapFile(String name) throws java.io.IOException {
+        return new String(java.nio.file.Files.readAllBytes(getMapFile(name).toPath()), java.nio.charset.StandardCharsets.UTF_8);
+    }
 }
