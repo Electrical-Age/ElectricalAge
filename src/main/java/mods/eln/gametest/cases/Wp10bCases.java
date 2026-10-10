@@ -117,7 +117,7 @@ public final class Wp10bCases {
     }
 
     /** Place with the fake player's view chosen so that the placed element's front is `front` (PlayerViewHorizontal). */
-    static TransparentNodeElement placeFacing(TestContext ctx, int damage, BlockPos p, Direction front) {
+    public static TransparentNodeElement placeFacing(TestContext ctx, int damage, BlockPos p, Direction front) {
         FakePlayer fp = player(ctx);
         TransparentNodeDescriptor d = Eln.transparentNodeItem.getDescriptor(damage);
         Direction clicked = Direction.fromIntMinecraftSide(net.minecraft.core.Direction.UP.get3DDataValue()).getInverse();

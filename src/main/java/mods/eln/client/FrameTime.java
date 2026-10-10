@@ -21,6 +21,7 @@ public final class FrameTime {
     }
 
     public static void onFrame(RenderFrameEvent.Pre event) {
+        mods.eln.gl.GlFrame.beginRenderFrame();
         long now = System.nanoTime();
         if (boot) boot = false;
         else deltaT = (now - oldNanoTime) * 1e-9f;

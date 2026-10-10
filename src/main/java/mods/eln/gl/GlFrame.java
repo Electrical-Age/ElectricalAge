@@ -3,9 +3,9 @@ package mods.eln.gl;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,9 +14,13 @@ import java.util.function.Consumer;
 
 /**
  * The state machine behind {@link GL11}: one frame per drawn node (opened by the client renderer, which then submits
- * {@link #batches()}). Vertices are transformed by the frame's own matrix stack into the node's frame and grouped by
- * {@link Key} (texture, blending, culling, lighting); every polygon mode becomes quads (a triangle repeats its last
- * vertex). Outside a frame every call goes to a frame that discards, so stray draw calls do no harm.
+ * {@link #batches()}). Vertices are transformed by the frame's matrix stack, which starts at the renderer's pose, and
+ * grouped by {@link Key} (texture, blending, culling, full-bright); every polygon mode becomes quads (a triangle repeats
+ * its last vertex). Outside a frame every call goes to a frame that discards, so stray draw calls do no harm.
+ * <p>
+ * Display lists (EA compiles every OBJ face group into one) are compiled into quads in list space plus the few state
+ * calls between them; calling a list transforms those quads straight into the batches. Batches come from a pool reset
+ * once per rendered frame ({@link #beginRenderFrame}), because the submitted geometry is read later in the frame.
  * Render thread only.
  */
 public final class GlFrame {
@@ -34,11 +38,11 @@ public final class GlFrame {
     public static final int STRIDE = 9;
 
     public static final class Batch {
-        public float[] data = new float[STRIDE * 64];
+        public float[] data = new float[STRIDE * 256];
         public int floats;
 
         void ensure(int more) {
-            if (floats + more > data.length) data = java.util.Arrays.copyOf(data, Math.max(data.length * 2, floats + more));
+            if (floats + more > data.length) data = Arrays.copyOf(data, Math.max(data.length * 2, floats + more));
         }
 
         public int vertices() {
@@ -55,16 +59,40 @@ public final class GlFrame {
         return current;
     }
 
-    /** Open the frame for one node's draw: identity matrix, 1.12 TESR defaults (texture, lighting and culling on). */
+    /** Open the frame with an identity base (tests). */
     public static GlFrame open() {
-        FRAME.reset();
+        return open(null, null);
+    }
+
+    /**
+     * Open the frame for one node's draw, with the renderer's pose as the base matrix (vertices come out in the pose's
+     * space). 1.12 TESR defaults: texture, lighting and culling on, white.
+     */
+    public static GlFrame open(Matrix4f pose, Matrix3f normal) {
+        FRAME.reset(pose, normal);
         current = FRAME;
         return FRAME;
     }
 
-    /** Close the frame; its batches stay readable until the next open. */
+    /** Close the frame; its batches stay readable until the pool is reset by the next render frame. */
     public static void close() {
         current = DISCARD;
+    }
+
+    // ---- batch pool, reset per rendered frame
+    private static final ArrayList<Batch> POOL = new ArrayList<>();
+    private static int poolUsed;
+
+    /** A new render frame: every batch handed out before has been drawn. */
+    public static void beginRenderFrame() {
+        poolUsed = 0;
+    }
+
+    private static Batch acquire() {
+        if (poolUsed == POOL.size()) POOL.add(new Batch());
+        Batch b = POOL.get(poolUsed++);
+        b.floats = 0;
+        return b;
     }
 
     private final boolean discard;
@@ -75,6 +103,7 @@ public final class GlFrame {
 
     // ---- state
     private final Matrix4f[] stack = new Matrix4f[64];
+    private final Matrix3f baseNormal = new Matrix3f();
     private int depth;
     private float r = 1, g = 1, b = 1, a = 1;
     private float nx, ny = 1, nz, u, v;
@@ -96,9 +125,12 @@ public final class GlFrame {
         for (int i = 0; i < stack.length; i++) stack[i] = new Matrix4f();
     }
 
-    void reset() {
+    void reset(Matrix4f pose, Matrix3f normal) {
         depth = 0;
-        stack[0].identity();
+        if (pose != null) stack[0].set(pose);
+        else stack[0].identity();
+        if (normal != null) baseNormal.set(normal);
+        else baseNormal.identity();
         r = g = b = a = 1;
         nx = 0;
         ny = 1;
@@ -113,18 +145,27 @@ public final class GlFrame {
         droppedVertices = 0;
         rec = null;
         mode = -1;
+        lastKey = null;
+        lastBatch = null;
     }
 
     public Map<Key, Batch> batches() {
         return batches;
     }
 
-    // ---- display-list recording
-    private static final Map<Integer, List<Consumer<GlFrame>>> LISTS = new HashMap<>();
+    // ---- display lists: state calls as ops, primitives as quads in list space
+    private record Prim(float[] quads, int floats, boolean colored) {
+    }
+
+    private static final Map<Integer, List<Object>> LISTS = new HashMap<>();
     private static int nextList = 1;
-    private List<Consumer<GlFrame>> rec;
+    private List<Object> rec;
     private boolean recExecute;
     private int recList;
+    // compile-time current values (GL_COMPILE doesn't execute, so the frame's own state stays as it was)
+    private float cu, cv, cnx, cny = 1, cnz;
+    private int ccolor;
+    private boolean ccolored;
 
     static synchronized int genLists(int range) {
         int first = nextList;
@@ -140,6 +181,9 @@ public final class GlFrame {
         rec = new ArrayList<>();
         recExecute = execute;
         recList = list;
+        cu = cv = cnx = cnz = 0;
+        cny = 1;
+        ccolored = false;
     }
 
     void endList() {
@@ -148,22 +192,28 @@ public final class GlFrame {
             LISTS.put(recList, rec);
         }
         rec = null;
+        if (recExecute) callList(recList);
     }
 
+    @SuppressWarnings("unchecked")
     void callList(int list) {
         if (record(f -> f.callList(list))) return;
-        List<Consumer<GlFrame>> ops;
+        List<Object> ops;
         synchronized (GlFrame.class) {
             ops = LISTS.get(list);
         }
-        if (ops != null) for (Consumer<GlFrame> op : ops) op.accept(this);
+        if (ops == null) return;
+        for (Object op : ops) {
+            if (op instanceof Prim p) replay(p);
+            else ((Consumer<GlFrame>) op).accept(this);
+        }
     }
 
-    /** While compiling a list: record op; returns true if it must not run now (GL_COMPILE). */
+    /** While compiling a list: record op and return true (it must not run now). */
     private boolean record(Consumer<GlFrame> op) {
         if (rec == null) return false;
         rec.add(op);
-        return !recExecute;
+        return true;
     }
 
     // ---- matrix stack
@@ -181,7 +231,7 @@ public final class GlFrame {
 
     void loadIdentity() {
         if (record(GlFrame::loadIdentity)) return;
-        stack[depth].identity();
+        stack[depth].set(stack[0]);
     }
 
     void translate(float x, float y, float z) {
@@ -202,7 +252,15 @@ public final class GlFrame {
     }
 
     // ---- attributes
+    private static int argb(float r, float g, float b, float a) {
+        return (clamp(a) << 24) | (clamp(r) << 16) | (clamp(g) << 8) | clamp(b);
+    }
+
     void color(float r, float g, float b, float a) {
+        if (rec != null) {
+            ccolor = argb(r, g, b, a);
+            ccolored = true;
+        }
         if (record(f -> f.color(r, g, b, a))) return;
         this.r = r;
         this.g = g;
@@ -211,14 +269,23 @@ public final class GlFrame {
     }
 
     void normal(float x, float y, float z) {
-        if (record(f -> f.normal(x, y, z))) return;
+        if (rec != null) {
+            cnx = x;
+            cny = y;
+            cnz = z;
+            return;
+        }
         nx = x;
         ny = y;
         nz = z;
     }
 
     void texCoord(float u, float v) {
-        if (record(f -> f.texCoord(u, v))) return;
+        if (rec != null) {
+            cu = u;
+            cv = v;
+            return;
+        }
         this.u = u;
         this.v = v;
     }
@@ -286,45 +353,58 @@ public final class GlFrame {
 
     // ---- primitives
     private int mode = -1;
-    private Batch primBatch;
-    private final Matrix3f normalMatrix = new Matrix3f();
-    private float[] prim = new float[STRIDE * 16];
+    private float[] prim = new float[STRIDE * 64];
     private int primFloats;
-    private final Vector3f tmp = new Vector3f();
-    private boolean flat;
+    private final Matrix3f normalMatrix = new Matrix3f();
+    private Key lastKey;
+    private Batch lastBatch;
+
+    /** The batch for the current state (cached while the state doesn't change). */
+    private Batch batch() {
+        Identifier t = texture2d ? texture : null;
+        Blend bl = blend ? blendMode : Blend.NONE;
+        Key k = lastKey;
+        if (k == null || k.texture != t || k.blend != bl || k.cull != cull || k.fullBright != fullBright) {
+            k = new Key(t, bl, cull, fullBright);
+            Batch b = batches.get(k);
+            if (b == null) {
+                b = acquire();
+                batches.put(k, b);
+            }
+            lastKey = k;
+            lastBatch = b;
+        }
+        return lastBatch;
+    }
 
     void begin(int mode) {
-        if (record(f -> f.begin(mode))) return;
         this.mode = mode;
         primFloats = 0;
-        if (discard) return;
-        stack[depth].normal(normalMatrix);
-        Key key = new Key(texture2d ? texture : null, blend ? blendMode : Blend.NONE, cull, fullBright);
-        flat = !lighting;
-        primBatch = batches.computeIfAbsent(key, k -> new Batch());
     }
 
     void vertex(float x, float y, float z) {
-        if (record(f -> f.vertex(x, y, z))) return;
-        if (discard || mode < 0) return;
-        if (primFloats + STRIDE > prim.length) prim = java.util.Arrays.copyOf(prim, prim.length * 2);
-        stack[depth].transformPosition(x, y, z, tmp);
-        prim[primFloats] = tmp.x;
-        prim[primFloats + 1] = tmp.y;
-        prim[primFloats + 2] = tmp.z;
-        prim[primFloats + 3] = u;
-        prim[primFloats + 4] = v;
-        int argb = (clamp(a) << 24) | (clamp(r) << 16) | (clamp(g) << 8) | clamp(b);
-        prim[primFloats + 5] = Float.intBitsToFloat(argb);
-        if (flat) tmp.set(0, 1, 0);
-        else {
-            normalMatrix.transform(nx, ny, nz, tmp);
-            float len = tmp.length();
-            if (len > 0) tmp.div(len);
+        if (mode < 0) return;
+        if (primFloats + STRIDE > prim.length) prim = Arrays.copyOf(prim, prim.length * 2);
+        float[] p = prim;
+        int i = primFloats;
+        p[i] = x;
+        p[i + 1] = y;
+        p[i + 2] = z;
+        if (rec != null) {
+            p[i + 3] = cu;
+            p[i + 4] = cv;
+            p[i + 5] = Float.intBitsToFloat(ccolor);
+            p[i + 6] = cnx;
+            p[i + 7] = cny;
+            p[i + 8] = cnz;
+        } else {
+            p[i + 3] = u;
+            p[i + 4] = v;
+            p[i + 5] = Float.intBitsToFloat(argb(r, g, b, a));
+            p[i + 6] = nx;
+            p[i + 7] = ny;
+            p[i + 8] = nz;
         }
-        prim[primFloats + 6] = tmp.x;
-        prim[primFloats + 7] = tmp.y;
-        prim[primFloats + 8] = tmp.z;
         primFloats += STRIDE;
     }
 
@@ -333,42 +413,124 @@ public final class GlFrame {
     }
 
     void end() {
-        if (record(GlFrame::end)) return;
         int m = mode;
         mode = -1;
-        if (discard || primBatch == null) return;
+        if (m < 0) return;
         int n = primFloats / STRIDE;
-        Batch out = primBatch;
-        primBatch = null;
+        float[] quads = toQuads(m, n);
+        int qf = quadFloats;
+        if (quads == null) {
+            if (rec == null) droppedVertices += n;
+            return;
+        }
+        if (rec != null) {
+            rec.add(new Prim(Arrays.copyOf(quads, qf), qf, ccolored));
+            return;
+        }
+        if (discard) return;
+        emit(quads, qf, true);
+    }
+
+    private float[] quadBuf = new float[STRIDE * 64];
+    private int quadFloats;
+
+    /** The current primitive as quads (list space), or null for lines/points. */
+    private float[] toQuads(int m, int n) {
+        quadFloats = 0;
         switch (m) {
             case GL11.GL_QUADS -> {
-                for (int i = 0; i + 3 < n; i += 4) quad(out, i, i + 1, i + 2, i + 3);
+                for (int i = 0; i + 3 < n; i += 4) quad(i, i + 1, i + 2, i + 3);
             }
             case GL11.GL_TRIANGLES -> {
-                for (int i = 0; i + 2 < n; i += 3) quad(out, i, i + 1, i + 2, i + 2);
+                for (int i = 0; i + 2 < n; i += 3) quad(i, i + 1, i + 2, i + 2);
             }
             case GL11.GL_QUAD_STRIP -> {
-                for (int i = 0; i + 3 < n; i += 2) quad(out, i, i + 1, i + 3, i + 2);
+                for (int i = 0; i + 3 < n; i += 2) quad(i, i + 1, i + 3, i + 2);
             }
             case GL11.GL_TRIANGLE_STRIP -> {
                 for (int i = 0; i + 2 < n; i++) {
-                    if ((i & 1) == 0) quad(out, i, i + 1, i + 2, i + 2);
-                    else quad(out, i + 1, i, i + 2, i + 2);
+                    if ((i & 1) == 0) quad(i, i + 1, i + 2, i + 2);
+                    else quad(i + 1, i, i + 2, i + 2);
                 }
             }
             case GL11.GL_TRIANGLE_FAN, GL11.GL_POLYGON -> {
-                for (int i = 1; i + 1 < n; i++) quad(out, 0, i, i + 1, i + 1);
+                for (int i = 1; i + 1 < n; i++) quad(0, i, i + 1, i + 1);
             }
-            default -> droppedVertices += n; // lines, points
+            default -> {
+                return null;
+            }
         }
+        return quadBuf;
     }
 
-    private void quad(Batch out, int i0, int i1, int i2, int i3) {
-        out.ensure(4 * STRIDE);
-        System.arraycopy(prim, i0 * STRIDE, out.data, out.floats, STRIDE);
-        System.arraycopy(prim, i1 * STRIDE, out.data, out.floats + STRIDE, STRIDE);
-        System.arraycopy(prim, i2 * STRIDE, out.data, out.floats + 2 * STRIDE, STRIDE);
-        System.arraycopy(prim, i3 * STRIDE, out.data, out.floats + 3 * STRIDE, STRIDE);
-        out.floats += 4 * STRIDE;
+    private void quad(int i0, int i1, int i2, int i3) {
+        if (quadFloats + 4 * STRIDE > quadBuf.length) quadBuf = Arrays.copyOf(quadBuf, quadBuf.length * 2);
+        System.arraycopy(prim, i0 * STRIDE, quadBuf, quadFloats, STRIDE);
+        System.arraycopy(prim, i1 * STRIDE, quadBuf, quadFloats + STRIDE, STRIDE);
+        System.arraycopy(prim, i2 * STRIDE, quadBuf, quadFloats + 2 * STRIDE, STRIDE);
+        System.arraycopy(prim, i3 * STRIDE, quadBuf, quadFloats + 3 * STRIDE, STRIDE);
+        quadFloats += 4 * STRIDE;
     }
+
+    private void replay(Prim p) {
+        if (discard) return;
+        emit(p.quads, p.floats, p.colored);
+    }
+
+    /** Transform quads (list or primitive space) by the current matrix into the current state's batch. */
+    private void emit(float[] q, int floats, boolean colored) {
+        Batch out = batch();
+        out.ensure(floats);
+        float[] d = out.data;
+        int o = out.floats;
+        Matrix4f m = stack[depth];
+        float m00 = m.m00(), m01 = m.m01(), m02 = m.m02(), m10 = m.m10(), m11 = m.m11(), m12 = m.m12(),
+            m20 = m.m20(), m21 = m.m21(), m22 = m.m22(), m30 = m.m30(), m31 = m.m31(), m32 = m.m32();
+        boolean flat = !lighting;
+        float fx = 0, fy = 1, fz = 0;
+        if (flat) {
+            // "up" in the base (pose) space
+            baseNormal.transform(0, 1, 0, tmpN);
+            tmpN.normalize();
+            fx = tmpN.x;
+            fy = tmpN.y;
+            fz = tmpN.z;
+        } else {
+            m.normal(normalMatrix);
+        }
+        float n00 = normalMatrix.m00, n01 = normalMatrix.m01, n02 = normalMatrix.m02, n10 = normalMatrix.m10,
+            n11 = normalMatrix.m11, n12 = normalMatrix.m12, n20 = normalMatrix.m20, n21 = normalMatrix.m21, n22 = normalMatrix.m22;
+        float col = Float.intBitsToFloat(argb(r, g, b, a));
+        for (int i = 0; i < floats; i += STRIDE) {
+            float x = q[i], y = q[i + 1], z = q[i + 2];
+            d[o] = m00 * x + m10 * y + m20 * z + m30;
+            d[o + 1] = m01 * x + m11 * y + m21 * z + m31;
+            d[o + 2] = m02 * x + m12 * y + m22 * z + m32;
+            d[o + 3] = q[i + 3];
+            d[o + 4] = q[i + 4];
+            d[o + 5] = colored ? q[i + 5] : col;
+            if (flat) {
+                d[o + 6] = fx;
+                d[o + 7] = fy;
+                d[o + 8] = fz;
+            } else {
+                float a0 = q[i + 6], a1 = q[i + 7], a2 = q[i + 8];
+                float bx = n00 * a0 + n10 * a1 + n20 * a2, by = n01 * a0 + n11 * a1 + n21 * a2, bz = n02 * a0 + n12 * a1 + n22 * a2;
+                float len = (float) Math.sqrt(bx * bx + by * by + bz * bz);
+                if (len > 0) {
+                    float inv = 1f / len;
+                    bx *= inv;
+                    by *= inv;
+                    bz *= inv;
+                }
+                d[o + 6] = bx;
+                d[o + 7] = by;
+                d[o + 8] = bz;
+            }
+            o += STRIDE;
+        }
+        out.floats = o;
+    }
+
+    private final org.joml.Vector3f tmpN = new org.joml.Vector3f();
 }

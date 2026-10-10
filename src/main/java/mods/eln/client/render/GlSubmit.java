@@ -27,6 +27,12 @@ public final class GlSubmit {
         };
     }
 
+    /** Open a frame based on the renderer's pose (vertices come out in pose space). */
+    public static GlFrame open(PoseStack poseStack) {
+        PoseStack.Pose p = poseStack.last();
+        return GlFrame.open(p.pose(), p.normal());
+    }
+
     /** Submit every batch of the frame (call after GlFrame.close()); light = the block's packed light coords. */
     public static void submit(GlFrame frame, PoseStack poseStack, SubmitNodeCollector collector, int light) {
         for (Map.Entry<GlFrame.Key, GlFrame.Batch> e : frame.batches().entrySet()) {
@@ -35,14 +41,15 @@ public final class GlSubmit {
             int l = e.getKey().fullBright() ? LightCoordsUtil.FULL_BRIGHT : light;
             float[] d = b.data;
             int n = b.floats;
+            // the frame was opened with this pose: vertices and normals are already in its space
             collector.submitCustomGeometry(poseStack, renderType(e.getKey()), (PoseStack.Pose pose, VertexConsumer vc) -> {
                 for (int i = 0; i < n; i += GlFrame.STRIDE) {
-                    vc.addVertex(pose, d[i], d[i + 1], d[i + 2])
+                    vc.addVertex(d[i], d[i + 1], d[i + 2])
                         .setColor(Float.floatToRawIntBits(d[i + 5]))
                         .setUv(d[i + 3], d[i + 4])
                         .setOverlay(OverlayTexture.NO_OVERLAY)
                         .setLight(l)
-                        .setNormal(pose, d[i + 6], d[i + 7], d[i + 8]);
+                        .setNormal(d[i + 6], d[i + 7], d[i + 8]);
                 }
             });
         }

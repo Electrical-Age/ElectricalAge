@@ -39,7 +39,7 @@ public class SixNodeRender implements BlockEntityRenderer<SixNodeEntity, SixNode
 
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        GlFrame frame = GlFrame.open();
+        GlFrame frame = GlSubmit.open(poseStack);
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             for (int idx = 0; idx < 6; idx++) {

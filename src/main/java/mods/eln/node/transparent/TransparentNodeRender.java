@@ -36,7 +36,7 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         if (state.render == null) return;
-        GlFrame frame = GlFrame.open();
+        GlFrame frame = GlSubmit.open(poseStack);
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             UtilsClient.glDefaultColor();
