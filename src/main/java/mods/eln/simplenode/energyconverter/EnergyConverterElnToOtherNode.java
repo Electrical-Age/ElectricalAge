@@ -13,8 +13,8 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.Failure;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -115,17 +115,17 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setDouble("energyBuffer", energyBuffer);
-        nbt.setDouble("inPowerFactor", inPowerFactor);
+        nbt.putDouble("energyBuffer", energyBuffer);
+        nbt.putDouble("inPowerFactor", inPowerFactor);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        energyBuffer = nbt.getDouble("energyBuffer");
-        inPowerFactor = nbt.getDouble("inPowerFactor");
+        energyBuffer = nbt.getDoubleOr("energyBuffer", 0.0);
+        inPowerFactor = nbt.getDoubleOr("inPowerFactor", 0.0);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
     }
 
     @Override
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         try {
             switch (stream.readByte()) {
                 case setInPowerFactor:

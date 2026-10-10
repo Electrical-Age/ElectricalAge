@@ -32,6 +32,10 @@ public class Eln {
     /** 1.12 config balancing.fuelHeatValueFactor: J per mB of fuel = factor * real heating value per litre. */
     public static double fuelHeatValueFactor = 0.0000675;
 
+    /** 1.12 config compatibility.ElnToOtherEnergyConverterEnable (true) and the FE ratio balancing.ElnToThermalExpansionConversionRatio (4/3 FE per J). */
+    public static boolean ElnToOtherEnergyConverterEnable = true;
+    public static double ElnToTeConversionRatio = 1.0 / 3.0 * 4;
+
     public static boolean modbusEnable = false; // 1.12 port: Modbus TCP server dropped; RTU devices stay off
 
     public static mods.eln.server.ServerEventListener serverEventListener;
@@ -191,6 +195,8 @@ public class Eln {
         mods.eln.server.ElnWorldSaves.register();
         mods.eln.node.NodeManager.registerUuid("s", mods.eln.node.six.SixNode.class);
         mods.eln.node.NodeManager.registerUuid("t", mods.eln.node.transparent.TransparentNode.class);
+        mods.eln.node.NodeManager.registerUuid(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode.getNodeUuidStatic(),
+            mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode.class);
         NeoForge.EVENT_BUS.addListener(ServerAboutToStartEvent.class, e -> {
             // item components are bound only once the server's registries are: ItemStacks can be made from here on
             mods.eln.registry.ElnRegistry.afterRegistration();
@@ -225,6 +231,10 @@ public class Eln {
                     if (!(node instanceof mods.eln.node.transparent.TransparentNode tn)) return null;
                     return tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h ? h : null;
                 }));
+        // energy converters: FE out of their back face (1.12: CapabilityEnergy.ENERGY on the entity)
+        modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
+            e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Energy.BLOCK,
+                mods.eln.registry.ElnRegistry.ENERGY_CONVERTER_ENTITY.get(), (be, side) -> be.getEnergyHandler(side)));
         modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {
             sixNodeBlock = mods.eln.registry.ElnRegistry.SIX_NODE_BLOCK.get();
             ghostBlock = mods.eln.registry.ElnRegistry.GHOST_BLOCK.get();

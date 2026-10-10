@@ -67,6 +67,24 @@ public final class ElnRegistry {
         BLOCK_ENTITIES.register("transparent_node", () -> new BlockEntityType<>(mods.eln.node.transparent.TransparentNodeEntity::new,
             TRANSPARENT_BLOCKS.stream().map(DeferredBlock::get).collect(java.util.stream.Collectors.toSet())));
 
+    /** Energy converter blocks (simple nodes, 1.12 Wp11 registerEnergyConverter); one block-entity type for all. */
+    public static final List<DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock>> CONVERTER_BLOCKS = new ArrayList<>();
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity>> ENERGY_CONVERTER_ENTITY =
+        BLOCK_ENTITIES.register("energy_converter_eln_to_other_entity", () -> new BlockEntityType<>(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity::new,
+            CONVERTER_BLOCKS.stream().map(DeferredBlock::get).collect(java.util.stream.Collectors.toSet())));
+
+    /** An energy converter block and its item (1.12 name, e.g. eln:energy_converter_eln_to_other_lvublock). */
+    public static DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock> registerEnergyConverter(
+        String name, mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor desc) {
+        DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock> block = BLOCKS.registerBlock(name,
+            p -> new mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock(p, desc),
+            p -> p.mapColor(MapColor.ICE).strength(0.5f).sound(SoundType.GLASS)); // 1.12 Material.PACKED_ICE
+        CONVERTER_BLOCKS.add(block);
+        ALL_ITEMS.add(ITEMS.registerItem(name, p -> new mods.eln.node.simple.SimpleNodeItem(block.get(), p)));
+        return block;
+    }
+
     /** Every EA item, in 1.12 id order (creative tab, tests). */
     public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
 

@@ -1,6 +1,10 @@
 package mods.eln.registry.batch;
 
 import mods.eln.ElnContent;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
 import mods.eln.node.NodeManager;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
@@ -26,7 +30,7 @@ public class Wp11Content implements ElnContent {
     @Override
     public void preInit() {
         registerTestBlock();
-        // registerEnergyConverter(): 26.x port, step Wp11c (simple-node framework + FE capability)
+        registerEnergyConverter();
         registerTurbine(4); // mechanical sub-UIDs (steam/gas turbine, generator, joints, flywheel, tachometer)
         registerGridDevices(123);
         // TheOneProbe info (replaces 1.7.10 Waila): node getWaila() lines, ghost blocks resolved to the real device
@@ -42,36 +46,25 @@ public class Wp11Content implements ElnContent {
 		 */
     }
 
-    /* 26.x port: energy converters come with step Wp11c (simple nodes, FE capability; IC2 has no 26.x port)
-    public static EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
-    public static EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
-    public static EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
+    public static net.neoforged.neoforge.registries.DeferredBlock<EnergyConverterElnToOtherBlock> elnToOtherBlockHvu, elnToOtherBlockMvu, elnToOtherBlockLvu;
 
-    /** EA -> FE/RF/IC2 exporters (1.12: OpenComputers part dropped). * /
+    /** EA -> FE exporters (1.12: FE/RF/IC2; 26.x: FE). IC2 tier/packet sizes kept in the descriptors. */
     public static void registerEnergyConverter() {
         if (ElnToOtherEnergyConverterEnable) {
-            GameRegistry.registerTileEntity(EnergyConverterElnToOtherEntity.class, new Identifier(MODID, "energy_converter_eln_to_other_entity"));
-            NodeManager.registerUuid(EnergyConverterElnToOtherNode.getNodeUuidStatic(), EnergyConverterElnToOtherNode.class);
-
-            elnToOtherBlockLvu = energyConverter("eln.EnergyConverterElnToOtherLVUBlock", "EnergyConverterElnToOtherLVU",
+            elnToOtherBlockLvu = energyConverter("energy_converter_eln_to_other_lvublock", "EnergyConverterElnToOtherLVU",
                 new ElnDescriptor(LVU, LVP()), new Ic2Descriptor(32, 1));
-            elnToOtherBlockMvu = energyConverter("eln.EnergyConverterElnToOtherMVUBlock", "EnergyConverterElnToOtherMVU",
+            elnToOtherBlockMvu = energyConverter("energy_converter_eln_to_other_mvublock", "EnergyConverterElnToOtherMVU",
                 new ElnDescriptor(MVU, MVP()), new Ic2Descriptor(128, 2));
-            elnToOtherBlockHvu = energyConverter("eln.EnergyConverterElnToOtherHVUBlock", "EnergyConverterElnToOtherHVU",
+            elnToOtherBlockHvu = energyConverter("energy_converter_eln_to_other_hvublock", "EnergyConverterElnToOtherHVU",
                 new ElnDescriptor(HVU, HVP()), new Ic2Descriptor(512, 3));
         }
     }
 
-    private static EnergyConverterElnToOtherBlock energyConverter(String name, String key, ElnDescriptor elnDesc, Ic2Descriptor ic2Desc) {
-        String blockName = TR_NAME(Type.TILE, name);
+    private static net.neoforged.neoforge.registries.DeferredBlock<EnergyConverterElnToOtherBlock> energyConverter(String name, String key, ElnDescriptor elnDesc, Ic2Descriptor ic2Desc) {
         EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(key, elnDesc, ic2Desc);
-        EnergyConverterElnToOtherBlock block = new EnergyConverterElnToOtherBlock(desc);
-        block.setCreativeTab(creativeTab).setTranslationKey(blockName);
-        GameRegistryCompat.registerBlock(block, SimpleNodeItem.class, blockName);
-        return block;
+        return mods.eln.registry.ElnRegistry.registerEnergyConverter(name, desc);
     }
 
-    */
 
     /** Mechanical sub-UIDs of id 4 (the electrical turbines of id 4 are wp10b's registerTurbineElectrical). */
     public static void registerTurbine(int id) {
