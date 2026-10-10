@@ -1,4 +1,4 @@
-// 26.3	2026-10-10T17:56:56.894857096	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-10T18:00:25.938511085	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -540,7 +540,7 @@ adad48cd9d9f462c2e3a5dcf4cf01bdfc515cb0e data/eln/recipe/sample_and_hold.json
 3c71ff94883402366dddda9d8679e9edc89a4b44 data/eln/recipe/signal_diode.json
 8998b85be4c80ce2be9f63fa69126c94c25929e2 data/eln/recipe/signal_processor.json
 429256bbec6c5dce28be7b7dcc320c5ce2613aad data/eln/recipe/signal_relay.json
-04e8ff288cdd6b75b91ae601ba603dc3fc8e61dd data/eln/recipe/signal_switch.json
+54e1527988778b7951b8a4c2355549fbbc2664ed data/eln/recipe/signal_switch.json
 e371cfb3570f38a97380ab2754acb9f7c34f6739 data/eln/recipe/signal_trimmer.json
 8062f3b65578eab153b9d22123835f9807934819 data/eln/recipe/silver_brush.json
 c3083279a9092abb386e52142d77440229c42890 data/eln/recipe/simple_lamp_socket.json

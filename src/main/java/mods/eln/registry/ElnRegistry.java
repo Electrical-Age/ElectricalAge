@@ -149,7 +149,7 @@ public final class ElnRegistry {
                 mods.eln.generic.ElnItem item = new mods.eln.generic.ElnItem(p, d);
                 d.parentItem = item;
                 d.parentItemDamage = id;
-                Eln.itemsByName.put(d.name, item);
+                Eln.itemsByName.putIfAbsent(d.name, item); // first wins: "Signal Switch" is 6081 (gate source) as in 1.12
                 return item;
             }, p -> p.stacksTo(stack)));
         }
@@ -165,7 +165,7 @@ public final class ElnRegistry {
                 // during registration; they run in afterRegistration()
                 d.parentItem = item;
                 d.parentItemDamage = id;
-                Eln.itemsByName.put(d.name, item);
+                Eln.itemsByName.putIfAbsent(d.name, item); // first wins: "Signal Switch" is 6081 (gate source) as in 1.12
                 return item;
             }));
         }
@@ -181,7 +181,7 @@ public final class ElnRegistry {
                 mods.eln.node.transparent.TransparentNodeItem item = new mods.eln.node.transparent.TransparentNodeItem(p, d, block::get);
                 d.parentItem = item;
                 d.parentItemDamage = id;
-                Eln.itemsByName.put(d.name, item);
+                Eln.itemsByName.putIfAbsent(d.name, item); // first wins: "Signal Switch" is 6081 (gate source) as in 1.12
                 return item;
             }));
         }
@@ -199,7 +199,7 @@ public final class ElnRegistry {
                 mods.eln.ore.OreItem item = new mods.eln.ore.OreItem(block.get(), p);
                 d.parentItem = item;
                 d.parentItemDamage = id;
-                Eln.itemsByName.put(d.name, item);
+                Eln.itemsByName.putIfAbsent(d.name, item); // first wins: "Signal Switch" is 6081 (gate source) as in 1.12
                 return item;
             }));
         }
