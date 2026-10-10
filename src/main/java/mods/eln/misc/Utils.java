@@ -375,4 +375,107 @@ public class Utils {
     public static float[] getSixNodePinDistance(Obj3D.Obj3DPart obj) {
         return new float[]{Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16)};
     }
+
+    public static double getWind(int worldId, int y) {
+        net.minecraft.world.level.Level world = Dimensions.level(worldId);
+        if (world == null) {
+            return Math.max(0.0, Eln.wind.getWind(y));
+        } else {
+            float factor = 1f + world.getRainLevel(0) * 0.2f + world.getThunderLevel(0) * 0.2f;
+            return Math.max(0.0, Eln.wind.getWind(y) * factor + world.getRainLevel(0) * 1f + world.getThunderLevel(0) * 2f);
+        }
+    }
+
+    public static int getLight(net.minecraft.world.level.Level w, net.minecraft.world.level.LightLayer e, int x, int y, int z) {
+        return mods.eln.compat.WorldCompat.getSavedLightValue(w, e, x, y, z);
+    }
+
+    public static int getRedstoneLevelAround(Coordonate coord, Direction side) {
+        int level = mods.eln.compat.WorldCompat.getStrongestIndirectPower(coord.world(), coord.x, coord.y, coord.z);
+        if (level >= 15) return 15;
+
+        side = side.getInverse();
+        switch (side) {
+            case YN:
+            case YP:
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x + 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x - 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z + 1, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z - 1, side.toSideValue()));
+
+            case XN:
+            case XP:
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y + 1, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y - 1, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z + 1, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z - 1, side.toSideValue()));
+
+            case ZN:
+            case ZP:
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x + 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x - 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y + 1, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y - 1, coord.z, side.toSideValue()));
+        }
+
+        return level;
+    }
+
+    public static java.util.ArrayList<net.minecraft.world.level.block.Block> traceRay(net.minecraft.world.level.Level world, double x, double y,
+                                            double z, double tx, double ty, double tz) {
+        java.util.ArrayList<net.minecraft.world.level.block.Block> blockList = new java.util.ArrayList<net.minecraft.world.level.block.Block>();
+
+        double dx, dy, dz;
+        dx = tx - x;
+        dy = ty - y;
+        dz = tz - z;
+        double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
+        double normInv = 1 / (norm + 0.000000001);
+        dx *= normInv;
+        dy *= normInv;
+        dz *= normInv;
+        double d = 0;
+
+        while (d < norm) {
+            if (Utils.isBlockLoaded(world, x, y, z)) {
+                net.minecraft.world.level.block.Block b = Utils.getBlock(world, x, y, z);
+                if (b != null)
+                    blockList.add(b);
+            }
+
+            x += dx;
+            y += dy;
+            z += dz;
+            d += 1;
+        }
+
+        return blockList;
+    }
+
+    public static boolean isBlockLoaded(net.minecraft.world.level.Level world, double x, double y, double z) {
+        return mods.eln.compat.WorldCompat.blockExists(world, net.minecraft.util.Mth.floor(x), net.minecraft.util.Mth.floor(y), net.minecraft.util.Mth.floor(z));
+    }
+
+    public static net.minecraft.world.level.block.Block getBlock(net.minecraft.world.level.Level world, double x, double y, double z) {
+        return mods.eln.compat.WorldCompat.getBlock(world, net.minecraft.util.Mth.floor(x), net.minecraft.util.Mth.floor(y), net.minecraft.util.Mth.floor(z));
+    }
+
+    public static double getLength(double x, double y,
+                                   double z, double tx, double ty, double tz) {
+        double dx, dy, dz;
+        dx = tx - x;
+        dy = ty - y;
+        dz = tz - z;
+        double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
+        return norm;
+    }
 }

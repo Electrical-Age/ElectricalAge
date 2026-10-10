@@ -71,6 +71,7 @@ public final class ElnWorldSaves {
             Eln.LOG.error("Electrical Age: loading nodes", e);
         }
         if (nbt.contains("config")) SaveConfig.instance.readFromNBT(nbt.getCompoundOrEmpty("config"));
+        if (nbt.contains("wind")) Eln.wind.readFromNBT(nbt.getCompoundOrEmpty("wind"), "");
         try {
             Eln.ghostManager.loadFromNBT(nbt.getCompoundOrEmpty("ghost"));
         } catch (Exception e) {
@@ -89,6 +90,11 @@ public final class ElnWorldSaves {
             nbt.put("nodes", nodes);
             nbt.put("ghost", ghost);
             if (dim == 0) nbt.put("config", SaveConfig.instance.writeToNBT(new CompoundTag()));
+            if (dim == 0) {
+                CompoundTag wind = new CompoundTag();
+                Eln.wind.writeToNBT(wind, "");
+                nbt.put("wind", wind);
+            }
             Path main = file(l, ""), tmp = file(l, ".tmp"), bak = file(l, ".bak");
             Files.createDirectories(main.getParent());
             NbtIo.writeCompressed(nbt, tmp);

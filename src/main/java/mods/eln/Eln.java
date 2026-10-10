@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
  */
 @Mod(Eln.MODID)
 public class Eln {
+    /** Global wind state (1.12: Eln.wind); saved with the overworld. */
+    public static mods.eln.misc.WindProcess wind = new mods.eln.misc.WindProcess();
+
     public static final String MODID = "eln";
     public static final Logger LOG = LoggerFactory.getLogger("eln");
 
@@ -29,7 +32,8 @@ public class Eln {
 
     /** Device batches ported from 1.12 (registry/batch), in the 1.12 order. */
     public static final java.util.List<ElnContent> CONTENT = java.util.List.of(
-        new mods.eln.registry.batch.Wp9aContent());
+        new mods.eln.registry.batch.Wp9aContent(),
+        new mods.eln.registry.batch.Wp9bContent());
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -144,6 +148,7 @@ public class Eln {
             // item components are bound only once the server's registries are: ItemStacks can be made from here on
             mods.eln.registry.ElnRegistry.afterRegistration();
             simulator.init();
+            simulator.addSlowProcess(wind = new mods.eln.misc.WindProcess());
             for (ElnContent c : CONTENT) c.serverAboutToStart();
         });
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, e -> {
