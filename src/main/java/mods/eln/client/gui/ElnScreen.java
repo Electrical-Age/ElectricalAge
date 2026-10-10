@@ -24,22 +24,67 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     public static final int LABEL = 0xFF404040;
 
     public ElnScreen(ElnNodeMenu menu, Inventory inventory, Component title) {
-        this(menu, inventory, title, 176, menu.spec.playerInventory() ? menu.spec.inventoryY() + 82 : 40);
+        this(menu, inventory, title, menu.spec.width(), menu.spec.playerInventory() ? Math.max(menu.spec.height(), menu.spec.inventoryY() + 82) : 40);
     }
 
     public ElnScreen(ElnNodeMenu menu, Inventory inventory, Component title, int width, int height) {
         super(menu, inventory, title, width, height);
         this.inventoryLabelY = menu.spec.inventoryY() - 11;
+        this.inventoryLabelX = menu.spec.inventoryX();
     }
 
     /** Refresh labels and values from the device (client tick). */
     protected void update() {
     }
 
+    private final java.util.List<Runnable> refreshers = new java.util.ArrayList<>();
+
     @Override
     protected void containerTick() {
         super.containerTick();
+        for (Runnable r : refreshers) r.run();
         update();
+    }
+
+    @Override
+    protected void init() {
+        refreshers.clear();
+        super.init();
+    }
+
+    // ---- small builders for the common screens (positions relative to the panel)
+
+    /** A button whose label follows the device (refreshed every tick). */
+    protected net.minecraft.client.gui.components.Button button(int x, int y, int w, java.util.function.Supplier<String> label,
+                                                                Runnable press, String... tooltip) {
+        var b = net.minecraft.client.gui.components.Button.builder(Component.literal(label.get()), btn -> press.run())
+            .bounds(leftPos + x, topPos + y, w, 20).build();
+        if (tooltip.length > 0) b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(String.join("\n", tooltip))));
+        addRenderableWidget(b);
+        refreshers.add(() -> b.setMessage(Component.literal(label.get())));
+        return b;
+    }
+
+    /** A text box committing on Enter / focus loss, following the device while not edited. */
+    protected EaField field(int x, int y, int w, java.util.function.Supplier<String> value, java.util.function.Consumer<String> commit,
+                            String... tooltip) {
+        EaField f = new EaField(leftPos + x, topPos + y, w, value.get(), commit);
+        if (tooltip.length > 0) f.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(String.join("\n", tooltip))));
+        addRenderableWidget(f);
+        refreshers.add(() -> f.setFromDevice(value.get()));
+        return f;
+    }
+
+    /** A text line (panel coordinates) re-read every frame. */
+    protected void label(GuiGraphicsExtractor g, int x, int y, String text) {
+        g.text(font, text, leftPos + x, topPos + y, LABEL, false);
+    }
+
+    /** Number formatting for fields: no trailing zeros. */
+    protected static String num(double v) {
+        String s = String.format(java.util.Locale.ROOT, "%.3f", v);
+        s = s.replaceAll("0+$", "");
+        return s.endsWith(".") ? s.substring(0, s.length() - 1) : s;
     }
 
     @Override
