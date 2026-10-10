@@ -79,6 +79,12 @@ public class Eln {
     public static mods.eln.cable.CableRenderDescriptor stdCableRenderSignal, stdCableRender50V, stdCableRender200V,
         stdCableRender800V, stdCableRender3200V;
 
+    /** config balancing.batteryCapacityFactor (1.12 default 1.0) */
+    public static double batteryCapacityFactor = 1.0;
+    /** battery half life in s (1.12: 2 * Utils.minecraftDay) */
+    public static final double stdBatteryHalfLife = 2 * mods.eln.misc.Utils.minecraftDay;
+    public static mods.eln.misc.FunctionTable batteryVoltageFunctionTable;
+
     /** config gameplay.explosion (1.12 meaning: the remaining real explosions; see Failure). */
     public static boolean explosionEnable = true;
 

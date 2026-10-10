@@ -88,4 +88,16 @@ public final class GameTestContext implements TestContext {
         }
         return new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray()));
     }
+
+    @Override
+    public mods.eln.node.transparent.TransparentNodeElement placeTransparent(int damage, BlockPos p) {
+        mods.eln.node.transparent.TransparentNodeDescriptor d = mods.eln.Eln.transparentNodeItem.getDescriptor(damage);
+        if (d == null) throw new IllegalStateException("no transparent node descriptor " + damage);
+        net.minecraft.server.level.ServerLevel level = level();
+        net.minecraft.world.entity.player.Player player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        mods.eln.node.transparent.TransparentNode node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem)
+            .placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
+        if (node == null) throw new IllegalStateException("placing " + d.name + " at " + p + " failed");
+        return node.element;
+    }
 }

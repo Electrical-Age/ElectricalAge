@@ -51,6 +51,13 @@ public final class ElnRegistry {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SixNodeEntity>> SIX_NODE_ENTITY =
         BLOCK_ENTITIES.register("six_node", () -> new BlockEntityType<>(SixNodeEntity::new, SIX_NODE_BLOCK.get()));
 
+    /** One block per transparent-node device; the shared block-entity type covers them all. */
+    public static final List<DeferredBlock<mods.eln.node.transparent.TransparentNodeBlock>> TRANSPARENT_BLOCKS = new ArrayList<>();
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.node.transparent.TransparentNodeEntity>> TRANSPARENT_NODE_ENTITY =
+        BLOCK_ENTITIES.register("transparent_node", () -> new BlockEntityType<>(mods.eln.node.transparent.TransparentNodeEntity::new,
+            TRANSPARENT_BLOCKS.stream().map(DeferredBlock::get).collect(java.util.stream.Collectors.toSet())));
+
     /** Every EA item, in 1.12 id order (creative tab, tests). */
     public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
 
@@ -78,6 +85,8 @@ public final class ElnRegistry {
         parentsSet = true;
         for (Map.Entry<Integer, SixNodeDescriptor> e : Eln.sixNodeItem.all().entrySet())
             e.getValue().setParent(e.getValue().parentItem, e.getKey());
+        for (Map.Entry<Integer, mods.eln.node.transparent.TransparentNodeDescriptor> e : Eln.transparentNodeItem.all().entrySet())
+            e.getValue().setParent(e.getValue().parentItem, e.getKey());
     }
 
     public static void register(IEventBus modBus) {
@@ -88,6 +97,22 @@ public final class ElnRegistry {
                 SixNodeItem item = new SixNodeItem(p, d);
                 // only the fields here: setParent overrides make ItemStacks (wiki entries...), which can't exist
                 // during registration; they run in afterRegistration()
+                d.parentItem = item;
+                d.parentItemDamage = id;
+                Eln.itemsByName.put(d.name, item);
+                return item;
+            }));
+        }
+        for (Map.Entry<Integer, mods.eln.node.transparent.TransparentNodeDescriptor> e : Eln.transparentNodeItem.all().entrySet()) {
+            int id = e.getKey();
+            mods.eln.node.transparent.TransparentNodeDescriptor d = e.getValue();
+            String name = nameOf("eln:transparent_node", id);
+            DeferredBlock<mods.eln.node.transparent.TransparentNodeBlock> block = BLOCKS.registerBlock(name,
+                p -> new mods.eln.node.transparent.TransparentNodeBlock(p, d),
+                p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion());
+            TRANSPARENT_BLOCKS.add(block);
+            ALL_ITEMS.add(ITEMS.registerItem(name, p -> {
+                mods.eln.node.transparent.TransparentNodeItem item = new mods.eln.node.transparent.TransparentNodeItem(p, d, block::get);
                 d.parentItem = item;
                 d.parentItemDamage = id;
                 Eln.itemsByName.put(d.name, item);

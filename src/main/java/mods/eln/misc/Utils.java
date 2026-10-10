@@ -347,4 +347,7 @@ public class Utils {
         }
         Utils.println("********");
     }
+
+    /** One Minecraft day in seconds (1.12 Utils.minecraftDay). */
+    public static final double minecraftDay = 60 * 24;
 }

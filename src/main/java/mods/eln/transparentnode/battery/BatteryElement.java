@@ -25,10 +25,10 @@ import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -109,16 +109,16 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory.getInventory();
     }
 
     public boolean hasOverVoltageProtection() {
-        return !Utils.isEmpty(getInventory().getStackInSlot(0));
+        return !Utils.isEmpty(getInventory().getItem(0));
     }
 
     public boolean hasOverHeatingProtection() {
-        return !Utils.isEmpty(getInventory().getStackInSlot(1));
+        return !Utils.isEmpty(getInventory().getItem(1));
     }
 
     @Override
@@ -194,23 +194,23 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         //	initPhysicalValue();
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getHeldItemMainhand());
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        return inventory.take(entityPlayer.getMainHandItem());
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         //inventory.writeToNBT(nbt, str + "inv");
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         fromNBT = true;
         //inventory.readFromNBT(nbt, str + "inv");
@@ -222,8 +222,8 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new BatteryContainer(this.node, player, getInventory());
+    public Container newContainer(Direction side, Player player) {
+        return null; // BatteryContainer: menus come with P4
     }
 
     @Override
@@ -236,29 +236,29 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public void readItemStackNBT(NBTTagCompound nbt) {
+    public void readItemStackNBT(CompoundTag nbt) {
         super.readItemStackNBT(nbt);
 
         if (nbt == null) nbt = descriptor.getDefaultNBT();
-        fromItemStack_charge = nbt.getDouble("charge");
-        fromItemStack_life = nbt.getDouble("life");
+        fromItemStack_charge = nbt.getDoubleOr("charge", 0.0);
+        fromItemStack_life = nbt.getDoubleOr("life", 0.0);
 
         fromItemStack = true;
     }
 
     @Override
-    public NBTTagCompound getItemStackNBT() {
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setDouble("charge", batteryProcess.getCharge());
-        nbt.setDouble("life", batteryProcess.life);
+    public CompoundTag getItemStackNBT() {
+        CompoundTag nbt = new CompoundTag();
+        nbt.putDouble("charge", batteryProcess.getCharge());
+        nbt.putDouble("life", batteryProcess.life);
         return nbt;
     }
 
 	/*
-	public static NBTTagCompound newItemStackNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("charge", 0.5);
-		nbt.setDouble("life", 1.0);
+	public static CompoundTag newItemStackNBT() {
+		CompoundTag nbt = new CompoundTag("itemStackNBT");
+		nbt.putDouble("charge", 0.5);
+		nbt.putDouble("life", 1.0);
 		return nbt;
 	}*/
 

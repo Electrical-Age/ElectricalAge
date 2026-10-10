@@ -24,6 +24,12 @@ public interface TestContext {
     /** Place a six-node device at p on face `side`; the block at p + side must be solid. */
     mods.eln.node.six.SixNodeElement placeSix(int damage, BlockPos p, mods.eln.misc.Direction side);
 
+    /**
+     * Place a transparent-node device as a player clicking the top of the block below p (front from the fake player's
+     * view, like 1.12). The node lands at p + the descriptor's spawn delta; use element.node.coordonate.
+     */
+    mods.eln.node.transparent.TransparentNodeElement placeTransparent(int damage, BlockPos p);
+
     /** Bytes for an element's networkUnserialize (the GUI packet path). */
     java.io.DataInputStream stream(Writer writer);
 

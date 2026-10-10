@@ -6,10 +6,16 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor;
 import mods.eln.sixnode.groundcable.GroundCableDescriptor;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
+import mods.eln.transparentnode.battery.BatteryDescriptor;
+import mods.eln.misc.FunctionTable;
+import mods.eln.misc.FunctionTableYProtect;
 
 import static mods.eln.Eln.*;
 import static mods.eln.i18n.I18N.TR_NAME;
 import static mods.eln.i18n.I18N.Type;
+
+import mods.eln.i18n.I18N;
+import mods.eln.misc.Utils;
 
 /**
  * Device registration, ported batch by batch from the 1.12 ElnDeviceRegistry and registry/batch/Wp*Content (in
@@ -47,6 +53,7 @@ public final class ElnDeviceRegistry {
         registerElectricalSource(3);
         registerElectricalCable(32);
         registerResistors(96);
+        registerBattery(16);
     }
 
     public static void registerElectricalCable(int id) {
@@ -288,6 +295,194 @@ public final class ElnDeviceRegistry {
             );
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+    }
+
+    public static void registerBattery(int id) {
+        int subId, completId;
+        String name;
+        double heatTIme = 30;
+        double[] voltageFunctionTable = {0.000, 0.9, 1.0, 1.025, 1.04, 1.05,
+            2.0};
+        FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
+            6.0 / 5);
+        double[] condoVoltageFunctionTable = {0.000, 0.89, 0.90, 0.905, 0.91, 1.1,
+            1.5};
+        FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
+            6.0 / 5);
+
+        Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
+
+        double stdDischargeTime = 4 * 60;
+        double stdU = LVU;
+        double stdP = LVP() / 4;
+        double stdEfficiency = 1.0 - 2.0 / 50.0;
+        double condoEfficiency = 1.0 - 2.0 / 50.0;
+
+        batteryVoltageFunctionTable = voltageFunction;
+        {
+            subId = 0;
+            name = TR_NAME(Type.NONE, "Cost Oriented Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+                stdP * 1.2, 0.000, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "Cheap battery" // name, description)
+            );
+            desc.setRenderSpec("lowcost");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Capacity Oriented Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction,
+                stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP / 2, stdDischargeTime * 8 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "the battery" // name, description)
+            );
+            desc.setRenderSpec("capacity");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 2;
+            name = TR_NAME(Type.NONE, "Voltage Oriented Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", meduimVoltageCableDescriptor, 0.5, true, true, voltageFunction, stdU * 4,
+                stdP * 1.2, 0.000, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "the battery" // name, description)
+            );
+            desc.setRenderSpec("highvoltage");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 3;
+            name = TR_NAME(Type.NONE, "Current Oriented Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+                stdP * 1.2 * 4, 0.000, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP * 4, stdDischargeTime / 6 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "the battery" // name, description)
+            );
+            desc.setRenderSpec("current");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 4;
+            name = TR_NAME(Type.NONE, "Life Oriented Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+                stdP * 1.2, 0.000, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "the battery" // name, description)
+            );
+            desc.setRenderSpec("life");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 5;
+            name = TR_NAME(Type.NONE, "Single-use Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
+                stdP * 1.2 * 2, 0.000, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP * 2, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "the battery" // name, description)
+            );
+            desc.setRenderSpec("coal");
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 32;
+            name = TR_NAME(Type.NONE, "50V Condensator");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "condo200", batteryCableDescriptor, 0.0, true, false,
+                condoVoltageFunction,
+                stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
+                // electricalPMax,electricalDischargeRate
+                stdP * 8, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "Obselete, must be deleted" // name, description)
+            );
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
+            desc.setDefaultIcon("empty-texture");
+            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 36;
+            name = TR_NAME(I18N.Type.NONE, "200V Condensator");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "condo200", highVoltageCableDescriptor, 0.0, true, false,
+                condoVoltageFunction,
+                MVU, MVP() * 1.5, 0.005, // electricalU,//
+                // electricalPMax,electricalDischargeRate
+                MVP(), 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "the battery" // name, description)
+            );
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
+            desc.setDefaultIcon("empty-texture");
+            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
         }
     }
 }

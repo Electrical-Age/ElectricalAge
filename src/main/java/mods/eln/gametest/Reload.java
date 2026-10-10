@@ -1,4 +1,4 @@
-package mods.eln.selftest;
+package mods.eln.gametest;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
@@ -7,11 +7,11 @@ import mods.eln.node.NodeManager;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNode;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -24,14 +24,14 @@ import java.util.TreeSet;
 /**
  * Save/load round trip of one node, the way a world load does it (NodeManager.loadFromNbt): save the node, unload and
  * forget it, build a fresh node of the same class from that tag, then save the fresh one. The two tags, and the
- * elements' client packets (networkSerialize), should be equal. Port step T3 (notes/port26/PLAN.md).
+ * elements' client packets (networkSerialize), should be equal. Ported from the 1.12 selftest (step T3); the 26.x harness runs it on every node of every case after measure().
  */
 public final class Reload {
-    public final NBTTagCompound before, after;
+    public final CompoundTag before, after;
     public final byte[] publishBefore, publishAfter;
     public final NodeBase fresh;
 
-    private Reload(NBTTagCompound before, NBTTagCompound after, byte[] pb, byte[] pa, NodeBase fresh) {
+    private Reload(CompoundTag before, CompoundTag after, byte[] pb, byte[] pa, NodeBase fresh) {
         this.before = before;
         this.after = after;
         this.publishBefore = pb;
@@ -39,10 +39,10 @@ public final class Reload {
         this.fresh = fresh;
     }
 
-    public static Reload node(WorldServer w, BlockPos p) throws ReflectiveOperationException {
-        NodeBase old = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p.getX(), p.getY(), p.getZ(), w));
+    public static Reload node(ServerLevel w, BlockPos p) throws ReflectiveOperationException {
+        NodeBase old = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p, w));
         if (old == null) throw new IllegalStateException("no node at " + p);
-        NBTTagCompound before = save(old);
+        CompoundTag before = save(old);
         byte[] pb = publish(old);
         old.unload();
         NodeManager.instance.removeNode(old);
@@ -52,14 +52,14 @@ public final class Reload {
         NodeManager.instance.addNode(fresh);
         fresh.initializeFromNBT();
         fresh.globalBoot();
-        TileEntity te = w.getTileEntity(p);
+        BlockEntity te = w.getBlockEntity(p);
         if (te instanceof NodeBlockEntity) ((NodeBlockEntity) te).forgetNode();
         return new Reload(before, save(fresh), pb, publish(fresh), fresh);
     }
 
-    static NBTTagCompound save(NodeBase n) {
-        NBTTagCompound t = new NBTTagCompound();
-        t.setString("tag", n.getNodeUuid());
+    static CompoundTag save(NodeBase n) {
+        CompoundTag t = new CompoundTag();
+        t.putString("tag", n.getNodeUuid());
         n.writeToNBT(t);
         return t;
     }
@@ -95,15 +95,15 @@ public final class Reload {
         return out.size() > 8 ? out.subList(0, 8) : out;
     }
 
-    private static void diff(String path, NBTTagCompound a, NBTTagCompound b, List<String> out) {
-        TreeSet<String> keys = new TreeSet<>(a.getKeySet());
-        keys.addAll(b.getKeySet());
+    private static void diff(String path, CompoundTag a, CompoundTag b, List<String> out) {
+        TreeSet<String> keys = new TreeSet<>(a.keySet());
+        keys.addAll(b.keySet());
         for (String k : keys) {
-            NBTBase x = a.getTag(k), y = b.getTag(k);
+            Tag x = a.get(k), y = b.get(k);
             if (x == null || y == null) {
                 out.add(path + k + (x == null ? " (only after)" : " (only before)"));
-            } else if (x instanceof NBTTagCompound && y instanceof NBTTagCompound) {
-                diff(path + k + "/", (NBTTagCompound) x, (NBTTagCompound) y, out);
+            } else if (x instanceof CompoundTag && y instanceof CompoundTag) {
+                diff(path + k + "/", (CompoundTag) x, (CompoundTag) y, out);
             } else if (!x.equals(y)) {
                 out.add(path + k + ": " + x + " -> " + y);
             }

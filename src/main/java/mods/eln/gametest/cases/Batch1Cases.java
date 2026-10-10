@@ -31,7 +31,7 @@ public final class Batch1Cases {
     static final double U = 50.0;
 
     public static List<TestCase> cases() {
-        return List.of(new ResistorCase(), new CableChainCase());
+        return List.of(new ResistorCase(), new CableChainCase(), new BatteryCase());
     }
 
     // ---- helpers (1.12 Wp9aCases) ----
@@ -151,6 +151,33 @@ public final class Batch1Cases {
             ctx.checkValue("cable chain current [A]", current(r), i);
             ctx.checkValue("cable 1 voltage [V]", load(c1, Direction.XN).getU(), U - i * (load(src, Direction.XP).getRs() + load(c1, Direction.XN).getRs()));
             ctx.checkValue("cable 2 voltage [V]", load(c2, Direction.XN).getU(), U - i * (link(src, c1) + link(c1, c2)));
+        }
+    }
+
+    static final int BATTERY = 0 + (16 << 6); // Cost Oriented Battery
+
+    /** 1.12 base selftest, battery part: open circuit U = voltageFunction(startCharge) * U nominal; charge = start. */
+    static final class BatteryCase implements TestCase {
+        mods.eln.transparentnode.battery.BatteryElement battery;
+
+        public String id() {
+            return "batch1_battery";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public void build(TestContext ctx) {
+            battery = (mods.eln.transparentnode.battery.BatteryElement) ctx.placeTransparent(BATTERY, ctx.at(1, 1, 1));
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.transparentnode.battery.BatteryDescriptor bd = battery.descriptor;
+            double expectedU = battery.batteryProcess.voltageFunction.getValue(bd.startCharge) * battery.batteryProcess.uNominal;
+            ctx.checkValue("battery open-circuit voltage [V]", battery.positiveLoad.getU() - battery.negativeLoad.getU(), expectedU);
+            ctx.check("battery charge", Math.abs(battery.batteryProcess.getCharge() - bd.startCharge) < 0.01,
+                String.format("%.4f (item start charge %.4f)", battery.batteryProcess.getCharge(), bd.startCharge));
         }
     }
 }
