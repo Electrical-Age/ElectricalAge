@@ -132,6 +132,10 @@ public final class SelfTest implements SelfTestContext {
 
     // ------------------------------------------------------------------ command
 
+    /** Damage ids placed by any selftest since server start (coverage for `/eln selftest inventory`). */
+    static final java.util.Set<Integer> PLACED_SIX = new java.util.TreeSet<>();
+    static final java.util.Set<Integer> PLACED_TRANSPARENT = new java.util.TreeSet<>();
+
     public static void command(MinecraftServer server, ICommandSender sender, String[] args) {
         // args[0] == "selftest"
         if (args.length >= 2 && args[1].equalsIgnoreCase("report")) {
@@ -141,10 +145,15 @@ public final class SelfTest implements SelfTestContext {
             }
             return;
         }
+        if (args.length >= 2 && args[1].equalsIgnoreCase("inventory")) {
+            Inventory.command(sender);
+            return;
+        }
         if (args.length >= 2 && args[1].equalsIgnoreCase("help")) {
             say(sender, "/eln selftest [ticks] [dim x y z] : run (default 40 ticks, 24 blocks above world spawn in dim 0)");
             say(sender, "/eln selftest keep [ticks] [dim x y z] : same, but leave the circuit in place (prints its position)");
             say(sender, "/eln selftest verify dim x y z [ticks] : after a restart, re-measure a kept circuit, then clean up");
+            say(sender, "/eln selftest inventory : write every EA block/item/descriptor to eln-inventory.json");
             say(sender, "/eln selftest report : print the last run's results (also in the server log, logger eln-selftest)");
             return;
         }
@@ -402,6 +411,7 @@ public final class SelfTest implements SelfTestContext {
     public SixNodeElement placeSix(int damage, BlockPos p, Direction side) {
         SixNodeDescriptor d = Eln.sixNodeItem.getDescriptor(damage);
         if (d == null) throw new IllegalStateException("no six node descriptor " + damage);
+        PLACED_SIX.add(damage);
         ItemStack stack = d.newItemStack();
         EnumFacing clicked = side.getInverse().toEnumFacing(); // face of the neighbour block at p + side
         float hx = 0.5F + 0.5F * clicked.getXOffset(), hy = 0.5F + 0.5F * clicked.getYOffset(), hz = 0.5F + 0.5F * clicked.getZOffset();
@@ -417,6 +427,7 @@ public final class SelfTest implements SelfTestContext {
     public TransparentNodeElement placeTransparent(int damage, BlockPos p) {
         TransparentNodeDescriptor d = Eln.transparentNodeItem.getDescriptor(damage);
         if (d == null) throw new IllegalStateException("no transparent node descriptor " + damage);
+        PLACED_TRANSPARENT.add(damage);
         ItemStack stack = d.newItemStack();
         IBlockState state = Eln.transparentNodeBlock.getDefaultState();
         // where TransparentNodeItem.placeBlockAt puts the node: p + the descriptor's spawn delta, rotated by the front
