@@ -85,6 +85,10 @@ public class Eln {
     public static final double stdBatteryHalfLife = 2 * mods.eln.misc.Utils.minecraftDay;
     public static mods.eln.misc.FunctionTable batteryVoltageFunctionTable;
 
+    /** config balancing.solarPanelPowerFactor (1.12 default 1.0) */
+    public static double solarPanelPowerFactor = 1.0;
+    public static final double solarPanelBasePower = 65.0;
+
     /** config gameplay.explosion (1.12 meaning: the remaining real explosions; see Failure). */
     public static boolean explosionEnable = true;
 

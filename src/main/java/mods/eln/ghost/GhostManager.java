@@ -158,6 +158,8 @@ public class GhostManager {
     }
 
     public void createGhost(Coordonate coordonate, Coordonate observerCoordonate, int UUID, Block block, int meta) {
+        // descriptors (and their ghost groups) are built before the ghost block is registered: null = the ghost block
+        if (block == null) block = Eln.ghostBlock;
         WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
         if (WorldCompat.setBlock(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, block, meta, 3)) {
             coordonate = new Coordonate(coordonate);

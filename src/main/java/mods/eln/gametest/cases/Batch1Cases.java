@@ -180,4 +180,21 @@ public final class Batch1Cases {
                 String.format("%.4f (item start charge %.4f)", battery.batteryProcess.getCharge(), bd.startCharge));
         }
     }
+
+    /** Reflection read of a (private) field, as the 1.12 cases' field() helper. */
+    @SuppressWarnings("unchecked")
+    static <T> T field(Object o, String name) {
+        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
+            try {
+                java.lang.reflect.Field f = c.getDeclaredField(name);
+                f.setAccessible(true);
+                return (T) f.get(o);
+            } catch (NoSuchFieldException ignored) {
+                // superclass
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalStateException("no field " + name + " in " + o.getClass());
+    }
 }

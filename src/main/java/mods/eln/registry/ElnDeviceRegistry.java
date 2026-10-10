@@ -7,6 +7,9 @@ import mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor;
 import mods.eln.sixnode.groundcable.GroundCableDescriptor;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
+import mods.eln.transparentnode.solarpanel.SolarPanelDescriptor;
+import mods.eln.ghost.GhostGroup;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
 
@@ -54,6 +57,7 @@ public final class ElnDeviceRegistry {
         registerElectricalCable(32);
         registerResistors(96);
         registerBattery(16);
+        registerSolarPanel(48);
     }
 
     public static void registerElectricalCable(int id) {
@@ -483,6 +487,109 @@ public final class ElnDeviceRegistry {
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
             desc.setDefaultIcon("empty-texture");
             transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+        }
+    }
+
+    /** From 1.12 Wp10bContent. */
+    public static void registerSolarPanel(int id) {
+        int subId, completId;
+        GhostGroup ghostGroup;
+        String name;
+
+        FunctionTable diodeIfUBase;
+        diodeIfUBase = new FunctionTableYProtect(new double[]{0.0, 0.002,
+            0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045,
+            0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.13, 1.0},
+            1.0, 0, 1.0);
+
+        FunctionTable solarIfSBase;
+        solarIfSBase = new FunctionTable(new double[]{0.0, 0.1, 0.4, 0.6,
+            0.8, 1.0}, 1);
+
+        double LVSolarU = 59;
+
+        {
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Small Solar Panel");
+
+            ghostGroup = new GhostGroup();
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,// String
+                // name,
+                obj.getObj("smallsolarpannel"), null,
+                ghostGroup, 0, 1, 0,// GhostGroup ghostGroup, int
+                // solarOffsetX,int solarOffsetY,int
+                // solarOffsetZ,
+                // FunctionTable solarIfSBase,
+                null, LVSolarU / 4, 65.0 * solarPanelPowerFactor,// double electricalUmax,double
+                // electricalPmax,
+                0.01,// ,double electricalDropFactor
+                Math.PI / 2, Math.PI / 2 // alphaMin alphaMax
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 2;
+            name = TR_NAME(Type.NONE, "Small Rotating Solar Panel");
+
+            ghostGroup = new GhostGroup();
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,// String
+                // name,
+                obj.getObj("smallsolarpannelrot"), lowVoltageCableDescriptor.render,
+                ghostGroup, 0, 1, 0,// GhostGroup ghostGroup, int
+                // solarOffsetX,int solarOffsetY,int
+                // solarOffsetZ,
+                // FunctionTable solarIfSBase,
+                null, LVSolarU / 4, solarPanelBasePower * solarPanelPowerFactor,// double electricalUmax,double
+                // electricalPmax,
+                0.01,// ,double electricalDropFactor
+                Math.PI / 4, Math.PI / 4 * 3 // alphaMin alphaMax
+            );
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 3;
+            name = TR_NAME(Type.NONE, "2x3 Solar Panel");
+
+            Coordonate groundCoordinate = new Coordonate(1, 0, 0, 0);
+
+            ghostGroup = new GhostGroup();
+            ghostGroup.addRectangle(0, 1, 0, 0, -1, 1);
+            ghostGroup.removeElement(0, 0, 0);
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
+                obj.getObj("bigSolarPanel"), meduimVoltageCableDescriptor.render,
+                ghostGroup, 1, 1, 0,
+                groundCoordinate,
+                LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
+                0.01,
+                Math.PI / 2, Math.PI / 2
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 4;
+            name = TR_NAME(Type.NONE, "2x3 Rotating Solar Panel");
+
+            Coordonate groundCoordinate = new Coordonate(1, 0, 0, 0);
+
+            ghostGroup = new GhostGroup();
+            ghostGroup.addRectangle(0, 1, 0, 0, -1, 1);
+            ghostGroup.removeElement(0, 0, 0);
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
+                obj.getObj("bigSolarPanelrot"), meduimVoltageCableDescriptor.render,
+                ghostGroup, 1, 1, 1,
+                groundCoordinate,
+                LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
+                0.01,
+                Math.PI / 8 * 3, Math.PI / 8 * 5
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }
 }

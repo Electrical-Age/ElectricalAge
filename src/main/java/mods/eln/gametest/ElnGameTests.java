@@ -32,6 +32,7 @@ public final class ElnGameTests {
     static List<TestCase> cases() {
         java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase()));
         l.addAll(mods.eln.gametest.cases.Batch1Cases.cases());
+        l.addAll(mods.eln.gametest.cases.SolarCases.cases());
         return l;
     }
 

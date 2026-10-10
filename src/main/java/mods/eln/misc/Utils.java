@@ -350,4 +350,17 @@ public class Utils {
 
     /** One Minecraft day in seconds (1.12 Utils.minecraftDay). */
     public static final double minecraftDay = 60 * 24;
+
+    public static net.minecraft.world.phys.Vec3 getVec05(Coordonate c) {
+        return new net.minecraft.world.phys.Vec3(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
+    }
+
+    /**
+     * The sun's angle in radians, 0 at noon (1.12 World.getCelestialAngleRadians(0)); 26.x keeps it as the SUN_ANGLE
+     * environment attribute in degrees (same convention: the daylight detector takes its cosine).
+     */
+    public static double sunAngleRadians(net.minecraft.world.level.Level world) {
+        return world.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.SUN_ANGLE, net.minecraft.core.BlockPos.ZERO)
+            * Math.PI / 180.0;
+    }
 }

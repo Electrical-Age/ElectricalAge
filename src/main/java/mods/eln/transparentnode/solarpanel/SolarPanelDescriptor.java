@@ -7,13 +7,13 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.Level;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         double alphaMin, double alphaMax
 
     ) {
-        super(name, SolarPanelElement.class, SolarPanelRender.class);
+        super(name, SolarPanelElement.class, null);
         this.groundCoordinate = groundCoordinate;
         this.ghostGroup = ghostGroup;
 
@@ -66,7 +66,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addEnergy(newItemStack());
     }
@@ -94,7 +94,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public Direction getFrontFromPlace(Direction side, EntityLivingBase entityLiving) {
+    public Direction getFrontFromPlace(Direction side, LivingEntity entityLiving) {
         if (canRotate && groundCoordinate != null) {
             // That is, if this isn't a 1x1 panel.
             return Direction.ZN;
@@ -102,39 +102,16 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
             return super.getFrontFromPlace(side, entityLiving);
         }
     }
+// 26.x port: draw() removed (client rendering; redone in P3)
 
-    void draw(float alpha, Direction front) {
-        front.glRotateZnRef();
-        GL11.glTranslatef(0, 0, main.getFloat("offZ"));
-        if (main != null) main.draw();
-        if (panel != null) {
-            front.glRotateZnRefInv();
-            panel.draw(alpha, 0f, 0f, 1f);
-        }
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw((float) alphaMin, Direction.XN);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Produces power from solar radiation."));
@@ -144,13 +121,13 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
+    public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
         if (canRotate) {
             super.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
             return;
         }
-        // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AxisAlignedBB is immutable now)
-        AxisAlignedBB bb = Block.FULL_BLOCK_AABB.offset(x, y, z);
+        // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AABB is immutable now)
+        AABB bb = new AABB(x, y, z, x + 1, y + 1, z + 1);
         bb = bb.setMaxY(bb.maxY - 0.5);
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
