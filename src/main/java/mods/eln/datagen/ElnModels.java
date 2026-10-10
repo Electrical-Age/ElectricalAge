@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Client item definitions, item models, block states and block models (P3 R1). Items get the flat icon 1.12 showed
  * (the descriptor's 1.7.10 icon name, in textures/items or textures/blocks; both directories are stitched into the item
- * and block atlases by atlases/*.json). Node, ghost and light blocks are drawn by block-entity renderers or not at all:
+ * and block atlases by assets/minecraft/atlases/*.json, which extend the vanilla atlases). Node, ghost and light blocks are drawn by block-entity renderers or not at all:
  * a particle-only model. Ores are cubes; energy converters are the 1.12 cube (front fixed for now).
  */
 public class ElnModels implements DataProvider {
