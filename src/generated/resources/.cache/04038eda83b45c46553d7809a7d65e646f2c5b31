@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T20:36:38.200878605	eln-global/Tags for minecraft:item mod id eln
+// 26.3	2026-10-11T20:42:48.879312073	eln-global/Tags for minecraft:item mod id eln
 84e660d99ec050723c2cbcd48806f26355cdd0fa data/c/tags/item/casings.json
 b1c2dbaac22ebe066a8de4d98af4e881ddef621f data/c/tags/item/casings/machine.json
 864234b02478871ab4edcaaf9bbb5976971370f5 data/c/tags/item/casings/machine_advanced.json
@@ -14,9 +14,8 @@ e6e8e09d8ee604aa26beb51c6fb4e0977d684768 data/c/tags/item/dusts/coal.json
 2cf22437e81f11894ae4a083b4f9aaa7131648fd data/c/tags/item/dusts/iron.json
 ab702d221148a3f3f5538cca2c65b8c1430ccbd3 data/c/tags/item/dusts/lead.json
 099e4e0599ca07b880296f2bd1db25254dc3ac7c data/c/tags/item/dusts/silicon.json
-cd10d6461e0fc3e3b888e7cef3d19163c9c9799f data/c/tags/item/ingots.json
+f1137c7846d66d54399d214e71f8cca5796ac79e data/c/tags/item/ingots.json
 a0b4bfe15d9df0c07b7a4e7a591f6ab78660ef36 data/c/tags/item/ingots/alloy.json
-df50219e35054de4e4ee221a5dc9ac5fb5130785 data/c/tags/item/ingots/copper.json
 faddda2a328ef2bf5622c70d46376f7bca1358e0 data/c/tags/item/ingots/ferrite.json
 d941123117e2543cf4733b89375860087cf9bf5c data/c/tags/item/ingots/lead.json
 de9263e8109a0fb9c323772ee182757202b21f85 data/c/tags/item/ingots/silicon.json

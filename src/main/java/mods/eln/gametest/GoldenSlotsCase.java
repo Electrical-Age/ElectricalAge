@@ -73,6 +73,9 @@ final class GoldenSlotsCase implements TestCase {
         "eln:shared_item@7688", "1.12 bug: ItemStackFilter.OreDict masked the damage to 8 bits, so Gold Plate (7688) passed as Coal Dust (8)",
         "minecraft:paper@0", "the E36 pack made paper a furnace fuel; vanilla has no paper fuel");
 
+    /** 1.12 devices dropped on purpose (Baughn 2026-10-11: hidden, uncraftable, "Obselete, must be deleted"). */
+    static final Set<String> REMOVED = Set.of("50V Condensator", "200V Condensator");
+
     static final String[] VANILLA = {"coal", "redstone", "iron_ingot", "egg", "paper", "water_bucket", "lava_bucket",
         "cobblestone", "dirt"};
 
@@ -136,6 +139,7 @@ final class GoldenSlotsCase implements TestCase {
             JsonObject dev = e.getAsJsonObject();
             String name = dev.get("device").getAsString();
             Object d = byName.get(name);
+            if (d == null && REMOVED.contains(name)) continue;
             if (d == null) {
                 ctx.check("golden slots: " + name + " exists", false, "no descriptor with that name");
                 continue;
@@ -225,7 +229,8 @@ final class GoldenSlotsCase implements TestCase {
             ctx.check("golden slots: " + name + " removed", NodeManager.instance.getNodeFromCoordonate(new Coordonate(p, level)) == null, "node left at " + p);
         }
         for (String k : known) ctx.line("INFO golden slots: known difference: " + k);
-        ctx.check("golden slots: devices", devices == golden.size(), devices + " of " + golden.size());
+        int expected = golden.size() - REMOVED.size();
+        ctx.check("golden slots: devices", devices == expected, devices + " of " + expected + " (1.12: " + golden.size() + ", removed " + REMOVED + ")");
         ctx.check("golden slots: slots match", slotsOk == slotsAll, slotsOk + " of " + slotsAll);
         // every descriptor with slots is a golden device: a subclass inheriting a spec 1.12 didn't give it would show here
         Set<String> goldenNames = new HashSet<>();

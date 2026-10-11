@@ -41,11 +41,12 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Scans blocks to produce signals."))
-        list.add(tr("- For tanks, outputs fill percentage."))
-        list.add(tr("- For inventories, outputs either total fill or fraction of slots with any items."))
-        list.add(tr("Right-click to change mode."))
-        list.add(tr("Otherwise behaves as a vanilla comparator."))
+        // 26.x: says what it is for first (Baughn); 1.12 began with "Scans blocks to produce signals."
+        list.add(tr("Reads the block it faces and outputs a signal (0-%1\$V), like a comparator.", mods.eln.Eln.SVU.toInt()))
+        list.add(tr("- Tanks: how full they are."))
+        list.add(tr("- Inventories: how full, or the share of slots in use."))
+        list.add(tr("- Other blocks: what a vanilla comparator would read."))
+        list.add(tr("Right-click to switch the inventory mode."))
     }
 }
 

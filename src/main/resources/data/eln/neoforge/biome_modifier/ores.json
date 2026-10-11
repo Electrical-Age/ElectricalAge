@@ -2,6 +2,7 @@
   "type": "neoforge:add_features",
   "biomes": "#minecraft:is_overworld",
   "features": [
+    "eln:lead_ore",
     "eln:tungsten_ore"
   ],
   "step": "underground_ores"

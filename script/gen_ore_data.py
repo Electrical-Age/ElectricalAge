@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the data files of EA's ores (26.x port, Wp12c): loot tables (each ore drops itself, as 1.12), the
 mineable/pickaxe tag, and world generation for the ores that generate with the 1.12 config defaults (production's
-eln.cfg too): only tungsten. Keep ORES in sync with registry/batch/Wp12cContent.registerOre.
+eln.cfg too): tungsten, and on 26.x lead (no other mod brings lead). Keep ORES in sync with registry/batch/Wp12cContent.registerOre.
 
 1.12 generated spawnRate veins per chunk at y spawnHeightMin..spawnHeightMax-1 with a random size
 spawnSizeMin..spawnSizeMax-1 (WorldGenMinable on plain stone). A 26.x ore feature has one size: the mean is used.
@@ -13,7 +13,7 @@ ROOT = os.path.join(os.path.dirname(__file__), '..', 'src', 'main', 'resources',
 
 # name, generates (1.12 default config), spawnRate, sizeMin, sizeMax, heightMin, heightMax
 ORES = [
-    ('lead_ore', False, 8, 3, 9, 0, 24),
+    ('lead_ore', True, 8, 3, 9, 0, 24),  # 26.x: on (Baughn, 2026-10-11): batteries need lead, no other mod supplies it
     ('tungsten_ore', True, 6, 3, 9, 0, 32),
     ('cinnabar_ore', False, 3, 3, 9, 0, 32),
 ]

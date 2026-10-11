@@ -12,7 +12,6 @@ batterychargerb/batterychargerb.obj
 classiclampsocket/classiclampsocket.obj
 compressora/compressora.obj
 compressorb/compressorb.obj
-condo200/condo200.obj
 dataloggercrtfloor/dataloggercrtfloor.obj
 daylightsensor/daylightsensor.obj
 digitalwallclock/digitalwallclock.obj

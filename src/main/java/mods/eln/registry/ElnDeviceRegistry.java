@@ -331,10 +331,6 @@ public final class ElnDeviceRegistry {
             2.0};
         FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
             6.0 / 5);
-        double[] condoVoltageFunctionTable = {0.000, 0.89, 0.90, 0.905, 0.91, 1.1,
-            1.5};
-        FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
-            6.0 / 5);
 
         Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
 
@@ -342,7 +338,6 @@ public final class ElnDeviceRegistry {
         double stdU = LVU;
         double stdP = LVP() / 4;
         double stdEfficiency = 1.0 - 2.0 / 50.0;
-        double condoEfficiency = 1.0 - 2.0 / 50.0;
 
         batteryVoltageFunctionTable = voltageFunction;
         {
@@ -466,49 +461,8 @@ public final class ElnDeviceRegistry {
             desc.setRenderSpec("coal");
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
-        {
-            subId = 32;
-            name = TR_NAME(Type.NONE, "50V Condensator");
-
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "condo200", batteryCableDescriptor, 0.0, true, false,
-                condoVoltageFunction,
-                stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
-                // electricalPMax,electricalDischargeRate
-                stdP * 8, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "Obselete, must be deleted" // name, description)
-            );
-            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-            desc.setDefaultIcon("empty-texture");
-            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        }
-
-        {
-            subId = 36;
-            name = TR_NAME(I18N.Type.NONE, "200V Condensator");
-
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "condo200", highVoltageCableDescriptor, 0.0, true, false,
-                condoVoltageFunction,
-                MVU, MVP() * 1.5, 0.005, // electricalU,//
-                // electricalPMax,electricalDischargeRate
-                MVP(), 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
-            );
-            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-            desc.setDefaultIcon("empty-texture");
-            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        }
+        // 50V and 200V Condensator (subIds 32, 36): hidden and uncraftable in 1.12 ("Obselete, must be deleted"); dropped
+        // (Baughn, 2026-10-11)
     }
 
     /** From 1.12 Wp10bContent. */

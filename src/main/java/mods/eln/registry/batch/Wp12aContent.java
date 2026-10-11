@@ -301,21 +301,7 @@ public class Wp12aContent implements ElnContent {
 
         GenericItemUsingDamageDescriptorWithComment element;
 
-        {
-            subId = 1;
-            completId = subId + (id << 6);
-
-            name = TR_NAME(Type.NONE, "Copper Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
-            sharedItem.addElement(completId, element);
-            // GameRegistryCompat.registerCustomItemStack(name,
-            // element.newItemStack(1));
-            copperIngot = element;
-            // wiki (P4): Data.addResource(element.newItemStack());
-            mods.eln.misc.OreDictTags.addToOre("ingotCopper", element);
-        }
+        // Copper Ingot (subId 1): dropped, vanilla's copper ingot is used (Baughn, 2026-10-11); recipes take c:ingots/copper
 
         {
             subId = 4;

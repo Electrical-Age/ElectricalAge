@@ -4,6 +4,6 @@
   "experience": 0.3,
   "ingredient": "eln:copper_dust",
   "result": {
-    "id": "eln:copper_ingot"
+    "id": "minecraft:copper_ingot"
   }
 }

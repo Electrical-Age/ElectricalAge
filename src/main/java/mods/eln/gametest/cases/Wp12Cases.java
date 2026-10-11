@@ -152,9 +152,9 @@ public final class Wp12Cases {
             }
             ctx.checkValue("wp12 FE drill receive per call (FE)", din, Math.floor(2400 * 0.05 * r));
             ctx.check("wp12 FE drill is receive-only", dout == 0, dout + " FE extracted");
-            ItemStack ingot = Eln.findItemStack("Copper Ingot", 1);
+            ItemStack ingot = Eln.findItemStack("Lead Ingot", 1);
             ctx.check("wp12 no FE on plain items", net.neoforged.neoforge.transfer.access.ItemAccess.forStack(ingot)
-                .getCapability(net.neoforged.neoforge.capabilities.Capabilities.Energy.ITEM) == null, "Copper Ingot");
+                .getCapability(net.neoforged.neoforge.capabilities.Capabilities.Energy.ITEM) == null, "Lead Ingot");
         }
     }
 
@@ -216,9 +216,9 @@ public final class Wp12Cases {
     }
 
     /**
-     * World generation data (26.x, no 1.12 counterpart): eln:tungsten_ore is a placed feature added to overworld biomes
-     * by the biome modifier (1.12 defaults: only tungsten generates), lead/cinnabar have none (EA's copper ore is gone), and the ores
-     * are pickaxe-mineable and need a tool.
+     * World generation data (26.x, no 1.12 counterpart): eln:tungsten_ore and eln:lead_ore are placed features added to
+     * overworld biomes by the biome modifier (1.12 defaults: only tungsten; 26.x adds lead, Baughn 2026-10-11), cinnabar
+     * has none (EA's copper ore is gone), and the ores are pickaxe-mineable and need a tool.
      */
     static final class OreWorldgen implements TestCase {
         @Override
@@ -243,8 +243,10 @@ public final class Wp12Cases {
                 net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tungsten_ore")));
             ctx.check("worldgen: placed feature eln:tungsten_ore", tungsten.isPresent(), "");
             boolean others = placed.get(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.PLACED_FEATURE,
-                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "lead_ore"))).isPresent();
-            ctx.check("worldgen: no lead/cinnabar features (1.12 defaults)", !others, "");
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "cinnabar_ore"))).isPresent();
+            ctx.check("worldgen: placed feature eln:lead_ore (26.x)", placed.get(net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.PLACED_FEATURE, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "lead_ore"))).isPresent(), "");
+            ctx.check("worldgen: no cinnabar feature (1.12 defaults)", !others, "");
             if (tungsten.isPresent()) {
                 var plains = w.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BIOME)
                     .getOrThrow(net.minecraft.world.level.biome.Biomes.PLAINS).value();

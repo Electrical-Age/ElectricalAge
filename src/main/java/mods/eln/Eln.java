@@ -41,7 +41,7 @@ public class Eln {
     public static mods.eln.server.ServerEventListener serverEventListener;
 
     /** Ingots and dusts (1.12 Eln statics; registered by Wp12a). */
-    public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment tinIngot, copperIngot, silverIngot, plumbIngot, tungstenIngot;
+    public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment tinIngot, silverIngot, plumbIngot, tungstenIngot;
     public static mods.eln.generic.GenericItemUsingDamageDescriptorWithComment dustTin, dustCopper, dustSilver;
 
     /** Lamp lifetimes [s] (1.12 config lamp.*LifeInHours: 16, 64, 6, 512 h). */
@@ -53,7 +53,7 @@ public class Eln {
     public static int killMonstersAroundLampsRange = 9;
 
     /** 1.12 config mapGenerate.* defaults (production too): only tungsten; 1.12 forced cinnabar off in code. */
-    public static boolean genLead = false, genTungsten = true, genCinnabar = false;
+    public static boolean genLead = true, genTungsten = true, genCinnabar = false;
 
     /**
      * 1.12 config dictionary.tungsten (false: EA-private oreElnTungsten ...) and dictionary.chips (true: circuitBasic /

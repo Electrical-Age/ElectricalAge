@@ -70,6 +70,10 @@ final class GoldenCase implements TestCase {
     static final Map<String, java.util.Set<String>> RECREATED = Map.of(
         "X-Ray Scanner", java.util.Set.of("energyStorage", "chargePower", "dischargePower")); // Baughn 2026-10-11
 
+    /** Fields changed on purpose (golden/README.md): name -> field -> why. */
+    static final Map<String, Map<String, String>> CHANGED = Map.of(
+        "Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"));
+
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);
         if (g == null) {
@@ -95,8 +99,9 @@ final class GoldenCase implements TestCase {
         JsonObject now = fields(descriptor);
         JsonObject was = g.getAsJsonObject("fields");
         StringBuilder diff = new StringBuilder();
+        Map<String, String> changed = CHANGED.getOrDefault(name, Map.of());
         for (String f : was.keySet()) {
-            if (IGNORED.contains(f)) continue;
+            if (IGNORED.contains(f) || changed.containsKey(f)) continue;
             JsonElement a = was.get(f), b = now.get(f);
             if (b == null) diff.append(f).append(" missing; ");
             else if (!same(a, b)) diff.append(f).append(": ").append(a).append(" -> ").append(b).append("; ");

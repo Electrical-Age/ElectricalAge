@@ -314,7 +314,7 @@ public final class Wp10aCases {
 
     /**
      * 50V macerator (200 W) fed at 50 V with a vanilla copper ingot (26.x port, P5 step 4: the machine recipes run):
-     * the 1.12 recipe is EA Copper Ingot -> 1 Copper Dust for 0.5 * 4000 J, and its input matches c:ingots/copper as
+     * the 1.12 recipe is EA Copper Ingot (now vanilla's) -> 1 Copper Dust for 0.5 * 4000 J, and its input matches c:ingots/copper as
      * 1.12 matched oreDictionary ingotCopper. Expected after 260 ticks (13 s; 2000 J at up to 200 W takes >= 10 s):
      * input slot empty, one Copper Dust in the output slot.
      */

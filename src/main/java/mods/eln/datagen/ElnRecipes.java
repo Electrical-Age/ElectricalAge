@@ -1743,7 +1743,7 @@ public final class ElnRecipes extends ElnRecipesBase {
 
         in = findItemStack("dustCopper");
         addSmelting(in.getItem(), 0,
-            findItemStack("Copper Ingot"));
+            stack(Items.COPPER_INGOT)); // 26.x: EA's copper ingot is gone
         in = findItemStack("Lead Ore");
         addSmelting(in.getItem(), 0,
             findItemStack("ingotLead"));

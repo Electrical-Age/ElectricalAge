@@ -1,6 +1,5 @@
-// 26.3	2026-10-11T20:36:38.201667582	eln-global/EA models
+// 26.3	2026-10-11T20:42:48.880436657	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
-6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_capacitor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_fuel_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_macerator.json
@@ -9,7 +8,6 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/2x3_rotating_solar_panel.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/2x3_solar_panel.json
-6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_capacitor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_egg_incubator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_fuel_generator.json
@@ -66,7 +64,6 @@ b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.jso
 61d873cbec0fa1e9200f30544172a2cabc47c78e assets/eln/items/10a_diode.json
 8f003523235d6a8229af3ba746e8b6b497350f5b assets/eln/items/200v_active_thermal_dissipator.json
 e612b1447501d6e9aa26cc34a7dc3a01a39066c7 assets/eln/items/200v_battery_charger.json
-a37567792a6962c92a72939cf7a32c2f1780de4f assets/eln/items/200v_capacitor.json
 f598b63ab1b2d0ac62718d46fce94888035f2675 assets/eln/items/200v_compressor.json
 13f0c0e8b23c207fabac6570230229509982497e assets/eln/items/200v_copper_heating_corp.json
 d298c5fc313c1482ecb2f45ec53b397168bd6728 assets/eln/items/200v_economic_light_bulb.json
@@ -86,7 +83,6 @@ d1f94e7fb1a9bc16ffa9e0f8524ae70d6917f64b assets/eln/items/25a_diode.json
 507b9088655a2bbd0bd3a3d06d266d6f17c2dcb9 assets/eln/items/2x3_rotating_solar_panel.json
 861291c51eba402c3930f1b4a65d550c96054a14 assets/eln/items/2x3_solar_panel.json
 55fc5a17b18fc0b2c2300c914ec12011790942f1 assets/eln/items/50v_battery_charger.json
-d318fceb518caf426757899e18b9abae22b6c589 assets/eln/items/50v_capacitor.json
 37a4b70ca3294977e668f4d53f321c6dfe13804a assets/eln/items/50v_carbon_incandescent_light_bulb.json
 df761356f972c2ef468238567908f9b444265705 assets/eln/items/50v_compressor.json
 ec16bb43a53a66496192fbaa1f69dd342e09ac4f assets/eln/items/50v_copper_heating_corp.json
@@ -141,7 +137,6 @@ dcec7d729a81b7afd3021b053bf6d59a56a9f13e assets/eln/items/combustion_chamber.jso
 1d2ea77488a8b50b8a4ac1993103676e162f29e0 assets/eln/items/configurable_summing_unit.json
 9ca40de6a4baa7074c6045668bff98ef9dfc205d assets/eln/items/copper_cable.json
 572c241fe6ade7690c37ea5ebda062a4011ab651 assets/eln/items/copper_dust.json
-42f2a98b1400153982d493c9554b9b7665ce4af4 assets/eln/items/copper_ingot.json
 1f7628d711e81955b8043ecc443341a2ab866db3 assets/eln/items/copper_plate.json
 bfa33d12496a132b673051b4b75a8e6f6c0ade17 assets/eln/items/copper_thermal_cable.json
 ae4529679393fdd0da412ff7ec147a6e1f502f8b assets/eln/items/cost_oriented_battery.json
@@ -376,8 +371,6 @@ ac101854a0780b4a47412d6c6143322779114598 assets/eln/models/item/10a_diode_3d.jso
 9a39da60f1f6fc370609349f9bc07ac7086a63f3 assets/eln/models/item/200v_active_thermal_dissipator_3d.json
 fe928ceefb3cac6333679b5b1f1459bcf55d75bf assets/eln/models/item/200v_battery_charger.json
 6f0d609a7fb38a9ef8df35c62e62f3ad5ce9c656 assets/eln/models/item/200v_battery_charger_3d.json
-b0100b52061090269ab1d500aba102ea33c25f58 assets/eln/models/item/200v_capacitor.json
-cf9248fedef0f952ecedb571339f325f4f85c279 assets/eln/models/item/200v_capacitor_3d.json
 3435d920e5278d364aa966cd911b55185509a866 assets/eln/models/item/200v_compressor.json
 e2b1a15503b275609fb5272352aa4d4a76ff19ed assets/eln/models/item/200v_compressor_3d.json
 d8f3c13f3620f91ccff79f23dd416f690243b414 assets/eln/models/item/200v_copper_heating_corp.json
@@ -408,8 +401,6 @@ ae38948a5b04fbb59a27dec504a293a8ee592573 assets/eln/models/item/2x3_rotating_sol
 c8d200f3b06daa53f6ea434ac4651a9e47541215 assets/eln/models/item/2x3_solar_panel_3d.json
 fe928ceefb3cac6333679b5b1f1459bcf55d75bf assets/eln/models/item/50v_battery_charger.json
 6f0d609a7fb38a9ef8df35c62e62f3ad5ce9c656 assets/eln/models/item/50v_battery_charger_3d.json
-b0100b52061090269ab1d500aba102ea33c25f58 assets/eln/models/item/50v_capacitor.json
-cf9248fedef0f952ecedb571339f325f4f85c279 assets/eln/models/item/50v_capacitor_3d.json
 3083070181fd3aab2d91b0e516861b2773879646 assets/eln/models/item/50v_carbon_incandescent_light_bulb.json
 d25039c834fe0719abc041d70c401c045f982c39 assets/eln/models/item/50v_compressor.json
 f3c9e42bfa8fa9a850f4aaa1aac65d17141f64a3 assets/eln/models/item/50v_compressor_3d.json
@@ -480,7 +471,6 @@ b3f5c08fef413d34de5d04f90f38a47802d6040c assets/eln/models/item/coal_plate.json
 dda5c623554325d251345662a26a1e7baffcab42 assets/eln/models/item/configurable_summing_unit_3d.json
 f6d6255a299ed2df5c6b6da80252479f667dec4e assets/eln/models/item/copper_cable.json
 cccc5dbe1554fd40c6976de5664dd54c74e522ad assets/eln/models/item/copper_dust.json
-6a3f4c81f8c460c7cf87e70f7c916b73dc5ba32e assets/eln/models/item/copper_ingot.json
 211e4624393ff74fc02ef2d6b21231c1b7db716d assets/eln/models/item/copper_plate.json
 eda98582a266c800cef3158a85f9a4aff96d8072 assets/eln/models/item/copper_thermal_cable.json
 5f1a35ab696c3b88c55be7d7902b1668629f1fb3 assets/eln/models/item/cost_oriented_battery.json

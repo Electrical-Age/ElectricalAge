@@ -119,7 +119,7 @@ public final class ElnMachineRecipes {
         add(maceratorRecipes, new Recipe(findItemStack("Cinnabar Ore"),
             new ItemStack[]{findItemStack("Cinnabar Dust", 2)}, 2.0 * f));
 
-        add(maceratorRecipes, new Recipe(findItemStack("Copper Ingot"),
+        add(maceratorRecipes, new Recipe(new ItemStack(Items.COPPER_INGOT), // 26.x: EA's copper ingot is gone
             new ItemStack[]{findItemStack("Copper Dust", 1)}, 0.5 * f));
         add(maceratorRecipes, new Recipe(new ItemStack(Items.IRON_INGOT),
             new ItemStack[]{findItemStack("Iron Dust", 1)}, 0.5 * f));
@@ -142,7 +142,7 @@ public final class ElnMachineRecipes {
     public static void recipePlateMachine() {
         float f = 10000;
         add(plateMachineRecipes, new Recipe(
-            findItemStack("Copper Ingot", plateConversionRatio),
+            new ItemStack(Items.COPPER_INGOT, plateConversionRatio), // 26.x: EA's copper ingot is gone
             findItemStack("Copper Plate"), 1.0 * f));
 
         add(plateMachineRecipes, new Recipe(findItemStack("Lead Ingot", plateConversionRatio),

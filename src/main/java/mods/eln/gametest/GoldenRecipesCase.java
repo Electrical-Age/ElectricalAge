@@ -72,9 +72,14 @@ final class GoldenRecipesCase implements TestCase {
         "eln:shared_item_stack_one", "eln:ore");
 
     /** A 1.12 golden stack as a 26.x item; null for other mods' items (or an unknown name, reported). */
+    /** EA items dropped for vanilla's (Baughn 2026-10-11): 1.12 name -> the 26.x item that stands in. */
+    static final Map<String, Item> NOW_VANILLA = Map.of("Copper Ingot", Items.COPPER_INGOT);
+
     static Item map(JsonObject o, List<String> unknown) {
         String id = o.get("item").getAsString();
         int damage = o.has("damage") ? o.get("damage").getAsInt() : 0;
+        if (id.startsWith("eln:") && o.has("name") && NOW_VANILLA.containsKey(o.get("name").getAsString()))
+            return NOW_VANILLA.get(o.get("name").getAsString());
         String path;
         if (EA_DAMAGE_ITEMS.contains(id)) {
             try {
