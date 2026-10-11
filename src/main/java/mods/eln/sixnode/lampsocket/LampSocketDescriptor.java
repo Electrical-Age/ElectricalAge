@@ -80,7 +80,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     @Override
     public void drawItem(boolean entity) {
-        GL11.glScalef(1.25f, 1.25f, 1.25f);
+        // 1.12 scaled by 1.25 here; at 26.x item poses that fills the first-person view
         render.drawItem(this);
     }
 
