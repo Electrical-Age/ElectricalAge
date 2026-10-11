@@ -37,6 +37,9 @@ public final class ElnClient {
                 mods.eln.client.render.ElnItemRenderer.Unbaked.MAP_CODEC));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "lit"), mods.eln.client.render.LitProperty.MAP_CODEC));
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class,
+            e -> e.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tutorial_sign"),
+                mods.eln.sixnode.tutorialsign.TutorialSignHud::render));
         modBus.addListener(EntityRenderersEvent.RegisterLayerDefinitions.class,
             e -> e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer));
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
