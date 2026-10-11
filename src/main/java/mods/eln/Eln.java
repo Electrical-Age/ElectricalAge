@@ -72,8 +72,8 @@ public class Eln {
     public static boolean replicatorPop = true;
     public static double replicatorPopPerSecondPerPlayer = 1.0 / 120;
 
-    /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10). */
-    public static float xRayScannerRange = 5f;
+    /** 1.12 config xrayscannerconfig.rangeInBloc (default 5, clamped 4..10); 26.x default 7.5 (Baughn's playtests). */
+    public static float xRayScannerRange = 7.5f;
     /** 1.12 config xrayscannerconfig.canBeCrafted (true). */
     public static boolean xRayScannerCanBeCrafted = true;
 
