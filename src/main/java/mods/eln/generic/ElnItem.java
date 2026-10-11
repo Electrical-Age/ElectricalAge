@@ -96,4 +96,36 @@ public class ElnItem extends Item implements IDescriptorItem {
     public boolean onEntitySwing(ItemStack stack, net.minecraft.world.entity.LivingEntity entity, InteractionHand hand) {
         return descriptor.onEntitySwing(entity, stack);
     }
+
+    // ---- R5: the energy of electrical items as the vanilla item bar (1.12 drew its own red->yellow bar in the GUI)
+
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        return descriptor instanceof mods.eln.item.electricalinterface.IItemEnergyBattery;
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        return energyBarWidth(descriptor, stack);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        return energyBarColor(descriptor, stack);
+    }
+
+    static double energyFraction(Object d, ItemStack stack) {
+        if (!(d instanceof mods.eln.item.electricalinterface.IItemEnergyBattery b)) return 0;
+        double max = b.getEnergyMax(stack);
+        return max <= 0 ? 0 : Math.max(0, Math.min(1, b.getEnergy(stack) / max));
+    }
+
+    public static int energyBarWidth(Object d, ItemStack stack) {
+        return (int) Math.round(13 * energyFraction(d, stack));
+    }
+
+    /** 1.12 drawEnergyBare: red when empty to yellow when full. */
+    public static int energyBarColor(Object d, ItemStack stack) {
+        return 0xFF0000 | ((int) Math.round(255 * energyFraction(d, stack)) << 8);
+    }
 }

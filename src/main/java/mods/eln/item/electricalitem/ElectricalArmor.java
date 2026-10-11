@@ -122,4 +122,20 @@ public class ElectricalArmor extends Item implements IItemEnergyBattery {
     @Override
     public void electricalItemUpdate(ItemStack stack, double time) {
     }
+
+    // R5: energy as the vanilla item bar (see ElnItem)
+    @Override
+    public boolean isBarVisible(net.minecraft.world.item.ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public int getBarWidth(net.minecraft.world.item.ItemStack stack) {
+        return mods.eln.generic.ElnItem.energyBarWidth(this, stack);
+    }
+
+    @Override
+    public int getBarColor(net.minecraft.world.item.ItemStack stack) {
+        return mods.eln.generic.ElnItem.energyBarColor(this, stack);
+    }
 }
