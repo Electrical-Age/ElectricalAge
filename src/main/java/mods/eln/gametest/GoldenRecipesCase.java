@@ -58,6 +58,10 @@ final class GoldenRecipesCase implements TestCase {
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
 
+    /** 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11). */
+    static final Set<String> REMOVED = Set.of("eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
+        "eln:copper_axe", "eln:copper_helmet", "eln:copper_chestplate", "eln:copper_leggings", "eln:copper_boots");
+
     /** Macerator inputs 26.x changes on purpose: vanilla ores give raw chunks (Baughn, 2026-10-10; golden/README.md). */
     static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore");
 
@@ -199,6 +203,7 @@ final class GoldenRecipesCase implements TestCase {
                 deferred.add(g.get("id").getAsString());
                 continue;
             }
+            if (out == null && REMOVED.contains(g.get("id").getAsString())) continue;
             if (out == null) {
                 failed.add(g.get("id").getAsString() + ": output not on 26.x");
                 continue;

@@ -21,14 +21,11 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Device batch Wp12d (26.x port, split from 1.12 Wp12Content): copper tools and armour (1.12: vanilla ToolMaterial.IRON
- * / ArmorMaterial.IRON with EA textures) and the E-Coal armour (energy instead of armour points, see ElectricalArmor).
- * 1.12 registry names kept (eln:copper_sword ... eln:e_coal_boots). Armour textures: equipment assets eln:copper and
- * eln:ecoal (client, P3).
+ * Device batch Wp12d (26.x port, split from 1.12 Wp12Content): the E-Coal armour (energy instead of armour points, see
+ * ElectricalArmor), 1.12 registry names kept (eln:e_coal_helmet ... eln:e_coal_boots); armour texture: equipment asset
+ * eln:ecoal (client, P3). 1.12's copper tools and armour are dropped: vanilla has them (Baughn, 2026-10-11).
  */
 public class Wp12dContent implements ElnContent {
-    public static DeferredItem<Item> swordCopper, hoeCopper, shovelCopper, pickaxeCopper, axeCopper;
-    public static DeferredItem<Item> helmetCopper, plateCopper, legsCopper, bootsCopper;
     public static DeferredItem<ElectricalArmor> helmetECoal, plateECoal, legsECoal, bootsECoal;
 
     static ResourceKey<EquipmentAsset> asset(String name) {
@@ -44,10 +41,6 @@ public class Wp12dContent implements ElnContent {
         return m;
     }
 
-    /** 1.12 copper armour = ArmorMaterial.IRON (durability 15, 2/5/6/2, enchantability 9) with EA's textures. */
-    static final ArmorMaterial COPPER = new ArmorMaterial(15, defense(2, 5, 6, 2), 9, SoundEvents.ARMOR_EQUIP_IRON, 0.0F, 0.0F,
-        ItemTags.REPAIRS_IRON_ARMOR, asset("copper"));
-
     /**
      * 1.12 E-Coal: durability 10, enchantability 0 (ElectricalArmor.getItemEnchantability), not repairable; no armour
      * points (1.12 ISpecialArmor ignored them: protection is the energy ratio).
@@ -57,7 +50,6 @@ public class Wp12dContent implements ElnContent {
 
     @Override
     public void preInit() {
-        registerTool();
         registerArmor();
     }
 
@@ -65,15 +57,6 @@ public class Wp12dContent implements ElnContent {
         DeferredItem<Item> i = ElnRegistry.ITEMS.registerItem(name, Item::new, props);
         ElnRegistry.ALL_ITEMS.add(i);
         return i;
-    }
-
-    public static void registerTool() {
-        // 1.12 ToolMaterial.IRON: as the 26.x iron tools
-        swordCopper = item("copper_sword", p -> p.sword(ToolMaterial.IRON, 3.0F, -2.4F));
-        hoeCopper = item("copper_hoe", p -> p.hoe(ToolMaterial.IRON, -2.0F, -1.0F));
-        shovelCopper = item("copper_shovel", p -> p.shovel(ToolMaterial.IRON, 1.5F, -3.0F));
-        pickaxeCopper = item("copper_pickaxe", p -> p.pickaxe(ToolMaterial.IRON, 1.0F, -2.8F));
-        axeCopper = item("copper_axe", p -> p.axe(ToolMaterial.IRON, 6.0F, -3.1F));
     }
 
     static DeferredItem<ElectricalArmor> eCoal(String name, ArmorType type, int armor, int armorMarge) {
@@ -91,10 +74,6 @@ public class Wp12dContent implements ElnContent {
     }
 
     public static void registerArmor() {
-        helmetCopper = item("copper_helmet", p -> p.humanoidArmor(COPPER, ArmorType.HELMET));
-        plateCopper = item("copper_chestplate", p -> p.humanoidArmor(COPPER, ArmorType.CHESTPLATE));
-        legsCopper = item("copper_leggings", p -> p.humanoidArmor(COPPER, ArmorType.LEGGINGS));
-        bootsCopper = item("copper_boots", p -> p.humanoidArmor(COPPER, ArmorType.BOOTS));
         // 1.7.10 E-Coal armour points {2, 6, 5, 2} (helmet, chest, legs, boots) became the energy ratios
         helmetECoal = eCoal("e_coal_helmet", ArmorType.HELMET, 2, 1);
         plateECoal = eCoal("e_coal_chestplate", ArmorType.CHESTPLATE, 6, 2);

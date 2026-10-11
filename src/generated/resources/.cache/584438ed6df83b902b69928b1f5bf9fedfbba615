@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T02:57:11.897070433	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-11T20:33:55.955695866	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -75,16 +75,7 @@ f996e81fb80e515548a6e7a7c20e6807ff52a339 data/eln/advancement/recipes/misc/cheap
 20786f52964ac84ab2f8e645c40b6af3e0d499dd data/eln/advancement/recipes/misc/cheap_ferromagnetic_core.json
 495dad7ca040158c03dae28e27b0da45f191dc33 data/eln/advancement/recipes/misc/combustion_chamber.json
 a7d17767a5dbba27b8cc1a46625e6e20c8a94f1d data/eln/advancement/recipes/misc/configurable_summing_unit.json
-412d5a47f826d942da42b468452760e81b4dec8b data/eln/advancement/recipes/misc/copper_axe.json
-e9991f1388086ead1a705aa78aba02002812b528 data/eln/advancement/recipes/misc/copper_boots.json
 3711c51bee4460d71f6e29103a148bd5755e35f9 data/eln/advancement/recipes/misc/copper_cable.json
-052ee44b839f84637419c11b6d3477d3da726c2f data/eln/advancement/recipes/misc/copper_chestplate.json
-9e168c767e347c1c94ecf02a51757b3be46cba0b data/eln/advancement/recipes/misc/copper_helmet.json
-fe448270d12ba2532edea0aaba743fc11cd77ce1 data/eln/advancement/recipes/misc/copper_hoe.json
-1488bc0b5c7c2c795b6bb1a1c89932aca257a441 data/eln/advancement/recipes/misc/copper_leggings.json
-81fa239bcf4c8b92b17670b94d2e72c0e1cae0fc data/eln/advancement/recipes/misc/copper_pickaxe.json
-7462f8538b885e93b99c4bae7f6333ea5ae6fc10 data/eln/advancement/recipes/misc/copper_shovel.json
-c9938e97b31523e34f48bc1d288b85335274e033 data/eln/advancement/recipes/misc/copper_sword.json
 c53010c2cd1a79ca86fe674c484b9812109565b4 data/eln/advancement/recipes/misc/copper_thermal_cable.json
 2a3ff9592a14b04f39eec41e7a86d8a86bb54afb data/eln/advancement/recipes/misc/copper_thermal_cable_2.json
 eb063b091ad07eb5f06a39702afbdcd703ebc5fd data/eln/advancement/recipes/misc/cost_oriented_battery.json
@@ -394,16 +385,7 @@ afa583372447fddaf5707f783a659b8429a6b5d5 data/eln/recipe/cheap_electrical_drill.
 ab676e2387186148a3df59b088cf2d1f4c3a15f4 data/eln/recipe/cheap_ferromagnetic_core.json
 10859b043b2f46648ba82294d9dd0461b0bd7cc2 data/eln/recipe/combustion_chamber.json
 e6d592a04e3a3543405fc3038e0c4d99be342217 data/eln/recipe/configurable_summing_unit.json
-ec876c67a7bb3f223f37ae6be0aa6a6e4d718622 data/eln/recipe/copper_axe.json
-d00ef9b1de1ae435f46e0d0ddea34ea3621666ef data/eln/recipe/copper_boots.json
 89d0120ee955a48da0b21c7a7067cc3a2973c7f1 data/eln/recipe/copper_cable.json
-64dd2c4b175ea960fe7c38895a6531a711b49c96 data/eln/recipe/copper_chestplate.json
-12bc2894a678fd85c293f51db07e2eeab78caff1 data/eln/recipe/copper_helmet.json
-7b942e25ed624818497b3396bd8166265262f286 data/eln/recipe/copper_hoe.json
-d59ad2a0556a7a0939f609017ddb09b77d5fc410 data/eln/recipe/copper_leggings.json
-a95e6c99dbfb2a133a4eb10bb175c8946891c876 data/eln/recipe/copper_pickaxe.json
-65a4035176ae239cb70651057f521cdf15c2b6e2 data/eln/recipe/copper_shovel.json
-65280c8505b25ec2a1910ffc395c3da4bf51f03e data/eln/recipe/copper_sword.json
 463809df7c826080fbc360c37ec92bc9dcfb6c76 data/eln/recipe/copper_thermal_cable.json
 836168ec2234349f8e92493da4fb6e2578ce81bc data/eln/recipe/copper_thermal_cable_2.json
 72f0e9a2cd5c0819a4ff08e2502cc6fb094d9012 data/eln/recipe/cost_oriented_battery.json

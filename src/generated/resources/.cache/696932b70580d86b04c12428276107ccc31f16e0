@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T02:57:11.893773577	eln-global/EA models
+// 26.3	2026-10-11T20:33:55.952861148	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_capacitor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
@@ -140,20 +140,11 @@ f560f5eda8ce5d031e9132c276204bb60b71dcd0 assets/eln/items/cinnabar_dust.json
 95e1215b35afc42a351197cc27f48657dc179d4e assets/eln/items/coal_plate.json
 dcec7d729a81b7afd3021b053bf6d59a56a9f13e assets/eln/items/combustion_chamber.json
 1d2ea77488a8b50b8a4ac1993103676e162f29e0 assets/eln/items/configurable_summing_unit.json
-4cb867ec35fd83817f2cb8e29cb2f30dc576d93b assets/eln/items/copper_axe.json
-b637b0e89500fa10af35fd29a91dc30a7b2ad137 assets/eln/items/copper_boots.json
 9ca40de6a4baa7074c6045668bff98ef9dfc205d assets/eln/items/copper_cable.json
-007cf0fac4c67ac8858d3976a5a370abc9462c8d assets/eln/items/copper_chestplate.json
 572c241fe6ade7690c37ea5ebda062a4011ab651 assets/eln/items/copper_dust.json
-ed4d3eb3e5401cbb5803332aac3c6052f16bab57 assets/eln/items/copper_helmet.json
-0cef373e66afc18f270c63c623807c3a05664a14 assets/eln/items/copper_hoe.json
 42f2a98b1400153982d493c9554b9b7665ce4af4 assets/eln/items/copper_ingot.json
-c5ef8b4527b8df5e0c69fc40639b2df13a2f4f99 assets/eln/items/copper_leggings.json
 b3b4d97fef367d173c7e3b887f2175382e149eed assets/eln/items/copper_ore.json
-11a7ee2a2ef34cd4f0e0f44b6fc7fb83e653eb46 assets/eln/items/copper_pickaxe.json
 1f7628d711e81955b8043ecc443341a2ab866db3 assets/eln/items/copper_plate.json
-7465c2218c28cf1a90f102749c8b06d2cc755961 assets/eln/items/copper_shovel.json
-be21913bb35bb16f9fde18dea3f0dae97735bf7f assets/eln/items/copper_sword.json
 bfa33d12496a132b673051b4b75a8e6f6c0ade17 assets/eln/items/copper_thermal_cable.json
 ae4529679393fdd0da412ff7ec147a6e1f502f8b assets/eln/items/cost_oriented_battery.json
 510704363c9c2101d95522808883862bd4af1936 assets/eln/items/current_oriented_battery.json
@@ -212,6 +203,7 @@ fd0aa72d3eb5d1bf7b04f632242dd9119a2253ff assets/eln/items/industrial_data_logger
 3524eb28ec02f59cfb5d5a686a6ded00e7572c6f assets/eln/items/iron_cable.json
 8a896c86af04321b4a515bb68f6d530e12b03df5 assets/eln/items/iron_dust.json
 b7ccc528e7b56155ebfa04c3b65da5f3c2f55163 assets/eln/items/iron_plate.json
+6355860b214ca3c0facb911d90b1c0cb53b124aa assets/eln/items/item_creative_tab.json
 22ac598464e4198151e2bdfb0fd34766e3d90ee3 assets/eln/items/jk_flip_flop_chip.json
 f5a23da41bb10218fa75a13c9fcfb768fca462f4 assets/eln/items/joint.json
 ddfd8ed2bdcafbca54e67237e525a57e085c7254 assets/eln/items/joint_hub.json
@@ -489,19 +481,10 @@ b3f5c08fef413d34de5d04f90f38a47802d6040c assets/eln/models/item/coal_plate.json
 9355a672186204780bd8b59b2516700f268bdf62 assets/eln/models/item/combustion_chamber.json
 716cc0d0f29699c7deab97c2ce12cb5973d2ebec assets/eln/models/item/configurable_summing_unit.json
 dda5c623554325d251345662a26a1e7baffcab42 assets/eln/models/item/configurable_summing_unit_3d.json
-ef97e6f4157c9058d86c80fc5be79ca95d4e8c1c assets/eln/models/item/copper_axe.json
-791fd92e5271013254ee30a937790a6043965222 assets/eln/models/item/copper_boots.json
 f6d6255a299ed2df5c6b6da80252479f667dec4e assets/eln/models/item/copper_cable.json
-ef25b494151f68744046ffb51f3758f31580f0ec assets/eln/models/item/copper_chestplate.json
 cccc5dbe1554fd40c6976de5664dd54c74e522ad assets/eln/models/item/copper_dust.json
-ba5d26cd72b94bbb6fd7ddc32ea937ca040499f8 assets/eln/models/item/copper_helmet.json
-cae3cad220a20ca8de9de9f261ceef479566b0f4 assets/eln/models/item/copper_hoe.json
 6a3f4c81f8c460c7cf87e70f7c916b73dc5ba32e assets/eln/models/item/copper_ingot.json
-8dcc07206d733700fce0e86e0527c3033942e6c7 assets/eln/models/item/copper_leggings.json
-35f91c61dff7f3386636e2bb1df970dfbc8d1321 assets/eln/models/item/copper_pickaxe.json
 211e4624393ff74fc02ef2d6b21231c1b7db716d assets/eln/models/item/copper_plate.json
-b773e5a0b36cf24213972094f6049d0ec984494f assets/eln/models/item/copper_shovel.json
-2b6db04f168bc891fd99fa2ba7631594d8588ebb assets/eln/models/item/copper_sword.json
 eda98582a266c800cef3158a85f9a4aff96d8072 assets/eln/models/item/copper_thermal_cable.json
 5f1a35ab696c3b88c55be7d7902b1668629f1fb3 assets/eln/models/item/cost_oriented_battery.json
 06c9c66ecf2ab7b439e25753922f776d84b4a7f0 assets/eln/models/item/cost_oriented_battery_3d.json
@@ -589,6 +572,7 @@ fbc7f1d6c88c6e8e094e1997d42aca0e74d9ce02 assets/eln/models/item/industrial_data_
 8404a8b62fbcefdab895692b745605322b08dc29 assets/eln/models/item/iron_cable.json
 f2108791b2409dd2603ed639399a535356cd7445 assets/eln/models/item/iron_dust.json
 10b955a4719e6c789f9240030414ffe31f379508 assets/eln/models/item/iron_plate.json
+8c73426f3430842b5c382fd4e2b88340bfb87d28 assets/eln/models/item/item_creative_tab.json
 a162ebc30c3f727346bfd760a52cdeacdc4966ca assets/eln/models/item/jk_flip_flop_chip.json
 2e938b6ca06fb48b1351a836d6159b101347b3ca assets/eln/models/item/jk_flip_flop_chip_3d.json
 b42ae2a5f1a3acd717407b875bb71cc44639e120 assets/eln/models/item/joint.json

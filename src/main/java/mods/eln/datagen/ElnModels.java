@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
  * a particle-only model. Ores are cubes; energy converters are the 1.12 cube (front fixed for now).
  */
 public class ElnModels implements DataProvider {
-    static final Set<String> HANDHELD = Set.of("copper_sword", "copper_hoe", "copper_shovel", "copper_pickaxe", "copper_axe");
+    static final Set<String> HANDHELD = Set.of();
 
     final PackOutput output;
     final List<String> missing = new ArrayList<>();
@@ -57,6 +57,7 @@ public class ElnModels implements DataProvider {
         }
         String t = iconTexture(name, false);
         if (t == null) t = iconTexture(name.replace("e_coal_", "ecoal_"), false);
+        if (t == null && name.equals("item_creative_tab")) t = iconTexture("elncreativetab", false);
         return t;
     }
 

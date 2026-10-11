@@ -2298,61 +2298,10 @@ public final class ElnRecipes extends ElnRecipesBase {
     // recipeComputerProbe(): OpenComputers/ComputerCraft dropped (rule 8)
 
 
+    // recipeArmor(), recipeTool(): copper armour and tools dropped, vanilla since 1.21.9 (Baughn, 2026-10-11)
     public static void recipeArmor() {
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.helmetCopper.get()),
-            "CCC",
-            "C C",
-            'C', "ingotCopper");
-
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.plateCopper.get()),
-            "C C",
-            "CCC",
-            "CCC",
-            'C', "ingotCopper");
-
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.legsCopper.get()),
-            "CCC",
-            "C C",
-            "C C",
-            'C', "ingotCopper");
-
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.bootsCopper.get()),
-            "C C",
-            "C C",
-            'C', "ingotCopper");
     }
 
     public static void recipeTool() {
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.shovelCopper.get()),
-            "i",
-            "s",
-            "s",
-            'i', "ingotCopper",
-            's', stack(Items.STICK));
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.axeCopper.get()),
-            "ii",
-            "is",
-            " s",
-            'i', "ingotCopper",
-            's', stack(Items.STICK));
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.hoeCopper.get()),
-            "ii",
-            " s",
-            " s",
-            'i', "ingotCopper",
-            's', stack(Items.STICK));
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.pickaxeCopper.get()),
-            "iii",
-            " s ",
-            " s ",
-            'i', "ingotCopper",
-            's', stack(Items.STICK));
-        addRecipe(stack(mods.eln.registry.batch.Wp12dContent.swordCopper.get()),
-            "i",
-            "i",
-            "s",
-            'i', "ingotCopper",
-            's', stack(Items.STICK));
-
     }
 }

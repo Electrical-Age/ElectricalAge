@@ -301,10 +301,6 @@ public final class Wp12Cases {
                 ctx.checkValue("e-coal armour: pig health after 10 damage (10 - 7)", healthAfter, 3.0);
                 ctx.checkValue("e-coal armour: energy left [J] (4000 - 3 * 500)", e, 2500.0);
                 ctx.check("e-coal armour: no armour points", pig.getArmorValue() == 0, "armor " + pig.getArmorValue());
-                Item sword = mods.eln.registry.batch.Wp12dContent.swordCopper.get();
-                ItemStack helmet = new ItemStack(mods.eln.registry.batch.Wp12dContent.helmetCopper.get());
-                ctx.check("copper tools and armour registered (iron stats)", new ItemStack(sword).getMaxDamage() == 250
-                    && helmet.getMaxDamage() == 15 * 11, "sword durability " + new ItemStack(sword).getMaxDamage() + ", helmet " + helmet.getMaxDamage());
             } finally {
                 pig.discard();
             }

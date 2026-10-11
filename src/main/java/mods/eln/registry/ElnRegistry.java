@@ -211,11 +211,14 @@ public final class ElnRegistry {
         }
         registerShared(Eln.sharedItem, "eln:shared_item", 64);
         registerShared(Eln.sharedItemStackOne, "eln:shared_item_stack_one", 1);
+        // 1.12 itemCreativeTab: an item only to be the tab's icon (texture elncreativetab), not listed in the tab
+        DeferredItem<Item> tabIcon = ITEMS.registerSimpleItem("item_creative_tab");
+        ALL_ITEMS.add(tabIcon);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
-            .icon(() -> ALL_ITEMS.isEmpty() ? ItemStack.EMPTY : new ItemStack(ALL_ITEMS.get(0).get()))
+            .icon(() -> new ItemStack(tabIcon.get()))
             .displayItems((params, out) -> ALL_ITEMS.forEach(i -> {
-                if (!mods.eln.node.DescriptorRegistry.isHiddenItem(i.get())) out.accept(i.get()); // 1.12 addWithoutRegistry
+                if (i != tabIcon && !mods.eln.node.DescriptorRegistry.isHiddenItem(i.get())) out.accept(i.get()); // 1.12 addWithoutRegistry
             }))
             .build());
         BLOCKS.register(modBus);

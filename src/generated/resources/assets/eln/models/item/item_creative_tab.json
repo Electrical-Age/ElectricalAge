@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/copper_leggings"
+    "layer0": "eln:items/elncreativetab"
   }
 }

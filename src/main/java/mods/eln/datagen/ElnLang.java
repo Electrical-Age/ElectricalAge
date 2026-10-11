@@ -13,19 +13,15 @@ import java.util.Map;
 
 /**
  * en_us: every EA item and block. Descriptor items take their descriptor's name (the 1.12 TR_NAME key, which is the
- * English name); the plain items (copper tools and armour, E-Coal armour, spawn egg) take their 1.12 names.
+ * English name); the plain items (E-Coal armour, spawn egg, tab icon) take their 1.12 names.
  */
 public class ElnLang extends LanguageProvider {
     /** 1.12 TR_NAME of the items that have no descriptor. */
     static final Map<String, String> PLAIN = Map.ofEntries(
-        Map.entry("copper_sword", "Copper Sword"), Map.entry("copper_hoe", "Copper Hoe"),
-        Map.entry("copper_shovel", "Copper Shovel"), Map.entry("copper_pickaxe", "Copper Pickaxe"),
-        Map.entry("copper_axe", "Copper Axe"),
-        Map.entry("copper_helmet", "Copper Helmet"), Map.entry("copper_chestplate", "Copper Chestplate"),
-        Map.entry("copper_leggings", "Copper Leggings"), Map.entry("copper_boots", "Copper Boots"),
         Map.entry("e_coal_helmet", "E-Coal Helmet"), Map.entry("e_coal_chestplate", "E-Coal Chestplate"),
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
+        Map.entry("item_creative_tab", "Electrical Age"),
         // 1.12 en_us.lang tile.eln.EnergyConverterElnToOther*Block.name
         Map.entry("energy_converter_eln_to_other_lvublock", "50V Electrical Age to other energy exporter"),
         Map.entry("energy_converter_eln_to_other_mvublock", "200V Electrical Age to other energy exporter"),
