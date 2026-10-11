@@ -55,28 +55,24 @@ public final class XRayRayMarch {
         double ny = dy == 0 ? Double.MAX_VALUE : (dy > 0 ? (y + 1 - eye[1]) : (eye[1] - y)) * ddy;
         double nz = dz == 0 ? Double.MAX_VALUE : (dz > 0 ? (z + 1 - eye[2]) : (eye[2] - z)) * ddz;
         double t = 0;
-        float r = 0, g = 0, b = 0;
+        float r = 0, g = 0, b = 0, grey = 0, blue = 0, ore = 0;
         while (t < range) {
             double next = Math.min(nx, Math.min(ny, nz));
             double len = Math.min(next, range) - t;
             int k = world.at(x, y, z);
             if (k >= 0 && k < COLORS.length) {
-                float a = (float) len * 0.9f;
+                // any ore crossed lights the pixel clearly; more ore along the ray, brighter
+                float a = (float) Math.min(1.0, 0.55 + len * 0.8);
                 r += COLORS[k][0] * a;
                 g += COLORS[k][1] * a;
                 b += COLORS[k][2] * a;
+                ore += a;
             } else if (k == SOLID) {
-                float a = (float) len * 0.045f;
-                r += a;
-                g += a;
-                b += a;
+                grey += (float) len * 0.07f;
             } else if (k == OTHER) {
-                float a = (float) len * 0.02f;
-                r += a;
-                g += a;
-                b += a;
+                grey += (float) len * 0.03f;
             } else {
-                b += (float) len * 0.006f;
+                blue += (float) len * 0.006f;
             }
             t = next;
             if (nx <= ny && nx <= nz) {
@@ -90,6 +86,11 @@ public final class XRayRayMarch {
                 nz += ddz;
             }
         }
+        // ores over the rock picture: the rock fades where an ore shows
+        float rock = 1 - Math.min(1, ore);
+        r += grey * rock;
+        g += grey * rock;
+        b += (grey + blue) * rock;
         out[o] = Math.min(1, r);
         out[o + 1] = Math.min(1, g);
         out[o + 2] = Math.min(1, b);
