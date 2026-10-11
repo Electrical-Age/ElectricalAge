@@ -70,7 +70,9 @@ final class XRayScan {
         XRayRayMarch.scan(lookup, new double[]{eye.x, eye.y, eye.z}, new double[]{look.x, look.y, look.z},
             new double[]{up.x, up.y, up.z}, d.fov, d.range, XRayScannerDescriptor.RES_W, XRayScannerDescriptor.RES_H, out);
         picture = out;
-        id = XRayScannerDescriptor.id(s);
+        long newId = XRayScannerDescriptor.id(s);
+        if (newId != id) mods.eln.Eln.LOG.info("X-ray scanner {}: scanning, {} ore block types in its filters", newId, slots.size());
+        id = newId;
     }
 
     static ItemStack held(ItemStack s) {

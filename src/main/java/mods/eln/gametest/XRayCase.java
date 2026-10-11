@@ -70,6 +70,22 @@ final class XRayCase implements TestCase {
         ctx.check("xray: has an id", XRayScannerDescriptor.id(s) != 0, "");
         ctx.check("xray: draws without a picture (server)", PublishRenderCase.draw(ctx, "X-Ray Scanner (item, running)",
             () -> d.drawItem(d.newItemStack(), false)), "");
+        // with a picture for its id (the client scan's job), the running scanner draws the 48x30 pixels too
+        var old = XRayScannerDescriptor.pictures;
+        long sid = XRayScannerDescriptor.id(s);
+        XRayScannerDescriptor.pictures = q -> q == sid ? new float[XRayScannerDescriptor.RES_W * XRayScannerDescriptor.RES_H * 3] : null;
+        try {
+            mods.eln.gl.GlFrame.beginRenderFrame();
+            var fr = mods.eln.gl.GlFrame.open();
+            final ItemStack run = s;
+            d.drawItem(run, false);
+            mods.eln.gl.GlFrame.close();
+            int v = 0;
+            for (var b : fr.batches().values()) v += b.vertices();
+            ctx.check("xray: a running scanner with a picture draws it", v >= 272 + 4 * 48 * 30, v + " vertices");
+        } finally {
+            XRayScannerDescriptor.pictures = old;
+        }
         d.electricalItemUpdate(s, 100.0);
         ctx.check("xray: flat battery switches it off", d.getState(s) == XRayScannerDescriptor.State.Idle && d.getEnergy(s) == 0, "");
 

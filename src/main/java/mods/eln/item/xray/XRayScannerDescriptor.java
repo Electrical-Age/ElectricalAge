@@ -251,6 +251,7 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
         float dx = (x1 - x0) / RES_H, dz = (z1 - z0) / RES_W;
         UtilsClient.disableLight();
         UtilsClient.disableTexture();
+        UtilsClient.disableCulling();
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glNormal3f(0, 1, 0);
         for (int py = 0; py < RES_H; py++)
@@ -264,6 +265,7 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
                 GL11.glVertex3f(xb, y, za);
             }
         GL11.glEnd();
+        UtilsClient.enableCulling();
         UtilsClient.enableTexture();
         UtilsClient.enableLight();
     }

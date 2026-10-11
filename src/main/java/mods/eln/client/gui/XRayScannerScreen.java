@@ -34,7 +34,7 @@ public class XRayScannerScreen extends AbstractContainerScreen<XRayScannerMenu> 
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int xm, int ym) {
         g.text(font, title, titleLabelX, titleLabelY, ElnScreen.LABEL, false);
-        g.text(font, tr("Ores to show: an ore block or raw chunk"), 8, 18, ElnScreen.LABEL, false);
+        g.text(font, tr("Ore blocks or raw chunks to show:"), 8, 18, ElnScreen.LABEL, false);
         g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, ElnScreen.LABEL, false);
     }
 
