@@ -43,6 +43,11 @@ final class ClientScreens {
         layout("sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor", "entity_sensor");
         layout("sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor", "fire_detector");
         layout("sixnode.lampsupply.LampSupplyDescriptor", "lamp_supply");
+        layout("sixnode.energymeter.EnergyMeterDescriptor", "energy_meter");
+        layout("sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor", "data_logger");
+        layout("transparentnode.teleporter.TeleporterDescriptor", "teleporter");
+        layout("sixnode.tutorialsign.TutorialSignDescriptor", "tutorial_sign");
+        layout("simplenode.energyconverter.EnergyConverterElnToOtherDescriptor", "energy_converter");
         layout("sixnode.hub.HubDescriptor", "hub");
         layout("transparentnode.heatfurnace.HeatFurnaceDescriptor", "heat_furnace");
         layout("transparentnode.FuelHeatFurnaceDescriptor", "fuel_heat_furnace");
@@ -83,6 +88,14 @@ final class ClientScreens {
         reg(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, mods.eln.sixnode.thermalsensor.ThermalSensorScreen::new);
         reg(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceScreen::new);
         reg(mods.eln.transparentnode.FuelHeatFurnaceDescriptor.class, mods.eln.transparentnode.FuelHeatFurnaceScreen::new);
+        // S1e
+        reg(mods.eln.sixnode.energymeter.EnergyMeterDescriptor.class, mods.eln.sixnode.energymeter.EnergyMeterScreen::new);
+        reg(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor.class,
+            mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerScreen::new);
+        reg(mods.eln.transparentnode.teleporter.TeleporterDescriptor.class, mods.eln.transparentnode.teleporter.TeleporterScreen::new);
+        reg(mods.eln.sixnode.tutorialsign.TutorialSignDescriptor.class, mods.eln.sixnode.tutorialsign.TutorialSignScreen::new);
+        reg(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.class,
+            mods.eln.simplenode.energyconverter.EnergyConverterScreen::new);
         // value lines from the slots (1.12 drew them over the panel)
         info(mods.eln.sixnode.resistor.ResistorDescriptor.class, (d, inv) -> java.util.List.of(
             tr("Resistance: %1$\u2126", Utils.plotValue(((mods.eln.sixnode.resistor.ResistorDescriptor) d).getRsValue(inv)))));

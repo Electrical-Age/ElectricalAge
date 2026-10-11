@@ -1,0 +1,92 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Industrial Data Logger"
+  },
+  {
+   "canvas": "graph",
+   "width": 162,
+   "height": 64
+  },
+  {
+   "row": [
+    {
+     "button": "reset",
+     "sample": "Reset"
+    },
+    {
+     "button": "pause",
+     "sample": [
+      "Running",
+      "Paused"
+     ]
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    },
+    {
+     "button": "print",
+     "sample": "Print"
+    },
+    {
+     "slot": "1"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "periodl",
+     "sample": "Period"
+    },
+    {
+     "field": "period",
+     "chars": 5
+    },
+    {
+     "text": "maxl",
+     "sample": "Max"
+    },
+    {
+     "field": "max",
+     "chars": 5
+    },
+    {
+     "text": "minl",
+     "sample": "Min"
+    },
+    {
+     "field": "min",
+     "chars": 5
+    }
+   ],
+   "fill": true
+  },
+  {
+   "button": "unit",
+   "sample": [
+    "Unit: Voltage [V]",
+    "Unit: Current [A]",
+    "Unit: Power [W]",
+    "Unit: Temp. [*C]",
+    "Unit: Percent [-]%",
+    "Unit: Energy [J]"
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

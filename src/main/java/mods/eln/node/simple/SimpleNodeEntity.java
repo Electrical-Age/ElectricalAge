@@ -105,6 +105,26 @@ public abstract class SimpleNodeEntity extends BlockEntity implements INodeEntit
     public void serverPacketUnserialize(DataInputStream stream) {
     }
 
+    /** Client -> the node's networkUnserialize: an id and a float (1.12 render.sender.clientSendFloat). */
+    public void clientSendFloat(byte id, float value) {
+        if (level == null || !level.isClientSide()) return;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            java.io.DataOutputStream stream = new java.io.DataOutputStream(bos);
+            stream.writeByte(mods.eln.Eln.packetPublishForNode);
+            stream.writeInt(worldPosition.getX());
+            stream.writeInt(worldPosition.getY());
+            stream.writeInt(worldPosition.getZ());
+            stream.writeInt(mods.eln.misc.Dimensions.id(level));
+            stream.writeUTF(getNodeUuid());
+            stream.writeByte(id);
+            stream.writeFloat(value);
+            mods.eln.network.ElnNet.sendToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);

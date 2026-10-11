@@ -1,0 +1,116 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Advanced Energy Meter"
+  },
+  {
+   "row": [
+    {
+     "field": "password",
+     "chars": 10
+    },
+    {
+     "button": "password",
+     "sample": [
+      "Change password",
+      "Try password"
+     ],
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "button": "state",
+     "sample": [
+      "is off",
+      "is on"
+     ]
+    },
+    {
+     "button": "mode",
+     "sample": [
+      "Counter Mode",
+      "Prepay Mode"
+     ],
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "field": "energy",
+     "chars": 10
+    },
+    {
+     "button": "setenergy",
+     "sample": "Set energy counter",
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "button": "eunit",
+     "sample": [
+      "KJ",
+      "MJ",
+      "GJ"
+     ]
+    },
+    {
+     "button": "tunit",
+     "sample": [
+      "H",
+      "D"
+     ]
+    },
+    {
+     "button": "resettime",
+     "sample": "Reset time counter",
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "energy",
+   "sample": "Energy counter: 99999999999J"
+  },
+  {
+   "text": "time",
+   "sample": "Time counter: 9999h 59' 59''"
+  },
+  {
+   "row": [
+    {
+     "text": "power",
+     "sample": "Power: 999.9kW"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

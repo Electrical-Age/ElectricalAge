@@ -27,11 +27,18 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     protected final mods.eln.gui.layout.Layout.Result layout;
 
     public ElnScreen(ElnNodeMenu menu, Inventory inventory, Component title) {
-        this(menu, inventory, title, menu.spec.width(), sizeFor(menu));
+        this(menu, inventory, title, widthFor(menu), sizeFor(menu));
+    }
+
+    /** A simple node's menu carries no layout (no descriptor id): the screen's layout gives the size then. */
+    static int widthFor(ElnNodeMenu menu) {
+        var l = ElnLayouts.layout(ElnScreens.descriptor(menu));
+        return l != null && menu.kind == ElnNodeMenu.SIMPLE ? l.width() : menu.spec.width();
     }
 
     static int sizeFor(ElnNodeMenu menu) {
-        if (ElnLayouts.layout(ElnScreens.descriptor(menu)) != null) return menu.spec.height();
+        var l = ElnLayouts.layout(ElnScreens.descriptor(menu));
+        if (l != null) return menu.kind == ElnNodeMenu.SIMPLE ? l.height() : menu.spec.height();
         return menu.spec.playerInventory() ? Math.max(menu.spec.height(), menu.spec.inventoryY() + 82) : 40;
     }
 

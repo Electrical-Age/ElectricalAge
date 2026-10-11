@@ -1,0 +1,14 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Tutorial Sign"
+  },
+  {
+   "field": "name",
+   "chars": 24,
+   "fill": true
+  }
+ ],
+ "gap": 4
+}
