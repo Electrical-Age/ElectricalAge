@@ -126,8 +126,10 @@ public class ElnModels implements DataProvider {
                     missing.add("item " + name);
                     tex = "items/missing";
                 }
+                // the data-log print had an empty icon (1.12 drew the graph over it): vanilla paper in the GUI
+                String layer = name.equals("data_logger_print") ? "minecraft:item/paper" : "eln:" + tex;
                 out.add(DataProvider.saveStable(cache, obj("parent", HANDHELD.contains(name) ? "minecraft:item/handheld" : "minecraft:item/generated",
-                    "textures", obj("layer0", "eln:" + tex)), assets.resolve("models/item/" + name + ".json")));
+                    "textures", obj("layer0", layer)), assets.resolve("models/item/" + name + ".json")));
             }
             JsonObject flat = obj("type", "minecraft:model", "model", model);
             Object d = item instanceof mods.eln.generic.IDescriptorItem di ? di.getEaDescriptor() : null;

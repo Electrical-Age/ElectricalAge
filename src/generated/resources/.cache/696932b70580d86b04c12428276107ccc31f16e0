@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T02:29:28.430436901	eln-global/EA models
+// 26.3	2026-10-11T02:37:04.32092371	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_capacitor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
@@ -511,7 +511,7 @@ b13a79f6fc3e42f0adf9075f9986b902f7827551 assets/eln/models/item/current_oriented
 19a8d01475f96407c3bf0c17abb42d1aca6951d8 assets/eln/models/item/d_flip_flop_chip_3d.json
 5c82ebdb0ecf7f81bf761bf45f32631469854382 assets/eln/models/item/data_logger.json
 3580ddbdbbd29caae956215381f0d51e82c98535 assets/eln/models/item/data_logger_3d.json
-0c1da3c6c1dfc8ef7df50a470325581515604c5f assets/eln/models/item/data_logger_print.json
+9186aec3aa11a45a2b24103e84126c200f2ac5c2 assets/eln/models/item/data_logger_print.json
 da8bfcf10a9dd320022e76172620c94f67437909 assets/eln/models/item/dc_dc_converter.json
 398c00167ba2364e15e694856726c35695f6bdee assets/eln/models/item/dc_dc_converter_3d.json
 2d9d17fcdea5e5dcdcfba75c0f3b08f0f36e27ec assets/eln/models/item/dielectric.json
