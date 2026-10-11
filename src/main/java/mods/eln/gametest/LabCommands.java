@@ -31,6 +31,7 @@ import java.util.TreeMap;
  * Lab-only scene builders for the render port (P3 R2), op level 2:
  * - `/elnlab gallery x y z`: every device, unpowered, laid out like the 1.12 gallery (selftest GalleryCase, same
  *   spacing and order), cameras written to eln-gallery-26.json in the server directory;
+ * - `/elnlab burn r x y z`: burn out every device within r blocks (overvoltage), to look at burnt renders;
  * - `/elnlab cables n x y z`: n low-voltage cables in connected rows of 50, for frame-time measurement;
  * - `/elnlab machines n x y z`: n 50V macerators, 2 apart.
  */
@@ -43,6 +44,9 @@ public final class LabCommands {
             Commands.literal("elnlab").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("gallery").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> gallery(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
+                .then(Commands.literal("burn").then(Commands.argument("r", IntegerArgumentType.integer(1, 64))
+                    .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .executes(c -> burn(c.getSource(), IntegerArgumentType.getInteger(c, "r"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
                 .then(Commands.literal("cables").then(Commands.argument("n", IntegerArgumentType.integer(1, 5000))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> cables(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
@@ -59,6 +63,28 @@ public final class LabCommands {
     public static int transparentId(String name) {
         for (var e : Eln.transparentNodeItem.all().entrySet()) if (e.getValue().name.equals(name)) return e.getKey();
         throw new IllegalStateException("no transparent device " + name);
+    }
+
+    static int burn(CommandSourceStack src, int r, BlockPos at) {
+        int n = 0;
+        for (mods.eln.node.NodeBase node : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (node.coordonate.world() != src.getLevel() || !node.coordonate.pos().closerThan(at, r + 0.5)) continue;
+            if (node instanceof mods.eln.node.six.SixNode six) {
+                for (Direction d : Direction.values()) {
+                    var e = six.getElement(d);
+                    if (e != null) {
+                        e.burn(mods.eln.sim.process.destruct.FailureCause.OVERVOLTAGE, mods.eln.sim.process.destruct.Failure.Kind.ELECTRONICS);
+                        n++;
+                    }
+                }
+            } else if (node instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) {
+                t.element.burn(mods.eln.sim.process.destruct.FailureCause.OVERVOLTAGE, mods.eln.sim.process.destruct.Failure.Kind.MACHINE);
+                n++;
+            }
+        }
+        int fn = n;
+        src.sendSuccess(() -> Component.literal("burnt " + fn + " device(s)"), true);
+        return n;
     }
 
     static int cables(CommandSourceStack src, int n, BlockPos origin) {
