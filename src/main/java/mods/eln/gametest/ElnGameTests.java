@@ -47,6 +47,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.PortHelperCases.addTo(l);
         mods.eln.gametest.cases.LampSupplyCases.addTo(l);
         mods.eln.gametest.cases.Wp12Cases.addTo(l);
+        mods.eln.gametest.cases.BurnChainCases.addTo(l);
         return l;
     }
 

@@ -1,5 +1,8 @@
 package mods.eln.sim;
 
+import mods.eln.node.NodeBase;
+import mods.eln.sim.process.destruct.FaultNetwork;
+
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
@@ -28,7 +31,7 @@ public class Simulator /* ,IPacketHandler */ {
 
     boolean run;
 
-    /** Run d.destructImpl() at the end of this slow tick. */
+    /** Run d.destructImpl() at the end of this slow tick (only the worst of each circuit; see tick()). */
     public void queueDestruct(IDestructable d) {
         destructableSet.add(d);
     }
@@ -431,8 +434,36 @@ public class Simulator /* ,IPacketHandler */ {
             // Failures queued by watchdogs during this tick; run here, where changing the simulation is safe.
             IDestructable[] queued = destructableSet.toArray(new IDestructable[0]);
             destructableSet.clear();
+            // One failure per network of connected nodes per tick, the worst: it opens the circuit, and the rest of the
+            // network is relieved (FaultNetwork.relieve). A fault through a run of cables burns the weakest one instead
+            // of every cable that went over its limit (26.x, Baughn's playtest).
+            java.util.Map<NodeBase, java.util.Set<NodeBase>> networkOf = new java.util.HashMap<>();
+            java.util.Map<java.util.Set<NodeBase>, IDestructable> worst = new java.util.IdentityHashMap<>();
+            java.util.List<IDestructable> run = new java.util.ArrayList<>();
             for (IDestructable d : queued) {
+                if (!(d.circuit() instanceof NodeBase node)) {
+                    run.add(d);
+                    continue;
+                }
+                java.util.Set<NodeBase> net = networkOf.get(node);
+                if (net == null) {
+                    net = FaultNetwork.of(node);
+                    for (NodeBase n : net) networkOf.put(n, net);
+                }
+                IDestructable w = worst.get(net);
+                if (w == null || d.severity() > w.severity()) {
+                    if (w != null) w.cancelFail();
+                    worst.put(net, d);
+                } else {
+                    d.cancelFail();
+                }
+            }
+            for (IDestructable d : run) {
                 d.destructImpl();
+            }
+            for (java.util.Map.Entry<java.util.Set<NodeBase>, IDestructable> e : worst.entrySet()) {
+                e.getValue().destructImpl();
+                FaultNetwork.relieve(e.getKey());
             }
         }
 

@@ -57,6 +57,7 @@ public class Failure implements IDestructable {
     @Nullable
     private FailureCause pendingCause;
     private double pendingValue;
+    private double pendingSeverity;
 
     public Failure(SixNodeElement e) {
         this.c = e.getCoordonate();
@@ -134,10 +135,40 @@ public class Failure implements IDestructable {
      */
     @Override
     public void fail(FailureCause cause, double value) {
-        if (pendingCause != null) return;
+        fail(cause, value, 0);
+    }
+
+    @Override
+    public void fail(FailureCause cause, double value, double severity) {
+        if (pendingCause != null) {
+            // a second watchdog of the same device in the same tick: keep the worse one
+            if (severity > pendingSeverity) {
+                pendingCause = cause;
+                pendingValue = value;
+                pendingSeverity = severity;
+            }
+            return;
+        }
         pendingCause = cause;
         pendingValue = value;
+        pendingSeverity = severity;
         Eln.simulator.queueDestruct(this);
+    }
+
+    @Override
+    public double severity() {
+        return pendingSeverity;
+    }
+
+    /** The device's node; Simulator groups failures by the network of connected nodes (FaultNetwork). */
+    @Override
+    public Object circuit() {
+        return node;
+    }
+
+    @Override
+    public void cancelFail() {
+        pendingCause = null;
     }
 
     /** Direct callers (not watchdogs) without a cause: treated as an overheat. */
@@ -150,7 +181,7 @@ public class Failure implements IDestructable {
         if (node != null && node.isDestructing()) return;
         Level w = c.world();
         if (w == null || w.isClientSide()) return;
-        Utils.print("%s fails: %s (%s, %.0f)", describe(), kind, cause, value);
+        Eln.LOG.info(String.format("%s fails: %s (%s, %.0f)", describe(), kind, cause, value));
         apply(w, cause, value);
     }
 

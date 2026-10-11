@@ -47,6 +47,12 @@ public class ThermalLoadWatchDog extends ValueWatchdog {
     }
 
     @Override
+    void clampToLimit() {
+        if (state.Tc > max) state.Tc = max;
+        if (state.Tc < min) state.Tc = min;
+    }
+
+    @Override
     FailureCause cause() {
         return FailureCause.OVERHEAT;
     }
