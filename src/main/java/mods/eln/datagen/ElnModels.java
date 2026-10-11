@@ -153,8 +153,15 @@ public class ElnModels implements DataProvider {
                 continue;
             }
             if (d instanceof mods.eln.generic.GenericItemUsingDamageDescriptor gi && gi.hasItemDraw()) {
-                // R5: item descriptors with a live look (data-log print): drawn in the flat model's pose, GUI = icon
+                // R5: item descriptors with a live look (data-log print): drawn in the flat model's pose, GUI = icon;
+                // model items (X-ray scanner) get a base model with their own pose
                 String base = "eln:item/" + name;
+                if (gi.itemDrawParent() != null) {
+                    base = "eln:item/" + name + "_3d";
+                    out.add(DataProvider.saveStable(cache, obj("parent", gi.itemDrawParent(), "textures",
+                        obj("particle", "eln:" + (itemTexture(name, item) == null ? "items/missing" : itemTexture(name, item)))),
+                        assets.resolve("models/item/" + name + "_3d.json")));
+                }
                 JsonArray cases = new JsonArray();
                 cases.add(obj("when", "gui", "model", flat));
                 JsonArray entity = new JsonArray();

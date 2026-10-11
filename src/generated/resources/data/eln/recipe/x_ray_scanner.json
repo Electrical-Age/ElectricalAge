@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:portable_battery",
+    "C": "#c:circuits/advanced",
+    "G": "eln:ore_scanner",
+    "P": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "PGP",
+    "PCP",
+    "PBP"
+  ],
+  "result": {
+    "id": "eln:x_ray_scanner"
+  }
+}

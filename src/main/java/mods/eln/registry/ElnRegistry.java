@@ -45,6 +45,8 @@ public final class ElnRegistry {
     /** Every EA device GUI (P4): ElnNodeMenu, rebuilt on the client from its open data. */
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.gui.ElnNodeMenu>> NODE_MENU =
         MENUS.register("node", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.gui.ElnNodeMenu::fromNetwork));
+    public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.item.xray.XRayScannerMenu>> XRAY_MENU =
+        MENUS.register("xray_scanner", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.item.xray.XRayScannerMenu::fromNetwork));
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
 
     /** Every EA item, in 1.12 id order (creative tab, tests). */

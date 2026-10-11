@@ -48,7 +48,12 @@ public final class ElnClient {
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent.class, ClientKeys::register);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, ClientKeys::tick);
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent.class,
-            e -> e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create));
+            e -> {
+                e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create);
+                e.register(ElnRegistry.XRAY_MENU.get(), mods.eln.client.gui.XRayScannerScreen::new);
+            });
+        XRayScan.install();
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, e -> XRayScan.tick());
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent.class,
             e -> mods.eln.client.render.ElnPipelines.ALL.forEach(e::registerPipeline));
     }

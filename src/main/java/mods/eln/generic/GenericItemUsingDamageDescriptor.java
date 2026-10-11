@@ -28,6 +28,11 @@ public class GenericItemUsingDamageDescriptor {
     public void drawItem(net.minecraft.world.item.ItemStack stack, boolean entity) {
     }
 
+    /** The base model's parent for hasItemDraw items (its display block = the pose), or null: the flat icon's pose. */
+    public String itemDrawParent() {
+        return null;
+    }
+
     /** R5: the vanilla item bar's fill (0..1), or -1 for none. Electrical items: their energy (see ElnItem). */
     public double itemBar(net.minecraft.world.item.ItemStack stack) {
         return -1;

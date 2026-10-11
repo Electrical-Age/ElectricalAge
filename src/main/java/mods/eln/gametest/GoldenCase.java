@@ -66,6 +66,10 @@ final class GoldenCase implements TestCase {
         ctx.check("golden: descriptors compared with 1.12", compared > 0, compared + " descriptor(s)");
     }
 
+    /** Items recreated rather than ported (new class): the 1.12 fields still compared. */
+    static final Map<String, java.util.Set<String>> RECREATED = Map.of(
+        "X-Ray Scanner", java.util.Set.of("energyStorage", "chargePower", "dischargePower")); // Baughn 2026-10-11
+
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);
         if (g == null) {
@@ -73,6 +77,16 @@ final class GoldenCase implements TestCase {
             return 0;
         }
         String name = g.get("name").getAsString();
+        java.util.Set<String> kept = RECREATED.get(name);
+        if (kept != null) {
+            // recreated on purpose: a new class; only the numbers that keep their meaning are compared
+            JsonObject now = fields(descriptor), was = g.getAsJsonObject("fields");
+            StringBuilder diff = new StringBuilder();
+            for (String f : kept)
+                if (now.get(f) == null || !same(was.get(f), now.get(f))) diff.append(f).append(": ").append(was.get(f)).append(" -> ").append(now.get(f)).append("; ");
+            ctx.check("golden " + name + ": recreated, kept numbers as in 1.12", diff.length() == 0, diff.toString());
+            return 1;
+        }
         if (!g.has("descriptorClass") || !g.get("descriptorClass").getAsString().endsWith("." + descriptor.getClass().getSimpleName())) {
             ctx.check("golden " + name + ": same descriptor class", false,
                 (g.has("descriptorClass") ? g.get("descriptorClass").getAsString() : "none") + " vs " + descriptor.getClass().getName());

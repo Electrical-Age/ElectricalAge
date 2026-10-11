@@ -1,4 +1,4 @@
-// 26.3	2026-10-10T18:08:24.949226254	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-11T02:57:11.897070433	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -314,6 +314,7 @@ a7c4d98bb61c1f2c0c89818c55e4b8dbf9c4feb5 data/eln/advancement/recipes/misc/wirel
 ccafd42c326caca27ed5482a65beb3adccfdfe44 data/eln/advancement/recipes/misc/wireless_signal_transmitter.json
 04bb3f018383fea849e2f12d8241de21a4e59cac data/eln/advancement/recipes/misc/wireless_switch.json
 a8f1b3c688cd59274fcedf0e6b88746f923ab6be data/eln/advancement/recipes/misc/wrench.json
+711dfaf02c2d5a8770ab0c640a52639ad764630d data/eln/advancement/recipes/misc/x_ray_scanner.json
 e46ace98665bbeee9e00c278a1a7d497e969c14a data/eln/advancement/recipes/misc/xnor_chip.json
 78b1262536db1831c27927ce0cd6508ad93c7970 data/eln/advancement/recipes/misc/xor_chip.json
 01b586aaf0d8672f78ba0f0a789e68fbb01d3f64 data/eln/advancement/recipes/misc/yellow_brush.json
@@ -632,6 +633,7 @@ ee218e366e10d4332393345631c21c46e9f20e14 data/eln/recipe/wireless_signal_receive
 110a74a295869e6598f07c9a0591811c90a8469c data/eln/recipe/wireless_signal_transmitter.json
 2aa80bdf0ced9790038afef366d4fb061b32b44f data/eln/recipe/wireless_switch.json
 70a6fa520a0520df820571a179a523681a424518 data/eln/recipe/wrench.json
+2f2f8a4598e0d3be079b4f9bf6f62ea4d4c88856 data/eln/recipe/x_ray_scanner.json
 02eb92669440cbf1416a7b736c662a893dbbaf87 data/eln/recipe/xnor_chip.json
 de5129a0212c38116f8ba1cbc65933c30744a07a data/eln/recipe/xor_chip.json
 956cf8ecb1bf39093f747f87860b83076a5752e7 data/eln/recipe/yellow_brush.json

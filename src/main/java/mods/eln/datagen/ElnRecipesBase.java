@@ -59,7 +59,7 @@ public abstract class ElnRecipesBase {
     static final HashSet<Item> smelted = new HashSet<>();
 
     /** Descriptor names of outputs that are deferred to a later phase (their recipes are skipped, not failed). */
-    static final Map<String, String> DEFERRED = Map.of("X-Ray Scanner", "P3 (client)");
+    static final Map<String, String> DEFERRED = Map.of();
 
     /**
      * A recipe stack: item, count and EA tag. Recipes are generated while item components are not bound yet (datagen's

@@ -46,6 +46,7 @@ public class ElnItemRenderer implements SpecialModelRenderer<ElnItemRenderer.Arg
                 GL11.glTranslatef(.5f, .5f, .5f);
                 d.drawItem(entity);
             } else if (a.descriptor() instanceof mods.eln.generic.GenericItemUsingDamageDescriptor d) {
+                if (d.itemDrawParent() != null) GL11.glTranslatef(.5f, .5f, .5f); // model items: centred like devices
                 d.drawItem(a.stack(), entity);
             }
         } catch (RuntimeException e) {

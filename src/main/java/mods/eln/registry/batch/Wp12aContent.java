@@ -1004,23 +1004,15 @@ public class Wp12aContent implements ElnContent {
             sharedItemStackOne.addElement(subId + (id << 6), desc);
         }
 
-        /* 26.x port: the X-Ray Scanner (mostly client: ore render storage) comes with P3
         {
+            // 26.x: recreated (item/xray; Baughn 2026-10-11): filter slots, client picture, 48x30 screen
             subId = 32;
             name = TR_NAME(Type.NONE, "X-Ray Scanner");
-
-            PortableOreScannerItem desc = new PortableOreScannerItem(
+            sharedItemStackOne.addElement(subId + (id << 6), new mods.eln.item.xray.XRayScannerDescriptor(
                 name, obj.getObj("XRayScanner"),
-                10000, 400, 300,// double energyStorage,double
-                // chargePower,double dischargePower,
-                xRayScannerRange, (float) (Math.PI / 2),// float
-                // viewRange,float
-                // viewYAlpha,
-                32, 20// int resWidth,int resHeight
-            );
-            sharedItemStackOne.addElement(subId + (id << 6), desc);
+                10000, 400, 300, // energy storage, charge power, discharge power
+                xRayScannerRange, (float) (Math.PI / 2))); // range, horizontal field of view
         }
-        */
     }
 
     public static void registerFuelBurnerItem(int id) {

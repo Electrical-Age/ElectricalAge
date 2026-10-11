@@ -97,6 +97,12 @@ public class ElnItem extends Item implements IDescriptorItem {
         return descriptor.onEntitySwing(entity, stack);
     }
 
+    /** EA items keep state in their custom data (energy, counters): changing it must not replay the equip animation. */
+    @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return slotChanged || oldStack.getItem() != newStack.getItem();
+    }
+
     // ---- R5: the energy of electrical items as the vanilla item bar (1.12 drew its own red->yellow bar in the GUI)
 
     @Override
