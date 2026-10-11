@@ -1741,9 +1741,6 @@ public final class ElnRecipes extends ElnRecipesBase {
     public static void recipeFurnace() {
         RStack in;
 
-        in = findItemStack("Copper Ore");
-        addSmelting(in.getItem(), 0,
-            findItemStack("Copper Ingot"));
         in = findItemStack("dustCopper");
         addSmelting(in.getItem(), 0,
             findItemStack("Copper Ingot"));

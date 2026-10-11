@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T20:33:55.952861148	eln-global/EA models
+// 26.3	2026-10-11T20:36:38.201667582	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_capacitor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
@@ -21,7 +21,6 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/auto_miner.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacity_oriented_battery.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
-17e03549a0dac410216acc4434e1a2c64effc717 assets/eln/blockstates/copper_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/current_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/dc_dc_converter.json
@@ -143,7 +142,6 @@ dcec7d729a81b7afd3021b053bf6d59a56a9f13e assets/eln/items/combustion_chamber.jso
 9ca40de6a4baa7074c6045668bff98ef9dfc205d assets/eln/items/copper_cable.json
 572c241fe6ade7690c37ea5ebda062a4011ab651 assets/eln/items/copper_dust.json
 42f2a98b1400153982d493c9554b9b7665ce4af4 assets/eln/items/copper_ingot.json
-b3b4d97fef367d173c7e3b887f2175382e149eed assets/eln/items/copper_ore.json
 1f7628d711e81955b8043ecc443341a2ab866db3 assets/eln/items/copper_plate.json
 bfa33d12496a132b673051b4b75a8e6f6c0ade17 assets/eln/items/copper_thermal_cable.json
 ae4529679393fdd0da412ff7ec147a6e1f502f8b assets/eln/items/cost_oriented_battery.json
@@ -367,7 +365,6 @@ ab94f8cbc90d170de011be7f9b4d263a590215a6 assets/eln/items/xnor_chip.json
 71cba1b1b77149026a0a839fe18e41aba9e722de assets/eln/items/xor_chip.json
 6c25b292ec9861f7c60a7a4deb48c0375dfd8184 assets/eln/items/yellow_brush.json
 249b572af77b493f1d8fb801a3767a40324d368f assets/eln/models/block/cinnabar_ore.json
-94edcb7f8f6116fc4a4440b9ade6602d72decbce assets/eln/models/block/copper_ore.json
 69747fd6ef6515c3b9da742b1c451992ab0f6947 assets/eln/models/block/energy_converter.json
 0d8d961cba304aa34406e1126335beec99aff252 assets/eln/models/block/lead_ore.json
 85c701d80e4572b606201f6720ff1e39979eaa78 assets/eln/models/block/particle_iron.json

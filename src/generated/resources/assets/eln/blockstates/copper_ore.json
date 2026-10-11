@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "eln:block/copper_ore"
-      }
-    }
-  ]
-}

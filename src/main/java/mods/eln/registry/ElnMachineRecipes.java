@@ -95,8 +95,8 @@ public final class ElnMachineRecipes {
     public static void recipeMacerator() {
         float f = 4000;
         // 26.x (Baughn, 2026-10-10): vanilla ore blocks macerate to raw chunks about like Fortune II (1-3, mean 1.75;
-        // copper 2-5 base), and a chunk to one dust with a 20% chance of two. First: their ore tags also hold EA's
-        // copper ore. 1.12 gave 2 dust per ore block.
+        // copper 2-5 base), and a chunk to one dust with a 20% chance of two. 1.12 gave 2 dust per ore block. EA's own
+        // copper ore is gone (vanilla has copper).
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.IRON_ORE), new ItemStack(Items.RAW_IRON), 1.5 * f).withExtra(2, 1, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.GOLD_ORE), new ItemStack(Items.RAW_GOLD), 3.0 * f).withExtra(2, 1, 1));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.COPPER_ORE), new ItemStack(Items.RAW_COPPER, 3), 1.0 * f)
@@ -106,8 +106,6 @@ public final class ElnMachineRecipes {
         add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_COPPER), new ItemStack[]{findItemStack("Copper Dust", 1)}, 1.0 * f).withExtra(4, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.COAL_ORE, 1),
             new ItemStack(Items.COAL, 3), 1.0 * f));
-        add(maceratorRecipes, new Recipe(findItemStack("Copper Ore"),
-            new ItemStack[]{findItemStack("Copper Dust", 2)}, 1.0 * f));
         add(maceratorRecipes, new Recipe(findItemStack("Lead Ore"),
             new ItemStack[]{findItemStack("Lead Dust", 2)}, 2.0 * f));
         add(maceratorRecipes, new Recipe(findItemStack("Tungsten Ore"),

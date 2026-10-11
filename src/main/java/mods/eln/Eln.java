@@ -53,7 +53,7 @@ public class Eln {
     public static int killMonstersAroundLampsRange = 9;
 
     /** 1.12 config mapGenerate.* defaults (production too): only tungsten; 1.12 forced cinnabar off in code. */
-    public static boolean genCopper = false, genLead = false, genTungsten = true, genCinnabar = false;
+    public static boolean genLead = false, genTungsten = true, genCinnabar = false;
 
     /**
      * 1.12 config dictionary.tungsten (false: EA-private oreElnTungsten ...) and dictionary.chips (true: circuitBasic /

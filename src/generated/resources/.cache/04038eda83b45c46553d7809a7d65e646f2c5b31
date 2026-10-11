@@ -1,4 +1,4 @@
-// 26.3	2026-10-10T17:50:11.067851504	eln-global/Tags for minecraft:item mod id eln
+// 26.3	2026-10-11T20:36:38.200878605	eln-global/Tags for minecraft:item mod id eln
 84e660d99ec050723c2cbcd48806f26355cdd0fa data/c/tags/item/casings.json
 b1c2dbaac22ebe066a8de4d98af4e881ddef621f data/c/tags/item/casings/machine.json
 864234b02478871ab4edcaaf9bbb5976971370f5 data/c/tags/item/casings/machine_advanced.json
@@ -20,9 +20,8 @@ df50219e35054de4e4ee221a5dc9ac5fb5130785 data/c/tags/item/ingots/copper.json
 faddda2a328ef2bf5622c70d46376f7bca1358e0 data/c/tags/item/ingots/ferrite.json
 d941123117e2543cf4733b89375860087cf9bf5c data/c/tags/item/ingots/lead.json
 de9263e8109a0fb9c323772ee182757202b21f85 data/c/tags/item/ingots/silicon.json
-a037918d08e4cc2f981a713b381aac5e6f211289 data/c/tags/item/ores.json
+9b9d0a9598eb273d063ee9b92b0a8b101b993784 data/c/tags/item/ores.json
 2b6951f8fd96baa6c173700469c8988bb9beb54b data/c/tags/item/ores/cinnabar.json
-28c605018a975611801fa52feac3f4707a1ecc54 data/c/tags/item/ores/copper.json
 e72492bfd3c828c6078748e561051971b8565211 data/c/tags/item/ores/lead.json
 d3a9e94652a8d2466cb65f136e02de09b695c6c2 data/c/tags/item/plates.json
 7fe7afa47a6e8e04a942b77894cf4b0d86288101 data/c/tags/item/plates/alloy.json

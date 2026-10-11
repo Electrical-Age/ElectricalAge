@@ -17,7 +17,8 @@ public class Wp12cContent implements ElnContent {
     /** The ores by 1.12 id (registered as blocks + block items by ElnRegistry). */
     public static final DescriptorRegistry<OreDescriptor> ores = new DescriptorRegistry<>(OreDescriptor.class);
 
-    public static OreDescriptor oreCopper;
+    /** 1.12 also had Copper Ore (id 1); dropped, vanilla has copper (Baughn, 2026-10-11). */
+    public static OreDescriptor oreLead;
 
     @Override
     public void preInit() {
@@ -29,22 +30,12 @@ public class Wp12cContent implements ElnContent {
         String name;
 
         {
-            id = 1;
-            name = TR_NAME(Type.NONE, "Copper Ore");
-            OreDescriptor desc = new OreDescriptor(name, id,
-                30 * (genCopper ? 1 : 0), 6, 10, 0, 80 // spawnRate, spawnSizeMin, spawnSizeMax, spawnHeightMin, spawnHeightMax
-            );
-            oreCopper = desc;
-            ores.addDescriptor(id, desc);
-            mods.eln.misc.OreDictTags.addToOre("oreCopper", desc);
-        }
-
-        {
             id = 4;
             name = TR_NAME(Type.NONE, "Lead Ore");
             OreDescriptor desc = new OreDescriptor(name, id,
-                8 * (genLead ? 1 : 0), 3, 9, 0, 24
+                8 * (genLead ? 1 : 0), 3, 9, 0, 24 // spawnRate, spawnSizeMin, spawnSizeMax, spawnHeightMin, spawnHeightMax
             );
+            oreLead = desc;
             ores.addDescriptor(id, desc);
             mods.eln.misc.OreDictTags.addToOre("oreLead", desc);
         }

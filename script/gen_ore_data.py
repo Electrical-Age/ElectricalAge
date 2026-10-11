@@ -13,7 +13,6 @@ ROOT = os.path.join(os.path.dirname(__file__), '..', 'src', 'main', 'resources',
 
 # name, generates (1.12 default config), spawnRate, sizeMin, sizeMax, heightMin, heightMax
 ORES = [
-    ('copper_ore', False, 30, 6, 10, 0, 80),
     ('lead_ore', False, 8, 3, 9, 0, 24),
     ('tungsten_ore', True, 6, 3, 9, 0, 32),
     ('cinnabar_ore', False, 3, 3, 9, 0, 32),

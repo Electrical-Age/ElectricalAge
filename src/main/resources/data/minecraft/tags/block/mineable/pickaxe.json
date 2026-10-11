@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "eln:copper_ore",
     "eln:lead_ore",
     "eln:tungsten_ore",
     "eln:cinnabar_ore"
