@@ -29,7 +29,11 @@ public final class ElnClient {
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {
             e.registerBlockEntityRenderer(ElnRegistry.SIX_NODE_ENTITY.get(), ctx -> new SixNodeRender());
             e.registerBlockEntityRenderer(ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), ctx -> new TransparentNodeRender());
+            // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
+            e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
         });
+        modBus.addListener(EntityRenderersEvent.RegisterLayerDefinitions.class,
+            e -> e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer));
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
         ClientScreens.registerAll();
         mods.eln.gui.ElnNodeMenu.clientLayout = mods.eln.client.gui.ElnLayouts::apply;

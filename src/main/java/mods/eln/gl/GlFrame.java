@@ -590,6 +590,9 @@ public final class GlFrame {
 
     /** Transform quads (list or primitive space) by the current matrix into the current state's batch. */
     private void emit(float[] q, int floats, boolean colored) {
+        // soot over additive glow (halos, light cones) would darken empty space: 1.12's overlay left it additive,
+        // where a soot colour adds next to nothing
+        if (soot && blend && blendMode == Blend.ADDITIVE) return;
         Batch out = batch();
         out.ensure(floats);
         float[] d = out.data;
