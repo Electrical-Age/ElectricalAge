@@ -24,7 +24,11 @@ import java.util.function.Consumer;
  * (eln:item/device_six / device_transparent); the device draws centred on the block centre, through the GL11 shim
  * like the placed blocks.
  */
-public class ElnItemRenderer implements SpecialModelRenderer<GenericItemBlockUsingDamageDescriptor> {
+public class ElnItemRenderer implements SpecialModelRenderer<ElnItemRenderer.Arg> {
+    /** The device (block descriptor) or the item descriptor with its stack (prints, live items). */
+    public record Arg(Object descriptor, ItemStack stack) {
+    }
+
     final boolean entity;
 
     ElnItemRenderer(boolean entity) {
@@ -32,16 +36,20 @@ public class ElnItemRenderer implements SpecialModelRenderer<GenericItemBlockUsi
     }
 
     @Override
-    public void submit(@Nullable GenericItemBlockUsingDamageDescriptor d, PoseStack poseStack, SubmitNodeCollector collector,
+    public void submit(@Nullable Arg a, PoseStack poseStack, SubmitNodeCollector collector,
                        int light, int overlay, boolean foil, int outline) {
-        if (d == null) return;
+        if (a == null) return;
         GlFrame frame = GlSubmit.open(poseStack);
         try {
-            GL11.glTranslatef(.5f, .5f, .5f);
             UtilsClient.glDefaultColor();
-            d.drawItem(entity);
+            if (a.descriptor() instanceof GenericItemBlockUsingDamageDescriptor d) {
+                GL11.glTranslatef(.5f, .5f, .5f);
+                d.drawItem(entity);
+            } else if (a.descriptor() instanceof mods.eln.generic.GenericItemUsingDamageDescriptor d) {
+                d.drawItem(a.stack(), entity);
+            }
         } catch (RuntimeException e) {
-            ElnRenderErrors.report("item " + d.name, e);
+            ElnRenderErrors.report("item " + a.stack().getItem(), e);
         } finally {
             GlFrame.close();
         }
@@ -54,17 +62,20 @@ public class ElnItemRenderer implements SpecialModelRenderer<GenericItemBlockUsi
     }
 
     @Override
-    public @Nullable GenericItemBlockUsingDamageDescriptor extractArgument(ItemStack stack) {
-        return stack.getItem() instanceof IDescriptorItem i && i.getEaDescriptor() instanceof GenericItemBlockUsingDamageDescriptor d
-            && d.hasItemDraw() ? d : null;
+    public @Nullable Arg extractArgument(ItemStack stack) {
+        if (!(stack.getItem() instanceof IDescriptorItem i)) return null;
+        Object d = i.getEaDescriptor();
+        if (d instanceof GenericItemBlockUsingDamageDescriptor b && b.hasItemDraw()
+            || d instanceof mods.eln.generic.GenericItemUsingDamageDescriptor g && g.hasItemDraw()) return new Arg(d, stack);
+        return null;
     }
 
-    public record Unbaked(String context) implements SpecialModelRenderer.Unbaked<GenericItemBlockUsingDamageDescriptor> {
+    public record Unbaked(String context) implements SpecialModelRenderer.Unbaked<Arg> {
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.STRING.fieldOf("context").forGetter(Unbaked::context)).apply(i, Unbaked::new));
 
         @Override
-        public SpecialModelRenderer<GenericItemBlockUsingDamageDescriptor> bake(SpecialModelRenderer.BakingContext context) {
+        public SpecialModelRenderer<Arg> bake(SpecialModelRenderer.BakingContext context) {
             return new ElnItemRenderer("entity".equals(this.context));
         }
 

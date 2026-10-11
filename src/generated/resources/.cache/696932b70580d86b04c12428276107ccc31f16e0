@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T02:01:29.001037333	eln-global/EA models
+// 26.3	2026-10-11T02:29:28.430436901	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_capacitor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
@@ -160,7 +160,7 @@ ae4529679393fdd0da412ff7ec147a6e1f502f8b assets/eln/items/cost_oriented_battery.
 46774c7c0c9bc757504f13a6afc7cbe45cd1614f assets/eln/items/cyan_brush.json
 b6a86730122c1e3e042892a19167fc2e440ca338 assets/eln/items/d_flip_flop_chip.json
 3bd320a75ad32faa3c2180d080a05d77c148cbb6 assets/eln/items/data_logger.json
-583bd8ce19c215c7ff6e836b31a4ce2917a06568 assets/eln/items/data_logger_print.json
+f5a668bacb3e6fd1ed601b06b2e6d455d1aeb435 assets/eln/items/data_logger_print.json
 661dbe0aebf24eadbaa354f1055a7e93b8b5a2b5 assets/eln/items/dc_dc_converter.json
 8520d766df6e210652cb43d6b1f3afd090bd693e assets/eln/items/dielectric.json
 e191f43f15cf7c2efad666aae8df6ee117d108c1 assets/eln/items/digital_watch.json
@@ -207,7 +207,7 @@ a85c47bd1ce8e932ded9ef01dd78e0ccb9f5d970 assets/eln/items/high_voltage_cable.jso
 dbadde2aaf16a92fc3972d7e6b3f4254c6eddab9 assets/eln/items/high_voltage_relay.json
 708ff0dd266dc1a3551cf58ca59388a08b0b704c assets/eln/items/high_voltage_switch.json
 f32af3c050c7673d1f5e3d48b17f8a898a0f68db assets/eln/items/hub.json
-3aa954c33ee8d8234439d27a83e70ac538145f4d assets/eln/items/improved_flashlight.json
+abc3744929bb16ef9d942ab9d03c8e70fb6134bb assets/eln/items/improved_flashlight.json
 fd0aa72d3eb5d1bf7b04f632242dd9119a2253ff assets/eln/items/industrial_data_logger.json
 3524eb28ec02f59cfb5d5a686a6ded00e7572c6f assets/eln/items/iron_cable.json
 8a896c86af04321b4a515bb68f6d530e12b03df5 assets/eln/items/iron_dust.json
@@ -322,7 +322,7 @@ b7e29d65acc834fcb4ebed3a7ed0f3fb200424af assets/eln/items/small_50v_incandescent
 c99526687a96afc04b5ebfea21eea17b4b3a1473 assets/eln/items/small_50v_iron_heating_corp.json
 ffd14e9f50510bf57f48a58fe12ce378986c31db assets/eln/items/small_50v_tungsten_heating_corp.json
 d3a87eefa9c2a68efc7a14aaf15833ccacebf4cc assets/eln/items/small_active_thermal_dissipator.json
-39ad5a13e74a8537d3c76449e6ef00c42f189d55 assets/eln/items/small_flashlight.json
+7e2e82302c54892687ba2243bc50944c7c1931fd assets/eln/items/small_flashlight.json
 bc142e6678b5721803461a88b3d575b6022288df assets/eln/items/small_fuel_burner.json
 209ffb384114cf11b0372609c1fc1575d3714a1d assets/eln/items/small_passive_thermal_dissipator.json
 e8a9c51d402495d833f811874ddeefcef4b9f35f assets/eln/items/small_rotating_solar_panel.json
@@ -582,6 +582,7 @@ fa2c449362a2fe3208f23a87fe973e6ef01277b3 assets/eln/models/item/high_voltage_cab
 cd00b58e81ac59de8141d98d9f08533f38421a6a assets/eln/models/item/high_voltage_switch_3d.json
 136bd387f848a243ed5ca650ecfa1a9b8b847418 assets/eln/models/item/hub.json
 c251aef626220cc513018d7aecb58814136c6d38 assets/eln/models/item/improved_flashlight.json
+eb7bcb6525c739b0037774cc9e9ab8abb44289ff assets/eln/models/item/improved_flashlight_on.json
 fbc7f1d6c88c6e8e094e1997d42aca0e74d9ce02 assets/eln/models/item/industrial_data_logger.json
 37360d24d794fbdc4f071d8069a3fcbb40987930 assets/eln/models/item/industrial_data_logger_3d.json
 8404a8b62fbcefdab895692b745605322b08dc29 assets/eln/models/item/iron_cable.json
@@ -748,6 +749,7 @@ f79f7c1afb94dbf76d22d54a92d978fc606abb8a assets/eln/models/item/small_50v_tungst
 cec136c781b8b8046541a1b692713df0e4486896 assets/eln/models/item/small_active_thermal_dissipator.json
 22f428856960fc5bd60194a4cd877dcaa59de03c assets/eln/models/item/small_active_thermal_dissipator_3d.json
 f7b5186aa4c74e582fd42ab3a999184a3847c7d1 assets/eln/models/item/small_flashlight.json
+84285f7db3e0dee988ab57a829a965aeace12691 assets/eln/models/item/small_flashlight_on.json
 5542cbbe6945c73d2937406ea5dff725bd4a2ee0 assets/eln/models/item/small_fuel_burner.json
 d2955aa488d4a0519898254b50821c9ce55f7fbd assets/eln/models/item/small_passive_thermal_dissipator.json
 3b690ab15dcc5a43dbcf99fe82fb17edbbf8a5b4 assets/eln/models/item/small_passive_thermal_dissipator_3d.json

@@ -150,6 +150,33 @@ public class ElnModels implements DataProvider {
                         "model", obj("type", "eln:device", "context", "hand")))), assets.resolve("items/" + name + ".json")));
                 continue;
             }
+            if (d instanceof mods.eln.generic.GenericItemUsingDamageDescriptor gi && gi.hasItemDraw()) {
+                // R5: item descriptors with a live look (data-log print): drawn in the flat model's pose, GUI = icon
+                String base = "eln:item/" + name;
+                JsonArray cases = new JsonArray();
+                cases.add(obj("when", "gui", "model", flat));
+                JsonArray entity = new JsonArray();
+                for (String c : new String[]{"ground", "fixed", "head"}) entity.add(c);
+                cases.add(obj("when", entity, "model", obj("type", "minecraft:special", "base", base,
+                    "model", obj("type", "eln:device", "context", "entity"))));
+                out.add(DataProvider.saveStable(cache, obj("model", obj("type", "minecraft:select", "property", "minecraft:display_context",
+                    "cases", cases, "fallback", obj("type", "minecraft:special", "base", base,
+                        "model", obj("type", "eln:device", "context", "hand")))), assets.resolve("items/" + name + ".json")));
+                continue;
+            }
+            if (d instanceof mods.eln.item.electricalitem.ElectricalLampItem lamp) {
+                // R5: flashlights show their "on" icon while lit (client condition eln:lit)
+                String onTex = iconTexture(lamp.getIconName().replaceAll("off$", "on"), false);
+                if (onTex != null) {
+                    out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:item/generated", "textures", obj("layer0", "eln:" + onTex)),
+                        assets.resolve("models/item/" + name + "_on.json")));
+                    out.add(DataProvider.saveStable(cache, obj("model", obj("type", "minecraft:condition", "property", "eln:lit",
+                        "on_true", obj("type", "minecraft:model", "model", "eln:item/" + name + "_on"), "on_false", flat)),
+                        assets.resolve("items/" + name + ".json")));
+                    continue;
+                }
+                missing.add("lit icon " + name);
+            }
             out.add(DataProvider.saveStable(cache, obj("model", flat), assets.resolve("items/" + name + ".json")));
         }
         if (!missing.isEmpty()) Eln.LOG.warn("ElnModels: no texture for {} entries: {}", missing.size(), missing);

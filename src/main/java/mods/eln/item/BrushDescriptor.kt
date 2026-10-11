@@ -31,6 +31,12 @@ class BrushDescriptor(name: String) : GenericItemUsingDamageDescriptor(name) {
 
     private fun getLife(stack: ItemStack?) = stack?.let { ItemNbt.get(it) }?.getIntOr("life", 0) ?: 32
 
+    /** R5: the paint left as the item bar (1.12 faded in a "dry" overlay instead); a full or empty brush has none. */
+    override fun itemBar(stack: ItemStack): Double {
+        val life = getLife(stack)
+        return if (life in 1..31) life / 32.0 else -1.0
+    }
+
     fun setLife(stack: ItemStack, life: Int) {
         val nbt = ItemNbt.get(stack) ?: CompoundTag()
         nbt.putInt("life", life)

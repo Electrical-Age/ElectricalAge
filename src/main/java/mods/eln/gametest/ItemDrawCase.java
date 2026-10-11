@@ -45,5 +45,10 @@ final class ItemDrawCase implements TestCase {
             if (a && b) ok++;
         }
         ctx.check("item_draw: devices", ok == all && all > 50, ok + " of " + all);
+        // item descriptors with a live look: the data-log print (empty log: the sheet alone)
+        var print = mods.eln.registry.batch.Wp9cContent.dataLogsPrintDescriptor;
+        var stack = print.newItemStack(1);
+        print.initializeStack(stack, new mods.eln.sixnode.electricaldatalogger.DataLogs(256));
+        PublishRenderCase.draw(ctx, "Data logger print (item, held)", () -> print.drawItem(stack, false));
     }
 }

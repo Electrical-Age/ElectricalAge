@@ -20,6 +20,19 @@ import java.util.List;
  */
 public class GenericItemUsingDamageDescriptor {
 
+    /** R5: drawn by eln:device outside the GUI (the item's own 3D/live look), in the 0..1 item space. */
+    public boolean hasItemDraw() {
+        return false;
+    }
+
+    public void drawItem(net.minecraft.world.item.ItemStack stack, boolean entity) {
+    }
+
+    /** R5: the vanilla item bar's fill (0..1), or -1 for none. Electrical items: their energy (see ElnItem). */
+    public double itemBar(net.minecraft.world.item.ItemStack stack) {
+        return -1;
+    }
+
     public String IconName;
     public String name;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;

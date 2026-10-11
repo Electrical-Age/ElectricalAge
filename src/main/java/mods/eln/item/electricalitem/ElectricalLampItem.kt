@@ -58,6 +58,9 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return nbt
     }
 
+    /** R5: the item model shows the "on" icon (client property eln:lit). */
+    fun isLit(stack: ItemStack) = getLight(stack) != 0 && getLightState(stack) != 0
+
     internal override fun getLightState(stack: ItemStack): Int {
         return getNbt(stack).getIntOr("LightState", 0)
     }

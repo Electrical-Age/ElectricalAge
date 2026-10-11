@@ -101,16 +101,19 @@ public class ElnItem extends Item implements IDescriptorItem {
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        return descriptor instanceof mods.eln.item.electricalinterface.IItemEnergyBattery;
+        return descriptor instanceof mods.eln.item.electricalinterface.IItemEnergyBattery || descriptor.itemBar(stack) >= 0;
     }
 
     @Override
     public int getBarWidth(ItemStack stack) {
-        return energyBarWidth(descriptor, stack);
+        double f = descriptor.itemBar(stack);
+        return f >= 0 ? (int) Math.round(13 * Math.min(1, f)) : energyBarWidth(descriptor, stack);
     }
 
     @Override
     public int getBarColor(ItemStack stack) {
+        double f = descriptor.itemBar(stack);
+        if (f >= 0) return net.minecraft.util.Mth.hsvToRgb((float) Math.min(1, f) / 3f, 1f, 1f);
         return energyBarColor(descriptor, stack);
     }
 
