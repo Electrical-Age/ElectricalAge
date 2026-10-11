@@ -71,7 +71,23 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        if (entity) {
+            draw(false);
+        } else {
+            GL11.glPushMatrix();
+            GL11.glTranslatef(0.8f, 0.3f, 0.2f);
+            GL11.glRotatef(150, 0, 0, 1);
+            draw(false);
+            GL11.glPopMatrix();
+        }
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

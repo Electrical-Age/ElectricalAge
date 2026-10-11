@@ -87,7 +87,15 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 
     //boolean[] defaultCharged = new boolean[]{true, true, true, true};
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        draw(null, null);
+    }
 
     public void applyTo(NbtElectricalLoad powerLoad) {
         cable.applyTo(powerLoad);

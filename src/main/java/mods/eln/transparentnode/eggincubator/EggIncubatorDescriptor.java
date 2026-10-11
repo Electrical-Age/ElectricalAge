@@ -67,7 +67,16 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        draw(0, 1f);
+
+    }
 
     void draw(int eggStackSize, float powerFactor) {
         if (eggStackSize == 0) powerFactor = 0f;

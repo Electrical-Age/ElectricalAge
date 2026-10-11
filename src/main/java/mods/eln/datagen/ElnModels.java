@@ -129,8 +129,28 @@ public class ElnModels implements DataProvider {
                 out.add(DataProvider.saveStable(cache, obj("parent", HANDHELD.contains(name) ? "minecraft:item/handheld" : "minecraft:item/generated",
                     "textures", obj("layer0", "eln:" + tex)), assets.resolve("models/item/" + name + ".json")));
             }
-            out.add(DataProvider.saveStable(cache, obj("model", obj("type", "minecraft:model", "model", model)),
-                assets.resolve("items/" + name + ".json")));
+            JsonObject flat = obj("type", "minecraft:model", "model", model);
+            Object d = item instanceof mods.eln.generic.IDescriptorItem di ? di.getEaDescriptor() : null;
+            if (d instanceof mods.eln.generic.GenericItemBlockUsingDamageDescriptor gd && gd.hasItemDraw()) {
+                // R5: the flat icon in the GUI, the device's 3D draw everywhere else (eln:device, ElnItemRenderer);
+                // the pose per context is the base model's display block (device_six / device_transparent)
+                String base = "eln:item/" + name + "_3d";
+                String parent = d instanceof mods.eln.node.six.SixNodeDescriptor ? "eln:item/device_six" : "eln:item/device_transparent";
+                String particle = "eln:" + (itemTexture(name, item) == null ? "items/missing" : itemTexture(name, item));
+                out.add(DataProvider.saveStable(cache, obj("parent", parent, "textures", obj("particle", particle)),
+                    assets.resolve("models/item/" + name + "_3d.json")));
+                JsonArray cases = new JsonArray();
+                cases.add(obj("when", "gui", "model", flat));
+                JsonArray entity = new JsonArray();
+                for (String c : new String[]{"ground", "fixed", "head"}) entity.add(c);
+                cases.add(obj("when", entity, "model", obj("type", "minecraft:special", "base", base,
+                    "model", obj("type", "eln:device", "context", "entity"))));
+                out.add(DataProvider.saveStable(cache, obj("model", obj("type", "minecraft:select", "property", "minecraft:display_context",
+                    "cases", cases, "fallback", obj("type", "minecraft:special", "base", base,
+                        "model", obj("type", "eln:device", "context", "hand")))), assets.resolve("items/" + name + ".json")));
+                continue;
+            }
+            out.add(DataProvider.saveStable(cache, obj("model", flat), assets.resolve("items/" + name + ".json")));
         }
         if (!missing.isEmpty()) Eln.LOG.warn("ElnModels: no texture for {} entries: {}", missing.size(), missing);
         return CompletableFuture.allOf(out.toArray(CompletableFuture[]::new));

@@ -68,7 +68,17 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glScalef(2f, 2f, 2f);
+        draw(false, null);
+
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

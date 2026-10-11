@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import mods.eln.gl.GL11;
+
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -61,7 +63,18 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glScalef(1.5f, 1.5f, 1.5f);
+
+        draw(0f, 1f, null);
+
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

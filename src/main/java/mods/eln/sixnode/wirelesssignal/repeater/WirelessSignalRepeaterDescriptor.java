@@ -1,5 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.repeater;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.UtilsClient;
 
 import mods.eln.misc.Direction;
@@ -45,7 +47,19 @@ public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        if (entity) {
+            GL11.glScalef(2.8f, 2.8f, 2.8f);
+        }
+        draw();
+
+    }
 
     public void draw() {
         if (main != null) main.draw();

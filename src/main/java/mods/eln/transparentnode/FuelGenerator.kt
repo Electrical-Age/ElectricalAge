@@ -1,5 +1,6 @@
 package mods.eln.transparentnode
 
+import mods.eln.gl.GL11
 import mods.eln.sound.LoopedSound
 
 import mods.eln.Eln
@@ -82,7 +83,17 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) {
+        objItemScale(obj)
+        preserveMatrix {
+            Direction.ZP.glRotateXnRef()
+            GL11.glTranslatef(0f, -1f, 0f)
+            GL11.glScalef(0.6f, 0.6f, 0.6f)
+            draw()
+        }
+    }
 
     override fun addInformation(itemStack: ItemStack, entityPlayer: Player?,
                                 list: MutableList<String>, par4: Boolean) {

@@ -60,7 +60,16 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        draw(13896, 1511, 1, 0, true);
+
+    }
     public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
         // UtilsClient.disableCulling();
         base.draw();

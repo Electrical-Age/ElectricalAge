@@ -109,4 +109,9 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		 * GL11.glLineWidth(2f); GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glDisable(GL11.GL_LIGHTING); GL11.glColor3f(1f,1f,1f); GL11.glBegin(GL11.GL_LINES); GL11.glVertex3d(0f, 0f, 0f); GL11.glVertex3d(Math.cos(alphaZ*Math.PI/180.0), Math.sin(alphaZ*Math.PI/180.0),0.0); GL11.glEnd(); GL11.glEnable(GL11.GL_TEXTURE_2D); GL11.glEnable(GL11.GL_LIGHTING);
 		 */
     }
+
+    @Override
+    public void drawItem(LampSocketDescriptor descriptor) {
+        draw(LRDU.Up, 0, (byte) 0, true, 15, 0);
+    }
 }

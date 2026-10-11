@@ -80,7 +80,18 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glTranslatef(-0.3f, -0.1f, 0f);
+        GL11.glRotatef(90, 1, 0, 0);
+        draw(0.7f, ledDefault);
+
+    }
 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {

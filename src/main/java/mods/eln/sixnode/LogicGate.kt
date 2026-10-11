@@ -1,5 +1,7 @@
 package mods.eln.sixnode.logicgate
 
+import mods.eln.gl.GL11
+
 
 import mods.eln.registry.ElnDeviceRegistry
 import mods.eln.Eln
@@ -57,7 +59,15 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f)
+        GL11.glScalef(1.25f, 1.25f, 1.25f)
+        GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
+        draw()
+
+    }
 
 
     override fun getFrontFromPlace(side: Direction?, player: Player?): LRDU? =

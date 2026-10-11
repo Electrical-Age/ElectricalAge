@@ -1,5 +1,7 @@
 package mods.eln.sixnode.diode;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -75,7 +77,19 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+        GL11.glScalef(1.25f, 1.25f, 1.25f);
+        GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+        draw();
+
+    }
 
     /*	public void applyTo(DiodeProcess diode) {
             diode.IfU = IfU;

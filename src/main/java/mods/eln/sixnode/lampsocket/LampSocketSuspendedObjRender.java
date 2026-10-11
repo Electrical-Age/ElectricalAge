@@ -106,4 +106,9 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 
 
     }
+
+    @Override
+    public void drawItem(LampSocketDescriptor descriptor) {
+        draw(LRDU.Up, 0, (byte) 0, 0, 0, 0);
+    }
 }

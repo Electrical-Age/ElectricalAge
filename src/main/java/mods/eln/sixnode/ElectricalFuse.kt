@@ -48,7 +48,12 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) {
+        draw(null)
+
+    }
 
 
     fun draw(installedFuse: ElectricalFuseDescriptor?) {

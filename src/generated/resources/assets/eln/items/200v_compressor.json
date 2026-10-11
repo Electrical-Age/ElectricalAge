@@ -1,6 +1,38 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "eln:item/200v_compressor"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "eln:item/200v_compressor"
+        },
+        "when": "gui"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "eln:item/200v_compressor_3d",
+          "model": {
+            "type": "eln:device",
+            "context": "entity"
+          }
+        },
+        "when": [
+          "ground",
+          "fixed",
+          "head"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:special",
+      "base": "eln:item/200v_compressor_3d",
+      "model": {
+        "type": "eln:device",
+        "context": "hand"
+      }
+    },
+    "property": "minecraft:display_context"
   }
 }

@@ -56,7 +56,15 @@ public class HubDescriptor extends SixNodeDescriptor {
 */
 
 	/*@Override
-	// 26.x port: renderItem() removed (client rendering; redone in P3)
+	@Override
+	public boolean hasItemDraw() {
+	    return true;
+	}
+
+	@Override
+	public void drawItem(boolean entity) {
+	    draw(new boolean[]{true, true, true, true, true, true});
+	}
 */
 
     @Override

@@ -60,7 +60,22 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glPushMatrix();
+        objItemScale(obj);
+        Direction.ZN.glRotateXnRef();
+        GL11.glTranslatef(0, -1, 0);
+        GL11.glScalef(0.6f, 0.6f, 0.6f);
+        draw(0);
+        GL11.glPopMatrix();
+
+    }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 

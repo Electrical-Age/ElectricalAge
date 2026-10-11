@@ -50,7 +50,18 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
     }
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) {
+        objItemScale(obj)
+        preserveMatrix {
+            Direction.ZN.glRotateXnRef()
+            GL11.glTranslatef(0f, -1f, 0f)
+            GL11.glScalef(0.6f, 0.6f, 0.6f)
+            draw(0.0)
+        }
+
+    }
 
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

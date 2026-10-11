@@ -1,0 +1,76 @@
+package mods.eln.client.render;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.generic.IDescriptorItem;
+import mods.eln.gl.GL11;
+import mods.eln.gl.GlFrame;
+import mods.eln.misc.UtilsClient;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.world.item.ItemStack;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
+
+import java.util.function.Consumer;
+
+/**
+ * R5: a device item drawn as its 3D model (1.12 renderItem outside the GUI), item model type `eln:device` with
+ * `context` "entity" (ground, item frame, head) or "hand". The pose comes from the base model's `display` block
+ * (eln:item/device_six / device_transparent); the device draws centred on the block centre, through the GL11 shim
+ * like the placed blocks.
+ */
+public class ElnItemRenderer implements SpecialModelRenderer<GenericItemBlockUsingDamageDescriptor> {
+    final boolean entity;
+
+    ElnItemRenderer(boolean entity) {
+        this.entity = entity;
+    }
+
+    @Override
+    public void submit(@Nullable GenericItemBlockUsingDamageDescriptor d, PoseStack poseStack, SubmitNodeCollector collector,
+                       int light, int overlay, boolean foil, int outline) {
+        if (d == null) return;
+        GlFrame frame = GlSubmit.open(poseStack);
+        try {
+            GL11.glTranslatef(.5f, .5f, .5f);
+            UtilsClient.glDefaultColor();
+            d.drawItem(entity);
+        } catch (RuntimeException e) {
+            ElnRenderErrors.report("item " + d.name, e);
+        } finally {
+            GlFrame.close();
+        }
+        GlSubmit.submit(frame, poseStack, collector, light);
+    }
+
+    @Override
+    public void getExtents(Consumer<Vector3fc> output) {
+        for (int i = 0; i < 8; i++) output.accept(new Vector3f(i & 1, (i >> 1) & 1, (i >> 2) & 1));
+    }
+
+    @Override
+    public @Nullable GenericItemBlockUsingDamageDescriptor extractArgument(ItemStack stack) {
+        return stack.getItem() instanceof IDescriptorItem i && i.getEaDescriptor() instanceof GenericItemBlockUsingDamageDescriptor d
+            && d.hasItemDraw() ? d : null;
+    }
+
+    public record Unbaked(String context) implements SpecialModelRenderer.Unbaked<GenericItemBlockUsingDamageDescriptor> {
+        public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+            Codec.STRING.fieldOf("context").forGetter(Unbaked::context)).apply(i, Unbaked::new));
+
+        @Override
+        public SpecialModelRenderer<GenericItemBlockUsingDamageDescriptor> bake(SpecialModelRenderer.BakingContext context) {
+            return new ElnItemRenderer("entity".equals(this.context));
+        }
+
+        @Override
+        public MapCodec<Unbaked> type() {
+            return MAP_CODEC;
+        }
+    }
+}

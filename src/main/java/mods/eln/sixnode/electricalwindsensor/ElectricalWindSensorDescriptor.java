@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalwindsensor;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.UtilsClient;
 
 import mods.eln.misc.*;
@@ -70,7 +72,21 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glRotatef(270, 1, 0, 0);
+        GL11.glTranslatef(-0.6f, 0f, 0f);
+
+        GL11.glScalef(2f, 2f, 2f);
+
+        draw(0);
+
+    }
 
     @Override
     public boolean canBePlacedOnSide(Player player, Direction side) {

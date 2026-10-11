@@ -1,6 +1,38 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "eln:item/electrical_breaker"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "eln:item/electrical_breaker"
+        },
+        "when": "gui"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "eln:item/electrical_breaker_3d",
+          "model": {
+            "type": "eln:device",
+            "context": "entity"
+          }
+        },
+        "when": [
+          "ground",
+          "fixed",
+          "head"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:special",
+      "base": "eln:item/electrical_breaker_3d",
+      "model": {
+        "type": "eln:device",
+        "context": "hand"
+      }
+    },
+    "property": "minecraft:display_context"
   }
 }

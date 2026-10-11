@@ -1,6 +1,38 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "eln:item/voltage_controlled_sine_oscillator"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "eln:item/voltage_controlled_sine_oscillator"
+        },
+        "when": "gui"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "eln:item/voltage_controlled_sine_oscillator_3d",
+          "model": {
+            "type": "eln:device",
+            "context": "entity"
+          }
+        },
+        "when": [
+          "ground",
+          "fixed",
+          "head"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:special",
+      "base": "eln:item/voltage_controlled_sine_oscillator_3d",
+      "model": {
+        "type": "eln:device",
+        "context": "hand"
+      }
+    },
+    "property": "minecraft:display_context"
   }
 }

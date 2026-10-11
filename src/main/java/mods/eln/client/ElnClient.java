@@ -32,6 +32,9 @@ public final class ElnClient {
             // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
         });
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent.class,
+            e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "device"),
+                mods.eln.client.render.ElnItemRenderer.Unbaked.MAP_CODEC));
         modBus.addListener(EntityRenderersEvent.RegisterLayerDefinitions.class,
             e -> e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer));
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);

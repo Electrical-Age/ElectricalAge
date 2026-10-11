@@ -73,5 +73,13 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return false; // its draw() is empty (an invisible block in 1.12 too): the flat icon everywhere
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        draw();
+    }
 }

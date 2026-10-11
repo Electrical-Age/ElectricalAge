@@ -75,7 +75,9 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) = draw()
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)

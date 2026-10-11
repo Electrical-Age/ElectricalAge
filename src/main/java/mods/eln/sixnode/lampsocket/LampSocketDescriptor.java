@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -71,7 +73,16 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glScalef(1.25f, 1.25f, 1.25f);
+        render.drawItem(this);
+    }
 
     @Override
     public boolean hasVolume() {

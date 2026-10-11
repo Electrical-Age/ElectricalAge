@@ -22,6 +22,18 @@ public class GenericItemBlockUsingDamageDescriptor {
     /** The 1.12 damage value (eln-ids.json, golden data); no meaning in game. */
     public int parentItemDamage;
 
+    /**
+     * R5: the item is drawn in 3D (the device's model) when held, dropped, framed or worn; the GUI keeps the flat
+     * icon. 1.12: renderItem for every type but INVENTORY.
+     */
+    public boolean hasItemDraw() {
+        return false;
+    }
+
+    /** The 3D item draw through the GL11 shim, centred on the origin. entity: dropped/framed/worn (1.12 ENTITY), else held. */
+    public void drawItem(boolean entity) {
+    }
+
     public GenericItemBlockUsingDamageDescriptor(String name) {
         this(name, name);
     }

@@ -107,7 +107,17 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glRotatef(90, 1, 0, 0);
+        draw(0.1f, 0.2f, true);
+
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

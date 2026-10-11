@@ -113,7 +113,18 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        objItemScale(obj);
+        Direction.ZN.glRotateXnRef();
+        draw(0f, false);
+
+    }
 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer,

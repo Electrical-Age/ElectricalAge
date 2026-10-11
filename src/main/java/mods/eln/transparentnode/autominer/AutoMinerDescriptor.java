@@ -159,7 +159,17 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
         UtilsClient.enableCulling();
     }
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        GL11.glScalef(0.18f, 0.18f, 0.18f);
+        draw(false, buttonsStateDefault, ledsAStateDefault, ledsPStateDefault);
+
+    }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 

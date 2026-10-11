@@ -63,7 +63,16 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        draw(defaultFero, 1, 4, false, 0f);
+
+    }
 
     void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
         if (main != null) main.draw();

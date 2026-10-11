@@ -1,5 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.tx;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -45,7 +47,20 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        if (entity) {
+
+            GL11.glScalef(2.8f, 2.8f, 2.8f);
+        }
+        draw();
+
+    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {

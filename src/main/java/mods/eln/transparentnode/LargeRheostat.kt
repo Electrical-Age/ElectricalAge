@@ -54,7 +54,9 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) = draw()
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :

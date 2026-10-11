@@ -84,7 +84,15 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    // 26.x port: renderItem() removed (client rendering; redone in P3)
+    @Override
+    public boolean hasItemDraw() {
+        return true;
+    }
+
+    @Override
+    public void drawItem(boolean entity) {
+        draw();
+    }
 
     public void draw() {
         GL11.glDisable(GL11.GL_CULL_FACE);
