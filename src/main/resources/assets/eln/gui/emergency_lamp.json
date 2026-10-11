@@ -1,0 +1,35 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "200V Emergency Lamp"
+  },
+  {
+   "button": "supply",
+   "sample": [
+    "Powered by Lamp Supply",
+    "Powered by cable"
+   ],
+   "fill": true
+  },
+  {
+   "field": "channel",
+   "chars": 24,
+   "fill": true
+  },
+  {
+   "text": "status",
+   "sample": [
+    "connected to aaaaaaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaaaaaa is not in range!"
+   ]
+  },
+  {
+   "gauge": "charge",
+   "width": 160,
+   "height": 12,
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

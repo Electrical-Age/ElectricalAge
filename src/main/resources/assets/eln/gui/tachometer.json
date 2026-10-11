@@ -1,0 +1,47 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Tachometer"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "row": [
+        {
+         "text": "hl",
+         "sample": "100%"
+        },
+        {
+         "field": "high",
+         "chars": 8
+        }
+       ]
+      },
+      {
+       "row": [
+        {
+         "text": "ll",
+         "sample": "0%"
+        },
+        {
+         "field": "low",
+         "chars": 8
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "button": "validate",
+     "sample": "Validate",
+     "fill": true
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

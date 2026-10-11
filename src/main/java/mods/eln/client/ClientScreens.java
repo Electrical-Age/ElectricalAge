@@ -96,10 +96,34 @@ final class ClientScreens {
         reg(mods.eln.sixnode.tutorialsign.TutorialSignDescriptor.class, mods.eln.sixnode.tutorialsign.TutorialSignScreen::new);
         reg(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.class,
             mods.eln.simplenode.energyconverter.EnergyConverterScreen::new);
+        // S1f: the Kotlin devices (chips share a descriptor class: by element class)
+        mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.AnalogChipDescriptor.class, d -> {
+            Class<?> e = ((mods.eln.node.six.SixNodeDescriptor) d).ElementClass;
+            if (e == mods.eln.sixnode.PIDRegulatorElement.class) return "pid_regulator";
+            if (e == mods.eln.sixnode.AmplifierElement.class) return "amplifier";
+            if (e == mods.eln.sixnode.SummingUnitElement.class) return "summing_unit";
+            if (e == mods.eln.sixnode.FilterElement.class) return "filter";
+            return null;
+        });
+        layout("sixnode.logicgate.LogicGateDescriptor", "pal");
+        layout("sixnode.EmergencyLampDescriptor", "emergency_lamp");
+        layout("mechanical.TachometerDescriptor", "tachometer");
+        reg(mods.eln.sixnode.AnalogChipDescriptor.class, (m, i, t, r) -> {
+            if (r instanceof mods.eln.sixnode.PIDRegulatorRender) return new mods.eln.client.gui.PIDRegulatorScreen(m, i, t, r);
+            if (r instanceof mods.eln.sixnode.AmplifierRender) return new mods.eln.client.gui.AmplifierScreen(m, i, t, r);
+            if (r instanceof mods.eln.sixnode.SummingUnitRender) return new mods.eln.client.gui.SummingUnitScreen(m, i, t, r);
+            if (r instanceof mods.eln.sixnode.FilterRender) return new mods.eln.client.gui.FilterScreen(m, i, t, r);
+            return new mods.eln.client.gui.ElnScreen(m, i, t);
+        });
+        reg(mods.eln.sixnode.logicgate.LogicGateDescriptor.class, (m, i, t, r) -> r instanceof mods.eln.sixnode.logicgate.PalRender
+            ? new mods.eln.client.gui.PalScreen(m, i, t, r) : new mods.eln.client.gui.ElnScreen(m, i, t));
+        reg(mods.eln.sixnode.EmergencyLampDescriptor.class, mods.eln.client.gui.EmergencyLampScreen::new);
+        reg(mods.eln.mechanical.TachometerDescriptor.class, mods.eln.client.gui.TachometerScreen::new);
         // value lines from the slots (1.12 drew them over the panel)
         info(mods.eln.sixnode.resistor.ResistorDescriptor.class, (d, inv) -> java.util.List.of(
             tr("Resistance: %1$\u2126", Utils.plotValue(((mods.eln.sixnode.resistor.ResistorDescriptor) d).getRsValue(inv)))));
-        info(mods.eln.transparentnode.LargeRheostatDescriptor.class, (d, inv) -> java.util.List.of());
+        info(mods.eln.transparentnode.LargeRheostatDescriptor.class, (d, inv) -> java.util.List.of(
+            tr("Nom. Resistance: %1$", Utils.plotValue(((mods.eln.transparentnode.LargeRheostatDescriptor) d).getRsValue(inv), "Ohm"))));
         info(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor.class, (d, inv) -> {
             var c = (mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor) d;
             return java.util.List.of(tr("Capacity: %1$F", Utils.plotValue(c.getCValue(inv))),

@@ -1,0 +1,23 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Amplifier"
+  },
+  {
+   "row": [
+    {
+     "text": "gainl",
+     "sample": "Gain"
+    },
+    {
+     "field": "gain",
+     "chars": 8,
+     "fill": true
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

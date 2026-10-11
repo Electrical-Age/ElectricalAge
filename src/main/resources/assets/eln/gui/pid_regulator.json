@@ -1,0 +1,52 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "PID Regulator"
+  },
+  {
+   "row": [
+    {
+     "canvas": "diagram",
+     "width": 118,
+     "height": 86
+    },
+    {
+     "column": [
+      {
+       "text": "kp",
+       "sample": "Kp = 50.0"
+      },
+      {
+       "slider": "kp",
+       "sample": "    ",
+       "fill": true
+      },
+      {
+       "text": "ki",
+       "sample": "Ki = 5.00"
+      },
+      {
+       "slider": "ki",
+       "sample": "    ",
+       "fill": true
+      },
+      {
+       "text": "kd",
+       "sample": "Kd = 5.00"
+      },
+      {
+       "slider": "kd",
+       "sample": "    ",
+       "fill": true
+      }
+     ],
+     "gap": 2,
+     "fill": true
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}
