@@ -71,6 +71,8 @@ public class EnergyMeterScreen extends ElnScreen {
     @Override
     protected void update() {
         for (Button b : locked) b.active = isLogged;
+        energy.active = isLogged;
+        energy.setEditable(isLogged);
         eunit.active = tunit.active = isLogged && hasWheels();
         if (render.mod != shownMode) {
             shownMode = render.mod;
