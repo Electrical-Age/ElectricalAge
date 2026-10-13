@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "eln:block/energy_converter"
+    "model": "eln:block/energy_converter_mvu"
   }
 }

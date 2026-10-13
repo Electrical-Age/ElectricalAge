@@ -82,13 +82,6 @@ public class ElnModels implements DataProvider {
             assets.resolve("models/block/particle_iron.json")));
         out.add(DataProvider.saveStable(cache, obj("textures", obj("particle", "minecraft:block/glass")),
             assets.resolve("models/block/particle_none.json")));
-        // 1.12 energy_converter_front2: EA side north, IC2 side south
-        out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:block/cube", "textures", obj(
-                "down", "eln:blocks/elntoic2lvu_side", "up", "eln:blocks/elntoic2lvu_side",
-                "north", "eln:blocks/elntoic2lvu_eln2", "south", "eln:blocks/elntoic2lvu_ic2",
-                "west", "eln:blocks/elntoic2lvu_side", "east", "eln:blocks/elntoic2lvu_side",
-                "particle", "eln:blocks/elntoic2lvu_side")),
-            assets.resolve("models/block/energy_converter.json")));
         for (Block b : BuiltInRegistries.BLOCK) {
             var id = BuiltInRegistries.BLOCK.getKey(b);
             if (!id.getNamespace().equals(Eln.MODID)) continue;
@@ -100,8 +93,19 @@ public class ElnModels implements DataProvider {
                 model = "eln:block/" + name;
                 out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:block/cube_all", "textures",
                     obj("all", "eln:" + (tex == null ? "blocks/ore" : tex))), assets.resolve("models/block/" + name + ".json")));
-            } else if (b instanceof mods.eln.node.simple.SimpleNodeBlock) {
-                model = "eln:block/energy_converter";
+            } else if (b instanceof mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock) {
+                // the synchronous-condenser models (AdventurAgent, tools/models/converter.py; OBJ in src/main/resources),
+                // turned so their EA face is the node's FRONT
+                JsonObject variants = new JsonObject();
+                for (int f = 0; f <= 6; f++) {
+                    JsonObject v = obj("model", converterModel(name));
+                    int[] r = CONVERTER_ROT[f];
+                    if (r[0] != 0) v.addProperty("x", r[0]);
+                    if (r[1] != 0) v.addProperty("y", r[1]);
+                    variants.add("front=" + f, v);
+                }
+                out.add(DataProvider.saveStable(cache, obj("variants", variants), assets.resolve("blockstates/" + name + ".json")));
+                continue;
             } else if (b instanceof mods.eln.sixnode.lampsocket.LightBlock) {
                 model = "eln:block/particle_none";
             } else {
@@ -117,7 +121,7 @@ public class ElnModels implements DataProvider {
             String name = BuiltInRegistries.ITEM.getKey(item).getPath();
             String model = "eln:item/" + name;
             if (item instanceof net.minecraft.world.item.BlockItem bi && bi.getBlock() instanceof mods.eln.node.simple.SimpleNodeBlock) {
-                model = "eln:block/energy_converter";
+                model = converterModel(name);
             } else if (name.equals("replicator_spawn_egg")) {
                 out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:item/generated", "textures",
                     obj("layer0", "minecraft:item/egg")), assets.resolve("models/item/" + name + ".json")));
@@ -199,5 +203,13 @@ public class ElnModels implements DataProvider {
     @Override
     public String getName() {
         return "EA models";
+    }
+
+    /** FRONT (vanilla direction index, 6 = unknown) -> {x, y} rotation of the north-facing converter model. */
+    static final int[][] CONVERTER_ROT = {{90, 0}, {270, 0}, {0, 0}, {0, 180}, {0, 270}, {0, 90}, {0, 0}};
+
+    /** eln:energy_converter_eln_to_other_lvublock -> eln:block/energy_converter_lvu. */
+    static String converterModel(String name) {
+        return "eln:block/energy_converter_" + name.replace("energy_converter_eln_to_other_", "").replace("block", "");
     }
 }

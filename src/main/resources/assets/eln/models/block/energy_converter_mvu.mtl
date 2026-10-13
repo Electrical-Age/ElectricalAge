@@ -1,0 +1,42 @@
+newmtl brass
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #brass
+
+newmtl copper
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #copper
+
+newmtl darksteel
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #darksteel
+
+newmtl export
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #export
+
+newmtl paint_blue
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #paint_blue
+
+newmtl porcelain
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #porcelain
+
+newmtl steel
+Ka 0 0 0
+Kd 1 1 1
+d 1
+map_Kd #steel
+

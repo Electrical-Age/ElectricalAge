@@ -88,7 +88,8 @@ public final class ElnRegistry {
         String name, mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor desc) {
         DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock> block = BLOCKS.registerBlock(name,
             p -> new mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock(p, desc),
-            p -> p.mapColor(MapColor.ICE).strength(0.5f).sound(SoundType.GLASS)); // 1.12 Material.PACKED_ICE
+            p -> p.mapColor(MapColor.ICE).strength(0.5f).sound(SoundType.GLASS) // 1.12 Material.PACKED_ICE
+                .noOcclusion()); // the condenser model doesn't fill the cube
         CONVERTER_BLOCKS.add(block);
         ALL_ITEMS.add(ITEMS.registerItem(name, p -> new mods.eln.node.simple.SimpleNodeItem(block.get(), p)));
         return block;
