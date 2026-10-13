@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/moderndatalogger"
+    "layer0": "eln:item/modern_data_logger"
   }
 }

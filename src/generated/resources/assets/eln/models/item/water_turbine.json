@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/waterturbine"
+    "layer0": "eln:item/water_turbine"
   }
 }

@@ -8,16 +8,12 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.resources.Identifier
 import net.minecraft.world.level.Level
 
 import mods.eln.i18n.I18N.tr
 
 class ElectricalLampItem(name: String, private var lightMin: Int, private var rangeMin: Int, private var dischargeMin: Double, private var lightMax: Int,
                          private var rangeMax: Int, internal var dischargeMax: Double, internal var energyStorage: Double, internal var chargePower: Double) : LampItem(name), IItemEnergyBattery {
-
-    internal var on: Identifier = Identifier.fromNamespaceAndPath("eln", "textures/items/" + name.replace(" ", "").lowercase() + "on.png")
-    internal var off: Identifier = Identifier.fromNamespaceAndPath("eln", "textures/items/" + name.replace(" ", "").lowercase() + "off.png")
 
     init {
         setDefaultIcon(name + "off")

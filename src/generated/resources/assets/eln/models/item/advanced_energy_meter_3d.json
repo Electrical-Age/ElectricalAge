@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/advancedenergymeter"
+    "particle": "eln:item/advanced_energy_meter"
   }
 }

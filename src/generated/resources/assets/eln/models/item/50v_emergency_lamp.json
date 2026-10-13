@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/emergencylamp"
+    "layer0": "eln:item/50v_emergency_lamp"
   }
 }

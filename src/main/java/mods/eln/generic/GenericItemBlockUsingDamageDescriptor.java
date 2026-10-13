@@ -44,7 +44,6 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public void setDefaultIcon(String name) {
-        // 1.12 also had a no-symbols texture variant (config noSymbols): textures come back in P3
         this.iconName = name.replaceAll(" ", "").toLowerCase();
     }
 

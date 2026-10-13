@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/electricalanemometersensor"
+    "particle": "eln:item/electrical_anemometer_sensor"
   }
 }

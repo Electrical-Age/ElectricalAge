@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/veryhighvoltagerelay"
+    "particle": "eln:item/very_high_voltage_relay"
   }
 }

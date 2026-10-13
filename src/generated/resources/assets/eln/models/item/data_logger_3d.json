@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/datalogger"
+    "particle": "eln:item/data_logger"
   }
 }

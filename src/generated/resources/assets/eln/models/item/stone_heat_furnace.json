@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/stoneheatfurnace"
+    "layer0": "eln:item/stone_heat_furnace"
   }
 }

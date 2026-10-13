@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/800vdefenceturret"
+    "particle": "eln:item/800v_defence_turret"
   }
 }

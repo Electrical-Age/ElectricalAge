@@ -284,7 +284,7 @@ public class Wp9cContent implements ElnContent {
             name = TR_NAME(Type.NONE, "Signal Switch");
 
             ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true,
-                Eln.noSymbols ? "signalswitch" : "switch");
+                "switch");
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/lowvoltagecable"
+    "layer0": "eln:item/low_voltage_cable"
   }
 }

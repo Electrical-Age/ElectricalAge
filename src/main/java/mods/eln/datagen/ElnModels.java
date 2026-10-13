@@ -50,6 +50,8 @@ public class ElnModels implements DataProvider {
     }
 
     String itemTexture(String name, Item item) {
+        // the redrawn icon set: textures/item/<registry id>.png (the schematic set overrides the same paths in a pack)
+        if (textureExists("item/" + name)) return "item/" + name;
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();
             if (d instanceof GenericItemUsingDamageDescriptor g) return iconTexture(g.getIconName(), false);
@@ -176,7 +178,8 @@ public class ElnModels implements DataProvider {
             }
             if (d instanceof mods.eln.item.electricalitem.ElectricalLampItem lamp) {
                 // R5: flashlights show their "on" icon while lit (client condition eln:lit)
-                String onTex = iconTexture(lamp.getIconName().replaceAll("off$", "on"), false);
+                String onTex = textureExists("item/" + name + "_on") ? "item/" + name + "_on"
+                    : iconTexture(lamp.getIconName().replaceAll("off$", "on"), false);
                 if (onTex != null) {
                     out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:item/generated", "textures", obj("layer0", "eln:" + onTex)),
                         assets.resolve("models/item/" + name + "_on.json")));

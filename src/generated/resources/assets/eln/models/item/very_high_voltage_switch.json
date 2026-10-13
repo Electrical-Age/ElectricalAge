@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/switch"
+    "layer0": "eln:item/very_high_voltage_switch"
   }
 }

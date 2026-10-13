@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/jointhub"
+    "particle": "eln:item/joint_hub"
   }
 }

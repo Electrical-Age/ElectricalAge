@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/gasturbine"
+    "particle": "eln:item/gas_turbine"
   }
 }

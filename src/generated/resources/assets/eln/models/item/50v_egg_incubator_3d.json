@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/50veggincubator"
+    "particle": "eln:item/50v_egg_incubator"
   }
 }

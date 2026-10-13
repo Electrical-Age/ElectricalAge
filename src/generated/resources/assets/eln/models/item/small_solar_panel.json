@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/smallsolarpanel"
+    "layer0": "eln:item/small_solar_panel"
   }
 }

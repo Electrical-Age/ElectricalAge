@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/powercapacitor"
+    "layer0": "eln:item/power_capacitor_block"
   }
 }

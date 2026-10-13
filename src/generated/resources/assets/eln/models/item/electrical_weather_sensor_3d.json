@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/electricalweathersensor"
+    "particle": "eln:item/electrical_weather_sensor"
   }
 }

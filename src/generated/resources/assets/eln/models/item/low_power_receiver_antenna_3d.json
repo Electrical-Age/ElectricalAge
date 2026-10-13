@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/electricalantennarx"
+    "particle": "eln:item/low_power_receiver_antenna"
   }
 }

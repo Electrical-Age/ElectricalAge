@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/small50vironheatingcorp"
+    "layer0": "eln:item/small_50v_iron_heating_corp"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/schmitttriggerchip"
+    "particle": "eln:item/schmitt_trigger_chip"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/electricalanemometersensor"
+    "layer0": "eln:item/electrical_anemometer_sensor"
   }
 }

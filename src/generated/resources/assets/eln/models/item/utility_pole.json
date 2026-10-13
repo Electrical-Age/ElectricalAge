@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/utilitypole"
+    "layer0": "eln:item/utility_pole"
   }
 }

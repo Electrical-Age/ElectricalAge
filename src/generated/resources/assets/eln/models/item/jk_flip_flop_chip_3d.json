@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/jkflipflopchip"
+    "particle": "eln:item/jk_flip_flop_chip"
   }
 }

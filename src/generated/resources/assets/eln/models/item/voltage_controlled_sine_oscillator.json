@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/voltagecontrolledsineoscillator"
+    "layer0": "eln:item/voltage_controlled_sine_oscillator"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/batterycharger"
+    "layer0": "eln:item/weak_50v_battery_charger"
   }
 }

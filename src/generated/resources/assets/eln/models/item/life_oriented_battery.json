@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/lifeorientedbattery"
+    "layer0": "eln:item/life_oriented_battery"
   }
 }

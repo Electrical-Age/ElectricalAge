@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/improvedflashlightoff"
+    "layer0": "eln:item/improved_flashlight"
   }
 }

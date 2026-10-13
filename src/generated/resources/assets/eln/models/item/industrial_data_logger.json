@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/industrialdatalogger"
+    "layer0": "eln:item/industrial_data_logger"
   }
 }

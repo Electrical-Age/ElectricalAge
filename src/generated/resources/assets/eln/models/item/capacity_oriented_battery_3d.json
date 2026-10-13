@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/capacityorientedbattery"
+    "particle": "eln:item/capacity_oriented_battery"
   }
 }

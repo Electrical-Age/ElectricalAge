@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/sampleandhold"
+    "particle": "eln:item/sample_and_hold"
   }
 }

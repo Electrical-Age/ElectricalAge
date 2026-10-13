@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/ledlamp"
+    "layer0": "eln:item/200v_led_bulb"
   }
 }

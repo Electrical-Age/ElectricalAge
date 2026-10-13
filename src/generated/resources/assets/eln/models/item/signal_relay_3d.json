@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/signalrelay"
+    "particle": "eln:item/signal_relay"
   }
 }

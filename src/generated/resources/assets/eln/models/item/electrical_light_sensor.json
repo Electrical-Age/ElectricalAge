@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/electricallightsensor"
+    "layer0": "eln:item/electrical_light_sensor"
   }
 }

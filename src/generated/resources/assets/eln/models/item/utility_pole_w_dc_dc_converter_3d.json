@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/utilitypolewdc-dcconverter"
+    "particle": "eln:item/utility_pole_w_dc_dc_converter"
   }
 }

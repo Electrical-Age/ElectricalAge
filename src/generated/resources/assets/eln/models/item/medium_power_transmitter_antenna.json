@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/electricalantennatx"
+    "layer0": "eln:item/medium_power_transmitter_antenna"
   }
 }

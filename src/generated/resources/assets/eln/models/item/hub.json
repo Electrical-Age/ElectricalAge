@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/hub"
+    "layer0": "eln:item/hub"
   }
 }

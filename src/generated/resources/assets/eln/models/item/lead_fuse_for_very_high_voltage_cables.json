@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/electricalfuse"
+    "layer0": "eln:item/lead_fuse_for_very_high_voltage_cables"
   }
 }

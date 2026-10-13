@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/voltage-to-redstoneconverter"
+    "layer0": "eln:item/voltage_to_redstone_converter"
   }
 }

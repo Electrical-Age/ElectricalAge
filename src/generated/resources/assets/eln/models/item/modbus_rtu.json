@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/modbusrtu"
+    "layer0": "eln:item/modbus_rtu"
   }
 }

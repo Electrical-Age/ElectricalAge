@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/analogwatch"
+    "layer0": "eln:item/analog_watch"
   }
 }

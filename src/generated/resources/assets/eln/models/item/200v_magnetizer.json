@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/200vmagnetizer"
+    "layer0": "eln:item/200v_magnetizer"
   }
 }

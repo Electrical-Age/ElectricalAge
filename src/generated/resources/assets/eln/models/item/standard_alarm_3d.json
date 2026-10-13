@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/electricalalarm"
+    "particle": "eln:item/standard_alarm"
   }
 }

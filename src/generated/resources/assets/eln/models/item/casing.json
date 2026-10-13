@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/casing"
+    "layer0": "eln:item/casing"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/advancedenergymeter"
+    "layer0": "eln:item/advanced_energy_meter"
   }
 }

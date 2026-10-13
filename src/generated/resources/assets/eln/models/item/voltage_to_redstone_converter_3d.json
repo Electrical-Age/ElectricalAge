@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/voltage-to-redstoneconverter"
+    "particle": "eln:item/voltage_to_redstone_converter"
   }
 }

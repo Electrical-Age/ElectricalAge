@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/gasturbine"
+    "layer0": "eln:item/gas_turbine"
   }
 }

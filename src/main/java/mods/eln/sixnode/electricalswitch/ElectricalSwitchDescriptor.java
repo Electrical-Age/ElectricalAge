@@ -56,9 +56,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         boolean signalSwitch) {
         super(name, ElectricalSwitchElement.class, null);
 
-        if (!Eln.noSymbols) {
-            setDefaultIcon("switch");
-        }
+        setDefaultIcon("switch");
 
         this.nominalVoltage = nominalVoltage;
         this.nominalPower = nominalPower;

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/fastelectricaldrill"
+    "layer0": "eln:item/fast_electrical_drill"
   }
 }

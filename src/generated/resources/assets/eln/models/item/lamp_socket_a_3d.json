@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/lampsocketa"
+    "particle": "eln:item/lamp_socket_a"
   }
 }

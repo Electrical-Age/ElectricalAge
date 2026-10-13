@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/incandescentironlamp"
+    "layer0": "eln:item/50v_incandescent_light_bulb"
   }
 }

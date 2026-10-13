@@ -57,6 +57,13 @@ public final class ElnClient {
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, e -> XRayScan.tick());
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent.class,
             e -> mods.eln.client.render.ElnPipelines.ALL.forEach(e::registerPipeline));
+        // the optional schematic icon set (Options -> Resource Packs): overrides textures/item/<id>.png
+        modBus.addListener(net.neoforged.neoforge.event.AddPackFindersEvent.class,
+            e -> e.addPackFinders(net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "resourcepacks/schematic_icons"),
+                net.minecraft.server.packs.PackType.CLIENT_RESOURCES,
+                net.minecraft.network.chat.Component.literal("Electrical Age: schematic icons"),
+                net.minecraft.server.packs.repository.PackSource.BUILT_IN, false,
+                net.minecraft.server.packs.repository.Pack.Position.TOP));
     }
 
     static final class ClientHooks implements UtilsClient.Hooks {

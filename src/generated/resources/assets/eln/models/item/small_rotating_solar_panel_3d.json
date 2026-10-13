@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:blocks/smallrotatingsolarpanel"
+    "particle": "eln:item/small_rotating_solar_panel"
   }
 }

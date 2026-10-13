@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/mediumfuelburner"
+    "layer0": "eln:item/medium_fuel_burner"
   }
 }

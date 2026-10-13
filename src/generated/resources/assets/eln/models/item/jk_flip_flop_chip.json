@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/jkflipflopchip"
+    "layer0": "eln:item/jk_flip_flop_chip"
   }
 }

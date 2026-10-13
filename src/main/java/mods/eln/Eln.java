@@ -174,9 +174,6 @@ public class Eln {
     public static double solarPanelPowerFactor = 1.0;
     public static final double solarPanelBasePower = 65.0;
 
-    /** config general.noSymbols (1.12: device textures without electrical symbols) */
-    public static boolean noSymbols = false;
-
     /** config gameplay.explosion (1.12 meaning: the remaining real explosions; see Failure). */
     public static boolean explosionEnable = true;
 

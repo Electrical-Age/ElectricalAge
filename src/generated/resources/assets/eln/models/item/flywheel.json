@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/flywheel"
+    "layer0": "eln:item/flywheel"
   }
 }

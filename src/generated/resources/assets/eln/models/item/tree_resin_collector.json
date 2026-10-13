@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/treeresincollector"
+    "layer0": "eln:item/tree_resin_collector"
   }
 }

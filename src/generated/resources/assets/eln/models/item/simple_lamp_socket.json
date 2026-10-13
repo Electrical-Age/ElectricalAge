@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/simplelampsocket"
+    "layer0": "eln:item/simple_lamp_socket"
   }
 }

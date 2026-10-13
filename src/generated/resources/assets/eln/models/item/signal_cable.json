@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/signalcable"
+    "layer0": "eln:item/signal_cable"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:blocks/25adiode"
+    "particle": "eln:item/25a_diode"
   }
 }

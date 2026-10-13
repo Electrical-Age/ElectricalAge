@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:blocks/thermalprobe"
+    "layer0": "eln:item/thermal_probe"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/graybrush"
+    "layer0": "eln:item/gray_brush"
   }
 }
