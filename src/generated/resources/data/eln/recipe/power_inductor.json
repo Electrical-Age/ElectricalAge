@@ -3,7 +3,7 @@
   "key": {
     "I": "minecraft:iron_ingot",
     "P": "#c:plates/iron",
-    "c": "eln:copper_cable"
+    "c": "eln:copper_coil"
   },
   "pattern": [
     " P ",

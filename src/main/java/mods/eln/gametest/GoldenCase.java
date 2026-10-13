@@ -74,8 +74,12 @@ final class GoldenCase implements TestCase {
     static final Map<String, Map<String, String>> CHANGED = Map.of(
         "Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"));
 
+    /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
+    static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163");
+
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);
+        if (g == null && NEW_IN_26.contains(key)) return 0;
         if (g == null) {
             ctx.check("golden " + key + ": known in 1.12", false, "no such item in golden/1.12/inventory.json");
             return 0;

@@ -89,6 +89,7 @@ final class GoldenSlotsCase implements TestCase {
         for (String key : ids.keySet()) {
             String item = key.substring(0, key.indexOf('@'));
             if (!item.equals("eln:shared_item") && !item.equals("eln:shared_item_stack_one") && !item.equals("eln:six_node")) continue;
+            if (GoldenCase.NEW_IN_26.contains(key)) continue;      // no 1.12 twin to compare with
             put(m, key, unknown);
         }
         for (String v : VANILLA) put(m, "minecraft:" + v + "@0", unknown);

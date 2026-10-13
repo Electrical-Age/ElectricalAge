@@ -1,20 +1,11 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/copper"
-      }
-    }
-  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ingredient": {
       "conditions": {
         "items": [
           {
-            "items": "#c:ingots/copper"
+            "items": "eln:copper_coil"
           }
         ]
       },

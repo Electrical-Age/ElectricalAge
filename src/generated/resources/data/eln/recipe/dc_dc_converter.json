@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:copper_cable",
+    "C": "eln:copper_coil",
     "I": "minecraft:iron_ingot"
   },
   "pattern": [

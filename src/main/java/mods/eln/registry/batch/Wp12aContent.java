@@ -684,6 +684,17 @@ public class Wp12aContent implements ElnContent {
             sharedItem.addElement(completId, descriptor);
             // wiki (P4): Data.addResource(descriptor.newItemStack());
         }
+        {
+            // 26.x (Baughn, 2026-10-13): thin, long copper wire for windings, as opposed to the thick Copper Cable for
+            // bulk current. Expensive by hand; a future wire-drawing machine makes it cheaper.
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 3;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Copper Coil");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+        }
     }
 
     public static void registerBrush(int id) {

@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T20:42:48.880436657	eln-global/EA models
+// 26.3	2026-10-13T16:41:18.652105814	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_fuel_generator.json
@@ -136,6 +136,7 @@ f560f5eda8ce5d031e9132c276204bb60b71dcd0 assets/eln/items/cinnabar_dust.json
 dcec7d729a81b7afd3021b053bf6d59a56a9f13e assets/eln/items/combustion_chamber.json
 1d2ea77488a8b50b8a4ac1993103676e162f29e0 assets/eln/items/configurable_summing_unit.json
 9ca40de6a4baa7074c6045668bff98ef9dfc205d assets/eln/items/copper_cable.json
+b01ecca3f3ec4b91a29e92cd48c43a2203625944 assets/eln/items/copper_coil.json
 572c241fe6ade7690c37ea5ebda062a4011ab651 assets/eln/items/copper_dust.json
 1f7628d711e81955b8043ecc443341a2ab866db3 assets/eln/items/copper_plate.json
 bfa33d12496a132b673051b4b75a8e6f6c0ade17 assets/eln/items/copper_thermal_cable.json
@@ -470,6 +471,7 @@ b3f5c08fef413d34de5d04f90f38a47802d6040c assets/eln/models/item/coal_plate.json
 716cc0d0f29699c7deab97c2ce12cb5973d2ebec assets/eln/models/item/configurable_summing_unit.json
 dda5c623554325d251345662a26a1e7baffcab42 assets/eln/models/item/configurable_summing_unit_3d.json
 f6d6255a299ed2df5c6b6da80252479f667dec4e assets/eln/models/item/copper_cable.json
+954fd9c445c1762e756e970c53b6d1925e6c5e18 assets/eln/models/item/copper_coil.json
 cccc5dbe1554fd40c6976de5664dd54c74e522ad assets/eln/models/item/copper_dust.json
 211e4624393ff74fc02ef2d6b21231c1b7db716d assets/eln/models/item/copper_plate.json
 eda98582a266c800cef3158a85f9a4aff96d8072 assets/eln/models/item/copper_thermal_cable.json

@@ -1,4 +1,4 @@
-// 26.3	2026-10-11T20:42:48.883805909	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-13T16:41:18.655091107	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -31,7 +31,7 @@ cf9a542869d932b0467be73079c897ff6e4c4e30 data/eln/advancement/recipes/misc/2x3_s
 cfa1b1325b4147e7565231411cf883d5bdf4482f data/eln/advancement/recipes/misc/50v_carbon_incandescent_light_bulb.json
 6cdd2a2fa50ffd476d43244a450f534e5bb4a6ea data/eln/advancement/recipes/misc/50v_carbon_incandescent_light_bulb_2.json
 cfc63eb99912c5bbe0f73e1d793a1df1e4b4c5d7 data/eln/advancement/recipes/misc/50v_compressor.json
-9f74ea54df9d5893fb282a241cbcbba2507f9f72 data/eln/advancement/recipes/misc/50v_copper_heating_corp.json
+0c2ffa5dab4cda894540b8f08905f63e1775536f data/eln/advancement/recipes/misc/50v_copper_heating_corp.json
 6e1c8814a88d0fa7361ed417b4ed336e495966f2 data/eln/advancement/recipes/misc/50v_economic_light_bulb.json
 3862f970bb4092a37db62941f19545319b80532a data/eln/advancement/recipes/misc/50v_egg_incubator.json
 8d13c57be21d9100cc02eca211d0105422997847 data/eln/advancement/recipes/misc/50v_emergency_lamp.json
@@ -76,6 +76,7 @@ f996e81fb80e515548a6e7a7c20e6807ff52a339 data/eln/advancement/recipes/misc/cheap
 495dad7ca040158c03dae28e27b0da45f191dc33 data/eln/advancement/recipes/misc/combustion_chamber.json
 a7d17767a5dbba27b8cc1a46625e6e20c8a94f1d data/eln/advancement/recipes/misc/configurable_summing_unit.json
 bdec91984c6084d4e7819043b06effcf89f1b20c data/eln/advancement/recipes/misc/copper_cable.json
+a4bc5c8521cddcafc66204673564d0f12cd4a473 data/eln/advancement/recipes/misc/copper_coil.json
 eae89276a850bb472186bce9bd10a536f029cc93 data/eln/advancement/recipes/misc/copper_thermal_cable.json
 2a3ff9592a14b04f39eec41e7a86d8a86bb54afb data/eln/advancement/recipes/misc/copper_thermal_cable_2.json
 eb063b091ad07eb5f06a39702afbdcd703ebc5fd data/eln/advancement/recipes/misc/cost_oriented_battery.json
@@ -83,7 +84,7 @@ d3db4b32cbde30526cac24c0dc87ff6b8e4fc85c data/eln/advancement/recipes/misc/curre
 dbbb12bd98f307467cefd19fa6a0ec1f7271eaa5 data/eln/advancement/recipes/misc/cyan_brush.json
 00fa837c4a13e0176ea6eded44c13316368cbb97 data/eln/advancement/recipes/misc/d_flip_flop_chip.json
 075c3a8de538d2e8e46ea5f0ec5945d6f04e6180 data/eln/advancement/recipes/misc/data_logger.json
-95516f3df70f4cf966d6cbd1a3114666c8eb5d9f data/eln/advancement/recipes/misc/dc_dc_converter.json
+0a5773dde2644fd61c0d60a9774b3417c747f731 data/eln/advancement/recipes/misc/dc_dc_converter.json
 ac2011fba37a0aed61ad00c01aebe821b0cdf556 data/eln/advancement/recipes/misc/digital_watch.json
 beb21cbc519abd5586148a52f156c30be73b6510 data/eln/advancement/recipes/misc/e_coal_boots.json
 1c3c00d31a0573d897a2cbec65af1080288f6e77 data/eln/advancement/recipes/misc/e_coal_chestplate.json
@@ -224,7 +225,7 @@ f665bdf9caaf800299dfc4f98c4923f398cca1ea data/eln/advancement/recipes/misc/singl
 2fc64c9140c8a695cea2ebb4c97a99d014ed979e data/eln/advancement/recipes/misc/small_200v_tungsten_heating_corp.json
 da90c01d2ed03dbb1ce5512a5f62af6fc8d8e3e1 data/eln/advancement/recipes/misc/small_50v_carbon_incandescent_light_bulb.json
 a2e09d8ad4f789080add4c6d8014bfb3f426f5e0 data/eln/advancement/recipes/misc/small_50v_carbon_incandescent_light_bulb_2.json
-8053d55315cb3f614d66c111e9c2d76155babb9b data/eln/advancement/recipes/misc/small_50v_copper_heating_corp.json
+cd117d48d4f01fd289478f1282e56688eb570bbe data/eln/advancement/recipes/misc/small_50v_copper_heating_corp.json
 552c78741ff1f88324c965666b2ac3266061bfca data/eln/advancement/recipes/misc/small_50v_economic_light_bulb.json
 22ec3af1c90f28cf9df40ece3a3a94f3217960ca data/eln/advancement/recipes/misc/small_50v_incandescent_light_bulb.json
 6260ec73e846c55a8f0d403aa893e9575bcd2c6d data/eln/advancement/recipes/misc/small_50v_iron_heating_corp.json
@@ -340,7 +341,7 @@ d222dad695bf0df4e61a765b79857892e1119ead data/eln/recipe/2x3_solar_panel_8.json
 71340d95d6699e4ee5d0d4fe4aa6442fbd63c985 data/eln/recipe/50v_carbon_incandescent_light_bulb.json
 913cb13fc06e3fc07dfef94143ff05b66dd1a9d6 data/eln/recipe/50v_carbon_incandescent_light_bulb_2.json
 e27181e42fe09c785177948282c93838ef7eaaaf data/eln/recipe/50v_compressor.json
-04e6339b982402b8a4afa41a805274b7434c35dd data/eln/recipe/50v_copper_heating_corp.json
+e1960b93a58994794aa02ebdfc31cf8726fb789b data/eln/recipe/50v_copper_heating_corp.json
 8933e3a8f0174cdb804e4a25548a7c3aab4a43e2 data/eln/recipe/50v_economic_light_bulb.json
 137d72909cd70d1597756c8645d82acf99e00f53 data/eln/recipe/50v_egg_incubator.json
 0e60606d43e253d5450263542f34729fdd8295d9 data/eln/recipe/50v_emergency_lamp.json
@@ -384,7 +385,8 @@ afa583372447fddaf5707f783a659b8429a6b5d5 data/eln/recipe/cheap_electrical_drill.
 ab676e2387186148a3df59b088cf2d1f4c3a15f4 data/eln/recipe/cheap_ferromagnetic_core.json
 10859b043b2f46648ba82294d9dd0461b0bd7cc2 data/eln/recipe/combustion_chamber.json
 e6d592a04e3a3543405fc3038e0c4d99be342217 data/eln/recipe/configurable_summing_unit.json
-dae610b8a2c2fc32cb02a935699c8bdb86534589 data/eln/recipe/copper_cable.json
+59b6b7cda71498662dc4759287863f6959474cf3 data/eln/recipe/copper_cable.json
+b99487bebe5fb5db55128da9327d630d8b0b2ade data/eln/recipe/copper_coil.json
 8c328672129b25913e931b652ce23f22576e63d7 data/eln/recipe/copper_thermal_cable.json
 836168ec2234349f8e92493da4fb6e2578ce81bc data/eln/recipe/copper_thermal_cable_2.json
 72f0e9a2cd5c0819a4ff08e2502cc6fb094d9012 data/eln/recipe/cost_oriented_battery.json
@@ -392,7 +394,7 @@ ce6d0ac0cea12579d72058660fd90558a03db127 data/eln/recipe/current_oriented_batter
 e70d02238ffa719c088ac138dab88c1d69bfd4d5 data/eln/recipe/cyan_brush.json
 4266eee09825c83087da735c1f8151685098854d data/eln/recipe/d_flip_flop_chip.json
 994ec4a50ae5086f8820bdd7bef2ddda90892dd4 data/eln/recipe/data_logger.json
-7de2f67228e860c175e9740cd31c38bdc4bda7ed data/eln/recipe/dc_dc_converter.json
+e0f38bc4eb3608f2f34e79e22d8e2b7999b3f5ea data/eln/recipe/dc_dc_converter.json
 58b2964af5b266fa8c333b8769473063e53b694e data/eln/recipe/digital_watch.json
 9d5586c045d46218b25d10fdcbc57ff21a8ce619 data/eln/recipe/e_coal_boots.json
 bc64e68a6d88b6f6ddd746613eaf2434d1ec555b data/eln/recipe/e_coal_chestplate.json
@@ -504,12 +506,12 @@ df8c34f80dfbf265aca1ddbc3d5995f9b048ada2 data/eln/recipe/portable_condensator.js
 c699b42e6b3f87462e994027cced098a68440cbd data/eln/recipe/portable_electrical_axe.json
 caf2468edaa7395edd4d3842074f75a19756a3ff data/eln/recipe/portable_electrical_mining_drill.json
 2d6c563c24177880cf9b0f0cb2a59c9e0b822d4d data/eln/recipe/power_capacitor.json
-c3f26735bba669dd5a210eb8e77a037cebda9b49 data/eln/recipe/power_inductor.json
-c0d249e3d2021209da74c07a2f3611274f773da4 data/eln/recipe/power_resistor.json
+fa8d180cf76c87a1bacb914e8882ea67ff221799 data/eln/recipe/power_inductor.json
+4cfa369f1103f4d144edd241fe429785aaabe8c8 data/eln/recipe/power_resistor.json
 52a0411cfab0a219bd72692e72568b43848930e3 data/eln/recipe/purple_brush.json
 00d438d0450731bc201193aef8acef83c879d8d9 data/eln/recipe/red_brush.json
 9c5c6e47e7f3d04b13fc71c6b5ddfc3182ee73e2 data/eln/recipe/redstone_to_voltage_converter.json
-c80ba38643c065e1898b829d92210d2f0ff8f2fa data/eln/recipe/rheostat.json
+d8732e9aa7d5b669948f47f5e99893da8e957c5e data/eln/recipe/rheostat.json
 523703af721f00a1c538f3d0517b58c5d417367a data/eln/recipe/robust_lamp_socket.json
 adad48cd9d9f462c2e3a5dcf4cf01bdfc515cb0e data/eln/recipe/sample_and_hold.json
 7e1409acba56e3791f862ac41f87c67789397242 data/eln/recipe/scanner.json
@@ -533,7 +535,7 @@ d6c874804a381b5b1091590bf35c9c0608b86276 data/eln/recipe/single_use_battery_2.js
 ddea0af6a07b687796a70ab01bb5b4e08cee7134 data/eln/recipe/small_200v_tungsten_heating_corp.json
 025de479e3bfdd491985bbe57da1b1f25a23293b data/eln/recipe/small_50v_carbon_incandescent_light_bulb.json
 85fa8ce5cfc5956de8c9acdac6f2858e87e2e0ce data/eln/recipe/small_50v_carbon_incandescent_light_bulb_2.json
-41136230b467a9766489ba2d8e7ffa6abe915b93 data/eln/recipe/small_50v_copper_heating_corp.json
+d6cf5f6337426b85d291a8164064b16bcec566ce data/eln/recipe/small_50v_copper_heating_corp.json
 7ed2c7d8c76a69441f971eb03c922c614029dbf8 data/eln/recipe/small_50v_economic_light_bulb.json
 1298a47abaa812016f32dea248ed37efd6982c7c data/eln/recipe/small_50v_incandescent_light_bulb.json
 73cbdd1037772521a5802210e1b253770c9bd824 data/eln/recipe/small_50v_iron_heating_corp.json
@@ -569,7 +571,7 @@ d3c9be2a659332bf91a00ce7d8970f72a6fbd853 data/eln/recipe/temperature_probe.json
 917aa4ec2cc201d6cb98cb13340bac98b273666d data/eln/recipe/thermal_insulation.json
 25bac59779dd19b1f79d0fc284cb4c789d4ad34f data/eln/recipe/thermal_probe.json
 611bff93cd14943556a294d4ab261bbb895db3fc data/eln/recipe/thermal_probe_chip.json
-629214816be94fc51c3fa7243b06151a64156653 data/eln/recipe/thermistor.json
+bbb8492c52bd6c9e57cbb3939174670c02324371 data/eln/recipe/thermistor.json
 6f76069fd12e628d25a69a7dd6acac1d8fae8d10 data/eln/recipe/thermometer.json
 242851f63c4f602d3b0dc0b84582ae9e087dc1a1 data/eln/recipe/tree_resin_collector.json
 3755444f7d89f99a651710b209e8c730e6576173 data/eln/recipe/tree_resin_collector_2.json

@@ -347,7 +347,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "cIc",
             "IPI",
             'I', stack(Items.IRON_INGOT),
-            'c', findItemStack("Copper Cable"),
+            'c', findItemStack("Copper Coil"),
             'P', "plateIron");
 
         addRecipe(findItemStack("Power Resistor"),
@@ -355,7 +355,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "c c",
             "IPI",
             'I', stack(Items.IRON_INGOT),
-            'c', findItemStack("Copper Cable"),
+            'c', findItemStack("Copper Coil"),
             'P', "plateCopper");
 
         addRecipe(findItemStack("Rheostat"),
@@ -363,7 +363,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             " MS",
             "cmc",
             'R', findItemStack("Power Resistor"),
-            'c', findItemStack("Copper Cable"),
+            'c', findItemStack("Copper Coil"),
             'm', findItemStack("Machine Block"),
             'M', findItemStack("Electrical Motor"),
             'S', findItemStack("Signal Cable")
@@ -375,7 +375,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "IPI",
             's', "dustSilicon",
             'I', stack(Items.IRON_INGOT),
-            'c', findItemStack("Copper Cable"),
+            'c', findItemStack("Copper Coil"),
             'P', "plateCopper");
 
         addRecipe(findItemStack("Large Rheostat"),
@@ -683,7 +683,7 @@ public final class ElnRecipes extends ElnRecipesBase {
         addRecipe(findItemStack("DC-DC Converter"),
             "C C",
             "III",
-            'C', findItemStack("Copper Cable"),
+            'C', findItemStack("Copper Coil"),
             'I', stack(Items.IRON_INGOT));
     }
 
@@ -1101,13 +1101,13 @@ public final class ElnRecipes extends ElnRecipesBase {
             "C C",
             "CCC",
             "C C",
-            'C', findItemStack("Copper Cable"));
+            'C', findItemStack("Copper Coil"));
 
         addRecipe(findItemStack("50V Copper Heating Corp"),
             "C C",
             "CCC",
             "C C",
-            'C', "ingotCopper");
+            'C', findItemStack("Copper Coil"));
 
         addRecipe(findItemStack("Small 200V Copper Heating Corp"),
             "CC",
@@ -1498,9 +1498,17 @@ public final class ElnRecipes extends ElnRecipesBase {
     }
 
     public static void recipeRawCable() {
-        addRecipe(findItemStack("Copper Cable", 6),
+        // 26.x (Baughn): copper cable is 1 per ingot by hand; the thin Copper Coil too, wound on a stick
+        addRecipe(findItemStack("Copper Cable", 3),
             "III",
             'I', "ingotCopper");
+
+        addRecipe(findItemStack("Copper Coil", 4),
+            " I ",
+            "ISI",
+            " I ",
+            'I', "ingotCopper",
+            'S', stack(Items.STICK));
 
         addRecipe(findItemStack("Iron Cable", 6),
             "III",
