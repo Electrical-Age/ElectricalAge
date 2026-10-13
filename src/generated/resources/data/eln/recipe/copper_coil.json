@@ -1,0 +1,25 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/copper"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:ingots/copper",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    " I ",
+    "ISI",
+    " I "
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:copper_coil"
+  }
+}

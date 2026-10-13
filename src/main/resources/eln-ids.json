@@ -287,6 +287,12 @@
   "kind": "shared_item",
   "name": "tungsten_cable"
  },
+ "eln:shared_item@4163": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Copper Coil",
+  "kind": "shared_item",
+  "name": "copper_coil"
+ },
  "eln:shared_item@448": {
   "descriptor": "FerromagneticCoreDescriptor",
   "display": "Cheap Ferromagnetic Core",

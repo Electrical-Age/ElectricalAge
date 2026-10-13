@@ -57,6 +57,10 @@ final class GoldenRecipesCase implements TestCase {
 
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
+    /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil.
+     *  Their output must still have a 26.x recipe. */
+    static final Set<String> CHANGED = Set.of("eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
+        "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp");
 
     /** 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11). */
     static final Set<String> REMOVED = Set.of("eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
@@ -211,6 +215,18 @@ final class GoldenRecipesCase implements TestCase {
             if (out == null && REMOVED.contains(g.get("id").getAsString())) continue;
             if (out == null) {
                 failed.add(g.get("id").getAsString() + ": output not on 26.x");
+                continue;
+            }
+            if (CHANGED.contains(g.get("id").getAsString())) {
+                boolean has = false;
+                for (RecipeHolder<?> h : mine) {
+                    Recipe<?> r = h.value();
+                    ItemStack res = r instanceof ShapedRecipe sr ? sr.assemble(CraftingInput.EMPTY)
+                        : r instanceof ShapelessRecipe sl ? sl.assemble(CraftingInput.EMPTY) : ItemStack.EMPTY;
+                    if (res.getItem() == out) { has = true; used.add(h.id().identifier()); }
+                }
+                if (!has) failed.add(g.get("id").getAsString() + ": changed on purpose, but no 26.x recipe makes it");
+                else matched++;
                 continue;
             }
             List<Slot> slots = new ArrayList<>();

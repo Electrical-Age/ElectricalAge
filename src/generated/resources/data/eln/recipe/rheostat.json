@@ -4,7 +4,7 @@
     "M": "eln:electrical_motor",
     "R": "eln:power_resistor",
     "S": "eln:signal_cable",
-    "c": "eln:copper_cable",
+    "c": "eln:copper_coil",
     "m": "eln:machine_block"
   },
   "pattern": [
