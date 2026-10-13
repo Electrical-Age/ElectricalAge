@@ -1,0 +1,1790 @@
+[
+ {
+  "item_id": "10a_diode",
+  "current_texture": "eln:blocks/10adiode",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_active_thermal_dissipator",
+  "current_texture": "eln:blocks/200vactivethermaldissipator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_battery_charger",
+  "current_texture": "eln:blocks/batterycharger",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_compressor",
+  "current_texture": "eln:blocks/200vcompressor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_copper_heating_corp",
+  "current_texture": "eln:items/200vcopperheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_economic_light_bulb",
+  "current_texture": "eln:items/fluorescentlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_emergency_lamp",
+  "current_texture": "eln:blocks/emergencylamp",
+  "current_size": 64,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_farming_lamp",
+  "current_texture": "eln:items/farminglamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_fuel_generator",
+  "current_texture": "eln:blocks/200vfuelgenerator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_incandescent_light_bulb",
+  "current_texture": "eln:items/incandescentironlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_iron_heating_corp",
+  "current_texture": "eln:items/200vironheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_led_bulb",
+  "current_texture": "eln:items/ledlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_macerator",
+  "current_texture": "eln:blocks/200vmacerator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_magnetizer",
+  "current_texture": "eln:blocks/200vmagnetizer",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_plate_machine",
+  "current_texture": "eln:blocks/200vplatemachine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_power_socket",
+  "current_texture": "eln:blocks/200vpowersocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "200v_tungsten_heating_corp",
+  "current_texture": "eln:items/200vtungstenheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "200v_turbine",
+  "current_texture": "eln:blocks/200vturbine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "25a_diode",
+  "current_texture": "eln:blocks/25adiode",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "2x3_rotating_solar_panel",
+  "current_texture": "eln:blocks/2x3rotatingsolarpanel",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "2x3_solar_panel",
+  "current_texture": "eln:blocks/2x3solarpanel",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_battery_charger",
+  "current_texture": "eln:blocks/batterycharger",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_carbon_incandescent_light_bulb",
+  "current_texture": "eln:items/incandescentcarbonlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_compressor",
+  "current_texture": "eln:blocks/50vcompressor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_copper_heating_corp",
+  "current_texture": "eln:items/50vcopperheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_economic_light_bulb",
+  "current_texture": "eln:items/fluorescentlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_egg_incubator",
+  "current_texture": "eln:blocks/50veggincubator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_emergency_lamp",
+  "current_texture": "eln:blocks/emergencylamp",
+  "current_size": 64,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_farming_lamp",
+  "current_texture": "eln:items/farminglamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_fuel_generator",
+  "current_texture": "eln:blocks/50vfuelgenerator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_incandescent_light_bulb",
+  "current_texture": "eln:items/incandescentironlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_iron_heating_corp",
+  "current_texture": "eln:items/50vironheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_led_bulb",
+  "current_texture": "eln:items/ledlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_macerator",
+  "current_texture": "eln:blocks/50vmacerator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_magnetizer",
+  "current_texture": "eln:blocks/50vmagnetizer",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_plate_machine",
+  "current_texture": "eln:blocks/50vplatemachine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_power_socket",
+  "current_texture": "eln:blocks/50vpowersocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "50v_tungsten_heating_corp",
+  "current_texture": "eln:items/50vtungstenheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "50v_turbine",
+  "current_texture": "eln:blocks/50vturbine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "800v_defence_turret",
+  "current_texture": "eln:blocks/800vdefenceturret",
+  "current_size": 16,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "advanced_chip",
+  "current_texture": "eln:items/advancedchip",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "advanced_electrical_motor",
+  "current_texture": "eln:items/advancedelectricalmotor",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "advanced_energy_meter",
+  "current_texture": "eln:blocks/advancedenergymeter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "advanced_machine_block",
+  "current_texture": "eln:items/advancedmachineblock",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "advanced_magnet",
+  "current_texture": "eln:items/advancedmagnet",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "alloy_dust",
+  "current_texture": "eln:items/alloydust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "alloy_ingot",
+  "current_texture": "eln:items/alloyingot",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "alloy_plate",
+  "current_texture": "eln:items/alloyplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "amplifier",
+  "current_texture": "eln:blocks/amplifier",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "analog_gauge",
+  "current_texture": "eln:blocks/analogvumeter",
+  "current_size": 16,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "analog_watch",
+  "current_texture": "eln:blocks/analogwatch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "analogic_regulator",
+  "current_texture": "eln:items/analogicregulator",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "and_chip",
+  "current_texture": "eln:blocks/andchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "animal_filter",
+  "current_texture": "eln:items/animalfilter",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "auto_miner",
+  "current_texture": "eln:blocks/autominer",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "average_electrical_drill",
+  "current_texture": "eln:items/averageelectricaldrill",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "average_ferromagnetic_core",
+  "current_texture": "eln:items/averageferromagneticcore",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "basic_magnet",
+  "current_texture": "eln:items/basicmagnet",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "big_fuel_burner",
+  "current_texture": "eln:items/bigfuelburner",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "black_brush",
+  "current_texture": "eln:items/blackbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "blown_lead_fuse",
+  "current_texture": "eln:items/blownelectricalfuse",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "blue_brush",
+  "current_texture": "eln:items/bluebrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "brown_brush",
+  "current_texture": "eln:items/brownbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "capacity_oriented_battery",
+  "current_texture": "eln:blocks/capacityorientedbattery",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "casing",
+  "current_texture": "eln:items/casing",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "cheap_chip",
+  "current_texture": "eln:items/cheapchip",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "cheap_electrical_drill",
+  "current_texture": "eln:items/cheapelectricaldrill",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "cheap_ferromagnetic_core",
+  "current_texture": "eln:items/cheapferromagneticcore",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "cinnabar_dust",
+  "current_texture": "eln:items/cinnabardust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "cinnabar_ore",
+  "current_texture": null,
+  "current_size": null,
+  "model_kind": "block_model"
+ },
+ {
+  "item_id": "coal_dust",
+  "current_texture": "eln:items/coaldust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "coal_plate",
+  "current_texture": "eln:items/coalplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "combustion_chamber",
+  "current_texture": "eln:items/combustionchamber",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "configurable_summing_unit",
+  "current_texture": "eln:blocks/configurablesummingunit",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "copper_cable",
+  "current_texture": "eln:items/coppercable",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "copper_dust",
+  "current_texture": "eln:items/copperdust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "copper_plate",
+  "current_texture": "eln:items/copperplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "copper_thermal_cable",
+  "current_texture": "eln:blocks/copperthermalcable",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "cost_oriented_battery",
+  "current_texture": "eln:blocks/costorientedbattery",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "current_oriented_battery",
+  "current_texture": "eln:blocks/currentorientedbattery",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "cyan_brush",
+  "current_texture": "eln:items/cyanbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "d_flip_flop_chip",
+  "current_texture": "eln:blocks/dflipflopchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "data_logger",
+  "current_texture": "eln:blocks/datalogger",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "data_logger_print",
+  "current_texture": "minecraft:item/paper",
+  "current_size": null,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "dc_dc_converter",
+  "current_texture": "eln:blocks/dc-dcconverter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "dielectric",
+  "current_texture": "eln:items/dielectric",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "digital_watch",
+  "current_texture": "eln:blocks/digitalwatch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "e_coal_boots",
+  "current_texture": "eln:items/ecoal_boots",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "e_coal_chestplate",
+  "current_texture": "eln:items/ecoal_chestplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "e_coal_helmet",
+  "current_texture": "eln:items/ecoal_helmet",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "e_coal_leggings",
+  "current_texture": "eln:items/ecoal_leggings",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "electrical_anemometer_sensor",
+  "current_texture": "eln:blocks/electricalanemometersensor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_breaker",
+  "current_texture": "eln:blocks/electricalbreaker",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_daylight_sensor",
+  "current_texture": "eln:blocks/electricaldaylightsensor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_entity_sensor",
+  "current_texture": "eln:blocks/electricalentitysensor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_fire_buzzer",
+  "current_texture": "eln:blocks/electricalfirebuzzer",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_fire_detector",
+  "current_texture": "eln:blocks/electricalfiredetector",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_furnace",
+  "current_texture": "eln:blocks/electricalfurnace",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_fuse_holder",
+  "current_texture": "eln:blocks/electricalfuseholder",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_light_sensor",
+  "current_texture": "eln:blocks/electricallightsensor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_motor",
+  "current_texture": "eln:items/electricalmotor",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "electrical_probe",
+  "current_texture": "eln:blocks/electricalprobe",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "electrical_probe_chip",
+  "current_texture": "eln:items/electricalprobechip",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "electrical_source",
+  "current_texture": "eln:blocks/electricalsource",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_timer",
+  "current_texture": "eln:blocks/electricaltimer",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "electrical_weather_sensor",
+  "current_texture": "eln:blocks/electricalweathersensor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "energy_converter_eln_to_other_hvublock",
+  "current_texture": null,
+  "current_size": null,
+  "model_kind": "block_model"
+ },
+ {
+  "item_id": "energy_converter_eln_to_other_lvublock",
+  "current_texture": null,
+  "current_size": null,
+  "model_kind": "block_model"
+ },
+ {
+  "item_id": "energy_converter_eln_to_other_mvublock",
+  "current_texture": null,
+  "current_size": null,
+  "model_kind": "block_model"
+ },
+ {
+  "item_id": "energy_meter",
+  "current_texture": "eln:blocks/energymeter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "experimental_transporter",
+  "current_texture": "eln:blocks/experimentaltransporter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "fast_electrical_drill",
+  "current_texture": "eln:items/fastelectricaldrill",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "ferrite_ingot",
+  "current_texture": "eln:items/ferriteingot",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "flat_lamp_socket",
+  "current_texture": "eln:blocks/flatlampsocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "fluorescent_lamp_socket",
+  "current_texture": "eln:blocks/fluorescentlampsocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "flywheel",
+  "current_texture": "eln:blocks/flywheel",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "fuel_heat_furnace",
+  "current_texture": "eln:blocks/fuelheatfurnace",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "gas_turbine",
+  "current_texture": "eln:blocks/gasturbine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "generator",
+  "current_texture": "eln:blocks/generator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "gold_dust",
+  "current_texture": "eln:items/golddust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "gold_plate",
+  "current_texture": "eln:items/goldplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "gray_brush",
+  "current_texture": "eln:items/graybrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "green_brush",
+  "current_texture": "eln:items/greenbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "ground_cable",
+  "current_texture": "eln:blocks/groundcable",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "high_power_receiver_antenna",
+  "current_texture": "eln:blocks/electricalantennarx",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "high_power_transmitter_antenna",
+  "current_texture": "eln:blocks/electricalantennatx",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "high_voltage_cable",
+  "current_texture": "eln:blocks/highvoltagecable",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "high_voltage_relay",
+  "current_texture": "eln:blocks/highvoltagerelay",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "high_voltage_switch",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "hub",
+  "current_texture": "eln:blocks/hub",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "improved_flashlight",
+  "current_texture": "eln:items/improvedflashlightoff",
+  "current_size": 16,
+  "model_kind": "flat+lit"
+ },
+ {
+  "item_id": "industrial_data_logger",
+  "current_texture": "eln:blocks/industrialdatalogger",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "iron_cable",
+  "current_texture": "eln:items/ironcable",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "iron_dust",
+  "current_texture": "eln:items/irondust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "iron_plate",
+  "current_texture": "eln:items/ironplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "item_creative_tab",
+  "current_texture": "eln:items/elncreativetab",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "jk_flip_flop_chip",
+  "current_texture": "eln:blocks/jkflipflopchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "joint",
+  "current_texture": "eln:blocks/joint",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "joint_hub",
+  "current_texture": "eln:blocks/jointhub",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "lamp_socket_a",
+  "current_texture": "eln:blocks/lampsocketa",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "lamp_socket_b_projector",
+  "current_texture": "eln:blocks/lampsocketbprojector",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "lamp_supply",
+  "current_texture": "eln:blocks/lampsupply",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "large_rheostat",
+  "current_texture": "eln:blocks/largerheostat",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "lead_dust",
+  "current_texture": "eln:items/leaddust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lead_fuse_for_high_voltage_cables",
+  "current_texture": "eln:items/electricalfuse",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lead_fuse_for_low_voltage_cables",
+  "current_texture": "eln:items/electricalfuse",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lead_fuse_for_medium_voltage_cables",
+  "current_texture": "eln:items/electricalfuse",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lead_fuse_for_very_high_voltage_cables",
+  "current_texture": "eln:items/electricalfuse",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lead_ingot",
+  "current_texture": "eln:items/leadingot",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lead_ore",
+  "current_texture": null,
+  "current_size": null,
+  "model_kind": "block_model"
+ },
+ {
+  "item_id": "lead_plate",
+  "current_texture": "eln:items/leadplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "led_vumeter",
+  "current_texture": "eln:blocks/ledvumeter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "life_oriented_battery",
+  "current_texture": "eln:blocks/lifeorientedbattery",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "light_blue_brush",
+  "current_texture": "eln:items/lightbluebrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "lime_brush",
+  "current_texture": "eln:items/limebrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "long_suspended_lamp_socket",
+  "current_texture": "eln:blocks/longsuspendedlampsocket",
+  "current_size": 16,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "low_power_receiver_antenna",
+  "current_texture": "eln:blocks/electricalantennarx",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "low_power_transmitter_antenna",
+  "current_texture": "eln:blocks/electricalantennatx",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "low_voltage_cable",
+  "current_texture": "eln:blocks/lowvoltagecable",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "low_voltage_relay",
+  "current_texture": "eln:blocks/lowvoltagerelay",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "low_voltage_switch",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "lowpass_filter",
+  "current_texture": "eln:blocks/lowpassfilter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "machine_block",
+  "current_texture": "eln:items/machineblock",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "machine_booster",
+  "current_texture": "eln:items/machinebooster",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "magenta_brush",
+  "current_texture": "eln:items/magentabrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "medium_fuel_burner",
+  "current_texture": "eln:items/mediumfuelburner",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "medium_power_receiver_antenna",
+  "current_texture": "eln:blocks/electricalantennarx",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "medium_power_transmitter_antenna",
+  "current_texture": "eln:blocks/electricalantennatx",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "medium_voltage_cable",
+  "current_texture": "eln:blocks/mediumvoltagecable",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "medium_voltage_relay",
+  "current_texture": "eln:blocks/mediumvoltagerelay",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "medium_voltage_switch",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "mercury",
+  "current_texture": "eln:items/mercury",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "mining_pipe",
+  "current_texture": "eln:items/miningpipe",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "modbus_rtu",
+  "current_texture": "eln:blocks/modbusrtu",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "modern_data_logger",
+  "current_texture": "eln:blocks/moderndatalogger",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "monster_filter",
+  "current_texture": "eln:items/monsterfilter",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "multimeter",
+  "current_texture": "eln:items/multimeter",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "nand_chip",
+  "current_texture": "eln:blocks/nandchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "nor_chip",
+  "current_texture": "eln:blocks/norchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "not_chip",
+  "current_texture": "eln:blocks/notchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "nuclear_alarm",
+  "current_texture": "eln:blocks/electricalalarm",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "on_off_regulator_1",
+  "current_texture": "eln:items/onoffregulator",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "on_off_regulator_10",
+  "current_texture": "eln:items/onoffregulator",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "opamp",
+  "current_texture": "eln:blocks/opamp",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "optimal_ferromagnetic_core",
+  "current_texture": "eln:items/optimalferromagneticcore",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "or_chip",
+  "current_texture": "eln:blocks/orchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "orange_brush",
+  "current_texture": "eln:items/orangebrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "ore_scanner",
+  "current_texture": "eln:items/orescanner",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "oscillator_chip",
+  "current_texture": "eln:blocks/oscillatorchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "overheating_protection",
+  "current_texture": "eln:items/overheatingprotection",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "overvoltage_protection",
+  "current_texture": "eln:items/overvoltageprotection",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "pal_chip",
+  "current_texture": "eln:blocks/palchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "pid_regulator",
+  "current_texture": "eln:blocks/pidregulator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "pink_brush",
+  "current_texture": "eln:items/pinkbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "player_filter",
+  "current_texture": "eln:items/playerfilter",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "portable_battery",
+  "current_texture": "eln:items/portablebattery",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "portable_battery_pack",
+  "current_texture": "eln:items/portablebatterypack",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "portable_capacitor",
+  "current_texture": "eln:items/portablecondensator",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "portable_capacitor_pack",
+  "current_texture": "eln:items/portablecondensatorpack",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "portable_electrical_axe",
+  "current_texture": "eln:items/portableelectricalaxe",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "portable_electrical_mining_drill",
+  "current_texture": "eln:items/portableelectricalminingdrill",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "power_capacitor",
+  "current_texture": "eln:blocks/powercapacitor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "power_capacitor_block",
+  "current_texture": "eln:blocks/powercapacitor",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "power_inductor",
+  "current_texture": "eln:blocks/powerinductor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "power_inductor_block",
+  "current_texture": "eln:blocks/powerinductor",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "power_resistor",
+  "current_texture": "eln:blocks/powerresistor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "purple_brush",
+  "current_texture": "eln:items/purplebrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "red_brush",
+  "current_texture": "eln:items/redbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "redstone_to_voltage_converter",
+  "current_texture": "eln:blocks/redstone-to-voltageconverter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "removed_from_mod_copper_thermal_cable",
+  "current_texture": "eln:blocks/empty-texture",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "replicator_spawn_egg",
+  "current_texture": "minecraft:item/egg",
+  "current_size": null,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "rheostat",
+  "current_texture": "eln:blocks/rheostat",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "robust_lamp_socket",
+  "current_texture": "eln:blocks/robustlampsocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "rubber",
+  "current_texture": "eln:items/rubber",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "sample_and_hold",
+  "current_texture": "eln:blocks/sampleandhold",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "scanner",
+  "current_texture": "eln:blocks/scanner",
+  "current_size": 64,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "schmitt_trigger_chip",
+  "current_texture": "eln:blocks/schmitttriggerchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "sconce_lamp_socket",
+  "current_texture": "eln:blocks/sconcelampsocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_20h_inductor",
+  "current_texture": "eln:blocks/empty-texture",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "signal_antenna",
+  "current_texture": "eln:items/signalantenna",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "signal_button",
+  "current_texture": "eln:blocks/button",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_cable",
+  "current_texture": "eln:blocks/signalcable",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "signal_cable_switch",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_diode",
+  "current_texture": "eln:blocks/signaldiode",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_processor",
+  "current_texture": "eln:blocks/signalprocessor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_relay",
+  "current_texture": "eln:blocks/signalrelay",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_source",
+  "current_texture": "eln:blocks/signalsource",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_switch",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_switch_with_led",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "signal_trimmer",
+  "current_texture": "eln:blocks/trimmer",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "silicon_dust",
+  "current_texture": "eln:items/silicondust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "silicon_ingot",
+  "current_texture": "eln:items/siliconingot",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "silicon_plate",
+  "current_texture": "eln:items/siliconplate",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "silver_brush",
+  "current_texture": "eln:items/silverbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "simple_lamp_socket",
+  "current_texture": "eln:blocks/simplelampsocket",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "single_use_battery",
+  "current_texture": "eln:blocks/single-usebattery",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "small_200v_copper_heating_corp",
+  "current_texture": "eln:items/small200vcopperheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_200v_iron_heating_corp",
+  "current_texture": "eln:items/small200vironheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_200v_tungsten_heating_corp",
+  "current_texture": "eln:items/small200vtungstenheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_50v_carbon_incandescent_light_bulb",
+  "current_texture": "eln:items/incandescentcarbonlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_50v_copper_heating_corp",
+  "current_texture": "eln:items/small50vcopperheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_50v_economic_light_bulb",
+  "current_texture": "eln:items/fluorescentlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_50v_incandescent_light_bulb",
+  "current_texture": "eln:items/incandescentironlamp",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_50v_iron_heating_corp",
+  "current_texture": "eln:items/small50vironheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_50v_tungsten_heating_corp",
+  "current_texture": "eln:items/small50vtungstenheatingcorp",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_active_thermal_dissipator",
+  "current_texture": "eln:blocks/smallactivethermaldissipator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "small_flashlight",
+  "current_texture": "eln:items/smallflashlightoff",
+  "current_size": 16,
+  "model_kind": "flat+lit"
+ },
+ {
+  "item_id": "small_fuel_burner",
+  "current_texture": "eln:items/smallfuelburner",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "small_passive_thermal_dissipator",
+  "current_texture": "eln:blocks/smallpassivethermaldissipator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "small_rotating_solar_panel",
+  "current_texture": "eln:blocks/smallrotatingsolarpanel",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "small_solar_panel",
+  "current_texture": "eln:blocks/smallsolarpanel",
+  "current_size": 64,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "solar_tracker",
+  "current_texture": "eln:items/solartracker",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "standard_alarm",
+  "current_texture": "eln:blocks/electricalalarm",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "steam_turbine",
+  "current_texture": "eln:blocks/steamturbine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "stone_heat_furnace",
+  "current_texture": "eln:blocks/stoneheatfurnace",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "streetlight",
+  "current_texture": "eln:blocks/streetlight",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "suspended_lamp_socket",
+  "current_texture": "eln:blocks/suspendedlampsocket",
+  "current_size": 16,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "tachometer",
+  "current_texture": "eln:blocks/tachometer",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "temperature_probe",
+  "current_texture": "eln:blocks/temperatureprobe",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "thermal_insulation",
+  "current_texture": "eln:items/thermalinsulation",
+  "current_size": 64,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "thermal_probe",
+  "current_texture": "eln:blocks/thermalprobe",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "thermal_probe_chip",
+  "current_texture": "eln:items/thermalprobechip",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "thermistor",
+  "current_texture": "eln:blocks/thermistor",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "thermometer",
+  "current_texture": "eln:items/thermometer",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "tree_resin",
+  "current_texture": "eln:items/treeresin",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "tree_resin_collector",
+  "current_texture": "eln:blocks/treeresincollector",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "tungsten_cable",
+  "current_texture": "eln:items/tungstencable",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "tungsten_dust",
+  "current_texture": "eln:items/tungstendust",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "tungsten_ingot",
+  "current_texture": "eln:items/tungsteningot",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "tungsten_ore",
+  "current_texture": null,
+  "current_size": null,
+  "model_kind": "block_model"
+ },
+ {
+  "item_id": "tutorial_sign",
+  "current_texture": "eln:blocks/tutorialsign",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "universal_meter",
+  "current_texture": "eln:items/allmeter",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "utility_pole",
+  "current_texture": "eln:blocks/utilitypole",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "utility_pole_w_dc_dc_converter",
+  "current_texture": "eln:blocks/utilitypolewdc-dcconverter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "very_high_voltage_cable",
+  "current_texture": "eln:blocks/veryhighvoltagecable",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "very_high_voltage_relay",
+  "current_texture": "eln:blocks/veryhighvoltagerelay",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "very_high_voltage_switch",
+  "current_texture": "eln:blocks/switch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "voltage_controlled_amplifier",
+  "current_texture": "eln:blocks/voltagecontrolledamplifier",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "voltage_controlled_sawtooth_oscillator",
+  "current_texture": "eln:blocks/voltagecontrolledsawtoothoscillator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "voltage_controlled_sine_oscillator",
+  "current_texture": "eln:blocks/voltagecontrolledsineoscillator",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "voltage_oriented_battery",
+  "current_texture": "eln:blocks/voltageorientedbattery",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "voltage_probe",
+  "current_texture": "eln:blocks/voltageprobe",
+  "current_size": 32,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "voltage_to_redstone_converter",
+  "current_texture": "eln:blocks/voltage-to-redstoneconverter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "water_turbine",
+  "current_texture": "eln:blocks/waterturbine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "weak_50v_battery_charger",
+  "current_texture": "eln:blocks/batterycharger",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "white_brush",
+  "current_texture": "eln:items/whitebrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "wind_turbine",
+  "current_texture": "eln:blocks/windturbine",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "wireless_analyzer",
+  "current_texture": "eln:items/wirelessanalyser",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "wireless_button",
+  "current_texture": "eln:blocks/wirelessbutton",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "wireless_signal_receiver",
+  "current_texture": "eln:blocks/wirelesssignalreceiver",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "wireless_signal_repeater",
+  "current_texture": "eln:blocks/wirelesssignalrepeater",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "wireless_signal_transmitter",
+  "current_texture": "eln:blocks/wirelesssignaltransmitter",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "wireless_switch",
+  "current_texture": "eln:blocks/wirelessswitch",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "wrench",
+  "current_texture": "eln:items/wrench",
+  "current_size": 16,
+  "model_kind": "flat"
+ },
+ {
+  "item_id": "x_ray_scanner",
+  "current_texture": "eln:items/x-rayscanner",
+  "current_size": 16,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "xnor_chip",
+  "current_texture": "eln:blocks/xnorchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "xor_chip",
+  "current_texture": "eln:blocks/xorchip",
+  "current_size": 32,
+  "model_kind": "flat+3d"
+ },
+ {
+  "item_id": "yellow_brush",
+  "current_texture": "eln:items/yellowbrush",
+  "current_size": 16,
+  "model_kind": "flat"
+ }
+]

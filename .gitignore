@@ -24,6 +24,7 @@ eclipse
 !src/main/resources/**/*.json
 !golden/**/*.json
 !src/generated/**/*.json
+!tools/**/*.json
 # kate
 *.kate-swp
 *.launch
@@ -44,3 +45,11 @@ build/
 run/
 runs/
 repo/
+
+# nix / direnv
+.direnv/
+result
+# tools/icons build output (out/ is already ignored)
+__pycache__/
+*.pyc
+tools/icons/refs/

@@ -48,6 +48,10 @@ $ cd ElectricalAge
 $ gradle unzipTutoMap runClient
 ```
 
+With Nix, `direnv allow` (or `nix develop`) gives a shell with both JDKs Gradle needs, the client's native
+libraries, and Python for the icon tools in `tools/icons`. Without Nix, set `JDK21` and `JDK25` to JDK homes
+(see `gradle.properties`).
+
 ## Contributing
 
 We appreciate any help from the community to improve the mod. You can find more information [here](./CONTRIBUTING.md).
