@@ -1883,6 +1883,30 @@ public final class ElnRecipes extends ElnRecipesBase {
             'B', stack(Items.BUCKET),
             'I', "ingotAlloy");
 
+        addRecipe(stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get(), 4),
+            "I I",
+            "I I",
+            "I I",
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("50V Oil Pump", 1),
+            "IPI",
+            "cMc",
+            "IWI",
+            'M', findItemStack("Machine Block"),
+            'c', findItemStack("Electrical Motor"),
+            'P', stack(Blocks.PISTON),
+            'W', stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get()),
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("200V Oil Pump", 1),
+            "IPI",
+            "cMc",
+            "IWI",
+            'M', findItemStack("Advanced Machine Block"),
+            'c', findItemStack("Advanced Electrical Motor"),
+            'P', stack(Blocks.PISTON),
+            'W', stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get()),
+            'I', "ingotAlloy");
+
         addRecipe(findItemStack("50V Compressor", 1),
             "IRI",
             "FMF",

@@ -61,6 +61,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor.class, mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, mods.eln.transparentnode.electricalmachine.ElectricalMachineRender::new);
+        ElnRenders.transparent(mods.eln.oil.OilPumpDescriptor.class, mods.eln.oil.OilPumpRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor.class, mods.eln.transparentnode.powercapacitor.PowerCapacitorRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.powerinductor.PowerInductorDescriptor.class, mods.eln.transparentnode.powerinductor.PowerInductorRender::new);

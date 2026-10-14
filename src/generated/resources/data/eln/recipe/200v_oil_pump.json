@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:ingots/alloy",
+    "M": "eln:advanced_machine_block",
+    "P": "minecraft:piston",
+    "W": "eln:well_casing",
+    "c": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "IPI",
+    "cMc",
+    "IWI"
+  ],
+  "result": {
+    "id": "eln:200v_oil_pump"
+  }
+}

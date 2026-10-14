@@ -42,6 +42,15 @@ public class Wp10aContent implements ElnContent {
         registerEggIncubator(41);
         registerAutoMiner(42);
         registerOilSeparator(80);
+        registerOilPump(81);
+    }
+
+    /** 26.x oil: the pump (on well casing; oil lakes and water). Placeholder model: the compressor's. */
+    public static void registerOilPump(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "50V Oil Pump"),
+            LVU, 1000, lowVoltageCableDescriptor, "compressora"));
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "200V Oil Pump"),
+            MVU, 4000, meduimVoltageCableDescriptor, "compressorb"));
     }
 
     /** 26.x oil: the tar sand separator (notes/oil; on the macerator's models until its own exist). */

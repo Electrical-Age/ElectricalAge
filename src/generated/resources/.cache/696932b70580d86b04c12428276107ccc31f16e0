@@ -1,9 +1,10 @@
-// 26.3	2026-10-14T21:17:13.173190474	eln-global/EA models
+// 26.3	2026-10-14T21:26:45.594102489	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_fuel_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_macerator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_magnetizer.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_oil_pump.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_plate_machine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_tar_sand_separator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_turbine.json
@@ -14,6 +15,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_fuel_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_macerator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_magnetizer.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_oil_pump.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_plate_machine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_tar_sand_separator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_turbine.json
@@ -77,6 +79,7 @@ f5386b1a8e75f2fb03728f384fd9b3d0f137491e assets/eln/items/200v_farming_lamp.json
 da9409f9b48c96388595c17cdaaf8b42fd42b058 assets/eln/items/200v_led_bulb.json
 ff4e488736f431dd00f01a6fdbeb1adec31cd4d2 assets/eln/items/200v_macerator.json
 5dee7380e440cbfad5c7f2df395fb68e77e9ee44 assets/eln/items/200v_magnetizer.json
+f1d374d39ca6941880799bfdd8697b329d0588a5 assets/eln/items/200v_oil_pump.json
 ced06a526a5336739c0903382f3d59da76c4690e assets/eln/items/200v_plate_machine.json
 a77004a197dbdb9447a13768a82d3c5a0db92529 assets/eln/items/200v_power_socket.json
 c41bf999c4194d47e8f6208abe7ffa9007449505 assets/eln/items/200v_tar_sand_separator.json
@@ -99,6 +102,7 @@ c555919a0b77f07dc27e3d0364e76210b8ec1462 assets/eln/items/50v_iron_heating_corp.
 2fdfeb44df7da390090dcbeb6984b618b135dfdb assets/eln/items/50v_led_bulb.json
 b934b8d1358fe8feae9ef4fc6e1e01462613ffd3 assets/eln/items/50v_macerator.json
 cdfde7157da8009b3d20b99f98a01d6482032032 assets/eln/items/50v_magnetizer.json
+8354df6f359d6de0b33443dc95987083089d4085 assets/eln/items/50v_oil_pump.json
 151fc1cac4c8c1779fb5abff0c1ebeb0c608ded0 assets/eln/items/50v_plate_machine.json
 7ac73e9491b53196ab2ee5b3c87a080ee387ee08 assets/eln/items/50v_power_socket.json
 d3f7ed94b2c39ca208659c9b74b19a8f69852e0c assets/eln/items/50v_tar_sand_separator.json
@@ -390,6 +394,7 @@ c14fe1865781c82710e78b991a896e3e76d6e938 assets/eln/models/item/200v_macerator.j
 cb8539837c2964adbba2086975fa8442fe952f4a assets/eln/models/item/200v_macerator_3d.json
 b6153f521740f91f20df16d1227e6f1ef16efd1e assets/eln/models/item/200v_magnetizer.json
 0419ed24c110cbe0207bee15234bd5008b24bb58 assets/eln/models/item/200v_magnetizer_3d.json
+4d6de43f34b3d842ae86b0a63f517b66320c2af0 assets/eln/models/item/200v_oil_pump.json
 cae62c66181615a1907943a24def91c83223281e assets/eln/models/item/200v_plate_machine.json
 b64af5dd65553d5688568fe24cb828999ebc73bf assets/eln/models/item/200v_plate_machine_3d.json
 6516b7328cc2ba074ac47a10c91fa493bb1bb5d1 assets/eln/models/item/200v_power_socket.json
@@ -425,6 +430,7 @@ c82d7047acda90b48726c8d1415c16cc9903f4a8 assets/eln/models/item/50v_macerator.js
 d57623ca8b24a3b021b2354c5dc85ab339ae2ce5 assets/eln/models/item/50v_macerator_3d.json
 40ad6d9e8ca77814614a5059ea26c9435529e0a7 assets/eln/models/item/50v_magnetizer.json
 ffcf1059091f018f65607403c2306a6c7aceb569 assets/eln/models/item/50v_magnetizer_3d.json
+6cc62f4c36b3248f592ce3d191775049b2c53c54 assets/eln/models/item/50v_oil_pump.json
 023a03a4fc343ccac912207babe422e1a276aa7d assets/eln/models/item/50v_plate_machine.json
 966e1cba8b02b6ffa992cca6b7f6bc90830b1778 assets/eln/models/item/50v_plate_machine_3d.json
 6f602c693037d2b79704aed318e74a861aa99d66 assets/eln/models/item/50v_power_socket.json

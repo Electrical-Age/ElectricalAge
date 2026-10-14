@@ -29,11 +29,17 @@ public final class OilWorldgen {
         PIECES.register("oil_lake", () -> (StructurePieceType.ContextlessType) OilLakePiece::new);
 
     public static DeferredBlock<Block> TAR_SAND;
+    /** Well casing: a column of it from the pump down to a lake (or water). */
+    public static DeferredBlock<Block> WELL_CASING;
+    public static DeferredItem<Item> WELL_CASING_ITEM;
     public static DeferredItem<Item> TAR_SAND_ITEM;
 
     static void register(IEventBus modBus) {
         TAR_SAND = Oil.BLOCKS.registerSimpleBlock("tar_sand", p -> p.mapColor(MapColor.TERRACOTTA_BLACK).strength(0.9f).sound(SoundType.SAND));
         TAR_SAND_ITEM = Oil.ITEMS.registerItem("tar_sand", p -> new BlockItem(TAR_SAND.get(), p.useBlockDescriptionPrefix()));
+        WELL_CASING = Oil.BLOCKS.registerSimpleBlock("well_casing", p -> p.mapColor(MapColor.METAL).strength(3f, 6f)
+            .sound(SoundType.METAL).requiresCorrectToolForDrops());
+        WELL_CASING_ITEM = Oil.ITEMS.registerItem("well_casing", p -> new BlockItem(WELL_CASING.get(), p.useBlockDescriptionPrefix()));
         STRUCTURE_TYPES.register(modBus);
         PIECES.register(modBus);
     }

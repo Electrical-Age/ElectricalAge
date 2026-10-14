@@ -29,6 +29,8 @@ public final class OilCases {
         cases.add(new CatchUp());
         cases.add(new LakeSizes());
         cases.add(new Separator());
+        cases.add(new Pump(false));
+        cases.add(new Pump(true));
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -205,6 +207,71 @@ public final class OilCases {
             ctx.check("oil: 100 mB crude in its tank", tank.getFluidAmount() == 100, tank.getFluidAmount() + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, sep.node.coordonate.pos(), null);
             ctx.check("oil: the tank is the block's fluid capability (pipes can drain it)", cap == tank, "" + cap);
+        }
+    }
+
+    /**
+     * The pump on well casing: from a 3 x 3 lake under the test floor (or water) at its 1 kW: crude flow = power / (5% of
+     * crude's heat value + a tiny lift), ~7.8 mB/s; the lake's record loses what the tank gains. Water at 20 J/mB.
+     */
+    static final class Pump implements TestCase {
+        final boolean water;
+        mods.eln.oil.OilPumpElement pump;
+        Reservoir r;
+        long before;
+
+        Pump(boolean water) {
+            this.water = water;
+        }
+
+        public String id() {
+            return water ? "oil_pump_water" : "oil_pump_lake";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos casing = ctx.at(2, 0, 1), under = casing.below();
+            ctx.level().setBlock(casing, mods.eln.oil.OilWorldgen.WELL_CASING.get().defaultBlockState(), 3);
+            if (water) {
+                ctx.level().setBlock(under, Blocks.WATER.defaultBlockState(), 3);
+            } else {
+                // (below the test floor is the structure's barrier layer: clear room for the lake, or it'd be a dam)
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dz = -1; dz <= 1; dz++) ctx.level().setBlock(under.offset(dx, 0, dz), Blocks.AIR.defaultBlockState(), 3);
+                int[] floor = new int[9], mask = new int[9];
+                java.util.Arrays.fill(floor, under.getY());
+                java.util.Arrays.fill(mask, 1);
+                r = ReservoirData.get(ctx.level()).create(under.getX() - 1, under.getZ() - 1, 3, 3, floor, mask, Long.MAX_VALUE);
+                Reservoirs.sweep(ctx.level(), r, under.getX() >> 4, under.getZ() >> 4);
+                before = r.amount();
+            }
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            pump = (mods.eln.oil.OilPumpElement) l.device(0 + (81 << 6), 2, 1);
+            l.feed(ctx.at(2, 1, 1), pump.front.left());
+        }
+
+        public void measure(TestContext ctx) {
+            var tank = (mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler();
+            int got = tank.getFluidAmount();
+            var fluid = tank.getFluid().getFluid();
+            BlockPos under = ctx.at(2, 0, 1).below();
+            ctx.line("oil: pump " + (water ? "water" : "lake") + ": " + got + " mB in 5 s, " + pump.getWaila() + ", at(under) "
+                + ReservoirData.get(ctx.level()).at(under) + ", block under " + ctx.level().getBlockState(under) + ", casing " + ctx.level().getBlockState(ctx.at(2, 0, 1)));
+            if (water) {
+                // 1000 W / (20 J/mB + lift) ~ 50 mB/s
+                ctx.check("oil: the pump draws water", fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) && got > 100, got + " mB of " + fluid);
+            } else {
+                ctx.check("oil: the pump draws crude", fluid.isSame(Oil.CRUDE.get()) && got > 15 && got < 60, got + " mB of " + fluid);
+                ctx.check("oil: the lake lost what the tank gained", before - r.amount() == got, (before - r.amount()) + " vs " + got);
+                ReservoirData.get(ctx.level()).remove(r);
+            }
         }
     }
 

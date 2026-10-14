@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "M": "eln:machine_block",
+    "P": "minecraft:piston",
+    "W": "eln:well_casing",
+    "c": "eln:electrical_motor"
+  },
+  "pattern": [
+    "IPI",
+    "cMc",
+    "IWI"
+  ],
+  "result": {
+    "id": "eln:50v_oil_pump"
+  }
+}

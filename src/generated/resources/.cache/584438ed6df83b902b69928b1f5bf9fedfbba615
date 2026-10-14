@@ -1,4 +1,4 @@
-// 26.3	2026-10-14T21:16:28.505040933	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-14T21:26:45.597082535	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -13,6 +13,7 @@ b743f97b457fe7a65c5081ef972fbd2599f59084 data/eln/advancement/recipes/misc/200v_
 1e8551e401c65cffde1ceb96b614bca73e55cc78 data/eln/advancement/recipes/misc/200v_led_bulb.json
 e59b7d9677bc37a760b28ff12f607b09abdd5407 data/eln/advancement/recipes/misc/200v_macerator.json
 2b0905b3e6707dcf7f4ed5356d48dae7410d272c data/eln/advancement/recipes/misc/200v_magnetizer.json
+064e72657597a6c9f249d4fc7d94bea1258ed26f data/eln/advancement/recipes/misc/200v_oil_pump.json
 e6861ea161f2d01ee0029b3c8e782a9a1fddc54f data/eln/advancement/recipes/misc/200v_plate_machine.json
 747f4ba0a62f6feff6fd0d7ba03081e89112a86b data/eln/advancement/recipes/misc/200v_power_socket.json
 0a5df19babf77af85a8355a565bc7ce232529590 data/eln/advancement/recipes/misc/200v_tar_sand_separator.json
@@ -43,6 +44,7 @@ bf96d5f29a885d050ac5a2d272f86da42ee72ab3 data/eln/advancement/recipes/misc/50v_i
 ccfbc796f950920e968b269f9180eea232666664 data/eln/advancement/recipes/misc/50v_led_bulb.json
 db7229a74ad2f978856374ba9a0e52a261dafbdc data/eln/advancement/recipes/misc/50v_macerator.json
 b2eba69bdd077479b980974fc9a6c665aa1b9341 data/eln/advancement/recipes/misc/50v_magnetizer.json
+151fc7d58628bcd6a14901680c9160a3f971c672 data/eln/advancement/recipes/misc/50v_oil_pump.json
 cd3449205d8535c147379b36fc881171fab688ef data/eln/advancement/recipes/misc/50v_plate_machine.json
 7c9f4976acb25a3392f0aaf5311c116fd47543e2 data/eln/advancement/recipes/misc/50v_power_socket.json
 458625917ce956f38084559149825d267713c403 data/eln/advancement/recipes/misc/50v_tar_sand_separator.json
@@ -282,6 +284,7 @@ f1a2376059a68048f4a3344057c141cdfd14d4b7 data/eln/advancement/recipes/misc/volta
 bf6f0a1b124a820ae6421b3f6af5543f50ecb116 data/eln/advancement/recipes/misc/voltage_to_redstone_converter.json
 86b33c8f8250d3c728c3f896c8c6a13fbdbf9df7 data/eln/advancement/recipes/misc/water_turbine.json
 db60d69221acdb19adf4acbf846d3c9cc1e7138b data/eln/advancement/recipes/misc/weak_50v_battery_charger.json
+cd1801fc1dc5360002e4ef5278cc0cdf93ca0226 data/eln/advancement/recipes/misc/well_casing.json
 0cc09378cc03badb9825bf5bb1f4916b823c6499 data/eln/advancement/recipes/misc/white_brush.json
 ce0db63f90401fd91f0cf024c4dd7912d78569c3 data/eln/advancement/recipes/misc/white_brush_10.json
 c493468d68783c0f725967d47f416f460e97aa4c data/eln/advancement/recipes/misc/white_brush_11.json
@@ -325,6 +328,7 @@ bb52ea119c34f3e68042bb58e800a272744be9d6 data/eln/recipe/200v_iron_heating_corp.
 053b8b4f4441dcbb53022b333c2cf6c0aa56e25e data/eln/recipe/200v_led_bulb.json
 b2bc41b4629f2c46260114fcfdff7291a52c17f2 data/eln/recipe/200v_macerator.json
 85b337d8c2972bad481b20f081d80f73afa315c8 data/eln/recipe/200v_magnetizer.json
+f52b8037748b5855a326b573fe52f465705d9bea data/eln/recipe/200v_oil_pump.json
 6a57a0d23a063888039a8df934f92bdc7bd7265e data/eln/recipe/200v_plate_machine.json
 0ddcffca2bb069c00a8553ecb13de05752db4f80 data/eln/recipe/200v_power_socket.json
 8679563ab6e0e1e5d10c076891217a5ba2d08c9a data/eln/recipe/200v_tar_sand_separator.json
@@ -355,6 +359,7 @@ c3df0135648fa5da128634cd93db0a29ae90c1d2 data/eln/recipe/50v_iron_heating_corp.j
 da3dbfb6e78d7a1692e94ab822a03e2303838246 data/eln/recipe/50v_led_bulb.json
 672f6570b6753daf81085b8ae2c2f7ff7ca46a9f data/eln/recipe/50v_macerator.json
 26130b38651d15a70cf75803d4255d8c6712abd8 data/eln/recipe/50v_magnetizer.json
+d01ad86ab044c11612d4f5d583c593d8d2050917 data/eln/recipe/50v_oil_pump.json
 e3498ec55daf9124e4b38e6dfa6dd8810d4d2147 data/eln/recipe/50v_plate_machine.json
 41115032978023f7e16964aa9c883906562734cf data/eln/recipe/50v_power_socket.json
 597e59b2cb40ff96580947c9d42e4806e4aba461 data/eln/recipe/50v_tar_sand_separator.json
@@ -594,6 +599,7 @@ bcdf2586ebaa97d9afcb494bbf7070b497d0aa22 data/eln/recipe/voltage_oriented_batter
 75586b79b852a84f56f1eb41fa2bcfd4fc615fb3 data/eln/recipe/voltage_to_redstone_converter.json
 9b3845ca1160b8f4abf96bd9475682978aec1372 data/eln/recipe/water_turbine.json
 7d2fe631dadef77994ea6da566a582f8a513ec22 data/eln/recipe/weak_50v_battery_charger.json
+eeb00d96bd5e748eb1d0b827dc5d3ff52fcbe137 data/eln/recipe/well_casing.json
 5ac84019aaf99e603a752234a647fe1c775b9f25 data/eln/recipe/white_brush.json
 d134d8b641b8d5f318e09a997614f6d128a919e9 data/eln/recipe/white_brush_10.json
 aba6db52693c9ba5b75741a94f76bf2a464a0cc2 data/eln/recipe/white_brush_11.json

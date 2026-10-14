@@ -54,6 +54,7 @@ public class ElnModels implements DataProvider {
         if (textureExists("item/" + name)) return "item/" + name;
         // 26.x oil machines: the macerator's icons until their own exist
         if (name.endsWith("tar_sand_separator")) return itemTexture(name.replace("tar_sand_separator", "macerator"), item);
+        if (name.endsWith("oil_pump")) return itemTexture(name.replace("oil_pump", "compressor"), item);
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();
             if (d instanceof GenericItemUsingDamageDescriptor g) return iconTexture(g.getIconName(), false);
@@ -108,7 +109,7 @@ public class ElnModels implements DataProvider {
                 }
                 out.add(DataProvider.saveStable(cache, obj("variants", variants), assets.resolve("blockstates/" + name + ".json")));
                 continue;
-            } else if (id.getPath().equals("crude_oil") || id.getPath().equals("reservoir_oil") || id.getPath().equals("tar_sand")) {
+            } else if (id.getPath().equals("crude_oil") || id.getPath().equals("reservoir_oil") || id.getPath().equals("tar_sand") || id.getPath().equals("well_casing")) {
                 continue;   // oil: hand-written in src/main/resources (fluids)
             } else if (b instanceof mods.eln.sixnode.lampsocket.LightBlock) {
                 model = "eln:block/particle_none";

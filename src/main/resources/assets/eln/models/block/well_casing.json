@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": { "end": "eln:block/well_casing_end", "side": "eln:block/well_casing_side" }
+}
