@@ -29,6 +29,39 @@ public final class PortHelperCases {
         cases.add(new FuelSmeltCase());
         cases.add(new LightCase());
         cases.add(new FluidCase());
+        cases.add(new WaterloggedCableCase());
+    }
+
+    /** 26.x (Baughn): a six-node device placed in a water source is waterlogged; removing it leaves the water. */
+    static final class WaterloggedCableCase implements TestCase {
+        public String id() {
+            return "port26_waterlogged_cable";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        mods.eln.node.six.SixNodeElement wet, dry;
+
+        public void build(TestContext ctx) {
+            BlockPos w = ctx.at(0, 1, 0), d = ctx.at(2, 1, 0);
+            ctx.world().setBlockAndUpdate(w, Blocks.WATER.defaultBlockState());
+            wet = ctx.placeSix(4 + (32 << 6), w);   // Low Voltage Cable
+            dry = ctx.placeSix(4 + (32 << 6), d);
+        }
+
+        public void measure(TestContext ctx) {
+            BlockPos w = ctx.at(0, 1, 0), d = ctx.at(2, 1, 0);
+            var ws = ctx.world().getBlockState(w);
+            var dryState = ctx.world().getBlockState(d);
+            var prop = mods.eln.node.six.SixNodeBlock.WATERLOGGED;
+            ctx.check("cable in water: waterlogged, water fluid", ws.hasProperty(prop) && ws.getValue(prop)
+                && ctx.world().getFluidState(w).is(net.minecraft.world.level.material.Fluids.WATER), String.valueOf(ws));
+            ctx.check("cable on dry ground: not waterlogged", dryState.hasProperty(prop) && !dryState.getValue(prop), String.valueOf(dryState));
+            ctx.world().destroyBlock(w, false);
+            ctx.check("removed: the water stays", ctx.world().getBlockState(w).is(Blocks.WATER), String.valueOf(ctx.world().getBlockState(w)));
+        }
     }
 
     /** 1.12 burn times: coal 1600 ticks (80 kJ), lava bucket 20000; cobblestone smelts to stone, dirt to nothing. */

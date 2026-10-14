@@ -17,8 +17,12 @@ import javax.annotation.Nullable;
 /**
  * The block holding up to six wall-mounted devices (1.12 SixNodeBlock), one per face. Shape: a thin plate on each
  * occupied face (1.12 used per-element boxes; cables don't collide). Placement is done by SixNodeItem.
+ * Waterloggable (26.x, Baughn): cables and the other wall devices can sit in water. Electrically nothing changes yet
+ * (shorting is planned).
  */
-public class SixNodeBlock extends NodeBlock {
+public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level.block.SimpleWaterloggedBlock {
+    public static final net.minecraft.world.level.block.state.properties.BooleanProperty WATERLOGGED =
+        net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
     private static final VoxelShape[] PLATES = new VoxelShape[6];
 
     static {
@@ -33,6 +37,31 @@ public class SixNodeBlock extends NodeBlock {
 
     public SixNodeBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(WATERLOGGED, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(WATERLOGGED);
+    }
+
+    @Override
+    protected net.minecraft.world.level.material.FluidState getFluidState(BlockState state) {
+        return state.getValue(WATERLOGGED) ? net.minecraft.world.level.material.Fluids.WATER.getSource(false) : super.getFluidState(state);
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess ticks,
+            BlockPos pos, net.minecraft.core.Direction dir, BlockPos neighbourPos, BlockState neighbour, net.minecraft.util.RandomSource random) {
+        if (state.getValue(WATERLOGGED))
+            ticks.scheduleTick(pos, net.minecraft.world.level.material.Fluids.WATER, net.minecraft.world.level.material.Fluids.WATER.getTickDelay(level));
+        return super.updateShape(state, level, ticks, pos, dir, neighbourPos, neighbour, random);
+    }
+
+    /** The state to place at pos: waterlogged if a water source is there. */
+    public BlockState stateFor(Level world, BlockPos pos) {
+        var f = world.getFluidState(pos);
+        return defaultBlockState().setValue(WATERLOGGED, f.is(net.minecraft.world.level.material.Fluids.WATER) && f.isSource());
     }
 
     @Override

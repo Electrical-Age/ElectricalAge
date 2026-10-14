@@ -62,7 +62,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             SixNode sixNode = new SixNode();
             sixNode.onBlockPlacedBy(new Coordonate(pos, world), direction, player, stack);
             sixNode.createSubBlock(stack, direction, player);
-            world.setBlock(pos, block.defaultBlockState(), 3);
+            world.setBlock(pos, block.stateFor(world, pos), 3);
             return true;
         } else if (old.getBlock() == block) {
             SixNodeEntity e = (SixNodeEntity) world.getBlockEntity(pos);
