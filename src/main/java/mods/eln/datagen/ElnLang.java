@@ -55,6 +55,9 @@ public class ElnLang extends LanguageProvider {
             add(b.get(), d.name);
         }
         add("itemGroup.eln", "Electrical Age");
+        add("block.eln.crude_oil", "Crude Oil");
+        add("block.eln.reservoir_oil", "Crude Oil");
+        add("item.eln.crude_oil_bucket", "Crude Oil Bucket");
     }
 
     static String descriptorName(Object d) {

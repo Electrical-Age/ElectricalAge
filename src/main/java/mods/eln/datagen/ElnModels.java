@@ -106,6 +106,8 @@ public class ElnModels implements DataProvider {
                 }
                 out.add(DataProvider.saveStable(cache, obj("variants", variants), assets.resolve("blockstates/" + name + ".json")));
                 continue;
+            } else if (id.getPath().equals("crude_oil") || id.getPath().equals("reservoir_oil")) {
+                continue;   // oil: hand-written in src/main/resources (fluids)
             } else if (b instanceof mods.eln.sixnode.lampsocket.LightBlock) {
                 model = "eln:block/particle_none";
             } else {
