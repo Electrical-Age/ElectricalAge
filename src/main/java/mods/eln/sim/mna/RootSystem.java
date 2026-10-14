@@ -421,6 +421,11 @@ public class RootSystem {
         s.step();
     }
 
+    /** The sub-systems (read-only use: /elnlab netdump). */
+    public List<SubSystem> systems() {
+        return java.util.Collections.unmodifiableList(systems);
+    }
+
     public int getSubSystemCount() {
         return systems.size();
     }

@@ -50,11 +50,27 @@ public final class LabCommands {
                 .then(Commands.literal("cables").then(Commands.argument("n", IntegerArgumentType.integer(1, 5000))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> cables(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
+                .then(Commands.literal("netdump").executes(c -> netdump(c.getSource())))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> machines(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))));
+    }
+
+    /** The solved network to eln-netdump/&lt;stamp&gt;.json and .falstad.txt in the server directory (NetDump). */
+    static int netdump(CommandSourceStack src) {
+        try {
+            long t0 = System.nanoTime();
+            var file = NetDump.dump(java.nio.file.Path.of("eln-netdump"));
+            String msg = "netdump: " + file + " (" + (System.nanoTime() - t0) / 1_000_000 + " ms)";
+            mods.eln.Eln.LOG.info(msg);
+            src.sendSuccess(() -> Component.literal(msg), false);
+            return 1;
+        } catch (java.io.IOException | RuntimeException e) {
+            src.sendFailure(Component.literal("netdump failed: " + e));
+            return 0;
+        }
     }
 
     /** What a node holds, for debugging by hand: each element's WAILA lines, plus lamp and lamp supply state. */
