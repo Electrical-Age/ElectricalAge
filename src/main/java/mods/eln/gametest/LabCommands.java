@@ -94,6 +94,11 @@ public final class LabCommands {
         if (node == null) out.add("no EA node at " + pos);
         else {
             out.add(node.getClass().getSimpleName() + " at " + pos + ", in simulation " + node.isAdded() + ", light " + (node instanceof mods.eln.node.Node n ? n.getLightValue() : -1));
+            if (node instanceof mods.eln.node.transparent.TransparentNode tn && tn.element != null) {
+                out.add("- " + tn.element.getClass().getSimpleName() + " " + new TreeMap<>(tn.element.getWaila()));
+                if (tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h)
+                    out.add("  tank: " + h.getFluidAmount() + " / " + h.getCapacity() + " mB of " + h.getFluid().getFluid());
+            }
             if (node instanceof mods.eln.node.six.SixNode six)
                 for (var el : six.sideElementList) {
                     if (el == null) continue;
