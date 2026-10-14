@@ -21,7 +21,12 @@ import java.util.Map;
 public final class ReservoirData extends SavedData {
     public static final Codec<ReservoirData> CODEC = RecordCodecBuilder.create(i -> i.group(
         Codec.INT.fieldOf("next_id").forGetter(d -> d.nextId),
-        Reservoir.CODEC.listOf().fieldOf("reservoirs").forGetter(d -> new ArrayList<>(d.byId.values()))
+        Reservoir.CODEC.listOf().fieldOf("reservoirs").forGetter(d -> new ArrayList<>(d.byId.values())),
+        Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("keys", Map.of()).forGetter(d -> {
+            Map<String, Integer> m = new java.util.HashMap<>();
+            d.byKey.forEach((k, v) -> m.put(Long.toString(k), v));
+            return m;
+        })
     ).apply(i, ReservoirData::new));
 
     public static final SavedDataType<ReservoirData> TYPE = new SavedDataType<>(
@@ -31,13 +36,27 @@ public final class ReservoirData extends SavedData {
     private final Map<Integer, Reservoir> byId = new LinkedHashMap<>();
     private final Long2ObjectOpenHashMap<List<Reservoir>> byChunk = new Long2ObjectOpenHashMap<>();
 
+    /** Generated lakes by their start key (LakeShape.key): each made once. */
+    private final Map<Long, Integer> byKey = new java.util.HashMap<>();
+
     public ReservoirData() {
-        this(1, List.of());
+        this(1, List.of(), Map.of());
     }
 
-    private ReservoirData(int nextId, List<Reservoir> list) {
+    private ReservoirData(int nextId, List<Reservoir> list, Map<String, Integer> keys) {
         this.nextId = nextId;
         for (Reservoir r : list) add(r);
+        keys.forEach((k, v) -> byKey.put(Long.parseLong(k), v));
+    }
+
+    public Reservoir byKey(long key) {
+        Integer id = byKey.get(key);
+        return id == null ? null : byId.get(id);
+    }
+
+    void setKey(Reservoir r, long key) {
+        byKey.put(key, r.id);
+        setDirty();
     }
 
     public static ReservoirData get(ServerLevel level) {

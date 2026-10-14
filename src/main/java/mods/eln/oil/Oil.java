@@ -64,6 +64,7 @@ public final class Oil {
         CRUDE_BUCKET = ITEMS.registerItem("crude_oil_bucket", p -> new BucketItem(CRUDE.get(), p.craftRemainder(Items.BUCKET).stacksTo(1)));
         RESERVOIR_OIL = FLUIDS.register("reservoir_oil", ReservoirOilFluid::new);
         RESERVOIR_BLOCK = BLOCKS.registerBlock("reservoir_oil", ReservoirOilBlock::new, p -> liquidProps(p));
+        OilWorldgen.register(modBus);
         TYPES.register(modBus);
         FLUIDS.register(modBus);
         BLOCKS.register(modBus);

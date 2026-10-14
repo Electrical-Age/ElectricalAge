@@ -45,6 +45,24 @@ public final class Reservoirs {
         if (!q.contains(j)) q.add(j);
     }
 
+    private static final java.util.concurrent.ConcurrentLinkedQueue<Object[]> PENDING = new java.util.concurrent.ConcurrentLinkedQueue<>();
+
+    /** Worldgen (any thread): make sure the generated lake has its record; made on the main thread, next tick. */
+    public static void ensure(ServerLevel level, LakeShape shape) {
+        PENDING.add(new Object[]{level, shape});
+    }
+
+    /** Main thread: the record of a generated lake, made once (keyed by the lake's start chunk). */
+    static Reservoir make(ServerLevel level, LakeShape shape) {
+        ReservoirData d = ReservoirData.get(level);
+        Reservoir r = d.byKey(shape.key());
+        if (r != null) return r;
+        int[][] cols = shape.columns();
+        r = d.create(shape.minX(), shape.minZ(), shape.sizeX(), shape.sizeZ(), cols[0], cols[1], Long.MAX_VALUE);
+        d.setKey(r, shape.key());
+        return r;
+    }
+
     /** Queue every loaded chunk of the lake for a sweep. */
     public static void refresh(ServerLevel level, Reservoir r) {
         for (int cx = r.minX >> 4; cx <= (r.minX + r.sizeX - 1) >> 4; cx++)
@@ -86,6 +104,10 @@ public final class Reservoirs {
     }
 
     static void tick(ServerTickEvent.Post e) {
+        for (Object[] p; (p = PENDING.poll()) != null; ) {
+            Reservoir r = make((ServerLevel) p[0], (LakeShape) p[1]);
+            refresh((ServerLevel) p[0], r);
+        }
         for (ServerLevel level : e.getServer().getAllLevels()) {
             // every 10 s re-check loaded lakes: crude poured in, blocks placed into them (dams)
             if (level.getGameTime() % 200 == 0) {

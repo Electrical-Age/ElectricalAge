@@ -1,0 +1,7 @@
+{
+  "type": "eln:oil_lake",
+  "biomes": "#minecraft:is_overworld",
+  "spawn_overrides": {},
+  "step": "lakes",
+  "terrain_adaptation": "none"
+}

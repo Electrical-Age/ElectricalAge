@@ -27,6 +27,7 @@ public final class OilCases {
         cases.add(new Buckets());
         cases.add(new Dam());
         cases.add(new CatchUp());
+        cases.add(new LakeSizes());
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -163,6 +164,38 @@ public final class OilCases {
             ctx.check("oil: the oil it held stays in the record", r.amount() == amount, "" + r.amount());
             ctx.check("oil: the dam block stays", ctx.level().getBlockState(cell).is(Blocks.COBBLESTONE), "");
             cleanup(ctx, r);
+        }
+    }
+
+    /** Generated lakes (LakeShape): mostly 5-20k buckets (design: a tower-fortnight or a few), every one a real lake. */
+    static final class LakeSizes extends Base {
+        public String id() {
+            return "oil_lake_sizes";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var rnd = new java.util.Random(12345);
+            int inRange = 0, n = 12;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < n; i++) {
+                int r0 = 28 + rnd.nextInt(29);
+                float aspect = 0.7f + 0.6f * rnd.nextFloat();
+                var shape = new mods.eln.oil.LakeShape(i, 0, 0, 0, Math.round(r0 * aspect), Math.round(r0 / aspect), rnd.nextInt());
+                int[][] cols = shape.columns();
+                long cells = 0;
+                for (int k = 0; k < cols[1].length; k++) cells += Integer.bitCount(cols[1][k]);
+                sb.append(cells).append(' ');
+                if (cells >= 4000 && cells <= 25000) inRange++;
+                ctx.check("oil: lake " + i + " has oil", cells > 500, "" + cells);
+            }
+            ctx.line("oil: lake sizes (buckets): " + sb);
+            ctx.check("oil: most lakes hold 4-25k buckets", inRange >= n * 2 / 3, inRange + " of " + n + ": " + sb);
+            ctx.check("oil: the lake structure is registered",
+                ctx.level().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE)
+                    .get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "oil_lake")).isPresent(), "");
         }
     }
 

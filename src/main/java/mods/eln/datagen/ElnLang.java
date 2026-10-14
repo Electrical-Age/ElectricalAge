@@ -58,6 +58,7 @@ public class ElnLang extends LanguageProvider {
         add("block.eln.crude_oil", "Crude Oil");
         add("block.eln.reservoir_oil", "Crude Oil");
         add("item.eln.crude_oil_bucket", "Crude Oil Bucket");
+        add("block.eln.tar_sand", "Tar Sand");
     }
 
     static String descriptorName(Object d) {
