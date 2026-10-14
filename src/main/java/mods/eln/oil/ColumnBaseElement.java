@@ -139,8 +139,8 @@ public class ColumnBaseElement extends TransparentNodeElement {
                     }
                     thermal.Tc -= whole * ColumnDescriptor.J_PER_MB / thermal.C;
                     used = whole;
-                    status = "distilling";
-                } else if (n <= 0) status = "an output is full";
+                }
+                status = n > 0 ? "distilling" : "an output is full";
             }
             meterCrude += used;
             meterTime += time;
@@ -190,8 +190,8 @@ public class ColumnBaseElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        // ~1 kJ/K of steel and crude; well lagged (~90 W lost at 350 C)
-        thermal.set(0.01, 4.0, 1000);
+        // ~0.4 kJ/K of steel and crude (a 1 kW heater gets it to 350 C in ~4 min); well lagged (~90 W lost at 350 C)
+        thermal.set(0.01, 4.0, 400);
         connect();
     }
 

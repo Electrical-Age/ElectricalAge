@@ -34,13 +34,12 @@ public final class ElnClient {
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(still, flow, null, tint),
                 mods.eln.oil.Oil.CRUDE, mods.eln.oil.Oil.CRUDE_FLOWING);
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(still, flow, null, tint), mods.eln.oil.Oil.RESERVOIR_OIL);
-            // the column's cuts: water's textures tinted (light ones), the oil's for heavy oil and residue
+            // the column's cuts: water's (greyscale) textures tinted, so each bucket differs from crude and the others
             var wStill = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_still"));
             var wFlow = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_flow"));
             for (var c : mods.eln.oil.Oil.Cut.values()) {
-                boolean dark = c == mods.eln.oil.Oil.Cut.HEAVYOIL || c == mods.eln.oil.Oil.Cut.RESIDUE;
-                var t = net.neoforged.neoforge.client.fluid.FluidTintSources.constant(dark ? 0xFFFFFFFF : c.color);
-                e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(dark ? still : wStill, dark ? flow : wFlow, null, t), c.source, c.flowing);
+                var t = net.neoforged.neoforge.client.fluid.FluidTintSources.constant(c.color);
+                e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(wStill, wFlow, null, t), c.source, c.flowing);
             }
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(wStill, wFlow, null,
                 net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFFE8ECF0)), mods.eln.oil.Oil.STEAM, mods.eln.oil.Oil.STEAM_FLOWING);

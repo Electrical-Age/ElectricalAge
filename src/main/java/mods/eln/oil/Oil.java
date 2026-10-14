@@ -84,10 +84,10 @@ public final class Oil {
      */
     public enum Cut {
         NATURALGAS("naturalgas", "Natural Gas", -300, 10, false, 0xFFD8E4F0),
-        GASOLINE("gasoline", "Gasoline", 740, 600, true, 0xFFE8B040),
-        DIESEL("diesel", "Diesel", 840, 3000, true, 0xFFB08830),
-        HEAVYOIL("heavyoil", "Heavy Oil", 950, 20000, true, 0xFF4A3420),
-        RESIDUE("residue", "Residue", 1050, 100000, true, 0xFF181410);
+        GASOLINE("gasoline", "Gasoline", 740, 600, true, 0xFFF4E27A),
+        DIESEL("diesel", "Diesel", 840, 3000, true, 0xFFC8862A),
+        HEAVYOIL("heavyoil", "Heavy Oil", 950, 20000, true, 0xFF6B3A1C),
+        RESIDUE("residue", "Residue", 1050, 100000, true, 0xFF2A2826);
 
         public final String id, display;
         final int density, viscosity;

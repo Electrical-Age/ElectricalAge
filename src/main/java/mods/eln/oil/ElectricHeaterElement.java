@@ -94,7 +94,7 @@ public class ElectricHeaterElement extends TransparentNodeElement {
         inventoryChange(inventory);
         // insulated except its back: Rs lets ~P through to a boiler at a few tens of degrees' difference; with nothing
         // to heat and no regulator it passes 800 degrees and burns
-        thermal.set(0.01, 2000.0 / desc.nominalP, 1000.0 * desc.nominalP / 1000.0);   // ~5% lost to the air at 100 K
+        thermal.set(0.01, 2000.0 / desc.nominalP, 250.0 * desc.nominalP / 1000.0);   // ~5% lost to the air at 100 K
         connect();
     }
 

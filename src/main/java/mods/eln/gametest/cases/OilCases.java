@@ -463,8 +463,8 @@ public final class OilCases {
             for (int i = 0; i < 4; i++) got[3 - i] = seg[i].tank.getFluidAmount();   // top segment = gas
             got[4] = base.tanks.residue();
             ctx.line("oil: column " + base.getWaila() + ", segments (top..bottom) " + java.util.Arrays.toString(got));
-            // 50 K x 1 kJ/K over the distilling point = 50 kJ = ~833 mB of crude (less the losses while it waited for its scan)
-            ctx.check("oil: the heat above 350 C distils ~800 mB of crude", used > 650 && used <= 840, used + " mB");
+            // 50 K x 0.4 kJ/K over the distilling point = 20 kJ = ~333 mB of crude (less the losses while it waited for its scan)
+            ctx.check("oil: the heat above 350 C distils ~330 mB of crude", used > 260 && used <= 335, used + " mB");
             ctx.check("oil: the base cools to the distilling point", Math.abs(base.thermal.Tc + TREF - 350) < 3, (base.thermal.Tc + TREF) + " C");
             String[] names = {"gas", "gasoline", "diesel", "heavy oil", "residue"};
             double[] y = {0.05, 0.30, 0.30, 0.25, 0.10};
