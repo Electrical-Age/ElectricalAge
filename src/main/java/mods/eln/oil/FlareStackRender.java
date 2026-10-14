@@ -62,7 +62,7 @@ public class FlareStackRender extends TransparentNodeElementRender {
         double x = p.getX() + 0.5, y = p.getY() + 1.05, z = p.getZ() + 0.5;
         while (due >= 1) {
             due -= 1;
-            double jx = (RND.nextDouble() - 0.5) * 0.25, jz = (RND.nextDouble() - 0.5) * 0.25;
+            double jx = (RND.nextDouble() - 0.5) * 0.18, jz = (RND.nextDouble() - 0.5) * 0.18;   // inside the tip (r 1.75 px)
             switch (l) {
                 case VAPOUR -> level.addParticle(ParticleTypes.CLOUD, x + jx, y, z + jz, jx * 0.1, 0.12, jz * 0.1);
                 case GAS -> {

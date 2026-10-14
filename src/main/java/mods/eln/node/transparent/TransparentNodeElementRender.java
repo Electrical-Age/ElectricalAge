@@ -196,6 +196,15 @@ public abstract class TransparentNodeElementRender {
         return null;
     }
 
+    /**
+     * Height (px above the floor) of the terminal conductors on face FACE, where a floor cable draws a lug; 0 = none.
+     * Default: the descriptor's {@code cableTerminals}, relative to this render's front.
+     */
+    public float cableKnuckleHeight(Direction face) {
+        mods.eln.cable.CableTerminals t = transparentNodedescriptor == null ? null : transparentNodedescriptor.cableTerminals;
+        return t == null ? 0 : t.heightAt(front, face);
+    }
+
     static final LRDUMask maskTempDraw = new LRDUMask();
 
     public CableRenderType drawCable(Direction side, CableRenderDescriptor render, LRDUMask connection, CableRenderType renderPreProcess) {

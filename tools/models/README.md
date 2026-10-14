@@ -36,6 +36,10 @@ For transparent/six nodes drawn by their `Render` class. `Model.write_eln(outdir
 - **Parts**: `o NAME` must come before the first `v` (vertices are global across parts); the descriptor draws parts by
   name (`obj.getPart("main").draw()`). For moving parts, write several `o` blocks and a `<name>.txt` with origins
   (`o part` / `f originX 0.1` ...); `write_eln` writes one part (`part="main"`).
+- **Several parts**: Obj3D adds faces to the FaceGroup of the last `usemtl`, which belongs to the part that was
+  current then, so every `o` needs its own `usemtl` line or its faces land in the previous part (elncheck doesn't
+  catch this). `oilkit.write_parts` writes `o NAME`, the part's `v`/`vt`, `usemtl atlas`, its faces, per part, plus
+  `NAME.txt` with the origins (centred block coordinates); `.txt` part names must match the `o` names exactly.
 - **UVs**: Obj3D stores `1 - v`, so write ordinary V-up OBJ UVs (0,0 = bottom left of the image). Don't flip again.
 - **Textures**: `map_Kd file.png` in the MTL resolves to `eln:model/<dir>/<file>` (lower case, file name only). Each
   `usemtl` group may have its own texture (one GlFrame batch each), but the convention here is one atlas per model:
@@ -60,7 +64,30 @@ wrong winding shows as a hole. For path 1, regenerate into a scratch dir and dif
 - Coplanar faces of different parts z-fight (speckle in the preview): offset by >= 0.1 px.
 - Plates on the block face: recess 0.1 px and let studs reach the face, rather than poking outside the block.
 - Floor cables join a node's face at the floor centre: keep the bottom middle of connecting faces filled (a plate down
-  to y = 0, about 7 px wide) and clear of overhangs.
+  to y = 0, about 7 px wide) and clear of overhangs. See "Cable terminals" below.
 - Keep it ~1000-1500 triangles: 8-12 sides for big cylinders, 6-8 for bolts and pipes.
 - `mcmodel.write_obj`/`write_mtl` must stay byte-identical for the converters: after editing the library, regenerate
   converter.py into a scratch dir and `cmp` with the committed OBJs.
+- Stacked blocks (e.g. `column.py`): give each block a half-height flange at the joint (0.5 px at its bottom and top)
+  so two neighbours form one flange without coplanar overlap; keep cylinder radius, side count and phase identical and
+  periodic details (rungs, hoops) at a period dividing 16 px. Check with a composed preview (`column.py --stack`).
+- elncheck's "front/back face near the floor" check is for nodes with floor cables; nodes without (stacked segments)
+  fail it legitimately.
+
+## Cable terminals (where floor cables connect)
+EA floor cables are only 1-2 px tall, so a device that wants them to meet its conductors opts in, and the cable then
+draws a lug at that end: the cable turns up against the face, a copper crimp barrel and a copper palm cover the middle
+conductor (`mods.eln.cable.CableTerminals`, `CableRender.drawKnuckles`). The convention, as in converter.py and
+steamturbine.py:
+- **Terminal plate** on each connecting face: centred across the face (4.5..11.5 px), floor to 4 px (tier stripe on
+  top is fine), flush with the face (recessed <= 0.1 px).
+- **Conductor centre 2.25 px above the floor, centred across (8 px, the cable's axis)**, reaching the face plane
+  (within 0.1 px). Studs are 1 px square (1.75..2.75 px); more studs go at 8 +- 2.25 px.
+- **Keep clear** of anything sticking out of the face in 6..10 px across, 0..3.5 px high: the lug lies on the face
+  there (palm up to 3.1 px high, barrel up to 2.85 px and +-2.1 px wide for the HV cable) and reaches 0.35 + cable
+  thickness px (at most 2.3 px) into the neighbouring block.
+- **Opt in** with one line in the descriptor's constructor, for the faces that carry plates (relative to the node's
+  front): `cableTerminals = CableTerminals.FRONT;` (converters), `FRONT_AND_BACK` (steam turbines), `ALL_SIDES`, or
+  `new CableTerminals(mask, heightPx)` for another conductor height. `TransparentNodeDescriptor` and, for simple
+  nodes, `DescriptorBase` have the field; a transparent node render can override `cableKnuckleHeight(face)`. Only
+  floor cables (LRDU Down onto a side face) get lugs; cable-to-cable joints are unchanged.

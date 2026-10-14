@@ -148,6 +148,11 @@ public abstract class SixNodeElementRender {
 
     }
 
+    /** Rebuild the display list (glListDraw) on the next draw. */
+    protected void invalidateGlList() {
+        glListReady = false;
+    }
+
     public LRDU front;
     CableRenderType connectionType;
     public SixNodeDescriptor sixNodeDescriptor;

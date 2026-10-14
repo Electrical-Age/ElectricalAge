@@ -25,6 +25,9 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 
     public final EntityMetaTag tileEntityMetaTag;
 
+    /** Faces with a floor terminal plate, where floor cables draw a lug (null = none; see CableTerminals). */
+    public mods.eln.cable.CableTerminals cableTerminals;
+
     public TransparentNodeDescriptor(
         String name,
         Class ElementClass,

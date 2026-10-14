@@ -27,6 +27,7 @@ public class ElectricHeaterDescriptor extends TransparentNodeDescriptor {
         this.cable = cable;
         this.obj = Eln.obj.getObj(model);
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
+        cableTerminals = mods.eln.cable.CableTerminals.FLANKS;   // tools/models/electricheater.py terminal plates
     }
 
     void draw() {

@@ -105,10 +105,38 @@ public class ElectricalCableRender extends SixNodeElementRender {
         UtilsClient.enableTexture();
     }
 
+    /** The lug heights the display list was built with (CableRenderType.knuckle). */
+    private float[] listKnuckle = new float[4];
+    private float knuckleCheck;
+
     @Override
     public void glListDraw() {
-        CableRender.drawCable(descriptor.render, connectedSide, CableRender.connectionType(this, side));
-        CableRender.drawNode(descriptor.render, connectedSide, CableRender.connectionType(this, side));
+        mods.eln.cable.CableRenderType ct = CableRender.connectionType(this, side);
+        listKnuckle = ct.knuckle.clone();
+        CableRender.drawCable(descriptor.render, connectedSide, ct);
+        CableRender.drawKnuckles(descriptor.render, ct);
+        CableRender.drawNode(descriptor.render, connectedSide, ct);
+    }
+
+    /**
+     * 26.x: the display list is only rebuilt when this cable publishes, but a device's front and render can reach the
+     * client after that, or change later: twice a second, floor cables recheck the lugs (CableTerminals) they should
+     * draw and rebuild when that differs.
+     */
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        if (side != Direction.YN || connectedSide.mask == 0) return;
+        knuckleCheck -= deltaT;
+        if (knuckleCheck > 0) return;
+        knuckleCheck = 0.5f;
+        if (!java.util.Arrays.equals(CableRender.knuckleHeights(this, side), listKnuckle)) invalidateGlList();
+    }
+
+    @Override
+    public void notifyNeighborSpawn() {
+        super.notifyNeighborSpawn();
+        invalidateGlList();
     }
 
     @Override

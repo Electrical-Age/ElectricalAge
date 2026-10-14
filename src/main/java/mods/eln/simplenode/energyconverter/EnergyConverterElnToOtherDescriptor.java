@@ -11,6 +11,7 @@ public class EnergyConverterElnToOtherDescriptor extends DescriptorBase {
         super(key);
         this.eln = eln;
         this.ic2 = ic2;
+        cableTerminals = mods.eln.cable.CableTerminals.FRONT; // terminal plate on the EA side (model)
     }
 
     void applyTo(EnergyConverterElnToOtherNode node) {

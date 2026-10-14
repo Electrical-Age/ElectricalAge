@@ -9,7 +9,10 @@ batterybig/batterybig.obj
 batterybig/batterybighv.obj
 batterychargera/batterychargera.obj
 batterychargerb/batterychargerb.obj
+boiler/boiler.obj
 classiclampsocket/classiclampsocket.obj
+columnbase/columnbase.obj
+columnsegment/columnsegment.obj
 compressora/compressora.obj
 compressorb/compressorb.obj
 dataloggercrtfloor/dataloggercrtfloor.obj
@@ -23,10 +26,13 @@ electricalsensor/electricalsensor.obj
 electricaltimer/electricaltimer.obj
 electricalweathersensor/electricalweathersensor.obj
 electricfurnace/electricfurnace.obj
+electricheater200v/electricheater200v.obj
+electricheater50v/electricheater50v.obj
 eletored/eletored.obj
 emergencyexitlighting/emergencyexitlighting.obj
 energymeter/energymeter.obj
 firedetector/firedetector.obj
+flarestack/flarestack.obj
 flatlamp/flatlamp.obj
 flatscreenmonitor/flatscreenmonitor.obj
 fluorescentlamp/fluorescentlamp.obj
@@ -58,6 +64,8 @@ maceratorb/maceratorb.obj
 magnetizera/magnetizera.obj
 magnetizerb/magnetizerb.obj
 mediumvoltageswitch/mediumvoltageswitch.obj
+oilpump200v/oilpump200v.obj
+oilpump50v/oilpump50v.obj
 passivethermaldissipatora/passivethermaldissipatora.obj
 platemachinea/platemachinea.obj
 platemachineb/platemachineb.obj
@@ -91,6 +99,8 @@ steamturbine50v/steamturbine50v.obj
 stonecache/stonecache.obj
 stonefurnace/stonefurnace.obj
 streetlight/streetlight.obj
+tarsandseparator200v/tarsandseparator200v.obj
+tarsandseparator50v/tarsandseparator50v.obj
 temperaturesensor/temperaturesensor.obj
 thermalsensor/thermalsensor.obj
 transformator/corea/feromagneticcorea.obj

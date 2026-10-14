@@ -49,18 +49,18 @@ public class Wp10aContent implements ElnContent {
 
     /** 26.x oil: the fractionating column (base + segments) and the flare stack (placeholder models). */
     public static void registerColumn(int id) {
-        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Base"), true, "fuelheater"));
-        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Segment"), false, "batterybig"));
-        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.FlareStackDescriptor(TR_NAME(Type.NONE, "Flare Stack"), "stonefurnace"));
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Base"), true, "columnbase"));
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Segment"), false, "columnsegment"));
+        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.FlareStackDescriptor(TR_NAME(Type.NONE, "Flare Stack"), "flarestack"));
     }
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
     public static void registerSteam(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
-            LVU, 1000, lowVoltageCableDescriptor, "largerheostat"));
+            LVU, 1000, lowVoltageCableDescriptor, "electricheater50v"));
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
-            MVU, 4000, meduimVoltageCableDescriptor, "largerheostat"));
-        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "electricfurnace"));
+            MVU, 4000, meduimVoltageCableDescriptor, "electricheater200v"));
+        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "boiler"));
         // Baughn: small steam turbines with the generator built in; they replace the heat turbines (now uncraftable)
         transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "50V Steam Turbine"),
             LVU, 1000, lowVoltageCableDescriptor, "steamturbine50v"));
@@ -68,26 +68,26 @@ public class Wp10aContent implements ElnContent {
             MVU, 4000, meduimVoltageCableDescriptor, "steamturbine200v"));
     }
 
-    /** 26.x oil: the pump (on well casing; oil lakes and water). Placeholder model: the compressor's. */
+    /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */
     public static void registerOilPump(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "50V Oil Pump"),
-            LVU, 1000, lowVoltageCableDescriptor, "compressora"));
+            LVU, 1000, lowVoltageCableDescriptor, "oilpump50v"));
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "200V Oil Pump"),
-            MVU, 4000, meduimVoltageCableDescriptor, "compressorb"));
+            MVU, 4000, meduimVoltageCableDescriptor, "oilpump200v"));
     }
 
-    /** 26.x oil: the tar sand separator (notes/oil; on the macerator's models until its own exist). */
+    /** 26.x oil: the tar sand separator (notes/oil; model tools/models/tarsandseparator.py, drawn as a macerator). */
     public static void registerOilSeparator(int id) {
         {
             String name = TR_NAME(Type.NONE, "50V Tar Sand Separator");
-            var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "maceratora", LVU, 200, LVU * 1.25,
+            var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "tarsandseparator50v", LVU, 200, LVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0), lowVoltageCableDescriptor, mods.eln.Eln.separatorRecipes);
             transparentNodeItem.addDescriptor(0 + (id << 6), desc);
             desc.setRunningSound("eln:macerator");
         }
         {
             String name = TR_NAME(Type.NONE, "200V Tar Sand Separator");
-            var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "maceratorb", MVU, 2000, MVU * 1.25,
+            var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "tarsandseparator200v", MVU, 2000, MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0), meduimVoltageCableDescriptor, mods.eln.Eln.separatorRecipes);
             transparentNodeItem.addDescriptor(4 + (id << 6), desc);
             desc.setRunningSound("eln:macerator");

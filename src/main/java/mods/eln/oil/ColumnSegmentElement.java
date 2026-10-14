@@ -53,6 +53,11 @@ public class ColumnSegmentElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
+        // face the same way as the base or segment below, so the stacked tower's nozzles and ladder line up
+        var below = mods.eln.node.NodeManager.instance == null ? null
+            : mods.eln.node.NodeManager.instance.getNodeFromCoordonate(node.coordonate.newWithOffset(0, -1, 0));
+        if (below instanceof TransparentNode tn && (tn.element instanceof ColumnBaseElement || tn.element instanceof ColumnSegmentElement))
+            front = tn.element.front;
         connect();
     }
 

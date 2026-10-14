@@ -32,6 +32,7 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
         this.cable = cable;
         this.obj = Eln.obj.getObj(model);
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
+        cableTerminals = mods.eln.cable.CableTerminals.FRONT_AND_BACK; // terminal plates front and back (model)
     }
 
     /** Steam (mB/s) at nominal power. */
