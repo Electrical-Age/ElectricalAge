@@ -109,7 +109,11 @@ public class ElectricalStackMachineProcess implements IProcess {
     /**
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
+    /** 26.x: an extra condition to run at all (e.g. the oil separator's tank has room). */
+    public java.util.function.BooleanSupplier extraCondition = () -> true;
+
     public boolean smeltCan() {
+        if (!extraCondition.getAsBoolean()) return false;
         if (Utils.isEmpty(inventory.getItem(inputSlotId))) {
             return false;
         } else {

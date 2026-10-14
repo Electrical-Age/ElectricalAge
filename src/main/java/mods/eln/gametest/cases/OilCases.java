@@ -28,6 +28,7 @@ public final class OilCases {
         cases.add(new Dam());
         cases.add(new CatchUp());
         cases.add(new LakeSizes());
+        cases.add(new Separator());
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -164,6 +165,46 @@ public final class OilCases {
             ctx.check("oil: the oil it held stays in the record", r.amount() == amount, "" + r.amount());
             ctx.check("oil: the dam block stays", ctx.level().getBlockState(cell).is(Blocks.COBBLESTONE), "");
             cleanup(ctx, r);
+        }
+    }
+
+    /** The tar sand separator: tar sand -> sand + 100 mB crude in its tank, drainable through the fluid capability. */
+    static final class Separator implements TestCase {
+        mods.eln.transparentnode.electricalmachine.OilSeparatorElement sep;
+
+        public String id() {
+            return "oil_separator";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            sep = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) l.device(0 + (80 << 6), 2, 1);
+            l.feed(ctx.at(2, 1, 1), sep.front.left());
+            sep.getInventory().setItem(sep.inSlotId, new ItemStack(mods.eln.oil.OilWorldgen.TAR_SAND_ITEM.get(), 1));
+            sep.getInventory().setChanged();
+            // 20 kJ a block at 200 W is 100 s: run it 4x faster for the test (800 W, within the LV source and cable)
+            mods.eln.sim.ElectricalStackMachineProcess proc = Wp10aCases.field(sep, "slowRefreshProcess");
+            proc.setSpeedUp(4);
+        }
+
+        public void measure(TestContext ctx) {
+            ItemStack in = sep.getInventory().getItem(sep.inSlotId), out = sep.getInventory().getItem(sep.outSlotId);
+            var tank = (mods.eln.fluid.ElementFluidHandler) sep.getFluidHandler();
+            mods.eln.sim.ElectricalStackMachineProcess proc = Wp10aCases.field(sep, "slowRefreshProcess");
+            ctx.check("oil: separator used the tar sand and made sand", in.isEmpty() && out.is(net.minecraft.world.item.Items.SAND) && out.getCount() == 1,
+                "in " + in + ", out " + out + ", recipes " + mods.eln.Eln.separatorRecipes.getRecipes().size() + ", can " + proc.smeltCan()
+                    + ", extra " + proc.extraCondition.getAsBoolean() + ", P " + proc.getPower() + ", state " + proc.processState());
+            ctx.check("oil: 100 mB crude in its tank", tank.getFluidAmount() == 100, tank.getFluidAmount() + " mB");
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, sep.node.coordonate.pos(), null);
+            ctx.check("oil: the tank is the block's fluid capability (pipes can drain it)", cap == tank, "" + cap);
         }
     }
 

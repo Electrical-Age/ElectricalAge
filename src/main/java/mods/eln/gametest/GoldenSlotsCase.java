@@ -237,7 +237,7 @@ final class GoldenSlotsCase implements TestCase {
         Set<String> goldenNames = new HashSet<>();
         for (JsonElement e : golden) goldenNames.add(e.getAsJsonObject().get("device").getAsString());
         for (var e : byName.entrySet())
-            if (MenuSpecs.of(e.getValue()) != MenuSpec.SCREEN_ONLY && !goldenNames.contains(e.getKey()))
+            if (MenuSpecs.of(e.getValue()) != MenuSpec.SCREEN_ONLY && !goldenNames.contains(e.getKey()) && !GoldenCase.NEW_IN_26_NAMES.contains(e.getKey()))
                 ctx.check("golden slots: " + e.getKey() + " has no 1.12 container", false, "spec from " + MenuSpecs.registeredClass(e.getValue()).getSimpleName());
         // a spec the 1.12 dump doesn't know would be a container 1.12 didn't have
         for (Class<?> c : MenuSpecs.registered())

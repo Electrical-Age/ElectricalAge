@@ -82,6 +82,8 @@ public class Eln {
 
     /** Machine recipes (1.12 Eln; filled by ElnRecipes, P5). */
     public static mods.eln.misc.RecipesList maceratorRecipes = new mods.eln.misc.RecipesList();
+    /** 26.x oil: tar sand -> sand (+ crude into the separator's tank). */
+    public static mods.eln.misc.RecipesList separatorRecipes = new mods.eln.misc.RecipesList();
     public static mods.eln.misc.RecipesList compressorRecipes = new mods.eln.misc.RecipesList();
     public static mods.eln.misc.RecipesList plateMachineRecipes = new mods.eln.misc.RecipesList();
     public static mods.eln.misc.RecipesList magnetiserRecipes = new mods.eln.misc.RecipesList();

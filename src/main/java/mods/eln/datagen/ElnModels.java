@@ -52,6 +52,8 @@ public class ElnModels implements DataProvider {
     String itemTexture(String name, Item item) {
         // the redrawn icon set: textures/item/<registry id>.png (the schematic set overrides the same paths in a pack)
         if (textureExists("item/" + name)) return "item/" + name;
+        // 26.x oil machines: the macerator's icons until their own exist
+        if (name.endsWith("tar_sand_separator")) return itemTexture(name.replace("tar_sand_separator", "macerator"), item);
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();
             if (d instanceof GenericItemUsingDamageDescriptor g) return iconTexture(g.getIconName(), false);

@@ -38,7 +38,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     private final NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
     final Resistor electricalResistor = new Resistor(electricalLoad, null);
 
-    private final ElectricalStackMachineProcess slowRefreshProcess;
+    protected final ElectricalStackMachineProcess slowRefreshProcess;
 
     private final ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
     private boolean powerOn = false;

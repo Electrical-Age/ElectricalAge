@@ -1864,5 +1864,17 @@
   "display": "Power capacitor",
   "kind": "transparent_node",
   "name": "power_capacitor_block"
+ },
+ "eln:transparent_node@5120": {
+  "descriptor": "OilSeparatorDescriptor",
+  "display": "50V Tar Sand Separator",
+  "kind": "transparent_node",
+  "name": "50v_tar_sand_separator"
+ },
+ "eln:transparent_node@5124": {
+  "descriptor": "OilSeparatorDescriptor",
+  "display": "200V Tar Sand Separator",
+  "kind": "transparent_node",
+  "name": "200v_tar_sand_separator"
  }
 }

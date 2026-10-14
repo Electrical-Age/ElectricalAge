@@ -75,7 +75,10 @@ final class GoldenCase implements TestCase {
         "Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"));
 
     /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
-    static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163");
+    static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
+        "eln:transparent_node@5120", "eln:transparent_node@5124");   // 26.x oil: tar sand separators
+    /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
+    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator");
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);

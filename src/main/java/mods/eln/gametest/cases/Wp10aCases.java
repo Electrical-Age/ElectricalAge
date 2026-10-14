@@ -135,12 +135,12 @@ public final class Wp10aCases {
      * Lays six-node devices on a case platform next to transparent nodes, keeping them from touching anything but
      * the block they hang off (an unwanted contact would add a parallel connection to the model).
      */
-    static final class Layout {
+    public static final class Layout {
         final TestContext ctx;
         final int width;
         final List<BlockPos> used = new ArrayList<>();
 
-        Layout(TestContext ctx, int width) {
+        public Layout(TestContext ctx, int width) {
             this.ctx = ctx;
             this.width = width;
         }
@@ -155,7 +155,7 @@ public final class Wp10aCases {
             return device(damage, dx, 1);
         }
 
-        TransparentNodeElement device(int damage, int dx, int dz) {
+        public TransparentNodeElement device(int damage, int dx, int dz) {
             BlockPos p = ctx.at(dx, 1, dz);
             used.add(p);
             return ctx.placeTransparent(damage, p);
@@ -186,7 +186,7 @@ public final class Wp10aCases {
         }
 
         /** LV cable on `side` of the device at p, and the 50 V source next to it. Returns {source, cable}. */
-        SixNodeElement[] feed(BlockPos device, Direction side) {
+        public SixNodeElement[] feed(BlockPos device, Direction side) {
             BlockPos cp = off(device, side);
             if (!onPlatform(cp) || used.contains(cp)) throw new IllegalStateException("feed side " + side + " blocked at " + cp);
             SixNodeElement cable = six(LV_CABLE, cp);

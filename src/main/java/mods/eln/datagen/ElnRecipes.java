@@ -1863,6 +1863,26 @@ public final class ElnRecipes extends ElnRecipesBase {
             'D', stack(Items.DIAMOND),
             'I', "ingotAlloy");
 
+        // 26.x oil: tar sand separators (hot-water extraction: a heated, stirred tank)
+        addRecipe(findItemStack("50V Tar Sand Separator", 1),
+            "IBI",
+            "HMH",
+            "IcI",
+            'M', findItemStack("Machine Block"),
+            'c', findItemStack("Electrical Motor"),
+            'H', findItemStack("50V Copper Heating Corp"),
+            'B', stack(Items.BUCKET),
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("200V Tar Sand Separator", 1),
+            "IBI",
+            "HMH",
+            "IcI",
+            'M', findItemStack("Advanced Machine Block"),
+            'c', findItemStack("Advanced Electrical Motor"),
+            'H', findItemStack("200V Copper Heating Corp"),
+            'B', stack(Items.BUCKET),
+            'I', "ingotAlloy");
+
         addRecipe(findItemStack("50V Compressor", 1),
             "IRI",
             "FMF",

@@ -49,6 +49,10 @@ public final class ElnMachineRecipes {
         recipePlateMachine();
         recipeCompressor();
         recipeMagnetizer();
+        // oil (26.x): hot-water extraction of tar sand, ~20 kJ a block; the separator's tank gets 100 mB of crude
+        separatorRecipes.getRecipes().clear();
+        separatorRecipes.addRecipe(new mods.eln.misc.Recipe(new ItemStack(mods.eln.oil.OilWorldgen.TAR_SAND_ITEM.get()),
+            new ItemStack(net.minecraft.world.item.Items.SAND), 20000));
         int before = maceratorRecipes.getRecipes().size();
         recipeMaceratorModOres();
         maceratorModOreAdded = maceratorRecipes.getRecipes().size() - before;
