@@ -433,10 +433,29 @@ public abstract class NodeBase {
         nodeConnectionList.clear();
     }
 
+    /**
+     * 26.x, for Stasis Delvers: if set and true for a node, connect() keeps it out of the simulation and only draws its
+     * connections (visualConnect). EA reconnects nodes from many places (a second device in a block, a switch toggled,
+     * a burn or repair); without this a frozen node could slip back into the simulation until the next freezer pass, and
+     * what got linked would depend on the order things happened (Baughn).
+     */
+    public static volatile java.util.function.Predicate<NodeBase> simulationVeto;
+
+    /** Is the node in the simulation (connected)? */
+    public boolean isAdded() {
+        return isAdded;
+    }
+
     public void connect() {
 
         if (isAdded) {
             disconnect();
+        }
+
+        var veto = simulationVeto;
+        if (veto != null && veto.test(this)) {
+            visualConnect();
+            return;
         }
 
         connectInit();
