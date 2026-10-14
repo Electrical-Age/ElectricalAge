@@ -51,6 +51,10 @@ public final class Reservoir {
         return id;
     }
 
+    public String describeBox() {
+        return "x " + minX + ".." + (minX + sizeX - 1) + ", z " + minZ + ".." + (minZ + sizeZ - 1);
+    }
+
     public long amount() {
         return amount;
     }
@@ -111,7 +115,7 @@ public final class Reservoir {
         int lo = lowestEighth(), hi = highestEighth();
         if (amount <= 0) return lo;
         while (lo < hi) {
-            int mid = (lo + hi + 1) >>> 1;
+            int mid = (lo + hi + 1) >> 1;   // signed: lakes below y 0 have negative heights
             if (volumeAt(mid) <= amount) lo = mid;
             else hi = mid - 1;
         }

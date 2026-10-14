@@ -35,6 +35,8 @@ public final class Reservoirs {
 
     private static final Map<ServerLevel, ArrayDeque<Job>> QUEUE = new WeakHashMap<>();
 
+    private static boolean ticked;
+
     static void register() {
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, Reservoirs::tick);
         NeoForge.EVENT_BUS.addListener(ChunkEvent.Load.class, Reservoirs::chunkLoad);
@@ -52,6 +54,12 @@ public final class Reservoirs {
         PENDING.add(new Object[]{level, shape});
     }
 
+    public static String debug() {
+        return "pending " + PENDING.size() + ", ticks " + tickCount + ", queues " + QUEUE.size();
+    }
+
+    static int tickCount;
+
     /** Main thread: the record of a generated lake, made once (keyed by the lake's start chunk). */
     static Reservoir make(ServerLevel level, LakeShape shape) {
         ReservoirData d = ReservoirData.get(level);
@@ -60,6 +68,7 @@ public final class Reservoirs {
         int[][] cols = shape.columns();
         r = d.create(shape.minX(), shape.minZ(), shape.sizeX(), shape.sizeZ(), cols[0], cols[1], Long.MAX_VALUE);
         d.setKey(r, shape.key());
+        mods.eln.Eln.LOG.info("Oil lake #{} made at {} {} (base y {}): {} buckets", r.id(), shape.cx(), shape.cz(), shape.baseY(), r.capacity() / 1000);
         return r;
     }
 
@@ -100,10 +109,31 @@ public final class Reservoirs {
         ChunkPos cp = e.getChunk().getPos();
         // (data storage: main thread only; chunk loads come in on the main thread)
         if (!level.getServer().isSameThread()) return;
+        // a lake whose record is missing (the server stopped between carving and making it): make it now
+        for (var ref : e.getChunk().getAllReferences().entrySet()) {
+            if (!(ref.getKey() instanceof OilLakeStructure)) continue;
+            for (long start : ref.getValue()) {
+                ChunkPos sp = ChunkPos.unpack(start);
+                long key = ((long) sp.x() << 32) ^ (sp.z() & 0xffffffffL);
+                if (ReservoirData.get(level).byKey(key) != null) continue;
+                var sc = level.getChunkSource().getChunkNow(sp.x(), sp.z());
+                var st = sc == null ? null : sc.getStartForStructure(ref.getKey());
+                if (st != null) for (var piece : st.getPieces()) if (piece instanceof OilLakePiece lp) make(level, lp.shape);
+            }
+        }
         for (Reservoir r : ReservoirData.get(level).inChunk(cp.x(), cp.z())) enqueue(level, new Job(r.id, cp.x(), cp.z()));
     }
 
     static void tick(ServerTickEvent.Post e) {
+        try {
+            tickInner(e);
+        } catch (Throwable t) {
+            mods.eln.Eln.LOG.error("Oil: reservoir tick failed", t);
+        }
+    }
+
+    static void tickInner(ServerTickEvent.Post e) {
+        tickCount++;
         for (Object[] p; (p = PENDING.poll()) != null; ) {
             Reservoir r = make((ServerLevel) p[0], (LakeShape) p[1]);
             refresh((ServerLevel) p[0], r);

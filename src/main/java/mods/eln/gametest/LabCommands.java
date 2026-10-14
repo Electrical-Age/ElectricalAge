@@ -50,6 +50,16 @@ public final class LabCommands {
                 .then(Commands.literal("cables").then(Commands.argument("n", IntegerArgumentType.integer(1, 5000))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> cables(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
+                .then(Commands.literal("oil").executes(c -> {
+                    var data = mods.eln.oil.ReservoirData.get(c.getSource().getLevel());
+                    c.getSource().sendSuccess(() -> Component.literal(data.all().size() + " oil lake(s); " + mods.eln.oil.Reservoirs.debug()), false);
+                    for (var r : data.all()) {
+                        String line = String.format("  #%d: %s, %d / %d mB (%.0f%%), surface y %.3f", r.id(), r.describeBox(), r.amount(), r.capacity(),
+                            100.0 * r.amount() / Math.max(1, r.capacity()), r.surface() / 8.0);
+                        c.getSource().sendSuccess(() -> Component.literal(line), false);
+                    }
+                    return data.all().size();
+                }))
                 .then(Commands.literal("netdump").executes(c -> netdump(c.getSource(), null, 0))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), 8))

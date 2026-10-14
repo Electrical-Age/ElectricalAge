@@ -193,6 +193,12 @@ public final class OilCases {
             }
             ctx.line("oil: lake sizes (buckets): " + sb);
             ctx.check("oil: most lakes hold 4-25k buckets", inRange >= n * 2 / 3, inRange + " of " + n + ": " + sb);
+            // a lake below y 0 (negative heights): full means the surface at its top
+            var deep = ReservoirData.get(ctx.level()).create(0, 0, 2, 1, new int[]{-21, -22}, new int[]{0b111, 0b1111}, Long.MAX_VALUE);
+            ctx.check("oil: below y 0, a full lake's surface is its top (y -18)", deep.surface() == -18 * 8, "" + deep.surface());
+            Reservoirs.take(ctx.level(), deep, 2000, false);
+            ctx.check("oil: below y 0, draining 2 of 7 cells lowers it to y -19", deep.surface() == -19 * 8, "" + deep.surface());
+            ReservoirData.get(ctx.level()).remove(deep);
             ctx.check("oil: the lake structure is registered",
                 ctx.level().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE)
                     .get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "oil_lake")).isPresent(), "");
