@@ -331,6 +331,69 @@ public abstract class NodeBase {
 
     }
 
+    /**
+     * 26.x, for Stasis Delvers: a node taken out of the simulation (time stopped) still shows the connections it would
+     * make, so frozen cables don't look cut. Masks only, on this node only; no electrical or thermal connection. Returns
+     * true if what the client sees changed (and then marks the node for publishing).
+     */
+    public boolean visualConnect() {
+        int before = visualHash();
+        lrduCubeMask.clear();
+        visualConnectInit();
+        int[] emptyBlockCoord = new int[3];
+        int[] otherBlockCoord = new int[3];
+        for (Direction direction : Direction.values()) {
+            if (!isBlockWrappable(direction)) continue;
+            emptyBlockCoord[0] = coordonate.x;
+            emptyBlockCoord[1] = coordonate.y;
+            emptyBlockCoord[2] = coordonate.z;
+            direction.applyTo(emptyBlockCoord, 1);
+            for (LRDU lrdu : LRDU.values()) {
+                Direction elementSide = direction.applyLRDU(lrdu);
+                otherBlockCoord[0] = emptyBlockCoord[0];
+                otherBlockCoord[1] = emptyBlockCoord[1];
+                otherBlockCoord[2] = emptyBlockCoord[2];
+                elementSide.applyTo(otherBlockCoord, 1);
+                NodeBase otherNode = NodeManager.instance.getNodeFromCoordonate(new Coordonate(otherBlockCoord[0], otherBlockCoord[1], otherBlockCoord[2], coordonate.dimention));
+                if (otherNode == null) continue;
+                Direction otherDirection = elementSide.getInverse();
+                LRDU otherLRDU = otherDirection.getLRDUGoingTo(direction).inverse();
+                if (this instanceof SixNode || otherNode instanceof SixNode) visualPair(direction, lrdu, otherNode, otherDirection, otherLRDU);
+            }
+        }
+        for (Direction dir : Direction.values()) {
+            NodeBase otherNode = getNeighbor(dir);
+            if (otherNode == null) continue;
+            for (LRDU lrdu : LRDU.values()) visualPair(dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
+        }
+        visualConnectInternal();
+        boolean changed = visualHash() != before;
+        if (changed) setNeedPublish(true);
+        return changed;
+    }
+
+    private void visualPair(Direction directionA, LRDU lrduA, NodeBase nodeB, Direction directionB, LRDU lrduB) {
+        if (compareConnectionMask(getSideConnectionMask(directionA, lrduA), nodeB.getSideConnectionMask(directionB, lrduB))) {
+            lrduCubeMask.set(directionA, lrduA, true);
+            newConnectionAt(directionA, lrduA);
+        }
+    }
+
+    /** Clear what visualConnect recomputes (subclasses: their element masks). */
+    protected void visualConnectInit() {
+    }
+
+    /** Internal (within the block) visual connections, for subclasses. */
+    protected void visualConnectInternal() {
+    }
+
+    /** A hash of what the client sees of the connections. */
+    protected int visualHash() {
+        int h = 0;
+        for (Direction d : Direction.values()) h = h * 31 + lrduCubeMask.get(d).mask;
+        return h;
+    }
+
     public void disconnectJob() {
 
         for (NodeConnection c : nodeConnectionList) {

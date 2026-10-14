@@ -435,6 +435,47 @@ public class SixNode extends Node {
         Eln.simulator.removeAllThermalConnection(internalThermalConnectionList);
     }
 
+    @Override
+    protected void visualConnectInit() {
+        lrduElementMask.clear();
+    }
+
+    /** The mask half of connectJob's INTERNAL part (no connections). */
+    @Override
+    protected void visualConnectInternal() {
+        for (Direction side : new Direction[]{Direction.YN, Direction.YP}) {
+            SixNodeElement element = sideElementList[side.getInt()];
+            if (element == null) continue;
+            for (LRDU lrdu : LRDU.values()) {
+                Direction otherSide = side.applyLRDU(lrdu);
+                SixNodeElement otherElement = sideElementList[otherSide.getInt()];
+                if (otherElement != null) visualInternal(side, element, lrdu, otherSide, otherElement, otherSide.getLRDUGoingTo(side));
+            }
+        }
+        Direction side = Direction.XN;
+        for (int idx = 0; idx < 4; idx++) {
+            Direction otherSide = side.right();
+            SixNodeElement element = sideElementList[side.getInt()];
+            SixNodeElement otherElement = sideElementList[otherSide.getInt()];
+            if (element != null && otherElement != null) visualInternal(side, element, LRDU.Right, otherSide, otherElement, LRDU.Left);
+            side = otherSide;
+        }
+    }
+
+    private void visualInternal(Direction side, SixNodeElement element, LRDU lrdu, Direction otherSide, SixNodeElement otherElement, LRDU otherLRDU) {
+        if (compareConnectionMask(element.getConnectionMask(lrdu), otherElement.getConnectionMask(otherLRDU))) {
+            lrduElementMask.set(side, lrdu, true);
+            lrduElementMask.set(otherSide, otherLRDU, true);
+        }
+    }
+
+    @Override
+    protected int visualHash() {
+        int h = super.visualHash();
+        for (Direction d : Direction.values()) h = h * 31 + lrduElementMask.get(d).mask;
+        return h;
+    }
+
     public void tryConnectTwoInternalElement(Direction side, SixNodeElement element, LRDU lrdu, Direction otherSide, SixNodeElement otherElement, LRDU otherLRDU) {
         if (compareConnectionMask(element.getConnectionMask(lrdu), otherElement.getConnectionMask(otherLRDU))) {
             lrduElementMask.set(side, lrdu, true);
