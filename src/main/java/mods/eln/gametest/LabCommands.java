@@ -50,9 +50,63 @@ public final class LabCommands {
                 .then(Commands.literal("cables").then(Commands.argument("n", IntegerArgumentType.integer(1, 5000))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> cables(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
+                .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> machines(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))));
+    }
+
+    /** What a node holds, for debugging by hand: each element's WAILA lines, plus lamp and lamp supply state. */
+    static int inspect(CommandSourceStack src, BlockPos pos) {
+        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
+        List<String> out = new ArrayList<>();
+        if (node == null) out.add("no EA node at " + pos);
+        else {
+            out.add(node.getClass().getSimpleName() + " at " + pos + ", in simulation " + node.isAdded() + ", light " + (node instanceof mods.eln.node.Node n ? n.getLightValue() : -1));
+            if (node instanceof mods.eln.node.six.SixNode six)
+                for (var el : six.sideElementList) {
+                    if (el == null) continue;
+                    out.add("- " + el.side + ": " + el.getClass().getSimpleName() + " " + new TreeMap<>(el.getWaila()));
+                    try {
+                        if (el instanceof mods.eln.sixnode.lampsocket.LampSocketElement l) {
+                            Object p = field(l, "lampProcess");
+                            out.add("  lamp: light " + field(p, "light") + " at " + field(p, "lbCoord") + ", poweredByLampSupply "
+                                + field(l, "poweredByLampSupply") + ", channel '" + l.channel + "', connected " + field(l, "isConnectedToLampSupply")
+                                + ", U " + l.positiveLoad.getU() + ", bulb " + l.getInventory().getItem(0) + ", cable " + l.getInventory().getItem(1));
+                        }
+                        if (el instanceof mods.eln.sixnode.lampsupply.LampSupplyElement s) {
+                            List<String> es = new ArrayList<>();
+                            for (Object e : (List<?>) field(s, "entries"))
+                                es.add("power '" + field(e, "powerChannel") + "' wireless '" + field(e, "wirelessChannel") + "'");
+                            out.add("  supply: " + es + ", states " + java.util.Arrays.toString((boolean[]) field(s, "channelStates"))
+                                + ", range " + s.getRange() + ", U " + s.powerLoad.getU() + ", I " + s.powerLoad.getI());
+                        }
+                    } catch (RuntimeException e) {
+                        out.add("  (" + e + ")");
+                    }
+                }
+        }
+        for (String line : out) {
+            mods.eln.Eln.LOG.info("elnlab inspect: {}", line);
+            src.sendSuccess(() -> Component.literal(line), false);
+        }
+        return out.size();
+    }
+
+    static Object field(Object o, String name) {
+        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
+            try {
+                var f = c.getDeclaredField(name);
+                f.setAccessible(true);
+                return f.get(o);
+            } catch (NoSuchFieldException e) {
+                // superclass
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalStateException("no field " + name + " in " + o.getClass());
     }
 
     public static int sixId(String name) {

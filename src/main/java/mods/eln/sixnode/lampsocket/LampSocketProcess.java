@@ -69,6 +69,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             if (list != null) {
                 for (LampSupplyElement.PowerSupplyChannelHandle s : list) {
                     if (s.element.isBurnt()) continue; // out of the simulation; its powerLoad is stale
+                    // 26.x: a supply that isn't simulated (removed without its destroy, e.g. /setblock, or frozen by
+                    // Stasis Delvers) would win as the nearest and leave its channel OFF for good (AdventurAgent)
+                    if (s.element.sixNode == null || !s.element.sixNode.isAdded() || s.element.sixNode.isDestructing()) continue;
                     float distance = (float) s.element.sixNode.coordonate.trueDistanceTo(myCoord);
                     if (distance < bestDistance && distance <= s.element.getRange()) {
                         bestDistance = distance;
