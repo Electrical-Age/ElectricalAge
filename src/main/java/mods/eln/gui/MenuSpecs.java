@@ -183,6 +183,9 @@ public final class MenuSpecs {
                 FuelBurnerDescriptor.class, MEDIUM, tr("Fuel burner slot")),
             regulator(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getRegulatorSlot(), 8, 58, 1,
                 new RegulatorType[]{RegulatorType.Analog}, MEDIUM, tr("Analog regulator slot"))).publishing(1));
+        put(mods.eln.oil.ElectricHeaterDescriptor.class, d -> MenuSpec.of(
+            regulator(mods.eln.oil.ElectricHeaterElement.REGULATOR_SLOT, 8, 24, 1,
+                new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM, tr("Regulator slot"))).publishing(1));
         put(mods.eln.transparentnode.LargeRheostatDescriptor.class, d -> resistor());
     }
 

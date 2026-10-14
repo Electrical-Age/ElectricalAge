@@ -78,9 +78,11 @@ final class GoldenCase implements TestCase {
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
         "eln:transparent_node@5120", "eln:transparent_node@5124",   // 26.x oil: tar sand separators
         "eln:transparent_node@5184", "eln:transparent_node@5188",   // 26.x oil: pumps
-        "eln:transparent_node@5248", "eln:transparent_node@5252", "eln:transparent_node@5256");  // heaters, boiler
+        "eln:transparent_node@5248", "eln:transparent_node@5252", "eln:transparent_node@5256",  // heaters, boiler
+        "eln:transparent_node@5260", "eln:transparent_node@5264");  // small steam turbines
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
-    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator");
+    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
+        "50V Electric Heater", "200V Electric Heater");
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);

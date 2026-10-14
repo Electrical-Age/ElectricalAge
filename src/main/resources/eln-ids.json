@@ -1906,5 +1906,17 @@
   "display": "Boiler",
   "kind": "transparent_node",
   "name": "boiler"
+ },
+ "eln:transparent_node@5260": {
+  "descriptor": "SteamGeneratorDescriptor",
+  "display": "50V Steam Turbine",
+  "kind": "transparent_node",
+  "name": "50v_steam_turbine"
+ },
+ "eln:transparent_node@5264": {
+  "descriptor": "SteamGeneratorDescriptor",
+  "display": "200V Steam Turbine",
+  "kind": "transparent_node",
+  "name": "200v_steam_turbine"
  }
 }

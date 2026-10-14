@@ -51,6 +51,7 @@ final class ClientScreens {
         layout("sixnode.hub.HubDescriptor", "hub");
         layout("transparentnode.heatfurnace.HeatFurnaceDescriptor", "heat_furnace");
         layout("transparentnode.FuelHeatFurnaceDescriptor", "fuel_heat_furnace");
+        layout("oil.ElectricHeaterDescriptor", "electric_heater");
         mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class,
             d -> mods.eln.sixnode.lampsocket.LampSocketScreen.fixedLayout(d) ? "lamp_socket_fixed" : "lamp_socket");
         mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class,
@@ -88,6 +89,7 @@ final class ClientScreens {
         reg(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, mods.eln.sixnode.thermalsensor.ThermalSensorScreen::new);
         reg(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceScreen::new);
         reg(mods.eln.transparentnode.FuelHeatFurnaceDescriptor.class, mods.eln.transparentnode.FuelHeatFurnaceScreen::new);
+        reg(mods.eln.oil.ElectricHeaterDescriptor.class, mods.eln.oil.ElectricHeaterScreen::new);
         // S1e
         reg(mods.eln.sixnode.energymeter.EnergyMeterDescriptor.class, mods.eln.sixnode.energymeter.EnergyMeterScreen::new);
         reg(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor.class,

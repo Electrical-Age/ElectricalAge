@@ -182,6 +182,7 @@ public class TransparentNode extends Node {
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (element.isBurnt() && Repair.onActivated(element, entityPlayer)) return true;
         if (element.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true;
+        if (mods.eln.fluid.FluidBuckets.use(entityPlayer, element.getFluidHandler())) return true;   // 26.x: buckets in and out
         return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
     }
 

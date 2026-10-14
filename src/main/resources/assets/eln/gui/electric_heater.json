@@ -1,0 +1,37 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "200V Electric Heater"
+  },
+  {
+   "row": [
+    {
+     "slot": "0"
+    },
+    {
+     "space": 0,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "target",
+   "sample": "Set point 1000°C  (now 1000°C, 9.99kW)"
+  },
+  {
+   "slider": "target",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

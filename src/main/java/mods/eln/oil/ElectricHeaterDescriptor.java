@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 26.x (notes/oil): the electric heater. A resistor whose whole power goes to its thermal face (the back); heat a
  * boiler or a fractionating column with it. Resistive heating is 100% efficient, but electricity -> heat -> steam ->
- * turbine is Carnot-limited, so it never breaks even. Unloaded it settles at ~600 °C (it burns above 800).
+ * turbine is Carnot-limited, so it never breaks even. It has a regulator slot (on/off or analog) and a set point; without one it heats at full power, and with nothing to heat it burns above 800 °C.
  * Placeholder model: the large rheostat's dissipator.
  */
 public class ElectricHeaterDescriptor extends TransparentNodeDescriptor {

@@ -708,25 +708,8 @@ public final class ElnRecipes extends ElnRecipesBase {
     }
 
     public static void recipeTurbine() {
-        addRecipe(findItemStack("50V Turbine"),
-            " m ",
-            "HMH",
-            " E ",
-            'M', findItemStack("Machine Block"),
-            'E', findItemStack("Low Voltage Cable"),
-            'H', findItemStack("Copper Thermal Cable"),
-            'm', findItemStack("Electrical Motor")
-
-        );
-        addRecipe(findItemStack("200V Turbine"),
-            "ImI",
-            "HMH",
-            "IEI",
-            'I', "itemRubber",
-            'M', findItemStack("Advanced Machine Block"),
-            'E', findItemStack("Medium Voltage Cable"),
-            'H', findItemStack("Copper Thermal Cable"),
-            'm', findItemStack("Advanced Electrical Motor"));
+        // 26.x (Baughn): the 50V/200V heat turbines are replaced by the small steam turbines (boiler + 50V/200V Steam
+        // Turbine); placed ones keep working, but they're no longer made
         addRecipe(findItemStack("Generator"),
             "mmm",
             "ama",
@@ -1924,6 +1907,22 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', findItemStack("Advanced Machine Block"),
             't', findItemStack("Copper Thermal Cable"),
             'I', "ingotAlloy");
+        addRecipe(findItemStack("50V Steam Turbine", 1),
+            " m ",
+            "IMI",
+            " E ",
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Low Voltage Cable"),
+            'I', stack(Items.IRON_INGOT),
+            'm', findItemStack("Electrical Motor"));
+        addRecipe(findItemStack("200V Steam Turbine", 1),
+            "ImI",
+            "IMI",
+            "IEI",
+            'I', "itemRubber",
+            'M', findItemStack("Advanced Machine Block"),
+            'E', findItemStack("Medium Voltage Cable"),
+            'm', findItemStack("Advanced Electrical Motor"));
         addRecipe(findItemStack("Boiler", 1),
             "IBI",
             "ICI",

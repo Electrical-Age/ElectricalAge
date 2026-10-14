@@ -53,6 +53,11 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
             MVU, 4000, meduimVoltageCableDescriptor, "largerheostat"));
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "electricfurnace"));
+        // Baughn: small steam turbines with the generator built in; they replace the heat turbines (now uncraftable)
+        transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "50V Steam Turbine"),
+            LVU, 1000, lowVoltageCableDescriptor, "turbineb"));
+        transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "200V Steam Turbine"),
+            MVU, 4000, meduimVoltageCableDescriptor, "turbinebblue"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Placeholder model: the compressor's. */

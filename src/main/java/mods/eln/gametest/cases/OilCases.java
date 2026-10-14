@@ -32,6 +32,8 @@ public final class OilCases {
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
+        cases.add(new SteamTurbine());
+        cases.add(new Buckets2());
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -321,6 +323,105 @@ public final class OilCases {
             ctx.check("oil: no more steam than the heat allows", steam <= 60 * 1000 / 175.0 * 67.5 * 1.05, steam + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, boiler.node.coordonate.pos(), null);
             ctx.check("oil: the boiler's tanks are its fluid capability", cap == boiler.tanks, "" + cap);
+        }
+    }
+
+    /**
+     * The 50V steam turbine: idle it keeps its steam at the open-circuit voltage; driving a 50V heater (2.5 ohm) it
+     * turns steam into electricity at 40% of 2.257 J/mB, up to 1 kW (1108 mB/s).
+     */
+    static final class SteamTurbine implements TestCase {
+        mods.eln.oil.SteamGeneratorElement idle, run;
+        mods.eln.oil.ElectricHeaterElement heater;
+        static final int FILL = 2000;
+
+        public String id() {
+            return "oil_steam_turbine";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            idle = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            run = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            heater = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, 1);
+            // turbine: electricity out of front/back (XN/XP); heater: power on its sides (front ZN: sides XN/XP)
+            run.front = mods.eln.misc.Direction.XN;
+            run.reconnect();
+            heater.front = mods.eln.misc.Direction.ZN;
+            heater.reconnect();
+            idle.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), FILL), true);
+            run.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), FILL), true);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("oil: steam turbine idle " + idle.getWaila() + ", running " + run.getWaila() + ", heater " + heater.getWaila());
+            ctx.check("oil: an idle steam turbine keeps its steam", idle.tank.getFluidAmount() >= FILL - 1, idle.tank.getFluidAmount() + " mB");
+            ctx.checkValue("oil: idle open-circuit voltage [V] (1.05 x 50)", idle.load.getU(), 52.5);
+            int used = FILL - run.tank.getFluidAmount();
+            // 1 s at up to 1 kW: at most 1108 mB; the output follows the tank (1 s), so a good part of the fill
+            ctx.check("oil: the loaded turbine uses steam, at most its nominal 1108 mB/s", used > 500 && used <= 1108 * 1.1, used + " mB in 1 s");
+            double p = run.source.getEffectiveP();
+            ctx.check("oil: the heater gets the turbine's power, up to 1 kW", p > 100 && p <= 1000 * 1.05, String.format("%.0f W", p));
+            // energy: what it delivered over the second can't beat 40% of the steam it used (allow the last step's lag)
+            ctx.check("oil: no more electricity than 40% of the steam", p * 0.9 <= used * mods.eln.oil.SteamGeneratorDescriptor.EFFICIENCY * 2.257,
+                String.format("%.0f W vs %d mB/s x 0.9 J", p, used));
+        }
+    }
+
+    /** Buckets on EA fluid devices (Baughn: manual bootstrap): water into the boiler; crude out of the pump. */
+    static final class Buckets2 implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.OilPumpElement pump;
+        ItemStack afterWater, afterEmpty, afterSteamTry;
+        int waterAfter, crudeAfter;
+
+        public String id() {
+            return "oil_device_buckets";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        static ItemStack use(TestContext ctx, mods.eln.node.transparent.TransparentNodeElement e, ItemStack held) {
+            var p = Wp10bCases.player(ctx);
+            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+            try {
+                e.node.onBlockActivated(p, mods.eln.misc.Direction.YP, 0.5F, 1F, 0.5F);
+                return p.getMainHandItem().copy();
+            } finally {
+                p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            pump = (mods.eln.oil.OilPumpElement) l.device(0 + (81 << 6), 4, 1);
+            afterWater = use(ctx, boiler, new ItemStack(net.minecraft.world.item.Items.WATER_BUCKET));
+            waterAfter = boiler.tanks.water();
+            afterSteamTry = use(ctx, boiler, new ItemStack(net.minecraft.world.item.Items.BUCKET));   // water stays in, steam has no bucket
+            pump.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.CRUDE.get(), 1500), true);
+            afterEmpty = use(ctx, pump, new ItemStack(net.minecraft.world.item.Items.BUCKET));
+            crudeAfter = pump.tank.getFluidAmount();
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("oil: a water bucket fills the boiler and comes back empty", waterAfter == 1000 && afterWater.is(net.minecraft.world.item.Items.BUCKET),
+                waterAfter + " mB, hand " + afterWater);
+            ctx.check("oil: an empty bucket can't take the boiler's water", boiler.tanks.water() == 1000 && afterSteamTry.is(net.minecraft.world.item.Items.BUCKET),
+                boiler.tanks.water() + " mB, hand " + afterSteamTry);
+            ctx.check("oil: an empty bucket takes 1000 mB of crude from the pump", crudeAfter == 500 && afterEmpty.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()),
+                crudeAfter + " mB, hand " + afterEmpty);
         }
     }
 

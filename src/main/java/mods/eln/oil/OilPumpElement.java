@@ -33,7 +33,7 @@ public class OilPumpElement extends TransparentNodeElement {
     final OilPumpDescriptor desc;
     final NbtElectricalLoad load = new NbtElectricalLoad("load");
     final Resistor resistor = new Resistor(load, null);
-    final ElementFluidHandler tank = new ElementFluidHandler(OilPumpDescriptor.TANK_MB);
+    public final ElementFluidHandler tank = new ElementFluidHandler(OilPumpDescriptor.TANK_MB);
     final VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
 
     /** Source found at the last look: a lake id (> 0), water (-1) or nothing (0); depth in blocks. */

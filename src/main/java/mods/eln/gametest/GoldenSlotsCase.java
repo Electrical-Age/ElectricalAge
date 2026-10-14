@@ -241,7 +241,8 @@ final class GoldenSlotsCase implements TestCase {
                 ctx.check("golden slots: " + e.getKey() + " has no 1.12 container", false, "spec from " + MenuSpecs.registeredClass(e.getValue()).getSimpleName());
         // a spec the 1.12 dump doesn't know would be a container 1.12 didn't have
         for (Class<?> c : MenuSpecs.registered())
-            ctx.check("golden slots: " + c.getSimpleName() + " in the 1.12 dump", seen.contains(c), "spec without a 1.12 container");
+            if (!c.getName().startsWith("mods.eln.oil."))   // 26.x oil & steam devices are new
+                ctx.check("golden slots: " + c.getSimpleName() + " in the 1.12 dump", seen.contains(c), "spec without a 1.12 container");
     }
 
     /** A spec without its filters (lambdas): kind, index, position, limit per slot. */
