@@ -314,6 +314,8 @@ public final class OilCases {
             int steam = boiler.tanks.steam(), water = boiler.tanks.water();
             ctx.line("oil: boiler: " + boiler.getWaila() + ", heater " + heater.getWaila());
             ctx.check("oil: the heater's back heats the boiler: steam made", steam > 2000, steam + " mB steam");
+            // 961 W at 175 J per mB of water: at most ~370 mB/s of steam once the heater is warm
+            ctx.check("oil: the steam meter is within what the heat allows", boiler.steamRate > 50 && boiler.steamRate <= 961 / 175.0 * 67.5 * 1.05, boiler.steamRate + " mB/s");
             ctx.check("oil: 67.5 mB of steam per mB of water", Math.abs(steam - (8000 - water) * 67.5) < 70, steam + " vs " + (8000 - water) * 67.5);
             // energy: 60 s x ~1 kW = ~60 kJ, -> ~340 mB of water -> ~23 B of steam (less the heater's warm-up and losses)
             ctx.check("oil: no more steam than the heat allows", steam <= 60 * 1000 / 175.0 * 67.5 * 1.05, steam + " mB");

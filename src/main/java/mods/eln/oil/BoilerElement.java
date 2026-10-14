@@ -26,8 +26,8 @@ public class BoilerElement extends TransparentNodeElement {
     final BoilerDescriptor desc;
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
     public final BoilerTanks tanks = new BoilerTanks();
-    double steamRate;   // mB/s, for WAILA
-    double carry, steamCarry;
+    public double steamRate;   // mB/s, for WAILA
+    double carry, steamCarry, meterSteam, meterTime;
 
     public BoilerElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -60,7 +60,14 @@ public class BoilerElement extends TransparentNodeElement {
                     made = w * BoilerDescriptor.STEAM_PER_WATER;
                 }
             }
-            steamRate = 0.98 * steamRate + 0.02 * made / Math.max(time, 1e-6);
+            // the meter: steam made over whole seconds (boiling comes in 67.5 mB lumps, too noisy per step)
+            meterSteam += made;
+            meterTime += time;
+            if (meterTime >= 1) {
+                steamRate = meterSteam / meterTime;
+                meterSteam = 0;
+                meterTime = 0;
+            }
         }
     }
 
