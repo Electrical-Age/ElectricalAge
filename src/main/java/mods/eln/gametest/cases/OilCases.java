@@ -34,6 +34,9 @@ public final class OilCases {
         cases.add(new Boiler());
         cases.add(new SteamTurbine());
         cases.add(new Buckets2());
+        cases.add(new Column());
+        cases.add(new ColumnFold());
+        cases.add(new Flare());
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -422,6 +425,104 @@ public final class OilCases {
                 boiler.tanks.water() + " mB, hand " + afterSteamTry);
             ctx.check("oil: an empty bucket takes 1000 mB of crude from the pump", crudeAfter == 500 && afterEmpty.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()),
                 crudeAfter + " mB, hand " + afterEmpty);
+        }
+    }
+
+    /**
+     * The fractionating column with 4 segments: crude at 400 C distils with the heat above 350 C (60 J/mB) into gas,
+     * gasoline, diesel, heavy oil (top to bottom) and residue in the base, at 5/30/30/25/10%.
+     */
+    static final class Column implements TestCase {
+        mods.eln.oil.ColumnBaseElement base;
+        final mods.eln.oil.ColumnSegmentElement[] seg = new mods.eln.oil.ColumnSegmentElement[4];
+        static final double TREF = mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
+
+        public String id() {
+            return "oil_column";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            base = (mods.eln.oil.ColumnBaseElement) l.device(0 + (83 << 6), 2, 1);
+            for (int i = 0; i < 4; i++) seg[i] = (mods.eln.oil.ColumnSegmentElement) ctx.placeTransparent(4 + (83 << 6), ctx.at(2, 2 + i, 1));
+            base.tanks.setCrude(8000);
+            base.thermal.Tc = 400 - TREF;
+        }
+
+        public void measure(TestContext ctx) {
+            int used = 8000 - base.tanks.crude();
+            int[] got = new int[5];
+            for (int i = 0; i < 4; i++) got[3 - i] = seg[i].tank.getFluidAmount();   // top segment = gas
+            got[4] = base.tanks.residue();
+            ctx.line("oil: column " + base.getWaila() + ", segments (top..bottom) " + java.util.Arrays.toString(got));
+            // 50 K x 1 kJ/K over the distilling point = 50 kJ = ~833 mB of crude (less the losses while it waited for its scan)
+            ctx.check("oil: the heat above 350 C distils ~800 mB of crude", used > 650 && used <= 840, used + " mB");
+            ctx.check("oil: the base cools to the distilling point", Math.abs(base.thermal.Tc + TREF - 350) < 3, (base.thermal.Tc + TREF) + " C");
+            String[] names = {"gas", "gasoline", "diesel", "heavy oil", "residue"};
+            double[] y = {0.05, 0.30, 0.30, 0.25, 0.10};
+            for (int c = 0; c < 5; c++)
+                ctx.check("oil: column " + names[c] + " is " + (int) (y[c] * 100) + "% of the crude", Math.abs(got[c] - used * y[c]) <= 2, got[c] + " of " + used);
+            ctx.check("oil: the top segment holds natural gas", seg[3].tank.getFluid().getFluid().isSame(mods.eln.oil.Oil.Cut.NATURALGAS.source.get()), "" + seg[3].tank.getFluid().getFluid());
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, seg[1].node.coordonate.pos(), null);
+            ctx.check("oil: a segment's tank is its fluid capability", cap == seg[1].tank, "" + cap);
+        }
+    }
+
+    /** Fewer segments: the missing cuts fold into the next heavier one (MACHINES-PLAN table). */
+    static final class ColumnFold implements TestCase {
+        public String id() {
+            return "oil_column_fold";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            double[][] want = {
+                {0, 0, 0, 0, 0},
+                {0, 0, 0, 0.90, 0.10},
+                {0, 0.35, 0, 0.55, 0.10},
+                {0.05, 0.30, 0.30, 0, 0.35},
+                {0.05, 0.30, 0.30, 0.25, 0.10},
+            };
+            for (int n = 0; n <= 4; n++) {
+                double[] f = mods.eln.oil.ColumnBaseElement.fractions(n);
+                boolean ok = true;
+                for (int c = 0; c < 5; c++) ok &= Math.abs(f[c] - want[n][c]) < 1e-9;
+                ctx.check("oil: column with " + n + " segments: cuts", ok, java.util.Arrays.toString(f));
+            }
+        }
+    }
+
+    /** The flare stack burns what it's given at 250 mB/s. */
+    static final class Flare implements TestCase {
+        mods.eln.oil.FlareStackElement flare;
+
+        public String id() {
+            return "oil_flare";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            flare = (mods.eln.oil.FlareStackElement) l.device(8 + (83 << 6), 2, 1);
+            flare.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 1000), true);
+        }
+
+        public void measure(TestContext ctx) {
+            int burnt = 1000 - flare.tank.getFluidAmount();
+            ctx.check("oil: the flare stack burns ~250 mB/s (2 s)", burnt >= 400 && burnt <= 550, burnt + " mB");
         }
     }
 

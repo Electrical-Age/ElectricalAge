@@ -62,6 +62,11 @@ public class ElnLang extends LanguageProvider {
         add("block.eln.well_casing", "Well Casing");
         add("fluid.eln.steam", "Steam");
         add("fluid_type.eln.steam", "Steam");
+        for (var c : mods.eln.oil.Oil.Cut.values()) {
+            add("fluid.eln." + c.id, c.display);
+            add("fluid_type.eln." + c.id, c.display);
+            if (c.bucket) add("item.eln." + c.id + "_bucket", c.display + " Bucket");
+        }
     }
 
     static String descriptorName(Object d) {

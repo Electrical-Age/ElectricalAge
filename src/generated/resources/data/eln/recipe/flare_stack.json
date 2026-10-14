@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "F": "minecraft:flint_and_steel",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "IFI",
+    "I I",
+    "IBI"
+  ],
+  "result": {
+    "id": "eln:flare_stack"
+  }
+}

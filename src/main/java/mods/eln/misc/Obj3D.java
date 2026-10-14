@@ -597,6 +597,11 @@ public class Obj3D {
         return true;
     }
 
+    /** 26.x: every part (placeholder models that draw a whole 1.12 model). */
+    public java.util.Collection<Obj3DPart> parts() {
+        return nameToPartHash.values();
+    }
+
     public Obj3DPart getPart(String part) {
         return nameToPartHash.get(part);
     }

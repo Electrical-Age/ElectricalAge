@@ -29,7 +29,7 @@ public class ElectricHeaterScreen extends ElnScreen {
         super.init();
         target = slider("target", 0, 780, 10, render.target,
             v -> Component.literal(deviceItem(ElectricHeaterElement.REGULATOR_SLOT).isEmpty()
-                ? tr("No regulator: full power  (now %1$, %2$)", celsius(render.temperature), Utils.plotPower("", render.power).trim())
+                ? tr("No regulator  (now %1$, %2$)", celsius(render.temperature), Utils.plotPower("", render.power).trim())
                 : tr("Set point %1$  (now %2$, %3$)", celsius(v), celsius(render.temperature), Utils.plotPower("", render.power).trim())),
             v -> render.clientSendFloat(ElectricHeaterElement.SET_TARGET_EVENT, (float) v));
         update();

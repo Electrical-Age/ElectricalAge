@@ -44,6 +44,14 @@ public class Wp10aContent implements ElnContent {
         registerOilSeparator(80);
         registerOilPump(81);
         registerSteam(82);
+        registerColumn(83);
+    }
+
+    /** 26.x oil: the fractionating column (base + segments) and the flare stack (placeholder models). */
+    public static void registerColumn(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Base"), true, "fuelheater"));
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Segment"), false, "batterybig"));
+        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.FlareStackDescriptor(TR_NAME(Type.NONE, "Flare Stack"), "stonefurnace"));
     }
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */

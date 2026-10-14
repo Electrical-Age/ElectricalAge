@@ -57,6 +57,8 @@ public class ElnModels implements DataProvider {
         if (name.endsWith("oil_pump")) return itemTexture(name.replace("oil_pump", "compressor"), item);
         if (name.endsWith("electric_heater")) return itemTexture("large_rheostat", item);
         if (name.equals("boiler")) return itemTexture("electrical_furnace", item);
+        if (name.startsWith("fractionating_column")) return itemTexture("fuel_heat_furnace", item);
+        if (name.equals("flare_stack")) return itemTexture("fuel_heat_furnace", item);
         if (name.endsWith("v_steam_turbine")) return itemTexture(name.replace("_steam_turbine", "_turbine"), item);
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();

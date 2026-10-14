@@ -253,7 +253,6 @@ public class Eln {
         mods.eln.datagen.ElnDataGen.register(modBus);
         mods.eln.gametest.LabCommands.register(); // /elnlab: render-port scenes (op only)
         mods.eln.network.ServerPacketHandler.register();
-        if (mods.eln.gametest.TestFluids.enabled()) mods.eln.gametest.TestFluids.register(modBus);
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         // fluid devices (fuel generator, turbines...): the element's tank as the block's fluid capability (1.12:
         // TransparentNodeEntityWithFluid); server side only, elements live there

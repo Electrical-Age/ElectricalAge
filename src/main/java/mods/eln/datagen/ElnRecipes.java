@@ -1923,6 +1923,28 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Advanced Machine Block"),
             'E', findItemStack("Medium Voltage Cable"),
             'm', findItemStack("Advanced Electrical Motor"));
+        addRecipe(findItemStack("Fractionating Column Base", 1),
+            "IBI",
+            "ICI",
+            "ItI",
+            'B', stack(Items.BUCKET),
+            'C', findItemStack("Machine Block"),
+            't', findItemStack("Copper Thermal Cable"),
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("Fractionating Column Segment", 2),
+            "IGI",
+            "B B",
+            "IGI",
+            'B', stack(Items.BUCKET),
+            'G', stack(Blocks.GLASS),
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("Flare Stack", 1),
+            "IFI",
+            "I I",
+            "IBI",
+            'F', stack(Items.FLINT_AND_STEEL),
+            'B', stack(Items.BUCKET),
+            'I', stack(Items.IRON_INGOT));
         addRecipe(findItemStack("Boiler", 1),
             "IBI",
             "ICI",

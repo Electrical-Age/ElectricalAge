@@ -1918,5 +1918,23 @@
   "display": "200V Steam Turbine",
   "kind": "transparent_node",
   "name": "200v_steam_turbine"
+ },
+ "eln:transparent_node@5312": {
+  "descriptor": "ColumnDescriptor",
+  "display": "Fractionating Column Base",
+  "kind": "transparent_node",
+  "name": "fractionating_column_base"
+ },
+ "eln:transparent_node@5316": {
+  "descriptor": "ColumnDescriptor",
+  "display": "Fractionating Column Segment",
+  "kind": "transparent_node",
+  "name": "fractionating_column_segment"
+ },
+ "eln:transparent_node@5320": {
+  "descriptor": "FlareStackDescriptor",
+  "display": "Flare Stack",
+  "kind": "transparent_node",
+  "name": "flare_stack"
  }
 }

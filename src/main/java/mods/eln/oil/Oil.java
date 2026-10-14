@@ -78,6 +78,49 @@ public final class Oil {
     public static DeferredHolder<Fluid, FlowingFluid> STEAM_FLOWING;
     public static DeferredBlock<ReservoirOilBlock> RESERVOIR_BLOCK;
 
+    /**
+     * The fractionating column's cuts (FuelRegistry names, so EA's generators, gas turbine and fuel furnace burn them;
+     * residue is no fuel). Ordinary NeoForge fluids without a world block; all but the gas come in buckets.
+     */
+    public enum Cut {
+        NATURALGAS("naturalgas", "Natural Gas", -300, 10, false, 0xFFD8E4F0),
+        GASOLINE("gasoline", "Gasoline", 740, 600, true, 0xFFE8B040),
+        DIESEL("diesel", "Diesel", 840, 3000, true, 0xFFB08830),
+        HEAVYOIL("heavyoil", "Heavy Oil", 950, 20000, true, 0xFF4A3420),
+        RESIDUE("residue", "Residue", 1050, 100000, true, 0xFF181410);
+
+        public final String id, display;
+        final int density, viscosity;
+        public final boolean bucket;
+        /** ARGB, for the fluid's texture tint (bucket, pipes). */
+        public final int color;
+        public DeferredHolder<FluidType, FluidType> type;
+        public DeferredHolder<Fluid, FlowingFluid> source, flowing;
+        public DeferredItem<Item> bucketItem;
+
+        Cut(String id, String display, int density, int viscosity, boolean bucket, int color) {
+            this.id = id;
+            this.display = display;
+            this.density = density;
+            this.viscosity = viscosity;
+            this.bucket = bucket;
+            this.color = color;
+        }
+
+        BaseFlowingFluid.Properties props() {
+            var p = new BaseFlowingFluid.Properties(type, source, flowing);
+            return bucket ? p.bucket(bucketItem) : p;
+        }
+
+        void register() {
+            type = TYPES.register(id, () -> new FluidType(FluidType.Properties.create().descriptionId("fluid.eln." + id)
+                .density(density).viscosity(viscosity)));
+            source = FLUIDS.register(id, () -> new BaseFlowingFluid.Source(props()));
+            flowing = FLUIDS.register("flowing_" + id, () -> new BaseFlowingFluid.Flowing(props()));
+            if (bucket) bucketItem = ITEMS.registerItem(id + "_bucket", p -> new BucketItem(source.get(), p.craftRemainder(Items.BUCKET).stacksTo(1)));
+        }
+    }
+
     private static BaseFlowingFluid.Properties crudeProps() {
         return new BaseFlowingFluid.Properties(CRUDE_TYPE, CRUDE, CRUDE_FLOWING).bucket(CRUDE_BUCKET).block(CRUDE_BLOCK)
             .slopeFindDistance(2).levelDecreasePerBlock(2).tickRate(30);
@@ -96,6 +139,7 @@ public final class Oil {
         RESERVOIR_OIL = FLUIDS.register("reservoir_oil", ReservoirOilFluid::new);
         STEAM = FLUIDS.register("steam", () -> new BaseFlowingFluid.Source(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
         STEAM_FLOWING = FLUIDS.register("flowing_steam", () -> new BaseFlowingFluid.Flowing(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
+        for (Cut c : Cut.values()) c.register();
         RESERVOIR_BLOCK = BLOCKS.registerBlock("reservoir_oil", ReservoirOilBlock::new, p -> liquidProps(p));
         OilWorldgen.register(modBus);
         TYPES.register(modBus);

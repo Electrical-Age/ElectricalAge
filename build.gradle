@@ -37,7 +37,6 @@ neoForge {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'eln.golden', file('golden/1.12').absolutePath
-            systemProperty 'eln.testfluids', 'true'
         }
         // Datagen (P5): lang, item tags, recipes -> src/generated/resources (committed)
         clientData {
