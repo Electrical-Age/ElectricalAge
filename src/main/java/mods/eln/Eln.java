@@ -263,7 +263,12 @@ public class Eln {
                     if (be.getLevel() == null || be.getLevel().isClientSide()) return null;
                     mods.eln.node.NodeBase node = be.getNode();
                     if (!(node instanceof mods.eln.node.transparent.TransparentNode tn)) return null;
-                    return tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h ? h : null;
+                    if (tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h) return h;
+                    // 26.x oil: devices with more than one tank (the boiler's water in, steam out)
+                    @SuppressWarnings("unchecked")
+                    var multi = tn.getFluidHandler() instanceof net.neoforged.neoforge.transfer.ResourceHandler<?> r
+                        ? (net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.fluid.FluidResource>) r : null;
+                    return multi;
                 }));
         modBus.addListener(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent.class, e ->
             e.put(mods.eln.registry.ElnRegistry.REPLICATOR.get(), mods.eln.entity.ReplicatorEntity.createAttributes().build()));

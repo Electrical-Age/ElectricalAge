@@ -1888,5 +1888,23 @@
   "display": "200V Oil Pump",
   "kind": "transparent_node",
   "name": "200v_oil_pump"
+ },
+ "eln:transparent_node@5248": {
+  "descriptor": "ElectricHeaterDescriptor",
+  "display": "50V Electric Heater",
+  "kind": "transparent_node",
+  "name": "50v_electric_heater"
+ },
+ "eln:transparent_node@5252": {
+  "descriptor": "ElectricHeaterDescriptor",
+  "display": "200V Electric Heater",
+  "kind": "transparent_node",
+  "name": "200v_electric_heater"
+ },
+ "eln:transparent_node@5256": {
+  "descriptor": "BoilerDescriptor",
+  "display": "Boiler",
+  "kind": "transparent_node",
+  "name": "boiler"
  }
 }

@@ -1907,6 +1907,32 @@ public final class ElnRecipes extends ElnRecipesBase {
             'W', stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get()),
             'I', "ingotAlloy");
 
+        // electric heaters: heating corps around a thermal cable out of the back; the boiler: a kettle on a thermal face
+        addRecipe(findItemStack("50V Electric Heater", 1),
+            "IHI",
+            "HCH",
+            "ItI",
+            'H', findItemStack("50V Copper Heating Corp"),
+            'C', findItemStack("Machine Block"),
+            't', findItemStack("Copper Thermal Cable"),
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("200V Electric Heater", 1),
+            "IHI",
+            "HCH",
+            "ItI",
+            'H', findItemStack("200V Copper Heating Corp"),
+            'C', findItemStack("Advanced Machine Block"),
+            't', findItemStack("Copper Thermal Cable"),
+            'I', "ingotAlloy");
+        addRecipe(findItemStack("Boiler", 1),
+            "IBI",
+            "ICI",
+            "ItI",
+            'B', stack(Items.BUCKET),
+            'C', stack(Items.CAULDRON),
+            't', findItemStack("Copper Thermal Cable"),
+            'I', stack(Items.IRON_INGOT));
+
         addRecipe(findItemStack("50V Compressor", 1),
             "IRI",
             "FMF",

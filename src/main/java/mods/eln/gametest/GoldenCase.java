@@ -77,7 +77,8 @@ final class GoldenCase implements TestCase {
     /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
         "eln:transparent_node@5120", "eln:transparent_node@5124",   // 26.x oil: tar sand separators
-        "eln:transparent_node@5184", "eln:transparent_node@5188");  // 26.x oil: pumps
+        "eln:transparent_node@5184", "eln:transparent_node@5188",   // 26.x oil: pumps
+        "eln:transparent_node@5248", "eln:transparent_node@5252", "eln:transparent_node@5256");  // heaters, boiler
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator");
 

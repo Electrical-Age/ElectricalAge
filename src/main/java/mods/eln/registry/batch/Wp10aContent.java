@@ -43,6 +43,16 @@ public class Wp10aContent implements ElnContent {
         registerAutoMiner(42);
         registerOilSeparator(80);
         registerOilPump(81);
+        registerSteam(82);
+    }
+
+    /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
+    public static void registerSteam(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
+            LVU, 1000, lowVoltageCableDescriptor, "largerheostat"));
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
+            MVU, 4000, meduimVoltageCableDescriptor, "largerheostat"));
+        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "electricfurnace"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Placeholder model: the compressor's. */

@@ -31,6 +31,7 @@ public final class OilCases {
         cases.add(new Separator());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
+        cases.add(new Boiler());
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -272,6 +273,52 @@ public final class OilCases {
                 ctx.check("oil: the lake lost what the tank gained", before - r.amount() == got, (before - r.amount()) + " vs " + got);
                 ReservoirData.get(ctx.level()).remove(r);
             }
+        }
+    }
+
+    /**
+     * Electric heater (1 kW) against a boiler with water: the boiler heats to 100 C, then boils: steam = heat / 175 J per mB
+     * of water x 67.5. Over 30 s of boiling at ~1 kW: ~10 kJ/s... ~380 mB/s of steam at the full kilowatt.
+     */
+    static final class Boiler implements TestCase {
+        mods.eln.oil.ElectricHeaterElement heater;
+        mods.eln.oil.BoilerElement boiler;
+
+        public String id() {
+            return "oil_boiler";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 4, 1);
+            heater = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 3, 1);
+            // heat out of the heater's back, into the boiler (+X); power from its side
+            heater.front = mods.eln.misc.Direction.XN;
+            heater.reconnect();
+            l.feed(ctx.at(3, 1, 1), mods.eln.misc.Direction.ZN);
+            boiler.tanks.fillWater(8000);
+            // both start at 99 C, near boiling: the test is about boiling, not the warm-up
+            boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            heater.thermal.Tc = boiler.thermal.Tc;
+        }
+
+        public void measure(TestContext ctx) {
+            int steam = boiler.tanks.steam(), water = boiler.tanks.water();
+            ctx.line("oil: boiler: " + boiler.getWaila() + ", heater " + heater.getWaila());
+            ctx.check("oil: the heater's back heats the boiler: steam made", steam > 2000, steam + " mB steam");
+            ctx.check("oil: 67.5 mB of steam per mB of water", Math.abs(steam - (8000 - water) * 67.5) < 70, steam + " vs " + (8000 - water) * 67.5);
+            // energy: 60 s x ~1 kW = ~60 kJ, -> ~340 mB of water -> ~23 B of steam (less the heater's warm-up and losses)
+            ctx.check("oil: no more steam than the heat allows", steam <= 60 * 1000 / 175.0 * 67.5 * 1.05, steam + " mB");
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, boiler.node.coordonate.pos(), null);
+            ctx.check("oil: the boiler's tanks are its fluid capability", cap == boiler.tanks, "" + cap);
         }
     }
 

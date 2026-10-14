@@ -1,10 +1,11 @@
-// 26.3	2026-10-14T21:26:45.597082535	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-14T21:40:29.041200278	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
 9b994be5ce946f8a655e05a806f648a2a791e1c1 data/eln/advancement/recipes/misc/200v_compressor.json
 77de1c23d6d3612eda465246a569974f6b83c12c data/eln/advancement/recipes/misc/200v_copper_heating_corp.json
 e743eae1cb21a91c07eceee43202fb0db4375195 data/eln/advancement/recipes/misc/200v_economic_light_bulb.json
+d050da6bef71a9b8a9f8195bf3d459ffd7811782 data/eln/advancement/recipes/misc/200v_electric_heater.json
 0542d053a10a8e5e981362b30ca7a8f2533faed9 data/eln/advancement/recipes/misc/200v_emergency_lamp.json
 adeecf98acdb46f2b3deed72dde3336fe761659c data/eln/advancement/recipes/misc/200v_farming_lamp.json
 b743f97b457fe7a65c5081ef972fbd2599f59084 data/eln/advancement/recipes/misc/200v_fuel_generator.json
@@ -36,6 +37,7 @@ cfc63eb99912c5bbe0f73e1d793a1df1e4b4c5d7 data/eln/advancement/recipes/misc/50v_c
 0c2ffa5dab4cda894540b8f08905f63e1775536f data/eln/advancement/recipes/misc/50v_copper_heating_corp.json
 6e1c8814a88d0fa7361ed417b4ed336e495966f2 data/eln/advancement/recipes/misc/50v_economic_light_bulb.json
 3862f970bb4092a37db62941f19545319b80532a data/eln/advancement/recipes/misc/50v_egg_incubator.json
+14303b712b1ddb027aadf855033c97087f03a454 data/eln/advancement/recipes/misc/50v_electric_heater.json
 8d13c57be21d9100cc02eca211d0105422997847 data/eln/advancement/recipes/misc/50v_emergency_lamp.json
 8fca0cf64992fbc5a8d89c34b7f8199d0746d317 data/eln/advancement/recipes/misc/50v_farming_lamp.json
 49fd5e9f7d5634ac7ab8b0729e87e916d4bdbfd1 data/eln/advancement/recipes/misc/50v_fuel_generator.json
@@ -71,6 +73,7 @@ e397443c98e6b42bdb11364d1b6ce472b87c0a04 data/eln/advancement/recipes/misc/auto_
 f289486095d89988f698c37c5d367dc83b161c16 data/eln/advancement/recipes/misc/big_fuel_burner.json
 2501e5ea88438b2af90471608116cac06a6e26e8 data/eln/advancement/recipes/misc/black_brush.json
 0422be25ff77f9d9a6e621f5f9e381118a147066 data/eln/advancement/recipes/misc/blue_brush.json
+b85823dd74834547255b7d60faa1cc1280c8c423 data/eln/advancement/recipes/misc/boiler.json
 7d99ddf6a770f2d9a3e99f992901d073c6e2cebf data/eln/advancement/recipes/misc/brown_brush.json
 727ff8c6105794cf50890d21503562ad91ba5af3 data/eln/advancement/recipes/misc/capacity_oriented_battery.json
 cd106d48bd6c7255ef6a10986204077dced4bc4d data/eln/advancement/recipes/misc/casing.json
@@ -320,6 +323,7 @@ b4d6506f82f2133968126d1aca892f7f3a5589d1 data/eln/recipe/200v_active_thermal_dis
 db75a7ac706c8f9058ecaab36bb11428c6be71b3 data/eln/recipe/200v_compressor.json
 aa668fa690ce2675a979a5c2025a4c98168becec data/eln/recipe/200v_copper_heating_corp.json
 abe8b2b6ffc6bbfbc4ab5c33a30e3888da5d8d28 data/eln/recipe/200v_economic_light_bulb.json
+0820e3ee87da79f00ed6dc2330ef7c584529e29d data/eln/recipe/200v_electric_heater.json
 b1c0ed4fee8f4b486843b128ef8582556320a2e5 data/eln/recipe/200v_emergency_lamp.json
 6c7eb1ce8eca0953c08d46fedfae58e0b89a7e40 data/eln/recipe/200v_farming_lamp.json
 0a71adc9858089eb85a9cf581fa10350f0bd8ac6 data/eln/recipe/200v_fuel_generator.json
@@ -351,6 +355,7 @@ e27181e42fe09c785177948282c93838ef7eaaaf data/eln/recipe/50v_compressor.json
 e1960b93a58994794aa02ebdfc31cf8726fb789b data/eln/recipe/50v_copper_heating_corp.json
 8933e3a8f0174cdb804e4a25548a7c3aab4a43e2 data/eln/recipe/50v_economic_light_bulb.json
 137d72909cd70d1597756c8645d82acf99e00f53 data/eln/recipe/50v_egg_incubator.json
+bf05073b6c6237d9db4003a1ca2f478d7ce0ecc5 data/eln/recipe/50v_electric_heater.json
 0e60606d43e253d5450263542f34729fdd8295d9 data/eln/recipe/50v_emergency_lamp.json
 f749aa360fc17b5026e299c0125bf2ceacb91542 data/eln/recipe/50v_farming_lamp.json
 fa8eab8ad306427da06ebc0c1e1e9ec6c122a6f9 data/eln/recipe/50v_fuel_generator.json
@@ -386,6 +391,7 @@ e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 9602844551f3d1dc111c860b342998dcc2d5e4e2 data/eln/recipe/big_fuel_burner.json
 1400d68edba46e673564ca9489831bad2b19be47 data/eln/recipe/black_brush.json
 351b690d7cf1b517859cc5b1d42e1e8a944e9634 data/eln/recipe/blue_brush.json
+21f310666ea330b0b32639f49e4acdeb5f6c1be0 data/eln/recipe/boiler.json
 9bf14159b70a5eb86642c34c15c2aca5cd1233c6 data/eln/recipe/brown_brush.json
 2654bb694e4ec304ddc307586afb15f0bfdbe5d4 data/eln/recipe/capacity_oriented_battery.json
 4c74af168b68d306cd10b1bee766e37ccc437952 data/eln/recipe/casing.json

@@ -1,6 +1,7 @@
-// 26.3	2026-10-14T21:26:45.594102489	eln-global/EA models
+// 26.3	2026-10-14T21:39:51.204967262	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_fuel_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_macerator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_magnetizer.json
@@ -12,6 +13,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/2x3_solar_panel.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_egg_incubator.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_electric_heater.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_fuel_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_macerator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_magnetizer.json
@@ -21,6 +23,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/800v_defence_turret.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/auto_miner.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/boiler.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacity_oriented_battery.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
@@ -71,6 +74,7 @@ e612b1447501d6e9aa26cc34a7dc3a01a39066c7 assets/eln/items/200v_battery_charger.j
 f598b63ab1b2d0ac62718d46fce94888035f2675 assets/eln/items/200v_compressor.json
 13f0c0e8b23c207fabac6570230229509982497e assets/eln/items/200v_copper_heating_corp.json
 d298c5fc313c1482ecb2f45ec53b397168bd6728 assets/eln/items/200v_economic_light_bulb.json
+54c98647881c07228c9759984b1354888464cec8 assets/eln/items/200v_electric_heater.json
 be30b72ebf5abbb0503d91cdc651d949b5f15203 assets/eln/items/200v_emergency_lamp.json
 f5386b1a8e75f2fb03728f384fd9b3d0f137491e assets/eln/items/200v_farming_lamp.json
 5e01270e1b0edda9fc11dfd5c39a218a60f35e58 assets/eln/items/200v_fuel_generator.json
@@ -94,6 +98,7 @@ df761356f972c2ef468238567908f9b444265705 assets/eln/items/50v_compressor.json
 ec16bb43a53a66496192fbaa1f69dd342e09ac4f assets/eln/items/50v_copper_heating_corp.json
 a9c7be41917ed0d012de250710e8a5c0d4ec0a3c assets/eln/items/50v_economic_light_bulb.json
 e2a85061b53983d8027e1676526b8e59afd5bfdb assets/eln/items/50v_egg_incubator.json
+676c66fa661c4bddb323cce1a882cd19c2e326e1 assets/eln/items/50v_electric_heater.json
 bdb3c3bea5c65be5df571564c77f11ad8fa6658f assets/eln/items/50v_emergency_lamp.json
 b9d865e32c266c6ff15c985edfce7df27b37bd8d assets/eln/items/50v_farming_lamp.json
 a66c7ed5d509176d166e7ef75206a8fbd3ff25dd assets/eln/items/50v_fuel_generator.json
@@ -131,6 +136,7 @@ efc871520b472181cabd857e1e3a7fcd5a2d616b assets/eln/items/big_fuel_burner.json
 ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 5596f719bb5de83a04831ac250f8c3413c8f9fac assets/eln/items/blown_lead_fuse.json
 455bb8c075ef804a67f6c3def780a8e7e147209f assets/eln/items/blue_brush.json
+11d8e05d7d4c49afc10498780c82c071c42ab4fa assets/eln/items/boiler.json
 4e6ec02f2a448b5dc61acd4cb001db2bf89175ab assets/eln/items/brown_brush.json
 416d58aaae7250af7c091abfb63554244ca09aa6 assets/eln/items/capacity_oriented_battery.json
 a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
@@ -383,6 +389,7 @@ bd23e2fc9f0a19326493f87f6a9c69ee2ae90984 assets/eln/models/item/10a_diode_3d.jso
 96700731e3f54e4b9741a05287db0ab4c3328c5a assets/eln/models/item/200v_compressor_3d.json
 f32669401e48fdf96ea802ebbde46cba761bcf85 assets/eln/models/item/200v_copper_heating_corp.json
 dfcfd5146acf4ffa054c081b338a29746a34fd40 assets/eln/models/item/200v_economic_light_bulb.json
+5445ae3a259c6d779aa9c67f0696d3845ccb939d assets/eln/models/item/200v_electric_heater.json
 018d9dccff93f914f71f1147d4faec23bfe639d8 assets/eln/models/item/200v_emergency_lamp.json
 fe5ab82dcd039b36559e5543309ec6a110639916 assets/eln/models/item/200v_farming_lamp.json
 141963314d33dfb844bb10230839ee5939beb9af assets/eln/models/item/200v_fuel_generator.json
@@ -419,6 +426,7 @@ f0ccd44245eafc70c0ee233a21c51ed9e4d42191 assets/eln/models/item/25a_diode_3d.jso
 63d40695180686de5e795180214f4aa17bc05f90 assets/eln/models/item/50v_economic_light_bulb.json
 2a6be90b78e25e85cb984f515842afa1dc8d39a2 assets/eln/models/item/50v_egg_incubator.json
 b50c74a926933067751d1065e36c649394925ab0 assets/eln/models/item/50v_egg_incubator_3d.json
+5445ae3a259c6d779aa9c67f0696d3845ccb939d assets/eln/models/item/50v_electric_heater.json
 8b73089b85e43f1e5bdfffd31de85f77964123e8 assets/eln/models/item/50v_emergency_lamp.json
 5e96e7e491eaa3c1fd46cfbc8c233c74668b6f54 assets/eln/models/item/50v_farming_lamp.json
 26057740c8db5e40453475720e80d8ce26fc3756 assets/eln/models/item/50v_fuel_generator.json
@@ -470,6 +478,7 @@ cc01262a7072282f9a8e435c335e9705c390a999 assets/eln/models/item/big_fuel_burner.
 d7d836ec1eddb214839388b90698ac9053b7e8b9 assets/eln/models/item/black_brush.json
 a156b4526875a4a67867cba5f6306a8bfde04fb7 assets/eln/models/item/blown_lead_fuse.json
 0b32ee436dbf7cfb34aef91f60ec27be6269e26e assets/eln/models/item/blue_brush.json
+09c70a74e51db7dd1d394f0fd622870dbe16f1a8 assets/eln/models/item/boiler.json
 3692a38ccb89b9e11066bb03b638e63ed63d39c3 assets/eln/models/item/brown_brush.json
 1fb49930355446d40b68162bc471465a6ac1901d assets/eln/models/item/capacity_oriented_battery.json
 c01d247e009543b7b3371b07e7b8a45e28eea766 assets/eln/models/item/capacity_oriented_battery_3d.json

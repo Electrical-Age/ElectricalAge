@@ -71,6 +71,11 @@ public final class Oil {
     public static DeferredBlock<LiquidBlock> CRUDE_BLOCK;
     public static DeferredItem<Item> CRUDE_BUCKET;
     public static DeferredHolder<Fluid, ReservoirOilFluid> RESERVOIR_OIL;
+    /** Steam (FuelRegistry: "steam", 2.257 J/mB), for EA's steam turbine; made by the boiler. No block, no bucket. */
+    public static final DeferredHolder<FluidType, FluidType> STEAM_TYPE = TYPES.register("steam", () -> new FluidType(
+        FluidType.Properties.create().descriptionId("fluid.eln.steam").density(-500).viscosity(200).temperature(373)));
+    public static DeferredHolder<Fluid, FlowingFluid> STEAM;
+    public static DeferredHolder<Fluid, FlowingFluid> STEAM_FLOWING;
     public static DeferredBlock<ReservoirOilBlock> RESERVOIR_BLOCK;
 
     private static BaseFlowingFluid.Properties crudeProps() {
@@ -89,6 +94,8 @@ public final class Oil {
         CRUDE_BLOCK = BLOCKS.registerBlock("crude_oil", p -> new LiquidBlock(CRUDE.get(), p), p -> liquidProps(p));
         CRUDE_BUCKET = ITEMS.registerItem("crude_oil_bucket", p -> new BucketItem(CRUDE.get(), p.craftRemainder(Items.BUCKET).stacksTo(1)));
         RESERVOIR_OIL = FLUIDS.register("reservoir_oil", ReservoirOilFluid::new);
+        STEAM = FLUIDS.register("steam", () -> new BaseFlowingFluid.Source(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
+        STEAM_FLOWING = FLUIDS.register("flowing_steam", () -> new BaseFlowingFluid.Flowing(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
         RESERVOIR_BLOCK = BLOCKS.registerBlock("reservoir_oil", ReservoirOilBlock::new, p -> liquidProps(p));
         OilWorldgen.register(modBus);
         TYPES.register(modBus);
