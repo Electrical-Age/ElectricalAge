@@ -110,14 +110,17 @@ public final class Reservoir {
         return volumeAt(highestEighth());
     }
 
-    /** The surface height (eighths) for the current amount: the highest h whose volume fits. */
+    /**
+     * The surface height (eighths) for the current amount: the lowest h that holds it, so the surface drops a step
+     * only once a whole 1/8 layer has gone (AdventurAgent: two buckets lowered a full lake).
+     */
     public int surface() {
         int lo = lowestEighth(), hi = highestEighth();
         if (amount <= 0) return lo;
         while (lo < hi) {
-            int mid = (lo + hi + 1) >> 1;   // signed: lakes below y 0 have negative heights
-            if (volumeAt(mid) <= amount) lo = mid;
-            else hi = mid - 1;
+            int mid = Math.floorDiv(lo + hi, 2);
+            if (volumeAt(mid) >= amount) hi = mid;
+            else lo = mid + 1;
         }
         return lo;
     }

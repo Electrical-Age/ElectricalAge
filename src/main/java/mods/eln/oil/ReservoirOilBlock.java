@@ -61,7 +61,8 @@ public class ReservoirOilBlock extends Block implements BucketPickup {
 
     @Override
     public ItemStack pickupBlock(@Nullable LivingEntity user, LevelAccessor level, BlockPos pos, BlockState state) {
-        if (!(level instanceof ServerLevel sl)) return ItemStack.EMPTY;
+        // the client can't see the record: predict a full bucket (the server decides)
+        if (!(level instanceof ServerLevel sl)) return new ItemStack(Oil.CRUDE_BUCKET.get());
         Reservoir r = ReservoirData.get(sl).at(pos);
         if (r == null || Reservoirs.take(sl, r, 1000, true) < 1000) return ItemStack.EMPTY;
         Reservoirs.take(sl, r, 1000, false);
