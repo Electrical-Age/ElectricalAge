@@ -12,7 +12,7 @@ import java.util.List;
  * 26.x (Baughn, oil thread): the small steam turbine, a turbine with its generator built in that puts out 50 or 200 V
  * like the old heat turbine, which it replaces as early-game power (coal -> heat furnace -> boiler -> this). It turns
  * what steam it gets into electricity at {@link #EFFICIENCY} of steam's heat value (2.257 J/mB), up to its nominal
- * power; the stock shaft Steam Turbine (7,200 mB/s) stays for big plants. Placeholder model: the heat turbine's.
+ * power; the stock shaft Steam Turbine (7,200 mB/s) stays for big plants. Model: tools/models/steamturbine.py.
  */
 public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
     /** Electric out per steam heat in: low-pressure steam at ~100 C, generous for the game (Carnot ~21%). */

@@ -62,9 +62,13 @@ final class GoldenRecipesCase implements TestCase {
     static final Set<String> CHANGED = Set.of("eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
         "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp");
 
-    /** 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11). */
+    /**
+     * 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11); the heat
+     * turbines, replaced by the 50V/200V steam turbines (Baughn, 2026-10-14).
+     */
     static final Set<String> REMOVED = Set.of("eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
-        "eln:copper_axe", "eln:copper_helmet", "eln:copper_chestplate", "eln:copper_leggings", "eln:copper_boots");
+        "eln:copper_axe", "eln:copper_helmet", "eln:copper_chestplate", "eln:copper_leggings", "eln:copper_boots",
+        "eln:50_v_turbine", "eln:200_v_turbine");
 
     /** Macerator inputs 26.x changes on purpose: vanilla ores give raw chunks (Baughn, 2026-10-10; golden/README.md). */
     static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore");
@@ -212,7 +216,7 @@ final class GoldenRecipesCase implements TestCase {
                 deferred.add(g.get("id").getAsString());
                 continue;
             }
-            if (out == null && REMOVED.contains(g.get("id").getAsString())) continue;
+            if (REMOVED.contains(g.get("id").getAsString())) continue;   // gone, or kept but no longer craftable
             if (out == null) {
                 failed.add(g.get("id").getAsString() + ": output not on 26.x");
                 continue;

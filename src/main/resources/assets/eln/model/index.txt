@@ -86,6 +86,8 @@ smallwaterwheel/smallwaterwheel.obj
 solarpanel2x2/solarpanel2x2.obj
 solarpanel2x3/bigsolarpanel.obj
 solarpanel2x3/bigsolarpanelrot.obj
+steamturbine200v/steamturbine200v.obj
+steamturbine50v/steamturbine50v.obj
 stonecache/stonecache.obj
 stonefurnace/stonefurnace.obj
 streetlight/streetlight.obj
