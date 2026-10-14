@@ -44,8 +44,27 @@ public abstract class NodeBlock extends Block implements EntityBlock {
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        NodeBlockEntity e = tileAt(level, pos, NodeBlockEntity.class);
-        return e == null ? 0 : e.getLightValue();
+        // the light engine asks from its own thread, where ServerLevel.getBlockEntity and getChunkNow answer null:
+        // read the block entity from the chunk the light engine sees (otherwise lamps that light their own block, e.g.
+        // street lights and suspended lamps, stay dark)
+        net.minecraft.world.level.block.entity.BlockEntity be;
+        if (level instanceof net.minecraft.world.level.Level l) {
+            Object chunk = l.getChunkSource().getChunkForLighting(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk instanceof net.minecraft.world.level.chunk.ImposterProtoChunk ip) chunk = ip.getWrapped();
+            be = chunk instanceof net.minecraft.world.level.chunk.LevelChunk c
+                ? c.getBlockEntity(pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType.CHECK) : null;
+        } else if (level instanceof net.minecraft.world.level.chunk.LevelChunk c) {
+            be = c.getBlockEntity(pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType.CHECK);
+        } else {
+            be = level.getBlockEntity(pos);
+        }
+        return be instanceof NodeBlockEntity e ? e.getLightValue() : 0;
+    }
+
+    /** The light comes from the block entity (getLightEmission), not the state: chunk light scans must ask. */
+    @Override
+    public boolean hasDynamicLightEmission(BlockState state) {
+        return true;
     }
 
     @Override
