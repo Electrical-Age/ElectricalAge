@@ -35,10 +35,36 @@ public final class Oil {
     static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Eln.MODID);
     static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Eln.MODID);
 
-    public static final DeferredHolder<FluidType, FluidType> CRUDE_TYPE = TYPES.register("crude_oil", () -> new FluidType(
+    public static final DeferredHolder<FluidType, FluidType> CRUDE_TYPE = TYPES.register("crude_oil", () -> new CrudeType(
         FluidType.Properties.create().descriptionId("block.eln.crude_oil").density(850).viscosity(6000).temperature(290)
             .canExtinguish(false).canConvertToSource(false).supportsBoating(true).canSwim(true).canDrown(true)
             .motionScale(0.003).fallDistanceModifier(0f)));
+
+    /**
+     * Crude's movement for entities: NeoForge leaves custom fluids to say how one moves in them (without this, a
+     * player in a lake couldn't move at all: AdventurAgent). Like a thick water: slow, sinking slowly, with a jump
+     * out at the shore.
+     */
+    static final class CrudeType extends FluidType {
+        CrudeType(FluidType.Properties p) {
+            super(p);
+        }
+
+        @Override
+        public boolean move(net.minecraft.world.entity.LivingEntity entity, net.minecraft.world.phys.Vec3 input, double gravity) {
+            double oldY = entity.getY();
+            entity.moveRelative(0.015f, input);
+            entity.move(net.minecraft.world.entity.MoverType.SELF, entity.getDeltaMovement());
+            var m = entity.getDeltaMovement().multiply(0.6, 0.7, 0.6);
+            if (gravity != 0) m = m.add(0, -gravity / 6, 0);
+            entity.setDeltaMovement(m);
+            // climb out at the shore, as in water
+            var d = entity.getDeltaMovement();
+            if (entity.horizontalCollision && entity.isFree(d.x, d.y + 0.6 - entity.getY() + oldY, d.z))
+                entity.setDeltaMovement(d.x, 0.3, d.z);
+            return true;
+        }
+    }
 
     public static DeferredHolder<Fluid, FlowingFluid> CRUDE;
     public static DeferredHolder<Fluid, FlowingFluid> CRUDE_FLOWING;

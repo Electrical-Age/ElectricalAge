@@ -77,7 +77,7 @@ public class ReservoirOilFluid extends Fluid {
 
     @Override
     public boolean isSource(FluidState state) {
-        return false;
+        return true;   // buckets look for sources (and take from the lake's record, not the block)
     }
 
     @Override

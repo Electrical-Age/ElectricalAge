@@ -95,6 +95,14 @@ public class OilLakePiece extends StructurePiece {
                     }
                     p.set(x, ceil, z);
                     if (!level.getBlockState(p).getFluidState().isEmpty() || level.getBlockState(p).is(BlockTags.SAND)) level.setBlock(p, stone, 2);
+                    // walls: no water or lava (aquifers, springs) next to the cavern
+                    for (int y = floorTop; y <= ceil; y++)
+                        for (var dir : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                            p.set(x + dir.getStepX(), y, z + dir.getStepZ());
+                            if (!chunkBox.isInside(p)) continue;
+                            BlockState n = level.getBlockState(p);
+                            if (!n.getFluidState().isEmpty() && !n.is(Oil.RESERVOIR_BLOCK.get())) level.setBlock(p, stone, 2);
+                        }
                 }
                 tarSand(level, p, x, z, tar);
             }

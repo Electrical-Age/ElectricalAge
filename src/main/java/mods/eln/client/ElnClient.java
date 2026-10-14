@@ -26,11 +26,11 @@ public final class ElnClient {
         mods.eln.sound.SoundCommand.clientPlayer = mods.eln.sound.SoundClient::play;
         UtilsClient.hooks = new ClientHooks();
         ClientRenders.registerAll();
-        // oil: crude (still/flowing) and lake oil drawn with the water textures, tinted near-black brown
+        // oil: crude (still/flowing) and lake oil, opaque (AdventurAgent: tinted water textures let the lake bed show through)
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent.class, e -> {
-            var tint = net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFF1C140E);
-            var still = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_still"));
-            var flow = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_flow"));
+            var tint = net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFFFFFFFF);
+            var still = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "block/oil_still"));
+            var flow = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "block/oil_flow"));
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(still, flow, null, tint),
                 mods.eln.oil.Oil.CRUDE, mods.eln.oil.Oil.CRUDE_FLOWING);
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(still, flow, null, tint), mods.eln.oil.Oil.RESERVOIR_OIL);
