@@ -53,11 +53,16 @@ public final class ElnNet {
     }
 
     public static void sendToPlayer(ServerPlayer player, ByteArrayOutputStream bos) {
-        PacketDistributor.sendToPlayer(player, new Data(bos.toByteArray()));
+        Data d = new Data(bos.toByteArray());
+        // only to clients that have EA's channel (a vanilla client or a test's mock player would refuse it)
+        if (player.connection == null || !player.connection.hasChannel(d)) return;
+        PacketDistributor.sendToPlayer(player, d);
     }
 
     public static void sendToTracking(ServerLevel level, int blockX, int blockZ, ByteArrayOutputStream bos) {
-        PacketDistributor.sendToPlayersTrackingChunk(level, new ChunkPos(blockX >> 4, blockZ >> 4), new Data(bos.toByteArray()));
+        Data d = new Data(bos.toByteArray());
+        for (ServerPlayer p : level.getChunkSource().chunkMap.getPlayers(new ChunkPos(blockX >> 4, blockZ >> 4), false))
+            if (p.connection != null && p.connection.hasChannel(d)) PacketDistributor.sendToPlayer(p, d);
     }
 
     /** Client -> server (GUI packets). Only call on the client. */
