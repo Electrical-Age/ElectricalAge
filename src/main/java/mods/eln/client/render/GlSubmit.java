@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 
+import java.util.List;
 import java.util.Map;
 
 /** Submits a closed {@link GlFrame}'s vertex batches as custom geometry, one RenderType per batch key (P3). */
@@ -31,7 +32,9 @@ public final class GlSubmit {
 
     /** Submit every batch of the frame (call after GlFrame.close()); light = the block's packed light coords. */
     public static void submit(GlFrame frame, PoseStack poseStack, SubmitNodeCollector collector, int light) {
-        submitExtras(frame, collector, light);
+        // extras last, from a copy: an item drawn by EA's own item renderer (an x-ray scanner in a battery charger)
+        // reopens the shared frame, which clears its batches and extras (that crashed the game)
+        List<GlFrame.Extra> extras = frame.extras().isEmpty() ? List.of() : new java.util.ArrayList<>(frame.extras());
         for (Map.Entry<GlFrame.Key, GlFrame.Batch> e : frame.batches().entrySet()) {
             GlFrame.Batch b = e.getValue();
             if (b.floats == 0) continue;
@@ -58,12 +61,13 @@ public final class GlSubmit {
                 }
             });
         }
+        submitExtras(extras, collector, light);
     }
 
     /** Text and items the frame recorded, each at its own matrix (already in pose space). */
-    static void submitExtras(GlFrame frame, SubmitNodeCollector collector, int light) {
+    static void submitExtras(List<GlFrame.Extra> extras, SubmitNodeCollector collector, int light) {
         var mc = net.minecraft.client.Minecraft.getInstance();
-        for (GlFrame.Extra e : frame.extras()) {
+        for (GlFrame.Extra e : extras) {
             PoseStack ps = new PoseStack();
             ps.last().pose().set(e.matrix());
             ps.last().normal().set(new org.joml.Matrix3f(e.matrix()).invert().transpose());
