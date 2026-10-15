@@ -83,7 +83,13 @@ public class OilLakePiece extends StructurePiece {
                 } else {
                     for (int y = floorTop; y < ceil; y++)
                         level.setBlock(p.set(x, y, z), kind == LakeShape.Kind.OIL && y < base ? oil : air, 2);
-                    // a solid floor and ceiling (no fluid, no hole into a cave below the oil)
+                    // a solid floor and ceiling (no fluid, no hole into a cave below the oil): Baughn found lakes over
+                    // the hollows of swiss-cheese terrain, so seal FLOOR_DEPTH blocks of air or fluid under the floor
+                    for (int y = floorTop - FLOOR_DEPTH; y < floorTop - 1; y++) {
+                        p.set(x, y, z);
+                        BlockState u = level.getBlockState(p);
+                        if (u.isAir() || !u.getFluidState().isEmpty()) level.setBlock(p, stone, 2);
+                    }
                     p.set(x, floorTop - 1, z);
                     BlockState under = level.getBlockState(p);
                     if (kind == LakeShape.Kind.OIL) {
@@ -108,13 +114,29 @@ public class OilLakePiece extends StructurePiece {
             }
     }
 
-    /** Tar sand under the surface above the lake, in patches; in deserts at the top, exposed. */
+    /** Blocks of air or fluid sealed with stone under a lake's floor. */
+    static final int FLOOR_DEPTH = 5;
+
+    /** Tar sand lies under the surface over this column (patches over the lake). */
+    public static boolean tarColumn(LakeShape shape, int x, int z) {
+        return shape.dist(x, z) <= 0.9f && LakeShape.noise(x / 7f, z / 7f, shape.seed() ^ 0x7A2) >= 0.55f;
+    }
+
+    /**
+     * Tar sand breaks the surface here (Baughn: otherwise a lake is invisible from above): small outcrops within the
+     * patches, in every biome.
+     */
+    public static boolean outcrop(LakeShape shape, int x, int z) {
+        return tarColumn(shape, x, z) && shape.dist(x, z) <= 0.75f && LakeShape.noise(x / 2.5f, z / 2.5f, shape.seed() ^ 0x0C7) >= 0.78f;
+    }
+
+    /** Tar sand under the surface above the lake, in patches; in deserts and at outcrops at the top, exposed. */
     private void tarSand(WorldGenLevel level, BlockPos.MutableBlockPos p, int x, int z, BlockState tar) {
-        if (shape.dist(x, z) > 0.9f || LakeShape.noise(x / 7f, z / 7f, shape.seed() ^ 0x7A2) < 0.55f) return;
+        if (!tarColumn(shape, x, z)) return;
         int top = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z) - 1;
         p.set(x, top, z);
-        boolean desert = level.getBiome(p).is(net.neoforged.neoforge.common.Tags.Biomes.IS_DESERT);
-        for (int y = desert ? top : top - 5; y <= (desert ? top : top - 2); y++) {
+        boolean exposed = outcrop(shape, x, z) || level.getBiome(p).is(net.neoforged.neoforge.common.Tags.Biomes.IS_DESERT);
+        for (int y = top - 5; y <= (exposed ? top : top - 2); y++) {
             p.set(x, y, z);
             BlockState s = level.getBlockState(p);
             if (s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(Blocks.SANDSTONE) || s.is(Blocks.GRAVEL) || s.is(BlockTags.BASE_STONE_OVERWORLD))

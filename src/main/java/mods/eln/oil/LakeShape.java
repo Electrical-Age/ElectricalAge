@@ -32,7 +32,7 @@ public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int
     }
 
     /** Normalised distance from the centre with the noisy shore: < 1 is the lake, < 1.18 the cavern (beach). */
-    float dist(int x, int z) {
+    public float dist(int x, int z) {
         float dx = (x + 0.5f - cx) / rx, dz = (z + 0.5f - cz) / rz;
         float d = (float) Math.sqrt(dx * dx + dz * dz);
         float warp = 1 + 0.35f * (noise(x / 18f, z / 18f, seed) - 0.5f) * 2 + 0.12f * (noise(x / 6f, z / 6f, seed ^ 0x51) - 0.5f) * 2;

@@ -538,7 +538,7 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             var rnd = new java.util.Random(12345);
             int inRange = 0, n = 12;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(), outcrops = new StringBuilder();
             for (int i = 0; i < n; i++) {
                 int r0 = 28 + rnd.nextInt(29);
                 float aspect = 0.7f + 0.6f * rnd.nextFloat();
@@ -546,11 +546,22 @@ public final class OilCases {
                 int[][] cols = shape.columns();
                 long cells = 0;
                 for (int k = 0; k < cols[1].length; k++) cells += Integer.bitCount(cols[1][k]);
+                int out = 0, tarCols = 0, area = 0;
+                for (int x = shape.minX(); x < shape.minX() + shape.sizeX(); x++)
+                    for (int z = shape.minZ(); z < shape.minZ() + shape.sizeZ(); z++) {
+                        if (shape.dist(x, z) <= 1) area++;
+                        if (mods.eln.oil.OilLakePiece.tarColumn(shape, x, z)) tarCols++;
+                        if (mods.eln.oil.OilLakePiece.outcrop(shape, x, z)) out++;
+                    }
+                outcrops.append(out).append('/').append(tarCols).append(' ');
+                // Baughn: the lake must show at the surface; a few small outcrops, not a slab
+                ctx.check("oil: lake " + i + " has tar sand outcrops at the surface", out >= 8 && out <= area * 0.04, out + " columns of " + area);
                 sb.append(cells).append(' ');
                 if (cells >= 4000 && cells <= 25000) inRange++;
                 ctx.check("oil: lake " + i + " has oil", cells > 500, "" + cells);
             }
             ctx.line("oil: lake sizes (buckets): " + sb);
+            ctx.line("oil: tar sand outcrop / buried columns per lake: " + outcrops);
             ctx.check("oil: most lakes hold 4-25k buckets", inRange >= n * 2 / 3, inRange + " of " + n + ": " + sb);
             // a lake below y 0 (negative heights): full means the surface at its top
             var deep = ReservoirData.get(ctx.level()).create(0, 0, 2, 1, new int[]{-21, -22}, new int[]{0b111, 0b1111}, Long.MAX_VALUE);
