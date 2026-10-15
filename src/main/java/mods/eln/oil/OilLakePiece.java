@@ -84,7 +84,7 @@ public class OilLakePiece extends StructurePiece {
                     for (int y = floorTop; y < ceil; y++)
                         level.setBlock(p.set(x, y, z), kind == LakeShape.Kind.OIL && y < base ? oil : air, 2);
                     // a solid floor and ceiling (no fluid, no hole into a cave below the oil): Baughn found lakes over
-                    // the hollows of swiss-cheese terrain, so seal FLOOR_DEPTH blocks of air or fluid under the floor
+                    // the hollows of swiss-cheese terrain, so seal FLOOR_DEPTH blocks of air or fluid under the floor (5 left caves just below)
                     for (int y = floorTop - FLOOR_DEPTH; y < floorTop - 1; y++) {
                         p.set(x, y, z);
                         BlockState u = level.getBlockState(p);
@@ -115,7 +115,7 @@ public class OilLakePiece extends StructurePiece {
     }
 
     /** Blocks of air or fluid sealed with stone under a lake's floor. */
-    static final int FLOOR_DEPTH = 5;
+    static final int FLOOR_DEPTH = 8;
 
     /** Tar sand lies under the surface over this column (patches over the lake). */
     public static boolean tarColumn(LakeShape shape, int x, int z) {
@@ -139,8 +139,17 @@ public class OilLakePiece extends StructurePiece {
         for (int y = top - 5; y <= (exposed ? top : top - 2); y++) {
             p.set(x, y, z);
             BlockState s = level.getBlockState(p);
-            if (s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(Blocks.SANDSTONE) || s.is(Blocks.GRAVEL) || s.is(BlockTags.BASE_STONE_OVERWORLD))
+            // (BlockTags.DIRT doesn't hold grass blocks: AdventurAgent found every outcrop under a layer of grass)
+            if (s.is(BlockTags.DIRT) || s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.SNOW_BLOCK)
+                || s.is(BlockTags.SAND) || s.is(Blocks.SANDSTONE) || s.is(Blocks.GRAVEL) || s.is(BlockTags.BASE_STONE_OVERWORLD)) {
                 level.setBlock(p, tar, 2);
+                // an outcrop is bare: no grass tuft or snow layer on top
+                if (y == top) {
+                    BlockPos up = p.above();
+                    BlockState a = level.getBlockState(up);
+                    if (!a.isAir() && a.canBeReplaced() && a.getFluidState().isEmpty()) level.setBlock(up, Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
         }
     }
 }
