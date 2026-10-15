@@ -55,7 +55,8 @@ public final class Reservoirs {
     }
 
     public static String debug() {
-        return "pending " + PENDING.size() + ", ticks " + tickCount + ", queues " + QUEUE.size();
+        return "pending " + PENDING.size() + ", ticks " + tickCount + ", queues " + QUEUE.size() + "; tar columns " + OilLakePiece.STATS[0]
+            + ", outcrops " + OilLakePiece.STATS[1] + ", tops set " + OilLakePiece.STATS[2] + ", last outcrop " + OilLakePiece.lastOutcrop;
     }
 
     static int tickCount;

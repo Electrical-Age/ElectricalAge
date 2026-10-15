@@ -112,10 +112,20 @@ public class OilLakePiece extends StructurePiece {
                 }
                 tarSand(level, p, x, z, tar);
             }
+        // AdventurAgent: over outcrops the chunk's heightmaps (rain, spawning, sky light, the client's) kept the old
+        // top; recompute them for this chunk's columns
+        net.minecraft.world.level.levelgen.Heightmap.primeHeightmaps(level.getChunk(chunkPos.x(), chunkPos.z()), java.util.EnumSet.of(
+            Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Heightmap.Types.WORLD_SURFACE,
+            Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE_WG, Heightmap.Types.OCEAN_FLOOR_WG));
     }
 
     /** Blocks of air or fluid sealed with stone under a lake's floor. */
     static final int FLOOR_DEPTH = 8;
+
+    /** Debug (/elnlab oil): tar columns, outcrop columns, outcrop tops set; the last outcrop seen. */
+    static final java.util.concurrent.atomic.AtomicInteger[] STATS = {new java.util.concurrent.atomic.AtomicInteger(),
+        new java.util.concurrent.atomic.AtomicInteger(), new java.util.concurrent.atomic.AtomicInteger()};
+    static volatile String lastOutcrop = "-";
 
     /** Tar sand lies under the surface over this column (patches over the lake). */
     public static boolean tarColumn(LakeShape shape, int x, int z) {
@@ -136,6 +146,12 @@ public class OilLakePiece extends StructurePiece {
         int top = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z) - 1;
         p.set(x, top, z);
         boolean exposed = outcrop(shape, x, z) || level.getBiome(p).is(net.neoforged.neoforge.common.Tags.Biomes.IS_DESERT);
+        STATS[0].incrementAndGet();
+        if (exposed) {
+            STATS[1].incrementAndGet();
+            if (top >= 63 && !level.getBiome(p).is(net.neoforged.neoforge.common.Tags.Biomes.IS_DESERT))
+                lastOutcrop = x + " " + top + " " + z + " " + level.getBlockState(p) + " biome " + level.getBiome(p).getRegisteredName();
+        }
         for (int y = top - 5; y <= (exposed ? top : top - 2); y++) {
             p.set(x, y, z);
             BlockState s = level.getBlockState(p);
@@ -143,6 +159,7 @@ public class OilLakePiece extends StructurePiece {
             if (s.is(BlockTags.DIRT) || s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.SNOW_BLOCK)
                 || s.is(BlockTags.SAND) || s.is(Blocks.SANDSTONE) || s.is(Blocks.GRAVEL) || s.is(BlockTags.BASE_STONE_OVERWORLD)) {
                 level.setBlock(p, tar, 2);
+                if (y == top) STATS[2].incrementAndGet();
                 // an outcrop is bare: no grass tuft or snow layer on top
                 if (y == top) {
                     BlockPos up = p.above();
