@@ -213,7 +213,14 @@ public class Eln {
     public static final mods.eln.node.DescriptorRegistry<mods.eln.node.transparent.TransparentNodeDescriptor> transparentNodeItem =
         new mods.eln.node.DescriptorRegistry<>(mods.eln.node.transparent.TransparentNodeDescriptor.class);
 
-    public Eln(IEventBus modBus) {
+    public Eln(IEventBus modBus, net.neoforged.fml.ModContainer container) {
+        container.registerConfig(net.neoforged.fml.config.ModConfig.Type.SYNCED, ElnConfig.SPEC);
+        modBus.addListener(net.neoforged.fml.event.config.ModConfigEvent.Loading.class, e -> {
+            if (e.getConfig().getSpec() == ElnConfig.SPEC) ElnConfig.refresh();
+        });
+        modBus.addListener(net.neoforged.fml.event.config.ModConfigEvent.Reloading.class, e -> {
+            if (e.getConfig().getSpec() == ElnConfig.SPEC) ElnConfig.refresh();
+        });
         simulator = new Simulator(0.05, 1 / electricalFrequency, electricalInterSystemOverSampling, 1 / thermalFrequency);
         nodeManager = new mods.eln.node.NodeManager("caca");
         ghostManager = new mods.eln.ghost.GhostManager("caca2");

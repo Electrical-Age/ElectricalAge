@@ -310,7 +310,11 @@ public abstract class NodeBase {
                         Direction otherDirection = elementSide.getInverse();
                         LRDU otherLRDU = otherDirection.getLRDUGoingTo(direction).inverse();
                         if (this instanceof SixNode || otherNode instanceof SixNode) {
-                            tryConnectTwoNode(this, direction, lrdu, otherNode, otherDirection, otherLRDU);
+                            // a frozen neighbour (Stasis) gets no link, only the look of one: a real link into a frozen
+                            // node outlived its parts and hung incognito (2026-10-17); without the look, cables at the
+                            // tower yard's edge seemed cut (Baughn)
+                            if (otherNode.isAdded) tryConnectTwoNode(this, direction, lrdu, otherNode, otherDirection, otherLRDU);
+                            else visualPair(direction, lrdu, otherNode, otherDirection, otherLRDU);
                         }
                     }
                 }
@@ -320,9 +324,10 @@ public abstract class NodeBase {
         {
             for (Direction dir : Direction.values()) {
                 NodeBase otherNode = getNeighbor(dir);
-                if (otherNode != null && otherNode.isAdded) {
+                if (otherNode != null) {
                     for (LRDU lrdu : LRDU.values()) {
-                        tryConnectTwoNode(this, dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
+                        if (otherNode.isAdded) tryConnectTwoNode(this, dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
+                        else visualPair(dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());   // (frozen: the look only)
                     }
                 }
 
