@@ -161,7 +161,7 @@ public class SixNode extends Node {
     /** The block went another way (an explosion, a command, a piston): every remaining element drops (1.12 breakBlock). */
     @Override
     public void onBreakBlock() {
-        disconnect();   // first: disconnecting with an element gone hangs (externalDisconnect's 1.12 while(true) trap)
+        if (isAdded()) disconnect();   // first, while the elements are still there
         for (int i = 0; i < 6; i++) {
             SixNodeElement e = sideElementList[i];
             if (e == null) continue;
@@ -533,9 +533,9 @@ public class SixNode extends Node {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
         if (element == null) {
-            Utils.println("sixnode newConnectionAt error");
-            while (true)
-                ;
+            // (1.12 hung the server here on purpose: incognito crashed 2026-10-17 after a battery blow-up)
+            Utils.println("sixnode connection to an empty side " + elementSide + " at " + coordonate + ": ignored");
+            return;
         }
         lrduElementMask.set(elementSide, elementSide.getLRDUGoingTo(side), true);
 
@@ -545,9 +545,9 @@ public class SixNode extends Node {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
         if (element == null) {
-            Utils.println("sixnode newConnectionAt error");
-            while (true)
-                ;
+            // (1.12 hung the server here on purpose: incognito crashed 2026-10-17 after a battery blow-up)
+            Utils.println("sixnode connection to an empty side " + elementSide + " at " + coordonate + ": ignored");
+            return;
         }
         lrduElementMask.set(elementSide, elementSide.getLRDUGoingTo(side), false);
     }

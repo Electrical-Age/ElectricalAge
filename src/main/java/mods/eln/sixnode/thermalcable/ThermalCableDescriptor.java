@@ -58,8 +58,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
         //thermalC = thermalTao / (thermalRs * 2) ;
         thermalC = Eln.simulator.getMinimalThermalC(thermalRs, thermalRp);
         if (!Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC)) {
-            Utils.println("Bad thermalCable setup");
-            while (true) ;
+            Utils.println("Bad thermalCable setup");   // (1.12 hung here; a log is enough)
         }
         voltageLevelColor = VoltageLevelColor.Thermal;
     }
