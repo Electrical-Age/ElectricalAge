@@ -158,6 +158,24 @@ public class SixNode extends Node {
 
     }
 
+    /** The block went another way (an explosion, a command, a piston): every remaining element drops (1.12 breakBlock). */
+    @Override
+    public void onBreakBlock() {
+        disconnect();   // first: disconnecting with an element gone hangs (externalDisconnect's 1.12 while(true) trap)
+        for (int i = 0; i < 6; i++) {
+            SixNodeElement e = sideElementList[i];
+            if (e == null) continue;
+            sideElementList[i] = null;
+            sideElementIdList[i] = 0;
+            try {
+                e.destroy(null);
+            } catch (RuntimeException ex) {
+                Utils.println("six node element destroy failed: " + ex);
+            }
+        }
+        super.onBreakBlock();
+    }
+
     public boolean deleteSubBlock(ServerPlayer entityPlayer, Direction direction) {
 
         if (sideElementList[direction.getInt()] == null)

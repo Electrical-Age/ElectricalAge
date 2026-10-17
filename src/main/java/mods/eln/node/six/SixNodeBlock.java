@@ -88,6 +88,15 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
             net.minecraft.world.entity.player.Player player, net.minecraft.world.phys.BlockHitResult hit) {
         SixNodeEntity e = tileAt(level, pos, SixNodeEntity.class);
         if (e == null) return net.minecraft.world.InteractionResult.PASS;
+        Direction side = sideAt(e, pos, hit);
+        if (side == null) return net.minecraft.world.InteractionResult.PASS;
+        double x = hit.getLocation().x - pos.getX(), y = hit.getLocation().y - pos.getY(), z = hit.getLocation().z - pos.getZ();
+        return e.onBlockActivated(player, side, (float) x, (float) y, (float) z)
+            ? net.minecraft.world.InteractionResult.SUCCESS : net.minecraft.world.InteractionResult.PASS;
+    }
+
+    /** The element whose plate holds the hit point, or null. */
+    static @Nullable Direction sideAt(SixNodeEntity e, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
         double x = hit.getLocation().x - pos.getX(), y = hit.getLocation().y - pos.getY(), z = hit.getLocation().z - pos.getZ();
         int mask = e.getSideMask();
         Direction side = null;
@@ -95,9 +104,33 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
         if ((mask & (1 << facing.getInt())) != 0 && PLATES[facing.getInt()].bounds().inflate(0.002).contains(x, y, z)) side = facing;
         for (int i = 0; side == null && i < 6; i++)
             if ((mask & (1 << i)) != 0 && PLATES[i].bounds().inflate(0.002).contains(x, y, z)) side = Direction.fromInt(i);
-        if (side == null) return net.minecraft.world.InteractionResult.PASS;
-        return e.onBlockActivated(player, side, (float) x, (float) y, (float) z)
-            ? net.minecraft.world.InteractionResult.SUCCESS : net.minecraft.world.InteractionResult.PASS;
+        return side;
+    }
+
+    /**
+     * Breaking takes only the element the player is looking at (1.12 removedByPlayer: the 26.x port lost this, so a
+     * pickaxe removed every face of the block and nothing dropped). Its item and inventory drop (SixNodeElement.destroy);
+     * the block stays while other faces remain.
+     */
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, net.minecraft.world.entity.player.Player player,
+                                       net.minecraft.world.item.ItemStack tool, boolean willHarvest, net.minecraft.world.level.material.FluidState fluid) {
+        SixNodeEntity e = tileAt(level, pos, SixNodeEntity.class);
+        if (e == null || player == null) return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+        if (level.isClientSide())   // (no prediction while other faces stay: the server's update follows)
+            return Integer.bitCount(e.getSideMask()) <= 1 && super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+        if (!(e.getNode() instanceof SixNode node) || !(player instanceof net.minecraft.server.level.ServerPlayer sp))
+            return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+        Direction side = null;
+        var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
+        if (pick instanceof net.minecraft.world.phys.BlockHitResult bh && bh.getBlockPos().equals(pos)) side = sideAt(e, pos, bh);
+        if (side == null) {   // (no element under the crosshair: take the first one)
+            for (int i = 0; i < 6 && side == null; i++) if ((e.getSideMask() & (1 << i)) != 0) side = Direction.fromInt(i);
+            if (side == null) return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+        }
+        if (!node.playerAskToBreakSubBlock(sp, side)) return false;
+        if (node.getIfSideRemain()) return false;
+        return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
     }
 
     @Override
