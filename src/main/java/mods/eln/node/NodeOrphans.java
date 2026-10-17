@@ -30,7 +30,7 @@ public final class NodeOrphans {
             if (isOrphan(n)) orphans.add(n);
         }
         for (NodeBase n : orphans) {
-            Utils.println("removing orphaned node " + n.getClass().getSimpleName() + " at " + n.coordonate + " (its block is gone)");
+            mods.eln.Eln.LOG.info("Removing orphaned EA node {} at {} {} {} (its block is gone)", n.getClass().getSimpleName(), n.coordonate.x, n.coordonate.y, n.coordonate.z);
             remove(n);
         }
     }

@@ -98,6 +98,7 @@ public final class LabCommands {
             return 0;
         }
         String what = node.getClass().getSimpleName();
+        mods.eln.Eln.LOG.info("elnlab remove: {} at {} by {}", what, pos.toShortString(), src.getTextName());
         mods.eln.node.NodeOrphans.remove(node);
         src.sendSuccess(() -> Component.literal("removed " + what + " at " + pos.toShortString()), true);
         return 1;
