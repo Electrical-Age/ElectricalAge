@@ -58,8 +58,10 @@ public final class MenuSpecs {
 
     static {
         // ---- six-node devices
-        put(mods.eln.sixnode.groundcable.GroundCableDescriptor.class, d -> MenuSpec.of(
-            cableSlot(0, 176 / 2 - 8, 8, 1)).panel(176, 114, 8, 32));
+        // Baughn 2026-10-17: no more "a piece of cable in the GUI before it works" (notes/port26/cable-slots.md). The
+        // ground cable, energy meters, electrical/voltage probes, thermal probe and lamp sockets lost their cable slot
+        // (built-in cable); the ground cable lost its GUI. Kept: breaker (trip rating), hub (which sides), transformer
+        // (turns); the lamp supply's and temperature probe's slots are optional (range, mode).
         put(mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor.class, d -> MenuSpec.of(
             cableSlot(0, 150, 21, 1)).panel(176, 140, 8, 58));
         put(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor.class, d -> MenuSpec.of(
@@ -73,23 +75,21 @@ public final class MenuSpecs {
         put(mods.eln.sixnode.electricalmath.ElectricalMathDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.sixnode.electricalmath.ElectricalMathContainer.restoneSlotId, 125 + 27 + 44 / 2, 25, 64,
                 item(Items.REDSTONE), MEDIUM, tr("Redstone slot"))).panel(220, 128, 30, 46));
-        put(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, d -> MenuSpec.of(
-            cableSlot(0, 152, d.voltageOnly ? 14 : 62, 1)).panel(176, d.voltageOnly ? 121 : 166, 8, d.voltageOnly ? 39 : 84));
+        put(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, d -> MenuSpec.of()
+            .panel(176, d.voltageOnly ? 121 : 166, 8, d.voltageOnly ? 39 : 84));
         put(mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor.class, d -> MenuSpec.of(
             descriptor(0, 184 / 2 - 12, 8, 1, BatteryItem.class, MEDIUM, tr("Portable battery slot"))).panel(176, 114, 8, 32));
-        put(mods.eln.sixnode.energymeter.EnergyMeterDescriptor.class, d -> MenuSpec.of(
-            cableSlot(0, 160, 106, 1)).panel(192, 208, 16, 126));
+        put(mods.eln.sixnode.energymeter.EnergyMeterDescriptor.class, d -> MenuSpec.of().panel(192, 208, 16, 126));
         put(mods.eln.sixnode.hub.HubDescriptor.class, d -> MenuSpec.of(
             cableSlot(0, 176 / 2 + 80 / 2 + 2, 134 / 2 - 9, 1),
             cableSlot(1, 176 / 2 - 80 / 2 - 20, 134 / 2 - 9, 1),
             cableSlot(2, 176 / 2 - 9, 134 / 2 + 80 / 2 + 2, 1),
             cableSlot(3, 176 / 2 - 9, 134 / 2 - 80 / 2 - 20, 1)).panel(176, 216, 8, 134));
         put(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class, d -> MenuSpec.of(
-            lamp(mods.eln.sixnode.lampsocket.LampSocketContainer.lampSlotId, 70, 57, 1, d.socketType),
-            cableSlot(mods.eln.sixnode.lampsocket.LampSocketContainer.cableSlotId, 70 + 18, 57, 1)));
+            lamp(mods.eln.sixnode.lampsocket.LampSocketContainer.lampSlotId, 70, 57, 1, d.socketType)));
         put(mods.eln.sixnode.lampsupply.LampSupplyDescriptor.class, d -> MenuSpec.of(
             six(0, 184, 144, 64, CABLE, MEDIUM,
-                tr("Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.").split("\n"))).panel(220, 205, 8, 125));
+                tr("Electrical cable slot (optional)\nBase range is 32 blocks.\nEach cable\nincreases range by one.").split("\n"))).panel(220, 205, 8, 125));
         put(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
                 tr("Redstone slot"), tr("(Increases capacity)")),
@@ -102,10 +102,11 @@ public final class MenuSpecs {
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot"))).panel(176, 112, 8, 30));
         put(mods.eln.sixnode.powersocket.PowerSocketDescriptor.class, d -> MenuSpec.of().panel(176, 144, 8, 60));
         put(mods.eln.sixnode.resistor.ResistorDescriptor.class, d -> resistor());
-        put(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, d -> MenuSpec.of(
-            // 1.12 passed temperatureOnly as "accepts electrical cable" (ThermalSensorElement.newContainer): kept
-            six(0, 152, 62, 1, d.temperatureOnly ? new Class<?>[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class}
-                : new Class<?>[]{ThermalCableDescriptor.class}, MEDIUM, tr("Cable slot"))));
+        // the thermal probe: built-in Copper Thermal Cable; the temperature probe: an optional mode slot
+        put(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, d -> d.temperatureOnly ? MenuSpec.of(
+            six(0, 152, 62, 1, new Class<?>[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class}, MEDIUM,
+                tr("Cable slot (optional)"), tr("Empty: on electrical cables"), tr("Thermal cable: on thermal cables")))
+            : MenuSpec.of());
         put(mods.eln.sixnode.batterycharger.BatteryChargerDescriptor.class, d -> MenuSpec.of(
             battery(0, 26 - 18 + 0, 6 + 0),
             battery(1, 26 - 18 + 18, 6 + 0),

@@ -477,8 +477,7 @@ public final class Wp9cCases {
             src = Wp9aCases.source(ctx, SOURCE, 0, 1, 50);
             meter = (EnergyMeterElement) ctx.placeSix(ENERGY_METER, ctx.at(1, 1, 1));
             orient(meter, l -> l, Direction.XN);
-            meter.getInventory().setItem(0, Eln.sixNodeItem.getDescriptor(LV_CABLE).newItemStack());
-            meter.getInventory().setChanged();
+            // no cable in a slot: built-in LV cable (Baughn 2026-10-17)
             meter.networkUnserialize(ctx.stream(o -> o.writeByte(EnergyMeterElement.clientToggleStateId)));
             r = Wp9aCases.resistor(ctx, POWER_RESISTOR, 2, 1, 48);
             gnd = ctx.placeSix(GROUND, ctx.at(3, 1, 1));

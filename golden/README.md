@@ -20,6 +20,9 @@ A port regenerates both with the same commands and diffs them against these file
 `golden_slots` (GoldenSlotsCase.KNOWN_MISSING) accepts these, and reports each as an INFO line:
 - Coal dust slots (resistor, rheostat, thermistor, large rheostat) refuse Mercury and Gold Plate. 1.12's
   `ItemStackFilter.OreDict` masked the damage to 8 bits, so shared items 520 and 7688 passed as Coal Dust (8). A bug.
+- Cable slots removed (Baughn 2026-10-17, `notes/port26/cable-slots.md`; `GoldenSlotsCase.removedCableSlots`): energy
+  meters, electrical/voltage probes and the thermal probe (slot 0), lamp sockets (slot 1) have a built-in cable; the
+  Ground Cable has no GUI at all (`GUI_REMOVED`). The lamp supply's and temperature probe's slots stay, now optional.
 - The stone heat furnace's fuel slot refuses paper. The E36 pack made paper a furnace fuel; vanilla 26.x has none.
 
 `golden_recipes`: the macerator turns vanilla ore blocks (iron, gold, copper; deepslate too, by tag) into raw chunks

@@ -91,7 +91,7 @@ public class EnergyMeterRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return cableRender;
+        return mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render; // built-in cable
     }
 
     @Override
@@ -104,14 +104,9 @@ public class EnergyMeterRender extends SixNodeElementRender {
             mod = Mod.valueOf(stream.readUTF());
             timerCouter = stream.readDouble();
             // energyStack = stream.readDouble();
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
             energyUnit = stream.readByte();
             timeUnit = stream.readByte();
-            if (desc == null)
-                cableRender = null;
-            else
-                cableRender = desc.render;
         } catch (IOException e) {
             e.printStackTrace();
         }

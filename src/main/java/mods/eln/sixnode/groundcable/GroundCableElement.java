@@ -39,6 +39,10 @@ public class GroundCableElement extends SixNodeElement {
     int color = 0;
     int colorCare = 0;
 
+    /**
+     * 1.12's cable slot (it only chose the cable drawn; Baughn 2026-10-17: slot removed). Kept, hidden, so a cable
+     * left in it by an older world stays in the saved data and drops when the ground is broken.
+     */
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public GroundCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -84,7 +88,6 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        //if (Utils.isEmpty(inventory.getItem(0 /* 1.12 GroundCableContainer.cableSlotId */))) return 0;
         return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
     }
 
@@ -110,7 +113,6 @@ public class GroundCableElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeByte(color << 4);
-            Utils.serialiseItemStack(stream, inventory.getItem(0 /* 1.12 GroundCableContainer.cableSlotId */));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,13 +147,7 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    protected void inventoryChanged() {
-        super.inventoryChanged();
-        reconnect();
-    }
-
-    @Override
     public boolean hasGui() {
-        return true;
+        return false;
     }
 }

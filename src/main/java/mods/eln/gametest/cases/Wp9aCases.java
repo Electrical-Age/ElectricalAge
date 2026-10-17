@@ -564,8 +564,7 @@ public final class Wp9aCases {
             }));
             socket = (PowerSocketElement) placeOnWall(ctx, SOCKET_50V, ctx.at(1, 0, 3));
             orient(socket, f -> f, Direction.XN);
-            socket.getInventory().setItem(0, lvCable()); // PowerSocketContainer.cableSlotId
-            socket.getInventory().setChanged();
+            // no cable in its (1.12, hidden) slot: built-in LV cable (Baughn 2026-10-17)
 
             srcC = source(ctx, SOURCE, 0, 2, U);
             charger = (BatteryChargerElement) ctx.placeSix(CHARGER_WEAK, ctx.at(1, 1, 2));

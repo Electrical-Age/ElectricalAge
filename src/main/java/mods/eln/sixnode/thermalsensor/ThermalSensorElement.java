@@ -41,6 +41,13 @@ public class ThermalSensorElement extends SixNodeElement {
     public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
     public ThermalSensorProcess slowProcess = new ThermalSensorProcess(this);
 
+    /**
+     * Thermal probe: 1.12's cable slot, removed (Baughn 2026-10-17: built-in Copper Thermal Cable); kept, hidden, so a
+     * cable left in it by an older world stays in the saved data and drops when the probe is broken.
+     * Temperature probe: an optional mode slot. Empty or an electrical cable: the back joins electrical cables (an LV
+     * cable, or the one in the slot); a thermal cable: the back joins thermal cables. One probe can't do both: the
+     * simulator only joins slow (electrical cable) thermal loads to slow ones and fast (thermal cable) to fast.
+     */
     AutoAcceptInventoryProxy inventory;
 
     static final byte powerType = 0, temperatureType = 1;
@@ -63,8 +70,7 @@ public class ThermalSensorElement extends SixNodeElement {
             inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
                 .acceptIfEmpty(0, ThermalCableDescriptor.class, ElectricalCableDescriptor.class);
         } else {
-            inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
-                .acceptIfEmpty(0, ThermalCableDescriptor.class);
+            inventory = new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this));
         }
     }
 
@@ -108,10 +114,8 @@ public class ThermalSensorElement extends SixNodeElement {
     @Override
     public ThermalLoad getThermalLoad(LRDU lrdu) {
         if (!descriptor.temperatureOnly) {
-            if (!Utils.isEmpty(getInventory().getItem(ThermalSensorContainer.cableSlotId))) {
-                if (front.left() == lrdu) return thermalLoad;
-                if (front.right() == lrdu) return thermalLoad;
-            }
+            if (front.left() == lrdu) return thermalLoad;
+            if (front.right() == lrdu) return thermalLoad;
         } else {
             if (front.inverse() == lrdu) return thermalLoad;
         }
@@ -121,15 +125,13 @@ public class ThermalSensorElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (!descriptor.temperatureOnly) {
-            if (!Utils.isEmpty(getInventory().getItem(ThermalSensorContainer.cableSlotId))) {
-                if (front.left() == lrdu) return NodeBase.maskThermal;
-                if (front.right() == lrdu) return NodeBase.maskThermal;
-            }
+            if (front.left() == lrdu) return NodeBase.maskThermal;
+            if (front.right() == lrdu) return NodeBase.maskThermal;
             if (front == lrdu) return NodeBase.maskElectricalOutputGate;
         } else {
             if (isItemThermalCable()) {
                 if (front.inverse() == lrdu) return NodeBase.maskThermal;
-            } else if (isItemElectricalCable()) {
+            } else {
                 if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
             }
             if (front == lrdu) return NodeBase.maskElectricalOutputGate;
@@ -192,32 +194,30 @@ public class ThermalSensorElement extends SixNodeElement {
     }
 
     public void computeElectricalLoad() {
-        ItemStack cable = getInventory().getItem(ThermalSensorContainer.cableSlotId);
-
-        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(cable);
-        if (descriptor == null) return;
-        if (descriptor.getClass() == ThermalCableDescriptor.class) {
-            ThermalCableDescriptor cableDescriptor = (ThermalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-            cableDescriptor.setThermalLoad(thermalLoad);
+        if (!this.descriptor.temperatureOnly) {
+            // built-in Copper Thermal Cable (1.12: a thermal cable in the slot)
+            ElnDeviceRegistry.copperThermalCableDescriptor.setThermalLoad(thermalLoad);
             thermalLoad.setAsFast();
-        } else if (descriptor.getClass() == ElectricalCableDescriptor.class) {
-            ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+            return;
+        }
+        ItemStack cable = getInventory().getItem(ThermalSensorContainer.cableSlotId);
+        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(cable);
+        if (descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class) {
+            ((ThermalCableDescriptor) descriptor).setThermalLoad(thermalLoad);
+            thermalLoad.setAsFast();
+        } else {
+            ElectricalCableDescriptor cableDescriptor = descriptor instanceof ElectricalCableDescriptor e ? e
+                : ElnDeviceRegistry.lowVoltageCableDescriptor; // empty slot: as an LV cable (Baughn 2026-10-17)
             cableDescriptor.applyTo(thermalLoad);
             thermalLoad.Rp = 1000000000.0;
             thermalLoad.setAsSlow();
-        } else {
-            thermalLoad.setHighImpedance();
         }
     }
 
     boolean isItemThermalCable() {
+        if (!descriptor.temperatureOnly) return false; // the thermal probe's slot is gone
         SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(getInventory().getItem(ThermalSensorContainer.cableSlotId));
         return descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class;
-    }
-
-    boolean isItemElectricalCable() {
-        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(getInventory().getItem(ThermalSensorContainer.cableSlotId));
-        return descriptor != null && descriptor.getClass() == ElectricalCableDescriptor.class;
     }
 
     @Override

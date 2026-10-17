@@ -58,6 +58,10 @@ public class LampSupplyElement extends SixNodeElement {
     public Resistor loadResistor;
     public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
+    /**
+     * Cables extend the range (descriptor range + one block per cable). Baughn 2026-10-17: no longer needed to connect;
+     * the supply works with an empty slot, as with an LV cable, and no cable sets a watchdog.
+     */
     private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
         .acceptIfIncrement(0, 64, ElectricalCableDescriptor.class);
 
@@ -189,7 +193,6 @@ public class LampSupplyElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (Utils.isEmpty(getInventory().getItem(LampSupplyContainer.cableSlotId))) return null;
         if (front == lrdu) return powerLoad;
         return null;
     }
@@ -201,7 +204,6 @@ public class LampSupplyElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (Utils.isEmpty(getInventory().getItem(LampSupplyContainer.cableSlotId))) return 0;
         if (front == lrdu) return NodeBase.maskElectricalPower;
         return 0;
     }
@@ -320,14 +322,11 @@ public class LampSupplyElement extends SixNodeElement {
 
     void setupFromInventory() {
         ItemStack cableStack = getInventory().getItem(LampSupplyContainer.cableSlotId);
-        if (!Utils.isEmpty(cableStack)) {
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-            desc.applyTo(powerLoad);
-            voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
-        } else {
-            voltageWatchdog.setUNominal(10000);
-            powerLoad.highImpedance();
-        }
+        ElectricalCableDescriptor desc = Utils.isEmpty(cableStack) ? null
+            : (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+        if (desc == null) desc = mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
+        desc.applyTo(powerLoad);
+        voltageWatchdog.setUNominal(10000); // 1.12's empty-slot value: off
     }
 
     @Override

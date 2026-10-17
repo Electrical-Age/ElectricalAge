@@ -44,7 +44,7 @@ public class ThermalSensorRender extends SixNodeElementRender {
     public void draw() {
         super.draw();
         front.glRotateOnX();
-        descriptor.draw(ecable != null);
+        descriptor.draw(descriptor.temperatureOnly && cable == null); // the adapter: on electrical cables
     }
 
 	/*
@@ -78,12 +78,14 @@ public class ThermalSensorRender extends SixNodeElementRender {
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
         if (!descriptor.temperatureOnly) {
-            if (front.left() == lrdu && cable != null) return cable.render;
-            if (front.right() == lrdu && cable != null) return cable.render;
+            // built-in Copper Thermal Cable (Baughn 2026-10-17)
+            if (front.left() == lrdu) return ElnDeviceRegistry.copperThermalCableDescriptor.render;
+            if (front.right() == lrdu) return ElnDeviceRegistry.copperThermalCableDescriptor.render;
             if (front == lrdu) return ElnDeviceRegistry.signalCableDescriptor.render;
         } else {
             if (front.inverse() == lrdu && cable != null) return cable.render;
             if (front.inverse() == lrdu && ecable != null) return ecable.render;
+            if (front.inverse() == lrdu) return ElnDeviceRegistry.lowVoltageCableDescriptor.render; // empty slot
             if (front == lrdu) return ElnDeviceRegistry.signalCableDescriptor.render;
         }
         return null;

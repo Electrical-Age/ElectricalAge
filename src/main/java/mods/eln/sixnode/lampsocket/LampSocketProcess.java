@@ -58,7 +58,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public void process(double time) {
         ItemStack lampStack = lamp.getInventory().getItem(0);
 
-        if (!lamp.poweredByLampSupply || Utils.isEmpty(lamp.getInventory().getItem(LampSocketContainer.cableSlotId))) {
+        if (!lamp.poweredByLampSupply) {
             lamp.setIsConnectedToLampSupply(false);
             oldLampSupply = null;
         } else {

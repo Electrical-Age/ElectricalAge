@@ -451,8 +451,7 @@ public final class Wp10aCases {
             BlockPos c2 = off(p, ind.front.right());
             l.six(LV_CABLE, c2);
             lamp = (LampSocketElement) l.six(LAMP_SOCKET, l.next(c2, ind.front.right()));
-            lamp.getInventory().setItem(0, Eln.sharedItem.getDescriptor(LAMP_BULB).newItemStack());
-            lamp.getInventory().setItem(1, lvCables(1));
+            lamp.getInventory().setItem(0, Eln.sharedItem.getDescriptor(LAMP_BULB).newItemStack()); // no cable: built in
             lamp.getInventory().setChanged();
             lamp.networkUnserialize(ctx.stream(out -> out.writeByte(3))); // LampSocketElement.tooglePowerSupplyType
             ItemStack copper = shared(COPPER_CABLE, mods.eln.item.CopperCableDescriptor.class, 1);

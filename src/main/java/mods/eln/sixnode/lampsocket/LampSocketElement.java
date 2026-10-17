@@ -46,10 +46,13 @@ public class LampSocketElement extends SixNodeElement {
     boolean poweredByLampSupply = true;
     boolean grounded = true;
 
+    /**
+     * Slot 0 is the bulb. Slot 1 was 1.12's cable slot (Baughn 2026-10-17: removed, the socket has a built-in LV cable);
+     * kept, hidden, so a cable left in it by an older world stays in the saved data and drops when the socket is broken.
+     */
     private AutoAcceptInventoryProxy acceptingInventory =
         (new AutoAcceptInventoryProxy(new SixNodeElementInventory(2, 64, this)))
-            .acceptIfEmpty(0, LampDescriptor.class)
-            .acceptIfEmpty(1, ElectricalCableDescriptor.class);
+            .acceptIfEmpty(0, LampDescriptor.class);
 
     LampDescriptor lampDescriptor = null;
     public String channel = lastSocketName;
@@ -178,7 +181,6 @@ public class LampSocketElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (Utils.isEmpty(acceptingInventory.getInventory().getItem(LampSocketContainer.cableSlotId))) return null;
         if (poweredByLampSupply) return null;
 
         if (grounded) return positiveLoad;
@@ -192,7 +194,6 @@ public class LampSocketElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (Utils.isEmpty(acceptingInventory.getInventory().getItem(LampSocketContainer.cableSlotId))) return 0;
         if (poweredByLampSupply) return 0;
         if (grounded) return NodeBase.maskElectricalPower;
 
@@ -242,7 +243,6 @@ public class LampSocketElement extends SixNodeElement {
             stream.writeByte((grounded ? (1 << 6) : 0));
             Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getItem(LampSocketContainer.lampSlotId));
             stream.writeFloat((float) lampProcess.alphaZ);
-            Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getItem(LampSocketContainer.cableSlotId));
             stream.writeBoolean(poweredByLampSupply);
             stream.writeUTF(channel);
             stream.writeBoolean(isConnectedToLampSupply);
@@ -260,17 +260,8 @@ public class LampSocketElement extends SixNodeElement {
 
     public void computeElectricalLoad() {
         ItemStack lamp = acceptingInventory.getInventory().getItem(LampSocketContainer.lampSlotId);
-        ItemStack cable = acceptingInventory.getInventory().getItem(LampSocketContainer.cableSlotId);
-
-        ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-
-        if (cableDescriptor == null) {
-            positiveLoad.highImpedance();
-            //negativeLoad.highImpedance();
-        } else {
-            cableDescriptor.applyTo(positiveLoad);
-            //cableDescriptor.applyTo(negativeLoad, grounded,5);
-        }
+        // built-in LV cable (1.12: the cable in the slot)
+        mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.applyTo(positiveLoad);
 
         lampDescriptor = (LampDescriptor) Utils.getItemObject(lamp);
 

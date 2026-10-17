@@ -25,7 +25,6 @@ public class ElectricalSensorRender extends SixNodeElementRender {
     int typeOfSensor = 0;
     float lowValue = 0, highValue = 50;
     byte dirType;
-    CableRenderDescriptor cableRender = null;
 
     public ElectricalSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -57,7 +56,6 @@ public class ElectricalSensorRender extends SixNodeElementRender {
             lowValue = stream.readFloat();
             highValue = stream.readFloat();
             dirType = stream.readByte();
-            cableRender = ElectricalCableDescriptor.getCableRender(Utils.unserialiseItemStack(stream));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -67,10 +65,10 @@ public class ElectricalSensorRender extends SixNodeElementRender {
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
         if (descriptor.voltageOnly) {
             if (lrdu == front) return ElnDeviceRegistry.signalCableDescriptor.render;
-            if (lrdu == front.inverse()) return cableRender;
+            if (lrdu == front.inverse()) return ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         } else {
             if (lrdu == front) return ElnDeviceRegistry.signalCableDescriptor.render;
-            if (lrdu == front.left() || lrdu == front.right()) return cableRender;
+            if (lrdu == front.left() || lrdu == front.right()) return ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         }
         return super.getCableRender(lrdu);
     }

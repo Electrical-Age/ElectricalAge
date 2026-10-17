@@ -23,8 +23,6 @@ public class PowerSocketRender extends SixNodeElementRender {
     Coordonate coord;
     String channel;
 
-    CableRenderDescriptor cableRender;
-
 
     public PowerSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -45,7 +43,7 @@ public class PowerSocketRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return cableRender;
+        return descriptor.cable().render;
     }
 
     @Override
@@ -54,13 +52,6 @@ public class PowerSocketRender extends SixNodeElementRender {
         try {
             channel = stream.readUTF();
 
-            ItemStack cableStack = Utils.unserialiseItemStack(stream);
-            if (!Utils.isEmpty(cableStack)) {
-                ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-                cableRender = desc.render;
-            } else {
-                cableRender = null;
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }

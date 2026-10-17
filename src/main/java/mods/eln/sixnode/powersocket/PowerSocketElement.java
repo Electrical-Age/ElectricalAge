@@ -42,6 +42,10 @@ public class PowerSocketElement extends SixNodeElement {
     public Resistor loadResistor = new Resistor(powerLoad, null);
     public IProcess PowerSocketSlowProcess = new PowerSocketSlowProcess();
 
+    /**
+     * 1.12's cable slot index (never in a 1.12 container; Baughn 2026-10-17: the socket has a built-in cable). Kept,
+     * hidden, so a cable put there by an older world stays in the saved data and drops when the socket is broken.
+     */
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public String channel = "Default channel";
@@ -101,20 +105,17 @@ public class PowerSocketElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (Utils.isEmpty(inventory.getItem(PowerSocketContainer.cableSlotId))) return null;
         if (front == lrdu) return powerLoad;
         return null;
     }
 
     @Override
     public ThermalLoad getThermalLoad(LRDU lrdu) {
-        if (Utils.isEmpty(inventory.getItem(PowerSocketContainer.cableSlotId))) return null;
         return null;
     }
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (Utils.isEmpty(inventory.getItem(PowerSocketContainer.cableSlotId))) return 0;
         if (front == lrdu) return NodeBase.maskElectricalPower;
         return 0;
     }
@@ -132,15 +133,6 @@ public class PowerSocketElement extends SixNodeElement {
     @Override
     public void initialize() {
         setupFromInventory();
-    }
-
-    @Override
-    protected void inventoryChanged() {
-        super.inventoryChanged();
-        sixNode.disconnect();
-        setupFromInventory();
-        sixNode.connect();
-        needPublish();
     }
 
     @Override
@@ -176,15 +168,9 @@ public class PowerSocketElement extends SixNodeElement {
     }
 
     void setupFromInventory() {
-        ItemStack cableStack = inventory.getItem(PowerSocketContainer.cableSlotId);
-        if (!Utils.isEmpty(cableStack)) {
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-            desc.applyTo(powerLoad);
-            voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
-        } else {
-            voltageWatchdog.setUNominal(10000);
-            powerLoad.highImpedance();
-        }
+        // the built-in cable's resistance, without its watchdog (the 10 kV nominal of 1.12's empty slot: off)
+        descriptor.cable().applyTo(powerLoad);
+        voltageWatchdog.setUNominal(10000);
     }
 
     @Override
@@ -215,7 +201,6 @@ public class PowerSocketElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeUTF(channel);
-            Utils.serialiseItemStack(stream, inventory.getItem(PowerSocketContainer.cableSlotId));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -226,12 +211,6 @@ public class PowerSocketElement extends SixNodeElement {
     }
 
     public int getRange() {
-        return getRange(descriptor, inventory);
-    }
-
-    private int getRange(PowerSocketDescriptor desc, SixNodeElementInventory inventory2) {
-        ItemStack stack = inventory.getItem(PowerSocketContainer.cableSlotId);
-        if (Utils.isEmpty(stack)) return desc.range;
-        return desc.range + stack.getCount();
+        return descriptor.range;
     }
 }

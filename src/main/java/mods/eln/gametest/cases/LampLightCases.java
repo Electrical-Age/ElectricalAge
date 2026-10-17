@@ -72,8 +72,6 @@ public final class LampLightCases {
             ctx.placeSix(cable, ctx.at(1, 1, 1));
             supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN);
-            supply.getInventory().setItem(0, Eln.sixNodeItem.getDescriptor(cable).newItemStack(1));
-            supply.getInventory().setChanged();
             supply.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(LampSupplyElement.setPowerName);
                 o.writeByte(0);
@@ -90,7 +88,6 @@ public final class LampLightCases {
             }
             lamp = (LampSocketElement) ctx.placeSix(socketSub + (LAMP_ID << 6), p, side);
             lamp.getInventory().setItem(0, Eln.sharedItem.getDescriptor(bulbSub + (BULB_ID << 6)).newItemStack());
-            lamp.getInventory().setItem(1, Eln.sixNodeItem.getDescriptor(cable).newItemStack(1));
             lamp.getInventory().setChanged();
             lamp.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(4); // LampSocketElement.setChannel

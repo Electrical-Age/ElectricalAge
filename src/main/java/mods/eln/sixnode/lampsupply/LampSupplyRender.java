@@ -79,12 +79,9 @@ public class LampSupplyRender extends SixNodeElementRender {
             }
 
             ItemStack cableStack = Utils.unserialiseItemStack(stream);
-            if (!Utils.isEmpty(cableStack)) {
-                ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-                cableRender = desc.render;
-            } else {
-                cableRender = null;
-            }
+            ElectricalCableDescriptor desc = Utils.isEmpty(cableStack) ? null
+                : (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+            cableRender = desc != null ? desc.render : mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         } catch (IOException e) {
             e.printStackTrace();
         }

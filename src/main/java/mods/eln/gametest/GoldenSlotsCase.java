@@ -76,6 +76,21 @@ final class GoldenSlotsCase implements TestCase {
     /** 1.12 devices dropped on purpose (Baughn 2026-10-11: hidden, uncraftable, "Obselete, must be deleted"). */
     static final Set<String> REMOVED = Set.of("50V Condensator", "200V Condensator");
 
+    /**
+     * 1.12 cable slots removed on purpose (Baughn 2026-10-17, notes/port26/cable-slots.md): the device has a built-in
+     * cable. By descriptor: the inventory indices of 1.12 slots that are gone (those golden slots are skipped).
+     */
+    static java.util.Set<Integer> removedCableSlots(Object d) {
+        if (d instanceof mods.eln.sixnode.energymeter.EnergyMeterDescriptor
+            || d instanceof mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor
+            || d instanceof mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor t && !t.temperatureOnly) return Set.of(0);
+        if (d instanceof mods.eln.sixnode.lampsocket.LampSocketDescriptor) return Set.of(1);
+        return Set.of();
+    }
+
+    /** Devices whose only 1.12 slot was the cable slot and whose GUI went with it (Baughn 2026-10-17). */
+    static final Set<String> GUI_REMOVED = Set.of("Ground Cable");
+
     static final String[] VANILLA = {"coal", "redstone", "iron_ingot", "egg", "paper", "water_bucket", "lava_bucket",
         "cobblestone", "dirt"};
 
@@ -141,6 +156,10 @@ final class GoldenSlotsCase implements TestCase {
             String name = dev.get("device").getAsString();
             Object d = byName.get(name);
             if (d == null && REMOVED.contains(name)) continue;
+            if (GUI_REMOVED.contains(name)) {
+                ctx.line("INFO golden slots: known difference: " + name + " has no GUI (its cable slot was removed)");
+                continue;
+            }
             if (d == null) {
                 ctx.check("golden slots: " + name + " exists", false, "no descriptor with that name");
                 continue;
@@ -197,7 +216,12 @@ final class GoldenSlotsCase implements TestCase {
                 else device.add(s);
             }
             ctx.check("golden slots: " + name + " player inventory", playerSlots == 36, playerSlots + " player slots");
-            var gs = dev.getAsJsonArray("slots");
+            var gs = new com.google.gson.JsonArray();
+            Set<Integer> removedSlots = removedCableSlots(d);
+            for (JsonElement g : dev.getAsJsonArray("slots"))
+                if (!removedSlots.contains(g.getAsJsonObject().get("index").getAsInt())) gs.add(g);
+            if (!removedSlots.isEmpty())
+                known.add(name + " cable slot " + removedSlots + " removed (built-in cable)");
             ctx.check("golden slots: " + name + " slot count", gs.size() == device.size(), device.size() + " vs 1.12 " + gs.size());
             for (int i = 0; i < Math.min(gs.size(), device.size()); i++) {
                 JsonObject g = gs.get(i).getAsJsonObject();
@@ -230,7 +254,7 @@ final class GoldenSlotsCase implements TestCase {
             ctx.check("golden slots: " + name + " removed", NodeManager.instance.getNodeFromCoordonate(new Coordonate(p, level)) == null, "node left at " + p);
         }
         for (String k : known) ctx.line("INFO golden slots: known difference: " + k);
-        int expected = golden.size() - REMOVED.size();
+        int expected = golden.size() - REMOVED.size() - GUI_REMOVED.size();
         ctx.check("golden slots: devices", devices == expected, devices + " of " + expected + " (1.12: " + golden.size() + ", removed " + REMOVED + ")");
         ctx.check("golden slots: slots match", slotsOk == slotsAll, slotsOk + " of " + slotsAll);
         // every descriptor with slots is a golden device: a subclass inheriting a spec 1.12 didn't give it would show here

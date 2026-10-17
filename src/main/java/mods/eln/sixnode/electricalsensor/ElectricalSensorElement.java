@@ -46,8 +46,11 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     public Resistor resistor;
 
-    private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
-        .acceptIfEmpty(0, ElectricalCableDescriptor.class);
+    /**
+     * 1.12's cable slot (Baughn 2026-10-17: removed, the probe has a built-in LV cable without watchdog). Kept, hidden,
+     * so a cable left in it by an older world stays in the saved data and drops when the probe is broken.
+     */
+    private final SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     static final byte dirNone = 0, dirAB = 1, dirBA = 2;
     byte dirType = dirNone;
@@ -86,10 +89,7 @@ public class ElectricalSensorElement extends SixNodeElement {
     }
 
     public Container getInventory() {
-        if (inventory != null)
-            return inventory.getInventory();
-        else
-            return null;
+        return inventory;
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -137,7 +137,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        boolean cable = !Utils.isEmpty(getInventory().getItem(ElectricalSensorContainer.cableSlotId));
+        boolean cable = true; // built in (1.12: a cable in the slot)
         if (!descriptor.voltageOnly) {
             if (front.left() == lrdu && cable) return NodeBase.maskElectricalAll;
             if (front.right() == lrdu && cable) return NodeBase.maskElectricalAll;
@@ -192,7 +192,6 @@ public class ElectricalSensorElement extends SixNodeElement {
             stream.writeFloat(lowValue);
             stream.writeFloat(highValue);
             stream.writeByte(dirType);
-            Utils.serialiseItemStack(stream, getInventory().getItem(ElectricalSensorContainer.cableSlotId));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -206,34 +205,15 @@ public class ElectricalSensorElement extends SixNodeElement {
         if (bLoad != null) ElnDeviceRegistry.applySmallRs(bLoad);
     }
 
-    @Override
-    protected void inventoryChanged() {
-        computeElectricalLoad();
-        reconnect();
-    }
-
     public void computeElectricalLoad() {
-        //if (!descriptor.voltageOnly)
-        {
-            ItemStack cable = getInventory().getItem(ElectricalSensorContainer.cableSlotId);
-            ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-
-            if (cableDescriptor == null) {
-                if (resistor != null) resistor.highImpedance();
-                //	currentWatchDog.setIAbsMax(100000);
-                voltageWatchDog.setUNominal(1000000000);
-            } else {
-                if (resistor != null) cableDescriptor.applyTo(resistor, 2);
-                //	currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
-                voltageWatchDog.setUNominal(cableDescriptor.electricalNominalVoltage);
-            }
-        }
+        // built-in LV cable (1.12: the cable in the slot), without its watchdog: the 1 GV nominal of 1.12's empty slot
+        if (resistor != null) ElnDeviceRegistry.lowVoltageCableDescriptor.applyTo(resistor, 2);
+        voltageWatchDog.setUNominal(1000000000);
     }
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (onBlockActivatedRotate(entityPlayer)) return true;
-        return inventory.take(entityPlayer.getMainHandItem(), this, false, true);
+        return onBlockActivatedRotate(entityPlayer);
     }
 
     @Override

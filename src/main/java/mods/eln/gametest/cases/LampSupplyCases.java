@@ -15,8 +15,8 @@ import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * Lamp supply powering lamp sockets by channel (no cable between them). Port step T3 (notes/port26/PLAN.md).
- * Electrical Source 50 V -> LV cable -> Lamp Supply (LV cable in its slot, power channel 0 named by GUI packet, no
- * wireless channel = always on). Two Robust Lamp Sockets (bulb + LV cable in their slots; powered by lamp supply is
+ * Electrical Source 50 V -> LV cable -> Lamp Supply (empty cable slot, power channel 0 named by GUI packet, no
+ * wireless channel = always on). Two Robust Lamp Sockets (bulb only, no cable: built in; powered by lamp supply is
  * their default) 3 and 5 blocks away: one on the supply's channel lights up (LampSocketProcess.light > 0), one on
  * another channel stays dark.
  */
@@ -44,7 +44,6 @@ public final class LampSupplyCases {
         LampSocketElement socket(TestContext ctx, int x, String channel) {
             LampSocketElement l = (LampSocketElement) ctx.placeSix(Wp10aCases.LAMP_SOCKET, ctx.at(x, 1, 1));
             l.getInventory().setItem(0, Eln.sharedItem.getDescriptor(Wp10aCases.LAMP_BULB).newItemStack());
-            l.getInventory().setItem(1, Wp10aCases.lvCables(1));
             l.getInventory().setChanged();
             l.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(4); // LampSocketElement.setChannel (package-private)
@@ -59,8 +58,7 @@ public final class LampSupplyCases {
             ctx.placeSix(Wp9aCases.LV_CABLE, ctx.at(1, 1, 1));
             supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN); // its power pin is the front
-            supply.getInventory().setItem(0, Wp10aCases.lvCables(1)); // LampSupplyContainer.cableSlotId
-            supply.getInventory().setChanged();
+            // its range slot left empty: the supply works without cables (Baughn 2026-10-17)
             supply.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(LampSupplyElement.setPowerName);
                 o.writeByte(0);

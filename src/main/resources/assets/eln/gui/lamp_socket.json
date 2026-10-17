@@ -20,7 +20,6 @@
   {
    "text": "status",
    "sample": [
-    "Cable slot empty",
     "connected to aaaaaaaaaaaaaaaaaaaa",
     "aaaaaaaaaaaaaaaaaaaa is not in range!"
    ]
@@ -38,9 +37,6 @@
     },
     {
      "slot": "0"
-    },
-    {
-     "slot": "1"
     }
    ],
    "fill": true

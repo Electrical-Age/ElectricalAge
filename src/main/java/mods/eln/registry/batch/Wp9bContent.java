@@ -78,6 +78,7 @@ public class Wp9bContent implements ElnContent {
                 "Miaou !");// description
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            copperThermalCableDescriptor = desc;
         }
     }
 

@@ -53,6 +53,8 @@ public final class ElnDeviceRegistry {
     public static ElectricalCableDescriptor lowVoltageCableDescriptor;
     public static ElectricalCableDescriptor batteryCableDescriptor;
     public static ElectricalCableDescriptor meduimVoltageCableDescriptor;
+    /** The Copper Thermal Cable: the thermal probe's built-in cable (Baughn 2026-10-17: no cable slot). */
+    public static mods.eln.sixnode.thermalcable.ThermalCableDescriptor copperThermalCableDescriptor;
 
     // moved from Eln (they read the low-voltage cable descriptor)
     public static double getSmallRs() {

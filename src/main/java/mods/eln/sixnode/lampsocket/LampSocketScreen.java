@@ -36,8 +36,7 @@ public class LampSocketScreen extends ElnScreen {
             () -> render.clientSend(LampSocketElement.tooglePowerSupplyType));
         channel = field("channel", () -> render.channel == null ? "" : render.channel,
             v -> render.clientSetString((byte) LampSocketElement.setChannel, v), tr("Specify the supply channel"));
-        text("status", this::status, () -> render.poweredByLampSupply && render.isConnectedToLampSupply
-            && !deviceItem(LampSocketContainer.cableSlotId).isEmpty() ? 0xFF00AA00 : 0xFFAA0000);
+        text("status", this::status, () -> render.poweredByLampSupply && render.isConnectedToLampSupply ? 0xFF00AA00 : 0xFFAA0000);
         LampSocketDescriptor d = render.descriptor;
         if (!fixed(d)) alpha = slider("alpha", d.alphaZMin, d.alphaZMax, (d.alphaZMax - d.alphaZMin) / 200, render.alphaZ,
             v -> Component.literal(tr("Orientation: %1$°", (int) v)), v -> render.clientSetFloat(LampSocketElement.setAlphaZId, (float) v));
@@ -46,7 +45,6 @@ public class LampSocketScreen extends ElnScreen {
 
     String status() {
         if (!render.poweredByLampSupply) return "";
-        if (deviceItem(LampSocketContainer.cableSlotId).isEmpty()) return tr("Cable slot empty");
         if (render.isConnectedToLampSupply) return tr("connected to %1$", render.channel);
         return tr("%1$ is not in range!", render.channel);
     }

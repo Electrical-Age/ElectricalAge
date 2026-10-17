@@ -46,6 +46,10 @@ public class EnergyMeterElement extends SixNodeElement {
     public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
     public ResistorSwitch shunt = new ResistorSwitch("shunt", aLoad, bLoad);
 
+    /**
+     * 1.12's cable slot (Baughn 2026-10-17: removed, the meter has a built-in LV cable without watchdog). Kept, hidden,
+     * so a cable left in it by an older world stays in the saved data and drops when the meter is broken.
+     */
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public float voltageMax = (float) Eln.SVU, voltageMin = 0;
@@ -113,7 +117,6 @@ public class EnergyMeterElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (Utils.isEmpty(inventory.getItem(EnergyMeterContainer.cableSlotId))) return 0;
         if (front == lrdu) return NodeBase.maskElectricalAll;
         if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
 
@@ -159,7 +162,6 @@ public class EnergyMeterElement extends SixNodeElement {
             stream.writeDouble(timeCounter);
 
             // stream.writeDouble(energyStack);
-            Utils.serialiseItemStack(stream, inventory.getItem(EnergyMeterContainer.cableSlotId));
 
             stream.writeByte(energyUnit);
             stream.writeByte(timeUnit);
@@ -181,31 +183,13 @@ public class EnergyMeterElement extends SixNodeElement {
         computeElectricalLoad();
     }
 
-    @Override
-    protected void inventoryChanged() {
-        computeElectricalLoad();
-        reconnect();
-    }
-
     public void computeElectricalLoad() {
-        ItemStack cable = inventory.getItem(EnergyMeterContainer.cableSlotId);
-
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-        if (cableDescriptor == null) {
-            aLoad.highImpedance();
-            bLoad.highImpedance();
-
-            voltageWatchDogA.disable();
-            voltageWatchDogB.disable();
-            // currentWatchDog.disable();
-        } else {
-            cableDescriptor.applyTo(aLoad);
-            cableDescriptor.applyTo(bLoad);
-
-            voltageWatchDogA.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
-            voltageWatchDogB.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
-            // currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
-        }
+        // built-in LV cable, without the watchdogs a cable in 1.12's slot set (Baughn 2026-10-17)
+        cableDescriptor = ElnDeviceRegistry.lowVoltageCableDescriptor;
+        cableDescriptor.applyTo(aLoad);
+        cableDescriptor.applyTo(bLoad);
+        voltageWatchDogA.disable();
+        voltageWatchDogB.disable();
     }
 
     @Override

@@ -27,6 +27,12 @@ public class PowerSocketDescriptor extends SixNodeDescriptor {
 
     public int range;
 
+    /** The built-in cable (Baughn 2026-10-17: no cable slot): LV for the 50V socket, MV for the 200V one. */
+    public mods.eln.sixnode.electricalcable.ElectricalCableDescriptor cable() {
+        return subID == 2 ? mods.eln.registry.ElnDeviceRegistry.meduimVoltageCableDescriptor
+            : mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
+    }
+
     public PowerSocketDescriptor(int subID, String name, Obj3D obj, int range) {
         super(name, PowerSocketElement.class, null);
         this.subID = subID;

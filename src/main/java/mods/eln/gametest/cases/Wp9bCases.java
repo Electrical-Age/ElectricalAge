@@ -253,10 +253,9 @@ public final class Wp9bCases {
                 out.writeFloat(30f);
             }));
             lv = ctx.placeSix(LV_CABLE, ctx.at(1, 1, 1));
-            // geometry on the output pin (front, toward +X): the input pin (front.inverse()) only connects once a cable is in the slot
+            // geometry on the output pin (front, toward +X); the input pin (front.inverse()) connects with no cable in
+            // a slot (built-in LV cable, Baughn 2026-10-17)
             probe = (ElectricalSensorElement) placeToward(ctx, VOLTAGE_PROBE, ctx.at(2, 1, 1), FRONT, net.minecraft.core.Direction.EAST);
-            probe.getInventory().setItem(0, Eln.sixNodeItem.getDescriptor(LV_CABLE).newItemStack());
-            probe.getInventory().setChanged();
             probe.networkUnserialize(ctx.stream(out -> {
                 out.writeByte(ElectricalSensorElement.setValueId);
                 out.writeFloat(0f);

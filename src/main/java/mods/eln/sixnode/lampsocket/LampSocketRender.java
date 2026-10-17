@@ -51,7 +51,6 @@ public class LampSocketRender extends SixNodeElementRender {
 
     public boolean isConnectedToLampSupply;
 
-    ElectricalCableDescriptor cable;
 
     public LampSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -139,7 +138,6 @@ public class LampSocketRender extends SixNodeElementRender {
             ItemStack lampStack = Utils.unserialiseItemStack(stream);
             lampDescriptor = (LampDescriptor) Utils.getItemObject(lampStack);
             alphaZ = stream.readFloat();
-            cable = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
             poweredByLampSupply = stream.readBoolean();
             channel = stream.readUTF();
@@ -169,13 +167,12 @@ public class LampSocketRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        if (cable == null
-            || (lrdu == front && !descriptor.cableFront)
+        if ((lrdu == front && !descriptor.cableFront)
             || (lrdu == front.left() && !descriptor.cableLeft)
             || (lrdu == front.right() && !descriptor.cableRight)
             || (lrdu == front.inverse() && !descriptor.cableBack))
             return null;
-        return cable.render;
+        return mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render; // built-in cable
     }
 
     public void clientSetGrounded(boolean value) {
