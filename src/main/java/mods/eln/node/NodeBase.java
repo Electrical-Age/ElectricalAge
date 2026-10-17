@@ -395,7 +395,11 @@ public abstract class NodeBase {
     }
 
     public void disconnectJob() {
+        dropConnections();
+    }
 
+    /** Remove every NodeConnection of this node, on both ends. */
+    protected void dropConnections() {
         for (NodeConnection c : nodeConnectionList) {
 
             if (c.N1 != this) {
@@ -469,7 +473,10 @@ public abstract class NodeBase {
 
     public void disconnect() {
         if (!isAdded) {
-            Utils.println("Node destroy error already destroy");
+            // Not in the simulation (frozen by Stasis, or never connected), but a running neighbour may still have linked
+            // to it: drop those links too, or a part removed later leaves a link to an empty side (incognito hung on it,
+            // 2026-10-17: a frozen node's part mined after a tower collapse).
+            dropConnections();
             return;
         }
 
