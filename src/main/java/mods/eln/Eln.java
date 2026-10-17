@@ -239,6 +239,7 @@ public class Eln {
         });
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
+        NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> mods.eln.node.NodeOrphans.tick(e.getServer()));
         // X-ray scanner: ore blocks per material come from tags
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.TagsUpdatedEvent.class, e -> mods.eln.item.xray.XRayFilter.invalidate());
         serverEventListener = new mods.eln.server.ServerEventListener();

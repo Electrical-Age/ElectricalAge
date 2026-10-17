@@ -65,6 +65,8 @@ public final class LabCommands {
                         .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), 8))
                         .then(Commands.argument("r", IntegerArgumentType.integer(0, 512))
                             .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
+                .then(Commands.literal("remove").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .executes(c -> remove(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -88,6 +90,19 @@ public final class LabCommands {
     }
 
     /** What a node holds, for debugging by hand: each element's WAILA lines, plus lamp and lamp supply state. */
+    /** Remove the node at pos from the simulation and the node list (no drops; its block, if any, stays). */
+    static int remove(CommandSourceStack src, BlockPos pos) {
+        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
+        if (node == null) {
+            src.sendFailure(Component.literal("no EA node at " + pos));
+            return 0;
+        }
+        String what = node.getClass().getSimpleName();
+        mods.eln.node.NodeOrphans.remove(node);
+        src.sendSuccess(() -> Component.literal("removed " + what + " at " + pos.toShortString()), true);
+        return 1;
+    }
+
     static int inspect(CommandSourceStack src, BlockPos pos) {
         var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
         List<String> out = new ArrayList<>();
