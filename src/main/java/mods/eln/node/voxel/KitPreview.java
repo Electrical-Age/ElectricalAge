@@ -53,16 +53,21 @@ public final class KitPreview {
         key += "|" + kit.tier + "|" + (plan == null ? "-" : plan.start + "" + plan.waypoints.size() + plan.touched) + "|" + p.isSecondaryUseActive();
         if (last != null && last.key.equals(key)) return;
         boolean ok = true;
+        String why = null;   // (in the action bar too: in stopped land the outlines' colours are drained grey)
         List<int[]> boxes = new ArrayList<>();
         if (h instanceof BlockHitResult bh && h.getType() == HitResult.Type.BLOCK && !p.isSecondaryUseActive()) {
             long[][] join = new long[1][];
             CableRouter.End at = CablePlacer.endAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation(), plan == null, join);
-            if (at == null) ok = false;
+            if (at == null) {
+                ok = false;
+                why = "Not a place for a cable";
+            }
             else if (plan == null || plan.tier != kit.tier) boxes.add(marker(at));
             else {
                 CableRouter.Result r = CablePlacer.route(level, plan, at, join[0]);
                 if (r.error != null) {
                     ok = false;
+                    why = "Can't reach there: " + r.error;
                     boxes.add(marker(at));
                 } else {
                     for (CableRouter.Piece pc : CableRouter.pieces(r.steps)) {
@@ -73,11 +78,15 @@ public final class KitPreview {
                                 (int) pc.bx() * 16 + b[3], (int) pc.by() * 16 + b[4], (int) pc.bz() * 16 + b[5]});
                     }
                     int len = r.length();
-                    if (!p.isCreative() && KitItem.length(p.getMainHandItem()) < len) ok = false;
+                    if (!p.isCreative() && KitItem.length(p.getMainHandItem()) < len) {
+                        ok = false;
+                        why = String.format("Too long: %.1f blocks of cable, the kit holds %.1f", len / 16.0, KitItem.length(p.getMainHandItem()) / 16.0);
+                    }
                 }
             }
         }
         send(p, ok, boxes);
+        if (why != null) p.sendOverlayMessage(net.minecraft.network.chat.Component.literal(why));
         LAST.put(p.getUUID(), new Last(key, boxes.isEmpty()));
     }
 
