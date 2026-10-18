@@ -103,7 +103,7 @@ def turbine(tier):
     m.add(prism("y", tcx, CZ, t["ri"] - 0.3, fy + 1.0, ry + 0.4, "castiron", n=8, caps=(False, False)))
     m.add(prism("x", ry, CZ, t["ri"] - 0.3, 8.0, tcx + 0.5, "castiron", n=8, caps=(False, True)))
     m.add(prism("y", 8.0, CZ, t["ri"] - 0.3, ry - 0.4, 15.5, "castiron", n=8, caps=(True, False)))
-    m.add(prism("y", 8.0, CZ, 1.9, 15.5, 16.0, "steel", n=12, caps=(False, True)))           # top flange (centred)
+    m.add(prism("y", 8.0, CZ, 2.75, 15.0, 16.0, "steel", n=12, caps=(True, True)))           # top flange (centred, an iron pipe's)
     gy = (top + fy) / 2 + 0.25
     m.add(prism("x", gy, CZ, 0.25, tcx - t["ri"] - 0.75, tcx - t["ri"] + 0.2, "brass", n=6, caps=(False, False)))
     m.add(prism("x", gy, CZ, 0.9, tcx - t["ri"] - 1.25, tcx - t["ri"] - 0.75, "brass", n=10))

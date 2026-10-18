@@ -35,6 +35,28 @@ public class FluidCoreTest {
         assertTrue(full.P > 1e5 && full.P < 1e8, "full " + full.P);
     }
 
+    @Test
+    void energyAndPressureRiseWithTemperatureEverywhere() {
+        // nothing may cap pressure (Baughn) or make the energy fold back (bisection would break): sweep T at fill levels
+        double V = 0.01;
+        for (double fill : new double[]{0.001, 0.1, 0.5, 0.9, 0.98, 1.0, 1.1}) {
+            double mw = fill * V * Water.RHO_L;
+            Flash f = new Flash();
+            double lastU = -Double.MAX_VALUE, lastP = -1;
+            for (double T = 280; T <= 5000; T += 5) {
+                f.split(mw, 0.001, V, T);
+                double U = f.energy(0.001);
+                assertTrue(U > lastU, "U not rising at T " + T + " fill " + fill);
+                assertTrue(f.P >= lastP - 1e-6 * Math.abs(lastP), "P falling at T " + T + " fill " + fill + ": " + lastP + " -> " + f.P);
+                lastU = U;
+                lastP = f.P;
+            }
+            // and the solver finds it back
+            double U = Flash.energyAt(mw, 0.001, V, 1500);
+            assertEquals(1500, new Flash().solve(mw, 0.001, U, V, 300).T, 0.1, "fill " + fill);
+        }
+    }
+
     static double[] totals(FluidNetwork net) {
         double m = 0, a = 0, u = 0;
         for (FluidNode n : net.nodes) {

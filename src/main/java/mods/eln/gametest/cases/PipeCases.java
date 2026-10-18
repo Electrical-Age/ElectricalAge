@@ -87,9 +87,9 @@ public final class PipeCases {
             VoxelNode n = node(ctx, first);
             var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
             ctx.line("pipe: boiler " + boiler.getWaila() + ", turbine " + turbine.getWaila() + ", network " + (net == null ? 0 : net.nodes.size()) + " nodes");
-            // (the 4 pipe blocks are one run: one lumped node; with the boiler, the turbine and the valve's air: 4 nodes)
+            // (the 4 pipe blocks are one run: one lumped node; with the boiler and the turbine: 3 nodes)
             ctx.check("pipe: boiler, the pipe run and turbine are one network", net != null && n != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet)
-                && net == mods.eln.fluid.FluidWorld.networkOf(((PipePart) n.parts.get(0)).fluid) && net.nodes.size() == 4, net == null ? "none" : net.nodes.size() + " nodes");
+                && net == mods.eln.fluid.FluidWorld.networkOf(((PipePart) n.parts.get(0)).fluid) && net.nodes.size() == 3, net == null ? "none" : net.nodes.size() + " nodes");
             ctx.check("pipe: the turbine runs off the piped steam", p > 500 && p <= 1050, String.format("%.0f W", p));
             ctx.check("pipe: steam is in the pipe", n != null && ((PipePart) n.parts.get(0)).fluid.mVapour() > 0, "");
         }

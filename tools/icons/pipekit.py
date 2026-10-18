@@ -51,6 +51,19 @@ def adapter():
         px[x, 6], px[x, 7], px[x, 8], px[x, 9] = (214, 214, 214, 255), (170, 170, 175, 255), (150, 150, 155, 255), (95, 95, 100, 255)
     return im
 
+def pipe_texture(base, seed):
+    """16x16 metal: the base colour with faint streaks along v (the pipe's length) and a little noise."""
+    import random
+    rnd = random.Random(seed)
+    im = Image.new("RGBA", (16, 16))
+    px = im.load()
+    streak = [rnd.randint(-6, 6) for _ in range(16)]
+    for x in range(16):
+        for y in range(16):
+            d = streak[x] + rnd.randint(-4, 4)
+            px[x, y] = tuple(max(0, min(255, c + d)) for c in base) + (255,)
+    return im
+
 def main():
     d = os.path.join(sys.argv[1], "assets/eln/textures/item")
     os.makedirs(d, exist_ok=True)
@@ -58,6 +71,10 @@ def main():
         icon(*[c + (255,) for c in cols]).save(os.path.join(d, f"pipe_kit_{name}.png"))
     valve().save(os.path.join(d, "pipe_valve.png"))
     adapter().save(os.path.join(d, "pipe_adapter.png"))
+    b = os.path.join(sys.argv[1], "assets/eln/textures/block")
+    os.makedirs(b, exist_ok=True)
+    pipe_texture((112, 112, 118), 1).save(os.path.join(b, "pipe_iron.png"))     # wrought iron: dark grey
+    pipe_texture((84, 96, 112), 2).save(os.path.join(b, "pipe_alloy.png"))      # alloy steel: blue-grey
 
 if __name__ == "__main__":
     main()

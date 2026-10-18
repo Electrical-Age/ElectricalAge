@@ -4,7 +4,8 @@ package mods.eln.sim.process.destruct;
 public enum FailureCause {
     OVERHEAT("overheated"),
     OVERVOLTAGE("overvoltage"),
-    OVERSPEED("overspeed");
+    OVERSPEED("overspeed"),
+    OVERPRESSURE("burst");
 
     public final String text;
 

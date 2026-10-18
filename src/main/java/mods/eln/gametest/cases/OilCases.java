@@ -34,7 +34,7 @@ public final class OilCases {
         cases.add(new Boiler());
         cases.add(new SteamTurbine());
         cases.add(new StackedPlant());
-        cases.add(new SafetyValve());
+        cases.add(new SealedPlant());
         cases.add(new OldBoilerSave());
         cases.add(new Buckets2());
         cases.add(new Column());
@@ -458,18 +458,23 @@ public final class OilCases {
                 mods.eln.fluid.FluidWorld.networkOf(boiler.vessel) != null && mods.eln.fluid.FluidWorld.networkOf(boiler.vessel) == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
             ctx.check("fluid: the turbine runs near its nominal kilowatt", p > 700 && p <= 1050, String.format("%.0f W", p));
             ctx.check("fluid: no more electricity than 40% of the heat (+5%)", energy <= 0.42 * HEAT * 80, String.format("%.0f J of %.0f J heat", energy, HEAT * 80));
-            ctx.check("fluid: the boiler stays below its safety valve", boiler.vessel.P() < mods.eln.oil.BoilerElement.SAFETY_PA, boiler.vessel.P() + " Pa");
+            ctx.check("fluid: the boiler stays below 10 bar (the turbine takes its steam)", boiler.vessel.P() < 10e5, boiler.vessel.P() + " Pa");
         }
     }
 
-    /** A sealed boiler, heated hard from just below its safety setting: the valve holds it there (no runaway, no NaN). */
-    static final class SafetyValve implements TestCase {
+    /**
+     * A sealed plant heated hard (Baughn: no caps; the pipe bursts, not the boiler): a boiler with one block of iron pipe
+     * on its top port, capped. The pressure climbs past 10 bar without pause, the pipe bursts at 40 and vents, and the
+     * boiler survives.
+     */
+    static final class SealedPlant implements TestCase {
         mods.eln.oil.BoilerElement boiler;
         mods.eln.sim.IProcess fire;
         double peak;
+        net.minecraft.core.BlockPos pipeAt;
 
         public String id() {
-            return "fluid_boiler_safety_valve";
+            return "fluid_sealed_plant_bursts_its_pipe";
         }
 
         public int width() {
@@ -486,19 +491,23 @@ public final class OilCases {
             boiler.thermal.Tc = 175 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
             boiler.fromTanks(8000, 0);
             boiler.showTanks();
+            pipeAt = ctx.at(1, 2, 1);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
-                boiler.thermal.moveEnergyTo(5000 * t);
+                boiler.thermal.moveEnergyTo(6000 * t);
                 peak = Math.max(peak, boiler.vessel.P());
             });
         }
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(fire);
-            double P = boiler.vessel.P();
-            ctx.line("fluid: sealed boiler " + boiler.getWaila() + String.format(", peak %.2f bar", peak / 1e5));
-            ctx.check("fluid: the state stays finite", Double.isFinite(P) && Double.isFinite(boiler.vessel.T()), P + " Pa");
-            ctx.check("fluid: the safety valve holds it near 10 bar", P > 9e5 && peak < 11e5, String.format("now %.2f, peak %.2f bar", P / 1e5, peak / 1e5));
-            ctx.check("fluid: the shell didn't fail", !boiler.node.isDestructing(), "");
+            var n = ctx.level().getBlockEntity(pipeAt) instanceof mods.eln.node.voxel.VoxelNodeEntity e && e.getNode() instanceof mods.eln.node.voxel.VoxelNode v ? v : null;
+            boolean burst = n != null && n.parts.get(0) instanceof mods.eln.node.voxel.PipePart p && p.burst;
+            ctx.line("fluid: sealed plant " + boiler.getWaila() + String.format(", peak %.1f bar", peak / 1e5));
+            ctx.check("fluid: the pressure rose past 10 bar (no cap)", peak > 30e5, String.format("peak %.1f bar", peak / 1e5));
+            ctx.check("fluid: the iron pipe burst", burst, "");
+            ctx.check("fluid: the crack lets the pressure down (the heat keeps coming)", boiler.vessel.P() < 0.9 * peak, String.format("%.1f bar now", boiler.vessel.P() / 1e5));
+            ctx.check("fluid: the boiler survived", !boiler.node.isDestructing() && !boiler.isBurnt(), "");
         }
     }
 

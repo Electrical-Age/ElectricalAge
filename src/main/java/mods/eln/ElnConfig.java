@@ -9,6 +9,7 @@ public final class ElnConfig {
 
     public static final ModConfigSpec SPEC;
     static final ModConfigSpec.DoubleValue BATTERY_LIFE_FACTOR;
+    static final ModConfigSpec.BooleanValue PROBE_DETAILS;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -16,6 +17,11 @@ public final class ElnConfig {
         BATTERY_LIFE_FACTOR = b.comment("Battery lifespan multiplier: wear is divided by it (1 = 1.12's wear; Baughn: 25). Wear also",
                 "doubles every 10 C above ambient and rises up to 4x as the charge runs low.")
             .defineInRange("batteryLifeFactor", 25.0, 0.01, 10000.0);
+        b.pop();
+        b.push("probe");
+        PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
+                "Also 1.12's wailaEasyMode: more detail on some machines.")
+            .define("details", false);
         b.pop();
         SPEC = b.build();
     }
@@ -25,5 +31,6 @@ public final class ElnConfig {
 
     static void refresh() {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
+        Eln.wailaEasyMode = PROBE_DETAILS.get();
     }
 }

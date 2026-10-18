@@ -33,7 +33,7 @@ import java.util.function.DoubleSupplier;
  */
 public class Failure implements IDestructable {
     public enum Kind {
-        CABLE, ELECTRONICS, MACHINE, TRANSFORMER, CAPACITOR, BATTERY, ROTATING, HV_LINE;
+        CABLE, ELECTRONICS, MACHINE, TRANSFORMER, CAPACITOR, BATTERY, ROTATING, HV_LINE, PRESSURE_VESSEL;
 
         public static Kind fromOrdinal(int i) {
             Kind[] v = values();
@@ -120,6 +120,13 @@ public class Failure implements IDestructable {
         return this;
     }
 
+    /** @param flashEnergy what the contents would release flashing to 1 atm (J); scales the burst. */
+    public Failure pressureVessel(DoubleSupplier flashEnergy) {
+        kind = Kind.PRESSURE_VESSEL;
+        energy = flashEnergy;
+        return this;
+    }
+
     public Failure hvLine() {
         kind = Kind.HV_LINE;
         return this;
@@ -203,6 +210,8 @@ public class Failure implements IDestructable {
             case ROTATING:
                 return cause == FailureCause.OVERSPEED ? Outcome.EXPLODE
                     : cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
+            case PRESSURE_VESSEL:
+                return cause == FailureCause.OVERPRESSURE ? Outcome.EXPLODE : cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
             case HV_LINE:
                 if (cause == FailureCause.OVERVOLTAGE && Math.abs(value) >= ARC_FLASH_VOLTAGE) return Outcome.ARC_FLASH;
                 return cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;

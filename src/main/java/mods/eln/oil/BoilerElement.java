@@ -32,14 +32,15 @@ import java.util.Map;
  * BoilerDescriptor: a vessel (a fluid-core node, notes/pipes/DESIGN.md phase 2) heated through its shell, a thermal load
  * on its sides. Water comes in by pipe (the fluid capability); steam leaves by pipe, or through the dome port under it
  * straight into a turbine below (the dome pipe draws at the top of the vessel and comes down the outside), or through
- * its top port. A safety valve vents above SAFETY_PA.
+ * its top port. No safety valve of its own (Baughn: pressure is real; fit a safety valve part on the line); it is
+ * rated BURST_PA, above any pipe, so a sealed plant bursts a pipe first, and a boiler with nowhere to go bursts.
  */
 public class BoilerElement extends TransparentNodeElement implements FluidDevice {
     final BoilerDescriptor desc;
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
     public final BoilerTanks tanks = new BoilerTanks();
     public static final double VOLUME = 0.008, SHELL_C = 700, SHELL_TO_WATER_K_PER_W = 0.005;
-    public static final double SAFETY_PA = 10e5, PORT_K = 6e-11, VALVE_K = 3e-13;
+    public static final double BURST_PA = 350e5, PORT_K = 6e-11;
     /** The vessel (built in initialize, where the block's height is known). */
     public FluidNode vessel;
     private double[] loaded;
@@ -89,8 +90,6 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W;
         vessel.heat += q;
         thermal.moveEnergyTo(-q * dt);
-        // the safety valve: shut below 95% of its setting, wide open at 105%
-        vents.get(0).open = Math.max(0, Math.min(1, (vessel.P() / SAFETY_PA - 0.95) / 0.1));
     }
 
     @Override
@@ -106,6 +105,13 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             meterTime = 0;
         }
         showTanks();
+        // over its rating the vessel bursts: what's in it flashes (explosion strength by that energy)
+        if (vessel.P() > BURST_PA) {
+            var v = vessel;
+            new mods.eln.sim.process.destruct.Failure(this).pressureVessel(
+                () -> Math.max(0, v.energy - v.mWater * Water.uLiquid(Water.TB) - v.mAir * Water.uAir(Water.T_AMBIENT)))
+                .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, v.P());
+        }
     }
 
     /** A new boiler, or one saved before the vessel (old saves): its tanks' water and steam (mB), air for the rest, at
@@ -176,8 +182,6 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         long pos = c.pos().asLong();
         ports = List.of(new FluidPort(vessel, pos, 0, 0.97, PORT_K),    // the dome pipe's flange, underneath
             new FluidPort(vessel, pos, 1, 1.0, PORT_K));                  // the top port
-        vents.clear();
-        vents.add(new Vent(vessel, 1.0, VALVE_K));
         connect();
     }
 

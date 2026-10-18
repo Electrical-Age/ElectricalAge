@@ -50,9 +50,16 @@ public final class Water {
         return Math.max(0, hVapour(T) - hLiquid(T));
     }
 
-    /** Specific internal energy of liquid (J/kg). */
+    /** From here the liquid's heat capacity climbs so its enthalpy meets the vapour's at the critical point (the latent
+     *  heat goes to 0 there, as it should; with constant heat capacities the two crossed at ~530 C: Gemini). */
+    static final double T_STEEP = 573.15;
+
+    /** Specific internal energy of liquid (J/kg); above the critical point there is no liquid: the vapour's. */
     public static double uLiquid(double T) {
-        return CP_L * (T - T0);
+        if (T <= T_STEEP) return CP_L * (T - T0);
+        if (T >= TC) return uVapour(T);
+        double h0 = CP_L * (T_STEEP - T0), h1 = uVapour(TC);
+        return h0 + (h1 - h0) * (T - T_STEEP) / (TC - T_STEEP);
     }
 
     /** Specific enthalpy of liquid (J/kg; the pressure term is negligible). */

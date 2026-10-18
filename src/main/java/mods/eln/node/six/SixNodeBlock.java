@@ -96,7 +96,7 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
     }
 
     /** The element whose plate holds the hit point, or null. */
-    static @Nullable Direction sideAt(SixNodeEntity e, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
+    public static @Nullable Direction sideAt(SixNodeEntity e, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
         double x = hit.getLocation().x - pos.getX(), y = hit.getLocation().y - pos.getY(), z = hit.getLocation().z - pos.getZ();
         int mask = e.getSideMask();
         Direction side = null;

@@ -464,6 +464,26 @@ public class VoxelNode extends Node implements FluidDevice {
         }
     }
 
+    /** For the probe (Jade): a headline, and with details the run's contents, ratings and fittings. */
+    public java.util.LinkedHashMap<String, String> getWaila(boolean details) {
+        var out = new java.util.LinkedHashMap<String, String>();
+        PipePart pipe = null;
+        for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null && (pipe == null || pp.burst)) pipe = pp;
+        if (pipe == null) return out;
+        var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
+        out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
+        out.put("Pressure", String.format("%.2f bar", n.P() / 1e5));
+        out.put("Temperature", String.format("%.0f °C", n.T() - 273.15));
+        for (VoxelPart p : parts) if (p instanceof ValvePart v) out.put("Valve", v.open ? "open" : "shut");
+        if (!details) return out;
+        out.put("Water", String.format("%.0f mB", n.mLiquid() / EaUnits.KG_PER_MB_WATER));
+        out.put("Steam", String.format("%.0f mB", n.mVapour() / EaUnits.KG_PER_MB_STEAM));
+        out.put("Run volume", String.format("%.2f L", n.volume * 1000));
+        out.put("Rating", String.format("works to %.0f bar, bursts at %.0f", pipe.workingPa(n.T()) / 1e5, pipe.burstPa(n.T()) / 1e5));
+        for (VoxelPart p : parts) if (p instanceof AdapterPart a) out.put("Adapter", net.minecraft.core.Direction.from3DDataValue(a.face).getName());
+        return out;
+    }
+
     /** The multimeter on a pipe: its run's pressure and what's in it (a gauge until there's a gauge part). */
     @Override
     public String multiMeterString(Direction side) {

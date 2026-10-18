@@ -14,6 +14,11 @@ kotlin { jvmToolchain(25) }
 
 repositories {
     mavenCentral()
+    // Jade (the WAILA of 26.x), compile-only: EA's tooltip plugin loads only when Jade is installed
+    exclusiveContent {
+        forRepository { maven { url = "https://api.modrinth.com/maven" } }
+        filter { includeGroup "maven.modrinth" }
+    }
 }
 
 // datagen output (P5) is part of the mod's resources
@@ -71,6 +76,8 @@ dependencies {
     // The MNA solver's QR decomposition
     implementation "org.apache.commons:commons-math3:${commons_math_version}"
     jarJar("org.apache.commons:commons-math3:[${commons_math_version},)") { version { prefer commons_math_version } }
+
+    compileOnly "maven.modrinth:jade:26.3.5+neoforge"
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation platform('org.junit:junit-bom:5.13.4')

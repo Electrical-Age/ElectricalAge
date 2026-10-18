@@ -10,7 +10,7 @@ Design frame: mcmodel px (0..16, corner origin), front XN (x = 0):
   base:  cast-iron heat collector with a heat-tinted copper contact pad (8 px wide, floor to 4 px) on every face;
   drum:  riveted plate, axis front-back, dished heads, two seam bands, oxide-red saddles;
   front: gauge glass (water level) between brass cocks, pressure gauge; top: steam dome with the outlet flange,
-         lever safety valve with its weight; z+ flank: feedwater inlet with a check valve and handwheel;
+         z+ flank: feedwater inlet with a check valve and handwheel (no safety valve: fit one on the line);
   dome pipe: from the dome down the z- flank into the base, out of a flange centred on the underside (the dome port).
 
 Usage: boiler.py RESOURCES_DIR  -> assets/eln/model/boiler/
@@ -57,19 +57,13 @@ def boiler():
     m.add(prism("x", CY + 2.6, CZ + 1.6, 0.2, 0.9, hx + 0.6, "brass", n=6, caps=(False, False)))
     m.add(*dial(0.5, CY + 2.6, CZ + 1.6, 1.1, "xn", depth=0.4))
     # steam dome + outlet flange on top
-    sx = 9.5
+    sx = 8.0   # (centred: the top port is the face's centre, where a pipe's flange meets it)
     top = CY + R * math.cos(math.pi / 16)
     m.add(prism("y", sx, CZ, 1.7, top - 1.0, top + 0.5, "rivet", n=10, caps=(False, True)))
-    m.add(prism("y", sx, CZ, 0.95, top + 0.5, 15.2, "steel", n=8, caps=(False, False)))
-    m.add(prism("y", sx, CZ, 1.6, 15.2, 15.85, "steel", n=10))
-    m.add(*bolt_ring("y", sx, CZ, 1.25, 15.85, 16.0, 4, rb=0.22))
-    # lever safety valve: body, bonnet, fulcrum, lever, weight
-    vx = 5.0
-    m.add(prism("y", vx, CZ, 0.75, top - 0.6, top + 0.6, "brass", n=8, caps=(False, True)))
-    m.add(prism("y", vx, CZ, 0.4, top + 0.6, 15.3, "brass", n=6, caps=(False, True)))
-    m.add(box(vx - 0.85, top - 0.2, CZ - 0.2, vx - 0.55, 15.6, CZ + 0.2, "darksteel"))
-    m.add(box(vx - 0.85, 15.3, CZ - 0.15, vx + 3.4, 15.55, CZ + 0.15, "darksteel"))
-    m.add(prism("x", 15.0, CZ, 0.55, vx + 2.4, vx + 3.2, "castiron", n=6))
+    m.add(prism("y", sx, CZ, 2.0, top + 0.5, 15.0, "steel", n=12, caps=(False, False)))     # (an iron pipe's bore)
+    m.add(prism("y", sx, CZ, 2.75, 15.0, 16.0, "steel", n=12))                               # flange: an iron pipe's
+
+    # (no built-in safety valve: Baughn, pressure is real; fit a safety valve part on the steam line)
     # feedwater inlet on the z+ flank: pipe, check valve, handwheel, flange at the face
     fx, fy = 11.25, 6.5
     m.add(prism("z", fx, fy, 0.55, CZ + 3.5, 15.9, "darksteel", n=6, caps=(False, True)))
@@ -84,7 +78,7 @@ def boiler():
     m.add(prism("y", sx, pz, pr + 0.15, py - 0.75, py + 0.75, "darksteel", n=8))               # elbow
     m.add(prism("y", sx, pz, pr, 3.6, py - 0.75, "steel", n=8, caps=(False, False)))           # down the flank
     m.add(prism("y", sx, pz, pr + 0.35, 3.6, 4.1, "steel", n=8))                               # gland into the base
-    m.add(prism("y", 8.0, 8.0, 1.9, 0.0, 0.3, "steel", n=12, caps=(True, False)))              # bottom flange
+    m.add(prism("y", 8.0, 8.0, 2.75, 0.0, 1.0, "steel", n=12, caps=(True, False)))             # bottom flange (an iron pipe's)
     m.add(*bolt_ring("y", 8.0, 8.0, 1.5, 0.0, 0.05, 4, rb=0.22))
     # nameplate on the z- flank of the base
     m.add(box(12.7, 1.0, 1.15, 13.9, 2.5, 1.25, "brass", faces="n"))

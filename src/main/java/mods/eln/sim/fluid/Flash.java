@@ -9,7 +9,7 @@ package mods.eln.sim.fluid;
 public final class Flash {
     /** Smallest gas space, as a fraction of the volume (below it the liquid is "full"). */
     static final double GAS_MIN = 0.02;
-    public static final double T_MIN = 80, T_MAX = 2500;   // (gas expanding fast cools a lot; ice is not modelled)
+    public static final double T_MIN = 80, T_MAX = 6000;   // (gas expanding fast cools a lot; ice is not modelled)
 
     public double T, P, mLiquid, mVapour, vGas;
     /** Partial pressures (Pa) of vapour and air in the gas space, and the liquid's extra pressure when full. */
@@ -36,6 +36,7 @@ public final class Flash {
         double ps = Water.psat(T);
         double mv;
         if (mw <= 0) mv = 0;
+        else if (T >= Water.TC) mv = mw;                                   // supercritical: one gas phase
         else if (mw * Water.R_V * T / V <= ps) mv = mw;                  // all vapour (superheated)
         else {
             double denom = 1 - ps / (Water.RHO_L * Water.R_V * T);
