@@ -100,13 +100,15 @@ public final class CablePart extends VoxelPart {
         int[] c = {8, 8, 8};
         c[n] = plane(face);
         List<CablePart> out = new ArrayList<>();
-        if (dirs.length == 2 && dirs[0] / 2 == dirs[1] / 2 && dirs[0] != dirs[1]) {
+        // the first two arms as one piece through the centre (straight or bent: the centre filled), the rest as arms
+        if (dirs.length >= 2) {
             int[] a = edge(c, dirs[0]), b = edge(c, dirs[1]);
-            out.add(new CablePart(tier, face, new int[]{a[0], a[1], a[2], b[0], b[1], b[2]}));
-            return out;
+            boolean straight = dirs[0] / 2 == dirs[1] / 2;
+            out.add(new CablePart(tier, face, straight ? new int[]{a[0], a[1], a[2], b[0], b[1], b[2]}
+                : new int[]{a[0], a[1], a[2], c[0], c[1], c[2], b[0], b[1], b[2]}));
         }
-        for (int d : dirs) {
-            int[] e = edge(c, d);
+        for (int i = dirs.length >= 2 ? 2 : 0; i < dirs.length; i++) {
+            int[] e = edge(c, dirs[i]);
             out.add(new CablePart(tier, face, new int[]{c[0], c[1], c[2], e[0], e[1], e[2]}));
         }
         return out;
@@ -175,8 +177,11 @@ public final class CablePart extends VoxelPart {
         for (int v : points) if (v < 0 || v > 16) return false;
         if (isKnuckle()) return points.length == 3 && boundaryAxes(points[0], points[1], points[2]) == 2;
         if (face > 5 || points.length < 6 || points.length % 3 != 0) return false;
+        // all on one plane, the cross-section inside the block (on a block face, or on a step inside one)
         int n = normalAxis(face);
-        for (int i = n; i < points.length; i += 3) if (points[i] != plane(face)) return false;
+        for (int i = n; i < points.length; i += 3) if (points[i] != points[n]) return false;
+        int h = TIERS[tier].height;
+        if (face % 2 == 0 ? points[n] + h > 16 : points[n] - h < 0) return false;
         for (int i = 3; i < points.length; i += 3) {
             int axes = 0;
             for (int a = 0; a < 3; a++) if (points[i + a] != points[i - 3 + a]) axes++;
@@ -224,11 +229,19 @@ public final class CablePart extends VoxelPart {
             for (int a = 0; a < 3; a++) {
                 int p = points[i - 3 + a], q = points[i + a];
                 if (a == n) {
-                    b[a] = plane(face) == 0 ? 0 : 16 - t.height;
-                    b[a + 3] = plane(face) == 0 ? t.height : 16;
+                    b[a] = face % 2 == 0 ? points[n] : points[n] - t.height;
+                    b[a + 3] = face % 2 == 0 ? points[n] + t.height : points[n];
+                } else if (p == q) {   // (across the piece)
+                    b[a] = Math.max(0, p - lo);
+                    b[a + 3] = Math.min(16, p + hi);
                 } else {
-                    b[a] = Math.max(0, Math.min(p, q) - lo);
-                    b[a + 3] = Math.min(16, Math.max(p, q) + hi);
+                    // along it: past a bend by half the width (the corner filled), not past its ends (a cable ending
+                    // at a stair's riser doesn't reach into it)
+                    boolean startJoint = i > 3, endJoint = i < points.length - 3;
+                    int lowEnd = p < q ? (startJoint ? lo : 0) : (endJoint ? lo : 0);
+                    int highEnd = p < q ? (endJoint ? hi : 0) : (startJoint ? hi : 0);
+                    b[a] = Math.max(0, Math.min(p, q) - lowEnd);
+                    b[a + 3] = Math.min(16, Math.max(p, q) + highEnd);
                 }
             }
             out.add(b);

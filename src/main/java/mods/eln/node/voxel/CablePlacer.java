@@ -63,13 +63,40 @@ public final class CablePlacer {
             }
 
             @Override
-            public boolean solid(long bx, long by, long bz) {
-                BlockPos p = new BlockPos((int) bx, (int) by, (int) bz);
-                if (!level.isLoaded(p)) return false;
-                BlockState s = level.getBlockState(p);
-                return !(s.getBlock() instanceof mods.eln.node.NodeBlock) && s.isCollisionShapeFullBlock(level, p);
+            public boolean solid(long x0, long y0, long z0, long x1, long y1, long z1) {
+                return CablePlacer.solid(level, x0, y0, z0, x1, y1, z1);
             }
         };
+    }
+
+    /**
+     * Is every voxel of the box (world voxels) solid enough to lay a cable on: a full solid block, or inside the shape of
+     * a decorative block (a stair's step, a slab), real or imitated by a voxel block (Mimic)?
+     */
+    static boolean solid(Level level, long x0, long y0, long z0, long x1, long y1, long z1) {
+        for (long bx = Math.floorDiv(x0, 16); bx <= Math.floorDiv(x1 - 1, 16); bx++)
+            for (long by = Math.floorDiv(y0, 16); by <= Math.floorDiv(y1 - 1, 16); by++)
+                for (long bz = Math.floorDiv(z0, 16); bz <= Math.floorDiv(z1 - 1, 16); bz++) {
+                    BlockPos p = new BlockPos((int) bx, (int) by, (int) bz);
+                    if (!level.isLoaded(p)) return false;
+                    BlockState s = level.getBlockState(p);
+                    if (!(s.getBlock() instanceof mods.eln.node.NodeBlock) && s.isCollisionShapeFullBlock(level, p)) continue;
+                    BlockState shape = Mimic.allowed(s) ? s
+                        : s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(p) instanceof VoxelNodeEntity e ? e.host() : null;
+                    if (shape == null) return false;
+                    List<int[]> boxes = Mimic.boxes(shape, level, p);
+                    // every voxel of the box's part in this block inside one of the shape's boxes
+                    int lx0 = (int) Math.max(0, x0 - bx * 16), ly0 = (int) Math.max(0, y0 - by * 16), lz0 = (int) Math.max(0, z0 - bz * 16);
+                    int lx1 = (int) Math.min(16, x1 - bx * 16), ly1 = (int) Math.min(16, y1 - by * 16), lz1 = (int) Math.min(16, z1 - bz * 16);
+                    for (int x = lx0; x < lx1; x++)
+                        for (int y = ly0; y < ly1; y++)
+                            for (int z = lz0; z < lz1; z++) {
+                                boolean in = false;
+                                for (int[] b : boxes) if (x >= b[0] && x < b[3] && y >= b[1] && y < b[4] && z >= b[2] && z < b[5]) { in = true; break; }
+                                if (!in) return false;
+                            }
+                }
+        return true;
     }
 
     /** Free round a junction point (the new cable meets the old one there). */
@@ -82,8 +109,8 @@ public final class CablePlacer {
             }
 
             @Override
-            public boolean solid(long bx, long by, long bz) {
-                return s.solid(bx, by, bz);
+            public boolean solid(long x0, long y0, long z0, long x1, long y1, long z1) {
+                return s.solid(x0, y0, z0, x1, y1, z1);
             }
         };
     }
@@ -127,7 +154,7 @@ public final class CablePlacer {
                         int[] q = new int[3];
                         int nx = CablePart.normalAxis(c.face);
                         int[] o = VoxelGeometry.others(nx);
-                        q[nx] = CablePart.plane(c.face);
+                        q[nx] = c.points[nx];
                         q[o[0]] = a;
                         q[o[1]] = b;
                         if (!c.passes(q[0], q[1], q[2])) continue;
@@ -141,6 +168,7 @@ public final class CablePlacer {
                 join[0] = best;
                 return new CableRouter.End(best[0], best[1], best[2], c.face, -1);
             }
+            if (v.host != null) return surface(pos, face, hx, hy, hz);   // (the imitated stair's surface)
             return null;
         }
         if (n != null) {
@@ -168,13 +196,18 @@ public final class CablePlacer {
             p[w] = base[w] + snap(h[w] * 16);
             return new CableRouter.End(p[0], p[1], p[2], edge, start ? f : CableRouter.reverse(f));
         }
-        // a plain block: a point on the face clicked
+        return surface(pos, face, hx, hy, hz);
+    }
+
+    /** A point on the surface clicked (a block's face, or a stair's step inside its block), the cable lying on it. */
+    static CableRouter.End surface(BlockPos pos, Direction face, double hx, double hy, double hz) {
         int f = face.get3DDataValue();
         int fa = CableRouter.axis(f);
         double[] h = {hx, hy, hz};
         long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
         long[] p = new long[3];
-        for (int a = 0; a < 3; a++) p[a] = a == fa ? base[a] + (f % 2 == 0 ? 0 : 16) : base[a] + snap(h[a] * 16);
+        for (int a = 0; a < 3; a++)
+            p[a] = a == fa ? base[a] + Math.round(h[a] * 16 / CableRouter.LATTICE) * CableRouter.LATTICE : base[a] + snap(h[a] * 16);
         return new CableRouter.End(p[0], p[1], p[2], CableRouter.reverse(f), -1);
     }
 

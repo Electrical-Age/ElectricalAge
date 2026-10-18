@@ -41,6 +41,7 @@ public final class CableCases {
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
+        cases.add(new StairsCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
@@ -664,6 +665,58 @@ public final class CableCases {
             fv.clearHost(null);
             afterFence = host(c, 3);
             c.check("mimic: the fence mined, the cable stays", afterFence.startsWith("none + "), afterFence);
+        }
+    }
+
+    /**
+     * Down a staircase (Mimic, support inside blocks): a corridor with two stairs up to a platform; a cable kit's route
+     * from the floor to the platform's top runs over the steps (on each step's tread and up its riser) through the stair
+     * blocks, now voxel blocks imitating the stairs.
+     */
+    static final class StairsCase implements TestCase {
+        String err, hosts = "";
+
+        public String name() {
+            return "cable up a staircase";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            for (int x = 1; x <= 7; x++) for (int y = 1; y <= 3; y++) {
+                c.floor(c.at(x, y, 0));
+                c.floor(c.at(x, y, 2));
+            }
+            var stairs = net.minecraft.world.level.block.Blocks.OAK_STAIRS.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.EAST);
+            level.setBlock(c.at(3, 1, 1), stairs, 3);
+            c.floor(c.at(4, 1, 1));
+            level.setBlock(c.at(4, 2, 1), stairs, 3);
+            for (int x = 5; x <= 7; x++) for (int y = 1; y <= 2; y++) c.floor(c.at(x, y, 1));
+            BlockPos a = c.at(1, 1, 1), b = c.at(6, 3, 1);
+            var start = new mods.eln.node.voxel.CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + 8, 0, -1);
+            var end = new mods.eln.node.voxel.CableRouter.End(b.getX() * 16L + 8, b.getY() * 16L, b.getZ() * 16L + 8, 0, -1);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, LV, start, end);
+            for (BlockPos p : new BlockPos[]{c.at(3, 1, 1), c.at(4, 2, 1)}) {
+                var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
+                hosts += n instanceof mods.eln.node.voxel.VoxelNode v && v.host != null ? v.host.getBlock().getName().getString() + " + " + v.parts.size() + "; " : "none; ";
+            }
+        }
+
+        public void measure(TestContext c) {
+            c.check("stairs: a route over the steps is laid", err == null, String.valueOf(err));
+            c.check("stairs: both stairs hold cable (imitated)", hosts.equals(hosts.replace("none", "")) && hosts.split(";").length >= 2, hosts);
         }
     }
 

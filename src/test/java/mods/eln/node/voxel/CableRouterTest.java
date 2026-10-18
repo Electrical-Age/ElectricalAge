@@ -24,8 +24,12 @@ public class CableRouterTest {
             }
 
             @Override
-            public boolean solid(long bx, long by, long bz) {
-                return solid.contains(List.of(bx, by, bz));
+            public boolean solid(long x0, long y0, long z0, long x1, long y1, long z1) {
+                for (long bx = Math.floorDiv(x0, 16); bx <= Math.floorDiv(x1 - 1, 16); bx++)
+                    for (long by = Math.floorDiv(y0, 16); by <= Math.floorDiv(y1 - 1, 16); by++)
+                        for (long bz = Math.floorDiv(z0, 16); bz <= Math.floorDiv(z1 - 1, 16); bz++)
+                            if (!solid.contains(List.of(bx, by, bz))) return false;
+                return true;
             }
         };
     }

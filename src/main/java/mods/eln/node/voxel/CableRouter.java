@@ -23,9 +23,10 @@ public final class CableRouter {
     /** Air kept round a cable (voxels, across and above it): two cables never look touching unless joined (Baughn). */
     public static final int CLEARANCE = 1;
 
-    /** The world: what's in the way (a box in world voxels) and which blocks are solid enough to lay a cable on. */
+    /** The world: what's in the way (a box in world voxels), and whether every voxel of a box is solid enough to lay a
+     *  cable on (full blocks, and the shapes of imitated decorative blocks: a stair's step). */
     public interface Space extends PipeRouter.Space {
-        boolean solid(long bx, long by, long bz);
+        boolean solid(long x0, long y0, long z0, long x1, long y1, long z1);
     }
 
     /** A routing end: a point on a face plane, the face its cable lies against (3D value), and, for a device or cable
@@ -138,7 +139,8 @@ public final class CableRouter {
         long[] c = new long[3];
         int n = axis(attach);
         for (int a = 0; a < 3; a++) {
-            if (a == n) c[a] = Math.floorDiv(p[a], 16) - (attach % 2 == 1 ? 1 : 0);
+            // (on a block's face plane: the block on the cable's side; on a plane inside a block, a step's top: that block)
+            if (a == n) c[a] = Math.floorDiv(p[a], 16) - (attach % 2 == 1 && Math.floorMod(p[a], 16) == 0 ? 1 : 0);
             else if (toward >= 0 && axis(toward) == a && Math.floorMod(p[a], 16) == 0 && toward % 2 == 0) c[a] = Math.floorDiv(p[a], 16) - 1;
             else c[a] = Math.floorDiv(p[a], 16);
         }
@@ -164,18 +166,44 @@ public final class CableRouter {
         return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
     }
 
-    /** Is the face under a step from p along d solid (the support block on attach's side)? */
-    static boolean supported(Space space, long[] p, int attach, int d) {
-        long[] mid = {p[0] * 2 + DV[d][0] * LATTICE, p[1] * 2 + DV[d][1] * LATTICE, p[2] * 2 + DV[d][2] * LATTICE};
-        for (int a = 0; a < 3; a++) mid[a] = Math.floorDiv(mid[a], 2);
-        long[] c = cell(mid, attach, -1);
-        return space.solid(c[0] + DV[attach][0], c[1] + DV[attach][1], c[2] + DV[attach][2]);
+    /** Is what's under a step from p along d solid (one voxel deep on attach's side, the cable's width)? */
+    static boolean supported(Space space, int width, long[] p, int attach, int d) {
+        int n = axis(attach), along = axis(d), w = 3 - n - along;
+        long[] lo = new long[3], hi = new long[3];
+        lo[along] = Math.min(p[along], p[along] + DV[d][along] * LATTICE);
+        hi[along] = Math.max(p[along], p[along] + DV[d][along] * LATTICE);
+        lo[w] = p[w] - width / 2;
+        hi[w] = p[w] + (width - width / 2);
+        lo[n] = attach % 2 == 0 ? p[n] - 1 : p[n];
+        hi[n] = lo[n] + 1;
+        return space.solid(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
+    }
+
+    /** One voxel beyond p along e, the cable's width across: on the cable's side (a wall there?) or the support's side
+     *  (does the support go on?). */
+    static boolean solidBeyond(Space space, int width, int height, long[] p, int attach, int e, boolean supportSide) {
+        int n = axis(attach), ea = axis(e), w = 3 - n - ea;
+        long[] lo = new long[3], hi = new long[3];
+        lo[ea] = e % 2 == 1 ? p[ea] : p[ea] - 1;
+        hi[ea] = lo[ea] + 1;
+        lo[w] = p[w] - width / 2;
+        hi[w] = p[w] + (width - width / 2);
+        if (supportSide) {
+            lo[n] = attach % 2 == 0 ? p[n] - 1 : p[n];
+            hi[n] = lo[n] + 1;
+        } else if (attach % 2 == 0) {
+            lo[n] = p[n];
+            hi[n] = p[n] + height;
+        } else {
+            lo[n] = p[n] - height;
+            hi[n] = p[n];
+        }
+        return space.solid(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
     }
 
     static List<Step> leg(Space space, int width, int height, End a, int attach0, int lastDir, End b, int arriveDir, long deadline) {
         long[] s = {a.x(), a.y(), a.z()}, t = {b.x(), b.y(), b.z()};
         for (int i = 0; i < 3; i++) if (Math.floorMod(s[i], LATTICE) != 0 || Math.floorMod(t[i], LATTICE) != 0) return null;
-        if (Math.floorMod(s[axis(attach0)], 16) != 0) return null;
         long[] lo = new long[3], hi = new long[3];
         for (int i = 0; i < 3; i++) {
             lo[i] = Math.min(s[i], t[i]) - MARGIN;
@@ -211,25 +239,23 @@ public final class CableRouter {
                 if (out(q, lo, hi)) continue;
                 // a cable stays inside its block: it crosses a block's edge, never runs along one (it would straddle two)
                 if (Math.floorMod(p[3 - n - axis(d)], 16) == 0) continue;
-                if (stepBlocked(space, width, height, p, k.attach(), d) || !supported(space, p, k.attach(), d)) continue;
+                if (stepBlocked(space, width, height, p, k.attach(), d) || !supported(space, width, p, k.attach(), d)) continue;
                 long[] cp = cell(p, k.attach(), d), cq = cell(q, k.attach(), reverse(d));
                 long g = o.g + LATTICE + (k.dir() >= 0 && k.dir() != d ? BEND : 0)
                     + (cp[0] != cq[0] || cp[1] != cq[1] || cp[2] != cq[2] ? BLOCK_ENTERED : 0);
                 push(open, best, from, outer, k, new Key(q[0], q[1], q[2], k.attach(), d), g, t, false);
             }
-            // corners: at a block boundary along e (across the face)
+            // corners, toward e (across the face): a wall met here (inner), or the support ending here (outer); at a block's
+            // edge or at a step inside a block (a stair's riser, a slab's edge)
             for (int e = 0; e < 6; e++) {
-                if (axis(e) == n || Math.floorMod(p[axis(e)], 16) != 0) continue;
-                long[] c = cell(p, k.attach(), reverse(e));   // (the cable's block on this side of the boundary)
-                long[] beyond = {c[0] + DV[e][0], c[1] + DV[e][1], c[2] + DV[e][2]};
-                if (space.solid(beyond[0], beyond[1], beyond[2])) {
+                if (axis(e) == n) continue;
+                if (solidBeyond(space, width, height, p, k.attach(), e, false)) {
                     // inner corner: up the wall met here
                     push(open, best, from, outer, k, new Key(p[0], p[1], p[2], e, -1), o.g + BEND, t, false);
                 } else {
-                    // outer corner: the support ends at this edge; round it onto the support's face toward e
-                    long[] sup = {c[0] + DV[k.attach()][0], c[1] + DV[k.attach()][1], c[2] + DV[k.attach()][2]};
-                    long[] supBeyond = {sup[0] + DV[e][0], sup[1] + DV[e][1], sup[2] + DV[e][2]};
-                    if (!space.solid(sup[0], sup[1], sup[2]) || space.solid(supBeyond[0], supBeyond[1], supBeyond[2])) continue;
+                    // outer corner: round the support's edge onto its face toward e
+                    if (solidBeyond(space, width, height, p, k.attach(), e, true)) continue;
+                    if (!solidBeyond(space, width, height, p, k.attach(), reverse(e), true)) continue;
                     if (knuckleBlocked(space, width, height, p, k.attach(), e)) continue;
                     push(open, best, from, outer, k, new Key(p[0], p[1], p[2], reverse(e), -1), o.g + BEND, t, true);
                 }
@@ -310,6 +336,14 @@ public final class CableRouter {
         List<long[]> poly = null;
         for (int i = 1; i < dense.size(); i++) {
             Step a = dense.get(i - 1), b = dense.get(i);
+            if (b.outer && !(Math.floorMod(new long[]{b.x, b.y, b.z}[axis(reverse(b.attach))], 16) == 0
+                && Math.floorMod(new long[]{b.x, b.y, b.z}[axis(a.attach)], 16) == 0)) {
+                // round a step inside a block (or across one block face): no knuckle, the faces just change
+                flush(out, curKey, poly);
+                curKey = null;
+                poly = null;
+                continue;
+            }
             if (b.outer) {
                 // knuckle in the block round the corner: the cable's block before the corner, beyond the edge
                 int e = reverse(b.attach);
