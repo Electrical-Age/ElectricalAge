@@ -73,6 +73,14 @@ public class Failure implements IDestructable {
         this.node = e.node;
     }
 
+    /** Anything else that burns out in place (a voxel node's cable conductor). */
+    public Failure(IBurnable target, NodeBase node, Coordonate c, String type) {
+        this.c = c;
+        this.type = type;
+        this.target = target;
+        this.node = node;
+    }
+
     /** Simple nodes can't burn out; they are removed (quietly, with smoke) instead. */
     public Failure(SimpleNode e) {
         this.c = e.coordonate;

@@ -153,7 +153,7 @@ public final class LabCommands {
         return out.size();
     }
 
-    static Object field(Object o, String name) {
+    public static Object field(Object o, String name) {
         for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
             try {
                 var f = c.getDeclaredField(name);

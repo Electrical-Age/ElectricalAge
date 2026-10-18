@@ -1,5 +1,6 @@
 package mods.eln.node.voxel;
 
+import mods.eln.Eln;
 import mods.eln.fluid.FluidWorld;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -30,6 +31,8 @@ public class VoxelNode extends Node implements FluidDevice {
 
     public final List<VoxelPart> parts = new ArrayList<>();
     private final BitSet used = new BitSet(4096);
+    /** The cables' conductors and their loads (server). */
+    final CableNet cables = new CableNet(this);
 
     @Override
     public String getNodeUuid() {
@@ -69,12 +72,18 @@ public class VoxelNode extends Node implements FluidDevice {
     /** Add a part (a pipe laid here): null if done, else why not. */
     public String addPart(VoxelPart p) {
         if (p instanceof PipePart pipe && !pipe.valid()) return "not a straight-pieced pipe inside the block";
+        if (p instanceof CablePart c && !c.valid()) return "not a cable lying on a face of the block";
         if (p instanceof AdapterPart a) {   // (its flange sits on its own stub's end)
             BitSet others = new BitSet(4096), want = new BitSet(4096);
             PipePart stub = stubOf(a);
             for (VoxelPart q : parts) if (q != stub) for (int[] b : q.boxes()) fill(others, b);
             for (int[] b : a.boxes()) fill(want, b);
             if (stub == null) return "no pipe ends there";
+            if (want.intersects(others)) return "something is in the way";
+        } else if (p instanceof CablePart c) {   // (cables joined to it may overlap it where they meet)
+            BitSet others = new BitSet(4096), want = new BitSet(4096);
+            for (VoxelPart q : parts) if (!(q instanceof CablePart o && o.touches(c))) for (int[] b : q.boxes()) fill(others, b);
+            for (int[] b : c.boxes()) fill(want, b);
             if (want.intersects(others)) return "something is in the way";
         } else if (!fits(p)) return "something is in the way";
         if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, null);
@@ -109,9 +118,18 @@ public class VoxelNode extends Node implements FluidDevice {
 
     private void changed() {
         vents = null;
-        if (isAdded()) FluidWorld.changed(this);
+        if (isAdded()) {
+            FluidWorld.changed(this);
+            // cables: rebuild the conductors and their links (reconnect keeps their state through the pieces)
+            boolean cable = false;
+            for (VoxelPart p : parts) if (p instanceof CablePart) cable = true;
+            if (cable || cablesBuilt) reconnect();
+        }
         setNeedPublish(true);
     }
+
+    /** Were there conductors at the last connect (a removed last cable must reconnect too)? */
+    private boolean cablesBuilt;
 
     // ---- fluid
 
@@ -466,16 +484,84 @@ public class VoxelNode extends Node implements FluidDevice {
                 }
     }
 
+    /**
+     * Cables: the conductors go into the simulation, then each port is linked to what's across its face: another voxel
+     * node's cable ending at the same point, or a six-node or transparent device by EA's edge rule (a cable lying on
+     * face A, ending on face F, takes the (F, edge F-A) connection a six-node cable on A would). No outer-corner
+     * wrapping: a cable round an outer corner is a knuckle in the corner block.
+     */
     @Override
     public void connectJob() {
-        super.connectJob();
+        cables.build();
+        cables.addToSimulation();
+        cablesBuilt = !cables.conductors.isEmpty();
+        for (Direction dir : Direction.values()) {
+            mods.eln.node.NodeBase other = getNeighbor(dir);
+            if (other == null || !other.isAdded()) continue;
+            if (other instanceof VoxelNode v) connectVoxel(dir, v);
+            else for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
+        }
         FluidWorld.add(this);
+    }
+
+    private void connectVoxel(Direction dir, VoxelNode v) {
+        int f = dir.toEnumFacing().get3DDataValue();
+        for (CablePart.Port p : cables.ports()) {
+            if (p.face() != f) continue;
+            CableNet.Conductor a = cables.at(p), b = v.cables.at(p.mirrored());
+            if (a == null || b == null || !compareConnectionMask(a.mask(), b.mask())) continue;
+            var e = new mods.eln.sim.ElectricalConnection(a.load, b.load);
+            Eln.simulator.addElectricalComponent(e);
+            mods.eln.sim.ThermalConnection t = null;
+            if (a.thermal != null && b.thermal != null) {
+                t = new mods.eln.sim.ThermalConnection(a.thermal, b.thermal);
+                Eln.simulator.addThermalConnection(t);
+            }
+            var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
+            nodeConnectionList.add(c);
+            v.nodeConnectionList.add(c);
+            v.setNeedPublish(true);
+        }
     }
 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
+        cables.removeFromSimulation();
         FluidWorld.remove(this);
+    }
+
+    /** The cable conductor taking EA's (side, edge) connection, or null: see connectJob. Not for voxel neighbours
+     *  (exact points) nor through air (no outer-corner wraps). */
+    private CableNet.Conductor legacy(Direction side, LRDU lrdu) {
+        mods.eln.node.NodeBase other = getNeighbor(side);
+        if (other == null || other instanceof VoxelNode) return null;
+        int f = side.toEnumFacing().get3DDataValue(), a = side.applyLRDU(lrdu).toEnumFacing().get3DDataValue();
+        for (CablePart.Port p : cables.ports()) {
+            if (p.face() != f) continue;
+            CableNet.Conductor k = cables.at(p);
+            if (k != null && k.face == a) return k;
+        }
+        return null;
+    }
+
+    /** Each working cable conductor's voltage, current and temperature (C above ambient; NaN without one): tests. */
+    public List<double[]> cableStates() {
+        List<double[]> out = new ArrayList<>();
+        for (CableNet.Conductor k : cables.live())
+            out.add(new double[]{k.load.getU(), k.load.getI(), k.thermal == null ? Double.NaN : k.thermal.Tc});
+        return out;
+    }
+
+    /** Has any cable here burnt out? */
+    public boolean cableBurnt() {
+        for (VoxelPart p : parts) if (p instanceof CablePart c && c.burnt != null) return true;
+        return false;
+    }
+
+    /** The cables' watchdogs (FaultNetwork). */
+    public List<mods.eln.sim.IProcess> slowProcesses() {
+        return cables.slowProcesses();
     }
 
     // ---- node
@@ -504,24 +590,28 @@ public class VoxelNode extends Node implements FluidDevice {
     }
 
     @Override
-    public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-        return 0;
+    public int getSideConnectionMask(Direction side, LRDU lrdu) {
+        CableNet.Conductor k = legacy(side, lrdu);
+        return k == null ? 0 : k.mask();
     }
 
     @Override
-    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
-        return null;
+    public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+        CableNet.Conductor k = legacy(side, lrdu);
+        return k == null ? null : k.thermal;
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
-        return null;
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        CableNet.Conductor k = legacy(side, lrdu);
+        return k == null ? null : k.load;
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
         // (other mods' pipes may have used an adapter since the last step: into the run, and the run into its pieces)
         if (isAdded()) {
+            cables.save();
             syncAdapters();
             for (VoxelPart p : parts) if (p instanceof AdapterPart a && stubOf(a) != null) mods.eln.fluid.FluidWorld.writeBackOf(stubOf(a).fluid);
             showAdapters();
@@ -591,6 +681,8 @@ public class VoxelNode extends Node implements FluidDevice {
     /** The multimeter on a pipe: its run's pressure and what's in it (a gauge until there's a gauge part). */
     @Override
     public String multiMeterString(Direction side) {
+        for (CableNet.Conductor k : cables.live())
+            return k.d.signalWire ? mods.eln.misc.Utils.plotSignal(k.load.getU(), k.load.getI()) : mods.eln.misc.Utils.plotUIP(k.load.getU(), k.load.getI());
         for (VoxelPart p : parts)
             if (p instanceof PipePart pipe && pipe.fluid != null) {
                 var n = pipe.fluid;
@@ -602,6 +694,8 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public String thermoMeterString(Direction side) {
+        for (CableNet.Conductor k : cables.live())
+            if (k.thermal != null) return mods.eln.misc.Utils.plotCelsius("T", k.thermal.Tc);
         for (VoxelPart p : parts)
             if (p instanceof PipePart pipe && pipe.fluid != null) return String.format("%.0f °C  ", pipe.fluid.T() - 273.15);
         return "";

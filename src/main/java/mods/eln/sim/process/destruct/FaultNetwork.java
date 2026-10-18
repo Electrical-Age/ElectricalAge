@@ -45,6 +45,8 @@ public final class FaultNetwork {
         for (NodeBase n : nodes) {
             if (n instanceof SixNode six) {
                 for (SixNodeElement e : six.sideElementList) if (e != null) relieve(e.slowProcessList);
+            } else if (n instanceof mods.eln.node.voxel.VoxelNode v) {
+                relieve(v.slowProcesses());
             } else if (n instanceof TransparentNode t && t.element != null) {
                 relieve(t.element.slowProcessList);
             }

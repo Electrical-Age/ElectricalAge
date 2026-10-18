@@ -88,6 +88,16 @@ public class VoxelNodeRender implements BlockEntityRenderer<VoxelNodeEntity, Vox
                     box(b[0], b[1], b[2], b[3], b[4], b[5]);
                     continue;
                 }
+                if (part instanceof CablePart c) {
+                    // (plain boxes in the six-node cable's texture until the baked model)
+                    UtilsClient.glDefaultColor();
+                    var d = CablePart.TIERS[c.tier].descriptor();
+                    if (d != null && d.render != null) d.render.bindCableTexture();
+                    else UtilsClient.bindTexture(TEX[0]);
+                    if (c.burnt != null) GL11.glColor4f(0.25f, 0.2f, 0.18f, 1f);
+                    for (int[] b : c.boxes()) box(b[0], b[1], b[2], b[3], b[4], b[5]);
+                    continue;
+                }
                 if (!(part instanceof PipePart pipe)) continue;
                 UtilsClient.glDefaultColor();
                 if (pipe.burst) GL11.glColor4f(0.55f, 0.35f, 0.25f, 1f);   // (burst: scorched)
