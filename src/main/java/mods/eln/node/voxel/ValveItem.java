@@ -6,7 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 
 /** A pipe valve: right-click a pipe running straight through a block's middle to fit it there. */
-public class ValveItem extends Item {
+public class ValveItem extends Item implements PipeTool {
     public ValveItem(Properties p) {
         super(p);
     }

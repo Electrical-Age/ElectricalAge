@@ -101,6 +101,8 @@ public class VoxelNode extends Node implements FluidDevice {
     public int partAt(double x, double y, double z) {
         for (int i = parts.size() - 1; i >= 0; i--)
             for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return i;
+        for (int i = parts.size() - 1; i >= 0; i--)   // (the outline is 2 voxels fatter than the parts)
+            for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return i;
         return -1;
     }
 

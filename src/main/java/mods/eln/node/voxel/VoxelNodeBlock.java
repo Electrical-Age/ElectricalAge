@@ -30,13 +30,22 @@ public class VoxelNodeBlock extends NodeBlock {
     @Override
     protected net.minecraft.world.InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos,
             net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
-        if (stack.getItem() instanceof PipeKitItem) return net.minecraft.world.InteractionResult.PASS;
+        if (stack.getItem() instanceof PipeTool) return net.minecraft.world.InteractionResult.PASS;
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
     static VoxelShape shapeOf(java.util.List<VoxelPart> parts) {
+        return shapeOf(parts, 0);
+    }
+
+    /** The parts' boxes, grown by grow voxels across (not past the block): thin pipes are hard to aim at
+     *  (AdventurAgent: a 5 degree band at 3 blocks), so the outline is fatter than what collides. */
+    static VoxelShape shapeOf(java.util.List<VoxelPart> parts, int grow) {
         VoxelShape s = Shapes.empty();
-        for (VoxelPart p : parts) for (int[] b : p.boxes()) s = Shapes.or(s, box(b[0], b[1], b[2], b[3], b[4], b[5]));
+        for (VoxelPart p : parts)
+            for (int[] b : p.boxes())
+                s = Shapes.or(s, box(Math.max(0, b[0] - grow), Math.max(0, b[1] - grow), Math.max(0, b[2] - grow),
+                    Math.min(16, b[3] + grow), Math.min(16, b[4] + grow), Math.min(16, b[5] + grow)));
         return s;
     }
 
@@ -44,7 +53,7 @@ public class VoxelNodeBlock extends NodeBlock {
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         if (e == null) return Shapes.block();
-        VoxelShape s = shapeOf(e.parts());
+        VoxelShape s = shapeOf(e.parts(), 2);
         return s.isEmpty() ? Shapes.block() : s;
     }
 

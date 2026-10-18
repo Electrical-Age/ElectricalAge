@@ -9,7 +9,7 @@ import net.minecraft.world.item.context.UseOnContext;
  * A pipe adapter: right-click the face of another mod's pipe or tank (or any block): it goes in the block in front,
  * its flange against that face, with a stub of pipe (iron) to the block's middle, where routes can join it.
  */
-public class AdapterItem extends Item {
+public class AdapterItem extends Item implements PipeTool {
     public AdapterItem(Properties p) {
         super(p);
     }

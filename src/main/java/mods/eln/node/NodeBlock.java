@@ -102,7 +102,7 @@ public abstract class NodeBlock extends Block implements EntityBlock {
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         // a pipe kit routes from and to devices' ports: the kit's use, not the device's (AdventurAgent)
-        if (stack.getItem() instanceof mods.eln.node.voxel.PipeKitItem) return InteractionResult.PASS;
+        if (stack.getItem() instanceof mods.eln.node.voxel.PipeTool) return InteractionResult.PASS;
         return activate(level, pos, player, hit);
     }
 

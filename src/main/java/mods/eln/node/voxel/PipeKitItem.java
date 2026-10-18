@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * (PipePlacer: waypoints, then a port to finish); right-clicking any other face lays one block of straight pipe,
  * centred, in the block in front of it, along the face's axis.
  */
-public class PipeKitItem extends Item {
+public class PipeKitItem extends Item implements PipeTool {
     public static final int MAX = 1024;
     public final int tier;
 
