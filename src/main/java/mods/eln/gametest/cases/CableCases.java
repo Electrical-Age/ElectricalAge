@@ -40,7 +40,9 @@ public final class CableCases {
         addLayouts(mine);
         cases.addAll(mine);
         // the same circuits built from six-node cables and converted (CableConverter)
-        for (TestCase t : mine) if (t instanceof Case k) cases.add(new ConvertCase(k.name.replace("voxel cable", "converted cable"), k.layout));
+        for (TestCase t : mine) if (t instanceof Case k) cases.add(new ConvertCase(k.name.replace("voxel cable", "converted cable"), k.layout, false));
+        // and converted, then reverted: six-node again, no knuckles left
+        for (TestCase t : mine) if (t instanceof Case k) cases.add(new ConvertCase(k.name.replace("voxel cable", "reverted cable"), k.layout, true));
     }
 
     static void addLayouts(List<TestCase> cases) {
@@ -160,9 +162,13 @@ public final class CableCases {
         int converted;
         final List<String> skipped = new ArrayList<>();
 
-        ConvertCase(String name, Layout layout) {
+        final boolean revert;
+        int voxelLeft = -1;
+
+        ConvertCase(String name, Layout layout, boolean revert) {
             this.name = name;
             this.layout = layout;
+            this.revert = revert;
         }
 
         public String name() {
@@ -201,11 +207,27 @@ public final class CableCases {
                         if (why == null) converted++;
                         else skipped.add(x + "," + y + "," + z + ": " + why);
                     }
+            if (!revert) return;
+            List<mods.eln.node.voxel.VoxelNode> vs = new ArrayList<>();
+            for (int x = 0; x < 10; x++)
+                for (int y = 1; y < 4; y++)
+                    for (int z = 6; z < 10; z++)
+                        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level())) instanceof mods.eln.node.voxel.VoxelNode v)
+                            vs.add(v);
+            for (var v : vs) mods.eln.node.voxel.CableConverter.revert(v);
+            for (var v : vs) if (v.legacy == null) mods.eln.node.voxel.CableConverter.revertKnuckles(v);
+            voxelLeft = 0;
+            for (int x = 0; x < 10; x++)
+                for (int y = 1; y < 4; y++)
+                    for (int z = 6; z < 10; z++)
+                        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level())) instanceof mods.eln.node.voxel.VoxelNode)
+                            voxelLeft++;
         }
 
         public void measure(TestContext c) {
             c.line(name + ": converted " + converted + " blocks; kept " + String.join("; ", skipped));
             c.check(name + ": cable blocks converted", converted > 0, converted + "");
+            if (revert) c.check(name + ": no voxel node left after the revert", voxelLeft == 0, voxelLeft + "");
             for (String k : skipped)
                 c.check(name + ": only devices kept as six-node", k.contains("holds a "), k);
             for (int i = 0; i < six.size(); i++) {

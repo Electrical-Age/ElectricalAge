@@ -10,6 +10,7 @@ public final class ElnConfig {
     public static final ModConfigSpec SPEC;
     static final ModConfigSpec.DoubleValue BATTERY_LIFE_FACTOR;
     static final ModConfigSpec.BooleanValue PROBE_DETAILS;
+    static final ModConfigSpec.BooleanValue CONVERT_CABLES;
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
 
     static {
@@ -27,6 +28,11 @@ public final class ElnConfig {
         COAL_KINDLE = b.comment("Seconds to relight a coal fire that went out.").defineInRange("coalKindleSeconds", 30.0, 0.0, 3600.0);
         OIL_LIGHT = b.comment("Seconds to light an oil burner.").defineInRange("oilLightSeconds", 3.0, 0.0, 3600.0);
         b.pop();
+        b.push("cables");
+        CONVERT_CABLES = b.comment("Convert six-node cables to voxel cables as their chunks load (blocks holding only cables; the",
+                "six-node block is kept inside for /elnlab cables revert). Off until the conversion is approved.")
+            .define("convertOnLoad", false);
+        b.pop();
         b.push("probe");
         PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
                 "Also 1.12's wailaEasyMode: more detail on some machines.")
@@ -41,6 +47,7 @@ public final class ElnConfig {
     static void refresh() {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
         Eln.wailaEasyMode = PROBE_DETAILS.get();
+        mods.eln.node.voxel.CableConverter.convertOnLoad = CONVERT_CABLES.get();
         mods.eln.sim.Fire.COAL.lag = COAL_LAG.get();
         mods.eln.sim.Fire.COAL.kindle = COAL_KINDLE.get();
         mods.eln.sim.Fire.OIL.lag = OIL_LAG.get();

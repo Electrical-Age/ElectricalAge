@@ -50,6 +50,15 @@ public final class LabCommands {
                 .then(Commands.literal("cables").then(Commands.argument("n", IntegerArgumentType.integer(1, 5000))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> cables(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
+                .then(Commands.literal("devicevolts").then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .executes(c -> deviceVolts(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "name")))))
+                .then(Commands.literal("voxelcables")
+                    .then(Commands.literal("convert").then(Commands.argument("r", IntegerArgumentType.integer(0, 100000))
+                        .executes(c -> voxelCables(c.getSource(), "convert", IntegerArgumentType.getInteger(c, "r")))))
+                    .then(Commands.literal("dry").then(Commands.argument("r", IntegerArgumentType.integer(0, 100000))
+                        .executes(c -> voxelCables(c.getSource(), "dry", IntegerArgumentType.getInteger(c, "r")))))
+                    .then(Commands.literal("revert").then(Commands.argument("r", IntegerArgumentType.integer(0, 100000))
+                        .executes(c -> voxelCables(c.getSource(), "revert", IntegerArgumentType.getInteger(c, "r"))))))
                 .then(Commands.literal("oil").executes(c -> {
                     var data = mods.eln.oil.ReservoirData.get(c.getSource().getLevel());
                     c.getSource().sendSuccess(() -> Component.literal(data.all().size() + " oil lake(s); " + mods.eln.oil.Reservoirs.debug()), false);
@@ -72,6 +81,98 @@ public final class LabCommands {
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> machines(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))));
+    }
+
+    /**
+     * /elnlab voxelcables convert|dry|revert r: six-node cables within r blocks (horizontally) to voxel cables, a report
+     * of what would convert and why not, or back. The report goes to the chat and, in full, to eln-voxelcables.txt.
+     */
+    static int voxelCables(CommandSourceStack src, String mode, int r) {
+        BlockPos at = BlockPos.containing(src.getPosition());
+        var level = src.getLevel();
+        Map<String, Integer> why = new TreeMap<>();
+        int done = 0, knuckles = 0;
+        StringBuilder log = new StringBuilder();
+        for (mods.eln.node.NodeBase n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (n.coordonate.world() != level) continue;
+            if (r > 0 && (Math.abs(n.coordonate.x - at.getX()) > r || Math.abs(n.coordonate.z - at.getZ()) > r)) continue;
+            if (mode.equals("revert")) {
+                if (n instanceof mods.eln.node.voxel.VoxelNode v) {
+                    if (v.legacy != null && mods.eln.node.voxel.CableConverter.revert(v) == null) done++;
+                }
+                continue;
+            }
+            if (!(n instanceof mods.eln.node.six.SixNode six)) continue;
+            String w = mode.equals("dry") ? mods.eln.node.voxel.CableConverter.plan(six).skip() : mods.eln.node.voxel.CableConverter.convert(six);
+            if (w == null) done++;
+            else {
+                why.merge(w, 1, Integer::sum);
+                log.append(n.coordonate.pos().toShortString()).append(": ").append(w).append('\n');
+            }
+        }
+        if (mode.equals("revert"))
+            for (mods.eln.node.NodeBase n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes()))
+                if (n instanceof mods.eln.node.voxel.VoxelNode v && n.coordonate.world() == level
+                    && (r == 0 || Math.abs(n.coordonate.x - at.getX()) <= r && Math.abs(n.coordonate.z - at.getZ()) <= r))
+                    knuckles += mods.eln.node.voxel.CableConverter.revertKnuckles(v);
+        int fd = done, fk = knuckles;
+        String verb = mode.equals("dry") ? "would convert" : mode.equals("revert") ? "reverted" : "converted";
+        src.sendSuccess(() -> Component.literal(verb + " " + fd + " block(s)" + (mode.equals("revert") ? ", removed " + fk + " knuckle(s)" : "")), true);
+        for (var e : why.entrySet()) src.sendSuccess(() -> Component.literal("  kept " + e.getValue() + ": " + e.getKey()), false);
+        try (Writer w = new FileWriter("eln-voxelcables.txt")) {
+            w.write(verb + " " + done + "\n" + log);
+        } catch (IOException e) {
+            src.sendFailure(Component.literal("report not written: " + e));
+        }
+        return done;
+    }
+
+    /**
+     * /elnlab devicevolts NAME: every device's (not cable's) load voltages to eln-devicevolts-NAME.json, keyed by
+     * position, element side and load index: compare before and after a cable conversion.
+     */
+    static int deviceVolts(CommandSourceStack src, String name) {
+        JsonObject out = new JsonObject();
+        int n = 0;
+        for (mods.eln.node.NodeBase node : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            String at = node.coordonate.dimention + " " + node.coordonate.pos().toShortString();
+            List<Object> elements = new ArrayList<>();
+            List<String> keys = new ArrayList<>();
+            if (node instanceof mods.eln.node.six.SixNode six) {
+                for (Direction d : Direction.values()) {
+                    var e = six.getElement(d);
+                    if (e != null && !(e instanceof mods.eln.sixnode.electricalcable.ElectricalCableElement)) {
+                        elements.add(e);
+                        keys.add(at + " " + d + " " + e.getClass().getSimpleName());
+                    }
+                }
+            } else if (node instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) {
+                elements.add(t.element);
+                keys.add(at + " " + t.element.getClass().getSimpleName());
+            }
+            for (int i = 0; i < elements.size(); i++) {
+                Object e = elements.get(i);
+                Object list;
+                try {
+                    list = field(e, "electricalLoadList");
+                } catch (RuntimeException ex) {
+                    continue;
+                }
+                JsonArray a = new JsonArray();
+                for (Object l : (List<?>) list) a.add(((mods.eln.sim.ElectricalLoad) l).getU());
+                out.add(keys.get(i), a);
+                n++;
+            }
+        }
+        try (Writer w = new FileWriter("eln-devicevolts-" + name + ".json")) {
+            new GsonBuilder().setPrettyPrinting().create().toJson(out, w);
+        } catch (IOException e) {
+            src.sendFailure(Component.literal("not written: " + e));
+            return 0;
+        }
+        int fn = n;
+        src.sendSuccess(() -> Component.literal("devicevolts: " + fn + " device(s) to eln-devicevolts-" + name + ".json"), false);
+        return n;
     }
 
     /** The solved network to eln-netdump/&lt;stamp&gt;.json and .falstad.txt in the server directory (NetDump). */

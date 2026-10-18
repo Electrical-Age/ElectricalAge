@@ -50,6 +50,8 @@ public final class CablePart extends VoxelPart {
     public final int[] points;
     /** Burnt out (by its watchdogs): an open circuit until repaired; null while it works. */
     public mods.eln.sim.process.destruct.FailureCause burnt;
+    /** Laid by the converter (a knuckle round an outer corner): a revert takes it out. */
+    public boolean byConverter;
     /** Saved state (server): voltage and temperature, restored into its conductor. */
     public double u, t;
 
@@ -281,6 +283,7 @@ public final class CablePart extends VoxelPart {
         tag.putInt("face", face);
         tag.putIntArray("pts", points);
         if (burnt != null) tag.putString("burnt", burnt.name());
+        if (byConverter) tag.putBoolean("conv", true);
         tag.putDouble("u", u);
         tag.putDouble("t", t);
     }
@@ -298,6 +301,7 @@ public final class CablePart extends VoxelPart {
                 p.burnt = mods.eln.sim.process.destruct.FailureCause.OVERHEAT;
             }
         }
+        p.byConverter = tag.getBooleanOr("conv", false);
         p.u = tag.getDoubleOr("u", 0);
         p.t = tag.getDoubleOr("t", 0);
         return p;

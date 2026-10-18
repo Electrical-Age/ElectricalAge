@@ -270,6 +270,7 @@ public class Eln {
         mods.eln.sound.ElnSounds.register(modBus);
         mods.eln.datagen.ElnDataGen.register(modBus);
         mods.eln.gametest.LabCommands.register(); // /elnlab: render-port scenes (op only)
+        mods.eln.node.voxel.CableConverter.register(); // six-node cables to voxel cables as chunks load (config)
         mods.eln.network.ServerPacketHandler.register();
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         // fluid devices (fuel generator, turbines...): the element's tank as the block's fluid capability (1.12:

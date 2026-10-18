@@ -85,7 +85,9 @@ public final class CableConverter {
                         if (!ws.isAir() && ws.getBlock() != ElnRegistry.VOXEL_NODE_BLOCK.get())
                             return Plan.skip("an outer corner goes through " + ws.getBlock().getName().getString());
                         int[] k = knucklePoint(d, f);
-                        knuckles.put(w, CablePart.knuckle(tier, k[0], k[1], k[2]));
+                        CablePart kn = CablePart.knuckle(tier, k[0], k[1], k[2]);
+                        kn.byConverter = true;
+                        knuckles.put(w, kn);
                         linked = true;
                     }
                 }
@@ -152,5 +154,89 @@ public final class CableConverter {
             if (err != null) mods.eln.misc.Utils.println("CableConverter: knuckle at " + k.getKey() + ": " + err);
         }
         return null;
+    }
+
+    /**
+     * Undo a conversion: the voxel node goes, the six-node block comes back from the NBT kept in it (its state as at
+     * the conversion). Returns null if done, else why not. Knuckles: see revertKnuckles.
+     */
+    public static String revert(VoxelNode v) {
+        if (v.legacy == null) return "not converted";
+        Level level = v.coordonate.world();
+        BlockPos pos = v.coordonate.pos();
+        CompoundTag nbt = v.legacy;
+        v.disconnect();
+        NodeManager.instance.removeNode(v);
+        level.setBlock(pos, mods.eln.Eln.sixNodeBlock.defaultBlockState(), 3);
+        SixNode s = new SixNode();
+        s.readFromNBT(nbt);
+        NodeManager.instance.addNode(s);
+        s.initializeFromNBT();
+        s.globalBoot();
+        s.setNeedPublish(true);
+        return null;
+    }
+
+    /** Take out the knuckles the converter laid in this node; the block goes if nothing is left. */
+    public static int revertKnuckles(VoxelNode v) {
+        int n = 0;
+        for (int i = v.parts.size() - 1; i >= 0; i--)
+            if (v.parts.get(i) instanceof CablePart c && c.byConverter) {
+                v.removePart(i, false);
+                n++;
+            }
+        if (n > 0 && v.parts.isEmpty()) {
+            Level level = v.coordonate.world();
+            BlockPos pos = v.coordonate.pos();
+            v.onBreakBlock();
+            level.removeBlock(pos, false);
+        }
+        return n;
+    }
+
+    // ---- automatic conversion as chunks load (ElnConfig [cables] convertOnLoad)
+
+    public static volatile boolean convertOnLoad = false;
+    /** At most this many blocks a tick (the rest wait for the next). */
+    static final int PER_TICK = 2000;
+    private static final Map<net.minecraft.server.level.ServerLevel, java.util.Set<Long>> PENDING = new java.util.WeakHashMap<>();
+    public static long converted, kept;
+
+    public static void register() {
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.level.ChunkEvent.Load.class, e -> {
+            if (!convertOnLoad || !(e.getLevel() instanceof net.minecraft.server.level.ServerLevel level)) return;
+            var cp = e.getChunk().getPos();
+            // (and its neighbours: a block at an edge waited for this chunk to load)
+            var set = PENDING.computeIfAbsent(level, l -> new java.util.HashSet<>());
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dz = -1; dz <= 1; dz++) set.add(net.minecraft.world.level.ChunkPos.pack(cp.x() + dx, cp.z() + dz));
+        });
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.ServerTickEvent.Post.class, e -> {
+            if (PENDING.isEmpty()) return;
+            for (var en : new ArrayList<>(PENDING.entrySet())) {
+                var level = en.getKey();
+                var chunks = en.getValue();
+                PENDING.remove(level);
+                int done = 0;
+                java.util.Set<Long> later = new java.util.HashSet<>();
+                for (NodeBase n : new ArrayList<>(NodeManager.instance.getNodes())) {
+                    if (!(n instanceof SixNode s) || n.coordonate.world() != level) continue;
+                    long cp = net.minecraft.world.level.ChunkPos.pack(n.coordonate.x >> 4, n.coordonate.z >> 4);
+                    if (!chunks.contains(cp)) continue;
+                    if (done >= PER_TICK) {
+                        later.add(cp);
+                        continue;
+                    }
+                    if (!level.isLoaded(n.coordonate.pos())) continue;
+                    String why = convert(s);
+                    if (why == null) {
+                        converted++;
+                        done++;
+                    } else kept++;
+                }
+                if (!later.isEmpty()) PENDING.computeIfAbsent(level, l -> new java.util.HashSet<>()).addAll(later);
+                if (done > 0) mods.eln.Eln.LOG.info("Cables converted to voxel cables: " + done + " block(s) (" + converted + " so far)");
+            }
+        });
     }
 }
