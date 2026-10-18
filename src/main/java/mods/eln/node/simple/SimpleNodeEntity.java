@@ -147,8 +147,39 @@ public abstract class SimpleNodeEntity extends BlockEntity implements INodeEntit
         input.read(NodeBlockEntity.DESCRIPTION_KEY, com.mojang.serialization.Codec.BYTE_BUFFER).ifPresent(b -> {
             byte[] a = new byte[b.remaining()];
             b.get(a);
-            // client: simple nodes have no render; their GUI data comes with P4b
+            // client: the node's publish data (the exporter's slider: Baughn saw it at 0 after a restart, as only live
+            // publishes were read, and the update tag was dropped)
+            if (level == null) pendingDescription = a;
+            else applyDescription(a);
         });
+    }
+
+    private byte[] pendingDescription;
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level != null && level.isClientSide() && pendingDescription != null) {
+            byte[] d = pendingDescription;
+            pendingDescription = null;
+            applyDescription(d);
+        }
+    }
+
+    /** The publish packet in the update tag (as NodeBlockEntity.applyDescription). */
+    void applyDescription(byte[] a) {
+        try {
+            java.io.DataInputStream stream = new java.io.DataInputStream(new java.io.ByteArrayInputStream(a));
+            if (stream.readByte() != mods.eln.Eln.packetNodeSingleSerialized) return;
+            stream.readInt();
+            stream.readInt();
+            stream.readInt();
+            stream.readInt();
+            if (!getNodeUuid().equals(stream.readUTF())) return;
+            serverPublishUnserialize(stream);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
