@@ -182,6 +182,18 @@ public class SixNode extends Node {
             return false;
 
         Utils.println("deleteSubBlock " + " " + direction);
+        try {
+            return deleteSubBlockImpl(entityPlayer, direction);
+        } finally {
+            afterSubBlockDeleted();
+        }
+    }
+
+    /** After an element went (a voxel node removes its block once nothing at all is left). */
+    protected void afterSubBlockDeleted() {
+    }
+
+    private boolean deleteSubBlockImpl(ServerPlayer entityPlayer, Direction direction) {
 
         disconnect();
         SixNodeElement e = sideElementList[direction.getInt()];
@@ -329,6 +341,7 @@ public class SixNode extends Node {
 
         super.publishSerialize(stream);
         try {
+            publishBeforeElements(stream);
             int idx = 0;
             stream.writeInt(0); // cover block: not ported yet
             stream.writeByte(sixNodeCacheBlockMeta);
@@ -345,6 +358,11 @@ public class SixNode extends Node {
 
             e.printStackTrace();
         }
+    }
+
+    /** For a voxel node: its parts, written before the elements (a client without an element's render stops reading at
+     *  that element). */
+    protected void publishBeforeElements(DataOutputStream stream) throws IOException {
     }
 
     public void preparePacketForClient(DataOutputStream stream, SixNodeElement e) {
@@ -385,8 +403,12 @@ public class SixNode extends Node {
 
     @Override
     public void connectJob() {
-
         super.connectJob();
+        connectElements();
+    }
+
+    /** The elements' own connect jobs and their links inside the block (a voxel node hosting elements calls this). */
+    protected void connectElements() {
         // Burnt elements stay out of the simulation (see SixNodeElement.burn).
         for (SixNodeElement element : sideElementList) {
             if (element != null && !element.isBurnt()) {

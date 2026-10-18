@@ -43,7 +43,16 @@ public class ElnJadePlugin implements IWailaPlugin {
     /** The device's lines, ordered: key TAB value. */
     static Map<String, String> lines(BlockAccessor acc, boolean details) {
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be) || !(be.getNode() instanceof mods.eln.node.NodeBase node)) return Map.of();
-        if (node instanceof mods.eln.node.voxel.VoxelNode v) return v.getWaila(details);
+        if (node instanceof mods.eln.node.voxel.VoxelNode v) {
+            // an element hosted there under the crosshair, else the parts
+            var h = acc.getHitResult().getLocation();
+            var p = acc.getPosition();
+            double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
+            int el = v.elementAt(x, y, z, 0);
+            if (el < 0 && v.partAt(x, y, z) < 0) el = v.elementAt(x, y, z, 2);
+            if (el >= 0 && v.sideElementList[el] != null) return v.sideElementList[el].getWaila();
+            return v.getWaila(details);
+        }
         if (node instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) return t.element.getWaila();
         if (node instanceof mods.eln.node.six.SixNode s && be instanceof mods.eln.node.six.SixNodeEntity se) {
             var side = mods.eln.node.six.SixNodeBlock.sideAt(se, acc.getPosition(), acc.getHitResult());

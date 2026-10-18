@@ -15,7 +15,7 @@ import java.util.List;
  * Block entity of a voxel node. Server: everything goes through the VoxelNode. Client: the parts, from the publish
  * packet, for the shape and the renderer.
  */
-public class VoxelNodeEntity extends NodeBlockEntity {
+public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
     /** Model data: the parts, for the block model (client/render/VoxelModel, baked into the chunk mesh). */
     public static final net.neoforged.neoforge.model.data.ModelProperty<List<VoxelPart>> PARTS = new net.neoforged.neoforge.model.data.ModelProperty<>();
 
@@ -43,30 +43,38 @@ public class VoxelNodeEntity extends NodeBlockEntity {
     }
 
     @Override
-    public int isProvidingWeakPower(Direction side) {
-        return 0;
+    public void serverPublishUnserialize(DataInputStream stream) {
+        super.serverPublishUnserialize(stream);
+        // re-mesh the chunk section if the parts changed (elements publish often: meters, lamps)
+        if (!partsChanged) return;
+        partsChanged = false;
+        requestModelDataUpdate();
+        if (level != null && level.isClientSide())
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), net.minecraft.world.level.block.Block.UPDATE_IMMEDIATE);
     }
 
     @Override
-    public void serverPublishUnserialize(DataInputStream stream) {
-        super.serverPublishUnserialize(stream);
-        try {
+    protected void readBeforeElements(DataInputStream stream) throws IOException {
+        {
             int n = stream.readShort();
+            int hash = n;
             List<VoxelPart> ps = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {
                 String kind = stream.readUTF();
                 byte[] b = new byte[stream.readShort()];
                 stream.readFully(b);
+                hash = hash * 31 + kind.hashCode() * 17 + java.util.Arrays.hashCode(b);
                 VoxelPart p = VoxelPart.deserialize(kind, new DataInputStream(new java.io.ByteArrayInputStream(b)));
                 if (p != null) ps.add(p);
             }
-            clientParts = List.copyOf(ps);
-            // re-mesh the chunk section with the new parts
-            requestModelDataUpdate();
-            if (level != null && level.isClientSide())
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), net.minecraft.world.level.block.Block.UPDATE_IMMEDIATE);
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (hash != partsHash || clientParts.size() != ps.size()) {
+                partsHash = hash;
+                partsChanged = true;
+                clientParts = List.copyOf(ps);
+            }
         }
     }
+
+    private int partsHash;
+    private boolean partsChanged;
 }

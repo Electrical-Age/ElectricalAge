@@ -209,6 +209,17 @@ public abstract class NodeBase {
     }
 
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (meterUse(entityPlayer, side)) return true;
+        if (hasGui(side)) {
+            // 1.12 opened GuiHandler.nodeBaseOpen + side; 26.x: the eln:node menu (P4)
+            return NodeMenus.open(this, entityPlayer, side);
+        }
+
+        return false;
+    }
+
+    /** A meter in hand: its reading of side, to the player. True if it was a meter. */
+    protected boolean meterUse(Player entityPlayer, Direction side) {
         ItemStack held = entityPlayer.getMainHandItem();
         if (!entityPlayer.level().isClientSide() && !Utils.isEmpty(held)) {
             // meters (MeterItems is filled when the meter items are ported)
@@ -221,11 +232,6 @@ public abstract class NodeBase {
                 return true;
             }
         }
-        if (hasGui(side)) {
-            // 1.12 opened GuiHandler.nodeBaseOpen + side; 26.x: the eln:node menu (P4)
-            return NodeMenus.open(this, entityPlayer, side);
-        }
-
         return false;
     }
 

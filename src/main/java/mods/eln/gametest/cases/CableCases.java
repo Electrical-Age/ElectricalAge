@@ -37,6 +37,7 @@ public final class CableCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new BurnCase());
         cases.add(new RoutedCase());
+        cases.add(new HostedCase());
         cases.add(new KitCase());
         List<TestCase> mine = new ArrayList<>();
         addLayouts(mine);
@@ -204,7 +205,7 @@ public final class CableCases {
                 for (int y = 1; y < 4; y++)
                     for (int z = 6; z < 10; z++) {
                         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level()));
-                        if (!(n instanceof mods.eln.node.six.SixNode s)) continue;
+                        if (!(n instanceof mods.eln.node.six.SixNode s) || n instanceof mods.eln.node.voxel.VoxelNode) continue;
                         String why = mods.eln.node.voxel.CableConverter.convert(s);
                         if (why == null) converted++;
                         else skipped.add(x + "," + y + "," + z + ": " + why);
@@ -332,6 +333,81 @@ public final class CableCases {
             var m = mods.eln.node.voxel.PipeKitRecipes.Merge.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 1,
                 List.of(mods.eln.node.voxel.CableKitItem.kit(LV, 100), mods.eln.node.voxel.CableKitItem.kit(LV, 28))));
             c.check("cable kit: two kits merge", mods.eln.node.voxel.KitItem.length(m) == 128 && m.getItem() instanceof mods.eln.node.voxel.CableKitItem, m.toString());
+        }
+    }
+
+    /** A six-node device in a voxel block (phase 2): created there as a placement into a voxel block does. */
+    static mods.eln.node.six.SixNodeElement host(TestContext c, int damage, BlockPos p, mods.eln.misc.Direction side) {
+        var level = c.level();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        var d = mods.eln.Eln.sixNodeItem.getDescriptor(damage);
+        mods.eln.node.voxel.VoxelNode v;
+        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) instanceof mods.eln.node.voxel.VoxelNode old) v = old;
+        else {
+            v = new mods.eln.node.voxel.VoxelNode();
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), side, player, d.newItemStack());
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+        }
+        if (!v.canPlaceElement(side.getInt()) || !v.createSubBlock(d.newItemStack(), side, player))
+            throw new IllegalStateException("can't host " + d.name + " at " + p + " " + side);
+        return v.getElement(side);
+    }
+
+    /**
+     * A device hosted in a voxel block works as in a six-node block: source -> six-node cables -> a Power Resistor in a
+     * voxel block (which also holds a pipe on its ceiling) -> ground; the current equals the all-six-node row's.
+     */
+    static final class HostedCase implements TestCase {
+        ResistorElement six, vox;
+
+        public String name() {
+            return "six-node device hosted in a voxel block";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            for (int z : new int[]{1, 6}) {
+                source(c, SOURCE, 0, z, 50);
+                for (int x = 1; x <= 3; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
+            }
+            six = resistor(c, POWER_RESISTOR, 4, 1, CORE);
+            c.placeSix(GROUND, c.at(5, 1, 1));
+            // the voxel row: a pipe across the ceiling first, then the resistor on the floor
+            String err = PipeKitItem.place(c.level(), c.at(4, 1, 6), new mods.eln.node.voxel.PipePart(0, new int[]{0, 12, 8, 16, 12, 8}), null);
+            if (err != null) throw new IllegalStateException(err);
+            vox = (ResistorElement) host(c, POWER_RESISTOR, c.at(4, 1, 6), mods.eln.misc.Direction.YN);
+            Wp9aCases.orient(vox, mods.eln.misc.LRDU::right, mods.eln.misc.Direction.XN);
+            vox.getInventory().setItem(0, Wp9aCases.coal(CORE));
+            vox.getInventory().setChanged();
+            c.placeSix(GROUND, c.at(5, 1, 6));
+        }
+
+        public void measure(TestContext c) {
+            double a = current(six), b = current(vox);
+            c.line(String.format("hosted: six-node %.5f A, in a voxel block %.5f A", a, b));
+            c.check("hosted device: carries the same current as in a six-node block (0.1%)", Math.abs(a) > 1 && Math.abs(a - b) <= 1e-3 * Math.abs(a),
+                String.format("six-node %.5f A, voxel %.5f A", a, b));
+            var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(4, 1, 6), c.level()));
+            c.check("hosted device: the block keeps its pipe", v.parts.size() == 1, v.parts.size() + " parts");
         }
     }
 

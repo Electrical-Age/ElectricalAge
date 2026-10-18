@@ -27,6 +27,15 @@ public class SixNodeEntity extends NodeBlockEntity {
         super(ElnRegistry.SIX_NODE_ENTITY.get(), pos, state);
     }
 
+    /** For subclasses with their own type (VoxelNodeEntity). */
+    protected SixNodeEntity(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    /** A voxel node's parts, sent before the elements (SixNode.publishBeforeElements). */
+    protected void readBeforeElements(DataInputStream stream) throws IOException {
+    }
+
     @Override
     public String getNodeUuid() {
         return "s";
@@ -64,6 +73,7 @@ public class SixNodeEntity extends NodeBlockEntity {
     public void serverPublishUnserialize(DataInputStream stream) {
         super.serverPublishUnserialize(stream);
         try {
+            readBeforeElements(stream);
             stream.readInt();  // cover block (1.12 sixNodeCacheBlock; not ported)
             stream.readByte(); // cover meta
             for (int idx = 0; idx < 6; idx++) {

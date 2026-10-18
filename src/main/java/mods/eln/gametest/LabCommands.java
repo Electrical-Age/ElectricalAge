@@ -102,7 +102,7 @@ public final class LabCommands {
                 }
                 continue;
             }
-            if (!(n instanceof mods.eln.node.six.SixNode six)) continue;
+            if (!(n instanceof mods.eln.node.six.SixNode six) || n instanceof mods.eln.node.voxel.VoxelNode) continue;
             // (the lab: load what the plan looks at; on a live server conversion waits for chunks to load)
             for (int dx = -1; dx <= 1; dx++)
                 for (int dz = -1; dz <= 1; dz++) level.getChunk((n.coordonate.x >> 4) + dx, (n.coordonate.z >> 4) + dz);

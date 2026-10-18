@@ -43,10 +43,9 @@ public final class FaultNetwork {
      */
     public static void relieve(Collection<NodeBase> nodes) {
         for (NodeBase n : nodes) {
+            if (n instanceof mods.eln.node.voxel.VoxelNode v) relieve(v.slowProcesses());   // (and its elements, below)
             if (n instanceof SixNode six) {
                 for (SixNodeElement e : six.sideElementList) if (e != null) relieve(e.slowProcessList);
-            } else if (n instanceof mods.eln.node.voxel.VoxelNode v) {
-                relieve(v.slowProcesses());
             } else if (n instanceof TransparentNode t && t.element != null) {
                 relieve(t.element.slowProcessList);
             }

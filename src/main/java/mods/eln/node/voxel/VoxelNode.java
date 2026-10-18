@@ -4,7 +4,6 @@ import mods.eln.Eln;
 import mods.eln.fluid.FluidWorld;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.fluid.EaUnits;
@@ -26,7 +25,7 @@ import java.util.List;
  * now), none overlapping. One per block (NodeManager), uuid "v". Its pipes are fluid devices: their ends on the block's
  * faces couple with whatever is on the other side at the same spot (FluidWorld). No electrical or thermal side yet.
  */
-public class VoxelNode extends Node implements FluidDevice {
+public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice {
     public static final String UUID = "v";
 
     public final List<VoxelPart> parts = new ArrayList<>();
@@ -48,6 +47,26 @@ public class VoxelNode extends Node implements FluidDevice {
     private void markUsed() {
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
+        for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(used, plate(f));
+    }
+
+    /**
+     * The voxels a six-node element on face f (EA Direction int) takes: a plate 3 voxels thick on that face, inset 2
+     * from its edges, so the edge midpoints (its ports) and cables round the inner corners stay free.
+     */
+    public static int[] plate(int f) {
+        int face = Direction.fromInt(f).toEnumFacing().get3DDataValue();
+        int n = CablePart.normalAxis(face);
+        int[] b = {2, 2, 2, 14, 14, 14};
+        b[n] = CablePart.plane(face) == 0 ? 0 : 13;
+        b[n + 3] = CablePart.plane(face) == 0 ? 3 : 16;
+        return b;
+    }
+
+    /** Elements changed (placed, broken): the plates in the grid. */
+    public void elementsChanged() {
+        markUsed();
+        setNeedPublish(true);
     }
 
     private static void fill(BitSet s, int[] b) {
@@ -114,7 +133,12 @@ public class VoxelNode extends Node implements FluidDevice {
         if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         changed();
-        return parts.isEmpty();
+        return isEmptyNode();
+    }
+
+    /** Nothing left: no parts, no elements (the block goes). */
+    public boolean isEmptyNode() {
+        return parts.isEmpty() && !getIfSideRemain();
     }
 
     /** The part whose boxes hold the block-local point (0..1), or -1. */
@@ -313,8 +337,13 @@ public class VoxelNode extends Node implements FluidDevice {
     /** A right-click on a valve (empty hand) turns it. */
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
+        // a six-node element hosted here: as in a six-node block (its own use, GUI, repair, meters)
+        int el = elementAt(vx, vy, vz, 0);
+        int pi = partAt(vx, vy, vz);
+        if (el < 0 && pi < 0) el = elementAt(vx, vy, vz, 2);
+        if (el >= 0) return super.onBlockActivated(player, Direction.fromInt(el), vx, vy, vz);
         if (player.getMainHandItem().isEmpty()) {
-            int i = partAt(vx, vy, vz);
+            int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
                 double next = SafetyValvePart.PRESETS[0] * 1e5;
                 for (double b : SafetyValvePart.PRESETS) if (b * 1e5 > sv.setPa + 1) { next = b * 1e5; break; }
@@ -330,7 +359,49 @@ public class VoxelNode extends Node implements FluidDevice {
                 return true;
             }
         }
-        return super.onBlockActivated(player, side, vx, vy, vz);
+        return pi >= 0 && meterUse(player, side);
+    }
+
+    /** The element (EA Direction int) whose plate, grown by grow voxels, holds the block-local point (0..1); -1. */
+    public int elementAt(double x, double y, double z, int grow) {
+        for (int f = 0; f < 6; f++) {
+            if (sideElementList[f] == null) continue;
+            int[] b = plate(f);
+            int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
+            if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
+        }
+        return -1;
+    }
+
+    /** Could an element go on face f (EA Direction int): free face, and its plate clear of the parts? */
+    public boolean canPlaceElement(int f) {
+        if (sideElementList[f] != null) return false;
+        BitSet want = new BitSet(4096);
+        fill(want, plate(f));
+        return !want.intersects(used);
+    }
+
+    @Override
+    public boolean createSubBlock(ItemStack itemStack, Direction direction, Player player) {
+        boolean ok = super.createSubBlock(itemStack, direction, player);
+        markUsed();
+        return ok;
+    }
+
+    /** Breaking by a player: the block's own break handles the last thing going. */
+    boolean breakingByPlayer;
+
+    @Override
+    protected void afterSubBlockDeleted() {
+        markUsed();
+        setNeedPublish(true);
+        // an element that went on its own (self-destruction) with nothing else left: the block goes too
+        if (!breakingByPlayer && isEmptyNode() && !isDestructing() && coordonate.world() != null) {
+            var level = coordonate.world();
+            var pos = coordonate.pos();
+            onBreakBlock();
+            level.removeBlock(pos, false);
+        }
     }
 
     /**
@@ -503,6 +574,7 @@ public class VoxelNode extends Node implements FluidDevice {
      */
     @Override
     public void connectJob() {
+        connectElements();   // (six-node elements hosted here: their loads and links inside the block)
         cables.build();
         cables.addToSimulation();
         cablesBuilt = !cables.conductors.isEmpty();
@@ -620,18 +692,22 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public int getSideConnectionMask(Direction side, LRDU lrdu) {
+        int m = super.getSideConnectionMask(side, lrdu);   // (an element on that face)
+        if (m != 0) return m;
         CableNet.Conductor k = legacy(side, lrdu);
         return k == null ? 0 : k.mask();
     }
 
     @Override
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+        if (sideElementList[side.applyLRDU(lrdu).getInt()] != null) return super.getThermalLoad(side, lrdu);
         CableNet.Conductor k = legacy(side, lrdu);
         return k == null ? null : k.thermal;
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        if (sideElementList[side.applyLRDU(lrdu).getInt()] != null) return super.getElectricalLoad(side, lrdu);
         CableNet.Conductor k = legacy(side, lrdu);
         return k == null ? null : k.load;
     }
@@ -658,7 +734,10 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
-        super.readFromNBT(nbt);
+        // the parts first: SixNode's read connects at its end. Voxel nodes saved before they hosted elements have the
+        // node's own data at the top level, not under "node".
+        boolean six = nbt.contains("node");
+        coordonate.readFromNBT(six ? nbt.getCompoundOrEmpty("node") : nbt, "c");
         parts.clear();
         legacy = nbt.getCompound("legacy").orElse(null);
         int n = nbt.getIntOr("parts", 0);
@@ -666,14 +745,20 @@ public class VoxelNode extends Node implements FluidDevice {
             VoxelPart p = VoxelPart.read(nbt.getCompoundOrEmpty("p" + i), coordonate.y);
             if (p != null) parts.add(p);
         }
+        if (six) super.readFromNBT(nbt);
+        else {
+            CompoundTag wrap = new CompoundTag();
+            wrap.put("node", nbt);
+            super.readFromNBT(wrap);
+        }
         markUsed();
     }
 
-    /** Client data: the part count, then each part's kind and length-prefixed bytes (an unknown kind is skipped). */
+    /** Client data: the part count, then each part's kind and length-prefixed bytes (an unknown kind is skipped); then
+     *  SixNode's elements. */
     @Override
-    public void publishSerialize(DataOutputStream stream) {
-        super.publishSerialize(stream);
-        try {
+    protected void publishBeforeElements(DataOutputStream stream) throws IOException {
+        {
             stream.writeShort(parts.size());
             for (VoxelPart p : parts) {
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -682,8 +767,6 @@ public class VoxelNode extends Node implements FluidDevice {
                 stream.writeShort(b.size());
                 stream.write(b.toByteArray());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -726,6 +809,7 @@ public class VoxelNode extends Node implements FluidDevice {
     /** The multimeter on a pipe: its run's pressure and what's in it (a gauge until there's a gauge part). */
     @Override
     public String multiMeterString(Direction side) {
+        if (sideElementList[side.getInt()] != null) return super.multiMeterString(side);
         for (CableNet.Conductor k : cables.live())
             return k.d.signalWire ? mods.eln.misc.Utils.plotSignal(k.load.getU(), k.load.getI()) : mods.eln.misc.Utils.plotUIP(k.load.getU(), k.load.getI());
         for (VoxelPart p : parts)
@@ -739,6 +823,7 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public String thermoMeterString(Direction side) {
+        if (sideElementList[side.getInt()] != null) return super.thermoMeterString(side);
         for (CableNet.Conductor k : cables.live())
             if (k.thermal != null) return mods.eln.misc.Utils.plotCelsius("T", k.thermal.Tc);
         for (VoxelPart p : parts)

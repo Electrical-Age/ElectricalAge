@@ -45,9 +45,10 @@ public final class ElnClient {
                 net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFFE8ECF0)), mods.eln.oil.Oil.STEAM, mods.eln.oil.Oil.STEAM_FLOWING);
         });
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {
-            e.registerBlockEntityRenderer(ElnRegistry.SIX_NODE_ENTITY.get(), ctx -> new SixNodeRender());
+            e.registerBlockEntityRenderer(ElnRegistry.SIX_NODE_ENTITY.get(), ctx -> new SixNodeRender<>());
             e.registerBlockEntityRenderer(ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), ctx -> new TransparentNodeRender());
-            // (voxel nodes: baked in the chunk mesh by VoxelModel, no block-entity renderer)
+            // voxel nodes: parts baked in the chunk mesh by VoxelModel; six-node elements hosted there drawn as in six-node blocks
+            e.registerBlockEntityRenderer(ElnRegistry.VOXEL_NODE_ENTITY.get(), ctx -> new SixNodeRender<>());
             // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
         });

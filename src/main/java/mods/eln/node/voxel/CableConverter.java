@@ -43,6 +43,7 @@ public final class CableConverter {
     }
 
     public static Plan plan(SixNode s) {
+        if (s instanceof VoxelNode) return Plan.skip("already a voxel block");
         Level level = s.coordonate.world();
         BlockPos pos = s.coordonate.pos();
         if (level == null) return Plan.skip("no level");
@@ -223,7 +224,7 @@ public final class CableConverter {
                 int done = 0;
                 java.util.Set<Long> later = new java.util.HashSet<>();
                 for (NodeBase n : new ArrayList<>(NodeManager.instance.getNodes())) {
-                    if (!(n instanceof SixNode s) || n.coordonate.world() != level) continue;
+                    if (!(n instanceof SixNode s) || n instanceof VoxelNode || n.coordonate.world() != level) continue;
                     long cp = net.minecraft.world.level.ChunkPos.pack(n.coordonate.x >> 4, n.coordonate.z >> 4);
                     if (!chunks.contains(cp)) continue;
                     if (done >= PER_TICK) {

@@ -125,7 +125,7 @@ public final class CableBench implements TestCase {
         if (System.getProperty("eln.bench.convert") != null) {
             int conv = 0, kept = 0;
             for (mods.eln.node.NodeBase n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes()))
-                if (n instanceof mods.eln.node.six.SixNode six && n.coordonate.world() == level) {
+                if (n instanceof mods.eln.node.six.SixNode six && !(n instanceof mods.eln.node.voxel.VoxelNode) && n.coordonate.world() == level) {
                     if (mods.eln.node.voxel.CableConverter.convert(six) == null) conv++;
                     else kept++;
                 }

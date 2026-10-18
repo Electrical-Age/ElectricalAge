@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
  * GL11 shim inside a GlFrame; the frame's batches are submitted as custom geometry. The render objects are read in
  * submit (not copied in extract): extract and submit run on the render thread in the same frame (P3 plan, point 5).
  */
-public class SixNodeRender implements BlockEntityRenderer<SixNodeEntity, SixNodeRender.State> {
+public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRenderer<E, SixNodeRender.State> {
     public static class State extends BlockEntityRenderState {
         SixNodeElementRender[] renders = new SixNodeElementRender[6];
     }
@@ -30,8 +30,15 @@ public class SixNodeRender implements BlockEntityRenderer<SixNodeEntity, SixNode
         return new State();
     }
 
+    /** Only blocks with elements (voxel blocks of plain cables and pipes are drawn by their block model). */
     @Override
-    public void extractRenderState(SixNodeEntity be, State state, float partialTicks, Vec3 cameraPosition,
+    public boolean shouldRender(E be, Vec3 cameraPosition) {
+        for (SixNodeElementRender r : be.elementRenderList) if (r != null) return BlockEntityRenderer.super.shouldRender(be, cameraPosition);
+        return false;
+    }
+
+    @Override
+    public void extractRenderState(E be, State state, float partialTicks, Vec3 cameraPosition,
                                    ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
         System.arraycopy(be.elementRenderList, 0, state.renders, 0, 6);

@@ -46,6 +46,9 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         }
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Direction direction = Direction.fromIntMinecraftSide(ctx.getClickedFace().get3DDataValue()).getInverse();
+        // clicking a voxel block (its cables or pipes): the device goes into that block, on the face behind the click
+        if (world.getBlockState(ctx.getClickedPos()).getBlock() == mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get())
+            pos = ctx.getClickedPos();
         boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction);
         if (ok && ctx.getPlayer() != null && !ctx.getPlayer().isCreative()) ctx.getItemInHand().shrink(1);
         return ok ? InteractionResult.SUCCESS : InteractionResult.FAIL;
@@ -66,11 +69,35 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             GhostGroup ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up);
             if (ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
+            // once six-node blocks are converted (ElnConfig [cables] convertOnLoad), new devices go into voxel blocks
+            // (not under water yet: the voxel block isn't waterloggable)
+            if (mods.eln.node.voxel.CableConverter.convertOnLoad && !block.stateFor(world, pos).getValue(SixNodeBlock.WATERLOGGED)) {
+                var v = new mods.eln.node.voxel.VoxelNode();
+                v.onBlockPlacedBy(new Coordonate(pos, world), direction, player, stack);
+                v.createSubBlock(stack, direction, player);
+                world.setBlock(pos, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+                return true;
+            }
             SixNode sixNode = new SixNode();
             sixNode.onBlockPlacedBy(new Coordonate(pos, world), direction, player, stack);
             sixNode.createSubBlock(stack, direction, player);
             world.setBlock(pos, block.stateFor(world, pos), 3);
             return true;
+        } else if (old.getBlock() == mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get()) {
+            // a voxel block: on a free face whose plate is clear of its cables and pipes
+            if (!(world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve) || !(ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v))
+                return false;
+            if (!v.canPlaceElement(direction.getInt())) {
+                if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No room for it on that face"));
+                return false;
+            }
+            if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
+            String error = descriptor.checkCanPlace(new Coordonate(pos, world), direction, LRDU.Up);
+            if (error != null) {
+                if (player != null) Utils.sendMessage(player, error);
+                return false;
+            }
+            return v.createSubBlock(stack, direction, player);
         } else if (old.getBlock() == block) {
             SixNodeEntity e = (SixNodeEntity) world.getBlockEntity(pos);
             SixNode sixNode = e == null ? null : (SixNode) e.getNode();
