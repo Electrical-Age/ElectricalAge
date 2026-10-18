@@ -42,6 +42,12 @@ neoForge {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'eln.golden', file('golden/1.12').absolutePath
+            // the cable benchmark instead of the tests: -PelnBench=result.json [-PelnBenchLabel=name]
+            if (project.hasProperty('elnBench')) {
+                systemProperty 'eln.bench', file(project.property('elnBench')).absolutePath
+                systemProperty 'eln.bench.label', project.findProperty('elnBenchLabel') ?: 'unnamed'
+                if (project.hasProperty('elnBenchNoRthCache')) systemProperty 'eln.bench.noRthCache', 'true'
+            }
         }
         // Datagen (P5): lang, item tags, recipes -> src/generated/resources (committed)
         clientData {

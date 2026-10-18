@@ -30,6 +30,8 @@ public final class ElnGameTests {
 
     /** The cases; ported 1.12 selftest cases are added here batch by batch. */
     static List<TestCase> cases() {
+        // the cable benchmark runs alone (-PelnBench=FILE; notes/cables/PERF.md)
+        if (mods.eln.gametest.bench.CableBench.enabled()) return List.of(new mods.eln.gametest.bench.CableBench());
         java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase(), new GoldenRecipesCase(), new GoldenSlotsCase(), new PublishRenderCase(), new GuiPacketCase(), new MachineMenuCase(), new MenusOpenCase(), new AutoMinerSpinCase(), new ItemDrawCase(), new XRayCase()));
         l.addAll(mods.eln.gametest.cases.Batch1Cases.cases());
         l.addAll(mods.eln.gametest.cases.SolarCases.cases());

@@ -52,6 +52,19 @@ public class Simulator /* ,IPacketHandler */ {
 
     private int printTimeCounter = 0;
 
+    /** Per-tick timings for the cable benchmark (gametest CableBench); null outside it. */
+    public interface TickProbe {
+        void tick(long electricalNs, long thermalFastNs, long thermalSlowNs, long slowNs, long totalNs);
+    }
+
+    public static volatile TickProbe probe;
+
+    /** List sizes {electrical processes, thermal fast loads, fast connections, fast processes, slow loads, slow connections, slow processes, slow processes (non-thermal)}. */
+    public int[] counts() {
+        return new int[]{electricalProcessList.size(), thermalFastLoadList.size(), thermalFastConnectionList.size(), thermalFastProcessList.size(),
+            thermalSlowLoadList.size(), thermalSlowConnectionList.size(), thermalSlowProcessList.size(), slowProcessList.size()};
+    }
+
     public ArrayList<IProcess> getElectricalProcessList() {
         return electricalProcessList;
     }
@@ -371,6 +384,7 @@ public class Simulator /* ,IPacketHandler */ {
         long stackStart;
 
         long startTime = System.nanoTime();
+        long e0 = electricalNsStack, tf0 = thermalFastNsStack, ts0 = thermalSlowNsStack;
 
         for (Object o : slowPreProcessList.toArray()) {
             IProcess process = (IProcess) o;
@@ -468,6 +482,9 @@ public class Simulator /* ,IPacketHandler */ {
         }
 
         slowNsStack += System.nanoTime() - stackStart;
+        TickProbe pr = probe;
+        if (pr != null) pr.tick(electricalNsStack - e0, thermalFastNsStack - tf0, thermalSlowNsStack - ts0,
+            System.nanoTime() - stackStart, System.nanoTime() - startTime);
         avgTickTime += 1.0 / 20 * ((int) (System.nanoTime() - startTime) / 1000);
 
 		/*stackStart = System.nanoTime();

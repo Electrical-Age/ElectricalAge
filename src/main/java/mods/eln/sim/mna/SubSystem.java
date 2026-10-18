@@ -32,6 +32,8 @@ public class SubSystem {
 
     double dt;
     boolean matrixValid = false;
+    /** Counts matrix rebuilds: inter-system Thevenin resistances depend only on the matrix (DelayInterSystem2). */
+    public int matrixVersion = 0;
 
     int stateCount;
     RealMatrix A;
@@ -170,6 +172,7 @@ public class SubSystem {
         statesTab = states.toArray(statesTab);
 
         matrixValid = true;
+        matrixVersion++;
 
         p.stop();
         Utils.println(p);
