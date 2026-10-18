@@ -28,6 +28,7 @@ public final class FluidWorld implements IProcess {
     private final Set<FluidDevice> devices = new LinkedHashSet<>();
     private final List<FluidNetwork> networks = new ArrayList<>();
     private final List<FluidDevice.Vent> vents = new ArrayList<>();
+    private final List<FluidDevice.Link> links = new ArrayList<>();
     /** Pipe runs lumped into one node each (DESIGN.md section 5): lump -> its members, and member -> lump. */
     private final Map<FluidNode, List<FluidNode>> lumps = new IdentityHashMap<>();
     private final Map<FluidNode, FluidNode> lumpOf = new IdentityHashMap<>();
@@ -54,6 +55,7 @@ public final class FluidWorld implements IProcess {
         INSTANCE.devices.clear();
         INSTANCE.networks.clear();
         INSTANCE.vents.clear();
+        INSTANCE.links.clear();
         INSTANCE.lumps.clear();
         INSTANCE.lumpOf.clear();
         INSTANCE.dirty = false;
@@ -89,6 +91,7 @@ public final class FluidWorld implements IProcess {
         rebuildIfDirty();
         for (FluidDevice d : devices) d.beforeFluidStep(time);
         for (FluidDevice.Vent v : vents) v.edge.open = v.open;
+        for (FluidDevice.Link l : links) l.edge.open = l.open;
         for (FluidNetwork n : networks) n.step(time);
         writeBack();
         burstThisStep.clear();
@@ -114,6 +117,7 @@ public final class FluidWorld implements IProcess {
         dirty = false;
         networks.clear();
         vents.clear();
+        links.clear();
         lumps.clear();
         lumpOf.clear();
         // ports by (level, block, face)
@@ -128,7 +132,13 @@ public final class FluidWorld implements IProcess {
         for (FluidDevice d : devices) {
             for (FluidDevice.FluidPort p : d.fluidPorts()) addNode(p.node(), parent, all, levelOf, d.fluidLevel());
             for (FluidDevice.Vent v : d.fluidVents()) addNode(v.node, parent, all, levelOf, d.fluidLevel());
+            for (FluidDevice.Link l : d.fluidLinks()) {
+                addNode(l.a, parent, all, levelOf, d.fluidLevel());
+                addNode(l.b, parent, all, levelOf, d.fluidLevel());
+            }
         }
+        List<FluidDevice.Link> allLinks = new ArrayList<>();
+        for (FluidDevice d : devices) allLinks.addAll(d.fluidLinks());
         List<Object[]> couplings = new ArrayList<>();   // {portA, portB}
         for (FluidDevice d : devices)
             for (FluidDevice.FluidPort p : d.fluidPorts()) {
@@ -190,6 +200,7 @@ public final class FluidWorld implements IProcess {
             }
         }
         for (Object[] c : couplings) union(repr.apply(((FluidDevice.FluidPort) c[0]).node()), repr.apply(((FluidDevice.FluidPort) c[1]).node()), parent2);
+        for (FluidDevice.Link l : allLinks) union(repr.apply(l.a), repr.apply(l.b), parent2);
         parent = parent2;
         all = reps;
         Map<FluidNode, FluidNetwork> byRoot = new IdentityHashMap<>();
@@ -209,6 +220,14 @@ public final class FluidWorld implements IProcess {
             // a run's end: its draw on the lump, and half the run's resistance instead of the piece's own
             double rA = a != p.node() ? runR.get(a) / 2 : 1 / p.k(), rB = b != q.node() ? runR.get(b) / 2 : 1 / q.k();
             byRoot.get(find(a, parent)).connect(a, drawOn(a, p.node(), p.draw()), b, drawOn(b, q.node(), q.draw()), 1 / (rA + rB));   // (in series)
+        }
+        for (FluidDevice.Link l : allLinks) {
+            FluidNode a = repr.apply(l.a), b = repr.apply(l.b);
+            if (a == b) continue;   // (both sides in one run: the valve can't hold anything back)
+            double r = 1 / l.k + (a != l.a ? runR.get(a) / 2 : 0) + (b != l.b ? runR.get(b) / 2 : 0);
+            l.edge = byRoot.get(find(a, parent)).connect(a, drawOn(a, l.a, l.drawA), b, drawOn(b, l.b, l.drawB), 1 / r);
+            l.edge.open = l.open;
+            links.add(l);
         }
         Map<FluidNetwork, FluidNode> air = new IdentityHashMap<>();
         for (FluidDevice d : devices)

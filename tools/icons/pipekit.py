@@ -23,11 +23,29 @@ def icon(hi, mid, lo):
             px[x, y] = (140, 90, 40, 255) if x == 6 else (110, 70, 30, 255)
     return im
 
+def valve():
+    """A gate valve: a pipe stub through a body, a stem and a red handwheel on top."""
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = im.load()
+    hi, mid, lo = (214, 214, 214, 255), (150, 150, 155, 255), (95, 95, 100, 255)
+    for x in range(1, 15):
+        px[x, 10], px[x, 11], px[x, 12] = hi, mid, lo
+    for x in range(5, 11):
+        for y in range(8, 15):
+            px[x, y] = mid if 5 < x < 10 else lo
+    for y in range(4, 8):
+        px[7, y], px[8, y] = lo, mid
+    for x in range(3, 13):
+        px[x, 3] = (190, 40, 30, 255)
+        px[x, 4] = (130, 25, 20, 255)
+    return im
+
 def main():
     d = os.path.join(sys.argv[1], "assets/eln/textures/item")
     os.makedirs(d, exist_ok=True)
     for name, cols in TIERS.items():
         icon(*[c + (255,) for c in cols]).save(os.path.join(d, f"pipe_kit_{name}.png"))
+    valve().save(os.path.join(d, "pipe_valve.png"))
 
 if __name__ == "__main__":
     main()

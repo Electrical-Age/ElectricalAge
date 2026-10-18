@@ -17,6 +17,28 @@ public interface FluidDevice {
         return List.of();
     }
 
+    /** Edges inside the device between its own nodes (a valve between two pipes); the device sets open before each
+     *  step. */
+    default List<Link> fluidLinks() {
+        return List.of();
+    }
+
+    final class Link {
+        public final FluidNode a, b;
+        public final double drawA, drawB, k;
+        public double open = 1;
+        /** This step's edge (set by the world). */
+        public FluidEdge edge;
+
+        public Link(FluidNode a, double drawA, FluidNode b, double drawB, double k) {
+            this.a = a;
+            this.drawA = drawA;
+            this.b = b;
+            this.drawB = drawB;
+            this.k = k;
+        }
+    }
+
     /** Nodes joined inside the device (pipes meeting at a junction): each group is one volume (lumped pipes). */
     default List<List<FluidNode>> fluidJoins() {
         return List.of();

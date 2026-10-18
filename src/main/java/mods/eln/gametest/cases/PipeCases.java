@@ -5,6 +5,7 @@ import mods.eln.gametest.TestContext;
 import mods.eln.node.voxel.PipeKitItem;
 import mods.eln.node.voxel.PipePart;
 import mods.eln.node.voxel.VoxelNode;
+import mods.eln.node.voxel.VoxelPart;
 import mods.eln.node.voxel.VoxelNodeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +24,7 @@ public final class PipeCases {
         cases.add(new JoinMidRun());
         cases.add(new KitCrafting());
         cases.add(new Burst());
+        cases.add(new Valve());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -200,6 +202,46 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** A valve between a pressurised run and an empty one: shut, it holds; open, the pressures even out. */
+    static final class Valve implements TestCase {
+        BlockPos a, b, c;
+        String err;
+        double heldHigh, heldLow;
+
+        public String id() {
+            return "pipe_valve";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            b = ctx.at(2, 1, 1);
+            c = ctx.at(3, 1, 1);
+            for (BlockPos p : new BlockPos[]{a, b, c}) lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
+            err = node(ctx, b).addValve();
+            if (err != null) return;
+            for (VoxelPart p : node(ctx, b).parts) if (p instanceof mods.eln.node.voxel.ValvePart v) v.open = false;
+            ((PipePart) node(ctx, a).parts.get(0)).fluid.fill(0, 5e5, 293.15);
+            mods.eln.fluid.FluidWorld.changed(node(ctx, a));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe: a valve fits in a straight pipe", err == null, "" + err);
+            if (err != null) return;
+            double pa = ((PipePart) node(ctx, a).parts.get(0)).fluid.P(), pc = ((PipePart) node(ctx, c).parts.get(0)).fluid.P();
+            ctx.check("pipe: shut, it holds (5 bar on one side, 1 on the other)", pa > 3e5 && pc < 1.5e5, String.format("%.2f / %.2f bar", pa / 1e5, pc / 1e5));
+            var parts = node(ctx, b).parts;
+            ctx.check("pipe: the pipe was cut in two around the valve", parts.size() == 3, parts.size() + " parts");
         }
     }
 

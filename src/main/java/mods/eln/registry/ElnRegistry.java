@@ -85,6 +85,8 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_kit_iron", p -> new mods.eln.node.voxel.PipeKitItem(0, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_ALLOY =
         ITEMS.registerItem("pipe_kit_alloy", p -> new mods.eln.node.voxel.PipeKitItem(1, p));
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_VALVE =
+        ITEMS.registerItem("pipe_valve", mods.eln.node.voxel.ValveItem::new);
 
     /** One block per transparent-node device; the shared block-entity type covers them all. */
     public static final List<DeferredBlock<mods.eln.node.transparent.TransparentNodeBlock>> TRANSPARENT_BLOCKS = new ArrayList<>();
@@ -234,6 +236,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(tabIcon);
         ALL_ITEMS.add(PIPE_KIT_IRON);   // (pipes, 26.x)
         ALL_ITEMS.add(PIPE_KIT_ALLOY);
+        ALL_ITEMS.add(PIPE_VALVE);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

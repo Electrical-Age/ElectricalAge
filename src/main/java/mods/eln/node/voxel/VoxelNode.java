@@ -6,6 +6,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.Node;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.fluid.EaUnits;
 import mods.eln.sim.fluid.FluidDevice;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
@@ -82,6 +83,7 @@ public class VoxelNode extends Node implements FluidDevice {
         VoxelPart p = parts.remove(index);
         markUsed();
         if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+        if (drop && p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
         changed();
         return parts.isEmpty();
     }
@@ -117,12 +119,87 @@ public class VoxelNode extends Node implements FluidDevice {
     @Override
     public List<List<mods.eln.sim.fluid.FluidNode>> fluidJoins() {
         java.util.Map<Integer, List<mods.eln.sim.fluid.FluidNode>> at = new java.util.HashMap<>();
+        java.util.Set<Integer> valves = new java.util.HashSet<>();
+        for (VoxelPart p : parts) if (p instanceof ValvePart v) valves.add(voxel(v.x, v.y, v.z));
         for (VoxelPart p : parts)
             if (p instanceof PipePart pipe && pipe.fluid != null)
-                for (int[] e : pipe.innerEnds()) at.computeIfAbsent(voxel(e[0], e[1], e[2]), k -> new ArrayList<>()).add(pipe.fluid);
+                for (int[] e : pipe.innerEnds())
+                    if (!valves.contains(voxel(e[0], e[1], e[2])))   // (a valve's two pipes meet through it, not joined)
+                        at.computeIfAbsent(voxel(e[0], e[1], e[2]), k -> new ArrayList<>()).add(pipe.fluid);
         List<List<mods.eln.sim.fluid.FluidNode>> out = new ArrayList<>();
         for (var g : at.values()) if (g.size() > 1) out.add(g);
         return out;
+    }
+
+    /** Each valve links the two pipes that end at it, open or shut. */
+    @Override
+    public List<Link> fluidLinks() {
+        List<Link> out = new ArrayList<>();
+        for (VoxelPart p : parts) {
+            if (!(p instanceof ValvePart v)) continue;
+            List<PipePart> ends = new ArrayList<>();
+            for (VoxelPart q : parts)
+                if (q instanceof PipePart pipe && pipe.fluid != null)
+                    for (int[] e : pipe.innerEnds()) if (e[0] == v.x && e[1] == v.y && e[2] == v.z) ends.add(pipe);
+            if (ends.size() != 2) continue;
+            PipePart a = ends.get(0), b = ends.get(1);
+            double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * 4;   // (a quarter block of pipe)
+            Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k);
+            l.open = v.open ? 1 : 0;
+            out.add(l);
+        }
+        return out;
+    }
+
+    /** Fit a valve in the pipe running straight through the block's centre (it is cut there into two). */
+    public String addValve() {
+        int x = 8, y = 8, z = 8;
+        for (VoxelPart p : parts) if (p instanceof ValvePart) return "there is a valve here already";
+        for (int i = 0; i < parts.size(); i++) {
+            if (!(parts.get(i) instanceof PipePart pipe) || !pipe.passes(x, y, z)) continue;
+            int axis = -1;
+            for (int a = 0; a < 3; a++) {
+                int[] lo = {x, y, z}, hi = {x, y, z};
+                lo[a] -= 2;
+                hi[a] += 2;
+                if (pipe.passes(lo[0], lo[1], lo[2]) && pipe.passes(hi[0], hi[1], hi[2])) axis = a;
+            }
+            if (axis < 0) return "the pipe turns here: fit a valve on a straight piece";
+            BitSet others = new BitSet(4096), want = new BitSet(4096);
+            for (int j = 0; j < parts.size(); j++) if (j != i) for (int[] b : parts.get(j).boxes()) fill(others, b);
+            for (int[] b : new ValvePart(x, y, z, axis, pipe.bore()).boxes()) fill(want, b);
+            if (want.intersects(others)) return "something is in the way";
+            PipePart[] halves = pipe.splitAt(x, y, z);
+            if (halves == null) return "the pipe ends here";
+            double[] saved = pipe.fluid == null ? null : new double[]{pipe.fluid.mWater, pipe.fluid.mAir, pipe.fluid.energy};
+            parts.remove(i);
+            for (PipePart hp : halves) {
+                double share = hp.length() / (double) Math.max(1, pipe.length());
+                hp.burst = pipe.burst;
+                hp.makeNode(coordonate.y, saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                parts.add(hp);
+            }
+            parts.add(new ValvePart(x, y, z, axis, pipe.bore()));
+            markUsed();
+            changed();
+            return null;
+        }
+        return "no pipe runs through the middle of this block";
+    }
+
+    /** A right-click on a valve (empty hand) turns it. */
+    @Override
+    public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
+        if (player.getMainHandItem().isEmpty()) {
+            int i = partAt(vx, vy, vz);
+            if (i >= 0 && parts.get(i) instanceof ValvePart v) {
+                v.open = !v.open;
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(v.open ? "Valve open" : "Valve shut"));
+                changed();
+                return true;
+            }
+        }
+        return super.onBlockActivated(player, side, vx, vy, vz);
     }
 
     /**
@@ -225,7 +302,10 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public void onBreakBlock() {
-        for (VoxelPart p : parts) if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+        for (VoxelPart p : parts) {
+            if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+            if (p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+        }
         parts.clear();
         super.onBreakBlock();
     }
@@ -285,6 +365,25 @@ public class VoxelNode extends Node implements FluidDevice {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /** The multimeter on a pipe: its run's pressure and what's in it (a gauge until there's a gauge part). */
+    @Override
+    public String multiMeterString(Direction side) {
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.fluid != null) {
+                var n = pipe.fluid;
+                double lq = n.mLiquid() / EaUnits.KG_PER_MB_WATER, st = n.mVapour() / EaUnits.KG_PER_MB_STEAM;
+                return String.format("%.2f bar  water %.0f mB  steam %.0f mB%s  ", n.P() / 1e5, lq, st, pipe.burst ? "  BURST" : "");
+            }
+        return "";
+    }
+
+    @Override
+    public String thermoMeterString(Direction side) {
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.fluid != null) return String.format("%.0f °C  ", pipe.fluid.T() - 273.15);
+        return "";
     }
 
     public boolean playerAskToBreakPart(Player player, int index) {

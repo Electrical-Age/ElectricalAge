@@ -47,6 +47,21 @@ public class VoxelNodeRender implements BlockEntityRenderer<VoxelNodeEntity, Vox
         GlFrame frame = GlSubmit.open(poseStack);
         try {
             for (VoxelPart part : state.parts) {
+                if (part instanceof ValvePart v) {
+                    UtilsClient.glDefaultColor();
+                    UtilsClient.bindTexture(TEX[0]);
+                    var bs = v.boxes();
+                    GL11.glColor4f(0.45f, 0.45f, 0.5f, 1f);
+                    box(bs.get(0)[0], bs.get(0)[1], bs.get(0)[2], bs.get(0)[3], bs.get(0)[4], bs.get(0)[5]);
+                    // the handwheel: red when shut, green when open
+                    if (v.open) GL11.glColor4f(0.3f, 0.75f, 0.3f, 1f);
+                    else GL11.glColor4f(0.8f, 0.2f, 0.15f, 1f);
+                    int[] s = bs.get(1);
+                    box(s[0], s[1], s[2], s[3], s[4], s[5]);
+                    if (v.axis == 1) box(s[3] - 1, s[1] - 2, s[2] - 2, s[3], s[4] + 2, s[5] + 2);
+                    else box(s[0] - 2, s[4] - 1, s[2] - 2, s[3] + 2, s[4], s[5] + 2);
+                    continue;
+                }
                 if (!(part instanceof PipePart pipe)) continue;
                 UtilsClient.glDefaultColor();
                 if (pipe.burst) GL11.glColor4f(0.55f, 0.35f, 0.25f, 1f);   // (burst: scorched)
