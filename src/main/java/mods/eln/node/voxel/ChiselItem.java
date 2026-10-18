@@ -108,8 +108,7 @@ public class ChiselItem extends Item implements PipeTool {
             node.onBlockPlacedBy(new Coordonate(at, level), mods.eln.misc.Direction.YN, player, ItemStack.EMPTY);
             node.host = st;
             node.carved = new BitSet(4096);
-            boolean wet = st.getOptionalValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED).orElse(false);
-            level.setBlock(at, ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState().setValue(VoxelNodeBlock.WATERLOGGED, wet), 3);
+            level.setBlock(at, VoxelNodeBlock.forHost(st), 3);
         }
         if (node.host == null) return "nothing to carve here";
         if (node.carved == null) node.carved = new BitSet(4096);

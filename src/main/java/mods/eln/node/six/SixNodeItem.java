@@ -47,7 +47,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Direction direction = Direction.fromIntMinecraftSide(ctx.getClickedFace().get3DDataValue()).getInverse();
         // clicking a voxel block (its cables or pipes): the device goes into that block, on the face behind the click
-        if (world.getBlockState(ctx.getClickedPos()).getBlock() == mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get())
+        if (world.getBlockState(ctx.getClickedPos()).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock)
             pos = ctx.getClickedPos();
         boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction);
         if (ok && ctx.getPlayer() != null && !ctx.getPlayer().isCreative()) ctx.getItemInHand().shrink(1);
@@ -82,7 +82,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             sixNode.createSubBlock(stack, direction, player);
             world.setBlock(pos, block.stateFor(world, pos), 3);
             return true;
-        } else if (old.getBlock() == mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get()) {
+        } else if (old.getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock) {
             // a voxel block: on a free face whose plate is clear of its cables and pipes
             if (!(world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve) || !(ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v))
                 return false;

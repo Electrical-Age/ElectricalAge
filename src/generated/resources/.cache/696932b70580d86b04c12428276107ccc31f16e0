@@ -1,4 +1,4 @@
-// 26.3	2026-10-18T18:22:54.475733622	eln-global/EA models
+// 26.3	2026-10-18T18:26:18.210811166	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -72,6 +72,9 @@ b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole_w_dc_dc_converter.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/voltage_oriented_battery.json
 3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node.json
+3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node_fence.json
+3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node_wall.json
+3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node_wooden_fence.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/water_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/wind_turbine.json
 61d873cbec0fa1e9200f30544172a2cabc47c78e assets/eln/items/10a_diode.json

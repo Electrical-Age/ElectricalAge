@@ -52,6 +52,9 @@ public class ElnLang extends LanguageProvider {
         add(ElnRegistry.REPLICATOR.get(), "Replicator");
         add(ElnRegistry.SIX_NODE_BLOCK.get(), "Electrical Age Device");
         add(ElnRegistry.VOXEL_NODE_BLOCK.get(), "Pipes and Cables");
+        add(ElnRegistry.VOXEL_NODE_WOODEN_FENCE.get(), "Pipes and Cables");
+        add(ElnRegistry.VOXEL_NODE_FENCE.get(), "Pipes and Cables");
+        add(ElnRegistry.VOXEL_NODE_WALL.get(), "Pipes and Cables");
         add(ElnRegistry.GHOST_BLOCK.get(), "Electrical Age Multiblock Part");
         add(ElnRegistry.LIGHT_BLOCK.get(), "Electrical Age Light");
         for (var b : ElnRegistry.TRANSPARENT_BLOCKS) {

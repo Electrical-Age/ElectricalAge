@@ -43,6 +43,7 @@ public final class CableCases {
         cases.add(new MimicCase());
         cases.add(new StairsCase());
         cases.add(new ChiselCase());
+        cases.add(new FenceJoinCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
@@ -788,6 +789,55 @@ public final class CableCases {
             c.check("chisel: the wall block is carved stone holding cable", wall.startsWith("Stone, carved 512, parts "), wall);
             c.check("chisel: right-click puts material back", !back.startsWith(back.substring(back.indexOf("-> ") + 3) + " "), back);
             c.check("chisel: carved and put back whole: stone again", whole.equals("carved true, after putting back: Stone"), whole);
+        }
+    }
+
+    /** A cable through the middle of a fence line: the fence it passes becomes a voxel block that still joins its real
+     *  neighbours both ways (the voxel block variant carries the fence tags). */
+    static final class FenceJoinCase implements TestCase {
+        String err, res;
+
+        public String name() {
+            return "fence joins an imitated fence";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var fence = net.minecraft.world.level.block.Blocks.OAK_FENCE.defaultBlockState();
+            for (int z = 0; z <= 2; z++) level.setBlock(c.at(3, 1, z), fence, 3);
+            for (int z = 0; z <= 2; z++)
+                level.setBlock(c.at(3, 1, z), net.minecraft.world.level.block.Block.updateFromNeighbourShapes(fence, level, c.at(3, 1, z)), 3);
+            BlockPos a = c.at(1, 1, 1), b = c.at(6, 1, 1);
+            var start = new mods.eln.node.voxel.CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + 8, 0, -1);
+            var end = new mods.eln.node.voxel.CableRouter.End(b.getX() * 16L + 8, b.getY() * 16L, b.getZ() * 16L + 8, 0, -1);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, LV, start, end);
+        }
+
+        public void measure(TestContext c) {
+            var level = c.level();
+            // the fence the cable went through (a voxel block now) and a real fence next to it
+            res = "no fence imitated";
+            for (int z = 0; z <= 2; z++) {
+                var v = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(3, 1, z), level));
+                if (!(v instanceof mods.eln.node.voxel.VoxelNode vn) || vn.host == null) continue;
+                int nz = z == 1 ? 0 : 1;
+                var real = level.getBlockState(c.at(3, 1, nz));
+                var toReal = nz < z ? net.minecraft.world.level.block.FenceBlock.NORTH : net.minecraft.world.level.block.FenceBlock.SOUTH;
+                var toMe = nz < z ? net.minecraft.world.level.block.FenceBlock.SOUTH : net.minecraft.world.level.block.FenceBlock.NORTH;
+                res = "imitated " + level.getBlockState(c.at(3, 1, z)).getBlock().getDescriptionId() + ", real fence joins it "
+                    + real.getOptionalValue(toMe).orElse(false) + ", imitated joins back " + vn.host.getOptionalValue(toReal).orElse(false);
+            }
+            c.check("fence join: laid", err == null, String.valueOf(err));
+            c.check("fence join: the real fence and the imitated one join both ways",
+                res.equals("imitated block.eln.voxel_node_wooden_fence, real fence joins it true, imitated joins back true"), res);
         }
     }
 

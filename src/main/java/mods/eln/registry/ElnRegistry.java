@@ -73,8 +73,19 @@ public final class ElnRegistry {
     public static final DeferredBlock<mods.eln.node.voxel.VoxelNodeBlock> VOXEL_NODE_BLOCK = BLOCKS.registerBlock("voxel_node",
         mods.eln.node.voxel.VoxelNodeBlock::new,
         p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
+    /** Voxel blocks imitating fences and walls carry their tags (data/minecraft/tags), so neighbours join them (Mimic). */
+    public static final DeferredBlock<mods.eln.node.voxel.VoxelNodeBlock> VOXEL_NODE_WOODEN_FENCE = BLOCKS.registerBlock("voxel_node_wooden_fence",
+        mods.eln.node.voxel.VoxelNodeBlock::new,
+        p -> p.mapColor(MapColor.WOOD).strength(1.0f, 1.0f).sound(SoundType.WOOD).noOcclusion().dynamicShape());
+    public static final DeferredBlock<mods.eln.node.voxel.VoxelNodeBlock> VOXEL_NODE_FENCE = BLOCKS.registerBlock("voxel_node_fence",
+        mods.eln.node.voxel.VoxelNodeBlock::new,
+        p -> p.mapColor(MapColor.NETHER).strength(1.0f, 1.0f).sound(SoundType.NETHER_BRICKS).noOcclusion().dynamicShape());
+    public static final DeferredBlock<mods.eln.node.voxel.VoxelNodeBlock> VOXEL_NODE_WALL = BLOCKS.registerBlock("voxel_node_wall",
+        mods.eln.node.voxel.VoxelNodeBlock::new,
+        p -> p.mapColor(MapColor.STONE).strength(1.0f, 1.0f).sound(SoundType.STONE).noOcclusion().dynamicShape());
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.node.voxel.VoxelNodeEntity>> VOXEL_NODE_ENTITY =
-        BLOCK_ENTITIES.register("voxel_node", () -> new BlockEntityType<>(mods.eln.node.voxel.VoxelNodeEntity::new, VOXEL_NODE_BLOCK.get()));
+        BLOCK_ENTITIES.register("voxel_node", () -> new BlockEntityType<>(mods.eln.node.voxel.VoxelNodeEntity::new, VOXEL_NODE_BLOCK.get(),
+            VOXEL_NODE_WOODEN_FENCE.get(), VOXEL_NODE_FENCE.get(), VOXEL_NODE_WALL.get()));
     public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
         DeferredRegister.create(Registries.RECIPE_SERIALIZER, Eln.MODID);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Merge>> PIPE_KIT_MERGE =

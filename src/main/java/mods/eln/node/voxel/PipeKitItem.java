@@ -97,7 +97,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
     public static String place(Level level, BlockPos pos, VoxelPart part, Player player) {
         BlockState old = level.getBlockState(pos);
         VoxelNodeBlock block = ElnRegistry.VOXEL_NODE_BLOCK.get();
-        if (old.getBlock() == block) {
+        if (old.getBlock() instanceof VoxelNodeBlock) {
             if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode node)) return "no node here";
             return node.addPart(part);
         }
@@ -115,9 +115,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
             node.onBreakBlock();
             return err;
         }
-        boolean wet = mimic ? old.getOptionalValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED).orElse(false)
-            : block.stateFor(level, pos).getValue(VoxelNodeBlock.WATERLOGGED);
-        level.setBlock(pos, block.defaultBlockState().setValue(VoxelNodeBlock.WATERLOGGED, wet), 3);
+        level.setBlock(pos, mimic ? VoxelNodeBlock.forHost(old) : block.stateFor(level, pos), 3);
         return null;
     }
 }

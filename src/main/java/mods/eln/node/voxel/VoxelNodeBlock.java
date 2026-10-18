@@ -52,6 +52,20 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         return super.updateShape(state, level, ticks, pos, dir, neighbourPos, neighbour, random);
     }
 
+    /** The voxel block to imitate host with: the variant carrying its fence or wall tags (neighbours join it), else the
+     *  plain one; waterlogged as the host was. */
+    public static BlockState forHost(BlockState host) {
+        net.minecraft.world.level.block.Block b = mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get();
+        if (host != null) {
+            if (host.is(net.minecraft.tags.BlockTags.WOODEN_FENCES)) b = mods.eln.registry.ElnRegistry.VOXEL_NODE_WOODEN_FENCE.get();
+            else if (host.is(net.minecraft.tags.BlockTags.FENCES)) b = mods.eln.registry.ElnRegistry.VOXEL_NODE_FENCE.get();
+            else if (host.is(net.minecraft.tags.BlockTags.WALLS) || host.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock)
+                b = mods.eln.registry.ElnRegistry.VOXEL_NODE_WALL.get();
+        }
+        boolean wet = host != null && host.getOptionalValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED).orElse(false);
+        return b.defaultBlockState().setValue(WATERLOGGED, wet);
+    }
+
     /** The state to place at pos: waterlogged if a water source is there. */
     public BlockState stateFor(Level world, BlockPos pos) {
         var f = world.getFluidState(pos);

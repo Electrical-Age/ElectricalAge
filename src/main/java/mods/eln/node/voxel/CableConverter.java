@@ -87,7 +87,7 @@ public final class CableConverter {
                     if (p != null && NodeBase.compareConnectionMask(s.getSideConnectionMask(d, lrdu),
                         p.getSideConnectionMask(od, od.getLRDUGoingTo(d).inverse()))) {
                         var ws = level.getBlockState(w);
-                        if (!ws.isAir() && ws.getBlock() != ElnRegistry.VOXEL_NODE_BLOCK.get())
+                        if (!ws.isAir() && !(ws.getBlock() instanceof VoxelNodeBlock))
                             return Plan.skip("an outer corner goes through " + ws.getBlock().getName().getString());
                         int kt = tier;
                         if (c == null) {   // (a device's corner: a signal or power knuckle by its edge; no thermal knuckles)
