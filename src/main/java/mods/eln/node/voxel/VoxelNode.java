@@ -577,6 +577,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         connectElements();   // (six-node elements hosted here: their loads and links inside the block)
         cables.build();
         cables.addToSimulation();
+        connectElementsToCables();
         cablesBuilt = !cables.conductors.isEmpty();
         for (Direction dir : Direction.values()) {
             mods.eln.node.NodeBase other = getNeighbor(dir);
@@ -594,29 +595,112 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return false;
     }
 
+    /**
+     * A connection point of this block (block-local voxels): a cable port, or an edge of a six-node element hosted here
+     * (the midpoint of an edge of its face). out: the face it opens on (3D value); elSide/lrdu: the element's (or -1).
+     */
+    record End(int x, int y, int z, int out, int mask, ElectricalLoad load, ThermalLoad thermal, int elSide, LRDU lrdu) {
+        boolean at(int[] p) {
+            return x == p[0] && y == p[1] && z == p[2];
+        }
+    }
+
+    List<End> ends() {
+        List<End> out = new ArrayList<>();
+        for (CableNet.Conductor k : cables.live())
+            for (CablePart c : k.parts)
+                for (CablePart.Port p : c.cablePorts()) out.add(new End(p.x(), p.y(), p.z(), p.face(), k.mask(), k.load, k.thermal, -1, null));
+        for (int f = 0; f < 6; f++) {
+            var e = sideElementList[f];
+            if (e == null) continue;
+            Direction fs = Direction.fromInt(f);
+            int af = fs.toEnumFacing().get3DDataValue();
+            for (LRDU l : LRDU.values()) {
+                int dv = fs.applyLRDU(l).toEnumFacing().get3DDataValue();
+                int[] c = {8, 8, 8};
+                c[CablePart.normalAxis(af)] = CablePart.plane(af);
+                c[CablePart.normalAxis(dv)] = dv % 2 == 0 ? 0 : 16;
+                boolean burnt = e.isBurnt();
+                out.add(new End(c[0], c[1], c[2], dv, e.getConnectionMask(l), burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l), f, l));
+            }
+        }
+        return out;
+    }
+
+    /** Links between hosted elements and cables in this block (made in connectJob). */
+    private final List<mods.eln.sim.ElectricalConnection> elementLinksE = new ArrayList<>();
+    private final List<mods.eln.sim.ThermalConnection> elementLinksT = new ArrayList<>();
+
+    /** Hosted elements and cable ends meeting at a point in this block (on the element's face, or an inner corner). */
+    private void connectElementsToCables() {
+        elementLinksE.clear();
+        elementLinksT.clear();
+        List<End> all = ends();
+        for (End a : all) {
+            if (a.elSide < 0) continue;
+            for (End b : all) {
+                if (b.elSide >= 0 || !a.at(new int[]{b.x, b.y, b.z}) || !compareConnectionMask(a.mask, b.mask)) continue;
+                lrduElementMask.set(Direction.fromInt(a.elSide), a.lrdu, true);
+                if (a.load == null || b.load == null) continue;
+                var e = new mods.eln.sim.ElectricalConnection(a.load, b.load);
+                Eln.simulator.addElectricalComponent(e);
+                elementLinksE.add(e);
+                if (a.thermal != null && b.thermal != null) {
+                    var t = new mods.eln.sim.ThermalConnection(a.thermal, b.thermal);
+                    Eln.simulator.addThermalConnection(t);
+                    elementLinksT.add(t);
+                }
+            }
+        }
+    }
+
+    /** Across a face to another voxel block: every end meeting one of its ends at the same point. */
     private void connectVoxel(Direction dir, VoxelNode v) {
         int f = dir.toEnumFacing().get3DDataValue();
-        for (CablePart.Port p : cables.ports()) {
-            if (p.face() != f) continue;
-            CableNet.Conductor a = cables.at(p), b = v.cables.at(p.mirrored());
-            if (a == null || b == null || !compareConnectionMask(a.mask(), b.mask())) continue;
-            var e = new mods.eln.sim.ElectricalConnection(a.load, b.load);
-            Eln.simulator.addElectricalComponent(e);
-            mods.eln.sim.ThermalConnection t = null;
-            if (a.thermal != null && b.thermal != null) {
-                t = new mods.eln.sim.ThermalConnection(a.thermal, b.thermal);
-                Eln.simulator.addThermalConnection(t);
+        List<End> theirs = v.ends();
+        for (End a : ends()) {
+            if (a.out != f) continue;
+            CablePart.Port m = new CablePart.Port(a.out, a.x, a.y, a.z).mirrored();
+            for (End b : theirs) {
+                if (b.out != m.face() || b.x != m.x() || b.y != m.y() || b.z != m.z() || !compareConnectionMask(a.mask, b.mask)) continue;
+                if (a.elSide >= 0) lrduElementMask.set(Direction.fromInt(a.elSide), a.lrdu, true);
+                if (b.elSide >= 0) v.lrduElementMask.set(Direction.fromInt(b.elSide), b.lrdu, true);
+                mods.eln.sim.ElectricalConnection e = null;
+                mods.eln.sim.ThermalConnection t = null;
+                if (a.load != null && b.load != null) {
+                    e = new mods.eln.sim.ElectricalConnection(a.load, b.load);
+                    Eln.simulator.addElectricalComponent(e);
+                }
+                if (a.thermal != null && b.thermal != null) {
+                    t = new mods.eln.sim.ThermalConnection(a.thermal, b.thermal);
+                    Eln.simulator.addThermalConnection(t);
+                }
+                var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
+                nodeConnectionList.add(c);
+                v.nodeConnectionList.add(c);
+                v.setNeedPublish(true);
             }
-            var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
-            nodeConnectionList.add(c);
-            v.nodeConnectionList.add(c);
-            v.setNeedPublish(true);
         }
+    }
+
+    /** (Element stubs are set by the connections themselves; a neighbour dropping its links reconnects at once.) */
+    @Override
+    public void externalDisconnect(Direction side, LRDU lrdu) {
+    }
+
+    /** A legacy neighbour linked to (side, edge): an element's stub, if it's an element's. */
+    @Override
+    public void newConnectionAt(Direction side, LRDU lrdu) {
+        if (sideElementList[side.applyLRDU(lrdu).getInt()] != null) super.newConnectionAt(side, lrdu);
     }
 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
+        for (var e : elementLinksE) Eln.simulator.removeElectricalComponent(e);
+        for (var t : elementLinksT) Eln.simulator.removeThermalConnection(t);
+        elementLinksE.clear();
+        elementLinksT.clear();
         cables.removeFromSimulation();
         FluidWorld.remove(this);
     }

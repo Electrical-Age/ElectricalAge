@@ -75,6 +75,25 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         }
     }
 
+    /** An element's stub toward a voxel cable here (CableRender asks): the cable at EA's (side, edge) slot. */
+    @Override
+    public mods.eln.cable.CableRenderDescriptor getCableRender(Direction side, mods.eln.misc.LRDU lrdu) {
+        var r = super.getCableRender(side, lrdu);
+        if (r != null) return r;
+        CablePart c = cableAt(side, lrdu);
+        if (c == null) return null;
+        var d = CablePart.TIERS[c.tier].descriptor();
+        return d == null ? null : d.render;
+    }
+
+    private CablePart cableAt(Direction side, mods.eln.misc.LRDU lrdu) {
+        int f = side.toEnumFacing().get3DDataValue(), a = side.applyLRDU(lrdu).toEnumFacing().get3DDataValue();
+        for (VoxelPart p : parts())
+            if (p instanceof CablePart c && !c.isKnuckle() && c.face == a)
+                for (CablePart.Port port : c.cablePorts()) if (port.face() == f) return c;
+        return null;
+    }
+
     private int partsHash;
     private boolean partsChanged;
 }

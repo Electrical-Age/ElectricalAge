@@ -38,6 +38,27 @@ public final class CableCases {
         cases.add(new BurnCase());
         cases.add(new RoutedCase());
         cases.add(new HostedCase());
+        cases.add(new Case("hosted device between voxel cables", (c, six, z) -> {
+            // source -> 3 cables -> resistor -> a cable -> ground: six-node row, and a voxel row where the resistor
+            // sits in a voxel block (its edges meet voxel cable ports across the faces)
+            source(c, SOURCE, 0, z, 50);
+            for (int x = 1; x <= 3; x++) {
+                if (six) c.placeSix(LV_CABLE, c.at(x, 1, z));
+                else voxel(c, c.at(x, 1, z), CablePart.arms(LV, DOWN, WEST, EAST));
+            }
+            ResistorElement r;
+            if (six) r = resistor(c, POWER_RESISTOR, 4, z, CORE);
+            else {
+                r = (ResistorElement) host(c, POWER_RESISTOR, c.at(4, 1, z), mods.eln.misc.Direction.YN);
+                Wp9aCases.orient(r, mods.eln.misc.LRDU::right, mods.eln.misc.Direction.XN);
+                r.getInventory().setItem(0, Wp9aCases.coal(CORE));
+                r.getInventory().setChanged();
+            }
+            if (six) c.placeSix(LV_CABLE, c.at(5, 1, z));
+            else voxel(c, c.at(5, 1, z), CablePart.arms(LV, DOWN, WEST, EAST));
+            c.placeSix(GROUND, c.at(6, 1, z));
+            return List.of(r);
+        }));
         cases.add(new KitCase());
         List<TestCase> mine = new ArrayList<>();
         addLayouts(mine);
