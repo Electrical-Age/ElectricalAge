@@ -35,6 +35,7 @@ public final class ClientPacketHandler {
                         if (stream.readInt() == Dimensions.id(level))
                             mods.eln.sound.SoundClient.play(mods.eln.sound.SoundCommand.fromStream(stream, level));
                     }
+                    case Eln.packetKitPreview -> mods.eln.client.render.KitOutline.read(stream);
                     default -> {
                     }
                 }

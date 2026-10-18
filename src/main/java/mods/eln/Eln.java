@@ -124,6 +124,8 @@ public class Eln {
     public static final byte packetDestroyUuid = 20;
     public static final byte packetClientToServerConnection = 21;
     public static final byte packetServerToClientInfo = 22;
+    /** 26.x: a cable kit's preview outlines (node.voxel.KitPreview). */
+    public static final byte packetKitPreview = 23;
 
     // Voltage / power levels, as in 1.12
     public static final double gateOutputCurrent = 0.100;
@@ -252,6 +254,9 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre.class, mods.eln.node.voxel.KitItem::onPickup);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ChiselItem::onLeftClick);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post.class, mods.eln.node.voxel.KitPreview::tick);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
+            e -> mods.eln.node.voxel.KitPreview.forget(e.getEntity().getUUID()));
         // pipe routes being laid: forgotten on logout and death
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
             e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));

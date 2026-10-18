@@ -462,6 +462,25 @@ public final class CableCases {
             var m = mods.eln.node.voxel.PipeKitRecipes.Merge.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 1,
                 List.of(mods.eln.node.voxel.CableKitItem.kit(LV, 100), mods.eln.node.voxel.CableKitItem.kit(LV, 28))));
             c.check("cable kit: two kits merge", mods.eln.node.voxel.KitItem.length(m) == 128 && m.getItem() instanceof mods.eln.node.voxel.CableKitItem, m.toString());
+            // Baughn: topping a kit up with cables like a bundle (a stack clicked onto the kit, or the kit onto a stack)
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var box = new net.minecraft.world.SimpleContainer(1);
+            var slot = new net.minecraft.world.inventory.Slot(box, 0, 0, 0);
+            var k1 = mods.eln.node.voxel.CableKitItem.kit(LV, 144);
+            box.setItem(0, k1);
+            var stack = coil.copyWithCount(40);
+            boolean took = k1.getItem().overrideOtherStackedOnMe(k1, stack, slot, net.minecraft.world.inventory.ClickAction.PRIMARY, player,
+                net.minecraft.world.entity.SlotAccess.of(() -> net.minecraft.world.item.ItemStack.EMPTY, x -> { }));
+            c.check("cable kit: 40 cables clicked onto a 9-cable kit go in (49 cables)", took && mods.eln.node.voxel.KitItem.length(k1) == 144 + 640 && stack.isEmpty(),
+                mods.eln.node.voxel.KitItem.length(k1) + " voxels, " + stack.getCount() + " left");
+            box.setItem(0, coil.copyWithCount(64));
+            boolean took2 = k1.getItem().overrideStackedOnOther(k1, slot, net.minecraft.world.inventory.ClickAction.PRIMARY, player);
+            c.check("cable kit: the kit clicked onto 64 cables takes what fits (to 1024 voxels)", took2 && mods.eln.node.voxel.KitItem.length(k1) == 1024
+                && box.getItem(0).getCount() == 64 - 15, mods.eln.node.voxel.KitItem.length(k1) + " voxels, " + box.getItem(0).getCount() + " left");
+            var other = mods.eln.node.voxel.CableKitItem.kit(LV, 16);
+            box.setItem(0, mods.eln.node.voxel.CableKitRecipes.coil(LV + 1).copyWithCount(5));
+            c.check("cable kit: another tier's cables don't go in", !other.getItem().overrideStackedOnOther(other, slot, net.minecraft.world.inventory.ClickAction.PRIMARY, player)
+                && mods.eln.node.voxel.KitItem.length(other) == 16, "");
         }
     }
 

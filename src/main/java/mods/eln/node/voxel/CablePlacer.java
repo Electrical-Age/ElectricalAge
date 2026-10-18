@@ -27,7 +27,7 @@ public final class CablePlacer {
     private CablePlacer() {
     }
 
-    static final class Plan {
+    public static final class Plan {
         final int tier;
         final CableRouter.End start;
         final long[] startJoin;
