@@ -31,7 +31,8 @@ public class HeatFurnaceScreen extends ElnScreen {
         gain = slider("gain", 0.1, 1.0, 0.01, render.gainSyncValue,
             v -> Component.literal(tr("Control gauge at %1$%", (int) Math.round(v * 100)) + "  (" + tr("Power: %1$W", render.power) + ")"),
             v -> render.clientSetGain((float) v));
-        text("fire", () -> fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL));
+        text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (fuel declined: press \"Decline fuel\" to take fuel)")
+            : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL));
         heat = slider("heat", 0, 980, 10, render.temperatureTargetSyncValue,
             v -> Component.literal(tr("Set point: %1$°C", (int) v) + "  (" + tr("Actual: %1$°C", Utils.plotValue(render.temperature)) + ")"),
             v -> render.clientSetTemperatureTarget((float) v));
