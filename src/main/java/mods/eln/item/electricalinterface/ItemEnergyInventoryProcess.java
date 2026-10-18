@@ -99,7 +99,9 @@ public class ItemEnergyInventoryProcess implements IProcess {
 
             for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[]{
                 net.minecraft.world.entity.EquipmentSlot.FEET, net.minecraft.world.entity.EquipmentSlot.LEGS,
-                net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.HEAD}) {
+                net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.HEAD,
+                // 26.x: the offhand too (it isn't in the main inventory list; Baughn: a flashlight there never recharged)
+                net.minecraft.world.entity.EquipmentSlot.OFFHAND}) {
                 ItemStack stack = player.getItemBySlot(slot); // 1.12 armorInventory (feet..head)
 
                 Object o = Utils.getItemObject(stack);
