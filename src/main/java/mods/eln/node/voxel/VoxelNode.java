@@ -692,7 +692,21 @@ public class VoxelNode extends Node implements FluidDevice {
         var out = new java.util.LinkedHashMap<String, String>();
         PipePart pipe = null;
         for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null && (pipe == null || pp.burst)) pipe = pp;
-        if (pipe == null) return out;
+        if (pipe == null) {
+            // cables: each conductor's tier, voltage and current (temperature with details)
+            int n = 0;
+            for (CableNet.Conductor k : cables.conductors) {
+                if (k.d == null || k.face < 0) continue;
+                String key = n++ == 0 ? "Cable" : "Cable " + n;
+                if (k.isBurntNow()) {
+                    out.put(key, k.d.name + ", BURNT");
+                    continue;
+                }
+                out.put(key, k.d.name + ": " + mods.eln.misc.Utils.plotVolt("", k.load.getU()) + " " + mods.eln.misc.Utils.plotAmpere("", k.load.getI()));
+                if (details && k.thermal != null) out.put(key + " temperature", mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc));
+            }
+            return out;
+        }
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
         out.put("Pressure", String.format("%.2f bar, %.0f °C", n.P() / 1e5, n.T() - 273.15));
