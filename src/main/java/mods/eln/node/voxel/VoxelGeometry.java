@@ -70,8 +70,9 @@ public final class VoxelGeometry {
                 pipe(b, pipe);
             } else if (part instanceof CablePart c) {
                 b.sprite = cableSprite(c.tier);
-                if (c.burnt != null) b.color(0.25f, 0.2f, 0.18f);
-                else b.color(1, 1, 1);
+                // (black insulation, Baughn; burnt: scorched brown)
+                if (c.burnt != null) b.color(0.35f, 0.22f, 0.14f);
+                else b.color(0.22f, 0.22f, 0.24f);
                 cable(b, c);
             }
         }
@@ -133,6 +134,7 @@ public final class VoxelGeometry {
             int[] bx = boxes.get(i);
             int w = 3 - along - n;
             double cw = (bx[w] + bx[w + 3]) / 2.0, half = (bx[w + 3] - bx[w]) / 2.0;
+            boolean knuckle = c.isKnuckle();
             double top = c.isKnuckle() || CablePart.plane(c.face) == 0 ? bx[n + 3] : bx[n];
             b.uvs = (q, fa) -> {
                 float[] uv = new float[8];
@@ -140,9 +142,10 @@ public final class VoxelGeometry {
                     double[] v = q[j];
                     double u, vv = v[along] / 16;
                     double depth = Math.abs(top - v[n]);
-                    if (fa == w) u = 0.25 + Math.signum(v[w] - cw) * (half / 32 + depth / 16);
+                    if (knuckle) u = 0.25 + (v[w] - cw) / 32;   // (a knuckle: just the strip)
+                    else if (fa == w) u = 0.25 + Math.signum(v[w] - cw) * (half / 32 + depth / 16);
                     else u = 0.25 + (v[w] - cw) / 32;
-                    if (fa == along) vv = 0.5 - depth / 16;
+                    if (fa == along && !knuckle) vv = 0.5 - depth / 16;
                     uv[2 * j] = (float) clamp01(u);
                     uv[2 * j + 1] = (float) clamp01(vv);
                 }
