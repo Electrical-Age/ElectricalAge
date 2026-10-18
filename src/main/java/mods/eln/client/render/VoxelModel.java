@@ -67,7 +67,12 @@ public final class VoxelModel implements DynamicBlockStateModel {
 
     @Override
     public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
-        List<VoxelPart> ps = level.getModelData(pos).get(VoxelNodeEntity.PARTS);
+        var data = level.getModelData(pos);
+        // the imitated block (a stair a cable runs over: Mimic), with its own model
+        BlockState host = data.get(VoxelNodeEntity.HOST);
+        if (host != null)
+            net.minecraft.client.Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(host).collectParts(level, pos, host, random, parts);
+        List<VoxelPart> ps = data.get(VoxelNodeEntity.PARTS);
         if (ps == null || ps.isEmpty()) return;
         QuadCollection.Builder qb = new QuadCollection.Builder();
         MutableQuad q = new MutableQuad();
@@ -93,5 +98,18 @@ public final class VoxelModel implements DynamicBlockStateModel {
     @Override
     public int materialFlags() {
         return 0;
+    }
+
+    /** An imitated block may have translucent faces (stained glass panes). */
+    @Override
+    public int materialFlags(BlockAndTintGetter level, BlockPos pos, BlockState state) {
+        BlockState host = level.getModelData(pos).get(VoxelNodeEntity.HOST);
+        return host == null ? 0 : net.minecraft.client.Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(host).materialFlags(level, pos, host);
+    }
+
+    @Override
+    public Material.Baked particleMaterial(BlockAndTintGetter level, BlockPos pos, BlockState state) {
+        BlockState host = level.getModelData(pos).get(VoxelNodeEntity.HOST);
+        return host == null ? particle : net.minecraft.client.Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(host).particleMaterial(level, pos, host);
     }
 }

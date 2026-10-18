@@ -68,6 +68,13 @@ public final class PipePlacer {
                         if (!level.isLoaded(p)) return true;
                         BlockState s = level.getBlockState(p);
                         if (s.isAir() || s.canBeReplaced() || s.getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) continue;
+                        if (Mimic.allowed(s)) {   // (a stair, fence, slab: only its own voxels are in the way)
+                            int lx0 = (int) (x0 - bx * 16), ly0 = (int) (y0 - by * 16), lz0 = (int) (z0 - bz * 16);
+                            int lx1 = (int) (x1 - bx * 16), ly1 = (int) (y1 - by * 16), lz1 = (int) (z1 - bz * 16);
+                            for (int[] b : Mimic.boxes(s, level, p))
+                                if (b[0] < lx1 && lx0 < b[3] && b[1] < ly1 && ly0 < b[4] && b[2] < lz1 && lz0 < b[5]) return true;
+                            continue;
+                        }
                         if (s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(p) instanceof VoxelNodeEntity e) {
                             List<VoxelPart> parts = e.parts();
                             int lx0 = (int) (x0 - bx * 16), ly0 = (int) (y0 - by * 16), lz0 = (int) (z0 - bz * 16);

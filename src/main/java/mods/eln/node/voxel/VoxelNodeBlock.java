@@ -41,6 +41,14 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
             BlockPos pos, net.minecraft.core.Direction dir, BlockPos neighbourPos, BlockState neighbour, net.minecraft.util.RandomSource random) {
         if (state.getValue(WATERLOGGED))
             ticks.scheduleTick(pos, net.minecraft.world.level.material.Fluids.WATER, net.minecraft.world.level.material.Fluids.WATER.getTickDelay(level));
+        // an imitated fence or wall keeps its connections (Mimic)
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode v && v.host != null) {
+            BlockState h = v.host.updateShape(level, ticks, pos, dir, neighbourPos, neighbour, random);
+            if (h != v.host && !h.isAir()) {
+                v.host = h;
+                v.elementsChanged();
+            }
+        }
         return super.updateShape(state, level, ticks, pos, dir, neighbourPos, neighbour, random);
     }
 
@@ -84,6 +92,8 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         if (e == null) return Shapes.block();
         VoxelShape s = shapeOf(e.parts(), 2);
+        BlockState host = e.host();
+        if (host != null) s = Shapes.or(s, host.getShape(level, pos, context));   // (the imitated block: Mimic)
         // six-node elements hosted here: their plates (grown like the parts' outline), for aiming; they don't collide
         int mask = e.getSideMask();
         for (int f = 0; f < 6; f++)
@@ -103,8 +113,43 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
-        return e == null ? Shapes.empty() : shapeOf(e.parts());
+        if (e == null) return Shapes.empty();
+        BlockState host = e.host();
+        return host == null ? shapeOf(e.parts()) : Shapes.or(shapeOf(e.parts()), host.getCollisionShape(level, pos, context));
     }
+
+    // ---- an imitated block (Mimic): its sound, its tool and speed when aimed at, its connections kept up to date
+
+    @Override
+    public net.minecraft.world.level.block.SoundType getSoundType(BlockState state, net.minecraft.world.level.LevelReader level, BlockPos pos,
+                                                                 @Nullable net.minecraft.world.entity.Entity entity) {
+        VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
+        BlockState host = e == null ? null : e.host();
+        return host != null ? host.getSoundType(level, pos, entity) : super.getSoundType(state, level, pos, entity);
+    }
+
+    /** What the player aims at in this block: 0 nothing, 1 a part or device, 2 the imitated block. */
+    static int aimed(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
+        var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
+        if (!(pick instanceof net.minecraft.world.phys.BlockHitResult bh) || !bh.getBlockPos().equals(pos)) return 0;
+        var h = bh.getLocation();
+        double x = h.x - pos.getX(), y = h.y - pos.getY(), z = h.z - pos.getZ();
+        for (VoxelPart p : e.parts()) for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return 1;
+        int mask = e.getSideMask();
+        for (int f = 0; f < 6; f++) if ((mask & (1 << f)) != 0 && VoxelPart.contains(VoxelNode.plate(f), x, y, z, 0.05)) return 1;
+        BlockState host = e.host();
+        if (host != null) for (var b : host.getShape(e.getLevel(), pos).toAabbs()) if (b.inflate(0.003).contains(x, y, z)) return 2;
+        return 1;
+    }
+
+    @Override
+    protected float getDestroyProgress(BlockState state, net.minecraft.world.entity.player.Player player, BlockGetter level, BlockPos pos) {
+        VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
+        BlockState host = e == null ? null : e.host();
+        if (host != null && aimed(e, pos, player) == 2) return host.getDestroyProgress(player, level, pos);
+        return super.getDestroyProgress(state, player, level, pos);
+    }
+
 
     /** Breaking takes the part under the crosshair; the block stays while others remain. */
     @Override
@@ -126,7 +171,11 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         }
         // nothing of this block under the crosshair (mining went on after what was aimed at went): nothing goes
         // (AdventurAgent: a fallback took the cable left in the block, and with it the block)
-        if (el < 0 && index < 0) return false;
+        if (el < 0 && index < 0) {
+            // the imitated block itself: it drops; the parts stay
+            if (node.host != null && aimed(e, pos, player) == 2) node.clearHost(player);
+            return false;
+        }
         node.breakingByPlayer = true;
         try {
             if (el >= 0) {
@@ -136,6 +185,10 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
             node.breakingByPlayer = false;
         }
         if (!node.isEmptyNode()) return false;   // (others remain)
+        if (node.host != null) {   // (the last part went: the block is the stair again)
+            node.removeEmptyBlock();
+            return false;
+        }
         return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
     }
 }

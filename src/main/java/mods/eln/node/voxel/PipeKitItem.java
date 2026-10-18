@@ -101,15 +101,23 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
             if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode node)) return "no node here";
             return node.addPart(part);
         }
-        if (!(old.isAir() || old.canBeReplaced())) return "the block is solid";
+        boolean mimic = Mimic.allowed(old);   // (a stair, fence, slab...: the voxel block takes its place and imitates it)
+        if (!mimic && !(old.isAir() || old.canBeReplaced())) return "the block is solid";
         VoxelNode node = new VoxelNode();
         node.onBlockPlacedBy(new Coordonate(pos, level), mods.eln.misc.Direction.YN, player, ItemStack.EMPTY);
+        if (mimic) {
+            node.host = old;
+            node.elementsChanged();
+        }
         String err = node.addPart(part);
         if (err != null) {
+            node.host = null;
             node.onBreakBlock();
             return err;
         }
-        level.setBlock(pos, block.stateFor(level, pos), 3);
+        boolean wet = mimic ? old.getOptionalValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED).orElse(false)
+            : block.stateFor(level, pos).getValue(VoxelNodeBlock.WATERLOGGED);
+        level.setBlock(pos, block.defaultBlockState().setValue(VoxelNodeBlock.WATERLOGGED, wet), 3);
         return null;
     }
 }

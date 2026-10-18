@@ -40,6 +40,7 @@ public final class CableCases {
         cases.add(new HostedCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
+        cases.add(new MimicCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
@@ -595,6 +596,74 @@ public final class CableCases {
             c.line(String.format("thermal: far end %.3f C (six-node), %.3f C (converted)", a, b));
             c.check("thermal: heat crosses the corners alike (2%)", a > 1 && Math.abs(a - b) <= 0.02 * a, String.format("%.3f vs %.3f", a, b));
             for (var h : hot) mods.eln.Eln.simulator.removeThermalLoad(h);
+        }
+    }
+
+    /**
+     * Cables through decorative blocks (Mimic): a cable kit's route from the source to the resistor, along a corridor with
+     * a fence and a top slab in it: under the slab, beside the fence post. Those blocks become voxel blocks imitating
+     * them; the circuit conducts. Then: the slab block's cable taken out -> it's a slab again; the fence mined -> the
+     * fence drops, the cable stays.
+     */
+    static final class MimicCase implements TestCase {
+        ResistorElement r;
+        String err, fenceHost, slabHost, afterPart, afterFence;
+
+        public String name() {
+            return "cable through a fence and under a slab";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            source(c, SOURCE, 0, 1, 50);
+            r = end(c, 7, 1);
+            for (int x = 2; x <= 5; x++) {
+                c.floor(c.at(x, 1, 0));
+                c.floor(c.at(x, 1, 2));
+            }
+            level.setBlock(c.at(3, 1, 1), net.minecraft.world.level.block.Blocks.OAK_FENCE.defaultBlockState(), 3);
+            level.setBlock(c.at(4, 1, 1), net.minecraft.world.level.block.Blocks.STONE_SLAB.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP), 3);
+            var hitS = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 1)).add(1.0, 0.05, 0.5);
+            var hitR = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(7, 1, 1)).add(0.0, 0.05, 0.5);
+            long[][] j = new long[1][];
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(level, c.at(0, 1, 1), net.minecraft.core.Direction.EAST, hitS, true, j);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(level, c.at(7, 1, 1), net.minecraft.core.Direction.WEST, hitR, false, j);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, LV, a, b);
+            fenceHost = host(c, 3);
+            slabHost = host(c, 4);
+        }
+
+        String host(TestContext c, int x) {
+            var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, 1, 1), c.level()));
+            return n instanceof mods.eln.node.voxel.VoxelNode v ? (v.host == null ? "none" : v.host.getBlock().getName().getString()) + " + " + v.parts.size() + " part(s)"
+                : c.level().getBlockState(c.at(x, 1, 1)).getBlock().getName().getString();
+        }
+
+        public void measure(TestContext c) {
+            c.check("mimic: laid through", err == null, String.valueOf(err));
+            c.check("mimic: the fence's block imitates the fence and holds cable", fenceHost.startsWith("Oak Fence + "), fenceHost);
+            c.check("mimic: the slab's block imitates the slab and holds cable", slabHost.startsWith("Stone Slab + "), slabHost);
+            double i = current(r);
+            c.check("mimic: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
+            // take the slab block's cable out: a slab again
+            var sv = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(4, 1, 1), c.level()));
+            while (!sv.parts.isEmpty()) sv.removePart(0, false);
+            sv.removeEmptyBlock();
+            afterPart = c.level().getBlockState(c.at(4, 1, 1)).getBlock().getName().getString();
+            c.check("mimic: without its cable the block is a slab again", afterPart.equals("Stone Slab"), afterPart);
+            var fv = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(3, 1, 1), c.level()));
+            fv.clearHost(null);
+            afterFence = host(c, 3);
+            c.check("mimic: the fence mined, the cable stays", afterFence.startsWith("none + "), afterFence);
         }
     }
 

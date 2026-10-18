@@ -306,7 +306,12 @@ public final class CablePlacer {
             BlockState s = level.getBlockState(bp);
             VoxelNode existing = s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(bp) instanceof VoxelNodeEntity ve
                 && ve.getNode() instanceof VoxelNode n ? n : null;
-            if (existing == null && !(s.isAir() || s.canBeReplaced())) return "a block is in the way at " + bp.toShortString();
+            if (existing == null && Mimic.allowed(s)) {   // (through a stair, under a fence: clear of its own voxels)
+                for (int[] hb : Mimic.boxes(s, level, bp))
+                    for (int[] pb : part.boxes())
+                        if (hb[0] < pb[3] && pb[0] < hb[3] && hb[1] < pb[4] && pb[1] < hb[4] && hb[2] < pb[5] && pb[2] < hb[5])
+                            return "the " + s.getBlock().getName().getString() + " is in the way at " + bp.toShortString();
+            } else if (existing == null && !(s.isAir() || s.canBeReplaced())) return "a block is in the way at " + bp.toShortString();
             if (existing != null) {
                 String why = existing.canAdd(part);
                 if (why != null) return why + " at " + bp.toShortString();

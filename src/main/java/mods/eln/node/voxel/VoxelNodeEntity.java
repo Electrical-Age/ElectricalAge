@@ -21,7 +21,19 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
 
     @Override
     public net.neoforged.neoforge.model.data.ModelData getModelData() {
-        return net.neoforged.neoforge.model.data.ModelData.of(PARTS, clientParts);
+        return net.neoforged.neoforge.model.data.ModelData.builder().with(PARTS, clientParts).with(HOST, clientHost).build();
+    }
+
+    /** Model data: the imitated block (Mimic), drawn with the parts. */
+    public static final net.neoforged.neoforge.model.data.ModelProperty<BlockState> HOST = new net.neoforged.neoforge.model.data.ModelProperty<>();
+
+    /** Client: the imitated block as last published, or null. */
+    public volatile BlockState clientHost;
+
+    /** The imitated block: server from the node, client from the last publish. */
+    public BlockState host() {
+        if (level != null && !level.isClientSide()) return getNode() instanceof VoxelNode v ? v.host : null;
+        return clientHost;
     }
 
     /** Client: the parts as last published. */
@@ -56,8 +68,10 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
     @Override
     protected void readBeforeElements(DataInputStream stream) throws IOException {
         {
+            int hostId = stream.readInt();
             int n = stream.readShort();
-            int hash = n;
+            int hash = n * 7919 + hostId;
+            clientHost = hostId == 0 ? null : net.minecraft.world.level.block.Block.stateById(hostId);
             List<VoxelPart> ps = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {
                 String kind = stream.readUTF();
