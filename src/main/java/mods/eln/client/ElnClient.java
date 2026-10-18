@@ -65,6 +65,7 @@ public final class ElnClient {
         modBus.addListener(EntityRenderersEvent.RegisterLayerDefinitions.class,
             e -> e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer));
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent.class, mods.eln.client.render.ChiselOutline::onExtract);
         ClientScreens.registerAll();
         mods.eln.gui.ElnNodeMenu.clientLayout = mods.eln.client.gui.ElnLayouts::apply;
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent.class, ClientKeys::register);
