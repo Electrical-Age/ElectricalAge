@@ -76,6 +76,14 @@ public final class LabCommands {
                             .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
                 .then(Commands.literal("remove").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> remove(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
+                .then(Commands.literal("reconnect").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .executes(c -> {
+                        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(BlockPosArgument.getLoadedBlockPos(c, "pos"), c.getSource().getLevel()));
+                        if (n == null) return 0;
+                        n.reconnect();
+                        c.getSource().sendSuccess(() -> Component.literal("reconnected " + n.getClass().getSimpleName()), false);
+                        return 1;
+                    })))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -230,6 +238,13 @@ public final class LabCommands {
                 if (tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h)
                     out.add("  tank: " + h.getFluidAmount() + " / " + h.getCapacity() + " mB of " + h.getFluid().getFluid());
             }
+            // links to neighbours (debugging live conversions: Incognito's spawn lamp)
+            List<String> links = new ArrayList<>();
+            for (var nc : node.nodeConnectionList) {
+                var o = field(nc, "N1") == node ? (mods.eln.node.NodeBase) field(nc, "N2") : (mods.eln.node.NodeBase) field(nc, "N1");
+                links.add(o.coordonate.x + "," + o.coordonate.y + "," + o.coordonate.z + (field(nc, "EC") != null ? " E" : "") + (o.isAdded() ? "" : " (gone)"));
+            }
+            out.add("  links: " + links);
             if (node instanceof mods.eln.node.voxel.VoxelNode v) {
                 out.add("- " + v.getWaila(true));
                 for (var p : v.parts) {
@@ -248,6 +263,12 @@ public final class LabCommands {
                             out.add("  lamp: light " + field(p, "light") + " at " + field(p, "lbCoord") + ", poweredByLampSupply "
                                 + field(l, "poweredByLampSupply") + ", channel '" + l.channel + "', connected " + field(l, "isConnectedToLampSupply")
                                 + ", U " + l.positiveLoad.getU() + ", bulb " + l.getInventory().getItem(0) + ", cable " + l.getInventory().getItem(1));
+                            out.add("  lamp load: grounded " + field(l, "grounded") + ", front " + field(l, "front") + ", simulated " + !l.positiveLoad.isNotSimulated()
+                                + ", in list x" + l.electricalLoadList.stream().filter(x -> x == l.positiveLoad).count() + ", R " + l.lampResistor.getR()
+                                + ", resistor in list x" + l.electricalComponentList.stream().filter(x -> x == l.lampResistor).count()
+                                + ", resistor subsystem " + (l.lampResistor.getSubSystem() != null) + ", abstracted " + l.positiveLoad.isAbstracted()
+                                + ", burnt " + l.isBurnt() + ", own node " + (l.sixNode == node) + ", node destructing " + (l.sixNode != null && l.sixNode.isDestructing())
+                                + ", mna root " + (mods.eln.Eln.simulator.mna.addStates.contains(l.positiveLoad) ? "pending" : "-"));
                         }
                         if (el instanceof mods.eln.sixnode.lampsupply.LampSupplyElement s) {
                             List<String> es = new ArrayList<>();

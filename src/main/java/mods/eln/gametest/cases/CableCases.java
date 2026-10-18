@@ -69,6 +69,32 @@ public final class CableCases {
             return List.of(r);
         };
         cases.add(new ConvertCase("converted device round a corner", deviceCorner, false));
+        Layout wallCorners = (c, six, z) -> {
+            // Incognito's spawn lamp (2026-10-18: dark after a live conversion): a device on a wall fed round two outer
+            // corners through one air block: source on a wall -> a wall cable -> up round the top edge of a block onto
+            // its top -> along it onto its side -> round the wall's edge to the device; a ground beyond the device
+            for (int[] b : new int[][]{{6, 1, z + 1}, {5, 1, z + 1}, {4, 2, z + 1}, {3, 2, z + 1}}) c.floor(c.at(b[0], b[1], b[2]));
+            mods.eln.misc.Direction wall = mods.eln.misc.Direction.ZP;
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(SOURCE, c.at(6, 1, z), wall);
+            src.networkUnserialize(c.stream(out -> {
+                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                out.writeFloat(50);
+            }));
+            c.placeSix(LV_CABLE, c.at(5, 1, z), wall);                                       // C: on the block's -z face
+            c.placeSix(LV_CABLE, c.at(5, 2, z + 1), mods.eln.misc.Direction.YN);              // B: on its top
+            c.placeSix(LV_CABLE, c.at(5, 2, z + 1), mods.eln.misc.Direction.XN);              // B: on the wall's +x face
+            ResistorElement r = (ResistorElement) c.placeSix(POWER_RESISTOR, c.at(4, 2, z), wall);   // L, by air at (5, 2, z)
+            Wp9aCases.orient(r, mods.eln.misc.LRDU::right, mods.eln.misc.Direction.XN);
+            r.getInventory().setItem(0, Wp9aCases.coal(CORE));
+            r.getInventory().setChanged();
+            c.placeSix(GROUND, c.at(3, 2, z), wall);
+            return List.of(r);
+        };
+        cases.add(new ConvertCase("converted wall device round two corners", wallCorners, false));
+        cases.add(new ConvertCase("converted wall device round two corners, backwards", wallCorners, false, true));
+        // the three blocks round the air block in every order (the live conversion went by the node list's order)
+        int[][] perms = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+        for (int[] pm : perms) cases.add(new ConvertCase("converted wall device round two corners, order " + pm[0] + pm[1] + pm[2], wallCorners, false, false, pm));
         Layout wet = (c, six, z) -> {
             // a cable and the resistor under water (waterlogged six-node blocks): they convert and stay wet
             source(c, SOURCE, 0, z, 50);
@@ -100,6 +126,9 @@ public final class CableCases {
             c.placeSix(GROUND, c.at(6, 1, z));
             return List.of(r);
         }));
+        cases.add(new LampCornerCase(0));
+        cases.add(new LampCornerCase(1));
+        cases.add(new LampCornerCase(2));
         cases.add(new KitCase());
         List<TestCase> mine = new ArrayList<>();
         addLayouts(mine);
@@ -227,13 +256,28 @@ public final class CableCases {
         int converted;
         final List<String> skipped = new ArrayList<>();
 
-        final boolean revert;
+        final boolean revert, backwards;
         int voxelLeft = -1;
 
         ConvertCase(String name, Layout layout, boolean revert) {
+            this(name, layout, revert, false);
+        }
+
+        /** backwards: convert from the far end (x, y, z descending): the order blocks convert in changes the links. */
+        /** order: the device block (0), the block with the two cables (1) and the wall cable below (2) first, in this
+         *  order (wallCorners), then the rest. */
+        int[] order;
+
+        ConvertCase(String name, Layout layout, boolean revert, boolean backwards, int[] order) {
+            this(name, layout, revert, backwards);
+            this.order = order;
+        }
+
+        ConvertCase(String name, Layout layout, boolean revert, boolean backwards) {
             this.name = name;
             this.layout = layout;
             this.revert = revert;
+            this.backwards = backwards;
         }
 
         public String name() {
@@ -263,9 +307,21 @@ public final class CableCases {
         public void build(TestContext c) {
             six = layout.build(c, true, 1);
             conv = layout.build(c, true, 6);
-            for (int x = 0; x < 10; x++)
-                for (int y = 1; y < 4; y++)
-                    for (int z = 6; z < 10; z++) {
+            if (order != null) {
+                int[][] key = {{4, 2, 6}, {5, 2, 7}, {5, 1, 6}};
+                for (int o : order) {
+                    var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(key[o][0], key[o][1], key[o][2]), c.level()));
+                    if (n instanceof mods.eln.node.six.SixNode s && !(n instanceof mods.eln.node.voxel.VoxelNode)) {
+                        String why = mods.eln.node.voxel.CableConverter.convert(s);
+                        if (why == null) converted++;
+                        else skipped.add(java.util.Arrays.toString(key[o]) + ": " + why);
+                    }
+                }
+            }
+            for (int i = 0; i < 10; i++)
+                for (int j = 1; j < 4; j++)
+                    for (int k = 6; k < 10; k++) {
+                        int x = backwards ? 9 - i : i, y = backwards ? 4 - j : j, z = backwards ? 15 - k : k;
                         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level()));
                         if (!(n instanceof mods.eln.node.six.SixNode s) || n instanceof mods.eln.node.voxel.VoxelNode) continue;
                         String why = mods.eln.node.voxel.CableConverter.convert(s);
@@ -838,6 +894,92 @@ public final class CableCases {
             c.check("fence join: laid", err == null, String.valueOf(err));
             c.check("fence join: the real fence and the imitated one join both ways",
                 res.equals("imitated block.eln.voxel_node_wooden_fence, real fence joins it true, imitated joins back true"), res);
+        }
+    }
+
+    /**
+     * Incognito's spawn lamp (2026-10-18: dark after a live conversion, lit again after a restart): a lamp socket on a
+     * wall fed round two outer corners (wallCorners with the socket for the resistor); converted (and reverted), it is
+     * still lit.
+     */
+    static final class LampCornerCase implements TestCase {
+        /** 0: six-node (the control), 1: converted, 2: converted and reverted. */
+        final int mode;
+        final boolean revert;
+        mods.eln.sixnode.lampsocket.LampSocketElement lamp;
+        BlockPos at;
+        int converted;
+
+        LampCornerCase(int mode) {
+            this.mode = mode;
+            this.revert = mode == 2;
+        }
+
+        public String name() {
+            return mode == 0 ? "six-node lamp round two corners" : revert ? "reverted lamp round two corners" : "converted lamp round two corners";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            int z = 6;
+            for (int[] b : new int[][]{{6, 1, z + 1}, {5, 1, z + 1}, {4, 2, z + 1}}) c.floor(c.at(b[0], b[1], b[2]));
+            mods.eln.misc.Direction wall = mods.eln.misc.Direction.ZP;
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(SOURCE, c.at(6, 1, z), wall);
+            src.networkUnserialize(c.stream(out -> {
+                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                out.writeFloat(50);
+            }));
+            c.placeSix(LV_CABLE, c.at(5, 1, z), wall);
+            c.placeSix(LV_CABLE, c.at(5, 2, z + 1), mods.eln.misc.Direction.YN);
+            c.placeSix(LV_CABLE, c.at(5, 2, z + 1), mods.eln.misc.Direction.XN);
+            at = c.at(4, 2, z);
+            lamp = (mods.eln.sixnode.lampsocket.LampSocketElement) c.placeSix(0 + (LampLightCases.LAMP_ID << 6), at, wall);
+            net.minecraft.world.item.ItemStack bulb = null;
+            for (int i = 0; i < 64 * 128 && bulb == null; i++) {
+                var d = mods.eln.Eln.sharedItem.getDescriptor(i);
+                if (d != null && "Small 50V Economic Light Bulb".equals(d.name)) bulb = d.newItemStack();
+            }
+            lamp.getInventory().setItem(0, bulb);
+            lamp.getInventory().setChanged();
+            if ((Boolean) mods.eln.gametest.LabCommands.field(lamp, "poweredByLampSupply"))   // (by cable, as Incognito's)
+                lamp.networkUnserialize(c.stream(out -> out.writeByte(3)));   // (tooglePowerSupplyType)
+            if (mode == 0) return;
+            for (BlockPos p : new BlockPos[]{c.at(4, 2, z), c.at(5, 1, z), c.at(5, 2, z + 1), c.at(6, 1, z)}) {
+                var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+                if (n instanceof mods.eln.node.six.SixNode s && !(n instanceof mods.eln.node.voxel.VoxelNode)
+                    && mods.eln.node.voxel.CableConverter.convert(s) == null) converted++;
+            }
+            if (revert)
+                for (BlockPos p : new BlockPos[]{c.at(4, 2, z), c.at(5, 1, z), c.at(5, 2, z + 1), c.at(6, 1, z), c.at(5, 2, z)})
+                    if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level())) instanceof mods.eln.node.voxel.VoxelNode v) {
+                        if (v.legacy != null) mods.eln.node.voxel.CableConverter.revert(v);
+                    }
+        }
+
+        public void measure(TestContext c) {
+            var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(at, c.level()));
+            var e = n instanceof mods.eln.node.six.SixNode s ? s.getElement(mods.eln.misc.Direction.ZP) : null;
+            double u = e instanceof mods.eln.sixnode.lampsocket.LampSocketElement l ? l.positiveLoad.getU() : -1;
+            c.check(name() + ": the lamp is powered (" + converted + " blocks converted)", u > 40, String.format("U %.2f V, node %s", u, n == null ? "-" : n.getClass().getSimpleName()));
         }
     }
 
