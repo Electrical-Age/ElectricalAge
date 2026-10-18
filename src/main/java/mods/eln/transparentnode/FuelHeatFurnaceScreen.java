@@ -33,6 +33,8 @@ public class FuelHeatFurnaceScreen extends ElnScreen {
             () -> render.clientSendId(E.getExternalControlledToggleEvent()));
         main = button("main", () -> render.getMainSwitch() ? tr("Furnace is on") : tr("Furnace is off"),
             () -> render.clientSendId(E.getMainSwitchToggleEvent()));
+        text("fire", () -> mods.eln.transparentnode.heatfurnace.HeatFurnaceScreen.fireLine(render.getFire(), render.getManualControl().getValue(),
+            render.getLighting(), mods.eln.sim.Fire.OIL));
         manual = slider("manual", 0, 1, 0.01, render.getManualControl().getValue(),
             v -> Component.literal(tr("Control value at %1$", Utils.plotPercent("", v).trim()) + "  ("
                 + tr("Heat Power: %1$", Utils.plotPower("", render.getHeatPower()).trim()) + ")"),

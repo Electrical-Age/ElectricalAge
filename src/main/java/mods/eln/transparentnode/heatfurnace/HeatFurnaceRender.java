@@ -18,6 +18,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class HeatFurnaceRender extends TransparentNodeElementRender {
+    /** The fire's real burn level (it lags the setting) and whether it's being lit. */
+    public float fire;
+    public boolean lighting;
+
 
     double temperature;
     float gainSyncValue = -1234, temperatureTargetSyncValue = -1234;
@@ -88,6 +92,8 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
             }
 
             power = stream.readShort();
+            fire = stream.readFloat();
+            lighting = stream.readBoolean();
 
             entityItemIn = unserializeItemStackToEntityItem(stream, entityItemIn);
 

@@ -109,6 +109,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private var setTemperature by published(0.0)
 
     private var heaterControlValue = 0.0
+    /** The burner's real level, lagging the control value (Fire.OIL). */
+    val fire = mods.eln.sim.Fire(mods.eln.sim.Fire.OIL)
     private var actualHeatPower by published(0.0)
 
     private val controlProcess = object : RegulatorProcess("controller") {
@@ -128,7 +130,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             }
             super.process(time)
 
-            val availableEnergy = tank.drainEnergy(heaterControlValue * nominalPower * time)
+            fire.step(heaterControlValue, nominalPower > 0 && tank.fluidAmount > 0, time)
+            val availableEnergy = tank.drainEnergy(fire.level * nominalPower * time)
             actualHeatPower = availableEnergy / time
             thermalLoad.PcTemp += actualHeatPower
         }
@@ -195,6 +198,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeFloat(actualHeatPower.toFloat())
         stream.writeFloat(thermalLoad.Tc.toFloat())
         stream.writeInt(FuelBurnerDescriptor.getDescriptor(inventory_.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type ?: -1)
+        stream.writeFloat(fire.level.toFloat())
+        stream.writeBoolean(fire.lighting())
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -225,6 +230,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         nbt.putDouble("manualControl", manualControl)
         nbt.putDouble("setTemperature", setTemperature)
         nbt.putDouble("actualHeatPower", actualHeatPower)
+        fire.write(nbt, "")
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
@@ -236,6 +242,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         manualControl = nbt.getDoubleOr("manualControl", 0.0)
         setTemperature = nbt.getDoubleOr("setTemperature", 0.0)
         actualHeatPower = nbt.getDoubleOr("actualHeatPower", 0.0)
+        if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
     }
 
     override fun hasGui() = true
@@ -276,6 +283,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 
     var heatPower = 0f
     var actualTemperature = 0f
+    var fire = 0f
+    var lighting = false
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
@@ -305,6 +314,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
                 else -> type
             }
         }
+        fire = stream.readFloat()
+        lighting = stream.readBoolean()
     }
 
 }

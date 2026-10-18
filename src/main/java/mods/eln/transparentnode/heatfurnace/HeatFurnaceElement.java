@@ -135,6 +135,8 @@ public class HeatFurnaceElement extends TransparentNodeElement {
             stream.writeFloat((float) furnaceProcess.getGain());
             stream.writeFloat((float) regulator.getTarget());
             stream.writeShort((int) furnaceProcess.getP());
+            stream.writeFloat((float) furnaceProcess.fire.level);
+            stream.writeBoolean(furnaceProcess.fire.lighting());
 
             serialiseItemStack(stream, inventory.getItem(HeatFurnaceContainer.combustibleId));
         } catch (IOException e) {
