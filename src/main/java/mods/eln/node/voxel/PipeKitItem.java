@@ -109,7 +109,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
             node.onBreakBlock();
             return err;
         }
-        level.setBlock(pos, block.defaultBlockState(), 3);
+        level.setBlock(pos, block.stateFor(level, pos), 3);
         return null;
     }
 }

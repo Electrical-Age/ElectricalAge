@@ -70,12 +70,11 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             if (ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
             // once six-node blocks are converted (ElnConfig [cables] convertOnLoad), new devices go into voxel blocks
-            // (not under water yet: the voxel block isn't waterloggable)
-            if (mods.eln.node.voxel.CableConverter.convertOnLoad && !block.stateFor(world, pos).getValue(SixNodeBlock.WATERLOGGED)) {
+            if (mods.eln.node.voxel.CableConverter.convertOnLoad) {
                 var v = new mods.eln.node.voxel.VoxelNode();
                 v.onBlockPlacedBy(new Coordonate(pos, world), direction, player, stack);
                 v.createSubBlock(stack, direction, player);
-                world.setBlock(pos, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+                world.setBlock(pos, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().stateFor(world, pos), 3);
                 return true;
             }
             SixNode sixNode = new SixNode();

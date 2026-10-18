@@ -50,8 +50,6 @@ public final class CableConverter {
         for (int dx = -2; dx <= 2; dx += 2)
             for (int dz = -2; dz <= 2; dz += 2)
                 if (!level.isLoaded(pos.offset(dx, 0, dz))) return Plan.skip("next to an unloaded chunk");
-        if (level.getBlockState(pos).getOptionalValue(mods.eln.node.six.SixNodeBlock.WATERLOGGED).orElse(false))
-            return Plan.skip("under water (voxel blocks aren't waterloggable yet)");
         List<CablePart> parts = new ArrayList<>();
         Map<BlockPos, List<CablePart>> knuckles = new LinkedHashMap<>();
         List<Integer> cableFaces = new ArrayList<>();
@@ -149,6 +147,7 @@ public final class CableConverter {
         if (p.skip != null) return p.skip;
         Level level = s.coordonate.world();
         BlockPos pos = s.coordonate.pos();
+        boolean wet = level.getBlockState(pos).getOptionalValue(mods.eln.node.six.SixNodeBlock.WATERLOGGED).orElse(false);
         CompoundTag legacy = new CompoundTag();
         s.writeToNBT(legacy);
         // the voxel node is built from the six-node NBT without the cables (the devices move over as they are)
@@ -160,7 +159,7 @@ public final class CableConverter {
         s.disconnect();
         s.unload();   // (wireless channels, lamp supplies: the hosted copies register again in globalBoot)
         NodeManager.instance.removeNode(s);
-        level.setBlock(pos, ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+        level.setBlock(pos, ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState().setValue(VoxelNodeBlock.WATERLOGGED, wet), 3);
         VoxelNode v = new VoxelNode();
         v.readFromNBT(host);
         NodeManager.instance.addNode(v);
@@ -202,7 +201,8 @@ public final class CableConverter {
         v.disconnect();
         v.unload();
         NodeManager.instance.removeNode(v);
-        level.setBlock(pos, mods.eln.Eln.sixNodeBlock.defaultBlockState(), 3);
+        boolean wet = level.getBlockState(pos).getOptionalValue(VoxelNodeBlock.WATERLOGGED).orElse(false);
+        level.setBlock(pos, mods.eln.Eln.sixNodeBlock.defaultBlockState().setValue(mods.eln.node.six.SixNodeBlock.WATERLOGGED, wet), 3);
         SixNode s = new SixNode();
         s.readFromNBT(nbt);
         NodeManager.instance.addNode(s);

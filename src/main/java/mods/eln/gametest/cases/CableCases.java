@@ -64,6 +64,16 @@ public final class CableCases {
             return List.of(r);
         };
         cases.add(new ConvertCase("converted device round a corner", deviceCorner, false));
+        Layout wet = (c, six, z) -> {
+            // a cable and the resistor under water (waterlogged six-node blocks): they convert and stay wet
+            source(c, SOURCE, 0, z, 50);
+            for (int x = 1; x <= 6; x++) {
+                if (x >= 3) c.level().setBlock(c.at(x, 1, z), net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 3);
+                if (x <= 5) c.placeSix(LV_CABLE, c.at(x, 1, z));
+            }
+            return List.of(end(c, 6, z));
+        };
+        cases.add(new ConvertCase("converted cable under water", wet, false));
         cases.add(new Case("hosted device between voxel cables", (c, six, z) -> {
             // source -> 3 cables -> resistor -> a cable -> ground: six-node row, and a voxel row where the resistor
             // sits in a voxel block (its edges meet voxel cable ports across the faces)
@@ -286,6 +296,11 @@ public final class CableCases {
             conv = now;
             if (revert) c.check(name + ": no voxel node left after the revert", voxelLeft == 0, voxelLeft + "");
             c.check(name + ": every six-node block converted (devices too)", skipped.isEmpty(), String.join("; ", skipped));
+            for (int x = 0; x < 10; x++) {
+                var st = c.level().getBlockState(c.at(x, 1, 6));
+                if (st.getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock && c.level().getBlockState(c.at(x, 1, 1)).getFluidState().isSource())
+                    c.check(name + ": a wet block stays wet at x " + x, st.getValue(mods.eln.node.voxel.VoxelNodeBlock.WATERLOGGED), st.toString());
+            }
             for (int i = 0; i < six.size(); i++) {
                 double a = current(six.get(i)), b = current(conv.get(i));
                 c.line(String.format("%s: load %d: six-node %.5f A, converted %.5f A", name, i, a, b));
