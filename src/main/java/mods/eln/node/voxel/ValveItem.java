@@ -5,7 +5,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 
-/** A pipe valve: right-click a pipe running straight through a block's middle to fit it there. */
+/** A pipe valve: right-click a straight stretch of pipe to fit it there (at the lattice point nearest the click). */
 public class ValveItem extends Item implements PipeTool {
     public ValveItem(Properties p) {
         super(p);
@@ -15,6 +15,7 @@ public class ValveItem extends Item implements PipeTool {
     public InteractionResult useOn(UseOnContext ctx) {
         var level = ctx.getLevel();
         if (level.isClientSide()) return InteractionResult.SUCCESS;
+        mods.eln.Eln.LOG.info("Valve used on {} face {} at {}", ctx.getClickedPos().toShortString(), ctx.getClickedFace(), ctx.getClickLocation());
         var pos = ctx.getClickedPos();
         var player = ctx.getPlayer();
         // (thin pipes are easy to miss: if the click went past, the pipe the player looks at)
@@ -22,7 +23,9 @@ public class ValveItem extends Item implements PipeTool {
             && player.pick(player.blockInteractionRange(), 1f, false) instanceof net.minecraft.world.phys.BlockHitResult bh
             && level.getBlockEntity(bh.getBlockPos()) instanceof VoxelNodeEntity) pos = bh.getBlockPos();
         String err;
-        if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n) err = n.addValve();
+        var hit = ctx.getClickLocation();
+        if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
+            err = n.addValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
         else {
             err = "fit it on a pipe";
             mods.eln.misc.Utils.println("Valve: no pipe at " + pos.toShortString() + ": " + level.getBlockState(pos));

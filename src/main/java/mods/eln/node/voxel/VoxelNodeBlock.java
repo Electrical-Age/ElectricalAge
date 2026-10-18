@@ -30,7 +30,10 @@ public class VoxelNodeBlock extends NodeBlock {
     @Override
     protected net.minecraft.world.InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos,
             net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
-        if (stack.getItem() instanceof PipeTool) return net.minecraft.world.InteractionResult.PASS;
+        if (stack.getItem() instanceof PipeTool) {
+            if (!level.isClientSide()) mods.eln.Eln.LOG.info("Pipe block {}: {} passed to the item", pos.toShortString(), stack.getItem());
+            return net.minecraft.world.InteractionResult.PASS;
+        }
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 

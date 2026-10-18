@@ -170,7 +170,29 @@ public class VoxelNode extends Node implements FluidDevice {
 
     /** Fit a valve in the pipe running straight through the block's centre (it is cut there into two). */
     public String addValve() {
-        int x = 8, y = 8, z = 8;
+        return addValve(8, 8, 8);
+    }
+
+    /** Fit a valve where the pipe under the click runs straight: the lattice point on it nearest the click. */
+    public String addValveNear(double hx, double hy, double hz) {
+        int idx = partAt(hx, hy, hz);
+        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
+        int[] best = null;
+        double bd = Double.MAX_VALUE;
+        for (int x = 4; x <= 12; x += 4)
+            for (int y = 4; y <= 12; y += 4)
+                for (int z = 4; z <= 12; z += 4) {
+                    if (!pipe.passes(x, y, z)) continue;
+                    double d = (x - hx * 16) * (x - hx * 16) + (y - hy * 16) * (y - hy * 16) + (z - hz * 16) * (z - hz * 16);
+                    if (d < bd) {
+                        bd = d;
+                        best = new int[]{x, y, z};
+                    }
+                }
+        return best == null ? "the pipe has no room for a valve here" : addValve(best[0], best[1], best[2]);
+    }
+
+    public String addValve(int x, int y, int z) {
         for (VoxelPart p : parts) if (p instanceof ValvePart) return "there is a valve here already";
         for (int i = 0; i < parts.size(); i++) {
             if (!(parts.get(i) instanceof PipePart pipe) || !pipe.passes(x, y, z)) continue;
@@ -201,7 +223,10 @@ public class VoxelNode extends Node implements FluidDevice {
             changed();
             return null;
         }
-        return "no pipe runs through the middle of this block";
+        StringBuilder here = new StringBuilder();
+        for (VoxelPart p : parts) here.append(' ').append(p.kind()).append(p instanceof PipePart pp ? java.util.Arrays.toString(pp.points) : "");
+        mods.eln.Eln.LOG.info("Valve at {}: no pipe through the middle; parts:{}", coordonate, here);
+        return "the pipe doesn't run straight there";
     }
 
     /** A right-click on a valve (empty hand) turns it. */

@@ -26,6 +26,7 @@ public final class PipeCases {
         cases.add(new Burst());
         cases.add(new Valve());
         cases.add(new Adapter());
+        cases.add(new ValveByPlayer());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -203,6 +204,45 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** A player fits a valve the real way (the server's use-item-on-block path, through the pipe block's use). */
+    static final class ValveByPlayer implements TestCase {
+        BlockPos at;
+        String result;
+
+        public String id() {
+            return "pipe_valve_by_player";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(1, 1, 1);
+            lay(ctx, at, 0, 0, 8, 8, 16, 8, 8);
+            var p = Wp10bCases.player(ctx);
+            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            var stack = new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get());
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+            var hit = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.62),
+                net.minecraft.core.Direction.SOUTH, at, false);
+            var r = p.gameMode.useItemOn(p, ctx.level(), stack, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+            result = r.toString();
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        }
+
+        public void measure(TestContext ctx) {
+            VoxelNode n = node(ctx, at);
+            boolean valve = false;
+            if (n != null) for (VoxelPart q : n.parts) if (q instanceof mods.eln.node.voxel.ValvePart) valve = true;
+            ctx.check("pipe: a player's right-click with a valve fits it", valve, result);
         }
     }
 
