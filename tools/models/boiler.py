@@ -3,13 +3,15 @@
 
 Drawn by BoilerRender -> BoilerDescriptor.draw(), which draws the parts main/body/furnace that exist (this model:
 `main`), after front.glRotateXnRef(). Connections (BoilerElement): thermal on all four horizontal faces at the floor
-(LRDU Down); water in and steam out through the fluid capability (pipes on any side), so the nozzles are decoration.
+(LRDU Down); water in and steam out through the fluid capability (pipes on any side); the dome port under it (centred)
+couples to a turbine's inlet below; the other nozzles are decoration.
 
 Design frame: mcmodel px (0..16, corner origin), front XN (x = 0):
   base:  cast-iron heat collector with a heat-tinted copper contact pad (8 px wide, floor to 4 px) on every face;
   drum:  riveted plate, axis front-back, dished heads, two seam bands, oxide-red saddles;
   front: gauge glass (water level) between brass cocks, pressure gauge; top: steam dome with the outlet flange,
-         lever safety valve with its weight; z+ flank: feedwater inlet with a check valve and handwheel.
+         lever safety valve with its weight; z+ flank: feedwater inlet with a check valve and handwheel;
+  dome pipe: from the dome down the z- flank into the base, out of a flange centred on the underside (the dome port).
 
 Usage: boiler.py RESOURCES_DIR  -> assets/eln/model/boiler/
 """
@@ -75,6 +77,15 @@ def boiler():
     m.add(prism("y", fx, 13.3, 0.25, fy + 0.8, fy + 1.7, "darksteel", n=6, caps=(False, False)))
     m.add(*handwheel(fx, fy + 1.8, 13.3, r=0.9, axis="y"))
     m.add(prism("z", fx, fy, 0.95, 15.3, 15.85, "steel", n=8))
+    # dome pipe (pipes phase 2): steam taken at the dome comes down the z- flank into the base and out of a flange on
+    # the underside (the dome port: a boiler set on a turbine feeds its inlet), as a locomotive's steam pipe does
+    py, pz, pr = 14.4, 1.9, 0.6
+    m.add(prism("z", sx, py, pr, pz, CZ - 1.0, "steel", n=8, caps=(False, False)))            # dome -> z- flank
+    m.add(prism("y", sx, pz, pr + 0.15, py - 0.75, py + 0.75, "darksteel", n=8))               # elbow
+    m.add(prism("y", sx, pz, pr, 3.6, py - 0.75, "steel", n=8, caps=(False, False)))           # down the flank
+    m.add(prism("y", sx, pz, pr + 0.35, 3.6, 4.1, "steel", n=8))                               # gland into the base
+    m.add(prism("y", 8.0, 8.0, 1.9, 0.0, 0.3, "steel", n=12, caps=(True, False)))              # bottom flange
+    m.add(*bolt_ring("y", 8.0, 8.0, 1.5, 0.0, 0.05, 4, rb=0.22))
     # nameplate on the z- flank of the base
     m.add(box(12.7, 1.0, 1.15, 13.9, 2.5, 1.25, "brass", faces="n"))
     return m

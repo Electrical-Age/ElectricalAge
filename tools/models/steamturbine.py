@@ -5,7 +5,7 @@ EA transparent node, drawn by SteamGeneratorRender through Obj3D (see README.md,
 mcmodel's px frame (0..16, corner origin); write_eln centres it. The shaft runs front-back along x:
   x = 0  (west, XN)  FRONT: generator end, terminal plate at floor level (electric out, LRDU Down)
   x = 16 (east, XP)  BACK:  turbine end, second terminal plate, fed by a bus duct along the z- skid rail
-  top: steam inlet stub + flange on the scroll; z+ side: exhaust vent stack (no steam output, it's a vent).
+  top: steam inlet stub + flange on the scroll, a riser to a flange centred on the top face (a boiler set on top feeds it); z+ side: exhaust vent stack (no steam output, it's a vent).
 
 Usage: steamturbine.py RESOURCES_DIR   (e.g. src/main/resources)
   Writes RESOURCES_DIR/assets/eln/model/steamturbine{50v,200v}/steamturbine*.{obj,mtl} + tex.png (atlas).
@@ -98,6 +98,12 @@ def turbine(tier):
     for k in range(t["bolts"]):
         a = 2 * math.pi * (k + 0.5) / t["bolts"]
         m.add(prism("y", tcx + br * math.cos(a), CZ + br * math.sin(a), 0.25, fy + 0.75, fy + 1.0, "brass", n=6))
+    # inlet riser to the top centre (pipes phase 2): a boiler set on top couples its dome port here
+    ry = 15.0
+    m.add(prism("y", tcx, CZ, t["ri"] - 0.3, fy + 1.0, ry + 0.4, "castiron", n=8, caps=(False, False)))
+    m.add(prism("x", ry, CZ, t["ri"] - 0.3, 8.0, tcx + 0.5, "castiron", n=8, caps=(False, True)))
+    m.add(prism("y", 8.0, CZ, t["ri"] - 0.3, ry - 0.4, 15.5, "castiron", n=8, caps=(True, False)))
+    m.add(prism("y", 8.0, CZ, 1.9, 15.5, 16.0, "steel", n=12, caps=(False, True)))           # top flange (centred)
     gy = (top + fy) / 2 + 0.25
     m.add(prism("x", gy, CZ, 0.25, tcx - t["ri"] - 0.75, tcx - t["ri"] + 0.2, "brass", n=6, caps=(False, False)))
     m.add(prism("x", gy, CZ, 0.9, tcx - t["ri"] - 1.25, tcx - t["ri"] - 0.75, "brass", n=10))
