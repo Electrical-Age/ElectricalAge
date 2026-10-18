@@ -73,7 +73,6 @@ public final class VoxelGeometry {
                 b.sprite = cableSprite(c.tier);
                 // (black insulation, Baughn; burnt: scorched brown)
                 if (c.burnt != null) b.color(0.35f, 0.22f, 0.14f);
-                else if (CablePart.TIERS[c.tier].thermal()) b.color(1, 1, 1);   // (the copper texture as it is)
                 else b.color(0.22f, 0.22f, 0.24f);
                 cable(b, c);
             }
