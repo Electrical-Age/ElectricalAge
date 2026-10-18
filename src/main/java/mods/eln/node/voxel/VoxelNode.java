@@ -50,6 +50,14 @@ public class VoxelNode extends Node implements FluidDevice {
                 for (int z = b[2]; z < b[5]; z++) s.set(voxel(x, y, z));
     }
 
+    /** Is any voxel of the box (local voxels, [x0, x1) etc.) used? */
+    public boolean usedIn(int x0, int y0, int z0, int x1, int y1, int z1) {
+        for (int x = Math.max(0, x0); x < Math.min(16, x1); x++)
+            for (int y = Math.max(0, y0); y < Math.min(16, y1); y++)
+                for (int z = Math.max(0, z0); z < Math.min(16, z1); z++) if (used.get(voxel(x, y, z))) return true;
+        return false;
+    }
+
     /** Would this part fit (no voxel already used)? */
     public boolean fits(VoxelPart p) {
         BitSet want = new BitSet(4096);

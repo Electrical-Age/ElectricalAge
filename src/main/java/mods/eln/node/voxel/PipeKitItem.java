@@ -14,8 +14,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A pipe kit (Baughn, notes/pipes/DESIGN.md 6a): a length of pipe of one tier, kept as the item's damage (stack size
- * is too low for pipes): length = MAX - damage voxels (16 voxels = one block). For now (phase 3, before the router)
- * right-clicking a face lays one block of straight pipe, centred, in the block in front of it, along the face's axis.
+ * is too low for pipes): length = MAX - damage voxels (16 voxels = one block). Right-click a port to route a pipe
+ * (PipePlacer: waypoints, then a port to finish); right-clicking any other face lays one block of straight pipe,
+ * centred, in the block in front of it, along the face's axis.
  */
 public class PipeKitItem extends Item {
     public static final int MAX = 1024;
@@ -55,12 +56,15 @@ public class PipeKitItem extends Item {
         ItemStack stack = ctx.getItemInHand();
         Player player = ctx.getPlayer();
         boolean creative = player != null && player.isCreative();
+        var face = ctx.getClickedFace();
+        // a route: started at a port, waypoints, finished at a port (PipePlacer); else one straight block
+        if (player instanceof net.minecraft.server.level.ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl
+            && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, tier)) return InteractionResult.SUCCESS;
+        BlockPos pos = ctx.getClickedPos().relative(face);
         if (!creative && length(stack) < 16) {
             if (player != null) player.sendOverlayMessage(Component.literal("Not enough pipe in this kit for a block"));
             return InteractionResult.FAIL;
         }
-        var face = ctx.getClickedFace();
-        BlockPos pos = ctx.getClickedPos().relative(face);
         int[] pts = switch (face.getAxis()) {
             case X -> new int[]{0, 8, 8, 16, 8, 8};
             case Y -> new int[]{8, 0, 8, 8, 16, 8};
