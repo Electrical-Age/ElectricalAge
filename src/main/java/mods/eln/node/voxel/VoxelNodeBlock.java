@@ -95,10 +95,9 @@ public class VoxelNodeBlock extends NodeBlock {
             if (el < 0) index = node.partAt(x, y, z);
             if (el < 0 && index < 0) el = node.elementAt(x, y, z, 2);
         }
-        if (el < 0 && index < 0) index = node.parts.size() - 1;
-        if (el < 0 && index < 0)   // (no part: an element)
-            for (int f = 0; f < 6 && el < 0; f++) if (node.sideElementList[f] != null) el = f;
-        if (el < 0 && index < 0) return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+        // nothing of this block under the crosshair (mining went on after what was aimed at went): nothing goes
+        // (AdventurAgent: a fallback took the cable left in the block, and with it the block)
+        if (el < 0 && index < 0) return false;
         node.breakingByPlayer = true;
         try {
             if (el >= 0) {

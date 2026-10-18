@@ -38,6 +38,7 @@ public final class CableCases {
         cases.add(new BurnCase());
         cases.add(new RoutedCase());
         cases.add(new HostedCase());
+        cases.add(new BreakMixedCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
@@ -460,6 +461,48 @@ public final class CableCases {
                 String.format("six-node %.5f A, voxel %.5f A", a, b));
             var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(4, 1, 6), c.level()));
             c.check("hosted device: the block keeps its pipe", v.parts.size() == 1, v.parts.size() + " parts");
+        }
+    }
+
+    /** Mining a device in a block that also holds a cable takes the device only (AdventurAgent's check 3). */
+    static final class BreakMixedCase implements TestCase {
+        String result;
+
+        public String name() {
+            return "break a device in a mixed voxel block";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public void build(TestContext c) {
+            BlockPos p = c.at(1, 1, 1);
+            c.floor(p.north());
+            // a cable on the north wall, a switch on the floor
+            voxel(c, p, CablePart.arms(LV, NORTH, WEST, EAST));
+            host(c, Wp9aCases.SWITCH_LV, p, mods.eln.misc.Direction.YN);
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            player.setPos(p.getX() + 0.5, p.getY() + 1.4 - player.getEyeHeight(), p.getZ() + 0.5);   // (eyes 1.4 above the floor, looking down)
+            player.setXRot(90);
+            player.setYRot(0);
+            var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
+            String hit = pick.getLocation().subtract(p.getX(), p.getY(), p.getZ()).toString();
+            // (as a survival player's mining does: the whole server path)
+            player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            player.gameMode.destroyBlock(p);
+            // mining goes on at the same spot (now nothing there): the cable must stay
+            player.gameMode.destroyBlock(p);
+            boolean removed = level.getBlockState(p).isAir();
+            var v = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
+            result = "block removed " + removed + ", node " + (v == null ? "gone" : v.getClass().getSimpleName())
+                + (v instanceof mods.eln.node.voxel.VoxelNode vn ? ", parts " + vn.parts.size() + ", floor element " + (vn.getElement(mods.eln.misc.Direction.YN) != null) : "")
+                + " (hit " + hit + ")";
+        }
+
+        public void measure(TestContext c) {
+            c.check("mixed block: mining the switch takes the switch only", result.startsWith("block removed false, node VoxelNode, parts 1, floor element false"), result);
         }
     }
 

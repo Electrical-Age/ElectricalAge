@@ -61,6 +61,23 @@ public class ElnJadePlugin implements IWailaPlugin {
         return Map.of();
     }
 
+    /** A voxel block's header: the device, pipe or cable under the crosshair (the block is "Pipes and Cables"). */
+    static String title(BlockAccessor acc) {
+        if (!(acc.getBlockEntity() instanceof NodeBlockEntity be) || !(be.getNode() instanceof mods.eln.node.voxel.VoxelNode v)) return null;
+        var h = acc.getHitResult().getLocation();
+        var p = acc.getPosition();
+        double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
+        int pi = v.partAt(x, y, z);
+        int el = v.elementAt(x, y, z, 0);
+        if (el < 0 && pi < 0) el = v.elementAt(x, y, z, 2);
+        if (el >= 0 && v.sideElementList[el] != null) return v.sideElementList[el].sixNodeElementDescriptor.name;
+        if (pi < 0) return null;
+        var part = v.parts.get(pi);
+        if (part instanceof mods.eln.node.voxel.CablePart c) return mods.eln.node.voxel.CablePart.TIERS[c.tier].name();
+        if (part instanceof mods.eln.node.voxel.PipePart pp) return (pp.tier == 0 ? "Iron" : "Alloy") + " Pipe";
+        return null;
+    }
+
     enum Server implements IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
@@ -73,6 +90,8 @@ public class ElnJadePlugin implements IWailaPlugin {
             } catch (RuntimeException e) {
                 return;   // (a device mid-change: no lines this time)
             }
+            String title = title(acc);
+            if (title != null) tag.putString("elnTitle", title);
             if (m == null || m.isEmpty()) return;
             ListTag list = new ListTag();
             for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
@@ -90,6 +109,8 @@ public class ElnJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
+            String title = acc.getServerData().getStringOr("elnTitle", "");
+            if (!title.isEmpty()) tooltip.replace(snownee.jade.api.JadeIds.CORE_OBJECT_NAME, Component.literal(title));
             var list = acc.getServerData().getListOrEmpty("elnProbe");
             boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
             int n = details ? list.size() : Math.min(HEADLINE, list.size());
