@@ -382,6 +382,9 @@ public final class PipeCases {
             ctx.check("pipe: iron and alloy kits don't merge", mix.isEmpty() || !(mix.getItem() instanceof PipeKitItem), "" + mix);
             ItemStack half = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
             var rest = remaining(ctx, 1, 1, PipeKitItem.kit(1, 33));
+            ItemStack half16 = craft(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
+                ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            ctx.check("pipe: a one-block kit splits too (in a 3x3 grid: 8)", PipeKitItem.length(half16) == 8, "" + PipeKitItem.length(half16));
             ctx.check("pipe: a kit splits in halves (33: 16 out, 17 stays)", PipeKitItem.length(half) == 16 && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17,
                 PipeKitItem.length(half) + " / " + rest);
         }
