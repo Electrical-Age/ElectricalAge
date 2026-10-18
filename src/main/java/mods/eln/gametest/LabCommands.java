@@ -115,6 +115,14 @@ public final class LabCommands {
                 if (tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h)
                     out.add("  tank: " + h.getFluidAmount() + " / " + h.getCapacity() + " mB of " + h.getFluid().getFluid());
             }
+            if (node instanceof mods.eln.node.voxel.VoxelNode v) {
+                out.add("- " + v.getWaila(true));
+                for (var p : v.parts) {
+                    var t = new net.minecraft.nbt.CompoundTag();
+                    p.write(t);
+                    out.add("  " + p.kind() + " " + t);
+                }
+            }
             if (node instanceof mods.eln.node.six.SixNode six)
                 for (var el : six.sideElementList) {
                     if (el == null) continue;

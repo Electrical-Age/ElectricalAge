@@ -186,6 +186,7 @@ public class VoxelNode extends Node implements FluidDevice {
     public String addSafetyValveNear(double hx, double hy, double hz) {
         int idx = partAt(hx, hy, hz);
         if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return "there's a valve there already";
+        for (VoxelPart q : parts) if (q instanceof SafetyValvePart) return "one safety valve per block (this one has one)";
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
         int[] best = null;
         double bd = Double.MAX_VALUE;
@@ -573,11 +574,11 @@ public class VoxelNode extends Node implements FluidDevice {
         if (pipe == null) return out;
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
-        out.put("Pressure", String.format("%.2f bar", n.P() / 1e5));
-        out.put("Temperature", String.format("%.0f °C", n.T() - 273.15));
+        out.put("Pressure", String.format("%.2f bar, %.0f °C", n.P() / 1e5, n.T() - 273.15));
         for (VoxelPart p : parts) if (p instanceof ValvePart v) out.put("Valve", v.open ? "open" : "shut");
         for (VoxelPart p : parts)
-            if (p instanceof SafetyValvePart sv) out.put("Safety valve", String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));
+            if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",
+                String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));
         if (!details) return out;
         out.put("Water", String.format("%.0f mB", n.mLiquid() / EaUnits.KG_PER_MB_WATER));
         out.put("Steam", String.format("%.0f mB", n.mVapour() / EaUnits.KG_PER_MB_STEAM));

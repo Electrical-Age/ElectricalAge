@@ -82,7 +82,8 @@ public class ElnJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
             var list = acc.getServerData().getListOrEmpty("elnProbe");
-            int n = mods.eln.Eln.wailaEasyMode || acc.showDetails() ? list.size() : Math.min(HEADLINE, list.size());
+            boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
+            int n = details ? list.size() : Math.min(HEADLINE, list.size());
             for (int i = 0; i < n; i++) {
                 String s = list.getStringOr(i, "");
                 int t = s.indexOf('\t');
