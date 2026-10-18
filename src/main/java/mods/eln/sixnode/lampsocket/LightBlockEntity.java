@@ -88,6 +88,9 @@ public class LightBlockEntity extends BlockEntity {
     }
 
     public static void addLight(Level w, int x, int y, int z, int light, int timeout) {
+        // block light is 0..15 (the turret asks for 25: 1.7.10 clamped it; here the meta property threw and crashed
+        // the server on the next tick)
+        light = Math.max(0, Math.min(15, light));
         Block block = WorldCompat.getBlock(w, x, y, z);
         if (block != ElnDeviceRegistry.lightBlock) {
             if (!Utils.isAirBlock(block)) return; // 26.x: also cave/void air
