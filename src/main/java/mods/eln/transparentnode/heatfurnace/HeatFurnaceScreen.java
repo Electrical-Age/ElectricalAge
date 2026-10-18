@@ -45,7 +45,7 @@ public class HeatFurnaceScreen extends ElnScreen {
         if (lighting) return tr("Fire: lighting...");
         if (fire <= 0) return tr("Fire: out");
         String trend = Math.abs(fire - setting) < 0.01 ? "" : fire < setting ? "  " + tr("rising") : "  " + tr("falling");
-        return tr("Fire: burning at %1$%", (int) Math.round(fire * 100)) + trend + "  (" + tr("follows the gauge over ~%1$ s", (int) kind.lag) + ")";
+        return tr("Fire: burning at %1$%", (int) Math.round(fire * 100)) + trend;
     }
 
     @Override
