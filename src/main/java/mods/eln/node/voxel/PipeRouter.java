@@ -20,6 +20,16 @@ public final class PipeRouter {
     static final int UNSUPPORTED = 5, REST = 3;
     /** Search limits: expansions, and how far outside the legs' box it may wander (voxels). */
     static final int MAX_EXPANSIONS = 400_000, MARGIN = 16 * 8;
+    /** Wall-clock budget for one route (all its legs), ms (Baughn: it must give up in time; it runs on the server
+     *  thread). */
+    public static final long TIME_BUDGET_MS = 200;
+
+    /** The search ran out of time or of expansions. */
+    static final class GaveUp extends RuntimeException {
+        GaveUp() {
+            super(null, null, false, false);
+        }
+    }
 
     /** What's in the way. A box in world voxels [x0, x1) x [y0, y1) x [z0, z1). */
     public interface Space {
@@ -52,6 +62,19 @@ public final class PipeRouter {
 
     /** Route from start through the waypoints to end, for a pipe of this bore (voxels). */
     public static Result route(Space space, int bore, End start, List<End> waypoints, End end) {
+        return route(space, bore, start, waypoints, end, TIME_BUDGET_MS);
+    }
+
+    public static Result route(Space space, int bore, End start, List<End> waypoints, End end, long budgetMs) {
+        long deadline = System.nanoTime() + budgetMs * 1_000_000;
+        try {
+            return routeUntil(space, bore, start, waypoints, end, deadline);
+        } catch (GaveUp e) {
+            return new Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
+        }
+    }
+
+    static Result routeUntil(Space space, int bore, End start, List<End> waypoints, End end, long deadline) {
         List<End> stops = new ArrayList<>();
         stops.add(start);
         stops.addAll(waypoints);
@@ -63,7 +86,7 @@ public final class PipeRouter {
             // leave a port along its direction; a waypoint continues the way the last leg arrived (no forced bend)
             int leaveDir = leg == 0 ? a.dir() : -1;
             int arrive = leg + 2 == stops.size() && b.dir() >= 0 ? b.dir() ^ 1 : -1;   // (arrive into a port: opposite its out-direction)
-            List<long[]> p = leg(space, bore, a, b, leaveDir, arriveDir, arrive);
+            List<long[]> p = leg(space, bore, a, b, leaveDir, arriveDir, arrive, deadline);
             if (p == null) return new Result(null, leg == 0 && stops.size() == 2 ? "no free path" : "no free path on leg " + (leg + 1));
             if (!pts.isEmpty()) p.remove(0);
             pts.addAll(p);
@@ -124,7 +147,7 @@ public final class PipeRouter {
     }
 
     /** One leg: A* over (point, last direction). Returns the lattice points, start and end included, or null. */
-    static List<long[]> leg(Space space, int bore, End a, End b, int leaveDir, int lastDir, int arriveDir) {
+    static List<long[]> leg(Space space, int bore, End a, End b, int leaveDir, int lastDir, int arriveDir, long deadline) {
         long[] s = {a.x(), a.y(), a.z()}, t = {b.x(), b.y(), b.z()};
         for (int i = 0; i < 3; i++) if (Math.floorMod(s[i], LATTICE) != 0 || Math.floorMod(t[i], LATTICE) != 0) return null;
         long lo0 = Math.min(s[0], t[0]) - MARGIN, hi0 = Math.max(s[0], t[0]) + MARGIN;
@@ -137,7 +160,8 @@ public final class PipeRouter {
         best.put(k0, 0L);
         open.add(new Open(k0, 0, h(s, t)));
         int expansions = 0;
-        while (!open.isEmpty() && expansions++ < MAX_EXPANSIONS) {
+        while (!open.isEmpty()) {
+            if (++expansions > MAX_EXPANSIONS || System.nanoTime() > deadline) throw new GaveUp();
             Open o = open.poll();
             Key k = o.k;
             if (o.g > best.getOrDefault(k, Long.MAX_VALUE)) continue;

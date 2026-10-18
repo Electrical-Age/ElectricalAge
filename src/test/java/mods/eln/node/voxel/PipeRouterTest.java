@@ -89,6 +89,49 @@ public class PipeRouterTest {
         assertNotNull(r.error);
     }
 
+    /** A sealed hollow cube: solid walls 1 block thick around a 3x3x3 hollow at the origin. */
+    static java.util.Set<List<Long>> sealedCube() {
+        java.util.Set<List<Long>> walls = new java.util.HashSet<>();
+        for (long x = -2; x <= 2; x++) for (long y = -2; y <= 2; y++) for (long z = -2; z <= 2; z++)
+            if (Math.max(Math.abs(x), Math.max(Math.abs(y), Math.abs(z))) == 2) walls.add(List.of(x, y, z));
+        return walls;
+    }
+
+    @Test
+    void insideASealedCubeToOutsideGivesUpInTime() {
+        // Baughn: an infeasible route must give up, within a time budget
+        long t0 = System.nanoTime();
+        var r = PipeRouter.route(solid(sealedCube()), 4, face(0, 0, 0, 1), List.of(), face(12, 0, 0, 0));
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        assertNotNull(r.error);
+        assertTrue(ms < PipeRouter.TIME_BUDGET_MS + 150, "took " + ms + " ms: " + r.error);
+    }
+
+    @Test
+    void outsideASealedCubeToInsideGivesUpInTime() {
+        long t0 = System.nanoTime();
+        var r = PipeRouter.route(solid(sealedCube()), 4, face(12, 0, 0, 0), List.of(), face(0, 0, 0, 1));
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        assertNotNull(r.error);
+        assertTrue(ms < PipeRouter.TIME_BUDGET_MS + 150, "took " + ms + " ms: " + r.error);
+    }
+
+    @Test
+    void aSlowWorldRunsOutOfTime() {
+        // every look at the world costs 50 us: a long route can't finish within the budget, and says so
+        PipeRouter.Space slow = (x0, y0, z0, x1, y1, z1) -> {
+            long until = System.nanoTime() + 50_000;
+            while (System.nanoTime() < until) Thread.onSpinWait();
+            return false;
+        };
+        long t0 = System.nanoTime();
+        var r = PipeRouter.route(slow, 4, face(0, 0, 0, 1), List.of(), face(60, 20, 40, 0), 100);
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        assertNotNull(r.error);
+        assertTrue(r.error.startsWith("gave up"), r.error);
+        assertTrue(ms < 100 + 150, "took " + ms + " ms");
+    }
+
     @Test
     void waypointsAreVisited() {
         var wp = new PipeRouter.End(2 * 16 + 8, 3 * 16 + 8, 8, -1);
