@@ -1,4 +1,4 @@
-// 26.3	2026-10-18T03:52:08.188631237	eln-global/EA models
+// 26.3	2026-10-18T10:57:10.020853533	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -284,6 +284,7 @@ fc7072eabfb82943749e3a2f64a672ea69f015d6 assets/eln/items/pink_brush.json
 876c6cd76e0b214eeae30fe23294840ee09fb077 assets/eln/items/pipe_adapter.json
 c37d42d320e747a50897587a392f8eac6ad1a86d assets/eln/items/pipe_kit_alloy.json
 0e52b8c4201a35ab6ea10911cbff7726f1dc6d51 assets/eln/items/pipe_kit_iron.json
+f8015433745159342a7e0bcd5f1b12d3813d64dc assets/eln/items/pipe_safety_valve.json
 73d8a7e3731c0a46b7e6e80712e8ab03d1ab94e2 assets/eln/items/pipe_valve.json
 a222de97919a80552ca8b6461dd1152c42f9343b assets/eln/items/player_filter.json
 fe78eef8cbad6b2ea4f1ee7ca815c53bd607e714 assets/eln/items/portable_battery.json
@@ -694,6 +695,7 @@ b9cc5a91629389539f8d34138c7844fc8c015a86 assets/eln/models/item/pid_regulator.js
 ed17386abf1e7b55e0167a95e65e07395740cece assets/eln/models/item/pipe_adapter.json
 2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_alloy.json
 cb6f096c14fa8c9e8b2459dee3fc41fed9f3a4f1 assets/eln/models/item/pipe_kit_iron.json
+4eca980c8e771e8c2a7a9ab24ef50903adf7b7ab assets/eln/models/item/pipe_safety_valve.json
 e094407dc02261dd7493e9998d5a611ecb791c42 assets/eln/models/item/pipe_valve.json
 4a9d386e1ae640f932b01052c84a1974236d246c assets/eln/models/item/player_filter.json
 fae3633068c6a0dddbd79198b06f9db6c89fe250 assets/eln/models/item/portable_battery.json

@@ -57,20 +57,16 @@ public class ElnJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor acc) {
-            boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails();
+            // (all of it: the client cuts it to the headline unless the player sneaks or the config asks for details)
             Map<String, String> m;
             try {
-                m = lines(acc, details);
+                m = lines(acc, true);
             } catch (RuntimeException e) {
                 return;   // (a device mid-change: no lines this time)
             }
             if (m == null || m.isEmpty()) return;
             ListTag list = new ListTag();
-            int n = 0;
-            for (var e : m.entrySet()) {
-                if (!details && n++ >= HEADLINE) break;
-                list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
-            }
+            for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
             tag.put("elnProbe", list);
         }
 
@@ -86,7 +82,8 @@ public class ElnJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
             var list = acc.getServerData().getListOrEmpty("elnProbe");
-            for (int i = 0; i < list.size(); i++) {
+            int n = mods.eln.Eln.wailaEasyMode || acc.showDetails() ? list.size() : Math.min(HEADLINE, list.size());
+            for (int i = 0; i < n; i++) {
                 String s = list.getStringOr(i, "");
                 int t = s.indexOf('\t');
                 tooltip.add(t < 0 ? Component.literal(s) : Component.literal(s.substring(0, t) + ": ").append(Component.literal(s.substring(t + 1).trim())));

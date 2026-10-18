@@ -185,6 +185,7 @@ public class VoxelNode extends Node implements FluidDevice {
      *  pipe's most open side; set to the pipe's working pressure. */
     public String addSafetyValveNear(double hx, double hy, double hz) {
         int idx = partAt(hx, hy, hz);
+        if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return "there's a valve there already";
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
         int[] best = null;
         double bd = Double.MAX_VALUE;
