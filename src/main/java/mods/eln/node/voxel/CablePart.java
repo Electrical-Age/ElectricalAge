@@ -50,6 +50,14 @@ public final class CablePart extends VoxelPart {
     public final int[] points;
     /** Burnt out (by its watchdogs): an open circuit until repaired; null while it works. */
     public mods.eln.sim.process.destruct.FailureCause burnt;
+    /** What breaking it gives back (voxels), if not its length: a converted six-node cable was one item, 16 voxels,
+     *  shared among its arms (a cross's four arms are 32 voxels long). -1: its length. */
+    public int paid = -1;
+
+    public int dropLength() {
+        return paid >= 0 ? paid : isKnuckle() ? 0 : length();
+    }
+
     /** Laid by the converter (a knuckle round an outer corner): a revert takes it out. */
     public boolean byConverter;
     /** Saved state (server): voltage and temperature, restored into its conductor. */
@@ -284,6 +292,7 @@ public final class CablePart extends VoxelPart {
         tag.putIntArray("pts", points);
         if (burnt != null) tag.putString("burnt", burnt.name());
         if (byConverter) tag.putBoolean("conv", true);
+        if (paid >= 0) tag.putInt("paid", paid);
         tag.putDouble("u", u);
         tag.putDouble("t", t);
     }
@@ -302,6 +311,7 @@ public final class CablePart extends VoxelPart {
             }
         }
         p.byConverter = tag.getBooleanOr("conv", false);
+        p.paid = tag.getIntOr("paid", -1);
         p.u = tag.getDoubleOr("u", 0);
         p.t = tag.getDoubleOr("t", 0);
         return p;

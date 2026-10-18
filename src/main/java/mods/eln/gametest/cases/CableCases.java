@@ -36,6 +36,8 @@ public final class CableCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BurnCase());
+        cases.add(new RoutedCase());
+        cases.add(new KitCase());
         List<TestCase> mine = new ArrayList<>();
         addLayouts(mine);
         cases.addAll(mine);
@@ -236,6 +238,100 @@ public final class CableCases {
                 c.check(name + ": load " + i + ": converted current = six-node current (0.1%)", Math.abs(a) > 1 && Math.abs(a - b) <= 1e-3 * Math.abs(a),
                     String.format("six-node %.5f A, converted %.5f A", a, b));
             }
+        }
+    }
+
+    /**
+     * A cable kit's route (CableRouter, CablePlacer): from the source's east edge to the resistor's west edge, past a
+     * wall on a one-block-wide floor strip: over the wall, or round the strip's side or underside (outer corners,
+     * knuckles), never through the air; the circuit conducts.
+     */
+    static final class RoutedCase implements TestCase {
+        ResistorElement r;
+        String err;
+        int pieces;
+        final StringBuilder where = new StringBuilder();
+
+        public String name() {
+            return "routed cable over a wall";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            source(c, SOURCE, 0, 1, 50);
+            r = end(c, 7, 1);
+            c.floor(c.at(4, 1, 1));
+            c.floor(c.at(4, 2, 1));
+            // (the floor strip's sides open: clear the rows beside it so the only way is over the wall)
+            for (int x = 0; x < 10; x++) {
+                c.level().setBlock(c.at(x, 0, 0), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+                c.level().setBlock(c.at(x, 0, 2), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+            }
+            var hitS = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 1)).add(1.0, 0.05, 0.5);
+            var hitR = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(7, 1, 1)).add(0.0, 0.05, 0.5);
+            long[][] j = new long[1][];
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 1), net.minecraft.core.Direction.EAST, hitS, true, j);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(7, 1, 1), net.minecraft.core.Direction.WEST, hitR, false, j);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, a, b);
+            for (int x = 1; x < 7; x++)
+                for (int y = 0; y < 4; y++)
+                    for (int z = 0; z < 3; z++)
+                        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level())) instanceof mods.eln.node.voxel.VoxelNode v) {
+                            pieces += v.parts.size();
+                            where.append(x).append(',').append(y).append(',').append(z).append(' ');
+                        }
+        }
+
+        public void measure(TestContext c) {
+            c.check("routed cable: laid", err == null, String.valueOf(err));
+            c.line("routed cable: pieces in blocks " + where);
+            c.check("routed cable: round the wall (8+ pieces: corners, knuckles)", pieces >= 8, pieces + " pieces");
+            double i = current(r);
+            c.line(String.format("routed cable: %.4f A through the resistor", i));
+            c.check("routed cable: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
+        }
+    }
+
+    /** Cable kits from coils and back, merging; breaking a laid piece gives its length back. */
+    static final class KitCase implements TestCase {
+        public String name() {
+            return "cable kits";
+        }
+
+        public void build(TestContext c) {
+        }
+
+        public void measure(TestContext c) {
+            var coil = mods.eln.node.voxel.CableKitRecipes.coil(LV);
+            var in = net.minecraft.world.item.crafting.CraftingInput.of(2, 2, List.of(coil.copy(), coil.copy(), coil.copy(), net.minecraft.world.item.ItemStack.EMPTY));
+            var kit = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(in);
+            c.check("cable kit: three coils make a 48-voxel kit", mods.eln.node.voxel.KitItem.length(kit) == 48 && kit.getItem() instanceof mods.eln.node.voxel.CableKitItem k && k.tier == LV,
+                kit + " " + mods.eln.node.voxel.KitItem.length(kit));
+            var in2 = net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(kit.copy()));
+            var back = mods.eln.node.voxel.CableKitRecipes.ToCoil.INSTANCE.assemble(in2);
+            var rest = mods.eln.node.voxel.CableKitRecipes.ToCoil.INSTANCE.getRemainingItems(in2);
+            c.check("cable kit: a kit gives a coil back and keeps 32", mods.eln.node.voxel.CableKitRecipes.coilTier(back) == LV
+                && mods.eln.node.voxel.KitItem.length(rest.get(0)) == 32, back + " / " + rest);
+            var mixed = net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(coil.copy(), mods.eln.node.voxel.CableKitRecipes.coil(LV + 1)));
+            c.check("cable kit: coils of two tiers don't mix", !mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.matches(mixed, c.level()), "");
+            var m = mods.eln.node.voxel.PipeKitRecipes.Merge.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 1,
+                List.of(mods.eln.node.voxel.CableKitItem.kit(LV, 100), mods.eln.node.voxel.CableKitItem.kit(LV, 28))));
+            c.check("cable kit: two kits merge", mods.eln.node.voxel.KitItem.length(m) == 128 && m.getItem() instanceof mods.eln.node.voxel.CableKitItem, m.toString());
         }
     }
 

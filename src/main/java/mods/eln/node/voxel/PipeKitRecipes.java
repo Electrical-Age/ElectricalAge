@@ -24,18 +24,19 @@ public final class PipeKitRecipes {
         public static final StreamCodec<RegistryFriendlyByteBuf, Merge> STREAM_CODEC = StreamCodec.unit(INSTANCE);
         public static final RecipeSerializer<Merge> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-        /** The tier and total length of 2+ kits of one tier (each a single item), or null. */
-        static int[] total(CraftingInput in) {
-            int tier = -1, len = 0, n = 0;
+        /** One of 2+ kits of one item (each a single item) and their total length, or null. */
+        static Object[] total(CraftingInput in) {
+            ItemStack kit = null;
+            int len = 0, n = 0;
             for (int i = 0; i < in.size(); i++) {
                 ItemStack s = in.getItem(i);
                 if (s.isEmpty()) continue;
-                if (!(s.getItem() instanceof PipeKitItem k) || s.getCount() != 1 || (tier >= 0 && k.tier != tier)) return null;
-                tier = k.tier;
-                len += PipeKitItem.length(s);
+                if (!(s.getItem() instanceof KitItem) || s.getCount() != 1 || (kit != null && s.getItem() != kit.getItem())) return null;
+                kit = s;
+                len += KitItem.length(s);
                 n++;
             }
-            return n >= 2 && len <= PipeKitItem.MAX ? new int[]{tier, len} : null;
+            return n >= 2 && len <= KitItem.MAX ? new Object[]{kit, len} : null;
         }
 
         @Override
@@ -45,8 +46,8 @@ public final class PipeKitRecipes {
 
         @Override
         public ItemStack assemble(CraftingInput input) {
-            int[] t = total(input);
-            return t == null ? ItemStack.EMPTY : PipeKitItem.kit(t[0], t[1]);
+            Object[] t = total(input);
+            return t == null ? ItemStack.EMPTY : ((KitItem) ((ItemStack) t[0]).getItem()).make((Integer) t[1]);
         }
 
         @Override

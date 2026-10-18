@@ -1,4 +1,4 @@
-// 26.3	2026-10-18T10:57:10.020853533	eln-global/EA models
+// 26.3	2026-10-18T15:51:01.363289948	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -71,7 +71,7 @@ b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole_w_dc_dc_converter.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/voltage_oriented_battery.json
-6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/voxel_node.json
+3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/water_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/wind_turbine.json
 61d873cbec0fa1e9200f30544172a2cabc47c78e assets/eln/items/10a_diode.json
@@ -146,6 +146,11 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 455bb8c075ef804a67f6c3def780a8e7e147209f assets/eln/items/blue_brush.json
 11d8e05d7d4c49afc10498780c82c071c42ab4fa assets/eln/items/boiler.json
 4e6ec02f2a448b5dc61acd4cb001db2bf89175ab assets/eln/items/brown_brush.json
+8b28d204138e8b3a19be00bec948932a9e853819 assets/eln/items/cable_kit_hv.json
+5e9c5666a93b581fa46fc9a7d72f0018e5a23bae assets/eln/items/cable_kit_lv.json
+8357193eeda22f7d16d16e19a17856cbb097699b assets/eln/items/cable_kit_mv.json
+0186f2aa540c8b8064b3472eec57f8a636962873 assets/eln/items/cable_kit_signal.json
+8a4e1e22bad335e63ea8671fc091833082a69edf assets/eln/items/cable_kit_vhv.json
 416d58aaae7250af7c091abfb63554244ca09aa6 assets/eln/items/capacity_oriented_battery.json
 a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
 54c73cdeae61d72e7dfca65d5655d763c6a23b82 assets/eln/items/cheap_chip.json
@@ -498,6 +503,11 @@ a156b4526875a4a67867cba5f6306a8bfde04fb7 assets/eln/models/item/blown_lead_fuse.
 0b32ee436dbf7cfb34aef91f60ec27be6269e26e assets/eln/models/item/blue_brush.json
 09c70a74e51db7dd1d394f0fd622870dbe16f1a8 assets/eln/models/item/boiler.json
 3692a38ccb89b9e11066bb03b638e63ed63d39c3 assets/eln/models/item/brown_brush.json
+cac6a0113223ca972d0fb558559968f3bedfb59a assets/eln/models/item/cable_kit_hv.json
+0ebb4e07b328e5edfdb89eddd9f667839b2fe653 assets/eln/models/item/cable_kit_lv.json
+f9992078b5ec44355c3a62df7588c097c1cc330c assets/eln/models/item/cable_kit_mv.json
+fd4526b81d5d19c6111fb9ee420bc4e7c645ddbf assets/eln/models/item/cable_kit_signal.json
+56d88a337caf4d4b80b1b429e38e515ea613ee3c assets/eln/models/item/cable_kit_vhv.json
 1fb49930355446d40b68162bc471465a6ac1901d assets/eln/models/item/capacity_oriented_battery.json
 c01d247e009543b7b3371b07e7b8a45e28eea766 assets/eln/models/item/capacity_oriented_battery_3d.json
 ccab4471b309e90a6f273d50e50f9ad1052fb4ff assets/eln/models/item/casing.json

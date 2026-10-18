@@ -18,8 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * (PipePlacer: waypoints, then a port to finish); right-clicking any other face lays one block of straight pipe,
  * centred, in the block in front of it, along the face's axis.
  */
-public class PipeKitItem extends Item implements PipeTool {
-    public static final int MAX = 1024;
+public class PipeKitItem extends Item implements PipeTool, KitItem {
     public final int tier;
 
     public PipeKitItem(int tier, Properties p) {
@@ -39,31 +38,9 @@ public class PipeKitItem extends Item implements PipeTool {
         return s;
     }
 
-    /**
-     * Picking up a kit tops up the player's other kits of its tier first (Baughn: stacking, reimplemented: a kit is a
-     * one-item stack holding up to MAX voxels). What's left is picked up as usual.
-     */
-    public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre e) {
-        var ent = e.getItemEntity();
-        ItemStack s = ent.getItem();
-        if (!(s.getItem() instanceof PipeKitItem k) || e.getPlayer().level().isClientSide() || ent.hasPickUpDelay()) return;
-        int len = length(s);
-        var inv = e.getPlayer().getInventory();
-        for (int i = 0; i < inv.getContainerSize() && len > 0; i++) {
-            ItemStack o = inv.getItem(i);
-            if (o == s || !(o.getItem() instanceof PipeKitItem ok) || ok.tier != k.tier) continue;
-            int room = MAX - length(o);
-            if (room <= 0) continue;
-            int take = Math.min(room, len);
-            o.setDamageValue(MAX - (length(o) + take));
-            len -= take;
-        }
-        if (len == length(s)) return;
-        if (len <= 0) {
-            e.getPlayer().take(ent, 1);
-            ent.discard();
-            e.setCanPickup(net.minecraft.util.TriState.FALSE);
-        } else s.setDamageValue(MAX - len);
+    @Override
+    public ItemStack make(int len) {
+        return kit(tier, len);
     }
 
     /** Not by vanilla's repair (two kits would gain 5%): kits merge by their own recipe (PipeKitRecipes). */

@@ -96,7 +96,9 @@ public final class CableConverter {
             int face = f.toEnumFacing().get3DDataValue();
             List<CablePart> arms = dirs.isEmpty() ? CablePart.arms(tier, face, otherPair(face)) : CablePart.arms(tier, face, dirs.stream().mapToInt(i -> i).toArray());
             double u = c.electricalLoad.state, t = c.thermalTc();
-            for (CablePart a : arms) {
+            for (int i = 0; i < arms.size(); i++) {
+                CablePart a = arms.get(i);
+                a.paid = 16 / arms.size() + (i == 0 ? 16 % arms.size() : 0);   // (the one cable item it was)
                 a.u = u;
                 a.t = t;
                 a.burnt = c.getBurnt();

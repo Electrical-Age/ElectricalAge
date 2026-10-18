@@ -71,8 +71,8 @@ public class VoxelNode extends Node implements FluidDevice {
         return !want.intersects(used);
     }
 
-    /** Add a part (a pipe laid here): null if done, else why not. */
-    public String addPart(VoxelPart p) {
+    /** Could the part go in (null), else why not. */
+    public String canAdd(VoxelPart p) {
         if (p instanceof PipePart pipe && !pipe.valid()) return "not a straight-pieced pipe inside the block";
         if (p instanceof CablePart c && !c.valid()) return "not a cable lying on a face of the block";
         if (p instanceof AdapterPart a) {   // (its flange sits on its own stub's end)
@@ -88,6 +88,13 @@ public class VoxelNode extends Node implements FluidDevice {
             for (int[] b : c.boxes()) fill(want, b);
             if (want.intersects(others)) return "something is in the way";
         } else if (!fits(p)) return "something is in the way";
+        return null;
+    }
+
+    /** Add a part (a pipe laid here): null if done, else why not. */
+    public String addPart(VoxelPart p) {
+        String why = canAdd(p);
+        if (why != null) return why;
         if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, null);
         parts.add(p);
         markUsed();
@@ -102,6 +109,7 @@ public class VoxelNode extends Node implements FluidDevice {
         VoxelPart p = parts.remove(index);
         markUsed();
         if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+        if (drop && p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
         if (drop && p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
         if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
@@ -601,6 +609,7 @@ public class VoxelNode extends Node implements FluidDevice {
     public void onBreakBlock() {
         for (VoxelPart p : parts) {
             if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+            if (p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
             if (p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
             if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
             if (p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));

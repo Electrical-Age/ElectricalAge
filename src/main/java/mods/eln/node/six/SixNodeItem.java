@@ -37,6 +37,13 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         Level world = ctx.getLevel();
         if (world.isClientSide()) return InteractionResult.SUCCESS;
         // the block in front of the clicked face, and the element faces back toward the clicked block
+        // once cables are voxel cables (ElnConfig [cables] convertOnLoad), the old cable items are coils: ingredients and
+        // device parts, not placed (Baughn 2026-10-18); a cable kit lays cable
+        if (mods.eln.node.voxel.CableConverter.convertOnLoad && descriptor instanceof mods.eln.sixnode.electricalcable.ElectricalCableDescriptor c
+            && mods.eln.node.voxel.CablePart.tierOf(c.name) >= 0) {
+            if (ctx.getPlayer() != null) ctx.getPlayer().sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cables are laid with a cable kit (craft one from these)"));
+            return InteractionResult.FAIL;
+        }
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Direction direction = Direction.fromIntMinecraftSide(ctx.getClickedFace().get3DDataValue()).getInverse();
         boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction);

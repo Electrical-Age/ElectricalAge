@@ -81,6 +81,17 @@ public final class ElnRegistry {
         RECIPE_SERIALIZERS.register("pipe_kit_merge", () -> mods.eln.node.voxel.PipeKitRecipes.Merge.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Split>> PIPE_KIT_SPLIT =
         RECIPE_SERIALIZERS.register("pipe_kit_split", () -> mods.eln.node.voxel.PipeKitRecipes.Split.SERIALIZER);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.CableKitRecipes.FromCoils>> CABLE_KIT_FROM_COILS =
+        RECIPE_SERIALIZERS.register("cable_kit_from_coils", () -> mods.eln.node.voxel.CableKitRecipes.FromCoils.SERIALIZER);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.CableKitRecipes.ToCoil>> CABLE_KIT_TO_COIL =
+        RECIPE_SERIALIZERS.register("cable_kit_to_coil", () -> mods.eln.node.voxel.CableKitRecipes.ToCoil.SERIALIZER);
+    /** Cable kits, one per CablePart tier: signal, low, medium, high, very high voltage. */
+    public static final java.util.List<net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.CableKitItem>> CABLE_KITS = java.util.List.of(
+        ITEMS.registerItem("cable_kit_signal", p -> new mods.eln.node.voxel.CableKitItem(0, p)),
+        ITEMS.registerItem("cable_kit_lv", p -> new mods.eln.node.voxel.CableKitItem(1, p)),
+        ITEMS.registerItem("cable_kit_mv", p -> new mods.eln.node.voxel.CableKitItem(2, p)),
+        ITEMS.registerItem("cable_kit_hv", p -> new mods.eln.node.voxel.CableKitItem(3, p)),
+        ITEMS.registerItem("cable_kit_vhv", p -> new mods.eln.node.voxel.CableKitItem(4, p)));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_IRON =
         ITEMS.registerItem("pipe_kit_iron", p -> new mods.eln.node.voxel.PipeKitItem(0, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_ALLOY =
@@ -243,6 +254,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_VALVE);
         ALL_ITEMS.add(PIPE_ADAPTER);
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
+        ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

@@ -22,6 +22,8 @@ public class ElnLang extends LanguageProvider {
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
         Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"),
+        Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
+        Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"),
         Map.entry("item_creative_tab", "Electrical Age"),
         // 1.12 en_us.lang tile.eln.EnergyConverterElnToOther*Block.name
         Map.entry("energy_converter_eln_to_other_lvublock", "50V Electrical Age to other energy exporter"),
