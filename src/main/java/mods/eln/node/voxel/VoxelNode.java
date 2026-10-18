@@ -423,7 +423,7 @@ public class VoxelNode extends Node implements FluidDevice {
         for (VoxelPart p : parts) {
             if (!(p instanceof PipePart pipe) || pipe.burst || pipe.fluid == null) continue;
             double P = pipe.fluid.P(), T = pipe.fluid.T();
-            if (P > pipe.burstPa(T) && mods.eln.fluid.FluidWorld.claimBurst(pipe.fluid)) {
+            if (P > pipe.burstPa(T) && mods.eln.fluid.FluidWorld.claimBurst(pipe.fluid, level.getGameTime())) {
                 pipe.burst = true;
                 changed = true;
                 if (level instanceof net.minecraft.server.level.ServerLevel sl0) {

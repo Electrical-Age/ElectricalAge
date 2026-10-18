@@ -72,9 +72,20 @@ public final class FluidWorld implements IProcess {
 
     private final java.util.Set<FluidNode> burstThisStep = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
 
-    /** May this piece of pipe burst now? Only one per run per step: once it vents, the run's pressure falls. */
-    public static boolean claimBurst(FluidNode piece) {
-        return INSTANCE.burstThisStep.add(INSTANCE.lumpOf.getOrDefault(piece, piece));
+    /** A run that burst less than this long ago (ticks) is venting through its crack: its other pieces hold. */
+    public static final long BURST_QUIET = 20 * 30;
+
+    /**
+     * May this piece of pipe burst now? One per run per step, and not while the run is venting from a burst in the last
+     * BURST_QUIET ticks (AdventurAgent: a whole run burst piece by piece while the first crack let the pressure down).
+     */
+    public static boolean claimBurst(FluidNode piece, long now) {
+        FluidNode lump = INSTANCE.lumpOf.getOrDefault(piece, piece);
+        var members = INSTANCE.lumps.get(lump);
+        for (FluidNode m : members == null ? List.of(piece) : members) if (now - m.burstTick < BURST_QUIET) return false;
+        if (!INSTANCE.burstThisStep.add(lump)) return false;
+        piece.burstTick = now;
+        return true;
     }
 
     /** The node standing for a piece of pipe this step (its run's lump), or the node itself. */

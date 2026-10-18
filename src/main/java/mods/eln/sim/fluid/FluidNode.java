@@ -16,6 +16,8 @@ public final class FluidNode {
      *  piece's own (1/conductance, along its length), so the run's ends get half the run's. */
     public boolean lumpable;
     public double resistance;
+    /** Game tick this piece burst (not saved; a run that just burst is venting: its other pieces wait). */
+    public long burstTick = Long.MIN_VALUE / 2;
     /** Heat loss to the surroundings (W/K) towards Water.T_AMBIENT; 0 = insulated. */
     public double lossWPerK;
     final Flash state = new Flash();

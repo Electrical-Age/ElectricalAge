@@ -494,7 +494,8 @@ public final class OilCases {
             boiler.fromTanks(8000, 0);
             boiler.showTanks();
             pipeAt = ctx.at(1, 2, 1);
-            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 16, 8}), null);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt.above(), new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
                 boiler.thermal.moveEnergyTo(6000 * t);
                 peak = Math.max(peak, boiler.vessel.P());
@@ -503,11 +504,14 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(fire);
-            var n = ctx.level().getBlockEntity(pipeAt) instanceof mods.eln.node.voxel.VoxelNodeEntity e && e.getNode() instanceof mods.eln.node.voxel.VoxelNode v ? v : null;
-            boolean burst = n != null && n.parts.get(0) instanceof mods.eln.node.voxel.PipePart p && p.burst;
+            int bursts = 0;
+            for (var at : new net.minecraft.core.BlockPos[]{pipeAt, pipeAt.above()})
+                if (ctx.level().getBlockEntity(at) instanceof mods.eln.node.voxel.VoxelNodeEntity e && e.getNode() instanceof mods.eln.node.voxel.VoxelNode v
+                    && v.parts.get(0) instanceof mods.eln.node.voxel.PipePart p && p.burst) bursts++;
+            boolean burst = bursts == 1;
             ctx.line("fluid: sealed plant " + boiler.getWaila() + String.format(", peak %.1f bar", peak / 1e5));
             ctx.check("fluid: the pressure rose past 10 bar (no cap)", peak > 30e5, String.format("peak %.1f bar", peak / 1e5));
-            ctx.check("fluid: the iron pipe burst", burst, "");
+            ctx.check("fluid: one piece of the iron run burst (not the whole run)", burst, bursts + " burst");
             ctx.check("fluid: the crack lets the pressure down (the heat keeps coming)", boiler.vessel.P() < 0.9 * peak, String.format("%.1f bar now", boiler.vessel.P() / 1e5));
             ctx.check("fluid: the boiler survived", !boiler.node.isDestructing() && !boiler.isBurnt(), "");
         }
