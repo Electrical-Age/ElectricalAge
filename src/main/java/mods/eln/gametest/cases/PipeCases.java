@@ -22,6 +22,7 @@ public final class PipeCases {
         cases.add(new RoutedOverAWall());
         cases.add(new JoinMidRun());
         cases.add(new KitCrafting());
+        cases.add(new Burst());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -199,6 +200,46 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** An iron run pressed past its burst rating (40 bar) bursts: the weak piece goes, scorched, and the run vents to
+     *  the air (Baughn: a burst vents; a player's break seals). Breaking the burst piece drops nothing. */
+    static final class Burst implements TestCase {
+        BlockPos a, b;
+
+        public String id() {
+            return "pipe_burst_vents";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            b = ctx.at(2, 1, 1);
+            lay(ctx, a, 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, b, 0, 0, 8, 8, 16, 8, 8);
+            for (BlockPos p : new BlockPos[]{a, b}) {
+                VoxelNode n = node(ctx, p);
+                ((PipePart) n.parts.get(0)).fluid.fill(0, 50e5, 293.15);
+                mods.eln.fluid.FluidWorld.changed(n);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            PipePart pa = (PipePart) node(ctx, a).parts.get(0), pb = (PipePart) node(ctx, b).parts.get(0);
+            ctx.check("pipe: one piece of the run burst", pa.burst ^ pb.burst, pa.burst + " " + pb.burst);
+            ctx.check("pipe: the run vented to the air", pa.fluid.P() < 2e5, String.format("%.2f bar", pa.fluid.P() / 1e5));
+            VoxelNode n = node(ctx, pa.burst ? a : b);
+            n.removePart(0, true);
+            var items = ctx.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(a).inflate(3));
+            ctx.check("pipe: a burst piece drops nothing", items.isEmpty(), items.size() + " items");
         }
     }
 

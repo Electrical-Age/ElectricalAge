@@ -81,7 +81,7 @@ public class VoxelNode extends Node implements FluidDevice {
         if (index < 0 || index >= parts.size()) return parts.isEmpty();
         VoxelPart p = parts.remove(index);
         markUsed();
-        if (drop && p instanceof PipePart pipe) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+        if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
         changed();
         return parts.isEmpty();
     }
@@ -159,6 +159,46 @@ public class VoxelNode extends Node implements FluidDevice {
         return null;
     }
 
+    /** A burst pipe vents its run. */
+    @Override
+    public List<Vent> fluidVents() {
+        List<Vent> out = new ArrayList<>();
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.burst && pipe.fluid != null) {
+                Vent v = new Vent(pipe.fluid, 0.5, PipePart.BURST_VENT_K);
+                v.open = 1;
+                out.add(v);
+            }
+        return out;
+    }
+
+    /** Over its rating a pipe bursts (the weakest of a run goes first: each piece checks its own rating against the
+     *  run's pressure); over its working pressure it strains and hisses. */
+    @Override
+    public void afterFluidStep(double dt) {
+        boolean changed = false;
+        var level = coordonate.world();
+        for (VoxelPart p : parts) {
+            if (!(p instanceof PipePart pipe) || pipe.burst || pipe.fluid == null) continue;
+            double P = pipe.fluid.P(), T = pipe.fluid.T();
+            if (P > pipe.burstPa(T) && mods.eln.fluid.FluidWorld.claimBurst(pipe.fluid)) {
+                pipe.burst = true;
+                changed = true;
+                if (level instanceof net.minecraft.server.level.ServerLevel sl) {
+                    var c = net.minecraft.world.phys.Vec3.atCenterOf(coordonate.pos());
+                    sl.playSound(null, coordonate.pos(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(),
+                        net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.6f);
+                    sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, c.x, c.y, c.z, 30, 0.3, 0.3, 0.3, 0.1);
+                }
+                mods.eln.misc.Utils.println("Pipe burst at " + coordonate + String.format(": %.1f bar, %.0f C", P / 1e5, T - 273.15));
+            } else if (P > pipe.workingPa(T) && level instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0) {
+                var c = net.minecraft.world.phys.Vec3.atCenterOf(coordonate.pos());
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, c.x, c.y, c.z, 2, 0.2, 0.2, 0.2, 0.02);
+            }
+        }
+        if (changed) changed();
+    }
+
     @Override
     public void connectJob() {
         super.connectJob();
@@ -185,7 +225,7 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public void onBreakBlock() {
-        for (VoxelPart p : parts) if (p instanceof PipePart pipe) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
         parts.clear();
         super.onBreakBlock();
     }

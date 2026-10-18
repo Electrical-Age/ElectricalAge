@@ -21,12 +21,22 @@ public final class PipePart extends VoxelPart {
     public static final double[] VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25};
     public static final double[] K_PER_BLOCK = {3e-11, 3e-11 * 2.25};
     public static final String[] TIER_NAME = {"iron", "alloy"};
+    /**
+     * Ratings (DESIGN.md 6a): working and burst pressure (Pa), and the temperature (K) from which the rating falls,
+     * linearly to half at SOFT_SPAN above it. Iron: 1850s-60s wrought iron; alloy: a Cr-Mo steam-line steel.
+     */
+    public static final double[] WORKING_PA = {10e5, 100e5}, BURST_PA = {40e5, 300e5}, SOFT_K = {573.15, 873.15};
+    static final double SOFT_SPAN = 100;
+    /** A burst pipe vents through this (m^3). */
+    static final double BURST_VENT_K = 3e-11;
 
     public final int tier;
     /** The polyline, x y z per point, in voxels. */
     public final int[] points;
     /** Server: the contents (null on the client). */
     public FluidNode fluid;
+    /** Burst (over its pressure rating): it vents its run to the air until replaced; breaking it drops nothing. */
+    public boolean burst;
 
     public PipePart(int tier, int[] points) {
         this.tier = tier;
@@ -83,6 +93,20 @@ public final class PipePart extends VoxelPart {
     /** The node's inside height (voxels): the bore, or the vertical run if longer. */
     int heightVoxels() {
         return Math.max(bore(), maxY() - minY());
+    }
+
+    /** The rating at temperature T: 1 up to SOFT_K, falling to 0.5 at SOFT_K + SOFT_SPAN and staying there. */
+    public double derate(double T) {
+        double over = T - SOFT_K[tier];
+        return over <= 0 ? 1 : Math.max(0.5, 1 - 0.5 * over / SOFT_SPAN);
+    }
+
+    public double burstPa(double T) {
+        return BURST_PA[tier] * derate(T);
+    }
+
+    public double workingPa(double T) {
+        return WORKING_PA[tier] * derate(T);
     }
 
     /** Make the contents node (server), for a pipe in the block at blockY: air at 1 atm if new. */
@@ -142,6 +166,7 @@ public final class PipePart extends VoxelPart {
     public void write(CompoundTag t) {
         t.putInt("tier", tier);
         t.putIntArray("pts", points);
+        if (burst) t.putBoolean("burst", true);
         if (fluid != null) {
             t.putDouble("w", fluid.mWater);
             t.putDouble("a", fluid.mAir);
@@ -151,6 +176,7 @@ public final class PipePart extends VoxelPart {
 
     static PipePart read(CompoundTag t, int blockY) {
         PipePart p = new PipePart(Math.max(0, Math.min(BORE.length - 1, t.getIntOr("tier", 0))), t.getIntArray("pts").orElse(new int[0]));
+        p.burst = t.getBooleanOr("burst", false);
         double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
         p.makeNode(blockY, saved);
         return p;
@@ -158,17 +184,19 @@ public final class PipePart extends VoxelPart {
 
     @Override
     public void serialize(java.io.DataOutputStream out) throws java.io.IOException {
-        out.writeByte(tier);
+        out.writeByte(tier | (burst ? 0x80 : 0));
         out.writeByte(points.length / 3);
         for (int v : points) out.writeByte(v);
     }
 
     static PipePart deserialize(java.io.DataInputStream in) throws java.io.IOException {
-        int tier = in.readByte();
+        int b = in.readByte();
         int n = in.readByte();
         int[] pts = new int[3 * n];
         for (int i = 0; i < pts.length; i++) pts[i] = in.readByte();
-        return new PipePart(Math.max(0, Math.min(BORE.length - 1, tier)), pts);
+        PipePart p = new PipePart(Math.max(0, Math.min(BORE.length - 1, b & 0x7F)), pts);
+        p.burst = (b & 0x80) != 0;
+        return p;
     }
 
     /** Is (x, y, z) on the centre line? */

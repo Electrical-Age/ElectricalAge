@@ -68,6 +68,13 @@ public final class FluidWorld implements IProcess {
         return null;
     }
 
+    private final java.util.Set<FluidNode> burstThisStep = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+
+    /** May this piece of pipe burst now? Only one per run per step: once it vents, the run's pressure falls. */
+    public static boolean claimBurst(FluidNode piece) {
+        return INSTANCE.burstThisStep.add(INSTANCE.lumpOf.getOrDefault(piece, piece));
+    }
+
     /** The edges at a node this step (its ports' couplings and vents). */
     public static List<FluidEdge> edgesOf(FluidNode n) {
         List<FluidEdge> out = new ArrayList<>();
@@ -84,6 +91,7 @@ public final class FluidWorld implements IProcess {
         for (FluidDevice.Vent v : vents) v.edge.open = v.open;
         for (FluidNetwork n : networks) n.step(time);
         writeBack();
+        burstThisStep.clear();
         for (FluidDevice d : devices) d.afterFluidStep(time);
     }
 
@@ -205,9 +213,10 @@ public final class FluidWorld implements IProcess {
         Map<FluidNetwork, FluidNode> air = new IdentityHashMap<>();
         for (FluidDevice d : devices)
             for (FluidDevice.Vent v : d.fluidVents()) {
-                FluidNetwork net = byRoot.get(find(v.node, parent));
-                FluidNode atm = air.computeIfAbsent(net, k -> k.add(FluidNode.atmosphere(v.node.z + v.node.height)));
-                v.edge = net.connect(v.node, v.draw, atm, 0, v.k);
+                FluidNode vn = repr.apply(v.node);   // (a burst pipe vents its whole run)
+                FluidNetwork net = byRoot.get(find(vn, parent));
+                FluidNode atm = air.computeIfAbsent(net, k -> k.add(FluidNode.atmosphere(vn.z + vn.height)));
+                v.edge = net.connect(vn, drawOn(vn, v.node, v.draw), atm, 0, v.k);
                 v.edge.open = v.open;
                 vents.add(v);
             }

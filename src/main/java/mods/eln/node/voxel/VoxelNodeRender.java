@@ -49,6 +49,7 @@ public class VoxelNodeRender implements BlockEntityRenderer<VoxelNodeEntity, Vox
             for (VoxelPart part : state.parts) {
                 if (!(part instanceof PipePart pipe)) continue;
                 UtilsClient.glDefaultColor();
+                if (pipe.burst) GL11.glColor4f(0.55f, 0.35f, 0.25f, 1f);   // (burst: scorched)
                 UtilsClient.bindTexture(TEX[pipe.tier]);
                 for (int[] b : pipe.boxes()) box(b[0], b[1], b[2], b[3], b[4], b[5]);
                 // flanges where it meets a face: a ring one voxel wider than the bore, half a voxel deep
