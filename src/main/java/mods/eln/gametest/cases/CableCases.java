@@ -38,6 +38,31 @@ public final class CableCases {
         cases.add(new BurnCase());
         cases.add(new RoutedCase());
         cases.add(new HostedCase());
+        // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
+        Layout mixed = (c, six, z) -> {
+            // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
+            c.floor(c.at(4, 1, z + 1));
+            source(c, SOURCE, 0, z, 50);
+            for (int x = 1; x <= 2; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
+            ResistorElement r = resistor(c, POWER_RESISTOR, 3, z, CORE);
+            c.placeSix(LV_CABLE, c.at(4, 1, z));
+            c.placeSix(GROUND, c.at(4, 1, z), mods.eln.misc.Direction.ZP);
+            return List.of(r);
+        };
+        cases.add(new ConvertCase("converted mixed block", mixed, false));
+        cases.add(new ConvertCase("reverted mixed block", mixed, true));
+        Layout deviceCorner = (c, six, z) -> {
+            // ... -> resistor -> floor cable up the side of a bump -> round its top edge -> a Ground Cable on top
+            c.floor(c.at(5, 1, z));
+            source(c, SOURCE, 0, z, 50);
+            for (int x = 1; x <= 2; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
+            ResistorElement r = resistor(c, POWER_RESISTOR, 3, z, CORE);
+            c.placeSix(LV_CABLE, c.at(4, 1, z));
+            c.placeSix(LV_CABLE, c.at(4, 1, z), mods.eln.misc.Direction.XP);
+            c.placeSix(GROUND, c.at(5, 2, z));
+            return List.of(r);
+        };
+        cases.add(new ConvertCase("converted device round a corner", deviceCorner, false));
         cases.add(new Case("hosted device between voxel cables", (c, six, z) -> {
             // source -> 3 cables -> resistor -> a cable -> ground: six-node row, and a voxel row where the resistor
             // sits in a voxel block (its edges meet voxel cable ports across the faces)
@@ -250,10 +275,16 @@ public final class CableCases {
 
         public void measure(TestContext c) {
             c.line(name + ": converted " + converted + " blocks; kept " + String.join("; ", skipped));
-            c.check(name + ": cable blocks converted", converted > 0, converted + "");
+            c.check(name + ": blocks converted", converted > 0, converted + "");
+            // (the devices were rebuilt in their voxel blocks: their elements now)
+            List<ResistorElement> now = new ArrayList<>();
+            for (ResistorElement r : conv) {
+                var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(r.sixNode.coordonate);
+                now.add(n instanceof mods.eln.node.six.SixNode s6 && s6.getElement(r.side) instanceof ResistorElement re ? re : r);
+            }
+            conv = now;
             if (revert) c.check(name + ": no voxel node left after the revert", voxelLeft == 0, voxelLeft + "");
-            for (String k : skipped)
-                c.check(name + ": only devices kept as six-node", k.contains("holds a "), k);
+            c.check(name + ": every six-node block converted (devices too)", skipped.isEmpty(), String.join("; ", skipped));
             for (int i = 0; i < six.size(); i++) {
                 double a = current(six.get(i)), b = current(conv.get(i));
                 c.line(String.format("%s: load %d: six-node %.5f A, converted %.5f A", name, i, a, b));

@@ -36,9 +36,9 @@ public final class CableConverter {
     }
 
     /** What converting a six-node block would do: its pieces, the knuckles to add next door, or why not. */
-    public record Plan(List<CablePart> parts, Map<BlockPos, List<CablePart>> knuckles, String skip) {
+    public record Plan(List<CablePart> parts, Map<BlockPos, List<CablePart>> knuckles, List<Integer> cableFaces, String skip) {
         static Plan skip(String why) {
-            return new Plan(List.of(), Map.of(), why);
+            return new Plan(List.of(), Map.of(), List.of(), why);
         }
     }
 
@@ -50,15 +50,19 @@ public final class CableConverter {
         for (int dx = -2; dx <= 2; dx += 2)
             for (int dz = -2; dz <= 2; dz += 2)
                 if (!level.isLoaded(pos.offset(dx, 0, dz))) return Plan.skip("next to an unloaded chunk");
+        if (level.getBlockState(pos).getOptionalValue(mods.eln.node.six.SixNodeBlock.WATERLOGGED).orElse(false))
+            return Plan.skip("under water (voxel blocks aren't waterloggable yet)");
         List<CablePart> parts = new ArrayList<>();
         Map<BlockPos, List<CablePart>> knuckles = new LinkedHashMap<>();
+        List<Integer> cableFaces = new ArrayList<>();
         boolean any = false;
         for (Direction f : Direction.values()) {
             SixNodeElement e = s.getElement(f);
             if (e == null) continue;
-            if (!(e instanceof ElectricalCableElement c)) return Plan.skip("holds a " + e.getClass().getSimpleName());
-            int tier = CablePart.tierOf(c.descriptor.name);
-            if (tier < 0) return Plan.skip("holds a " + c.descriptor.name);
+            // cables become cable pieces; any other device moves over as it is (hosted), its edges as ports
+            ElectricalCableElement c = e instanceof ElectricalCableElement ce && CablePart.tierOf(ce.descriptor.name) >= 0 ? ce : null;
+            int tier = c == null ? CablePart.tierOf("Low Voltage Cable") : CablePart.tierOf(c.descriptor.name);
+            if (c != null) cableFaces.add(f.getInt());
             any = true;
             List<Integer> dirs = new ArrayList<>();
             for (Direction d : Direction.values()) {
@@ -85,8 +89,15 @@ public final class CableConverter {
                         var ws = level.getBlockState(w);
                         if (!ws.isAir() && ws.getBlock() != ElnRegistry.VOXEL_NODE_BLOCK.get())
                             return Plan.skip("an outer corner goes through " + ws.getBlock().getName().getString());
+                        int kt = tier;
+                        if (c == null) {   // (a device's corner: a signal or power knuckle by its edge; no thermal knuckles)
+                            int m = e.getConnectionMask(edge);
+                            if ((m & (NodeBase.maskElectricalPower | NodeBase.maskElectricalGate)) == 0)
+                                return Plan.skip("a non-electrical outer corner (" + e.getClass().getSimpleName() + ")");
+                            kt = (m & NodeBase.maskElectricalPower) == 0 ? CablePart.tierOf("Signal Cable") : CablePart.tierOf("Low Voltage Cable");
+                        }
                         int[] k = knucklePoint(d, f);
-                        CablePart kn = CablePart.knuckle(tier, k[0], k[1], k[2]);
+                        CablePart kn = CablePart.knuckle(kt, k[0], k[1], k[2]);
                         kn.byConverter = true;
                         knuckles.computeIfAbsent(w, x -> new ArrayList<>()).add(kn);   // (a block may hold several corners)
                         linked = true;
@@ -94,6 +105,7 @@ public final class CableConverter {
                 }
                 if (linked) dirs.add(d.toEnumFacing().get3DDataValue());
             }
+            if (c == null) continue;   // (a device: knuckles for its outer corners only)
             int face = f.toEnumFacing().get3DDataValue();
             List<CablePart> arms = dirs.isEmpty() ? CablePart.arms(tier, face, otherPair(face)) : CablePart.arms(tier, face, dirs.stream().mapToInt(i -> i).toArray());
             double u = c.electricalLoad.state, t = c.thermalTc();
@@ -107,7 +119,7 @@ public final class CableConverter {
             parts.addAll(arms);
         }
         if (!any) return Plan.skip("empty");
-        return new Plan(parts, knuckles, null);
+        return new Plan(parts, knuckles, cableFaces, null);
     }
 
     /** A knuckle's point in the wrap block: on the side toward the cable's block (-d), and toward f. */
@@ -139,11 +151,22 @@ public final class CableConverter {
         BlockPos pos = s.coordonate.pos();
         CompoundTag legacy = new CompoundTag();
         s.writeToNBT(legacy);
+        // the voxel node is built from the six-node NBT without the cables (the devices move over as they are)
+        CompoundTag host = legacy.copy();
+        for (int f : p.cableFaces) {
+            host.putShort("EID" + f, (short) 0);
+            host.remove("ED" + f);
+        }
         s.disconnect();
+        s.unload();   // (wireless channels, lamp supplies: the hosted copies register again in globalBoot)
         NodeManager.instance.removeNode(s);
         level.setBlock(pos, ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
         VoxelNode v = new VoxelNode();
-        v.onBlockPlacedBy(new Coordonate(pos, level), Direction.YN, null, ItemStack.EMPTY);
+        v.readFromNBT(host);
+        NodeManager.instance.addNode(v);
+        v.neighborBlockRead();
+        v.globalBoot();
+        v.setNeedPublish(true);
         v.legacy = legacy;
         for (CablePart part : p.parts) {
             String err = v.addPart(part);
@@ -168,8 +191,16 @@ public final class CableConverter {
         if (v.legacy == null) return "not converted";
         Level level = v.coordonate.world();
         BlockPos pos = v.coordonate.pos();
-        CompoundTag nbt = v.legacy;
+        // the devices as they are now; the cables as they were (from the six-node NBT kept at the conversion)
+        CompoundTag nbt = new CompoundTag();
+        v.writeToNBT(nbt);
+        for (int f = 0; f < 6; f++)
+            if (nbt.getShortOr("EID" + f, (short) 0) == 0 && v.legacy.getShortOr("EID" + f, (short) 0) != 0) {
+                nbt.putShort("EID" + f, v.legacy.getShortOr("EID" + f, (short) 0));
+                nbt.put("ED" + f, v.legacy.getCompoundOrEmpty("ED" + f));
+            }
         v.disconnect();
+        v.unload();
         NodeManager.instance.removeNode(v);
         level.setBlock(pos, mods.eln.Eln.sixNodeBlock.defaultBlockState(), 3);
         SixNode s = new SixNode();
@@ -189,7 +220,7 @@ public final class CableConverter {
                 v.removePart(i, false);
                 n++;
             }
-        if (n > 0 && v.parts.isEmpty()) {
+        if (n > 0 && v.isEmptyNode()) {
             Level level = v.coordonate.world();
             BlockPos pos = v.coordonate.pos();
             v.onBreakBlock();
