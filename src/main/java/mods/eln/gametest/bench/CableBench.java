@@ -177,8 +177,8 @@ public final class CableBench implements TestCase {
     /** The floor cable's load at p: a six-node element's, or a converted voxel node's conductor. */
     ElectricalLoad loadAt(BlockPos p) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
-        if (n instanceof mods.eln.node.six.SixNode six) return ((ElectricalCableElement) six.getElement(Direction.YN)).electricalLoad;
         if (n instanceof mods.eln.node.voxel.VoxelNode v) return v.cableLoad(0);
+        if (n instanceof mods.eln.node.six.SixNode six) return ((ElectricalCableElement) six.getElement(Direction.YN)).electricalLoad;
         throw new IllegalStateException("no cable at " + p);
     }
 
