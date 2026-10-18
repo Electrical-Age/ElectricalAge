@@ -103,6 +103,9 @@ public final class LabCommands {
                 continue;
             }
             if (!(n instanceof mods.eln.node.six.SixNode six)) continue;
+            // (the lab: load what the plan looks at; on a live server conversion waits for chunks to load)
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dz = -1; dz <= 1; dz++) level.getChunk((n.coordonate.x >> 4) + dx, (n.coordonate.z >> 4) + dz);
             String w = mode.equals("dry") ? mods.eln.node.voxel.CableConverter.plan(six).skip() : mods.eln.node.voxel.CableConverter.convert(six);
             if (w == null) done++;
             else {
@@ -133,8 +136,10 @@ public final class LabCommands {
      */
     static int deviceVolts(CommandSourceStack src, String name) {
         JsonObject out = new JsonObject();
-        int n = 0;
+        int n = 0, errors = 0;
+        String firstError = null;
         for (mods.eln.node.NodeBase node : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+          try {
             String at = node.coordonate.dimention + " " + node.coordonate.pos().toShortString();
             List<Object> elements = new ArrayList<>();
             List<String> keys = new ArrayList<>();
@@ -159,10 +164,19 @@ public final class LabCommands {
                     continue;
                 }
                 JsonArray a = new JsonArray();
-                for (Object l : (List<?>) list) a.add(((mods.eln.sim.ElectricalLoad) l).getU());
+                for (Object l : (List<?>) list) a.add(((mods.eln.sim.mna.state.State) l).state);
                 out.add(keys.get(i), a);
                 n++;
             }
+          } catch (RuntimeException ex) {
+            errors++;
+            if (firstError == null) firstError = node.getClass().getSimpleName() + ": " + ex;
+          }
+        }
+        if (errors > 0) {
+            String fe = firstError;
+            int fn0 = errors;
+            src.sendSuccess(() -> Component.literal("devicevolts: " + fn0 + " node(s) failed, first: " + fe), false);
         }
         try (Writer w = new FileWriter("eln-devicevolts-" + name + ".json")) {
             new GsonBuilder().setPrettyPrinting().create().toJson(out, w);

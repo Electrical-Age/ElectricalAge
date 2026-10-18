@@ -142,6 +142,8 @@ public abstract class NodeBase {
         if (state.canBeReplaced()) return true;
         if (state.isAir()) return true;
         if (block == Eln.sixNodeBlock) return true;
+        // (a cable's knuckle round an outer corner may share the block with a six-node wrap: CableConverter)
+        if (block == mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get()) return true;
         if (block == Eln.ghostBlock) return true;
         if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) return true;
         if (block == Blocks.REDSTONE_TORCH || block == Blocks.REDSTONE_WALL_TORCH) return true; // 26.x: lit is a state

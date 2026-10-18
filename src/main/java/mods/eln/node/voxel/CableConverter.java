@@ -36,7 +36,7 @@ public final class CableConverter {
     }
 
     /** What converting a six-node block would do: its pieces, the knuckles to add next door, or why not. */
-    public record Plan(List<CablePart> parts, Map<BlockPos, CablePart> knuckles, String skip) {
+    public record Plan(List<CablePart> parts, Map<BlockPos, List<CablePart>> knuckles, String skip) {
         static Plan skip(String why) {
             return new Plan(List.of(), Map.of(), why);
         }
@@ -50,7 +50,7 @@ public final class CableConverter {
             for (int dz = -2; dz <= 2; dz += 2)
                 if (!level.isLoaded(pos.offset(dx, 0, dz))) return Plan.skip("next to an unloaded chunk");
         List<CablePart> parts = new ArrayList<>();
-        Map<BlockPos, CablePart> knuckles = new LinkedHashMap<>();
+        Map<BlockPos, List<CablePart>> knuckles = new LinkedHashMap<>();
         boolean any = false;
         for (Direction f : Direction.values()) {
             SixNodeElement e = s.getElement(f);
@@ -71,11 +71,11 @@ public final class CableConverter {
                 // same plane: the node next door toward d
                 LRDU lrdu = d.getLRDUGoingTo(f);
                 NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos.relative(d.toEnumFacing()), level));
-                if (n != null) {
-                    if (NodeBase.compareConnectionMask(s.getSideConnectionMask(d, lrdu), n.getSideConnectionMask(d.getInverse(), lrdu.inverseIfLR())))
-                        linked = true;
-                } else if (s.isBlockWrappable(d)) {
-                    // outer corner: round the edge, through the block toward d, onto face -f of the block beyond
+                if (n != null && NodeBase.compareConnectionMask(s.getSideConnectionMask(d, lrdu), n.getSideConnectionMask(d.getInverse(), lrdu.inverseIfLR())))
+                    linked = true;
+                // outer corner: round the edge, through the block toward d (air, or a voxel node holding another
+                // corner's knuckle), onto face -f of the block beyond
+                if (!linked && (n == null ? s.isBlockWrappable(d) : n instanceof VoxelNode)) {
                     BlockPos w = pos.relative(d.toEnumFacing());
                     NodeBase p = NodeManager.instance.getNodeFromCoordonate(new Coordonate(w.relative(f.toEnumFacing()), level));
                     Direction od = f.getInverse();
@@ -87,7 +87,7 @@ public final class CableConverter {
                         int[] k = knucklePoint(d, f);
                         CablePart kn = CablePart.knuckle(tier, k[0], k[1], k[2]);
                         kn.byConverter = true;
-                        knuckles.put(w, kn);
+                        knuckles.computeIfAbsent(w, x -> new ArrayList<>()).add(kn);   // (a block may hold several corners)
                         linked = true;
                     }
                 }
@@ -146,13 +146,14 @@ public final class CableConverter {
             String err = v.addPart(part);
             if (err != null) mods.eln.misc.Utils.println("CableConverter: " + pos + ": " + err);
         }
-        for (var k : p.knuckles.entrySet()) {
-            if (NodeManager.instance.getNodeFromCoordonate(new Coordonate(k.getKey(), level)) instanceof VoxelNode w
-                && w.parts.stream().anyMatch(q -> q instanceof CablePart c && c.isKnuckle() && java.util.Arrays.equals(c.points, k.getValue().points)))
-                continue;   // (laid by the block round the corner, converted first)
-            String err = PipeKitItem.place(level, k.getKey(), k.getValue(), null);
-            if (err != null) mods.eln.misc.Utils.println("CableConverter: knuckle at " + k.getKey() + ": " + err);
-        }
+        for (var k : p.knuckles.entrySet())
+            for (CablePart kn : k.getValue()) {
+                if (NodeManager.instance.getNodeFromCoordonate(new Coordonate(k.getKey(), level)) instanceof VoxelNode w
+                    && w.parts.stream().anyMatch(q -> q instanceof CablePart c && c.isKnuckle() && java.util.Arrays.equals(c.points, kn.points)))
+                    continue;   // (laid by the block round the corner, converted first)
+                String err = PipeKitItem.place(level, k.getKey(), kn, null);
+                if (err != null) mods.eln.misc.Utils.println("CableConverter: knuckle at " + k.getKey() + ": " + err);
+            }
         return null;
     }
 
