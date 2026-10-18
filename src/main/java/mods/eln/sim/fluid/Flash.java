@@ -9,7 +9,7 @@ package mods.eln.sim.fluid;
 public final class Flash {
     /** Smallest gas space, as a fraction of the volume (below it the liquid is "full"). */
     static final double GAS_MIN = 0.02;
-    public static final double T_MIN = 250, T_MAX = 2500;
+    public static final double T_MIN = 80, T_MAX = 2500;   // (gas expanding fast cools a lot; ice is not modelled)
 
     public double T, P, mLiquid, mVapour, vGas;
     /** Partial pressures (Pa) of vapour and air in the gas space, and the liquid's extra pressure when full. */

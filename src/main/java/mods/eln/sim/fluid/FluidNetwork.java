@@ -87,7 +87,7 @@ public final class FluidNetwork {
                 double pa = e.a.fixed ? e.a.P() : P[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : P[idx.get(e.b)];
                 double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
                 e.flow = e.g * (pa + offA - pb - offB + e.head);
-                if (e.kind == FluidEdge.Kind.CHECK && e.flow < 0 && e.g != 0) {
+                if (e.oneWay() && e.flow < 0 && e.g != 0) {
                     e.g = 0;
                     e.flow = 0;
                     again = true;
@@ -95,7 +95,9 @@ public final class FluidNetwork {
             }
             if (!again) break;
         }
-        // 6. cap what leaves each node per phase
+        // 6. no edge may move more than would even out its own pressure difference (the linearized solve can
+        //    overshoot when a node changes phase or an edge's upstream side flips); then cap what leaves each node
+        limitToEqualize(dt);
         capOutflows(dt);
         // 7. move contents
         for (FluidEdge e : edges) transfer(e, dt);
@@ -103,25 +105,53 @@ public final class FluidNetwork {
         for (FluidNode n : free) n.update();
     }
 
+    /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */
+    static final double BAND = 0.1;
+
     /**
-     * How n's pressure rises per kg of e's packet arriving (liquid, or gas of the upstream node's mix, with its
-     * enthalpy); the same rate applies to it leaving. By a small flash step.
+     * What flows out of node u through a port at height fraction port, per kg: liquid, vapour and air shares, specific
+     * enthalpy (J/kg), density (kg/m^3) and viscosity (Pa s). A port near the liquid level draws a mix, so the flow
+     * doesn't flip between liquid and gas as the level passes it (that chattered).
+     */
+    static double[] packet(FluidNode u, double port) {
+        double T = u.T();
+        double mv = u.mVapour(), ma = u.mAir, mg = mv + ma;
+        double w;   // liquid share of the volume drawn
+        if (u.mLiquid() <= 0) w = 0;
+        else if (mg <= 0) w = 1;
+        else {
+            double x = Math.max(0, Math.min(1, (u.level() - port) / BAND + 0.5));
+            w = x * x * (3 - 2 * x);
+        }
+        double rhoG = mg > 0 ? mg / u.state.vGas : 0;
+        double rho = w * Water.RHO_L + (1 - w) * rhoG;
+        double muG = mg > 0 ? (mv * Water.MU_V + ma * Water.MU_AIR) / mg : Water.MU_AIR;
+        double mu = w * Water.MU_L + (1 - w) * muG;
+        double xl, xv, xa;
+        if (rho > 0) {
+            xl = w * Water.RHO_L / rho;
+            xv = (1 - xl) * (mg > 0 ? mv / mg : 0);
+            xa = (1 - xl) * (mg > 0 ? ma / mg : 1);
+        } else {
+            xl = 0; xv = 0; xa = 1;
+            T = Water.T_AMBIENT;
+        }
+        double h = xl * Water.hLiquid(T) + xv * Water.hVapour(T) + xa * Water.hAir(T);
+        // the gravity head weighs what is moved by mass: lifting a stream that is mostly liquid by mass takes a
+        // liquid's head (by volume it may be mostly gas; with that, two pipes between two vessels kept water
+        // circulating for ever)
+        double rhoHead = xl * Water.RHO_L + (1 - xl) * rhoG;
+        return new double[]{xl, xv, xa, h, rho, mu, rhoHead};
+    }
+
+    /**
+     * How n's pressure rises per kg of e's packet arriving (from the upstream side, with its enthalpy); the same rate
+     * applies to it leaving. By a small flash step.
      */
     static double dPdm(FluidNode n, FluidEdge e, Flash probe) {
-        FluidNode u = e.fromA ? e.a : e.b;
-        double port = e.fromA ? e.portA : e.portB;
-        double fw, fa, h;
-        double T = u.T();
-        if (u.mLiquid() > 0 && port < u.level()) {
-            fw = 1; fa = 0; h = Water.hLiquid(T);
-        } else {
-            double mv = u.mVapour(), ma = u.mAir, m = mv + ma;
-            if (m <= 0) { fw = 0; fa = 1; T = Water.T_AMBIENT; }
-            else { fw = mv / m; fa = ma / m; }
-            h = fw * Water.hVapour(T) + fa * Water.hAir(T);
-        }
+        double[] pk = e.fromA ? packet(e.a, e.portA) : packet(e.b, e.portB);
         double d = Math.max(1e-7, 1e-4 * n.mass());
-        probe.solve(n.mWater + fw * d, n.mAir + fa * d, n.energy + h * d, n.volume, n.T());
+        probe.solve(n.mWater + (pk[0] + pk[1]) * d, n.mAir + pk[2] * d, n.energy + pk[3] * d, n.volume, n.T());
         double s = (probe.P - n.P()) / d;
         if (!(s > 0)) s = Water.R_AIR * Math.max(n.T(), Flash.T_MIN) / n.volume;   // (an empty node: as air)
         return s;
@@ -138,26 +168,36 @@ public final class FluidNetwork {
             fromA = !fromA;
         }
         props(e, fromA);
-        if (e.kind == FluidEdge.Kind.CHECK && !fromA) e.g = 0;
+        if (e.oneWay() && !fromA) e.g = 0;
     }
 
     private static void props(FluidEdge e, boolean fromA) {
-        FluidNode u = fromA ? e.a : e.b;
-        double port = fromA ? e.portA : e.portB;
-        boolean liquid = u.mLiquid() > 0 && port < u.level();
-        double rho, mu;
-        if (liquid) {
-            rho = Water.RHO_L;
-            mu = Water.MU_L;
-        } else {
-            double mv = u.mVapour(), ma = u.mAir, m = mv + ma;
-            rho = m > 0 ? m / u.state.vGas : 0;
-            mu = m > 0 ? (mv * Water.MU_V + ma * Water.MU_AIR) / m : Water.MU_AIR;
-        }
+        double[] pk = fromA ? packet(e.a, e.portA) : packet(e.b, e.portB);
         e.fromA = fromA;
-        e.rho = rho;
-        e.head = rho * G * (e.zA() - e.zB());
-        e.g = rho * e.k * e.open / mu;
+        e.rho = pk[4];
+        e.head = pk[6] * G * (e.zA() - e.zB());
+        e.g = pk[4] * e.k * e.open / pk[5];
+    }
+
+    private void limitToEqualize(double dt) {
+        java.util.Map<FluidNode, Integer> deg = new java.util.IdentityHashMap<>();
+        for (FluidEdge e : edges) {
+            deg.merge(e.a, 1, Integer::sum);
+            deg.merge(e.b, 1, Integer::sum);
+        }
+        for (FluidEdge e : edges) {
+            if (e.flow == 0) continue;
+            double drive = e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head;
+            if (drive == 0 || (drive > 0) != (e.flow > 0)) {
+                e.flow = 0;
+                continue;
+            }
+            double s = (e.a.fixed ? 0 : e.sA) + (e.b.fixed ? 0 : e.sB);
+            if (s <= 0) continue;
+            int n = Math.max(e.a.fixed ? 1 : deg.get(e.a), e.b.fixed ? 1 : deg.get(e.b));
+            double max = Math.abs(drive) / s / dt / n;
+            if (Math.abs(e.flow) > max) e.flow = Math.signum(e.flow) * max;
+        }
     }
 
     private void capOutflows(double dt) {
@@ -167,8 +207,9 @@ public final class FluidNetwork {
             for (FluidEdge e : edges) {
                 double f = out(e, n);
                 if (f <= 0) continue;
-                if (liquidFrom(e, n)) outL += f;
-                else outG += f;
+                double xl = packet(n, port(e, n))[0];
+                outL += f * xl;
+                outG += f * (1 - xl);
             }
             double haveL = n.mLiquid(), haveG = n.mVapour() + n.mAir;
             double sL = outL * dt > DRAIN_CAP * haveL ? DRAIN_CAP * haveL / (outL * dt) : 1;
@@ -176,9 +217,49 @@ public final class FluidNetwork {
             if (sL < 1 || sG < 1)
                 for (FluidEdge e : edges) {
                     if (out(e, n) <= 0) continue;
-                    e.flow *= liquidFrom(e, n) ? sL : sG;
+                    double xl = packet(n, port(e, n))[0];
+                    e.flow *= Math.min(xl > 0 ? sL : 1, xl < 1 ? sG : 1);
                 }
         }
+        // ... and the liquid level: a node may fill at most half its free space per step (the pressure answers
+        // liquid steeply only once it is full; without this a step can overfill it far into its stiff range), and
+        // its level may move at most half a port band per step either way (else a port near the level flips between
+        // drawing gas and liquid every step, and the water sloshes back and forth for ever)
+        for (FluidNode n : nodes) {
+            if (n.fixed) continue;
+            double inL = 0, outL = 0;
+            for (FluidEdge e : edges) {
+                double f = out(e, n);
+                if (f > 0) outL += f * packet(n, port(e, n))[0];
+                else if (f < 0) {
+                    FluidNode o = other(e, n);
+                    inL -= f * packet(o, port(e, o))[0];
+                }
+            }
+            double band = 0.5 * BAND * n.volume * Water.RHO_L / dt;
+            double room = 0.5 * Math.max(0, n.state.vGas - Flash.GAS_MIN * n.volume) + 1e-4 * n.volume;
+            double limIn = Math.min(room * Water.RHO_L / dt, band);
+            if (inL - outL > limIn) {
+                double sc = (limIn + outL) / inL;
+                for (FluidEdge e : edges) {
+                    if (out(e, n) >= 0) continue;
+                    FluidNode o = other(e, n);
+                    if (packet(o, port(e, o))[0] > 0) e.flow *= sc;
+                }
+            } else if (outL - inL > band) {
+                double sc = (band + inL) / outL;
+                for (FluidEdge e : edges)
+                    if (out(e, n) > 0 && packet(n, port(e, n))[0] > 0) e.flow *= sc;
+            }
+        }
+    }
+
+    private static FluidNode other(FluidEdge e, FluidNode n) {
+        return e.a == n ? e.b : e.a;
+    }
+
+    private static double port(FluidEdge e, FluidNode n) {
+        return e.a == n ? e.portA : e.portB;
     }
 
     /** The flow leaving n through e (kg/s; <= 0 if none). */
@@ -188,32 +269,18 @@ public final class FluidNetwork {
         return 0;
     }
 
-    private static boolean liquidFrom(FluidEdge e, FluidNode n) {
-        double port = e.a == n ? e.portA : e.portB;
-        return n.mLiquid() > 0 && port < n.level();
-    }
-
     private static void transfer(FluidEdge e, double dt) {
         e.fLiquid = e.fVapour = e.fAir = e.fEnthalpy = 0;
         e.power = 0;
         if (e.flow == 0) return;
         FluidNode u = e.flow > 0 ? e.a : e.b, d = e.flow > 0 ? e.b : e.a;
+        double[] pk = packet(u, port(e, u));
+        if (pk[4] <= 0) return;
         double m = Math.abs(e.flow);
-        double T = u.T();
-        double liq = 0, vap = 0, air = 0, h;
-        if (liquidFrom(e, u)) {
-            liq = m;
-            h = m * Water.hLiquid(T);
-        } else {
-            double mv = u.mVapour(), ma = u.mAir, tot = mv + ma;
-            if (tot <= 0) return;
-            vap = m * mv / tot;
-            air = m * ma / tot;
-            h = vap * Water.hVapour(T) + air * Water.hAir(T);
-        }
+        double liq = m * pk[0], vap = m * pk[1], air = m * pk[2], h = m * pk[3];
         double toD = h;
         if (e.kind == FluidEdge.Kind.TURBINE) {
-            e.power = Math.max(0, FluidEdge.TURBINE_EFFICIENCY * vap * (Water.hVapour(T) - Water.hLiquid(Water.TB)));
+            e.power = Math.max(0, FluidEdge.TURBINE_EFFICIENCY * vap * (Water.hVapour(u.T()) - Water.hLiquid(Water.TB)));
             toD -= e.power;
         }
         if (!u.fixed) {

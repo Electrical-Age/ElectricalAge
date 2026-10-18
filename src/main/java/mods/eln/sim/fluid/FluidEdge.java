@@ -39,6 +39,11 @@ public final class FluidEdge {
         return this;
     }
 
+    /** Check valves and turbines pass flow only from a to b. */
+    public boolean oneWay() {
+        return kind == Kind.CHECK || kind == Kind.TURBINE;
+    }
+
     double zA() {
         return a.z + portA * a.height;
     }
