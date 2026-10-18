@@ -68,16 +68,51 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         return Water.hVapour(inlet.T()) - Water.hLiquid(Water.TB);
     }
 
+    /**
+     * The shaft (Baughn: overspeed, and voltage with speed). Inertia constant H (kinetic energy at nominal speed =
+     * H x nominal power); the governor opens the steam valve on a speed error (PI) and moves with a short lag; steam
+     * flows through the nozzle in proportion to the inlet pressure (choked), plus a small leak past the shut valve; the
+     * generator's EMF is in proportion to speed, so an overloaded turbine slows and its voltage sags. Above TRIP the shaft
+     * bursts (EA's overspeed failure): an unloaded turbine fed very high-pressure steam runs away on the leak alone.
+     */
+    static final double H = 4, GOV_TAU = 0.5, KP = 8, KI = 2, LEAK = 0.005, LOSS = 0.05, TRIP = 1.25, P_REF = 2e5, FLOW_MAX = 1.5;
+    /** Shaft speed (1 = nominal), governor valve (0..1) and its integral. */
+    public double omega, gate, gateI;
+
     class Run implements IProcess {
         @Override
         public void process(double time) {
             if (inlet == null) return;
-            // last step's output came from the inlet's steam: exhaust it
-            double usedKg = source.getEffectiveP() * time / (SteamGeneratorDescriptor.EFFICIENCY * jPerKg());
+            double pe = Math.max(0, source.getEffectiveP());
+            // governor
+            double err = 1 - omega;
+            double raw = gateI + KP * err;
+            // (integrate only while the valve isn't pinned, or the spin-up winds it up and the shaft overshoots)
+            if (raw > 0 && raw < 1 || raw <= 0 && err > 0 || raw >= 1 && err < 0) gateI = Math.max(0, Math.min(1, gateI + KI * err * time));
+            double target = Math.max(0, Math.min(1, gateI + KP * err));
+            gate += (target - gate) * Math.min(1, time / GOV_TAU);
+            // steam through the nozzle (choked: by the inlet pressure), and only what the inlet has above 1 atm
+            double mNom = desc.nominalSteam() * EaUnits.KG_PER_MB_STEAM;   // kg/s at nominal power
+            double want = (LEAK + (1 - LEAK) * gate) * FLOW_MAX * mNom * inlet.P() / P_REF * time;
+            want = Math.min(want, EaUnits.steamAvailable(inlet));
             double mv = inlet.mVapour(), mg = mv + inlet.mAir;
-            double got = usedKg > 0 && mv > 0 ? EaUnits.drainGas(inlet, usedKg * mg / mv) : 0;
-            double used = got / EaUnits.KG_PER_MB_STEAM;
-            meterSteam += used;
+            double jpk = jPerKg();
+            double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
+            double pMech = SteamGeneratorDescriptor.EFFICIENCY * got * jpk / time;
+            // the shaft
+            double pNom = desc.nominalP;
+            double ek = H * pNom * omega * omega + (pMech - pe - LOSS * pNom * omega * omega) * time;
+            omega = Math.sqrt(Math.max(0, ek) / (H * pNom));
+            source.setUmax(desc.maxU * omega);
+            source.setP(omega > 0.05 ? 10 * pNom : 0);
+            if (omega > TRIP)
+                new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).rotating(() -> H * pNom * omega * omega)
+                    .fail(mods.eln.sim.process.destruct.FailureCause.OVERSPEED, omega);
+            else if (omega > 1.1 && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
+                sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.MINECART_RIDING, net.minecraft.sounds.SoundSource.BLOCKS,
+                    0.8f, (float) Math.min(2, omega * 1.4));   // (the whine of a shaft over speed)
+            // meters
+            meterSteam += got / EaUnits.KG_PER_MB_STEAM;
             meterTime += time;
             if (meterTime >= 1) {
                 steamRate = meterSteam / meterTime;
@@ -88,8 +123,6 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
                 syncTank();
                 show();
             }
-            double offer = EaUnits.steamAvailable(inlet) * SteamGeneratorDescriptor.EFFICIENCY * jPerKg() / SteamGeneratorDescriptor.RESPONSE_SECONDS;
-            source.setP(Math.min(desc.nominalP, offer));
         }
     }
 
@@ -168,7 +201,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     @Override
     public void initialize() {
         desc.cable.applyTo(load);
-        source.setUmax(desc.maxU);
+        source.setUmax(desc.maxU * omega);   // (the EMF follows the shaft: Run)
         source.setImax(desc.nominalP * 5 / desc.maxU);
         var c = node.coordonate;
         double volume = desc.nominalSteam() * SteamGeneratorDescriptor.TANK_SECONDS * EaUnits.KG_PER_MB_STEAM / INLET_RHO;
@@ -206,6 +239,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             show();
         }
         tank.writeToNBT(nbt, "tank");
+        nbt.putDouble("omega", omega);
+        nbt.putDouble("gate", gate);
+        nbt.putDouble("gateI", gateI);
         if (inlet != null) {
             nbt.putDouble("inletW", inlet.mWater);
             nbt.putDouble("inletA", inlet.mAir);
@@ -217,6 +253,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         tank.readFromNBT(nbt, "tank");
+        omega = nbt.getDoubleOr("omega", 0);
+        gate = nbt.getDoubleOr("gate", 0);
+        gateI = nbt.getDoubleOr("gateI", 0);
         if (nbt.contains("inletW"))
             loaded = new double[]{nbt.getDoubleOr("inletW", 0), nbt.getDoubleOr("inletA", 0), nbt.getDoubleOr("inletU", 0)};
     }
@@ -227,6 +266,8 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         info.put(I18N.tr("Steam"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
         info.put(I18N.tr("Steam used"), String.format("%.0f mB/s", steamRate));
         if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar", inlet.P() / 1e5));
+        info.put(I18N.tr("Speed"), String.format("%.0f%%", omega * 100));
+        info.put(I18N.tr("Steam valve"), String.format("%.0f%%", gate * 100));
         info.put(I18N.tr("Generated power"), Utils.plotPower("", source.getEffectiveP()));
         info.put(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
         return info;
