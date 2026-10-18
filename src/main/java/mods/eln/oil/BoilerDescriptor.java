@@ -23,6 +23,12 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
         obj = Eln.obj.getObj(model);
     }
 
+    /** A boiler may also stand on another EA device (a steam turbine: its dome port feeds the turbine's inlet below). */
+    @Override
+    public boolean isFloor(net.minecraft.world.level.block.Block below) {
+        return super.isFloor(below) || below instanceof mods.eln.node.transparent.TransparentNodeBlock;
+    }
+
     void draw() {
         if (obj != null) for (String part : new String[]{"main", "body", "furnace"}) {
             var p = obj.getPart(part);

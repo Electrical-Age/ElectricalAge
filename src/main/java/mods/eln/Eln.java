@@ -235,10 +235,12 @@ public class Eln {
             mods.eln.registry.ElnMachineRecipes.registerAll();
             simulator.init();
             simulator.addSlowProcess(wind = new mods.eln.misc.WindProcess());
+            simulator.addSlowProcess(mods.eln.fluid.FluidWorld.reset());   // (before the devices' own: they see this tick's state)
             for (ElnContent c : CONTENT) c.serverAboutToStart();
         });
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, e -> {
             simulator.stop();
+            mods.eln.fluid.FluidWorld.reset();
             for (ElnContent c : CONTENT) c.serverStopped();
             serverEventListener.clear();
             nodeManager.clear();

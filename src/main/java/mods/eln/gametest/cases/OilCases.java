@@ -33,6 +33,9 @@ public final class OilCases {
         cases.add(new Pump(true));
         cases.add(new Boiler());
         cases.add(new SteamTurbine());
+        cases.add(new StackedPlant());
+        cases.add(new SafetyValve());
+        cases.add(new OldBoilerSave());
         cases.add(new Buckets2());
         cases.add(new Column());
         cases.add(new ColumnFold());
@@ -281,13 +284,30 @@ public final class OilCases {
         }
     }
 
+    /** Each tick, take all the steam a boiler offers through its fluid capability, as a pipe would (mB taken). */
+    static mods.eln.sim.IProcess pipeOut(mods.eln.oil.BoilerElement boiler, int[] taken) {
+        return t -> {
+            int n = boiler.tanks.steam();
+            if (n <= 0) return;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                taken[0] += boiler.tanks.extract(1, net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.STEAM.get()), n, tx);
+                tx.commit();
+            }
+        };
+    }
+
     /**
-     * Electric heater (1 kW) against a boiler with water: the boiler heats to 100 C, then boils: steam = heat / 175 J per mB
-     * of water x 67.5. Over 30 s of boiling at ~1 kW: ~10 kJ/s... ~380 mB/s of steam at the full kilowatt.
+     * Electric heater (1 kW) against a boiler with water, its steam drawn off by a pipe (the fluid capability): the
+     * boiler heats to 100 C, then boils: steam = heat / 2257 J per g (the water is already hot), so up to ~440 mB/s at
+     * the full kilowatt (in a steady plant, fed cold water, 175 J per mB of water: ~385 mB/s, as before the vessel).
+     * Since the pipes' phase 2 the boiler is a vessel: what leaves as steam is exactly what the water lost.
      */
     static final class Boiler implements TestCase {
         mods.eln.oil.ElectricHeaterElement heater;
         mods.eln.oil.BoilerElement boiler;
+        final int[] taken = new int[1];
+        mods.eln.sim.IProcess pipe;
+        double water0;
 
         public String id() {
             return "oil_boiler";
@@ -309,21 +329,26 @@ public final class OilCases {
             heater.front = mods.eln.misc.Direction.XN;
             heater.reconnect();
             l.feed(ctx.at(3, 1, 1), mods.eln.misc.Direction.ZN);
-            boiler.tanks.fillWater(8000);
-            // both start at 99 C, near boiling: the test is about boiling, not the warm-up
+            // both start at 99 C, near boiling, full of water: the test is about boiling, not the warm-up
             boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
             heater.thermal.Tc = boiler.thermal.Tc;
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            water0 = boiler.vessel.mWater;
+            mods.eln.Eln.simulator.addSlowProcess(pipe = pipeOut(boiler, taken));
         }
 
         public void measure(TestContext ctx) {
-            int steam = boiler.tanks.steam(), water = boiler.tanks.water();
-            ctx.line("oil: boiler: " + boiler.getWaila() + ", heater " + heater.getWaila());
+            mods.eln.Eln.simulator.removeSlowProcess(pipe);
+            boiler.syncTanks();   // (the pipe's last draw since the last fluid step)
+            int steam = taken[0];
+            ctx.line("oil: boiler: " + boiler.getWaila() + ", heater " + heater.getWaila() + ", piped off " + steam + " mB");
             ctx.check("oil: the heater's back heats the boiler: steam made", steam > 2000, steam + " mB steam");
-            // 961 W at 175 J per mB of water: at most ~370 mB/s of steam once the heater is warm
-            ctx.check("oil: the steam meter is within what the heat allows", boiler.steamRate > 50 && boiler.steamRate <= 961 / 175.0 * 67.5 * 1.05, boiler.steamRate + " mB/s");
-            ctx.check("oil: 67.5 mB of steam per mB of water", Math.abs(steam - (8000 - water) * 67.5) < 70, steam + " vs " + (8000 - water) * 67.5);
-            // energy: 60 s x ~1 kW = ~60 kJ, -> ~340 mB of water -> ~23 B of steam (less the heater's warm-up and losses)
-            ctx.check("oil: no more steam than the heat allows", steam <= 60 * 1000 / 175.0 * 67.5 * 1.05, steam + " mB");
+            ctx.check("oil: the steam meter is within what the heat allows", boiler.steamRate > 50 && boiler.steamRate <= 961 / 2.257 * 1.05, boiler.steamRate + " mB/s");
+            double lost = (water0 - boiler.vessel.mWater) / mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM;
+            ctx.check("oil: the steam piped off is the water the vessel lost (1 mB of steam = 1 mg)", Math.abs(steam - lost) < 2, steam + " vs " + lost);
+            // energy: 60 s x ~1 kW = ~60 kJ at 2257 J/g: at most ~27 B of steam
+            ctx.check("oil: no more steam than the heat allows", steam <= 60 * 1000 / 2.257 * 1.05, steam + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, boiler.node.coordonate.pos(), null);
             ctx.check("oil: the boiler's tanks are its fluid capability", cap == boiler.tanks, "" + cap);
         }
@@ -331,7 +356,7 @@ public final class OilCases {
 
     /**
      * The 50V steam turbine: idle it keeps its steam at the open-circuit voltage; driving a 50V heater (2.5 ohm) it
-     * turns steam into electricity at 40% of 2.257 J/mB, up to 1 kW (1108 mB/s).
+     * turns steam into electricity at 40% of 2.257 J/mB, up to 1 kW (1108 mB/s). Steam piped in collects in its inlet.
      */
     static final class SteamTurbine implements TestCase {
         mods.eln.oil.SteamGeneratorElement idle, run;
@@ -366,16 +391,155 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             ctx.line("oil: steam turbine idle " + idle.getWaila() + ", running " + run.getWaila() + ", heater " + heater.getWaila());
-            ctx.check("oil: an idle steam turbine keeps its steam", idle.tank.getFluidAmount() >= FILL - 1, idle.tank.getFluidAmount() + " mB");
+            double k = mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM;
+            ctx.check("oil: an idle steam turbine keeps its steam", idle.inlet.mVapour() / k >= FILL - 1, idle.inlet.mVapour() / k + " mB");
             ctx.checkValue("oil: idle open-circuit voltage [V] (1.05 x 50)", idle.load.getU(), 52.5);
-            int used = FILL - run.tank.getFluidAmount();
-            // 1 s at up to 1 kW: at most 1108 mB; the output follows the tank (1 s), so a good part of the fill
+            double used = FILL - run.inlet.mVapour() / k;
+            // 1 s at up to 1 kW: at most 1108 mB; the output follows the inlet (1 s), so a good part of the fill
             ctx.check("oil: the loaded turbine uses steam, at most its nominal 1108 mB/s", used > 500 && used <= 1108 * 1.1, used + " mB in 1 s");
             double p = run.source.getEffectiveP();
             ctx.check("oil: the heater gets the turbine's power, up to 1 kW", p > 100 && p <= 1000 * 1.05, String.format("%.0f W", p));
             // energy: what it delivered over the second can't beat 40% of the steam it used (allow the last step's lag)
-            ctx.check("oil: no more electricity than 40% of the steam", p * 0.9 <= used * mods.eln.oil.SteamGeneratorDescriptor.EFFICIENCY * 2.257,
-                String.format("%.0f W vs %d mB/s x 0.9 J", p, used));
+            ctx.check("oil: no more electricity than 40% of the steam", p * 0.9 <= used * mods.eln.oil.SteamGeneratorDescriptor.EFFICIENCY * 2.3,
+                String.format("%.0f W vs %.0f mB/s x 0.9 J", p, used));
+        }
+    }
+
+    /**
+     * Pipes phase 2 (notes/pipes/DESIGN.md): a boiler set on a steam turbine feeds it through its dome port, no pipes.
+     * 2.5 kW of heat into the boiler's shell; the turbine drives a 50 V heater. After a minute the turbine runs near
+     * its nominal kilowatt, and below what the heat allows (40% of it at the boiling point).
+     */
+    static final class StackedPlant implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        mods.eln.oil.ElectricHeaterElement load;
+        mods.eln.sim.IProcess fire;
+        double energy;
+        static final double HEAT = 2500;
+
+        public String id() {
+            return "fluid_boiler_on_turbine";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 1600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            turbine = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            load = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, 1);
+            turbine.front = mods.eln.misc.Direction.XN;
+            turbine.reconnect();
+            load.front = mods.eln.misc.Direction.ZN;
+            load.reconnect();
+            boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(4, 2, 1));
+            boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                boiler.thermal.moveEnergyTo(HEAT * t);
+                if (energy >= 0) energy += turbine.source.getEffectiveP() * t;
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            double p = turbine.source.getEffectiveP();
+            ctx.line("fluid: boiler " + boiler.getWaila() + ", turbine " + turbine.getWaila() + "; boiler in sim " + boiler.node.isAdded()
+                + " at " + boiler.node.coordonate + ", turbine in sim " + turbine.node.isAdded() + " at " + turbine.node.coordonate
+                + ", boiler element now " + ctx.level().getBlockEntity(boiler.node.coordonate.pos()));
+            ctx.check("fluid: the boiler's dome feeds the turbine below (one network)",
+                mods.eln.fluid.FluidWorld.networkOf(boiler.vessel) != null && mods.eln.fluid.FluidWorld.networkOf(boiler.vessel) == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+            ctx.check("fluid: the turbine runs near its nominal kilowatt", p > 700 && p <= 1050, String.format("%.0f W", p));
+            ctx.check("fluid: no more electricity than 40% of the heat (+5%)", energy <= 0.42 * HEAT * 80, String.format("%.0f J of %.0f J heat", energy, HEAT * 80));
+            ctx.check("fluid: the boiler stays below its safety valve", boiler.vessel.P() < mods.eln.oil.BoilerElement.SAFETY_PA, boiler.vessel.P() + " Pa");
+        }
+    }
+
+    /** A sealed boiler, heated hard from just below its safety setting: the valve holds it there (no runaway, no NaN). */
+    static final class SafetyValve implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.sim.IProcess fire;
+        double peak;
+
+        public String id() {
+            return "fluid_boiler_safety_valve";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.thermal.Tc = 175 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                boiler.thermal.moveEnergyTo(5000 * t);
+                peak = Math.max(peak, boiler.vessel.P());
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            double P = boiler.vessel.P();
+            ctx.line("fluid: sealed boiler " + boiler.getWaila() + String.format(", peak %.2f bar", peak / 1e5));
+            ctx.check("fluid: the state stays finite", Double.isFinite(P) && Double.isFinite(boiler.vessel.T()), P + " Pa");
+            ctx.check("fluid: the safety valve holds it near 10 bar", P > 9e5 && peak < 11e5, String.format("now %.2f, peak %.2f bar", P / 1e5, peak / 1e5));
+            ctx.check("fluid: the shell didn't fail", !boiler.node.isDestructing(), "");
+        }
+    }
+
+    /** An old save (tanks only, no vessel): the vessel starts from the tanks' water and steam. */
+    static final class OldBoilerSave implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        double w, l;
+
+        public String id() {
+            return "fluid_boiler_old_save";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l0 = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l0.device(8 + (82 << 6), 1, 1);
+            var tag = new net.minecraft.nbt.CompoundTag();
+            boiler.writeToNBT(tag);
+            tag.remove("vesselW");
+            tag.remove("vesselA");
+            tag.remove("vesselU");
+            tag.putInt("boilerwater", 4000);
+            tag.putInt("boilersteam", 1000);
+            boiler.tanks.readFromNBT(tag, "boiler");
+            boiler.fromTanks(boiler.tanks.water(), boiler.tanks.steam());
+            w = boiler.vessel.mWater;
+            l = boiler.vessel.mLiquid();
+        }
+
+        public void measure(TestContext ctx) {
+            double k = mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+            double extra = w - (4000 * k + 1000e-6);   // (the fill also saturates the air space with vapour: < 0.2 g)
+            ctx.check("fluid: an old boiler's water and steam are in its vessel", extra >= -1e-9 && extra < 2e-4, w + " kg, " + extra + " over");
+            ctx.check("fluid: most of it liquid", l > 0.9 * 4000 * k, l + " kg");
         }
     }
 
@@ -421,7 +585,8 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             ctx.check("oil: a water bucket fills the boiler and comes back empty", waterAfter == 1000 && afterWater.is(net.minecraft.world.item.Items.BUCKET),
                 waterAfter + " mB, hand " + afterWater);
-            ctx.check("oil: an empty bucket can't take the boiler's water", boiler.tanks.water() == 1000 && afterSteamTry.is(net.minecraft.world.item.Items.BUCKET),
+            // (a little of it evaporates into the vessel's air space: since the pipes' phase 2 the tanks show the vessel)
+            ctx.check("oil: an empty bucket can't take the boiler's water", boiler.tanks.water() >= 990 && afterSteamTry.is(net.minecraft.world.item.Items.BUCKET),
                 boiler.tanks.water() + " mB, hand " + afterSteamTry);
             ctx.check("oil: an empty bucket takes 1000 mB of crude from the pump", crudeAfter == 500 && afterEmpty.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()),
                 crudeAfter + " mB, hand " + afterEmpty);

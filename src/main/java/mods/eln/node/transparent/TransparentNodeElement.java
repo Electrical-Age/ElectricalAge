@@ -195,7 +195,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         Block block;
         boolean needDestroy = false;
         if (transparentNodeDescriptor.mustHaveFloor()) {
-            if (!node.isBlockOpaque(Direction.YN)) needDestroy = true;
+            if (!node.isBlockOpaque(Direction.YN)) {
+                // (devices that may stand on more than solid blocks: a boiler on a turbine)
+                var below = node.coordonate.world().getBlockState(node.coordonate.pos().below()).getBlock();
+                if (!transparentNodeDescriptor.isFloor(below)) needDestroy = true;
+            }
         }
         if (transparentNodeDescriptor.mustHaveCeiling()) {
             if (!node.isBlockOpaque(Direction.YP)) needDestroy = true;

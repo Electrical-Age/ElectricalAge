@@ -60,7 +60,7 @@ public final class FluidNode {
         return this;
     }
 
-    void update() {
+    public void update() {
         state.solve(mWater, mAir, energy, volume, state.T);
     }
 

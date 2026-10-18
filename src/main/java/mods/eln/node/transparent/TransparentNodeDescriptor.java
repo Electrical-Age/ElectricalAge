@@ -85,6 +85,11 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return false;
     }
 
+    /** What this device can stand on (mustHaveFloor): a solid block or a hopper. */
+    public boolean isFloor(Block below) {
+        return below.defaultBlockState().isSolidRender() || below instanceof HopperBlock;
+    }
+
     public String checkCanPlace(Coordonate coord, Direction front) {
         Block block;
         boolean needDestroy = false;
@@ -92,7 +97,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             Coordonate temp = new Coordonate(coord);
             temp.move(Direction.YN);
             block = temp.getBlock();
-            if (block == null || ((!block.defaultBlockState().isSolidRender()) && block instanceof HopperBlock == false))
+            if (block == null || !isFloor(block))
                 return tr("You can't place this block at this side");
         }
         if (mustHaveCeiling()) {
