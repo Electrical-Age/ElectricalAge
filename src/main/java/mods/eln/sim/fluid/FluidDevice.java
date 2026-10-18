@@ -17,6 +17,11 @@ public interface FluidDevice {
         return List.of();
     }
 
+    /** Nodes joined inside the device (pipes meeting at a junction): each group is one volume (lumped pipes). */
+    default List<List<FluidNode>> fluidJoins() {
+        return List.of();
+    }
+
     /** Before each step of its network (heat exchange, valve settings), with the step's length (s). */
     default void beforeFluidStep(double dt) {
     }

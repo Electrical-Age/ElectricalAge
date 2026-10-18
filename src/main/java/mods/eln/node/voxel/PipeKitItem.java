@@ -59,7 +59,7 @@ public class PipeKitItem extends Item {
         var face = ctx.getClickedFace();
         // a route: started at a port, waypoints, finished at a port (PipePlacer); else one straight block
         if (player instanceof net.minecraft.server.level.ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl
-            && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, tier)) return InteractionResult.SUCCESS;
+            && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, tier, ctx.getClickLocation())) return InteractionResult.SUCCESS;
         BlockPos pos = ctx.getClickedPos().relative(face);
         if (!creative && length(stack) < 16) {
             if (player != null) player.sendOverlayMessage(Component.literal("Not enough pipe in this kit for a block"));

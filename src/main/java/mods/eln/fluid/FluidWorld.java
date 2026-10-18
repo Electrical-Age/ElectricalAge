@@ -142,6 +142,11 @@ public final class FluidWorld implements IProcess {
             var q = (FluidDevice.FluidPort) c[1];
             if (p.node().lumpable && q.node().lumpable) union(p.node(), q.node(), runParent);
         }
+        List<List<FluidNode>> joins = new ArrayList<>();
+        for (FluidDevice d : devices) joins.addAll(d.fluidJoins());
+        for (List<FluidNode> g : joins)
+            for (int i = 1; i < g.size(); i++)
+                if (runParent.containsKey(g.get(0)) && runParent.containsKey(g.get(i))) union(g.get(0), g.get(i), runParent);
         Map<FluidNode, List<FluidNode>> runs = new IdentityHashMap<>();
         for (FluidNode n : runParent.keySet()) runs.computeIfAbsent(find(n, runParent), r -> new ArrayList<>()).add(n);
         Map<FluidNode, Double> runR = new IdentityHashMap<>();

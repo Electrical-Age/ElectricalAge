@@ -171,6 +171,63 @@ public final class PipePart extends VoxelPart {
         return new PipePart(Math.max(0, Math.min(BORE.length - 1, tier)), pts);
     }
 
+    /** Is (x, y, z) on the centre line? */
+    public boolean passes(int x, int y, int z) {
+        for (int i = 3; i < points.length; i += 3) {
+            boolean in = true;
+            for (int a = 0; a < 3; a++) {
+                int v = a == 0 ? x : a == 1 ? y : z;
+                if (v < Math.min(points[i - 3 + a], points[i + a]) || v > Math.max(points[i - 3 + a], points[i + a])) in = false;
+            }
+            if (in) return true;
+        }
+        return false;
+    }
+
+    /** Split at a point on the centre line into two pipes ending there (null if it's not inside the line). */
+    public PipePart[] splitAt(int x, int y, int z) {
+        for (int i = 3; i < points.length; i += 3) {
+            boolean in = true;
+            for (int a = 0; a < 3; a++) {
+                int v = a == 0 ? x : a == 1 ? y : z;
+                if (v < Math.min(points[i - 3 + a], points[i + a]) || v > Math.max(points[i - 3 + a], points[i + a])) in = false;
+            }
+            if (!in) continue;
+            boolean atStart = points[0] == x && points[1] == y && points[2] == z;
+            boolean atEnd = points[points.length - 3] == x && points[points.length - 2] == y && points[points.length - 1] == z;
+            if (atStart || atEnd) return null;
+            int[] p1 = new int[i + 3], p2 = new int[points.length - i + 3];
+            System.arraycopy(points, 0, p1, 0, i);
+            p1[i] = x; p1[i + 1] = y; p1[i + 2] = z;
+            p2[0] = x; p2[1] = y; p2[2] = z;
+            System.arraycopy(points, i, p2, 3, points.length - i);
+            PipePart a = new PipePart(tier, dedupe(p1)), b = new PipePart(tier, dedupe(p2));
+            return new PipePart[]{a, b};
+        }
+        return null;
+    }
+
+    /** Drop repeated points (a split at a corner). */
+    static int[] dedupe(int[] p) {
+        java.util.List<Integer> out = new java.util.ArrayList<>();
+        for (int i = 0; i < p.length; i += 3) {
+            int n = out.size();
+            if (n >= 3 && out.get(n - 3) == p[i] && out.get(n - 2) == p[i + 1] && out.get(n - 1) == p[i + 2]) continue;
+            out.add(p[i]); out.add(p[i + 1]); out.add(p[i + 2]);
+        }
+        return out.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    /** Its ends inside the block (not on a face): where it can be joined. */
+    public java.util.List<int[]> innerEnds() {
+        java.util.List<int[]> out = new java.util.ArrayList<>();
+        for (int end = 0; end < 2; end++) {
+            int i = end == 0 ? 0 : points.length - 3;
+            if (faceOf(points[i], points[i + 1], points[i + 2]) < 0) out.add(new int[]{points[i], points[i + 1], points[i + 2]});
+        }
+        return out;
+    }
+
     /** A valid pipe: at least two points, each piece along one axis, inside the block, not zero length. */
     public boolean valid() {
         if (points.length < 6 || points.length % 3 != 0) return false;

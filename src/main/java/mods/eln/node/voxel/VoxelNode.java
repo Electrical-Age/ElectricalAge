@@ -113,6 +113,52 @@ public class VoxelNode extends Node implements FluidDevice {
         return out;
     }
 
+    /** Pipes whose inner ends meet at the same point are joined (a junction). */
+    @Override
+    public List<List<mods.eln.sim.fluid.FluidNode>> fluidJoins() {
+        java.util.Map<Integer, List<mods.eln.sim.fluid.FluidNode>> at = new java.util.HashMap<>();
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.fluid != null)
+                for (int[] e : pipe.innerEnds()) at.computeIfAbsent(voxel(e[0], e[1], e[2]), k -> new ArrayList<>()).add(pipe.fluid);
+        List<List<mods.eln.sim.fluid.FluidNode>> out = new ArrayList<>();
+        for (var g : at.values()) if (g.size() > 1) out.add(g);
+        return out;
+    }
+
+    /**
+     * Join a new pipe to an existing one at a point on its centre line (a junction: Baughn, routes may join a run mid-way):
+     * the existing pipe is cut there into two, and the new one may overlap them only around the junction.
+     */
+    public String addJoined(PipePart part, int x, int y, int z) {
+        if (!part.valid()) return "not a straight-pieced pipe inside the block";
+        int target = -1;
+        for (int i = 0; i < parts.size(); i++) if (parts.get(i) instanceof PipePart p && p.passes(x, y, z)) target = i;
+        if (target < 0) return "no pipe there to join";
+        PipePart old = (PipePart) parts.get(target);
+        int h = Math.max(old.bore(), part.bore()) / 2 + 1;
+        BitSet want = new BitSet(4096);
+        for (int[] b : part.boxes()) fill(want, b);
+        BitSet around = new BitSet(4096);
+        fill(around, new int[]{Math.max(0, x - h), Math.max(0, y - h), Math.max(0, z - h), Math.min(16, x + h), Math.min(16, y + h), Math.min(16, z + h)});
+        want.andNot(around);
+        if (want.intersects(used)) return "something is in the way";
+        PipePart[] halves = old.splitAt(x, y, z);
+        double[] saved = old.fluid == null ? null : new double[]{old.fluid.mWater, old.fluid.mAir, old.fluid.energy};
+        if (halves != null) {
+            parts.remove(target);
+            for (PipePart hp : halves) {
+                double share = hp.length() / (double) Math.max(1, old.length());
+                hp.makeNode(coordonate.y, saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                parts.add(hp);
+            }
+        }
+        if (part.fluid == null) part.makeNode(coordonate.y, null);
+        parts.add(part);
+        markUsed();
+        changed();
+        return null;
+    }
+
     @Override
     public void connectJob() {
         super.connectJob();

@@ -19,6 +19,7 @@ public final class PipeCases {
         cases.add(new BoilerPipeTurbine());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
+        cases.add(new JoinMidRun());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -147,6 +148,55 @@ public final class PipeCases {
             ctx.check("pipe: a route over the wall is found and laid", err == null, "" + err);
             ctx.check("pipe: it goes over the wall (longer than straight across)", length > 3 * 16, length + " voxels");
             ctx.check("pipe: the turbine runs off the routed pipe", p > 400 && p <= 1050, String.format("%.0f W", p));
+        }
+    }
+
+    /**
+     * Joining a run mid-way (Baughn): a straight run lies across the turbine's top (into its inlet from above, through
+     * a pipe that then turns along x); a route from the boiler's top port joins that run in the middle of a block. The
+     * run is cut there into two pieces, the three meet in a junction, and boiler, run and turbine are one network.
+     */
+    static final class JoinMidRun implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        String err;
+        BlockPos joinBlock;
+        int partsAtJoin;
+
+        public String id() {
+            return "pipe_join_mid_run";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            turbine = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 5, 1);
+            // the run: down into the turbine at x 5, coming along x from x 3 (open end inside block 3)
+            lay(ctx, ctx.at(5, 2, 1), 0, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            lay(ctx, ctx.at(4, 2, 1), 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, ctx.at(3, 2, 1), 0, 4, 8, 8, 16, 8, 8);
+            joinBlock = ctx.at(4, 2, 1);
+            var level = ctx.level();
+            var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(1, 1, 1), net.minecraft.core.Direction.UP);
+            long[] join = {joinBlock.getX() * 16L + 8, joinBlock.getY() * 16L + 8, joinBlock.getZ() * 16L + 8};
+            err = mods.eln.node.voxel.PipePlacer.routeAndJoinForTests(level, 0, a, join);
+            VoxelNode n = node(ctx, joinBlock);
+            partsAtJoin = n == null ? 0 : n.parts.size();
+        }
+
+        public void measure(TestContext ctx) {
+            var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
+            ctx.check("pipe: the route joins the run", err == null, "" + err);
+            ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
+            ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
         }
     }
 
