@@ -51,20 +51,8 @@ public final class VoxelGeometry {
                 if (v.open) b.color(0.3f, 0.75f, 0.3f);
                 else b.color(0.8f, 0.2f, 0.15f);
                 double plane = c[stem] + s;
-                // the rim: short pieces round the circle; two spokes across
-                int n = 16;
-                for (int k = 0; k < n; k++) {
-                    double ang = 2 * Math.PI * k / n;
-                    double u = c[so[0]] + (r - 0.5) * Math.cos(ang), w = c[so[1]] + (r - 0.5) * Math.sin(ang);
-                    double[] lo = new double[3], hi = new double[3];
-                    lo[stem] = plane;
-                    hi[stem] = plane + 1;
-                    lo[so[0]] = u - 0.6;
-                    hi[so[0]] = u + 0.6;
-                    lo[so[1]] = w - 0.6;
-                    hi[so[1]] = w + 0.6;
-                    b.boxD(lo, hi);
-                }
+                // the rim: a ring (AdventurAgent: 16 cubes read as beads); two spokes across
+                b.ring(stem, c[so[0]], c[so[1]], r - 1.1, r, plane, plane + 1, 16);
                 for (int a = 0; a < 2; a++) {
                     double[] lo = new double[3], hi = new double[3];
                     lo[stem] = plane + 0.2;
@@ -287,6 +275,34 @@ public final class VoxelGeometry {
                 n1[axis] = 1;
                 cap(wind(cc0, cc0, ring0[k1], ring0[k], n0[0], n0[1], n0[2]), axis, f0);
                 cap(wind(cc1, cc1, ring1[k], ring1[k1], n1[0], n1[1], n1[2]), axis, f1);
+            }
+        }
+
+        /** A flat ring round axis, centred at (c1, c2), radii rIn..rOut, from a0 to a1, in n segments. */
+        void ring(int axis, double c1, double c2, double rIn, double rOut, double a0, double a1, int n) {
+            int[] o = others(axis);
+            java.util.function.BiFunction<Double, double[], double[]> at = (rr, aa) -> {
+                double[] v = new double[3];
+                v[o[0]] = c1 + rr * Math.cos(aa[0]);
+                v[o[1]] = c2 + rr * Math.sin(aa[0]);
+                v[axis] = aa[1];
+                return v;
+            };
+            for (int k = 0; k < n; k++) {
+                double t0 = 2 * Math.PI * k / n, t1 = 2 * Math.PI * (k + 1) / n, tm = (t0 + t1) / 2;
+                double[] i00 = at.apply(rIn, new double[]{t0, a0}), i10 = at.apply(rIn, new double[]{t1, a0});
+                double[] i01 = at.apply(rIn, new double[]{t0, a1}), i11 = at.apply(rIn, new double[]{t1, a1});
+                double[] o00 = at.apply(rOut, new double[]{t0, a0}), o10 = at.apply(rOut, new double[]{t1, a0});
+                double[] o01 = at.apply(rOut, new double[]{t0, a1}), o11 = at.apply(rOut, new double[]{t1, a1});
+                double[] out = new double[3], down = new double[3];
+                out[o[0]] = Math.cos(tm);
+                out[o[1]] = Math.sin(tm);
+                down[axis] = -1;
+                float[] uv = {k / (float) n, 0, (k + 1) / (float) n, 0, (k + 1) / (float) n, 1, k / (float) n, 1};
+                add(wind(o00, o10, o11, o01, out[0], out[1], out[2]), uv, -1);
+                add(wind(i00, i10, i11, i01, -out[0], -out[1], -out[2]), uv, -1);
+                add(wind(i00, i10, o10, o00, down[0], down[1], down[2]), uv, -1);
+                add(wind(i01, i11, o11, o01, -down[0], -down[1], -down[2]), uv, -1);
             }
         }
 
