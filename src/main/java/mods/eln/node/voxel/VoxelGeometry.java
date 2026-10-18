@@ -37,17 +37,44 @@ public final class VoxelGeometry {
         Builder b = new Builder();
         for (VoxelPart part : parts) {
             if (part instanceof ValvePart v) {
+                // a gate valve: a body round the pipe, a stem, and a round handwheel wider than the pipe (Baughn: they
+                // looked like buttons); the wheel red when shut, green when open
                 b.sprite = PIPE[0];
-                var bs = v.boxes();
                 b.color(0.45f, 0.45f, 0.5f);
-                b.box(bs.get(0));
-                // the handwheel: red when shut, green when open
+                int h = v.bore / 2 + 1, r = v.wheel(), s = v.reach();
+                double[] c = {v.x, v.y, v.z};
+                int[] o = others(v.axis);
+                b.tube(v.axis, c[o[0]], c[o[1]], h, c[v.axis] - h, c[v.axis] + h);
+                int stem = v.axis == 1 ? 0 : 1;   // (the stem's axis: up, or along x for a vertical pipe)
+                int[] so = others(stem);
+                b.tube(stem, c[so[0]], c[so[1]], 0.75, c[stem] + h - 0.5, c[stem] + s);
                 if (v.open) b.color(0.3f, 0.75f, 0.3f);
                 else b.color(0.8f, 0.2f, 0.15f);
-                int[] s = bs.get(1);
-                b.box(s);
-                if (v.axis == 1) b.box(new int[]{s[3] - 1, s[1] - 2, s[2] - 2, s[3], s[4] + 2, s[5] + 2});
-                else b.box(new int[]{s[0] - 2, s[4] - 1, s[2] - 2, s[3] + 2, s[4], s[5] + 2});
+                double plane = c[stem] + s;
+                // the rim: short pieces round the circle; two spokes across
+                int n = 16;
+                for (int k = 0; k < n; k++) {
+                    double ang = 2 * Math.PI * k / n;
+                    double u = c[so[0]] + (r - 0.5) * Math.cos(ang), w = c[so[1]] + (r - 0.5) * Math.sin(ang);
+                    double[] lo = new double[3], hi = new double[3];
+                    lo[stem] = plane;
+                    hi[stem] = plane + 1;
+                    lo[so[0]] = u - 0.6;
+                    hi[so[0]] = u + 0.6;
+                    lo[so[1]] = w - 0.6;
+                    hi[so[1]] = w + 0.6;
+                    b.boxD(lo, hi);
+                }
+                for (int a = 0; a < 2; a++) {
+                    double[] lo = new double[3], hi = new double[3];
+                    lo[stem] = plane + 0.2;
+                    hi[stem] = plane + 0.8;
+                    lo[so[a]] = c[so[a]] - r + 0.5;
+                    hi[so[a]] = c[so[a]] + r - 0.5;
+                    lo[so[1 - a]] = c[so[1 - a]] - 0.4;
+                    hi[so[1 - a]] = c[so[1 - a]] + 0.4;
+                    b.boxD(lo, hi);
+                }
             } else if (part instanceof SafetyValvePart sv) {
                 b.sprite = PIPE[0];
                 b.color(0.8f, 0.6f, 0.3f);   // (brass body, a red cap)
@@ -174,6 +201,18 @@ public final class VoxelGeometry {
 
         void color(float r, float g, float b) {
             argb = 0xFF000000 | Math.round(r * 255) << 16 | Math.round(g * 255) << 8 | Math.round(b * 255);
+        }
+
+        /** A box in fractional voxels (not culled against the block's faces). */
+        void boxD(double[] lo, double[] hi) {
+            double[][] c = new double[8][];
+            for (int i = 0; i < 8; i++) c[i] = new double[]{(i & 1) == 0 ? lo[0] : hi[0], (i & 2) == 0 ? lo[1] : hi[1], (i & 4) == 0 ? lo[2] : hi[2]};
+            face(c[0], c[4], c[6], c[2], -1, 0, 0, -1);
+            face(c[1], c[3], c[7], c[5], 1, 0, 0, -1);
+            face(c[0], c[1], c[5], c[4], 0, -1, 0, -1);
+            face(c[2], c[6], c[7], c[3], 0, 1, 0, -1);
+            face(c[0], c[2], c[3], c[1], 0, 0, -1, -1);
+            face(c[4], c[5], c[7], c[6], 0, 0, 1, -1);
         }
 
         /** A box in voxels, every face out, UVs planar on the face's two other axes (vanilla density). */

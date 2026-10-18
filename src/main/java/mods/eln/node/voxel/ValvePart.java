@@ -31,15 +31,30 @@ public final class ValvePart extends VoxelPart {
         return KIND;
     }
 
-    /** The body (a cube a little wider than the bore) and the stem with its handwheel on top (or on the side, for a
-     *  vertical pipe). */
+    /** The handwheel's radius (voxels): wider than the pipe, so it reads as a valve (Baughn). */
+    public int wheel() {
+        return bore / 2 + 3;
+    }
+
+    /** How far the wheel sits from the pipe's axis (voxels). */
+    public int reach() {
+        return bore / 2 + 3;
+    }
+
+    /** The body (a cube a little wider than the bore), the stem, and the handwheel's disc at its end (on top, or on the
+     *  side for a vertical pipe). */
     @Override
     public List<int[]> boxes() {
-        int h = bore / 2 + 1;
+        int h = bore / 2 + 1, r = wheel(), s = reach();
         List<int[]> out = new ArrayList<>();
         out.add(clamp(new int[]{x - h, y - h, z - h, x + h, y + h, z + h}));
-        if (axis == 1) out.add(clamp(new int[]{x + h, y - 1, z - 1, x + h + 2, y + 1, z + 1}));
-        else out.add(clamp(new int[]{x - 1, y + h, z - 1, x + 1, y + h + 2, z + 1}));
+        if (axis == 1) {
+            out.add(clamp(new int[]{x + h, y - 1, z - 1, x + s, y + 1, z + 1}));
+            out.add(clamp(new int[]{x + s, y - r, z - r, x + s + 1, y + r, z + r}));
+        } else {
+            out.add(clamp(new int[]{x - 1, y + h, z - 1, x + 1, y + s, z + 1}));
+            out.add(clamp(new int[]{x - r, y + s, z - r, x + r, y + s + 1, z + r}));
+        }
         return out;
     }
 
