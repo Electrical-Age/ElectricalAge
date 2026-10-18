@@ -25,6 +25,7 @@ public final class PipeCases {
         cases.add(new KitCrafting());
         cases.add(new Burst());
         cases.add(new Valve());
+        cases.add(new Adapter());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -202,6 +203,60 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** A pipe adapter: water put in through the fluid capability on its face goes into the run behind it, and comes
+     *  back out the same way. */
+    static final class Adapter implements TestCase {
+        BlockPos at;
+        int put, took;
+        double inRunAfterPut = -1;
+
+        public String id() {
+            return "pipe_adapter_capability";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(2, 1, 1);
+            ctx.level().setBlock(ctx.at(1, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            var item = new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(ctx.at(1, 1, 1)),
+                net.minecraft.core.Direction.EAST, ctx.at(1, 1, 1), false);
+            item.useOn(new net.minecraft.world.item.context.UseOnContext(ctx.level(), null, net.minecraft.world.InteractionHand.MAIN_HAND, item, hit));
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
+            if (cap == null) return;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 500, tx);
+                tx.commit();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            VoxelNode n = node(ctx, at);
+            ctx.check("pipe: an adapter goes on the stone's face, with its stub", n != null && n.adapterOn(net.minecraft.core.Direction.WEST.get3DDataValue()) != null, "");
+            if (n == null) return;
+            PipePart stub = null;
+            for (VoxelPart p : n.parts) if (p instanceof PipePart pp) stub = pp;
+            double run = stub == null ? 0 : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid).mWater / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+            ctx.check("pipe: 500 mB of water went in through the capability (the stub holds ~950)", put == 500, put + " mB");
+            ctx.check("pipe: it is in the run (some evaporates into its air)", run > 495 && run < 505, run + " mB");
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 200, tx);
+                tx.commit();
+            }
+            ctx.check("pipe: water comes back out through it", took == 200, took + " mB");
+            var other = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.UP);
+            ctx.check("pipe: only on the adapter's face", other == null, "" + other);
         }
     }
 

@@ -69,11 +69,19 @@ public class VoxelNode extends Node implements FluidDevice {
     /** Add a part (a pipe laid here): null if done, else why not. */
     public String addPart(VoxelPart p) {
         if (p instanceof PipePart pipe && !pipe.valid()) return "not a straight-pieced pipe inside the block";
-        if (!fits(p)) return "something is in the way";
+        if (p instanceof AdapterPart a) {   // (its flange sits on its own stub's end)
+            BitSet others = new BitSet(4096), want = new BitSet(4096);
+            PipePart stub = stubOf(a);
+            for (VoxelPart q : parts) if (q != stub) for (int[] b : q.boxes()) fill(others, b);
+            for (int[] b : a.boxes()) fill(want, b);
+            if (stub == null) return "no pipe ends there";
+            if (want.intersects(others)) return "something is in the way";
+        } else if (!fits(p)) return "something is in the way";
         if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, null);
         parts.add(p);
         markUsed();
         changed();
+        if (p instanceof AdapterPart) showAdapters();
         return null;
     }
 
@@ -84,6 +92,7 @@ public class VoxelNode extends Node implements FluidDevice {
         markUsed();
         if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
         if (drop && p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+        if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         changed();
         return parts.isEmpty();
     }
@@ -149,6 +158,12 @@ public class VoxelNode extends Node implements FluidDevice {
             out.add(l);
         }
         return out;
+    }
+
+    /** The adapter on that face (for the fluid capability), or null. */
+    public AdapterPart adapterOn(int face) {
+        for (VoxelPart p : parts) if (p instanceof AdapterPart a && a.face == face) return a;
+        return null;
     }
 
     /** Fit a valve in the pipe running straight through the block's centre (it is cut there into two). */
@@ -249,6 +264,55 @@ public class VoxelNode extends Node implements FluidDevice {
         return out;
     }
 
+    /** The pipe stub behind an adapter (the pipe ending at the adapter's face, at the face's centre). */
+    PipePart stubOf(AdapterPart a) {
+        int[] s = AdapterPart.stub(a.face);
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.fluid != null && pipe.passes(s[3], s[4], s[5])) return pipe;
+        return null;
+    }
+
+    /** Adapters: what other mods' pipes put in or took out since the last step goes into or out of the run. */
+    public void syncAdapters() {
+        for (VoxelPart p : parts) {
+            if (!(p instanceof AdapterPart a)) continue;
+            PipePart stub = stubOf(a);
+            if (stub == null) continue;
+            var run = mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
+            int[] d = a.tanks.take();
+            if (d[0] > 0) EaUnits.addWater(run, d[0] * EaUnits.KG_PER_MB_WATER, mods.eln.sim.fluid.Water.T_AMBIENT, false);
+            if (d[1] > 0) drainLiquid(run, d[1] * EaUnits.KG_PER_MB_WATER);
+            if (d[2] > 0) EaUnits.addWater(run, d[2] * EaUnits.KG_PER_MB_STEAM, mods.eln.sim.fluid.Water.TB, true);
+            if (d[3] > 0) EaUnits.drainVapour(run, d[3] * EaUnits.KG_PER_MB_STEAM);
+        }
+    }
+
+    static void drainLiquid(mods.eln.sim.fluid.FluidNode n, double m) {
+        m = Math.min(m, n.mLiquid());
+        if (m <= 0) return;
+        n.mWater -= m;
+        n.energy -= m * mods.eln.sim.fluid.Water.hLiquid(n.T());
+        n.update();
+    }
+
+    private void showAdapters() {
+        for (VoxelPart p : parts) {
+            if (!(p instanceof AdapterPart a)) continue;
+            PipePart stub = stubOf(a);
+            if (stub == null) continue;
+            var run = mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
+            double freeL = Math.max(0, 0.9 * run.volume - run.mLiquid() / mods.eln.sim.fluid.Water.RHO_L);
+            double gasRoom = Math.max(0, 9e5 - run.P()) * Math.max(1e-6, freeL) / (mods.eln.sim.fluid.Water.R_V * Math.max(300, run.T()));
+            a.tanks.show((int) Math.floor(run.mLiquid() / EaUnits.KG_PER_MB_WATER), (int) Math.floor(EaUnits.steamAvailable(run) / EaUnits.KG_PER_MB_STEAM),
+                (int) (freeL * mods.eln.sim.fluid.Water.RHO_L / EaUnits.KG_PER_MB_WATER), (int) (gasRoom / EaUnits.KG_PER_MB_STEAM));
+        }
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        syncAdapters();
+    }
+
     /** Over its rating a pipe bursts (the weakest of a run goes first: each piece checks its own rating against the
      *  run's pressure); over its working pressure it strains and hisses. */
     @Override
@@ -274,6 +338,7 @@ public class VoxelNode extends Node implements FluidDevice {
             }
         }
         if (changed) changed();
+        showAdapters();
     }
 
     @Override
@@ -298,6 +363,7 @@ public class VoxelNode extends Node implements FluidDevice {
     @Override
     public void initializeFromNBT() {
         connect();
+        showAdapters();
     }
 
     @Override
@@ -305,6 +371,7 @@ public class VoxelNode extends Node implements FluidDevice {
         for (VoxelPart p : parts) {
             if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
             if (p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+            if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         }
         parts.clear();
         super.onBreakBlock();
@@ -327,6 +394,12 @@ public class VoxelNode extends Node implements FluidDevice {
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
+        // (other mods' pipes may have used an adapter since the last step: into the run, and the run into its pieces)
+        if (isAdded()) {
+            syncAdapters();
+            for (VoxelPart p : parts) if (p instanceof AdapterPart a && stubOf(a) != null) mods.eln.fluid.FluidWorld.writeBackOf(stubOf(a).fluid);
+            showAdapters();
+        }
         super.writeToNBT(nbt);
         nbt.putInt("parts", parts.size());
         for (int i = 0; i < parts.size(); i++) {

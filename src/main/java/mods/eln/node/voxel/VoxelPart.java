@@ -34,6 +34,7 @@ public abstract class VoxelPart {
         return switch (t.getStringOr("kind", "")) {
             case PipePart.KIND -> PipePart.read(t, blockY);
             case ValvePart.KIND -> ValvePart.read(t);
+            case AdapterPart.KIND -> AdapterPart.read(t);
             default -> null;
         };
     }
@@ -43,6 +44,7 @@ public abstract class VoxelPart {
         return switch (kind) {
             case PipePart.KIND -> PipePart.deserialize(in);
             case ValvePart.KIND -> ValvePart.deserialize(in);
+            case AdapterPart.KIND -> AdapterPart.deserialize(in);
             default -> null;
         };
     }

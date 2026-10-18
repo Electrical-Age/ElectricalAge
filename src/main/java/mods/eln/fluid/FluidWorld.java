@@ -77,6 +77,25 @@ public final class FluidWorld implements IProcess {
         return INSTANCE.burstThisStep.add(INSTANCE.lumpOf.getOrDefault(piece, piece));
     }
 
+    /** The node standing for a piece of pipe this step (its run's lump), or the node itself. */
+    public static FluidNode nodeFor(FluidNode n) {
+        INSTANCE.rebuildIfDirty();
+        return INSTANCE.lumpOf.getOrDefault(n, n);
+    }
+
+    /** Write a run's lump back into its pieces now (before saving a piece whose run changed since the step). */
+    public static void writeBackOf(FluidNode piece) {
+        FluidNode lump = INSTANCE.lumpOf.get(piece);
+        if (lump == null) return;
+        for (FluidNode m : INSTANCE.lumps.get(lump)) {
+            double share = m.volume / lump.volume;
+            m.mWater = lump.mWater * share;
+            m.mAir = lump.mAir * share;
+            m.energy = lump.energy * share;
+            m.update();
+        }
+    }
+
     /** The edges at a node this step (its ports' couplings and vents). */
     public static List<FluidEdge> edgesOf(FluidNode n) {
         List<FluidEdge> out = new ArrayList<>();

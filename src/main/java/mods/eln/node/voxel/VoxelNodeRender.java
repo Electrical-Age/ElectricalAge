@@ -62,6 +62,14 @@ public class VoxelNodeRender implements BlockEntityRenderer<VoxelNodeEntity, Vox
                     else box(s[0] - 2, s[4] - 1, s[2] - 2, s[3] + 2, s[4], s[5] + 2);
                     continue;
                 }
+                if (part instanceof AdapterPart a) {
+                    UtilsClient.glDefaultColor();
+                    UtilsClient.bindTexture(TEX[0]);
+                    GL11.glColor4f(0.75f, 0.55f, 0.3f, 1f);   // (brass)
+                    int[] b = a.boxes().get(0);
+                    box(b[0], b[1], b[2], b[3], b[4], b[5]);
+                    continue;
+                }
                 if (!(part instanceof PipePart pipe)) continue;
                 UtilsClient.glDefaultColor();
                 if (pipe.burst) GL11.glColor4f(0.55f, 0.35f, 0.25f, 1f);   // (burst: scorched)

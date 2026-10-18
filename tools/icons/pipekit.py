@@ -40,12 +40,24 @@ def valve():
         px[x, 4] = (130, 25, 20, 255)
     return im
 
+def adapter():
+    """A brass flange plate with a short pipe stub."""
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = im.load()
+    for y in range(3, 13):
+        for x in (2, 3):
+            px[x, y] = (205, 160, 80, 255) if x == 2 else (150, 110, 50, 255)
+    for x in range(4, 14):
+        px[x, 6], px[x, 7], px[x, 8], px[x, 9] = (214, 214, 214, 255), (170, 170, 175, 255), (150, 150, 155, 255), (95, 95, 100, 255)
+    return im
+
 def main():
     d = os.path.join(sys.argv[1], "assets/eln/textures/item")
     os.makedirs(d, exist_ok=True)
     for name, cols in TIERS.items():
         icon(*[c + (255,) for c in cols]).save(os.path.join(d, f"pipe_kit_{name}.png"))
     valve().save(os.path.join(d, "pipe_valve.png"))
+    adapter().save(os.path.join(d, "pipe_adapter.png"))
 
 if __name__ == "__main__":
     main()

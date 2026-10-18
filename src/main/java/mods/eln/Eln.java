@@ -273,6 +273,15 @@ public class Eln {
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();
         // fluid devices (fuel generator, turbines...): the element's tank as the block's fluid capability (1.12:
         // TransparentNodeEntityWithFluid); server side only, elements live there
+        // pipe adapters (voxel nodes): the fluid capability on the adapter's face, a view of the pipe run behind it
+        modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
+            e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK,
+                mods.eln.registry.ElnRegistry.VOXEL_NODE_ENTITY.get(), (be, side) -> {
+                    if (side == null || be.getLevel() == null || be.getLevel().isClientSide()) return null;
+                    if (!(be.getNode() instanceof mods.eln.node.voxel.VoxelNode n)) return null;
+                    var a = n.adapterOn(side.get3DDataValue());
+                    return a == null ? null : a.tanks;
+                }));
         modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
             e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK,
                 mods.eln.registry.ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), (be, side) -> {
