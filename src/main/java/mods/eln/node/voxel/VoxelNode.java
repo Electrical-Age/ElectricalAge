@@ -31,6 +31,8 @@ public class VoxelNode extends Node implements FluidDevice {
 
     public final List<VoxelPart> parts = new ArrayList<>();
     private final BitSet used = new BitSet(4096);
+    /** The six-node block this was converted from (its NBT), kept for a revert; null if built as a voxel node. */
+    public CompoundTag legacy;
     /** The cables' conductors and their loads (server). */
     final CableNet cables = new CableNet(this);
 
@@ -119,6 +121,7 @@ public class VoxelNode extends Node implements FluidDevice {
     private void changed() {
         vents = null;
         if (isAdded()) {
+            if (hasFluid()) FluidWorld.add(this);
             FluidWorld.changed(this);
             // cables: rebuild the conductors and their links (reconnect keeps their state through the pieces)
             boolean cable = false;
@@ -501,7 +504,14 @@ public class VoxelNode extends Node implements FluidDevice {
             if (other instanceof VoxelNode v) connectVoxel(dir, v);
             else for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
         }
-        FluidWorld.add(this);
+        // only blocks with pipes in the fluid world (it steps every device every tick)
+        if (hasFluid()) FluidWorld.add(this);
+        else FluidWorld.remove(this);
+    }
+
+    private boolean hasFluid() {
+        for (VoxelPart p : parts) if (!(p instanceof CablePart)) return true;
+        return false;
     }
 
     private void connectVoxel(Direction dir, VoxelNode v) {
@@ -537,11 +547,15 @@ public class VoxelNode extends Node implements FluidDevice {
         mods.eln.node.NodeBase other = getNeighbor(side);
         if (other == null || other instanceof VoxelNode) return null;
         int f = side.toEnumFacing().get3DDataValue(), a = side.applyLRDU(lrdu).toEnumFacing().get3DDataValue();
-        for (CablePart.Port p : cables.ports()) {
-            if (p.face() != f) continue;
-            CableNet.Conductor k = cables.at(p);
-            if (k != null && k.face == a) return k;
-        }
+        for (CableNet.Conductor k : cables.live())
+            for (CablePart c : k.parts) {
+                List<CablePart.Port> ps = c.cablePorts();
+                for (CablePart.Port p : ps) {
+                    if (p.face() != f) continue;
+                    // a cable lying on a; a knuckle whose other side opens on a (the cable round the corner lies on it)
+                    if (c.isKnuckle() ? ps.stream().anyMatch(q -> q.face() == a) : k.face == a) return k;
+                }
+            }
         return null;
     }
 
@@ -551,6 +565,12 @@ public class VoxelNode extends Node implements FluidDevice {
         for (CableNet.Conductor k : cables.live())
             out.add(new double[]{k.load.getU(), k.load.getI(), k.thermal == null ? Double.NaN : k.thermal.Tc});
         return out;
+    }
+
+    /** The load of the working cable conductor lying on face (3D value), or null. */
+    public ElectricalLoad cableLoad(int face) {
+        for (CableNet.Conductor k : cables.live()) if (k.face == face) return k.load;
+        return null;
     }
 
     /** Has any cable here burnt out? */
@@ -617,6 +637,7 @@ public class VoxelNode extends Node implements FluidDevice {
             showAdapters();
         }
         super.writeToNBT(nbt);
+        if (legacy != null) nbt.put("legacy", legacy);
         nbt.putInt("parts", parts.size());
         for (int i = 0; i < parts.size(); i++) {
             CompoundTag t = new CompoundTag();
@@ -630,6 +651,7 @@ public class VoxelNode extends Node implements FluidDevice {
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         parts.clear();
+        legacy = nbt.getCompound("legacy").orElse(null);
         int n = nbt.getIntOr("parts", 0);
         for (int i = 0; i < n; i++) {
             VoxelPart p = VoxelPart.read(nbt.getCompoundOrEmpty("p" + i), coordonate.y);

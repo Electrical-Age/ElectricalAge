@@ -114,6 +114,11 @@ public final class CablePart extends VoxelPart {
         };
     }
 
+    /** The axis of a direction (3D value): 0 x, 1 y, 2 z. */
+    static int axis(int dir) {
+        return normalAxis(dir);
+    }
+
     /** The attachment face's plane coordinate: 0 for down/north/west, 16 for up/south/east. */
     static int plane(int face) {
         return face % 2 == 0 ? 0 : 16;

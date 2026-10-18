@@ -46,6 +46,7 @@ neoForge {
             if (project.hasProperty('elnBench')) {
                 systemProperty 'eln.bench', file(project.property('elnBench')).absolutePath
                 systemProperty 'eln.bench.label', project.findProperty('elnBenchLabel') ?: 'unnamed'
+                if (project.hasProperty('elnBenchConvert')) systemProperty 'eln.bench.convert', 'true'
                 if (project.hasProperty('elnBenchNoRthCache')) systemProperty 'eln.bench.noRthCache', 'true'
             }
         }

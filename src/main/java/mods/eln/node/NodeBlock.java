@@ -42,23 +42,28 @@ public abstract class NodeBlock extends Block implements EntityBlock {
         return RenderShape.INVISIBLE;
     }
 
+    /**
+     * The light each node block emits, per level and position, for the light engine: it asks from its own thread, where
+     * reading the chunk's block entities or the node list races the server thread (2026-10-18: a mass block change,
+     * the cable converter, threw in the light worker, which then died and the server hung on save). Written on the
+     * owning thread (Node.setLightValue, the client's publish), read here.
+     */
+    static final java.util.Map<Object, java.util.concurrent.ConcurrentHashMap<Long, Integer>> LIGHT =
+        java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
+    public static void setLight(net.minecraft.world.level.Level level, BlockPos pos, int light) {
+        if (level == null) return;
+        var m = LIGHT.computeIfAbsent(level, k -> new java.util.concurrent.ConcurrentHashMap<>());
+        if (light <= 0) m.remove(pos.asLong());
+        else m.put(pos.asLong(), light);
+    }
+
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        // the light engine asks from its own thread, where ServerLevel.getBlockEntity and getChunkNow answer null:
-        // read the block entity from the chunk the light engine sees (otherwise lamps that light their own block, e.g.
-        // street lights and suspended lamps, stay dark)
-        net.minecraft.world.level.block.entity.BlockEntity be;
-        if (level instanceof net.minecraft.world.level.Level l) {
-            Object chunk = l.getChunkSource().getChunkForLighting(pos.getX() >> 4, pos.getZ() >> 4);
-            if (chunk instanceof net.minecraft.world.level.chunk.ImposterProtoChunk ip) chunk = ip.getWrapped();
-            be = chunk instanceof net.minecraft.world.level.chunk.LevelChunk c
-                ? c.getBlockEntity(pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType.CHECK) : null;
-        } else if (level instanceof net.minecraft.world.level.chunk.LevelChunk c) {
-            be = c.getBlockEntity(pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType.CHECK);
-        } else {
-            be = level.getBlockEntity(pos);
-        }
-        return be instanceof NodeBlockEntity e ? e.getLightValue() : 0;
+        Object key = level instanceof net.minecraft.world.level.chunk.LevelChunk c ? c.getLevel() : level;
+        var m = LIGHT.get(key);
+        Integer v = m == null ? null : m.get(pos.asLong());
+        return v == null ? 0 : v;
     }
 
     /** The light comes from the block entity (getLightEmission), not the state: chunk light scans must ask. */

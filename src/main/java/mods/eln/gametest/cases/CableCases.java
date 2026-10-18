@@ -36,6 +36,14 @@ public final class CableCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BurnCase());
+        List<TestCase> mine = new ArrayList<>();
+        addLayouts(mine);
+        cases.addAll(mine);
+        // the same circuits built from six-node cables and converted (CableConverter)
+        for (TestCase t : mine) if (t instanceof Case k) cases.add(new ConvertCase(k.name.replace("voxel cable", "converted cable"), k.layout));
+    }
+
+    static void addLayouts(List<TestCase> cases) {
         cases.add(new Case("voxel cable straight", (c, six, z) -> {
             source(c, SOURCE, 0, z, 50);
             for (int x = 1; x <= 6; x++) {
@@ -141,6 +149,71 @@ public final class CableCases {
                 s.append(b ? 'X' : '-');
             }
             c.check("voxel cable burn chain: exactly one cable of 6 burns", burnt == 1, "cables (source side first): " + s);
+        }
+    }
+
+    /** Six-node circuits in both rows; the second row's cable blocks are converted at once. */
+    static final class ConvertCase implements TestCase {
+        final String name;
+        final Layout layout;
+        List<ResistorElement> six, conv;
+        int converted;
+        final List<String> skipped = new ArrayList<>();
+
+        ConvertCase(String name, Layout layout) {
+            this.name = name;
+            this.layout = layout;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            six = layout.build(c, true, 1);
+            conv = layout.build(c, true, 6);
+            for (int x = 0; x < 10; x++)
+                for (int y = 1; y < 4; y++)
+                    for (int z = 6; z < 10; z++) {
+                        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level()));
+                        if (!(n instanceof mods.eln.node.six.SixNode s)) continue;
+                        String why = mods.eln.node.voxel.CableConverter.convert(s);
+                        if (why == null) converted++;
+                        else skipped.add(x + "," + y + "," + z + ": " + why);
+                    }
+        }
+
+        public void measure(TestContext c) {
+            c.line(name + ": converted " + converted + " blocks; kept " + String.join("; ", skipped));
+            c.check(name + ": cable blocks converted", converted > 0, converted + "");
+            for (String k : skipped)
+                c.check(name + ": only devices kept as six-node", k.contains("holds a "), k);
+            for (int i = 0; i < six.size(); i++) {
+                double a = current(six.get(i)), b = current(conv.get(i));
+                c.line(String.format("%s: load %d: six-node %.5f A, converted %.5f A", name, i, a, b));
+                c.check(name + ": load " + i + ": converted current = six-node current (0.1%)", Math.abs(a) > 1 && Math.abs(a - b) <= 1e-3 * Math.abs(a),
+                    String.format("six-node %.5f A, converted %.5f A", a, b));
+            }
         }
     }
 

@@ -72,8 +72,10 @@ final class CableNet {
             // (save() gives every piece its conductor's state; a piece added since starts from the first's)
             double u = parts.get(0).u, t = parts.get(0).t;
             load.state = u;
+            if (face < 0) return;   // (a knuckle: no watchdogs, its neighbours' see the same voltage)
             Failure failure = new Failure(this, node, node.coordonate, "cable " + d.name).cable();
-            if (!d.signalWire && face >= 0) {
+            ThermalLoadWatchDog tw = null;
+            if (!d.signalWire) {
                 thermal = new ThermalLoad();
                 d.applyTo(thermal);
                 // a shorter piece: less to heat and less surface to lose it from (Gemini: else short pieces never burn)
@@ -83,10 +85,23 @@ final class CableNet {
                 thermal.setAsSlow();
                 thermal.Tc = t;
                 thermalSlow.add(new ElectricalLoadHeatThermalLoad(load, thermal));
-                slow.add(new ThermalLoadWatchDog().set(thermal).setLimit(d.thermalWarmLimit, d.thermalCoolLimit).set(failure));
+                tw = new ThermalLoadWatchDog();
+                tw.set(thermal).setLimit(d.thermalWarmLimit, d.thermalCoolLimit).set(failure);
+                watchdogs.add(tw);
             }
-            slow.add(new VoltageStateWatchDog().set(load).setUMaxMin(d.electricalNominalVoltage).set(failure));
+            VoltageStateWatchDog vw = new VoltageStateWatchDog();
+            vw.set(load).setUMaxMin(d.electricalNominalVoltage).set(failure);
+            watchdogs.add(vw);
+            // both in one slow process (Baughn: keep per-block processes cheap)
+            ThermalLoadWatchDog t0 = tw;
+            slow.add(time -> {
+                if (t0 != null) t0.process(time);
+                vw.process(time);
+            });
         }
+
+        /** Its watchdogs (FaultNetwork relieves them). */
+        final List<IProcess> watchdogs = new ArrayList<>();
 
         int mask() {
             return d.getNodeMask();
@@ -247,7 +262,7 @@ final class CableNet {
     /** Processes of the conductors (FaultNetwork relieves their watchdogs). */
     List<IProcess> slowProcesses() {
         List<IProcess> out = new ArrayList<>();
-        for (Conductor k : live()) out.addAll(k.slow);
+        for (Conductor k : live()) out.addAll(k.watchdogs);
         return out;
     }
 }

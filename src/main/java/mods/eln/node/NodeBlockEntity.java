@@ -73,6 +73,7 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
         }
         if (lastLight != light) {
             lastLight = light;
+            if (level != null) NodeBlock.setLight(level, worldPosition, light);
             if (level != null) level.getLightEngine().checkBlock(worldPosition);
         }
     }
@@ -161,6 +162,7 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
     @Override
     public void setRemoved() {
         if (level != null && level.isClientSide()) {
+            NodeBlock.setLight(level, worldPosition, 0);
             clientList.remove(this);
             clientDestroy();
         }

@@ -87,6 +87,11 @@ public class ElectricalCableElement extends SixNodeElement {
         nbt.putByte("color", (byte) (color + (colorCare << 4)));
     }
 
+    /** Its temperature (C above ambient; 0 for a signal cable): the voxel-cable converter. */
+    public double thermalTc() {
+        return descriptor.signalWire ? 0 : thermalLoad.Tc;
+    }
+
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
         return electricalLoad;

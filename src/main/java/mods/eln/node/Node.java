@@ -19,6 +19,7 @@ public abstract class Node extends NodeBase {
         if (light < 0) light = 0;
         if (lastLight != light) {
             lastLight = light;
+            NodeBlock.setLight(coordonate.world(), coordonate.pos(), light);
             // 26.x: the block's light emission comes from the BE (NodeBlock.getLightEmission); re-check it
             if (coordonate.getBlockExist()) coordonate.world().getLightEngine().checkBlock(coordonate.pos());
             setNeedPublish(true);
@@ -35,6 +36,7 @@ public abstract class Node extends NodeBase {
         super.readFromNBT(nbt);
 
         lastLight = nbt.getByteOr("lastLight", (byte) 0);
+        if (lastLight > 0 && coordonate.world() != null) NodeBlock.setLight(coordonate.world(), coordonate.pos(), lastLight);
     }
 
 

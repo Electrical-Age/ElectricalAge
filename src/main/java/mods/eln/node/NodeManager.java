@@ -61,6 +61,7 @@ public class NodeManager {
 
     public void removeNode(NodeBase node) {
         if (node == null) return;
+        if (node instanceof Node && node.coordonate.world() != null) NodeBlock.setLight(node.coordonate.world(), node.coordonate.pos(), 0);
         nodesMap.remove(node.coordonate);
         nodes.remove(node);
         Utils.println("NodeManager has " + nodesMap.size() + "node");

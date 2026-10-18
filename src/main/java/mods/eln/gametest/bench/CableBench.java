@@ -90,52 +90,59 @@ public final class CableBench implements TestCase {
         for (int cx = (o.getX() >> 4) - 1; cx <= ((o.getX() + 400) >> 4) + 1; cx++)
             for (int cz = (o.getZ() >> 4) - 1; cz <= ((o.getZ() + 220) >> 4) + 1; cz++) level.setChunkForced(cx, cz, true);
         String[] tiers = {"Low Voltage Cable", "Medium Voltage Cable", "High Voltage Cable", "Very High Voltage Cable", "Signal Cable"};
+        List<Object[]> feeds = new ArrayList<>();   // tier, first, last
         // straight runs, 2 apart (not touching), tiers in turn
         for (int r = 0; r < RUNS; r++) {
             String tier = tiers[r % tiers.length];
-            ElectricalLoad first = null, last = null;
             for (int i = 0; i < RUN_LEN; i++) {
                 BlockPos p = o.offset(i, 0, r * 2);
-                ElectricalLoad l = cable(ctx, tier, p, Direction.YN);
-                if (first == null) first = l;
-                last = l;
+                cable(ctx, tier, p, Direction.YN);
                 if (r < 10) teardown.add(p);
             }
-            runs.add(feed(tier, first, last));
+            feeds.add(new Object[]{tier, o.offset(0, 0, r * 2), o.offset(RUN_LEN - 1, 0, r * 2)});
         }
         // the grid: rows every 2 blocks, columns every 8 (crossings and T's), fed at the corners
         BlockPos g = o.offset(RUN_LEN + 10, 0, 0);
-        ElectricalLoad[][] grid = new ElectricalLoad[GRID_X][GRID_Z];
         for (int x = 0; x < GRID_X; x++)
             for (int z = 0; z < GRID_Z; z++)
-                if (z % 2 == 0 || x % 8 == 0) grid[x][z] = cable(ctx, "Medium Voltage Cable", g.offset(x, 0, z), Direction.YN);
-        ElectricalCableDescriptor mv = descriptor("Medium Voltage Cable");
-        for (int[] c : new int[][]{{0, 0}, {GRID_X - 8, 0}, {0, GRID_Z - 2}, {GRID_X - 8, GRID_Z - 2}}) {
-            VoltageSource s = new VoltageSource("bench", terminal(grid[c[0]][c[1]]), null).setU(mv.electricalNominalVoltage);
-            add(s);
-        }
-        for (int x = 4; x < GRID_X; x += 8)
-            for (int z = 4; z < GRID_Z; z += 8) add(new Resistor(terminal(grid[x][z]), null).setR(4 * mv.electricalNominalVoltage * mv.electricalNominalVoltage / mv.electricalNominalPower));
-        shortAt = grid[GRID_X / 2][GRID_Z / 2];
-        for (int x = 0; x < GRID_X; x++) gridRow.add(grid[x][GRID_Z / 2]);
+                if (z % 2 == 0 || x % 8 == 0) cable(ctx, "Medium Voltage Cable", g.offset(x, 0, z), Direction.YN);
         // runs over bumps: floor, up the bump's side (inner corner), over its top (outer corners), down
         BlockPos b = g.offset(GRID_X + 10, 0, 0);
         for (int r = 0; r < BUMP_RUNS; r++) {
-            ElectricalLoad first = null, last = null;
             for (int i = 0; i < BUMP_LEN; i++) {
                 BlockPos p = b.offset(i, 0, r * 3);
-                ElectricalLoad l;
                 if (i % 6 == 3) {
                     ctx.floor(p);
-                    l = cable(ctx, "Low Voltage Cable", p.above(), Direction.YN);
+                    cable(ctx, "Low Voltage Cable", p.above(), Direction.YN);
                     cable(ctx, "Low Voltage Cable", p.west(), Direction.XP);
                     cable(ctx, "Low Voltage Cable", p.east(), Direction.XN);
-                } else l = cable(ctx, "Low Voltage Cable", p, Direction.YN);
-                if (first == null) first = l;
-                last = l;
+                } else cable(ctx, "Low Voltage Cable", p, Direction.YN);
             }
-            runs.add(feed("Low Voltage Cable", first, last));
+            BlockPos last = b.offset(BUMP_LEN - 1, 0, r * 3);
+            feeds.add(new Object[]{"Low Voltage Cable", b.offset(0, 0, r * 3), (BUMP_LEN - 1) % 6 == 3 ? last.above() : last});
         }
+        // the voxel build: the same scene through the converter
+        if (System.getProperty("eln.bench.convert") != null) {
+            int conv = 0, kept = 0;
+            for (mods.eln.node.NodeBase n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes()))
+                if (n instanceof mods.eln.node.six.SixNode six && n.coordonate.world() == level) {
+                    if (mods.eln.node.voxel.CableConverter.convert(six) == null) conv++;
+                    else kept++;
+                }
+            result.addProperty("converted", conv);
+            result.addProperty("keptSixNode", kept);
+        }
+        for (Object[] f : feeds) runs.add(feed((String) f[0], loadAt((BlockPos) f[1]), loadAt((BlockPos) f[2])));
+        ElectricalCableDescriptor mv = descriptor("Medium Voltage Cable");
+        for (int[] c : new int[][]{{0, 0}, {GRID_X - 8, 0}, {0, GRID_Z - 2}, {GRID_X - 8, GRID_Z - 2}}) {
+            VoltageSource s = new VoltageSource("bench", terminal(loadAt(g.offset(c[0], 0, c[1]))), null).setU(mv.electricalNominalVoltage);
+            add(s);
+        }
+        for (int x = 4; x < GRID_X; x += 8)
+            for (int z = 4; z < GRID_Z; z += 8)
+                add(new Resistor(terminal(loadAt(g.offset(x, 0, z))), null).setR(4 * mv.electricalNominalVoltage * mv.electricalNominalVoltage / mv.electricalNominalPower));
+        shortAt = loadAt(g.offset(GRID_X / 2, 0, GRID_Z / 2));
+        for (int x = 0; x < GRID_X; x++) gridRow.add(loadAt(g.offset(x, 0, GRID_Z / 2)));
         result.addProperty("label", System.getProperty("eln.bench.label", "?"));
         result.addProperty("cables", cables);
         result.addProperty("buildMs", (System.nanoTime() - t0) / 1e6);
@@ -161,11 +168,18 @@ public final class CableBench implements TestCase {
         return (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(Ids.six(tier));
     }
 
-    ElectricalLoad cable(TestContext ctx, String tier, BlockPos p, Direction side) {
+    void cable(TestContext ctx, String tier, BlockPos p, Direction side) {
         ctx.floor(p.relative(side.toEnumFacing()));
-        SixNodeElement e = ctx.placeSix(Ids.six(tier), p, side);
+        ctx.placeSix(Ids.six(tier), p, side);
         cables++;
-        return ((ElectricalCableElement) e).electricalLoad;
+    }
+
+    /** The floor cable's load at p: a six-node element's, or a converted voxel node's conductor. */
+    ElectricalLoad loadAt(BlockPos p) {
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
+        if (n instanceof mods.eln.node.six.SixNode six) return ((ElectricalCableElement) six.getElement(Direction.YN)).electricalLoad;
+        if (n instanceof mods.eln.node.voxel.VoxelNode v) return v.cableLoad(0);
+        throw new IllegalStateException("no cable at " + p);
     }
 
     /** A source at the first cable, a resistor drawing half the rated power at the last. */
