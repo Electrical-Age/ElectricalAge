@@ -82,8 +82,7 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         if (r != null) return r;
         CablePart c = cableAt(side, lrdu);
         if (c == null) return null;
-        var d = CablePart.TIERS[c.tier].descriptor();
-        return d == null ? null : d.render;
+        return CablePart.TIERS[c.tier].render();
     }
 
     private CablePart cableAt(Direction side, mods.eln.misc.LRDU lrdu) {

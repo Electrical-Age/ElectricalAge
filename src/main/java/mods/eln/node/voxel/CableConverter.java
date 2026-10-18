@@ -58,8 +58,10 @@ public final class CableConverter {
             SixNodeElement e = s.getElement(f);
             if (e == null) continue;
             // cables become cable pieces; any other device moves over as it is (hosted), its edges as ports
-            ElectricalCableElement c = e instanceof ElectricalCableElement ce && CablePart.tierOf(ce.descriptor.name) >= 0 ? ce : null;
-            int tier = c == null ? CablePart.tierOf("Low Voltage Cable") : CablePart.tierOf(c.descriptor.name);
+            boolean cable = (e instanceof ElectricalCableElement || e instanceof mods.eln.sixnode.thermalcable.ThermalCableElement)
+                && CablePart.tierOf(e.sixNodeElementDescriptor.name) >= 0;
+            SixNodeElement c = cable ? e : null;
+            int tier = c == null ? CablePart.tierOf("Low Voltage Cable") : CablePart.tierOf(e.sixNodeElementDescriptor.name);
             if (c != null) cableFaces.add(f.getInt());
             any = true;
             List<Integer> dirs = new ArrayList<>();
@@ -106,7 +108,8 @@ public final class CableConverter {
             if (c == null) continue;   // (a device: knuckles for its outer corners only)
             int face = f.toEnumFacing().get3DDataValue();
             List<CablePart> arms = dirs.isEmpty() ? CablePart.arms(tier, face, otherPair(face)) : CablePart.arms(tier, face, dirs.stream().mapToInt(i -> i).toArray());
-            double u = c.electricalLoad.state, t = c.thermalTc();
+            double u = c instanceof ElectricalCableElement ec ? ec.electricalLoad.state : 0;
+            double t = c instanceof ElectricalCableElement ec ? ec.thermalTc() : ((mods.eln.sixnode.thermalcable.ThermalCableElement) c).thermalTc();
             for (int i = 0; i < arms.size(); i++) {
                 CablePart a = arms.get(i);
                 a.paid = 16 / arms.size() + (i == 0 ? 16 % arms.size() : 0);   // (the one cable item it was)

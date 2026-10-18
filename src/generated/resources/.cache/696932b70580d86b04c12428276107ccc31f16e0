@@ -1,4 +1,4 @@
-// 26.3	2026-10-18T15:51:01.363289948	eln-global/EA models
+// 26.3	2026-10-18T17:46:23.536011727	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -150,6 +150,7 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 5e9c5666a93b581fa46fc9a7d72f0018e5a23bae assets/eln/items/cable_kit_lv.json
 8357193eeda22f7d16d16e19a17856cbb097699b assets/eln/items/cable_kit_mv.json
 0186f2aa540c8b8064b3472eec57f8a636962873 assets/eln/items/cable_kit_signal.json
+79b870e1f7fbe75896ae51704698975ea8bca766 assets/eln/items/cable_kit_thermal.json
 8a4e1e22bad335e63ea8671fc091833082a69edf assets/eln/items/cable_kit_vhv.json
 416d58aaae7250af7c091abfb63554244ca09aa6 assets/eln/items/capacity_oriented_battery.json
 a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
@@ -507,6 +508,7 @@ cac6a0113223ca972d0fb558559968f3bedfb59a assets/eln/models/item/cable_kit_hv.jso
 0ebb4e07b328e5edfdb89eddd9f667839b2fe653 assets/eln/models/item/cable_kit_lv.json
 f9992078b5ec44355c3a62df7588c097c1cc330c assets/eln/models/item/cable_kit_mv.json
 fd4526b81d5d19c6111fb9ee420bc4e7c645ddbf assets/eln/models/item/cable_kit_signal.json
+80f5ba728226c8bad50fbfde58ff21fdd9494563 assets/eln/models/item/cable_kit_thermal.json
 56d88a337caf4d4b80b1b429e38e515ea613ee3c assets/eln/models/item/cable_kit_vhv.json
 1fb49930355446d40b68162bc471465a6ac1901d assets/eln/models/item/capacity_oriented_battery.json
 c01d247e009543b7b3371b07e7b8a45e28eea766 assets/eln/models/item/capacity_oriented_battery_3d.json

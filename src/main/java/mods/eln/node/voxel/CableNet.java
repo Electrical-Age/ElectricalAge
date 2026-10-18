@@ -47,8 +47,11 @@ final class CableNet {
     final class Conductor implements IBurnable {
         final List<CablePart> parts = new ArrayList<>();
         final ElectricalCableDescriptor d;
+        /** The thermal cable's (d null then: no electrical load, only heat). */
+        final mods.eln.sixnode.thermalcable.ThermalCableDescriptor td;
         final int tier, face;
-        final ElectricalLoad load = new ElectricalLoad();
+        /** Null for a thermal cable. */
+        final ElectricalLoad load;
         ThermalLoad thermal;
         final List<IProcess> slow = new ArrayList<>(), thermalSlow = new ArrayList<>();
 
@@ -56,6 +59,16 @@ final class CableNet {
             this.tier = tier;
             this.face = face;
             this.d = CablePart.TIERS[tier].descriptor();
+            this.td = CablePart.TIERS[tier].thermalDescriptor();
+            this.load = td != null ? null : new ElectricalLoad();
+        }
+
+        boolean valid() {
+            return d != null || td != null;
+        }
+
+        String name() {
+            return d != null ? d.name : td.name;
         }
 
         double share() {
@@ -67,6 +80,10 @@ final class CableNet {
 
         void make() {
             double s = share();
+            if (td != null) {
+                makeThermal(s);
+                return;
+            }
             load.setCanBeSimplifiedByLine(true);
             d.applyTo(load, s);
             // (save() gives every piece its conductor's state; a piece added since starts from the first's)
@@ -100,11 +117,31 @@ final class CableNet {
             });
         }
 
+        /** A thermal cable: a heat conductor only (like the six-node thermal cable, its load in the fast thermal step). */
+        void makeThermal(double s) {
+            thermal = new ThermalLoad();
+            if (face < 0) {   // (a knuckle: a short link round the corner; not shorter than a quarter block: the
+                // explicit thermal step needs a heat capacity of 3 dt / Rs, which a tiny Rs makes a heat sink)
+                thermal.Rs = td.rs() * 0.25;
+                thermal.Rp = td.rp() / 0.25;
+            } else {
+                thermal.Rs = td.rs() * s;
+                thermal.Rp = td.rp() / s;
+            }
+            thermal.C = Math.max(td.c() * s, Eln.simulator.getMinimalThermalC(thermal.Rs, thermal.Rp));
+            thermal.Tc = parts.get(0).t;
+            if (face < 0) return;
+            ThermalLoadWatchDog tw = new ThermalLoadWatchDog();
+            tw.set(thermal).setLimit(td.warmLimit(), td.coolLimit()).set(new Failure(this, node, node.coordonate, "cable " + td.name).cable());
+            watchdogs.add(tw);
+            slow.add(tw);
+        }
+
         /** Its watchdogs (FaultNetwork relieves them). */
         final List<IProcess> watchdogs = new ArrayList<>();
 
         int mask() {
-            return d.getNodeMask();
+            return d != null ? d.getNodeMask() : NodeBase.maskThermalWire;
         }
 
         boolean isBurntNow() {
@@ -182,14 +219,14 @@ final class CableNet {
             of.put(c, k);
         }
         conductors.addAll(byRoot.values());
-        for (Conductor k : conductors) if (k.d != null) k.make();
+        for (Conductor k : conductors) if (k.valid()) k.make();
         // inner corners and tier changes: conductors touching inside the block are joined, as six-node elements were
         for (int i = 0; i < conductors.size(); i++)
             for (int j = i + 1; j < conductors.size(); j++) {
                 Conductor a = conductors.get(i), b = conductors.get(j);
-                if (a.d == null || b.d == null || a.isBurntNow() || b.isBurntNow()) continue;
+                if (!a.valid() || !b.valid() || a.isBurntNow() || b.isBurntNow()) continue;
                 if (!NodeBase.compareConnectionMask(a.mask(), b.mask()) || !touch(a, b)) continue;
-                internalE.add(new ElectricalConnection(a.load, b.load));
+                if (a.load != null && b.load != null) internalE.add(new ElectricalConnection(a.load, b.load));
                 if (a.thermal != null && b.thermal != null) internalT.add(new ThermalConnection(a.thermal, b.thermal));
             }
     }
@@ -207,13 +244,13 @@ final class CableNet {
     /** The working conductors (in the simulation). */
     List<Conductor> live() {
         List<Conductor> out = new ArrayList<>();
-        for (Conductor k : conductors) if (k.d != null && !k.isBurntNow()) out.add(k);
+        for (Conductor k : conductors) if (k.valid() && !k.isBurntNow()) out.add(k);
         return out;
     }
 
     void addToSimulation() {
         for (Conductor k : live()) {
-            Eln.simulator.addElectricalLoad(k.load);
+            if (k.load != null) Eln.simulator.addElectricalLoad(k.load);
             if (k.thermal != null) Eln.simulator.addThermalLoad(k.thermal);
             for (IProcess p : k.slow) Eln.simulator.addSlowProcess(p);
             for (IProcess p : k.thermalSlow) Eln.simulator.addThermalSlowProcess(p);
@@ -230,16 +267,16 @@ final class CableNet {
             for (IProcess p : k.slow) Eln.simulator.removeSlowProcess(p);
             for (IProcess p : k.thermalSlow) Eln.simulator.removeThermalSlowProcess(p);
             if (k.thermal != null) Eln.simulator.removeThermalLoad(k.thermal);
-            Eln.simulator.removeElectricalLoad(k.load);
+            if (k.load != null) Eln.simulator.removeElectricalLoad(k.load);
         }
     }
 
     /** Copy each conductor's state into its pieces (for saving, or before a rebuild). */
     void save() {
         for (Conductor k : conductors) {
-            if (k.d == null || k.isBurntNow()) continue;
+            if (!k.valid() || k.isBurntNow()) continue;
             for (CablePart p : k.parts) {
-                p.u = k.load.state;
+                p.u = k.load == null ? 0 : k.load.state;
                 if (k.thermal != null) p.t = k.thermal.Tc;
             }
         }

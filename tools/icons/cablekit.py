@@ -4,8 +4,8 @@ Usage: cablekit.py RESOURCES_DIR -> assets/eln/textures/item/cable_kit_{signal,l
 import math, os, sys
 from PIL import Image
 
-TAGS = {"signal": (230, 230, 230), "lv": (200, 60, 50), "mv": (230, 190, 40), "hv": (60, 110, 210), "vhv": (130, 60, 170)}
-THICK = {"signal": 1, "lv": 1.4, "mv": 1.7, "hv": 2.1, "vhv": 2.4}
+TAGS = {"signal": (230, 230, 230), "lv": (200, 60, 50), "mv": (230, 190, 40), "hv": (60, 110, 210), "vhv": (130, 60, 170), "thermal": (205, 120, 60)}
+THICK = {"signal": 1, "lv": 1.4, "mv": 1.7, "hv": 2.1, "vhv": 2.4, "thermal": 2.4}
 
 def icon(tag, thick):
     im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))

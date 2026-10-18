@@ -28,6 +28,7 @@ public final class VoxelGeometry {
 
     /** The cable texture of a tier (the six-node cable's, copied onto the block atlas: textures/block/cable/). */
     public static Identifier cableSprite(int tier) {
+        if (CablePart.TIERS[tier].thermal()) return Identifier.fromNamespaceAndPath("eln", "block/cable/thermal");
         return Identifier.fromNamespaceAndPath("eln", CablePart.TIERS[tier].height() > 1 && CablePart.TIERS[tier].name().startsWith("Very")
             ? "block/cable/cablevhv" : "block/cable/cable");
     }
@@ -72,6 +73,7 @@ public final class VoxelGeometry {
                 b.sprite = cableSprite(c.tier);
                 // (black insulation, Baughn; burnt: scorched brown)
                 if (c.burnt != null) b.color(0.35f, 0.22f, 0.14f);
+                else if (CablePart.TIERS[c.tier].thermal()) b.color(1, 1, 1);   // (the copper texture as it is)
                 else b.color(0.22f, 0.22f, 0.24f);
                 cable(b, c);
             }

@@ -39,6 +39,7 @@ public final class CableCases {
         cases.add(new RoutedCase());
         cases.add(new HostedCase());
         cases.add(new BreakMixedCase());
+        cases.add(new ThermalCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
@@ -518,6 +519,82 @@ public final class CableCases {
 
         public void measure(TestContext c) {
             c.check("mixed block: mining the switch takes the switch only", result.startsWith("block removed false, node VoxelNode, parts 1, floor element false"), result);
+        }
+    }
+
+    /**
+     * Thermal cables (the voxel thermal tier): a hot body (a big heat capacity at 500 C) on one end of six copper thermal
+     * cables, over a bump halfway (outer corners: thermal knuckles); six-node and converted rows warm their far end
+     * alike.
+     */
+    static final class ThermalCase implements TestCase {
+        final List<mods.eln.sim.ThermalLoad> hot = new ArrayList<>();
+        String err = "";
+
+        public String name() {
+            return "thermal cable converted";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 200;   // (steady: a corner's knuckle adds heat capacity, so the first second warms slower)
+        }
+
+        public void build(TestContext c) {
+            int id = Ids.six("Copper Thermal Cable");
+            for (int z : new int[]{1, 6}) {
+                c.floor(c.at(4, 1, z));
+                for (int x : new int[]{1, 2, 3, 5, 6}) c.placeSix(id, c.at(x, 1, z));
+                c.placeSix(id, c.at(3, 1, z), mods.eln.misc.Direction.XP);
+                c.placeSix(id, c.at(4, 2, z));
+                c.placeSix(id, c.at(5, 1, z), mods.eln.misc.Direction.XN);
+            }
+            for (int x = 0; x < 10; x++)
+                for (int y = 1; y < 4; y++) {
+                    var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, 6), c.level()));
+                    if (n instanceof mods.eln.node.six.SixNode s6 && !(n instanceof mods.eln.node.voxel.VoxelNode)) {
+                        String why = mods.eln.node.voxel.CableConverter.convert(s6);
+                        if (why != null) err += x + "," + y + ": " + why + "; ";
+                    }
+                }
+            for (int z : new int[]{1, 6}) {
+                var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(1, 1, z), c.level()));
+                mods.eln.sim.ThermalLoad t = n instanceof mods.eln.node.voxel.VoxelNode v ? v.cableThermal(0)
+                    : ((mods.eln.node.six.SixNode) n).getElement(mods.eln.misc.Direction.YN).getThermalLoad(mods.eln.misc.LRDU.Left);
+                var body = new mods.eln.sim.ThermalLoad(500, 1e9, 1e-3, 1e9);
+                mods.eln.Eln.simulator.addThermalLoad(body);
+                mods.eln.Eln.simulator.addThermalConnection(new mods.eln.sim.ThermalConnection(body, t));
+                hot.add(body);
+            }
+        }
+
+        double far(TestContext c, int z) {
+            var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(6, 1, z), c.level()));
+            if (n instanceof mods.eln.node.voxel.VoxelNode v) return v.cableThermal(0).Tc;
+            return ((mods.eln.node.six.SixNode) n).getElement(mods.eln.misc.Direction.YN).getThermalLoad(mods.eln.misc.LRDU.Left).Tc;
+        }
+
+        public void measure(TestContext c) {
+            c.check("thermal: every block converted", err.isEmpty(), err);
+            double a = far(c, 1), b = far(c, 6);
+            c.line(String.format("thermal: far end %.3f C (six-node), %.3f C (converted)", a, b));
+            c.check("thermal: heat crosses the corners alike (2%)", a > 1 && Math.abs(a - b) <= 0.02 * a, String.format("%.3f vs %.3f", a, b));
+            for (var h : hot) mods.eln.Eln.simulator.removeThermalLoad(h);
         }
     }
 

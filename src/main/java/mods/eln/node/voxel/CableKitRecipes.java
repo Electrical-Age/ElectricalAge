@@ -25,12 +25,14 @@ public final class CableKitRecipes {
     public static int coilTier(ItemStack s) {
         if (s.isEmpty()) return -1;
         var d = GenericItemBlockUsingDamageDescriptor.getDescriptor(s);
-        return d instanceof ElectricalCableDescriptor c ? CablePart.tierOf(c.name) : -1;
+        if (d instanceof ElectricalCableDescriptor c) return CablePart.tierOf(c.name);
+        if (d instanceof mods.eln.sixnode.thermalcable.ThermalCableDescriptor t) return CablePart.tierOf(t.name);
+        return -1;
     }
 
     /** A coil of a tier. */
     public static ItemStack coil(int tier) {
-        var d = CablePart.TIERS[tier].descriptor();
+        var d = CablePart.TIERS[tier].sixDescriptor();
         return d == null ? ItemStack.EMPTY : d.newItemStack();
     }
 

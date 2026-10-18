@@ -727,13 +727,19 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public List<double[]> cableStates() {
         List<double[]> out = new ArrayList<>();
         for (CableNet.Conductor k : cables.live())
-            out.add(new double[]{k.load.getU(), k.load.getI(), k.thermal == null ? Double.NaN : k.thermal.Tc});
+            out.add(new double[]{k.load == null ? Double.NaN : k.load.getU(), k.load == null ? Double.NaN : k.load.getI(), k.thermal == null ? Double.NaN : k.thermal.Tc});
         return out;
     }
 
     /** The load of the working cable conductor lying on face (3D value), or null. */
     public ElectricalLoad cableLoad(int face) {
         for (CableNet.Conductor k : cables.live()) if (k.face == face) return k.load;
+        return null;
+    }
+
+    /** The thermal load of the working cable conductor lying on face (3D value), or null. */
+    public ThermalLoad cableThermal(int face) {
+        for (CableNet.Conductor k : cables.live()) if (k.face == face) return k.thermal;
         return null;
     }
 
@@ -867,13 +873,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             // cables: each conductor's tier, voltage and current (temperature with details)
             int n = 0;
             for (CableNet.Conductor k : cables.conductors) {
-                if (k.d == null || k.face < 0) continue;
+                if (!k.valid() || k.face < 0) continue;
                 String key = n++ == 0 ? "Cable" : "Cable " + n;
                 if (k.isBurntNow()) {
-                    out.put(key, k.d.name + ", BURNT");
+                    out.put(key, k.name() + ", BURNT");
                     continue;
                 }
-                out.put(key, k.d.name + ": " + mods.eln.misc.Utils.plotVolt("", k.load.getU()) + " " + mods.eln.misc.Utils.plotAmpere("", k.load.getI()));
+                if (k.load == null) {   // (the thermal cable)
+                    out.put(key, k.name() + ": " + mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc) + " " + mods.eln.misc.Utils.plotPower("", k.thermal.getPower()));
+                    continue;
+                }
+                out.put(key, k.name() + ": " + mods.eln.misc.Utils.plotVolt("", k.load.getU()) + " " + mods.eln.misc.Utils.plotAmpere("", k.load.getI()));
                 if (details && k.thermal != null) out.put(key + " temperature", mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc));
             }
             return out;
@@ -899,7 +909,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public String multiMeterString(Direction side) {
         if (sideElementList[side.getInt()] != null) return super.multiMeterString(side);
         for (CableNet.Conductor k : cables.live())
-            return k.d.signalWire ? mods.eln.misc.Utils.plotSignal(k.load.getU(), k.load.getI()) : mods.eln.misc.Utils.plotUIP(k.load.getU(), k.load.getI());
+            if (k.load != null) return k.d.signalWire ? mods.eln.misc.Utils.plotSignal(k.load.getU(), k.load.getI()) : mods.eln.misc.Utils.plotUIP(k.load.getU(), k.load.getI());
         for (VoxelPart p : parts)
             if (p instanceof PipePart pipe && pipe.fluid != null) {
                 var n = pipe.fluid;

@@ -93,6 +93,27 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
         }
     }
     */
+    /** For voxel thermal cables (CableNet): the limits and per-element constants. */
+    public double warmLimit() {
+        return thermalWarmLimit;
+    }
+
+    public double coolLimit() {
+        return thermalCoolLimit;
+    }
+
+    public double rs() {
+        return thermalRs;
+    }
+
+    public double rp() {
+        return thermalRp;
+    }
+
+    public double c() {
+        return thermalC;
+    }
+
     public void setThermalLoad(ThermalLoad thermalLoad) {
         thermalLoad.Rp = thermalRp;
         thermalLoad.Rs = thermalRs;

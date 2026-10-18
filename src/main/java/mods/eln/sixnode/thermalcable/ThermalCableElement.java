@@ -79,6 +79,11 @@ public class ThermalCableElement extends SixNodeElement {
         return thermalLoad;
     }
 
+    /** Its temperature (C above ambient): the voxel-cable converter. */
+    public double thermalTc() {
+        return thermalLoad.Tc;
+    }
+
     @Override
     public int getConnectionMask(LRDU lrdu) {
         return NodeBase.maskThermalWire + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);

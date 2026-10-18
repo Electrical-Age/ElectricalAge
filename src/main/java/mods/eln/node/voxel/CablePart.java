@@ -22,10 +22,31 @@ public final class CablePart extends VoxelPart {
     public static final String KIND = "cable";
 
     /** The tiers: six-node cable descriptor name, cross-section width and height (voxels). Signal 1x1 (Baughn). */
-    public record Tier(String name, int width, int height) {
+    public record Tier(String name, int width, int height, boolean thermal) {
+        Tier(String name, int width, int height) {
+            this(name, width, height, false);
+        }
+
+        /** An electrical tier's descriptor (null for the thermal cable). */
         public ElectricalCableDescriptor descriptor() {
-            for (var e : Eln.sixNodeItem.all().values())
-                if (e.name.equals(name) && e instanceof ElectricalCableDescriptor d) return d;
+            return sixDescriptor() instanceof ElectricalCableDescriptor d ? d : null;
+        }
+
+        /** The thermal cable's descriptor (null for the electrical tiers). */
+        public mods.eln.sixnode.thermalcable.ThermalCableDescriptor thermalDescriptor() {
+            return sixDescriptor() instanceof mods.eln.sixnode.thermalcable.ThermalCableDescriptor d ? d : null;
+        }
+
+        /** The six-node cable (its item is the coil). */
+        public mods.eln.node.six.SixNodeDescriptor sixDescriptor() {
+            for (var e : Eln.sixNodeItem.all().values()) if (e.name.equals(name)) return e;
+            return null;
+        }
+
+        public mods.eln.cable.CableRenderDescriptor render() {
+            var d = sixDescriptor();
+            if (d instanceof ElectricalCableDescriptor e) return e.render;
+            if (d instanceof mods.eln.sixnode.thermalcable.ThermalCableDescriptor t) return t.render;
             return null;
         }
     }
@@ -36,6 +57,7 @@ public final class CablePart extends VoxelPart {
         new Tier("Medium Voltage Cable", 3, 1),
         new Tier("High Voltage Cable", 4, 2),
         new Tier("Very High Voltage Cable", 4, 2),
+        new Tier("Copper Thermal Cable", 4, 4, true),
     };
 
     public static int tierOf(String name) {
