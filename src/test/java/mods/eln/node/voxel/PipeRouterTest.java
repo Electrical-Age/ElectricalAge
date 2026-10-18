@@ -67,6 +67,19 @@ public class PipeRouterTest {
     }
 
     @Test
+    void runsAlongTheFloorRatherThanInTheAir() {
+        // a floor of solid blocks at y = -1: from a port on the top of block (0,0,0)'s east face... a straight run east
+        // at the block's middle height floats 8 voxels above the floor; the router drops to the lane next to it
+        java.util.Set<List<Long>> floor = new java.util.HashSet<>();
+        for (long x = -2; x <= 8; x++) for (long z = -2; z <= 2; z++) floor.add(List.of(x, -1L, z));
+        var r = PipeRouter.route(solid(floor), 4, face(0, 0, 0, 1), List.of(), face(6, 0, 0, 0));
+        assertNull(r.error);
+        long low = Long.MAX_VALUE;
+        for (long[] p : r.points) low = Math.min(low, p[1]);
+        assertEquals(4, low, "the run drops to y 4 voxels (resting on the floor): " + PipeRouter.perBlock(r.points).keySet());
+    }
+
+    @Test
     void boxedInHasNoPath() {
         java.util.Set<List<Long>> walls = new java.util.HashSet<>();
         for (long x = -1; x <= 1; x++) for (long y = -1; y <= 1; y++) for (long z = -1; z <= 1; z++)

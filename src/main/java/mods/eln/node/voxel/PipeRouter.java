@@ -15,6 +15,9 @@ import java.util.PriorityQueue;
 public final class PipeRouter {
     public static final int LATTICE = 4;
     static final int BEND = 6, BLOCK_ENTERED = 1;
+    /** A step whose pipe rests against nothing (no block or part within REST voxels of its side) costs this much more:
+     *  runs follow walls and floors rather than hang in the air (Baughn), even when a little longer. */
+    static final int UNSUPPORTED = 5, REST = 3;
     /** Search limits: expansions, and how far outside the legs' box it may wander (voxels). */
     static final int MAX_EXPANSIONS = 400_000, MARGIN = 16 * 8;
 
@@ -154,7 +157,7 @@ public final class PipeRouter {
                 for (int x = 0; x < 3; x++) if (x != d / 2 && Math.floorMod(q[x], 16) == 0) inPlane = true;
                 if (inPlane) continue;
                 if (stepBlocked(space, bore, p, d)) continue;
-                long g = o.g + LATTICE + (k.dir() >= 0 && k.dir() != d ? BEND : 0)
+                long g = o.g + LATTICE + (k.dir() >= 0 && k.dir() != d ? BEND : 0) + (supported(space, bore, q, d) ? 0 : UNSUPPORTED)
                     + (Math.floorDiv(q[0], 16) != Math.floorDiv(p[0], 16) || Math.floorDiv(q[1], 16) != Math.floorDiv(p[1], 16)
                     || Math.floorDiv(q[2], 16) != Math.floorDiv(p[2], 16) ? BLOCK_ENTERED : 0);
                 Key nk = new Key(q[0], q[1], q[2], d);
@@ -165,6 +168,31 @@ public final class PipeRouter {
             }
         }
         return null;
+    }
+
+    /** Does a pipe at q (moving along d) rest against something on any side across its run? */
+    static boolean supported(Space space, int bore, long[] q, int d) {
+        long h = bore / 2;
+        int along = d / 2;
+        for (int side = 0; side < 3; side++) {
+            if (side == along) continue;
+            for (int sgn = -1; sgn <= 1; sgn += 2) {
+                long[] lo = new long[3], hi = new long[3];
+                for (int a = 0; a < 3; a++) {
+                    lo[a] = q[a] - h;
+                    hi[a] = q[a] + h;
+                }
+                if (sgn < 0) {
+                    lo[side] = q[side] - h - REST;
+                    hi[side] = q[side] - h;
+                } else {
+                    lo[side] = q[side] + h;
+                    hi[side] = q[side] + h + REST;
+                }
+                if (space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])) return true;
+            }
+        }
+        return false;
     }
 
     static long h(long[] p, long[] t) {

@@ -27,6 +27,7 @@ public final class PipeCases {
         cases.add(new Valve());
         cases.add(new Adapter());
         cases.add(new ValveByPlayer());
+        cases.add(new KitPickupMerges());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -204,6 +205,49 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** Picking up a dropped kit tops up the kit already in the inventory (Baughn: stacking, reimplemented). */
+    static final class KitPickupMerges implements TestCase {
+        int held, inv;
+        boolean gone;
+
+        public String id() {
+            return "pipe_kit_pickup_merges";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            var p = Wp10bCases.player(ctx);
+            p.getInventory().clearContent();
+            p.getInventory().add(PipeKitItem.kit(0, 16));
+            var ent = new net.minecraft.world.entity.item.ItemEntity(ctx.level(), p.getX(), p.getY(), p.getZ(), PipeKitItem.kit(0, 40));
+            ent.setNoPickUpDelay();
+            ctx.level().addFreshEntity(ent);
+            ent.playerTouch(p);
+            gone = ent.isRemoved();
+            int kits = 0;
+            for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+                var s = p.getInventory().getItem(i);
+                if (s.getItem() instanceof PipeKitItem) {
+                    kits++;
+                    held = PipeKitItem.length(s);
+                }
+            }
+            inv = kits;
+            p.getInventory().clearContent();
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe: the dropped kit merged into the one held (16 + 40)", gone && inv == 1 && held == 56, "gone " + gone + ", kits " + inv + ", length " + held);
         }
     }
 
