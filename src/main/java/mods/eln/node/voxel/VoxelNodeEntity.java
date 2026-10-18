@@ -21,11 +21,38 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
 
     @Override
     public net.neoforged.neoforge.model.data.ModelData getModelData() {
-        return net.neoforged.neoforge.model.data.ModelData.builder().with(PARTS, clientParts).with(HOST, clientHost).build();
+        var b = net.neoforged.neoforge.model.data.ModelData.builder().with(PARTS, clientParts).with(HOST, clientHost);
+        if (clientCarved != null && !clientCarved.isEmpty()) b.with(CARVED, hostBoxes());
+        return b.build();
     }
+
+    /** Model data: what's left of a carved block (boxes), drawn in its textures instead of its model. */
+    public static final net.neoforged.neoforge.model.data.ModelProperty<List<int[]>> CARVED = new net.neoforged.neoforge.model.data.ModelProperty<>();
 
     /** Model data: the imitated block (Mimic), drawn with the parts. */
     public static final net.neoforged.neoforge.model.data.ModelProperty<BlockState> HOST = new net.neoforged.neoforge.model.data.ModelProperty<>();
+
+    /** Has the chisel taken anything from the imitated block? */
+    public boolean isCarved() {
+        if (level != null && !level.isClientSide()) return getNode() instanceof VoxelNode v && v.carved != null && !v.carved.isEmpty();
+        return clientCarved != null && !clientCarved.isEmpty();
+    }
+
+    /** Client: the carved-away voxels as last published, or null. */
+    public volatile java.util.BitSet clientCarved;
+
+    /** What's left of the imitated block, as boxes: server from the node, client from the last publish. */
+    public List<int[]> hostBoxes() {
+        if (level != null && !level.isClientSide()) return getNode() instanceof VoxelNode v ? v.hostBoxes() : List.of();
+        BlockState h = clientHost;
+        if (h == null || level == null) return List.of();
+        List<int[]> boxes = Mimic.boxes(h, level, worldPosition);
+        java.util.BitSet c = clientCarved;
+        if (c == null || c.isEmpty()) return boxes;
+        java.util.BitSet s = Mimic.voxels(boxes);
+        s.andNot(c);
+        return Mimic.boxes(s);
+    }
 
     /** Client: the imitated block as last published, or null. */
     public volatile BlockState clientHost;
@@ -69,8 +96,11 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
     protected void readBeforeElements(DataInputStream stream) throws IOException {
         {
             int hostId = stream.readInt();
+            byte[] cv = new byte[stream.readShort()];
+            stream.readFully(cv);
+            clientCarved = cv.length == 0 ? null : java.util.BitSet.valueOf(cv);
             int n = stream.readShort();
-            int hash = n * 7919 + hostId;
+            int hash = n * 7919 + hostId + 31 * java.util.Arrays.hashCode(cv);
             clientHost = hostId == 0 ? null : net.minecraft.world.level.block.Block.stateById(hostId);
             List<VoxelPart> ps = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {

@@ -81,10 +81,9 @@ public final class CablePlacer {
                     if (!level.isLoaded(p)) return false;
                     BlockState s = level.getBlockState(p);
                     if (!(s.getBlock() instanceof mods.eln.node.NodeBlock) && s.isCollisionShapeFullBlock(level, p)) continue;
-                    BlockState shape = Mimic.allowed(s) ? s
-                        : s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(p) instanceof VoxelNodeEntity e ? e.host() : null;
-                    if (shape == null) return false;
-                    List<int[]> boxes = Mimic.boxes(shape, level, p);
+                    List<int[]> boxes = Mimic.allowed(s) ? Mimic.boxes(s, level, p)
+                        : s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(p) instanceof VoxelNodeEntity e ? e.hostBoxes() : null;
+                    if (boxes == null || boxes.isEmpty()) return false;
                     // every voxel of the box's part in this block inside one of the shape's boxes
                     int lx0 = (int) Math.max(0, x0 - bx * 16), ly0 = (int) Math.max(0, y0 - by * 16), lz0 = (int) Math.max(0, z0 - bz * 16);
                     int lx1 = (int) Math.min(16, x1 - bx * 16), ly1 = (int) Math.min(16, y1 - by * 16), lz1 = (int) Math.min(16, z1 - bz * 16);

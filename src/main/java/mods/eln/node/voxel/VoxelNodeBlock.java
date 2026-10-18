@@ -93,7 +93,7 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         if (e == null) return Shapes.block();
         VoxelShape s = shapeOf(e.parts(), 2);
         BlockState host = e.host();
-        if (host != null) s = Shapes.or(s, host.getShape(level, pos, context));   // (the imitated block: Mimic)
+        if (host != null) s = Shapes.or(s, hostShape(e, host, level, pos, context, false));   // (the imitated block: Mimic)
         // six-node elements hosted here: their plates (grown like the parts' outline), for aiming; they don't collide
         int mask = e.getSideMask();
         for (int f = 0; f < 6; f++)
@@ -115,7 +115,15 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         if (e == null) return Shapes.empty();
         BlockState host = e.host();
-        return host == null ? shapeOf(e.parts()) : Shapes.or(shapeOf(e.parts()), host.getCollisionShape(level, pos, context));
+        return host == null ? shapeOf(e.parts()) : Shapes.or(shapeOf(e.parts()), hostShape(e, host, level, pos, context, true));
+    }
+
+    /** The imitated block's shape, or what the chisel left of it. */
+    static VoxelShape hostShape(VoxelNodeEntity e, BlockState host, BlockGetter level, BlockPos pos, CollisionContext context, boolean collision) {
+        if (!e.isCarved()) return collision ? host.getCollisionShape(level, pos, context) : host.getShape(level, pos, context);
+        VoxelShape s = Shapes.empty();
+        for (int[] b : e.hostBoxes()) s = Shapes.or(s, box(b[0], b[1], b[2], b[3], b[4], b[5]));
+        return s;
     }
 
     // ---- an imitated block (Mimic): its sound, its tool and speed when aimed at, its connections kept up to date
@@ -138,7 +146,7 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         int mask = e.getSideMask();
         for (int f = 0; f < 6; f++) if ((mask & (1 << f)) != 0 && VoxelPart.contains(VoxelNode.plate(f), x, y, z, 0.05)) return 1;
         BlockState host = e.host();
-        if (host != null) for (var b : host.getShape(e.getLevel(), pos).toAabbs()) if (b.inflate(0.003).contains(x, y, z)) return 2;
+        if (host != null) for (int[] b : e.hostBoxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return 2;
         return 1;
     }
 

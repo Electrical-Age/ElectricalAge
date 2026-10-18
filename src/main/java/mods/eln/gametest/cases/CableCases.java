@@ -42,6 +42,7 @@ public final class CableCases {
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
         cases.add(new StairsCase());
+        cases.add(new ChiselCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
@@ -717,6 +718,76 @@ public final class CableCases {
         public void measure(TestContext c) {
             c.check("stairs: a route over the steps is laid", err == null, String.valueOf(err));
             c.check("stairs: both stairs hold cable (imitated)", hosts.equals(hosts.replace("none", "")) && hosts.split(";").length >= 2, hosts);
+        }
+    }
+
+    /**
+     * The chisel (Baughn: carve a hole through a wall so a cable fits): a stone wall across a walled corridor; a 4-voxel
+     * chisel carves a tunnel 8 wide and 4 high along the floor through it; a cable kit's route then goes through. Putting
+     * material back, and a block carved and put back whole is plain stone again.
+     */
+    static final class ChiselCase implements TestCase {
+        String err, wall, back, whole;
+
+        public String name() {
+            return "chisel a cable hole through a wall";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            for (int x = 1; x <= 6; x++) for (int y = 1; y <= 2; y++) {
+                c.floor(c.at(x, y, 0));
+                c.floor(c.at(x, y, 2));
+            }
+            BlockPos w = c.at(3, 1, 1);
+            c.floor(w);
+            c.floor(w.above());
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.CHISEL.get()));
+            for (int k = 0; k < 4; k++)
+                for (int zz : new int[]{4, 8}) {
+                    var hit = new net.minecraft.world.phys.Vec3(w.getX() + k * 4 / 16.0, w.getY() + 2 / 16.0, w.getZ() + (zz + 2) / 16.0);
+                    mods.eln.node.voxel.ChiselItem.carve(player, level, w, hit, net.minecraft.core.Direction.WEST, 4, true);
+                }
+            BlockPos a = c.at(1, 1, 1), b = c.at(6, 1, 1);
+            var start = new mods.eln.node.voxel.CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + 8, 0, -1);
+            var end = new mods.eln.node.voxel.CableRouter.End(b.getX() * 16L + 8, b.getY() * 16L, b.getZ() * 16L + 8, 0, -1);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, LV, start, end);
+            var n = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(w, level));
+            wall = (n.host == null ? "none" : n.host.getBlock().getName().getString()) + ", carved " + (n.carved == null ? 0 : n.carved.cardinality())
+                + ", parts " + n.parts.size();
+            // put back where no cable is: the upper half of the tunnel's far corner
+            var hit = new net.minecraft.world.phys.Vec3(w.getX() + 14.5 / 16.0, w.getY() + 4 / 16.0, w.getZ() + 10.5 / 16.0);
+            int before = n.carved.cardinality();
+            mods.eln.node.voxel.ChiselItem.carve(player, level, w, hit, net.minecraft.core.Direction.DOWN, 1, false);
+            back = before + " -> " + n.carved.cardinality();
+            // a second block: carved a little, put back whole: stone again
+            BlockPos w2 = w.above();
+            var h2 = new net.minecraft.world.phys.Vec3(w2.getX() + 0, w2.getY() + 0.5, w2.getZ() + 0.5);
+            mods.eln.node.voxel.ChiselItem.carve(player, level, w2, h2, net.minecraft.core.Direction.WEST, 2, true);
+            boolean carvedNow = level.getBlockState(w2).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock;
+            mods.eln.node.voxel.ChiselItem.carve(player, level, w2.west(), new net.minecraft.world.phys.Vec3(w2.getX(), w2.getY() + 0.5, w2.getZ() + 0.5),
+                net.minecraft.core.Direction.EAST, 2, false);
+            whole = "carved " + carvedNow + ", after putting back: " + level.getBlockState(w2).getBlock().getName().getString();
+        }
+
+        public void measure(TestContext c) {
+            c.check("chisel: a route through the carved hole is laid", err == null, String.valueOf(err));
+            c.check("chisel: the wall block is carved stone holding cable", wall.startsWith("Stone, carved 512, parts "), wall);
+            c.check("chisel: right-click puts material back", !back.startsWith(back.substring(back.indexOf("-> ") + 3) + " "), back);
+            c.check("chisel: carved and put back whole: stone again", whole.equals("carved true, after putting back: Stone"), whole);
         }
     }
 

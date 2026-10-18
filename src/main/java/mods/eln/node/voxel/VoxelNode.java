@@ -34,6 +34,26 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public CompoundTag legacy;
     /** The decorative block this one imitates (a stair a cable runs over...: Mimic), or null. */
     public net.minecraft.world.level.block.state.BlockState host;
+    /** The imitated block's voxels carved away (the chisel), or null. */
+    public BitSet carved;
+
+    /** The voxels of the parts and hosted elements (not the imitated block). */
+    public BitSet partsVoxels() {
+        BitSet s = new BitSet(4096);
+        for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(s, b);
+        for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(s, plate(f));
+        return s;
+    }
+
+    /** What's left of the imitated block, as boxes (none without one). */
+    public List<int[]> hostBoxes() {
+        if (host == null || coordonate.world() == null) return List.of();
+        List<int[]> boxes = Mimic.boxes(host, coordonate.world(), coordonate.pos());
+        if (carved == null || carved.isEmpty()) return boxes;
+        BitSet s = Mimic.voxels(boxes);
+        s.andNot(carved);
+        return Mimic.boxes(s);
+    }
 
     /** The cables' conductors and their loads (server). */
     final CableNet cables = new CableNet(this);
@@ -51,8 +71,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(used, plate(f));
-        if (host != null && coordonate.world() != null)
-            for (int[] b : Mimic.boxes(host, coordonate.world(), coordonate.pos())) fill(used, b);
+        for (int[] b : hostBoxes()) fill(used, b);
     }
 
     /** The imitated block was mined: it drops, the parts stay (or the block goes if nothing is left). */
@@ -63,6 +82,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (level instanceof net.minecraft.server.level.ServerLevel sl && (player == null || !player.isCreative()))
             net.minecraft.world.level.block.Block.dropResources(host, sl, pos, null, player, player == null ? ItemStack.EMPTY : player.getMainHandItem());
         host = null;
+        carved = null;
         markUsed();
         setNeedPublish(true);
         if (isEmptyNode()) removeEmptyBlock();
@@ -841,6 +861,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (String k : node.keySet()) if (!nbt.contains(k)) nbt.put(k, node.get(k).copy());
         if (legacy != null) nbt.put("legacy", legacy);
         if (host != null) nbt.put("host", net.minecraft.nbt.NbtUtils.writeBlockState(host));
+        if (carved != null && !carved.isEmpty()) nbt.putLongArray("carved", carved.toLongArray());
         nbt.putInt("parts", parts.size());
         for (int i = 0; i < parts.size(); i++) {
             CompoundTag t = new CompoundTag();
@@ -859,6 +880,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         parts.clear();
         legacy = nbt.getCompound("legacy").orElse(null);
         host = nbt.getCompound("host").map(t -> net.minecraft.nbt.NbtUtils.readBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK, t)).orElse(null);
+        carved = nbt.getLongArray("carved").map(BitSet::valueOf).orElse(null);
         int n = nbt.getIntOr("parts", 0);
         for (int i = 0; i < n; i++) {
             VoxelPart p = VoxelPart.read(nbt.getCompoundOrEmpty("p" + i), coordonate.y);
@@ -879,6 +901,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     protected void publishBeforeElements(DataOutputStream stream) throws IOException {
         {
             stream.writeInt(host == null ? 0 : net.minecraft.world.level.block.Block.getId(host));
+            byte[] cv = carved == null ? new byte[0] : carved.toByteArray();
+            stream.writeShort(cv.length);
+            stream.write(cv);
             stream.writeShort(parts.size());
             for (VoxelPart p : parts) {
                 ByteArrayOutputStream b = new ByteArrayOutputStream();

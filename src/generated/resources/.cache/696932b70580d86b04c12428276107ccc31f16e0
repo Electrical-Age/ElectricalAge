@@ -1,4 +1,4 @@
-// 26.3	2026-10-18T17:46:23.536011727	eln-global/EA models
+// 26.3	2026-10-18T18:22:54.475733622	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -157,6 +157,7 @@ a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
 54c73cdeae61d72e7dfca65d5655d763c6a23b82 assets/eln/items/cheap_chip.json
 76b341a7ed092dde68fc920f40b4daf9645cea82 assets/eln/items/cheap_electrical_drill.json
 75599ffe285eb46bc0a5ed45a7da5ed746cc6cac assets/eln/items/cheap_ferromagnetic_core.json
+ba615ac186a982885f7bfd849b6a46919ccc56c1 assets/eln/items/chisel.json
 f560f5eda8ce5d031e9132c276204bb60b71dcd0 assets/eln/items/cinnabar_dust.json
 25bc81a2d15fd985d4ded7d263222fc97ed6408c assets/eln/items/cinnabar_ore.json
 0b10ab2c3df4347ff01ac48252cef9fcb2483a35 assets/eln/items/coal_dust.json
@@ -516,6 +517,7 @@ ccab4471b309e90a6f273d50e50f9ad1052fb4ff assets/eln/models/item/casing.json
 bf73432e1181339472b745af9693c30e46be8c6d assets/eln/models/item/cheap_chip.json
 826d5304e14e80c2632d1bb8f9b89c816d1450fe assets/eln/models/item/cheap_electrical_drill.json
 232731e48152ff4ac53adf38b3996ec6cf194cae assets/eln/models/item/cheap_ferromagnetic_core.json
+37a5be76f1064db47696ffa1f69f48bec24a1b7b assets/eln/models/item/chisel.json
 1e993688c3c963644d34a0e55dc75de19cb99daf assets/eln/models/item/cinnabar_dust.json
 a9953e6a49c74c057dac9d99d58d72189660a69d assets/eln/models/item/coal_dust.json
 1a3ffec747ee0cb6fefbabbee0ea304386be4ba8 assets/eln/models/item/coal_plate.json
