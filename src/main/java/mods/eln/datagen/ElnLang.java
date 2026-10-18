@@ -21,7 +21,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("e_coal_helmet", "E-Coal Helmet"), Map.entry("e_coal_chestplate", "E-Coal Chestplate"),
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
-        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_adapter", "Pipe Adapter"),
+        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"),
         Map.entry("item_creative_tab", "Electrical Age"),
         // 1.12 en_us.lang tile.eln.EnergyConverterElnToOther*Block.name
         Map.entry("energy_converter_eln_to_other_lvublock", "50V Electrical Age to other energy exporter"),
@@ -57,6 +57,8 @@ public class ElnLang extends LanguageProvider {
             add(b.get(), d.name);
         }
         add("itemGroup.eln", "Electrical Age");
+        add("death.attack.eln.scald", "%1$s was scalded by steam");
+        add("death.attack.eln.scald.player", "%1$s was scalded by steam while fighting %2$s");
         add("block.eln.crude_oil", "Crude Oil");
         add("block.eln.reservoir_oil", "Crude Oil");
         add("item.eln.crude_oil_bucket", "Crude Oil Bucket");

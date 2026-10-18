@@ -93,6 +93,7 @@ public class VoxelNode extends Node implements FluidDevice {
         if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
         if (drop && p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
         if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
+        if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         changed();
         return parts.isEmpty();
     }
@@ -107,6 +108,7 @@ public class VoxelNode extends Node implements FluidDevice {
     }
 
     private void changed() {
+        vents = null;
         if (isAdded()) FluidWorld.changed(this);
         setNeedPublish(true);
     }
@@ -173,6 +175,57 @@ public class VoxelNode extends Node implements FluidDevice {
         return addValve(8, 8, 8);
     }
 
+    /** The pipe a safety valve sits on (the pipe passing through its point). */
+    PipePart pipeUnder(SafetyValvePart v) {
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe && pipe.fluid != null && pipe.passes(v.x, v.y, v.z)) return pipe;
+        return null;
+    }
+
+    /** Fit a safety valve on the pipe under the click, at the lattice point nearest the click, its outlet out of the
+     *  pipe's most open side; set to the pipe's working pressure. */
+    public String addSafetyValveNear(double hx, double hy, double hz) {
+        int idx = partAt(hx, hy, hz);
+        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
+        int[] best = null;
+        double bd = Double.MAX_VALUE;
+        for (int x = 4; x <= 12; x += 4)
+            for (int y = 4; y <= 12; y += 4)
+                for (int z = 4; z <= 12; z += 4) {
+                    if (!pipe.passes(x, y, z)) continue;
+                    double d = (x - hx * 16) * (x - hx * 16) + (y - hy * 16) * (y - hy * 16) + (z - hz * 16) * (z - hz * 16);
+                    if (d < bd) {
+                        bd = d;
+                        best = new int[]{x, y, z};
+                    }
+                }
+        if (best == null) return "the pipe has no room for it here";
+        int axis = -1;
+        for (int a = 0; a < 3; a++) {
+            int[] lo = best.clone(), hi = best.clone();
+            lo[a] -= 2;
+            hi[a] += 2;
+            if (pipe.passes(lo[0], lo[1], lo[2]) && pipe.passes(hi[0], hi[1], hi[2])) axis = a;
+        }
+        if (axis < 0) return "the pipe turns there";
+        // outlet: up if the pipe isn't vertical and there's room, else the most open side
+        int outlet = -1;
+        for (int d : axis == 1 ? new int[]{2, 3, 4, 5} : new int[]{1, 2, 3, 4, 5, 0}) {
+            var v = new SafetyValvePart(best[0], best[1], best[2], d, pipe.bore(), pipe.workingPa(mods.eln.sim.fluid.Water.T_AMBIENT));
+            if (v.boxes().get(0)[3] - v.boxes().get(0)[0] < 4 || v.boxes().get(0)[4] - v.boxes().get(0)[1] < 4
+                || v.boxes().get(0)[5] - v.boxes().get(0)[2] < 4) continue;   // (cut off by the block's edge)
+            if (fits(v)) {
+                outlet = d;
+                break;
+            }
+        }
+        if (outlet < 0) return "no room around the pipe there";
+        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(), pipe.workingPa(mods.eln.sim.fluid.Water.T_AMBIENT));
+        parts.add(v);
+        markUsed();
+        changed();
+        return null;
+    }
+
     /** Fit a valve where the pipe under the click runs straight: the lattice point on it nearest the click. */
     public String addValveNear(double hx, double hy, double hz) {
         int idx = partAt(hx, hy, hz);
@@ -231,6 +284,14 @@ public class VoxelNode extends Node implements FluidDevice {
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         if (player.getMainHandItem().isEmpty()) {
             int i = partAt(vx, vy, vz);
+            if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
+                double next = SafetyValvePart.PRESETS[0] * 1e5;
+                for (double b : SafetyValvePart.PRESETS) if (b * 1e5 > sv.setPa + 1) { next = b * 1e5; break; }
+                sv.setPa = next;
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Safety valve set to %.0f bar", next / 1e5)));
+                setNeedPublish(true);
+                return true;
+            }
             if (i >= 0 && parts.get(i) instanceof ValvePart v) {
                 v.open = !v.open;
                 player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(v.open ? "Valve open" : "Valve shut"));
@@ -278,15 +339,25 @@ public class VoxelNode extends Node implements FluidDevice {
     /** A burst pipe vents its run. */
     @Override
     public List<Vent> fluidVents() {
-        List<Vent> out = new ArrayList<>();
-        for (VoxelPart p : parts)
-            if (p instanceof PipePart pipe && pipe.burst && pipe.fluid != null) {
-                Vent v = new Vent(pipe.fluid, 0.5, PipePart.BURST_VENT_K);
-                v.open = 1;
-                out.add(v);
-            }
-        return out;
+        if (vents == null) {
+            vents = new java.util.LinkedHashMap<>();
+            for (VoxelPart p : parts)
+                if (p instanceof PipePart pipe && pipe.burst && pipe.fluid != null) {
+                    Vent v = new Vent(pipe.fluid, 0.5, PipePart.BURST_VENT_K);
+                    v.open = 1;
+                    vents.put(v, p);
+                } else if (p instanceof SafetyValvePart sv && pipeUnder(sv) != null) {
+                    PipePart under = pipeUnder(sv);
+                    double draw = sv.outlet == 1 ? 1 : sv.outlet == 0 ? 0 : 0.5;   // (a valve on top lets out what's at the top)
+                    vents.put(new Vent(under.fluid, draw, SafetyValvePart.VENT_K), p);
+                }
+        }
+        return new ArrayList<>(vents.keySet());
     }
+
+    /** The vents (burst pipes, safety valves) and their parts, kept while the parts don't change (the world sets each
+     *  vent's edge, which the jets read). */
+    private java.util.Map<Vent, VoxelPart> vents;
 
     /** The pipe stub behind an adapter (the pipe ending at the adapter's face, at the face's centre). */
     PipePart stubOf(AdapterPart a) {
@@ -335,6 +406,10 @@ public class VoxelNode extends Node implements FluidDevice {
     @Override
     public void beforeFluidStep(double dt) {
         syncAdapters();
+        // safety valves open by the pressure under them
+        if (vents != null)
+            for (var e : vents.entrySet())
+                if (e.getValue() instanceof SafetyValvePart sv) e.getKey().open = sv.opening(mods.eln.fluid.FluidWorld.nodeFor(e.getKey().node).P());
     }
 
     /** Over its rating a pipe bursts (the weakest of a run goes first: each piece checks its own rating against the
@@ -349,6 +424,10 @@ public class VoxelNode extends Node implements FluidDevice {
             if (P > pipe.burstPa(T) && mods.eln.fluid.FluidWorld.claimBurst(pipe.fluid)) {
                 pipe.burst = true;
                 changed = true;
+                if (level instanceof net.minecraft.server.level.ServerLevel sl0) {
+                    int[] c = pipe.crackPoint();
+                    pipe.burstDir = SteamJet.chooseDir(sl0, coordonate.pos(), c[3]);
+                }
                 if (level instanceof net.minecraft.server.level.ServerLevel sl) {
                     var c = net.minecraft.world.phys.Vec3.atCenterOf(coordonate.pos());
                     sl.playSound(null, coordonate.pos(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(),
@@ -363,6 +442,26 @@ public class VoxelNode extends Node implements FluidDevice {
         }
         if (changed) changed();
         showAdapters();
+        // jets out of burst pipes
+        if (vents != null && level instanceof net.minecraft.server.level.ServerLevel sl)
+            for (var e : vents.entrySet())
+                if (e.getValue() instanceof PipePart pipe && pipe.burstDir >= 0 && e.getKey().edge != null) {
+                    int[] c = pipe.crackPoint();
+                    var dir = net.minecraft.core.Direction.from3DDataValue(pipe.burstDir);
+                    var origin = new net.minecraft.world.phys.Vec3(coordonate.x + c[0] / 16.0, coordonate.y + c[1] / 16.0, coordonate.z + c[2] / 16.0)
+                        .add(dir.getStepX() * pipe.bore() / 32.0, dir.getStepY() * pipe.bore() / 32.0, dir.getStepZ() * pipe.bore() / 32.0);
+                    SteamJet.tick(sl, origin, dir, e.getKey().edge, SteamJet.MAX_LENGTH);
+                } else if (e.getValue() instanceof SafetyValvePart sv && e.getKey().edge != null && e.getKey().open > 0) {
+                    var dir = net.minecraft.core.Direction.from3DDataValue(sv.outlet);
+                    int[] b = sv.boxes().get(0);
+                    var origin = new net.minecraft.world.phys.Vec3(coordonate.x + (b[0] + b[3]) / 32.0, coordonate.y + (b[1] + b[4]) / 32.0,
+                        coordonate.z + (b[2] + b[5]) / 32.0).add(dir.getStepX() * 0.125, dir.getStepY() * 0.125, dir.getStepZ() * 0.125);
+                    double q = SteamJet.tick(sl, origin, dir, e.getKey().edge, 1.0);
+                    // the whistle: steam only, pitch and loudness with the flow
+                    if (q > 200 && SteamJet.gasShare(e.getKey().edge) > 0.5 && sl.getGameTime() % 4 == 0)
+                        sl.playSound(null, coordonate.pos(), net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.BLOCKS,
+                            (float) Math.min(2, 0.4 + q / 10000), (float) Math.min(2, 1.4 + q / 40000));
+                }
     }
 
     @Override
@@ -396,6 +495,7 @@ public class VoxelNode extends Node implements FluidDevice {
             if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
             if (p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
             if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
+            if (p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         }
         parts.clear();
         super.onBreakBlock();
@@ -475,6 +575,8 @@ public class VoxelNode extends Node implements FluidDevice {
         out.put("Pressure", String.format("%.2f bar", n.P() / 1e5));
         out.put("Temperature", String.format("%.0f °C", n.T() - 273.15));
         for (VoxelPart p : parts) if (p instanceof ValvePart v) out.put("Valve", v.open ? "open" : "shut");
+        for (VoxelPart p : parts)
+            if (p instanceof SafetyValvePart sv) out.put("Safety valve", String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));
         if (!details) return out;
         out.put("Water", String.format("%.0f mB", n.mLiquid() / EaUnits.KG_PER_MB_WATER));
         out.put("Steam", String.format("%.0f mB", n.mVapour() / EaUnits.KG_PER_MB_STEAM));

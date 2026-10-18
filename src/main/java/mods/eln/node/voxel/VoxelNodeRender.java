@@ -64,6 +64,22 @@ public class VoxelNodeRender implements BlockEntityRenderer<VoxelNodeEntity, Vox
                     else box(s[0] - 2, s[4] - 1, s[2] - 2, s[3] + 2, s[4], s[5] + 2);
                     continue;
                 }
+                if (part instanceof SafetyValvePart sv) {
+                    UtilsClient.glDefaultColor();
+                    UtilsClient.bindTexture(TEX[0]);
+                    GL11.glColor4f(0.8f, 0.6f, 0.3f, 1f);   // (brass body, a red cap)
+                    int[] b = sv.boxes().get(0);
+                    int ax = sv.outlet / 2 == 0 ? 1 : sv.outlet / 2 == 1 ? 2 : 0;   // (Direction 3D value pairs: y, z, x)
+                    double cx = (b[0] + b[3]) / 2.0, cy = (b[1] + b[4]) / 2.0, cz = (b[2] + b[5]) / 2.0;
+                    double[] c = {cx, cy, cz};
+                    int[] o = others(ax);
+                    double lo = ax == 0 ? b[0] : ax == 1 ? b[1] : b[2], hi = ax == 0 ? b[3] : ax == 1 ? b[4] : b[5];
+                    tube(ax, c[o[0]], c[o[1]], 1.4, lo, hi);
+                    GL11.glColor4f(0.75f, 0.15f, 0.12f, 1f);
+                    boolean up = sv.outlet % 2 == 1;
+                    tube(ax, c[o[0]], c[o[1]], 2.0, up ? hi - 1 : lo, up ? hi : lo + 1);
+                    continue;
+                }
                 if (part instanceof AdapterPart a) {
                     UtilsClient.glDefaultColor();
                     UtilsClient.bindTexture(TEX[0]);

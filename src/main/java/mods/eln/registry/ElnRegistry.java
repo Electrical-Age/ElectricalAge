@@ -87,6 +87,8 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_kit_alloy", p -> new mods.eln.node.voxel.PipeKitItem(1, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_VALVE =
         ITEMS.registerItem("pipe_valve", mods.eln.node.voxel.ValveItem::new);
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.SafetyValveItem> PIPE_SAFETY_VALVE =
+        ITEMS.registerItem("pipe_safety_valve", mods.eln.node.voxel.SafetyValveItem::new);
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.AdapterItem> PIPE_ADAPTER =
         ITEMS.registerItem("pipe_adapter", mods.eln.node.voxel.AdapterItem::new);
 
@@ -240,6 +242,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_KIT_ALLOY);
         ALL_ITEMS.add(PIPE_VALVE);
         ALL_ITEMS.add(PIPE_ADAPTER);
+        ALL_ITEMS.add(PIPE_SAFETY_VALVE);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

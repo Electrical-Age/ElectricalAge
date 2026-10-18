@@ -27,8 +27,8 @@ public final class PipePart extends VoxelPart {
      */
     public static final double[] WORKING_PA = {10e5, 100e5}, BURST_PA = {40e5, 300e5}, SOFT_K = {573.15, 873.15};
     static final double SOFT_SPAN = 100;
-    /** A burst pipe vents through this (m^3). */
-    static final double BURST_VENT_K = 3e-11;
+    /** A burst pipe vents through this (m^3): a crack, about a third of an open bore (a jet that lasts: Gemini). */
+    static final double BURST_VENT_K = 1e-11;
 
     public final int tier;
     /** The polyline, x y z per point, in voxels. */
@@ -37,6 +37,8 @@ public final class PipePart extends VoxelPart {
     public FluidNode fluid;
     /** Burst (over its pressure rating): it vents its run to the air until replaced; breaking it drops nothing. */
     public boolean burst;
+    /** Where a burst's jet points (Direction 3D value), -1 if not burst. */
+    public int burstDir = -1;
 
     public PipePart(int tier, int[] points) {
         this.tier = tier;
@@ -167,6 +169,7 @@ public final class PipePart extends VoxelPart {
         t.putInt("tier", tier);
         t.putIntArray("pts", points);
         if (burst) t.putBoolean("burst", true);
+        if (burstDir >= 0) t.putInt("burstDir", burstDir);
         if (fluid != null) {
             t.putDouble("w", fluid.mWater);
             t.putDouble("a", fluid.mAir);
@@ -177,6 +180,7 @@ public final class PipePart extends VoxelPart {
     static PipePart read(CompoundTag t, int blockY) {
         PipePart p = new PipePart(Math.max(0, Math.min(BORE.length - 1, t.getIntOr("tier", 0))), t.getIntArray("pts").orElse(new int[0]));
         p.burst = t.getBooleanOr("burst", false);
+        p.burstDir = t.getIntOr("burstDir", -1);
         double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
         p.makeNode(blockY, saved);
         return p;
@@ -197,6 +201,20 @@ public final class PipePart extends VoxelPart {
         PipePart p = new PipePart(Math.max(0, Math.min(BORE.length - 1, b & 0x7F)), pts);
         p.burst = (b & 0x80) != 0;
         return p;
+    }
+
+    /** The middle of the longest straight piece (block-local voxels) and its axis: where a burst cracks. */
+    public int[] crackPoint() {
+        int best = 3, bestLen = -1;
+        for (int i = 3; i < points.length; i += 3) {
+            int len = Math.abs(points[i] - points[i - 3]) + Math.abs(points[i + 1] - points[i - 2]) + Math.abs(points[i + 2] - points[i - 1]);
+            if (len > bestLen) {
+                bestLen = len;
+                best = i;
+            }
+        }
+        int axis = points[best] != points[best - 3] ? 0 : points[best + 1] != points[best - 2] ? 1 : 2;
+        return new int[]{(points[best] + points[best - 3]) / 2, (points[best + 1] + points[best - 2]) / 2, (points[best + 2] + points[best - 1]) / 2, axis};
     }
 
     /** Is (x, y, z) on the centre line? */

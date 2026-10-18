@@ -35,6 +35,7 @@ public abstract class VoxelPart {
             case PipePart.KIND -> PipePart.read(t, blockY);
             case ValvePart.KIND -> ValvePart.read(t);
             case AdapterPart.KIND -> AdapterPart.read(t);
+            case SafetyValvePart.KIND -> SafetyValvePart.read(t);
             default -> null;
         };
     }
@@ -45,6 +46,7 @@ public abstract class VoxelPart {
             case PipePart.KIND -> PipePart.deserialize(in);
             case ValvePart.KIND -> ValvePart.deserialize(in);
             case AdapterPart.KIND -> AdapterPart.deserialize(in);
+            case SafetyValvePart.KIND -> SafetyValvePart.deserialize(in);
             default -> null;
         };
     }

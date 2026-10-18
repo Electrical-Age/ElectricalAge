@@ -35,6 +35,8 @@ public final class OilCases {
         cases.add(new SteamTurbine());
         cases.add(new StackedPlant());
         cases.add(new SealedPlant());
+        cases.add(new SafetyValvePlant());
+        cases.add(new SteamJetScalds());
         cases.add(new OldBoilerSave());
         cases.add(new Buckets2());
         cases.add(new Column());
@@ -508,6 +510,100 @@ public final class OilCases {
             ctx.check("fluid: the iron pipe burst", burst, "");
             ctx.check("fluid: the crack lets the pressure down (the heat keeps coming)", boiler.vessel.P() < 0.9 * peak, String.format("%.1f bar now", boiler.vessel.P() / 1e5));
             ctx.check("fluid: the boiler survived", !boiler.node.isDestructing() && !boiler.isBurnt(), "");
+        }
+    }
+
+    /** The same sealed plant with a safety valve on its pipe: it lifts at 10 bar and whistles; the pipe holds. */
+    static final class SafetyValvePlant implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.sim.IProcess fire;
+        double peak;
+        net.minecraft.core.BlockPos pipeAt;
+        String err;
+
+        public String id() {
+            return "fluid_safety_valve_holds_the_plant";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.thermal.Tc = 175 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            pipeAt = ctx.at(1, 2, 1);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
+            var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
+            err = n.addSafetyValveNear(0.5, 8 / 16.0, 0.5);
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                boiler.thermal.moveEnergyTo(4000 * t);
+                peak = Math.max(peak, boiler.vessel.P());
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
+            boolean burst = false;
+            for (var p : n.parts) if (p instanceof mods.eln.node.voxel.PipePart pp && pp.burst) burst = true;
+            ctx.line("fluid: plant with a safety valve " + boiler.getWaila() + String.format(", peak %.1f bar", peak / 1e5));
+            ctx.check("fluid: a safety valve fits on the pipe", err == null, "" + err);
+            ctx.check("fluid: it holds the plant near its 10 bar setting", peak > 9e5 && peak < 12e5, String.format("peak %.1f bar", peak / 1e5));
+            ctx.check("fluid: the pipe doesn't burst", !burst, "");
+        }
+    }
+
+    /** A burst pipe's jet scalds what stands in it (Baughn: walking through it should kill you). */
+    static final class SteamJetScalds implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.sim.IProcess fire;
+        net.minecraft.world.entity.LivingEntity pig;
+        float start;
+
+        public String id() {
+            return "fluid_steam_jet_scalds";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 1400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 2, 1);
+            boiler.thermal.Tc = 240 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            var at = ctx.at(2, 2, 1);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), at, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
+            // walls around the pipe but on one side: the jet goes there, where the pig stands
+            for (var d : new net.minecraft.core.Direction[]{net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH, net.minecraft.core.Direction.WEST})
+                ctx.level().setBlock(at.relative(d), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            pig = (net.minecraft.world.entity.LivingEntity) net.minecraft.world.entity.EntityTypes.PIG.create(ctx.level(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            pig.setPos(at.getX() + 1.5, at.getY(), at.getZ() + 0.5);
+            if (pig instanceof net.minecraft.world.entity.Mob m) m.setNoAi(true);
+            ctx.level().addFreshEntity(pig);
+            start = pig.getHealth();
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(8000 * t));
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line("fluid: jet test boiler " + boiler.getWaila() + ", pig " + pig.getHealth() + "/" + start + (pig.isRemoved() ? " (dead)" : ""));
+            ctx.check("fluid: the pig in the jet was scalded (dead or hurt)", pig.isDeadOrDying() || pig.isRemoved() || pig.getHealth() < start - 4, pig.getHealth() + "");
+            if (!pig.isRemoved()) pig.discard();
         }
     }
 
