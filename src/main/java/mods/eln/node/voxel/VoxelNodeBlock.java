@@ -26,6 +26,14 @@ public class VoxelNodeBlock extends NodeBlock {
         return new VoxelNodeEntity(pos, state);
     }
 
+    /** A pipe kit in hand lays pipe against a pipe as against any block (no sneaking: AdventurAgent). */
+    @Override
+    protected net.minecraft.world.InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos,
+            net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
+        if (stack.getItem() instanceof PipeKitItem) return net.minecraft.world.InteractionResult.PASS;
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
+    }
+
     static VoxelShape shapeOf(java.util.List<VoxelPart> parts) {
         VoxelShape s = Shapes.empty();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) s = Shapes.or(s, box(b[0], b[1], b[2], b[3], b[4], b[5]));
