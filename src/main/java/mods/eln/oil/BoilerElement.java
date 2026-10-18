@@ -39,7 +39,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
     public final BoilerTanks tanks = new BoilerTanks();
     public static final double VOLUME = 0.008, SHELL_C = 700, SHELL_TO_WATER_K_PER_W = 0.005;
-    public static final double SAFETY_PA = 10e5, PORT_K = 3e-11, VALVE_K = 3e-13;
+    public static final double SAFETY_PA = 10e5, PORT_K = 6e-11, VALVE_K = 3e-13;
     /** The vessel (built in initialize, where the block's height is known). */
     public FluidNode vessel;
     private double[] loaded;

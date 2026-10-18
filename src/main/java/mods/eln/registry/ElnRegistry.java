@@ -69,6 +69,17 @@ public final class ElnRegistry {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SixNodeEntity>> SIX_NODE_ENTITY =
         BLOCK_ENTITIES.register("six_node", () -> new BlockEntityType<>(SixNodeEntity::new, SIX_NODE_BLOCK.get()));
 
+    /** Voxel nodes (pipes phase 3, notes/pipes/DESIGN.md section 2): parts in a block's voxels; the pipe kits. */
+    public static final DeferredBlock<mods.eln.node.voxel.VoxelNodeBlock> VOXEL_NODE_BLOCK = BLOCKS.registerBlock("voxel_node",
+        mods.eln.node.voxel.VoxelNodeBlock::new,
+        p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.node.voxel.VoxelNodeEntity>> VOXEL_NODE_ENTITY =
+        BLOCK_ENTITIES.register("voxel_node", () -> new BlockEntityType<>(mods.eln.node.voxel.VoxelNodeEntity::new, VOXEL_NODE_BLOCK.get()));
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_IRON =
+        ITEMS.registerItem("pipe_kit_iron", p -> new mods.eln.node.voxel.PipeKitItem(0, p));
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_ALLOY =
+        ITEMS.registerItem("pipe_kit_alloy", p -> new mods.eln.node.voxel.PipeKitItem(1, p));
+
     /** One block per transparent-node device; the shared block-entity type covers them all. */
     public static final List<DeferredBlock<mods.eln.node.transparent.TransparentNodeBlock>> TRANSPARENT_BLOCKS = new ArrayList<>();
 
@@ -215,6 +226,8 @@ public final class ElnRegistry {
         // 1.12 itemCreativeTab: an item only to be the tab's icon (texture elncreativetab), not listed in the tab
         DeferredItem<Item> tabIcon = ITEMS.registerSimpleItem("item_creative_tab");
         ALL_ITEMS.add(tabIcon);
+        ALL_ITEMS.add(PIPE_KIT_IRON);   // (pipes, 26.x)
+        ALL_ITEMS.add(PIPE_KIT_ALLOY);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

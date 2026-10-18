@@ -21,6 +21,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("e_coal_helmet", "E-Coal Helmet"), Map.entry("e_coal_chestplate", "E-Coal Chestplate"),
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
+        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"),
         Map.entry("item_creative_tab", "Electrical Age"),
         // 1.12 en_us.lang tile.eln.EnergyConverterElnToOther*Block.name
         Map.entry("energy_converter_eln_to_other_lvublock", "50V Electrical Age to other energy exporter"),
@@ -48,6 +49,7 @@ public class ElnLang extends LanguageProvider {
         }
         add(ElnRegistry.REPLICATOR.get(), "Replicator");
         add(ElnRegistry.SIX_NODE_BLOCK.get(), "Electrical Age Device");
+        add(ElnRegistry.VOXEL_NODE_BLOCK.get(), "Electrical Age Pipe");
         add(ElnRegistry.GHOST_BLOCK.get(), "Electrical Age Multiblock Part");
         add(ElnRegistry.LIGHT_BLOCK.get(), "Electrical Age Light");
         for (var b : ElnRegistry.TRANSPARENT_BLOCKS) {

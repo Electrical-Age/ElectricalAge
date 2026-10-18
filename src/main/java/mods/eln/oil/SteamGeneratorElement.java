@@ -42,7 +42,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     public final PowerSource source = new PowerSource("source", load);
     public final PreciseElementFluidHandler tank;
     final double jPerMb = FuelRegistry.INSTANCE.heatEnergyPerMilliBucket("steam");
-    public static final double PORT_K = 3e-11;
+    public static final double PORT_K = 6e-11;   // (two coupled ports are in series: 3e-11 boiler to turbine)
     /** The inlet holds TANK_SECONDS of nominal steam at about this density (kg/m^3; ~5 bar). */
     static final double INLET_RHO = 2.5;
     public double steamRate;   // mB/s used, averaged over whole seconds

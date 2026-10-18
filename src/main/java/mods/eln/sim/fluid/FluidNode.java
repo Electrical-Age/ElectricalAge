@@ -12,6 +12,10 @@ public final class FluidNode {
     public double mWater, mAir, energy;
     /** Heat into the contents this step (W; devices add to it, the network clears it after each step). */
     public double heat;
+    /** A piece of pipe: pieces coupled to each other are lumped into one node per run (FluidWorld); resistance is the
+     *  piece's own (1/conductance, along its length), so the run's ends get half the run's. */
+    public boolean lumpable;
+    public double resistance;
     /** Heat loss to the surroundings (W/K) towards Water.T_AMBIENT; 0 = insulated. */
     public double lossWPerK;
     final Flash state = new Flash();

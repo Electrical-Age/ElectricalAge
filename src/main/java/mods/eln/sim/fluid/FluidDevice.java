@@ -29,9 +29,16 @@ public interface FluidDevice {
      * A port: node is the device's volume behind it; pos and face say where it is (a block position as a long and the
      * face it opens on, as net.minecraft.core.Direction's 3D data value: 0 down, 1 up, 2 north, 3 south, 4 west,
      * 5 east); draw is where on the node it draws from (0 bottom .. 1 top: a dome draws steam whatever face it opens
-     * on); k its conductance (m^3; two coupled ports use the smaller).
+     * on); k its conductance (m^3; two coupled ports are in series); at where on the face its centre is, in voxels
+     * (0..16 along the face's two other axes in x, y, z order, packed u * 17 + v; the face centre is CENTRE): two ports
+     * couple only at the same spot.
      */
-    record FluidPort(FluidNode node, long pos, int face, double draw, double k) {
+    record FluidPort(FluidNode node, long pos, int face, double draw, double k, int at) {
+        public static final int CENTRE = 8 * 17 + 8;
+
+        public FluidPort(FluidNode node, long pos, int face, double draw, double k) {
+            this(node, pos, face, draw, k, CENTRE);
+        }
     }
 
     /** A vent to the air from a node at height fraction draw; the device sets open (0..1) before each step. */

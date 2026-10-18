@@ -227,6 +227,7 @@ public class Eln {
         mods.eln.server.ElnWorldSaves.register();
         mods.eln.node.NodeManager.registerUuid("s", mods.eln.node.six.SixNode.class);
         mods.eln.node.NodeManager.registerUuid("t", mods.eln.node.transparent.TransparentNode.class);
+        mods.eln.node.NodeManager.registerUuid(mods.eln.node.voxel.VoxelNode.UUID, mods.eln.node.voxel.VoxelNode.class);   // (pipes; never unregister)
         mods.eln.node.NodeManager.registerUuid(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode.getNodeUuidStatic(),
             mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode.class);
         NeoForge.EVENT_BUS.addListener(ServerAboutToStartEvent.class, e -> {

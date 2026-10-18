@@ -47,6 +47,7 @@ public final class ElnClient {
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {
             e.registerBlockEntityRenderer(ElnRegistry.SIX_NODE_ENTITY.get(), ctx -> new SixNodeRender());
             e.registerBlockEntityRenderer(ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), ctx -> new TransparentNodeRender());
+            e.registerBlockEntityRenderer(ElnRegistry.VOXEL_NODE_ENTITY.get(), ctx -> new mods.eln.node.voxel.VoxelNodeRender());
             // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
         });

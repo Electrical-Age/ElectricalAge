@@ -95,9 +95,13 @@ public final class FluidNetwork {
             }
             if (!again) break;
         }
-        // 6. no edge may move more than would even out its own pressure difference (the linearized solve can
-        //    overshoot when a node changes phase or an edge's upstream side flips); then cap what leaves each node
-        limitToEqualize(dt);
+        // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
+        //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
+        //    what leaves each node
+        for (int pass = 0; pass < 3; pass++) {
+            limitNoReversal(dt);
+            limitToNeighbourRange(dt);
+        }
         capOutflows(dt);
         // 7. move contents
         for (FluidEdge e : edges) transfer(e, dt);
@@ -120,7 +124,7 @@ public final class FluidNetwork {
         if (u.mLiquid() <= 0) w = 0;
         else if (mg <= 0) w = 1;
         else {
-            double x = Math.max(0, Math.min(1, (u.level() - port) / BAND + 0.5));
+            double x = Math.max(0, Math.min(1, (u.level() - port) / BAND));   // (all liquid once the level is a band above the port)
             w = x * x * (3 - 2 * x);
         }
         double rhoG = mg > 0 ? mg / u.state.vGas : 0;
@@ -179,24 +183,58 @@ public final class FluidNetwork {
         e.g = pk[4] * e.k * e.open / pk[5];
     }
 
-    private void limitToEqualize(double dt) {
-        java.util.Map<FluidNode, Integer> deg = new java.util.IdentityHashMap<>();
-        for (FluidEdge e : edges) {
-            deg.merge(e.a, 1, Integer::sum);
-            deg.merge(e.b, 1, Integer::sum);
-        }
+    /** Each node's pressure change this step if the flows run as they are (net, by each edge's dP/dm at that end). */
+    private java.util.Map<FluidNode, Double> rises(double dt) {
+        java.util.Map<FluidNode, Double> r = new java.util.IdentityHashMap<>();
         for (FluidEdge e : edges) {
             if (e.flow == 0) continue;
-            double drive = e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head;
-            if (drive == 0 || (drive > 0) != (e.flow > 0)) {
+            if (!e.a.fixed) r.merge(e.a, -e.sA * e.flow * dt, Double::sum);
+            if (!e.b.fixed) r.merge(e.b, e.sB * e.flow * dt, Double::sum);
+        }
+        return r;
+    }
+
+    /** An edge whose drive would change sign by the end of the step (counting both ends' net change) is cut back to
+     *  where it would just even out. */
+    private void limitNoReversal(double dt) {
+        var r = rises(dt);
+        for (FluidEdge e : edges) {
+            if (e.flow == 0) continue;
+            double d = e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head;
+            if (d == 0 || (d > 0) != (e.flow > 0)) {
                 e.flow = 0;
                 continue;
             }
-            double s = (e.a.fixed ? 0 : e.sA) + (e.b.fixed ? 0 : e.sB);
-            if (s <= 0) continue;
-            int n = Math.max(e.a.fixed ? 1 : deg.get(e.a), e.b.fixed ? 1 : deg.get(e.b));
-            double max = Math.abs(drive) / s / dt / n;
-            if (Math.abs(e.flow) > max) e.flow = Math.signum(e.flow) * max;
+            double d1 = d + r.getOrDefault(e.a, 0.0) - r.getOrDefault(e.b, 0.0);
+            if (d1 != 0 && (d1 > 0) != (d > 0)) e.flow *= 0.9 * d / (d - d1);
+        }
+    }
+
+    private void limitToNeighbourRange(double dt) {
+        for (FluidNode n : nodes) {
+            if (n.fixed) continue;
+            double P = n.P(), lo = P, hi = P, rise = 0, inRise = 0, outFall = 0;
+            for (FluidEdge e : edges) {
+                if (e.a != n && e.b != n) continue;
+                double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
+                // the pressure this edge pushes n towards (where its drive would be zero)
+                double towards = e.b == n ? e.a.P() + offA - offB + e.head : e.b.P() + offB - offA - e.head;
+                lo = Math.min(lo, towards);
+                hi = Math.max(hi, towards);
+                if (e.flow == 0) continue;
+                double into = e.b == n ? e.flow : -e.flow;   // kg/s into n
+                double sN = e.b == n ? e.sB : e.sA;
+                rise += sN * into * dt;
+                if (into > 0) inRise += sN * into * dt;
+                else outFall -= sN * into * dt;
+            }
+            if (P + rise > hi + 1e-9 && inRise > 0) {
+                double f = Math.max(0, Math.min(1, (hi - P + outFall) / inRise));
+                for (FluidEdge e : edges) if ((e.b == n && e.flow > 0) || (e.a == n && e.flow < 0)) e.flow *= f;
+            } else if (P + rise < lo - 1e-9 && outFall > 0) {
+                double f = Math.max(0, Math.min(1, (P - lo + inRise) / outFall));
+                for (FluidEdge e : edges) if ((e.a == n && e.flow > 0) || (e.b == n && e.flow < 0)) e.flow *= f;
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-// 26.3	2026-10-14T22:46:46.467497105	eln-global/EA models
+// 26.3	2026-10-18T02:31:53.434668994	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -71,6 +71,7 @@ b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole_w_dc_dc_converter.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/voltage_oriented_battery.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/voxel_node.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/water_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/wind_turbine.json
 61d873cbec0fa1e9200f30544172a2cabc47c78e assets/eln/items/10a_diode.json
@@ -280,6 +281,8 @@ ff6e2b28162f15aa2036f97affcfd80a1465b7d9 assets/eln/items/ore_scanner.json
 7cfae86b3a9e4fa357ad809ae260c10b26d25135 assets/eln/items/pal_chip.json
 0f02a092e70e85b3657bef77f92fd664ad0f65fa assets/eln/items/pid_regulator.json
 fc7072eabfb82943749e3a2f64a672ea69f015d6 assets/eln/items/pink_brush.json
+c37d42d320e747a50897587a392f8eac6ad1a86d assets/eln/items/pipe_kit_alloy.json
+0e52b8c4201a35ab6ea10911cbff7726f1dc6d51 assets/eln/items/pipe_kit_iron.json
 a222de97919a80552ca8b6461dd1152c42f9343b assets/eln/items/player_filter.json
 fe78eef8cbad6b2ea4f1ee7ca815c53bd607e714 assets/eln/items/portable_battery.json
 03e549623a3e9b8e499ad90f96537ef46fcf636c assets/eln/items/portable_battery_pack.json
@@ -686,6 +689,8 @@ f8814ca76c3ee546f3f1a6c7cd450ba56ea724cc assets/eln/models/item/oscillator_chip.
 b9cc5a91629389539f8d34138c7844fc8c015a86 assets/eln/models/item/pid_regulator.json
 5fc27be2ceebb3d231d5d90cc6567f3ea45fd67b assets/eln/models/item/pid_regulator_3d.json
 579902b074770a6931aff7e763a1cd7319c986d7 assets/eln/models/item/pink_brush.json
+2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_alloy.json
+cb6f096c14fa8c9e8b2459dee3fc41fed9f3a4f1 assets/eln/models/item/pipe_kit_iron.json
 4a9d386e1ae640f932b01052c84a1974236d246c assets/eln/models/item/player_filter.json
 fae3633068c6a0dddbd79198b06f9db6c89fe250 assets/eln/models/item/portable_battery.json
 53f8a69b50216adf11b139d9f568234f8994f0d6 assets/eln/models/item/portable_battery_pack.json

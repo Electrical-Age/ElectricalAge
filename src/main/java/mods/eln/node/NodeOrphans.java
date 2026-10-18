@@ -26,7 +26,7 @@ public final class NodeOrphans {
         if (++ticks % 200 != 0) return;
         List<NodeBase> orphans = new ArrayList<>();
         for (NodeBase n : new ArrayList<>(NodeManager.instance.getNodes())) {
-            if (!(n instanceof SixNode) && !(n instanceof TransparentNode)) continue;   // (other mods' nodes keep their own blocks)
+            if (!(n instanceof SixNode) && !(n instanceof TransparentNode) && !(n instanceof mods.eln.node.voxel.VoxelNode)) continue;   // (other mods' nodes keep their own blocks)
             if (isOrphan(n)) orphans.add(n);
         }
         for (NodeBase n : orphans) {
