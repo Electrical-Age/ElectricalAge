@@ -30,7 +30,7 @@ public final class ElnConfig {
         b.pop();
         b.push("cables");
         CONVERT_CABLES = b.comment("Convert six-node cables to voxel cables as their chunks load (blocks holding only cables; the",
-                "six-node block is kept inside for /elnlab cables revert). Off until the conversion is approved.")
+                "six-node block is kept inside for /elnlab voxelcables revert). Off until the conversion is approved.")
             .define("convertOnLoad", false);
         b.pop();
         b.push("probe");
