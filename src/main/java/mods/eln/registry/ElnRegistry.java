@@ -75,6 +75,12 @@ public final class ElnRegistry {
         p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.node.voxel.VoxelNodeEntity>> VOXEL_NODE_ENTITY =
         BLOCK_ENTITIES.register("voxel_node", () -> new BlockEntityType<>(mods.eln.node.voxel.VoxelNodeEntity::new, VOXEL_NODE_BLOCK.get()));
+    public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
+        DeferredRegister.create(Registries.RECIPE_SERIALIZER, Eln.MODID);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Merge>> PIPE_KIT_MERGE =
+        RECIPE_SERIALIZERS.register("pipe_kit_merge", () -> mods.eln.node.voxel.PipeKitRecipes.Merge.SERIALIZER);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Split>> PIPE_KIT_SPLIT =
+        RECIPE_SERIALIZERS.register("pipe_kit_split", () -> mods.eln.node.voxel.PipeKitRecipes.Split.SERIALIZER);
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_IRON =
         ITEMS.registerItem("pipe_kit_iron", p -> new mods.eln.node.voxel.PipeKitItem(0, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_ALLOY =
@@ -238,6 +244,7 @@ public final class ElnRegistry {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
+        RECIPE_SERIALIZERS.register(modBus);
         ENTITY_TYPES.register(modBus);
         MENUS.register(modBus);
         TABS.register(modBus);

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": ["eln:alloy_plate", "eln:alloy_plate", "eln:alloy_plate"],
+  "result": {
+    "id": "eln:pipe_kit_alloy",
+    "components": {"minecraft:damage": 1008}
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": ["eln:iron_plate", "eln:iron_plate"],
+  "result": {
+    "id": "eln:pipe_kit_iron",
+    "components": {"minecraft:damage": 1008}
+  }
+}

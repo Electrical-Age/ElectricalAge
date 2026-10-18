@@ -7,6 +7,7 @@ import mods.eln.node.voxel.PipePart;
 import mods.eln.node.voxel.VoxelNode;
 import mods.eln.node.voxel.VoxelNodeEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public final class PipeCases {
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
         cases.add(new JoinMidRun());
+        cases.add(new KitCrafting());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -197,6 +199,53 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** Pipe kits in the crafting grid: plates make a block of pipe; kits merge; a kit splits in halves. */
+    static final class KitCrafting implements TestCase {
+        public String id() {
+            return "pipe_kit_crafting";
+        }
+
+        public int width() {
+            return 2;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        static ItemStack craft(TestContext ctx, int w, int h, ItemStack... items) {
+            var in = net.minecraft.world.item.crafting.CraftingInput.of(w, h, java.util.Arrays.asList(items));
+            var level = ctx.level();
+            var r = level.getServer().getRecipeManager().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, in, level);
+            return r.map(x -> x.value().assemble(in)).orElse(ItemStack.EMPTY);
+        }
+
+        static java.util.List<ItemStack> remaining(TestContext ctx, int w, int h, ItemStack... items) {
+            var in = net.minecraft.world.item.crafting.CraftingInput.of(w, h, java.util.Arrays.asList(items));
+            var level = ctx.level();
+            var r = level.getServer().getRecipeManager().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, in, level);
+            return r.map(x -> (java.util.List<ItemStack>) x.value().getRemainingItems(in)).orElse(java.util.List.of());
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            ItemStack plate = mods.eln.Eln.findItemStack("Iron Plate");
+            ItemStack k = craft(ctx, 2, 1, plate.copy(), plate.copy());
+            ctx.check("pipe: 2 iron plates make an iron kit of one block (16 voxels)", k.getItem() == mods.eln.registry.ElnRegistry.PIPE_KIT_IRON.get()
+                && PipeKitItem.length(k) == 16, k + " " + PipeKitItem.length(k));
+            ItemStack m = craft(ctx, 2, 1, PipeKitItem.kit(0, 16), PipeKitItem.kit(0, 40));
+            ctx.check("pipe: two iron kits merge (16 + 40)", PipeKitItem.length(m) == 56, "" + PipeKitItem.length(m));
+            ItemStack mix = craft(ctx, 2, 1, PipeKitItem.kit(0, 16), PipeKitItem.kit(1, 16));
+            ctx.check("pipe: iron and alloy kits don't merge", mix.isEmpty() || !(mix.getItem() instanceof PipeKitItem), "" + mix);
+            ItemStack half = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
+            var rest = remaining(ctx, 1, 1, PipeKitItem.kit(1, 33));
+            ctx.check("pipe: a kit splits in halves (33: 16 out, 17 stays)", PipeKitItem.length(half) == 16 && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17,
+                PipeKitItem.length(half) + " / " + rest);
         }
     }
 

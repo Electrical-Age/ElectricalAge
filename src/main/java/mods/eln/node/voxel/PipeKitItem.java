@@ -39,6 +39,12 @@ public class PipeKitItem extends Item {
         return s;
     }
 
+    /** Not by vanilla's repair (two kits would gain 5%): kits merge by their own recipe (PipeKitRecipes). */
+    @Override
+    public boolean isCombineRepairable(ItemStack stack) {
+        return false;
+    }
+
     @Override
     public boolean isBarVisible(ItemStack stack) {
         return true;
