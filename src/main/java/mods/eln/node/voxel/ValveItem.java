@@ -15,7 +15,6 @@ public class ValveItem extends Item implements PipeTool {
     public InteractionResult useOn(UseOnContext ctx) {
         var level = ctx.getLevel();
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        mods.eln.Eln.LOG.info("Valve used on {} face {} at {}", ctx.getClickedPos().toShortString(), ctx.getClickedFace(), ctx.getClickLocation());
         var pos = ctx.getClickedPos();
         var player = ctx.getPlayer();
         // (thin pipes are easy to miss: if the click went past, the pipe the player looks at)

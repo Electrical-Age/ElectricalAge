@@ -223,9 +223,6 @@ public class VoxelNode extends Node implements FluidDevice {
             changed();
             return null;
         }
-        StringBuilder here = new StringBuilder();
-        for (VoxelPart p : parts) here.append(' ').append(p.kind()).append(p instanceof PipePart pp ? java.util.Arrays.toString(pp.points) : "");
-        mods.eln.Eln.LOG.info("Valve at {}: no pipe through the middle; parts:{}", coordonate, here);
         return "the pipe doesn't run straight there";
     }
 
