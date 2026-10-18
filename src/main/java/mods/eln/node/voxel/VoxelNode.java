@@ -806,6 +806,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             showAdapters();
         }
         super.writeToNBT(nbt);
+        // (and the node's own data at the top level too, as before voxel nodes hosted elements: a world saved by this
+        // version still loads in the previous one, without the hosted elements)
+        CompoundTag node = nbt.getCompoundOrEmpty("node");
+        for (String k : node.keySet()) if (!nbt.contains(k)) nbt.put(k, node.get(k).copy());
         if (legacy != null) nbt.put("legacy", legacy);
         nbt.putInt("parts", parts.size());
         for (int i = 0; i < parts.size(); i++) {
