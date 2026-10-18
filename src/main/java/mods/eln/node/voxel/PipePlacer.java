@@ -35,6 +35,8 @@ public final class PipePlacer {
         final List<PipeRouter.End> waypoints = new ArrayList<>();
         final net.minecraft.resources.ResourceKey<Level> dim;
 
+        long touched;
+
         Plan(int tier, PipeRouter.End start, net.minecraft.resources.ResourceKey<Level> dim) {
             this.tier = tier;
             this.start = start;
@@ -43,6 +45,17 @@ public final class PipePlacer {
     }
 
     static final Map<UUID, Plan> PLANS = new HashMap<>();
+    /** A plan nobody touched for this long is dropped (ticks). */
+    static final long PLAN_TIMEOUT = 20 * 60 * 3;
+
+    /** Forget a player's route (logout, death, server stop). */
+    public static void forget(UUID player) {
+        PLANS.remove(player);
+    }
+
+    public static void forgetAll() {
+        PLANS.clear();
+    }
 
     /** The world as the router sees it: solid blocks and other devices are in the way, and so are used voxels of
      *  voxel nodes; air, replaceable blocks and liquids are free. */
@@ -122,10 +135,13 @@ public final class PipePlacer {
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier,
                               net.minecraft.world.phys.Vec3 hit) {
         Plan plan = PLANS.get(player.getUUID());
-        if (plan != null && plan.dim != level.dimension()) {
+        long now = level.getGameTime();
+        if (plan != null && (plan.dim != level.dimension() || plan.tier != tier || now - plan.touched > PLAN_TIMEOUT)) {
             PLANS.remove(player.getUUID());
+            if (plan.tier != tier) player.sendOverlayMessage(Component.literal("Pipe route cancelled (another kind of pipe in hand)"));
             plan = null;
         }
+        if (plan != null) plan.touched = now;
         PipeRouter.End port = portAt(level, pos, face);
         if (player.isSecondaryUseActive()) {
             if (plan == null) return false;
@@ -141,7 +157,9 @@ public final class PipePlacer {
         }
         if (plan == null) {
             if (port == null) return false;   // (not a port: the kit lays a straight block)
-            PLANS.put(player.getUUID(), new Plan(tier, port, level.dimension()));
+            Plan p = new Plan(tier, port, level.dimension());
+            p.touched = now;
+            PLANS.put(player.getUUID(), p);
             player.sendOverlayMessage(Component.literal("Pipe route started: click blocks for waypoints, a port to finish, sneak-click to undo"));
             return true;
         }

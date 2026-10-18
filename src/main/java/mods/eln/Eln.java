@@ -242,6 +242,7 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, e -> {
             simulator.stop();
             mods.eln.fluid.FluidWorld.reset();
+            mods.eln.node.voxel.PipePlacer.forgetAll();
             for (ElnContent c : CONTENT) c.serverStopped();
             serverEventListener.clear();
             nodeManager.clear();
@@ -249,6 +250,11 @@ public class Eln {
         });
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
+        // pipe routes being laid: forgotten on logout and death
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
+            e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingDeathEvent.class,
+            e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> mods.eln.node.NodeOrphans.tick(e.getServer()));
         // X-ray scanner: ore blocks per material come from tags
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.TagsUpdatedEvent.class, e -> mods.eln.item.xray.XRayFilter.invalidate());
