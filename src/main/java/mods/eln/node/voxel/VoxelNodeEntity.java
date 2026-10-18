@@ -16,6 +16,14 @@ import java.util.List;
  * packet, for the shape and the renderer.
  */
 public class VoxelNodeEntity extends NodeBlockEntity {
+    /** Model data: the parts, for the block model (client/render/VoxelModel, baked into the chunk mesh). */
+    public static final net.neoforged.neoforge.model.data.ModelProperty<List<VoxelPart>> PARTS = new net.neoforged.neoforge.model.data.ModelProperty<>();
+
+    @Override
+    public net.neoforged.neoforge.model.data.ModelData getModelData() {
+        return net.neoforged.neoforge.model.data.ModelData.of(PARTS, clientParts);
+    }
+
     /** Client: the parts as last published. */
     public volatile List<VoxelPart> clientParts = List.of();
 
@@ -52,7 +60,11 @@ public class VoxelNodeEntity extends NodeBlockEntity {
                 VoxelPart p = VoxelPart.deserialize(kind, new DataInputStream(new java.io.ByteArrayInputStream(b)));
                 if (p != null) ps.add(p);
             }
-            clientParts = ps;
+            clientParts = List.copyOf(ps);
+            // re-mesh the chunk section with the new parts
+            requestModelDataUpdate();
+            if (level != null && level.isClientSide())
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), net.minecraft.world.level.block.Block.UPDATE_IMMEDIATE);
         } catch (IOException e) {
             e.printStackTrace();
         }

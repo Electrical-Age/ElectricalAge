@@ -116,6 +116,10 @@ public class ElnModels implements DataProvider {
                 continue;
             } else if (id.getPath().equals("crude_oil") || id.getPath().equals("reservoir_oil") || id.getPath().equals("tar_sand") || id.getPath().equals("well_casing")) {
                 continue;   // oil: hand-written in src/main/resources (fluids)
+            } else if (b instanceof mods.eln.node.voxel.VoxelNodeBlock) {
+                // baked from its parts (client/render/VoxelModel)
+                out.add(DataProvider.saveStable(cache, obj("variants", obj("", obj("type", "eln:voxel_node"))), assets.resolve("blockstates/" + name + ".json")));
+                continue;
             } else if (b instanceof mods.eln.sixnode.lampsocket.LightBlock) {
                 model = "eln:block/particle_none";
             } else {

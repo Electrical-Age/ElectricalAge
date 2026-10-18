@@ -1,9 +1,7 @@
 {
-  "multipart": [
-    {
-      "apply": {
-        "model": "eln:block/particle_iron"
-      }
+  "variants": {
+    "": {
+      "type": "eln:voxel_node"
     }
-  ]
+  }
 }

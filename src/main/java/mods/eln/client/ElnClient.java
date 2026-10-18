@@ -47,13 +47,15 @@ public final class ElnClient {
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {
             e.registerBlockEntityRenderer(ElnRegistry.SIX_NODE_ENTITY.get(), ctx -> new SixNodeRender());
             e.registerBlockEntityRenderer(ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), ctx -> new TransparentNodeRender());
-            e.registerBlockEntityRenderer(ElnRegistry.VOXEL_NODE_ENTITY.get(), ctx -> new mods.eln.node.voxel.VoxelNodeRender());
+            // (voxel nodes: baked in the chunk mesh by VoxelModel, no block-entity renderer)
             // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
         });
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "device"),
                 mods.eln.client.render.ElnItemRenderer.Unbaked.MAP_CODEC));
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterBlockStateModels.class,
+            e -> e.registerModel(mods.eln.client.render.VoxelModel.ID, mods.eln.client.render.VoxelModel.Unbaked.CODEC));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "lit"), mods.eln.client.render.LitProperty.MAP_CODEC));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class,

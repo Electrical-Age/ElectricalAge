@@ -57,6 +57,12 @@ public class VoxelNodeBlock extends NodeBlock {
         return s.isEmpty() ? Shapes.block() : s;
     }
 
+    /** Drawn by its block model (client/render/VoxelModel) in the chunk mesh. */
+    @Override
+    protected net.minecraft.world.level.block.RenderShape getRenderShape(BlockState state) {
+        return net.minecraft.world.level.block.RenderShape.MODEL;
+    }
+
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
