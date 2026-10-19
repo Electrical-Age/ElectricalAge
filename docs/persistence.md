@@ -56,6 +56,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - `loadFromNbt(nbt, dim)`: per node `upgradeTag` -> class lookup -> `newInstance` -> `readFromNBT` -> `addNode`
   -> `initializeFromNBT`; after all, `globalBoot()` on each. Any throwable but a `VirtualMachineError` (so a
   `LinkageError` too) while building or reading one node makes that node an orphan; the rest of the file loads.
+  The same throwables from `initializeFromNBT` or `globalBoot` are logged and the load goes on.
   `saveToNbt(nbt, dim)` skips `mustBeSaved()==false` and other dims; `dim == Integer.MIN_VALUE` means all dims
   (tests). Each node keeps its last saved tag (`NodeBase.lastSaved`: the tag it was loaded from, then each save that
   worked; one tag per node held in memory): if its `writeToNBT` throws, that tag is written instead, with a WARN

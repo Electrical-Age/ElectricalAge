@@ -52,12 +52,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - The FE exporter is a transparent node: it burns out in place and can be repaired instead of vanishing; old
   simple-node saves are upgraded on load (`transparentnode/energyconverter/ExporterSaveUpgrade.java`,
   `ExporterSaveUpgradeTest`). `SimpleNode` and its block/BE/item are gone.
-- Nodes that cannot load are kept as orphans and written back unchanged (`node/NodeManager.java`,
-  `NodeSaveLoadTest`); nodes whose block is gone leave the simulation (`node/NodeOrphans.java`, `/elnlab remove`).
+- Nodes that cannot load (including a `LinkageError`) are kept as orphans and written back unchanged; an orphan is
+  dropped, with a warning, when its block is removed, and placing a six-node device on its block is refused
+  (`node/NodeManager.java`, `NodeSaveLoadTest`, `SixNodeBreakCases`). A node whose save throws is written with its
+  last good data instead of being left out. Nodes whose block is gone leave the simulation (`node/NodeOrphans.java`,
+  `/elnlab remove`).
 - A six-node face whose device cannot load is kept as saved data and the face stays taken (placing on it is refused
-  with a message; breaking the block discards it) instead of being dropped from the next save (`SixNodeLoadTest`).
-- An unreadable `electricalAgeWorld<dim>.dat` or `.dat.bak` is renamed to `*.corrupt-<time>` instead of being
-  overwritten by the next save (`server/ElnWorldSaves.java`, `ElnWorldSavesTest`).
+  with a message; breaking the block discards it, also a voxel block holding nothing else) instead of being dropped
+  from the next save (`SixNodeLoadTest`, `SixNodeBreakCases`).
+- An `electricalAgeWorld<dim>.dat` or `.dat.bak` with bad content is renamed to `*.corrupt-<time>` instead of being
+  overwritten by the next save; one that can't be read at all (permissions, I/O error) is left in place and the
+  dimension is not saved that session (an error at every skipped save). With no `.dat`, a whole `.dat.tmp` is loaded
+  before the older `.bak` (`server/ElnWorldSaves.java`, `ElnWorldSavesTest`).
 - A loaded six-node connects once, not twice; a client packet for a bad or empty six-node side is ignored instead of
   throwing (`SixNodeLoadTest`). Voxel blocks invalidate capability caches when pipe adapters come and go.
 - Portable batteries charge items in the offhand too. Sounds: render loops play client-side (`sound/LoopedSoundPlayer`).

@@ -86,14 +86,14 @@ Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to th
 - Neighbour change: `NodeBlock` -> `NodeBlockEntity.onNeighborBlockChange` -> `NodeBase.onNeighborBlockChange` -> `neighborBlockRead()` + `reconnect()` if added.
 - Break: `NodeBlockEntity.setRemoved` (not on chunk unload) -> `onBreakBlock` -> disconnect + `NodeManager.removeNode`. Six-node breaks one face per click (`playerAskToBreakSubBlock`). `NodeOrphans` removes nodes whose block is gone (every 10 s, loaded chunks only; also `/elnlab remove`).
 - Chunk unload: nothing. Nodes live outside chunk data and keep simulating (1.12 semantics). Only dimension unload calls `NodeManager.unload(dim)`.
-- Load: `NodeManager.loadFromNbt` -> `upgradeTag` -> class by `"tag"` -> `readFromNBT` -> `initializeFromNBT` -> `globalBoot`. Unknown type or a throwing load: kept as an orphan tag and saved back unchanged (`keepOrphan`); a node placed later at that spot replaces it.
+- Load: `NodeManager.loadFromNbt` -> `upgradeTag` -> class by `"tag"` -> `readFromNBT` -> `initializeFromNBT` -> `globalBoot`. Unknown type or a throwing load: kept as an orphan tag and saved back unchanged (`keepOrphan`); a node placed later at that spot replaces it, and removing the block there drops it (`dropOrphans`).
 - Burn/repair (`sim/process/destruct`): `Failure` decides by `Failure.Kind`; most devices `burn()` in place (`IBurnable`): disconnect, then reconnect with the element skipped by `connectJob`; publish bit `HEADER_BURNT`; drops nothing of the device itself. `Repair.onActivated` (right-click with `getRepairPart()`) -> `repair()`. Real explosions only for rotating/battery cases; `Eln.explosionEnable`.
 
 ## Tests
 
-- `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown node types / devices kept and re-saved; orphans per dimension.
+- `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown node types / devices kept and re-saved; orphans per dimension and dropped by position; a failing save keeps the last good tag.
 - `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java`: old exporter tags (jqwik).
-- GameTests (`gametest/`): `Reload` round-trips every node of every case; `cases/SixNodeBreakCases` (one face per break); `cases/BurnChainCases` (one cable of a chain burns); `GoldenCase` (descriptor numbers vs `golden/1.12`).
+- GameTests (`gametest/`): `Reload` round-trips every node of every case; `cases/SixNodeBreakCases` (one face per break, kept-only voxel block, orphan block); `cases/BurnChainCases` (one cable of a chain burns); `GoldenCase` (descriptor numbers vs `golden/1.12`).
 
 ## Gotchas
 

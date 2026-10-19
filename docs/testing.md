@@ -33,7 +33,9 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `sim/AuditFixesTest` | Regression tests for the 1.7.10 sim bugs fixed in the WP16 audit. |
 | `sim/FireTest` | A fire's burn level lags its setting. |
 | `sim/fluid/FluidCoreTest`, `FluidPropertyTest` | Water/steam/air properties, flash, turbine calibration; random networks conserve mass/energy, no NaN, settle. Not jqwik: own seeds, printed in the failure message. |
-| `node/NodeSaveLoadTest` | Unloadable node tags are kept by `NodeManager` as orphans and written back unchanged. |
+| `node/NodeSaveLoadTest` | Unloadable node tags (also a `LinkageError`) are kept by `NodeManager` as orphans and written back unchanged; dropped by position; a node whose save throws keeps its last good tag. |
+| `node/six/SixNodeLoadTest` | A six-node face that cannot load is kept and its side stays taken; load connects once; bad client packets ignored. |
+| `server/ElnWorldSavesTest` | Bad save files set aside, unreadable ones left and saving blocked, a whole `.tmp` preferred to the `.bak`. |
 | `transparentnode/energyconverter/ExporterSaveUpgradeTest` (jqwik) | Old simple-node `"ElnToOther"` exporter tags become transparent-node tags (`"node"`, `"element"`, `"others"`). |
 | `node/voxel/CableArmsPropertyTest` (jqwik) | `CableConverter.plan` + `CablePart.arms`: one conductor, opens at edge middles, inner-corner joins. |
 | `node/voxel/CableRouterTest`, `PipeRouterTest` | Routers on synthetic worlds. |
@@ -76,7 +78,7 @@ FE receiver.
 wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Cases` (shafts, poles, converters),
 `Wp12Cases`, `SolarCases` (first multiblock), `LogicTruthCases`, `ChipMoreCases`, `WirelessMoreCases`,
 `WorldSensorCases`, `ShaftMoreCases`, `LampSupplyCases`, `LampLightCases`, `CableSlotCases` (devices work with an empty
-inventory), `SixNodeBreakCases`, `BurnChainCases` (one failure per network), `CableCases` (voxel vs six-node cables,
+inventory), `SixNodeBreakCases` (one face per break, kept-only voxel block, orphan block), `BurnChainCases` (one failure per network), `CableCases` (voxel vs six-node cables,
 currents agree to 0.1%), `PipeCases`, `OilCases`, `TurretCases`, `OreDropCases`, `ItemCapabilityCases` (hoppers/pipes),
 `TooltipCases`, `PortHelperCases` (fuel, smelting, `eln:light`, waterlogged six-node block).
 
