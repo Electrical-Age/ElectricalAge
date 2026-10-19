@@ -24,7 +24,8 @@ import java.util.Set;
  */
 final class GoldenCase implements TestCase {
     /** 1.12-only or render-only fields: no meaning on 26.x. */
-    static final Set<String> IGNORED = Set.of("iconName", "IconName", "parentItemDamage", "voltageLevelColor");
+    static final Set<String> IGNORED = Set.of("iconName", "IconName", "parentItemDamage", "voltageLevelColor",
+        "tileEntityMetaTag");
 
     public String id() {
         return "golden_descriptors";
