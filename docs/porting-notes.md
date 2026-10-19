@@ -54,6 +54,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `ExporterSaveUpgradeTest`). `SimpleNode` and its block/BE/item are gone.
 - Nodes that cannot load are kept as orphans and written back unchanged (`node/NodeManager.java`,
   `NodeSaveLoadTest`); nodes whose block is gone leave the simulation (`node/NodeOrphans.java`, `/elnlab remove`).
+- A six-node face whose device cannot load is kept as saved data and the face stays taken (placing on it is refused
+  with a message; breaking the block discards it) instead of being dropped from the next save (`SixNodeLoadTest`).
+- An unreadable `electricalAgeWorld<dim>.dat` or `.dat.bak` is renamed to `*.corrupt-<time>` instead of being
+  overwritten by the next save (`server/ElnWorldSaves.java`, `ElnWorldSavesTest`).
+- A loaded six-node connects once, not twice; a client packet for a bad or empty six-node side is ignored instead of
+  throwing (`SixNodeLoadTest`). Voxel blocks invalidate capability caches when pipe adapters come and go.
 - Portable batteries charge items in the offhand too. Sounds: render loops play client-side (`sound/LoopedSoundPlayer`).
 
 ## Bugs fixed
