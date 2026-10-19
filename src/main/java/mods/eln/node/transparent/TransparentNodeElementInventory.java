@@ -1,105 +1,24 @@
 package mods.eln.node.transparent;
 
 import mods.eln.compat.ISidedInventoryCompat;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.Utils;
-import net.minecraft.world.entity.player.Player;
+import mods.eln.node.ElementInventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 
-public class TransparentNodeElementInventory implements ISidedInventoryCompat, INBTTReady {
-    protected TransparentNodeElement transparentNodeElement = null;
+/**
+ * Inventory of a transparent-node element. The sided rules (which slots a face may insert into or extract from)
+ * expose nothing here; machines that feed from hoppers and pipes override them.
+ */
+public class TransparentNodeElementInventory extends ElementInventory implements ISidedInventoryCompat {
+    protected final TransparentNodeElement transparentNodeElement;
 
-    int stackLimit;
-
-
-    public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
-        inv = new ItemStack[size];
-        java.util.Arrays.fill(inv, ItemStack.EMPTY);
-        this.stackLimit = stackLimit;
-        this.transparentNodeElement = TransparentNodeElement;
-    }
-
-    private ItemStack[] inv;
-
-    private ItemStack[] getInv() {
-        return inv;
-    }
-
-    @Override
-    public int getSizeInventory() {
-
-        return getInv().length;
-    }
-
-    @Override
-    public ItemStack getStackInSlot(int slot) {
-
-        return getInv()[slot];
-    }
-
-    @Override
-    public ItemStack decrStackSize(int slot, int amt) {
-        ItemStack stack = getStackInSlot(slot);
-        if (!Utils.isEmpty(stack)) {
-            if (stack.getCount() <= amt) {
-                setInventorySlotContents(slot, ItemStack.EMPTY);
-            } else {
-                stack = stack.split(amt);
-                if (stack.getCount() == 0) {
-                    setInventorySlotContents(slot, ItemStack.EMPTY);
-                }
-            }
-        }
-        return stack;
-    }
-
-    @Override
-    public ItemStack removeStackFromSlot(int slot) {
-        ItemStack stack = getStackInSlot(slot);
-        if (!Utils.isEmpty(stack)) {
-            setInventorySlotContents(slot, ItemStack.EMPTY);
-        }
-        return stack;
-    }
-
-    @Override
-    public void setInventorySlotContents(int slot, ItemStack stack) {
-        getInv()[slot] = stack == null ? ItemStack.EMPTY : stack; // never store null (1.12)
-        if (!Utils.isEmpty(stack) && stack.getCount() > getInventoryStackLimit()) {
-            stack.setCount(getInventoryStackLimit());
-        }
+    public TransparentNodeElementInventory(int size, int stackLimit, TransparentNodeElement transparentNodeElement) {
+        super(size, stackLimit);
+        this.transparentNodeElement = transparentNodeElement;
     }
 
     @Override
     public String getInventoryName() {
         return "tco.TransparentNodeInventory";
-    }
-
-    @Override
-    public int getInventoryStackLimit() {
-
-        return stackLimit;
-    }
-
-    @Override
-    public boolean isUsableByPlayer(Player player) {
-
-		/*
-         * if(transparentNodeElement != null) { if(NodeManager.instance.getNodeFromCoordonate(transparentNodeElement.node.coordonate) != transparentNodeElement.node) return false; return player.getDistance(transparentNodeElement.node.coordonate.x + 0.5, transparentNodeElement.node.coordonate.y + 0.5, transparentNodeElement.node.coordonate.z + 0.5) < 10; }
-		 */
-        return true;
-        // return player.getDistanceSq(transparentNodeRender.tileEntity.getBlockPos().getX() + 0.5, transparentNodeRender.tileEntity.getBlockPos().getY() + 0.5, transparentNodeRender.tileEntity.getBlockPos().getZ() + 0.5) < 18;
-    }
-
-    @Override
-    public void openInventory() {
-
-    }
-
-    @Override
-    public void closeInventory() {
-
     }
 
     @Override
@@ -109,24 +28,12 @@ public class TransparentNodeElementInventory implements ISidedInventoryCompat, I
         }
     }
 
-    @Override
-    public void readFromNBT(CompoundTag nbt, String str) {
-
-        Utils.readFromNBT(nbt, str, this);
-    }
-
-    @Override
-    public void writeToNBT(CompoundTag nbt, String str) {
-
-        Utils.writeToNBT(nbt, str, this);
-    }
-
+    /** Valid if some face may insert it. */
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack) {
-        for (int idx = 0; idx < 6; idx++) {
-            int[] lol = getAccessibleSlotsFromSide(idx);
-            for (int hohoho : lol) {
-                if (hohoho == i && canInsertItem(i, itemstack, idx)) {
+        for (int side = 0; side < 6; side++) {
+            for (int slot : getAccessibleSlotsFromSide(side)) {
+                if (slot == i && canInsertItem(i, itemstack, side)) {
                     return true;
                 }
             }
@@ -135,24 +42,17 @@ public class TransparentNodeElementInventory implements ISidedInventoryCompat, I
     }
 
     @Override
-    public boolean hasCustomInventoryName() {
-
-        return false;
-    }
-
-    @Override
-    public int[] getAccessibleSlotsFromSide(int var1) {
+    public int[] getAccessibleSlotsFromSide(int side) {
         return new int[]{};
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
         return false;
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int var3) {
+    public boolean canExtractItem(int slot, ItemStack stack, int side) {
         return false;
     }
-
 }
