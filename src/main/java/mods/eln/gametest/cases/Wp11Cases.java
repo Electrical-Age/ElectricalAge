@@ -1,8 +1,9 @@
 package mods.eln.gametest.cases;
 
 import mods.eln.Eln;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
+import mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherBlock;
+import mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor;
+import mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherElement;
 import mods.eln.registry.batch.Wp11Content;
 import mods.eln.gridnode.electricalpole.ElectricalPoleElement;
 import mods.eln.mechanical.GeneratorDescriptor;
@@ -62,6 +63,7 @@ public final class Wp11Cases {
         cases.add(new TurbineIdleCase());
         cases.add(new PoleCase());
         cases.add(new EnergyConverterCase());
+        cases.add(new LegacyExporterCase());
     }
 
     // ---- helpers ----
@@ -254,12 +256,12 @@ public final class Wp11Cases {
      * is U / (src-cable 2rs + cable-converter 2rs + R). The buffer integrates the resistor power over the elapsed
      * ticks (0.05 s each). Forge Energy on the back face (only): stored = buffer * ratio (ElnToThermalExpansion,
      * FE per J); extracting N FE removes N / ratio J (an aborted transaction gives it back); the front face has no
-     * capability; insert is refused. 26.x: FE only (1.12 also had RF and IC2 EU). The converter is a simple node:
-     * this case removes it at the end of measure.
+     * capability; insert is refused. 26.x: FE only (1.12 also had RF and IC2 EU). The converter is a transparent node
+     * (a simple node until 2026-10): this case removes it at the end of measure.
      */
     static final class EnergyConverterCase implements TestCase {
         BlockPos pos;
-        EnergyConverterElnToOtherNode node;
+        EnergyConverterElnToOtherElement node;
         long builtAt;
 
         public String name() {
@@ -269,26 +271,29 @@ public final class Wp11Cases {
         public void build(TestContext ctx) {
             pos = ctx.at(1, 1, 1);
             feed(ctx, ctx.at(2, 1, 1), ctx.at(3, 1, 1));
-            if (Wp11Content.elnToOtherBlockLvu == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
-            EnergyConverterElnToOtherBlock block = Wp11Content.elnToOtherBlockLvu.get();
+            EnergyConverterElnToOtherDescriptor d = Wp11Content.elnToOtherLvu;
+            if (d == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
             // front = player view inverse: yaw 90 (looking -X) -> front XP, towards the cable at x = 2
             net.neoforged.neoforge.common.util.FakePlayer player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.world());
             float yaw = player.getYRot(), pitch = player.getXRot();
             player.setYRot(90f);
             player.setXRot(0f);
+            mods.eln.node.transparent.TransparentNode placed;
             try {
-                mods.eln.node.simple.SimpleNodeItem item = (mods.eln.node.simple.SimpleNodeItem) block.asItem();
-                if (item.placeAt(new ItemStack(item), player, ctx.world(), pos) == null)
-                    throw new IllegalStateException("placing the energy converter at " + pos + " failed");
+                placed = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, ctx.world(), pos, Direction.YN);
             } finally {
                 player.setYRot(yaw);
                 player.setXRot(pitch);
             }
+            if (placed == null) throw new IllegalStateException("placing the energy converter at " + pos + " failed");
             NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, ctx.world()));
-            if (!(n instanceof EnergyConverterElnToOtherNode)) throw new IllegalStateException("no converter node at " + pos);
-            node = (EnergyConverterElnToOtherNode) n;
-            node.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(EnergyConverterElnToOtherNode.setInPowerFactor);
+            if (!(n instanceof mods.eln.node.transparent.TransparentNode t) || !(t.element instanceof EnergyConverterElnToOtherElement e))
+                throw new IllegalStateException("no converter node at " + pos);
+            node = e;
+            // the GUI slider's packet (EnergyConverterScreen -> render.clientSendFloat -> TransparentNode.networkUnserialize)
+            t.networkUnserialize(ctx.stream(out -> {
+                out.writeShort(t.elementId);
+                out.writeByte(EnergyConverterElnToOtherElement.setInPowerFactor);
                 out.writeFloat(0.2f);
             }), null);
             builtAt = ctx.world().getGameTime();
@@ -309,6 +314,7 @@ public final class Wp11Cases {
             double lvp = Eln.LVP(), r = rs(), ratio = Eln.ElnToTeConversionRatio;
             ctx.check("wp11 converter front faces the feed cable (XP)", node.getFront() == Direction.XP, String.valueOf(node.getFront()));
             ctx.checkValue("wp11 converter input power factor (GUI packet)", node.inPowerFactor, 0.2);
+            ctx.check("wp11 converter publishes the factor (GUI slider)", publishedFactor(node) == 0.2f, String.valueOf(publishedFactor(node)));
             Resistor in = field(node, "powerInResistor");
             double buffer = node.energyBuffer, max = node.energyBufferMax;
             ctx.checkValue("wp11 converter buffer max [J] (2 * LVP)", max, 2 * lvp);
@@ -365,5 +371,122 @@ public final class Wp11Cases {
         }
     }
 
+    /** The factor a client render reads from the element's publish (what the GUI slider shows). */
+    static float publishedFactor(EnergyConverterElnToOtherElement e) {
+        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+        e.networkSerialize(new java.io.DataOutputStream(bos));
+        var r = new mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherRender(null, e.getDescriptor());
+        r.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())));
+        return r.inPowerFactor;
+    }
 
+    /**
+     * An exporter saved while it was a simple node (tag "ElnToOther", coordinates and state at the root of the node
+     * tag, block entity eln:energy_converter_eln_to_other_entity), loaded as the node file loads: it comes back as a
+     * transparent node at the same position with the same front, slider and buffer, its old block-entity id resolves
+     * to the transparent-node one, and it pushes its buffer as FE into the block behind (a test sink). The tag is
+     * built by hand as the simple node wrote it.
+     */
+    static final class LegacyExporterCase implements TestCase {
+        static final double BUFFER = 300.0, FACTOR = 0.37;
+        BlockPos pos, sinkPos;
+        net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler sink;
+        EnergyConverterElnToOtherElement element;
+        double bufferAtLoad;
+
+        public String name() {
+            return "wp11 legacy exporter save";
+        }
+
+        public void build(TestContext ctx) {
+            if (Wp11Content.elnToOtherLvu == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
+            pos = ctx.at(3, 2, 1);      // in the air: the simple-node block needed no floor
+            sinkPos = ctx.at(2, 2, 1);  // behind it: front XP (east), back XN
+            int dim = mods.eln.misc.Dimensions.id(ctx.world());
+
+            net.minecraft.nbt.CompoundTag old = new net.minecraft.nbt.CompoundTag();
+            old.putString("tag", "ElnToOther");
+            old.putInt("cx", pos.getX());
+            old.putInt("cy", pos.getY());
+            old.putInt("cz", pos.getZ());
+            old.putInt("cd", dim);
+            old.putByte("NBOpaque", (byte) 0);
+            old.putByte("NBWrap", (byte) 0);
+            old.putByte("SNfront", (byte) Direction.XP.getInt());
+            old.putString("SNdescriptorKey", "EnergyConverterElnToOtherLVU");
+            old.putFloat("loadUc", 0f);
+            old.putDouble("powerInResistorR", 1e9);
+            old.putDouble("energyBuffer", BUFFER);
+            old.putDouble("inPowerFactor", FACTOR);
+            net.minecraft.nbt.CompoundTag file = new net.minecraft.nbt.CompoundTag();
+            file.put("n0", old);
+
+            // as on a world load: the node file first (LevelEvent.Load), then the chunk with the block and its entity
+            NodeManager.instance.loadFromNbt(file, dim);
+            NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, ctx.world()));
+            ctx.check("legacy exporter: a transparent node at the saved position", n instanceof mods.eln.node.transparent.TransparentNode,
+                n == null ? "none" : n.getClass().getSimpleName());
+            if (!(n instanceof mods.eln.node.transparent.TransparentNode t) || !(t.element instanceof EnergyConverterElnToOtherElement e))
+                throw new IllegalStateException("the old exporter tag did not load as an exporter at " + pos + ": " + n);
+            element = e;
+            bufferAtLoad = e.energyBuffer;
+            ctx.check("legacy exporter: coordinates kept", t.coordonate.pos().equals(pos) && t.coordonate.dimention == dim, String.valueOf(t.coordonate));
+            ctx.check("legacy exporter: device LVU (descriptor key -> id)", e.getDescriptor() == Wp11Content.elnToOtherLvu, e.getDescriptor().name);
+            ctx.check("legacy exporter: front kept (XP)", e.getFront() == Direction.XP, String.valueOf(e.getFront()));
+            ctx.checkValue("legacy exporter: slider (input power factor) kept", e.inPowerFactor, FACTOR);
+            ctx.checkValue("legacy exporter: energy buffer kept [J]", e.energyBuffer, BUFFER);
+            ctx.check("legacy exporter: slider published to the GUI", publishedFactor(e) == (float) FACTOR, String.valueOf(publishedFactor(e)));
+            net.minecraft.nbt.CompoundTag saved = new net.minecraft.nbt.CompoundTag();
+            t.writeToNBT(saved);
+            ctx.check("legacy exporter: saves again as a transparent node (coordinates in 'node')",
+                saved.getCompoundOrEmpty("node").getIntOr("cx", 0) == pos.getX() && saved.getCompoundOrEmpty("node").getIntOr("cy", 0) == pos.getY()
+                    && saved.getCompoundOrEmpty("node").getIntOr("cz", 0) == pos.getZ() && saved.getShortOr("eid", (short) 0) == (short) Wp11Content.elnToOtherLvu.parentItemDamage,
+                saved.toString());
+
+            // the chunk: block state (FRONT = east, as the simple-node block stored it) and the old block-entity id
+            EnergyConverterElnToOtherBlock block = (EnergyConverterElnToOtherBlock) mods.eln.registry.ElnRegistry.TRANSPARENT_BLOCKS.stream()
+                .map(net.neoforged.neoforge.registries.DeferredBlock::get).filter(b -> b.descriptor == Wp11Content.elnToOtherLvu).findFirst().orElseThrow();
+            var state = block.defaultBlockState().setValue(EnergyConverterElnToOtherBlock.FRONT, net.minecraft.core.Direction.EAST.get3DDataValue());
+            net.minecraft.nbt.CompoundTag beTag = new net.minecraft.nbt.CompoundTag();
+            beTag.putString("id", "eln:energy_converter_eln_to_other_entity");
+            beTag.putInt("x", pos.getX());
+            beTag.putInt("y", pos.getY());
+            beTag.putInt("z", pos.getZ());
+            BlockEntity loaded = BlockEntity.loadStatic(pos, state, beTag, ctx.world().registryAccess());
+            ctx.check("legacy exporter: old block-entity id loads as the transparent-node entity",
+                loaded instanceof mods.eln.node.transparent.TransparentNodeEntity, loaded == null ? "null" : loaded.getClass().getSimpleName());
+            ctx.world().setBlock(pos, state, 3);
+            ctx.check("legacy exporter: block entity is a transparent-node entity",
+                ctx.world().getBlockEntity(pos) instanceof mods.eln.node.transparent.TransparentNodeEntity, String.valueOf(ctx.world().getBlockEntity(pos)));
+
+            ctx.world().setBlock(sinkPos, mods.eln.gametest.TestEnergySinks.BLOCK.defaultBlockState(), 3);
+            sink = mods.eln.gametest.TestEnergySinks.put(sinkPos, 1_000_000);
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void measure(TestContext ctx) {
+            try {
+                double ratio = Eln.ElnToTeConversionRatio;
+                long expected = (long) (bufferAtLoad * ratio);
+                ctx.check("legacy exporter: FE pushed into the block behind = its buffer * ratio", Math.abs(sink.getAmountAsLong() - expected) <= 1,
+                    sink.getAmountAsLong() + " FE, expected " + expected);
+                ctx.check("legacy exporter: buffer emptied by the push", element.energyBuffer < 1 / ratio + 1e-9, element.energyBuffer + " J");
+                ctx.check("legacy exporter: block state FRONT unchanged (east)",
+                    ctx.world().getBlockState(pos).getValue(EnergyConverterElnToOtherBlock.FRONT) == net.minecraft.core.Direction.EAST.get3DDataValue(), "");
+                var cap = net.neoforged.neoforge.capabilities.Capabilities.Energy.BLOCK;
+                ctx.check("legacy exporter: FE capability on the back face",
+                    ctx.world().getCapability(cap, pos, net.minecraft.core.Direction.WEST) != null
+                        && ctx.world().getCapability(cap, pos, net.minecraft.core.Direction.EAST) == null, "");
+            } finally {
+                mods.eln.gametest.TestEnergySinks.remove(sinkPos);
+                ctx.world().removeBlock(sinkPos, false);
+                ctx.world().removeBlock(pos, false);
+                ctx.check("legacy exporter removed (own cleanup)",
+                    NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, ctx.world())) == null, "");
+            }
+        }
+    }
 }

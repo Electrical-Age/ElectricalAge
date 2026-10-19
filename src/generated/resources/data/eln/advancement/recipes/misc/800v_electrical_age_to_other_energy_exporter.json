@@ -1,20 +1,11 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/copper"
-      }
-    }
-  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ingredient": {
       "conditions": {
         "items": [
           {
-            "items": "#c:circuits/basic"
+            "items": "#c:circuits/advanced"
           }
         ]
       },
@@ -22,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:energy_converter_eln_to_other_lvublock"
+        "recipes": "eln:800v_electrical_age_to_other_energy_exporter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -35,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:energy_converter_eln_to_other_lvublock"
+      "eln:800v_electrical_age_to_other_energy_exporter"
     ]
   }
 }

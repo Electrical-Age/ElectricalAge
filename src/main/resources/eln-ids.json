@@ -1936,5 +1936,23 @@
   "display": "Flare Stack",
   "kind": "transparent_node",
   "name": "flare_stack"
+ },
+ "eln:transparent_node@5376": {
+  "descriptor": "EnergyConverterElnToOtherDescriptor",
+  "display": "50V Electrical Age to other energy exporter",
+  "kind": "transparent_node",
+  "name": "energy_converter_eln_to_other_lvublock"
+ },
+ "eln:transparent_node@5380": {
+  "descriptor": "EnergyConverterElnToOtherDescriptor",
+  "display": "200V Electrical Age to other energy exporter",
+  "kind": "transparent_node",
+  "name": "energy_converter_eln_to_other_mvublock"
+ },
+ "eln:transparent_node@5384": {
+  "descriptor": "EnergyConverterElnToOtherDescriptor",
+  "display": "800V Electrical Age to other energy exporter",
+  "kind": "transparent_node",
+  "name": "energy_converter_eln_to_other_hvublock"
  }
 }

@@ -230,8 +230,9 @@ public class Eln {
         mods.eln.node.NodeManager.registerUuid("s", mods.eln.node.six.SixNode.class);
         mods.eln.node.NodeManager.registerUuid("t", mods.eln.node.transparent.TransparentNode.class);
         mods.eln.node.NodeManager.registerUuid(mods.eln.node.voxel.VoxelNode.UUID, mods.eln.node.voxel.VoxelNode.class);   // (pipes; never unregister)
-        mods.eln.node.NodeManager.registerUuid(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode.getNodeUuidStatic(),
-            mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode.class);
+        // FE exporters saved while they were simple nodes load as transparent nodes
+        mods.eln.node.NodeManager.registerTagUpgrade(mods.eln.transparentnode.energyconverter.ExporterSaveUpgrade.OLD_TYPE,
+            mods.eln.transparentnode.energyconverter.ExporterSaveUpgrade::upgrade);
         NeoForge.EVENT_BUS.addListener(ServerAboutToStartEvent.class, e -> {
             // item components are bound only once the server's registries are: ItemStacks can be made from here on
             mods.eln.registry.ElnRegistry.afterRegistration();
@@ -315,10 +316,14 @@ public class Eln {
             e.put(mods.eln.registry.ElnRegistry.REPLICATOR.get(), mods.eln.entity.ReplicatorEntity.createAttributes().build()));
         // FE on EA's energy items (batteries, tools, lamps)
         modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, mods.eln.item.electricalitem.ItemEnergyCapability::register);
-        // energy converters: FE out of their back face (1.12: CapabilityEnergy.ENERGY on the entity)
+        // FE out of a device's face (the exporters' back face; 1.12: CapabilityEnergy.ENERGY on the entity): the
+        // element's handler, null on the client, for the null side and while burnt (TransparentNode.getEnergyHandler)
         modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
             e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Energy.BLOCK,
-                mods.eln.registry.ElnRegistry.ENERGY_CONVERTER_ENTITY.get(), (be, side) -> be.getEnergyHandler(side)));
+                mods.eln.registry.ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), (be, side) -> {
+                    if (side == null || be.getLevel() == null || be.getLevel().isClientSide()) return null;
+                    return be.getNode() instanceof mods.eln.node.transparent.TransparentNode tn ? tn.getEnergyHandler(side) : null;
+                }));
         modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> {
             sixNodeBlock = mods.eln.registry.ElnRegistry.SIX_NODE_BLOCK.get();
             ghostBlock = mods.eln.registry.ElnRegistry.GHOST_BLOCK.get();

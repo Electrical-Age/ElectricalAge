@@ -2,7 +2,7 @@ package mods.eln;
 
 /**
  * Device content hooks (1.12 port, M1 split). Everything in Eln's lifecycle that touches device packages
- * (sixnode, transparentnode, simplenode, gridnode, mechanical, item, entity, ore, wiki, ...) lives in
+ * (sixnode, transparentnode, gridnode, mechanical, item, entity, ore, wiki, ...) lives in
  * mods.eln.registry.ElnContentImpl, which is built together with those packages. When they are excluded from the
  * build (M1: core only), Eln runs with the no-op defaults below.
  */

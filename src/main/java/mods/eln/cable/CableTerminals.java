@@ -1,8 +1,6 @@
 package mods.eln.cable;
 
-import mods.eln.misc.DescriptorBase;
 import mods.eln.misc.Direction;
-import mods.eln.node.simple.SimpleNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -13,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * Cable-to-cable joints and devices without terminals are unchanged.
  * <p>
  * Opt in with one line in the descriptor's constructor: {@code cableTerminals = CableTerminals.FRONT_AND_BACK;}
- * ({@code TransparentNodeDescriptor} and, for simple nodes, {@code DescriptorBase} have the field). A transparent node
+ * ({@code TransparentNodeDescriptor} has the field). A transparent node
  * render can also override {@code TransparentNodeElementRender.cableKnuckleHeight(face)}.
  */
 public final class CableTerminals {
@@ -55,10 +53,6 @@ public final class CableTerminals {
     public static float heightAt(BlockEntity be, Direction face) {
         if (be instanceof TransparentNodeEntity t) {
             return t.elementRender == null ? 0 : t.elementRender.cableKnuckleHeight(face);
-        }
-        if (be instanceof SimpleNodeEntity s) {
-            Object d = s.getDescriptor();
-            if (d instanceof DescriptorBase db && db.cableTerminals != null) return db.cableTerminals.heightAt(s.front, face);
         }
         return 0;
     }

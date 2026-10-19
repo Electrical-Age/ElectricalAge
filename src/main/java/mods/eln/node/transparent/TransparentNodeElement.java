@@ -201,6 +201,16 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
 
+    /**
+     * The element's Forge Energy handler on a block face (26.x energy capability), null if none; TransparentNode
+     * hides it while burnt.
+     */
+    @Nullable
+    public net.neoforged.neoforge.transfer.energy.EnergyHandler getEnergyHandler(@Nullable net.minecraft.core.Direction side) {
+        return null;
+    }
+
+
     public void onNeighborBlockChange() {
         checkCanStay(false);
     }

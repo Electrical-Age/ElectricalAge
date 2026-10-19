@@ -20,6 +20,11 @@ public class TransparentNodeBlock extends NodeBlock {
         this.descriptor = descriptor;
     }
 
+    /** The state placed for a device facing FRONT (TransparentNodeItem); one without a front state: the default. */
+    public BlockState stateForFront(mods.eln.misc.Direction front) {
+        return defaultBlockState();
+    }
+
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TransparentNodeEntity(pos, state);

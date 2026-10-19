@@ -101,7 +101,7 @@ public class ElnModels implements DataProvider {
                 model = "eln:block/" + name;
                 out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:block/cube_all", "textures",
                     obj("all", "eln:" + (tex == null ? "blocks/ore" : tex))), assets.resolve("models/block/" + name + ".json")));
-            } else if (b instanceof mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock) {
+            } else if (b instanceof mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherBlock) {
                 // the synchronous-condenser models (AdventurAgent, tools/models/converter.py; OBJ in src/main/resources),
                 // turned so their EA face is the node's FRONT
                 JsonObject variants = new JsonObject();
@@ -134,7 +134,7 @@ public class ElnModels implements DataProvider {
             Item item = h.get();
             String name = BuiltInRegistries.ITEM.getKey(item).getPath();
             String model = "eln:item/" + name;
-            if (item instanceof net.minecraft.world.item.BlockItem bi && bi.getBlock() instanceof mods.eln.node.simple.SimpleNodeBlock) {
+            if (item instanceof mods.eln.node.transparent.TransparentNodeItem ti && ti.descriptor instanceof mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor) {
                 model = converterModel(name);
             } else if (name.equals("replicator_spawn_egg")) {
                 out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:item/generated", "textures",

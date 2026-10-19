@@ -49,6 +49,29 @@ public class NodeManager {
         UUIDToClass.put(uuid, classType);
     }
 
+    /**
+     * Rewrites of saved node tags from older versions, by the saved type ("tag"), applied before the node is built:
+     * a device that changed node kind keeps its saves (the simple-node FE exporter, now a transparent node). An
+     * upgrade returns the tag unchanged when it can't convert it, and the orphan path keeps it.
+     */
+    public static final HashMap<String, java.util.function.UnaryOperator<CompoundTag>> TAG_UPGRADES = new HashMap<>();
+
+    public static void registerTagUpgrade(String type, java.util.function.UnaryOperator<CompoundTag> upgrade) {
+        TAG_UPGRADES.put(type, upgrade);
+    }
+
+    /** The tag as this version reads it (TAG_UPGRADES applied). */
+    public static CompoundTag upgradeTag(CompoundTag tag) {
+        var u = TAG_UPGRADES.get(tag.getStringOr("tag", ""));
+        if (u == null) return tag;
+        try {
+            return u.apply(tag);
+        } catch (RuntimeException e) {
+            LOG.warn("Electrical Age: upgrading a saved node of type '{}' failed; keeping it as it was", tag.getStringOr("tag", ""), e);
+            return tag;
+        }
+    }
+
     Collection<NodeBase> getNodeList() {
         return nodesMap.values();
     }
@@ -136,7 +159,7 @@ public class NodeManager {
     public void loadFromNbt(CompoundTag nbt, int dim) {
         List<NodeBase> addedNode = new ArrayList<NodeBase>();
         for (Object o : Utils.getTags(nbt)) {
-            CompoundTag tag = (CompoundTag) o;
+            CompoundTag tag = upgradeTag((CompoundTag) o);
             String type = tag.getStringOr("tag", "");
             Class nodeClass = UUIDToClass.get(type);
             if (nodeClass == null) {

@@ -205,7 +205,7 @@ final class GoldenSlotsCase implements TestCase {
             ctx.check("golden slots: " + name + " inventory holds the slots", elementInv != null
                     && elementInv.getContainerSize() >= menu.spec.inventorySize(),
                 "element inventory " + (elementInv == null ? "null" : elementInv.getContainerSize()) + ", spec needs " + menu.spec.inventorySize());
-            MenuSpec client = NodeMenus.spec(menu.kind, menu.descriptorId, menu.simpleKey);
+            MenuSpec client = NodeMenus.spec(menu.kind, menu.descriptorId);
             ctx.check("golden slots: " + name + " client spec", shape(client).equals(shape(menu.spec))
                 && client.playerInventory() == menu.spec.playerInventory(), "client " + client.slots().size() + " slots");
 

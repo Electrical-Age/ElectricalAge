@@ -25,13 +25,12 @@ import org.jspecify.annotations.Nullable;
  * from the descriptor (it has no nodes).
  */
 public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer {
-    public static final byte SIX = 0, TRANSPARENT = 1, SIMPLE = 2;
+    public static final byte SIX = 0, TRANSPARENT = 1;
 
     public final BlockPos pos;
     public final Direction side;
     public final byte kind;
     public final int descriptorId;
-    public final String simpleKey;
     public final MenuSpec spec;
     public final Container deviceInventory;
     /** Server only (null on the client). */
@@ -39,13 +38,12 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     public final int deviceSlots;
 
     public ElnNodeMenu(int containerId, Inventory playerInventory, Container deviceInventory, MenuSpec spec, @Nullable NodeBase node,
-                       BlockPos pos, Direction side, byte kind, int descriptorId, String simpleKey) {
+                       BlockPos pos, Direction side, byte kind, int descriptorId) {
         super(ElnRegistry.NODE_MENU.get(), containerId);
         this.pos = pos;
         this.side = side;
         this.kind = kind;
         this.descriptorId = descriptorId;
-        this.simpleKey = simpleKey;
         this.spec = spec;
         this.deviceInventory = deviceInventory;
         this.node = node;
@@ -71,10 +69,9 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         Direction side = Direction.fromInt(buf.readByte());
         byte kind = buf.readByte();
         int id = buf.readInt();
-        String key = buf.readUtf();
-        MenuSpec spec = clientLayout.apply(NodeMenus.spec(kind, id, key), NodeMenus.descriptor(kind, id));
+        MenuSpec spec = clientLayout.apply(NodeMenus.spec(kind, id), NodeMenus.descriptor(kind, id));
         return new ElnNodeMenu(containerId, playerInventory, new SimpleContainer(Math.max(1, spec.inventorySize())), spec, null,
-            pos, side, kind, id, key);
+            pos, side, kind, id);
     }
 
     public void writeOpenData(RegistryFriendlyByteBuf buf) {
@@ -82,7 +79,6 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         buf.writeByte(side.getInt());
         buf.writeByte(kind);
         buf.writeInt(descriptorId);
-        buf.writeUtf(simpleKey);
     }
 
     @Override

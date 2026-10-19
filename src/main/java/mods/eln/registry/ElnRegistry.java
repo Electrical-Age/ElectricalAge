@@ -129,23 +129,10 @@ public final class ElnRegistry {
         BLOCK_ENTITIES.register("transparent_node", () -> new BlockEntityType<>(mods.eln.node.transparent.TransparentNodeEntity::new,
             TRANSPARENT_BLOCKS.stream().map(DeferredBlock::get).collect(java.util.stream.Collectors.toSet())));
 
-    /** Energy converter blocks (simple nodes, 1.12 Wp11 registerEnergyConverter); one block-entity type for all. */
-    public static final List<DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock>> CONVERTER_BLOCKS = new ArrayList<>();
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity>> ENERGY_CONVERTER_ENTITY =
-        BLOCK_ENTITIES.register("energy_converter_eln_to_other_entity", () -> new BlockEntityType<>(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity::new,
-            CONVERTER_BLOCKS.stream().map(DeferredBlock::get).collect(java.util.stream.Collectors.toSet())));
-
-    /** An energy converter block and its item (1.12 name, e.g. eln:energy_converter_eln_to_other_lvublock). */
-    public static DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock> registerEnergyConverter(
-        String name, mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor desc) {
-        DeferredBlock<mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock> block = BLOCKS.registerBlock(name,
-            p -> new mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock(p, desc),
-            p -> p.mapColor(MapColor.ICE).strength(0.5f).sound(SoundType.GLASS) // 1.12 Material.PACKED_ICE
-                .noOcclusion()); // the condenser model doesn't fill the cube
-        CONVERTER_BLOCKS.add(block);
-        ALL_ITEMS.add(ITEMS.registerItem(name, p -> new mods.eln.node.simple.SimpleNodeItem(block.get(), p)));
-        return block;
+    static {
+        // the FE exporter's own block-entity type, from when it was a simple node: saved chunks name it
+        BLOCK_ENTITIES.addAlias(net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "energy_converter_eln_to_other_entity"),
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "transparent_node"));
     }
 
     public static final DeferredRegister<net.minecraft.world.entity.EntityType<?>> ENTITY_TYPES =
@@ -233,9 +220,8 @@ public final class ElnRegistry {
             int id = e.getKey();
             mods.eln.node.transparent.TransparentNodeDescriptor d = e.getValue();
             String name = nameOf("eln:transparent_node", id);
-            DeferredBlock<mods.eln.node.transparent.TransparentNodeBlock> block = BLOCKS.registerBlock(name,
-                p -> new mods.eln.node.transparent.TransparentNodeBlock(p, d),
-                p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion());
+            // (a device may bring its own block class and properties: the FE exporter's baked model)
+            DeferredBlock<mods.eln.node.transparent.TransparentNodeBlock> block = BLOCKS.registerBlock(name, d::newBlock, d::blockProperties);
             TRANSPARENT_BLOCKS.add(block);
             ALL_ITEMS.add(ITEMS.registerItem(name, p -> {
                 mods.eln.node.transparent.TransparentNodeItem item = new mods.eln.node.transparent.TransparentNodeItem(p, d, block::get);

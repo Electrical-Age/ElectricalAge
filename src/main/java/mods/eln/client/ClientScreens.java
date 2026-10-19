@@ -46,7 +46,7 @@ final class ClientScreens {
         layout("sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor", "data_logger");
         layout("transparentnode.teleporter.TeleporterDescriptor", "teleporter");
         layout("sixnode.tutorialsign.TutorialSignDescriptor", "tutorial_sign");
-        layout("simplenode.energyconverter.EnergyConverterElnToOtherDescriptor", "energy_converter");
+        layout("transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor", "energy_converter");
         layout("sixnode.hub.HubDescriptor", "hub");
         layout("transparentnode.heatfurnace.HeatFurnaceDescriptor", "heat_furnace");
         layout("transparentnode.FuelHeatFurnaceDescriptor", "fuel_heat_furnace");
@@ -95,8 +95,8 @@ final class ClientScreens {
             mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerScreen::new);
         reg(mods.eln.transparentnode.teleporter.TeleporterDescriptor.class, mods.eln.transparentnode.teleporter.TeleporterScreen::new);
         reg(mods.eln.sixnode.tutorialsign.TutorialSignDescriptor.class, mods.eln.sixnode.tutorialsign.TutorialSignScreen::new);
-        reg(mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.class,
-            mods.eln.simplenode.energyconverter.EnergyConverterScreen::new);
+        reg(mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor.class,
+            mods.eln.transparentnode.energyconverter.EnergyConverterScreen::new);
         // S1f: the Kotlin devices (chips share a descriptor class: by element class)
         mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.AnalogChipDescriptor.class, d -> {
             Class<?> e = ((mods.eln.node.six.SixNodeDescriptor) d).ElementClass;

@@ -1,4 +1,4 @@
-package mods.eln.simplenode.energyconverter;
+package mods.eln.transparentnode.energyconverter;
 
 import mods.eln.client.gui.EaSlider;
 import mods.eln.client.gui.ElnScreen;
@@ -10,12 +10,12 @@ import static mods.eln.i18n.I18N.tr;
 
 /** EA -> Forge Energy converter (P4b; layout gui/energy_converter.json): the input power limit. */
 public class EnergyConverterScreen extends ElnScreen {
-    final EnergyConverterElnToOtherEntity render;
+    final EnergyConverterElnToOtherRender render;
     EaSlider limit;
 
     public EnergyConverterScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
         super(menu, inventory, title);
-        this.render = (EnergyConverterElnToOtherEntity) render;
+        this.render = (EnergyConverterElnToOtherRender) render;
     }
 
     @Override
@@ -23,7 +23,7 @@ public class EnergyConverterScreen extends ElnScreen {
         super.init();
         limit = slider("limit", 0, 1, 0.01, render.inPowerFactor,
             v -> Component.literal(tr("Input power is limited to %1$W", (int) (v * render.inPowerMax))),
-            v -> render.clientSendFloat(EnergyConverterElnToOtherNode.setInPowerFactor, (float) v));
+            v -> render.clientSendFloat(EnergyConverterElnToOtherElement.setInPowerFactor, (float) v));
         render.hasChanges = false;
     }
 

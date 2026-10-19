@@ -1,4 +1,4 @@
-// 26.3	2026-10-19T01:10:49.264784504	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-19T13:19:35.908326505	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -6,6 +6,7 @@ a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_
 77de1c23d6d3612eda465246a569974f6b83c12c data/eln/advancement/recipes/misc/200v_copper_heating_corp.json
 e743eae1cb21a91c07eceee43202fb0db4375195 data/eln/advancement/recipes/misc/200v_economic_light_bulb.json
 d050da6bef71a9b8a9f8195bf3d459ffd7811782 data/eln/advancement/recipes/misc/200v_electric_heater.json
+e5d9e5f459a600a6558396e549f90654555124de data/eln/advancement/recipes/misc/200v_electrical_age_to_other_energy_exporter.json
 0542d053a10a8e5e981362b30ca7a8f2533faed9 data/eln/advancement/recipes/misc/200v_emergency_lamp.json
 adeecf98acdb46f2b3deed72dde3336fe761659c data/eln/advancement/recipes/misc/200v_farming_lamp.json
 b743f97b457fe7a65c5081ef972fbd2599f59084 data/eln/advancement/recipes/misc/200v_fuel_generator.json
@@ -38,6 +39,7 @@ cfc63eb99912c5bbe0f73e1d793a1df1e4b4c5d7 data/eln/advancement/recipes/misc/50v_c
 6e1c8814a88d0fa7361ed417b4ed336e495966f2 data/eln/advancement/recipes/misc/50v_economic_light_bulb.json
 3862f970bb4092a37db62941f19545319b80532a data/eln/advancement/recipes/misc/50v_egg_incubator.json
 14303b712b1ddb027aadf855033c97087f03a454 data/eln/advancement/recipes/misc/50v_electric_heater.json
+cd9e547cb968ae64990b316727d5cebcf0255787 data/eln/advancement/recipes/misc/50v_electrical_age_to_other_energy_exporter.json
 8d13c57be21d9100cc02eca211d0105422997847 data/eln/advancement/recipes/misc/50v_emergency_lamp.json
 8fca0cf64992fbc5a8d89c34b7f8199d0746d317 data/eln/advancement/recipes/misc/50v_farming_lamp.json
 49fd5e9f7d5634ac7ab8b0729e87e916d4bdbfd1 data/eln/advancement/recipes/misc/50v_fuel_generator.json
@@ -53,6 +55,7 @@ e66dc6bbecb715722e880e211fe59913fadcbedb data/eln/advancement/recipes/misc/50v_s
 458625917ce956f38084559149825d267713c403 data/eln/advancement/recipes/misc/50v_tar_sand_separator.json
 8e3b85897658969af3d6d89f1f79f22619b924ac data/eln/advancement/recipes/misc/50v_tungsten_heating_corp.json
 2422a0e9ea7ec844761ef4e22a9f49b614483724 data/eln/advancement/recipes/misc/800v_defence_turret.json
+80062b4f9d51ddc94f07ab57dcc4e3c6a3457591 data/eln/advancement/recipes/misc/800v_electrical_age_to_other_energy_exporter.json
 79496b983ba9ed522455a9d984138a4452a98a45 data/eln/advancement/recipes/misc/advanced_chip.json
 77337270d3bcb51cd04bcfbbe92d2b91205082b0 data/eln/advancement/recipes/misc/advanced_electrical_motor.json
 3a619981495eb6f8bd59182f26cbc226b1dd4a70 data/eln/advancement/recipes/misc/advanced_energy_meter.json
@@ -113,9 +116,6 @@ b2f15519b77cf6222fa8c0452e0f6c9aad6e7610 data/eln/advancement/recipes/misc/elect
 a278a8ffc954fedd4f7dc050c32d8aba50d42142 data/eln/advancement/recipes/misc/electrical_probe_chip.json
 7679f2d424bfe1d6d01d31ff3446e095965f7a2b data/eln/advancement/recipes/misc/electrical_timer.json
 38383b7a61375d6dc63982937c944d537c1cb537 data/eln/advancement/recipes/misc/electrical_weather_sensor.json
-7a9fba46778872679243923b03c2674bd7db70d0 data/eln/advancement/recipes/misc/energy_converter_eln_to_other_hvublock.json
-7561e5cc1791182cdf7299754ab52274542df4b9 data/eln/advancement/recipes/misc/energy_converter_eln_to_other_lvublock.json
-8612c9dc0bf58f6e89a2cc5eb4762ebba12c09d8 data/eln/advancement/recipes/misc/energy_converter_eln_to_other_mvublock.json
 c95c5929d0b1534b30262ea3827c5f15d75bb044 data/eln/advancement/recipes/misc/energy_meter.json
 e09f2b8bf38f6e72748fec44315b25bcf864bccc data/eln/advancement/recipes/misc/experimental_transporter.json
 e6626b81782dcf21944212f0e22b7ebca4a2ce5b data/eln/advancement/recipes/misc/fast_electrical_drill.json
@@ -331,6 +331,7 @@ db75a7ac706c8f9058ecaab36bb11428c6be71b3 data/eln/recipe/200v_compressor.json
 aa668fa690ce2675a979a5c2025a4c98168becec data/eln/recipe/200v_copper_heating_corp.json
 abe8b2b6ffc6bbfbc4ab5c33a30e3888da5d8d28 data/eln/recipe/200v_economic_light_bulb.json
 0820e3ee87da79f00ed6dc2330ef7c584529e29d data/eln/recipe/200v_electric_heater.json
+6acccb7965305b6673f61666ebb362cb6ac1abd3 data/eln/recipe/200v_electrical_age_to_other_energy_exporter.json
 b1c0ed4fee8f4b486843b128ef8582556320a2e5 data/eln/recipe/200v_emergency_lamp.json
 6c7eb1ce8eca0953c08d46fedfae58e0b89a7e40 data/eln/recipe/200v_farming_lamp.json
 0a71adc9858089eb85a9cf581fa10350f0bd8ac6 data/eln/recipe/200v_fuel_generator.json
@@ -363,6 +364,7 @@ e1960b93a58994794aa02ebdfc31cf8726fb789b data/eln/recipe/50v_copper_heating_corp
 8933e3a8f0174cdb804e4a25548a7c3aab4a43e2 data/eln/recipe/50v_economic_light_bulb.json
 137d72909cd70d1597756c8645d82acf99e00f53 data/eln/recipe/50v_egg_incubator.json
 bf05073b6c6237d9db4003a1ca2f478d7ce0ecc5 data/eln/recipe/50v_electric_heater.json
+3036c3944b13f7be742df3e56251c4209fc6d3ef data/eln/recipe/50v_electrical_age_to_other_energy_exporter.json
 0e60606d43e253d5450263542f34729fdd8295d9 data/eln/recipe/50v_emergency_lamp.json
 f749aa360fc17b5026e299c0125bf2ceacb91542 data/eln/recipe/50v_farming_lamp.json
 fa8eab8ad306427da06ebc0c1e1e9ec6c122a6f9 data/eln/recipe/50v_fuel_generator.json
@@ -378,6 +380,7 @@ e3498ec55daf9124e4b38e6dfa6dd8810d4d2147 data/eln/recipe/50v_plate_machine.json
 597e59b2cb40ff96580947c9d42e4806e4aba461 data/eln/recipe/50v_tar_sand_separator.json
 26dd0e5b78d384e75a61dd3a288c91e7a056aed6 data/eln/recipe/50v_tungsten_heating_corp.json
 3c252398718236f524e1fa22cbb61b427356d014 data/eln/recipe/800v_defence_turret.json
+5503d8a4e479f03cd3c832b392fb5e93b78b7a44 data/eln/recipe/800v_electrical_age_to_other_energy_exporter.json
 7ea06e3dd79c15911fb0a5e5b0dee923286aabfc data/eln/recipe/advanced_chip.json
 cc4e6d7b00eee3b561d0c68aaa1e8bf2a24be60f data/eln/recipe/advanced_electrical_motor.json
 e122ea080232997e518a99bad9dc7789ae3e705a data/eln/recipe/advanced_energy_meter.json
@@ -438,9 +441,6 @@ e4c4dcba3d8ecd290568206dd3348bb4f4bb4cbb data/eln/recipe/electrical_fuse_holder.
 c611bc5041d2328ae1ef25e0e0db2858897e737d data/eln/recipe/electrical_probe_chip.json
 3f68557f1332b42206ff633ce893d7517b0f80be data/eln/recipe/electrical_timer.json
 9ab60bed5336cddef50785cb434218fb6e524fda data/eln/recipe/electrical_weather_sensor.json
-5503d8a4e479f03cd3c832b392fb5e93b78b7a44 data/eln/recipe/energy_converter_eln_to_other_hvublock.json
-3036c3944b13f7be742df3e56251c4209fc6d3ef data/eln/recipe/energy_converter_eln_to_other_lvublock.json
-6acccb7965305b6673f61666ebb362cb6ac1abd3 data/eln/recipe/energy_converter_eln_to_other_mvublock.json
 fcad7ac7974a4a1f34a82d16fc8438ba71b5b019 data/eln/recipe/energy_meter.json
 c2715733a822da5ec8a2af7742a673d2fdd1699e data/eln/recipe/experimental_transporter.json
 578f4c90700882a789008dc7d51958f37b2cd362 data/eln/recipe/fast_electrical_drill.json

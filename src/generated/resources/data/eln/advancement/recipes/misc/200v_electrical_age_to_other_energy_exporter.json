@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:circuits/advanced"
+            "items": "#c:circuits/basic"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:energy_converter_eln_to_other_hvublock"
+        "recipes": "eln:200v_electrical_age_to_other_energy_exporter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:energy_converter_eln_to_other_hvublock"
+      "eln:200v_electrical_age_to_other_energy_exporter"
     ]
   }
 }

@@ -107,6 +107,12 @@ public class TransparentNode extends Node {
         return element.getItemHandler(side);
     }
 
+    /** Forge Energy handler of the element on a face (26.x energy capability), null if none or burnt. */
+    public net.neoforged.neoforge.transfer.energy.EnergyHandler getEnergyHandler(net.minecraft.core.Direction side) {
+        if (element == null || element.isBurnt()) return null;
+        return element.getEnergyHandler(side);
+    }
+
     /**
      * Tells capability caches (hoppers, pipes) to look again: the element bound, burnt out, was repaired or is gone.
      */

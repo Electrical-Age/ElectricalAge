@@ -2366,7 +2366,7 @@ public final class ElnRecipes extends ElnRecipesBase {
 
     public static void recipeEnergyConverter() {
         if (ElnToOtherEnergyConverterEnable) {
-            addRecipe(stack(mods.eln.registry.batch.Wp11Content.elnToOtherBlockLvu.get()),
+            addRecipe(findItemStack("50V Electrical Age to other energy exporter"),
                 "III",
                 "cCR",
                 "III",
@@ -2375,7 +2375,7 @@ public final class ElnRecipes extends ElnRecipesBase {
                 'I', stack(Items.IRON_INGOT),
                 'R', "ingotCopper");
 
-            addRecipe(stack(mods.eln.registry.batch.Wp11Content.elnToOtherBlockMvu.get()),
+            addRecipe(findItemStack("200V Electrical Age to other energy exporter"),
                 "III",
                 "cCR",
                 "III",
@@ -2384,7 +2384,7 @@ public final class ElnRecipes extends ElnRecipesBase {
                 'I', stack(Items.IRON_INGOT),
                 'R', dictTungstenIngot);
 
-            addRecipe(stack(mods.eln.registry.batch.Wp11Content.elnToOtherBlockHvu.get()),
+            addRecipe(findItemStack("800V Electrical Age to other energy exporter"),
                 "III",
                 "cCR",
                 "III",

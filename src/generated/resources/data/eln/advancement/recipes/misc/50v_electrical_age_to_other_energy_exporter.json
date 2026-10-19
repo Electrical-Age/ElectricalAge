@@ -1,4 +1,13 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/copper"
+      }
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ingredient": {
@@ -13,7 +22,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:energy_converter_eln_to_other_mvublock"
+        "recipes": "eln:50v_electrical_age_to_other_energy_exporter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +35,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:energy_converter_eln_to_other_mvublock"
+      "eln:50v_electrical_age_to_other_energy_exporter"
     ]
   }
 }

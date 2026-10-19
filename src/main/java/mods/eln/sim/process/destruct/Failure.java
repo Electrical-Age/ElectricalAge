@@ -5,7 +5,6 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.transparent.TransparentNodeElement;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -79,14 +78,6 @@ public class Failure implements IDestructable {
         this.type = type;
         this.target = target;
         this.node = node;
-    }
-
-    /** Simple nodes can't burn out; they are removed (quietly, with smoke) instead. */
-    public Failure(SimpleNode e) {
-        this.c = e.coordonate;
-        this.type = e.toString();
-        this.target = null;
-        this.node = e;
     }
 
     public Failure cable() {

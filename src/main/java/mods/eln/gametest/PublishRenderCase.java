@@ -115,8 +115,9 @@ final class PublishRenderCase implements TestCase {
             TransparentNodeEntity be = new TransparentNodeEntity(at, level.getBlockState(at));
             be.setLevel(level);
             if (roundTrip(ctx, d.name, node, be)) {
+                // a device drawn by its block model (the FE exporter) has nothing for the element render to draw
                 if (be.elementRender == null) ctx.check("publish " + d.name + " render made", false, "none");
-                else if (INVISIBLE_IN_112.contains(d.name)) {
+                else if (INVISIBLE_IN_112.contains(d.name) || level.getBlockState(at).getRenderShape() == net.minecraft.world.level.block.RenderShape.MODEL) {
                     be.elementRender.draw();
                     ok++;
                 } else if (draw(ctx, d.name, be.elementRender::draw)) ok++;

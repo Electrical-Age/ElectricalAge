@@ -66,6 +66,7 @@ public final class ElnGameTests {
     public static void register(IEventBus modBus) {
         for (TestCase c : cases()) FUNCTIONS.register(c.id(), () -> helper -> run(helper, c));
         FUNCTIONS.register(modBus);
+        TestEnergySinks.register(modBus);
         modBus.addListener(RegisterGameTestsEvent.class, ElnGameTests::registerTests);
     }
 

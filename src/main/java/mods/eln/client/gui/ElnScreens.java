@@ -35,8 +35,7 @@ public final class ElnScreens {
         return switch (menu.kind) {
             case ElnNodeMenu.SIX -> Eln.sixNodeItem.getDescriptor(menu.descriptorId);
             case ElnNodeMenu.TRANSPARENT -> Eln.transparentNodeItem.getDescriptor(menu.descriptorId);
-            // simple nodes (energy converter): the client block entity's descriptor
-            default -> render(menu) instanceof mods.eln.node.simple.SimpleNodeEntity s ? s.getDescriptor() : null;
+            default -> null;
         };
     }
 
@@ -47,7 +46,6 @@ public final class ElnScreens {
         BlockEntity be = level.getBlockEntity(menu.pos);
         if (be instanceof SixNodeEntity six) return six.elementRenderList[menu.side.getInt()];
         if (be instanceof TransparentNodeEntity t) return t.elementRender;
-        if (be instanceof mods.eln.node.simple.SimpleNodeEntity s) return s;
         return null;
     }
 
@@ -55,8 +53,7 @@ public final class ElnScreens {
     public static ElnScreen create(ElnNodeMenu menu, Inventory inventory, Component title) {
         Object d = descriptor(menu);
         Object render = render(menu);
-        Component name = d instanceof mods.eln.generic.GenericItemBlockUsingDamageDescriptor gd ? Component.literal(gd.name)
-            : render instanceof mods.eln.node.simple.SimpleNodeEntity s ? s.getBlockState().getBlock().getName() : title;
+        Component name = d instanceof mods.eln.generic.GenericItemBlockUsingDamageDescriptor gd ? Component.literal(gd.name) : title;
         if (d != null && render != null) {
             for (Class<?> c = d.getClass(); c != null; c = c.getSuperclass()) {
                 Factory f = BY_DESCRIPTOR.get(c);
