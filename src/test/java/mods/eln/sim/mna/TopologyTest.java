@@ -190,6 +190,67 @@ public class TopologyTest {
         for (int k = 0; k < n; k += 25) assertEquals("node " + k, 500 - k * i, loads[k].getU(), 0.5);
     }
 
+    /**
+     * A cable run whose last load also has a resistor to ground: that load has exactly two resistors, so the run
+     * collapses into a Line ending at ground (bPin null). Line.simProcessFlush read bPin.state (NPE every step).
+     */
+    @Test
+    public void lineEndingAtGround() {
+        ElectricalLoad src = new ElectricalLoad(), b = new ElectricalLoad(), c = new ElectricalLoad();
+        for (ElectricalLoad l : new ElectricalLoad[]{src, b, c}) {
+            l.setRs(0.5); // each ElectricalConnection = 1 ohm
+            root.addState(l);
+        }
+        b.setCanBeSimplifiedByLine(true);
+        c.setCanBeSimplifiedByLine(true);
+        root.addComponent(new VoltageSource("v", src, null).setU(10));
+        root.addComponent(new ElectricalConnection(src, b));
+        root.addComponent(new ElectricalConnection(b, c));
+        root.addComponent(new Resistor(c, null).setR(8));
+        root.step();
+        assertTrue("b and c should be in a Line", b.isAbstracted() && c.isAbstracted());
+        assertEquals(9, b.getU(), EPS);
+        assertEquals(8, c.getU(), EPS);
+    }
+
+    /**
+     * Over 100 states, with Lines to ground hanging off the chain: a Line made of ElectricalConnections may be
+     * replaced by an InterSystem, so the SubSystem builder left those it met past the size limit for
+     * generateInterSystems, which built an InterSystemAbstraction on the Line's null (ground) pin: NPE.
+     */
+    @Test
+    public void groundedLinesOnALargeChain() {
+        root = new RootSystem(DT, 50);
+        int n = 150;
+        ElectricalLoad[] loads = new ElectricalLoad[n];
+        List<ElectricalLoad> taps = new ArrayList<ElectricalLoad>();
+        for (int i = 0; i < n; i++) {
+            loads[i] = new ElectricalLoad();
+            loads[i].setRs(0.5);
+            root.addState(loads[i]);
+            if (i > 0) root.addComponent(new ElectricalConnection(loads[i - 1], loads[i]));
+            if (i % 10 == 5) { // a two-load cable stub to a 98 ohm resistor to ground (100 ohm in all)
+                ElectricalLoad x = new ElectricalLoad(), y = new ElectricalLoad();
+                for (ElectricalLoad l : new ElectricalLoad[]{x, y}) {
+                    l.setRs(0.5);
+                    l.setCanBeSimplifiedByLine(true);
+                    root.addState(l);
+                }
+                root.addComponent(new ElectricalConnection(loads[i], x));
+                root.addComponent(new ElectricalConnection(x, y));
+                root.addComponent(new Resistor(y, null).setR(98));
+                taps.add(y);
+            }
+        }
+        root.addComponent(new VoltageSource("v", loads[0], null).setU(100));
+        for (int i = 0; i < 200; i++) root.step();
+        assertTrue(root.getSubSystemCount() > 1);
+        for (ElectricalLoad l : loads) assertTrue(Double.isFinite(l.getU()));
+        // every stub: 98/100 of its chain node's voltage
+        for (int k = 0; k < taps.size(); k++)
+            assertEquals("stub " + k, loads[k * 10 + 5].getU() * 0.98, taps.get(k).getU(), 1e-6 * 100);
+    }
+
     static double[] solve2(double a, double b, double c, double d, double e, double f) {
         double det = a * d - b * c;
         return new double[]{(e * d - b * f) / det, (a * f - e * c) / det};
