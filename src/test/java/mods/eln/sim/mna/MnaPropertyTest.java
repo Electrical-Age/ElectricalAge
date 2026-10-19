@@ -99,6 +99,21 @@ public class MnaPropertyTest {
             return out;
         }
 
+        /**
+         * A relative tolerance for comparing two double-precision solves of the active network: floor, or more when
+         * the spread of conductances makes the matrix ill-conditioned. A 1e9 high impedance next to a 0.02 ohm
+         * connection (two 0.01 ohm loads) gives a condition number ~5e10; a node cut off but for the 1e9 then
+         * comes out ~1e-5 off in both solves (and differently each run, as the matrix order follows hash order).
+         */
+        double conditionTolerance(double floor) {
+            double gMin = Double.POSITIVE_INFINITY, gMax = 1; // (1: a voltage source's entries in the matrix)
+            for (RandomNet.Edge e : activeEdges()) {
+                gMin = Math.min(gMin, 1 / e.r());
+                gMax = Math.max(gMax, 1 / e.r());
+            }
+            return Math.max(floor, 20 * Math.ulp(1.0) * gMax / gMin);
+        }
+
         /** Every state finite. */
         void assertFinite(String ctx) {
             for (int i = 0; i < nodes.length; i++)
@@ -242,8 +257,7 @@ public class MnaPropertyTest {
             int steps = 1 + rnd.nextInt(2);
             for (int s = 0; s < steps; s++) b.root.step();
             b.assertFinite("after op " + op + " (" + what + ")");
-            // (1e-5: a 1e9 high impedance next to 0.1 ohm leaves ~1e10 condition numbers, in both solves)
-            b.assertMatchesReference("after op " + op + " (" + what + ")", 1e-5);
+            b.assertMatchesReference("after op " + op + " (" + what + ")", b.conditionTolerance(1e-7));
         }
     }
 
