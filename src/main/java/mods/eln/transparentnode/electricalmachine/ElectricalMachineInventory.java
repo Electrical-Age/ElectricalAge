@@ -35,13 +35,20 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int side) {
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
         switch (Direction.fromIntMinecraftSide(side)) {
             case YP:
-                return true;
+                // only what the machine can process, so a hopper can't jam the input with something it can't use
+                return slot == machineElement.inSlotId && hasRecipe(stack);
             default:
                 return false;
         }
+    }
+
+    /** A recipe takes this item (in any quantity: recipes needing several items still accept one at a time). */
+    boolean hasRecipe(ItemStack stack) {
+        ElectricalMachineDescriptor d = getDescriptor();
+        return d != null && !stack.isEmpty() && d.recipe.getRecipe(stack.copyWithCount(stack.getMaxStackSize())) != null;
     }
 
     @Override

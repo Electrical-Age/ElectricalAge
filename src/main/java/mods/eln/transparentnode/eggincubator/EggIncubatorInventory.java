@@ -17,8 +17,9 @@ public class EggIncubatorInventory extends TransparentNodeElementInventory {
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
-        return true;
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
+        // eggs only (the GUI's egg slot filter)
+        return slot == EggIncubatorContainer.EggSlotId && stack.is(net.minecraft.world.item.Items.EGG);
     }
 
     @Override

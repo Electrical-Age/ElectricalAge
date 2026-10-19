@@ -70,6 +70,7 @@ public class TransparentNode extends Node {
 
         element.onBreakElement();
         super.onBreakBlock();
+        invalidateCapabilities();
     }
 
     @Override
@@ -97,6 +98,21 @@ public class TransparentNode extends Node {
     @Override
     public String thermoMeterString(Direction side) {
         return element.thermoMeterString(side);
+    }
+
+    /** Item handler of the element on a face (26.x item capability), null if none or burnt. */
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getItemHandler(
+        net.minecraft.core.Direction side) {
+        if (element == null || element.isBurnt()) return null;
+        return element.getItemHandler(side);
+    }
+
+    /**
+     * Tells capability caches (hoppers, pipes) to look again: the element bound, burnt out, was repaired or is gone.
+     */
+    public void invalidateCapabilities() {
+        if (coordonate != null && coordonate.world() instanceof net.minecraft.server.level.ServerLevel l)
+            l.invalidateCapabilities(coordonate.pos());
     }
 
     /** Fluid handler of the element (26.x fluid capability; fluid devices are ported with their batch). */
@@ -139,6 +155,7 @@ public class TransparentNode extends Node {
             elementId = descriptor.parentItemDamage; // the 1.12 id, as in node NBT and client packets
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
             element.initializeFromThat(side, entityLiving, mods.eln.generic.ItemNbt.get(itemStack));
+            invalidateCapabilities();
         } catch (InstantiationException e) {
 
             e.printStackTrace();
@@ -164,6 +181,7 @@ public class TransparentNode extends Node {
     @Override
     public void initializeFromNBT() {
         element.initialize();
+        invalidateCapabilities();
     }
 
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
@@ -244,6 +262,7 @@ public class TransparentNode extends Node {
         super.unload();
         if (element != null)
             element.unload();
+        invalidateCapabilities();
 
     }
 

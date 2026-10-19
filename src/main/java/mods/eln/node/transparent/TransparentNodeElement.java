@@ -185,6 +185,21 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return null;
     }
 
+    /**
+     * The element's items as seen from a block face (26.x item capability: hoppers, pipes): the inventory's own sided
+     * rules (getAccessibleSlotsFromSide / canInsertItem / canExtractItem), null where it exposes no slot on that face,
+     * for the null side, and while burnt. Plain TransparentNodeElementInventory exposes nothing, so devices whose
+     * slots are upgrades (cores, cables, regulators...) stay closed. WorldlyContainerWrapper defers setChanged (and
+     * so inventoryChange) to the commit of the outermost transaction.
+     */
+    @Nullable
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getItemHandler(
+        @Nullable net.minecraft.core.Direction side) {
+        if (side == null || isBurnt()) return null;
+        if (!(getInventory() instanceof net.minecraft.world.WorldlyContainer wc) || wc.getSlotsForFace(side).length == 0) return null;
+        return new net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper(wc, side);
+    }
+
 
     public void onNeighborBlockChange() {
         checkCanStay(false);
@@ -520,6 +535,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         burntKind = kind;
         node.connect();
         needPublish();
+        node.invalidateCapabilities();
     }
 
     @Override
@@ -534,6 +550,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         for (IProcess p : thermalFastProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         node.connect();
         needPublish();
+        node.invalidateCapabilities();
     }
 
     public Map<String, String> getWaila() {

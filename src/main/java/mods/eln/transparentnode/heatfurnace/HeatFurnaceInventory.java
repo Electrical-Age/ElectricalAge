@@ -16,8 +16,9 @@ public class HeatFurnaceInventory extends TransparentNodeElementInventory {
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
-        return true;
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
+        // fuel only (the GUI's fuel slot filter)
+        return slot == HeatFurnaceContainer.combustibleId && mods.eln.misc.Utils.getItemEnergie(stack) > 0;
     }
 
     @Override

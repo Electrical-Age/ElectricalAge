@@ -2,6 +2,12 @@ package mods.eln.transparentnode.autominer;
 
 
 
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
@@ -62,10 +68,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean isStorageReady() {
-        Container i = getDropInventory();
-        if (i == null) return false;
-        for (int idx = 0; idx < i.getContainerSize(); idx++) {
-            if (Utils.isEmpty(i.getItem(idx)))
+        ResourceHandler<ItemResource> h = getDropHandler();
+        if (h == null) return false;
+        for (int idx = 0; idx < h.size(); idx++) {
+            if (h.getResource(idx).isEmpty())
                 return true;
         }
         return false;
@@ -212,20 +218,32 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         oldJob = job;
     }
 
-    private Container getDropInventory() {
-        Container chestEntity = null;
+    /**
+     * Where mined items go: the block 1 (else 2) forward and 1 down, through its item capability from above (26.x:
+     * modded and EA inventories too), else a plain vanilla Container there as before.
+     */
+    public ResourceHandler<ItemResource> getDropHandler() {
+        ResourceHandler<ItemResource> handler = null;
         for (int x = 2; x >= 1; x--) {
             Coordonate c = new Coordonate(x, -1, 0, miner.world());
             c.applyTransformation(miner.front, miner.coordonate());
-            if (c.getTileEntity() instanceof Container) {
-                chestEntity = (Container) c.getTileEntity();
-            }
+            ResourceHandler<ItemResource> h = miner.world().getCapability(Capabilities.Item.BLOCK, c.pos(), net.minecraft.core.Direction.UP);
+            if (h == null && c.getTileEntity() instanceof Container chest) h = VanillaContainerWrapper.of(chest);
+            if (h != null) handler = h;
         }
-        return chestEntity;
+        return handler;
     }
 
-    private boolean drop(ItemStack stack) {
-        return Utils.tryPutStackInInventory(stack, getDropInventory());
+    /** Puts the whole stack into the drop inventory, or nothing (the stack stays queued). */
+    public boolean drop(ItemStack stack) {
+        if (Utils.isEmpty(stack)) return true;
+        ResourceHandler<ItemResource> h = getDropHandler();
+        if (h == null) return false;
+        try (Transaction tx = Transaction.openRoot()) {
+            if (ResourceHandlerUtil.insertStacking(h, ItemResource.of(stack), stack.getCount(), tx) < stack.getCount()) return false;
+            tx.commit();
+            return true;
+        }
     }
 
     private boolean isMinable(Block block) {

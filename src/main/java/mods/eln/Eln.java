@@ -303,6 +303,14 @@ public class Eln {
                         ? (net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.fluid.FluidResource>) r : null;
                     return multi;
                 }));
+        // machines' items to hoppers and pipes (never worked in any EA version): the element's own sided-inventory
+        // rules; null on faces without slots, for the null side and while burnt (TransparentNodeElement.getItemHandler)
+        modBus.addListener(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent.class, e ->
+            e.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.Item.BLOCK,
+                mods.eln.registry.ElnRegistry.TRANSPARENT_NODE_ENTITY.get(), (be, side) -> {
+                    if (side == null || be.getLevel() == null || be.getLevel().isClientSide()) return null;
+                    return be.getNode() instanceof mods.eln.node.transparent.TransparentNode tn ? tn.getItemHandler(side) : null;
+                }));
         modBus.addListener(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent.class, e ->
             e.put(mods.eln.registry.ElnRegistry.REPLICATOR.get(), mods.eln.entity.ReplicatorEntity.createAttributes().build()));
         // FE on EA's energy items (batteries, tools, lamps)

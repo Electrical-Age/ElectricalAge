@@ -24,10 +24,12 @@ public class ElectricalFurnaceInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int side) {
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
         switch (Direction.fromIntMinecraftSide(side)) {
             case YP:
-                return true;
+                // only smeltable items, so a hopper can't jam the input
+                return slot == ElectricalFurnaceElement.inSlotId && transparentNodeElement != null
+                    && !mods.eln.misc.Utils.smeltResult(transparentNodeElement.node.coordonate.world(), stack).isEmpty();
             default:
                 return false;
         }
