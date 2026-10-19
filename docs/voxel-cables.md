@@ -16,11 +16,12 @@ unless a path says otherwise. Fluid physics and the MNA itself: see simulation.m
 | `CableRouter`, `PipeRouter` | server | A* routers, pure Java (world behind a `Space` interface) |
 | `CablePlacer`, `PipePlacer`, `KitPreview` | server | Kit UX: start, waypoints, finish; preview outlines sent as `Eln.packetKitPreview` |
 | `KitItem`, `CableKitItem`, `PipeKitItem`, `CableKitRecipes`, `PipeKitRecipes` | both | Kits: length = MAX - damage (1024 voxels); coils <-> kit recipes |
-| `Mimic`, `ChiselItem` | server | Imitate passive decorative blocks (stairs, slabs, fences, walls, panes, bars, carpets); carve plain blocks |
+| `Mimic`, `ChiselItem`, `ChiselBrush` | server (`ChiselBrush`: both, pure) | Imitate passive decorative blocks (stairs, slabs, fences, walls, panes, bars, carpets); carve plain blocks (see Chisel) |
 | `CableConverter` | server | Six-node block -> voxel node and back |
 | `VoxelGeometry` | both (pure) | Parts -> textured quads; no client classes |
 | `VoxelNodeBlock`, `VoxelNodeEntity` | both | Block (shape = part boxes, waterloggable) and BE (`extends SixNodeEntity`; client keeps parts/host from publish) |
-| `client/render/VoxelModel`, `client/render/KitOutline` | client | Chunk-mesh model; kit/chisel outlines |
+| `client/render/VoxelModel`, `client/render/KitOutline`, `client/render/ChiselOutline` | client | Chunk-mesh model; kit/chisel outlines |
+| `client/ChiselRadial`, `client/gui/RadialMenu` | client | The chisel's brush menu (wrench key) |
 
 Blocks: `voxel_node`, `voxel_node_wooden_fence`, `voxel_node_fence`, `voxel_node_wall` (fence/wall variants carry the
 vanilla tags so neighbours join an imitated fence), one BE type `voxel_node` (`registry/ElnRegistry.java`).
@@ -98,6 +99,27 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
 - `PipeRouter`: lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), waypoints as legs; gives up on the
   wall-clock budget (Baughn: it runs on the server thread).
 
+## Chisel
+
+- Left-click carves the brush out of the block just inside the face hit (cancels mining, both sides:
+  `ChiselItem.onLeftClick`); right-click puts the block's own material back into the block just outside it (not into
+  parts). Sneak + right-click is the same put-back (the sneak cycling of sizes is gone, Baughn). A plain carvable block
+  (`Mimic.carvable`) becomes a voxel node with `host` = the block and `carved` = the voxels taken; all carved away and
+  empty: air; nothing carved and empty: the plain block again.
+- Brush = size (1, 2, 4, 8) x shape, `ChiselBrush.box(shape, size, axis, vx, vy, vz)`: `CUBE` the grid-aligned size
+  cube round the voxel hit; `FLAT` a 1-deep size x size layer at the hit voxel's depth, grid-aligned across the face
+  (reliefs, trims); `TUNNEL` the size x size footprint through all 16 voxels along the face normal (the cable hole; put
+  back fills the same column). Always inside one block. `ChiselItem.brushBox` turns a hit into that box; the client
+  outline (`client/render/ChiselOutline`) draws the same box, so it shows the shape. There is no server-side chisel
+  preview (`KitPreview` is kits only).
+- Stored in the stack's custom data: `"brush"` (size, the pre-shape key) and `"shape"` (`ChiselBrush.Shape` ordinal,
+  missing = cube). The name shows both: "Chisel (4, flat)" (`item.eln.chisel.shape.*`).
+- Chosen in a radial menu: the wrench key (`key.eln.wrench`, C) with a chisel in the main hand opens
+  `client/ChiselRadial` (inner ring sizes, outer ring shapes, centre = the brush so far) instead of reporting the
+  wrench key to the server. Release the key over a segment (or click; clicks while held pick without closing; a click
+  on the centre commits), Esc cancels. A changed brush is sent as `Eln.packetChiselBrush`; `ChiselItem.applyBrush` sets
+  it on the server's main-hand stack only if that is a chisel and the size and shape are valid.
+
 ## Rendering pointers
 
 `VoxelGeometry` (quads) -> `VoxelModel` (NeoForge dynamic block-state model, `{"type": "eln:voxel_node"}`,
@@ -110,13 +132,15 @@ device terminal plates) applies to six-node floor cables only, not voxel cables.
 - Unit (`src/test/java/mods/eln/node/voxel/`): `CableRouterTest` (floor, hole, wall climb, bump, sealed box gives up),
   `PipeRouterTest` (obstacles, ports, floor preference, sealed cube in/out gives up in time, slow world, waypoints),
   `CableArmsPropertyTest` (jqwik: arms are one conductor open exactly at linked edges; perpendicular cables touch iff
-  linked both ways; knuckles sit on an edge). MNA lines ending at ground: `sim/mna/TopologyTest`
+  linked both ways; knuckles sit on an edge), `ChiselBrushTest` (every shape, size, axis and hit voxel: inside the
+  block, volumes, flat/tunnel boxes, brush validation). MNA lines ending at ground: `sim/mna/TopologyTest`
   (`lineEndingAtGround`, `lineGroundedAtBothEnds`), `MnaPropertyTest.lineCollapseKeepsThePhysics`.
 - GameTests `gametest/cases/CableCases.java` (currents vs six-node to 0.1%): "voxel cable straight / inner corners /
   outer corners / tee", their "converted ..." and "reverted ..." variants, "voxel cable burn chain" (exactly one of 6
   burns), "routed cable over a wall", "cable kits", "six-node device hosted in a voxel block", "break a device in a
   mixed voxel block", "thermal cable converted", "cable through a fence and under a slab", "cable up a staircase",
-  "chisel a cable hole through a wall", "fence joins an imitated fence", "converted wall device round two corners"
+  "chisel a cable hole through a wall", "chisel brush shapes" (flat 16 + 16 voxels, tunnel 256 and put back 64, sneak
+  + right-click puts back and keeps the brush, the brush packet: held chisel only, invalid ignored), "fence joins an imitated fence", "converted wall device round two corners"
   (every order), "converted cable under water", lamp round two corners (six-node / converted / reverted).
 - `gametest/cases/PipeCases.java`: `pipe_boiler_to_turbine`, `pipe_two_in_one_block`, `pipe_routed_over_a_wall`,
   `pipe_join_mid_run`, `pipe_kit_crafting`, `pipe_burst_vents`, `pipe_valve`, `pipe_adapter_capability`,

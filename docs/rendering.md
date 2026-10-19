@@ -38,7 +38,7 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - Extract/submit caveat: `submit` reads the render objects live (not a snapshot). Fine while extract and submit share the render thread in one frame; if submit moves threads, render state must snapshot what `draw()` reads.
 - `node/voxel` parts are not drawn per frame: `client/render/VoxelModel.java` bakes them into the chunk mesh (blockstate model type `eln:voxel_node`). See voxel-cables.md.
 - The FE exporter blocks are the only device with a static baked block model: `assets/eln/models/block/energy_converter_{lvu,mvu,hvu}.json` (`neoforge:obj`); its render object only carries GUI values.
-- Outlines: `client/render/KitOutline.java` (cable kit preview from the server's `KitPreview`), `client/render/ChiselOutline.java`, both on `ExtractBlockOutlineRenderStateEvent`.
+- Outlines: `client/render/KitOutline.java` (cable kit preview from the server's `KitPreview`), `client/render/ChiselOutline.java` (the chisel's brush box, size and shape, computed on the client from `ChiselItem.brushBox` / `ChiselBrush.box`, the same geometry as carving), both on `ExtractBlockOutlineRenderStateEvent`.
 
 ## OBJ models
 
@@ -79,6 +79,10 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - X-ray: `client/XRayScan.java` (client) scans the grid every other client tick for the held, switched-on scanner and installs `XRayScannerDescriptor.pictures`; the item draw shows it. Ray marching in `item/xray/XRayRayMarch.java`, ore matching by tags in `item/xray/XRayFilter.java` (invalidated on `TagsUpdatedEvent`), filter screen `client/gui/XRayScannerScreen.java`.
 - Tutorial sign HUD: `sixnode/tutorialsign/TutorialSignHud.java`, GUI layer `eln:tutorial_sign` (registered above all): nearest sign within one block shows its text top-left.
 - Jade: `compat/jade/ElnJadePlugin.java` (`@WailaPlugin`, compileOnly dep): server data provider on `NodeBlockEntity`, lines from the device's `getWaila`; details while sneaking or with config `probe.details`. TheOneProbe: not ported (no 26.x build).
+
+## Radial menu
+
+- `client/gui/RadialMenu.java` (the chisel's brush menu; see networking-gui.md): drawn in `extractRenderState` with `GuiGraphicsExtractor.fill` only, one 1-pixel row of spans at a time (the extractor has no arbitrary-polygon fill and its render state is private): translucent dark segments (`0x90101010`), the hovered one lighter, the current choice green, 1-pixel gaps between segments and rings, labels with `centeredText`. No background blur (`extractBackground` is empty), not a pause screen.
 
 ## Performance (R6, 2026-10-11, OpenGL and Vulkan alike)
 

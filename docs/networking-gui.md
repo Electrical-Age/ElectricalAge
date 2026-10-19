@@ -11,9 +11,12 @@ device menus (`eln:node`), screens and the JSON layout engine. Node internals: a
 | `src/main/java/mods/eln/network/ServerPacketHandler.java` | server | Sets `ElnNet.serverHandler`; hops to the server thread, then `handle()`. |
 | `src/main/java/mods/eln/client/ClientPacketHandler.java` | client | `packetRx`, set as `ElnNet.clientHandler` by `client/ElnClient`; runs on the client thread. |
 
-Packet ids are constants in `src/main/java/mods/eln/Eln.java` (`packetPlayerKey` 14 ... `packetKitPreview` 23).
+Packet ids are constants in `src/main/java/mods/eln/Eln.java` (`packetPlayerKey` 14 ... `packetChiselBrush` 24).
 Handled today:
-- client -> server: `packetPlayerKey` (to `server/PlayerKeys`), `packetPublishForNode` (GUI actions).
+- client -> server: `packetPlayerKey` (to `server/PlayerKeys`), `packetPublishForNode` (GUI actions),
+  `packetChiselBrush` (size byte, shape byte: `ChiselItem.brushPacket`, sent by `client/ChiselRadial`; the server's
+  `ChiselItem.applyBrush` sets it on the player's main-hand stack only if that is a chisel and `ChiselBrush.valid`;
+  anything else is ignored, the packet never names a stack).
 - server -> client: `packetNodeSingleSerialized` (publish), `packetForClientNode` (node packet), `packetPlaySound`,
   `packetKitPreview` (`node/voxel/KitPreview` -> `client/render/KitOutline`). Other ids are defined but unused.
 
@@ -107,6 +110,15 @@ JSON: `src/main/resources/assets/eln/gui/*.json` (49 files). `client/gui/ElnLayo
 manager every time a screen opens (resource packs can override them) and measures with the client font. Slot leaves
 are named by slot index. A slot wider than 18 gets the big skin.
 
+## Radial menu (client)
+
+`src/main/java/mods/eln/client/gui/RadialMenu.java`: a generic, non-pausing screen of rings of `Segment(label, current,
+pick)` round a centre text, for a held tool's modes. Opened while a key is held (`ClientKeys` -> `ChiselRadial` for
+the chisel, on the wrench key): releasing the key picks the hovered segment and runs the commit; clicks pick while the
+key is held, otherwise pick and commit; a centre click commits; Esc cancels. `Gui.setScreen` releases all key
+mappings, so the screen watches `keyReleased`/`mouseReleased` against the key itself. A tap (no hold seen) leaves it
+open until a click, the key again, or Esc. The commit sends whatever packet the tool needs.
+
 ## Item-held screen: X-ray scanner
 
 `src/main/java/mods/eln/item/xray/XRayScannerMenu.java` (both; `ElnRegistry.XRAY_MENU`), opened on sneak + use by
@@ -126,6 +138,8 @@ needs the stack in that slot to still be a scanner. Screen: `client/gui/XRayScan
 | `gametest/MachineMenuCase` (`machine_menu`) | a click puts iron ore into the macerator input (single click, not shift-click) |
 | `gametest/PublishRenderCase` (`publish_render`) | every render consumes its publish packet exactly and draws |
 | `gametest/XRayCase` (`xray_scanner`) | scanner menu and filters |
+| `gametest/cases/CableCases` (`chisel_brush_shapes`) | `packetChiselBrush` through `ServerPacketHandler.handle`: applied to a held chisel; bad size, bad shape, short packet or no chisel ignored |
+| `src/test/java/mods/eln/client/gui/RadialMenuTest.java` | radial menu hit test: centre, gaps, segments clockwise from the top |
 
 ## Gotchas
 

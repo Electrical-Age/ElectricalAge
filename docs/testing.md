@@ -39,6 +39,8 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `transparentnode/energyconverter/ExporterSaveUpgradeTest` (jqwik) | Old simple-node `"ElnToOther"` exporter tags become transparent-node tags (`"node"`, `"element"`, `"others"`). |
 | `node/voxel/CableArmsPropertyTest` (jqwik) | `CableConverter.plan` + `CablePart.arms`: one conductor, opens at edge middles, inner-corner joins. |
 | `node/voxel/CableRouterTest`, `PipeRouterTest` | Routers on synthetic worlds. |
+| `node/voxel/ChiselBrushTest` | Chisel brush boxes (cube, flat, tunnel) for every axis, size and hit voxel; brush validation. |
+| `client/gui/RadialMenuTest` | Radial menu hit test (ring and segment under the mouse). |
 | `gui/LayoutTest` | Layout engine; every `assets/eln/gui/*.json` has no overlaps and nothing outside its panel. |
 | `item/xray/XRayRayMarchTest` | X-ray ray march. |
 | `gametest/StructureFileTest` | The generated floor `.nbt` parses (3x3 stone floor). |
