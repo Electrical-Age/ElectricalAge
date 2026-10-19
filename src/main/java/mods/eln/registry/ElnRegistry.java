@@ -104,6 +104,10 @@ public final class ElnRegistry {
         ITEMS.registerItem("cable_kit_hv", p -> new mods.eln.node.voxel.CableKitItem(3, p)),
         ITEMS.registerItem("cable_kit_vhv", p -> new mods.eln.node.voxel.CableKitItem(4, p)),
         ITEMS.registerItem("cable_kit_thermal", p -> new mods.eln.node.voxel.CableKitItem(5, p)));
+    /** Raw lead and tungsten: what their ores drop, like raw iron (Baughn 2026-10-19: they dropped the ore block, as in
+     *  1.7); smelted or blasted to ingots, macerated to dust. */
+    public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
+    public static final DeferredItem<Item> RAW_TUNGSTEN = ITEMS.registerSimpleItem("raw_tungsten");
     /** The chisel (carving blocks voxel by voxel: a hole through a wall for a cable; art). */
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ChiselItem> CHISEL =
         ITEMS.registerItem("chisel", mods.eln.node.voxel.ChiselItem::new);
@@ -271,6 +275,8 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);
+        ALL_ITEMS.add(RAW_LEAD);
+        ALL_ITEMS.add(RAW_TUNGSTEN);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

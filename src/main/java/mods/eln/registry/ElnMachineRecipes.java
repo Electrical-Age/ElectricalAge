@@ -110,10 +110,11 @@ public final class ElnMachineRecipes {
         add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_COPPER), new ItemStack[]{findItemStack("Copper Dust", 1)}, 1.0 * f).withExtra(4, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.COAL_ORE, 1),
             new ItemStack(Items.COAL, 3), 1.0 * f));
-        add(maceratorRecipes, new Recipe(findItemStack("Lead Ore"),
-            new ItemStack[]{findItemStack("Lead Dust", 2)}, 2.0 * f));
-        add(maceratorRecipes, new Recipe(findItemStack("Tungsten Ore"),
-            new ItemStack[]{findItemStack("Tungsten Dust", 2)}, 2.0 * f));
+        // (lead and tungsten as iron: ore to raw, raw to dust; Baughn 2026-10-19)
+        add(maceratorRecipes, new Recipe(findItemStack("Lead Ore"), new ItemStack(ElnRegistry.RAW_LEAD.get()), 2.0 * f).withExtra(2, 1, 1));
+        add(maceratorRecipes, new Recipe(findItemStack("Tungsten Ore"), new ItemStack(ElnRegistry.RAW_TUNGSTEN.get()), 2.0 * f).withExtra(2, 1, 1));
+        add(maceratorRecipes, new Recipe(new ItemStack(ElnRegistry.RAW_LEAD.get()), new ItemStack[]{findItemStack("Lead Dust", 1)}, 2.0 * f).withExtra(4, 1));
+        add(maceratorRecipes, new Recipe(new ItemStack(ElnRegistry.RAW_TUNGSTEN.get()), new ItemStack[]{findItemStack("Tungsten Dust", 1)}, 2.0 * f).withExtra(4, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Items.COAL, 1),
             new ItemStack[]{findItemStack("Coal Dust", 2)}, 1.0 * f));
         add(maceratorRecipes, new Recipe(new ItemStack(Items.CHARCOAL),

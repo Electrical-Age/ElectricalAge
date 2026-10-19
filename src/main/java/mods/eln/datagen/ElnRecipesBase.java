@@ -406,4 +406,14 @@ public abstract class ElnRecipesBase {
             .save(out, key(name));
         smeltingAdded++;
     }
+
+    /** Blast furnace recipe (raw ores, as vanilla's: half the time). */
+    public static void addBlasting(Item parentItem, RStack result, float xp) {
+        if (parentItem == null || parentItem == Items.AIR || result.isEmpty()) return;
+        String name = "blasting_" + nextName(stack(parentItem));
+        SimpleCookingRecipeBuilder.blasting(Ingredient.of(parentItem), RecipeCategory.MISC, CookingBookCategory.MISC,
+                result(result), xp, 100)
+            .unlockedBy("has_ingredient", hasItem.apply(parentItem))
+            .save(out, key(name));
+    }
 }

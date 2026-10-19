@@ -1,4 +1,4 @@
-// 26.3	2026-10-14T22:46:46.470492248	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-19T01:10:49.264784504	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -72,6 +72,8 @@ e397443c98e6b42bdb11364d1b6ce472b87c0a04 data/eln/advancement/recipes/misc/auto_
 95c342338728eb6fd711b224aeb60ab9c76f2ca1 data/eln/advancement/recipes/misc/average_ferromagnetic_core.json
 f289486095d89988f698c37c5d367dc83b161c16 data/eln/advancement/recipes/misc/big_fuel_burner.json
 2501e5ea88438b2af90471608116cac06a6e26e8 data/eln/advancement/recipes/misc/black_brush.json
+99ae0efd8c0ccafddc9ab9361155ecf7fa6da6a7 data/eln/advancement/recipes/misc/blasting_raw_lead_2.json
+48e1ac1745c2bab169ae79b8355a217ff57a1b03 data/eln/advancement/recipes/misc/blasting_raw_tungsten_2.json
 0422be25ff77f9d9a6e621f5f9e381118a147066 data/eln/advancement/recipes/misc/blue_brush.json
 b85823dd74834547255b7d60faa1cc1280c8c423 data/eln/advancement/recipes/misc/boiler.json
 7d99ddf6a770f2d9a3e99f992901d073c6e2cebf data/eln/advancement/recipes/misc/brown_brush.json
@@ -253,6 +255,8 @@ e8c327e1c267ab8bef14abf96413256c1701bf8f data/eln/advancement/recipes/misc/small
 430f821d64dbb4ade469c2e04f0358db222fda3c data/eln/advancement/recipes/misc/smelting_iron_dust.json
 7a7471d91bad84682b06bfaf8f9c1d4866594a71 data/eln/advancement/recipes/misc/smelting_lead_dust.json
 12efe4e5da605d3f4b5f67858df2ce6a0468ebea data/eln/advancement/recipes/misc/smelting_lead_ore.json
+22bb088c3d9696fd24203ff02ec5cac2078385f1 data/eln/advancement/recipes/misc/smelting_raw_lead.json
+57237921ba333d6e4bd2fcca054756a4033886d1 data/eln/advancement/recipes/misc/smelting_raw_tungsten.json
 300625402fff8fbbb757e31f8010fd0c98cd81ff data/eln/advancement/recipes/misc/smelting_silicon_dust.json
 401066b07056c4f4a8955cc4d0c1f2f65c5933a8 data/eln/advancement/recipes/misc/smelting_tree_resin.json
 781894285bd74b9950f592f59b0816861a63176e data/eln/advancement/recipes/misc/smelting_tungsten_dust.json
@@ -393,6 +397,8 @@ e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 08c28dacf73dce30b445d692fa1e1bef7c6c9f3f data/eln/recipe/average_ferromagnetic_core.json
 9602844551f3d1dc111c860b342998dcc2d5e4e2 data/eln/recipe/big_fuel_burner.json
 1400d68edba46e673564ca9489831bad2b19be47 data/eln/recipe/black_brush.json
+c0fbc37fef711710f071e961fde22bae501d6883 data/eln/recipe/blasting_raw_lead_2.json
+bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2.json
 351b690d7cf1b517859cc5b1d42e1e8a944e9634 data/eln/recipe/blue_brush.json
 21f310666ea330b0b32639f49e4acdeb5f6c1be0 data/eln/recipe/boiler.json
 9bf14159b70a5eb86642c34c15c2aca5cd1233c6 data/eln/recipe/brown_brush.json
@@ -574,6 +580,8 @@ fce6b23dcd9d59552bfeface7df4539c7ccca9d2 data/eln/recipe/smelting_gold_dust.json
 0ebe346602b3eab1864fc65805ae0b02ced116c9 data/eln/recipe/smelting_iron_dust.json
 449b0f27cfd1283f924ab3134c451848748e9ecb data/eln/recipe/smelting_lead_dust.json
 105b27174165dc9bbf192836bcd9f21e2310f5aa data/eln/recipe/smelting_lead_ore.json
+fc713db8259f05a5864738f17d2d6eedbc652a96 data/eln/recipe/smelting_raw_lead.json
+e129c4e81729a9c6551a2820aabd496c12855877 data/eln/recipe/smelting_raw_tungsten.json
 fb315a6c097599a1b9d4157f9ff691a0dcc9c23a data/eln/recipe/smelting_silicon_dust.json
 31f6b2ca8d9768491cd6918bd348426a8b82d57c data/eln/recipe/smelting_tree_resin.json
 f8d98570968cecc459a14f0cd820a44af3560cf9 data/eln/recipe/smelting_tungsten_dust.json

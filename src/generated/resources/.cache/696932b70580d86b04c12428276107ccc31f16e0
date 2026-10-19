@@ -1,4 +1,4 @@
-// 26.3	2026-10-18T18:26:18.210811166	eln-global/EA models
+// 26.3	2026-10-19T01:10:49.261740819	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -309,6 +309,8 @@ bb572d18678811390e465d1b9223a2c06e17e29f assets/eln/items/power_inductor.json
 9a7bd0ce4042310543d384df8d2700dd4cd536d0 assets/eln/items/power_inductor_block.json
 bf068de505375f5f9ec04a78ee5c2a83a7a011cf assets/eln/items/power_resistor.json
 3a1476cc2dba50c9b42511ef68a4cf4aaecd7df6 assets/eln/items/purple_brush.json
+b55edeb01df76c93f21f29619f8d26165b99d00c assets/eln/items/raw_lead.json
+1757624c1c4d7bf6ec569ae4203ce86e55daa84e assets/eln/items/raw_tungsten.json
 bae9dca6e3c95a2105471e125019ac19ad43290e assets/eln/items/red_brush.json
 b876ffedc606f386d6683a01dc43e69e36cf2d15 assets/eln/items/redstone_to_voltage_converter.json
 d87898d7bbdcfad341b6d5f784911e5010f589e1 assets/eln/items/removed_from_mod_copper_thermal_cable.json
@@ -730,6 +732,8 @@ feac52c16140ecf0f832fe64097d546bf9f71aec assets/eln/models/item/portable_electri
 4fafcb0c1d0860c264fd81adea6645e0f828f815 assets/eln/models/item/power_resistor.json
 ab73c04b31e34c1972906b95e3757e8d30d947d1 assets/eln/models/item/power_resistor_3d.json
 abf755dac3070db29b726f36643ea6abf1b54a77 assets/eln/models/item/purple_brush.json
+9ff7a48979d0ffbb4cf0c12db3760518b492c528 assets/eln/models/item/raw_lead.json
+be4f1cab9ac17f083d360b956d4cd60acd2c42a7 assets/eln/models/item/raw_tungsten.json
 0a113881abc061d241fb12ea6cb381ff3b9523c3 assets/eln/models/item/red_brush.json
 ddb49e46a183fe91ae30ed41a6f0f9ea7c2d32a5 assets/eln/models/item/redstone_to_voltage_converter.json
 9bee73d4bb46fb195135cc692a62c427740abee6 assets/eln/models/item/redstone_to_voltage_converter_3d.json

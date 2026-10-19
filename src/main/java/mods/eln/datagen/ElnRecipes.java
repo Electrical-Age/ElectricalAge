@@ -1747,6 +1747,11 @@ public final class ElnRecipes extends ElnRecipesBase {
         in = findItemStack("Tungsten Dust");
         addSmelting(in.getItem(), 0,
             findItemStack("Tungsten Ingot"));
+        // raw lead and tungsten (their ores' drops, as raw iron), smelted and blasted
+        addSmelting(mods.eln.registry.ElnRegistry.RAW_LEAD.get(), 0, findItemStack("ingotLead"));
+        addSmelting(mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get(), 0, findItemStack("Tungsten Ingot"));
+        addBlasting(mods.eln.registry.ElnRegistry.RAW_LEAD.get(), findItemStack("ingotLead"), 0.7f);
+        addBlasting(mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get(), findItemStack("Tungsten Ingot"), 0.7f);
         in = findItemStack("ingotAlloy");
         // addSmelting(in.getItem().itemID, 0,
         // findItemStack("Ferrite Ingot"));

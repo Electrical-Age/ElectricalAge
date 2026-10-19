@@ -206,8 +206,9 @@ public final class Wp12Cases {
                     inside + " lead ore block(s) in the stone (expected > 0), " + outside + " outside (expected 0)");
                 if (samplePos != null) {
                     List<ItemStack> drops = net.minecraft.world.level.block.Block.getDrops(w.getBlockState(samplePos), w, samplePos, null);
-                    ctx.check("wp12 lead ore drop", drops.size() == 1 && drops.get(0).getItem() == ore.asItem() && drops.get(0).getCount() == 1,
-                        drops + " (expected 1x lead ore)");
+                    // (raw lead, as iron ore gives raw iron: Baughn 2026-10-19)
+                    ctx.check("wp12 lead ore drop", drops.size() == 1 && drops.get(0).getItem() == mods.eln.registry.ElnRegistry.RAW_LEAD.get() && drops.get(0).getCount() == 1,
+                        drops + " (expected 1x raw lead)");
                 }
             } finally {
                 for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(ctx.at(0, 1, 0), ctx.at(7, 3, 2))) w.removeBlock(p, false);
