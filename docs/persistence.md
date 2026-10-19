@@ -25,9 +25,13 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 
 ## Lifecycle (`server/ElnWorldSaves`, registered in `Eln`)
 
-- `LevelEvent.Load` (ServerLevel) -> `load`: marks dim loaded; reads `.dat`, on any exception the `.dat.bak`.
-  Order: `NodeManager.loadFromNbt(nodes, dim)`, `config`, `wind`, `GhostManager.loadFromNBT(ghost)`. Each
-  step has its own try/catch. Node file before chunks: block entities find their node when chunks load.
+- `LevelEvent.Load` (ServerLevel) -> `load`: parses `.dat`, else `.dat.bak` (a missing `.dat` is skipped: a
+  save that crashed between its moves). A file that exists but can't be parsed is renamed to
+  `<name>.corrupt-<yyyyMMdd-HHmmss>` and logged as an error, so no save overwrites it (even when the `.bak` is
+  good: else the next save would rotate the bad `.dat` over it); both bad -> a loud banner, the dim starts with no
+  nodes. The dim is marked loaded (saved) unless a bad file could not be renamed. The parsed tag is applied once:
+  `NodeManager.loadFromNbt(nodes, dim)`, `config` + `wind`, `GhostManager.loadFromNBT(ghost)`, each in its own
+  try/catch. Node file before chunks: block entities find their node when chunks load.
 - `LevelEvent.Save` -> `save`: only for dims marked loaded. Writes `.dat.tmp`, moves `.dat` -> `.dat.bak`,
   then `.tmp` -> `.dat` (atomic move when possible).
 - `LevelEvent.Unload` -> `NodeManager.unload(dim)` (calls `NodeBase.unload()`, drops nodes and orphans of the
@@ -115,6 +119,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown type kept and re-saved byte-equal over two round
   trips; unknown transparent `eid` throws and is kept; orphans stay in their dim and are dropped on `unload(dim)`.
   (Added in 948ac491 asserting the loss; reversed in 2f54a6d5.)
+- `src/test/java/mods/eln/server/ElnWorldSavesTest.java`: unreadable `.dat` and `.dat.bak` are renamed aside;
+  a bad `.dat` with a good `.bak` loads the backup and leaves it untouched; a missing `.dat` is not corruption.
 - `src/test/java/mods/eln/node/six/SixNodeLoadTest.java`: `readFromNBT` does not connect (the loader does, once);
   a face with an unknown device id is kept, re-saved equal over two round trips, and its side stays taken.
 - `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java` (jqwik): every field
@@ -131,5 +137,4 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   (e.g. cable slot in `GroundCableElement`, `EnergyMeterElement`, `ElectricalSensorElement`,
   `ThermalSensorElement`, `PowerSocketElement`) so old items survive and drop on break.
 - Unknown `VoxelPart` kinds read as null and are dropped from the next save.
-- If both `.dat` and `.dat.bak` fail to read, the dim is still marked loaded and the next save overwrites both.
 - Nodes in unloaded chunks keep running; code touching neighbours must check `level.isLoaded`.
