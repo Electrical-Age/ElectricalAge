@@ -70,7 +70,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     private void markUsed() {
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
-        for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(used, plate(f));
+        for (int f = 0; f < 6; f++) if (sideElementList[f] != null || isSideKept(f)) fill(used, plate(f));
         for (int[] b : hostBoxes()) fill(used, b);
     }
 
@@ -423,7 +423,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** Could an element go on face f (EA Direction int): free face, and its plate clear of the parts? */
     public boolean canPlaceElement(int f) {
-        if (sideElementList[f] != null) return false;
+        if (sideElementList[f] != null || isSideKept(f)) return false;
         BitSet want = new BitSet(4096);
         fill(want, plate(f));
         return !want.intersects(used);

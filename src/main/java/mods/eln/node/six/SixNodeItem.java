@@ -86,6 +86,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             // a voxel block: on a free face whose plate is clear of its cables and pipes
             if (!(world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve) || !(ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v))
                 return false;
+            if (v.isSideKept(direction.getInt())) return v.createSubBlock(stack, direction, player);   // (refuses, and says why)
             if (!v.canPlaceElement(direction.getInt())) {
                 if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No room for it on that face"));
                 return false;
@@ -108,6 +109,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
                 sixNode.createSubBlock(stack, direction, player);
                 return true;
             }
+            if (sixNode.isSideKept(direction.getInt())) return sixNode.createSubBlock(stack, direction, player);   // (refuses, and says why)
         }
         return false;
     }

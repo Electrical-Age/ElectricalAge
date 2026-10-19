@@ -48,6 +48,19 @@ public class SixNode extends Node {
 
     public LRDUCubeMask lrduElementMask = new LRDUCubeMask();
 
+    /**
+     * Sides whose saved device could not be built or loaded (a device this version lacks, or a load that threw): the
+     * raw {EID, ED} pair, written back unchanged on save so a version that can load it again still finds it. The side
+     * stays taken: a device placed on it would silently replace the saved one, so placement is refused. Breaking the
+     * whole block discards them.
+     */
+    private final CompoundTag[] keptSides = new CompoundTag[6];
+
+    /** Is this side holding a device that could not be loaded (kept as saved data, see keptSides)? */
+    public boolean isSideKept(int side) {
+        return keptSides[side] != null;
+    }
+
     public SixNodeElement getElement(Direction side) {
         return sideElementList[side.getInt()];
     }
@@ -84,7 +97,10 @@ public class SixNode extends Node {
     }
 
     public boolean createSubBlock(ItemStack itemStack, Direction direction, Player player) {
-
+        if (keptSides[direction.getInt()] != null) {
+            if (player != null) Utils.sendMessage(player, "This side holds a device this version of Electrical Age cannot load; its data is kept. Break the block to discard it.");
+            return false;
+        }
         SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
         if (sideElementList[direction.getInt()] != null)
             return false;
@@ -163,6 +179,12 @@ public class SixNode extends Node {
     public void onBreakBlock() {
         if (isAdded()) disconnect();   // first, while the elements are still there
         for (int i = 0; i < 6; i++) {
+            if (keptSides[i] == null) continue;
+            Eln.LOG.warn("Electrical Age: the block at {} was broken; discarding the saved six-node device {} on side {} that this version could not load",
+                coordonate, keptSides[i].getShortOr("EID", (short) 0), Direction.fromInt(i));
+            keptSides[i] = null;
+        }
+        for (int i = 0; i < 6; i++) {
             SixNodeElement e = sideElementList[i];
             if (e == null) continue;
             sideElementList[i] = null;
@@ -208,11 +230,9 @@ public class SixNode extends Node {
         return true;
     }
 
+    /** Is any side taken? Kept sides count, so the block stays when the last device that loaded goes. */
     public boolean getIfSideRemain() {
-        for (SixNodeElement sideElement : sideElementList) {
-            if (sideElement != null)
-                return true;
-        }
+        for (int i = 0; i < 6; i++) if (sideElementList[i] != null || keptSides[i] != null) return true;
         return false;
     }
 
@@ -226,34 +246,28 @@ public class SixNode extends Node {
         for (idx = 0; idx < 6; idx++) {
 
             short sideElementId = nbt.getShortOr("EID" + idx, (short) 0);
+            keptSides[idx] = null;
             if (sideElementId == 0) {
                 sideElementList[idx] = null;
                 sideElementIdList[idx] = 0;
             } else {
                 try {
                     SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
+                    if (descriptor == null) throw new IllegalStateException("no six-node device " + sideElementId + " in this version");
                     sideElementIdList[idx] = sideElementId;
                     sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
                     sideElementList[idx].readFromNBT(nbt.getCompoundOrEmpty("ED" + idx));
                     sideElementList[idx].initialize();
-                } catch (InstantiationException e) {
-
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-
-                    e.printStackTrace();
-                } catch (IllegalArgumentException e) {
-
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-
-                    e.printStackTrace();
-                } catch (SecurityException e) {
-
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    // (a half-built element must not stay: it would run, save and drop as if it had loaded)
+                    sideElementList[idx] = null;
+                    sideElementIdList[idx] = 0;
+                    CompoundTag kept = new CompoundTag();
+                    kept.putShort("EID", sideElementId);
+                    kept.put("ED", nbt.getCompoundOrEmpty("ED" + idx).copy());
+                    keptSides[idx] = kept;
+                    Eln.LOG.warn("Electrical Age: the six-node device {} on side {} at {} cannot be loaded; keeping its saved data, "
+                        + "and the side stays taken", sideElementId, Direction.fromInt(idx), coordonate, e);
                 }
             }
         }
@@ -274,7 +288,10 @@ public class SixNode extends Node {
 
         for (SixNodeElement sideElement : sideElementList) {
 
-            if (sideElement == null) {
+            if (sideElement == null && keptSides[idx] != null) {
+                nbt.putShort("EID" + idx, keptSides[idx].getShortOr("EID", (short) 0));
+                nbt.put("ED" + idx, keptSides[idx].getCompoundOrEmpty("ED").copy());
+            } else if (sideElement == null) {
                 nbt.putShort("EID" + idx, (short) 0);
             } else {
                 nbt.putShort("EID" + idx, (short) sideElementIdList[idx]);
@@ -288,9 +305,9 @@ public class SixNode extends Node {
         nbt.put("node", nodeNbt);
     }
 
+    /** Is the side taken (a device, or one kept as saved data)? */
     public boolean getSideEnable(Direction direction) {
-
-        return sideElementList[direction.getInt()] != null;
+        return sideElementList[direction.getInt()] != null || keptSides[direction.getInt()] != null;
     }
 
     @Override

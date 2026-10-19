@@ -56,6 +56,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   (`Orphan(at, tag)`, position from `node/cx..`), logged, and written back unchanged by `saveToNbt` after the
   live nodes. `addNode` at the same position drops the orphan. `getOrphans(dim)` returns copies.
   `TransparentNode.readFromNBT` throws on an unknown `eid` on purpose so the device becomes an orphan.
+- Kept six-node sides: in `SixNode.readFromNBT` a face whose device can't be built or loaded (unknown `EID`, any
+  exception) is kept raw as `{EID, ED}` (`keptSides`), logged, and written back unchanged by `writeToNBT`; the rest of
+  the block loads. The side stays taken (`getSideEnable`, `getIfSideRemain`, `VoxelNode.canPlaceElement`/`markUsed`):
+  placing over it is refused with a chat message, because unlike a node orphan the block still stands and a player
+  would naturally reuse the "empty" face and so delete the device. Breaking the whole block discards them (logged).
 - Two meanings of "orphan": `NodeManager` orphans = saved tags this version cannot load; `NodeOrphans` = live
   nodes whose block is gone.
 
@@ -110,6 +115,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown type kept and re-saved byte-equal over two round
   trips; unknown transparent `eid` throws and is kept; orphans stay in their dim and are dropped on `unload(dim)`.
   (Added in 948ac491 asserting the loss; reversed in 2f54a6d5.)
+- `src/test/java/mods/eln/node/six/SixNodeLoadTest.java`: `readFromNBT` does not connect (the loader does, once);
+  a face with an unknown device id is kept, re-saved equal over two round trips, and its side stays taken.
 - `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java` (jqwik): every field
   carried, extra keys go to `element`, unplaceable tags unchanged, `NodeManager` loads an old exporter and
   re-saves it as `"t"`.
@@ -123,7 +130,6 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - Inventory sizes: `Utils.readFromNBT` drops slots `>=` the current size. Removed 1.12 slots stay as hidden slots
   (e.g. cable slot in `GroundCableElement`, `EnergyMeterElement`, `ElectricalSensorElement`,
   `ThermalSensorElement`, `PowerSocketElement`) so old items survive and drop on break.
-- Not everything becomes an orphan: in `SixNode.readFromNBT` a reflection failure of one face only prints a stack
-  trace, and that element is missing from the next save. Unknown `VoxelPart` kinds read as null and are dropped.
+- Unknown `VoxelPart` kinds read as null and are dropped from the next save.
 - If both `.dat` and `.dat.bak` fail to read, the dim is still marked loaded and the next save overwrites both.
 - Nodes in unloaded chunks keep running; code touching neighbours must check `level.isLoaded`.
