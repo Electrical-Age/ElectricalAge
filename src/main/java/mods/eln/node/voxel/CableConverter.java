@@ -167,6 +167,7 @@ public final class CableConverter {
         v.readFromNBT(host);
         NodeManager.instance.addNode(v);
         v.neighborBlockRead();
+        v.initializeFromNBT();
         v.globalBoot();
         v.setNeedPublish(true);
         v.legacy = legacy;

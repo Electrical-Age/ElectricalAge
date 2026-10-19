@@ -873,8 +873,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
-        // the parts first: SixNode's read connects at its end. Voxel nodes saved before they hosted elements have the
-        // node's own data at the top level, not under "node".
+        // Voxel nodes saved before they hosted elements have the node's own data at the top level, not under "node".
         boolean six = nbt.contains("node");
         coordonate.readFromNBT(six ? nbt.getCompoundOrEmpty("node") : nbt, "c");
         parts.clear();

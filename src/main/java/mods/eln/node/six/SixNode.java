@@ -257,8 +257,8 @@ public class SixNode extends Node {
                 }
             }
         }
-        initializeFromNBT();
-
+        // (no connect here: NodeManager and the other loaders call initializeFromNBT once the node is added; a connect
+        // here too ran before addNode, and left the node's loads in the simulator if anything after it threw)
     }
 
     @Override
