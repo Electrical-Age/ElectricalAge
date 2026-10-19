@@ -113,14 +113,6 @@ public class TransparentNode extends Node {
         return element.getEnergyHandler(side);
     }
 
-    /**
-     * Tells capability caches (hoppers, pipes) to look again: the element bound, burnt out, was repaired or is gone.
-     */
-    public void invalidateCapabilities() {
-        if (coordonate != null && coordonate.world() instanceof net.minecraft.server.level.ServerLevel l)
-            l.invalidateCapabilities(coordonate.pos());
-    }
-
     /** Fluid handler of the element (26.x fluid capability; fluid devices are ported with their batch). */
     public Object getFluidHandler() {
         return element.getFluidHandler();

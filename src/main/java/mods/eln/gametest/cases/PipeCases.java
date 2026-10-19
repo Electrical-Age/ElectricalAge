@@ -2,6 +2,7 @@ package mods.eln.gametest.cases;
 
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
+import mods.eln.node.voxel.AdapterPart;
 import mods.eln.node.voxel.PipeKitItem;
 import mods.eln.node.voxel.PipePart;
 import mods.eln.node.voxel.VoxelNode;
@@ -341,6 +342,19 @@ public final class PipeCases {
             ctx.check("pipe: water comes back out through it", took == 200, took + " mB");
             var other = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.UP);
             ctx.check("pipe: only on the adapter's face", other == null, "" + other);
+
+            // a cache held by another mod's pipe sees the adapter go and come back on the same block
+            int west = net.minecraft.core.Direction.WEST.get3DDataValue();
+            var cache = net.neoforged.neoforge.capabilities.BlockCapabilityCache.create(
+                net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.level(), at, net.minecraft.core.Direction.WEST);
+            boolean held = cache.getCapability() != null;
+            int i = n.parts.indexOf(n.adapterOn(west));
+            n.removePart(i, false);
+            boolean gone = cache.getCapability() == null;
+            String err = n.addPart(new AdapterPart(west));
+            boolean back = cache.getCapability() != null;
+            ctx.check("pipe: a held capability cache follows the adapter out and back in", held && gone && back && err == null,
+                "held " + held + ", gone " + gone + ", back " + back + (err == null ? "" : ", " + err));
         }
     }
 

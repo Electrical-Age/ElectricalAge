@@ -79,6 +79,15 @@ public abstract class NodeBase {
 
     }
 
+    /**
+     * Tells capability caches (hoppers, other mods' pipes) to look again: what a face offers changed while the block
+     * entity stayed (an element bound, burnt out, repaired or gone; a pipe adapter added or removed).
+     */
+    public void invalidateCapabilities() {
+        if (coordonate != null && coordonate.world() instanceof ServerLevel l)
+            l.invalidateCapabilities(coordonate.pos());
+    }
+
     public void notifyNeighbor() {
         Utils.notifyNeighbours(coordonate.world(), coordonate.pos());
     }

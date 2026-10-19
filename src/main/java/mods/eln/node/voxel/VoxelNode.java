@@ -209,6 +209,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (cable || cablesBuilt) reconnect();
         }
         setNeedPublish(true);
+        invalidateCapabilities();   // (an adapter added, removed or its pipe changed: pipes holding a cache look again)
     }
 
     /** Were there conductors at the last connect (a removed last cable must reconnect too)? */
@@ -808,6 +809,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public void initializeFromNBT() {
         connect();
         showAdapters();
+        invalidateCapabilities();
     }
 
     @Override
@@ -821,6 +823,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         parts.clear();
         super.onBreakBlock();
+        invalidateCapabilities();
+    }
+
+    @Override
+    public void unload() {
+        super.unload();
+        invalidateCapabilities();
     }
 
     @Override

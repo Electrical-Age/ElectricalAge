@@ -75,15 +75,13 @@ forward and 1 down (1 forward wins), via `Capabilities.Item.BLOCK` from `UP`, el
 
 ## Invalidation
 
-`TransparentNode.invalidateCapabilities()` calls `ServerLevel.invalidateCapabilities(pos)`. Called from:
+`NodeBase.invalidateCapabilities()` calls `ServerLevel.invalidateCapabilities(pos)`. Called from:
 `TransparentNode.initializeFromThat` (element bound), `initializeFromNBT`, `onBreakBlock`, `unload`, and
-`TransparentNodeElement.burn` / `repair`. Rule: call it whenever the set of handlers a face returns can change without
-the block entity being replaced (bind, burn, repair, a face changing role). Block entity placement/removal itself is
-NeoForge's job.
-
-Missing today: `VoxelNode` never invalidates, so a `BlockCapabilityCache` held by another mod's pipe will not see an
-adapter added to or removed from an existing voxel block until something else invalidates. The fluid capability on
-transparent nodes ignores burn state, so it needs no invalidation on burn.
+`TransparentNodeElement.burn` / `repair`; `VoxelNode.changed()` (every part added or removed, a pipe burst: covers
+pipe adapters coming and going), `initializeFromNBT`, `onBreakBlock`, `unload`. Rule: call it whenever the set of
+handlers a face returns can change without the block entity being replaced (bind, burn, repair, a face changing
+role). Block entity placement/removal itself is NeoForge's job. The fluid capability on transparent nodes ignores
+burn state, so it needs no invalidation on burn.
 
 ## Tests (GameTests, by name)
 
@@ -95,7 +93,8 @@ transparent nodes ignores burn state, so it needs no invalidation on burn.
   stick, aborted insert, hopper feed, closed devices (power capacitor, power inductor, DC-DC converter), egg incubator,
   burnt macerator clears a held `BlockCapabilityCache` and repair restores it.
 - `autominer_drop_capability`: autominer fills a macerator below; a refused stick stays queued.
-- `pipe_adapter_capability` (`gametest/cases/PipeCases.java`): water in and out through the adapter face, only there.
+- `pipe_adapter_capability` (`gametest/cases/PipeCases.java`): water in and out through the adapter face, only there;
+  a held `BlockCapabilityCache` clears when the adapter is removed and comes back when it is added again.
 - `port26 fluid handler` (`gametest/cases/PortHelperCases.java`): tank semantics; fuel heat furnace exposes its tank.
 - `oil_separator`, `oil_boiler`, `oil_column` (`gametest/cases/OilCases.java`): fluid capability lookups (null side).
 - Unit: `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java` (tag upgrade).
