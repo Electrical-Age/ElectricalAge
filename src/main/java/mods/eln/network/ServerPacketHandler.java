@@ -36,6 +36,7 @@ public final class ServerPacketHandler {
                 return;
             }
             if (type == Eln.packetChiselBrush) {
+                if (stream.available() < 2) return;   // (short: ignored quietly)
                 mods.eln.node.voxel.ChiselItem.applyBrush(player, stream.readByte(), stream.readByte());
                 return;
             }

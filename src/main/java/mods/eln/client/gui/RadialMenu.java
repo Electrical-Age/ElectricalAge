@@ -91,9 +91,10 @@ public class RadialMenu extends Screen {
         return false;
     }
 
-    /** No blur or dimming: the world stays visible round the menu. */
+    /** No blur or dimming: the world stays visible round the menu (subtitles still drawn, as Screen does). */
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
+        minecraft.gui.hud.extractDeferredSubtitles();
     }
 
     @Override
@@ -160,7 +161,10 @@ public class RadialMenu extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
-        if (holdKey.matchesMouse(e)) return true;
+        if (holdKey.matchesMouse(e)) {
+            if (!held) finish();   // (as keyPressed: the key bound to a mouse button)
+            return true;
+        }
         if (e.button() != 0) return false;
         int[] h = at(e.x() - width / 2.0, e.y() - height / 2.0, counts());
         if (h == null) return true;
