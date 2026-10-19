@@ -13,7 +13,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-/** EA's keys (1.12 ClientKeyHandler): the wrench key (C), held while clicking a switch to open its screen. */
+/**
+ * EA's keys (1.12 ClientKeyHandler): the wrench key (C), held while clicking a switch to open its screen. With a chisel
+ * in the main hand it opens the chisel's brush menu instead (ChiselRadial), and the server is not told the key is down.
+ */
 final class ClientKeys {
     private ClientKeys() {
     }
@@ -28,8 +31,17 @@ final class ClientKeys {
     }
 
     static void tick(ClientTickEvent.Post e) {
-        if (Minecraft.getInstance().getConnection() == null) return;
+        var mc = Minecraft.getInstance();
+        if (mc.getConnection() == null) return;
+        boolean clicked = false;
+        while (WRENCH.consumeClick()) clicked = true;
         boolean down = WRENCH.isDown();
+        if ((down || clicked) && !wrenchDown && mc.gui.screen() == null && mc.player != null
+            && mc.player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ChiselItem) {
+            // (a tap shorter than a tick leaves only the click: the menu then stays open until a choice or Esc)
+            mc.gui.setScreen(ChiselRadial.create(mc.player.getMainHandItem(), WRENCH, down));
+            return;
+        }
         if (down == wrenchDown) return;
         wrenchDown = down;
         try {
