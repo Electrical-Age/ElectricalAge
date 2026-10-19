@@ -54,8 +54,12 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - File layout: compound of `n0`, `n1`, ... each a node tag `{tag: <type>, ...node.writeToNBT}`. Load iterates
   all child compounds (`Utils.getTags`), key names do not matter.
 - `loadFromNbt(nbt, dim)`: per node `upgradeTag` -> class lookup -> `newInstance` -> `readFromNBT` -> `addNode`
-  -> `initializeFromNBT`; after all, `globalBoot()` on each. `saveToNbt(nbt, dim)` skips `mustBeSaved()==false`
-  and other dims; `dim == Integer.MIN_VALUE` means all dims (tests).
+  -> `initializeFromNBT`; after all, `globalBoot()` on each. Any throwable but a `VirtualMachineError` (so a
+  `LinkageError` too) while building or reading one node makes that node an orphan; the rest of the file loads.
+  `saveToNbt(nbt, dim)` skips `mustBeSaved()==false` and other dims; `dim == Integer.MIN_VALUE` means all dims
+  (tests). Each node keeps its last saved tag (`NodeBase.lastSaved`: the tag it was loaded from, then each save that
+  worked; one tag per node held in memory): if its `writeToNBT` throws, that tag is written instead, with a WARN
+  (a node never saved before is logged as missing from the save).
 - Save upgrades: `registerTagUpgrade(type, op)` / `TAG_UPGRADES`, applied before the type lookup. A throwing
   upgrade logs and keeps the tag. Only one today: `"ElnToOther"` (1.12/early 26.x simple-node FE exporter) ->
   `transparentnode/energyconverter/ExporterSaveUpgrade` (commit 6b105574). It moves `cx/cy/cz/cd/NBOpaque/NBWrap`
@@ -125,7 +129,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   bounds: save, unload, build a fresh node from the tag, save again; any difference except keys ending `Uc` or
   `State` (`Reload.isTransient`) fails. It calls `readFromNBT` directly, so it does not cover `upgradeTag` or orphans.
 - `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown type kept and re-saved byte-equal over two round
-  trips; unknown transparent `eid` throws and is kept; orphans stay in their dim and are dropped on `unload(dim)`.
+  trips; unknown transparent `eid` throws and is kept; orphans stay in their dim and are dropped on `unload(dim)`;
+  a `LinkageError` orphans only that node; a node whose save throws keeps its loaded, then last saved, tag.
   (Added in 948ac491 asserting the loss; reversed in 2f54a6d5.)
 - `src/test/java/mods/eln/server/ElnWorldSavesTest.java`: unreadable `.dat` and `.dat.bak` are renamed aside;
   a bad `.dat` with a good `.bak` loads the backup and leaves it untouched; a missing `.dat` is not corruption; with

@@ -103,4 +103,93 @@ public class NodeSaveLoadTest {
         nm.saveToNbt(after, 7);
         assertTrue(after.isEmpty());
     }
+
+    /** A six-node whose load or save can be made to fail (a device with a bug, or a class missing at run time). */
+    public static class FlakyNode extends mods.eln.node.six.SixNode {
+        static final String TYPE = "test:flaky";
+        static boolean failRead, failWrite;
+
+        @Override
+        public String getNodeUuid() {
+            return TYPE;
+        }
+
+        @Override
+        public void readFromNBT(CompoundTag nbt) {
+            if (failRead) throw new NoClassDefFoundError("some/device/Class");
+            super.readFromNBT(nbt);
+        }
+
+        @Override
+        public void writeToNBT(CompoundTag nbt) {
+            if (failWrite) throw new IllegalStateException("a device that cannot save");
+            super.writeToNBT(nbt);
+        }
+
+        @Override
+        public void initializeFromNBT() {
+        }
+
+        @Override
+        public void globalBoot() {
+        }
+    }
+
+    static CompoundTag flaky(int x) {
+        CompoundTag body = new CompoundTag();
+        for (int i = 0; i < 6; i++) body.putShort("EID" + i, (short) 0);
+        CompoundTag n = savedNode(FlakyNode.TYPE, body);
+        n.getCompoundOrEmpty("node").putInt("cx", x);
+        return n;
+    }
+
+    /** A LinkageError while loading one node makes it an orphan; the rest of the file still loads. */
+    @Test
+    public void aLinkageErrorOrphansOnlyThatNode() {
+        NodeManager.registerUuid(FlakyNode.TYPE, FlakyNode.class);
+        FlakyNode.failRead = true;
+        try {
+            NodeManager nm = new NodeManager("test");
+            CompoundTag nodes = new CompoundTag();
+            nodes.put("n0", flaky(1));
+            nodes.put("n1", savedNode("eln:unknown", new CompoundTag()));
+            nm.loadFromNbt(nodes, 0);
+            assertEquals(2, nm.getOrphans(0).size(), "both kept: " + nm.getOrphans(0));
+        } finally {
+            FlakyNode.failRead = false;
+        }
+    }
+
+    /**
+     * A node whose writeToNBT throws is saved with its last good data (here: what it was loaded from, then the last
+     * save that worked). It used to be left out of the file, so the next load deleted it.
+     */
+    @Test
+    public void aNodeThatFailsToSaveKeepsItsLastGoodData() {
+        NodeManager.registerUuid(FlakyNode.TYPE, FlakyNode.class);
+        try {
+            NodeManager nm = new NodeManager("test");
+            CompoundTag nodes = new CompoundTag();
+            CompoundTag original = flaky(1);
+            nodes.put("n0", original.copy());
+            nm.loadFromNbt(nodes, 0);
+            assertEquals(1, nm.getNodes().size());
+
+            FlakyNode.failWrite = true;
+            CompoundTag failed = new CompoundTag();
+            nm.saveToNbt(failed, 0);
+            assertEquals(1, failed.size(), "still in the file: " + failed);
+            assertEquals(original, failed.getCompoundOrEmpty("n0"), "as it was loaded");
+
+            FlakyNode.failWrite = false;
+            CompoundTag good = new CompoundTag();
+            nm.saveToNbt(good, 0);
+            FlakyNode.failWrite = true;
+            CompoundTag again = new CompoundTag();
+            nm.saveToNbt(again, 0);
+            assertEquals(good, again, "as last saved");
+        } finally {
+            FlakyNode.failWrite = false;
+        }
+    }
 }

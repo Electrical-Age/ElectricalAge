@@ -168,9 +168,13 @@ public class NodeManager {
             }
             NodeBase node;
             try {
+                CompoundTag loadedFrom = tag.copy();
                 node = (NodeBase) nodeClass.getConstructor().newInstance();
                 node.readFromNBT(tag);
-            } catch (Exception e) {
+                node.lastSaved = loadedFrom;
+            } catch (VirtualMachineError e) {
+                throw e;
+            } catch (Throwable e) {   // (LinkageError too: one node's missing class must not stop the rest of the file)
                 keepOrphan(dim, tag, "loading a node of type '" + type + "' failed", e);
                 continue;
             }
@@ -188,7 +192,7 @@ public class NodeManager {
         }
     }
 
-    private void keepOrphan(int dim, CompoundTag tag, String why, Exception e) {
+    private void keepOrphan(int dim, CompoundTag tag, String why, Throwable e) {
         Coordonate at = null;
         CompoundTag pos = tag.getCompoundOrEmpty("node");
         if (pos.contains("cx")) {
@@ -206,17 +210,27 @@ public class NodeManager {
         List<NodeBase> nodesCopy = new ArrayList<NodeBase>();
         nodesCopy.addAll(nodes);
         for (NodeBase node : nodesCopy) {
+            if (!node.mustBeSaved()) continue;
+            if (dim != Integer.MIN_VALUE && (node.coordonate == null || node.coordonate.dimention != dim)) continue;
             try {
-                if (node.mustBeSaved() == false) continue;
-                if (dim != Integer.MIN_VALUE && node.coordonate.dimention != dim) continue;
                 CompoundTag nbtNode = new CompoundTag();
                 nbtNode.putString("tag", node.getNodeUuid());
                 node.writeToNBT(nbtNode);
+                node.lastSaved = nbtNode;
                 nbt.put("n" + nodeCounter++, nbtNode);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (VirtualMachineError e) {
+                throw e;
+            } catch (Throwable e) {
+                // a node left out of the file is deleted for good at the next load: write its last good data instead
+                if (node.lastSaved != null) {
+                    LOG.warn("Electrical Age: saving the node {} at {} failed; writing its last good saved data instead",
+                        node.getClass().getSimpleName(), node.coordonate, e);
+                    nbt.put("n" + nodeCounter++, node.lastSaved.copy());
+                } else {
+                    LOG.error("Electrical Age: saving the node {} at {} failed and it was never saved before; it is missing from this save",
+                        node.getClass().getSimpleName(), node.coordonate, e);
+                }
             }
-
         }
         for (Map.Entry<Integer, List<Orphan>> e : orphans.entrySet()) {
             if (dim != Integer.MIN_VALUE && e.getKey() != dim) continue;

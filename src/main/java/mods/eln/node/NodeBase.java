@@ -69,6 +69,12 @@ public abstract class NodeBase {
 
     private boolean needPublish = false;
 
+    /**
+     * The node's last saved tag (from the file it was loaded from, then from each save that worked): NodeManager
+     * writes it in place of a save that throws, so one broken writeToNBT doesn't delete the node from the file.
+     */
+    CompoundTag lastSaved;
+
     // public static boolean canBePlacedOn(ItemStack itemStack,Direction side)
 
     public boolean mustBeSaved() {
