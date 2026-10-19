@@ -9,8 +9,8 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The item array of a node element: fixed size, one stack limit for every slot, saved with the element. Never holds
- * null (empty slots are ItemStack.EMPTY). Out-of-range slots read as empty and ignore writes. Subclasses tell their
- * element about changes in {@link #markDirty()}.
+ * null (empty slots are ItemStack.EMPTY). Out-of-range slots read as empty; a stack written to one is lost, and
+ * logged with where the write came from. Subclasses tell their element about changes in {@link #markDirty()}.
  */
 public abstract class ElementInventory implements IInventoryCompat, INBTTReady {
     private final ItemStack[] inv;
@@ -60,7 +60,12 @@ public abstract class ElementInventory implements IInventoryCompat, INBTTReady {
 
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack) {
-        if (slot < 0 || slot >= inv.length) return;
+        if (slot < 0 || slot >= inv.length) {
+            if (!Utils.isEmpty(stack))
+                mods.eln.Eln.LOG.warn("Electrical Age: {} has no slot {} (size {}); the {} written there is lost",
+                    getClass().getSimpleName(), slot, inv.length, stack, new Throwable("written from"));
+            return;
+        }
         inv[slot] = stack == null ? ItemStack.EMPTY : stack;
         if (!Utils.isEmpty(stack) && stack.getCount() > getInventoryStackLimit()) {
             stack.setCount(getInventoryStackLimit());
