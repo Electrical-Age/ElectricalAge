@@ -1,2 +1,0 @@
-# EA 1.12 port: core-level excluded sources not owned by a device batch (batches: m1-exclude-<batch>.txt).
-# Build everything with: gradlew build -PelnAll. Remove lines as work packages land.
