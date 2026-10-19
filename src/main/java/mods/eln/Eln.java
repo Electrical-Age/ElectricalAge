@@ -126,6 +126,8 @@ public class Eln {
     public static final byte packetServerToClientInfo = 22;
     /** 26.x: a cable kit's preview outlines (node.voxel.KitPreview). */
     public static final byte packetKitPreview = 23;
+    /** 26.x, client -> server: the held chisel's brush from the radial menu (size byte, shape byte; ChiselItem.applyBrush). */
+    public static final byte packetChiselBrush = 24;
 
     // Voltage / power levels, as in 1.12
     public static final double gateOutputCurrent = 0.100;

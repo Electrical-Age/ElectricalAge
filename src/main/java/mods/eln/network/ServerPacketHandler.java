@@ -13,7 +13,8 @@ import java.io.IOException;
 
 /**
  * Server side of EA's byte protocol, client -> server (1.12 PacketHandler): GUI actions for a node
- * (packetPublishForNode: x, y, z, dimension, node uuid, then the node's own bytes). Runs on the server thread.
+ * (packetPublishForNode: x, y, z, dimension, node uuid, then the node's own bytes), the wrench key (packetPlayerKey) and
+ * the held chisel's brush (packetChiselBrush). Runs on the server thread.
  * 26.x hardening: the player must be in the node's dimension and within 16 blocks (1.12 trusted any coordinates).
  */
 public final class ServerPacketHandler {
@@ -32,6 +33,10 @@ public final class ServerPacketHandler {
             byte type = stream.readByte();
             if (type == Eln.packetPlayerKey) {
                 mods.eln.server.PlayerKeys.set(player, stream.readByte(), stream.readBoolean());
+                return;
+            }
+            if (type == Eln.packetChiselBrush) {
+                mods.eln.node.voxel.ChiselItem.applyBrush(player, stream.readByte(), stream.readByte());
                 return;
             }
             if (type != Eln.packetPublishForNode) return;

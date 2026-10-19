@@ -32,7 +32,11 @@ public class ElnLang extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
-        add("key.eln.wrench", "Wrench (hold to open a switch's screen)");
+        add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
+        add("item.eln.chisel.shape.cube", "cube");
+        add("item.eln.chisel.shape.flat", "flat");
+        add("item.eln.chisel.shape.tunnel", "tunnel");
+        add("gui.eln.chisel.brush", "Chisel brush");
         add("key.category.eln.keys", "Electrical Age");
         for (var h : ElnRegistry.ALL_ITEMS) {
             Item item = h.get();

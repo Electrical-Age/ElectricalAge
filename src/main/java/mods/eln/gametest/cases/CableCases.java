@@ -43,6 +43,7 @@ public final class CableCases {
         cases.add(new MimicCase());
         cases.add(new StairsCase());
         cases.add(new ChiselCase());
+        cases.add(new ChiselShapesCase());
         cases.add(new FenceJoinCase());
         // mixed blocks (a device and a cable in one block) and a device round an outer corner, converted
         Layout mixed = (c, six, z) -> {
@@ -864,6 +865,87 @@ public final class CableCases {
             c.check("chisel: the wall block is carved stone holding cable", wall.startsWith("Stone, carved 512, parts "), wall);
             c.check("chisel: right-click puts material back", !back.startsWith(back.substring(back.indexOf("-> ") + 3) + " "), back);
             c.check("chisel: carved and put back whole: stone again", whole.equals("carved true, after putting back: Stone"), whole);
+        }
+    }
+
+    /**
+     * The chisel's brush shapes on stone (Baughn): a 4-voxel flat layer twice (16 voxels a layer), a 4-voxel tunnel
+     * through a block (4 x 4 x 16) and a tunnel put back from the hole's floor (the 4 x 4 column across the hole);
+     * sneak + right-click no longer changes the brush, it puts material back like a plain right-click.
+     */
+    static final class ChiselShapesCase implements TestCase {
+        String flat, tunnel, sneak, packet;
+
+        public String name() {
+            return "chisel brush shapes";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        static int carved(net.minecraft.world.level.Level level, BlockPos p) {
+            var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
+            return n instanceof mods.eln.node.voxel.VoxelNode v && v.carved != null ? v.carved.cardinality() : -1;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var west = net.minecraft.core.Direction.WEST;
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var stack = new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.CHISEL.get());
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+            BlockPos f = c.at(2, 1, 1), t = c.at(4, 1, 1), s = c.at(6, 1, 1);
+            c.floor(f);
+            c.floor(t);
+            c.floor(s);
+            var flatShape = mods.eln.node.voxel.ChiselBrush.Shape.FLAT;
+            var tunnelShape = mods.eln.node.voxel.ChiselBrush.Shape.TUNNEL;
+            // flat: the west face, then one voxel deeper (the face the ray would hit next)
+            mods.eln.node.voxel.ChiselItem.carve(player, level, f, new net.minecraft.world.phys.Vec3(f.getX(), f.getY() + 0.5, f.getZ() + 0.5), west, 4, flatShape, true);
+            int one = carved(level, f);
+            mods.eln.node.voxel.ChiselItem.carve(player, level, f, new net.minecraft.world.phys.Vec3(f.getX() + 1 / 16.0, f.getY() + 0.5, f.getZ() + 0.5), west, 4, flatShape, true);
+            flat = one + ", " + carved(level, f);
+            // tunnel through, then put back from the hole's floor (y = 8): the column x 4..8, z 8..12 across the hole
+            mods.eln.node.voxel.ChiselItem.carve(player, level, t, new net.minecraft.world.phys.Vec3(t.getX(), t.getY() + 0.5, t.getZ() + 0.5), west, 4, tunnelShape, true);
+            int through = carved(level, t);
+            mods.eln.node.voxel.ChiselItem.carve(player, level, t, new net.minecraft.world.phys.Vec3(t.getX() + 5.5 / 16, t.getY() + 0.5, t.getZ() + 9.5 / 16),
+                net.minecraft.core.Direction.UP, 4, tunnelShape, false);
+            tunnel = through + ", " + carved(level, t);
+            // sneak + right-click: a plain right-click (put back 1 voxel), the brush unchanged
+            mods.eln.node.voxel.ChiselItem.setBrush(stack, 1, mods.eln.node.voxel.ChiselBrush.Shape.CUBE);
+            player.setShiftKeyDown(true);
+            int before = carved(level, t);
+            var hit = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(t.getX() + 1.5 / 16, t.getY() + 0.5, t.getZ() + 9.5 / 16),
+                net.minecraft.core.Direction.UP, t, false);
+            stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+            stack.use(level, player, net.minecraft.world.InteractionHand.MAIN_HAND);
+            var hitS = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(s.getX(), s.getY() + 0.5, s.getZ() + 0.5), west, s, false);
+            stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hitS));
+            player.setShiftKeyDown(false);
+            sneak = "brush " + mods.eln.node.voxel.ChiselItem.size(stack) + " " + mods.eln.node.voxel.ChiselItem.shape(stack)
+                + ", put back " + (before - carved(level, t)) + ", plain block " + level.getBlockState(s).getBlock().getName().getString()
+                + ", name " + stack.getHoverName().getString();
+            // the radial menu's packet: applied to the held chisel; a bad size or shape, or no chisel in hand, ignored
+            var handler = (java.util.function.Consumer<byte[]>) b -> mods.eln.network.ServerPacketHandler.handle(b, player);
+            handler.accept(mods.eln.node.voxel.ChiselItem.brushPacket(8, tunnelShape));
+            packet = mods.eln.node.voxel.ChiselItem.size(stack) + " " + mods.eln.node.voxel.ChiselItem.shape(stack);
+            handler.accept(new byte[]{mods.eln.Eln.packetChiselBrush, 3, 1});
+            handler.accept(new byte[]{mods.eln.Eln.packetChiselBrush, 4, 7});
+            handler.accept(new byte[]{mods.eln.Eln.packetChiselBrush, 4});
+            packet += ", bad: " + mods.eln.node.voxel.ChiselItem.size(stack) + " " + mods.eln.node.voxel.ChiselItem.shape(stack);
+            var stone = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stone);
+            handler.accept(mods.eln.node.voxel.ChiselItem.brushPacket(2, flatShape));
+            packet += ", no chisel: " + stone.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA) + " " + mods.eln.node.voxel.ChiselItem.size(stack);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+        }
+
+        public void measure(TestContext c) {
+            c.check("chisel: a 4-voxel flat layer is 16 voxels, the next layer 16 more", flat.equals("16, 32"), flat);
+            c.check("chisel: a 4-voxel tunnel is 256 voxels; put back from the floor fills the 64 across the hole", tunnel.equals("256, 192"), tunnel);
+            c.check("chisel: sneak + right-click puts back and keeps the brush", sneak.equals("brush 1 CUBE, put back 1, plain block Stone, name Chisel (1, cube)"), sneak);
+            c.check("chisel: the brush packet sets the held chisel only, and only to a valid brush", packet.equals("8 TUNNEL, bad: 8 TUNNEL, no chisel: false 8"), packet);
         }
     }
 

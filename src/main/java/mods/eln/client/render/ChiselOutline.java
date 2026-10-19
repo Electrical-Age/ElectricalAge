@@ -10,7 +10,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 
-/** With a chisel in hand: the outline is the brush cube the next left-click would take away (ChiselItem.carve). */
+/**
+ * With a chisel in hand: the outline is the brush box (size and shape: cube, flat layer or tunnel through the block)
+ * the next left-click would take away, from the same geometry as ChiselItem.carve (ChiselBrush.box).
+ */
 public final class ChiselOutline {
     private ChiselOutline() {
     }
@@ -20,16 +23,13 @@ public final class ChiselOutline {
         if (player == null || !(player.getMainHandItem().getItem() instanceof ChiselItem)) return;
         var level = e.getLevel();
         var hit = e.getHitResult();
-        int size = ChiselItem.size(player.getMainHandItem());
-        var face = hit.getDirection();
-        Vec3 v = hit.getLocation().add(face.getStepX() * -0.001, face.getStepY() * -0.001, face.getStepZ() * -0.001);
-        BlockPos at = BlockPos.containing(v);
+        var stack = player.getMainHandItem();
+        BlockPos at = ChiselItem.target(hit.getLocation(), hit.getDirection(), true);
         var st = level.getBlockState(at);
         boolean carvable = Mimic.carvable(st) || level.getBlockEntity(at) instanceof VoxelNodeEntity ve && ve.host() != null;
         if (!carvable) return;
-        int vx = (int) Math.floor((v.x - at.getX()) * 16), vy = (int) Math.floor((v.y - at.getY()) * 16), vz = (int) Math.floor((v.z - at.getZ()) * 16);
-        int x0 = vx / size * size, y0 = vy / size * size, z0 = vz / size * size;
-        var shape = Shapes.box(x0 / 16.0, y0 / 16.0, z0 / 16.0, (x0 + size) / 16.0, (y0 + size) / 16.0, (z0 + size) / 16.0);
+        int[] b = ChiselItem.brushBox(hit.getLocation(), hit.getDirection(), ChiselItem.size(stack), ChiselItem.shape(stack), true);
+        var shape = Shapes.box(b[0] / 16.0, b[1] / 16.0, b[2] / 16.0, b[3] / 16.0, b[4] / 16.0, b[5] / 16.0);
         e.addCustomRenderer((state, collector, pose, lrs) -> {
             Vec3 cam = lrs.cameraRenderState.pos;
             pose.pushPose();

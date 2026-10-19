@@ -96,6 +96,7 @@
   "fluid_type.eln.naturalgas": "Natural Gas",
   "fluid_type.eln.residue": "Residue",
   "fluid_type.eln.steam": "Steam",
+  "gui.eln.chisel.brush": "Chisel brush",
   "item.eln.10a_diode": "10A Diode",
   "item.eln.200v_active_thermal_dissipator": "200V Active Thermal Dissipator",
   "item.eln.200v_battery_charger": "200V Battery Charger",
@@ -180,6 +181,9 @@
   "item.eln.cheap_electrical_drill": "Cheap Electrical Drill",
   "item.eln.cheap_ferromagnetic_core": "Cheap Ferromagnetic Core",
   "item.eln.chisel": "Chisel",
+  "item.eln.chisel.shape.cube": "cube",
+  "item.eln.chisel.shape.flat": "flat",
+  "item.eln.chisel.shape.tunnel": "tunnel",
   "item.eln.cinnabar_dust": "Cinnabar Dust",
   "item.eln.cinnabar_ore": "Cinnabar Ore",
   "item.eln.coal_dust": "Coal Dust",
@@ -428,5 +432,5 @@
   "item.eln.yellow_brush": "Yellow Brush",
   "itemGroup.eln": "Electrical Age",
   "key.category.eln.keys": "Electrical Age",
-  "key.eln.wrench": "Wrench (hold to open a switch's screen)"
+  "key.eln.wrench": "Wrench (hold: a switch's screen on click; the chisel's brush menu)"
 }
