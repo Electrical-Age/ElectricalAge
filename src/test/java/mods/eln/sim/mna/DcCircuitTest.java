@@ -4,6 +4,7 @@ import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.PowerSource;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.component.TestConductance;
 import mods.eln.sim.mna.component.TestCurrentSource;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
@@ -221,5 +222,26 @@ public class DcCircuitTest {
         ps.setImax(2);
         root.step();
         assertEquals(2, load.getCurrent(), 1e-6);
+    }
+
+    /**
+     * A Monopole (conductance to ground) removed the way a device disconnects (removeComponent, breakConnection)
+     * must stop acting. Monopole had no breakConnection, so it stayed in its pin's component list and the next
+     * SubSystem build put it back.
+     */
+    @Test
+    public void removedMonopoleLeavesTheCircuit() {
+        VoltageState a = node(), b = node();
+        vs(a, null, 10);
+        r(a, b, 10);
+        TestConductance m = new TestConductance(0.1);
+        m.connectTo(b);
+        root.addComponent(m);
+        root.step();
+        assertEquals(5, b.state, EPS);
+        root.removeComponent(m);
+        m.breakConnection();
+        root.step();
+        assertEquals(10, b.state, EPS);
     }
 }
