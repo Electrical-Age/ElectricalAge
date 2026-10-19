@@ -165,7 +165,7 @@ public class RadialMenu extends Screen {
             if (!held) finish();   // (as keyPressed: the key bound to a mouse button)
             return true;
         }
-        if (e.button() != 0) return false;
+        if (e.button() != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return false;   // (26.3: left is 1, AdventurAgent)
         int[] h = at(e.x() - width / 2.0, e.y() - height / 2.0, counts());
         if (h == null) return true;
         if (h[0] < 0 || !held) {
