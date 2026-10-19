@@ -343,41 +343,13 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
 
     public void readFromNBT(CompoundTag nbt) {
-
-        int idx;
-
         Container inv = getInventory();
         if (inv != null) {
             Utils.readFromNBT(nbt, "inv", inv);
         }
 
-        idx = 0;
-
-        for (State electricalLoad : electricalLoadList) {
-            if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
-        }
-
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.readFromNBT(nbt, "");
-        }
-
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).readFromNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-
+        INBTTReady.readAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalFastProcessList);
 
         byte b = nbt.getByteOr("others", (byte) 0);
         front = Direction.fromInt(b & 0x7);
@@ -388,8 +360,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
 
     public void writeToNBT(CompoundTag nbt) {
-        int idx = 0;
-
         if (burnt != null) {
             nbt.putByte("burnt", (byte) (burnt.ordinal() + 1));
             nbt.putByte("burntKind", (byte) burntKind.ordinal());
@@ -400,28 +370,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
             Utils.writeToNBT(nbt, "inv", inv);
         }
 
-        for (State electricalLoad : electricalLoadList) {
-            if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.writeToNBT(nbt, "");
-        }
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).writeToNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
+        INBTTReady.writeAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalFastProcessList);
 
 
         nbt.putByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));

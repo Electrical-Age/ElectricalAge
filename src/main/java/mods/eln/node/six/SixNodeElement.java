@@ -253,9 +253,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
     }
 
     public void readFromNBT(CompoundTag nbt) {
-
-        int idx;
-
         front = front.readFromNBT(nbt, "sixFront");
         burnt = nbt.contains("burnt") ? FailureCause.fromOrdinal(nbt.getByteOr("burnt", (byte) 0) - 1) : null;
         burntKind = burnt != null ? Failure.Kind.fromOrdinal(nbt.getByteOr("burntKind", (byte) 0)) : null;
@@ -265,42 +262,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
             Utils.readFromNBT(nbt, "inv", inv);
         }
 
-        for (NbtElectricalLoad electricalLoad : electricalLoadList) {
-            electricalLoad.readFromNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.readFromNBT(nbt, "");
-        }
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).readFromNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalSlowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
+        INBTTReady.readAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalProcessList, thermalSlowProcessList);
 
     }
 
     public void writeToNBT(CompoundTag nbt) {
-
-        int idx;
-
         front.writeToNBT(nbt, "sixFront");
         if (burnt != null) {
             nbt.putByte("burnt", (byte) (burnt.ordinal() + 1));
@@ -312,35 +279,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
             Utils.writeToNBT(nbt, "inv", inv);
         }
 
-        for (NbtElectricalLoad electricalLoad : electricalLoadList) {
-            electricalLoad.writeToNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.writeToNBT(nbt, "");
-        }
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).writeToNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalSlowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
+        INBTTReady.writeAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalProcessList, thermalSlowProcessList);
 
     }
 
