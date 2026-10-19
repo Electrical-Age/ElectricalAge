@@ -35,6 +35,31 @@ public class NodeManager {
         return r;
     }
 
+    /** Is a node this version could not load kept at c? */
+    public boolean hasOrphanAt(Coordonate c) {
+        for (List<Orphan> l : orphans.values()) for (Orphan o : l) if (c.equals(o.at())) return true;
+        return false;
+    }
+
+    /**
+     * Forgets the orphans at c, each with a WARN naming why: its block went for real (not a chunk unload), or a new
+     * node took the place. Returns how many went.
+     */
+    public int dropOrphans(Coordonate c, String why) {
+        int n = 0;
+        for (List<Orphan> l : orphans.values()) {
+            for (Iterator<Orphan> i = l.iterator(); i.hasNext(); ) {
+                Orphan o = i.next();
+                if (!c.equals(o.at())) continue;
+                i.remove();
+                n++;
+                LOG.warn("Electrical Age: {}; discarding the saved node of type '{}' at {} that this version could not load",
+                    why, o.tag().getStringOr("tag", ""), c);
+            }
+        }
+        return n;
+    }
+
     public HashMap<Coordonate, NodeBase> getNodeArray() {
         return nodesMap;
     }
@@ -93,7 +118,7 @@ public class NodeManager {
             new Throwable("Null coordonate addnode").printStackTrace();
             return;
         }
-        for (List<Orphan> l : orphans.values()) l.removeIf(o -> node.coordonate.equals(o.at()));
+        dropOrphans(node.coordonate, "a new node was placed there");
         NodeBase old = nodesMap.put(node.coordonate, node);
         if (old != null) {
             nodes.remove(old);

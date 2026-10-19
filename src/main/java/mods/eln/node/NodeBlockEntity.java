@@ -168,9 +168,12 @@ public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity
         }
         // The block is gone (broken, replaced, cleared by a GameTest...), not just unloaded: remove the node, so it
         // can't stay in the simulation and connect to whatever is built here next.
+        // A node kept as saved data (an orphan this version could not load) goes with its block.
         if (!chunkUnloading && level != null && !level.isClientSide()) {
-            NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(worldPosition, level));
+            Coordonate c = new Coordonate(worldPosition, level);
+            NodeBase n = NodeManager.instance.getNodeFromCoordonate(c);
             if (n != null && !n.isDestructing()) n.onBreakBlock();
+            NodeManager.instance.dropOrphans(c, "its block was removed");
         }
         super.setRemoved();
     }

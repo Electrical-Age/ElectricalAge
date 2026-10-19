@@ -68,7 +68,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   no coordinates: returned unchanged (-> orphan).
 - Orphans (commit 2f54a6d5): a tag with an unknown type, or whose `readFromNBT` throws, is kept raw per dim
   (`Orphan(at, tag)`, position from `node/cx..`), logged, and written back unchanged by `saveToNbt` after the
-  live nodes. `addNode` at the same position drops the orphan. `getOrphans(dim)` returns copies.
+  live nodes. `addNode` at the same position drops the orphan, with a WARN. When the block at an orphan's position
+  is removed for real (`NodeBlockEntity.setRemoved` without a chunk unload: broken, replaced, cleared), the orphan
+  is dropped with a WARN (`dropOrphans`), so it can't come back inside whatever is built there next. Placing a
+  six-node device on a six-node block whose node is an orphan is refused with a chat message (`SixNodeItem`; it used
+  to remove the block). `getOrphans(dim)` returns copies.
   `TransparentNode.readFromNBT` throws on an unknown `eid` on purpose so the device becomes an orphan.
 - Kept six-node sides: in `SixNode.readFromNBT` a face whose device can't be built or loaded (unknown `EID`, any
   exception) is kept raw as `{EID, ED}` (`keptSides`), logged, and written back unchanged by `writeToNBT`; the rest of
@@ -131,6 +135,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown type kept and re-saved byte-equal over two round
   trips; unknown transparent `eid` throws and is kept; orphans stay in their dim and are dropped on `unload(dim)`;
   a `LinkageError` orphans only that node; a node whose save throws keeps its loaded, then last saved, tag.
+  `dropOrphans` forgets only the orphans at its position.
+- GameTest `orphan six-node block: kept on placement, dropped with the block` (`gametest/cases/SixNodeBreakCases`).
   (Added in 948ac491 asserting the loss; reversed in 2f54a6d5.)
 - `src/test/java/mods/eln/server/ElnWorldSavesTest.java`: unreadable `.dat` and `.dat.bak` are renamed aside;
   a bad `.dat` with a good `.bak` loads the backup and leaves it untouched; a missing `.dat` is not corruption; with

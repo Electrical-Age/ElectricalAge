@@ -1,5 +1,7 @@
 package mods.eln.node.six;
 
+import mods.eln.node.NodeManager;
+
 import mods.eln.generic.IDescriptorItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -102,6 +104,11 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             SixNodeEntity e = (SixNodeEntity) world.getBlockEntity(pos);
             SixNode sixNode = e == null ? null : (SixNode) e.getNode();
             if (sixNode == null) {
+                // a block whose node this version could not load (kept as saved data): leave it, as for a kept face
+                if (NodeManager.instance.hasOrphanAt(new Coordonate(pos, world))) {
+                    if (player != null) Utils.sendMessage(player, "This block holds devices this version of Electrical Age cannot load; their data is kept. Break the block to discard them.");
+                    return false;
+                }
                 world.removeBlock(pos, false);
                 return false;
             }

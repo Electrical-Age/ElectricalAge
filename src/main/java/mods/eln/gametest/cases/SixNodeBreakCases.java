@@ -21,6 +21,7 @@ public final class SixNodeBreakCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new BreakOneFace());
         cases.add(new BreakKeptOnlyVoxel());
+        cases.add(new OrphanBlock());
     }
 
     static final class BreakOneFace implements TestCase {
@@ -112,6 +113,59 @@ public final class SixNodeBreakCases {
         public void measure(TestContext ctx) {
             ctx.check("kept-only voxel block: the player's break goes through", destroyed && air, "destroyed " + destroyed + ", air " + air);
             ctx.check("kept-only voxel block: its node is gone", nodeGone, "node gone " + nodeGone);
+        }
+    }
+
+    /**
+     * A six-node block whose node this version could not load (an orphan, kept as saved data): placing a device on it
+     * is refused and leaves the block and its data; removing the block for real drops the data. Placing used to remove
+     * the block and leave the data behind, to come back in whatever was built there next.
+     */
+    static final class OrphanBlock implements TestCase {
+        BlockPos p;
+        String result = "";
+
+        public String name() {
+            return "orphan six-node block: kept on placement, dropped with the block";
+        }
+
+        public void build(TestContext ctx) {
+            p = ctx.at(1, 1, 1);
+            var level = ctx.level();
+            ctx.level().setBlockAndUpdate(ctx.at(0, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            int dim = mods.eln.misc.Dimensions.id(ctx.world());
+            net.minecraft.nbt.CompoundTag pos = new net.minecraft.nbt.CompoundTag();
+            pos.putInt("cx", p.getX());
+            pos.putInt("cy", p.getY());
+            pos.putInt("cz", p.getZ());
+            pos.putInt("cd", dim);
+            net.minecraft.nbt.CompoundTag o = new net.minecraft.nbt.CompoundTag();
+            o.putString("tag", "eln:test_no_such_node_type");
+            o.put("node", pos);
+            net.minecraft.nbt.CompoundTag file = new net.minecraft.nbt.CompoundTag();
+            file.put("n0", o);
+            var nm = mods.eln.node.NodeManager.instance;
+            var at = new mods.eln.misc.Coordonate(p, level);
+            nm.loadFromNbt(file, dim);
+            level.setBlock(p, mods.eln.node.six.SixNodeBlock.get().defaultBlockState(), 3);
+            boolean kept = nm.hasOrphanAt(at);
+            ItemStack cable = mods.eln.Eln.sixNodeItem.getDescriptor(Ids.six("Low Voltage Cable")).newItemStack();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            boolean placed = ((mods.eln.node.six.SixNodeItem) cable.getItem()).placeAt(cable, player, level, p, Direction.XN);
+            boolean blockStays = level.getBlockState(p).is(mods.eln.node.six.SixNodeBlock.get());
+            boolean keptAfter = nm.hasOrphanAt(at);
+            level.removeBlock(p, false);
+            boolean dropped = !nm.hasOrphanAt(at);
+            result = "kept " + kept + ", placed " + placed + ", block stays " + blockStays + ", kept after " + keptAfter + ", dropped " + dropped;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("orphan block: placement refused, block and data kept; removal drops the data",
+                result.equals("kept true, placed false, block stays true, kept after true, dropped true"), result);
         }
     }
 }

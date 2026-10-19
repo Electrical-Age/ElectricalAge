@@ -192,4 +192,26 @@ public class NodeSaveLoadTest {
             FlakyNode.failWrite = false;
         }
     }
+
+    /** dropOrphans forgets the orphans at one position only; a node added there replaces its orphan. */
+    @Test
+    public void orphansAreDroppedByPosition() {
+        NodeManager nm = new NodeManager("test");
+        CompoundTag nodes = new CompoundTag();
+        nodes.put("n0", savedNode("eln:unknown", new CompoundTag()));
+        CompoundTag other = savedNode("eln:unknown", new CompoundTag());
+        other.getCompoundOrEmpty("node").putInt("cx", 11);
+        nodes.put("n1", other);
+        nm.loadFromNbt(nodes, 0);
+        mods.eln.misc.Coordonate at = new mods.eln.misc.Coordonate();
+        at.readFromNBT(savedNode("x", new CompoundTag()).getCompoundOrEmpty("node"), "c");
+
+        assertTrue(nm.hasOrphanAt(at));
+        assertEquals(1, nm.dropOrphans(at, "test"));
+        assertTrue(!nm.hasOrphanAt(at));
+        CompoundTag saved = new CompoundTag();
+        nm.saveToNbt(saved, 0);
+        assertEquals(1, saved.size(), "the other stays: " + saved);
+        assertEquals(11, saved.getCompoundOrEmpty("n0").getCompoundOrEmpty("node").getIntOr("cx", 0));
+    }
 }
