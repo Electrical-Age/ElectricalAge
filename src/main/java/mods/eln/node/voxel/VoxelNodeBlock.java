@@ -196,6 +196,10 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         if (el < 0 && index < 0) {
             // the imitated block itself: it drops; the parts stay
             if (node.host != null && aimed(e, pos, player) == 2) node.clearHost(player);
+            // only faces this version could not load are left (no part, plate or host to aim at): the block goes, as a
+            // six-node block's does; onBreakBlock logs each discarded face. Else the block could never be broken.
+            if (node.parts.isEmpty() && node.host == null && e.getSideMask() == 0)
+                return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
             return false;
         }
         node.breakingByPlayer = true;

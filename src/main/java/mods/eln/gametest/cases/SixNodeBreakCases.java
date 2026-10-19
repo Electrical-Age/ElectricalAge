@@ -20,6 +20,7 @@ public final class SixNodeBreakCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BreakOneFace());
+        cases.add(new BreakKeptOnlyVoxel());
     }
 
     static final class BreakOneFace implements TestCase {
@@ -60,6 +61,57 @@ public final class SixNodeBreakCases {
             ctx.check("breaking takes one face; the block stays for the other", stayed, "stayed " + stayed);
             ctx.check("that face drops its item", afterPick == 1, afterPick + " items");
             ctx.check("the rest drops when the block goes another way", afterRemove == 2, afterRemove + " items");
+        }
+    }
+
+    /**
+     * A voxel block whose only content is a face this version could not load (kept as saved data) can still be broken
+     * by a player: nothing in it can be aimed at, and it used to refuse every break.
+     */
+    static final class BreakKeptOnlyVoxel implements TestCase {
+        BlockPos p;
+        boolean destroyed, air, nodeGone;
+
+        public String name() {
+            return "voxel block with only a kept face can be broken";
+        }
+
+        public void build(TestContext ctx) {
+            p = ctx.at(1, 1, 1);
+            var level = ctx.level();
+            int dim = mods.eln.misc.Dimensions.id(ctx.world());
+            net.minecraft.nbt.CompoundTag pos = new net.minecraft.nbt.CompoundTag();
+            pos.putInt("cx", p.getX());
+            pos.putInt("cy", p.getY());
+            pos.putInt("cz", p.getZ());
+            pos.putInt("cd", dim);
+            net.minecraft.nbt.CompoundTag v = new net.minecraft.nbt.CompoundTag();
+            v.putString("tag", mods.eln.node.voxel.VoxelNode.UUID);
+            v.put("node", pos);
+            for (int i = 0; i < 6; i++) v.putShort("EID" + i, (short) 0);
+            v.putShort("EID" + Direction.YN.getInt(), (short) 32000);   // no such device
+            v.put("ED" + Direction.YN.getInt(), new net.minecraft.nbt.CompoundTag());
+            net.minecraft.nbt.CompoundTag file = new net.minecraft.nbt.CompoundTag();
+            file.put("n0", v);
+            mods.eln.node.NodeManager.instance.loadFromNbt(file, dim);
+            if (!(mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) instanceof mods.eln.node.voxel.VoxelNode n)
+                || !n.isSideKept(Direction.YN.getInt()))
+                throw new IllegalStateException("the voxel tag with a kept face did not load at " + p);
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            destroyed = level.getBlockState(p).onDestroyedByPlayer(level, p, player, ItemStack.EMPTY, true, level.getFluidState(p));
+            air = level.getBlockState(p).isAir();
+            nodeGone = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) == null;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("kept-only voxel block: the player's break goes through", destroyed && air, "destroyed " + destroyed + ", air " + air);
+            ctx.check("kept-only voxel block: its node is gone", nodeGone, "node gone " + nodeGone);
         }
     }
 }

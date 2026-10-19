@@ -65,6 +65,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   the block loads. The side stays taken (`getSideEnable`, `getIfSideRemain`, `VoxelNode.canPlaceElement`/`markUsed`):
   placing over it is refused with a chat message, because unlike a node orphan the block still stands and a player
   would naturally reuse the "empty" face and so delete the device. Breaking the whole block discards them (logged).
+  A block left with only kept faces (and, for a voxel block, no parts or imitated block) breaks at the player's
+  first hit, since nothing in it can be aimed at.
 - Two meanings of "orphan": `NodeManager` orphans = saved tags this version cannot load; `NodeOrphans` = live
   nodes whose block is gone.
 
@@ -127,6 +129,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   carried, extra keys go to `element`, unplaceable tags unchanged, `NodeManager` loads an old exporter and
   re-saves it as `"t"`.
 - GameTest `wp11 legacy exporter save` (`gametest/cases/Wp11Cases`): old tag through `loadFromNbt` in a world.
+- GameTest `voxel block with only a kept face can be broken` (`gametest/cases/SixNodeBreakCases`).
 - GameTests `converted ...` / `reverted ...` (`gametest/cases/CableCases`, `ConvertCase`): convert and revert.
 
 ## Gotchas
