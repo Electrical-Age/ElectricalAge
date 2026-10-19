@@ -52,21 +52,21 @@ public final class ElnWorldSaves {
         Path main = file(l, ""), bak = file(l, ".bak");
         if (!Files.exists(main) && !Files.exists(bak)) return; // fresh world / dimension
         try {
-            read(main);
+            read(main, Dimensions.id(l));
         } catch (Exception ex) {
             Eln.LOG.error("Electrical Age: cannot read " + main + ", trying the backup", ex);
             try {
-                read(bak);
+                read(bak, Dimensions.id(l));
             } catch (Exception ex2) {
                 Eln.LOG.error("Electrical Age: cannot read the backup save " + bak, ex2);
             }
         }
     }
 
-    static void read(Path p) throws IOException {
+    static void read(Path p, int dim) throws IOException {
         CompoundTag nbt = NbtIo.readCompressed(p, NbtAccounter.unlimitedHeap());
         try {
-            NodeManager.instance.loadFromNbt(nbt.getCompoundOrEmpty("nodes"));
+            NodeManager.instance.loadFromNbt(nbt.getCompoundOrEmpty("nodes"), dim);
         } catch (Exception e) {
             Eln.LOG.error("Electrical Age: loading nodes", e);
         }

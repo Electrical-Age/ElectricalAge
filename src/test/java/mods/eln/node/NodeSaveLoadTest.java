@@ -11,10 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * DOCUMENTS A DATA LOSS (quality plan, phase 2): a saved node the running version cannot load is dropped from
- * NodeManager, so the next save writes the world's node file without it and the player's machine is gone for good,
- * even if a later version could load it again. These tests assert today's behaviour; when the loader keeps the
- * raw NBT of such nodes, turn them around (the node's tag must come back out of saveToNbt unchanged).
+ * Data safety (quality plan, phase 4): a saved node the running version cannot load (unknown type, unknown device,
+ * or a load that throws) is kept by NodeManager as an orphan, the raw tag, and the next save of that dimension writes
+ * it back out unchanged, so a later version that can load it again still finds the player's machine.
  */
 public class NodeSaveLoadTest {
     NodeManager previous = NodeManager.instance;
@@ -36,46 +35,72 @@ public class NodeSaveLoadTest {
         return n;
     }
 
-    /** NodeManager.loadFromNbt: no class for the type -> NPE inside the try -> stack trace, node skipped. */
+    static CompoundTag roundTrip(NodeManager nm, CompoundTag nodes, int dim) {
+        nm.loadFromNbt(nodes, dim);
+        CompoundTag saved = new CompoundTag();
+        nm.saveToNbt(saved, dim);
+        return saved;
+    }
+
     @Test
-    public void aNodeOfAnUnknownTypeIsDroppedAndNotSavedAgain() {
+    public void aNodeOfAnUnknownTypeIsKeptAndSavedAgain() {
         NodeManager nm = new NodeManager("test");
-        CompoundTag nodes = new CompoundTag();
         CompoundTag body = new CompoundTag();
         body.putString("someState", "a machine from a newer (or older) version");
-        nodes.put("n0", savedNode("eln:not_a_node_type_of_this_version", body));
+        CompoundTag node = savedNode("eln:not_a_node_type_of_this_version", body);
+        CompoundTag nodes = new CompoundTag();
+        nodes.put("n0", node.copy());
 
-        nm.loadFromNbt(nodes);
+        CompoundTag saved = roundTrip(nm, nodes, 0);
         assertTrue(nm.getNodes().isEmpty(), "the unknown node is not loaded");
+        assertEquals(1, saved.size(), "... but the next save still has it: " + saved);
+        assertEquals(node, saved.getCompoundOrEmpty("n0"));
 
-        CompoundTag saved = new CompoundTag();
-        nm.saveToNbt(saved, Integer.MIN_VALUE);
-        assertTrue(saved.isEmpty(), "... and the next save no longer has it: " + saved);
+        // and again on the save after (load the saved file into a fresh manager)
+        assertEquals(saved, roundTrip(new NodeManager("test"), saved, 0));
     }
 
     /**
-     * TransparentNode.readFromNBT: a device id this version doesn't have (a removed or renamed device) gives no
-     * descriptor; the NPE is not one of the exceptions it catches, so it escapes with element still null, and
-     * NodeManager drops the node as above.
+     * TransparentNode.readFromNBT: a device id this version doesn't have (a removed or renamed device) throws rather
+     * than leaving a node with no element; NodeManager keeps the tag as an orphan.
      */
     @Test
-    public void aTransparentNodeOfAnUnknownDeviceIsDroppedToo() {
+    public void aTransparentNodeOfAnUnknownDeviceIsKeptToo() {
         NodeManager.registerUuid("t", TransparentNode.class);
         CompoundTag body = new CompoundTag();
         body.putShort("eid", (short) 32000);   // no such device
-        body.put("element", new CompoundTag());
+        CompoundTag element = new CompoundTag();
+        element.putDouble("energy", 12.5);
+        body.put("element", element);
 
         TransparentNode t = new TransparentNode();
-        assertThrows(NullPointerException.class, () -> t.readFromNBT(savedNode("t", body)));
+        assertThrows(Exception.class, () -> t.readFromNBT(savedNode("t", body)));
         assertNull(t.element, "no element to run, save or break");
 
         NodeManager nm = new NodeManager("test");
         CompoundTag nodes = new CompoundTag();
         nodes.put("n0", savedNode("t", body));
-        nm.loadFromNbt(nodes);
+        CompoundTag saved = roundTrip(nm, nodes, 0);
         assertEquals(0, nm.getNodes().size());
-        CompoundTag saved = new CompoundTag();
-        nm.saveToNbt(saved, Integer.MIN_VALUE);
-        assertTrue(saved.isEmpty());
+        assertEquals(savedNode("t", body), saved.getCompoundOrEmpty("n0"));
+    }
+
+    @Test
+    public void orphansBelongToTheirDimension() {
+        NodeManager nm = new NodeManager("test");
+        CompoundTag nodes = new CompoundTag();
+        nodes.put("n0", savedNode("eln:unknown", new CompoundTag()));
+        nm.loadFromNbt(nodes, 7);
+
+        CompoundTag other = new CompoundTag();
+        nm.saveToNbt(other, 0);
+        assertTrue(other.isEmpty(), "another dimension's save doesn't get it: " + other);
+        assertEquals(1, nm.getOrphans(7).size());
+
+        nm.unload(7);
+        assertTrue(nm.getOrphans(7).isEmpty(), "unloading the dimension forgets it (its file still has it)");
+        CompoundTag after = new CompoundTag();
+        nm.saveToNbt(after, 7);
+        assertTrue(after.isEmpty());
     }
 }

@@ -43,27 +43,14 @@ public class TransparentNode extends Node {
         super.readFromNBT(nbt.getCompoundOrEmpty("node"));
 
         elementId = nbt.getShortOr("eid", (short) 0);
+        // No device of this id in this version (removed or renamed), or it can't be built: throw, so that
+        // NodeManager keeps the saved tag as an orphan instead of holding a node with no element.
+        TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(elementId);
+        if (descriptor == null) throw new IllegalStateException("no transparent node device with id " + elementId);
         try {
-            TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(elementId);
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
-            e.printStackTrace();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("cannot build transparent node device " + elementId, e);
         }
         element.readFromNBT(nbt.getCompoundOrEmpty("element"));
 

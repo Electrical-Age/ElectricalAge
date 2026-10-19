@@ -5,6 +5,8 @@ import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeElement;
 import net.minecraft.nbt.CompoundTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -13,6 +15,25 @@ public class NodeManager {
 
     private HashMap<Coordonate, NodeBase> nodesMap;
     private ArrayList<NodeBase> nodes;
+
+    private static final Logger LOG = LoggerFactory.getLogger("eln");
+
+    /**
+     * Saved nodes this version could not load (no class for the type, or its load threw), per dimension: raw copies
+     * of their tags, written back out unchanged by saveToNbt so that a missing or broken device doesn't delete the
+     * player's machine for good. A node placed later at the same position replaces the orphan.
+     */
+    private final HashMap<Integer, List<Orphan>> orphans = new HashMap<>();
+
+    record Orphan(Coordonate at, CompoundTag tag) {
+    }
+
+    /** The orphaned node tags of a dimension (copies). */
+    public List<CompoundTag> getOrphans(int dim) {
+        List<CompoundTag> r = new ArrayList<>();
+        for (Orphan o : orphans.getOrDefault(dim, List.of())) r.add(o.tag().copy());
+        return r;
+    }
 
     public HashMap<Coordonate, NodeBase> getNodeArray() {
         return nodesMap;
@@ -49,6 +70,7 @@ public class NodeManager {
             new Throwable("Null coordonate addnode").printStackTrace();
             return;
         }
+        for (List<Orphan> l : orphans.values()) l.removeIf(o -> node.coordonate.equals(o.at()));
         NodeBase old = nodesMap.put(node.coordonate, node);
         if (old != null) {
             nodes.remove(old);
@@ -105,25 +127,55 @@ public class NodeManager {
     }
 
 
+    /** Loads a node file without a dimension (tests): orphans are kept under Integer.MIN_VALUE. */
     public void loadFromNbt(CompoundTag nbt) {
+        loadFromNbt(nbt, Integer.MIN_VALUE);
+    }
+
+    /** Loads the nodes of dimension dim's node file; nodes that can't be loaded are kept as orphans of dim. */
+    public void loadFromNbt(CompoundTag nbt, int dim) {
         List<NodeBase> addedNode = new ArrayList<NodeBase>();
         for (Object o : Utils.getTags(nbt)) {
             CompoundTag tag = (CompoundTag) o;
-            Class nodeClass = UUIDToClass.get(tag.getStringOr("tag", ""));
+            String type = tag.getStringOr("tag", "");
+            Class nodeClass = UUIDToClass.get(type);
+            if (nodeClass == null) {
+                keepOrphan(dim, tag, "no node type '" + type + "' in this version", null);
+                continue;
+            }
+            NodeBase node;
             try {
-                NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
+                node = (NodeBase) nodeClass.getConstructor().newInstance();
                 node.readFromNBT(tag);
-                addNode(node);
-                addedNode.add(node);
+            } catch (Exception e) {
+                keepOrphan(dim, tag, "loading a node of type '" + type + "' failed", e);
+                continue;
+            }
+            addNode(node);
+            addedNode.add(node);
+            try {
                 node.initializeFromNBT();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error("Electrical Age: initializing node {} at {}", type, node.coordonate, e);
             }
         }
 
         for (NodeBase n : addedNode) {
             n.globalBoot();
         }
+    }
+
+    private void keepOrphan(int dim, CompoundTag tag, String why, Exception e) {
+        Coordonate at = null;
+        CompoundTag pos = tag.getCompoundOrEmpty("node");
+        if (pos.contains("cx")) {
+            at = new Coordonate();
+            at.readFromNBT(pos, "c");
+        }
+        String where = at == null ? "unknown position" : at.x + " " + at.y + " " + at.z + " (dim " + at.dimention + ")";
+        if (e == null) LOG.warn("Electrical Age: {} at {}; keeping its saved data unchanged", why, where);
+        else LOG.warn("Electrical Age: {} at {}; keeping its saved data unchanged", why, where, e);
+        orphans.computeIfAbsent(dim, k -> new ArrayList<>()).add(new Orphan(at, tag.copy()));
     }
 
     public void saveToNbt(CompoundTag nbt, int dim) {
@@ -143,15 +195,20 @@ public class NodeManager {
             }
 
         }
-
+        for (Map.Entry<Integer, List<Orphan>> e : orphans.entrySet()) {
+            if (dim != Integer.MIN_VALUE && e.getKey() != dim) continue;
+            for (Orphan o : e.getValue()) nbt.put("n" + nodeCounter++, o.tag().copy());
+        }
     }
 
     public void clear() {
         nodes.clear();
         nodesMap.clear();
+        orphans.clear();
     }
 
     public void unload(int dimensionId) {
+        orphans.remove(dimensionId);
 
         Iterator<NodeBase> i = nodes.iterator();
         while (i.hasNext()) {
