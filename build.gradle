@@ -89,6 +89,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    // property-based tests (random circuits, thermal networks); runs on the JUnit platform next to Jupiter/vintage
+    testImplementation 'net.jqwik:jqwik:1.9.3'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -97,6 +99,8 @@ test {
     useJUnitPlatform()
     // Utils.rand returns the midpoint (the 1.12 sim tests were written against that)
     systemProperty 'eln.deterministic', 'true'
+    // jqwik keeps failing seeds (replayed first on the next run) under build/, not in the tests' working directory
+    systemProperty 'jqwik.database', file('build/jqwik-database').absolutePath
     if (project.hasProperty('fluidCases')) systemProperty 'fluid.cases', project.property('fluidCases')
     // LayoutTest checks every shipped screen layout (assets/eln/gui)
     systemProperty 'eln.guiDir', file('src/main/resources/assets/eln/gui').absolutePath
