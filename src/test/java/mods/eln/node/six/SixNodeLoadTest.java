@@ -83,4 +83,14 @@ public class SixNodeLoadTest {
         again.writeToNBT(out2);
         assertEquals(out, out2);
     }
+
+    /** Client packets naming a side out of range, or an empty side, are ignored (the side byte used to NPE). */
+    @Test
+    public void malformedClientPacketsAreIgnored() {
+        SixNode s = new SixNode();
+        s.readFromNBT(saved());
+        for (byte[] packet : new byte[][]{{9, 0, 0}, {-1, 0, 5}, {0, 0, 0}, {3, 0, 1}, {2}})
+            org.junit.jupiter.api.Assertions.assertDoesNotThrow(
+                () -> s.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(packet)), null));
+    }
 }

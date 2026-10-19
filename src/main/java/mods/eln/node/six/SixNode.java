@@ -654,11 +654,13 @@ public class SixNode extends Node {
     public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream, player);
 
-        Direction side;
+        // (from a client: a side byte out of range, an empty side or another device's id are ignored)
         try {
-            side = Direction.fromInt(stream.readByte());
-            if (side != null & sideElementIdList[side.getInt()] == stream.readShort()) {
-                sideElementList[side.getInt()].networkUnserialize(stream, player);
+            Direction side = Direction.fromInt(stream.readByte());
+            short id = stream.readShort();
+            SixNodeElement element = side == null ? null : sideElementList[side.getInt()];
+            if (element != null && sideElementIdList[side.getInt()] == id) {
+                element.networkUnserialize(stream, player);
             } else {
                 Utils.println("sixnode unserialize miss");
             }
