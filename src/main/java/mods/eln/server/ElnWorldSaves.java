@@ -59,17 +59,26 @@ public final class ElnWorldSaves {
      * unreadable file could not be moved aside, in which case EA does not save this dimension at all this session.
      */
     static boolean load(Path main, Path bak, int dim) {
-        if (!Files.exists(main) && !Files.exists(bak)) return true; // fresh world / dimension
+        Path tmp = main.resolveSibling(main.getFileName() + ".tmp");
+        if (!Files.exists(main) && !Files.exists(tmp) && !Files.exists(bak)) return true; // fresh world / dimension
         boolean safe = true;
         CompoundTag nbt = null;
-        for (Path p : new Path[]{main, bak}) {
-            if (!Files.exists(p)) continue;   // (no .dat: a save crashed between its two moves; the .bak is the last one)
+        // no .dat: a save crashed between its moves. A .tmp that is whole (checkWhole: gzip length and CRC) is then
+        // the newest save; a .tmp next to a .dat is a write that never got moved, and is ignored.
+        Path[] order = Files.exists(main) ? new Path[]{main, bak} : new Path[]{tmp, bak};
+        for (Path p : order) {
+            if (!Files.exists(p)) continue;
             try {
+                if (p == tmp) checkWhole(p);
                 nbt = NbtIo.readCompressed(p, NbtAccounter.unlimitedHeap());
+                if (p == tmp) Eln.LOG.warn("Electrical Age: {} is missing; loaded the complete newer save {}", main, tmp);
                 break;
             } catch (Exception ex) {
-                Eln.LOG.error("Electrical Age: cannot read the save file " + p, ex);
-                safe &= setAside(p);
+                if (p == tmp) Eln.LOG.warn("Electrical Age: ignoring the half-written save file " + p, ex);
+                else {
+                    Eln.LOG.error("Electrical Age: cannot read the save file " + p, ex);
+                    safe &= setAside(p);
+                }
             }
         }
         if (nbt == null) {
@@ -83,6 +92,16 @@ public final class ElnWorldSaves {
         if (!safe) Eln.LOG.error("Electrical Age: an unreadable save file of dimension {} could not be moved aside; "
             + "EA will NOT save this dimension until the server restarts, so that file is not overwritten", dim);
         return safe;
+    }
+
+    /**
+     * Reads a gzip file to its end, so its trailer (length and CRC) is checked: NbtIo stops after the NBT data and
+     * would take a file cut short in the trailer, or with a bad CRC, as good.
+     */
+    static void checkWhole(Path p) throws IOException {
+        try (var in = new java.util.zip.GZIPInputStream(Files.newInputStream(p))) {
+            in.transferTo(java.io.OutputStream.nullOutputStream());
+        }
     }
 
     /** Renames an unreadable save file to &lt;name&gt;.corrupt-&lt;yyyyMMdd-HHmmss&gt; (never replacing anything). */

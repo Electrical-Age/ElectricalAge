@@ -25,8 +25,10 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 
 ## Lifecycle (`server/ElnWorldSaves`, registered in `Eln`)
 
-- `LevelEvent.Load` (ServerLevel) -> `load`: parses `.dat`, else `.dat.bak` (a missing `.dat` is skipped: a
-  save that crashed between its moves). A file that exists but can't be parsed is renamed to
+- `LevelEvent.Load` (ServerLevel) -> `load`: parses `.dat`, else `.dat.bak`. A missing `.dat` is a save that
+  crashed between its moves: then a `.dat.tmp` that is whole (read to its end, so the gzip length and CRC are
+  checked) is the newest save and is preferred to the `.bak`; a `.tmp` that is not whole is ignored with a warning
+  (not set aside). A `.tmp` next to a `.dat` is ignored. A file that exists but can't be parsed is renamed to
   `<name>.corrupt-<yyyyMMdd-HHmmss>` and logged as an error, so no save overwrites it (even when the `.bak` is
   good: else the next save would rotate the bad `.dat` over it); both bad -> a loud banner, the dim starts with no
   nodes. The dim is marked loaded (saved) unless a bad file could not be renamed. The parsed tag is applied once:
@@ -122,7 +124,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   trips; unknown transparent `eid` throws and is kept; orphans stay in their dim and are dropped on `unload(dim)`.
   (Added in 948ac491 asserting the loss; reversed in 2f54a6d5.)
 - `src/test/java/mods/eln/server/ElnWorldSavesTest.java`: unreadable `.dat` and `.dat.bak` are renamed aside;
-  a bad `.dat` with a good `.bak` loads the backup and leaves it untouched; a missing `.dat` is not corruption.
+  a bad `.dat` with a good `.bak` loads the backup and leaves it untouched; a missing `.dat` is not corruption; with
+  no `.dat` a whole `.tmp` beats the `.bak`, a truncated one is ignored, and a `.tmp` beside a `.dat` is ignored.
 - `src/test/java/mods/eln/node/six/SixNodeLoadTest.java`: `readFromNBT` does not connect (the loader does, once);
   a face with an unknown device id is kept, re-saved equal over two round trips, and its side stays taken.
 - `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java` (jqwik): every field

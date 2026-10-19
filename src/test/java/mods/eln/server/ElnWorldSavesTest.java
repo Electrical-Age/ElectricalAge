@@ -83,4 +83,63 @@ public class ElnWorldSavesTest {
         assertTrue(Files.exists(bak));
         assertTrue(corrupt(dir, "electricalAgeWorld0.dat").isEmpty());
     }
+
+    /** A save file whose node file holds one node of an unknown type marked m (it loads as an orphan of dim 0). */
+    static void writeMarked(Path p, String m) throws IOException {
+        CompoundTag node = new CompoundTag();
+        node.putString("tag", "no-such-type");
+        node.putString("marker", m);
+        CompoundTag nodes = new CompoundTag();
+        nodes.put("n0", node);
+        CompoundTag file = new CompoundTag();
+        file.put("nodes", nodes);
+        NbtIo.writeCompressed(file, p);
+    }
+
+    static String loadedMarker() {
+        List<CompoundTag> o = NodeManager.instance.getOrphans(0);
+        return o.size() == 1 ? o.get(0).getStringOr("marker", "") : o.size() + " nodes";
+    }
+
+    /** A save that crashed after moving .dat to .dat.bak but before .tmp to .dat: the complete .tmp is the newest. */
+    @Test
+    public void withNoFileACompleteTmpIsPreferredToTheOlderBackup(@TempDir Path dir) throws IOException {
+        Path main = dir.resolve("electricalAgeWorld0.dat"), bak = dir.resolve("electricalAgeWorld0.dat.bak"),
+            tmp = dir.resolve("electricalAgeWorld0.dat.tmp");
+        writeMarked(tmp, "tmp");
+        writeMarked(bak, "bak");
+        new NodeManager("test");
+
+        assertTrue(ElnWorldSaves.load(main, bak, 0));
+        assertEquals("tmp", loadedMarker());
+        assertTrue(Files.exists(bak), "the backup is left alone");
+    }
+
+    /** A .tmp cut short (the crash came while writing it) is ignored, not set aside; the backup loads. */
+    @Test
+    public void aHalfWrittenTmpIsIgnored(@TempDir Path dir) throws IOException {
+        Path main = dir.resolve("electricalAgeWorld0.dat"), bak = dir.resolve("electricalAgeWorld0.dat.bak"),
+            tmp = dir.resolve("electricalAgeWorld0.dat.tmp");
+        writeMarked(tmp, "tmp");
+        byte[] whole = Files.readAllBytes(tmp);
+        Files.write(tmp, java.util.Arrays.copyOf(whole, whole.length - 6));
+        writeMarked(bak, "bak");
+        new NodeManager("test");
+
+        assertTrue(ElnWorldSaves.load(main, bak, 0));
+        assertEquals("bak", loadedMarker());
+        assertTrue(corrupt(dir, "electricalAgeWorld0.dat.tmp").isEmpty());
+    }
+
+    /** A .tmp next to a .dat never got moved; the .dat is the save. */
+    @Test
+    public void aTmpNextToTheFileIsIgnored(@TempDir Path dir) throws IOException {
+        Path main = dir.resolve("electricalAgeWorld0.dat"), bak = dir.resolve("electricalAgeWorld0.dat.bak");
+        writeMarked(dir.resolve("electricalAgeWorld0.dat.tmp"), "tmp");
+        writeMarked(main, "main");
+        new NodeManager("test");
+
+        assertTrue(ElnWorldSaves.load(main, bak, 0));
+        assertEquals("main", loadedMarker());
+    }
 }
