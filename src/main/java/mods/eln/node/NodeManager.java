@@ -207,13 +207,21 @@ public class NodeManager {
             addedNode.add(node);
             try {
                 node.initializeFromNBT();
-            } catch (Exception e) {
+            } catch (VirtualMachineError e) {
+                throw e;
+            } catch (Throwable e) {
                 LOG.error("Electrical Age: initializing node {} at {}", type, node.coordonate, e);
             }
         }
 
         for (NodeBase n : addedNode) {
-            n.globalBoot();
+            try {
+                n.globalBoot();
+            } catch (VirtualMachineError e) {
+                throw e;
+            } catch (Throwable e) {   // (one node must not stop the others booting)
+                LOG.error("Electrical Age: booting node {} at {}", n.getClass().getSimpleName(), n.coordonate, e);
+            }
         }
     }
 

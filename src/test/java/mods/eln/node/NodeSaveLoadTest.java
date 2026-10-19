@@ -107,7 +107,7 @@ public class NodeSaveLoadTest {
     /** A six-node whose load or save can be made to fail (a device with a bug, or a class missing at run time). */
     public static class FlakyNode extends mods.eln.node.six.SixNode {
         static final String TYPE = "test:flaky";
-        static boolean failRead, failWrite;
+        static boolean failRead, failWrite, failInit;
 
         @Override
         public String getNodeUuid() {
@@ -128,10 +128,12 @@ public class NodeSaveLoadTest {
 
         @Override
         public void initializeFromNBT() {
+            if (failInit) throw new NoClassDefFoundError("some/device/Class");
         }
 
         @Override
         public void globalBoot() {
+            if (failInit) throw new NoClassDefFoundError("some/device/Class");
         }
     }
 
@@ -213,5 +215,22 @@ public class NodeSaveLoadTest {
         nm.saveToNbt(saved, 0);
         assertEquals(1, saved.size(), "the other stays: " + saved);
         assertEquals(11, saved.getCompoundOrEmpty("n0").getCompoundOrEmpty("node").getIntOr("cx", 0));
+    }
+
+    /** A LinkageError while initializing or booting one node doesn't stop the load of the others. */
+    @Test
+    public void aLinkageErrorAtInitDoesNotStopTheLoad() {
+        NodeManager.registerUuid(FlakyNode.TYPE, FlakyNode.class);
+        FlakyNode.failInit = true;
+        try {
+            NodeManager nm = new NodeManager("test");
+            CompoundTag nodes = new CompoundTag();
+            nodes.put("n0", flaky(1));
+            nodes.put("n1", flaky(2));
+            nm.loadFromNbt(nodes, 0);
+            assertEquals(2, nm.getNodes().size());
+        } finally {
+            FlakyNode.failInit = false;
+        }
     }
 }
