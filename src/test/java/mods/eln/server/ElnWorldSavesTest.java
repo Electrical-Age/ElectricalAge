@@ -142,4 +142,57 @@ public class ElnWorldSavesTest {
         assertTrue(ElnWorldSaves.load(main, bak, 0));
         assertEquals("main", loadedMarker());
     }
+
+    /**
+     * A file that can't be read at all (here: a directory, "Is a directory"; in a world: permissions, a disk error) is
+     * not corrupt: it is left in place, and the dimension is not saved this session, so it can't be overwritten. It
+     * used to be renamed aside like a corrupt file, and the dimension started from the backup or empty.
+     */
+    @Test
+    public void anUnreadableButNotCorruptFileIsLeftAndBlocksSaving(@TempDir Path dir) throws IOException {
+        Path main = dir.resolve("electricalAgeWorld0.dat"), bak = dir.resolve("electricalAgeWorld0.dat.bak");
+        Files.createDirectory(main);
+        writeMarked(bak, "bak");
+        new NodeManager("test");
+
+        assertFalse(ElnWorldSaves.load(main, bak, 0), "not safe to save");
+        assertTrue(Files.isDirectory(main), "left where it was");
+        assertTrue(corrupt(dir, "electricalAgeWorld0.dat").isEmpty());
+        assertEquals("bak", loadedMarker(), "the backup still loads for this session");
+        try {
+            ElnWorldSaves.loaded(0, false);
+            assertFalse(ElnWorldSaves.maySave(0));
+            assertFalse(ElnWorldSaves.maySave(0), "every save is skipped (and logged)");
+            ElnWorldSaves.loaded(0, true);
+            assertTrue(ElnWorldSaves.maySave(0));
+        } finally {
+            ElnWorldSaves.loaded(0, false);
+            ElnWorldSaves.unloadForTest(0);
+        }
+    }
+
+    /** A file cut short is bad content: set aside. */
+    @Test
+    public void aTruncatedFileIsSetAside(@TempDir Path dir) throws IOException {
+        Path main = dir.resolve("electricalAgeWorld0.dat"), bak = dir.resolve("electricalAgeWorld0.dat.bak");
+        writeMarked(main, "main");
+        byte[] whole = Files.readAllBytes(main);
+        Files.write(main, java.util.Arrays.copyOf(whole, whole.length / 2));
+        new NodeManager("test");
+
+        assertTrue(ElnWorldSaves.load(main, bak, 0));
+        assertFalse(Files.exists(main));
+        assertEquals(1, corrupt(dir, "electricalAgeWorld0.dat").size());
+    }
+
+    @Test
+    public void formatErrorsAreToldFromReadErrors() {
+        assertTrue(ElnWorldSaves.isFormatError(new java.util.zip.ZipException("Not in GZIP format")));
+        assertTrue(ElnWorldSaves.isFormatError(new java.io.EOFException()));
+        assertTrue(ElnWorldSaves.isFormatError(new IllegalStateException("bad tag type")));
+        assertFalse(ElnWorldSaves.isFormatError(new java.nio.file.AccessDeniedException("f")));
+        assertFalse(ElnWorldSaves.isFormatError(new IOException("Input/output error")));
+        assertFalse(ElnWorldSaves.isFormatError(new RuntimeException(new java.nio.file.AccessDeniedException("f"))));
+        assertTrue(ElnWorldSaves.isFormatError(new RuntimeException(new java.io.EOFException())));
+    }
 }

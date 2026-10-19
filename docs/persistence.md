@@ -31,10 +31,14 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   (not set aside). A `.tmp` next to a `.dat` is ignored. A file that exists but can't be parsed is renamed to
   `<name>.corrupt-<yyyyMMdd-HHmmss>` and logged as an error, so no save overwrites it (even when the `.bak` is
   good: else the next save would rotate the bad `.dat` over it); both bad -> a loud banner, the dim starts with no
-  nodes. The dim is marked loaded (saved) unless a bad file could not be renamed. The parsed tag is applied once:
+  nodes. Only bad content is set aside (`isFormatError`: gzip/EOF/UTF errors or an NBT parse exception, anywhere in
+  the cause chain). A file that can't be read at all (any other `IOException`: permissions, a disk error) is left in
+  place and the next file is tried (so the `.bak` still loads for the session). The dim is marked loaded (saved)
+  unless a file could not be read or a bad one could not be renamed; then it is blocked: every save of it is
+  skipped with an error in the log, until a restart. The parsed tag is applied once:
   `NodeManager.loadFromNbt(nodes, dim)`, `config` + `wind`, `GhostManager.loadFromNBT(ghost)`, each in its own
   try/catch. Node file before chunks: block entities find their node when chunks load.
-- `LevelEvent.Save` -> `save`: only for dims marked loaded. Writes `.dat.tmp`, moves `.dat` -> `.dat.bak`,
+- `LevelEvent.Save` -> `save`: only for dims marked loaded (`maySave`; a blocked dim logs an error each time). Writes `.dat.tmp`, moves `.dat` -> `.dat.bak`,
   then `.tmp` -> `.dat` (atomic move when possible).
 - `LevelEvent.Unload` -> `NodeManager.unload(dim)` (calls `NodeBase.unload()`, drops nodes and orphans of the
   dim) and `GhostManager.unload(dim)`.
@@ -126,6 +130,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - `src/test/java/mods/eln/server/ElnWorldSavesTest.java`: unreadable `.dat` and `.dat.bak` are renamed aside;
   a bad `.dat` with a good `.bak` loads the backup and leaves it untouched; a missing `.dat` is not corruption; with
   no `.dat` a whole `.tmp` beats the `.bak`, a truncated one is ignored, and a `.tmp` beside a `.dat` is ignored.
+  A file that can't be read (a directory in the test) is left in place and blocks saving; a truncated `.dat` is set
+  aside; `isFormatError` tells the two apart.
 - `src/test/java/mods/eln/node/six/SixNodeLoadTest.java`: `readFromNBT` does not connect (the loader does, once);
   a face with an unknown device id is kept, re-saved equal over two round trips, and its side stays taken.
 - `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java` (jqwik): every field

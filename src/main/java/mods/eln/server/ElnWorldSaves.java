@@ -29,6 +29,8 @@ public final class ElnWorldSaves {
     }
 
     private static final Set<Integer> loaded = new HashSet<>();
+    /** Dimensions that must not be saved this session (a save file could not be read and is still in place). */
+    private static final Set<Integer> blocked = new HashSet<>();
 
     public static void register() {
         NeoForge.EVENT_BUS.addListener(LevelEvent.Load.class, e -> {
@@ -49,14 +51,56 @@ public final class ElnWorldSaves {
 
     static void load(ServerLevel l) {
         int dim = Dimensions.id(l);
-        if (load(file(l, ""), file(l, ".bak"), dim)) loaded.add(dim);
+        loaded(dim, load(file(l, ""), file(l, ".bak"), dim));
+    }
+
+    /** Records the outcome of loading dim: saved from now on, or blocked (see maySave). */
+    static void loaded(int dim, boolean safe) {
+        if (safe) {
+            loaded.add(dim);
+            blocked.remove(dim);
+        } else {
+            loaded.remove(dim);
+            blocked.add(dim);
+        }
+    }
+
+    /** Forgets dim's load outcome (tests; a world does this on LevelEvent.Unload). */
+    static void unloadForTest(int dim) {
+        loaded.remove(dim);
+        blocked.remove(dim);
+    }
+
+    /** May dim be saved now? A blocked dimension logs an error at every save it skips, so the loss is not missed. */
+    static boolean maySave(int dim) {
+        if (blocked.contains(dim)) {
+            Eln.LOG.error("Electrical Age: NOT saving dimension {}: its save file could not be read at load and is kept as it was. "
+                + "EA changes in this dimension are lost when the server stops; fix the file (permissions, disk) and restart.", dim);
+            return false;
+        }
+        return loaded.contains(dim);
     }
 
     /**
-     * Loads a dimension's node file, else its backup. A file that exists but cannot be read is renamed aside to
-     * &lt;name&gt;.corrupt-&lt;time&gt; first, so no later save can overwrite it (a save moves .dat over .dat.bak): the
-     * player's EA world stays recoverable by hand. Returns whether the dimension may be saved; false only if an
-     * unreadable file could not be moved aside, in which case EA does not save this dimension at all this session.
+     * Is ex (or a cause) a sign that the file's content is bad (gzip or NBT format, cut short), rather than that it
+     * could not be read at all (permissions, a disk or network error)? Only bad content is set aside.
+     */
+    static boolean isFormatError(Throwable ex) {
+        for (Throwable t = ex; t != null; t = t.getCause()) {
+            if (t instanceof java.util.zip.ZipException || t instanceof java.io.EOFException
+                || t instanceof java.io.UTFDataFormatException || t instanceof java.io.CharConversionException) return true;
+            if (t instanceof IOException) return false;
+            if (t.getCause() == t) break;
+        }
+        return ex instanceof RuntimeException;   // NBT parse errors (ReportedNbtException, NbtAccounterException...)
+    }
+
+    /**
+     * Loads a dimension's node file, else its backup. A file whose content is bad (isFormatError) is renamed aside
+     * to &lt;name&gt;.corrupt-&lt;time&gt; first, so no later save can overwrite it (a save moves .dat over .dat.bak): the
+     * player's EA world stays recoverable by hand. A file that can't be read at all (permissions, I/O error) is left
+     * where it is and the next one is tried. Returns whether the dimension may be saved: false if a file could not be
+     * read or could not be moved aside; EA then does not save this dimension at all this session (maySave).
      */
     static boolean load(Path main, Path bak, int dim) {
         Path tmp = main.resolveSibling(main.getFileName() + ".tmp");
@@ -74,7 +118,11 @@ public final class ElnWorldSaves {
                 if (p == tmp) Eln.LOG.warn("Electrical Age: {} is missing; loaded the complete newer save {}", main, tmp);
                 break;
             } catch (Exception ex) {
-                if (p == tmp) Eln.LOG.warn("Electrical Age: ignoring the half-written save file " + p, ex);
+                if (!isFormatError(ex)) {
+                    Eln.LOG.error("Electrical Age: cannot read the save file " + p + " (not a format error: left in place; "
+                        + "EA will NOT save dimension " + dim + " this session)", ex);
+                    safe = false;
+                } else if (p == tmp) Eln.LOG.warn("Electrical Age: ignoring the half-written save file " + p, ex);
                 else {
                     Eln.LOG.error("Electrical Age: cannot read the save file " + p, ex);
                     safe &= setAside(p);
@@ -84,12 +132,12 @@ public final class ElnWorldSaves {
         if (nbt == null) {
             Eln.LOG.error("**************************************************************************************");
             Eln.LOG.error("Electrical Age: NO READABLE SAVE for dimension {}: {} and {} both failed to load.", dim, main, bak);
-            Eln.LOG.error("Electrical Age: this dimension starts with no EA nodes; the unreadable files were kept as *.corrupt-*.");
+            Eln.LOG.error("Electrical Age: this dimension starts with no EA nodes; the unreadable files were kept (in place or as *.corrupt-*).");
             Eln.LOG.error("**************************************************************************************");
         } else {
             apply(nbt, dim);
         }
-        if (!safe) Eln.LOG.error("Electrical Age: an unreadable save file of dimension {} could not be moved aside; "
+        if (!safe) Eln.LOG.error("Electrical Age: a save file of dimension {} could not be read or moved aside; "
             + "EA will NOT save this dimension until the server restarts, so that file is not overwritten", dim);
         return safe;
     }
@@ -140,7 +188,7 @@ public final class ElnWorldSaves {
 
     static void save(ServerLevel l) {
         int dim = Dimensions.id(l);
-        if (!loaded.contains(dim)) return;
+        if (!maySave(dim)) return;
         try {
             CompoundTag nbt = new CompoundTag();
             CompoundTag nodes = new CompoundTag(), ghost = new CompoundTag();
@@ -167,6 +215,7 @@ public final class ElnWorldSaves {
     static void unload(ServerLevel l) {
         int dim = Dimensions.id(l);
         loaded.remove(dim);
+        blocked.remove(dim);
         try {
             NodeManager.instance.unload(dim);
             Eln.ghostManager.unload(dim);
