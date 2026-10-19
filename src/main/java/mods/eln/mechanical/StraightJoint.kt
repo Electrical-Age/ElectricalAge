@@ -4,7 +4,6 @@ import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.Obj3D
 import mods.eln.misc.Utils
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.ElectricalLoad
@@ -12,7 +11,7 @@ import mods.eln.sim.ThermalLoad
 import net.minecraft.world.entity.player.Player
 
 open class StraightJointDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    StraightJointElement::class, null, EntityMetaTag.Basic) {
+    StraightJointElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))

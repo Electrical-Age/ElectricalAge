@@ -6,7 +6,6 @@ import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
@@ -39,7 +38,7 @@ class GeneratorDescriptor(
     powerOutPerDeltaU: Float,
     nominalP: Float,
     thermalLoadInitializer: ThermalLoadInitializer) :
-    SimpleShaftDescriptor(name, GeneratorElement::class, null, EntityMetaTag.Basic) {
+    SimpleShaftDescriptor(name, GeneratorElement::class, null) {
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
     val cable = cable

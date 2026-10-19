@@ -209,11 +209,6 @@ public class TransparentNode extends Node {
     }
 
     @Override
-    public int getBlockMetadata() {
-        return element.transparentNodeDescriptor.tileEntityMetaTag.meta;
-    }
-
-    @Override
     public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream, player);
 

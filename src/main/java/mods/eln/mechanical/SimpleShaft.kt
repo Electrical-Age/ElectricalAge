@@ -17,8 +17,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.reflect.KClass
 
-abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<*>?, tag: EntityMetaTag) :
-    TransparentNodeDescriptor(name, elm.java, render?.java, tag) {
+abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<*>?) :
+    TransparentNodeDescriptor(name, elm.java, render?.java) {
 
     abstract val obj: Obj3D
     abstract val static: Array<out Obj3D.Obj3DPart>

@@ -23,28 +23,17 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
     public Class ElementClass, RenderClass;
     protected VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
-    public final EntityMetaTag tileEntityMetaTag;
-
     /** Faces with a floor terminal plate, where floor cables draw a lug (null = none; see CableTerminals). */
     public mods.eln.cable.CableTerminals cableTerminals;
 
-    public TransparentNodeDescriptor(
-        String name,
-        Class ElementClass,
-        Class RenderClass,
-        EntityMetaTag tag) {
+    public TransparentNodeDescriptor(String name, Class ElementClass, Class RenderClass) {
         super(name);
         this.ElementClass = ElementClass;
         this.RenderClass = RenderClass;
-        this.tileEntityMetaTag = tag;
     }
 
 
     protected GhostGroup ghostGroup = null;
-
-    public TransparentNodeDescriptor(String name, Class ElementClass, Class RenderClass) {
-        this(name, ElementClass, RenderClass, EntityMetaTag.Basic);
-    }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 

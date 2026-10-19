@@ -9,7 +9,6 @@ import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
 import mods.eln.misc.Obj3D
 import mods.eln.node.NodeBase
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
@@ -28,7 +27,7 @@ import java.text.NumberFormat
 import java.text.ParseException
 
 class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    TachometerElement::class, null, EntityMetaTag.Basic) {
+    TachometerElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))

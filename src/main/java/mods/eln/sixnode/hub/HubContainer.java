@@ -1,8 +1,7 @@
 package mods.eln.sixnode.hub;
 
 /**
- * Slot ids and other constants of the 1.12 HubContainer (legacy/). The menu itself (AbstractContainerMenu + Screen) comes
- * with P4; elements only need the constants until then.
+ * Slot ids and other constants of the 1.12 HubContainer. The menus themselves are built in gui/MenuSpecs.
  */
 public final class HubContainer {
     private HubContainer() {

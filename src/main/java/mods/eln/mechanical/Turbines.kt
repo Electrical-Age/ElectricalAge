@@ -6,7 +6,6 @@ import mods.eln.fluid.PreciseElementFluidHandler
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.published
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
@@ -19,7 +18,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
-    SimpleShaftDescriptor(baseName, TurbineElement::class, null, EntityMetaTag.Fluid) {
+    SimpleShaftDescriptor(baseName, TurbineElement::class, null) {
     // Overall time for steam input changes to take effect, in seconds.
     abstract val inertia: Float
     // Optimal fluid consumed per second, mB.

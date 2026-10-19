@@ -31,8 +31,7 @@ import java.io.DataOutputStream
 import java.util.*
 
 class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: ThermalLoadInitializerByPowerDrop) :
-    TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, null,
-        EntityMetaTag.Fluid) {
+    TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, null) {
     private val main = model.getPart("Main")
     private val burners = arrayOf(model.getPart("BurnerA"), model.getPart("BurnerB"), model.getPart("BurnerC"))
     private val powerLED = model.getPart("PowerLED")
@@ -321,7 +320,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 }
 
 
-// 26.x port: the menu comes with P4; until then only the slot ids.
+// Slot ids of the 1.12 container. The menus themselves are built in gui/MenuSpecs.
 class FuelHeatFurnaceContainer {
     companion object {
         val FuelBurnerSlot = 0

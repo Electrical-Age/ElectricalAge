@@ -505,14 +505,6 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     }
 
-/*	protected boolean hasSidedInventory(){
-		return false;
-	}
-	public int tileEntityMetaTag() {
-		return hasSidedInventory() ? 0x4 : 0;
-	}
-	*/
-
     /** Set when the device burnt out (see Failure); null while it works. */
     @Nullable
     private FailureCause burnt;

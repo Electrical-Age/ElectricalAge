@@ -75,10 +75,6 @@ public abstract class NodeBase {
         return true;
     }
 
-    public int getBlockMetadata() {
-        return 0;
-    }
-
     public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
 
     }

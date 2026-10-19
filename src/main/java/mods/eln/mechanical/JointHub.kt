@@ -4,7 +4,6 @@ import mods.eln.gl.GL11
 
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
@@ -17,7 +16,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    JointHubElement::class, null, EntityMetaTag.Basic) {
+    JointHubElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
