@@ -70,6 +70,9 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
             State stateAfter = last.aPin == states.getLast() ? last.bPin : last.aPin;
             //stateBefore.remove(first);
             //stateAfter.remove(last);
+            // ground at both ends: no state outside would reach the Line, so no SubSystem would take it; leave the
+            // resistors and states as they are (solved as a small SubSystem of their own)
+            if (stateBefore == null && stateAfter == null) return;
 
             Line l = new Line();
             l.resistors = resistors;

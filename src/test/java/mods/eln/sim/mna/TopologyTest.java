@@ -214,6 +214,27 @@ public class TopologyTest {
     }
 
     /**
+     * Two cable loads between two resistors to ground and nothing else: a Line with ground at both ends, which no
+     * state reaches, so the SubSystem builder never takes it and generateInterSystems got it (NPE on its null pin).
+     */
+    @Test
+    public void lineGroundedAtBothEnds() {
+        ElectricalLoad x = new ElectricalLoad(), y = new ElectricalLoad();
+        for (ElectricalLoad l : new ElectricalLoad[]{x, y}) {
+            l.setRs(0.5);
+            l.setCanBeSimplifiedByLine(true);
+            root.addState(l);
+        }
+        root.addComponent(new Resistor(x, null).setR(10));
+        root.addComponent(new ElectricalConnection(x, y));
+        root.addComponent(new Resistor(y, null).setR(10));
+        root.step();
+        root.step();
+        assertEquals(0, x.getU(), EPS);
+        assertEquals(0, y.getU(), EPS);
+    }
+
+    /**
      * Over 100 states, with Lines to ground hanging off the chain: a Line made of ElectricalConnections may be
      * replaced by an InterSystem, so the SubSystem builder left those it met past the size limit for
      * generateInterSystems, which built an InterSystemAbstraction on the Line's null (ground) pin: NPE.
