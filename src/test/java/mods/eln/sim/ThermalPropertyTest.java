@@ -146,9 +146,9 @@ public class ThermalPropertyTest {
         List<ThermalLoad> loads = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             double rs = logUniform(rnd, 0.01, 10), rp = logUniform(rnd, 0.1, 1e4);
-            ThermalLoad l = new ThermalLoad(rnd.nextDouble() * 1000, rp, rs, h.sim.getMinimalThermalC(rs, rp));
-            h.sim.checkThermalLoad(rs, rp, l.C);
-            l.Rp = Double.POSITIVE_INFINITY; // closed, to have a strict bound (the check above used the real Rp)
+            ThermalLoad l = new ThermalLoad(rnd.nextDouble() * 1000, rp, rs, h.sim.getMinimalThermalC(rs, Double.POSITIVE_INFINITY));
+            h.sim.checkThermalLoad(rs, Double.POSITIVE_INFINITY, l.C);
+            l.Rp = Double.POSITIVE_INFINITY; // closed (no loss to ambient), so the bound is strict
             loads.add(l);
         }
         List<ThermalConnection> cons = new ArrayList<>();
