@@ -36,7 +36,8 @@ public final class KitPreview {
     }
 
     public static void tick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post e) {
-        if (!(e.getEntity() instanceof ServerPlayer p) || !(p.level() instanceof ServerLevel level) || p.tickCount % 4 != 0) return;
+        if (!(e.getEntity() instanceof ServerPlayer p) || !(p.level() instanceof ServerLevel level)) return;
+        CablePlacer.checkLapse(p, level.getGameTime());   // (every tick: Baughn found the outline slow at 4 ticks)
         Last last = LAST.get(p.getUUID());
         if (!(p.getMainHandItem().getItem() instanceof CableKitItem kit)) {
             if (last != null && !last.sentEmpty) {

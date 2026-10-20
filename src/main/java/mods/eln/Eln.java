@@ -248,6 +248,7 @@ public class Eln {
             simulator.stop();
             mods.eln.fluid.FluidWorld.reset();
             mods.eln.node.voxel.PipePlacer.forgetAll();
+            mods.eln.node.voxel.CablePlacer.forgetAll();
             for (ElnContent c : CONTENT) c.serverStopped();
             serverEventListener.clear();
             nodeManager.clear();
@@ -265,6 +266,11 @@ public class Eln {
             e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingDeathEvent.class,
             e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));
+        // ... and cable routes (Baughn: they never timed out)
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
+            e -> mods.eln.node.voxel.CablePlacer.forget(e.getEntity().getUUID()));
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingDeathEvent.class,
+            e -> mods.eln.node.voxel.CablePlacer.forget(e.getEntity().getUUID()));
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> mods.eln.node.NodeOrphans.tick(e.getServer()));
         // X-ray scanner: ore blocks per material come from tags
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.TagsUpdatedEvent.class, e -> mods.eln.item.xray.XRayFilter.invalidate());

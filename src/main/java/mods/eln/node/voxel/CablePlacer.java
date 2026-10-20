@@ -49,6 +49,34 @@ public final class CablePlacer {
         PLANS.remove(player);
     }
 
+    /** A route left alone this long lapses (Baughn: waypoints must time out; a later cable started from an old attempt). */
+    public static final long IDLE_TICKS = 20 * 60;
+
+    /**
+     * Why a route being laid lapses now, or null if it holds: another item in hand (Baughn's rule), a minute without a
+     * click, the player further from its last point than a full kit reaches, another dimension.
+     */
+    static String lapse(Plan plan, long now, boolean holdingItsKit, boolean sameDim, Vec3 at) {
+        if (!sameDim) return "another dimension";
+        if (!holdingItsKit) return "another item in hand";
+        if (now - plan.touched > IDLE_TICKS) return "a minute without a click";
+        CableRouter.End last = plan.waypoints.isEmpty() ? plan.start : plan.waypoints.get(plan.waypoints.size() - 1);
+        double dx = at.x * 16 - last.x(), dy = at.y * 16 - last.y(), dz = at.z * 16 - last.z();
+        if (dx * dx + dy * dy + dz * dz > (double) KitItem.MAX * KitItem.MAX) return "too far from it";
+        return null;
+    }
+
+    /** Each player tick (KitPreview): drop a route that lapsed, and say why. */
+    static void checkLapse(ServerPlayer p, long now) {
+        Plan plan = PLANS.get(p.getUUID());
+        if (plan == null) return;
+        boolean holding = p.getMainHandItem().getItem() instanceof CableKitItem k && k.tier == plan.tier;
+        String why = lapse(plan, now, holding, plan.dim == p.level().dimension(), p.position());
+        if (why == null) return;
+        PLANS.remove(p.getUUID());
+        p.sendOverlayMessage(Component.literal("Cable route dropped (" + why + ")"));
+    }
+
     public static void forgetAll() {
         PLANS.clear();
     }
@@ -228,7 +256,7 @@ public final class CablePlacer {
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier, Vec3 hit) {
         Plan plan = PLANS.get(player.getUUID());
         long now = level.getGameTime();
-        if (plan != null && (plan.dim != level.dimension() || plan.tier != tier || now - plan.touched > PipePlacer.PLAN_TIMEOUT)) {
+        if (plan != null && (plan.tier != tier || lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null)) {
             PLANS.remove(player.getUUID());
             if (plan.tier != tier) player.sendOverlayMessage(Component.literal("Cable route cancelled (another kind of cable in hand)"));
             plan = null;
