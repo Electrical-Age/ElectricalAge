@@ -562,6 +562,21 @@ public final class CableCases {
             var kit = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(in);
             c.check("cable kit: three coils make a 48-voxel kit", mods.eln.node.voxel.KitItem.length(kit) == 48 && kit.getItem() instanceof mods.eln.node.voxel.CableKitItem k && k.tier == LV,
                 kit + " " + mods.eln.node.voxel.KitItem.length(kit));
+            // whole stacks (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of kits)
+            var four = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+            for (int q = 0; q < 4; q++) four.add(coil.copyWithCount(10));
+            var k40 = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 2, four));
+            int[] use4 = mods.eln.node.voxel.CableKitRecipes.FromCoils.useForTests(four);
+            c.check("cable kit: 2x2 stacks of 10 make one 40-cable kit and use them all", mods.eln.node.voxel.KitItem.length(k40) == 640
+                && use4 != null && use4[0] + use4[1] + use4[2] + use4[3] == 40, mods.eln.node.voxel.KitItem.length(k40) + " " + java.util.Arrays.toString(use4));
+            var nine = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+            for (int q = 0; q < 9; q++) nine.add(coil.copyWithCount(64));
+            var kFull = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(3, 3, nine));
+            int[] use9 = mods.eln.node.voxel.CableKitRecipes.FromCoils.useForTests(nine);
+            int sum9 = 0, min9 = 99;
+            for (int q = 0; use9 != null && q < 9; q++) { sum9 += use9[q]; min9 = Math.min(min9, use9[q]); }
+            c.check("cable kit: 3x3 stacks of 64 make a full kit, at least one from each slot, the rest left", mods.eln.node.voxel.KitItem.length(kFull) == 1024
+                && sum9 == 64 && min9 >= 1, mods.eln.node.voxel.KitItem.length(kFull) + " " + java.util.Arrays.toString(use9));
             var in2 = net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(kit.copy()));
             var back = mods.eln.node.voxel.CableKitRecipes.ToCoil.INSTANCE.assemble(in2);
             var rest = mods.eln.node.voxel.CableKitRecipes.ToCoil.INSTANCE.getRemainingItems(in2);

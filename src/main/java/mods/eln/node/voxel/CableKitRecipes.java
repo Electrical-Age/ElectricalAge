@@ -12,6 +12,8 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
+
 /**
  * Cable kits and the old cable items ("coils": still crafting ingredients and device components; Baughn 2026-10-18):
  * coils of one tier, with or without a kit of that tier, make a kit 16 voxels longer per coil; a lone cable kit gives
@@ -42,27 +44,66 @@ public final class CableKitRecipes {
         public static final StreamCodec<RegistryFriendlyByteBuf, FromCoils> STREAM_CODEC = StreamCodec.unit(INSTANCE);
         public static final RecipeSerializer<FromCoils> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-        /** {tier, length}: 1+ coils of one tier and at most one kit of it, fitting in a kit; or null. */
+        /**
+         * {tier, length, cables used}: coils of one tier and at most one kit of it; the kit takes whole stacks of cable,
+         * as many as fit (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of small
+         * kits). At least one cable from every slot (the crafting grid takes one from each), or null.
+         */
         static int[] total(CraftingInput in) {
-            int tier = -1, len = 0, coils = 0, kits = 0;
-            for (int i = 0; i < in.size(); i++) {
-                ItemStack s = in.getItem(i);
+            List<ItemStack> items = new java.util.ArrayList<>();
+            for (int i = 0; i < in.size(); i++) items.add(in.getItem(i));
+            int[] use = use(items);
+            if (use == null) return null;
+            int tier = use[use.length - 3], len = use[use.length - 2], cables = use[use.length - 1];
+            return new int[]{tier, len, cables};
+        }
+
+        /**
+         * How many cables each slot gives (the slots in order, first come first served), then tier, length and the
+         * cables used; or null. Shared by the recipe and the crafted event (CableKitRecipes.crafted), which takes them.
+         */
+        public static int[] useForTests(List<ItemStack> items) {
+            return use(items);
+        }
+
+        static int[] use(List<ItemStack> items) {
+            int tier = -1, kitLen = 0, kits = 0, slots = 0;
+            for (ItemStack s : items) {
                 if (s.isEmpty()) continue;
                 int t;
                 if (s.getItem() instanceof CableKitItem k) {
                     if (++kits > 1 || s.getCount() != 1) return null;
                     t = k.tier;
-                    len += KitItem.length(s);
+                    kitLen += KitItem.length(s);
                 } else {
                     t = coilTier(s);
                     if (t < 0) return null;
-                    coils++;
-                    len += 16;
+                    slots++;
                 }
                 if (tier >= 0 && t != tier) return null;
                 tier = t;
             }
-            return coils >= 1 && len <= KitItem.MAX ? new int[]{tier, len} : null;
+            int room = (KitItem.MAX - kitLen) / 16;
+            if (slots < 1 || room < slots) return null;
+            int[] out = new int[items.size() + 3];
+            int used = 0;
+            // one from each slot first (the grid takes that anyway), then the rest in order while it fits
+            for (int i = 0; i < items.size(); i++)
+                if (!items.get(i).isEmpty() && !(items.get(i).getItem() instanceof CableKitItem)) {
+                    out[i] = 1;
+                    used++;
+                }
+            for (int i = 0; i < items.size() && used < room; i++) {
+                ItemStack s = items.get(i);
+                if (s.isEmpty() || s.getItem() instanceof CableKitItem) continue;
+                int more = Math.min(s.getCount() - 1, room - used);
+                out[i] += more;
+                used += more;
+            }
+            out[items.size()] = tier;
+            out[items.size() + 1] = kitLen + used * 16;
+            out[items.size() + 2] = used;
+            return out;
         }
 
         @Override
@@ -125,5 +166,21 @@ public final class CableKitRecipes {
         public RecipeSerializer<ToCoil> getSerializer() {
             return SERIALIZER;
         }
+    }
+
+    /**
+     * A kit crafted from cables takes the cables it counted: the grid takes one from each slot after this, so the rest
+     * goes here (both sides, as the grid's own taking).
+     */
+    public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
+        if (!(e.getCrafting().getItem() instanceof CableKitItem)) return;
+        var grid = e.getInventory();
+        List<ItemStack> items = new java.util.ArrayList<>();
+        for (int i = 0; i < grid.getContainerSize(); i++) items.add(grid.getItem(i));
+        int[] use = FromCoils.use(items);
+        if (use == null) return;
+        if (KitItem.length(e.getCrafting()) != use[items.size() + 1]) return;   // (not this recipe's kit)
+        for (int i = 0; i < items.size(); i++)
+            if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
     }
 }

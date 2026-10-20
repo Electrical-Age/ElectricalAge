@@ -257,6 +257,7 @@ public class Eln {
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre.class, mods.eln.node.voxel.KitItem::onPickup);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent.class, mods.eln.node.voxel.CableKitRecipes::crafted);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ChiselItem::onLeftClick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post.class, mods.eln.node.voxel.KitPreview::tick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
