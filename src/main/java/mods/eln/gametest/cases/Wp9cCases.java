@@ -635,13 +635,13 @@ public final class Wp9cCases {
     }
 
     /**
-     * Tree Resin Collector on the -X side of a 3-log trunk (logs at x2, y1..3) with a leaf block above the collector.
+     * Tree Resin Collector on the -X side of a 3-log trunk (logs at x2, y1..3) with four leaves on its other sides.
      * Placement rule: only on the side of wood (canBePlacedOnSide: log yes, stone no). Production =
-     * min(0.05, 3/5 / 1440 per trunk block * 3 blocks / 1 collector) = 0.00125 items/s; without the leaf * 1e-9.
+     * min(0.05, 3/5 / 1440 per trunk block * 3 blocks / 1 collector) = 0.00125 items/s; with fewer than 4 leaves * 1e-9.
      */
     static final class ResinCollectorCase extends Wp9bCases.Base {
         TreeResinCollectorElement collector;
-        BlockPos leaf;
+        java.util.List<BlockPos> crown;
 
         public String name() {
             return "wp9c tree resin collector";
@@ -653,8 +653,10 @@ public final class Wp9cCases {
 
         public void build(TestContext ctx) {
             for (int y = 1; y <= 3; y++) setVanilla(ctx, ctx.at(2, y, 1), Blocks.OAK_LOG.defaultBlockState());
-            leaf = ctx.at(1, 2, 1);
-            setVanilla(ctx, leaf, Blocks.OAK_LEAVES.defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
+            // a crown on the far side only (Baughn: collectors round a tree with leaves on other sides should all work)
+            var leafState = Blocks.OAK_LEAVES.defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true);
+            crown = java.util.List.of(ctx.at(2, 4, 1), ctx.at(3, 3, 1), ctx.at(3, 2, 1), ctx.at(2, 3, 2));
+            for (BlockPos q : crown) setVanilla(ctx, q, leafState);
             collector = (TreeResinCollectorElement) ctx.placeSix(RESIN_COLLECTOR, ctx.at(1, 1, 1), Direction.XP);
         }
 
@@ -667,9 +669,9 @@ public final class Wp9cCases {
             ctx.check("wp9c resin collector placement: on the side of a log yes, of stone no", onLog && !onStone,
                 "log " + onLog + ", stone " + onStone);
             double expected = 3f / 5f / (60f * 24f) * 3;
-            ctx.checkValue("wp9c resin collector production [1/s] (3-log trunk, leaves)", (double) call(collector, "getProductPerSecond"), expected);
-            ctx.world().removeBlock(leaf, false);
-            ctx.checkValue("wp9c resin collector production without leaves [1/s] (* 1e-9)", (double) call(collector, "getProductPerSecond"), expected * 1e-9);
+            ctx.checkValue("wp9c resin collector production [1/s] (3-log trunk, leaves on the other sides)", (double) call(collector, "getProductPerSecond"), expected);
+            ctx.world().removeBlock(crown.get(0), false);
+            ctx.checkValue("wp9c resin collector production with too few leaves [1/s] (* 1e-9: not a tree)", (double) call(collector, "getProductPerSecond"), expected * 1e-9);
         }
     }
 
