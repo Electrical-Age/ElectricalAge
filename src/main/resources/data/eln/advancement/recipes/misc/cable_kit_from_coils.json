@@ -21,7 +21,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": "eln:cable_kit_from_coils"
+        "recipes": "eln:cable_kit_from_coils_lv"
       }
     }
   },
@@ -33,7 +33,12 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:cable_kit_from_coils"
+      "eln:cable_kit_from_coils_signal",
+      "eln:cable_kit_from_coils_lv",
+      "eln:cable_kit_from_coils_mv",
+      "eln:cable_kit_from_coils_hv",
+      "eln:cable_kit_from_coils_vhv",
+      "eln:cable_kit_from_coils_thermal"
     ]
   }
 }

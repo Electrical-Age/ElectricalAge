@@ -39,10 +39,21 @@ public final class CableKitRecipes {
     }
 
     public static final class FromCoils extends CustomRecipe {
-        public static final FromCoils INSTANCE = new FromCoils();
-        public static final MapCodec<FromCoils> MAP_CODEC = MapCodec.unit(INSTANCE);
-        public static final StreamCodec<RegistryFriendlyByteBuf, FromCoils> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+        /** Any tier (tests). The recipes themselves are one per tier (data/eln/recipe/cable_kit_from_coils_*.json). */
+        public static final FromCoils INSTANCE = new FromCoils(-1);
+        public static final MapCodec<FromCoils> MAP_CODEC = tierCodec(FromCoils::new, r -> r.tier);
+        public static final StreamCodec<RegistryFriendlyByteBuf, FromCoils> STREAM_CODEC = tierStream(FromCoils::new, r -> r.tier);
         public static final RecipeSerializer<FromCoils> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+
+        /**
+         * One recipe per tier (AdventurAgent: with one recipe for all tiers the book offered every tier's kit from LV
+         * cable alone, and clicking the MV kit placed LV cable); -1 matches any.
+         */
+        public final int tier;
+
+        public FromCoils(int tier) {
+            this.tier = tier;
+        }
 
         /**
          * {tier, length, cables used}: coils of one tier and at most one kit of it; the kit takes whole stacks of cable,
@@ -108,13 +119,14 @@ public final class CableKitRecipes {
 
         @Override
         public boolean matches(CraftingInput input, Level level) {
-            return total(input) != null;
+            int[] t = total(input);
+            return t != null && (tier < 0 || t[0] == tier);
         }
 
         @Override
         public ItemStack assemble(CraftingInput input) {
             int[] t = total(input);
-            return t == null ? ItemStack.EMPTY : CableKitItem.kit(t[0], t[1]);
+            return t == null || tier >= 0 && t[0] != tier ? ItemStack.EMPTY : CableKitItem.kit(t[0], t[1]);
         }
 
         @Override
@@ -125,44 +137,43 @@ public final class CableKitRecipes {
         /**
          * In the recipe book (Baughn: it wasn't in the recipe browser or JEI): learnable, unlocked by holding cable
          * (data/eln/advancement/recipes/misc/cable_kit_from_coils.json), shown as one cable to a one-cable kit per tier.
-         * The grid takes whole stacks all the same.
+         * The grid takes whole stacks all the same. (The any-tier instance stays out of the book.)
          */
         @Override
         public boolean isSpecial() {
-            return false;
+            return tier < 0;
         }
 
         @Override
         public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
-            List<net.minecraft.world.item.Item> coils = new java.util.ArrayList<>();
-            for (int t = 0; t < CablePart.TIERS.length; t++) {
-                ItemStack c = coil(t);
-                if (!c.isEmpty()) coils.add(c.getItem());
-            }
-            return coils.isEmpty() ? net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE
-                : net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(coils.stream()));
+            ItemStack c = tier < 0 ? ItemStack.EMPTY : coil(tier);
+            return c.isEmpty() ? net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE
+                : net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(c.getItem()));
         }
 
         @Override
         public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
-            List<net.minecraft.world.item.crafting.display.RecipeDisplay> out = new java.util.ArrayList<>();
-            for (int t = 0; t < CablePart.TIERS.length; t++) {
-                ItemStack c = coil(t);
-                if (c.isEmpty()) continue;
-                out.add(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
-                    List.of(slot(c)), slot(CableKitItem.kit(t, 16)), table()));
-            }
-            return out;
+            ItemStack c = tier < 0 ? ItemStack.EMPTY : coil(tier);
+            if (c.isEmpty()) return List.of();
+            return List.of(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
+                List.of(slot(c)), slot(CableKitItem.kit(tier, 16)), table()));
         }
     }
 
     public static final class ToCoil extends CustomRecipe {
-        public static final ToCoil INSTANCE = new ToCoil();
-        public static final MapCodec<ToCoil> MAP_CODEC = MapCodec.unit(INSTANCE);
-        public static final StreamCodec<RegistryFriendlyByteBuf, ToCoil> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+        /** Any tier (tests); the recipes are one per tier, as FromCoils. */
+        public static final ToCoil INSTANCE = new ToCoil(-1);
+        public static final MapCodec<ToCoil> MAP_CODEC = tierCodec(ToCoil::new, r -> r.tier);
+        public static final StreamCodec<RegistryFriendlyByteBuf, ToCoil> STREAM_CODEC = tierStream(ToCoil::new, r -> r.tier);
         public static final RecipeSerializer<ToCoil> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-        static ItemStack lone(CraftingInput in) {
+        public final int tier;
+
+        public ToCoil(int tier) {
+            this.tier = tier;
+        }
+
+        ItemStack lone(CraftingInput in) {
             ItemStack found = null;
             for (int i = 0; i < in.size(); i++) {
                 ItemStack s = in.getItem(i);
@@ -170,6 +181,7 @@ public final class CableKitRecipes {
                 if (found != null || !(s.getItem() instanceof CableKitItem) || s.getCount() != 1) return null;
                 found = s;
             }
+            if (found != null && tier >= 0 && ((CableKitItem) found.getItem()).tier != tier) return null;
             return found != null && KitItem.length(found) >= 16 ? found : null;
         }
 
@@ -203,26 +215,21 @@ public final class CableKitRecipes {
         /** In the recipe book too: a kit gives a cable back (and keeps the rest), per tier. */
         @Override
         public boolean isSpecial() {
-            return false;
+            return tier < 0;
         }
 
         @Override
         public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
-            List<net.minecraft.world.item.Item> kits = new java.util.ArrayList<>();
-            for (int t = 0; t < CablePart.TIERS.length; t++) kits.add(CableKitItem.kit(t, 32).getItem());
-            return net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(kits.stream()));
+            if (tier < 0) return net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE;
+            return net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(CableKitItem.kit(tier, 32).getItem()));
         }
 
         @Override
         public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
-            List<net.minecraft.world.item.crafting.display.RecipeDisplay> out = new java.util.ArrayList<>();
-            for (int t = 0; t < CablePart.TIERS.length; t++) {
-                ItemStack c = coil(t);
-                if (c.isEmpty()) continue;
-                out.add(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
-                    List.of(slot(CableKitItem.kit(t, 32))), slot(c), table()));
-            }
-            return out;
+            ItemStack c = tier < 0 ? ItemStack.EMPTY : coil(tier);
+            if (c.isEmpty()) return List.of();
+            return List.of(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
+                List.of(slot(CableKitItem.kit(tier, 32))), slot(c), table()));
         }
     }
 
@@ -240,6 +247,15 @@ public final class CableKitRecipes {
         if (KitItem.length(e.getCrafting()) != use[items.size() + 1]) return;   // (not this recipe's kit)
         for (int i = 0; i < items.size(); i++)
             if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
+    }
+
+    /** Codecs for a recipe with a tier ({"tier": n}; absent: any tier). */
+    static <R> MapCodec<R> tierCodec(java.util.function.IntFunction<R> make, java.util.function.ToIntFunction<R> tier) {
+        return com.mojang.serialization.Codec.INT.optionalFieldOf("tier", -1).xmap(make::apply, tier::applyAsInt);
+    }
+
+    static <R> StreamCodec<RegistryFriendlyByteBuf, R> tierStream(java.util.function.IntFunction<R> make, java.util.function.ToIntFunction<R> tier) {
+        return net.minecraft.network.codec.ByteBufCodecs.VAR_INT.<RegistryFriendlyByteBuf>cast().map(make::apply, tier::applyAsInt);
     }
 
     static net.minecraft.world.item.crafting.display.SlotDisplay slot(ItemStack s) {

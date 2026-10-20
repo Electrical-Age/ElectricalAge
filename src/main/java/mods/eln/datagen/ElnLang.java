@@ -37,6 +37,9 @@ public class ElnLang extends LanguageProvider {
         add("item.eln.chisel.shape.flat", "flat");
         add("item.eln.chisel.shape.tunnel", "tunnel");
         add("gui.eln.chisel.brush", "Chisel brush");
+        // JEI (compat/jei/ResinCategory)
+        add("jei.eln.tree_resin_collector", "Tree Resin Collector");
+        add("jei.eln.tree_resin_collector.how", "On the side of a log, with leaves above. Right-click to empty.");
         // the guide advancements' hints (Baughn's words, 2026-10-20; data/eln/advancement/guide, tools/advancements/make_guide.py)
         add("advancements.eln.guide.root.title", "Electrical Age");
         add("advancements.eln.guide.root.description", "Every tree is a rubber tree.");
