@@ -185,9 +185,16 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         connect();
     }
 
+    /** A water bucket fills it by hand (Baughn: buckets should work, pipes just automate it). */
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
-        return false;
+        var hand = player.getMainHandItem();
+        if (!hand.is(net.minecraft.world.item.Items.WATER_BUCKET)) return false;
+        if (BoilerTanks.WATER_MB - tanks.water() < 1000) return false;
+        tanks.fillWater(1000);
+        if (!player.isCreative()) player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
+        player.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.BUCKET_EMPTY, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
+        return true;
     }
 
     @Override

@@ -20,6 +20,8 @@ public final class PipeCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BoilerPipeTurbine());
+        cases.add(new BoilerBucket());
+        cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
         cases.add(new JoinMidRun());
@@ -44,6 +46,68 @@ public final class PipeCases {
      * Boiler and turbine side by side, an iron pipe from the boiler's top port up, across three blocks and down into the
      * turbine's inlet: the turbine runs off the boiler's steam (as the stacked plant, a little behind for the pipe).
      */
+    /** A water bucket fills a boiler by hand (Baughn: buckets work, pipes only automate it); the bucket comes back empty. */
+    static final class BoilerBucket implements TestCase {
+        int before, after;
+        boolean took, emptied;
+
+        public String id() {
+            return "boiler_takes_a_bucket";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            var boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.fromTanks(2000, 0);
+            boiler.showTanks();
+            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            fp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WATER_BUCKET));
+            before = boiler.tanks.water();
+            took = boiler.onBlockActivated(fp, mods.eln.misc.Direction.XP, 0.5f, 0.5f, 0.5f);
+            after = boiler.tanks.water();
+            emptied = fp.getMainHandItem().is(net.minecraft.world.item.Items.BUCKET);
+            fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("boiler bucket: taken, 1000 mB more water", took && after - before == 1000, before + " -> " + after);
+            ctx.check("boiler bucket: the bucket comes back empty", emptied, "");
+        }
+    }
+
+    /** The guide advancements (Baughn's hints) all load, under the rubber root. */
+    static final class GuideAdvancements implements TestCase {
+        public String id() {
+            return "guide_advancements_load";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var adv = ctx.level().getServer().getAdvancements();
+            String[] keys = {"root", "copper_cable", "heat_furnace", "boiler", "safety_valve", "steam_turbine", "big_iron", "machine_block",
+                "macerator", "electrical_furnace", "auto_miner", "cable_kit", "chisel", "lead", "battery", "solar", "multimeter", "converter",
+                "fuse", "lamp"};
+            java.util.List<String> missing = new java.util.ArrayList<>();
+            for (String k : keys)
+                if (adv.get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "guide/" + k)) == null) missing.add(k);
+            ctx.check("guide advancements: all " + keys.length + " load", missing.isEmpty(), missing.toString());
+            var root = adv.get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "guide/copper_cable"));
+            ctx.check("guide advancements: under the rubber root", root != null && root.value().parent().map(Object::toString).orElse("").equals("eln:guide/root"),
+                root == null ? "-" : String.valueOf(root.value().parent()));
+        }
+    }
+
     static final class BoilerPipeTurbine implements TestCase {
         mods.eln.oil.BoilerElement boiler;
         mods.eln.oil.SteamGeneratorElement turbine;
