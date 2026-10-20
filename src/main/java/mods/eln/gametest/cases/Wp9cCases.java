@@ -670,7 +670,11 @@ public final class Wp9cCases {
                 "log " + onLog + ", stone " + onStone);
             double expected = 3f / 5f / (60f * 24f) * 3;
             ctx.checkValue("wp9c resin collector production [1/s] (3-log trunk, leaves on the other sides)", (double) call(collector, "getProductPerSecond"), expected);
+            var waila = collector.getWaila();
+            ctx.check("wp9c resin collector probe: pot and rate, no null (Baughn)", waila.containsKey("Resin in pot")
+                && waila.get("Rate").endsWith("per hour") && !waila.containsValue(null), String.valueOf(waila));
             ctx.world().removeBlock(crown.get(0), false);
+            ctx.check("wp9c resin collector probe off a tree", collector.getWaila().get("Rate").startsWith("none"), String.valueOf(collector.getWaila()));
             ctx.checkValue("wp9c resin collector production with too few leaves [1/s] (* 1e-9: not a tree)", (double) call(collector, "getProductPerSecond"), expected * 1e-9);
         }
     }

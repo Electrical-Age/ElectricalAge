@@ -60,6 +60,16 @@ public class TreeResinCollectorElement extends SixNodeElement {
         return null;
     }
 
+    /** For the probe (Jade): what's in the pot, and how fast it fills (or that it isn't on a tree). */
+    @Override
+    public java.util.Map<String, String> getWaila() {
+        var out = new java.util.LinkedHashMap<String, String>();
+        double rate = getProductPerSecond();
+        out.put("Resin in pot", String.format("%.2f / %d", Math.min(occupancyMax, getProduct(rate)), (int) occupancyMax));
+        out.put("Rate", rate < 1e-6 ? "none: not on a tree (needs leaves round its logs)" : String.format("%.1f per hour", rate * 3600));
+        return out;
+    }
+
     @Override
     public String thermoMeterString() {
         return null;
