@@ -121,6 +121,39 @@ public final class CableKitRecipes {
         public RecipeSerializer<FromCoils> getSerializer() {
             return SERIALIZER;
         }
+
+        /**
+         * In the recipe book (Baughn: it wasn't in the recipe browser or JEI): learnable, unlocked by holding cable
+         * (data/eln/advancement/recipes/misc/cable_kit_from_coils.json), shown as one cable to a one-cable kit per tier.
+         * The grid takes whole stacks all the same.
+         */
+        @Override
+        public boolean isSpecial() {
+            return false;
+        }
+
+        @Override
+        public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
+            List<net.minecraft.world.item.Item> coils = new java.util.ArrayList<>();
+            for (int t = 0; t < CablePart.TIERS.length; t++) {
+                ItemStack c = coil(t);
+                if (!c.isEmpty()) coils.add(c.getItem());
+            }
+            return coils.isEmpty() ? net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE
+                : net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(coils.stream()));
+        }
+
+        @Override
+        public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+            List<net.minecraft.world.item.crafting.display.RecipeDisplay> out = new java.util.ArrayList<>();
+            for (int t = 0; t < CablePart.TIERS.length; t++) {
+                ItemStack c = coil(t);
+                if (c.isEmpty()) continue;
+                out.add(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
+                    List.of(slot(c)), slot(CableKitItem.kit(t, 16)), table()));
+            }
+            return out;
+        }
     }
 
     public static final class ToCoil extends CustomRecipe {
@@ -166,6 +199,31 @@ public final class CableKitRecipes {
         public RecipeSerializer<ToCoil> getSerializer() {
             return SERIALIZER;
         }
+
+        /** In the recipe book too: a kit gives a cable back (and keeps the rest), per tier. */
+        @Override
+        public boolean isSpecial() {
+            return false;
+        }
+
+        @Override
+        public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
+            List<net.minecraft.world.item.Item> kits = new java.util.ArrayList<>();
+            for (int t = 0; t < CablePart.TIERS.length; t++) kits.add(CableKitItem.kit(t, 32).getItem());
+            return net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(kits.stream()));
+        }
+
+        @Override
+        public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+            List<net.minecraft.world.item.crafting.display.RecipeDisplay> out = new java.util.ArrayList<>();
+            for (int t = 0; t < CablePart.TIERS.length; t++) {
+                ItemStack c = coil(t);
+                if (c.isEmpty()) continue;
+                out.add(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
+                    List.of(slot(CableKitItem.kit(t, 32))), slot(c), table()));
+            }
+            return out;
+        }
     }
 
     /**
@@ -182,5 +240,41 @@ public final class CableKitRecipes {
         if (KitItem.length(e.getCrafting()) != use[items.size() + 1]) return;   // (not this recipe's kit)
         for (int i = 0; i < items.size(); i++)
             if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
+    }
+
+    static net.minecraft.world.item.crafting.display.SlotDisplay slot(ItemStack s) {
+        return new net.minecraft.world.item.crafting.display.SlotDisplay.ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(s));
+    }
+
+    static net.minecraft.world.item.crafting.display.SlotDisplay table() {
+        return new net.minecraft.world.item.crafting.display.SlotDisplay.ItemSlotDisplay(net.minecraft.world.item.Items.CRAFTING_TABLE.builtInRegistryHolder());
+    }
+
+    /** Example recipes for JEI (compat/jei), which can't list these itself: per tier, 1 and 9 cables to a kit, a kit to a cable. */
+    public static List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> examples() {
+        List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
+        var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
+        var book = new net.minecraft.world.item.crafting.CraftingRecipe.CraftingBookInfo(net.minecraft.world.item.crafting.CraftingBookCategory.MISC, "eln_cable_kit");
+        for (int t = 0; t < CablePart.TIERS.length; t++) {
+            ItemStack c = coil(t);
+            if (c.isEmpty()) continue;
+            var ing = net.minecraft.world.item.crafting.Ingredient.of(c.getItem());
+            for (int n : new int[]{1, 9}) {
+                List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();
+                for (int i = 0; i < n; i++) ings.add(ing);
+                out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(key("cable_kit_from_coils_" + t + "_" + n),
+                    new net.minecraft.world.item.crafting.ShapelessRecipe(info, book, net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(CableKitItem.kit(t, 16 * n)), ings)));
+            }
+            var kit = CableKitItem.kit(t, 32);
+            out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(key("cable_kit_to_coil_" + t),
+                new net.minecraft.world.item.crafting.ShapelessRecipe(info, book, net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(c),
+                    List.of(net.minecraft.world.item.crafting.Ingredient.of(kit.getItem())))));
+        }
+        return out;
+    }
+
+    private static net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> key(String path) {
+        return net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
+            net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "jei/" + path));
     }
 }

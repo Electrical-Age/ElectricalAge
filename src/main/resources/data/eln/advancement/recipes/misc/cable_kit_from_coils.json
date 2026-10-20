@@ -1,0 +1,39 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_it": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:signal_cable",
+              "eln:low_voltage_cable",
+              "eln:medium_voltage_cable",
+              "eln:high_voltage_cable",
+              "eln:very_high_voltage_cable",
+              "eln:copper_thermal_cable"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "eln:cable_kit_from_coils"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_it"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:cable_kit_from_coils"
+    ]
+  }
+}

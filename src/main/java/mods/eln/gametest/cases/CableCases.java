@@ -562,6 +562,14 @@ public final class CableCases {
             var kit = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(in);
             c.check("cable kit: three coils make a 48-voxel kit", mods.eln.node.voxel.KitItem.length(kit) == 48 && kit.getItem() instanceof mods.eln.node.voxel.CableKitItem k && k.tier == LV,
                 kit + " " + mods.eln.node.voxel.KitItem.length(kit));
+            // in the recipe book and JEI (Baughn: they weren't): learnable, shown per tier, unlocked by holding cable
+            var from = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE;
+            var adv = c.level().getServer().getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "recipes/misc/cable_kit_from_coils"));
+            c.check("cable kit: the recipe is in the recipe book (learnable, one display per tier, unlocked by cable)",
+                !from.isSpecial() && from.display().size() >= 5 && adv != null && !from.placementInfo().isImpossibleToPlace(),
+                from.display().size() + " displays, advancement " + (adv != null));
+            c.check("cable kit: JEI examples per tier", mods.eln.node.voxel.CableKitRecipes.examples().size() >= 15,
+                mods.eln.node.voxel.CableKitRecipes.examples().size() + " examples");
             // whole stacks (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of kits)
             var four = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
             for (int q = 0; q < 4; q++) four.add(coil.copyWithCount(10));

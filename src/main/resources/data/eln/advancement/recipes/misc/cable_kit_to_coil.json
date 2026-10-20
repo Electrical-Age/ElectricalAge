@@ -1,0 +1,39 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_it": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:cable_kit_signal",
+              "eln:cable_kit_lv",
+              "eln:cable_kit_mv",
+              "eln:cable_kit_hv",
+              "eln:cable_kit_vhv",
+              "eln:cable_kit_thermal"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": "eln:cable_kit_to_coil"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_it"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:cable_kit_to_coil"
+    ]
+  }
+}
