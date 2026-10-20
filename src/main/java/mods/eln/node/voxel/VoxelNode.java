@@ -124,6 +124,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /** Is any voxel of the box (local voxels, [x0, x1) etc.) used? */
+    /** A copy of the used voxels (for a route snapshot, RouteView). */
+    public BitSet usedCopy() {
+        return (BitSet) used.clone();
+    }
+
     public boolean usedIn(int x0, int y0, int z0, int x1, int y1, int z1) {
         for (int x = Math.max(0, x0); x < Math.min(16, x1); x++)
             for (int y = Math.max(0, y0); y < Math.min(16, y1); y++)

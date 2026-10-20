@@ -37,6 +37,8 @@ public final class CableCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new BurnCase());
         cases.add(new RoutedCase());
+        cases.add(new JoinedRouteCase());
+        cases.add(new PreviewSnapshotCase());
         cases.add(new HostedCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
@@ -435,6 +437,113 @@ public final class CableCases {
             double i = current(r);
             c.line(String.format("routed cable: %.4f A through the resistor", i));
             c.check("routed cable: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
+        }
+    }
+
+    /**
+     * A route started on an old cable joins it (Baughn: cable laid with two clicks wasn't connected): a cable from the
+     * source to a free point on the floor, then a second one from a point on that cable to the resistor; the circuit
+     * conducts.
+     */
+    static final class JoinedRouteCase implements TestCase {
+        ResistorElement r;
+        String err1, err2, joinAt;
+
+        public String name() {
+            return "a route from an old cable joins it";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 4;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            source(c, SOURCE, 0, 1, 50);
+            r = end(c, 7, 1);
+            var level = c.level();
+            var hitS = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 1)).add(1.0, 0.05, 0.5);
+            long[][] j = new long[1][];
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(level, c.at(0, 1, 1), net.minecraft.core.Direction.EAST, hitS, true, j);
+            var free = new mods.eln.node.voxel.CableRouter.End(c.at(3, 1, 1).getX() * 16L + 8, c.at(3, 1, 1).getY() * 16L, c.at(3, 1, 1).getZ() * 16L + 8, 0, -1);
+            err1 = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, LV, a, free);
+            // a click on the laid cable's top, a block from its end
+            var onCable = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(2, 1, 1)).add(0.5, 1.0 / 16 + 0.001, 0.5);
+            long[][] j2 = new long[1][];
+            var s2 = mods.eln.node.voxel.CablePlacer.endAtForTests(level, c.at(2, 1, 1), net.minecraft.core.Direction.UP, onCable, true, j2);
+            joinAt = j2[0] == null ? "no join" : java.util.Arrays.toString(j2[0]);
+            var hitR = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(7, 1, 1)).add(0.0, 0.05, 0.5);
+            long[][] j3 = new long[1][];
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(level, c.at(7, 1, 1), net.minecraft.core.Direction.WEST, hitR, false, j3);
+            err2 = s2 == null ? "no start on the cable" : mods.eln.node.voxel.CablePlacer.routeAndLayJoinedForTests(level, LV, s2, j2[0], b, j3[0]);
+        }
+
+        public void measure(TestContext c) {
+            c.check("joined route: the first cable laid", err1 == null, String.valueOf(err1));
+            c.check("joined route: the second starts on it (a join)", !"no join".equals(joinAt), joinAt);
+            c.check("joined route: the second laid", err2 == null, String.valueOf(err2));
+            double i = current(r);
+            c.check("joined route: the circuit conducts through the join", Math.abs(i) > 1, String.format("%.4f A", i));
+        }
+    }
+
+    /**
+     * The route preview runs on its own thread over a snapshot of the blocks (Baughn: the preview was slow): over stairs,
+     * a slab and a fence it shows exactly the route the live world gives.
+     */
+    static final class PreviewSnapshotCase implements TestCase {
+        String result;
+        boolean same;
+
+        public String name() {
+            return "route preview from a snapshot";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 4;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            level.setBlock(c.at(3, 1, 1), net.minecraft.world.level.block.Blocks.OAK_STAIRS.defaultBlockState(), 3);
+            level.setBlock(c.at(5, 1, 1), net.minecraft.world.level.block.Blocks.OAK_SLAB.defaultBlockState(), 3);
+            level.setBlock(c.at(6, 1, 0), net.minecraft.world.level.block.Blocks.OAK_FENCE.defaultBlockState(), 3);
+            var a = new mods.eln.node.voxel.CableRouter.End(c.at(1, 1, 1).getX() * 16L + 8, c.at(1, 1, 1).getY() * 16L, c.at(1, 1, 1).getZ() * 16L + 8, 0, -1);
+            var b = new mods.eln.node.voxel.CableRouter.End(c.at(8, 1, 1).getX() * 16L + 8, c.at(8, 1, 1).getY() * 16L, c.at(8, 1, 1).getZ() * 16L + 8, 0, -1);
+            var lo = c.at(0, 0, 0);
+            var live = mods.eln.node.voxel.KitPreview.answer(mods.eln.node.voxel.RouteView.live(level), LV, a, null, List.of(), b, null, Integer.MAX_VALUE);
+            var snap = mods.eln.node.voxel.KitPreview.answer(mods.eln.node.voxel.RouteView.snapshot(level, lo.getX() - 8, lo.getY() - 8, lo.getZ() - 8,
+                lo.getX() + 18, lo.getY() + 12, lo.getZ() + 12), LV, a, null, List.of(), b, null, Integer.MAX_VALUE);
+            result = live.message() + " / " + snap.message();
+            same = live.ok() && snap.ok() && live.boxes().size() == snap.boxes().size();
+            for (int i = 0; same && i < live.boxes().size(); i++) same = java.util.Arrays.equals(live.boxes().get(i), snap.boxes().get(i));
+        }
+
+        public void measure(TestContext c) {
+            c.check("route preview: the snapshot gives the live route", same, result);
         }
     }
 

@@ -83,7 +83,12 @@ public final class CablePlacer {
 
     /** The world for the cable router: the pipe router's obstacles, and full solid blocks to lay cables on. */
     public static CableRouter.Space space(Level level) {
-        PipeRouter.Space blocked = PipePlacer.space(level);
+        return space(RouteView.live(level));
+    }
+
+    /** ... read through a view of the world (live, or a snapshot for the preview thread). */
+    public static CableRouter.Space space(RouteView view) {
+        PipeRouter.Space blocked = PipePlacer.space(view);
         return new CableRouter.Space() {
             @Override
             public boolean blocked(long x0, long y0, long z0, long x1, long y1, long z1) {
@@ -92,7 +97,7 @@ public final class CablePlacer {
 
             @Override
             public boolean solid(long x0, long y0, long z0, long x1, long y1, long z1) {
-                return CablePlacer.solid(level, x0, y0, z0, x1, y1, z1);
+                return CablePlacer.solid(view, x0, y0, z0, x1, y1, z1);
             }
         };
     }
@@ -101,16 +106,20 @@ public final class CablePlacer {
      * Is every voxel of the box (world voxels) solid enough to lay a cable on: a full solid block, or inside the shape of
      * a decorative block (a stair's step, a slab), real or imitated by a voxel block (Mimic)?
      */
-    static boolean solid(Level level, long x0, long y0, long z0, long x1, long y1, long z1) {
+    static boolean solid(RouteView view, long x0, long y0, long z0, long x1, long y1, long z1) {
         for (long bx = Math.floorDiv(x0, 16); bx <= Math.floorDiv(x1 - 1, 16); bx++)
             for (long by = Math.floorDiv(y0, 16); by <= Math.floorDiv(y1 - 1, 16); by++)
                 for (long bz = Math.floorDiv(z0, 16); bz <= Math.floorDiv(z1 - 1, 16); bz++) {
                     BlockPos p = new BlockPos((int) bx, (int) by, (int) bz);
-                    if (!level.isLoaded(p)) return false;
-                    BlockState s = level.getBlockState(p);
-                    if (!(s.getBlock() instanceof mods.eln.node.NodeBlock) && s.isCollisionShapeFullBlock(level, p)) continue;
-                    List<int[]> boxes = Mimic.allowed(s) ? Mimic.boxes(s, level, p)
-                        : s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(p) instanceof VoxelNodeEntity e ? e.hostBoxes() : null;
+                    if (!view.loaded(p)) return false;
+                    BlockState s = view.state(p);
+                    if (!(s.getBlock() instanceof mods.eln.node.NodeBlock) && s.isCollisionShapeFullBlock(view.shapes(), p)) continue;
+                    List<int[]> boxes = null;
+                    if (Mimic.allowed(s)) boxes = Mimic.boxes(s, view.shapes(), p);
+                    else if (s.getBlock() instanceof VoxelNodeBlock) {
+                        RouteView.Voxels v = view.voxels(p);
+                        if (v != null) boxes = v.hostBoxes();
+                    }
                     if (boxes == null || boxes.isEmpty()) return false;
                     // every voxel of the box's part in this block inside one of the shape's boxes
                     int lx0 = (int) Math.max(0, x0 - bx * 16), ly0 = (int) Math.max(0, y0 - by * 16), lz0 = (int) Math.max(0, z0 - bz * 16);
@@ -126,13 +135,21 @@ public final class CablePlacer {
         return true;
     }
 
-    /** Free round a junction point (the new cable meets the old one there). */
+    /** Free round a junction point (the new cable meets the old one there): of what's in the way there, only the old
+     *  cable; solid blocks stay solid (they were free too, and a route could pass through a floor beside a junction). */
     static CableRouter.Space around(CableRouter.Space s, long[] p) {
-        PipeRouter.Space free = PipePlacer.spaceAround(s, p, 4);
+        final int h = 4;
+        PipeRouter.Space free = PipePlacer.spaceAround(s, p, h);
         return new CableRouter.Space() {
             @Override
             public boolean blocked(long x0, long y0, long z0, long x1, long y1, long z1) {
-                return free.blocked(x0, y0, z0, x1, y1, z1);
+                if (free.blocked(x0, y0, z0, x1, y1, z1)) return true;
+                long cx0 = Math.max(x0, p[0] - h), cx1 = Math.min(x1, p[0] + h), cy0 = Math.max(y0, p[1] - h), cy1 = Math.min(y1, p[1] + h),
+                    cz0 = Math.max(z0, p[2] - h), cz1 = Math.min(z1, p[2] + h);
+                for (long x = cx0; x < cx1; x++)
+                    for (long y = cy0; y < cy1; y++)
+                        for (long z = cz0; z < cz1; z++) if (s.solid(x, y, z, x + 1, y + 1, z + 1)) return true;
+                return false;
             }
 
             @Override
@@ -344,6 +361,17 @@ public final class CablePlacer {
         if (endJoin != null) s = around(s, endJoin);
         CablePart.Tier t = CablePart.TIERS[plan.tier];
         return CableRouter.route(s, t.width(), t.height(), plan.start, wps, last);
+    }
+
+    /** Route between two ends, each maybe joining an old cable (join point or null), and lay it (GameTests). */
+    public static String routeAndLayJoinedForTests(Level level, int tier, CableRouter.End start, long[] startJoin, CableRouter.End end, long[] endJoin) {
+        CablePart.Tier t = CablePart.TIERS[tier];
+        CableRouter.Space s = space(level);
+        if (startJoin != null) s = around(s, startJoin);
+        if (endJoin != null) s = around(s, endJoin);
+        var r = CableRouter.route(s, t.width(), t.height(), start, List.of(), end);
+        if (r.error != null) return r.error;
+        return lay(level, tier, r.steps, null);
     }
 
     /** Route between two ends and lay it (GameTests). Null if done, else why not. */
