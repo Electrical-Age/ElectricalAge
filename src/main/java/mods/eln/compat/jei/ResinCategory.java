@@ -21,7 +21,7 @@ public class ResinCategory extends AbstractRecipeCategory<ResinCategory.Resin> {
     public static final IRecipeType<Resin> TYPE = IRecipeType.create("eln", "tree_resin_collector", Resin.class);
 
     public ResinCategory(IGuiHelper gui, ItemStack collector) {
-        super(TYPE, Component.translatable("jei.eln.tree_resin_collector"), gui.createDrawableItemStack(collector), 140, 50);
+        super(TYPE, Component.translatable("jei.eln.tree_resin_collector"), gui.createDrawableItemStack(collector), 140, 60);
     }
 
     @Override
@@ -35,6 +35,6 @@ public class ResinCategory extends AbstractRecipeCategory<ResinCategory.Resin> {
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder b, Resin r, IFocusGroup focuses) {
         b.addRecipeArrow().setPosition(46, 6);
-        b.addText(Component.translatable("jei.eln.tree_resin_collector.how"), 140, 22).setPosition(0, 28);
+        b.addText(Component.translatable("jei.eln.tree_resin_collector.how"), 140, 30).setPosition(0, 28);
     }
 }

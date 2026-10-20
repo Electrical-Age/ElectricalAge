@@ -46,8 +46,9 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
      * chisel lagged everyone nearby; every collision and outline query, from every entity each tick, rebuilt them box by
      * box from the carved voxels, slower with each carve).
      */
-    public record Shapes(int stamp, BlockState host, List<int[]> hostBoxes, net.minecraft.world.phys.shapes.VoxelShape outline,
-                         net.minecraft.world.phys.shapes.VoxelShape collision, net.minecraft.world.phys.shapes.VoxelShape carvedHost) {
+    public record Shapes(int stamp, BlockState host, int sideMask, List<int[]> hostBoxes, net.minecraft.world.phys.shapes.VoxelShape outline,
+                         net.minecraft.world.phys.shapes.VoxelShape collision, net.minecraft.world.phys.shapes.VoxelShape carvedHost,
+                         net.minecraft.world.phys.shapes.VoxelShape outlineCarved, net.minecraft.world.phys.shapes.VoxelShape collisionCarved) {
     }
 
     private volatile Shapes shapes;
@@ -57,11 +58,18 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         VoxelNode v = server && getNode() instanceof VoxelNode n ? n : null;
         int stamp = server ? (v == null ? -1 : v.stamp) : partsHash;
         BlockState h = host();
+        int mask = getSideMask();
         Shapes c = shapes;
-        if (c != null && c.stamp() == stamp && c.host() == h) return c;
+        if (c != null && c.stamp() == stamp && c.host() == h && c.sideMask() == mask) return c;
         List<VoxelPart> ps = parts();
         List<int[]> hb = server ? (v == null ? List.of() : v.hostBoxes()) : clientHostBoxes();
-        c = new Shapes(stamp, h, List.copyOf(hb), VoxelNodeBlock.shapeOf(ps, 2), VoxelNodeBlock.shapeOf(ps, 0), VoxelNodeBlock.union(hb, 0));
+        // (each Shapes.or optimises its result again: AdventurAgent measured 2-3 us per box per query when only the parts
+        // were kept; so the whole outline and collision of a carved block are kept too)
+        var outline = VoxelNodeBlock.outlineOf(ps, mask);
+        var collision = VoxelNodeBlock.shapeOf(ps, 0);
+        var carvedHost = VoxelNodeBlock.union(hb, 0);
+        c = new Shapes(stamp, h, mask, List.copyOf(hb), outline, collision, carvedHost,
+            net.minecraft.world.phys.shapes.Shapes.or(outline, carvedHost), net.minecraft.world.phys.shapes.Shapes.or(collision, carvedHost));
         shapes = c;
         return c;
     }
