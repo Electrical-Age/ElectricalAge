@@ -70,7 +70,7 @@ public final class KitPreview {
                     why = "Can't reach there: " + r.error;
                     boxes.add(marker(at));
                 } else {
-                    for (CableRouter.Piece pc : CableRouter.pieces(r.steps)) {
+                    for (CableRouter.Piece pc : CableRouter.pieces(r.steps, CablePart.TIERS[kit.tier].width(), CablePart.TIERS[kit.tier].height())) {
                         CablePart part = pc.face() < 0 ? CablePart.knuckle(kit.tier, pc.points()[0], pc.points()[1], pc.points()[2])
                             : new CablePart(kit.tier, pc.face(), pc.points());
                         for (int[] b : part.boxes())

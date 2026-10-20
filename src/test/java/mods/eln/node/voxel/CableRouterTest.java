@@ -48,7 +48,7 @@ public class CableRouterTest {
     /** Every piece is a valid cable part in its block, lies against a solid block, and isn't inside one. */
     static void check(Set<List<Long>> solid, CableRouter.Result r) {
         assertNull(r.error);
-        for (CableRouter.Piece p : CableRouter.pieces(r.steps)) {
+        for (CableRouter.Piece p : CableRouter.pieces(r.steps, 2, 1)) {
             CablePart part = new CablePart(LV, p.face(), p.points());
             assertTrue(part.valid(), "piece " + p + " " + java.util.Arrays.toString(p.points()));
             assertFalse(solid.contains(List.of(p.bx(), p.by(), p.bz())), "a piece inside a solid block: " + p);
@@ -67,7 +67,7 @@ public class CableRouterTest {
         check(solid, r);
         assertEquals(80, r.length());
         assertEquals(2, r.steps.size(), "a straight line");
-        assertEquals(6, CableRouter.pieces(r.steps).size(), "half a block in the first and last, whole ones between");
+        assertEquals(6, CableRouter.pieces(r.steps, 2, 1).size(), "half a block in the first and last, whole ones between");
     }
 
     @Test
@@ -98,7 +98,7 @@ public class CableRouterTest {
         solid.add(List.of(4L, 0L, 1L));
         var r = CableRouter.route(world(solid), 2, 1, onFloor(1, 1), List.of(), onFloor(7, 1));
         check(solid, r);
-        long knuckles = CableRouter.pieces(r.steps).stream().filter(p -> p.face() < 0).count();
+        long knuckles = CableRouter.pieces(r.steps, 2, 1).stream().filter(p -> p.face() < 0).count();
         assertTrue(knuckles >= 2, "knuckles " + knuckles + ", steps " + r.steps);
     }
 

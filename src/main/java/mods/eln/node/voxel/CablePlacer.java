@@ -328,7 +328,7 @@ public final class CablePlacer {
 
     /** Lay a route: a cable part per block piece (and the knuckles); checked first, all or nothing. */
     public static String lay(Level level, int tier, List<CableRouter.Step> steps, net.minecraft.world.entity.player.Player player) {
-        List<CableRouter.Piece> pieces = CableRouter.pieces(steps);
+        List<CableRouter.Piece> pieces = CableRouter.pieces(steps, CablePart.TIERS[tier].width(), CablePart.TIERS[tier].height());
         List<CablePart> parts = new ArrayList<>();
         for (CableRouter.Piece p : pieces) {
             CablePart part = p.face() < 0 ? CablePart.knuckle(tier, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, p.face(), p.points());

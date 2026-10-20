@@ -246,7 +246,10 @@ public final class CableRouter {
                 push(open, best, from, outer, k, new Key(q[0], q[1], q[2], k.attach(), d), g, t, false);
             }
             // corners, toward e (across the face): a wall met here (inner), or the support ending here (outer); at a block's
-            // edge or at a step inside a block (a stair's riser, a slab's edge)
+            // edge or at a step inside a block (a stair's riser, a slab's edge). Not two in a row at one point: that is
+            // a run of no length, and two inner corners turned a cable round to the far side of a plane, through the
+            // edge where two blocks meet diagonally (the cable's width reached the far block and read as a wall)
+            if (k.dir() < 0 && !k.equals(k0)) continue;
             for (int e = 0; e < 6; e++) {
                 if (axis(e) == n) continue;
                 if (solidBeyond(space, width, height, p, k.attach(), e, false)) {
@@ -302,10 +305,13 @@ public final class CableRouter {
 
     /**
      * The route as pieces per block: each run on one face cut at block boundaries, local voxels (0..16), and a knuckle
-     * in the block round each outer corner.
+     * in the block round each outer corner on a block edge. Round an outer corner inside a block (onto a top slab's
+     * underside, over a bottom slab's edge) one of the two runs reaches {@code height} past the corner, so the cable
+     * fills the corner (Baughn: a voxel was missing there; it only touched along an edge).
      */
-    public static List<Piece> pieces(List<Step> steps) {
+    public static List<Piece> pieces(List<Step> steps, int width, int height) {
         List<Piece> out = new ArrayList<>();
+        Gap gap = null;   // (an outer corner inside a block still to fill)
         // densify: a point at every block boundary crossed along a run
         List<Step> dense = new ArrayList<>();
         for (int i = 0; i < steps.size(); i++) {
@@ -338,7 +344,11 @@ public final class CableRouter {
             Step a = dense.get(i - 1), b = dense.get(i);
             if (b.outer && !(Math.floorMod(new long[]{b.x, b.y, b.z}[axis(reverse(b.attach))], 16) == 0
                 && Math.floorMod(new long[]{b.x, b.y, b.z}[axis(a.attach)], 16) == 0)) {
-                // round a step inside a block (or across one block face): no knuckle, the faces just change
+                // round a step inside a block (or across one block face): no knuckle, the faces just change, and the run
+                // that stays in its block past the corner reaches over it
+                gap = new Gap(new long[]{b.x, b.y, b.z}, a.attach, b.attach, height);
+                if (gap.fillBefore(poly, curKey)) gap = null;
+                else alongEdge(poly, curKey, a.attach, b.attach, width);
                 flush(out, curKey, poly);
                 curKey = null;
                 poly = null;
@@ -373,9 +383,100 @@ public final class CableRouter {
                 poly.add(new long[]{a.x, a.y, a.z});
             }
             poly.add(new long[]{b.x, b.y, b.z});
+            if (gap != null && poly.size() == 2) {
+                if (!gap.fillAfter(poly, curKey)) {
+                    gap.stub(out);
+                    alongEdgeStart(poly, curKey, gap.from(), gap.to(), width);
+                }
+                gap = null;
+            }
         }
+        if (gap != null) gap.stub(out);
         flush(out, curKey, poly);
         return out;
+    }
+
+    /**
+     * The corner of an outer turn inside a block, from face {@code from} to face {@code to} at c: the two runs only meet
+     * along the edge, and the square beyond both (height x height, the cable's width along the edge) must be cable too.
+     * The run before reaches into it if it comes at the corner across the edge, the run after if it leaves across it,
+     * within their blocks; else a short piece on the new face fills it.
+     */
+    private record Gap(long[] c, int from, int to, int h) {
+        boolean fillBefore(List<long[]> poly, List<Long> key) {
+            return poly != null && poly.size() >= 2 && dirOf(poly.get(poly.size() - 2), poly.get(poly.size() - 1)) == reverse(to)
+                && reach(poly, key, h, true);
+        }
+
+        boolean fillAfter(List<long[]> poly, List<Long> key) {
+            return dirOf(poly.get(0), poly.get(1)) == from && reach(poly, key, h, false);
+        }
+
+        void stub(List<Piece> out) {
+            int e = reverse(from);
+            long[] q = {c[0] + DV[e][0] * h, c[1] + DV[e][1] * h, c[2] + DV[e][2] * h};
+            long[] mid = {Math.floorDiv(c[0] + q[0], 2), Math.floorDiv(c[1] + q[1], 2), Math.floorDiv(c[2] + q[2], 2)};
+            long[] cell = cell(mid, to, -1);
+            int[] local = new int[6];
+            for (int a = 0; a < 3; a++) {
+                local[a] = (int) (q[a] - cell[a] * 16);
+                local[3 + a] = (int) (c[a] - cell[a] * 16);
+            }
+            out.add(new Piece(cell[0], cell[1], cell[2], to, local));
+        }
+    }
+
+    /**
+     * A run that comes along the edge to an outer corner ends at the corner point, but the next run's cross-section there
+     * is the cable's width round it: reach on by that half of the width (as a bend inside a piece does), within the block.
+     */
+    private static void alongEdge(List<long[]> poly, List<Long> key, int from, int to, int width) {
+        if (poly == null || key == null || poly.size() < 2) return;
+        int d = dirOf(poly.get(poly.size() - 2), poly.get(poly.size() - 1));
+        if (d < 0 || axis(d) == axis(from) || axis(d) == axis(to)) return;
+        reach(poly, key, d % 2 == 1 ? width - width / 2 : width / 2, true);
+    }
+
+    /** ... and a run that leaves an outer corner along the edge reaches back by the other half. */
+    private static void alongEdgeStart(List<long[]> poly, List<Long> key, int from, int to, int width) {
+        int d = dirOf(poly.get(0), poly.get(1));
+        if (d < 0 || axis(d) == axis(from) || axis(d) == axis(to)) return;
+        int back = reverse(d);
+        reach(poly, key, back % 2 == 1 ? width - width / 2 : width / 2, false);
+    }
+
+    /** The axis direction from a to b (a straight step), or -1. */
+    private static int dirOf(long[] a, long[] b) {
+        int d = -1;
+        for (int k = 0; k < 3; k++) {
+            if (a[k] == b[k]) continue;
+            if (d >= 0) return -1;
+            d = k == 1 ? (b[k] > a[k] ? 1 : 0) : k == 2 ? (b[k] > a[k] ? 3 : 2) : (b[k] > a[k] ? 5 : 4);
+        }
+        return d;
+    }
+
+    /**
+     * Stretch a run by {@code h} past its end (or before its start), along its own direction, if that stays inside its
+     * block (key). False if it can't.
+     */
+    private static boolean reach(List<long[]> poly, List<Long> key, int h, boolean atEnd) {
+        if (poly == null || key == null || poly.size() < 2) return false;
+        long[] p = atEnd ? poly.get(poly.size() - 1) : poly.get(0), q = atEnd ? poly.get(poly.size() - 2) : poly.get(1);
+        long[] n = p.clone();
+        int axes = 0;
+        for (int k = 0; k < 3; k++) {
+            long d = Long.signum(p[k] - q[k]);
+            if (d == 0) continue;
+            axes++;
+            n[k] = p[k] + d * h;
+            long local = n[k] - key.get(k) * 16;
+            if (local < 0 || local > 16) return false;
+        }
+        if (axes != 1) return false;
+        if (atEnd) poly.set(poly.size() - 1, n);
+        else poly.set(0, n);
+        return true;
     }
 
     private static void flush(List<Piece> out, List<Long> key, List<long[]> poly) {
