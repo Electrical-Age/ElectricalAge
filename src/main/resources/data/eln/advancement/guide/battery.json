@@ -1,0 +1,38 @@
+{
+  "parent": "eln:guide/lead",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:cost_oriented_battery",
+              "eln:capacity_oriented_battery",
+              "eln:voltage_oriented_battery",
+              "eln:current_oriented_battery",
+              "eln:life_oriented_battery"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:cost_oriented_battery"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.battery.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.battery.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

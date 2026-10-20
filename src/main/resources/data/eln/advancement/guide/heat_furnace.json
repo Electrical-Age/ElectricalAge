@@ -1,0 +1,35 @@
+{
+  "parent": "eln:guide/copper_cable",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:stone_heat_furnace",
+              "eln:fuel_heat_furnace"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:stone_heat_furnace"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.heat_furnace.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.heat_furnace.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

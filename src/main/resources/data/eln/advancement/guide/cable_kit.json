@@ -1,0 +1,39 @@
+{
+  "parent": "eln:guide/copper_cable",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:cable_kit_signal",
+              "eln:cable_kit_lv",
+              "eln:cable_kit_mv",
+              "eln:cable_kit_hv",
+              "eln:cable_kit_vhv",
+              "eln:cable_kit_thermal"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:cable_kit_lv"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.cable_kit.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.cable_kit.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

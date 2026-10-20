@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/converter",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:electrical_fuse_holder"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:electrical_fuse_holder"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.fuse.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.fuse.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "parent": "eln:guide/boiler",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:50v_steam_turbine",
+              "eln:200v_steam_turbine"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:50v_steam_turbine"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.steam_turbine.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.steam_turbine.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

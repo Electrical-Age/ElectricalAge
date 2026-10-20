@@ -1,0 +1,41 @@
+{
+  "parent": "eln:guide/steam_turbine",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:lamp_socket_a",
+              "eln:simple_lamp_socket",
+              "eln:flat_lamp_socket",
+              "eln:robust_lamp_socket",
+              "eln:sconce_lamp_socket",
+              "eln:suspended_lamp_socket",
+              "eln:long_suspended_lamp_socket",
+              "eln:fluorescent_lamp_socket"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:lamp_socket_a"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.lamp.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.lamp.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

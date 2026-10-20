@@ -1,0 +1,37 @@
+{
+  "parent": "eln:guide/steam_turbine",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:small_solar_panel",
+              "eln:small_rotating_solar_panel",
+              "eln:2x3_solar_panel",
+              "eln:2x3_rotating_solar_panel"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:small_solar_panel"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.solar.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.solar.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

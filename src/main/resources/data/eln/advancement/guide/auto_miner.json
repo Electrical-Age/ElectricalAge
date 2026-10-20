@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/macerator",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:auto_miner"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:auto_miner"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.auto_miner.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.auto_miner.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

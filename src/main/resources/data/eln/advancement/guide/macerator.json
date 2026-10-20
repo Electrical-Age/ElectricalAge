@@ -1,0 +1,35 @@
+{
+  "parent": "eln:guide/machine_block",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:50v_macerator",
+              "eln:200v_macerator"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:50v_macerator"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.macerator.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.macerator.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

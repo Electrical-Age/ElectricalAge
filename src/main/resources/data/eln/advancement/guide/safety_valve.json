@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/boiler",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:pipe_safety_valve"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:pipe_safety_valve"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.safety_valve.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.safety_valve.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}
