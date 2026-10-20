@@ -1018,7 +1018,7 @@ public final class CableCases {
      * sneak + right-click no longer changes the brush, it puts material back like a plain right-click.
      */
     static final class ChiselShapesCase implements TestCase {
-        String flat, tunnel, sneak, packet;
+        String flat, tunnel, sneak, packet, cache;
 
         public String name() {
             return "chisel brush shapes";
@@ -1070,6 +1070,23 @@ public final class CableCases {
             sneak = "brush " + mods.eln.node.voxel.ChiselItem.size(stack) + " " + mods.eln.node.voxel.ChiselItem.shape(stack)
                 + ", put back " + (before - carved(level, t)) + ", plain block " + level.getBlockState(s).getBlock().getName().getString()
                 + ", name " + stack.getHoverName().getString();
+            // Baughn: holding the chisel lagged everyone near. A second stroke in the same tick does nothing, and a
+            // carved block's shapes are kept until it changes, and match the box-by-box union they replace
+            var ve = (mods.eln.node.voxel.VoxelNodeEntity) level.getBlockEntity(t);
+            var sh1 = ve.shapes();
+            int c0 = carved(level, t);
+            stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+            int c1 = carved(level, t);
+            var sh2 = ve.shapes();
+            mods.eln.node.voxel.ChiselItem.carve(player, level, t, new net.minecraft.world.phys.Vec3(t.getX(), t.getY() + 0.1, t.getZ() + 0.1), west, 1,
+                mods.eln.node.voxel.ChiselBrush.Shape.CUBE, true);
+            var sh3 = ve.shapes();
+            var old = net.minecraft.world.phys.shapes.Shapes.empty();
+            for (int[] b : ve.hostBoxes())
+                old = net.minecraft.world.phys.shapes.Shapes.or(old, net.minecraft.world.level.block.Block.box(b[0], b[1], b[2], b[3], b[4], b[5]));
+            boolean same = !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(old, sh3.carvedHost(), net.minecraft.world.phys.shapes.BooleanOp.NOT_SAME);
+            cache = "held " + (c0 - c1) + ", kept " + (sh1 == sh2) + ", renewed " + (sh3 != sh2) + ", carved " + (carved(level, t) - c1)
+                + ", same shape " + same;
             // the radial menu's packet: applied to the held chisel; a bad size or shape, or no chisel in hand, ignored
             var handler = (java.util.function.Consumer<byte[]>) b -> mods.eln.network.ServerPacketHandler.handle(b, player);
             handler.accept(mods.eln.node.voxel.ChiselItem.brushPacket(8, tunnelShape));
@@ -1089,6 +1106,7 @@ public final class CableCases {
             c.check("chisel: a 4-voxel flat layer is 16 voxels, the next layer 16 more", flat.equals("16, 32"), flat);
             c.check("chisel: a 4-voxel tunnel is 256 voxels; put back from the floor fills the 64 across the hole", tunnel.equals("256, 192"), tunnel);
             c.check("chisel: sneak + right-click puts back and keeps the brush", sneak.equals("brush 1 CUBE, put back 1, plain block Stone, name Chisel (1, cube)"), sneak);
+            c.check("chisel: one stroke a tick at most; shapes cached until a carve, and right", cache.equals("held 0, kept true, renewed true, carved 1, same shape true"), cache);
             c.check("chisel: the brush packet sets the held chisel only, and only to a valid brush", packet.equals("8 TUNNEL, bad: 8 TUNNEL, no chisel: false 8"), packet);
         }
     }

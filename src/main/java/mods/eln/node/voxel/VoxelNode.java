@@ -67,7 +67,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return (x * 16 + y) * 16 + z;
     }
 
+    /** Bumped whenever the parts, sides, host or carving may have changed: VoxelNodeEntity's shape cache. */
+    volatile int stamp;
+
     private void markUsed() {
+        stamp++;
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null || isSideKept(f)) fill(used, plate(f));

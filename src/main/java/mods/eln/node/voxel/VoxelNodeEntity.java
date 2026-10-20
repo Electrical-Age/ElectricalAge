@@ -41,9 +41,37 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
     /** Client: the carved-away voxels as last published, or null. */
     public volatile java.util.BitSet clientCarved;
 
+    /**
+     * The block's shapes and what's left of the host, kept until the parts, host or carving change (Baughn: holding the
+     * chisel lagged everyone nearby; every collision and outline query, from every entity each tick, rebuilt them box by
+     * box from the carved voxels, slower with each carve).
+     */
+    public record Shapes(int stamp, BlockState host, List<int[]> hostBoxes, net.minecraft.world.phys.shapes.VoxelShape outline,
+                         net.minecraft.world.phys.shapes.VoxelShape collision, net.minecraft.world.phys.shapes.VoxelShape carvedHost) {
+    }
+
+    private volatile Shapes shapes;
+
+    public Shapes shapes() {
+        boolean server = level != null && !level.isClientSide();
+        VoxelNode v = server && getNode() instanceof VoxelNode n ? n : null;
+        int stamp = server ? (v == null ? -1 : v.stamp) : partsHash;
+        BlockState h = host();
+        Shapes c = shapes;
+        if (c != null && c.stamp() == stamp && c.host() == h) return c;
+        List<VoxelPart> ps = parts();
+        List<int[]> hb = server ? (v == null ? List.of() : v.hostBoxes()) : clientHostBoxes();
+        c = new Shapes(stamp, h, List.copyOf(hb), VoxelNodeBlock.shapeOf(ps, 2), VoxelNodeBlock.shapeOf(ps, 0), VoxelNodeBlock.union(hb, 0));
+        shapes = c;
+        return c;
+    }
+
     /** What's left of the imitated block, as boxes: server from the node, client from the last publish. */
     public List<int[]> hostBoxes() {
-        if (level != null && !level.isClientSide()) return getNode() instanceof VoxelNode v ? v.hostBoxes() : List.of();
+        return shapes().hostBoxes();
+    }
+
+    private List<int[]> clientHostBoxes() {
         BlockState h = clientHost;
         if (h == null || level == null) return List.of();
         List<int[]> boxes = Mimic.boxes(h, level, worldPosition);

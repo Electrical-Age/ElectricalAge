@@ -93,19 +93,25 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
     /** The parts' boxes, grown by grow voxels across (not past the block): thin pipes are hard to aim at
      *  (AdventurAgent: a 5 degree band at 3 blocks), so the outline is fatter than what collides. */
     static VoxelShape shapeOf(java.util.List<VoxelPart> parts, int grow) {
+        java.util.List<int[]> boxes = new java.util.ArrayList<>();
+        for (VoxelPart p : parts) boxes.addAll(p.boxes());
+        return union(boxes, grow);
+    }
+
+    /** The union of boxes (voxels, grown by grow, not past the block), optimised once at the end. */
+    static VoxelShape union(java.util.List<int[]> boxes, int grow) {
         VoxelShape s = Shapes.empty();
-        for (VoxelPart p : parts)
-            for (int[] b : p.boxes())
-                s = Shapes.or(s, box(Math.max(0, b[0] - grow), Math.max(0, b[1] - grow), Math.max(0, b[2] - grow),
-                    Math.min(16, b[3] + grow), Math.min(16, b[4] + grow), Math.min(16, b[5] + grow)));
-        return s;
+        for (int[] b : boxes)
+            s = Shapes.joinUnoptimized(s, box(Math.max(0, b[0] - grow), Math.max(0, b[1] - grow), Math.max(0, b[2] - grow),
+                Math.min(16, b[3] + grow), Math.min(16, b[4] + grow), Math.min(16, b[5] + grow)), net.minecraft.world.phys.shapes.BooleanOp.OR);
+        return s.optimize();
     }
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         if (e == null) return Shapes.block();
-        VoxelShape s = shapeOf(e.parts(), 2);
+        VoxelShape s = e.shapes().outline();
         BlockState host = e.host();
         if (host != null) s = Shapes.or(s, hostShape(e, host, level, pos, context, false));   // (the imitated block: Mimic)
         // six-node elements hosted here: their plates (grown like the parts' outline), for aiming; they don't collide
@@ -129,15 +135,14 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         if (e == null) return Shapes.empty();
         BlockState host = e.host();
-        return host == null ? shapeOf(e.parts()) : Shapes.or(shapeOf(e.parts()), hostShape(e, host, level, pos, context, true));
+        VoxelShape parts = e.shapes().collision();
+        return host == null ? parts : Shapes.or(parts, hostShape(e, host, level, pos, context, true));
     }
 
     /** The imitated block's shape, or what the chisel left of it. */
     static VoxelShape hostShape(VoxelNodeEntity e, BlockState host, BlockGetter level, BlockPos pos, CollisionContext context, boolean collision) {
         if (!e.isCarved()) return collision ? host.getCollisionShape(level, pos, context) : host.getShape(level, pos, context);
-        VoxelShape s = Shapes.empty();
-        for (int[] b : e.hostBoxes()) s = Shapes.or(s, box(b[0], b[1], b[2], b[3], b[4], b[5]));
-        return s;
+        return e.shapes().carvedHost();
     }
 
     // ---- an imitated block (Mimic): its sound, its tool and speed when aimed at, its connections kept up to date

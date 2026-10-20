@@ -78,11 +78,30 @@ public class ChiselItem extends Item implements PipeTool {
         return Component.translatable(getDescriptionId()).append(" (" + size(stack) + ", ").append(shapeName(shape(stack))).append(")");
     }
 
+    /**
+     * At most one stroke per {@link #STROKE_TICKS} per player (Baughn: holding the button down lagged the game; a
+     * cancelled left-click is sent again every tick while held, and each stroke re-publishes and re-meshes the block).
+     */
+    static final int STROKE_TICKS = 4;
+    private static final java.util.Map<java.util.UUID, Long> LAST_STROKE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    static boolean strokeReady(ServerPlayer p, ServerLevel level) {
+        long now = level.getGameTime();
+        Long last = LAST_STROKE.get(p.getUUID());
+        if (last != null && now - last < STROKE_TICKS && now >= last) return false;
+        LAST_STROKE.put(p.getUUID(), now);
+        return true;
+    }
+
+    public static void forget(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent e) {
+        LAST_STROKE.remove(e.getEntity().getUUID());
+    }
+
     /** Right-click: put material back. */
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         if (ctx.getLevel().isClientSide()) return InteractionResult.SUCCESS;
-        if (ctx.getPlayer() instanceof ServerPlayer sp)
+        if (ctx.getPlayer() instanceof ServerPlayer sp && strokeReady(sp, (ServerLevel) ctx.getLevel()))
             carve(sp, (ServerLevel) ctx.getLevel(), ctx.getClickedPos(), ctx.getClickLocation(), ctx.getClickedFace(), size(ctx.getItemInHand()),
                 shape(ctx.getItemInHand()), false);
         return InteractionResult.SUCCESS;
@@ -96,7 +115,7 @@ public class ChiselItem extends Item implements PipeTool {
         if (e.getAction() != net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action.START) return;
         if (!(e.getEntity() instanceof ServerPlayer sp) || !(e.getLevel() instanceof ServerLevel sl)) return;
         var pick = sp.pick(sp.blockInteractionRange(), 1f, false);
-        if (!(pick instanceof BlockHitResult bh) || !bh.getBlockPos().equals(e.getPos())) return;
+        if (!(pick instanceof BlockHitResult bh) || !bh.getBlockPos().equals(e.getPos()) || !strokeReady(sp, sl)) return;
         carve(sp, sl, e.getPos(), bh.getLocation(), bh.getDirection(), size(s), shape(s), true);
     }
 
