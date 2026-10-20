@@ -53,5 +53,6 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
         super.addInformation(stack, player, list, adv);
         list.add(String.format("Steam in (any side), %.0f V out (front and back)", nominalU));
         list.add(String.format("Up to %.0f W from %.0f mB/s of steam", nominalP, nominalSteam()));
+        list.add("Might want a boiler with that.");   // (Baughn: the heat turbine gave way to steam, with no hint)
     }
 }

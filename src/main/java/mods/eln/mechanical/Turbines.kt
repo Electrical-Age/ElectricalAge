@@ -73,6 +73,11 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
 
 class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     TurbineDescriptor(baseName, obj) {
+    override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
+        super.addInformation(stack, player, list, par4)
+        list.add("Might want a boiler with that.")   // (Baughn)
+    }
+
     // Steam turbines are for baseload.
     override val inertia = 20f
     // Computed to equal a single 36LP Railcraft boiler, or half of a 36HP.
