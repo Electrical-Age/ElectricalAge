@@ -83,7 +83,8 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5260", "eln:transparent_node@5264",  // small steam turbines
         "eln:transparent_node@5312", "eln:transparent_node@5316", "eln:transparent_node@5320",  // column, flare stack
         // the FE exporters: 1.12 simple-node blocks (eln:energy_converter_eln_to_other_*block), transparent nodes since 26.x
-        "eln:transparent_node@5376", "eln:transparent_node@5380", "eln:transparent_node@5384");
+        "eln:transparent_node@5376", "eln:transparent_node@5380", "eln:transparent_node@5384",
+        "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
         "50V Electric Heater", "200V Electric Heater");

@@ -1738,6 +1738,9 @@ public final class ElnRecipes extends ElnRecipesBase {
         in = findItemStack("Lead Ore");
         addSmelting(in.getItem(), 0,
             findItemStack("ingotLead"));
+        in = findItemStack("Deepslate Lead Ore");
+        addSmelting(in.getItem(), 0,
+            findItemStack("ingotLead"));
         in = findItemStack("dustLead");
         addSmelting(in.getItem(), 0,
             findItemStack("ingotLead"));

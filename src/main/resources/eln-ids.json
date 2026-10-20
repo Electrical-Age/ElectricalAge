@@ -125,6 +125,12 @@
   "kind": "ore",
   "name": "cinnabar_ore"
  },
+ "eln:ore@7": {
+  "descriptor": "OreDescriptor",
+  "display": "Deepslate Lead Ore",
+  "kind": "ore",
+  "name": "deepslate_lead_ore"
+ },
  "eln:shared_item@10": {
   "descriptor": "GenericItemUsingDamageDescriptorWithComment",
   "display": "Cinnabar Dust",

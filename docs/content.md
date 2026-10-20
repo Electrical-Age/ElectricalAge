@@ -34,8 +34,11 @@ architecture.md.
   `ore/OreBlock`, `ore/OreItem`); `ElnRegistry.register` creates their blocks. Copper is vanilla's.
 - Generation is plain data in `src/main/resources/data/eln/`: `worldgen/feature/{lead,tungsten}_ore.json`,
   `worldgen/placed_feature/...`, `neoforge/biome_modifier/ores.json` (overworld, `underground_ores`). Cinnabar does
-  not generate (1.12 forced it off). Decision: lead generates (8 veins/chunk, y 0-23); batteries need lead and no
-  other mod supplies it.
+  not generate (1.12 forced it off). Decision: lead generates (8 veins/chunk); batteries need lead and no other mod
+  supplies it. Since 2026-10-20 (Baughn: y < 24 was 1.7.10's world) it lies in the middle of the deepslate range
+  (`trapezoid` -64..0, peaking at -32), as `lead_ore` in stone-like blocks and `deepslate_lead_ore` (ore id 7, 26.x
+  only; harder, deepslate sounds) in deepslate and tuff. All of it written by `script/gen_ore_data.py`; the deepslate
+  texture by `tools/textures/deepslate_ore.py` (the ore's specks over vanilla deepslate).
 - Drops: `loot_table/blocks/{lead,tungsten}_ore.json` give raw lead / raw tungsten (Fortune, explosion decay; silk
   touch keeps the ore), as vanilla iron (decision 41e71a8f). Test: `gametest/cases/OreDropCases` (`ore_drops_raw`).
 - `script/gen_ore_data.py` once wrote these files, but it is stale. It would write "drops itself" loot tables and a
@@ -85,8 +88,11 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
   event above.
 - The only datagen run is `clientData` in `build.gradle` (`gradlew runClientData`); there is no `data` run. Output:
   `src/generated/resources/`, committed and added as a resources dir. It holds 325 recipes and 325 recipe-unlock
-  advancements (the only advancements), `assets/eln/lang/en_us.json` (the only lang file), and item, model and
-  blockstate JSON.
+  advancements, `assets/eln/lang/en_us.json` (the only lang file), and item, model and blockstate JSON.
+- The guide advancements (Baughn's hints, 2026-10-20): `src/main/resources/data/eln/advancement/guide/*.json`, written
+  by `tools/advancements/make_guide.py` (which also prints their lang lines for `ElnLang`). Rubber is the root; heat
+  furnace, boiler and steam turbine come early (the only early power). All `inventory_changed` triggers, toasts only.
+  Test: `guide_advancements_load`.
 - Tags: `ElnItemTags` puts EA items into the tags of their 1.12 ore names (`OreDictTags.EA_ENTRIES`), and each
   `c:group/x` into `c:group`: 34 `c:` item tag files. Tungsten is EA-private (1.12 `dictionary.tungsten` = false):
   `eln:ores|ingots|dusts/tungsten`. Hand-written in `src/main/resources/data/`: `c:raw_materials/{lead,tungsten}`

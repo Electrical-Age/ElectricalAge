@@ -240,7 +240,9 @@ public final class ElnRegistry {
                 mods.eln.ore.OreBlock b = new mods.eln.ore.OreBlock(p, d);
                 d.block = b;
                 return b;
-            }, p -> p.mapColor(MapColor.STONE).strength(3.0f, 5.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
+            }, name.startsWith("deepslate_")   // (as vanilla's deepslate ores: darker, harder, deepslate sounds)
+                ? p -> p.mapColor(MapColor.DEEPSLATE).strength(4.5f, 5.0f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE)
+                : p -> p.mapColor(MapColor.STONE).strength(3.0f, 5.0f).requiresCorrectToolForDrops().sound(SoundType.STONE));
             ALL_ITEMS.add(ITEMS.registerItem(name, p -> {
                 mods.eln.ore.OreItem item = new mods.eln.ore.OreItem(block.get(), p);
                 d.parentItem = item;

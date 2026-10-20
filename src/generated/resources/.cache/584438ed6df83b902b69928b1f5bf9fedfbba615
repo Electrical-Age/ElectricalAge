@@ -1,4 +1,4 @@
-// 26.3	2026-10-19T13:19:35.908326505	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-20T19:45:34.484314353	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -251,6 +251,7 @@ e8c327e1c267ab8bef14abf96413256c1701bf8f data/eln/advancement/recipes/misc/small
 0e1846cb14bb77c9b58bd829e28b9000af6b5047 data/eln/advancement/recipes/misc/smelting_alloy_dust_2.json
 47a8de424dce982c10245c4d8b9548ee43c7fa28 data/eln/advancement/recipes/misc/smelting_cinnabar_dust.json
 965c962c416183f4d6df847ddab0b8450587dbc8 data/eln/advancement/recipes/misc/smelting_copper_dust.json
+188d918d46efc62e4f3e9fc38d299b5bb0f778d1 data/eln/advancement/recipes/misc/smelting_deepslate_lead_ore.json
 15902fb8e02df5ea61e1f0751f95c7808c0eb8b0 data/eln/advancement/recipes/misc/smelting_gold_dust.json
 430f821d64dbb4ade469c2e04f0358db222fda3c data/eln/advancement/recipes/misc/smelting_iron_dust.json
 7a7471d91bad84682b06bfaf8f9c1d4866594a71 data/eln/advancement/recipes/misc/smelting_lead_dust.json
@@ -576,6 +577,7 @@ e1c6f55b036e2a967f23435250ad0a6b6928b22d data/eln/recipe/small_fuel_burner.json
 ec0dc1526a744fa5c8004aa7b3edfa80d6e1ae46 data/eln/recipe/smelting_alloy_dust_2.json
 001f874620fbf5fe9aa3356b35af5b60ce5715ef data/eln/recipe/smelting_cinnabar_dust.json
 24f19e1839c89bdc5c3977ca908b365691c475f1 data/eln/recipe/smelting_copper_dust.json
+afa4a828683a29fbab55db2c073e6fd7c619010b data/eln/recipe/smelting_deepslate_lead_ore.json
 fce6b23dcd9d59552bfeface7df4539c7ccca9d2 data/eln/recipe/smelting_gold_dust.json
 0ebe346602b3eab1864fc65805ae0b02ced116c9 data/eln/recipe/smelting_iron_dust.json
 449b0f27cfd1283f924ab3134c451848748e9ecb data/eln/recipe/smelting_lead_dust.json

@@ -41,6 +41,16 @@ public class Wp12cContent implements ElnContent {
         }
 
         {
+            // 26.x: lead lives in the middle of the deepslate range (Baughn 2026-10-20: y < 24 was 1.7.10's world), so it
+            // needs a deepslate ore too; world generation is data (script/gen_ore_data.py)
+            id = 7;
+            name = TR_NAME(Type.NONE, "Deepslate Lead Ore");
+            OreDescriptor desc = new OreDescriptor(name, id, 0, 3, 9, -64, 0);
+            ores.addDescriptor(id, desc);
+            mods.eln.misc.OreDictTags.addToOre("oreLead", desc);
+        }
+
+        {
             id = 5;
             name = TR_NAME(Type.NONE, "Tungsten Ore");
             OreDescriptor desc = new OreDescriptor(name, id,
