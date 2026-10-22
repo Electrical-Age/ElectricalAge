@@ -238,13 +238,12 @@ public final class CableKitRecipes {
      * goes here (both sides, as the grid's own taking).
      */
     public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
-        if (!(e.getCrafting().getItem() instanceof CableKitItem)) return;
+        if (!PipeKitRecipes.ours(e, FromCoils.class)) return;
         var grid = e.getInventory();
         List<ItemStack> items = new java.util.ArrayList<>();
         for (int i = 0; i < grid.getContainerSize(); i++) items.add(grid.getItem(i));
         int[] use = FromCoils.use(items);
         if (use == null) return;
-        if (KitItem.length(e.getCrafting()) != use[items.size() + 1]) return;   // (not this recipe's kit)
         for (int i = 0; i < items.size(); i++)
             if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
     }

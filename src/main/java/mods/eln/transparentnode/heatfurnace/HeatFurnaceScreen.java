@@ -49,7 +49,8 @@ public class HeatFurnaceScreen extends ElnScreen {
     boolean refuels() {
         var s = deviceItem(HeatFurnaceContainer.combustibleId);
         var mc = net.minecraft.client.Minecraft.getInstance();
-        return render.takeFuel && !s.isEmpty() && mods.eln.misc.Utils.getItemEnergie(s) > 0;
+        // (the client has no server for burn times: AdventurAgent saw "last fuel" with coal going in; any cooking fuel)
+        return render.takeFuel && !s.isEmpty() && s.has(net.minecraft.core.component.DataComponents.COOKING_FUEL);
     }
 
     /** Baughn: the burner UI shows how the true power setting lags the player's. */
@@ -62,7 +63,7 @@ public class HeatFurnaceScreen extends ElnScreen {
     public static String fireLine(double fire, double setting, boolean lighting, mods.eln.sim.Fire.Kind kind, boolean refuels) {
         if (lighting) return tr("Fire: lighting...");
         if (fire <= 0) return tr("Fire: out");
-        String trend = Math.abs(fire - setting) < 0.01 ? "" : fire < setting ? "  " + (refuels ? tr("rising") : tr("burning its last fuel"))
+        String trend = Math.abs(fire - setting) < 0.01 ? "" : fire < setting ? "  " + (refuels ? tr("rising") : tr("last fuel"))
             : "  " + tr("falling");
         return tr("Fire: burning at %1$%", (int) Math.round(fire * 100)) + trend;
     }

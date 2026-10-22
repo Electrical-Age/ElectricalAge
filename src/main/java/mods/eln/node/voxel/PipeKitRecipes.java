@@ -146,26 +146,38 @@ public final class PipeKitRecipes {
         }
     }
 
+    /**
+     * Was this craft one of cls's recipes? Asked of the grid on the server (AdventurAgent: a shift-click craft passes
+     * the moved, often empty, stack as the crafted item, so checking that let the kit take one plate per slot: a free
+     * kit's worth of plates). The client leaves it to the server's sync.
+     */
+    static boolean ours(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e, Class<?> cls) {
+        if (!(e.getEntity().level() instanceof net.minecraft.server.level.ServerLevel sl) || !(e.getInventory() instanceof net.minecraft.world.inventory.CraftingContainer cc))
+            return false;
+        var in = cc.asCraftInput();
+        return sl.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, in, sl).map(h -> cls.isInstance(h.value())).orElse(false);
+    }
+
     /** A kit crafted from plates takes the plates it counted (the grid takes one from each slot after this). */
     public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
-        if (!(e.getCrafting().getItem() instanceof PipeKitItem)) return;
+        if (!ours(e, FromPlates.class)) return;
         var grid = e.getInventory();
         List<ItemStack> items = new java.util.ArrayList<>();
         for (int i = 0; i < grid.getContainerSize(); i++) items.add(grid.getItem(i));
         int[] use = FromPlates.use(items);
-        if (use == null || PipeKitItem.length(e.getCrafting()) != use[items.size() + 1]) return;   // (not this recipe's kit)
+        if (use == null) return;
         for (int i = 0; i < items.size(); i++)
             if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
     }
 
-    /** JEI examples: per tier, PER_BLOCK and 9 slots of plates to a kit. */
+    /** JEI examples: per tier, 9 slots of plates to a kit. */
     public static List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> examples() {
         List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
         var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
         var book = new net.minecraft.world.item.crafting.CraftingRecipe.CraftingBookInfo(net.minecraft.world.item.crafting.CraftingBookCategory.MISC, "eln_pipe_kit");
         for (int t = 0; t < PLATE.length; t++) {
             var ing = net.minecraft.world.item.crafting.Ingredient.of(plate(t));
-            for (int n : new int[]{PER_BLOCK[t], 9}) {
+            for (int n : new int[]{9}) {   // (the one-block recipe JEI lists itself, from display(): AdventurAgent saw it twice)
                 List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();
                 for (int i = 0; i < n; i++) ings.add(ing);
                 out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
