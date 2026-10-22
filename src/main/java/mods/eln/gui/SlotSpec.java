@@ -32,6 +32,17 @@ public record SlotSpec(String kind, int index, int x, int y, int limit, Predicat
         return new SlotSpec("SlotWithSkin", index, x, y, 64, s -> true, skin, comment);
     }
 
+    /** A machine's output: take only, nothing goes in (Baughn: shift-click put items into the plate machine's and the
+     *  electric furnace's output slots). */
+    public static SlotSpec output(int index, int x, int y, String skin) {
+        return new SlotSpec("Output", index, x, y, 64, s -> false, skin, new String[0]);
+    }
+
+    /** A furnace's input: what vanilla's furnace would smelt (the recipe property set, known on both sides; ElnSlot). */
+    public static SlotSpec smeltable(int index, int x, int y, String skin, String... comment) {
+        return new SlotSpec("Smeltable", index, x, y, 64, s -> true, skin, comment);
+    }
+
     /** 1.12 GenericItemUsingDamageSlot: shared items only, descriptor class or a subclass. */
     public static SlotSpec descriptor(int index, int x, int y, int limit, Class<?>[] classes, String skin, String... comment) {
         return new SlotSpec("GenericItemUsingDamageSlot", index, x, y, limit, s -> descriptorIs(s, classes), skin, comment);

@@ -59,6 +59,40 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         return Component.translatable(getDescriptionId()).append(String.format(" (%.2f blocks)", length(stack) / 16.0));
     }
 
+    /**
+     * Plates of this tier into the kit, like filling a bundle (as cable kits): click a stack onto the kit, or the kit
+     * onto them. As many blocks as fit go in, PipeKitRecipes.PER_BLOCK plates each.
+     */
+    int absorb(ItemStack kit, ItemStack plates, java.util.function.IntConsumer take) {
+        if (kit.getCount() != 1 || PipeKitRecipes.plateTier(plates) != tier) return 0;
+        int per = PipeKitRecipes.PER_BLOCK[tier];
+        int n = Math.min(plates.getCount() / per, (MAX - length(kit)) / 16);
+        if (n <= 0) return 0;
+        kit.setDamageValue(MAX - (length(kit) + 16 * n));
+        take.accept(n * per);
+        return n;
+    }
+
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack self, ItemStack other, net.minecraft.world.inventory.Slot slot,
+                                            net.minecraft.world.inventory.ClickAction action, Player player,
+                                            net.minecraft.world.entity.SlotAccess carried) {
+        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
+        if (absorb(self, other, other::shrink) == 0) return false;
+        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
+        return true;
+    }
+
+    @Override
+    public boolean overrideStackedOnOther(ItemStack self, net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
+                                          Player player) {
+        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
+        ItemStack plates = slot.getItem();
+        if (absorb(self, plates, n -> slot.safeTake(n, n, player)) == 0) return false;
+        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
+        return true;
+    }
+
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();

@@ -607,6 +607,27 @@ public final class CableCases {
             var m = mods.eln.node.voxel.PipeKitRecipes.Merge.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 1,
                 List.of(mods.eln.node.voxel.CableKitItem.kit(LV, 100), mods.eln.node.voxel.CableKitItem.kit(LV, 28))));
             c.check("cable kit: two kits merge", mods.eln.node.voxel.KitItem.length(m) == 128 && m.getItem() instanceof mods.eln.node.voxel.CableKitItem, m.toString());
+            // pipe kits as cable kits (Baughn: they didn't stack up or craft many at a time): whole stacks of plates
+            var plate = new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
+                net.minecraft.resources.Identifier.parse("eln:iron_plate")));
+            var plates = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+            for (int q = 0; q < 4; q++) plates.add(plate.copyWithCount(10));
+            var pk = mods.eln.node.voxel.PipeKitRecipes.FromPlates.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 2, plates));
+            int[] pu = mods.eln.node.voxel.PipeKitRecipes.FromPlates.use(plates);
+            c.check("pipe kit: 2x2 stacks of 10 iron plates make one 20-block kit and use them all", mods.eln.node.voxel.PipeKitItem.length(pk) == 320
+                && pu != null && pu[0] + pu[1] + pu[2] + pu[3] == 40, mods.eln.node.voxel.PipeKitItem.length(pk) + " " + java.util.Arrays.toString(pu));
+            var one = mods.eln.node.voxel.PipeKitRecipes.FromPlates.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(plate.copy())));
+            c.check("pipe kit: a single plate makes nothing (two to a block)", one.isEmpty(), one.toString());
+            var pkit = mods.eln.node.voxel.PipeKitItem.kit(0, 16);
+            var pbox = new net.minecraft.world.SimpleContainer(1);
+            var pslot = new net.minecraft.world.inventory.Slot(pbox, 0, 0, 0);
+            pbox.setItem(0, pkit);
+            var pstack = plate.copyWithCount(7);
+            pkit.getItem().overrideOtherStackedOnMe(pkit, pstack, pslot, net.minecraft.world.inventory.ClickAction.PRIMARY,
+                net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level()),
+                net.minecraft.world.entity.SlotAccess.of(() -> net.minecraft.world.item.ItemStack.EMPTY, x -> { }));
+            c.check("pipe kit: 7 plates clicked on fill 3 blocks and leave 1", mods.eln.node.voxel.PipeKitItem.length(pkit) == 64 && pstack.getCount() == 1,
+                mods.eln.node.voxel.PipeKitItem.length(pkit) + " / " + pstack.getCount());
             // Baughn: topping a kit up with cables like a bundle (a stack clicked onto the kit, or the kit onto a stack)
             var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
             var box = new net.minecraft.world.SimpleContainer(1);

@@ -239,6 +239,14 @@ final class GoldenSlotsCase implements TestCase {
                         want.remove(k);
                         known.add(name + " slot " + i + " no longer takes " + probes.get(k) + ": " + KNOWN_MISSING.get(k));
                     }
+                // narrowed on purpose (Baughn 2026-10-22: shift-click filled outputs and ignored which slot made sense):
+                // outputs take nothing, a machine's input only what it has a recipe for, a furnace's only smeltables
+                boolean narrowed = s instanceof mods.eln.gui.ElnSlot es && ("Output".equals(es.spec.kind()) || "Smeltable".equals(es.spec.kind())
+                    || d instanceof mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor md && es.spec.index() == md.outStackCount);
+                if (narrowed && want.containsAll(got) && !got.equals(want)) {
+                    known.add(name + " slot " + i + " narrowed: takes " + got.size() + " of 1.12's " + want.size() + " probes");
+                    want = got;
+                }
                 boolean ok = index == g.get("index").getAsInt() && limit == g.get("limit").getAsInt() && got.equals(want);
                 slotsAll++;
                 if (ok) slotsOk++;

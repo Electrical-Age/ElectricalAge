@@ -27,12 +27,13 @@ public class HeatFurnaceScreen extends ElnScreen {
     protected void init() {
         super.init();
         button("external", () -> render.controleExternal ? tr("External control") : tr("Internal control"), render::clientToogleControl);
-        fuel = button("fuel", () -> render.takeFuel ? tr("Take fuel") : tr("Decline fuel"), render::clientToogleTakeFuel);
+        // (states, as the other toggles: Baughn read "Decline fuel" as the button's action)
+        fuel = button("fuel", () -> render.takeFuel ? tr("Taking fuel") : tr("Declining fuel"), render::clientToogleTakeFuel);
         gain = slider("gain", 0.1, 1.0, 0.01, render.gainSyncValue,
             v -> Component.literal(tr("Control gauge at %1$%", (int) Math.round(v * 100)) + "  (" + tr("Power: %1$W", render.power) + ")"),
             v -> render.clientSetGain((float) v));
-        text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (fuel declined: press \"Decline fuel\" to take fuel)")
-            : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL));
+        text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel: click \"Declining fuel\" to take it)")
+            : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL, refuels()));
         heat = slider("heat", 0, 980, 10, render.temperatureTargetSyncValue,
             v -> Component.literal(tr("Set point: %1$°C", (int) v) + "  (" + tr("Actual: %1$°C", Utils.plotValue(render.temperature)) + ")"),
             v -> render.clientSetTemperatureTarget((float) v));
@@ -40,11 +41,25 @@ public class HeatFurnaceScreen extends ElnScreen {
         update();
     }
 
+    /** Will the fire get more fuel: taking fuel, with something burnable in the fuel slot? */
+    boolean refuels() {
+        var s = deviceItem(HeatFurnaceContainer.combustibleId);
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        return render.takeFuel && !s.isEmpty() && mods.eln.misc.Utils.getItemEnergie(s) > 0;
+    }
+
     /** Baughn: the burner UI shows how the true power setting lags the player's. */
     public static String fireLine(double fire, double setting, boolean lighting, mods.eln.sim.Fire.Kind kind) {
+        return fireLine(fire, setting, lighting, kind, true);
+    }
+
+    /** ... and it doesn't claim to be rising when no more fuel is coming (Baughn: "rising" with fuel declined, the last
+     *  of it burning). */
+    public static String fireLine(double fire, double setting, boolean lighting, mods.eln.sim.Fire.Kind kind, boolean refuels) {
         if (lighting) return tr("Fire: lighting...");
         if (fire <= 0) return tr("Fire: out");
-        String trend = Math.abs(fire - setting) < 0.01 ? "" : fire < setting ? "  " + tr("rising") : "  " + tr("falling");
+        String trend = Math.abs(fire - setting) < 0.01 ? "" : fire < setting ? "  " + (refuels ? tr("rising") : tr("burning its last fuel"))
+            : "  " + tr("falling");
         return tr("Fire: burning at %1$%", (int) Math.round(fire * 100)) + trend;
     }
 

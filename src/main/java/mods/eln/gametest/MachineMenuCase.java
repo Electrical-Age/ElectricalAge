@@ -35,6 +35,17 @@ final class MachineMenuCase implements TestCase {
         menu.clicked(4, 0, ContainerInput.PICKUP, fp);
         ctx.check("macerator: iron ore taken by the input slot", menu.getSlot(4).getItem().is(Items.IRON_ORE),
             "slot 4 holds " + menu.getSlot(4).getItem() + ", carried " + menu.getCarried());
+        // shift-click (Baughn: items went into the output slots): a stack the macerator has no recipe for goes nowhere
+        // in the device, ore goes to the input only; nothing can be put in an output
+        int dev = menu.deviceSlots;
+        menu.setCarried(ItemStack.EMPTY);
+        fp.getInventory().setItem(9, new ItemStack(Items.OAK_PLANKS, 16));
+        menu.quickMoveStack(fp, dev);   // (the first main-inventory slot: inventory index 9)
+        boolean outsEmpty = true;
+        for (int i = 0; i < 4; i++) outsEmpty &= menu.getSlot(i).getItem().isEmpty();
+        ctx.check("macerator: shift-clicked planks go into no device slot", outsEmpty && !menu.getSlot(4).getItem().is(Items.OAK_PLANKS),
+            "outputs empty " + outsEmpty + ", input " + menu.getSlot(4).getItem());
+        ctx.check("macerator: an output slot takes nothing", !menu.getSlot(0).mayPlace(new ItemStack(Items.IRON_ORE)), "");
     }
 
     public void measure(TestContext ctx) {

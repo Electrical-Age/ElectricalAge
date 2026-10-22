@@ -10,12 +10,171 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
+
 /**
  * Pipe kits in the crafting grid (Baughn, notes/pipes/DESIGN.md 6a): kits of one tier put together merge (their lengths
  * add, up to a full kit); a lone kit splits in two halves (one is the result, the other stays in the grid).
  */
 public final class PipeKitRecipes {
     private PipeKitRecipes() {
+    }
+
+    /** The plate a tier's pipe is made of, and how many make one block (16 voxels) of it (the old recipes: 2 iron
+     *  plates or 3 alloy plates to a one-block kit). */
+    static final String[] PLATE = {"eln:iron_plate", "eln:alloy_plate"};
+    static final int[] PER_BLOCK = {2, 3};
+
+    static net.minecraft.world.item.Item plate(int tier) {
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(PLATE[tier]));
+    }
+
+    /** The pipe tier a stack of plates makes, or -1. */
+    static int plateTier(ItemStack s) {
+        if (s.isEmpty()) return -1;
+        for (int t = 0; t < PLATE.length; t++) if (s.is(plate(t))) return t;
+        return -1;
+    }
+
+    /**
+     * Pipe kits from plates (Baughn: pipe kits didn't stack up or craft many at a time; cable kits had been fixed):
+     * plates of one tier, with or without a kit of that tier, make a kit a block longer per PER_BLOCK plates, from whole
+     * stacks, as many as fit in one kit (at least one plate from every slot: the grid takes one from each; the rest by
+     * the crafted event, {@link #crafted}). As CableKitRecipes.FromCoils.
+     */
+    public static final class FromPlates extends CustomRecipe {
+        public static final FromPlates INSTANCE = new FromPlates(-1);
+        public static final MapCodec<FromPlates> MAP_CODEC = CableKitRecipes.tierCodec(FromPlates::new, r -> r.tier);
+        public static final StreamCodec<RegistryFriendlyByteBuf, FromPlates> STREAM_CODEC = CableKitRecipes.tierStream(FromPlates::new, r -> r.tier);
+        public static final RecipeSerializer<FromPlates> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+
+        public final int tier;
+
+        public FromPlates(int tier) {
+            this.tier = tier;
+        }
+
+        /** Plates taken from each slot (in order), then tier, length and plates used; or null. */
+        public static int[] use(List<ItemStack> items) {
+            int tier = -1, kitLen = 0, kits = 0, slots = 0, total = 0;
+            for (ItemStack s : items) {
+                if (s.isEmpty()) continue;
+                int t;
+                if (s.getItem() instanceof PipeKitItem k) {
+                    if (++kits > 1 || s.getCount() != 1) return null;
+                    t = k.tier;
+                    kitLen += PipeKitItem.length(s);
+                } else {
+                    t = plateTier(s);
+                    if (t < 0) return null;
+                    slots++;
+                    total += s.getCount();
+                }
+                if (tier >= 0 && t != tier) return null;
+                tier = t;
+            }
+            if (slots < 1) return null;
+            int per = PER_BLOCK[tier];
+            int blocks = Math.min((KitItem.MAX - kitLen) / 16, total / per);
+            int used = blocks * per;
+            if (blocks < 1 || used < slots) return null;   // (every slot gives one: the grid takes it)
+            int[] out = new int[items.size() + 3];
+            int taken = 0;
+            for (int i = 0; i < items.size(); i++)
+                if (!items.get(i).isEmpty() && !(items.get(i).getItem() instanceof PipeKitItem)) {
+                    out[i] = 1;
+                    taken++;
+                }
+            for (int i = 0; i < items.size() && taken < used; i++) {
+                ItemStack s = items.get(i);
+                if (s.isEmpty() || s.getItem() instanceof PipeKitItem) continue;
+                int more = Math.min(s.getCount() - 1, used - taken);
+                out[i] += more;
+                taken += more;
+            }
+            out[items.size()] = tier;
+            out[items.size() + 1] = kitLen + blocks * 16;
+            out[items.size() + 2] = used;
+            return out;
+        }
+
+        static int[] total(CraftingInput in) {
+            List<ItemStack> items = new java.util.ArrayList<>();
+            for (int i = 0; i < in.size(); i++) items.add(in.getItem(i));
+            int[] u = use(items);
+            return u == null ? null : new int[]{u[u.length - 3], u[u.length - 2]};
+        }
+
+        @Override
+        public boolean matches(CraftingInput input, Level level) {
+            int[] t = total(input);
+            return t != null && (tier < 0 || t[0] == tier);
+        }
+
+        @Override
+        public ItemStack assemble(CraftingInput input) {
+            int[] t = total(input);
+            return t == null || tier >= 0 && t[0] != tier ? ItemStack.EMPTY : PipeKitItem.kit(t[0], t[1]);
+        }
+
+        @Override
+        public RecipeSerializer<FromPlates> getSerializer() {
+            return SERIALIZER;
+        }
+
+        /** In the recipe book: PER_BLOCK plates to a one-block kit, per tier (the grid takes whole stacks all the same). */
+        @Override
+        public boolean isSpecial() {
+            return tier < 0;
+        }
+
+        @Override
+        public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
+            if (tier < 0) return net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE;
+            List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();
+            for (int i = 0; i < PER_BLOCK[tier]; i++) ings.add(net.minecraft.world.item.crafting.Ingredient.of(plate(tier)));
+            return net.minecraft.world.item.crafting.PlacementInfo.create(ings);
+        }
+
+        @Override
+        public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+            if (tier < 0) return List.of();
+            List<net.minecraft.world.item.crafting.display.SlotDisplay> in = new java.util.ArrayList<>();
+            for (int i = 0; i < PER_BLOCK[tier]; i++) in.add(CableKitRecipes.slot(new ItemStack(plate(tier))));
+            return List.of(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(in,
+                CableKitRecipes.slot(PipeKitItem.kit(tier, 16)), CableKitRecipes.table()));
+        }
+    }
+
+    /** A kit crafted from plates takes the plates it counted (the grid takes one from each slot after this). */
+    public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
+        if (!(e.getCrafting().getItem() instanceof PipeKitItem)) return;
+        var grid = e.getInventory();
+        List<ItemStack> items = new java.util.ArrayList<>();
+        for (int i = 0; i < grid.getContainerSize(); i++) items.add(grid.getItem(i));
+        int[] use = FromPlates.use(items);
+        if (use == null || PipeKitItem.length(e.getCrafting()) != use[items.size() + 1]) return;   // (not this recipe's kit)
+        for (int i = 0; i < items.size(); i++)
+            if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
+    }
+
+    /** JEI examples: per tier, PER_BLOCK and 9 slots of plates to a kit. */
+    public static List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> examples() {
+        List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
+        var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
+        var book = new net.minecraft.world.item.crafting.CraftingRecipe.CraftingBookInfo(net.minecraft.world.item.crafting.CraftingBookCategory.MISC, "eln_pipe_kit");
+        for (int t = 0; t < PLATE.length; t++) {
+            var ing = net.minecraft.world.item.crafting.Ingredient.of(plate(t));
+            for (int n : new int[]{PER_BLOCK[t], 9}) {
+                List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();
+                for (int i = 0; i < n; i++) ings.add(ing);
+                out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "jei/pipe_kit_from_plates_" + t + "_" + n)),
+                    new net.minecraft.world.item.crafting.ShapelessRecipe(info, book,
+                        net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(PipeKitItem.kit(t, 16 * (n / PER_BLOCK[t]))), ings)));
+            }
+        }
+        return out;
     }
 
     public static final class Merge extends CustomRecipe {

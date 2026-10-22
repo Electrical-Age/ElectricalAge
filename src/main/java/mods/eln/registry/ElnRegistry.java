@@ -88,6 +88,8 @@ public final class ElnRegistry {
             VOXEL_NODE_WOODEN_FENCE.get(), VOXEL_NODE_FENCE.get(), VOXEL_NODE_WALL.get()));
     public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
         DeferredRegister.create(Registries.RECIPE_SERIALIZER, Eln.MODID);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.FromPlates>> PIPE_KIT_FROM_PLATES =
+        RECIPE_SERIALIZERS.register("pipe_kit_from_plates", () -> mods.eln.node.voxel.PipeKitRecipes.FromPlates.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Merge>> PIPE_KIT_MERGE =
         RECIPE_SERIALIZERS.register("pipe_kit_merge", () -> mods.eln.node.voxel.PipeKitRecipes.Merge.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Split>> PIPE_KIT_SPLIT =

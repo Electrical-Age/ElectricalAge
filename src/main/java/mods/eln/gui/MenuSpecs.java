@@ -132,16 +132,17 @@ public final class MenuSpecs {
                 MEDIUM, tr("Egg slot"))).publishing(1).panel(202, 111, 8, 29));
         // P4b layout (ElectricalFurnaceScreen): input -> arrow -> output, heater and regulator to the right
         put(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, d -> MenuSpec.of(
-            any(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.outSlotId, 86, 25, BIG),
-            any(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId, 28, 25, MEDIUM, tr("Input")),
+            SlotSpec.output(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.outSlotId, 86, 25, BIG),
+            SlotSpec.smeltable(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId, 28, 25, MEDIUM, tr("Input")),
             descriptor(2, 130, 25, 1, HeatingCorpElement.class, MEDIUM, tr("Heating element slot")),
             descriptor(3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot")),
             regulator(4, 150, 25, 1, new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM,
                 tr("Regulator slot"))).publishing(1).inventoryAt(122));
         put(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, d -> {
             SlotSpec[] s = new SlotSpec[2 + d.outStackCount];
-            for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = any(idx, 130 - 32 + idx * 18, 12, MEDIUM);
-            s[d.outStackCount] = any(d.outStackCount, 8 + 36, 12, MEDIUM);
+            for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = SlotSpec.output(idx, 130 - 32 + idx * 18, 12, MEDIUM);
+            // the input: only what this machine has a recipe for (Baughn: shift-click ignored which slot made sense)
+            s[d.outStackCount] = filter(d.outStackCount, 8 + 36, 12, 64, st -> d.recipe.getRecipe(st.copyWithCount(st.getMaxStackSize())) != null, MEDIUM, tr("Input"));
             s[d.outStackCount + 1] = descriptor(d.outStackCount + 1, 8, 12, 5, MachineBoosterDescriptor.class, MEDIUM, tr("Booster slot"));
             return MenuSpec.of(s).publishing(1).panel(204, 122, 8, 40);
         });
