@@ -68,7 +68,7 @@ public final class KitPreview {
         boolean device = at != null && CablePlacer.isDevice(level, bh.getBlockPos(), bh.getLocation());
         if (at == null) {
             send(p, false, boxes);
-            p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Not a place for a cable"));
+            p.sendOverlayMessage(net.minecraft.network.chat.Component.literal(CablePlacer.noEnd(level, bh.getBlockPos())));
             return;
         }
         if (plan == null || plan.tier != kit.tier) {   // (where it would start: at once)

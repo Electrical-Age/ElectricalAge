@@ -38,6 +38,8 @@ public final class CableCases {
         cases.add(new BurnCase());
         cases.add(new RoutedCase());
         cases.add(new JoinedRouteCase());
+        cases.add(new DeviceEndCase());
+        cases.add(new WaypointEndCase());
         cases.add(new PreviewSnapshotCase());
         cases.add(new HostedCase());
         cases.add(new BreakMixedCase());
@@ -437,6 +439,137 @@ public final class CableCases {
             double i = current(r);
             c.line(String.format("routed cable: %.4f A through the resistor", i));
             c.check("routed cable: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
+        }
+    }
+
+    /**
+     * A cable routed to a device ends at the middle of the clicked edge, however far off it the click was (Baughn: snap
+     * to the connector's centre); a floor cable ending at a terminal plate gets a lug in its mesh (Baughn: the steam
+     * turbine showed a bare cable end).
+     */
+    static final class DeviceEndCase implements TestCase {
+        ResistorElement r;
+        String err;
+        String endAt = "none";
+        int plain, lugged;
+        String ends = "";
+        boolean endsOk = true;
+
+        public String name() {
+            return "a cable to a device ends at its connector, with a lug";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 4;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            source(c, SOURCE, 0, 1, 50);
+            r = end(c, 7, 1);
+            var hitS = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 1)).add(1.0, 0.05, 0.5);
+            var hitR = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(7, 1, 1)).add(0.0, 0.05, 0.2);   // (off-centre)
+            long[][] j = new long[1][];
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 1), net.minecraft.core.Direction.EAST, hitS, true, j);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(7, 1, 1), net.minecraft.core.Direction.WEST, hitR, false, j);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, a, b);
+            // a 50V steam turbine: ends on its front and back (its terminal plates), none on its flanks
+            var tb = c.placeTransparent(12 + (82 << 6), c.at(4, 1, 2));
+            for (var d : new net.minecraft.core.Direction[]{net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH,
+                net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST}) {
+                var hit = net.minecraft.world.phys.Vec3.atCenterOf(c.at(4, 1, 2)).add(d.getStepX() * 0.5, -0.45, d.getStepZ() * 0.5);
+                boolean got = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(4, 1, 2), d, hit, false, new long[1][]) != null;
+                var ed = mods.eln.misc.Direction.fromEnumFacing(d);
+                boolean want = ed == tb.front || ed == tb.front.back();
+                ends += d + (got ? "+ " : "- ");
+                endsOk &= got == want;
+            }
+            if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(6, 1, 1), c.level())) instanceof mods.eln.node.voxel.VoxelNode v)
+                for (var part : v.parts)
+                    if (part instanceof mods.eln.node.voxel.CablePart cp)
+                        for (var port : cp.cablePorts())
+                            if (port.face() == 5) {
+                                endAt = port.x() + "," + port.y() + "," + port.z();
+                                float[] lugs = new float[4];
+                                lugs[5 - 2] = mods.eln.cable.CableTerminals.CONDUCTOR_HEIGHT_PX;
+                                plain = mods.eln.node.voxel.VoxelGeometry.of(List.of(cp)).size();
+                                lugged = mods.eln.node.voxel.VoxelGeometry.of(List.of(cp), lugs).size();
+                            }
+        }
+
+        public void measure(TestContext c) {
+            c.check("device end: laid", err == null, String.valueOf(err));
+            c.check("device end: the cable meets the device at the middle of the edge (16,0,8)", "16,0,8".equals(endAt), endAt);
+            c.check("device end: a lug at a terminal plate (3 more boxes)", lugged == plain + 18, plain + " -> " + lugged + " quads");
+            c.check("device end: a turbine takes cables on its front and back only", endsOk, ends);
+            double i = current(r);
+            c.check("device end: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
+        }
+    }
+
+    /**
+     * A run from one floor point to another (a waypoint clicked twice) has a piece in every block it crosses, and ends at
+     * the clicked point: half-way into the last block.
+     */
+    static final class WaypointEndCase implements TestCase {
+        String err;
+        final StringBuilder where = new StringBuilder();
+        boolean last;
+
+        public String name() {
+            return "a run ended at a waypoint reaches it";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 4;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            var hitA = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(1, 0, 1)).add(0.5, 1.0, 0.5);
+            var hitB = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(5, 0, 1)).add(0.5, 1.0, 0.5);
+            long[][] j = new long[1][];
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 1), net.minecraft.core.Direction.UP, hitA, true, j);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(5, 0, 1), net.minecraft.core.Direction.UP, hitB, false, j);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, a, b);
+            for (int x = 0; x < 8; x++)
+                if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, 1, 1), c.level())) instanceof mods.eln.node.voxel.VoxelNode v)
+                    for (var part : v.parts) {
+                        where.append(x).append(':');
+                        if (part instanceof mods.eln.node.voxel.CablePart cp) {
+                            where.append(cp.face).append(java.util.Arrays.toString(cp.points));
+                            if (x == 5 && cp.valid() && !cp.boxes().isEmpty()) last = true;
+                        }
+                        where.append(' ');
+                    }
+        }
+
+        public void measure(TestContext c) {
+            c.check("waypoint end: laid", err == null, String.valueOf(err));
+            c.line("waypoint end: parts " + where);
+            c.check("waypoint end: a piece in the last block", last, where.toString());
         }
     }
 

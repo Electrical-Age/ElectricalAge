@@ -170,6 +170,12 @@ public final class CablePlacer {
         return el >= 0;
     }
 
+    /** Why a click is no end: on a machine, no connector on that edge (AdventurAgent: say so); else no place for one. */
+    static String noEnd(Level level, BlockPos pos) {
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
+        return n != null && !(n instanceof VoxelNode) ? "No connector there: try another face or edge of the machine" : "Not a place for a cable";
+    }
+
     /** A click as a routing end: on a device, its face's nearest edge; on a cable, a point of it; else a point on the
      *  face clicked. join (out) gets the junction point for a cable. */
     static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join) {
@@ -242,13 +248,17 @@ public final class CablePlacer {
                     edge = g;
                 }
             }
+            // (no connector on that edge, as the steam turbine's flanks: not an end, AdventurAgent)
+            var side = mods.eln.misc.Direction.fromEnumFacing(face);
+            if (n.getSideConnectionMask(side, side.getLRDUGoingTo(mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(edge)))) == 0)
+                return null;
             long[] p = new long[3];
             long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
             p[fa] = base[fa] + (f % 2 == 0 ? 0 : 16);
             int ga = CableRouter.axis(edge);
             p[ga] = base[ga] + (edge % 2 == 0 ? 0 : 16);
             int w = 3 - fa - ga;
-            p[w] = base[w] + snap(h[w] * 16);
+            p[w] = base[w] + 8;   // (the middle of the edge: the connector's centre, where a terminal plate's lug sits, Baughn)
             return new CableRouter.End(p[0], p[1], p[2], edge, start ? f : CableRouter.reverse(f));
         }
         return surface(pos, face, hx, hy, hz);
@@ -304,7 +314,7 @@ public final class CablePlacer {
         long[][] join = new long[1][];
         CableRouter.End at = endAt(level, pos, face, hit, plan == null, join);
         if (at == null) {
-            player.sendOverlayMessage(Component.literal("Not a place for a cable"));
+            player.sendOverlayMessage(Component.literal(noEnd(level, pos)));
             return true;
         }
         boolean device = at.dir() >= 0;

@@ -34,6 +34,11 @@ public final class VoxelGeometry {
     }
 
     public static List<Quad> of(List<VoxelPart> parts) {
+        return of(parts, null);
+    }
+
+    /** ... with lugs where floor cables end at a terminal plate (lugs: conductor height px per horizontal face, or null). */
+    public static List<Quad> of(List<VoxelPart> parts, float[] lugs) {
         Builder b = new Builder();
         for (VoxelPart part : parts) {
             if (part instanceof ValvePart v) {
@@ -90,6 +95,9 @@ public final class VoxelGeometry {
                 if (c.burnt != null) b.color(0.35f, 0.22f, 0.14f);
                 else b.color(0.22f, 0.22f, 0.24f);
                 cable(b, c);
+                if (lugs != null && c.face == 0 && !c.isKnuckle())
+                    for (CablePart.Port port : c.cablePorts())
+                        if (port.face() >= 2 && lugs[port.face() - 2] > 0) lug(b, c, port, lugs[port.face() - 2]);
             }
         }
         return b.out;
@@ -170,6 +178,36 @@ public final class VoxelGeometry {
             b.box(bx);
             b.uvs = null;
         }
+    }
+
+    /**
+     * A cable lug where a floor cable ends at a device's terminal plate (as six-node cables draw them, CableRender.drawKnuckles):
+     * the cable turns up against the face, a copper crimp barrel tops it and a copper palm lies on the plate's middle
+     * conductor, H px above the floor.
+     */
+    static void lug(Builder b, CablePart c, CablePart.Port port, float H) {
+        int along = port.face() >= 4 ? 0 : 2, across = 2 - along;
+        double edge = along == 0 ? port.x() : port.z(), in = edge == 0 ? 1 : -1, mid = across == 0 ? port.x() : port.z();
+        double w2 = c.tierInfo().width() / 2.0, h = c.tierInfo().height();
+        b.color(0.22f, 0.22f, 0.24f);
+        lugBox(b, along, across, 0, H - 0.1, mid, w2 + 0.05, edge + in * 0.25, edge + in * (0.25 + h));
+        b.sprite = PIPE[0];
+        b.color(0.77f, 0.43f, 0.27f);   // (dull copper: a lug you can touch isn't bare metal, Baughn)
+        lugBox(b, along, across, H - 0.1, H + 0.6, mid, w2 + 0.15, edge + in * 0.15, edge + in * (0.35 + h));
+        lugBox(b, along, across, H - 0.85, H + 0.85, mid, Math.max(0.75, w2 - 0.25), edge, edge + in * 0.25);
+        b.sprite = cableSprite(c.tier);
+        b.color(0.22f, 0.22f, 0.24f);
+    }
+
+    static void lugBox(Builder b, int along, int across, double y0, double y1, double mid, double half, double a0, double a1) {
+        double[] lo = new double[3], hi = new double[3];
+        lo[1] = y0;
+        hi[1] = y1;
+        lo[across] = mid - half;
+        hi[across] = mid + half;
+        lo[along] = Math.min(a0, a1);
+        hi[along] = Math.max(a0, a1);
+        b.boxD(lo, hi);
     }
 
     static double clamp01(double v) {

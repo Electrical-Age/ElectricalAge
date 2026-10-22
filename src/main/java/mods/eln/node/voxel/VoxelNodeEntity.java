@@ -21,9 +21,49 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
 
     @Override
     public net.neoforged.neoforge.model.data.ModelData getModelData() {
-        var b = net.neoforged.neoforge.model.data.ModelData.builder().with(PARTS, clientParts).with(HOST, clientHost);
+        var b = net.neoforged.neoforge.model.data.ModelData.builder().with(PARTS, clientParts).with(HOST, clientHost).with(LUGS, clientLugs);
         if (clientCarved != null && !clientCarved.isEmpty()) b.with(CARVED, hostBoxes());
         return b.build();
+    }
+
+    /**
+     * Model data: the terminal plates beside the block (CableTerminals), the conductor height (px) per horizontal face
+     * (index 3D value - 2; 0 = none). A floor cable ending at one draws a lug there, as six-node cables do (Baughn: the
+     * steam turbine showed a bare cable end; the same code for every machine).
+     */
+    public static final net.neoforged.neoforge.model.data.ModelProperty<float[]> LUGS = new net.neoforged.neoforge.model.data.ModelProperty<>();
+
+    /** Client: the terminal heights the mesh was built with; rechecked twice a second (a device's front can come later). */
+    public volatile float[] clientLugs = new float[4];
+    private float lugCheck;
+
+    @Override
+    public void clientRefresh(float deltaT) {
+        super.clientRefresh(deltaT);
+        lugCheck -= deltaT;
+        if (lugCheck > 0) return;
+        lugCheck = 0.5f;
+        float[] k = lugHeights();
+        if (java.util.Arrays.equals(k, clientLugs)) return;
+        clientLugs = k;
+        requestModelDataUpdate();
+        if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), net.minecraft.world.level.block.Block.UPDATE_IMMEDIATE);
+    }
+
+    /** The terminal heights beside the faces a floor cable here ends on (0 elsewhere). */
+    float[] lugHeights() {
+        float[] k = new float[4];
+        if (level == null) return k;
+        for (VoxelPart p : clientParts)
+            if (p instanceof CablePart c && !c.isKnuckle() && c.face == 0)
+                for (CablePart.Port port : c.cablePorts()) {
+                    int f = port.face();
+                    if (f < 2 || k[f - 2] > 0) continue;
+                    var d = net.minecraft.core.Direction.from3DDataValue(f);
+                    var be = level.getBlockEntity(worldPosition.relative(d));
+                    k[f - 2] = mods.eln.cable.CableTerminals.heightAt(be, Direction.fromEnumFacing(d.getOpposite()));
+                }
+        return k;
     }
 
     /** Model data: what's left of a carved block (boxes), drawn in its textures instead of its model. */

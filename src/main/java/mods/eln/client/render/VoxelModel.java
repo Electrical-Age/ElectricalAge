@@ -78,7 +78,7 @@ public final class VoxelModel implements DynamicBlockStateModel {
         if (ps == null || ps.isEmpty()) return;
         QuadCollection.Builder qb = new QuadCollection.Builder();
         MutableQuad q = new MutableQuad();
-        for (VoxelGeometry.Quad g : VoxelGeometry.of(ps)) {
+        for (VoxelGeometry.Quad g : VoxelGeometry.of(ps, data.get(VoxelNodeEntity.LUGS))) {
             Material.Baked mat = sprites.getOrDefault(g.sprite(), particle);
             q.reset().setSprite(mat, com.mojang.blaze3d.platform.Transparency.NONE).setColor(g.argb()).setAmbientOcclusion(true);
             for (int i = 0; i < 4; i++) {
