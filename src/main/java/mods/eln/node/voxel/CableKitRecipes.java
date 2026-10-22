@@ -120,7 +120,7 @@ public final class CableKitRecipes {
         @Override
         public boolean matches(CraftingInput input, Level level) {
             int[] t = total(input);
-            return t != null && (tier < 0 || t[0] == tier);
+            return t != null && (tier < 0 || t[0] == tier) && !PipeKitRecipes.otherRecipe(input, level);
         }
 
         @Override
@@ -274,7 +274,7 @@ public final class CableKitRecipes {
             ItemStack c = coil(t);
             if (c.isEmpty()) continue;
             var ing = net.minecraft.world.item.crafting.Ingredient.of(c.getItem());
-            for (int n : new int[]{1, 9}) {
+            for (int n : new int[]{9}) {   // (the one-cable recipe JEI lists itself, from display(): AdventurAgent saw it twice)
                 List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();
                 for (int i = 0; i < n; i++) ings.add(ing);
                 out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(key("cable_kit_from_coils_" + t + "_" + n),

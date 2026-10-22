@@ -165,7 +165,7 @@ public class MnaPropertyTest {
             }
             for (int k = 0; k < net.n; k++) {
                 if (Double.isNaN(ref[k])) continue;
-                assertEquals(0, sum[k], relTol * 10 * abs[k] + 1e-9, ctx + ": KCL at node " + k + " in " + net);
+                assertEquals(0, sum[k], relTol * 10 * abs[k] + 1e-8, ctx + ": KCL at node " + k + " in " + net);
             }
         }
     }

@@ -553,7 +553,25 @@ public final class CableCases {
             return "cable kits";
         }
 
+        /** Real crafts in a crafting table: {tier, plates in one slot} (AdventurAgent: 4 alloy plates left 2, not 1). */
+        static final int[][] TABLE = {{1, 4}, {1, 7}, {0, 5}};
+        net.minecraft.world.inventory.CraftingMenu[] menus = new net.minecraft.world.inventory.CraftingMenu[TABLE.length];
+        net.minecraft.world.item.ItemStack[] results = new net.minecraft.world.item.ItemStack[TABLE.length];
+
         public void build(TestContext c) {
+            for (int q = 0; q < TABLE.length; q++) {
+                int[] t = TABLE[q];
+                var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+                var cm = new net.minecraft.world.inventory.CraftingMenu(7, fp.getInventory(),
+                    net.minecraft.world.inventory.ContainerLevelAccess.create(c.level(), net.minecraft.core.BlockPos.ZERO));
+                cm.getSlot(1).set(new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
+                    net.minecraft.resources.Identifier.parse(t[0] == 0 ? "eln:iron_plate" : "eln:alloy_plate")), t[1]));
+                cm.slotsChanged(cm.getSlot(1).container);
+                results[q] = cm.getSlot(0).getItem().copy();
+                cm.clicked(0, 0, net.minecraft.world.inventory.ContainerInput.PICKUP, fp);
+                cm.setCarried(net.minecraft.world.item.ItemStack.EMPTY);
+                menus[q] = cm;
+            }
         }
 
         public void measure(TestContext c) {
@@ -580,7 +598,7 @@ public final class CableCases {
                 && mvIngs.size() == 1 && mvIngs.get(0).test(mods.eln.node.voxel.CableKitRecipes.coil(LV + 1)) && !mvIngs.get(0).test(coil)
                 && !((mods.eln.node.voxel.CableKitRecipes.FromCoils) mv).matches(net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(coil.copy())), c.level())
                 && ((mods.eln.node.voxel.CableKitRecipes.FromCoils) mv).matches(mvIn, c.level()) && mv.display().size() == 1, String.valueOf(mv));
-            c.check("cable kit: JEI examples per tier", mods.eln.node.voxel.CableKitRecipes.examples().size() >= 15,
+            c.check("cable kit: JEI examples per tier", mods.eln.node.voxel.CableKitRecipes.examples().size() >= 10,
                 mods.eln.node.voxel.CableKitRecipes.examples().size() + " examples");
             // whole stacks (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of kits)
             var four = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
@@ -618,6 +636,22 @@ public final class CableCases {
                 && pu != null && pu[0] + pu[1] + pu[2] + pu[3] == 40, mods.eln.node.voxel.PipeKitItem.length(pk) + " " + java.util.Arrays.toString(pu));
             var one = mods.eln.node.voxel.PipeKitRecipes.FromPlates.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(plate.copy())));
             c.check("pipe kit: a single plate makes nothing (two to a block)", one.isEmpty(), one.toString());
+            // EA's casing (8 iron plates in a ring) still crafts: the kit recipe steps aside for another recipe
+            var ring = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+            var ip = new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("eln:iron_plate")));
+            for (int q = 0; q < 9; q++) ring.add(q == 4 ? net.minecraft.world.item.ItemStack.EMPTY : ip.copy());
+            var ringIn = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, ring);
+            var got = c.level().recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, ringIn, c.level());
+            c.check("casing: a ring of iron plates is still a casing", got.isPresent() && got.get().value().assemble(ringIn).getItem().toString().contains("casing"),
+                got.map(h -> h.value().assemble(ringIn).toString()).orElse("none"));
+            // the table crafts from build()
+            for (int q = 0; q < TABLE.length; q++) {
+                int[] t = TABLE[q];
+                int per = t[0] == 0 ? 2 : 3, blocks = t[1] / per, left = menus[q].getSlot(1).getItem().getCount();
+                c.check("pipe kit: a table craft of " + t[1] + (t[0] == 0 ? " iron" : " alloy") + " plates makes " + blocks + " blocks and leaves " + (t[1] - blocks * per),
+                    mods.eln.node.voxel.PipeKitItem.length(results[q]) == 16 * blocks && left == t[1] - blocks * per,
+                    "result " + mods.eln.node.voxel.PipeKitItem.length(results[q]) / 16 + " blocks, " + left + " left");
+            }
             var pkit = mods.eln.node.voxel.PipeKitItem.kit(0, 16);
             var pbox = new net.minecraft.world.SimpleContainer(1);
             var pslot = new net.minecraft.world.inventory.Slot(pbox, 0, 0, 0);

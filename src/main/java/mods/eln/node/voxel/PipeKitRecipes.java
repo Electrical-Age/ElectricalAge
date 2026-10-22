@@ -105,16 +105,43 @@ public final class PipeKitRecipes {
             return u == null ? null : new int[]{u[u.length - 3], u[u.length - 2]};
         }
 
+        /**
+         * Plates of this tier (and at most one kit), however few: when there are too few for a block it matches with
+         * no result. After a craft the grid asks the matching recipe for its remainders; with too few plates left to
+         * match, vanilla gave the inputs back instead (AdventurAgent: alloy kits left a plate behind).
+         */
         @Override
         public boolean matches(CraftingInput input, Level level) {
-            int[] t = total(input);
-            return t != null && (tier < 0 || t[0] == tier);
+            int t = -1, kits = 0, plates = 0;
+            for (int i = 0; i < input.size(); i++) {
+                ItemStack s = input.getItem(i);
+                if (s.isEmpty()) continue;
+                int st;
+                if (s.getItem() instanceof PipeKitItem k) {
+                    if (++kits > 1 || s.getCount() != 1) return false;
+                    st = k.tier;
+                } else {
+                    st = plateTier(s);
+                    if (st < 0) return false;
+                    plates++;
+                }
+                if (t >= 0 && st != t) return false;
+                t = st;
+            }
+            return plates > 0 && (tier < 0 || t == tier) && !otherRecipe(input, level);
         }
 
         @Override
         public ItemStack assemble(CraftingInput input) {
             int[] t = total(input);
             return t == null || tier >= 0 && t[0] != tier ? ItemStack.EMPTY : PipeKitItem.kit(t[0], t[1]);
+        }
+
+        /** Nothing stays behind: the plates are used up (an EA plate's crafting remainder is the plate itself, so the
+         *  default put one back each craft: AdventurAgent's alloy kits left a plate). */
+        @Override
+        public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
+            return NonNullList.withSize(input.size(), ItemStack.EMPTY);
         }
 
         @Override
@@ -144,6 +171,20 @@ public final class PipeKitRecipes {
             return List.of(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(in,
                 CableKitRecipes.slot(PipeKitItem.kit(tier, 16)), CableKitRecipes.table()));
         }
+    }
+
+    /**
+     * Does another crafting recipe take this grid (server; the client can't tell)? Kits made from whole stacks match
+     * any grid of their items, so they step aside for those: EA's casing is 8 iron plates in a ring.
+     */
+    static boolean otherRecipe(CraftingInput input, Level level) {
+        if (!(level instanceof net.minecraft.server.level.ServerLevel sl)) return false;
+        for (var h : sl.recipeAccess().recipeMap().byType(net.minecraft.world.item.crafting.RecipeType.CRAFTING)) {
+            var r = h.value();
+            if (r instanceof FromPlates || r instanceof CableKitRecipes.FromCoils || r instanceof Merge || r instanceof Split) continue;
+            if (r.matches(input, level)) return true;
+        }
+        return false;
     }
 
     /**
