@@ -18,14 +18,14 @@ public final class KitOutline {
     }
 
     private static volatile List<int[]> boxes = List.of();
-    private static volatile boolean ok = true;
+    private static volatile int state = 1;
 
     public static void read(DataInputStream in) throws IOException {
-        boolean k = in.readBoolean();
+        int k = in.readByte();   // (0 won't work, 1 works, 2 connects to a machine: KitPreview.send)
         int n = in.readShort();
         List<int[]> l = new ArrayList<>(n);
         for (int i = 0; i < n; i++) l.add(new int[]{in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt()});
-        ok = k;
+        state = k;
         boxes = l;
     }
 
@@ -33,7 +33,8 @@ public final class KitOutline {
         var player = Minecraft.getInstance().player;
         List<int[]> bs = boxes;
         if (player == null || bs.isEmpty() || !(player.getMainHandItem().getItem() instanceof CableKitItem)) return;
-        int color = ok ? 0xC040FF60 : 0xC0FF4040;
+        int st = state;
+        int color = st == 2 ? 0xE040D8FF : st == 1 ? 0xC040FF60 : 0xC0FF4040;   // (cyan: into a machine's port)
         e.addCustomRenderer((state, collector, pose, lrs) -> {
             Vec3 cam = lrs.cameraRenderState.pos;
             for (int[] b : bs) {

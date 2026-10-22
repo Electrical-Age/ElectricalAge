@@ -159,6 +159,17 @@ public final class CablePlacer {
         };
     }
 
+    /** Is the clicked thing a device (a machine's face, hosted in a voxel block or a block of its own)? */
+    static boolean isDevice(Level level, BlockPos pos, Vec3 hit) {
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
+        if (n == null) return false;
+        if (!(n instanceof VoxelNode v)) return true;
+        double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
+        int el = v.elementAt(hx, hy, hz, 0);
+        if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
+        return el >= 0;
+    }
+
     /** A click as a routing end: on a device, its face's nearest edge; on a cable, a point of it; else a point on the
      *  face clicked. join (out) gets the junction point for a cable. */
     static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join) {

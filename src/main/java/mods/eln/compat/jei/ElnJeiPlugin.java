@@ -24,8 +24,27 @@ public class ElnJeiPlugin implements IModPlugin {
         return Identifier.fromNamespaceAndPath("eln", "jei");
     }
 
+    /** The machines' recipe lists, by key (MachineCategory). */
+    static final java.util.Map<String, java.util.function.Supplier<mods.eln.misc.RecipesList>> MACHINES = new java.util.LinkedHashMap<>();
+    static final java.util.Map<String, mezz.jei.api.recipe.types.IRecipeType<mods.eln.misc.Recipe>> TYPES = new java.util.LinkedHashMap<>();
+
+    static {
+        MACHINES.put("macerator", () -> Eln.maceratorRecipes);
+        MACHINES.put("compressor", () -> Eln.compressorRecipes);
+        MACHINES.put("plate_machine", () -> Eln.plateMachineRecipes);
+        MACHINES.put("magnetiser", () -> Eln.magnetiserRecipes);
+        MACHINES.put("separator", () -> Eln.separatorRecipes);
+        for (String k : MACHINES.keySet()) TYPES.put(k, mezz.jei.api.recipe.types.IRecipeType.create("eln", k, mods.eln.misc.Recipe.class));
+    }
+
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        for (var e : MACHINES.entrySet()) {
+            var list = e.getValue().get();
+            if (list.getMachines().isEmpty() || list.getRecipes().isEmpty()) continue;
+            registration.addRecipeCategories(new MachineCategory(registration.getJeiHelpers().getGuiHelper(), TYPES.get(e.getKey()), e.getKey(),
+                list.getMachines().get(0)));
+        }
         ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1);
         if (!collector.isEmpty()) registration.addRecipeCategories(new ResinCategory(registration.getJeiHelpers().getGuiHelper(), collector));
     }
@@ -34,6 +53,10 @@ public class ElnJeiPlugin implements IModPlugin {
     public void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(RecipeTypes.CRAFTING, mods.eln.node.voxel.CableKitRecipes.examples());
         registration.addRecipes(RecipeTypes.CRAFTING, mods.eln.node.voxel.PipeKitRecipes.examples());
+        for (var e : MACHINES.entrySet()) {
+            var list = e.getValue().get();
+            if (!list.getMachines().isEmpty() && !list.getRecipes().isEmpty()) registration.addRecipes(TYPES.get(e.getKey()), list.getRecipes());
+        }
         ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1), resin = Eln.findItemStack("Tree Resin", 1);
         if (!collector.isEmpty() && !resin.isEmpty())
             registration.addRecipes(ResinCategory.TYPE, List.of(new ResinCategory.Resin(collector, resin)));
@@ -41,6 +64,11 @@ public class ElnJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        for (var e : MACHINES.entrySet()) {
+            var list = e.getValue().get();
+            if (list.getRecipes().isEmpty()) continue;
+            for (ItemStack m : list.getMachines()) registration.addCraftingStation(TYPES.get(e.getKey()), m);
+        }
         ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1);
         if (!collector.isEmpty()) registration.addCraftingStation(ResinCategory.TYPE, collector);
     }

@@ -64,14 +64,16 @@ public final class KitPreview {
         }
         long[][] join = new long[1][];
         CableRouter.End at = CablePlacer.endAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation(), plan == null, join);
+        // a machine's port: snapped to it and in its own colour (Baughn: it wasn't obvious that cables connect to machines)
+        boolean device = at != null && CablePlacer.isDevice(level, bh.getBlockPos(), bh.getLocation());
         if (at == null) {
             send(p, false, boxes);
             p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Not a place for a cable"));
             return;
         }
         if (plan == null || plan.tier != kit.tier) {   // (where it would start: at once)
-            boxes.add(marker(at));
-            send(p, true, boxes);
+            boxes.add(device ? port(at) : marker(at));
+            send(p, true, boxes, device);
             return;
         }
         // the route: on the preview thread, over a snapshot of the blocks round its ends (Baughn: the router on the server
@@ -90,7 +92,12 @@ public final class KitPreview {
                 if (GEN.getOrDefault(id, 0L) != gen) return;
                 ServerPlayer now = server.getPlayerList().getPlayer(id);
                 if (now == null) return;
-                send(now, a.ok, a.boxes);
+                List<int[]> bs = a.boxes;
+                if (device && a.ok) {
+                    bs = new ArrayList<>(bs);
+                    bs.add(port(at));
+                }
+                send(now, a.ok, bs, device && a.ok);
                 // (always a line: a "can't reach" left over from a moment ago read as if the route drawn now were wrong)
                 now.sendOverlayMessage(net.minecraft.network.chat.Component.literal(a.message));
             });
@@ -172,11 +179,21 @@ public final class KitPreview {
         return new int[]{(int) at.x() - 1, (int) at.y() - 1, (int) at.z() - 1, (int) at.x() + 1, (int) at.y() + 1, (int) at.z() + 1};
     }
 
+    /** A machine's port: a bigger cube centred on where the cable meets it. */
+    static int[] port(CableRouter.End at) {
+        return new int[]{(int) at.x() - 2, (int) at.y() - 2, (int) at.z() - 2, (int) at.x() + 2, (int) at.y() + 2, (int) at.z() + 2};
+    }
+
     static void send(ServerPlayer p, boolean ok, List<int[]> boxes) {
+        send(p, ok, boxes, false);
+    }
+
+    /** state: 0 won't work, 1 works, 2 works and connects to a machine (KitOutline's colours). */
+    static void send(ServerPlayer p, boolean ok, List<int[]> boxes, boolean device) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (DataOutputStream out = new DataOutputStream(bos)) {
             out.writeByte(Eln.packetKitPreview);
-            out.writeBoolean(ok);
+            out.writeByte(!ok ? 0 : device ? 2 : 1);
             int n = Math.min(boxes.size(), 2000);
             out.writeShort(n);
             for (int i = 0; i < n; i++) for (int v : boxes.get(i)) out.writeInt(v);

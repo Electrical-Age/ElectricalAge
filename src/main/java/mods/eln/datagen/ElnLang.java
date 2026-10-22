@@ -39,6 +39,12 @@ public class ElnLang extends LanguageProvider {
         add("gui.eln.chisel.brush", "Chisel brush");
         // JEI (compat/jei/ResinCategory)
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
+        add("jei.eln.machine.macerator", "Macerator");
+        add("jei.eln.machine.compressor", "Compressor");
+        add("jei.eln.machine.plate_machine", "Plate Machine");
+        add("jei.eln.machine.magnetiser", "Magnetizer");
+        add("jei.eln.machine.separator", "Separator");
+        add("jei.eln.machine.extra", "(sometimes more)");
         add("jei.eln.tree_resin_collector.how", "On the side of a log under leaves. Right-click it to empty it.");
         // the guide advancements' hints (Baughn's words, 2026-10-20; data/eln/advancement/guide, tools/advancements/make_guide.py)
         add("advancements.eln.guide.root.title", "Electrical Age");

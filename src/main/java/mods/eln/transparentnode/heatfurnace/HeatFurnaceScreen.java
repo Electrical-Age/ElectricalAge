@@ -15,6 +15,8 @@ import static mods.eln.i18n.I18N.tr;
  */
 public class HeatFurnaceScreen extends ElnScreen {
     final HeatFurnaceRender render;
+    /** The simulation's 0 in °C (PhysicalConstant.Tref, 20 °C). */
+    static final double C0 = mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
     EaSlider gain, heat;
     net.minecraft.client.gui.components.Button fuel;
 
@@ -35,7 +37,9 @@ public class HeatFurnaceScreen extends ElnScreen {
         text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel: click \"Declining fuel\" to take it)")
             : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL, refuels()));
         heat = slider("heat", 0, 980, 10, render.temperatureTargetSyncValue,
-            v -> Component.literal(tr("Set point: %1$°C", (int) v) + "  (" + tr("Actual: %1$°C", Utils.plotValue(render.temperature)) + ")"),
+            // (in °C, as Jade shows them: the simulation's temperatures are above the 20 °C reference; Baughn saw the GUI
+            // and Jade disagree by that much)
+            v -> Component.literal(tr("Set point: %1$°C", (int) Math.round(v + C0)) + "  (" + tr("Actual: %1$°C", Utils.plotValue(render.temperature + C0)) + ")"),
             v -> render.clientSetTemperatureTarget((float) v));
         render.gainSyncNew = render.temperatureTargetSyncNew = false;
         update();
