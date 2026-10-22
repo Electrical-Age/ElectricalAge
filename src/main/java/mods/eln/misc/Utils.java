@@ -402,6 +402,26 @@ public class Utils {
         return new float[]{Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16)};
     }
 
+    /**
+     * Where the wind comes from, if another mod models it (Watershed, by IMC "eln"/"wind": a supplier of this function):
+     * the wind speed (m/s) at a place now, NaN where it has no wind (other dimensions). Null: EA's own global wind.
+     */
+    public static volatile java.util.function.ToDoubleBiFunction<net.minecraft.world.level.Level, net.minecraft.core.BlockPos> windSource;
+
+    /**
+     * The wind at c, dy blocks up: the wind source's speed there if there is one (Baughn: EA's wind turbine reads
+     * Watershed's wind map), scaled by height as EA's own wind, else EA's global wind at that height.
+     */
+    public static double getWind(Coordonate c, int dy) {
+        var src = windSource;
+        int y = c.y + dy;
+        if (src != null && c.getWorldExist()) {
+            double w = src.applyAsDouble(c.world(), new net.minecraft.core.BlockPos(c.x, y, c.z));
+            if (!Double.isNaN(w)) return Math.max(0.0, w * Math.min(Math.max(y, 0), 100) / 100.0);
+        }
+        return getWind(c.dimention, y);
+    }
+
     public static double getWind(int worldId, int y) {
         net.minecraft.world.level.Level world = Dimensions.level(worldId);
         if (world == null) {

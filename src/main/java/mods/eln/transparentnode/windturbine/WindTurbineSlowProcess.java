@@ -34,8 +34,7 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     }
 
     double getWind() {
-        return Math.abs(localWind + Utils.getWind(turbine.node.coordonate.dimention, turbine.node.coordonate.y +
-            turbine.descriptor.offY)) * environmentWindFactor;
+        return Math.abs(localWind + Utils.getWind(turbine.node.coordonate, turbine.descriptor.offY)) * environmentWindFactor;
     }
 
     void setWind(double wind) {

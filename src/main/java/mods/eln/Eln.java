@@ -219,6 +219,17 @@ public class Eln {
 
     public Eln(IEventBus modBus, net.neoforged.fml.ModContainer container) {
         container.registerConfig(net.neoforged.fml.config.ModConfig.Type.SYNCED, ElnConfig.SPEC);
+        // another mod's wind (Watershed's wind map) for the wind turbine and sensor: IMC "wind", a supplier of
+        // ToDoubleBiFunction<Level, BlockPos> (m/s; NaN = none there), see Utils.windSource
+        modBus.addListener(net.neoforged.fml.event.lifecycle.InterModProcessEvent.class, e -> e.getIMCStream("wind"::equals).forEach(m -> {
+            Object f = m.messageSupplier().get();
+            if (f instanceof java.util.function.ToDoubleBiFunction<?, ?> fn) {
+                @SuppressWarnings("unchecked")
+                var w = (java.util.function.ToDoubleBiFunction<net.minecraft.world.level.Level, net.minecraft.core.BlockPos>) fn;
+                mods.eln.misc.Utils.windSource = w;
+                org.slf4j.LoggerFactory.getLogger("eln").info("Wind from {}", m.senderModId());
+            }
+        }));
         modBus.addListener(net.neoforged.fml.event.config.ModConfigEvent.Loading.class, e -> {
             if (e.getConfig().getSpec() == ElnConfig.SPEC) ElnConfig.refresh();
         });

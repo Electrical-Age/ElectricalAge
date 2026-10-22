@@ -436,6 +436,19 @@ public final class Wp10bCases {
             FunctionTable pfw = field(field(wind, "descriptor"), "PfW");
             PowerSource ps = field(wind, "powerSource");
             within(ctx, f("wp10b wind turbine power [W] (PfW(wind %.3f))", w), ps.getP(), pfw.getValue(w), 0.01 * pfw.getValue(w) + 1e-9);
+            // another mod's wind (Utils.windSource: Watershed's wind map): used where it has one, scaled by height like EA's
+            mods.eln.misc.Coordonate wc = new mods.eln.misc.Coordonate(pos(wind), ctx.world());
+            var before = mods.eln.misc.Utils.windSource;
+            try {
+                mods.eln.misc.Utils.windSource = (l, p) -> 12.0;
+                double got = mods.eln.misc.Utils.getWind(wc, 3), want = 12.0 * Math.min(Math.max(wc.y + 3, 0), 100) / 100.0;
+                within(ctx, "wp10b wind from another mod's wind source [m/s]", got, want, 1e-9);
+                mods.eln.misc.Utils.windSource = (l, p) -> Double.NaN;
+                within(ctx, "wp10b no wind there from the source: EA's own", mods.eln.misc.Utils.getWind(wc, 3),
+                    mods.eln.misc.Utils.getWind(wc.dimention, wc.y + 3), 1e-9);
+            } finally {
+                mods.eln.misc.Utils.windSource = before;
+            }
             int g = ghosts(ctx, pos(wind), 3);
             ctx.check("wp10b wind turbine ghost blocks (mast 3 + blades 4)", g == 7, g + " ghost block(s)");
             Object wp = field(water, "slowProcess");
