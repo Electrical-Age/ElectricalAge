@@ -236,6 +236,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         super.networkSerialize(stream);
         try {
             stream.writeFloat((float) omega);   // (the rotor's turn, SteamGeneratorRender)
+            stream.writeFloat((float) (steamRate / desc.nominalSteam()));   // (the steam out of its vent)
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }

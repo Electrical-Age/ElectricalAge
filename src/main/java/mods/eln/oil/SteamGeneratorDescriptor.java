@@ -44,6 +44,12 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
         draw(0);
     }
 
+    /** The vent's outlet (model coordinates, front XN), from the model's .txt; null without a model. */
+    float[] vent() {
+        var p = obj == null ? null : obj.getPart("main");
+        return p == null ? null : new float[]{p.getFloat("ventX"), p.getFloat("ventY"), p.getFloat("ventZ")};
+    }
+
     /** The model, its rotor (shaft and coupling) turned `angle` degrees about the shaft. */
     void draw(float angle) {
         if (obj != null) {

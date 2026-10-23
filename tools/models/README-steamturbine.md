@@ -21,7 +21,7 @@ Design: a compact turbine-generator set on a skid, shaft running front to back.
 ## Files
 - `steamturbine.py RESOURCES` writes `assets/eln/model/steamturbine{50v,200v}/` with `steamturbine*.obj` + `.mtl`
   (part `main`, one material `atlas`) and `tex.png` (64x32 atlas of 8 procedural 16x16 cells: steel, darksteel,
-  castiron, copper, brass, paint (tier colour), glass (gauge face), rubber). 1396 / 1556 triangles (main + rotor).
+  castiron, copper, brass, paint (tier colour), glass (gauge face), rubber). 1454 / 1614 triangles (main + rotor).
   Run: `nix-shell -p 'python3.withPackages(p:[p.pillow])' --run 'python3 tools/models/steamturbine.py src/main/resources'`,
   then `python3 script/gen_model_index.py`.
 - Check and preview: `python3 tools/models/elncheck.py src/main/resources/assets/eln/model/steamturbine*/steamturbine*.obj --preview OUT`.
