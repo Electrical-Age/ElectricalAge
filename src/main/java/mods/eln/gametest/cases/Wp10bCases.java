@@ -97,6 +97,7 @@ public final class Wp10bCases {
         cases.add(new TeleporterCase());
         cases.add(new IdleCase());
         cases.add(new HeatFurnaceExternalCase());
+        cases.add(new HeatFurnaceTrimmerCase());
     }
 
     // ------------------------------------------------------------------ helpers
@@ -583,6 +584,78 @@ public final class Wp10bCases {
             within(ctx, "wp10b heat furnace: full signal on its right side, full gain", off.furnaceProcess.getGain(), 1.0, 0.05);
             ctx.check("wp10b heat furnace: a signal takes fuel (left and right)", half.getTakeFuel() && off.getTakeFuel(),
                 "left " + half.getTakeFuel() + ", right " + off.getTakeFuel());
+        }
+    }
+
+    /**
+     * A Signal Trimmer placed right beside a heat furnace's side, facing it, with no cable between (a player's report via
+     * Baughn): the furnace reads its signal. The stone heat furnace on its left with a six-node trimmer and on its right with
+     * one hosted in a voxel block (as placed in-world once cables are converted); the fuel heat furnace likewise.
+     */
+    static final class HeatFurnaceTrimmerCase implements TestCase {
+        HeatFurnaceElement left, right;
+        TransparentNodeElement fuelLeft, fuelRight;
+
+        public String name() {
+            return "wp10b heat furnace with a signal trimmer beside it";
+        }
+
+        public int width() {
+            return 15;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        static void trimmer(TestContext ctx, Wp10aCases.Layout l, TransparentNodeElement f, boolean onRight, boolean voxel) {
+            BlockPos p = f.node.coordonate.pos();
+            Direction side = onRight ? f.front.right() : f.front.left();
+            BlockPos tp = off(p, side);
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            mods.eln.node.voxel.CableConverter.convertOnLoad = voxel;
+            mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement t;
+            try {
+                l.used.add(tp);
+                t = (mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement) ctx.placeSix(Wp9cCases.SIGNAL_TRIMMER, tp);
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+            }
+            Wp9aCases.orient(t, x -> x, side.getInverse());
+            t.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement.setVoltagerId);
+                o.writeFloat((float) (Eln.SVU / 2));
+            }));
+        }
+
+        TransparentNodeElement furnace(TestContext ctx, Wp10aCases.Layout l, int damage, int x, boolean onRight, boolean voxel) {
+            BlockPos p = ctx.at(x, 1, 1);
+            TransparentNodeElement f = ctx.placeTransparent(damage, p);
+            l.used.add(p);
+            if (f instanceof HeatFurnaceElement h)
+                h.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleControlExternalId)));
+            else
+                f.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getExternalControlledToggleEvent())));
+            trimmer(ctx, l, f, onRight, voxel);
+            return f;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            left = (HeatFurnaceElement) furnace(ctx, l, HEAT_FURNACE, 1, false, false);
+            right = (HeatFurnaceElement) furnace(ctx, l, HEAT_FURNACE, 5, true, true);
+            fuelLeft = furnace(ctx, l, FUEL_HEAT_FURNACE, 9, false, true);
+            fuelRight = furnace(ctx, l, FUEL_HEAT_FURNACE, 13, true, false);
+        }
+
+        public void measure(TestContext ctx) {
+            within(ctx, "wp10b heat furnace: a six-node trimmer on its left, no cable [V]", left.electricalCmdLoad.getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
+            within(ctx, "wp10b heat furnace: a voxel-hosted trimmer on its right, no cable [V]", right.electricalCmdLoad.getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
+            within(ctx, "wp10b heat furnace: half the signal from a trimmer, half the gain", right.furnaceProcess.getGain(), 0.5, 0.05);
+            within(ctx, "wp10b fuel heat furnace: a voxel-hosted trimmer on its left [V]",
+                Batch1Cases.<ElectricalLoad>field(fuelLeft, "controlLoad").getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
+            within(ctx, "wp10b fuel heat furnace: a six-node trimmer on its right [V]",
+                Batch1Cases.<ElectricalLoad>field(fuelRight, "controlLoad").getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
         }
     }
 
