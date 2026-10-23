@@ -259,6 +259,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
             stream.writeFloat((float) (cookW / ENERGY_PER_ITEM));   // (progress a second)
             stream.writeFloat((float) (inlet == null ? 1 : inlet.P() / 1e5));
             stream.writeFloat((float) (steamRate * EaUnits.KG_PER_MB_STEAM / SteamOvenDescriptor.maxSteamKgPerS()));   // (the vent's plume)
+            stream.writeFloat((float) steamRate);   // (mB/s)
             stream.writeBoolean(powered);
             Utils.serialiseItemStack(stream, Utils.isEmpty(inventory.getItem(inSlotId)) ? null : inventory.getItem(inSlotId));
         } catch (IOException e) {

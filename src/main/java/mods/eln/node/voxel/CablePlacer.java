@@ -233,25 +233,26 @@ public final class CablePlacer {
             return null;
         }
         if (n != null) {
-            // a device: the edge of the clicked face nearest the click; the cable lies in the block in front, against
-            // the face beyond that edge, and meets the device there (EA's edge rule)
+            // a device: the edge of the clicked face nearest the click that has a connector (a click high on a face whose
+            // connector is at the floor still finds it, AdventurAgent); the cable lies in the block in front, against the
+            // face beyond that edge, and meets the device there (EA's edge rule)
             int f = face.get3DDataValue();
             int fa = CableRouter.axis(f);
             double[] h = {hx, hy, hz};
+            var side = mods.eln.misc.Direction.fromEnumFacing(face);
             int edge = -1;
             double bd = Double.MAX_VALUE;
             for (int g = 0; g < 6; g++) {
                 if (CableRouter.axis(g) == fa) continue;
+                if (n.getSideConnectionMask(side, side.getLRDUGoingTo(mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g)))) == 0) continue;
                 double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
                 if (d < bd) {
                     bd = d;
                     edge = g;
                 }
             }
-            // (no connector on that edge, as the steam turbine's flanks: not an end, AdventurAgent)
-            var side = mods.eln.misc.Direction.fromEnumFacing(face);
-            if (n.getSideConnectionMask(side, side.getLRDUGoingTo(mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(edge)))) == 0)
-                return null;
+            // (no connector on any edge of that face, as the steam turbine's flanks: not an end, AdventurAgent)
+            if (edge < 0) return null;
             long[] p = new long[3];
             long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
             p[fa] = base[fa] + (f % 2 == 0 ? 0 : 16);

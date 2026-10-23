@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Steam oven model (Baughn 2026-10-23): a steel cabinet on feet with a glass door in front, the steam pipe coming in on
-top (an iron pipe's 4 px bore to a laid pipe's flange on the top face, where a pipe couples), a vent stack at the back
+top (an iron pipe's 4 px bore to a laid pipe's flange on the top face, where a pipe couples), a vent out of the back face
 that the renderer puffs steam from (the .txt's ventX/Y/Z), and 50 V terminal plates low on both sides (the fan).
 
 EA transparent node drawn by SteamOvenRender through Obj3D. px frame (0..16, corner origin); front = x 0 (XN).
@@ -30,16 +30,16 @@ def oven():
     m.add(prism("y", 8, 8, PIPE_R, 13, 15, "castiron", n=12, caps=(False, False)))
     m.add(prism("y", 8, 8, PIPE_R + 0.75, 15, 16, "steel", n=12))
     m.add(prism("y", 8, 8, PIPE_R + 0.35, 13, 13.6, "paint", n=12, caps=(False, True)))   # (50 V green collar)
-    # the vent stack at the back, open at the top
-    m.add(prism("y", 12.5, 12.5, 0.9, 13, 14.8, "castiron", n=8, caps=(False, False)))
-    m.add(tube("y", 12.5, 12.5, 0.8, 1.2, 14.8, 15.6, "darksteel", n=8))
-    m.add(prism("y", 12.5, 12.5, 0.85, 14.2, 14.3, "soot", n=8, caps=(False, True)))
+    # the vent out of the back face, high up (a boiler set on top would hide one on the roof, AdventurAgent)
+    m.add(prism("x", 11, 8, 0.9, 15, 15.9, "castiron", n=8, caps=(False, False)))
+    m.add(prism("x", 11, 8, 1.2, 15.6, 16, "darksteel", n=8, caps=(False, False)))
+    m.add(prism("x", 11, 8, 0.85, 15.3, 15.35, "soot", n=8, caps=(False, True)))
     # the fan's 50 V terminal plates, low on both sides
     for z0, z1 in ((0.1, 0.85), (15.15, 15.9)):
         m.add(box(4.5, 0, z0, 11.5, 4.0, z1, "steel"), box(4.5, 4.0, z0, 11.5, 4.5, z1, "paint"))
         for x in (5.75, 8.0, 10.25):
             m.add(box(x - 0.5, 1.75, z0 - 0.1, x + 0.5, 2.75, z1 + 0.1, "copper"))
-    vent = (12.5 / 16 - 0.5, 15.6 / 16 - 0.5, 12.5 / 16 - 0.5)
+    vent = (16 / 16 - 0.5, 11 / 16 - 0.5, 8 / 16 - 0.5)   # (the outlet's centre; it faces +x, the back)
     return m, vent
 
 def atlas(path):

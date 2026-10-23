@@ -1,4 +1,4 @@
 o main
-f ventX 0.28125
-f ventY 0.47500
-f ventZ 0.28125
+f ventX 0.50000
+f ventY 0.18750
+f ventZ 0.00000

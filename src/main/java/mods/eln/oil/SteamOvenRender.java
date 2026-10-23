@@ -14,7 +14,7 @@ import java.io.IOException;
 /** The steam oven (SteamOvenDescriptor): the model, the plume from its vent while it cooks, and the GUI's values. */
 public class SteamOvenRender extends TransparentNodeElementRender {
     final SteamOvenDescriptor desc;
-    public float progress, perSecond, pressureBar;
+    public float progress, perSecond, pressureBar, steamMbS;
     public boolean powered;
     final RcInterpolator steam = new RcInterpolator(1.5f);
     ItemEntity entityItemIn;
@@ -52,7 +52,9 @@ public class SteamOvenRender extends TransparentNodeElementRender {
         while (due >= 1) {
             due -= 1;
             double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.06;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, x + jx, y, z + jz, jx * 0.2, 0.04 + RND.nextDouble() * 0.03, jz * 0.2);
+            // out of the back face (model +x), then rising: a boiler set on top doesn't hide it (AdventurAgent)
+            double out = 0.04 + RND.nextDouble() * 0.02;
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, x + jz * s, y + jx, z + jz * c, c * out, 0.02 + RND.nextDouble() * 0.02, -s * out);
         }
     }
 
@@ -64,6 +66,7 @@ public class SteamOvenRender extends TransparentNodeElementRender {
             perSecond = stream.readFloat();
             pressureBar = stream.readFloat();
             steam.setTarget(stream.readFloat());
+            steamMbS = stream.readFloat();
             powered = stream.readBoolean();
             entityItemIn = Utils.unserializeItemStackToEntityItem(stream, entityItemIn, tileEntity);
         } catch (IOException e) {
