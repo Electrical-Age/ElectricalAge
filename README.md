@@ -1,26 +1,23 @@
 # Minecraft Mod - Codename : ELN
 
-[![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=1.7.10-MNA)](https://travis-ci.org/Electrical-Age/ElectricalAge)
+[![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=develop)](https://travis-ci.org/Electrical-Age/ElectricalAge)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge?ref=badge_shield)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0dd12c97357f4542903a667fa82a852c)](https://www.codacy.com/app/Baughn/ElectricalAge?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Electrical-Age/ElectricalAge&amp;utm_campaign=Badge_Grade)
 
-> ## Minecraft 1.12.2 port (branch `ports/1.12`) — alpha
+> ## Minecraft 26.3 port — alpha
 >
-> This branch ports Electrical Age 1.17.0 (1.7.10) to **Minecraft 1.12.2 / Forge** (also runs on Cleanroom).
-> It was done in October 2026 by an AI agent (Claude, as "tsugumi-lab") for the Erisia server, at Baughn's request.
+> This branch ports Electrical Age 1.17.0 (1.7.10) to **Minecraft 26.3 / NeoForge**.
+> It was done in October 2026 by an AI agent (Claude, as "tsugumi-lab") for the Erisia server, at Baughn's request. It's currently undergoing playtesting on said server.
 >
-> - **Requirements:** Forge 1.12.2 and [Forgelin-Continuous](https://github.com/ChAoSUnItY/Forgelin-Continuous) (Kotlin 2.4 runtime).
->   RedstoneFlux, IndustrialCraft 2 and The One Probe integrations are optional.
-> - **Status:** all device families are ported and registered. A built-in self-test (`/eln selftest`) passes 245/245 on
->   a dedicated server, the simulator has headless JUnit tests (`src/test`), and the client was smoke-tested headlessly.
+> - **Requirements:** Stable-version NeoForge for 26.3. All other integrations are optional.
+> - **Status:** Potentially playable; playtesting is in progress. A built-in selftest (`/eln selftest`) passes, the simulator has headless JUnit tests (`src/test`), and the client was smoke-tested headlessly.
 >   Only light human play-testing so far: expect bugs.
 > - **Deliberate behaviour changes** (bugs fixed against real physics rather than ported): generator heat retuned and
 >   its thermal watchdog enabled, motor efficiency 0.9, fuses trip at 1.08x and breakers at 1.05x, transformer/capacitor
 >   currents reported correctly, generators motor with the same droop law they generate with (uncapped: a stalled
->   motor on a stiff supply will overheat; build inrush protection).
-> - **Known gaps:** rendering is still the 1.7.10 immediate-mode path (TESRs), so large builds are slower than they
->   should be. The tutorial map and the wiki below describe the 1.7.10 version.
-> - **Building:** JDK 8 (target) and 21+ (Gradle), then `./gradlew build`. The optional-integration jars go in `libs/`
+>   motor on a stiff supply will overheat; build inrush protection). Many more.
+> - **Known gaps:** rendering for many blocks is still the 1.7.10 immediate-mode path (TESRs), so large builds are slower than they should be. The tutorial map and the wiki below describe the 1.7.10 version, and are unlikely to be very helpful.
+> - **Building:** JDK 8+ (target) and 21+ (Gradle), then `./gradlew build`. The optional-integration jars go in `libs/`
 >   (see `gradle/scripts/dependencies.gradle` for the exact file names).
 
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
@@ -29,7 +26,7 @@ Look at the official project website [electrical-age.net](https://electrical-age
 
 ## How to get started
 
-**ElectricalAge is Minecraft 1.7.10 compatible only. Forge is needed.**
+**ElectricalAge is Minecraft 26.3 compatible only. NeoForge is needed.**
 
 1. Download the [last mod release](https://minecraft.curseforge.com/projects/electrical-age) (other versions are available through the same link). Copy the Jar file to the `.minecraft/mods/` directory (or related folder depending on your platform).
 2. Get started with the tutorial map or start playing on the offical demonstration map. The two official maps can be [downloaded from here](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_tutorialMap_BETA-1.9_r41.zip). They must be copied to the `.minecraft/saves/` (or related) directory.
@@ -91,8 +88,9 @@ Use at your own risk and do map backup frequently.
 
 ## MAIN DEVELOPERS
 
-- **Dolu1990** (Code guru, concepts, some 3D models)
-- **Svein Ove Aas, aka. Baughn** (Code, some 3D models, concepts)
+- **Dolu1990** (Historical code guru, concepts, some 3D models)
+- **Svein Ove Aas, aka. Baughn** (Code, some 3D models, concepts, porting, network security checks)
+- **jrddunbr** (Code, concepts, some 3D models, more)
 - **cm0x4D** (Sound engineer, code and 3D models/texturing, concepts)
 - **lambdaShade** (3D models/texturing/graphics maestro, concepts, some sounds and lines of code)
 - **metc** (Website/Wiki webmaster)
@@ -119,7 +117,6 @@ Mod promotion:
 
 - **TheBroBeans** (initial promotor)
 - **don_bruce/BenPlotz** (forum expert, [video tutorials](https://www.youtube.com/channel/UCRYhOQhspQqIBvL8kiDu2Rw))
-- **Baughn** (forum expert)
 - ...
 
 The full list of contributors is [available here](https://github.com/Electrical-Age/ElectricalAge/graphs/contributors).
