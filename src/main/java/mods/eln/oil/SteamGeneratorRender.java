@@ -52,11 +52,8 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
         double x = p.getX() + 0.5 + v[0] * c + v[2] * s, y = p.getY() + 0.5 + v[1], z = p.getZ() + 0.5 - v[0] * s + v[2] * c;
         while (due >= 1) {
             due -= 1;
-            double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.02;
-            // out of the side outlet (model +z), then rising: clear of a boiler on top (AdventurAgent)
-            double out = 0.035 + RND.nextDouble() * 0.015, jy = (RND.nextDouble() - 0.5) * 0.06;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, x + jx * c, y + jy, z - jx * s,
-                s * out + jz * 0.2, 0.015 + RND.nextDouble() * 0.01, c * out + jz * 0.2);
+            double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.06;
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, x + jx, y, z + jz, jx * 0.2, 0.03 + RND.nextDouble() * 0.02, jz * 0.2);
         }
     }
 

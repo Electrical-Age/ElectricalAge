@@ -5,7 +5,7 @@ EA transparent node, drawn by SteamGeneratorRender through Obj3D (see README.md,
 mcmodel's px frame (0..16, corner origin); write_eln centres it. The shaft runs front-back along x:
   x = 0  (west, XN)  FRONT: generator end, terminal plate at floor level (electric out, LRDU Down)
   x = 16 (east, XP)  BACK:  turbine end, second terminal plate, fed by a bus duct along the z- skid rail
-  top: steam inlet stub + flange on the scroll, a riser to a flange centred on the top face (a boiler set on top feeds it); z+ side: exhaust vent stack, out through an open outlet on the z+ face: the renderer puffs steam from it.
+  top: steam inlet stub + flange on the scroll, a riser to a flange centred on the top face (a boiler set on top feeds it); z+ side: exhaust vent stack, open at the top: the renderer puffs steam from it.
 
 Usage: steamturbine.py RESOURCES_DIR   (e.g. src/main/resources)
   Writes RESOURCES_DIR/assets/eln/model/steamturbine{50v,200v}/steamturbine*.{obj,mtl} + tex.png (atlas).
@@ -115,17 +115,15 @@ def turbine(tier):
     # --- exhaust vent stack on the z+ side (vents to air; the turbine has no steam output)
     ez = CZ + scroll_r(t, math.pi / 2) + 1.0
     m.add(prism("z", tcx, cy - 0.25, 0.9, CZ + 1.0, ez + 0.9, "castiron", n=8, caps=(False, True)))
-    # up, then out sideways through an open outlet on the z+ face: the steam leaves there (Baughn), clear of a boiler set
-    # on top (AdventurAgent: straight up, it rose into the boiler)
-    vy = 11.5
-    m.add(prism("y", tcx, ez, 0.9, cy - 0.25, vy + 0.9, "castiron", n=8, caps=(True, True)))
-    m.add(prism("z", tcx, vy, 0.9, ez, 15.0, "castiron", n=8, caps=(False, False)))
-    m.add(tube("z", tcx, vy, 0.8, 1.25, 15.0, 15.9, "darksteel", n=8))                        # open outlet
-    m.add(prism("z", tcx, vy, 0.85, 14.4, 14.5, "rubber", n=8, caps=(False, True)))           # (dark inside the bore)
+    # straight up to an open outlet: the steam leaves there (Baughn). (A boiler set on top would hide it, but nobody
+    # builds like that, Baughn: pipes are cheap.)
+    m.add(prism("y", tcx, ez, 0.9, cy - 0.25, 12.75, "castiron", n=8, caps=(True, False)))
+    m.add(tube("y", tcx, ez, 0.8, 1.25, 12.75, 13.75, "darksteel", n=8))                      # open outlet
+    m.add(prism("y", tcx, ez, 0.85, 12.0, 12.5, "rubber", n=8, caps=(False, True)))           # (dark inside the bore)
     # --- terminal plates (electric out, front and back, floor level)
     terminal_plate(m, 0.1, 0.85, 0.1, 0.0)
     terminal_plate(m, 15.15, 15.9, 15.9, 16.0)
-    vent = (tcx / 16 - 0.5, vy / 16 - 0.5, 15.9 / 16 - 0.5)   # (the outlet's centre, model coordinates; it faces z+)
+    vent = (tcx / 16 - 0.5, 13.75 / 16 - 0.5, ez / 16 - 0.5)   # (the outlet's centre, model coordinates; it faces up)
     return m, rotor, vent
 
 # ---------- textures: 16x16 cells of one atlas (procedural, deterministic) ----------

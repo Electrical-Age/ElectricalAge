@@ -3,5 +3,5 @@ f originY -0.078125
 f originZ 0.0
 o main
 f ventX 0.20312
-f ventY 0.21875
-f ventZ 0.49375
+f ventY 0.35938
+f ventZ 0.25174
