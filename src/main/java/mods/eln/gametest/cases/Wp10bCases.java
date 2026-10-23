@@ -555,13 +555,13 @@ public final class Wp10bCases {
             return 40;
         }
 
-        HeatFurnaceElement place(TestContext ctx, Wp10aCases.Layout l, int x, float volts) {
+        HeatFurnaceElement place(TestContext ctx, Wp10aCases.Layout l, int x, float volts, boolean right) {
             BlockPos p = ctx.at(x, 1, 1);
             HeatFurnaceElement f = (HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, p);
             l.used.add(p);
-            // as a player: the GUI's toggle packet, and a signal cable between source and furnace
+            // as a player: the GUI's toggle packet, and a signal cable between source and furnace, on either side
             f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleControlExternalId)));
-            BlockPos cp = off(p, f.front.left());
+            BlockPos cp = off(p, right ? f.front.right() : f.front.left());
             l.six(0 + (32 << 6), cp);   // (signal cable)
             ElectricalSourceElement s = (ElectricalSourceElement) l.six(SIGNAL_SOURCE, cp.south());   // (beside the cable, on the platform)
             s.networkUnserialize(ctx.stream(o -> {
@@ -573,15 +573,16 @@ public final class Wp10bCases {
 
         public void build(TestContext ctx) {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
-            half = place(ctx, l, 1, (float) (mods.eln.Eln.SVU / 2));
-            off = place(ctx, l, 5, 0f);
+            half = place(ctx, l, 1, (float) (mods.eln.Eln.SVU / 2), false);
+            off = place(ctx, l, 5, (float) mods.eln.Eln.SVU, true);
         }
 
         public void measure(TestContext ctx) {
             within(ctx, "wp10b heat furnace: control input reads the signal [V]", half.electricalCmdLoad.getU(), mods.eln.Eln.SVU / 2, 0.05 * mods.eln.Eln.SVU);
             within(ctx, "wp10b heat furnace: half the signal, half the gain", half.furnaceProcess.getGain(), 0.5, 0.05);
-            ctx.check("wp10b heat furnace: a signal takes fuel; none takes none", half.getTakeFuel() && !off.getTakeFuel(),
-                "half " + half.getTakeFuel() + ", off " + off.getTakeFuel());
+            within(ctx, "wp10b heat furnace: full signal on its right side, full gain", off.furnaceProcess.getGain(), 1.0, 0.05);
+            ctx.check("wp10b heat furnace: a signal takes fuel (left and right)", half.getTakeFuel() && off.getTakeFuel(),
+                "left " + half.getTakeFuel() + ", right " + off.getTakeFuel());
         }
     }
 

@@ -156,8 +156,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             .set(Failure(this).machine())
     }
 
+    // the control signal on either side, not the front or back (Baughn)
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?) = when {
-        side != front.inverse && lrdu == LRDU.Down -> controlLoad
+        (side == front.left() || side == front.right()) && lrdu == LRDU.Down -> controlLoad
         else -> null
     }
 
@@ -169,7 +170,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun getConnectionMask(side: Direction?, lrdu: LRDU?) = when (lrdu) {
         LRDU.Down -> when (side) {
             front.inverse -> NodeBase.maskThermal
-            else -> NodeBase.maskElectricalInputGate
+            front.left(), front.right() -> NodeBase.maskElectricalInputGate
+            else -> 0
         }
         else -> 0
     }
