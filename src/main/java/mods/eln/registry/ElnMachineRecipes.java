@@ -41,6 +41,9 @@ public final class ElnMachineRecipes {
 
     public static int maceratorModOreAdded;
 
+    /** Other mods' additions (Stasis Delvers: riftstone to dust), run at the end of every refill. */
+    public static final List<Runnable> EXTRA = new java.util.concurrent.CopyOnWriteArrayList<>();
+
     /** Server start: refill the four lists. */
     public static void registerAll() {
         for (RecipesList l : new RecipesList[]{maceratorRecipes, plateMachineRecipes, compressorRecipes, magnetiserRecipes})
@@ -56,6 +59,7 @@ public final class ElnMachineRecipes {
         int before = maceratorRecipes.getRecipes().size();
         recipeMaceratorModOres();
         maceratorModOreAdded = maceratorRecipes.getRecipes().size() - before;
+        for (Runnable r : EXTRA) r.run();
         LOG.info("Electrical Age machine recipes: macerator {} ({} from mod ores), compressor {}, plate machine {}, magnetizer {}",
             maceratorRecipes.getRecipes().size(), maceratorModOreAdded, compressorRecipes.getRecipes().size(),
             plateMachineRecipes.getRecipes().size(), magnetiserRecipes.getRecipes().size());
