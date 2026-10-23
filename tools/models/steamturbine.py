@@ -15,14 +15,15 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcmodel import Model, box, prism, tube, volute
 
 TIERS = {
-    # cy: shaft height; rg/gx: generator radius and x span; r0/r1/tx: scroll radii and x span; ri/rf: inlet pipe and
-    # flange radius; fins: generator cooling fins; bolts: on the inlet flange
+    # cy: shaft height; rg/gx: generator radius and x span; r0/r1/tx: scroll radii and x span; fins: generator cooling
+    # fins; bolts: on the top flange
     "50v": dict(paint="paint_green", cy=6.75, rg=3.75, gx=(2.25, 7.25), r0=2.75, r1=4.75, tx=(9.25, 13.25),
-                ri=1.1, rf=1.9, fins=(3.0, 6.5), bolts=4),
+                fins=(3.0, 6.5), bolts=4),
     "200v": dict(paint="paint_blue", cy=7.25, rg=4.5, gx=(1.75, 7.75), r0=3.25, r1=5.5, tx=(9.0, 13.75),
-                 ri=1.4, rf=2.4, fins=(2.5, 3.75, 5.75, 7.0), bolts=6),
+                 fins=(2.5, 3.75, 5.75, 7.0), bolts=6),
 }
 CZ = 8.0
+PIPE_R = 2.0                      # an iron pipe's radius (PipePart.BORE[0] / 2 voxels)
 START = math.radians(40)          # scroll tongue angle (0 = up, 90 = +z); the radius grows from there round to it
 
 # atlas: material -> (col, row), 4x2 cells of 16 px (64x32 png)
@@ -73,10 +74,15 @@ def turbine(tier):
     m.add(box(bx - 1.0, 1.5, 2.5, 15.25, 3.0, 4.5, "darksteel"))                               # bus duct (on the rail) to the back plate
     # nameplate on the z+ flank
     m.add(box(bx - 1.5, cy - 0.75, CZ + rg + 0.0, bx + 1.5, cy + 0.75, CZ + rg + 0.1, "brass"))
-    # --- shaft and coupling
-    m.add(prism("x", cy, CZ, 0.6, gx1 + 0.6, tx0 - 0.5, "darksteel", n=8, caps=(False, False)))
+    # --- shaft and coupling: a part of their own, which the renderer turns with the shaft's speed (Baughn); the coupling's
+    # bolts show it turning
+    rotor = Model()
+    rotor.add(prism("x", cy, CZ, 0.6, gx1 + 0.6, tx0 - 0.5, "darksteel", n=8, caps=(False, False)))
     cx = (gx1 + 0.6 + tx0 - 0.5) / 2
-    m.add(prism("x", cy, CZ, 1.5, cx - 0.4, cx + 0.4, "copper", n=8))
+    rotor.add(prism("x", cy, CZ, 1.5, cx - 0.4, cx + 0.4, "copper", n=8))
+    for k in range(4):
+        a = math.pi / 2 * k + math.pi / 4
+        rotor.add(prism("x", cy + 1.45 * math.cos(a), CZ + 1.45 * math.sin(a), 0.3, cx - 0.55, cx + 0.55, "brass", n=6))
     # --- turbine: scroll casing, end covers, pedestal
     m.add(volute("x", cy, CZ, t["r0"], t["r1"], tx0, tx1, "castiron", n=20, start=START))
     m.add(prism("x", cy, CZ, t["r0"] - 1.25, tx0 - 0.5, tx0, "castiron", n=10, r_end=t["r0"] - 0.5, caps=(True, False)))
@@ -87,27 +93,25 @@ def turbine(tier):
     # governor housing on the back of the casing
     m.add(box(tx1 - 0.25, cy + 1.25, CZ - 1.5, tx1 + 1.5, cy + 3.25, CZ + 1.5, "steel"))
     m.add(box(tx1 - 0.25, cy + 3.25, CZ - 1.6, tx1 + 1.6, cy + 3.5, CZ + 1.6, "paint"))
-    # --- steam inlet on top: stub, flange, bolts, tier collar, pressure gauge facing the front
+    # --- steam inlet: an iron pipe's bore (4 px, Baughn: the standard for this tier) the whole way, as a laid pipe looks:
+    # up out of the scroll, across to the middle, up to a pipe's flange on the top face (a boiler set on top, or a pipe
+    # laid to it, couples there)
     top = cy + scroll_r(t, 0.0)
-    fy = min(15.25, top + 2.25)
-    m.add(prism("y", tcx, CZ, t["ri"], cy + t["r0"], fy, "castiron", n=10, caps=(False, False)))
-    m.add(prism("y", tcx, CZ, t["ri"] + 0.25, top - 0.25, top + 0.25, "paint", n=10, caps=(False, True)))
-    m.add(prism("y", tcx, CZ, t["rf"], fy, fy + 0.75, "steel", n=12))
-    m.add(prism("y", tcx, CZ, t["ri"] - 0.2, fy + 0.75, fy + 0.76, "darksteel", n=10, caps=(False, True)))   # bore
-    br = (t["ri"] + t["rf"]) / 2 + 0.1
+    yh = min(15.75 - PIPE_R, top + PIPE_R)  # (the run across: clear of the scroll where there's room, under the top flange's face)
+    m.add(prism("y", tcx, CZ, PIPE_R, top - 1.0, yh + PIPE_R, "castiron", n=12, caps=(False, True)))
+    m.add(prism("y", tcx, CZ, PIPE_R + 0.25, top - 0.5, min(top + 0.25, yh - PIPE_R + 0.25), "paint", n=12, caps=(False, True)))   # tier collar
+    m.add(prism("x", yh, CZ, PIPE_R, 8.0, tcx, "castiron", n=12, caps=(False, False)))
+    m.add(prism("y", 8.0, CZ, PIPE_R, yh - PIPE_R, 15.0, "castiron", n=12, caps=(True, False)))
+    m.add(prism("y", 8.0, CZ, PIPE_R + 0.75, 15.0, 16.0, "steel", n=12))                     # top flange, a laid pipe's
+    br = PIPE_R + 0.4
     for k in range(t["bolts"]):
         a = 2 * math.pi * (k + 0.5) / t["bolts"]
-        m.add(prism("y", tcx + br * math.cos(a), CZ + br * math.sin(a), 0.25, fy + 0.75, fy + 1.0, "brass", n=6))
-    # inlet riser to the top centre (pipes phase 2): a boiler set on top couples its dome port here
-    ry = 15.0
-    m.add(prism("y", tcx, CZ, t["ri"] - 0.3, fy + 1.0, ry + 0.4, "castiron", n=8, caps=(False, False)))
-    m.add(prism("x", ry, CZ, t["ri"] - 0.3, 8.0, tcx + 0.5, "castiron", n=8, caps=(False, True)))
-    m.add(prism("y", 8.0, CZ, t["ri"] - 0.3, ry - 0.4, 15.5, "castiron", n=8, caps=(True, False)))
-    m.add(prism("y", 8.0, CZ, 2.75, 15.0, 16.0, "steel", n=12, caps=(True, True)))           # top flange (centred, an iron pipe's)
-    gy = (top + fy) / 2 + 0.25
-    m.add(prism("x", gy, CZ, 0.25, tcx - t["ri"] - 0.75, tcx - t["ri"] + 0.2, "brass", n=6, caps=(False, False)))
-    m.add(prism("x", gy, CZ, 0.9, tcx - t["ri"] - 1.25, tcx - t["ri"] - 0.75, "brass", n=10))
-    m.add(prism("x", gy, CZ, 0.7, tcx - t["ri"] - 1.3, tcx - t["ri"] - 1.25, "glass", n=10, caps=(True, False)))
+        m.add(prism("y", 8.0 + br * math.cos(a), CZ + br * math.sin(a), 0.25, 14.75, 15.0, "brass", n=6))
+    # pressure gauge on the bend over the generator, facing the front
+    gx = 8.0 - PIPE_R
+    m.add(prism("x", yh, CZ, 0.25, gx - 0.5, gx + 0.2, "brass", n=6, caps=(False, False)))
+    m.add(prism("x", yh, CZ, 0.9, gx - 1.0, gx - 0.5, "brass", n=10))
+    m.add(prism("x", yh, CZ, 0.7, gx - 1.05, gx - 1.0, "glass", n=10, caps=(True, False)))
     # --- exhaust vent stack on the z+ side (vents to air; the turbine has no steam output)
     ez = CZ + scroll_r(t, math.pi / 2) + 1.0
     m.add(prism("z", tcx, cy - 0.25, 0.9, CZ + 1.0, ez + 0.9, "castiron", n=8, caps=(False, True)))
@@ -116,7 +120,7 @@ def turbine(tier):
     # --- terminal plates (electric out, front and back, floor level)
     terminal_plate(m, 0.1, 0.85, 0.1, 0.0)
     terminal_plate(m, 15.15, 15.9, 15.9, 16.0)
-    return m
+    return m, rotor
 
 # ---------- textures: 16x16 cells of one atlas (procedural, deterministic) ----------
 def atlas(path, tier):
@@ -149,7 +153,10 @@ def main():
         name = "steamturbine" + tier
         out = os.path.join(res, "assets/eln/model", name)
         os.makedirs(out, exist_ok=True)
-        tris = turbine(tier).write_eln(out, name, CELLS, GRID)
+        m, rotor = turbine(tier)
+        tris = m.write_eln(out, name, CELLS, GRID, extra=[("rotor", rotor)])
+        with open(os.path.join(out, name + ".txt"), "w") as f:   # the rotor turns about the shaft (Obj3D part origin)
+            f.write(f"o rotor\nf originY {TIERS[tier]['cy'] / 16 - 0.5}\nf originZ {CZ / 16 - 0.5}\n")
         atlas(os.path.join(out, "tex.png"), tier)
         print(name, "triangles", tris)
 

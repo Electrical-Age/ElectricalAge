@@ -232,6 +232,16 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     }
 
     @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeFloat((float) omega);   // (the rotor's turn, SteamGeneratorRender)
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         if (inlet != null) {

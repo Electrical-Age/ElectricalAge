@@ -41,9 +41,16 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
     }
 
     void draw() {
+        draw(0);
+    }
+
+    /** The model, its rotor (shaft and coupling) turned `angle` degrees about the shaft. */
+    void draw(float angle) {
         if (obj != null) {
             var p = obj.getPart("main");
             if (p != null) p.draw();
+            var r = obj.getPart("rotor");
+            if (r != null) r.draw(angle, 1, 0, 0);
         }
     }
 

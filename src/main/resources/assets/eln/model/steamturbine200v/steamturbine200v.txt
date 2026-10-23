@@ -1,0 +1,3 @@
+o rotor
+f originY -0.046875
+f originZ 0.0
