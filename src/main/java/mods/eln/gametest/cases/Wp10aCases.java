@@ -83,6 +83,7 @@ public final class Wp10aCases {
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
         cases.add(new MaceratorReverseCase());
+        cases.add(new MaceratorFieldSpeedCase());
         cases.add(new SingleUseChargeCase());
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
@@ -437,6 +438,61 @@ public final class Wp10aCases {
             ctx.check("a watchdog under its minimum names reverse voltage",
                 mods.eln.sim.process.destruct.FailureCause.REVERSE_VOLTAGE == wd.causeFor(-30)
                     && mods.eln.sim.process.destruct.FailureCause.OVERVOLTAGE == wd.causeFor(80), "");
+        }
+    }
+
+    /**
+     * Stasis Delvers' acceleration fields (NodeBase.timeScale, λ-Nero): a macerator where time runs 3x draws 3x the
+     * power and grinds 3x as fast, for the same energy per item; one beside it at 1x for comparison.
+     */
+    static final class MaceratorFieldSpeedCase implements TestCase {
+        ElectricalMachineElement fast, normal;
+        java.util.function.ToDoubleFunction<mods.eln.node.NodeBase> before;
+
+        public String name() {
+            return "wp10a macerator in a 3x acceleration field";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        ElectricalMachineElement place(TestContext ctx, Layout l, int x) {
+            ElectricalMachineElement m = (ElectricalMachineElement) l.device(MACHINES[0], x, 1);
+            SixNodeElement[] f = l.feed(ctx.at(x, 1, 1), m.front.left());
+            ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat((float) U);
+            }));
+            m.getInventory().setItem(m.inSlotId, new ItemStack(Items.COPPER_INGOT, 16));
+            m.getInventory().setChanged();
+            return m;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            normal = place(ctx, l, 2);
+            fast = place(ctx, l, 6);
+            before = mods.eln.node.NodeBase.timeScale;
+            var prev = before;
+            mods.eln.node.NodeBase.timeScale = n -> n == fast.node ? 3.0 : prev == null ? 1.0 : prev.applyAsDouble(n);
+        }
+
+        static double pw(ElectricalMachineElement m) {
+            return Batch1Cases.<mods.eln.sim.mna.component.Resistor>field(m, "electricalResistor").getP();
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.node.NodeBase.timeScale = before;
+            int a = fast.getInventory().getItem(fast.outSlotId).getCount(), b = normal.getInventory().getItem(normal.outSlotId).getCount();
+            ctx.line("macerator: 3x made " + a + " dust, 1x made " + b + "; power " + pw(fast) + " W vs " + pw(normal) + " W");
+            ctx.check("3x: about three times the dust (each count rounds down)", b > 0 && a >= 3 * b && a <= 3 * b + 3, a + " vs " + b);
+            ctx.check("3x: about three times the power", Math.abs(pw(fast) / pw(normal) - 3) < 0.3,
+                pw(fast) + " W vs " + pw(normal) + " W");
         }
     }
 

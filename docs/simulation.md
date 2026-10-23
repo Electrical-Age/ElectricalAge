@@ -50,6 +50,10 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
 - `NodeBase.isAdded()`: node is in the simulation. `NodeBase.simulationVeto` (static, null in this repo; set by an
   external freezer such as Stasis Delvers): if it returns true, `connect()` only does `visualConnect()` and the node
   stays out. `disconnect()` of a non-added node still drops neighbours' links (`dropConnections`).
+- `NodeBase.timeScale` (26.x, static, null in this repo; set by Stasis Delvers for its acceleration fields): how
+  many times faster time runs at a node. `ElectricalMachineElement` checks it once a second and multiplies its speed-up
+  by it (as boosters do: the resistor drops, so the machine draws that much more power and finishes that much sooner,
+  for the same energy per item). Test: `wp10a_macerator_in_a_3x_acceleration_field`.
 
 ## MNA (`src/main/java/mods/eln/sim/mna/`)
 

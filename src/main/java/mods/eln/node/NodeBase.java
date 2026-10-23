@@ -469,6 +469,19 @@ public abstract class NodeBase {
      */
     public static volatile java.util.function.Predicate<NodeBase> simulationVeto;
 
+    /**
+     * 26.x, for Stasis Delvers' acceleration fields: if set, how many times faster than normal time runs at a node
+     * (1 normally). Machines that process (ElectricalMachineElement) draw that much more power and so finish that much
+     * sooner, for the same energy per item (λ-Nero). The electrical solve itself stays in real time.
+     */
+    public static volatile java.util.function.ToDoubleFunction<NodeBase> timeScale;
+
+    /** How fast time runs at this node (timeScale; at least 1). */
+    public double timeScale() {
+        var f = timeScale;
+        return f == null ? 1.0 : Math.max(1.0, f.applyAsDouble(this));
+    }
+
     /** Is the node in the simulation (connected)? */
     public boolean isAdded() {
         return isAdded;

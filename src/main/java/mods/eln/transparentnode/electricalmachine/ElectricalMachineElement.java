@@ -66,6 +66,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         electricalComponentList.add(electricalResistor);
         slowProcessList.add(slowRefreshProcess);
         slowProcessList.add(slowProcess);
+        slowProcessList.add(fieldSpeedProcess);
         slowRefreshProcess.setObserver(this);
         slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
 
@@ -124,6 +125,21 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         needPublish();
     }
 
+    /** The speed of time here (NodeBase.timeScale), checked once a second: it scales the machine's power and pace. */
+    double fieldSpeed = 1;
+    private double fieldCheck;
+
+    private final mods.eln.sim.IProcess fieldSpeedProcess = time -> {
+        fieldCheck += time;
+        if (fieldCheck < 1) return;
+        fieldCheck = 0;
+        double s = node.timeScale();
+        if (s != fieldSpeed) {
+            fieldSpeed = s;
+            setPhysicalValue();
+        }
+    };
+
     private void setPhysicalValue() {
         ItemStack stack;
 
@@ -132,7 +148,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         if (!Utils.isEmpty(stack)) {
             boosterCount = stack.getCount();
         }
-        double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount);
+        double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount) * fieldSpeed;   // (an acceleration field: NodeBase.timeScale)
         slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
         slowRefreshProcess.setSpeedUp(speedUp);
 
