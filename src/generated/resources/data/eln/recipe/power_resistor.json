@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "P": "#c:plates/copper",
+    "c": "eln:copper_coil"
+  },
+  "pattern": [
+    " P ",
+    "c c",
+    "IPI"
+  ],
+  "result": {
+    "id": "eln:power_resistor"
+  }
+}

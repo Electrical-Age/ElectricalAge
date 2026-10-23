@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/copper"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "I": "minecraft:iron_ingot",
+    "R": "#c:ingots/copper",
+    "c": "eln:low_voltage_cable"
+  },
+  "pattern": [
+    "III",
+    "cCR",
+    "III"
+  ],
+  "result": {
+    "id": "eln:energy_converter_eln_to_other_lvublock"
+  }
+}

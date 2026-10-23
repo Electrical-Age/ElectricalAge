@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_coil",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "C C",
+    "III"
+  ],
+  "result": {
+    "id": "eln:dc_dc_converter"
+  }
+}

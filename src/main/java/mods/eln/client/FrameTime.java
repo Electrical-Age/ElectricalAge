@@ -1,78 +1,45 @@
 package mods.eln.client;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
-import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.World;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 
-public class FrameTime {
-    static FrameTime instance;
-
-    public FrameTime() {
-        instance = this;
-        FMLCommonHandler.instance().bus().register(this);
+/** Once per rendered frame: every client node block entity's clientRefresh(deltaT), deltaT capped at 0.1 s (1.12). */
+public final class FrameTime {
+    private FrameTime() {
     }
 
-    public void init() {
-        //	NodeBlockEntity.nodeAddedList.clear();
+    static float deltaT = 0.02f;
+    static long oldNanoTime;
+    static boolean boot = true;
+
+    public static float get() {
+        return UtilsClient.isGameInPause() ? 0f : Math.min(0.1f, deltaT);
     }
 
-    public void stop() {
-        //	NodeBlockEntity.nodeAddedList.clear();
-    }
-
-    public static float get2() {
-        if (Utils.isGameInPause())
-            return 0f;
-        return Math.min(0.1f, instance.deltaT);
-    }
-
+    /** 1.12 name. */
     public static float getNotCaped2() {
-        float value = get2();
-        return value;
+        return get();
     }
 
-    float deltaT = 0.02f;
-    long oldNanoTime = 0;
-    boolean boot = true;
-
-    @SubscribeEvent
-    public void tick(RenderTickEvent event) {
-        if (event.phase != Phase.START) return;
-
-        long nanoTime = System.nanoTime();
-
-        if (boot) {
-            boot = false;
-        } else {
-            deltaT = (nanoTime - oldNanoTime) * 0.000000001f;
-            //	Utils.println(deltaT);
-        }
-
-        oldNanoTime = nanoTime;
-
-        //Utils.println(NodeBlockEntity.clientList.size());
-        Iterator<NodeBlockEntity> i = NodeBlockEntity.clientList.iterator();
-        World w = Minecraft.getMinecraft().theWorld;
-
-        if (!Utils.isGameInPause()) {
-            float deltaTcaped = getNotCaped2();
-            while (i.hasNext()) {
-                NodeBlockEntity e = i.next();
-                if (e.getWorldObj() != w) {
-                    i.remove();
-                    continue;
-                }
-                e.clientRefresh(deltaTcaped);
+    public static void onFrame(RenderFrameEvent.Pre event) {
+        mods.eln.gl.GlFrame.beginRenderFrame();
+        long now = System.nanoTime();
+        if (boot) boot = false;
+        else deltaT = (now - oldNanoTime) * 1e-9f;
+        oldNanoTime = now;
+        if (UtilsClient.isGameInPause() || Minecraft.getInstance().level == null) return;
+        float dt = get();
+        for (NodeBlockEntity e : new ArrayList<>(NodeBlockEntity.clientList)) {
+            if (e.getLevel() != Minecraft.getInstance().level) {
+                NodeBlockEntity.clientList.remove(e);
+                continue;
             }
+            e.clientRefresh(dt);
         }
-        //Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(1, 1).
-        //	Utils.println("delta T : " + deltaT + "   " + event);
+        mods.eln.sound.LoopedSoundPlayer.update(dt);
     }
 }

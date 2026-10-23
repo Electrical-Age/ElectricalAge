@@ -1,328 +1,289 @@
 package mods.eln.node;
 
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
-import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.*;
-import mods.eln.server.DelayedBlockRemove;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.EnumSkyBlock;
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Direction;
+import mods.eln.misc.Dimensions;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.function.Consumer;
 
+/**
+ * The in-world anchor of a node (1.12 NodeBlockEntity). Server: finds its node in NodeManager by position; the node
+ * itself is saved by ElnWorldSaves, not here. Client: receives the node's publish bytes (EA protocol) and keeps what
+ * the renderer needs. Removing the block removes the node (setRemoved, except on chunk unload, where nodes stay).
+ */
+public abstract class NodeBlockEntity extends BlockEntity implements INodeEntity {
+    public static final String DESCRIPTION_KEY = "elnDescription";
 
-public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient, INodeEntity {
-
-    public static final LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
-
-
-    public NodeBlock getBlock() {
-        return (NodeBlock) getBlockType();
-    }
+    /** Client: every loaded node block entity, refreshed once per frame (1.12 clientList, FrameTime). */
+    public static final java.util.Set<NodeBlockEntity> clientList = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+    private byte[] pendingDescription;
 
     boolean redstone = false;
     int lastLight = 0xFF;
     boolean firstUnserialize = true;
+    private boolean chunkUnloading = false;
+
+    Node node = null;
+
+    protected NodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    // ---- client: publish bytes ----
 
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
-
         int light = 0;
         try {
             if (firstUnserialize) {
                 firstUnserialize = false;
-                Utils.notifyNeighbor(this);
-
+                Utils.notifyNeighbours(level, worldPosition);
             }
-            Byte b = stream.readByte();
+            byte b = stream.readByte();
             light = b & 0xF;
             boolean newRedstone = (b & 0x10) != 0;
             if (redstone != newRedstone) {
                 redstone = newRedstone;
-                worldObj.notifyBlockChange(xCoord, yCoord, zCoord, getBlockType());
-            } else {
-                redstone = newRedstone;
+                Utils.notifyNeighbours(level, worldPosition);
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-    /*	if(lastLight == 0xFF) //boot trololol
-        {
-			lastLight = 15;
-			worldObj.updateLightByType(EnumSkyBlock.Block,xCoord,yCoord,zCoord);
-		}*/
-
         if (lastLight != light) {
             lastLight = light;
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            if (level != null) NodeBlock.setLight(level, worldPosition, light);
+            if (level != null) level.getLightEngine().checkBlock(worldPosition);
         }
-
-
     }
 
     @Override
     public void serverPacketUnserialize(DataInputStream stream) {
-
     }
-
-
-    //abstract public Node newNode();
-    //abstract public Node newNode(Direction front,EntityLiving entityLiving,int metadata);
 
     public abstract int isProvidingWeakPower(Direction side);
-    //{
-    //if(worldObj.isRemote) return 0;
-    //return getNode().isProvidingWeakPower(side);
-    //}
 
-    Node node = null;
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return null;
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return null;
-    }
-
-
-    public NodeBlockEntity() {
-
-    }
-
-
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getRenderBoundingBox() {
-        if (cameraDrawOptimisation()) {
-            return AxisAlignedBB.getBoundingBox(xCoord - 1, yCoord - 1, zCoord - 1, xCoord + 1, yCoord + 1, zCoord + 1);
-        } else {
-            return INFINITE_EXTENT_AABB;
-        }
+    public boolean canConnectRedstone(Direction side) {
+        return redstone;
     }
 
     public boolean cameraDrawOptimisation() {
         return true;
     }
 
+    /** Light the block emits: client from the last publish, server from the node. */
     public int getLightValue() {
-        if (worldObj.isRemote) {
-            if (lastLight == 0xFF) {
-                return 0;
-            }
-            return lastLight;
-        } else {
-            Node node = getNode();
-            if (node == null) return 0;
-            return getNode().getLightValue();
-        }
+        if (level == null) return 0;
+        if (level.isClientSide()) return lastLight == 0xFF ? 0 : lastLight;
+        Node n = getNode();
+        return n == null ? 0 : n.getLightValue();
     }
 
-    /**
-     * Reads a tile entity from NBT.
-     */
-    public void readFromNBT(NBTTagCompound nbt) {
-        super.readFromNBT(nbt);
+    // ---- server: node lifecycle ----
+
+    void onBlockPlacedBy(Direction front, LivingEntity entityLiving, int metadata) {
     }
-
-    /**
-     * Writes a tile entity to NBT.
-     */
-    public void writeToNBT(NBTTagCompound nbt) {
-        super.writeToNBT(nbt);
-    }
-
-
-    //max draw distance
-    @Override
-    @SideOnly(Side.CLIENT)
-    public double getMaxRenderDistanceSquared() {
-        return 4096.0 * (4) * (4);
-    }
-
-
-    void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, int metadata) {
-
-    }
-
-
-    @Override
-    public boolean canUpdate() {
-
-        return true;
-    }
-
-    boolean updateEntityFirst = true;
-
-    @Override
-    public void updateEntity() {
-        if (updateEntityFirst) {
-            updateEntityFirst = false;
-            if (!worldObj.isRemote) {
-                // worldObj.setBlock(xCoord, yCoord, zCoord, 0);
-            } else {
-                clientList.add(this);
-            }
-        }
-    }
-
 
     public void onBlockAdded() {
-        if (!worldObj.isRemote && getNode() == null) {
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+        if (level != null && !level.isClientSide() && getNode() == null) {
+            level.removeBlock(worldPosition, false);
         }
     }
 
     public void onBreakBlock() {
-        if (!worldObj.isRemote) {
-            if (getNode() == null) return;
-            getNode().onBreakBlock();
+        if (level != null && !level.isClientSide()) {
+            Node n = getNode();
+            if (n != null) n.onBreakBlock();
         }
-    }
-
-    public void onChunkUnload() {
-        if (worldObj.isRemote) {
-            destructor();
-        }
-    }
-
-    //client only
-    public void destructor() {
-        clientList.remove(this);
     }
 
     @Override
-    public void invalidate() {
-
-        if (worldObj.isRemote) {
-            destructor();
-        }
-        super.invalidate();
+    public void onChunkUnloaded() {
+        chunkUnloading = true;
     }
 
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!worldObj.isRemote) {
-            if (getNode() == null) return false;
-            getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
-            return true;
+    // ---- client: refresh and teardown (P3)
+
+    /** Client, once per frame: animations and sounds (1.12 FrameTime). */
+    public void clientRefresh(float deltaT) {
+    }
+
+    private static final java.util.Random SMOKE_RANDOM = new java.util.Random();
+
+    /** A wisp of smoke from a burnt device now and then (1.12 BurntRender.smoke: about every 3 s at 60 fps). */
+    protected void burntSmoke() {
+        if (level == null || SMOKE_RANDOM.nextInt(180) != 0) return;
+        level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, worldPosition.getX() + 0.3 + SMOKE_RANDOM.nextDouble() * 0.4,
+            worldPosition.getY() + 0.5 + SMOKE_RANDOM.nextDouble() * 0.3, worldPosition.getZ() + 0.3 + SMOKE_RANDOM.nextDouble() * 0.4, 0, 0.03, 0);
+    }
+
+    /** Client: a neighbour block entity appeared (cables reconnect their drawing). */
+    public void tileEntityNeighborSpawn() {
+    }
+
+    /** Client: the block entity goes away; renders free what they hold. */
+    public void clientDestroy() {
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level != null && level.isClientSide()) {
+            clientList.add(this);
+            if (pendingDescription != null) {
+                byte[] d = pendingDescription;
+                pendingDescription = null;
+                applyDescription(d);
+            }
         }
-        //if(entityPlayer.getCurrentEquippedItem().getItem() instanceof ItemBlock)
-        {
-            return true;
+    }
+
+    @Override
+    public void setRemoved() {
+        if (level != null && level.isClientSide()) {
+            NodeBlock.setLight(level, worldPosition, 0);
+            clientList.remove(this);
+            clientDestroy();
         }
-        //return true;
+        // The block is gone (broken, replaced, cleared by a GameTest...), not just unloaded: remove the node, so it
+        // can't stay in the simulation and connect to whatever is built here next.
+        // A node kept as saved data (an orphan this version could not load) goes with its block.
+        if (!chunkUnloading && level != null && !level.isClientSide()) {
+            Coordonate c = new Coordonate(worldPosition, level);
+            NodeBase n = NodeManager.instance.getNodeFromCoordonate(c);
+            if (n != null && !n.isDestructing()) n.onBreakBlock();
+            NodeManager.instance.dropOrphans(c, "its block was removed");
+        }
+        super.setRemoved();
+    }
+
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (level != null && !level.isClientSide()) {
+            Node n = getNode();
+            if (n == null) return false;
+            n.onBlockActivated(entityPlayer, side, vx, vy, vz);
+        }
+        return true;
     }
 
     public void onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
-            if (getNode() == null) return;
-            getNode().onNeighborBlockChange();
+        if (level != null && !level.isClientSide()) {
+            Node n = getNode();
+            if (n != null) n.onNeighborBlockChange();
         }
     }
 
+    /** Selftest reload: drop the cached node so the next getNode() looks it up again. */
+    public void forgetNode() {
+        node = null;
+    }
 
+    @Nullable
     public Node getNode() {
-        if (worldObj.isRemote) {
-            Utils.fatal();
-            return null;
-        }
-        if (this.worldObj == null) return null;
-        if (node == null) {
-            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, worldObj));
-            if (nodeFromCoordonate instanceof Node) {
-                node = (Node) nodeFromCoordonate;
-            } else {
-                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordonate(xCoord, yCoord, zCoord, worldObj));
-            }
-            if (node == null) DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+        if (level == null || level.isClientSide()) return null;
+        if (node == null || node.isDestructing()) {
+            NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(worldPosition, level));
+            node = n instanceof Node ? (Node) n : null;
         }
         return node;
     }
 
-
-    public static NodeBlockEntity getEntity(int x, int y, int z) {
-        TileEntity entity;
-        if ((entity = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z)) != null) {
-            if (entity instanceof NodeBlockEntity) {
-                return (NodeBlockEntity) entity;
-            }
-        }
-        return null;
-    }
-
+    // ---- client sync: the publish packet rides in the update tag (1.12: same) ----
 
     @Override
-    public Packet getDescriptionPacket() {
-        Node node = getNode(); //TO DO NULL POINTER
-        if (node == null) {
-            Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
-            return null;
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        if (level == null || level.isClientSide()) return tag;
+        Node n = getNode();
+        if (n != null) {
+            ByteArrayOutputStream p = n.getPublishPacket();
+            if (p != null) tag.putByteArray(DESCRIPTION_KEY, p.toByteArray());
         }
-        return new S3FPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
-        //return null;
+        return tag;
     }
 
+    @Override
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void handleUpdateTag(ValueInput input) {
+        input.read(DESCRIPTION_KEY, com.mojang.serialization.Codec.BYTE_BUFFER).ifPresent(b -> {
+            byte[] a = new byte[b.remaining()];
+            b.get(a);
+            if (level == null) pendingDescription = a; // applied in onLoad
+            else applyDescription(a);
+        });
+    }
+
+    /** The publish packet in the update tag: packet id, x, y, z, dimension, node uuid, then the node's data. */
+    void applyDescription(byte[] a) {
+        if (level != null && level.isClientSide()) clientList.add(this); // in case onLoad didn't run on this side
+        try {
+            DataInputStream stream = new DataInputStream(new java.io.ByteArrayInputStream(a));
+            if (stream.readByte() != Eln.packetNodeSingleSerialized) return;
+            stream.readInt();
+            stream.readInt();
+            stream.readInt();
+            stream.readInt();
+            if (!getNodeUuid().equals(stream.readUTF())) return;
+            serverPublishUnserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ValueInput input) {
+        handleUpdateTag(input);
+    }
 
     public void preparePacketForServer(DataOutputStream stream) {
         try {
             stream.writeByte(Eln.packetPublishForNode);
-
-            stream.writeInt(xCoord);
-            stream.writeInt(yCoord);
-            stream.writeInt(zCoord);
-
-            stream.writeByte(worldObj.provider.dimensionId);
-
+            stream.writeInt(worldPosition.getX());
+            stream.writeInt(worldPosition.getY());
+            stream.writeInt(worldPosition.getZ());
+            stream.writeInt(Dimensions.id(level));
             stream.writeUTF(getNodeUuid());
-
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
-        UtilsClient.sendPacketToServer(bos);
+        if (level == null || !level.isClientSide()) return; // a test's stand-in client entity on the server
+        mods.eln.network.ElnNet.sendToServer(bos);
     }
 
-
-    public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+    /** Client: how a cable leaving this block at (side, lrdu) is drawn, or null (1.12). */
+    public mods.eln.cable.CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
         return null;
     }
 
     public int getCableDry(Direction side, LRDU lrdu) {
         return 0;
-    }
-
-    public boolean canConnectRedstone(Direction xn) {
-
-        if (worldObj.isRemote)
-            return redstone;
-        else {
-            if (getNode() == null) return false;
-            return getNode().canConnectRedstone();
-        }
-    }
-
-    public void clientRefresh(float deltaT) {
-
     }
 }

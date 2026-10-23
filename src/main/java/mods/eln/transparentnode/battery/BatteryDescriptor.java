@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.battery;
 
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+
 import mods.eln.Eln;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
@@ -11,11 +13,11 @@ import mods.eln.sim.*;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 
@@ -79,7 +81,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
                              double electricalStdP, double electricalStdDischargeTime, double electricalStdEfficiency, double electricalStdHalfLife,
                              double thermalHeatTime, double thermalWarmLimit, double thermalCoolLimit,
                              String description) {
-        super(name, BatteryElement.class, BatteryRender.class);
+        super(name, BatteryElement.class, null);
         this.electricalU = electricalU;
         this.electricalDischargeRate = electricalDischargeRate;
         this.electricalStdEfficiency = electricalStdEfficiency;
@@ -178,20 +180,22 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     }
 
     public static BatteryDescriptor getDescriptorFrom(ItemStack itemStack) {
-        return list[itemStack.getItemDamage() & 0x7];
+        // 1.12: battery sub-items were damage values 0..7 of the group; on 26.x the item knows its descriptor
+        GenericItemBlockUsingDamageDescriptor d = GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack);
+        return d instanceof BatteryDescriptor ? (BatteryDescriptor) d : null;
     }
 
     @Override
-    public NBTTagCompound getDefaultNBT() {
-        NBTTagCompound nbt = new NBTTagCompound();
+    public CompoundTag getDefaultNBT() {
+        CompoundTag nbt = new CompoundTag();
 
-        nbt.setDouble("charge", startCharge);
-        nbt.setDouble("life", 1.0);
+        nbt.putDouble("charge", startCharge);
+        nbt.putDouble("life", 1.0);
         return nbt;
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(Utils.plotVolt(tr("Nominal voltage: "), electricalU));
         list.add(Utils.plotPower(tr("Nominal power: "), electricalStdP));
@@ -210,15 +214,15 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     }
 
     double getChargeInTag(ItemStack stack) {
-        if (!stack.hasTagCompound())
-            stack.setTagCompound(getDefaultNBT());
-        return stack.getTagCompound().getDouble("charge");
+        if (!mods.eln.generic.ItemNbt.has(stack))
+            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
+        return mods.eln.generic.ItemNbt.get(stack).getDoubleOr("charge", 0.0);
     }
 
     double getLifeInTag(ItemStack stack) {
-        if (!stack.hasTagCompound())
-            stack.setTagCompound(getDefaultNBT());
-        return stack.getTagCompound().getDouble("life");
+        if (!mods.eln.generic.ItemNbt.has(stack))
+            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
+        return mods.eln.generic.ItemNbt.get(stack).getDoubleOr("life", 0.0);
     }
 
     public double getEnergy(double charge, double life) {
@@ -236,31 +240,27 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         return energy;
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        draw(true, true);
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(true, true);
-        }
-    }
-
-    @Override
-    public boolean onEntityItemUpdate(EntityItem entityItem) {
-        if (entityItem.isBurning()) {
-            entityItem.worldObj.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2, true);
-            entityItem.extinguish();
-            entityItem.setDead();
+    public boolean onEntityItemUpdate(ItemEntity entityItem) {
+        if (entityItem.isOnFire()) {
+            entityItem.level().explode(entityItem, entityItem.getX(), entityItem.getY(), entityItem.getZ(), 2, net.minecraft.world.level.Level.ExplosionInteraction.BLOCK);
+            entityItem.clearFire();
+            entityItem.discard();
         }
         return false;
     }

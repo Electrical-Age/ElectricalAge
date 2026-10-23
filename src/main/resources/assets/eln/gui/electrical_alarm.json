@@ -1,0 +1,17 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Standard Alarm"
+  },
+  {
+   "button": "mute",
+   "sample": [
+    "Sound: on",
+    "Sound: muted"
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

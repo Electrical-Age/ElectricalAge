@@ -19,11 +19,11 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
 
 import javax.annotation.Nullable;
 import java.io.DataOutputStream;
@@ -32,6 +32,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ResistorElement extends SixNodeElement {
+    /** 1.12 ResistorContainer.coreId */
+    public static final int coreSlotId = 0;
+
 
     ResistorDescriptor descriptor;
     NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
@@ -74,7 +77,7 @@ public class ResistorElement extends SixNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).electronics());
 
         resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
         if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
@@ -156,7 +159,7 @@ public class ResistorElement extends SixNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -165,8 +168,9 @@ public class ResistorElement extends SixNodeElement {
         return true;
     }
 
+    /** A burnt resistor/diode is simply replaced. */
     @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new ResistorContainer(player, inventory);
+    public net.minecraft.world.item.ItemStack getRepairPart() {
+        return mods.eln.sim.process.destruct.Repair.sameItem(this);
     }
 }

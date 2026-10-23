@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "#c:rubbers",
+    "C": "eln:low_voltage_cable",
+    "I": "eln:copper_cable"
+  },
+  "pattern": [
+    "  I",
+    " I ",
+    "CAC"
+  ],
+  "result": {
+    "id": "eln:low_voltage_switch"
+  }
+}

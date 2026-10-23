@@ -1,0 +1,51 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Summing Unit"
+  },
+  {
+   "row": [
+    {
+     "text": "g0l",
+     "sample": "Gain for input 3"
+    },
+    {
+     "field": "g0",
+     "chars": 7,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "g1l",
+     "sample": "Gain for input 3"
+    },
+    {
+     "field": "g1",
+     "chars": 7,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "g2l",
+     "sample": "Gain for input 3"
+    },
+    {
+     "field": "g2",
+     "chars": 7,
+     "fill": true
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

@@ -1,19 +1,20 @@
 package mods.eln.entity;
 
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 
-public class ReplicatorHungryAttack extends EntityAINearestAttackableTarget {
+/** Hungry replicators hunt other replicators (1.12 ReplicatorHungryAttack; target chance 0 = every tick). */
+public class ReplicatorHungryAttack extends NearestAttackableTargetGoal<ReplicatorEntity> {
 
-    ReplicatorEntity replicator;
+    final ReplicatorEntity replicator;
 
-    public ReplicatorHungryAttack(ReplicatorEntity replicator, Class par2Class, int par3, boolean par4) {
-        super(replicator, par2Class, par3, par4);
+    public ReplicatorHungryAttack(ReplicatorEntity replicator) {
+        super(replicator, ReplicatorEntity.class, 0, false, false, null);
         this.replicator = replicator;
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         if (replicator.hunger < replicator.hungerToCanibal) return false;
-        return super.shouldExecute();
+        return super.canUse();
     }
 }

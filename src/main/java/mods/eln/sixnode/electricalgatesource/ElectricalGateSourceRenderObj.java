@@ -1,11 +1,14 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor.ObjType;
-import net.minecraft.tileentity.TileEntity;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.awt.*;
 
@@ -51,8 +54,7 @@ public class ElectricalGateSourceRenderObj {
             }
         }
     }
-
-    public void draw(float factor, float distance, TileEntity e) {
+    public void draw(float factor, float distance, BlockEntity e) {
         switch (objType) {
             case Button:
                 if (main != null) main.draw();

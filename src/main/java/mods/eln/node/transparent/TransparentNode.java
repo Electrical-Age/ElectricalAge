@@ -1,5 +1,6 @@
 package mods.eln.node.transparent;
 
+import mods.eln.sim.process.destruct.Repair;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -7,14 +8,13 @@ import mods.eln.misc.Utils;
 import mods.eln.node.Node;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -25,7 +25,7 @@ public class TransparentNode extends Node {
 
     public TransparentNodeElement element;
     public int elementId;
-    public EntityPlayerMP removedByPlayer;
+    public ServerPlayer removedByPlayer;
 
     @Override
     public boolean nodeAutoSave() {
@@ -39,40 +39,27 @@ public class TransparentNode extends Node {
         element.onNeighborBlockChange();
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
-        super.readFromNBT(nbt.getCompoundTag("node"));
+    public void readFromNBT(CompoundTag nbt) {
+        super.readFromNBT(nbt.getCompoundOrEmpty("node"));
 
-        elementId = nbt.getShort("eid");
+        elementId = nbt.getShortOr("eid", (short) 0);
+        // No device of this id in this version (removed or renamed), or it can't be built: throw, so that
+        // NodeManager keeps the saved tag as an orphan instead of holding a node with no element.
+        TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(elementId);
+        if (descriptor == null) throw new IllegalStateException("no transparent node device with id " + elementId);
         try {
-            TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(elementId);
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
-            e.printStackTrace();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("cannot build transparent node device " + elementId, e);
         }
-        element.readFromNBT(nbt.getCompoundTag("element"));
+        element.readFromNBT(nbt.getCompoundOrEmpty("element"));
 
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(Utils.newNbtTagCompund(nbt, "node"));
 
-        nbt.setShort("eid", (short) elementId);
+        nbt.putShort("eid", (short) elementId);
 
         element.writeToNBT(Utils.newNbtTagCompund(nbt, "element"));
 
@@ -83,15 +70,18 @@ public class TransparentNode extends Node {
 
         element.onBreakElement();
         super.onBreakBlock();
+        invalidateCapabilities();
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        if (element.isBurnt()) return null;
         return element.getElectricalLoad(side, lrdu);
     }
 
     @Override
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+        if (element.isBurnt()) return null;
         return element.getThermalLoad(side, lrdu);
     }
 
@@ -110,7 +100,21 @@ public class TransparentNode extends Node {
         return element.thermoMeterString(side);
     }
 
-    public IFluidHandler getFluidHandler() {
+    /** Item handler of the element on a face (26.x item capability), null if none or burnt. */
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getItemHandler(
+        net.minecraft.core.Direction side) {
+        if (element == null || element.isBurnt()) return null;
+        return element.getItemHandler(side);
+    }
+
+    /** Forge Energy handler of the element on a face (26.x energy capability), null if none or burnt. */
+    public net.neoforged.neoforge.transfer.energy.EnergyHandler getEnergyHandler(net.minecraft.core.Direction side) {
+        if (element == null || element.isBurnt()) return null;
+        return element.getEnergyHandler(side);
+    }
+
+    /** Fluid handler of the element (26.x fluid capability; fluid devices are ported with their batch). */
+    public Object getFluidHandler() {
         return element.getFluidHandler();
     }
 
@@ -136,7 +140,7 @@ public class TransparentNode extends Node {
     ;
 
     @Override
-    public void initializeFromThat(Direction side, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void initializeFromThat(Direction side, LivingEntity entityLiving, ItemStack itemStack) {
         try {
             // Direction front = null;
             TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(itemStack);
@@ -146,10 +150,10 @@ public class TransparentNode extends Node {
 			 * }
 			 */
 
-            int metadata = itemStack.getItemDamage();
-            elementId = metadata;
+            elementId = descriptor.parentItemDamage; // the 1.12 id, as in node NBT and client packets
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
-            element.initializeFromThat(side, entityLiving, itemStack.getTagCompound());
+            element.initializeFromThat(side, entityLiving, mods.eln.generic.ItemNbt.get(itemStack));
+            invalidateCapabilities();
         } catch (InstantiationException e) {
 
             e.printStackTrace();
@@ -175,10 +179,13 @@ public class TransparentNode extends Node {
     @Override
     public void initializeFromNBT() {
         element.initialize();
+        invalidateCapabilities();
     }
 
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (element.isBurnt() && Repair.onActivated(element, entityPlayer)) return true;
         if (element.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true;
+        if (mods.eln.fluid.FluidBuckets.use(entityPlayer, element.getFluidHandler())) return true;   // 26.x: buckets in and out
         return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
     }
 
@@ -188,23 +195,13 @@ public class TransparentNode extends Node {
         return element.hasGui();
     }
 
-    public IInventory getInventory(Direction side) {
+    public Container getInventory(Direction side) {
         if (element == null) return null;
         return element.getInventory();
     }
 
-    public Container newContainer(Direction side, EntityPlayer player) {
-        if (element == null) return null;
-        return element.newContainer(side, player);
-    }
-
     @Override
-    public int getBlockMetadata() {
-        return element.transparentNodeDescriptor.tileEntityMetaTag.meta;
-    }
-
-    @Override
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream, player);
 
         Direction side;
@@ -223,13 +220,14 @@ public class TransparentNode extends Node {
     @Override
     public void connectJob() {
         super.connectJob();
-        element.connectJob();
+        // A burnt element stays out of the simulation (see TransparentNodeElement.burn).
+        if (!element.isBurnt()) element.connectJob();
     }
 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
-        element.disconnectJob();
+        if (!element.isBurnt()) element.disconnectJob();
     }
 
     @Override
@@ -239,8 +237,9 @@ public class TransparentNode extends Node {
         element.checkCanStay(onCreate);
     }
 
-    public void dropElement(EntityPlayerMP entityPlayer) {
-        if (element != null)
+    public void dropElement(ServerPlayer entityPlayer) {
+        // A burnt device is slag: its contents drop, the device itself doesn't.
+        if (element != null && !element.isBurnt())
             if (Utils.mustDropItem(entityPlayer))
                 dropItem(element.getDropItemStack());
     }
@@ -248,7 +247,7 @@ public class TransparentNode extends Node {
     @Override
     public String getNodeUuid() {
 
-        return Eln.transparentNodeBlock.getNodeUuid();
+        return "t";
     }
 
     @Override
@@ -256,6 +255,7 @@ public class TransparentNode extends Node {
         super.unload();
         if (element != null)
             element.unload();
+        invalidateCapabilities();
 
     }
 

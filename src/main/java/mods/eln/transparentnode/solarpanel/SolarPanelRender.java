@@ -10,8 +10,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -44,7 +43,7 @@ public class SolarPanelRender extends TransparentNodeElementRender {
         if (hasTracker == false) {
             alpha = (float) descriptor.alphaTrunk(pannelAlphaSyncValue);
         } else {
-            alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
+            alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getLevel()));
         }
         interpol.setTarget(alpha);
         if (boot) {
@@ -110,12 +109,6 @@ public class SolarPanelRender extends TransparentNodeElementRender {
 
     }
 
-    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new SolarPannelGuiDraw(player, inventory, this);
-    }
 
     @Override
     public boolean cameraDrawOptimisation() {

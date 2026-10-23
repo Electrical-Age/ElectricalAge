@@ -19,13 +19,13 @@ import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -57,7 +57,7 @@ public class TransformerElement extends TransparentNodeElement {
 
         electricalLoadList.add(primaryLoad);
         electricalLoadList.add(secondaryLoad);
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).transformer();
         slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
         slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
 
@@ -132,15 +132,15 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     private void computeInventory() {
-        ItemStack primaryCable = inventory.getStackInSlot(TransformerContainer.primaryCableSlotId);
-        ItemStack secondaryCable = inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId);
-        ItemStack core = inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId);
+        ItemStack primaryCable = inventory.getItem(TransformerContainer.primaryCableSlotId);
+        ItemStack secondaryCable = inventory.getItem(TransformerContainer.secondaryCableSlotId);
+        ItemStack core = inventory.getItem(TransformerContainer.ferromagneticSlotId);
         ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
 
-        if (primaryCable != null) {
+        if (!Utils.isEmpty(primaryCable)) {
             primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
         }
-        if (secondaryCable != null) {
+        if (!Utils.isEmpty(secondaryCable)) {
             secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
         }
 
@@ -155,13 +155,13 @@ public class TransformerElement extends TransparentNodeElement {
             voltageSecondaryWatchdog.setUNominal(1000000);
 
         double coreFactor = 1;
-        if (core != null) {
+        if (!Utils.isEmpty(core)) {
             FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
             coreFactor = coreDescriptor.cableMultiplicator;
         }
 
-        if (primaryCable == null || core == null) {
+        if (Utils.isEmpty(primaryCable) || Utils.isEmpty(core)) {
             primaryLoad.highImpedance();
             primaryMaxCurrent = 0;
         } else {
@@ -169,7 +169,7 @@ public class TransformerElement extends TransparentNodeElement {
             primaryMaxCurrent = (float) primaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (secondaryCable == null || core == null) {
+        if (Utils.isEmpty(secondaryCable) || Utils.isEmpty(core)) {
             secondaryLoad.highImpedance();
             secondaryMaxCurrent = 0;
         } else {
@@ -177,9 +177,9 @@ public class TransformerElement extends TransparentNodeElement {
             secondaryMaxCurrent = (float) secondaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (primaryCable != null && secondaryCable != null) {
-            transformer.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
-            interSystemProcess.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
+        if (!Utils.isEmpty(primaryCable) && !Utils.isEmpty(secondaryCable)) {
+            transformer.setRatio(1.0 * secondaryCable.getCount() / primaryCable.getCount());
+            interSystemProcess.setRatio(1.0 * secondaryCable.getCount() / primaryCable.getCount());
         } else {
             transformer.setRatio(1);
             interSystemProcess.setRatio(1);
@@ -206,7 +206,7 @@ public class TransformerElement extends TransparentNodeElement {
         }
     }
 
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         disconnect();
         computeInventory();
         connect();
@@ -214,7 +214,7 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         return false;
     }
 
@@ -223,17 +223,12 @@ public class TransformerElement extends TransparentNodeElement {
         return true;
     }
 
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new TransformerContainer(player, inventory);
-    }
-
     public float getLightOpacity() {
         return 1.0f;
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -264,18 +259,18 @@ public class TransformerElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (inventory.getStackInSlot(0) == null)
+            if (Utils.isEmpty(inventory.getItem(0)))
                 stream.writeByte(0);
             else
-                stream.writeByte(inventory.getStackInSlot(0).stackSize);
-            if (inventory.getStackInSlot(1) == null)
+                stream.writeByte(inventory.getItem(0).getCount());
+            if (Utils.isEmpty(inventory.getItem(1)))
                 stream.writeByte(0);
             else
-                stream.writeByte(inventory.getStackInSlot(1).stackSize);
+                stream.writeByte(inventory.getItem(1).getCount());
 
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.primaryCableSlotId));
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId));
+            Utils.serialiseItemStack(stream, inventory.getItem(TransformerContainer.ferromagneticSlotId));
+            Utils.serialiseItemStack(stream, inventory.getItem(TransformerContainer.primaryCableSlotId));
+            Utils.serialiseItemStack(stream, inventory.getItem(TransformerContainer.secondaryCableSlotId));
 
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
             stream.writeBoolean(isIsolator);
@@ -286,7 +281,7 @@ public class TransformerElement extends TransparentNodeElement {
                     secondaryLoad.getI() / secondaryMaxCurrent), 0f, 1f);
             }
             stream.writeFloat(load);
-            stream.writeBoolean(inventory.getStackInSlot(3) != null);
+            stream.writeBoolean(!Utils.isEmpty(inventory.getItem(3)));
 
         } catch (IOException e) {
 
@@ -295,15 +290,15 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setBoolean("isIsolated", isIsolator);
+        nbt.putBoolean("isIsolated", isIsolator);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        isIsolator = nbt.getBoolean("isIsolated");
+        isIsolator = nbt.getBooleanOr("isIsolated", false);
     }
 
     @Override
@@ -314,7 +309,7 @@ public class TransformerElement extends TransparentNodeElement {
         if (Eln.wailaEasyMode) {
             FerromagneticCoreDescriptor core =
                 (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(
-                    inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
+                    inventory.getItem(TransformerContainer.ferromagneticSlotId));
             if (core != null) {
                 info.put(I18N.tr("Core factor"), Utils.plotValue(core.cableMultiplicator));
             }

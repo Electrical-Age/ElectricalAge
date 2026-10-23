@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:repeater",
+    "#c:circuits/basic"
+  ],
+  "result": {
+    "id": "eln:electrical_timer"
+  }
+}

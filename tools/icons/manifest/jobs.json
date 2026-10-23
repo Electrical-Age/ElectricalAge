@@ -1,0 +1,825 @@
+[
+ {
+  "set": "vanilla",
+  "job": "chips",
+  "families": [
+   "logic_chip",
+   "analog_signal"
+  ],
+  "ids": [
+   "and_chip",
+   "d_flip_flop_chip",
+   "jk_flip_flop_chip",
+   "nand_chip",
+   "nor_chip",
+   "not_chip",
+   "or_chip",
+   "oscillator_chip",
+   "pal_chip",
+   "schmitt_trigger_chip",
+   "xnor_chip",
+   "xor_chip",
+   "amplifier",
+   "configurable_summing_unit",
+   "lowpass_filter",
+   "opamp",
+   "pid_regulator",
+   "sample_and_hold",
+   "signal_processor",
+   "voltage_controlled_amplifier",
+   "voltage_controlled_sawtooth_oscillator",
+   "voltage_controlled_sine_oscillator"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "chips",
+  "families": [
+   "logic_chip",
+   "analog_signal"
+  ],
+  "ids": [
+   "and_chip",
+   "d_flip_flop_chip",
+   "jk_flip_flop_chip",
+   "nand_chip",
+   "nor_chip",
+   "not_chip",
+   "or_chip",
+   "oscillator_chip",
+   "pal_chip",
+   "schmitt_trigger_chip",
+   "xnor_chip",
+   "xor_chip",
+   "amplifier",
+   "configurable_summing_unit",
+   "lowpass_filter",
+   "opamp",
+   "pid_regulator",
+   "sample_and_hold",
+   "signal_processor",
+   "voltage_controlled_amplifier",
+   "voltage_controlled_sawtooth_oscillator",
+   "voltage_controlled_sine_oscillator"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "cables",
+  "families": [
+   "cable_junction"
+  ],
+  "ids": [
+   "200v_power_socket",
+   "50v_power_socket",
+   "copper_thermal_cable",
+   "ground_cable",
+   "high_voltage_cable",
+   "hub",
+   "low_voltage_cable",
+   "medium_voltage_cable",
+   "signal_cable",
+   "utility_pole",
+   "utility_pole_w_dc_dc_converter",
+   "very_high_voltage_cable"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "cables",
+  "families": [
+   "cable_junction"
+  ],
+  "ids": [
+   "200v_power_socket",
+   "50v_power_socket",
+   "copper_thermal_cable",
+   "ground_cable",
+   "high_voltage_cable",
+   "hub",
+   "low_voltage_cable",
+   "medium_voltage_cable",
+   "signal_cable",
+   "utility_pole",
+   "utility_pole_w_dc_dc_converter",
+   "very_high_voltage_cable"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "power_passive",
+  "families": [
+   "power_passive",
+   "converter"
+  ],
+  "ids": [
+   "10a_diode",
+   "25a_diode",
+   "electrical_fuse_holder",
+   "large_rheostat",
+   "lead_fuse_for_high_voltage_cables",
+   "lead_fuse_for_low_voltage_cables",
+   "lead_fuse_for_medium_voltage_cables",
+   "lead_fuse_for_very_high_voltage_cables",
+   "power_capacitor",
+   "power_capacitor_block",
+   "power_inductor",
+   "power_inductor_block",
+   "power_resistor",
+   "rheostat",
+   "signal_diode",
+   "thermistor",
+   "dc_dc_converter",
+   "blown_lead_fuse"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "power_passive",
+  "families": [
+   "power_passive",
+   "converter"
+  ],
+  "ids": [
+   "10a_diode",
+   "25a_diode",
+   "electrical_fuse_holder",
+   "large_rheostat",
+   "lead_fuse_for_high_voltage_cables",
+   "lead_fuse_for_low_voltage_cables",
+   "lead_fuse_for_medium_voltage_cables",
+   "lead_fuse_for_very_high_voltage_cables",
+   "power_capacitor",
+   "power_capacitor_block",
+   "power_inductor",
+   "power_inductor_block",
+   "power_resistor",
+   "rheostat",
+   "signal_diode",
+   "thermistor",
+   "dc_dc_converter",
+   "blown_lead_fuse"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "power_switching",
+  "families": [
+   "power_switching"
+  ],
+  "ids": [
+   "electrical_breaker",
+   "high_voltage_relay",
+   "high_voltage_switch",
+   "low_voltage_relay",
+   "low_voltage_switch",
+   "medium_voltage_relay",
+   "medium_voltage_switch",
+   "signal_cable_switch",
+   "signal_relay",
+   "signal_switch_with_led",
+   "very_high_voltage_relay",
+   "very_high_voltage_switch"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "power_switching",
+  "families": [
+   "power_switching"
+  ],
+  "ids": [
+   "electrical_breaker",
+   "high_voltage_relay",
+   "high_voltage_switch",
+   "low_voltage_relay",
+   "low_voltage_switch",
+   "medium_voltage_relay",
+   "medium_voltage_switch",
+   "signal_cable_switch",
+   "signal_relay",
+   "signal_switch_with_led",
+   "very_high_voltage_relay",
+   "very_high_voltage_switch"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "signal_io",
+  "families": [
+   "signal_io"
+  ],
+  "ids": [
+   "electrical_timer",
+   "modbus_rtu",
+   "nuclear_alarm",
+   "redstone_to_voltage_converter",
+   "signal_button",
+   "signal_source",
+   "signal_switch",
+   "signal_trimmer",
+   "standard_alarm",
+   "voltage_to_redstone_converter"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "signal_io",
+  "families": [
+   "signal_io"
+  ],
+  "ids": [
+   "electrical_timer",
+   "modbus_rtu",
+   "nuclear_alarm",
+   "redstone_to_voltage_converter",
+   "signal_button",
+   "signal_source",
+   "signal_switch",
+   "signal_trimmer",
+   "standard_alarm",
+   "voltage_to_redstone_converter"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "wireless",
+  "families": [
+   "wireless"
+  ],
+  "ids": [
+   "high_power_receiver_antenna",
+   "high_power_transmitter_antenna",
+   "low_power_receiver_antenna",
+   "low_power_transmitter_antenna",
+   "medium_power_receiver_antenna",
+   "medium_power_transmitter_antenna",
+   "wireless_button",
+   "wireless_signal_receiver",
+   "wireless_signal_repeater",
+   "wireless_signal_transmitter",
+   "wireless_switch"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "wireless",
+  "families": [
+   "wireless"
+  ],
+  "ids": [
+   "high_power_receiver_antenna",
+   "high_power_transmitter_antenna",
+   "low_power_receiver_antenna",
+   "low_power_transmitter_antenna",
+   "medium_power_receiver_antenna",
+   "medium_power_transmitter_antenna",
+   "wireless_button",
+   "wireless_signal_receiver",
+   "wireless_signal_repeater",
+   "wireless_signal_transmitter",
+   "wireless_switch"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "sensors",
+  "families": [
+   "sensor"
+  ],
+  "ids": [
+   "electrical_anemometer_sensor",
+   "electrical_daylight_sensor",
+   "electrical_entity_sensor",
+   "electrical_fire_buzzer",
+   "electrical_fire_detector",
+   "electrical_light_sensor",
+   "electrical_probe",
+   "electrical_weather_sensor",
+   "scanner",
+   "tachometer",
+   "temperature_probe",
+   "thermal_probe",
+   "voltage_probe"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "sensors",
+  "families": [
+   "sensor"
+  ],
+  "ids": [
+   "electrical_anemometer_sensor",
+   "electrical_daylight_sensor",
+   "electrical_entity_sensor",
+   "electrical_fire_buzzer",
+   "electrical_fire_detector",
+   "electrical_light_sensor",
+   "electrical_probe",
+   "electrical_weather_sensor",
+   "scanner",
+   "tachometer",
+   "temperature_probe",
+   "thermal_probe",
+   "voltage_probe"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "meters",
+  "families": [
+   "meter_display"
+  ],
+  "ids": [
+   "advanced_energy_meter",
+   "analog_gauge",
+   "analog_watch",
+   "data_logger",
+   "digital_watch",
+   "energy_meter",
+   "industrial_data_logger",
+   "led_vumeter",
+   "modern_data_logger"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "meters",
+  "families": [
+   "meter_display"
+  ],
+  "ids": [
+   "advanced_energy_meter",
+   "analog_gauge",
+   "analog_watch",
+   "data_logger",
+   "digital_watch",
+   "energy_meter",
+   "industrial_data_logger",
+   "led_vumeter",
+   "modern_data_logger"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "machines",
+  "families": [
+   "machine"
+  ],
+  "ids": [
+   "200v_compressor",
+   "200v_macerator",
+   "200v_magnetizer",
+   "200v_plate_machine",
+   "50v_compressor",
+   "50v_egg_incubator",
+   "50v_macerator",
+   "50v_magnetizer",
+   "50v_plate_machine",
+   "800v_defence_turret",
+   "auto_miner",
+   "electrical_furnace",
+   "experimental_transporter",
+   "flywheel",
+   "joint",
+   "joint_hub"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "machines",
+  "families": [
+   "machine"
+  ],
+  "ids": [
+   "200v_compressor",
+   "200v_macerator",
+   "200v_magnetizer",
+   "200v_plate_machine",
+   "50v_compressor",
+   "50v_egg_incubator",
+   "50v_macerator",
+   "50v_magnetizer",
+   "50v_plate_machine",
+   "800v_defence_turret",
+   "auto_miner",
+   "electrical_furnace",
+   "experimental_transporter",
+   "flywheel",
+   "joint",
+   "joint_hub"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "generators",
+  "families": [
+   "generator"
+  ],
+  "ids": [
+   "200v_fuel_generator",
+   "200v_turbine",
+   "50v_fuel_generator",
+   "50v_turbine",
+   "electrical_source",
+   "gas_turbine",
+   "generator",
+   "steam_turbine",
+   "water_turbine",
+   "wind_turbine"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "generators",
+  "families": [
+   "generator"
+  ],
+  "ids": [
+   "200v_fuel_generator",
+   "200v_turbine",
+   "50v_fuel_generator",
+   "50v_turbine",
+   "electrical_source",
+   "gas_turbine",
+   "generator",
+   "steam_turbine",
+   "water_turbine",
+   "wind_turbine"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "solar_thermal",
+  "families": [
+   "solar",
+   "thermal"
+  ],
+  "ids": [
+   "2x3_rotating_solar_panel",
+   "2x3_solar_panel",
+   "small_rotating_solar_panel",
+   "small_solar_panel",
+   "200v_active_thermal_dissipator",
+   "fuel_heat_furnace",
+   "small_active_thermal_dissipator",
+   "small_passive_thermal_dissipator",
+   "stone_heat_furnace"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "solar_thermal",
+  "families": [
+   "solar",
+   "thermal"
+  ],
+  "ids": [
+   "2x3_rotating_solar_panel",
+   "2x3_solar_panel",
+   "small_rotating_solar_panel",
+   "small_solar_panel",
+   "200v_active_thermal_dissipator",
+   "fuel_heat_furnace",
+   "small_active_thermal_dissipator",
+   "small_passive_thermal_dissipator",
+   "stone_heat_furnace"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "batteries",
+  "families": [
+   "battery"
+  ],
+  "ids": [
+   "200v_battery_charger",
+   "50v_battery_charger",
+   "capacity_oriented_battery",
+   "cost_oriented_battery",
+   "current_oriented_battery",
+   "life_oriented_battery",
+   "single_use_battery",
+   "voltage_oriented_battery",
+   "weak_50v_battery_charger"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "batteries",
+  "families": [
+   "battery"
+  ],
+  "ids": [
+   "200v_battery_charger",
+   "50v_battery_charger",
+   "capacity_oriented_battery",
+   "cost_oriented_battery",
+   "current_oriented_battery",
+   "life_oriented_battery",
+   "single_use_battery",
+   "voltage_oriented_battery",
+   "weak_50v_battery_charger"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "heating_elements",
+  "families": [
+   "heating_element"
+  ],
+  "ids": [
+   "200v_copper_heating_corp",
+   "200v_iron_heating_corp",
+   "200v_tungsten_heating_corp",
+   "50v_copper_heating_corp",
+   "50v_iron_heating_corp",
+   "50v_tungsten_heating_corp",
+   "small_200v_copper_heating_corp",
+   "small_200v_iron_heating_corp",
+   "small_200v_tungsten_heating_corp",
+   "small_50v_copper_heating_corp",
+   "small_50v_iron_heating_corp",
+   "small_50v_tungsten_heating_corp"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "heating_elements",
+  "families": [
+   "heating_element"
+  ],
+  "ids": [
+   "200v_copper_heating_corp",
+   "200v_iron_heating_corp",
+   "200v_tungsten_heating_corp",
+   "50v_copper_heating_corp",
+   "50v_iron_heating_corp",
+   "50v_tungsten_heating_corp",
+   "small_200v_copper_heating_corp",
+   "small_200v_iron_heating_corp",
+   "small_200v_tungsten_heating_corp",
+   "small_50v_copper_heating_corp",
+   "small_50v_iron_heating_corp",
+   "small_50v_tungsten_heating_corp"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "light_bulbs",
+  "families": [
+   "light_bulb"
+  ],
+  "ids": [
+   "200v_economic_light_bulb",
+   "200v_farming_lamp",
+   "200v_incandescent_light_bulb",
+   "200v_led_bulb",
+   "50v_carbon_incandescent_light_bulb",
+   "50v_economic_light_bulb",
+   "50v_farming_lamp",
+   "50v_incandescent_light_bulb",
+   "50v_led_bulb",
+   "small_50v_carbon_incandescent_light_bulb",
+   "small_50v_economic_light_bulb",
+   "small_50v_incandescent_light_bulb"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "light_bulbs",
+  "families": [
+   "light_bulb"
+  ],
+  "ids": [
+   "200v_economic_light_bulb",
+   "200v_farming_lamp",
+   "200v_incandescent_light_bulb",
+   "200v_led_bulb",
+   "50v_carbon_incandescent_light_bulb",
+   "50v_economic_light_bulb",
+   "50v_farming_lamp",
+   "50v_incandescent_light_bulb",
+   "50v_led_bulb",
+   "small_50v_carbon_incandescent_light_bulb",
+   "small_50v_economic_light_bulb",
+   "small_50v_incandescent_light_bulb"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "lighting_fixtures",
+  "families": [
+   "lighting_fixture"
+  ],
+  "ids": [
+   "200v_emergency_lamp",
+   "50v_emergency_lamp",
+   "flat_lamp_socket",
+   "fluorescent_lamp_socket",
+   "lamp_socket_a",
+   "lamp_socket_b_projector",
+   "lamp_supply",
+   "long_suspended_lamp_socket",
+   "robust_lamp_socket",
+   "sconce_lamp_socket",
+   "simple_lamp_socket",
+   "streetlight",
+   "suspended_lamp_socket"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "lighting_fixtures",
+  "families": [
+   "lighting_fixture"
+  ],
+  "ids": [
+   "200v_emergency_lamp",
+   "50v_emergency_lamp",
+   "flat_lamp_socket",
+   "fluorescent_lamp_socket",
+   "lamp_socket_a",
+   "lamp_socket_b_projector",
+   "lamp_supply",
+   "long_suspended_lamp_socket",
+   "robust_lamp_socket",
+   "sconce_lamp_socket",
+   "simple_lamp_socket",
+   "streetlight",
+   "suspended_lamp_socket"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "parts_mechanical",
+  "families": [
+   "machine_part"
+  ],
+  "ids": [
+   "advanced_electrical_motor",
+   "advanced_machine_block",
+   "advanced_magnet",
+   "average_electrical_drill",
+   "average_ferromagnetic_core",
+   "basic_magnet",
+   "big_fuel_burner",
+   "casing",
+   "cheap_electrical_drill",
+   "cheap_ferromagnetic_core",
+   "combustion_chamber",
+   "electrical_motor",
+   "fast_electrical_drill",
+   "machine_block",
+   "medium_fuel_burner",
+   "mining_pipe",
+   "optimal_ferromagnetic_core",
+   "small_fuel_burner",
+   "thermal_insulation"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "parts_mechanical",
+  "families": [
+   "machine_part"
+  ],
+  "ids": [
+   "advanced_electrical_motor",
+   "electrical_motor"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "parts_modules",
+  "families": [
+   "machine_part"
+  ],
+  "ids": [
+   "advanced_chip",
+   "analogic_regulator",
+   "animal_filter",
+   "cheap_chip",
+   "electrical_probe_chip",
+   "machine_booster",
+   "monster_filter",
+   "on_off_regulator_1",
+   "on_off_regulator_10",
+   "overheating_protection",
+   "overvoltage_protection",
+   "player_filter",
+   "signal_antenna",
+   "solar_tracker",
+   "thermal_probe_chip"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "materials",
+  "families": [
+   "material"
+  ],
+  "ids": [
+   "alloy_dust",
+   "alloy_ingot",
+   "alloy_plate",
+   "cinnabar_dust",
+   "coal_dust",
+   "coal_plate",
+   "copper_cable",
+   "copper_dust",
+   "copper_plate",
+   "dielectric",
+   "ferrite_ingot",
+   "gold_dust",
+   "gold_plate",
+   "iron_cable",
+   "iron_dust",
+   "iron_plate",
+   "lead_dust",
+   "lead_ingot",
+   "lead_plate",
+   "mercury",
+   "rubber",
+   "silicon_dust",
+   "silicon_ingot",
+   "silicon_plate",
+   "tree_resin",
+   "tungsten_cable",
+   "tungsten_dust",
+   "tungsten_ingot"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "tools",
+  "families": [
+   "tool"
+  ],
+  "ids": [
+   "improved_flashlight",
+   "multimeter",
+   "ore_scanner",
+   "portable_battery",
+   "portable_battery_pack",
+   "portable_capacitor",
+   "portable_capacitor_pack",
+   "portable_electrical_axe",
+   "portable_electrical_mining_drill",
+   "small_flashlight",
+   "thermometer",
+   "universal_meter",
+   "wireless_analyzer",
+   "wrench",
+   "x_ray_scanner"
+  ]
+ },
+ {
+  "set": "schematic",
+  "job": "tools",
+  "families": [
+   "tool"
+  ],
+  "ids": [
+   "portable_battery",
+   "portable_battery_pack",
+   "portable_capacitor",
+   "portable_capacitor_pack"
+  ]
+ },
+ {
+  "set": "vanilla",
+  "job": "brushes_armor_misc",
+  "families": [
+   "brush",
+   "armor",
+   "misc"
+  ],
+  "ids": [
+   "black_brush",
+   "blue_brush",
+   "brown_brush",
+   "cyan_brush",
+   "gray_brush",
+   "green_brush",
+   "light_blue_brush",
+   "lime_brush",
+   "magenta_brush",
+   "orange_brush",
+   "pink_brush",
+   "purple_brush",
+   "red_brush",
+   "silver_brush",
+   "white_brush",
+   "yellow_brush",
+   "e_coal_boots",
+   "e_coal_chestplate",
+   "e_coal_helmet",
+   "e_coal_leggings",
+   "item_creative_tab",
+   "tree_resin_collector",
+   "tutorial_sign"
+  ]
+ }
+]

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:blasting",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "ingredient": "eln:raw_tungsten",
+  "result": {
+    "id": "eln:tungsten_ingot"
+  }
+}

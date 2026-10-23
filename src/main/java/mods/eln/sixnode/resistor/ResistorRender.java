@@ -6,9 +6,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.io.IOException;
 public class ResistorRender extends SixNodeElementRender {
 
     public ResistorDescriptor descriptor;
-    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
     private CableRenderType renderPreProcess;
 
     private float wiperPos = 0;
@@ -43,8 +41,4 @@ public class ResistorRender extends SixNodeElementRender {
         descriptor.draw(wiperPos);
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ResistorGui(player, inventory, this);
-    }
 }

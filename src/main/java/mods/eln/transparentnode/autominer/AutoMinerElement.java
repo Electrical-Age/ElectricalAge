@@ -18,11 +18,11 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -63,7 +63,7 @@ public class AutoMinerElement extends TransparentNodeElement {
         electricalComponentList.add(powerResistor);
         slowProcessList.add(slowProcess);
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
         slowProcessList.add(voltageWatchdog.set(inPowerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
     }
 
@@ -132,8 +132,8 @@ public class AutoMinerElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        return inventory.take(entityPlayer.getMainHandItem());
     }
 
     @Override
@@ -142,12 +142,7 @@ public class AutoMinerElement extends TransparentNodeElement {
     }
 
     @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new AutoMinerContainer(player, inventory.getInventory());
-    }
-
-    @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory.getInventory();
     }
 
@@ -179,17 +174,17 @@ public class AutoMinerElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setBoolean("powerOk", powerOk);
-        nbt.setBoolean("silkTouch", slowProcess.silkTouch);
+        nbt.putBoolean("powerOk", powerOk);
+        nbt.putBoolean("silkTouch", slowProcess.silkTouch);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        powerOk = nbt.getBoolean("powerOk");
-        slowProcess.silkTouch = nbt.getBoolean("silkTouch");
+        powerOk = nbt.getBooleanOr("powerOk", false);
+        slowProcess.silkTouch = nbt.getBooleanOr("silkTouch", false);
     }
 
     void pushLog(String log) {

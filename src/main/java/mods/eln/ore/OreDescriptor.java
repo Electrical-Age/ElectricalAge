@@ -1,26 +1,27 @@
 package mods.eln.ore;
 
-import cpw.mods.fml.common.IWorldGenerator;
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
-import mods.eln.wiki.Data;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.feature.WorldGenMinable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.feature.OreFeature;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor implements IWorldGenerator {
+/**
+ * An EA ore (1.12: a metadata variant of eln:ore). 26.x: one block per ore; world generation is data
+ * (data/eln/worldgen, made by script/gen_ore_data.py from these numbers): spawnRate veins per chunk, size
+ * spawnSizeMin..spawnSizeMax-1, y spawnHeightMin..spawnHeightMax-1, replacing plain stone (as 1.12's WorldGenMinable).
+ */
+public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor {
 
     int metadata;
 
     int spawnRate, spawnSizeMax, spawnSizeMin, spawnHeightMin, spawnHeightMax;
+
+    /** The ore's block (set at registration). */
+    public Block block;
 
     public OreDescriptor(String name, int metadata,
                          int spawnRate, int spawnSizeMin, int spawnSizeMax, int spawnHeightMin, int spawnHeightMax) {
@@ -33,41 +34,48 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
         this.spawnSizeMax = spawnSizeMax;
     }
 
-    public IIcon getBlockIconId(int side, int damage) {
-        return getIcon();
+    /** One vein (1.12 WorldGenMinable on plain stone); used by the selftest and the regeneration. */
+    public void generateVein(ServerLevel w, RandomSource random, int posX, int posY, int posZ, int size) {
+        new LiveOreFeature(block, size).placeHere(w, random, new BlockPos(posX, posY, posZ));
     }
 
-    @Override
-    public void setParent(Item item, int damage) {
-        super.setParent(item, damage);
-        Data.addOre(newItemStack());
-    }
+    /**
+     * The vanilla ore feature for a live level: OreFeature.place first checks the world-generation heightmap, which
+     * only exists while chunks generate (a live level logs "Unprimed heightmap"); this skips that check.
+     */
+    static final class LiveOreFeature extends OreFeature {
+        private final int veinSize;
 
-    public ArrayList<ItemStack> getBlockDropped(int fortune) {
-        ArrayList<ItemStack> list = new ArrayList<ItemStack>();
-        list.add(new ItemStack(Eln.oreItem, 1, metadata));
-        return list;
-    }
+        LiveOreFeature(Block block, int size) {
+            super(new BlockMatchTest(Blocks.STONE), block.defaultBlockState(), size);
+            veinSize = size;
+        }
 
-    @Override
-    public void generate(Random random, int chunkX, int chunkZ, World world,
-                         IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
-        if (world.provider.isSurfaceWorld()) {
-            generateSurface(random, chunkX * 16, chunkZ * 16, world); //This makes it gen overworld (the *16 is important)
+        boolean placeHere(ServerLevel level, RandomSource random, BlockPos origin) {
+            // as OreFeature.place, without the OCEAN_FLOOR_WG test
+            float dir = random.nextFloat() * (float) Math.PI;
+            float spreadXY = veinSize / 8.0F;
+            int maxRadius = net.minecraft.util.Mth.ceil((veinSize / 16.0F * 2.0F + 1.0F) / 2.0F);
+            double x0 = origin.getX() + Math.sin(dir) * spreadXY;
+            double x1 = origin.getX() - Math.sin(dir) * spreadXY;
+            double z0 = origin.getZ() + Math.cos(dir) * spreadXY;
+            double z1 = origin.getZ() - Math.cos(dir) * spreadXY;
+            double y0 = origin.getY() + random.nextInt(3) - 2;
+            double y1 = origin.getY() + random.nextInt(3) - 2;
+            int xStart = origin.getX() - net.minecraft.util.Mth.ceil(spreadXY) - maxRadius;
+            int yStart = origin.getY() - 2 - maxRadius;
+            int zStart = origin.getZ() - net.minecraft.util.Mth.ceil(spreadXY) - maxRadius;
+            int sizeXZ = 2 * (net.minecraft.util.Mth.ceil(spreadXY) + maxRadius);
+            int sizeY = 2 * (2 + maxRadius);
+            return doPlace(level, random, x0, x1, z0, z1, y0, y1, xStart, yStart, zStart, sizeXZ, sizeY);
         }
     }
 
-    public void generateSurface(Random random, int x, int z, World w) {
-        if (w.getWorldInfo().getTerrainType() == WorldType.FLAT) return;
-        //for(int i = 0;i<4;i++){ //This goes through the ore metadata
-        for (int ii = 0; ii < spawnRate; ii++) { //This makes it gen multiple times in each chunk
-            int posX = x + random.nextInt(16); //X coordinate to gen at
-            int posY = spawnHeightMin + random.nextInt(spawnHeightMax - spawnHeightMin); //Y coordinate less than 40 to gen at
-            int posZ = z + random.nextInt(16); //Z coordinate to gen at
-            int size = spawnSizeMin + random.nextInt(spawnSizeMax - spawnSizeMin);
-            new WorldGenMinable(Eln.oreBlock, metadata, size, Blocks.stone).generate(w, random, posX, posY, posZ); //The gen call
-        }
-        //}
-        //new WorldGenTrees(par1, par2, par3, par4, par5)
+    public int getMetadata() {
+        return metadata;
+    }
+
+    public int getSpawnRate() {
+        return spawnRate;
     }
 }

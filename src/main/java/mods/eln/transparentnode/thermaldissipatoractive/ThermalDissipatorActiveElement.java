@@ -16,8 +16,8 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.player.EntityPlayer;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -49,9 +49,9 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setTMax(this.descriptor.warmLimit)
-            .set(new WorldExplosion(this).machineExplosion());
+            .set(new Failure(this).machine());
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
         slowProcessList.add(voltageWatchdog.set(positiveLoad).setUNominal(this.descriptor.nominalElectricalU).set(exp));
 
     }
@@ -101,7 +101,7 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+    public boolean onBlockActivated(Player entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
 
         return false;

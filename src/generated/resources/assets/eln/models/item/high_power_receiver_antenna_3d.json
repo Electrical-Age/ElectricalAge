@@ -1,0 +1,6 @@
+{
+  "parent": "eln:item/device_transparent",
+  "textures": {
+    "particle": "eln:item/high_power_receiver_antenna"
+  }
+}

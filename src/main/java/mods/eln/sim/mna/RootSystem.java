@@ -221,56 +221,51 @@ public class RootSystem {
         Iterator<Component> ic = addComponents.iterator();
         while (ic.hasNext()) {
             Component c = ic.next();
-            if (!c.canBeReplacedByInterSystem()) {
-                System.out.println("ELN generateInterSystems ERROR");
+            // Left over = straddles two SubSystems (size limit, or a private/non-private boundary). Any resistor can
+            // be split into two half-resistors + delay sources (exact for DC). 1.7.10 cast everything to Resistor
+            // (ClassCastException on e.g. a capacitor across a private boundary); such a component is now left
+            // out of the simulation (open circuit) until its device is re-added, with a log line, instead of
+            // crashing the tick.
+            if (c instanceof Resistor) {
+                new InterSystemAbstraction(this, (Resistor) c);
+            } else {
+                Utils.println("ELN generateInterSystems: " + c.getClass().getSimpleName()
+                    + " straddles two SubSystems and is not a resistor; left unsimulated until re-added");
             }
-
-            new InterSystemAbstraction(this, (Resistor) c);
 
             ic.remove();
         }
     }
 
+    /** Time spent in each stage of step(), ns, accumulated: generate, inter-system, stepCalc, stepFlush, line flush (the cable benchmark reads it). */
+    public final long[] stageNs = new long[5];
+
     public void step() {
-        Profiler profiler = new Profiler();
-        profiler.add("Generate");
+        long t = System.nanoTime(), t1;
         generate();
-        profiler.add("interSystem");
+        stageNs[0] += (t1 = System.nanoTime()) - t;
+        t = t1;
         for (int idx = 0; idx < interSystemOverSampling; idx++) {
             for (IRootSystemPreStepProcess p : processPre) {
                 p.rootSystemPreStepProcess();
             }
         }
-		
-	/*	for (SubSystem s : systems) {
-			for (State state : s.states) {
-				Utils.print(state.state + " ");
-			}
-		}
-		Utils.println("");*/
-
-        profiler.add("stepCalc");
+        stageNs[1] += (t1 = System.nanoTime()) - t;
+        t = t1;
         for (SubSystem s : systems) {
             s.stepCalc();
         }
-        profiler.add("stepFlush");
+        stageNs[2] += (t1 = System.nanoTime()) - t;
+        t = t1;
         for (SubSystem s : systems) {
             s.stepFlush();
         }
-        profiler.add("simProcessFlush");
+        stageNs[3] += (t1 = System.nanoTime()) - t;
+        t = t1;
         for (ISubSystemProcessFlush p : processF) {
             p.simProcessFlush();
         }
-		
-	/*	for (SubSystem s : systems) {
-			for (State state : s.states) {
-				Utils.print(state.state + " ");
-			}
-		}
-		Utils.println("");*/
-
-        profiler.stop();
-        //Utils.println(profiler);
+        stageNs[4] += System.nanoTime() - t;
     }
 
     private void buildSubSystem(State root) {
@@ -415,8 +410,25 @@ public class RootSystem {
         s.step();
     }
 
+    /** The sub-systems (read-only use: /elnlab netdump). */
+    public List<SubSystem> systems() {
+        return java.util.Collections.unmodifiableList(systems);
+    }
+
     public int getSubSystemCount() {
         return systems.size();
+    }
+
+    /** {sub-systems, states solved (after line simplification), lines, states inside lines}: for the cable benchmark. */
+    public int[] stats() {
+        int states = 0, lines = 0, inLines = 0;
+        for (SubSystem s : systems) states += s.states.size();
+        for (ISubSystemProcessFlush p : processF)
+            if (p instanceof mods.eln.sim.mna.component.Line l) {
+                lines++;
+                inLines += l.states.size();
+            }
+        return new int[]{systems.size(), states, lines, inLines, processPre.size()};
     }
 
     public void addProcess(ISubSystemProcessFlush p) {

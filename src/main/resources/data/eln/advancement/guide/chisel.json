@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/cable_kit",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:chisel"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:chisel"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.chisel.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.chisel.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

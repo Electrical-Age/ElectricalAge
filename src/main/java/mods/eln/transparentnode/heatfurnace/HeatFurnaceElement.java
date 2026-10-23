@@ -17,12 +17,12 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtFurnaceProcess;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -36,7 +36,6 @@ import java.util.Map;
 public class HeatFurnaceElement extends TransparentNodeElement {
 
     public NbtElectricalGateInput electricalCmdLoad = new NbtElectricalGateInput("electricalCmdLoad");
-    //public SignalRp electricalCmdRp = new SignalRp(electricalCmdLoad);
     public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
     public NbtFurnaceProcess furnaceProcess = new NbtFurnaceProcess("furnaceProcess", thermalLoad);
     public HeatFurnaceInventoryProcess inventoryProcess = new HeatFurnaceInventoryProcess(this);
@@ -77,7 +76,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(this.descriptor.thermal)
-            .set(new WorldExplosion(this).machineExplosion());
+            .set(new Failure(this).machine());
     }
 
     @Override
@@ -121,7 +120,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         return false;
     }
 
@@ -135,8 +134,10 @@ public class HeatFurnaceElement extends TransparentNodeElement {
             stream.writeFloat((float) furnaceProcess.getGain());
             stream.writeFloat((float) regulator.getTarget());
             stream.writeShort((int) furnaceProcess.getP());
+            stream.writeFloat((float) furnaceProcess.fire.level);
+            stream.writeBoolean(furnaceProcess.fire.lighting());
 
-            serialiseItemStack(stream, inventory.getStackInSlot(HeatFurnaceContainer.combustibleId));
+            serialiseItemStack(stream, inventory.getItem(HeatFurnaceContainer.combustibleId));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -148,12 +149,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new HeatFurnaceContainer(node, player, inventory, descriptor);
-    }
-
-    @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -163,13 +159,13 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         try {
             switch (packetType) {
                 case unserializeGain:
-                    if (inventory.getStackInSlot(HeatFurnaceContainer.regulatorId) == null) {
+                    if (Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId))) {
                         furnaceProcess.setGain(stream.readFloat());
                     }
                     needPublish();
                     break;
                 case unserializeTemperatureTarget:
-                    //if(inventory.getStackInSlot(HeatFurnaceContainer.regulatorId) == null)
+                    //if(Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)))
                 {
                     regulator.setTarget(stream.readFloat());
                 }
@@ -211,7 +207,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
 
         computeInventory();
@@ -219,9 +215,9 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     void computeInventory() {
-        ItemStack regulatorStack = inventory.getStackInSlot(HeatFurnaceContainer.regulatorId);
+        ItemStack regulatorStack = inventory.getItem(HeatFurnaceContainer.regulatorId);
 
-        if (regulatorStack != null && !controlExternal) {
+        if (!Utils.isEmpty(regulatorStack) && !controlExternal) {
             IRegulatorDescriptor regulator = (IRegulatorDescriptor) Utils.getItemObject(regulatorStack);
 
             regulator.applyTo(this.regulator, 500.0, 10.0, 0.1, 0.1);
@@ -232,18 +228,18 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
-        nbt.setBoolean("takeFuel", takeFuel);
-        nbt.setBoolean("controlExternal", controlExternal);
+        nbt.putBoolean("takeFuel", takeFuel);
+        nbt.putBoolean("controlExternal", controlExternal);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        takeFuel = nbt.getBoolean("takeFuel");
-        controlExternal = nbt.getBoolean("controlExternal");
+        takeFuel = nbt.getBooleanOr("takeFuel", false);
+        controlExternal = nbt.getBooleanOr("controlExternal", false);
     }
 
     @Override

@@ -1,17 +1,18 @@
 package mods.eln.item.electricalitem
 
+
+import mods.eln.compat.WorldCompat
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.Utils
 import mods.eln.sim.IProcess
 import mods.eln.wiki.Data
-import net.minecraft.block.Block
-import net.minecraft.block.material.Material
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.util.ChunkCoordinates
-import net.minecraft.world.World
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.Level
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -25,20 +26,21 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Cuts down trees. Right-click to make it act like a regular axe."))
     }
 
     override fun getStrVsBlock(stack: ItemStack, block: Block?): Float {
         return when {
-            block != null && (block.material === Material.wood || block.material === Material.plants || block.material === Material.vine) -> getStrength(stack)
+            // 1.12 materials WOOD, PLANTS, VINE -> 26.x: axe-mineable blocks, leaves, vines
+            block != null && block.defaultBlockState().let { it.`is`(net.minecraft.tags.BlockTags.MINEABLE_WITH_AXE) || it.`is`(net.minecraft.tags.BlockTags.LEAVES) || it.`is`(net.minecraft.world.level.block.Blocks.VINE) } -> getStrength(stack)
             else -> super.getStrVsBlock(stack, block)
         }
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer?): ItemStack {
-        if (!w.isRemote) {
+    override fun onItemRightClick(s: ItemStack, w: Level, p: Player?): ItemStack {
+        if (!w.isClientSide()) {
             setCapitation(p, s, !getCapitation(s))
         }
         return s
@@ -46,28 +48,28 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
 
     private fun getCapitation(stack: ItemStack): Boolean {
         val nbt = getNbt(stack)
-        if (!nbt.hasKey("capitation")) {
-            nbt.setBoolean("capitation", true)
+        if (!nbt.contains("capitation")) {
+            editNbt(stack) { it.putBoolean("capitation", true) }
         }
-        return nbt.getBoolean("capitation")
+        return nbt.getBooleanOr("capitation", true)
     }
 
-    private fun setCapitation(p: EntityPlayer?, stack: ItemStack, capitation: Boolean) {
-        getNbt(stack).setBoolean("capitation", capitation)
+    private fun setCapitation(p: Player?, stack: ItemStack, capitation: Boolean) {
+        editNbt(stack) { it.putBoolean("capitation", capitation) }
         if (p != null) {
-            Utils.addChatMessage(p, "Set treecapitation to $capitation")
+            Utils.sendMessage(p, "Set treecapitation to $capitation")
         }
     }
 
-    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: EntityLivingBase): Boolean {
-        return if (entity is EntityPlayer && getCapitation(stack)) {
+    override fun onBlockDestroyed(stack: ItemStack, w: Level, block: Block, x: Int, y: Int, z: Int, entity: LivingEntity): Boolean {
+        return if (entity is Player && getCapitation(stack)) {
             TreeCapitation.addBlockSwapper(
                 world = w,
                 player = entity,
                 tool = this,
                 stack = stack,
                 leaves = true,
-                origCoords = ChunkCoordinates(x, y, z)
+                origCoords = BlockPos(x, y, z)
             )
             true
         } else {
@@ -139,14 +141,14 @@ object TreeCapitation : IProcess {
      * documentation).
      * @return The created block swapper.
      */
-    fun addBlockSwapper(world: World, player: EntityPlayer, tool: ElectricalTool, origCoords: ChunkCoordinates, leaves: Boolean, stack: ItemStack) {
+    fun addBlockSwapper(world: Level, player: Player, tool: ElectricalTool, origCoords: BlockPos, leaves: Boolean, stack: ItemStack) {
         val swapper = BlockSwapper(world, player, tool, origCoords, BLOCK_RANGE, leaves, stack)
 
         // Block swapper registration should only occur on the server
-        if (world.isRemote)
+        if (world.isClientSide())
             return
 
-        val dim = world.provider.dimensionId
+        val dim = mods.eln.misc.Dimensions.id(world)
         blockSwappers[dim] = blockSwappers[dim]?.plus(swapper) ?: listOf(swapper)
     }
 
@@ -180,11 +182,11 @@ object TreeCapitation : IProcess {
         /**
          * The world the block swapper is doing the swapping in.
          */
-        private val world: World,
+        private val world: Level,
         /**
          * The player the swapper is swapping for.
          */
-        private val player: EntityPlayer,
+        private val player: Player,
         /**
          * The Terra Truncator which created this swapper.
          */
@@ -192,7 +194,7 @@ object TreeCapitation : IProcess {
         /**
          * The origin of the swapper (eg, where it started).
          */
-        private val origin: ChunkCoordinates,
+        private val origin: BlockPos,
         /**
          * The initial range which this block swapper starts with.
          */
@@ -216,7 +218,7 @@ object TreeCapitation : IProcess {
          * The set of already swaps coordinates which do not have
          * to be revisited.
          */
-        private val completedCoords: MutableSet<ChunkCoordinates>
+        private val completedCoords: MutableSet<BlockPos>
 
         init {
 
@@ -260,9 +262,9 @@ object TreeCapitation : IProcess {
                     tool = tool,
                     stack = stack,
                     world = world,
-                    x = candidate.coordinates.posX,
-                    y = candidate.coordinates.posY,
-                    z = candidate.coordinates.posZ
+                    x = candidate.coordinates.x,
+                    y = candidate.coordinates.y,
+                    z = candidate.coordinates.z
                 )
 
                 remainingSwaps--
@@ -272,10 +274,11 @@ object TreeCapitation : IProcess {
                 // Then, go through all of the adjacent blocks and look if
                 // any of them are any good.
                 for (adj in adjacent(candidate.coordinates)) {
-                    val block = world.getBlock(adj.posX, adj.posY, adj.posZ)
+                    val adjState = world.getBlockState(adj)
+                    val block = adjState.block
 
-                    val isWood = block.isWood(world, adj.posX, adj.posY, adj.posZ)
-                    val isLeaf = block.isLeaves(world, adj.posX, adj.posY, adj.posZ)
+                    val isWood = adjState.`is`(net.minecraft.tags.BlockTags.LOGS)
+                    val isLeaf = adjState.`is`(net.minecraft.tags.BlockTags.LEAVES)
 
                     // If it's not wood or a leaf, we aren't interested.
                     if (!isWood && !isLeaf)
@@ -297,8 +300,8 @@ object TreeCapitation : IProcess {
             return true
         }
 
-        fun adjacent(original: ChunkCoordinates): List<ChunkCoordinates> {
-            val coords = ArrayList<ChunkCoordinates>()
+        fun adjacent(original: BlockPos): List<BlockPos> {
+            val coords = ArrayList<BlockPos>()
             // Visit all the surrounding blocks in the provided radius.
             // Gotta love these nested loops, right?
             for (dx in -SINGLE_BLOCK_RADIUS..SINGLE_BLOCK_RADIUS)
@@ -308,7 +311,7 @@ object TreeCapitation : IProcess {
                         if (dx == 0 && dy == 0 && dz == 0)
                             continue
 
-                        coords.add(ChunkCoordinates(original.posX + dx, original.posY + dy, original.posZ + dz))
+                        coords.add(original.offset(dx, dy, dz))
                     }
 
             return coords
@@ -332,7 +335,7 @@ object TreeCapitation : IProcess {
             /**
              * The location of this swap candidate.
              */
-            var coordinates: ChunkCoordinates,
+            var coordinates: BlockPos,
             /**
              * The remaining range of this swap candidate.
              */
@@ -363,32 +366,35 @@ object TreeCapitation : IProcess {
 /**
  * The bits below, however, are from ToolCommons.java. Mostly. Maybe about half, by now.
  */
-fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
-    if (world.isRemote || !world.blockExists(x, y, z))
+fun removeBlockWithDrops(player: Player, tool: ElectricalTool, stack: ItemStack, world: Level, x: Int, y: Int, z: Int) {
+    if (world.isClientSide() || !WorldCompat.blockExists(world, x, y, z))
         return
 
-    val block = world.getBlock(x, y, z)
-    val meta = world.getBlockMetadata(x, y, z)
+    val pos = BlockPos(x, y, z)
+    val state = world.getBlockState(pos)
+    val block = state.block
 
-    if (block != null && !block.isAir(world, x, y, z) && block.getPlayerRelativeBlockHardness(player, world, x, y, z) > 0) {
-        if (!block.canHarvestBlock(player, meta))
+    if (!state.isAir && state.getDestroyProgress(player, world, pos) > 0) {
+        if (!state.canHarvestBlock(world, pos, player))
             return
 
-        if (!player.capabilities.isCreativeMode) {
+        if (!player.isCreative) {
             val energy = tool.getEnergy(stack)
             tool.subtractEnergyForBlockBreak(stack, block)
             val newEnergy = tool.getEnergy(stack)
             if (newEnergy > 0 && newEnergy < energy) {
-                val localMeta = world.getBlockMetadata(x, y, z)
-                block.onBlockHarvested(world, x, y, z, localMeta, player)
-
-                if (block.removedByPlayer(world, player, x, y, z, true)) {
-                    block.onBlockDestroyedByPlayer(world, x, y, z, localMeta)
-                    block.harvestBlock(world, player, x, y, z, localMeta)
+                // 1.12 onBlockHarvested / removedByPlayer / onPlayerDestroy / harvestBlock; not gameMode.destroyBlock,
+                // which would call the tool's mineBlock again (the drill's 3x3 would cascade)
+                val te = world.getBlockEntity(pos)
+                val localState = block.playerWillDestroy(world, pos, world.getBlockState(pos), player)
+                if (localState.onDestroyedByPlayer(world, pos, player, stack, true, world.getFluidState(pos))) {
+                    block.destroy(world, pos, localState)
+                    if (world is net.minecraft.server.level.ServerLevel && player is net.minecraft.server.level.ServerPlayer)
+                        block.playerDestroy(world, player, pos, localState, te, stack)
                 }
             }
         } else {
-            world.setBlockToAir(x, y, z)
+            WorldCompat.setBlockToAir(world, x, y, z)
         }
     }
 }

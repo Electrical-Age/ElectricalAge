@@ -8,10 +8,10 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.DataOutputStream;
@@ -43,9 +43,9 @@ abstract public class GridElement extends TransparentNodeElement {
 
     /* Connect one GridNode to another. */
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         // Check if user is holding an appropriate tool.
-        final ItemStack stack = entityPlayer.getCurrentEquippedItem();
+        final ItemStack stack = entityPlayer.getMainHandItem();
         final GenericItemBlockUsingDamageDescriptor itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
         if (itemDesc instanceof ElectricalCableDescriptor) {
             return onTryGridConnect(entityPlayer, stack, (ElectricalCableDescriptor) itemDesc, side);
@@ -54,9 +54,9 @@ abstract public class GridElement extends TransparentNodeElement {
         return false;
     }
 
-    private boolean onTryGridConnect(EntityPlayer entityPlayer, ItemStack stack, ElectricalCableDescriptor cable, Direction side) {
+    private boolean onTryGridConnect(Player entityPlayer, ItemStack stack, ElectricalCableDescriptor cable, Direction side) {
         // First node, or second node?
-        UUID uuid = entityPlayer.getPersistentID();
+        UUID uuid = entityPlayer.getUUID();
         Pair<Coordonate, Direction> p = pending.get(uuid);
         GridElement other = null;
         if (p != null) {
@@ -64,30 +64,30 @@ abstract public class GridElement extends TransparentNodeElement {
         }
         // Check if it's the *correct* cable descriptor.
         if (!cable.equals(desc.cableDescriptor)) {
-            Utils.addChatMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
+            Utils.sendMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
             return true;
         }
         if (other == null || other == this) {
-            Utils.addChatMessage(entityPlayer, "Setting starting point");
+            Utils.sendMessage(entityPlayer, "Setting starting point");
             pending.put(uuid, Pair.of(this.coordonate(), side));
         } else {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
-            if (stack.stackSize < distance) {
-                Utils.addChatMessage(entityPlayer, "You need " + cableLength + " units of cable");
+            if (stack.getCount() < distance) {
+                Utils.sendMessage(entityPlayer, "You need " + cableLength + " units of cable");
             } else if (distance > range) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
+                Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
             } else if (!this.canConnect(other)) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect these two objects");
+                Utils.sendMessage(entityPlayer, "Cannot connect these two objects");
             } else if (!this.validLOS(other)) {
-                Utils.addChatMessage(entityPlayer, "Cannot connect, no line of sight");
+                Utils.sendMessage(entityPlayer, "Cannot connect, no line of sight");
             } else {
                 if (GridLink.addLink(this, other, side, p.getRight(), cable, cableLength)) {
-                    Utils.addChatMessage(entityPlayer, "Added connection");
-                    stack.splitStack(cableLength);
+                    Utils.sendMessage(entityPlayer, "Added connection");
+                    stack.split(cableLength);
                 } else {
-                    Utils.addChatMessage(entityPlayer, "Already connected");
+                    Utils.sendMessage(entityPlayer, "Already connected");
                 }
             }
             pending.remove(uuid);
@@ -140,11 +140,11 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
         Integer i = 0;
-        NBTTagCompound gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks");
+        CompoundTag gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks");
         for (GridLink link : gridLinkList) {
             link.writeToNBT(Utils.newNbtTagCompund(gridLinks, i.toString()), "");
             i++;
@@ -152,14 +152,14 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         assert gridLinkList.isEmpty();
-        final NBTTagCompound gridLinks = nbt.getCompoundTag("gridLinks");
+        final CompoundTag gridLinks = nbt.getCompoundOrEmpty("gridLinks");
         for (Integer i = 0; ; i++) {
-            final NBTTagCompound linkTag = gridLinks.getCompoundTag(i.toString());
-            if (linkTag.hasNoTags())
+            final CompoundTag linkTag = gridLinks.getCompoundOrEmpty(i.toString());
+            if (linkTag.isEmpty())
                 break;
             gridLinksBooting.add(new GridLink(linkTag, ""));
         }
@@ -264,11 +264,10 @@ abstract public class GridElement extends TransparentNodeElement {
                 // It's always the "a" side doing this.
                 Coordonate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
-                    final Vec3 start = getCablePoint(ourSide, i);
-                    start.rotateAroundY((float) Math.toRadians(idealRenderingAngle));
-                    Vec3 end = target.getCablePoint(theirSide, i);
-                    end.rotateAroundY((float) Math.toRadians(target.idealRenderingAngle));
-                    end = end.addVector(offset.x, offset.y, offset.z);
+                    // 1.12: Vec3 is immutable (1.7.10 rotateAroundY rotated in place; rotateYaw is the same rotation)
+                    final Vec3 start = getCablePoint(ourSide, i).yRot((float) Math.toRadians(idealRenderingAngle));
+                    Vec3 end = target.getCablePoint(theirSide, i).yRot((float) Math.toRadians(target.idealRenderingAngle));
+                    end = end.add(offset.x, offset.y, offset.z);
                     writeVec(stream, start);
                     writeVec(stream, end);
                 }
@@ -286,9 +285,9 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     private void writeVec(DataOutputStream stream, Vec3 sp) throws IOException {
-        stream.writeFloat((float) sp.xCoord);
-        stream.writeFloat((float) sp.yCoord);
-        stream.writeFloat((float) sp.zCoord);
+        stream.writeFloat((float) sp.x);
+        stream.writeFloat((float) sp.y);
+        stream.writeFloat((float) sp.z);
     }
 
     @Override

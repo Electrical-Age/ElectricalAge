@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "E": "eln:small_50v_tungsten_heating_corp",
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "IGG",
+    "E G",
+    "CII"
+  ],
+  "result": {
+    "id": "eln:50v_egg_incubator"
+  }
+}

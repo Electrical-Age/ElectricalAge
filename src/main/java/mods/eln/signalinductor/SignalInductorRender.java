@@ -1,12 +1,13 @@
 package mods.eln.signalinductor;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.item.ItemStack;
+import mods.eln.gl.GL11;
 
 public class SignalInductorRender extends SixNodeElementRender {
 
@@ -16,7 +17,7 @@ public class SignalInductorRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
-        ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
+        ItemStack i = UtilsClient.clientPlayerHelmet();
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 

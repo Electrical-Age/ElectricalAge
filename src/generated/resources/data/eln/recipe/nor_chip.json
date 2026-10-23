@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "c": "eln:copper_cable",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    " r ",
+    "rCc",
+    " r "
+  ],
+  "result": {
+    "id": "eln:nor_chip"
+  }
+}

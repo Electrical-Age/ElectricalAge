@@ -7,18 +7,14 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.sound.LoopedSound;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class ElectricalMachineRender extends TransparentNodeElementRender {
-    private final TransparentNodeElementInventory inventory;
 
     final ElectricalMachineDescriptor descriptor;
 
@@ -27,8 +23,8 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     private CableRenderType connectionType;
     private final LRDUMask eConn = new LRDUMask();
 
-    private EntityItem inEntity;
-    private EntityItem outEntity;
+    private ItemEntity inEntity;
+    private ItemEntity outEntity;
     float powerFactor;
     float processState;
     private float processStatePerSecond;
@@ -38,11 +34,10 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     public ElectricalMachineRender(TransparentNodeEntity tileEntity, final TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (ElectricalMachineDescriptor) descriptor;
-        inventory = new ElectricalMachineInventory(2 + this.descriptor.outStackCount, 64, this);
         drawHandle = this.descriptor.newDrawHandle();
 
         if (this.descriptor.runningSound != null) {
-            addLoopedSound(new LoopedSound(this.descriptor.runningSound, coordonate(), ISound.AttenuationType.LINEAR) {
+            addLoopedSound(new mods.eln.sound.LoopedSound(this.descriptor.runningSound, coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
                 @Override
                 public float getPitch() {
                     return powerFactor;
@@ -78,11 +73,6 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     @Override
     public boolean cameraDrawOptimisation() {
         return false;
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalMachineGuiDraw(player, inventory, this);
     }
 
     @Override

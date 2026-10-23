@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "M": "eln:advanced_electrical_motor",
+    "P": "minecraft:diamond_pickaxe",
+    "T": "eln:mining_pipe"
+  },
+  "pattern": [
+    "MCM",
+    " T ",
+    " P "
+  ],
+  "result": {
+    "id": "eln:fast_electrical_drill"
+  }
+}

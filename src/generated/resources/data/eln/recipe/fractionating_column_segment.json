@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "IGI",
+    "B B",
+    "IGI"
+  ],
+  "result": {
+    "count": 2,
+    "id": "eln:fractionating_column_segment"
+  }
+}

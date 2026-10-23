@@ -8,9 +8,8 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -28,7 +27,6 @@ public class LampSupplyRender extends SixNodeElementRender {
 
     CableRenderDescriptor cableRender;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public LampSupplyRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -55,10 +53,9 @@ public class LampSupplyRender extends SixNodeElementRender {
         }
         descriptor.draw(interpolator.get());
     }
-
     @Override
     public void refresh(float deltaT) {
-        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
+        if (!Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(0)))
             interpolator.setTarget(0f);
         else
             interpolator.setTarget(1f);
@@ -72,11 +69,6 @@ public class LampSupplyRender extends SixNodeElementRender {
     }
 
     @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new LampSupplyGui(this, player, inventory);
-    }
-
-    @Override
     public void publishUnserialize(DataInputStream stream) {
         super.publishUnserialize(stream);
         try {
@@ -87,12 +79,9 @@ public class LampSupplyRender extends SixNodeElementRender {
             }
 
             ItemStack cableStack = Utils.unserialiseItemStack(stream);
-            if (cableStack != null) {
-                ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-                cableRender = desc.render;
-            } else {
-                cableRender = null;
-            }
+            ElectricalCableDescriptor desc = Utils.isEmpty(cableStack) ? null
+                : (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+            cableRender = desc != null ? desc.render : mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_cable",
+    "S": "minecraft:cobblestone"
+  },
+  "pattern": [
+    "S",
+    "C"
+  ],
+  "result": {
+    "id": "eln:copper_thermal_cable"
+  }
+}

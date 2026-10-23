@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:machine_block",
+    "I": "#c:plates/iron",
+    "M": "eln:electrical_motor"
+  },
+  "pattern": [
+    " I ",
+    "IMI",
+    " B "
+  ],
+  "result": {
+    "id": "eln:wind_turbine"
+  }
+}

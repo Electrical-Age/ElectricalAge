@@ -1,0 +1,8 @@
+{
+ "column": [
+  {"text": "title", "sample": "200V Electrical Age to other energy exporter"},
+  {"text": "limit", "sample": "Input power is limited to 99999W"},
+  {"slider": "limit", "sample": "    ", "fill": true}
+ ],
+ "gap": 4
+}

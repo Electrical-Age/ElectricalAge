@@ -4,14 +4,14 @@ import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Resistor;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class ElectricalStackMachineProcess implements IProcess {
 
     ElectricalStackMachineProcessObserver observer;
 
-    public IInventory inventory;
+    public Container inventory;
     int inputSlotId, OutputSlotId, outputSlotNbr;
     Resistor electricalResistor;
     double resistorValue;
@@ -33,7 +33,7 @@ public class ElectricalStackMachineProcess implements IProcess {
         this.observer = observer;
     }
 
-    public ElectricalStackMachineProcess(IInventory inventory, int inputSlotId, int OutputSlotId, int outputSlotNbr,
+    public ElectricalStackMachineProcess(Container inventory, int inputSlotId, int OutputSlotId, int outputSlotNbr,
                                          Resistor electricalResistor, double resistorValue, RecipesList recipesList) {
         this.inventory = inventory;
         this.inputSlotId = inputSlotId;
@@ -61,11 +61,11 @@ public class ElectricalStackMachineProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        ItemStack itemStackIn = inventory.getStackInSlot(inputSlotId);
+        ItemStack itemStackIn = inventory.getItem(inputSlotId);
 
-        boolean itemTypeChanged = itemStackIn == null && itemStackInOld != null ||
-            itemStackIn != null && itemStackInOld == null ||
-            itemStackIn != null && itemStackInOld != null && !itemStackIn.getUnlocalizedName().equals(itemStackInOld.getUnlocalizedName());
+        boolean itemTypeChanged = Utils.isEmpty(itemStackIn) && !Utils.isEmpty(itemStackInOld) ||
+            !Utils.isEmpty(itemStackIn) && Utils.isEmpty(itemStackInOld) ||
+            !Utils.isEmpty(itemStackIn) && !Utils.isEmpty(itemStackInOld) && itemStackIn.getItem() != itemStackInOld.getItem() /* 1.12: translation keys (damage sub-items) */;
 
         if (itemTypeChanged || (!smeltCan()) || !smeltInProcess) {
             smeltInit();
@@ -95,7 +95,7 @@ public class ElectricalStackMachineProcess implements IProcess {
             electricalResistor.highImpedance();
         } else {
             smeltInProcess = true;
-            energyNeeded = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId)).energy;
+            energyNeeded = recipesList.getRecipe(inventory.getItem(inputSlotId)).energy;
             energyCounter = 0.0;
             electricalResistor.setR(resistorValue / speedUp);
         }
@@ -109,8 +109,12 @@ public class ElectricalStackMachineProcess implements IProcess {
     /**
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
+    /** 26.x: an extra condition to run at all (e.g. the oil separator's tank has room). */
+    public java.util.function.BooleanSupplier extraCondition = () -> true;
+
     public boolean smeltCan() {
-        if (inventory.getStackInSlot(inputSlotId) == null) {
+        if (!extraCondition.getAsBoolean()) return false;
+        if (Utils.isEmpty(inventory.getItem(inputSlotId))) {
             return false;
         } else {
             ItemStack[] output = getSmeltResult();
@@ -119,10 +123,12 @@ public class ElectricalStackMachineProcess implements IProcess {
         }
     }
 
+    static final java.util.Random RANDOM = new java.util.Random();
+
     public ItemStack[] getSmeltResult() {
-        Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
+        Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
         if (recipe == null) return null;
-        return recipe.output;
+        return recipe.maxOutput();
     }
 
     /**
@@ -130,9 +136,9 @@ public class ElectricalStackMachineProcess implements IProcess {
      */
     public void smeltItem() {
         if (this.smeltCan()) {
-            Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
-            Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory, outSlotIdList);
-            inventory.decrStackSize(inputSlotId, recipe.input.stackSize);
+            Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
+            Utils.tryPutStackInInventory(recipe.getOutputCopy(RANDOM), inventory, outSlotIdList);
+            inventory.removeItem(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);
         }
     }

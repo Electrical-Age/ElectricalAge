@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "c": "eln:copper_cable",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    "rrr",
+    "cCc",
+    "   "
+  ],
+  "result": {
+    "id": "eln:voltage_controlled_sine_oscillator"
+  }
+}

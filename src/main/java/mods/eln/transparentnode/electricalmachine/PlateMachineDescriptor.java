@@ -1,10 +1,12 @@
 package mods.eln.transparentnode.electricalmachine;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.world.entity.item.ItemEntity;
 
 public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
     private Obj3DPart main;
@@ -34,7 +36,7 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
     }
 
     @Override
-    void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
+    void draw(ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
         PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
 
         main.draw();
@@ -44,9 +46,8 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         UtilsClient.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
         UtilsClient.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
     }
-
     @Override
-    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
+    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
         PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
         handle.interpolator.setTarget(powerFactor);
         handle.interpolator.step(deltaT);
@@ -56,7 +57,6 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         handle.itemCounter += deltaT * 90;
         while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
     }
-
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

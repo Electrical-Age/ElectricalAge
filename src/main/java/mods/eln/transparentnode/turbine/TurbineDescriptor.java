@@ -12,9 +12,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
                              double nominalP, double nominalPowerLost, double electricalRs,
                              double thermalC, double DeltaTForInput,
                              double powerOutPerDeltaU, String soundFile) {
-        super(name, TurbineElement.class, TurbineRender.class);
+        super(name, TurbineElement.class, null);
         double nominalEff = Math.abs(1 - (0 + PhysicalConstant.Tref) / (nominalDeltaT + PhysicalConstant.Tref));
         this.TtoU = TtoU;
         this.PoutToPin = PoutToPin;
@@ -86,27 +86,23 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
         if (main != null) main.draw();
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        draw();
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw();
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Generates electricity using heat."));

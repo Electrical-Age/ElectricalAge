@@ -1,5 +1,7 @@
 package mods.eln.cable;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.cable.CableRenderType.CableRenderTypeMethodType;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -8,9 +10,10 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import mods.eln.gl.GL11;
+import mods.eln.misc.UtilsClient;
 
 public class CableRender {
     private CableRender() {
@@ -27,7 +30,7 @@ public class CableRender {
         Block block;
         int x2, y2, z2;
         CableRenderType connectionTypeBuild = new CableRenderType();
-        TileEntity otherTileEntity;
+        BlockEntity otherTileEntity;
 
         for (LRDU lrdu : LRDU.values()) {
             //noConnection
@@ -35,9 +38,9 @@ public class CableRender {
 
             Direction sideLrdu = side.applyLRDU(lrdu);
 
-            x2 = entity.xCoord;
-            y2 = entity.yCoord;
-            z2 = entity.zCoord;
+            x2 = entity.getBlockPos().getX();
+            y2 = entity.getBlockPos().getY();
+            z2 = entity.getBlockPos().getZ();
 
             switch (sideLrdu) {
                 case XN:
@@ -63,7 +66,7 @@ public class CableRender {
             }
 
             //standardConnection
-            otherTileEntity = entity.getWorldObj().getTileEntity(x2, y2, z2);
+            otherTileEntity = WorldCompat.getBlockEntity(entity.getLevel(), x2, y2, z2);
             if (otherTileEntity instanceof SixNodeEntity) {
                 SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
@@ -75,7 +78,7 @@ public class CableRender {
             }
 
             //no wrappeConection ?
-            if (!NodeBase.isBlockWrappable(entity.getWorldObj().getBlock(x2, y2, z2), entity.getWorldObj(), x2, y2, z2)) {
+            if (!NodeBase.isBlockWrappable(entity.getLevel().getBlockState(new net.minecraft.core.BlockPos(x2, y2, z2)), entity.getLevel(), new net.minecraft.core.BlockPos(x2, y2, z2))) {
                 continue;
             } else {
                 switch (side) {
@@ -101,7 +104,7 @@ public class CableRender {
                         break;
                 }
 
-                otherTileEntity = entity.getWorldObj().getTileEntity(x2, y2, z2);
+                otherTileEntity = WorldCompat.getBlockEntity(entity.getLevel(), x2, y2, z2);
 
                 if (otherTileEntity instanceof NodeBlockEntity) {
 				/*
@@ -166,7 +169,7 @@ public class CableRender {
         Block block;
         int x2, y2, z2;
         CableRenderType connectionTypeBuild = new CableRenderType();
-        TileEntity otherTileEntity;
+        BlockEntity otherTileEntity;
 
         for (LRDU lrdu : LRDU.values()) {
             //noConnection
@@ -209,9 +212,9 @@ public class CableRender {
                 continue;
             }
 
-            x2 = element.tileEntity.xCoord;
-            y2 = element.tileEntity.yCoord;
-            z2 = element.tileEntity.zCoord;
+            x2 = element.tileEntity.getBlockPos().getX();
+            y2 = element.tileEntity.getBlockPos().getY();
+            z2 = element.tileEntity.getBlockPos().getZ();
 
             switch (sideLrdu) {
                 case XN:
@@ -237,7 +240,7 @@ public class CableRender {
             }
 
             //standardConnection
-            otherTileEntity = element.tileEntity.getWorldObj().getTileEntity(x2, y2, z2);
+            otherTileEntity = WorldCompat.getBlockEntity(element.tileEntity.getLevel(), x2, y2, z2);
             if (otherTileEntity instanceof SixNodeEntity) {
                 SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
@@ -247,8 +250,13 @@ public class CableRender {
                 }
             }
 
+            // 26.x: a floor cable ending at a device's terminal plate gets a lug (drawn by the cable, see drawKnuckle)
+            if (side == Direction.YN && !sideLrdu.isY()) {
+                connectionTypeBuild.knuckle[lrdu.dir] = CableTerminals.heightAt(otherTileEntity, sideLrdu.getInverse());
+            }
+
             //no wrappeConection ?
-            if (!NodeBase.isBlockWrappable(element.tileEntity.getWorldObj().getBlock(x2, y2, z2), element.tileEntity.getWorldObj(), x2, y2, z2)) {
+            if (!NodeBase.isBlockWrappable(element.tileEntity.getLevel().getBlockState(new net.minecraft.core.BlockPos(x2, y2, z2)), element.tileEntity.getLevel(), new net.minecraft.core.BlockPos(x2, y2, z2))) {
                 continue;
             } else {
                 switch (side) {
@@ -274,7 +282,7 @@ public class CableRender {
                         break;
                 }
 
-                otherTileEntity = element.tileEntity.getWorldObj().getTileEntity(x2, y2, z2);
+                otherTileEntity = WorldCompat.getBlockEntity(element.tileEntity.getLevel(), x2, y2, z2);
 
                 if (otherTileEntity instanceof NodeBlockEntity) {
                     //Direction otherDirection = side.getInverse();
@@ -339,6 +347,99 @@ public class CableRender {
             }
         }
         return connectionTypeBuild;
+    }
+
+    /**
+     * 26.x: the conductor heights (px) a floor cable's arms meet, as {@link #connectionType(SixNodeElementRender, Direction)}
+     * sets them in {@code knuckle}, without the rest (cheap enough to poll; see ElectricalCableRender.refresh).
+     */
+    public static float[] knuckleHeights(SixNodeElementRender element, Direction side) {
+        float[] k = new float[4];
+        if (side != Direction.YN || element.tileEntity == null || element.tileEntity.getLevel() == null) return k;
+        for (LRDU lrdu : LRDU.values()) {
+            if (!element.connectedSide.get(lrdu)) continue;
+            Direction sideLrdu = side.applyLRDU(lrdu);
+            if (sideLrdu.isY() || element.tileEntity.elementRenderList[sideLrdu.getInt()] != null) continue;
+            BlockEntity other = element.tileEntity.getLevel().getBlockEntity(element.tileEntity.getBlockPos().relative(sideLrdu.toEnumFacing()));
+            k[lrdu.dir] = CableTerminals.heightAt(other, sideLrdu.getInverse());
+        }
+        return k;
+    }
+
+    /** Copper of the lugs (the device models' copper texture, 196/110/70). */
+    static final float LUG_R = 0.77f, LUG_G = 0.43f, LUG_B = 0.27f;
+
+    /**
+     * 26.x: cable lugs where a floor cable meets a device's terminal plate ({@code connectionType.knuckle}, px): the
+     * cable turns up against the face (cable texture, takes the current dye colour), a copper crimp barrel tops it and
+     * a copper palm lies on the plate's middle conductor. Sizes follow the cable (width, thickness); the height is the
+     * device's. Local frame as drawCable: x = height above the face, Left/Right along z, Down/Up along y, edges at
+     * +-0.5. Draw it after drawCable and before drawNode; it leaves the colour at copper.
+     */
+    public static void drawKnuckles(CableRenderDescriptor cable, CableRenderType connectionType) {
+        if (cable == null) return;
+        boolean any = false;
+        for (float k : connectionType.knuckle) any |= k > 0;
+        if (!any) return;
+        final float px = 1f / 16f;
+        float w2 = cable.widthDiv2, h = cable.height;
+        UtilsClient.disableCulling();
+        // pass 1: the risers, in the cable's texture and colour
+        for (int idx = 0; idx < 4; idx++) {
+            float H = connectionType.knuckle[idx] * px;
+            if (H <= 0) continue;
+            LRDU lrdu = LRDU.fromInt(idx);
+            boolean alongZ = lrdu == LRDU.Left || lrdu == LRDU.Right;
+            float edge = (lrdu == LRDU.Left || lrdu == LRDU.Down) ? -0.5f : 0.5f, in = -Math.signum(edge);
+            lugBox(alongZ, true, 0, H - 0.1f * px, -w2 - 0.05f * px, w2 + 0.05f * px,
+                edge + in * 0.25f * px, edge + in * (0.25f * px + h));
+        }
+        // pass 2: copper barrel and palm
+        UtilsClient.disableTexture();
+        GL11.glColor3f(LUG_R, LUG_G, LUG_B);
+        for (int idx = 0; idx < 4; idx++) {
+            float H = connectionType.knuckle[idx] * px;
+            if (H <= 0) continue;
+            LRDU lrdu = LRDU.fromInt(idx);
+            boolean alongZ = lrdu == LRDU.Left || lrdu == LRDU.Right;
+            float edge = (lrdu == LRDU.Left || lrdu == LRDU.Down) ? -0.5f : 0.5f, in = -Math.signum(edge);
+            float bw = w2 + 0.15f * px, pw = Math.max(0.75f * px, w2 - 0.25f * px);
+            lugBox(alongZ, false, H - 0.1f * px, H + 0.6f * px, -bw, bw, edge + in * 0.15f * px, edge + in * (0.35f * px + h));
+            lugBox(alongZ, false, H - 0.85f * px, H + 0.85f * px, -pw, pw, edge, edge + in * 0.25f * px);
+        }
+        UtilsClient.enableTexture();
+        UtilsClient.enableCulling();
+    }
+
+    /**
+     * A box for drawKnuckles: x (height) x0..x1, across a0..a1, along the arm b0..b1 (either order). Textured: planar
+     * UVs on the cable sprite's body half, 16 px per block like drawCable.
+     */
+    static void lugBox(boolean alongZ, boolean textured, float x0, float x1, float a0, float a1, float b0, float b1) {
+        float[] xs = {Math.min(x0, x1), Math.max(x0, x1)}, as = {Math.min(a0, a1), Math.max(a0, a1)},
+            bs = {Math.min(b0, b1), Math.max(b0, b1)};
+        GL11.glBegin(GL11.GL_QUADS);
+        // faces normal to x, a, b; k = 0 the min side, 1 the max side
+        for (int axis = 0; axis < 3; axis++) {
+            for (int k = 0; k < 2; k++) {
+                float sgn = k == 0 ? -1 : 1;
+                float nx = axis == 0 ? sgn : 0, na = axis == 1 ? sgn : 0, nb = axis == 2 ? sgn : 0;
+                if (alongZ) GL11.glNormal3f(nx, na, nb);
+                else GL11.glNormal3f(nx, nb, na);
+                for (int c = 0; c < 4; c++) {
+                    // the four corners in the face's plane: (p, q) = (0,0) (1,0) (1,1) (0,1)
+                    int p = (c == 1 || c == 2) ? 1 : 0, q = (c >= 2) ? 1 : 0;
+                    float x, a, b, u, v;
+                    if (axis == 0) { x = xs[k]; a = as[p]; b = bs[q]; u = a; v = b; }
+                    else if (axis == 1) { a = as[k]; x = xs[p]; b = bs[q]; u = b; v = x; }
+                    else { b = bs[k]; a = as[p]; x = xs[q]; u = a; v = x; }
+                    if (textured) GL11.glTexCoord2f(0.25f + u * 0.5f, 0.5f + v);
+                    if (alongZ) GL11.glVertex3f(x, a, b);
+                    else GL11.glVertex3f(x, b, a);
+                }
+            }
+        }
+        GL11.glEnd();
     }
 
     public static void drawCable(CableRenderDescriptor cable, LRDUMask connection, CableRenderType connectionType) {

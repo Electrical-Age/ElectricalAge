@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "front=0": {
+      "model": "eln:block/energy_converter_hvu",
+      "x": 90
+    },
+    "front=1": {
+      "model": "eln:block/energy_converter_hvu",
+      "x": 270
+    },
+    "front=2": {
+      "model": "eln:block/energy_converter_hvu"
+    },
+    "front=3": {
+      "model": "eln:block/energy_converter_hvu",
+      "y": 180
+    },
+    "front=4": {
+      "model": "eln:block/energy_converter_hvu",
+      "y": 270
+    },
+    "front=5": {
+      "model": "eln:block/energy_converter_hvu",
+      "y": 90
+    },
+    "front=6": {
+      "model": "eln:block/energy_converter_hvu"
+    }
+  }
+}

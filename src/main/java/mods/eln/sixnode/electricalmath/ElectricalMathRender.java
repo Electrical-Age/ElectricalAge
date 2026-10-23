@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalmath;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -7,9 +9,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -20,7 +21,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
     Coordonate coord;
     PhysicalInterpolator interpolator;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     String expression;
 
@@ -37,11 +37,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
         coord = new Coordonate(tileEntity);
         ledOn[0] = true;
         ledOn[4] = true;
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalMathGui(player, inventory, this);
     }
 
     @Override
@@ -100,7 +95,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             ledTime = 0;
         }
 
-        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
+        if (!Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(0)))
             interpolator.setTarget(0f);
         else
             interpolator.setTarget(1f);
@@ -110,6 +105,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return ElnDeviceRegistry.signalCableDescriptor.render;
     }
 }

@@ -2,245 +2,162 @@ package mods.eln.node.six;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
+import mods.eln.node.ElnRenders;
+
+import mods.eln.misc.Direction;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.Container;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import mods.eln.registry.ElnRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Block entity of a six-node (1.12 SixNodeEntity). Server: everything goes through the SixNode. Client: which faces
+ * hold an element (for the shape) and, from P3, the element renders.
+ */
 public class SixNodeEntity extends NodeBlockEntity {
-    //boolean[] syncronizedSideEnable = new boolean[6];
+    /** Client: 1.12 element ids per face, from the publish packet (0 = none). */
+    public final short[] elementRenderIdList = new short[6];
 
-
-    public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
-    short[] elementRenderIdList = new short[6];
-
-    public Block sixNodeCacheBlock = Blocks.air;
-    public byte sixNodeCacheBlockMeta = 0;
-
-    public SixNodeEntity() {
-        for (int idx = 0; idx < 6; idx++) {
-            elementRenderList[idx] = null;
-            elementRenderIdList[idx] = 0;
-        }
+    public SixNodeEntity(BlockPos pos, BlockState state) {
+        super(ElnRegistry.SIX_NODE_ENTITY.get(), pos, state);
     }
 
-	/* caca
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction direction) {
-		
-		//Utils.println("onBlockActivated " + direction);
-		
-		return getNode().onBlockActivated(entityPlayer, direction);
-	}
-	*/
-
-    public static final int singleTargetId = 2;
-
-    @Override
-    public void serverPublishUnserialize(DataInputStream stream) {
-
-        Block sixNodeCacheBlockOld = sixNodeCacheBlock;
-
-        super.serverPublishUnserialize(stream);
-
-        try {
-
-            sixNodeCacheBlock = Block.getBlockById(stream.readInt());
-            sixNodeCacheBlockMeta = stream.readByte();
-
-            int idx;
-            for (idx = 0; idx < 6; idx++) {
-                short id = stream.readShort();
-                if (id == 0) {
-                    elementRenderIdList[idx] = (short) 0;
-                    elementRenderList[idx] = null;
-                } else {
-                    if (id != elementRenderIdList[idx]) {
-                        elementRenderIdList[idx] = id;
-                        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(id);
-                        elementRenderList[idx] = (SixNodeElementRender) descriptor.RenderClass.getConstructor(SixNodeEntity.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
-                    }
-                    elementRenderList[idx].publishUnserialize(stream);
-                }
-            }
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
-            e.printStackTrace();
-        }
-
-        //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
-        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
-            Chunk chunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord);
-            chunk.generateHeightMap();
-            Utils.updateSkylight(chunk);
-            chunk.generateSkylightMap();
-            Utils.updateAllLightTypes(worldObj, xCoord, yCoord, zCoord);
-        }
-
+    /** For subclasses with their own type (VoxelNodeEntity). */
+    protected SixNodeEntity(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
-    @Override
-    public void serverPacketUnserialize(DataInputStream stream) {
-
-        super.serverPacketUnserialize(stream);
-
-        try {
-            int side = stream.readByte();
-            int id = stream.readShort();
-            if (elementRenderIdList[side] == id) {
-                elementRenderList[side].serverPacketUnserialize(stream);
-            }
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-    }
-
-    public boolean getSyncronizedSideEnable(Direction direction) {
-        return elementRenderList[direction.getInt()] != null;
-    }
-
-    public Container newContainer(Direction side, EntityPlayer player) {
-        SixNode n = ((SixNode) getNode());
-        if (n == null) return null;
-        return n.newContainer(side, player);
-    }
-
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return elementRenderList[side.getInt()].newGuiDraw(side, player);
-    }
-
-    public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-        side = side.applyLRDU(lrdu);
-        if (elementRenderList[side.getInt()] == null)
-            return null;
-
-        return elementRenderList[side.getInt()].getCableRender(lrdu);
-    }
-
-    public int getCableDry(Direction side, LRDU lrdu) {
-        side = side.applyLRDU(lrdu);
-        if (elementRenderList[side.getInt()] == null)
-            return 0;
-
-        return elementRenderList[side.getInt()].getCableDry(lrdu);
-    }
-
-    @Override
-    public boolean cameraDrawOptimisation() {
-        for (SixNodeElementRender e : elementRenderList) {
-            if (e != null && !e.cameraDrawOptimisation())
-                return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void destructor() {
-        for (SixNodeElementRender render : elementRenderList) {
-            if (render != null)
-                render.destructor();
-        }
-        super.destructor();
-    }
-
-    /*public float getBlockHardness(World world, int x, int y, int z) {
-
-        return 0;
-    }*/
-    public int getDamageValue(World world, int x, int y, int z) {
-        if (world.isRemote) {
-            for (int idx = 0; idx < 6; idx++) {
-                if (elementRenderList[idx] != null) {
-                    return elementRenderIdList[idx];
-                }
-            }
-        }
-        return 0;
-    }
-
-    public boolean hasVolume(World world, int x, int y, int z) {
-
-        if (worldObj.isRemote) {
-            for (SixNodeElementRender e : elementRenderList) {
-                if (e != null && e.sixNodeDescriptor.hasVolume())
-                    return true;
-            }
-            return false;
-        } else {
-            SixNode node = ((SixNode) getNode());
-            if (node == null)
-                return false;
-            return node.hasVolume();
-        }
-    }
-
-    @Override
-    public void tileEntityNeighborSpawn() {
-
-        for (SixNodeElementRender e : elementRenderList) {
-            if (e != null)
-                e.notifyNeighborSpawn();
-        }
+    /** A voxel node's parts, sent before the elements (SixNode.publishBeforeElements). */
+    protected void readBeforeElements(DataInputStream stream) throws IOException {
     }
 
     @Override
     public String getNodeUuid() {
-        return Eln.sixNodeBlock.getNodeUuid();
+        return "s";
+    }
+
+    /** Faces holding an element: server from the node, client from the last publish. */
+    public int getSideMask() {
+        int mask = 0;
+        if (level != null && !level.isClientSide()) {
+            NodeBase n = getNode();
+            if (n instanceof SixNode) {
+                SixNode s = (SixNode) n;
+                for (int i = 0; i < 6; i++) if (s.sideElementList[i] != null) mask |= 1 << i;
+            }
+        } else {
+            for (int i = 0; i < 6; i++) if (elementRenderIdList[i] != 0) mask |= 1 << i;
+        }
+        return mask;
+    }
+
+    @Override
+    public int isProvidingWeakPower(Direction side) {
+        if (level == null || level.isClientSide()) return 0;
+        NodeBase n = getNode();
+        return n instanceof SixNode ? ((SixNode) n).isProvidingWeakPower(side) : 0;
+    }
+
+    // ---- client: element renders (1.12 SixNodeEntity, P3)
+
+    /** Client: the render of each face's element (null = none, or no render ported yet). */
+    public final SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
+    private static boolean warnedMissingRender;
+
+    @Override
+    public void serverPublishUnserialize(DataInputStream stream) {
+        super.serverPublishUnserialize(stream);
+        try {
+            readBeforeElements(stream);
+            stream.readInt();  // cover block (1.12 sixNodeCacheBlock; not ported)
+            stream.readByte(); // cover meta
+            for (int idx = 0; idx < 6; idx++) {
+                short id = stream.readShort();
+                if (id == 0) {
+                    if (elementRenderList[idx] != null) elementRenderList[idx].destructor();
+                    elementRenderIdList[idx] = 0;
+                    elementRenderList[idx] = null;
+                    continue;
+                }
+                if (id != elementRenderIdList[idx] || elementRenderList[idx] == null) {
+                    elementRenderIdList[idx] = id;
+                    if (elementRenderList[idx] != null) elementRenderList[idx].destructor();
+                    elementRenderList[idx] = null;
+                    SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(id);
+                    ElnRenders.Six f = descriptor == null ? null : ElnRenders.six(descriptor);
+                    if (f != null) elementRenderList[idx] = f.create(this, Direction.fromInt(idx), descriptor);
+                }
+                if (elementRenderList[idx] == null) {
+                    // no render to parse this element's payload: the faces after it can't be read this time
+                    if (!warnedMissingRender) {
+                        warnedMissingRender = true;
+                        Eln.LOG.warn("No render for six-node element {} (P3 in progress); further faces skipped", id);
+                    }
+                    return;
+                }
+                elementRenderList[idx].publishUnserialize(stream);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void serverPacketUnserialize(DataInputStream stream) {
+        try {
+            int side = stream.readByte();
+            int id = stream.readShort();
+            if (side >= 0 && side < 6 && elementRenderIdList[side] == id && elementRenderList[side] != null)
+                elementRenderList[side].serverPacketUnserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+        side = side.applyLRDU(lrdu);
+        SixNodeElementRender r = elementRenderList[side.getInt()];
+        return r == null ? null : r.getCableRender(lrdu);
+    }
+
+    @Override
+    public int getCableDry(Direction side, LRDU lrdu) {
+        side = side.applyLRDU(lrdu);
+        SixNodeElementRender r = elementRenderList[side.getInt()];
+        return r == null ? 0 : r.getCableDry(lrdu);
+    }
+
+    @Override
+    public boolean cameraDrawOptimisation() {
+        for (SixNodeElementRender e : elementRenderList) if (e != null && !e.cameraDrawOptimisation()) return false;
+        return true;
     }
 
     @Override
     public void clientRefresh(float deltaT) {
         for (SixNodeElementRender e : elementRenderList) {
-            if (e != null) {
-                e.refresh(deltaT);
-            }
+            if (e == null) continue;
+            e.refresh(deltaT);
+            if (e.burnt) burntSmoke();
         }
-
     }
 
     @Override
-    public int isProvidingWeakPower(Direction side) {
-        if (worldObj.isRemote) {
-            int max = 0;
-            for (SixNodeElementRender r : elementRenderList) {
-                if (r == null) continue;
-                if (max < r.isProvidingWeakPower(side)) max = r.isProvidingWeakPower(side);
-            }
-            return max;
-        } else {
-            if (getNode() == null) return 0;
-            return getNode().isProvidingWeakPower(side);
+    public void tileEntityNeighborSpawn() {
+        for (SixNodeElementRender e : elementRenderList) if (e != null) e.notifyNeighborSpawn();
+    }
+
+    @Override
+    public void clientDestroy() {
+        for (int i = 0; i < 6; i++) {
+            if (elementRenderList[i] != null) elementRenderList[i].destructor();
+            elementRenderList[i] = null;
         }
     }
 }
-// && 

@@ -1,229 +1,213 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
+import mods.eln.gl.GL11;
+
 import mods.eln.Eln;
-import mods.eln.generic.GenericItemBlockUsingDamage;
-import mods.eln.generic.GenericItemUsingDamage;
-import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.ITileEntitySpawnClient;
-import mods.eln.sim.PhysicalConstant;
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
-import org.lwjgl.opengl.GL11;
 
-import java.io.*;
-import java.lang.reflect.Field;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * The 1.12 Utils, ported a piece at a time (P0: what the simulator needs). With -Deln.deterministic=true (the unit
+ * tests), rand returns the midpoint, like the 1.12 test stub did.
+ */
 public class Utils {
-
-    public static final Object[] d = new Object[5];
-
-    public static final double minecraftDay = 60 * 24;
-
-    public static final Random random = new Random();
-
-    public static final double burnTimeToEnergyFactor = 1.0;
-
-    public static final double voltageMageFactor = 0.1;
-
-    private static int uuid = 1;
-
-    private Utils() {
-    }
-
-    public static double rand(double min, double max) {
-        return random.nextDouble() * (max - min) + min;
-    }
-
-    public static void println(String str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.println(str);
-    }
+    static final boolean DETERMINISTIC = Boolean.getBoolean("eln.deterministic");
 
     public static void println(Object str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.println(str.toString());
-    }
-
-    public static void print(String str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.print(str);
-    }
-
-    public static void print(Object str) {
-        if (!Eln.debugEnabled)
-            return;
-        System.out.print(str.toString());
+        String s = String.valueOf(str);
+        // 1.12 code reports broken invariants as println("ASSERT ..."): make those visible (tools/gt-summary.sh)
+        if (s.startsWith("ASSERT")) Eln.LOG.warn(s);
+        else Eln.LOG.debug(s);
     }
 
     public static void print(String format, Object... data) {
-        if (!Eln.debugEnabled) return;
-        print(String.format(format, data));
+        Eln.LOG.debug(String.format(format, data));
     }
 
-    static String floatToStr(double f, int high, int low) {
-        String temp = "";
-        for (int idx = 0; idx < high; idx++)
-            temp = temp + "0";
-        temp = temp + ".";
-        for (int idx = 0; idx < low; idx++)
-            temp = temp + "0";
+    public static void print(Object str) {
+        Eln.LOG.debug(String.valueOf(str));
+    }
 
-        String str = new DecimalFormat(temp).format(f);
-        int idx = 0;
-        char[] ch = str.toCharArray();
-        while (true) {
-            if (str.length() == idx)
-                break;
-            if (ch[idx] == '.') {
-                ch[idx - 1] = '0';
-                break;
-            }
-            if (ch[idx] != '0' && ch[idx] != ' ')
-                break;
-            ch[idx] = '_';
-            idx++;
-        }
-
-        return new String(ch);
+    /** Uniform in [min, max). */
+    public static double rand(double min, double max) {
+        if (DETERMINISTIC) return (min + max) / 2;
+        return min + ThreadLocalRandom.current().nextDouble() * (max - min);
     }
 
     public static boolean isTheClass(Object o, Class c) {
-        if (o.getClass() == c)
-            return true;
-        for (Class classIterator = o.getClass().getSuperclass(); classIterator != null; classIterator = classIterator.getSuperclass())
-        // for (Class classIterator : o.getClass().getClass())
-        {
-            if (classIterator == c) {
-                return true;
-            }
-        }
+        for (Class k = o.getClass(); k != null; k = k.getSuperclass()) if (k == c) return true;
         return false;
     }
 
-    public static boolean hasTheInterface(Object o, Class c) {
-        for (Class i : o.getClass().getInterfaces()) {
-            if (i == c)
-                return true;
-        }
-        return false;
-    }
-
-    public static Direction entityLivingViewDirection(EntityLivingBase entityLiving) {
-        if (entityLiving.rotationPitch > 45)
-            return Direction.YN;
-        if (entityLiving.rotationPitch < -45)
-            return Direction.YP;
-        int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-        if (dirx == 3)
-            return Direction.XP;
-        if (dirx == 0)
-            return Direction.ZP;
-        if (dirx == 1)
-            return Direction.XN;
-        return Direction.ZN;
-    }
-
-    public static Direction entityLivingHorizontalViewDirection(EntityLivingBase entityLiving) {
-        int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-        if (dirx == 3)
-            return Direction.XP;
-        if (dirx == 0)
-            return Direction.ZP;
-        if (dirx == 1)
-            return Direction.XN;
-        return Direction.ZN;
+    public static boolean isEmpty(net.minecraft.world.item.ItemStack stack) {
+        return stack == null || stack.isEmpty();
     }
 
     /**
-     * Returns the number of ticks that the supplied fuel item will keep the furnace burning, or 0 if the item isn't fuel
+     * Same item, or both in a common tag (1.12: same item + meta, or a shared ore dictionary name). Without damage
+     * metadata on 26.x, item identity replaces item + meta.
      */
-    /*
-	 * public static int getItemBurnTime(ItemStack par0ItemStack) { if (par0ItemStack == null) { return 0; } else { int var1 = par0ItemStack.getItem().shiftedIndex; Item var2 = par0ItemStack.getItem();
-	 * 
-	 * if (par0ItemStack.getItem() instanceof ItemBlock && Block.blocksList[var1] != null) { Block var3 = Block.blocksList[var1];
-	 * 
-	 * if (var3 == Block.woodSingleSlab) { return 150; }
-	 * 
-	 * if (var3.blockMaterial == Material.wood) { return 300; } }
-	 * 
-	 * if (var2 instanceof ItemTool && ((ItemTool) var2).getToolMaterialName().equals("WOOD")) return 200; if (var2 instanceof ItemSword && ((ItemSword) var2).func_77825_f().equals("WOOD")) return 200; if (var2 instanceof ItemHoe && ((ItemHoe) var2).func_77842_f().equals("WOOD")) return 200; if (var1 == Item.stick.shiftedIndex) return 100; if (var1 == Item.coal.shiftedIndex) return 1600; if (var1 == Item.bucketLava.shiftedIndex) return 20000; if (var1 == Block.sapling.blockID) return 100; if (var1 == Item.blazeRod.shiftedIndex) return 2400; return GameRegistry.getFuelValue(par0ItemStack); } }
-	 */
-    public static double getItemEnergie(ItemStack par0ItemStack) {
-        return burnTimeToEnergyFactor * 80000.0 / 1600 * TileEntityFurnace.getItemBurnTime(par0ItemStack);
+    /**
+     * 1.12: the same item, or sharing an ore dictionary name. 26.x: the same item, or sharing a specific c: convention
+     * tag (c:group/material, the ore dictionary's successor). Broad tags (c:ingots, minecraft:logs...) don't count:
+     * every ingot would be "the same" as every other.
+     */
+    public static boolean areSame(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.ItemStack output) {
+        if (isEmpty(stack) || isEmpty(output)) return false;
+        if (stack.getItem() == output.getItem()) return true;
+        return stack.typeHolder().tags().anyMatch(t -> t.location().getNamespace().equals("c") && t.location().getPath().contains("/") && output.is(t));
     }
 
-    public static double getCoalEnergyReference() {
-        return burnTimeToEnergyFactor * 80000.0;
+    public static void sendPacketToClient(java.io.ByteArrayOutputStream bos, net.minecraft.server.level.ServerPlayer player) {
+        mods.eln.network.ElnNet.sendToPlayer(player, bos);
     }
 
-    public static byte booleanSideMaskToByte(boolean[] side) {
-        byte b = 0;
-        if (side[0])
-            b |= 1 << 0;
-        if (side[1])
-            b |= 1 << 1;
-        if (side[2])
-            b |= 1 << 2;
-        if (side[3])
-            b |= 1 << 3;
-        if (side[4])
-            b |= 1 << 4;
-        if (side[5])
-            b |= 1 << 5;
-        return b;
+    public static void sendMessage(net.minecraft.world.entity.player.Player player, String text) {
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal(text));
     }
 
-    public static void ByteTobooleanSideMask(byte b, boolean[] side) {
-        for (int idx = 0; idx < 6; idx++) {
-            side[idx] = false;
-            if (((b >> idx) & 1) != 0)
-                side[idx] = true;
+    public static void notifyNeighbours(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        net.minecraft.world.level.block.state.BlockState s = level.getBlockState(pos);
+        level.updateNeighborsAt(pos, s.getBlock());
+    }
+
+    /** The direction the entity looks along (pitch beyond 45 degrees: down/up). Yaw convention as in 1.12. */
+    public static Direction entityLivingViewDirection(net.minecraft.world.entity.LivingEntity e) {
+        if (e.getXRot() > 45) return Direction.YN;
+        if (e.getXRot() < -45) return Direction.YP;
+        return entityLivingHorizontalViewDirection(e);
+    }
+
+    public static Direction entityLivingHorizontalViewDirection(net.minecraft.world.entity.LivingEntity e) {
+        int dirx = net.minecraft.util.Mth.floor((double) (e.getYRot() * 4.0F / 360.0F) + 0.5D) & 3;
+        if (dirx == 3) return Direction.XP;
+        if (dirx == 0) return Direction.ZP;
+        if (dirx == 1) return Direction.XN;
+        return Direction.ZN;
+    }
+
+    /** Registry access for item (de)serialization: the running server's (null when there is none). */
+    @javax.annotation.Nullable
+    public static net.minecraft.core.HolderLookup.Provider registries() {
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        return server == null ? null : server.registryAccess();
+    }
+
+    /** An ItemStack as NBT (26.x codec), or null for empty stacks or when no registries are available. */
+    @javax.annotation.Nullable
+    public static net.minecraft.nbt.Tag saveItem(net.minecraft.world.item.ItemStack stack) {
+        net.minecraft.core.HolderLookup.Provider r = registries();
+        if (r == null || isEmpty(stack)) return null;
+        return net.minecraft.world.item.ItemStack.CODEC.encodeStart(r.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), stack)
+            .result().orElse(null);
+    }
+
+    public static net.minecraft.world.item.ItemStack loadItem(net.minecraft.nbt.Tag tag) {
+        net.minecraft.core.HolderLookup.Provider r = registries();
+        if (r == null || tag == null) return net.minecraft.world.item.ItemStack.EMPTY;
+        return net.minecraft.world.item.ItemStack.CODEC.parse(r.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), tag)
+            .result().orElse(net.minecraft.world.item.ItemStack.EMPTY);
+    }
+
+    /** An inventory as a list of {Slot: byte, item} under key str (1.12 layout: Slot + the stack's own tags). */
+    public static void readFromNBT(net.minecraft.nbt.CompoundTag nbt, String str, net.minecraft.world.Container inventory) {
+        net.minecraft.nbt.ListTag list = nbt.getListOrEmpty(str);
+        for (int i = 0; i < list.size(); i++) {
+            net.minecraft.nbt.CompoundTag t = list.getCompoundOrEmpty(i);
+            int slot = t.getByteOr("Slot", (byte) 0) & 255;
+            if (slot < inventory.getContainerSize())
+                inventory.setItem(slot, loadItem(t.get("item")));
         }
     }
 
+    public static void writeToNBT(net.minecraft.nbt.CompoundTag nbt, String str, net.minecraft.world.Container inventory) {
+        net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            net.minecraft.nbt.Tag item = saveItem(inventory.getItem(i));
+            if (item == null) continue;
+            net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+            t.putByte("Slot", (byte) i);
+            t.put("item", item);
+            list.add(t);
+        }
+        nbt.put(str, list);
+    }
+
+    /** 1.12 Utils.newNbtTagCompund: a new compound stored under key str of nbt, returned for filling. */
+    public static net.minecraft.nbt.CompoundTag newNbtTagCompund(net.minecraft.nbt.CompoundTag nbt, String str) {
+        net.minecraft.nbt.CompoundTag c = new net.minecraft.nbt.CompoundTag();
+        nbt.put(str, c);
+        return c;
+    }
+
+    /** The compound tags directly inside nbt (1.12 getTags). */
+    public static java.util.List<net.minecraft.nbt.CompoundTag> getTags(net.minecraft.nbt.CompoundTag nbt) {
+        java.util.List<net.minecraft.nbt.CompoundTag> out = new java.util.ArrayList<>();
+        for (String k : nbt.keySet()) {
+            net.minecraft.nbt.Tag t = nbt.get(k);
+            if (t instanceof net.minecraft.nbt.CompoundTag) out.add((net.minecraft.nbt.CompoundTag) t);
+        }
+        return out;
+    }
+
+    /** 1.12 mustDropItem: drops are on unless the player is in creative. */
+    public static boolean mustDropItem(net.minecraft.world.entity.player.Player player) {
+        return player == null || !player.isCreative();
+    }
+
+    public static boolean isCreative(net.minecraft.world.entity.player.Player player) {
+        return player != null && player.isCreative();
+    }
+
+    private static int uuid = 1;
+
+    /** Server-side unique ids (sound tracks, element uuids), as in 1.12. */
+    public static int getUuid() {
+        if (uuid < 1) uuid = 1;
+        return uuid++;
+    }
+
+    /**
+     * An item for the client in an element packet: its registry id ("" for empty). 1.12 wrote two shorts (numeric item
+     * id, damage); 26.x has neither, and both ends are EA code.
+     */
+    public static void serialiseItemStack(java.io.DataOutputStream stream, net.minecraft.world.item.ItemStack stack) throws java.io.IOException {
+        if (isEmpty(stack)) stream.writeUTF("");
+        else stream.writeUTF(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+    }
+
+    public static net.minecraft.world.item.ItemStack unserialiseItemStack(java.io.DataInputStream stream) throws java.io.IOException {
+        String id = stream.readUTF();
+        if (id.isEmpty()) return net.minecraft.world.item.ItemStack.EMPTY;
+        net.minecraft.resources.Identifier key = net.minecraft.resources.Identifier.tryParse(id);
+        if (key == null) return net.minecraft.world.item.ItemStack.EMPTY;
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(key)
+            .map(net.minecraft.world.item.ItemStack::new).orElse(net.minecraft.world.item.ItemStack.EMPTY);
+    }
+
+    /** Client: an item shown on a device (furnace, machine), kept while it stays the same item (1.12). */
+    public static net.minecraft.world.entity.item.ItemEntity unserializeItemStackToEntityItem(java.io.DataInputStream stream,
+            net.minecraft.world.entity.item.ItemEntity old, net.minecraft.world.level.block.entity.BlockEntity be) throws java.io.IOException {
+        net.minecraft.world.item.ItemStack stack = unserialiseItemStack(stream);
+        if (stack.isEmpty() || be.getLevel() == null) return null;
+        if (old != null && old.getItem().getItem() == stack.getItem()) return old;
+        net.minecraft.core.BlockPos p = be.getBlockPos();
+        return new net.minecraft.world.entity.item.ItemEntity(be.getLevel(), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 1.2, stack);
+    }
+
+    /** A player is inside the box (1.12: renders skip work nobody sees). */
+    public static boolean isPlayerAround(net.minecraft.world.level.Level level, net.minecraft.world.phys.AABB box) {
+        return level != null && !level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class, box).isEmpty();
+    }
+
+    /** The player holds an EA wrench (filled when the wrench item is ported). */
+    public static java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrenchCheck = mods.eln.server.PlayerKeys::usingWrench;
+
+    public static boolean isPlayerUsingWrench(net.minecraft.world.entity.player.Player player) {
+        return player != null && wrenchCheck.test(player);
+    }
+
+    // ---- 1.12 text formatting (meters, waila, tooltips) ----
     public static String plotValue(double value) {
         double valueAbs = Math.abs(value);
         if (valueAbs < 0.0001) {
@@ -276,7 +260,7 @@ public class Utils {
     }
 
     public static String plotCelsius(String header, double value) {
-        value += PhysicalConstant.Tref - PhysicalConstant.TCelsius;
+        value += mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
         if (!header.equals(""))
             header += " ";
         return header + plotValue(value, "\u00B0C ");
@@ -369,63 +353,417 @@ public class Utils {
         return header + plotValue(buckets, "B ");
     }
 
-    public static void readFromNBT(NBTTagCompound nbt, String str, IInventory inventory) {
-        NBTTagList var2 = nbt.getTagList(str, 10);
+    public static String plotSignal(double U, double I) {
+        return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U / Eln.SVU);
+    }
 
-        for (int var3 = 0; var3 < var2.tagCount(); ++var3) {
-            NBTTagCompound var4 = (NBTTagCompound) var2.getCompoundTagAt(var3);
-            int var5 = var4.getByte("Slot") & 255;
+    public static float limit(float value, float min, float max) {
+        return Math.max(Math.min(value, max), min);
+    }
 
-            if (var5 >= 0 && var5 < inventory.getSizeInventory()) {
-                inventory.setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
-            }
+    public static double limit(double value, double min, double max) {
+        return Math.max(Math.min(value, max), min);
+    }
+
+    public static void printFunction(FunctionTable func, double start, double end, double step) {
+        Utils.println("********");
+        double x;
+        for (int idx = 0; (x = start + step * idx) < end + 0.00001; idx++) {
+            Utils.println(func.getValue(x));
+        }
+        Utils.println("********");
+    }
+
+    /** One Minecraft day in seconds (1.12 Utils.minecraftDay). */
+    public static final double minecraftDay = 60 * 24;
+
+    public static net.minecraft.world.phys.Vec3 getVec05(Coordonate c) {
+        return new net.minecraft.world.phys.Vec3(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
+    }
+
+    /**
+     * The sun's angle in radians, 0 at noon (1.12 World.getCelestialAngleRadians(0)); 26.x keeps it as the SUN_ANGLE
+     * environment attribute in degrees (same convention: the daylight detector takes its cosine).
+     */
+    public static double sunAngleRadians(net.minecraft.world.level.Level world) {
+        return world.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.SUN_ANGLE, net.minecraft.core.BlockPos.ZERO)
+            * Math.PI / 180.0;
+    }
+
+    /** The EA descriptor behind a stack (1.12: of a damage sub-item), else the Item itself; null for empty stacks. */
+    public static Object getItemObject(net.minecraft.world.item.ItemStack stack) {
+        if (isEmpty(stack)) return null;
+        net.minecraft.world.item.Item i = stack.getItem();
+        if (i instanceof mods.eln.generic.IDescriptorItem) return ((mods.eln.generic.IDescriptorItem) i).getEaDescriptor();
+        return i;
+    }
+
+    public static float[] getSixNodePinDistance(Obj3D.Obj3DPart obj) {
+        return new float[]{Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16)};
+    }
+
+    /**
+     * Where the wind comes from, if another mod models it (Watershed, by IMC "eln"/"wind": a supplier of this function):
+     * the wind speed (m/s) at a place now, NaN where it has no wind (other dimensions). Null: EA's own global wind.
+     */
+    public static volatile java.util.function.ToDoubleBiFunction<net.minecraft.world.level.Level, net.minecraft.core.BlockPos> windSource;
+
+    /**
+     * The wind at c, dy blocks up: the wind source's speed there if there is one (Baughn: EA's wind turbine reads
+     * Watershed's wind map), scaled by height as EA's own wind, else EA's global wind at that height.
+     */
+    public static double getWind(Coordonate c, int dy) {
+        var src = windSource;
+        int y = c.y + dy;
+        if (src != null && c.getWorldExist()) {
+            double w = src.applyAsDouble(c.world(), new net.minecraft.core.BlockPos(c.x, y, c.z));
+            if (!Double.isNaN(w)) return Math.max(0.0, w * Math.min(Math.max(y, 0), 100) / 100.0);
+        }
+        return getWind(c.dimention, y);
+    }
+
+    public static double getWind(int worldId, int y) {
+        net.minecraft.world.level.Level world = Dimensions.level(worldId);
+        if (world == null) {
+            return Math.max(0.0, Eln.wind.getWind(y));
+        } else {
+            float factor = 1f + world.getRainLevel(0) * 0.2f + world.getThunderLevel(0) * 0.2f;
+            return Math.max(0.0, Eln.wind.getWind(y) * factor + world.getRainLevel(0) * 1f + world.getThunderLevel(0) * 2f);
         }
     }
 
-    public static void writeToNBT(NBTTagCompound nbt, String str, IInventory inventory) {
-        NBTTagList var2 = new NBTTagList();
+    public static int getLight(net.minecraft.world.level.Level w, net.minecraft.world.level.LightLayer e, int x, int y, int z) {
+        return mods.eln.compat.WorldCompat.getSavedLightValue(w, e, x, y, z);
+    }
 
-        for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3) {
-            if (inventory.getStackInSlot(var3) != null) {
-                NBTTagCompound var4 = new NBTTagCompound();
-                var4.setByte("Slot", (byte) var3);
-                inventory.getStackInSlot(var3).writeToNBT(var4);
-                var2.appendTag(var4);
+    public static int getRedstoneLevelAround(Coordonate coord, Direction side) {
+        int level = mods.eln.compat.WorldCompat.getStrongestIndirectPower(coord.world(), coord.x, coord.y, coord.z);
+        if (level >= 15) return 15;
+
+        side = side.getInverse();
+        switch (side) {
+            case YN:
+            case YP:
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x + 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x - 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z + 1, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z - 1, side.toSideValue()));
+
+            case XN:
+            case XP:
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y + 1, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y - 1, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z + 1, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y, coord.z - 1, side.toSideValue()));
+
+            case ZN:
+            case ZP:
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x + 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x - 1, coord.y, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y + 1, coord.z, side.toSideValue()));
+                if (level >= 15) return 15;
+                level = Math.max(level, mods.eln.compat.WorldCompat.getIndirectPowerLevelTo(coord.world(), coord.x, coord.y - 1, coord.z, side.toSideValue()));
+        }
+
+        return level;
+    }
+
+    public static java.util.ArrayList<net.minecraft.world.level.block.Block> traceRay(net.minecraft.world.level.Level world, double x, double y,
+                                            double z, double tx, double ty, double tz) {
+        java.util.ArrayList<net.minecraft.world.level.block.Block> blockList = new java.util.ArrayList<net.minecraft.world.level.block.Block>();
+
+        double dx, dy, dz;
+        dx = tx - x;
+        dy = ty - y;
+        dz = tz - z;
+        double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
+        double normInv = 1 / (norm + 0.000000001);
+        dx *= normInv;
+        dy *= normInv;
+        dz *= normInv;
+        double d = 0;
+
+        while (d < norm) {
+            if (Utils.isBlockLoaded(world, x, y, z)) {
+                net.minecraft.world.level.block.Block b = Utils.getBlock(world, x, y, z);
+                if (b != null)
+                    blockList.add(b);
+            }
+
+            x += dx;
+            y += dy;
+            z += dz;
+            d += 1;
+        }
+
+        return blockList;
+    }
+
+    public static boolean isBlockLoaded(net.minecraft.world.level.Level world, double x, double y, double z) {
+        return mods.eln.compat.WorldCompat.blockExists(world, net.minecraft.util.Mth.floor(x), net.minecraft.util.Mth.floor(y), net.minecraft.util.Mth.floor(z));
+    }
+
+    public static net.minecraft.world.level.block.Block getBlock(net.minecraft.world.level.Level world, double x, double y, double z) {
+        return mods.eln.compat.WorldCompat.getBlock(world, net.minecraft.util.Mth.floor(x), net.minecraft.util.Mth.floor(y), net.minecraft.util.Mth.floor(z));
+    }
+
+    public static double getLength(double x, double y,
+                                   double z, double tx, double ty, double tz) {
+        double dx, dy, dz;
+        dx = tx - x;
+        dy = ty - y;
+        dz = tz - z;
+        double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
+        return norm;
+    }
+
+    public static short modbusToShort(double outputNormalized, int i) {
+        int bit = Float.floatToRawIntBits((float) outputNormalized);
+        if (i == 1)
+            return (short) bit;
+        else
+            return (short) (bit >>> 16);
+    }
+    public static float modbusToFloat(short first, short second) {
+        int bit = ((((int) first) & 0xFFFF) << 16) + (((int) second) & 0xFFFF);
+        return Float.intBitsToFloat(bit);
+    }
+
+    /** The world save folder, with a trailing slash (1.12: DimensionManager save root). */
+    public static String getMapFolder() {
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        return server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).toString() + "/";
+    }
+
+    public static java.io.File getMapFile(String name) {
+        return new java.io.File(getMapFolder() + name);
+    }
+
+    public static String readMapFile(String name) throws java.io.IOException {
+        return new String(java.nio.file.Files.readAllBytes(getMapFile(name).toPath()), java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    /** Smelting result of a single input item (1.12 FurnaceRecipes.getSmeltingResult); EMPTY without a server/recipe. */
+    public static net.minecraft.world.item.ItemStack smeltResult(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack input) {
+        if (isEmpty(input) || !(level instanceof net.minecraft.server.level.ServerLevel sl)) return net.minecraft.world.item.ItemStack.EMPTY;
+        net.minecraft.world.item.crafting.SingleRecipeInput in = new net.minecraft.world.item.crafting.SingleRecipeInput(input);
+        return sl.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.SMELTING, in, sl)
+            .map(r -> r.value().assemble(in))
+            .orElse(net.minecraft.world.item.ItemStack.EMPTY);
+    }
+
+    /** Per-slot limit: the container's, capped by the item's own max stack size (1.12 used the container's only). */
+    static int slotLimit(net.minecraft.world.Container inventory, net.minecraft.world.item.ItemStack stack) {
+        return Math.min(inventory.getMaxStackSize(), stack.getMaxStackSize());
+    }
+
+    public static boolean canPutStackInInventory(net.minecraft.world.item.ItemStack[] stackList, net.minecraft.world.Container inventory, int[] slotsIdList) {
+        net.minecraft.world.item.ItemStack[] outputStack = new net.minecraft.world.item.ItemStack[slotsIdList.length];
+        net.minecraft.world.item.ItemStack[] inputStack = new net.minecraft.world.item.ItemStack[stackList.length];
+
+        for (int idx = 0; idx < outputStack.length; idx++) {
+            if (!Utils.isEmpty(inventory.getItem(slotsIdList[idx])))
+                outputStack[idx] = inventory.getItem(slotsIdList[idx]).copy();
+        }
+        for (int idx = 0; idx < stackList.length; idx++) {
+            inputStack[idx] = stackList[idx].copy();
+        }
+
+        boolean oneStackDone;
+        for (net.minecraft.world.item.ItemStack stack : inputStack) {
+            oneStackDone = false;
+            for (int idx = 0; idx < slotsIdList.length; idx++) {
+                net.minecraft.world.item.ItemStack targetStack = outputStack[idx];
+
+                if (Utils.isEmpty(targetStack)) {
+                    outputStack[idx] = stack;
+                    oneStackDone = true;
+                    break;
+                } else if (net.minecraft.world.item.ItemStack.isSameItemSameComponents(targetStack, stack)) {
+                    int transferMax = slotLimit(inventory, targetStack) - targetStack.getCount();
+                    if (transferMax > 0) {
+                        int transfer = Math.min(stack.getCount(), transferMax);
+                        outputStack[idx].grow(transfer);
+                        stack.shrink(transfer);
+                    }
+
+                    if (stack.getCount() == 0) {
+                        oneStackDone = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!oneStackDone)
+                return false;
+        }
+        return true;
+    }
+
+    public static boolean tryPutStackInInventory(net.minecraft.world.item.ItemStack[] stackList, net.minecraft.world.Container inventory, int[] slotsIdList) {
+        for (net.minecraft.world.item.ItemStack stack : stackList) {
+            for (int idx = 0; idx < slotsIdList.length; idx++) {
+                net.minecraft.world.item.ItemStack targetStack = inventory.getItem(slotsIdList[idx]);
+                if (Utils.isEmpty(targetStack)) {
+                    inventory.setItem(slotsIdList[idx], stack.copy());
+                    stack.setCount(0);
+                    break;
+                } else if (net.minecraft.world.item.ItemStack.isSameItemSameComponents(targetStack, stack)) {
+                    int transferMax = slotLimit(inventory, targetStack) - targetStack.getCount();
+                    if (transferMax > 0) {
+                        int transfer = Math.min(stack.getCount(), transferMax);
+                        targetStack.grow(transfer); // 1.12: decrStackSize(slot, -transfer)
+                        inventory.setChanged();
+                        stack.shrink(transfer);
+                    }
+
+                    if (stack.getCount() == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /** 1.12: WATER or FLOWING_WATER; 26.x has one water block (flowing is a state). */
+    public static boolean isWater(Coordonate waterCoord) {
+        return waterCoord.getBlock() == net.minecraft.world.level.block.Blocks.WATER;
+    }
+
+    public static final double burnTimeToEnergyFactor = 1.0;
+
+    /** Fuel energy of a stack [J] (1.12: 80 kJ per 1600 ticks of furnace burn time). 26.x: the COOKING_FUEL component. */
+    public static double getItemEnergie(net.minecraft.world.item.ItemStack stack) {
+        return burnTimeToEnergyFactor * 80000.0 / 1600 * burnTime(stack);
+    }
+
+    public static double getCoalEnergyReference() {
+        return burnTimeToEnergyFactor * 80000.0;
+    }
+
+    /** Furnace burn time in ticks (0 if not a fuel). */
+    public static int burnTime(net.minecraft.world.item.ItemStack stack) {
+        if (isEmpty(stack)) return 0;
+        net.minecraft.world.item.component.CookingFuel fuel = stack.get(net.minecraft.core.component.DataComponents.COOKING_FUEL);
+        if (fuel == null) return 0;
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server == null) return 0;
+        try {
+            net.minecraft.world.level.storage.loot.LootContext ctx = new net.minecraft.world.level.storage.loot.LootContext.Builder(
+                new net.minecraft.world.level.storage.loot.LootParams.Builder(server.overworld())
+                    .create(net.minecraft.world.level.storage.loot.parameters.LootContextParamSets.EMPTY))
+                .create(java.util.Optional.empty());
+            return fuel.burnTime().get(ctx, 0);
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
+    /** Day fraction 0..1 (1.12: world time / 23999). */
+    public static double getWorldTime(net.minecraft.world.level.Level world) {
+        return world.getOverworldClockTime() / (23999.0);
+    }
+
+    public static double getWeatherNoLoad(int dim) {
+        net.minecraft.world.level.Level world = Dimensions.level(dim);
+        if (world == null) return 0.0;
+        if (world.isThundering())
+            return 1.0;
+        if (world.isRaining())
+            return 0.5;
+        return 0.0;
+    }
+
+    public static void serverTeleport(net.minecraft.world.entity.Entity e, double x, double y, double z) {
+        if (e instanceof net.minecraft.server.level.ServerPlayer)
+            ((net.minecraft.server.level.ServerPlayer) e).teleportTo(x, y, z);
+        else
+            e.setPos(x, y, z);
+    }
+
+    /**
+     * 1.12 `block == Blocks.AIR` / isAirBlock: on 26.x also cave_air and void_air, and EA's light block (1.12
+     * LightBlock was Material.AIR, so lamps and flashlights saw through it).
+     */
+    public static boolean isAirBlock(net.minecraft.world.level.block.Block block) {
+        return block != null && (block.defaultBlockState().isAir()
+            || (mods.eln.registry.ElnDeviceRegistry.lightBlock != null && block == mods.eln.registry.ElnDeviceRegistry.lightBlock));
+    }
+
+    public static final double voltageMageFactor = 0.1;
+
+    public static double voltageMargeFactorSub(double value) {
+        if (value > 1 + voltageMageFactor) {
+            return value - voltageMageFactor;
+        } else if (value > 1) {
+            return 1;
+        }
+        return value;
+    }
+
+    /** 1.12 tryPutStackInInventory(stack, inventory): all of the stack or nothing (autominer drops into its chest). */
+    public static boolean tryPutStackInInventory(net.minecraft.world.item.ItemStack stack, net.minecraft.world.Container inventory) {
+        if (inventory == null) return false;
+        int limit = slotLimit(inventory, stack);
+
+        // First, make a list of possible target slots.
+        java.util.ArrayList<Integer> slots = new java.util.ArrayList<>(4);
+        int need = stack.getCount();
+        for (int i = 0; i < inventory.getContainerSize() && need > 0; i++) {
+            net.minecraft.world.item.ItemStack slot = inventory.getItem(i);
+            if (!isEmpty(slot) && slot.getCount() < limit && net.minecraft.world.item.ItemStack.isSameItemSameComponents(slot, stack)) {
+                slots.add(i);
+                need -= limit - slot.getCount();
+            }
+        }
+        for (int i = 0; i < inventory.getContainerSize() && need > 0; i++) {
+            if (isEmpty(inventory.getItem(i))) {
+                slots.add(i);
+                need -= limit;
             }
         }
 
-        nbt.setTag(str, var2);
+        // Is there space enough?
+        if (need > 0) {
+            return false;
+        }
+
+        // Yes. Proceed.
+        int toPut = stack.getCount();
+        for (Integer slot : slots) {
+            net.minecraft.world.item.ItemStack target = inventory.getItem(slot);
+            if (isEmpty(target)) {
+                int amount = Math.min(toPut, limit);
+                inventory.setItem(slot, stack.copyWithCount(amount));
+                toPut -= amount;
+            } else {
+                int space = limit - target.getCount();
+                int amount = Math.min(toPut, space);
+                target.grow(amount);
+                toPut -= amount;
+            }
+            if (toPut <= 0) break;
+        }
+        inventory.setChanged();
+        return true;
     }
 
-    public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {
-        // Profiler p = new Profiler();
-        // p.add("A");
-        // ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
-        // ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0, bos.toByteArray());
-        // p.add("B");
-        // Eln.eventChannel.sendTo(new FMLProxyPacket(b, Eln.channelName), player);
-        // p.stop();
-        // Utils.println(p);
-
-        S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-        player.playerNetServerHandler.sendPacket(packet);
-
-        // FMLCommonHandler.instance().getMinecraftServerInstance().getEln.eventChannel.sendTo(new FMLProxyPacket(packet),player);
+    /** 1.12 dropItem: spawn the stack as an item entity at the block (respects the doTileDrops rule via popResource). */
+    public static void dropItem(net.minecraft.world.item.ItemStack itemStack, Coordonate coordonate) {
+        if (isEmpty(itemStack)) return;
+        net.minecraft.world.level.block.Block.popResource(coordonate.world(), coordonate.pos(), itemStack);
     }
 
-	/*
-	 * public static void sendPacketToPlayer( ElnServerPacket packet, EntityPlayerMP player) {
-	 * 
-	 * Eln.eventChannel.sendTo(new FMLProxyPacket(packet), player); // player.playerNetServerHandler.sendPacket(new FMLProxyPacket(packet)); }
-	 */
-
-    // private static Color[] dyeColors
-
-    // public Color getDyeColor(ItemStack stack)
-    // {
-    // ItemDye.dyeColors[stack.getItemDamage()];
-    // }
-
+    // ---- draw colours (P3: on the GL11 shim)
     public static void setGlColorFromDye(int damage) {
         setGlColorFromDye(damage, 1.0f);
     }
@@ -539,925 +877,5 @@ public class Utils {
                 GL11.glColor3f(1.0f, 0.80f, 0.5f);
                 break;
         }
-    }
-
-	/*
-	 * public static double getWeather(World world) { if(world.isThundering()) return 1.0; if(world.isRaining()) return 0.5; return 0.0;
-	 * 
-	 * }
-	 */
-
-    // Into utilsClient To
-    public static double getWeatherNoLoad(int dim) {
-        if (!getWorldExist(dim)) return 0.0;
-        World world = getWorld(dim);
-        if (world.isThundering())
-            return 1.0;
-        if (world.isRaining())
-            return 0.5;
-        return 0.0;
-    }
-
-    public static World getWorld(int dim) {
-        return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(dim);
-    }
-
-    public static boolean getWorldExist(int dim) {
-        return DimensionManager.getWorld(dim) != null;
-    }
-
-    public static double getWind(int worldId, int y) {
-        if (!getWorldExist(worldId)) {
-            return Math.max(0.0, Eln.instance.wind.getWind(y));
-        } else {
-            World world = getWorld(worldId);
-            float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
-            return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
-        }
-    }
-
-    // public static double getWind(World world, int y)
-    // {
-    // float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
-    // return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
-    // }
-
-    public static void dropItem(ItemStack itemStack, int x, int y, int z, World world) {
-        if (itemStack == null)
-            return;
-        if (world.getGameRules().getGameRuleBooleanValue("doTileDrops")) {
-            float var6 = 0.7F;
-            double var7 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            double var9 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            double var11 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            EntityItem var13 = new EntityItem(world, (double) x + var7, (double) y + var9, (double) z + var11, itemStack);
-            var13.delayBeforeCanPickup = 10;
-            world.spawnEntityInWorld(var13);
-        }
-    }
-
-    public static void dropItem(ItemStack itemStack, Coordonate coordonate) {
-        dropItem(itemStack, coordonate.x, coordonate.y, coordonate.z, coordonate.world());
-    }
-
-    public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory) {
-        if (inventory == null) return false;
-        int limit = inventory.getInventoryStackLimit();
-
-        // First, make a list of possible target slots.
-        ArrayList<Integer> slots = new ArrayList<>(4);
-        int need = stack.stackSize;
-        for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
-            ItemStack slot = inventory.getStackInSlot(i);
-            if (slot != null && slot.stackSize < limit && slot.isItemEqual(stack)) {
-                slots.add(i);
-                need -= limit - slot.stackSize;
-            }
-        }
-        for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
-            if (inventory.getStackInSlot(i) == null) {
-                slots.add(i);
-                need -= limit;
-            }
-        }
-
-        // Is there space enough?
-        if (need > 0) {
-            return false;
-        }
-
-        // Yes. Proceed.
-        int toPut = stack.stackSize;
-        for (Integer slot : slots) {
-            ItemStack target = inventory.getStackInSlot(slot);
-            if (target == null) {
-                int amount = Math.min(toPut, limit);
-                inventory.setInventorySlotContents(slot, new ItemStack(stack.getItem(), amount, stack.getItemDamage()));
-                toPut -= amount;
-            } else {
-               int space = limit - target.stackSize;
-               int amount = Math.min(toPut, space);
-               target.stackSize += amount;
-               toPut -= amount;
-            }
-            if (toPut <= 0) break;
-        }
-
-        return true;
-    }
-
-    @Deprecated
-    public static boolean canPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList) {
-        int limit = inventory.getInventoryStackLimit();
-        ItemStack[] outputStack = new ItemStack[slotsIdList.length];
-        ItemStack[] inputStack = new ItemStack[stackList.length];
-
-        for (int idx = 0; idx < outputStack.length; idx++) {
-            if (inventory.getStackInSlot(slotsIdList[idx]) != null)
-                outputStack[idx] = inventory.getStackInSlot(slotsIdList[idx]).copy();
-        }
-        for (int idx = 0; idx < stackList.length; idx++) {
-            inputStack[idx] = stackList[idx].copy();
-        }
-
-        boolean oneStackDone;
-        for (ItemStack stack : inputStack) {
-            // if(stack == null) continue;
-            oneStackDone = false;
-            for (int idx = 0; idx < slotsIdList.length; idx++) {
-                ItemStack targetStack = outputStack[idx];
-
-                if (targetStack == null) {
-                    outputStack[idx] = stack;
-                    oneStackDone = true;
-                    break;
-                } else if (targetStack.isItemEqual(stack)) {
-                    // inventory.decrStackSize(idx, -stack.stackSize);
-                    int transferMax = limit - targetStack.stackSize;
-                    if (transferMax > 0) {
-                        int transfer = stack.stackSize;
-                        if (transfer > transferMax)
-                            transfer = transferMax;
-                        outputStack[idx].stackSize += transfer;
-                        stack.stackSize -= transfer;
-                    }
-
-                    if (stack.stackSize == 0) {
-                        oneStackDone = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!oneStackDone)
-                return false;
-        }
-        return true;
-    }
-
-    @Deprecated
-    public static boolean tryPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList) {
-        int limit = inventory.getInventoryStackLimit();
-
-        for (ItemStack stack : stackList) {
-            for (int idx = 0; idx < slotsIdList.length; idx++) {
-                ItemStack targetStack = inventory.getStackInSlot(slotsIdList[idx]);
-                if (targetStack == null) {
-                    inventory.setInventorySlotContents(slotsIdList[idx], stack.copy());
-                    stack.stackSize = 0;
-                    break;
-                } else if (targetStack.isItemEqual(stack)) {
-                    // inventory.decrStackSize(idx, -stack.stackSize);
-                    int transferMax = limit - targetStack.stackSize;
-                    if (transferMax > 0) {
-                        int transfer = stack.stackSize;
-                        if (transfer > transferMax)
-                            transfer = transferMax;
-                        inventory.decrStackSize(slotsIdList[idx], -transfer);
-                        stack.stackSize -= transfer;
-                    }
-
-                    if (stack.stackSize == 0) {
-                        break;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    public static double voltageMargeFactorSub(double value) {
-        if (value > 1 + voltageMageFactor) {
-            return value - voltageMageFactor;
-        } else if (value > 1) {
-            return 1;
-        }
-        return value;
-    }
-
-	/*
-	 * public static void bindGuiTexture(String string) { Utils.bindTextureByName("/sprites/gui/" + string); }
-	 */
-
-    public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException {
-        if (stack == null) {
-            stream.writeShort(-1);
-            stream.writeShort(-1);
-        } else {
-            stream.writeShort(Item.getIdFromItem(stack.getItem()));
-            stream.writeShort(stack.getItemDamage());
-        }
-    }
-
-    public static ItemStack unserialiseItemStack(DataInputStream stream) throws IOException {
-        short id, damage;
-        id = stream.readShort();
-        damage = stream.readShort();
-        if (id == -1)
-            return null;
-        return Utils.newItemStack(id, 1, damage);
-    }
-
-    public static EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old, TileEntity tileEntity) throws IOException {
-        short itemId, ItemDamage;
-        if ((itemId = stream.readShort()) == -1) {
-            stream.readShort();
-            return null;
-
-        } else {
-            ItemDamage = stream.readShort();
-            if (old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
-                return new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
-            else
-                return old;
-        }
-    }
-
-    public static boolean isGameInPause() {
-        return Minecraft.getMinecraft().isGamePaused();
-    }
-
-    public static int getLight(World w, EnumSkyBlock e, int x, int y, int z) {
-        return w.getSavedLightValue(e, x, y, z);
-    }
-
-	/*
-	 * int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z); int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f); return Math.max(b, s); }
-	 */
-
-	/*
-	 * public static void drawHalo(Obj3DPart halo,float r,float g,float b,World w,int x,int y,int z,boolean bilinear) {
-	 * 
-	 * disableLight(); enableBlend();
-	 * 
-	 * drawHaloNoLightSetup(halo,r,g,b, w,x,y,z,bilinear); enableLight(); disableBlend(); }
-	 */
-
-	/*
-	 * public float frameTime() { float time = Minecraft.getMinecraft().entityRenderer.performanceToFps(par0) }
-	 */
-
-    public static void notifyNeighbor(TileEntity t) {
-        int x = t.xCoord;
-        int y = t.yCoord;
-        int z = t.zCoord;
-        World w = t.getWorldObj();
-        TileEntity o;
-        o = w.getTileEntity(x + 1, y, z);
-        if (o != null && o instanceof ITileEntitySpawnClient)
-            ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x - 1, y, z);
-        if (o != null && o instanceof ITileEntitySpawnClient)
-            ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y + 1, z);
-        if (o != null && o instanceof ITileEntitySpawnClient)
-            ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y - 1, z);
-        if (o != null && o instanceof ITileEntitySpawnClient)
-            ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y, z + 1);
-        if (o != null && o instanceof ITileEntitySpawnClient)
-            ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-        o = w.getTileEntity(x, y, z - 1);
-        if (o != null && o instanceof ITileEntitySpawnClient)
-            ((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-    }
-
-    public static boolean playerHasMeter(EntityPlayer entityPlayer) {
-        return Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
-            || Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
-            || Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem());
-    }
-
-    public static int getRedstoneLevelAround(Coordonate coord, Direction side) {
-        int level = coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z);
-        if (level >= 15) return 15;
-
-        side = side.getInverse();
-        switch (side) {
-            case YN:
-            case YP:
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x + 1, coord.y, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x - 1, coord.y, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z + 1, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z - 1, side.toSideValue()));
-
-            case XN:
-            case XP:
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y + 1, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z + 1, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z - 1, side.toSideValue()));
-
-            case ZN:
-            case ZP:
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x + 1, coord.y, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x - 1, coord.y, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y + 1, coord.z, side.toSideValue()));
-                if (level >= 15) return 15;
-                level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
-        }
-
-        return level;
-    }
-
-    public static boolean isPlayerAround(World world, AxisAlignedBB axisAlignedBB) {
-        return !world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB).isEmpty();
-    }
-
-    public static Object getItemObject(ItemStack stack) {
-        if (stack == null)
-            return null;
-        Item i = stack.getItem();
-        if (i instanceof GenericItemUsingDamage) {
-            return ((GenericItemUsingDamage) i).getDescriptor(stack);
-        }
-        if (i instanceof GenericItemBlockUsingDamage) {
-            return ((GenericItemBlockUsingDamage) i).getDescriptor(stack);
-        }
-        return i;
-    }
-
-	/*
-	 * public static void drawIcon(Icon icon) { Utils.bindTextureByName(icon.getIconName()); Utils.disableCulling(); GL11.glBegin(GL11.GL_QUADS); GL11.glTexCoord2f(0f, 0f); GL11.glVertex3f(0.5f,-0.5f,0f); GL11.glTexCoord2f(0f, 0f);GL11.glVertex3f(-0.5f,-0.5f,0f); GL11.glTexCoord2f(0f, 1f);GL11.glVertex3f(-0.5f,0.5f,0f); GL11.glTexCoord2f(1f, 1f);GL11.glVertex3f(0.5f,0.5f,0f); GL11.glEnd(); Utils.enableCulling(); }
-	 * 
-	 * public static void drawEnergyBare(float e) { float x = 14f/16f,y = 15f/16f-e*14f/16f; GL11.glColor3f(e, e, 0f); GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glBegin(GL11.GL_QUADS); GL11.glVertex3f(x+1f/16f,y,0.01f); GL11.glVertex3f(x,y,0f); GL11.glVertex3f(x,15f/16f,0f); GL11.glVertex3f(x+1f/16f,15f/16f,0.01f); GL11.glEnd(); GL11.glEnable(GL11.GL_TEXTURE_2D); GL11.glColor3f(1f, 1f, 1f); }
-	 */
-
-    static public void getItemStack(String name, List list) {
-        Iterator aitem = Item.itemRegistry.iterator();
-        List<ItemStack> tempList = new ArrayList<ItemStack>(3000);
-        Item item;
-
-        while (aitem.hasNext()) {
-            item = (Item) aitem.next();
-            if (item != null && item.getCreativeTab() != null) {
-                item.getSubItems(item, (CreativeTabs) null, tempList);
-            }
-        }
-
-        String s = name.toLowerCase();
-
-        for (ItemStack itemstack : tempList) {
-            // String s1 = itemstack.getDisplayName();
-
-            if (itemstack.getDisplayName().toLowerCase().contains(s)) {
-                list.add(itemstack);
-            }
-        }
-    }
-
-    public static Side getSide() {
-        return FMLCommonHandler.instance().getEffectiveSide();
-    }
-
-    public static boolean isServer() {
-        return getSide() == Side.SERVER;
-    }
-
-    public static void printSide(String string) {
-        Utils.println(string);
-    }
-
-    public static short modbusToShort(double outputNormalized, int i) {
-        int bit = Float.floatToRawIntBits((float) outputNormalized);
-        if (i == 1)
-            return (short) bit;
-        else
-            return (short) (bit >>> 16);
-    }
-
-    public static float modbusToFloat(short first, short second) {
-        int bit = ((((int) first) & 0xFFFF) << 16) + (((int) second) & 0xFFFF);
-        return Float.intBitsToFloat(bit);
-    }
-
-    public static boolean areSame(ItemStack stack, ItemStack output) {
-        try {
-            if (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage()) return true;
-            int[] stackIds = OreDictionary.getOreIDs(stack);
-            int[] outputIds = OreDictionary.getOreIDs(output);
-            // System.out.println(Arrays.toString(stackIds) + "   " + Arrays.toString(outputIds));
-            for (int i : outputIds) {
-                for (int j : stackIds) {
-                    if (i == j) return true;
-                }
-            }
-        } catch (Exception e) {
-        }
-        return false;
-    }
-
-    public static Vec3 getVec05(Coordonate c) {
-        return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
-    }
-
-    public static double getHeadPosY(Entity e) {
-        if (e instanceof EntityOtherPlayerMP)
-            return e.posY + e.getEyeHeight();
-        return e.posY;
-    }
-
-	/*
-	 * public static boolean isPlayerInteractRiseWith(EntityPlayerMP entity, ItemStack stack) {
-	 * 
-	 * return entity.inventory.getCurrentItem() == stack && Eln.playerManager.get(entity).getInteractRise(); }
-	 */
-
-    public static boolean isCreative(EntityPlayerMP entityPlayer) {
-        return entityPlayer.theItemInWorldManager.isCreative();
-		/*
-		 * Minecraft m = Minecraft.getMinecraft(); return m.getIntegratedServer().getGameType().isCreative();
-		 */
-    }
-
-    public static boolean mustDropItem(EntityPlayerMP entityPlayer) {
-        if (entityPlayer == null)
-            return true;
-        return !isCreative(entityPlayer);
-    }
-
-    public static void serverTeleport(Entity e, double x, double y, double z) {
-        if (e instanceof EntityPlayerMP)
-            ((EntityPlayerMP) e).setPositionAndUpdate(x, y, z);
-        else
-            e.setPosition(x, y, z);
-    }
-
-    public static ArrayList<Block> traceRay(World world, double x, double y,
-                                            double z, double tx, double ty, double tz) {
-        ArrayList<Block> blockList = new ArrayList<Block>();
-
-        double dx, dy, dz;
-        dx = tx - x;
-        dy = ty - y;
-        dz = tz - z;
-        double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
-        double normInv = 1 / (norm + 0.000000001);
-        dx *= normInv;
-        dy *= normInv;
-        dz *= normInv;
-        double d = 0;
-
-        while (d < norm) {
-            if (Utils.isBlockLoaded(world, x, y, z)) {
-                Block b = Utils.getBlock(world, x, y, z);
-                if (b != null)
-                    blockList.add(b);
-            }
-
-            x += dx;
-            y += dy;
-            z += dz;
-            d += 1;
-        }
-
-        return blockList;
-    }
-
-    interface TraceRayWeight {
-        float getWeight(Block block);
-    }
-
-    public static class TraceRayWeightOpaque implements TraceRayWeight {
-
-        @Override
-        public float getWeight(Block block) {
-            if (block == null)
-                return 0;
-            return block.isOpaqueCube() ? 1f : 0f;
-        }
-    }
-
-    public static float traceRay(World w, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, TraceRayWeight weight) {
-        int posXint = (int) Math.round(posX);
-        int posYint = (int) Math.round(posY);
-        int posZint = (int) Math.round(posZ);
-
-        float x = (float) (posX - posXint), y = (float) (posY - posYint), z = (float) (posZ - posZint);
-
-        float vx = (float) (targetX - posX);
-        float vy = (float) (targetY - posY);
-        float vz = (float) (targetZ - posZ);
-
-        float rangeMax = (float) Math.sqrt(vx * vx + vy * vy + vz * vz);
-        float normInv = 1f / rangeMax;
-        vx *= normInv;
-        vy *= normInv;
-        vz *= normInv;
-
-        if (vx == 0)
-            vx += 0.0001f;
-        if (vy == 0)
-            vy += 0.0001f;
-        if (vz == 0)
-            vz += 0.0001f;
-
-        float vxInv = 1f / vx, vyInv = 1f / vy, vzInv = 1f / vz;
-
-        float stackRed = 0;
-        float d = 0;
-
-        while (d < rangeMax) {
-            float xFloor = MathHelper.floor_float(x);
-            float yFloor = MathHelper.floor_float(y);
-            float zFloor = MathHelper.floor_float(z);
-
-            float dx = x - xFloor, dy = y - yFloor, dz = z - zFloor;
-            dx = (vx > 0 ? (1 - dx) * vxInv : -dx * vxInv);
-            dy = (vy > 0 ? (1 - dy) * vyInv : -dy * vyInv);
-            dz = (vz > 0 ? (1 - dz) * vzInv : -dz * vzInv);
-
-            float dBest = Math.min(Math.min(dx, dy), dz) + 0.01f;
-
-            int xInt = (int) xFloor;
-            int yInt = (int) yFloor;
-            int zInt = (int) zFloor;
-
-            Block block = Blocks.air;
-
-            if (w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
-                block = w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
-
-            float dToStack;
-
-            if (d + dBest < rangeMax)
-                dToStack = dBest;
-            else {
-                dToStack = (rangeMax - d);
-            }
-
-            stackRed += weight.getWeight(block) * dToStack;
-
-            x += vx * dBest;
-            y += vy * dBest;
-            z += vz * dBest;
-
-            d += dBest;
-        }
-
-        return stackRed;
-    }
-
-    public static boolean isBlockLoaded(World world, double x, double y, double z) {
-        return world.blockExists(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
-    }
-
-    public static Block getBlock(World world, double x, double y, double z) {
-        Block block = world.getBlock(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
-        return block;
-    }
-
-    public static double getLength(double x, double y,
-                                   double z, double tx, double ty, double tz) {
-        double dx, dy, dz;
-        dx = tx - x;
-        dy = ty - y;
-        dz = tz - z;
-        double norm = (Math.sqrt(dx * dx + dy * dy + dz * dz));
-        return norm;
-    }
-
-    public static <T> int readPrivateInt(Object o, String feildName) {
-        try {
-            Field f = o.getClass().getDeclaredField(feildName);
-            f.setAccessible(true);
-            return f.getInt(o);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public static <T> double readPrivateDouble(Object o, String feildName) {
-        try {
-            Field f = o.getClass().getDeclaredField(feildName);
-            f.setAccessible(true);
-            return f.getDouble(o);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public static ItemStack[][] getItemStackGrid(IRecipe r) {
-        ItemStack[][] stacks = new ItemStack[3][3];
-        try {
-            if (r instanceof ShapedRecipes) {
-                ShapedRecipes s = (ShapedRecipes) r;
-                for (int idx2 = 0; idx2 < 3; idx2++) {
-                    for (int idx = 0; idx < 3; idx++) {
-                        ItemStack rStack = null;
-                        if (idx < s.recipeWidth && idx2 < s.recipeHeight) {
-                            rStack = s.recipeItems[idx + idx2 * s.recipeWidth];
-                        }
-                        stacks[idx2][idx] = rStack;
-                    }
-                }
-                return stacks;
-            }
-            if (r instanceof ShapedOreRecipe) {
-                ShapedOreRecipe s = (ShapedOreRecipe) r;
-                int width = readPrivateInt(s, "width");
-                int height = readPrivateInt(s, "height");
-                Object[] inputs = s.getInput();
-
-                for (int idx2 = 0; idx2 < height; idx2++) {
-                    for (int idx = 0; idx < width; idx++) {
-                        Object o = inputs[idx + idx2 * width];
-                        ItemStack stack = null;
-                        if (o instanceof List) {
-                            if (o instanceof List && !((List) o).isEmpty())
-                                stack = (ItemStack) ((List) o).get(0);
-                        }
-
-                        if (o instanceof ItemStack) {
-                            stack = (ItemStack) o;
-                        }
-                        stacks[idx2][idx] = stack;
-                    }
-                }
-
-                return stacks;
-            }
-            if (r instanceof ShapelessRecipes) {
-                ShapelessRecipes s = (ShapelessRecipes) r;
-                int idx = 0;
-                for (Object o : s.recipeItems) {
-                    ItemStack stack = (ItemStack) o;
-                    stacks[idx / 3][idx % 3] = stack;
-                    idx++;
-                }
-                return stacks;
-            }
-            if (r instanceof ShapelessOreRecipe) {
-                ShapelessOreRecipe s = (ShapelessOreRecipe) r;
-                int idx = 0;
-                for (Object o : s.getInput()) {
-                    ItemStack stack = null;
-                    if (o instanceof List && !((List) o).isEmpty()) {
-                        stack = (ItemStack) ((List) o).get(0);
-                    }
-
-                    if (o instanceof ItemStack) {
-                        stack = (ItemStack) o;
-                    }
-                    stacks[idx / 3][idx % 3] = stack;
-                    idx++;
-                }
-                return stacks;
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-        return null;
-    }
-
-    public static ArrayList<ItemStack> getRecipeInputs(IRecipe r) {
-        try {
-            ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
-            if (r instanceof ShapedRecipes) {
-                for (ItemStack stack : ((ShapedRecipes) r).recipeItems) {
-                    stacks.add(stack);
-                }
-            }
-            if (r instanceof ShapelessRecipes) {
-                for (Object stack : ((ShapelessRecipes) r).recipeItems) {
-                    stacks.add((ItemStack) stack);
-                }
-            }
-            if (r instanceof ShapedOreRecipe) {
-                for (Object o : ((ShapedOreRecipe) r).getInput()) {
-                    if (o instanceof List) {
-                        stacks.addAll((List) o);
-                    }
-
-                    if (o instanceof ItemStack) {
-                        stacks.add((ItemStack) o);
-                    }
-                }
-            }
-            if (r instanceof ShapelessOreRecipe) {
-                for (Object o : ((ShapelessOreRecipe) r).getInput()) {
-                    if (o instanceof List) {
-                        stacks.addAll((List) o);
-                    }
-
-                    if (o instanceof ItemStack) {
-                        stacks.add((ItemStack) o);
-                    }
-                }
-            }
-            return stacks;
-        } catch (Exception e) {
-            return new ArrayList<ItemStack>();
-        }
-    }
-
-    public static double getWorldTime(World world) {
-        return world.getWorldTime() / (23999.0);
-    }
-
-    public static boolean isWater(Coordonate waterCoord) {
-        Block block = waterCoord.getBlock();
-        return (block == Blocks.flowing_water || block == Blocks.water);
-    }
-
-    public static void addChatMessage(EntityPlayer entityPlayer, String string) {
-        entityPlayer.addChatMessage(new ChatComponentText(string));
-    }
-
-    public static ItemStack newItemStack(int i, int size, int damage) {
-        return new ItemStack(Item.getItemById(i), size, damage);
-    }
-
-    public static ItemStack newItemStack(Item i, int size, int damage) {
-        return new ItemStack(i, size, damage);
-    }
-
-    public static List<NBTTagCompound> getTags(NBTTagCompound nbt) {
-        Object[] set = nbt.func_150296_c().toArray();
-
-        ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();
-
-        for (int idx = 0; idx < set.length; idx++) {
-            tags.add(nbt.getCompoundTag((String) set[idx]));
-        }
-        return tags;
-    }
-
-    public static boolean isRemote(IBlockAccess world) {
-        if (!(world instanceof World)) {
-            fatal();
-        }
-        return ((World) world).isRemote;
-    }
-
-    public static boolean nullCheck(Object o) {
-        return (o == null);
-    }
-
-    public static void nullFatal(Object o) {
-        if (o == null)
-            fatal();
-    }
-
-    public static void fatal() {
-        try {
-            throw new Exception();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static Block getBlock(int blockId) {
-        return Block.getBlockById(blockId);
-    }
-
-    public static void updateSkylight(Chunk chunk) {
-        chunk.func_150804_b(false);
-    }
-
-    public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
-        worldObj.func_147451_t(xCoord, yCoord, zCoord);
-
-        worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
-    }
-
-    public static int getItemId(ItemStack stack) {
-        return Item.getIdFromItem(stack.getItem());
-    }
-
-    public static int getItemId(Block block) {
-        return Item.getIdFromItem(Item.getItemFromBlock(block));
-    }
-
-    // public static RecipesList smeltRecipeList = new RecipesList();
-
-    public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack, float f) {
-        FurnaceRecipes.smelting().func_151394_a(newItemStack(parentItem, 1, parentItemDamage), findItemStack, f);
-    }
-
-    public static void addSmelting(Block parentBlock, int parentItemDamage, ItemStack findItemStack, float f) {
-        FurnaceRecipes.smelting().func_151394_a(newItemStack(Item.getItemFromBlock(parentBlock), 1, parentItemDamage), findItemStack, f);
-    }
-
-    public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack) {
-        addSmelting(parentItem, parentItemDamage, findItemStack, 0.3f);
-    }
-
-    public static void addSmelting(Block parentBlock, int parentItemDamage, ItemStack findItemStack) {
-        addSmelting(parentBlock, parentItemDamage, findItemStack, 0.3f);
-    }
-
-    public static NBTTagCompound newNbtTagCompund(NBTTagCompound nbt, String string) {
-        NBTTagCompound cmp = new NBTTagCompound();
-        nbt.setTag(string, cmp);
-        return cmp;
-    }
-
-    public static String getMapFolder() {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        String savesAt = !server.isDedicatedServer() ? "saves/" : "";
-        return savesAt + server.getFolderName() + "/";
-    }
-
-    public static File getMapFile(String name) {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        File f = server.getFile(getMapFolder() + name);
-        return f;
-    }
-
-    public static String readMapFile(String name) throws IOException {
-        File file = getMapFile(name);
-        FileInputStream fis = new FileInputStream(file);
-        byte[] data = new byte[(int) file.length()];
-        fis.read(data);
-        fis.close();
-        String s = new String(data, "UTF-8");
-        return s;
-    }
-
-    public static void generateHeightMap(Chunk chunk) {
-    }
-
-    public static int getUuid() {
-        if (uuid < 1) uuid = 1;
-        return uuid++;
-    }
-
-	/*
-	 * public static float[] getSixNodePinDistance(Obj3D obj) {
-	 * 
-	 * return new float[]{obj.zMin*16,obj.zMax*16,obj.yMin*16,obj.yMax*16}; }
-	 */
-
-    public static float[] getSixNodePinDistance(Obj3DPart obj) {
-        return new float[]{Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16)};
-    }
-
-    public static boolean isWrench(ItemStack stack) {
-        return areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
-    }
-
-    // @SideOnly(Side.SERVER)
-    public static boolean isPlayerUsingWrench(EntityPlayer player) {
-        if (player == null) return false;
-        if (Eln.playerManager.get(player).getInteractEnable()) return true;
-        ItemStack stack = player.inventory.getCurrentItem();
-        if (stack == null) return false;
-        return isWrench(stack);
-    }
-
-    public static boolean isClassLoaded(String name) {
-        try {
-            Class<?> cc = Class.forName(name);
-            if (cc != null) {
-                return true;
-            }
-        } catch (ClassNotFoundException e) {
-        }
-        return false;
-    }
-
-    public static String plotSignal(double U, double I) {
-        return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U / Eln.SVU);
-    }
-
-    public static float limit(float value, float min, float max) {
-        return Math.max(Math.min(value, max), min);
-    }
-
-    public static double limit(double value, double min, double max) {
-        return Math.max(Math.min(value, max), min);
-    }
-
-    public static void printFunction(FunctionTable func, double start, double end, double step) {
-        Utils.println("********");
-        double x;
-        for (int idx = 0; (x = start + step * idx) < end + 0.00001; idx++) {
-            Utils.println(func.getValue(x));
-        }
-        Utils.println("********");
     }
 }

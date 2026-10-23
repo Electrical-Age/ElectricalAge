@@ -1,15 +1,18 @@
 package mods.eln.transparentnode.windturbine;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -41,7 +44,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
                                  double nominalPower, double nominalWind, double maxVoltage, double maxWind, int offY,
                                  int rayX, int rayY, int rayZ, int blockMalusMinCount, double blockMalus,
                                  String soundName, float nominalVolume) {
-        super(name, WindTurbineElement.class, WindTurbineRender.class);
+        super(name, WindTurbineElement.class, null);
 
         this.cable = cable;
         this.nominalPower = nominalPower;
@@ -73,7 +76,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.LowVoltage;
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addEnergy(newItemStack());
     }
@@ -102,34 +105,29 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public Direction getFrontFromPlace(Direction side,
-                                       EntityLivingBase entityLiving) {
+                                       LivingEntity entityLiving) {
         return Direction.XN;
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        objItemScale(obj);
+        Direction.ZN.glRotateXnRef();
+        draw(0f, false);
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            draw(0f, false);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+    public void addInformation(ItemStack itemStack, Player entityPlayer,
                                List<String> list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 

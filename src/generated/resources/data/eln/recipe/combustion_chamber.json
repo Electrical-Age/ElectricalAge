@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "L": "minecraft:stone"
+  },
+  "pattern": [
+    " L ",
+    "L L",
+    " L "
+  ],
+  "result": {
+    "id": "eln:combustion_chamber"
+  }
+}

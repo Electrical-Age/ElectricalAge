@@ -12,7 +12,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 
@@ -45,13 +45,13 @@ public class DownlinkElement extends GridElement {
         thermalWatchdog
             .set(thermalLoad)
             .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).cable());
 
         slowProcessList.add(voltageWatchdog);
         voltageWatchdog
             .set(electricalLoad)
             .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).hvLine());
 
     }
 

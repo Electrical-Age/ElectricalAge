@@ -1,5 +1,7 @@
 package mods.eln.sim.nbt;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 
@@ -7,7 +9,7 @@ public class NbtElectricalGateOutput extends NbtElectricalLoad {
 
     public NbtElectricalGateOutput(String name) {
         super(name);
-        Eln.instance.signalCableDescriptor.applyTo(this);
+        ElnDeviceRegistry.signalCableDescriptor.applyTo(this);
     }
 
     public String plot(String str) {

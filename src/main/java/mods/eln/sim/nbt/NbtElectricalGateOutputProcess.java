@@ -6,7 +6,7 @@ import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.component.Capacitor;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTReady {
 
@@ -23,7 +23,7 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 
     public void setHighImpedance(boolean enable) {
         this.highImpedance = enable;
-        double baseC = Eln.instance.gateOutputCurrent / Eln.instance.electricalFrequency / Eln.SVU;
+        double baseC = Eln.gateOutputCurrent / Eln.electricalFrequency / Eln.SVU;
         if (enable) {
             setC(baseC / 1000);
         } else {
@@ -43,15 +43,15 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        setHighImpedance(nbt.getBoolean(str + name + "highImpedance"));
-        U = nbt.getDouble(str + name + "U");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        setHighImpedance(nbt.getBooleanOr(str + name + "highImpedance", false));
+        U = nbt.getDoubleOr(str + name + "U", 0.0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setBoolean(str + name + "highImpedance", highImpedance);
-        nbt.setDouble(str + name + "U", U);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putBoolean(str + name + "highImpedance", highImpedance);
+        nbt.putDouble(str + name + "U", U);
     }
 
     public void setOutputNormalized(double value) {

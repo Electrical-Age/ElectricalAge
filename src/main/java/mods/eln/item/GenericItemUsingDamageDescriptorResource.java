@@ -2,7 +2,7 @@ package mods.eln.item;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 public class GenericItemUsingDamageDescriptorResource extends GenericItemUsingDamageDescriptor {
 

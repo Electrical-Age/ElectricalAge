@@ -1,5 +1,7 @@
 package mods.eln.sixnode.groundcable;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
@@ -16,12 +18,12 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,6 +39,10 @@ public class GroundCableElement extends SixNodeElement {
     int color = 0;
     int colorCare = 0;
 
+    /**
+     * 1.12's cable slot (it only chose the cable drawn; Baughn 2026-10-17: slot removed). Kept, hidden, so a cable
+     * left in it by an older world stays in the saved data and drops when the ground is broken.
+     */
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public GroundCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -48,9 +54,9 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte b = nbt.getByte("color");
+        byte b = nbt.getByteOr("color", (byte) 0);
         color = b & 0xF;
         colorCare = (b >> 4) & 1;
     }
@@ -60,13 +66,13 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("color", (byte) (color + (colorCare << 4)));
+        nbt.putByte("color", (byte) (color + (colorCare << 4)));
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -82,7 +88,6 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        //if (inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
         return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
     }
 
@@ -108,7 +113,6 @@ public class GroundCableElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeByte(color << 4);
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,17 +120,17 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.applySmallRs(electricalLoad);
+        ElnDeviceRegistry.applySmallRs(electricalLoad);
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getMainHandItem();
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
-            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
-        } else if (currentItemStack != null) {
+        } else if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
 
             GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
@@ -143,18 +147,7 @@ public class GroundCableElement extends SixNodeElement {
     }
 
     @Override
-    protected void inventoryChanged() {
-        super.inventoryChanged();
-        reconnect();
-    }
-
-    @Override
     public boolean hasGui() {
-        return true;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new GroundCableContainer(player, inventory);
+        return false;
     }
 }

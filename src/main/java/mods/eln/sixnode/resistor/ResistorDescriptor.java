@@ -1,5 +1,11 @@
 package mods.eln.sixnode.resistor;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
+
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -8,11 +14,9 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Created by svein on 05/08/15.
@@ -36,7 +40,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
                               ISerie series,
                               double tempCoef,
                               boolean isRheostat) {
-        super(name, ResistorElement.class, ResistorRender.class);
+        super(name, ResistorElement.class, null);
         this.obj = obj;
         this.series = series;
         this.tempCoef = tempCoef;
@@ -52,15 +56,15 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
-    public double getRsValue(IInventory inventory) {
-        ItemStack core = inventory.getStackInSlot(ResistorContainer.coreId);
+    public double getRsValue(Container inventory) {
+        ItemStack core = inventory.getItem(ResistorElement.coreSlotId);
 
-        if (core == null) return series.getValue(0);
-        return series.getValue(core.stackSize);
+        if (Utils.isEmpty(core)) return series.getValue(0);
+        return series.getValue(core.getCount());
     }
 
     @Override
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addEnergy(newItemStack());
     }
@@ -86,30 +90,26 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(IItemRenderer.ItemRenderType type, ItemStack item, IItemRenderer.ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, IItemRenderer.ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw(0);
-        } else {
-            super.renderItem(type, item, data);
-        }
+    public void drawItem(boolean entity) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+        GL11.glScalef(1.25f, 1.25f, 1.25f);
+        GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+        draw(0);
+
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
 }

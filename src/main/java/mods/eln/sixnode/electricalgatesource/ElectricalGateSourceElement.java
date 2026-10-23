@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalgatesource;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -15,9 +17,9 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -74,16 +76,16 @@ public class ElectricalGateSourceElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
+        byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) ((front.toInt() << 0)));
+        nbt.putByte("front", (byte) ((front.toInt() << 0)));
     }
 
     @Override
@@ -133,7 +135,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        Eln.instance.signalCableDescriptor.applyTo(outputGate);
+        ElnDeviceRegistry.signalCableDescriptor.applyTo(outputGate);
         computeElectricalLoad();
     }
 
@@ -146,12 +148,12 @@ public class ElectricalGateSourceElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getMainHandItem();
 
         if (onBlockActivatedRotate(entityPlayer)) {
             return true;
-        } else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
+        } else if (!mods.eln.misc.PlayerUtilKt.isHoldingMeter(entityPlayer) && descriptor.onOffOnly) {
             outputGateProcess.state(!outputGateProcess.getOutputOnOff());
             play(new SoundCommand("random.click").mulVolume(0.3F, 0.6F).smallRange());
             if (autoResetProcess != null)

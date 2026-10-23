@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:plates/alloy",
+    "c": "eln:copper_cable"
+  },
+  "pattern": [
+    " C ",
+    "CcC",
+    " C "
+  ],
+  "result": {
+    "id": "eln:advanced_machine_block"
+  }
+}

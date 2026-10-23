@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "R": "#c:circuits/basic",
+    "c": "eln:copper_cable"
+  },
+  "pattern": [
+    "IcI",
+    "IRI",
+    "IcI"
+  ],
+  "result": {
+    "id": "eln:energy_meter"
+  }
+}

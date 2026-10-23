@@ -13,8 +13,12 @@ public class FurnaceProcess implements IProcess {
         this.load = load;
     }
 
+    /** The fire's real burn level, lagging the gain (Fire.COAL). */
+    public final Fire fire = new Fire(Fire.COAL);
+
     @Override
     public void process(double time) {
+        fire.step(gain, combustibleEnergy > 0, time);
         double energyConsumed = getP() * time;
         combustibleEnergy -= energyConsumed;
         load.PcTemp += energyConsumed / time;
@@ -36,6 +40,6 @@ public class FurnaceProcess implements IProcess {
     }
 
     public double getP() {
-        return combustibleEnergy / nominalCombustibleEnergy * nominalPower * gain;
+        return combustibleEnergy / nominalCombustibleEnergy * nominalPower * fire.level;
     }
 }

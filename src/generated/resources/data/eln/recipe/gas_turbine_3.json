@@ -1,0 +1,45 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/steel"
+      }
+    },
+    {
+      "type": "neoforge:tag_empty",
+      "tag": "c:storage_blocks/steel"
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/steel"
+      }
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:storage_blocks/iron"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "H": "eln:copper_thermal_cable",
+    "M": "eln:advanced_machine_block",
+    "S": "#c:storage_blocks/iron",
+    "m": "eln:advanced_electrical_motor",
+    "s": "#c:ingots/steel"
+  },
+  "pattern": [
+    "msH",
+    "sSs",
+    " M "
+  ],
+  "result": {
+    "id": "eln:gas_turbine"
+  }
+}

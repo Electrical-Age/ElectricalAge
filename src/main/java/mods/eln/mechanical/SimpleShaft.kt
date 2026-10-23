@@ -1,22 +1,24 @@
 package mods.eln.mechanical
 
 import mods.eln.cable.CableRender
+
+import mods.eln.sound.LoopedSound
+
+import mods.eln.gl.GL11
+
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
 import mods.eln.misc.*
 import mods.eln.node.transparent.*
-import mods.eln.sim.process.destruct.WorldExplosion
-import mods.eln.sound.LoopedSound
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
-import org.lwjgl.opengl.GL11
+import mods.eln.sim.process.destruct.Failure
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.reflect.KClass
 
-abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag) :
-    TransparentNodeDescriptor(name, elm.java, render.java, tag) {
+abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<*>?) :
+    TransparentNodeDescriptor(name, elm.java, render?.java) {
 
     abstract val obj: Obj3D
     abstract val static: Array<out Obj3D.Obj3DPart>
@@ -28,7 +30,6 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
-
     open fun draw(angle: Double) {
         for (part in static) {
             part.draw()
@@ -37,9 +38,9 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             assert(rotating.size > 0)
             val bb = rotating[0].boundingBox()
             val centre = bb.centre()
-            val ox = centre.xCoord
-            val oy = centre.yCoord
-            val oz = centre.zCoord
+            val ox = centre.x
+            val oy = centre.y
+            val oz = centre.z
             GL11.glTranslated(ox, oy, oz)
             GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)
@@ -49,23 +50,22 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
     }
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            objItemScale(obj)
-            preserveMatrix {
-                Direction.ZN.glRotateXnRef()
-                GL11.glTranslatef(0f, -1f, 0f)
-                GL11.glScalef(0.6f, 0.6f, 0.6f)
-                draw(0.0)
-            }
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) {
+        objItemScale(obj)
+        preserveMatrix {
+            Direction.ZN.glRotateXnRef()
+            GL11.glTranslatef(0f, -1f, 0f)
+            GL11.glScalef(0.6f, 0.6f, 0.6f)
+            draw(0.0)
         }
+
     }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 }
 
 open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
@@ -161,13 +161,14 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     }
 }
 
+
 abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     TransparentNodeElement(node, desc_), ShaftElement {
     override val shaftMass = 5.0
     override var shaft = ShaftNetwork(this)
 
     init {
-        val exp = WorldExplosion(this).machineExplosion()
+        val exp = Failure(this).rotating { shaft.energy }
         slowProcessList.add(createShaftWatchdog(this).set(exp));
     }
 
@@ -191,12 +192,12 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         shaft.writeToNBT(nbt, "shaft")
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         shaft.readFromNBT(nbt, "shaft")
     }

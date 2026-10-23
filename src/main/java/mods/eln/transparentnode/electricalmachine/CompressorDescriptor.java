@@ -1,11 +1,14 @@
 package mods.eln.transparentnode.electricalmachine;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.entity.item.EntityItem;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.item.ItemEntity;
 
 public class CompressorDescriptor extends ElectricalMachineDescriptor {
     private float tyOn;
@@ -49,7 +52,7 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
     }
 
     @Override
-    void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity,
+    void draw(ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity,
               float powerFactor, float processState) {
         CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
 
@@ -60,9 +63,8 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
         GL11.glTranslatef(0f, tyOff + (float) Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);
         move.draw();
     }
-
     @Override
-    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
+    void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
         CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
         handle.interpolator.setTarget(processState);
         handle.interpolator.step(deltaT);
@@ -70,7 +72,6 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
         handle.itemCounter += deltaT * 90;
         while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
     }
-
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

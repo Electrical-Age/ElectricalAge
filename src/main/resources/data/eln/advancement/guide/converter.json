@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/steam_turbine",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:dc_dc_converter"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:dc_dc_converter"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.converter.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.converter.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

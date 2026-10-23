@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/machine_block",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:electrical_furnace"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:electrical_furnace"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.electrical_furnace.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.electrical_furnace.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

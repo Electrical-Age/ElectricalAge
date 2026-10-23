@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 0.3,
+  "ingredient": "eln:silicon_dust",
+  "result": {
+    "id": "eln:silicon_ingot"
+  }
+}

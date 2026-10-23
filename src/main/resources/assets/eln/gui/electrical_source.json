@@ -1,0 +1,34 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Electrical Source"
+  },
+  {
+   "text": "now",
+   "sample": "Output voltage  (now 99.99kV)"
+  },
+  {
+   "row": [
+    {
+     "field": "voltage",
+     "chars": 10
+    },
+    {
+     "text": "unit",
+     "sample": "V"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "set",
+     "sample": "Set"
+    }
+   ],
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/steam_turbine",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:steam_turbine"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:steam_turbine"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.big_iron.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.big_iron.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

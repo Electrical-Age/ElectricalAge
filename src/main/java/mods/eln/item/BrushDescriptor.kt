@@ -1,28 +1,25 @@
 package mods.eln.item
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor
+import mods.eln.generic.ItemNbt
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.Utils
-import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
-import net.minecraft.client.Minecraft
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.IItemRenderer
-import org.lwjgl.opengl.GL11
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
 
-class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
-
-    private val icon = ResourceLocation("eln", "textures/items/" + name.toLowerCase().replace(" ", "") + ".png")
+/**
+ * Paint brush for cables (one item per colour; 1.12: the colour was the low 4 bits of the item damage, which on 26.x
+ * is the 1.12 id this descriptor was registered under). Item rendering (dry overlay) comes back in P3.
+ */
+class BrushDescriptor(name: String) : GenericItemUsingDamageDescriptor(name) {
 
     override fun getName(stack: ItemStack): String {
-        val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
         val color = getColor(stack)
         val life = getLife(stack)
-        return if (!creative && color == 15 && life == 0) "Empty " + super.getName(stack) else super.getName(stack)
+        return if (color == 15 && life == 0) "Empty " + super.getName(stack) else super.getName(stack)
     }
 
     override fun setParent(item: Item, damage: Int) {
@@ -30,68 +27,48 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
         Data.addWiring(newItemStack())
     }
 
-    fun getColor(stack: ItemStack) = stack.itemDamage and 0xF
+    fun getColor(stack: ItemStack) = parentItemDamage and 0xF
 
-    private fun getLife(stack: ItemStack?) = if (stack == null || stack.tagCompound == null)
-        32
-    else
-        stack.tagCompound.getInteger("life")
+    private fun getLife(stack: ItemStack?) = stack?.let { ItemNbt.get(it) }?.getIntOr("life", 0) ?: 32
 
-    fun setLife(stack: ItemStack, life: Int) {
-        stack.tagCompound.setInteger("life", life)
+    /** R5: the paint left as the item bar (1.12 faded in a "dry" overlay instead); a full or empty brush has none. */
+    override fun itemBar(stack: ItemStack): Double {
+        val life = getLife(stack)
+        return if (life in 1..31) life / 32.0 else -1.0
     }
 
-    override fun getDefaultNBT(): NBTTagCompound? {
-        val nbt = NBTTagCompound()
-        nbt.setInteger("life", 32)
+    fun setLife(stack: ItemStack, life: Int) {
+        val nbt = ItemNbt.get(stack) ?: CompoundTag()
+        nbt.putInt("life", life)
+        ItemNbt.set(stack, nbt)
+    }
+
+    override fun getDefaultNBT(): CompoundTag? {
+        val nbt = CompoundTag()
+        nbt.putInt("life", 32)
         return nbt
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-
         if (itemStack != null) {
-            val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
-            list.add(tr("Can paint %1$ blocks", if (creative) "infinite" else itemStack.tagCompound.getInteger("life")))
+            val creative = entityPlayer?.isCreative ?: false
+            list.add(tr("Can paint %1$ blocks", if (creative) "infinite" else getLife(itemStack)))
         }
     }
 
-    fun use(stack: ItemStack, entityPlayer: EntityPlayer): Boolean {
-
-        val creative = entityPlayer.capabilities.isCreativeMode
-        var life = stack.tagCompound.getInteger("life")
+    fun use(stack: ItemStack, entityPlayer: Player): Boolean {
+        val creative = entityPlayer.isCreative
+        var life = getLife(stack)
         return if (creative || life != 0) {
             if (!creative) {
                 --life
-                stack.tagCompound.setInteger("life", life)
+                setLife(stack, life)
             }
             true
         } else {
-            Utils.addChatMessage(entityPlayer, tr("Brush is dry"))
+            Utils.sendMessage(entityPlayer, tr("Brush is dry"))
             false
         }
-    }
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = type == IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
-            UtilsClient.drawIcon(type, icon)
-            if (!creative) {
-                GL11.glColor4f(1f, 1f, 1f, 0.75f - 0.75f * getLife(item) / 32f)
-                UtilsClient.drawIcon(type, dryOverlay)
-                GL11.glColor3f(1f, 1f, 1f)
-            }
-        } else {
-            super.renderItem(type, item, *data)
-        }
-    }
-
-    companion object {
-        private val dryOverlay = ResourceLocation("eln", "textures/items/brushdryoverlay.png")
     }
 }

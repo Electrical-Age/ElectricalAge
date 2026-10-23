@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "c": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    " c ",
+    "cc ",
+    "  c"
+  ],
+  "result": {
+    "id": "eln:wrench"
+  }
+}

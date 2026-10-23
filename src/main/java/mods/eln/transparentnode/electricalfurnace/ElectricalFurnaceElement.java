@@ -1,7 +1,10 @@
 package mods.eln.transparentnode.electricalfurnace;
 
+import net.minecraft.world.entity.item.ItemEntity;
+
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
-import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.i18n.I18N;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
@@ -19,13 +22,13 @@ import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -82,23 +85,18 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
         slowProcessList.add(slowRefreshProcess);
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
         slowProcessList.add(voltageWatchdog.set(electricalLoad).set(exp));
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
     @Override
     public boolean hasGui() {
         return true;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new ElectricalFurnaceContainer(this.node, player, inventory);
     }
 
     @Override
@@ -141,19 +139,19 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
         smeltResistor.highImpedance();
         slowRefreshProcess.process(0.05);
 
-        Eln.instance.lowVoltageCableDescriptor.applyTo(electricalLoad);
+        ElnDeviceRegistry.lowVoltageCableDescriptor.applyTo(electricalLoad);
         //electricalLoad.setRs(MnaConst.highImpedance);
 
 
         //	ItemStack stack = new ItemStack(Item.coal);
-        //	EntityItem entity = new EntityItem(node.coordonate.world(), node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 1.5, stack);
-        //	node.coordonate.world().spawnEntityInWorld(entity);
+        //	ItemEntity entity = new ItemEntity(node.coordonate.world(), node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 1.5, stack);
+        //	node.coordonate.world().spawnEntity(entity);
 
         connect();
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
         setPhysicalValue();
         needPublish();
@@ -162,27 +160,27 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     public void setPhysicalValue() {
         ItemStack itemStack;
         heatingCorpResistor.setState(powerOn);
-        itemStack = inventory.getStackInSlot(heatingCorpSlotId);
-        if (itemStack == null) {
+        itemStack = inventory.getItem(heatingCorpSlotId);
+        if (Utils.isEmpty(itemStack)) {
             thermalRegulator.setRmin(MnaConst.highImpedance);
             voltageWatchdog.setUNominal(100000);
         } else {
-            HeatingCorpElement element = ((GenericItemUsingDamage<HeatingCorpElement>) itemStack.getItem()).getDescriptor(itemStack);
+            HeatingCorpElement element = ((HeatingCorpElement) Utils.getItemObject(itemStack));
             element.applyTo(thermalRegulator);
             voltageWatchdog.setUNominal(element.electricalNominalU);
         }
 
-        itemStack = inventory.getStackInSlot(thermalRegulatorSlotId);
-        if (itemStack == null) {
+        itemStack = inventory.getItem(thermalRegulatorSlotId);
+        if (Utils.isEmpty(itemStack)) {
             thermalRegulator.setNone();
         } else {
-            IRegulatorDescriptor element = ((GenericItemUsingDamage<IRegulatorDescriptor>) itemStack.getItem()).getDescriptor(itemStack);
+            IRegulatorDescriptor element = ((IRegulatorDescriptor) Utils.getItemObject(itemStack));
             element.applyTo(thermalRegulator, 500.0, 10.0, 0.1, 0.1);
         }
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         return false;
     }
 
@@ -195,12 +193,10 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
             stream.writeShort((int) thermalLoad.Tc);
 
             ItemStack stack;
-            if ((stack = inventory.getStackInSlot(inSlotId)) == null) {
-                stream.writeShort(-1);
-                stream.writeShort(-1);
+            if (Utils.isEmpty(stack = inventory.getItem(inSlotId))) {
+                Utils.serialiseItemStack(stream, null);
             } else {
-                stream.writeShort(Item.getIdFromItem(stack.getItem()));
-                stream.writeShort(stack.getItemDamage());
+                Utils.serialiseItemStack(stream, stack); // 1.12: item id + metadata shorts; 26.x: registry id (P3 render)
             }
 
             stream.writeShort((int) heatingCorpResistor.getP());
@@ -215,17 +211,17 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setBoolean("powerOn", powerOn);
-        nbt.setBoolean("autoShutDown", autoShutDown);
+        nbt.putBoolean("powerOn", powerOn);
+        nbt.putBoolean("autoShutDown", autoShutDown);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        powerOn = nbt.getBoolean("powerOn");
-        autoShutDown = nbt.getBoolean("autoShutDown");
+        powerOn = nbt.getBooleanOr("powerOn", false);
+        autoShutDown = nbt.getBooleanOr("autoShutDown", false);
     }
 
     public void setPowerOn(boolean value) {
@@ -265,8 +261,8 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
-        if (inventory.getStackInSlot(heatingCorpSlotId) != null) {
-            info.put(I18N.tr("Heating element"), inventory.getStackInSlot(heatingCorpSlotId).getDisplayName());
+        if (!Utils.isEmpty(inventory.getItem(heatingCorpSlotId))) {
+            info.put(I18N.tr("Heating element"), inventory.getItem(heatingCorpSlotId).getHoverName().getString());
         } else {
             info.put(I18N.tr("Heating element"), I18N.tr("None"));
         }

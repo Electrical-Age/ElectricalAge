@@ -1,11 +1,13 @@
 package mods.eln.sixnode.electricallightsensor;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.Level;
 
 public class ElectricalLightSensorSlowProcess implements IProcess {
 
@@ -28,14 +30,14 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
 
             if (!element.sixNode.coordonate.getBlockExist()) return;
             Coordonate coord = element.sixNode.coordonate;
-            //int light = coord.world().getSavedLightValue(EnumSkyBlock.Sky, coord.x, coord.y, coord.z) - coord.world().skylightSubtracted;
+            //int light = WorldCompat.getSavedLightValue(coord.world(), net.minecraft.world.level.LightLayer.SKY, coord.x, coord.y, coord.z) - coord.world().skylightSubtracted;
             //	Utils.println("Light : " + light);
-            World world = coord.world();
+            Level world = coord.world();
             //if(element.descriptor.dayLightOnly) {
-            if (!world.provider.hasNoSky) {
-                int i1 = world.getSavedLightValue(EnumSkyBlock.Sky, coord.x, coord.y, coord.z) - world.skylightSubtracted;
+            if (world.dimensionType().hasSkyLight()) { // 1.7.10 !hasNoSky
+                int i1 = WorldCompat.getSavedLightValue(world, net.minecraft.world.level.LightLayer.SKY, coord.x, coord.y, coord.z) - world.getSkyDarken();
                 i1 = Math.max(0, i1);
-                float f = world.getCelestialAngleRadians(1.0F);
+                float f = (float) Utils.sunAngleRadians(world);
 
                 if (f < (float) Math.PI) {
                     f += (0.0F - f) * 0.2F;
@@ -43,7 +45,7 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
                     f += (((float) Math.PI * 2F) - f) * 0.2F;
                 }
 
-                i1 = Math.round((float) i1 * MathHelper.cos(f));
+                i1 = Math.round((float) i1 * Mth.cos(f));
 
                 if (i1 < 0) {
                     i1 = 0;
@@ -57,9 +59,9 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
             }
             //}
             if (!element.descriptor.dayLightOnly) {
-                // light = Math.max(light, (int)(world.getBlockLightValue(coord.x, coord.y, coord.z)));
+                // light = Math.max(light, (int)(WorldCompat.getBlockLightValue(world, coord.x, coord.y, coord.z)));
                 //light = 0;
-                light = Math.max(light, Utils.getLight(world, EnumSkyBlock.Block, coord.x, coord.y, coord.z));
+                light = Math.max(light, Utils.getLight(world, net.minecraft.world.level.LightLayer.BLOCK, coord.x, coord.y, coord.z));
             }
             element.outputGateProcess.setOutputNormalized(light / 15.0);
         }

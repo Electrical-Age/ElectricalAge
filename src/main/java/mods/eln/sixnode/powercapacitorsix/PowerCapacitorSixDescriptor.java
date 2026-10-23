@@ -1,5 +1,9 @@
 package mods.eln.sixnode.powercapacitorsix;
 
+import mods.eln.gl.GL11;
+
+
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Direction;
@@ -10,10 +14,9 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
@@ -30,7 +33,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
                                        Obj3D obj,
                                        ISerie serie,
                                        double dischargeTao) {
-        super(name, PowerCapacitorSixElement.class, PowerCapacitorSixRender.class);
+        super(name, PowerCapacitorSixElement.class, null);
         this.serie = serie;
         this.dischargeTao = dischargeTao;
         this.obj = obj;
@@ -49,27 +52,27 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         return serie.getValue(cableCount - 1) / uTemp / uTemp;
     }
 
-    public double getCValue(IInventory inventory) {
-        ItemStack core = inventory.getStackInSlot(PowerCapacitorSixContainer.redId);
-        ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
-        if (core == null || diel == null)
+    public double getCValue(Container inventory) {
+        ItemStack core = inventory.getItem(PowerCapacitorSixContainer.redId);
+        ItemStack diel = inventory.getItem(PowerCapacitorSixContainer.dielectricId);
+        if (Utils.isEmpty(core) || Utils.isEmpty(diel))
             return getCValue(0, 0);
         else {
-            return getCValue(core.stackSize, getUNominalValue(inventory));
+            return getCValue(core.getCount(), getUNominalValue(inventory));
         }
     }
 
-    public double getUNominalValue(IInventory inventory) {
-        ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
-        if (diel == null)
+    public double getUNominalValue(Container inventory) {
+        ItemStack diel = inventory.getItem(PowerCapacitorSixContainer.dielectricId);
+        if (Utils.isEmpty(diel))
             return 10000;
         else {
             DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-            return desc.uNominal * diel.stackSize;
+            return desc.uNominal * diel.getCount();
         }
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addEnergy(newItemStack());
     }
@@ -80,30 +83,26 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         if (null != CapacitorCore) CapacitorCore.draw();
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw();
-        } else {
-            super.renderItem(type, item, data);
-        }
+    public void drawItem(boolean entity) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+        GL11.glScalef(1.25f, 1.25f, 1.25f);
+        GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+        draw();
+
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
 }

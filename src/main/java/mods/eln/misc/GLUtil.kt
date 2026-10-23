@@ -1,6 +1,6 @@
 package mods.eln.misc
 
-import org.lwjgl.opengl.GL11
+import mods.eln.gl.GL11
 
 /**
  * A series of convenience functions for drawing with OpenGL.

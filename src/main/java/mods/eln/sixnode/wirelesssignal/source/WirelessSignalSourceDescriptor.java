@@ -1,13 +1,15 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
+import mods.eln.gl.GL11;
+
+
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
 import mods.eln.wiki.Data;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
 
@@ -18,22 +20,17 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
     public WirelessSignalSourceDescriptor(String name,
                                           ElectricalGateSourceRenderObj render,
                                           int range, boolean autoReset) {
-        super(name, WirelessSignalSourceElement.class, WirelessSignalSourceRender.class);
+        super(name, WirelessSignalSourceElement.class, null);
         this.range = range;
         this.autoReset = autoReset;
         this.render = render;
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-
-    void draw(float factor, float distance, TileEntity e) {
+    void draw(float factor, float distance, BlockEntity e) {
         render.draw(factor, distance, e);
     }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     @Override
     public void setParent(Item item, int damage) {
@@ -41,23 +38,19 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    public void drawItem(boolean entity) {
+        GL11.glScalef(1.5f, 1.5f, 1.5f);
+        draw(0f, 1f, null);
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glScalef(1.5f, 1.5f, 1.5f);
-            draw(0f, 1f, null);
-        }
     }
 }

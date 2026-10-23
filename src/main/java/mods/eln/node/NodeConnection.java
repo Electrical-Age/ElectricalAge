@@ -13,6 +13,11 @@ public class NodeConnection {
     ElectricalConnection EC;
     ThermalConnection TC;
 
+    /** The node at the other end from n. */
+    public NodeBase other(NodeBase n) {
+        return n == N1 ? N2 : N1;
+    }
+
     public NodeConnection(NodeBase N1, Direction dir1, LRDU lrdu1, NodeBase N2, Direction dir2, LRDU lrdu2, ElectricalConnection EC, ThermalConnection TC) {
         this.N1 = N1;
         this.N2 = N2;

@@ -1,7 +1,8 @@
 package mods.eln.sixnode
 
+import mods.eln.gl.GL11
+
 import mods.eln.cable.CableRenderDescriptor
-import mods.eln.gui.*
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.Node
@@ -12,20 +13,18 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.mna.component.ResistorSwitch
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.lampsupply.LampSupplyElement
-import net.minecraft.client.gui.GuiButton
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import org.lwjgl.opengl.GL11
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor, val batteryCapacity: Double,
                               val chargePower: Double, val consumption: Double, val lightLevel: Int, model: Obj3D)
-    : SixNodeDescriptor(name, EmergencyLampElement::class.java, EmergencyLampRender::class.java) {
+    : SixNodeDescriptor(name, EmergencyLampElement::class.java, null) {
 
     val mainCeiling: Obj3D.Obj3DPart = model.getPart("coreCeil")
     val panelCeiling: Obj3D.Obj3DPart = model.getPart("panelCeil")
@@ -36,10 +35,9 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
     val lightWall: Obj3D.Obj3DPart = model.getPart("lightWall")
 
     init {
-        voltageLevelColor = VoltageLevelColor.fromCable(cable)
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable)
         setDefaultIcon("emergencylamp")
     }
-
     fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
         if (onCeiling) {
             mainCeiling.draw()
@@ -70,10 +68,11 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
         }
     }
 
-    override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?)
+
+    override fun getFrontFromPlace(side: Direction?, player: Player?)
         = super.getFrontFromPlace(side, player).inverse()
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>,
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>,
                                 par4: Boolean) {
         with(list) {
             add("As long as power is provided, the internal battery")
@@ -162,7 +161,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         slowProcessList.add(process)
         slowProcessList.add(NodePeriodicPublishProcess(sixNode, 2.0, 0.5))
         slowProcessList.add(VoltageStateWatchDog().set(load).setUNominal(desc.cable.electricalNominalVoltage)
-            .set(WorldExplosion(this).cableExplosion()))
+            .set(Failure(this).electronics()))
     }
 
     override fun getConnectionMask(lrdu: LRDU) = when {
@@ -206,20 +205,20 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         }
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
-        on = nbt.getBoolean("on")
-        charge = nbt.getDouble("charge")
-        poweredByCable = nbt.getBoolean("poweredByCable")
-        channel = nbt.getString("channel")
+        on = nbt.getBooleanOr("on", false)
+        charge = nbt.getDoubleOr("charge", 0.0)
+        poweredByCable = nbt.getBooleanOr("poweredByCable", false)
+        channel = nbt.getStringOr("channel", "")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setBoolean("on", on)
-        nbt.setDouble("charge", charge)
-        nbt.setBoolean("poweredByCable", poweredByCable)
-        nbt.setString("channel", channel)
+        nbt.putBoolean("on", on)
+        nbt.putDouble("charge", charge)
+        nbt.putBoolean("poweredByCable", poweredByCable)
+        nbt.putString("channel", channel)
     }
 
     override fun hasGui() = true
@@ -250,8 +249,6 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
         isConnectedToLampSupply = stream.readBoolean()
     }
 
-    override fun newGuiDraw(side: Direction?, player: EntityPlayer?) = EmergencyLampGui(this)
-
     override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = if (poweredByCable) when {
         side == Direction.YP -> desc.cable.render
         lrdu == front.left() || lrdu == front.right() -> desc.cable.render
@@ -259,48 +256,6 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
     } else null
 }
 
-class EmergencyLampGui(private var render: EmergencyLampRender)
-    : GuiScreenEln() {
-    private lateinit var buttonSupplyType: GuiButton
-    private lateinit var channel: GuiTextFieldEln
-    private lateinit var charge: GuiVerticalProgressBar
 
-    override fun initGui() {
-        super.initGui()
-        buttonSupplyType = newGuiButton(18, 12, 140, "")
-        channel = newGuiTextField(19, 38, 138)
-        channel.setComment(0, tr("Specify the supply channel"))
-        channel.text = render.channel
-        charge = newGuiVerticalProgressBar(166, 12, 16, 39)
-        charge.setColor(0.2f, 0.5f, 0.8f)
-    }
+// 26.x port: class EmergencyLampGui removed (client; redone in P3/P4)
 
-    override fun guiObjectEvent(`object`: IGuiObject) {
-        super.guiObjectEvent(`object`)
-        if (`object` === buttonSupplyType) {
-            render.clientSend(EmergencyLampElement.Event.TOGGLE_POWERED_BY_CABLE.value.toInt())
-        } else if (`object` === channel) {
-            render.clientSetString(EmergencyLampElement.Event.SET_CHANNEL.value, channel.text)
-        }
-    }
-
-    override fun newHelper(): GuiHelperContainer = GuiHelperContainer(this, 196, 64, 8, 84)
-
-    override fun preDraw(f: Float, x: Int, y: Int) {
-        super.preDraw(f, x, y)
-
-        if (!render.poweredByCable) {
-            buttonSupplyType.displayString = tr("Powered by Lamp Supply")
-            channel.visible = true
-            if (render.isConnectedToLampSupply)
-                channel.setComment(1, "§2" + tr("connected to " + render.channel))
-            else
-                channel.setComment(1, "§4" + tr("%1$ is not in range!", render.channel))
-        } else {
-            channel.visible = false
-            buttonSupplyType.displayString = tr("Powered by cable")
-        }
-        charge.setValue(render.charge)
-        charge.setComment(0, Utils.plotPercent("Charge: ", render.charge.toDouble()))
-    }
-}

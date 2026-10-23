@@ -16,12 +16,12 @@ import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.DiodeHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class DiodeElement extends SixNodeElement {
         thermalLoadList.add(thermalLoad);
         electricalComponentList.add(resistorSwitch);
         electricalProcessList.add(diodeProcess);
-        slowProcessList.add(thermalWatchdog.set(thermalLoad).set(this.descriptor.thermal).set(new WorldExplosion(this).cableExplosion()));
+        slowProcessList.add(thermalWatchdog.set(thermalLoad).set(this.descriptor.thermal).set(new Failure(this).electronics()));
         thermalSlowProcessList.add(heater);
     }
 
@@ -59,16 +59,16 @@ public class DiodeElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
+        byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
+        nbt.putByte("front", (byte) (front.toInt() << 0));
     }
 
     @Override
@@ -131,5 +131,11 @@ public class DiodeElement extends SixNodeElement {
         descriptor.applyTo(anodeLoad);
         descriptor.applyTo(thermalLoad);
         descriptor.applyTo(resistorSwitch);
+    }
+
+    /** A burnt resistor/diode is simply replaced. */
+    @Override
+    public net.minecraft.world.item.ItemStack getRepairPart() {
+        return mods.eln.sim.process.destruct.Repair.sameItem(this);
     }
 }

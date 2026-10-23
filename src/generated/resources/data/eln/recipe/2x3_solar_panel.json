@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:storage_blocks/steel"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:storage_blocks/steel",
+    "P": "eln:small_solar_panel"
+  },
+  "pattern": [
+    "PPP",
+    "PPP",
+    "I I"
+  ],
+  "result": {
+    "id": "eln:2x3_solar_panel"
+  }
+}

@@ -1,9 +1,9 @@
 package mods.eln.node
 
-import net.minecraft.inventory.IInventory
+import net.minecraft.world.Container
 
 interface INodeElement {
     fun needPublish()
     fun reconnect()
-    fun inventoryChange(inventory: IInventory?)
+    fun inventoryChange(inventory: Container?)
 }

@@ -5,8 +5,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -18,7 +17,6 @@ public class ElectricalWatchRender extends SixNodeElementRender {
     boolean upToDate = false;
     long oldDate = 1379;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public ElectricalWatchRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -30,7 +28,7 @@ public class ElectricalWatchRender extends SixNodeElementRender {
         super.draw();
         long time;
         if (upToDate)
-            time = tileEntity.getWorldObj().getWorldTime();
+            time = tileEntity.getLevel().getOverworldClockTime();
         else
             time = oldDate;
         time += 6000;
@@ -40,7 +38,6 @@ public class ElectricalWatchRender extends SixNodeElementRender {
 
         descriptor.draw(time / 12000f, (time % 1000) / 1000f, upToDate);
     }
-
     @Override
     public void publishUnserialize(DataInputStream stream) {
         super.publishUnserialize(stream);
@@ -52,8 +49,4 @@ public class ElectricalWatchRender extends SixNodeElementRender {
         }
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalWatchGui(player, inventory, this);
-    }
 }

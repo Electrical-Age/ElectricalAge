@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.electricalantennatx;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -8,10 +10,9 @@ import mods.eln.node.transparent.TransparentNode.FrontType;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
                                          double electricalNominalVoltage, double electricalNominalPower,
                                          double electricalMaximalVoltage, double electricalMaximalPower,
                                          ElectricalCableDescriptor cable) {
-        super(name, ElectricalAntennaTxElement.class, ElectricalAntennaTxRender.class);
+        super(name, ElectricalAntennaTxElement.class, null);
         this.rangeMax = rangeMax;
         this.electricalNominalVoltage = electricalNominalVoltage;
         this.electricalNominalPower = electricalNominalPower;
@@ -79,22 +80,18 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
         return false;
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
-            super.renderItem(type, item, data);
-        else
-            draw();
+    public void drawItem(boolean entity) {
+        draw();
     }
 
     public void draw() {
@@ -104,7 +101,7 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Wireless energy transmitter."));
         list.add(tr("Nominal usage:"));

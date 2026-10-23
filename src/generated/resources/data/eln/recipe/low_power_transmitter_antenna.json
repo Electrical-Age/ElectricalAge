@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "I": "#c:plates/iron",
+    "R": "minecraft:redstone",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "R i",
+    "CI ",
+    "R i"
+  ],
+  "result": {
+    "id": "eln:low_power_transmitter_antenna"
+  }
+}

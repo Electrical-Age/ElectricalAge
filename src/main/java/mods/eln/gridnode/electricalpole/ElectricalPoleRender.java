@@ -7,8 +7,6 @@ import mods.eln.misc.LRDUMask;
 import mods.eln.misc.SlewLimiter;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.sound.LoopedSound;
-import net.minecraft.client.audio.ISound;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -29,7 +27,7 @@ public class ElectricalPoleRender extends GridRender {
         this.descriptor = (ElectricalPoleDescriptor) descriptor;
 
         if (this.descriptor.includeTransformer) {
-            addLoopedSound(new LoopedSound("eln:Transformer", coordonate(), ISound.AttenuationType.LINEAR) {
+            addLoopedSound(new mods.eln.sound.LoopedSound("eln:Transformer", coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
                 @Override
                 public float getVolume() {
                     if (load.getPosition() > ElectricalPoleRender.this.descriptor.minimalLoadToHum)
@@ -45,7 +43,7 @@ public class ElectricalPoleRender extends GridRender {
     @Override
     public void draw() {
         super.draw();
-        cableRenderType = drawCable(front.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType);
+        cableRenderType = drawCable(front.down(), Eln.stdCableRender3200V, eConn, cableRenderType);
     }
 
     @Override

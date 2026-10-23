@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "c": "eln:medium_voltage_cable"
+  },
+  "pattern": [
+    "RIR",
+    "ICI",
+    "RcR"
+  ],
+  "result": {
+    "id": "eln:200v_battery_charger"
+  }
+}

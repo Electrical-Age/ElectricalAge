@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "c": "eln:copper_cable"
+  },
+  "pattern": [
+    " c ",
+    "cCc",
+    " c "
+  ],
+  "result": {
+    "id": "eln:and_chip"
+  }
+}

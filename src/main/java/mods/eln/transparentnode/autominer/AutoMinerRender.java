@@ -1,18 +1,15 @@
 package mods.eln.transparentnode.autominer;
 
+import java.awt.Color;
+
 import mods.eln.Eln;
-import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.sound.LoopedSound;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -24,7 +21,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     private final boolean[] ledsAState;
     private final boolean[] ledsPState;
 
-    private final RenderStorage render = new RenderStorage(Eln.instance.autominerRange, 130, 24, 24);
 
     private final PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
     private final RcInterpolator rotSpeed = new RcInterpolator(1);
@@ -38,8 +34,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
     private float recalcTimeout = 0;
 
-    private final TransparentNodeElementInventory inventory =
-        new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 
     private short pipeLength = 0;
     AutoMinerSlowProcess.jobType job;
@@ -65,7 +59,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             ledsPState[idx] = Math.random() > 0.5;
         }
 
-        addLoopedSound(new LoopedSound("eln:autominer", coordonate(), ISound.AttenuationType.LINEAR) {
+        addLoopedSound(new mods.eln.sound.LoopedSound("eln:autominer", coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
             @Override
             public float getVolume() {
                 if (powerOk &&
@@ -127,29 +121,21 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             GL11.glScalef(1 / 128f, -1 / 128f, 1);
             int idx = 0;
             for (String log : logs) {
-                Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? Color.COLOR_BRIGHT_GREEN + "> " +
-                    log.substring(2) : Color.COLOR_DARK_GREEN + log, 80, 1 + idx, 0xFFD0D0D0 /*No effect...*/);
+                // 1.12 colour codes: bright green for the newest line, dark green for the rest
+                UtilsClient.drawString(idx == 0 ? "> " + log.substring(2) : log, 80, 1 + idx, idx == 0 ? 0xFF55FF55 : 0xFF00AA00);
                 idx += 8;
             }
             GL11.glPopMatrix();
             UtilsClient.enableLight();
         }
 
-        if (drawRay) {
-            float raySize = 0.625f - 0.02f * 2;
-            float scale = 1f / render.getResWidth() * raySize;
-
-            GL11.glTranslatef(-raySize, 0, 0);
-            GL11.glScalef(scale, -scale, 1);
-            render.draw(0.4f, 1.3f, 0.8f);
-        }
+        // drawRay: the ore-scanner view on the screen comes with the X-ray scanner (R5)
 
         GL11.glPopMatrix();
         UtilsClient.enableCulling();
 
         descriptor.draw(false, buttonsState, ledsAState, ledsPState);
     }
-
     public void refresh(float deltaT) {
         super.refresh(deltaT);
         pipeAlpha += rotSpeed.get() * deltaT;
@@ -192,20 +178,13 @@ public class AutoMinerRender extends TransparentNodeElementRender {
                         camAlpha = (float) (Math.PI / 2);
                         break;
                 }
-                render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5,
-                    tileEntity.yCoord + 0.5 - (Math.max(0, pipeLength - 5)),
-                    tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
+                // R5: ore-scanner view (PortableOreScannerItem.RenderStorage.generate)
             }
         }
 
         pipeLengthInterpol.step(deltaT);
         if (pipeLengthInterpol.get() < 0) pipeLengthInterpol.setPos(0);
         rotSpeed.step(deltaT);
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new AutoMinerGuiDraw(player, inventory, this);
     }
 
     @Override

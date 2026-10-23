@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -8,16 +10,14 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
     ElectricalDataLoggerDescriptor descriptor;
     long time;
 
@@ -35,7 +35,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return ElnDeviceRegistry.signalCableDescriptor.render;
     }
 
     @Override
@@ -51,9 +51,8 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
                 drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
             }
         }
-        descriptor.draw(log, side, front, this.tileEntity.xCoord, this.tileEntity.zCoord);
+        descriptor.draw(log, side, front, this.tileEntity.getBlockPos().getX(), this.tileEntity.getBlockPos().getZ());
     }
-
 	/*
     @Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
@@ -96,8 +95,4 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         }
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalDataLoggerGui(player, inventory, this);
-    }
 }

@@ -8,8 +8,8 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
         double nominalP, double nominalT,
         double nominalTao, double nominalConnectionDrop
     ) {
-        super(name, ThermalDissipatorPassiveElement.class, ThermalDissipatorPassiveRender.class);
+        super(name, ThermalDissipatorPassiveElement.class, null);
         thermalC = nominalP * nominalTao / nominalT;
         thermalRp = nominalT / nominalP;
         thermalRs = nominalConnectionDrop / nominalP;
@@ -49,13 +49,13 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
         load.set(thermalRs, thermalRp, thermalC);
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addThermal(newItemStack());
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+    public void addInformation(ItemStack itemStack, Player entityPlayer,
                                List list, boolean par4) {
 
         super.addInformation(itemStack, entityPlayer, list, par4);
@@ -72,23 +72,18 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
     }
 
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    public void drawItem(boolean entity) {
+        draw();
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw();
-        }
     }
 }

@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/copper"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_thermal_cable",
+    "I": "#c:ingots/copper"
+  },
+  "pattern": [
+    "I I",
+    "III",
+    "CIC"
+  ],
+  "result": {
+    "id": "eln:small_passive_thermal_dissipator"
+  }
+}

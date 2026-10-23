@@ -1,18 +1,18 @@
 package mods.eln.transparentnode.electricalfurnace;
 
-import mods.eln.generic.GenericItemUsingDamage;
+
+import mods.eln.misc.Utils;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.IProcess;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.world.item.ItemStack;
 
 public class ElectricalFurnaceProcess implements IProcess {
 
     ElectricalFurnaceElement furnace;
     TransparentNodeElementInventory inventory;
 
-    public static final double energyNeededPerSmelt = 1000;
+    public static final double energyNeededPerSmelt = mods.eln.misc.RecipesList.electricalFurnaceEnergyPerSmelt;
 
     ItemStack itemStackInOld = null;
 
@@ -27,17 +27,17 @@ public class ElectricalFurnaceProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        ItemStack itemStack = inventory.getStackInSlot(furnace.thermalIsolatorSlotId);
+        ItemStack itemStack = inventory.getItem(furnace.thermalIsolatorSlotId);
 
-        if (itemStack == null) {
+        if (Utils.isEmpty(itemStack)) {
             furnace.descriptor.refreshTo(furnace.thermalLoad, 1);
         } else {
-            ThermalIsolatorElement element = ((GenericItemUsingDamage<ThermalIsolatorElement>) itemStack.getItem()).getDescriptor(itemStack);
+            ThermalIsolatorElement element = ((ThermalIsolatorElement) Utils.getItemObject(itemStack));
             furnace.descriptor.refreshTo(furnace.thermalLoad, element.getConductionFactor());
         }
 
-        ItemStack itemStackIn = inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId);
-        ItemStack itemStackOut = inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId);
+        ItemStack itemStackIn = inventory.getItem(ElectricalFurnaceElement.inSlotId);
+        ItemStack itemStackOut = inventory.getItem(ElectricalFurnaceElement.outSlotId);
         if (itemStackInOld != itemStackIn || (!smeltCan()) || !smeltInProcess) {
             smeltInit();
             itemStackInOld = itemStackIn;
@@ -94,22 +94,22 @@ public class ElectricalFurnaceProcess implements IProcess {
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
     private boolean smeltCan() {
-        if (inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId) == null) {
+        if (Utils.isEmpty(inventory.getItem(ElectricalFurnaceElement.inSlotId))) {
             return false;
         } else {
             ItemStack var1 = getSmeltResult();
-            if (var1 == null) return false;
-            if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId) == null) return true;
-            if (!inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isItemEqual(var1)) return false;
-            int result = inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).stackSize + var1.stackSize;
+            if (Utils.isEmpty(var1)) return false;
+            if (Utils.isEmpty(inventory.getItem(ElectricalFurnaceElement.outSlotId))) return true;
+            if (!net.minecraft.world.item.ItemStack.isSameItem(inventory.getItem(ElectricalFurnaceElement.outSlotId), var1)) return false;
+            int result = inventory.getItem(ElectricalFurnaceElement.outSlotId).getCount() + var1.getCount();
 
             //energyNeeded = 1000.0;
-            return (result <= inventory.getInventoryStackLimit() && result <= var1.getMaxStackSize());
+            return (result <= inventory.getMaxStackSize() && result <= var1.getMaxStackSize());
         }
     }
 
     public ItemStack getSmeltResult() {
-        return FurnaceRecipes.smelting().getSmeltingResult(inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId));
+        return Utils.smeltResult(furnace.node.coordonate.world(), inventory.getItem(ElectricalFurnaceElement.inSlotId));
     }
 
     /**
@@ -119,18 +119,19 @@ public class ElectricalFurnaceProcess implements IProcess {
         if (this.smeltCan()) {
             ItemStack var1 = getSmeltResult();
 
-            if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId) == null) {
-                inventory.setInventorySlotContents(1, var1.copy());
-            } else if (inventory.getStackInSlot(ElectricalFurnaceElement.outSlotId).isItemEqual(var1)) {
-                inventory.decrStackSize(ElectricalFurnaceElement.outSlotId, -var1.stackSize);
+            if (Utils.isEmpty(inventory.getItem(ElectricalFurnaceElement.outSlotId))) {
+                inventory.setItem(1, var1.copy());
+            } else if (net.minecraft.world.item.ItemStack.isSameItem(inventory.getItem(ElectricalFurnaceElement.outSlotId), var1)) {
+                inventory.getItem(ElectricalFurnaceElement.outSlotId).grow(var1.getCount()); // 1.12: decrStackSize(out, -n)
+                inventory.setChanged();
             }
 
-            /*--this.furnaceItemStacks[0].stackSize;
+            /*--this.furnaceItemStacks[0].getCount();
 
-            if (this.furnaceItemStacks[0].stackSize <= 0) {
+            if (this.furnaceItemStacks[0].getCount() <= 0) {
                 this.furnaceItemStacks[0] = null;
             }*/
-            inventory.decrStackSize(ElectricalFurnaceElement.inSlotId, 1);
+            inventory.removeItem(ElectricalFurnaceElement.inSlotId, 1);
         }
     }
 

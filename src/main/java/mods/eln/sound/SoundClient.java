@@ -1,52 +1,44 @@
 package mods.eln.sound;
 
-import mods.eln.client.ClientProxy;
-import mods.eln.client.SoundLoader;
-import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvent;
 
-public class SoundClient {
-    /*public static void playFromBlock(World world, int x, int y, int z, String track, float volume, float pitch, float rangeNominal, float rangeMax) {
-		play(world, x + 0.5, y + 0.5, z + 0.5, track, volume, pitch, rangeNominal, rangeMax);
-	}*/
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Client playback of EA sound commands (1.12 SoundClient; client only): volume falls off linearly between the nominal
+ * and the maximum range, and the sound is placed 2 blocks from the player towards the source, as in 1.12. Not ported:
+ * the muffling by blocks in between (1.12 traceRay weights) and the multi-band tracks.
+ */
+public final class SoundClient {
+    private SoundClient() {
+    }
+
+    private static final Set<String> warned = new HashSet<>();
+
+    static SoundEvent event(String track) {
+        SoundEvent e = ElnSounds.event(track);
+        if (e == null && warned.add(track)) mods.eln.Eln.LOG.warn("EA: no sound event for track {}", track);
+        return e;
+    }
 
     public static void play(SoundCommand p) {
-        ClientProxy.soundClientEventListener.currentUuid = p.uuid; //trolilole
-
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-        if (p.world.provider.dimensionId != player.dimension) return;
-        double distance = Math.sqrt(Math.pow(p.x - player.posX, 2) + Math.pow(p.y - player.posY, 2) + Math.pow(p.z - player.posZ, 2));
+        Minecraft mc = Minecraft.getInstance();
+        var player = mc.player;
+        if (player == null || p.world == null || p.world != player.level()) return;
+        double dx = p.x - player.getX(), dy = p.y - player.getY(), dz = p.z - player.getZ();
+        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (distance >= p.rangeMax) return;
-        float distanceFactor = 1;
-        if (distance > p.rangeNominal) {
-            distanceFactor = (float) ((p.rangeMax - distance) / (p.rangeMax - p.rangeNominal));
-        }
-
-        float blockFactor = Utils.traceRay(p.world, player.posX, player.posY, player.posZ, p.x, p.y, p.z, new Utils.TraceRayWeightOpaque()) * p.blockFactor;
-
-        int trackCount = SoundLoader.getTrackCount(p.track);
-
-        if (trackCount == 1) {
-            float temp = 1.0f / (1 + blockFactor);
-            p.volume *= Math.pow(temp, 2);
-            p.volume *= distanceFactor;
-            if (p.volume <= 0) return;
-
-            p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track, p.volume, p.pitch, false);
-        } else {
-            for (int idx = 0; idx < trackCount; idx++) {
-                float bandVolume = p.volume;
-                bandVolume *= distanceFactor;
-                float normalizedBlockFactor = blockFactor;
-
-                bandVolume -= ((trackCount - 1 - idx) / (trackCount - 1f) + 0.2) * normalizedBlockFactor;
-                Utils.print(bandVolume + " ");
-                p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
-            }
-            Utils.println("");
-        }
-
-        ClientProxy.soundClientEventListener.currentUuid = null;
+        float factor = distance > p.rangeNominal ? (float) ((p.rangeMax - distance) / (p.rangeMax - p.rangeNominal)) : 1f;
+        float volume = p.volume * factor;
+        if (volume <= 0) return;
+        SoundEvent e = event(p.track);
+        if (e == null) return;
+        double d = Math.max(distance, 0.001);
+        mc.getSoundManager().play(new SimpleSoundInstance(e.location(), ElnSounds.category(p.track), volume, p.pitch,
+            net.minecraft.util.RandomSource.create(), false, 0, net.minecraft.client.resources.sounds.SoundInstance.Attenuation.NONE,
+            player.getX() + 2 * dx / d, player.getY() + 2 * dy / d, player.getZ() + 2 * dz / d, false));
     }
 }

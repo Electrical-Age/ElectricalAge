@@ -1,0 +1,11 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 31415926,
+    "spacing": 75,
+    "separation": 30
+  },
+  "structures": [
+    { "structure": "eln:oil_lake", "weight": 1 }
+  ]
+}

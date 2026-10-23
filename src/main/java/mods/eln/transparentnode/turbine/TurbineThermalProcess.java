@@ -28,7 +28,7 @@ public class TurbineThermalProcess implements IProcess {
         efficiency = Math.abs(1 - (turbine.coolLoad.Tc + PhysicalConstant.Tref) / (turbine.warmLoad.Tc + PhysicalConstant.Tref));
         if (efficiency < 0.05) efficiency = 0.05;
 
-        double E = src.getP() * time / Eln.instance.heatTurbinePowerFactor;
+        double E = src.getP() * time / Eln.heatTurbinePowerFactor;
 
         double Pout = E / time;
         double Pin = descriptor.PoutToPin.getValue(Pout) / efficiency;

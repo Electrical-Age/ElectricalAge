@@ -1,24 +1,26 @@
 package mods.eln.ghost;
 
+
+
+import net.minecraft.core.BlockPos;
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class GhostManager extends WorldSavedData {
+public class GhostManager {
     public GhostManager(String par1Str) {
-        super(par1Str);
     }
 
     Map<Coordonate, GhostElement> ghostTable = new Hashtable<Coordonate, GhostElement>();
@@ -32,10 +34,6 @@ public class GhostManager extends WorldSavedData {
     public void init() {
     }
 
-    @Override
-    public boolean isDirty() {
-        return true;
-    }
 
 	/*
     public void addGhost(GhostElement element) {
@@ -71,7 +69,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordonate.equals(observerCoordonate)) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordonate);
-                element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
+                WorldCompat.setBlockToAir(element.elementCoordonate.world(), element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
             }
         }
     }
@@ -84,7 +82,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordonate.equals(observerCoordonate) && element.getUUID() == uuid) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordonate);
-                element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
+                WorldCompat.setBlockToAir(element.elementCoordonate.world(), element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
             }
         }
     }
@@ -97,7 +95,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordonate.equals(observerCoordonate) && element.getUUID() != uuid) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordonate);
-                element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
+                WorldCompat.setBlockToAir(element.elementCoordonate.world(), element.elementCoordonate.x, element.elementCoordonate.y, element.elementCoordonate.z);
             }
         }
     }
@@ -110,34 +108,14 @@ public class GhostManager extends WorldSavedData {
 
     public void removeGhostAndBlock(Coordonate coordonate) {
         removeGhost(coordonate);
-        coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z); //caca1.5.1
+        WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z); //caca1.5.1
     }
 
-    @Override
-    public void readFromNBT(NBTTagCompound nbt) {
-		/*for(NBTTagCompound o : Utils.getTags(nbt)) {
-			NBTTagCompound tag = (NBTTagCompound) o;
 
-			GhostElement ghost = new GhostElement();
-			ghost.readFromNBT(tag, "");
-			ghostTable.put(ghost.elementCoordonate, ghost);
-		}*/
-    }
 
-    @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-	/*	int nodeCounter = 0;
-		
-		for(GhostElement ghost : ghostTable.values()) {
-			NBTTagCompound nbtGhost = new NBTTagCompound();
-			ghost.writeToNBT(nbtGhost, "");
-			nbt.setTag("n" + nodeCounter++, nbtGhost);
-		}*/
-    }
-
-    public void loadFromNBT(NBTTagCompound nbt) {
-        for (NBTTagCompound o : Utils.getTags(nbt)) {
-            NBTTagCompound tag = (NBTTagCompound) o;
+    public void loadFromNBT(CompoundTag nbt) {
+        for (CompoundTag o : Utils.getTags(nbt)) {
+            CompoundTag tag = (CompoundTag) o;
 
             GhostElement ghost = new GhostElement();
             ghost.readFromNBT(tag, "");
@@ -145,14 +123,14 @@ public class GhostManager extends WorldSavedData {
         }
     }
 
-    public void saveToNBT(NBTTagCompound nbt, int dim) {
+    public void saveToNBT(CompoundTag nbt, int dim) {
         int nodeCounter = 0;
 
         for (GhostElement ghost : ghostTable.values()) {
             if (dim != Integer.MIN_VALUE && ghost.elementCoordonate.dimention != dim) continue;
-            NBTTagCompound nbtGhost = new NBTTagCompound();
+            CompoundTag nbtGhost = new CompoundTag();
             ghost.writeToNBT(nbtGhost, "");
-            nbt.setTag("n" + nodeCounter++, nbtGhost);
+            nbt.put("n" + nodeCounter++, nbtGhost);
         }
     }
 
@@ -167,10 +145,10 @@ public class GhostManager extends WorldSavedData {
         }
     }
 
-    public boolean canCreateGhostAt(World world, int x, int y, int z) {
-        if (!world.getChunkProvider().chunkExists(x >> 4, z >> 4)) {
+    public boolean canCreateGhostAt(Level world, int x, int y, int z) {
+        if (!WorldCompat.blockExists(world, x, y, z)) { // 1.7.10 chunkExists = chunk loaded
             return false;
-        } else if (world.getBlock(x, y, z) != Blocks.air && !world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
+        } else if (!world.getBlockState(new BlockPos(x, y, z)).canBeReplaced()) {
             return false;
         } else return true;
     }
@@ -180,8 +158,10 @@ public class GhostManager extends WorldSavedData {
     }
 
     public void createGhost(Coordonate coordonate, Coordonate observerCoordonate, int UUID, Block block, int meta) {
-        coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
-        if (coordonate.world().setBlock(coordonate.x, coordonate.y, coordonate.z, block, meta, 3)) {
+        // descriptors (and their ghost groups) are built before the ghost block is registered: null = the ghost block
+        if (block == null) block = Eln.ghostBlock;
+        WorldCompat.setBlockToAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        if (WorldCompat.setBlock(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, block, meta, 3)) {
             coordonate = new Coordonate(coordonate);
             GhostElement element = new GhostElement(coordonate, observerCoordonate, UUID);
             ghostTable.put(element.elementCoordonate, element);

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "eln:10a_diode"
+  },
+  "pattern": [
+    "D",
+    "D",
+    "D"
+  ],
+  "result": {
+    "id": "eln:25a_diode"
+  }
+}

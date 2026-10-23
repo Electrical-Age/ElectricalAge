@@ -2,7 +2,7 @@ package mods.eln.sixnode.modbusrtu;
 
 import mods.eln.misc.Utils;
 import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusSlot {
 
@@ -18,7 +18,7 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
         rtu.mapping.add(this);
     }
 
-    public ServerWirelessRxStatus(NBTTagCompound nbt, String str, ModbusRtuElement rtu) {
+    public ServerWirelessRxStatus(CompoundTag nbt, String str, ModbusRtuElement rtu) {
         super();
         readFromNBT(nbt, str);
         this.rtu = rtu;

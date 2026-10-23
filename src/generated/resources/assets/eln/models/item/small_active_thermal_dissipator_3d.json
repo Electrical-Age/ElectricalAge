@@ -1,0 +1,6 @@
+{
+  "parent": "eln:item/device_transparent",
+  "textures": {
+    "particle": "eln:item/small_active_thermal_dissipator"
+  }
+}

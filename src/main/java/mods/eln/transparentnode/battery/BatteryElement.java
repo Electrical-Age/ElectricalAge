@@ -23,12 +23,12 @@ import mods.eln.sim.nbt.NbtBatterySlowProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,6 +56,7 @@ public class BatteryElement extends TransparentNodeElement {
     double syncronizedPositiveUc, syncronizedNegativeUc, syncronizedCurrent, syncronizedTc;
 
     NbtBatterySlowProcess batterySlowProcess = new NbtBatterySlowProcess(node, batteryProcess, thermalLoad);
+    private final Failure failure = new Failure(this).battery(() -> batteryProcess.getEnergy());
 
     AutoAcceptInventoryProxy inventory =
         (new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(2, 64, this)))
@@ -90,6 +91,7 @@ public class BatteryElement extends TransparentNodeElement {
         electricalComponentList.add(cutSwitch);
         thermalLoadList.add(thermalLoad);
         electricalProcessList.add(batteryProcess);
+        batteryProcess.chargeHeat = thermalLoad;
         thermalFastProcessList.add(negativeETProcess);
 
         slowProcessList.add(batterySlowProcess);
@@ -103,20 +105,21 @@ public class BatteryElement extends TransparentNodeElement {
         thermalWatchdog
             .set(thermalLoad)
             .setTMax(this.descriptor.thermalWarmLimit)
-            .set(new WorldExplosion(this).machineExplosion());
+            .set(failure);
+        batterySlowProcess.failure = failure;
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory.getInventory();
     }
 
     public boolean hasOverVoltageProtection() {
-        return getInventory().getStackInSlot(0) != null;
+        return !Utils.isEmpty(getInventory().getItem(0));
     }
 
     public boolean hasOverHeatingProtection() {
-        return getInventory().getStackInSlot(1) != null;
+        return !Utils.isEmpty(getInventory().getItem(1));
     }
 
     @Override
@@ -192,23 +195,23 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         //	initPhysicalValue();
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        return inventory.take(entityPlayer.getMainHandItem());
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         //inventory.writeToNBT(nbt, str + "inv");
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         fromNBT = true;
         //inventory.readFromNBT(nbt, str + "inv");
@@ -217,11 +220,6 @@ public class BatteryElement extends TransparentNodeElement {
     @Override
     public boolean hasGui() {
         return true;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new BatteryContainer(this.node, player, getInventory());
     }
 
     @Override
@@ -234,29 +232,29 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public void readItemStackNBT(NBTTagCompound nbt) {
+    public void readItemStackNBT(CompoundTag nbt) {
         super.readItemStackNBT(nbt);
 
         if (nbt == null) nbt = descriptor.getDefaultNBT();
-        fromItemStack_charge = nbt.getDouble("charge");
-        fromItemStack_life = nbt.getDouble("life");
+        fromItemStack_charge = nbt.getDoubleOr("charge", 0.0);
+        fromItemStack_life = nbt.getDoubleOr("life", 0.0);
 
         fromItemStack = true;
     }
 
     @Override
-    public NBTTagCompound getItemStackNBT() {
-        NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setDouble("charge", batteryProcess.getCharge());
-        nbt.setDouble("life", batteryProcess.life);
+    public CompoundTag getItemStackNBT() {
+        CompoundTag nbt = new CompoundTag();
+        nbt.putDouble("charge", batteryProcess.getCharge());
+        nbt.putDouble("life", batteryProcess.life);
         return nbt;
     }
 
 	/*
-	public static NBTTagCompound newItemStackNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("charge", 0.5);
-		nbt.setDouble("life", 1.0);
+	public static CompoundTag newItemStackNBT() {
+		CompoundTag nbt = new CompoundTag("itemStackNBT");
+		nbt.putDouble("charge", 0.5);
+		nbt.putDouble("life", 1.0);
 		return nbt;
 	}*/
 

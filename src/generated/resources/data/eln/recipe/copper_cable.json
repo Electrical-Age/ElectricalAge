@@ -1,0 +1,22 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/copper"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:ingots/copper"
+  },
+  "pattern": [
+    "III"
+  ],
+  "result": {
+    "count": 3,
+    "id": "eln:copper_cable"
+  }
+}

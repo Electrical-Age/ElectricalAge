@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": ["eln:iron_plate", "eln:iron_plate", "minecraft:lever"],
+  "result": {
+    "id": "eln:pipe_valve"
+  }
+}

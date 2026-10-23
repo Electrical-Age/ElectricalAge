@@ -15,11 +15,11 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
         this.descriptor = (ElectricalSwitchDescriptor) descriptor;
 
-        WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+        Failure exp = new Failure(this).electronics();
 
         //	slowProcessList.add(currentWatchDog);
         slowProcessList.add(voltageWatchDogA);
@@ -67,18 +67,18 @@ public class ElectricalSwitchElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
+        byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
-        switchState = nbt.getBoolean("switchState");
+        switchState = nbt.getBooleanOr("switchState", false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
-        nbt.setBoolean("switchState", switchState);
+        nbt.putByte("front", (byte) (front.toInt() << 0));
+        nbt.putBoolean("switchState", switchState);
     }
 
     @Override
@@ -158,17 +158,17 @@ public class ElectricalSwitchElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getMainHandItem();
 
-        if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (mods.eln.node.MeterItems.isMultiMeter(entityPlayer.getMainHandItem())) {
             return false;
         }
-        if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (mods.eln.node.MeterItems.isThermometer(entityPlayer.getMainHandItem())) {
             return false;
         }
-        if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (mods.eln.node.MeterItems.isAllMeter(entityPlayer.getMainHandItem())) {
             return false;
         } else {
             setSwitchState(!switchState);

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalcable;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
@@ -17,12 +19,12 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -59,30 +61,35 @@ public class ElectricalCableElement extends SixNodeElement {
             thermalWatchdog
                 .set(thermalLoad)
                 .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-                .set(new WorldExplosion(this).cableExplosion());
+                .set(new Failure(this).cable());
         }
 
         slowProcessList.add(voltageWatchdog);
         voltageWatchdog
             .set(electricalLoad)
             .setUMaxMin(this.descriptor.electricalNominalVoltage)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).cable());
 
 
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte b = nbt.getByte("color");
+        byte b = nbt.getByteOr("color", (byte) 0);
         color = b & 0xF;
         colorCare = (b >> 4) & 1;
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("color", (byte) (color + (colorCare << 4)));
+        nbt.putByte("color", (byte) (color + (colorCare << 4)));
+    }
+
+    /** Its temperature (C above ambient; 0 for a signal cable): the voxel-cable converter. */
+    public double thermalTc() {
+        return descriptor.signalWire ? 0 : thermalLoad.Tc;
     }
 
     @Override
@@ -157,17 +164,17 @@ public class ElectricalCableElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
 	/*	World w = sixNode.coordonate.world();
-		boolean exist = w.blockExists(10000, 0, 0);
+		boolean exist = WorldCompat.blockExists(w, 10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getMainHandItem();
         //int i;
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
-            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
             sixNode.reconnect();
-        } else if (currentItemStack != null) {
+        } else if (!Utils.isEmpty(currentItemStack)) {
             Item item = currentItemStack.getItem();
 
             GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);

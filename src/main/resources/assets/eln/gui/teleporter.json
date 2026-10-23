@@ -1,0 +1,57 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Experimental Transporter"
+  },
+  {
+   "row": [
+    {
+     "text": "namel",
+     "sample": "Name"
+    },
+    {
+     "field": "name",
+     "chars": 14,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "targetl",
+     "sample": "Destination"
+    },
+    {
+     "field": "target",
+     "chars": 14,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "charge",
+   "sample": "Power consumption: 20000W"
+  },
+  {
+   "slider": "charge",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "gauge": "energy",
+   "width": 160,
+   "height": 12,
+   "fill": true
+  },
+  {
+   "button": "start",
+   "sample": "Start",
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

@@ -6,9 +6,9 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils.WirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,9 +21,9 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
     }
 
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-        if (world.isRemote) return true;
-        Utils.addChatMessage(player, "-------------------");
+    public boolean onItemUse(ItemStack stack, Player player, Level world, int x, int y, int z, int side, float vx, float vy, float vz) {
+        if (world.isClientSide()) return true;
+        Utils.sendMessage(player, "-------------------");
         Direction dir = Direction.fromIntMinecraftSide(side);
         Coordonate c = new Coordonate(x, y, z, world);
         c.move(dir);
@@ -42,20 +42,20 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
                 double temp = txStrength.get(oneTx);
                 if (temp < strength) strength = temp;
             }
-            Utils.addChatMessage(player, entrySet.getKey() + " Strength=" + String.format("%2.1f", strength) + " Value=" + String.format("%3.0f", aggregator.aggregate(set) * 100) + "%");
+            Utils.sendMessage(player, entrySet.getKey() + " Strength=" + String.format("%2.1f", strength) + " Value=" + String.format("%3.0f", aggregator.aggregate(set) * 100) + "%");
         }
 
         if (txSet.isEmpty()) {
-            Utils.addChatMessage(player, "No wireless signal in area!");
+            Utils.sendMessage(player, "No wireless signal in area!");
         }
         /*ArrayList<WirelessSignalInfo> list = WirelessSignalRxProcess.getTxList(c);
 		int idx = 0;
 		for (WirelessSignalInfo e : list) {
-			Utils.addChatMessage(player, e.tx.getChannel() + " Strength=" + String.format("%2.1f", e.power) + " Value=" + String.format("%2.1fV", e.tx.getValue() * Eln.instance.SVU));
+			Utils.sendMessage(player, e.tx.getChannel() + " Strength=" + String.format("%2.1f", e.power) + " Value=" + String.format("%2.1fV", e.tx.getValue() * Eln.SVU));
 			idx++;
 		}
 		if (list.size() == 0) {
-			Utils.addChatMessage(player, "No wireless signal in area!");
+			Utils.sendMessage(player, "No wireless signal in area!");
 		}*/
         return true;
     }

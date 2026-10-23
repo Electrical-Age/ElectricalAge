@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "c": "eln:very_high_voltage_cable",
+    "r": "eln:rubber"
+  },
+  "pattern": [
+    "rcr"
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:lead_fuse_for_very_high_voltage_cables"
+  }
+}

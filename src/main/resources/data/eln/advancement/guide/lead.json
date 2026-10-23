@@ -1,0 +1,36 @@
+{
+  "parent": "eln:guide/copper_cable",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "eln:raw_lead",
+              "eln:lead_ore",
+              "eln:deepslate_lead_ore"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:raw_lead"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.lead.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.lead.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

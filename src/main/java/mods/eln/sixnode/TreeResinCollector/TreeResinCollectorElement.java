@@ -1,5 +1,9 @@
 package mods.eln.sixnode.TreeResinCollector;
 
+
+
+import mods.eln.registry.ElnDeviceRegistry;
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -14,9 +18,9 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,6 +60,16 @@ public class TreeResinCollectorElement extends SixNodeElement {
         return null;
     }
 
+    /** For the probe (Jade): what's in the pot, and how fast it fills (or that it isn't on a tree). */
+    @Override
+    public java.util.Map<String, String> getWaila() {
+        var out = new java.util.LinkedHashMap<String, String>();
+        double rate = getProductPerSecond();
+        out.put("Resin in pot", String.format("%.2f / %d", Math.min(occupancyMax, getProduct(rate)), (int) occupancyMax));
+        out.put("Rate", rate < 1e-6 ? "none: not on a tree (needs leaves round its logs)" : String.format("%.1f per hour", rate * 3600));
+        return out;
+    }
+
     @Override
     public String thermoMeterString() {
         return null;
@@ -67,7 +81,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
 
     double getProductPerSecond() {
         Coordonate coord = sixNode.coordonate;
-        World worldObj = coord.world();
+        Level world = coord.world();
         int[] posWood = new int[3];
         int[] posCollector = new int[3];
         Direction woodDirection = side;
@@ -78,29 +92,29 @@ public class TreeResinCollectorElement extends SixNodeElement {
         posCollector[1] = coord.y;
         posCollector[2] = coord.z;
         woodDirection.applyTo(posWood, 1);
-        int leafCount = 0;
         int yStart, yEnd;
 
-        while (TreeResinCollectorDescriptor.isWood(worldObj.getBlock(posWood[0], posWood[1] - 1, posWood[2]))) {
+        while (TreeResinCollectorDescriptor.isWood(WorldCompat.getBlock(world, posWood[0], posWood[1] - 1, posWood[2]))) {
             posWood[1]--;
         }
         yStart = posWood[1];
 
         posWood[1] = coord.y;
-        // timeCounter-= timeTarget;
-        while (TreeResinCollectorDescriptor.isWood(worldObj.getBlock(posWood[0], posWood[1] + 1, posWood[2]))) {
-            if (TreeResinCollectorDescriptor.isLeaf(worldObj.getBlock(posCollector[0], posWood[1] + 1, posCollector[2])))
-                leafCount++;
+        while (TreeResinCollectorDescriptor.isWood(WorldCompat.getBlock(world, posWood[0], posWood[1] + 1, posWood[2]))) {
             posWood[1]++;
         }
         yEnd = posWood[1];
+        // a genuine tree (Baughn: "anything that appears to be Genuine Tree"): leaves anywhere round the logs joined to
+        // this one. 1.7 wanted a leaf in the collector's own column beside the trunk, which today's trees often lack on
+        // some sides: of several collectors round one tree, only some worked
+        int leafCount = treeLeaves(world, new net.minecraft.core.BlockPos(posWood[0], coord.y, posWood[2]));
 
         int collectiorCount = 0;
-        Coordonate coordTemp = new Coordonate(posCollector[0], 0, posCollector[2], worldObj);
+        Coordonate coordTemp = new Coordonate(posCollector[0], 0, posCollector[2], world);
         posCollector[1] = yStart;
         for (posCollector[1] = yStart; posCollector[1] <= yEnd; posCollector[1]++) {
             coordTemp.y = posCollector[1];
-            // if(worldObj.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
+            // if(world.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
             NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
             if (node instanceof SixNode) {
                 SixNode six = (SixNode) node;
@@ -113,9 +127,42 @@ public class TreeResinCollectorElement extends SixNodeElement {
             collectiorCount++;
             Utils.println("ASSERT collectiorCount == 0");
         }
-        double leaf = leafCount >= 1 ? 1 : 0.000000001;
+        double leaf = leafCount >= TREE_LEAVES ? 1 : 0.000000001;
         double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount) * leaf;
         return productPerSeconde;
+    }
+
+    /** A tree has at least this many leaves within 2 blocks (straight out) of its logs. */
+    static final int TREE_LEAVES = 4;
+    /** At most this many joined logs are looked at (a big jungle tree has ~100-200). */
+    static final int MAX_LOGS = 256;
+
+    /** Leaves within 2 blocks, along the axes, of the logs joined (also diagonally: branches) to {@code start}. */
+    static int treeLeaves(Level world, net.minecraft.core.BlockPos start) {
+        java.util.Set<net.minecraft.core.BlockPos> logs = new java.util.HashSet<>(), leaves = new java.util.HashSet<>();
+        java.util.ArrayDeque<net.minecraft.core.BlockPos> todo = new java.util.ArrayDeque<>();
+        if (!world.getBlockState(start).is(net.minecraft.tags.BlockTags.LOGS)) return 0;
+        logs.add(start);
+        todo.add(start);
+        while (!todo.isEmpty() && leaves.size() < TREE_LEAVES) {
+            var p = todo.poll();
+            for (var d : net.minecraft.core.Direction.values())
+                for (int k = 1; k <= 2; k++) {
+                    var q = p.relative(d, k);
+                    var st = world.getBlockState(q);
+                    if (st.is(net.minecraft.tags.BlockTags.LEAVES)) leaves.add(q);
+                    else if (!st.isAir()) break;
+                }
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dz = -1; dz <= 1; dz++) {
+                        var q = p.offset(dx, dy, dz);
+                        if (logs.size() >= MAX_LOGS || logs.contains(q) || !world.getBlockState(q).is(net.minecraft.tags.BlockTags.LOGS)) continue;
+                        logs.add(q);
+                        todo.add(q);
+                    }
+        }
+        return leaves.size();
     }
 
     double getProduct(double productPerSecond) {
@@ -124,7 +171,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+    public boolean onBlockActivated(Player entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
         double productPerSeconde = getProductPerSecond();
         double product = getProduct(productPerSeconde);
@@ -139,24 +186,24 @@ public class TreeResinCollectorElement extends SixNodeElement {
         }
 
         for (int idx = 0; idx < productI; idx++) {
-            sixNode.dropItem(Eln.treeResin.newItemStack(1));
+            if (ElnDeviceRegistry.treeResin != null) sixNode.dropItem(ElnDeviceRegistry.treeResin.newItemStack(1));
         }
 
-        Utils.addChatMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
+        Utils.sendMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
         needPublish();
         return true;
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        timeFromLastActivated = nbt.getDouble("timeFromLastActivated");
+        timeFromLastActivated = nbt.getDoubleOr("timeFromLastActivated", 0.0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setDouble("timeFromLastActivated", timeFromLastActivated);
+        nbt.putDouble("timeFromLastActivated", timeFromLastActivated);
     }
 
     class TreeResinCollectorSlowProcess implements IProcess {

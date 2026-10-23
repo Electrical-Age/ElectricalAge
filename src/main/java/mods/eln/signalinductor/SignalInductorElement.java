@@ -10,7 +10,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class SignalInductorElement extends SixNodeElement {
 

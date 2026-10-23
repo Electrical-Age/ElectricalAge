@@ -4,7 +4,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 public class SignalInductorDescriptor extends SixNodeDescriptor {
 
@@ -13,7 +13,7 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
     public double henri;
 
     public SignalInductorDescriptor(String name, double henri, ElectricalCableDescriptor cable) {
-        super(name, SignalInductorElement.class, SignalInductorRender.class);
+        super(name, SignalInductorElement.class, null);
         this.henri = henri;
         this.cable = cable;
     }

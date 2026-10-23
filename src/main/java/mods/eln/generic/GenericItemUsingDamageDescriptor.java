@@ -1,33 +1,49 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
+/**
+ * Descriptor of a plain EA item (1.12: a sub-item of SharedItem, item + damage). On 26.x each descriptor has its own
+ * Item ({@link #parentItem}, an {@link IDescriptorItem}); damage values are gone. Item renders (1.12 IItemRenderer)
+ * move to item models in P3.
+ */
 public class GenericItemUsingDamageDescriptor {
 
+    /** R5: drawn by eln:device outside the GUI (the item's own 3D/live look), in the 0..1 item space. */
+    public boolean hasItemDraw() {
+        return false;
+    }
+
+    public void drawItem(net.minecraft.world.item.ItemStack stack, boolean entity) {
+    }
+
+    /** The base model's parent for hasItemDraw items (its display block = the pose), or null: the flat icon's pose. */
+    public String itemDrawParent() {
+        return null;
+    }
+
+    /** R5: the vanilla item bar's fill (0..1), or -1 for none. Electrical items: their energy (see ElnItem). */
+    public double itemBar(net.minecraft.world.item.ItemStack stack) {
+        return -1;
+    }
+
     public String IconName;
-    private IIcon iconIndex;
     public String name;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
     public Item parentItem;
+    /** The 1.12 damage value (for eln-ids.json lookups and golden data); no meaning in game. */
     public int parentItemDamage;
 
     public GenericItemUsingDamageDescriptor(String name) {
@@ -43,30 +59,24 @@ public class GenericItemUsingDamageDescriptor {
         this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
     }
 
-    public NBTTagCompound getDefaultNBT() {
+    public CompoundTag getDefaultNBT() {
         return null;
     }
 
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
     }
 
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+    public ItemStack onItemRightClick(ItemStack s, Level w, Player p) {
         return s;
     }
 
     public void getSubItems(List list) {
-        ItemStack stack = newItemStack(1);
-        list.add(stack);
+        list.add(newItemStack(1));
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon(IconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
+    /** What 1.7.10 getIconName() returned. */
+    public String getIconName() {
+        return IconName;
     }
 
     public String getName(ItemStack stack) {
@@ -74,19 +84,18 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
-        if (stack == null)
-            return null;
-        if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
-            return null;
-        return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) stack.getItem()).getDescriptor(stack);
+        if (Utils.isEmpty(stack)) return null;
+        if (stack.getItem() instanceof IDescriptorItem) {
+            Object d = ((IDescriptorItem) stack.getItem()).getEaDescriptor();
+            if (d instanceof GenericItemUsingDamageDescriptor) return (GenericItemUsingDamageDescriptor) d;
+        }
+        return null;
     }
 
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
         GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
-        if (desc == null)
-            return null;
-        if (extendClass.isAssignableFrom(desc.getClass()) == false)
-            return null;
+        if (desc == null) return null;
+        if (!extendClass.isAssignableFrom(desc.getClass())) return null;
         return desc;
     }
 
@@ -96,8 +105,8 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public ItemStack newItemStack(int size) {
-        ItemStack stack = new ItemStack(parentItem, size, parentItemDamage);
-        stack.setTagCompound(getDefaultNBT());
+        ItemStack stack = new ItemStack(parentItem, size);
+        ItemNbt.set(stack, getDefaultNBT());
         return stack;
     }
 
@@ -106,68 +115,51 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public boolean checkSameItemStack(ItemStack stack) {
-        if (stack == null)
-            return false;
-        if (stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage)
-            return false;
-        return true;
+        return !Utils.isEmpty(stack) && stack.getItem() == parentItem;
     }
 
-    /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-     */
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
+    /** Right-click on a block with the item; true if something happened (1.12 onItemUse). */
+    public boolean onItemUse(ItemStack stack, Player player, Level world, int x, int y, int z, int side, float vx, float vy, float vz) {
         return false;
     }
 
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
+    public void onUpdate(ItemStack stack, Level world, Entity entity, int par4, boolean par5) {
     }
 
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
-    }
-
-    public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
-    }
-
-    protected NBTTagCompound getNbt(ItemStack stack) {
-        NBTTagCompound nbt = stack.getTagCompound();
+    /** The stack's EA tag, created from getDefaultNBT() when missing (1.12 semantics: the stack gets the tag). */
+    protected CompoundTag getNbt(ItemStack stack) {
+        CompoundTag nbt = ItemNbt.get(stack);
         if (nbt == null) {
-            stack.setTagCompound(nbt = getDefaultNBT());
+            nbt = getDefaultNBT();
+            ItemNbt.set(stack, nbt);
         }
         return nbt;
+    }
+
+    /** Change the stack's EA tag (created from getDefaultNBT() when missing) and store it back (see ItemNbt.edit). */
+    protected void editNbt(ItemStack stack, java.util.function.Consumer<CompoundTag> edit) {
+        CompoundTag nbt = getNbt(stack);
+        edit.accept(nbt);
+        ItemNbt.set(stack, nbt);
     }
 
     public float getStrVsBlock(ItemStack stack, Block block) {
         return 0.2f;
     }
 
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, Level w, Block block, int x, int y, int z, LivingEntity entity) {
         return false;
     }
 
-    public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
         return true;
     }
 
-    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+    public boolean onEntitySwing(LivingEntity entityLiving, ItemStack stack) {
         return false;
     }
 
-    public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, EntityPlayer player) {
+    public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, Player player) {
         return false;
     }
 }

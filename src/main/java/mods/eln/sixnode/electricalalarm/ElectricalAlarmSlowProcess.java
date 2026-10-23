@@ -26,7 +26,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
 
-            boolean warm = element.inputGate.getU() > Eln.instance.SVU / 2;
+            boolean warm = element.inputGate.getU() > Eln.SVU / 2;
             element.setWarm(warm);
             if (warm & !element.mute) {
                 if (soundTimeTimeout == 0) {

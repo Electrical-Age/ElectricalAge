@@ -1,9 +1,8 @@
 package mods.eln.sound;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.ByteArrayOutputStream;
@@ -30,17 +29,15 @@ public class SoundServer {
         try {
             stream.writeByte(Eln.packetPlaySound);
 
-            stream.writeByte(p.world.provider.dimensionId);
+            stream.writeInt(mods.eln.misc.Dimensions.id(p.world)); // 1.12 port: dimension as int (was byte)
 
             p.writeTo(stream);
 
-            MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-            for (Object obj : server.getConfigurationManager().playerEntityList) {
-                EntityPlayerMP player = (EntityPlayerMP) obj;
-                if (player.dimension == p.world.provider.dimensionId && player.getDistance(p.x, p.y, p.z) < p.rangeMax + 2)
-                    ;
-                Utils.sendPacketToClient(bos, player);
+            if (!(p.world instanceof net.minecraft.server.level.ServerLevel)) return;
+            for (ServerPlayer player : ((net.minecraft.server.level.ServerLevel) p.world).players()) {
+                // WP16: 1.7.10 had an empty `;` body here, so every sound went to every player (any dimension)
+                if (Math.sqrt(player.distanceToSqr(p.x, p.y, p.z)) < p.rangeMax + 2)
+                    Utils.sendPacketToClient(bos, player);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -3,7 +3,7 @@ package mods.eln.sim.nbt;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.FurnaceProcess;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class NbtFurnaceProcess extends FurnaceProcess implements INBTTReady {
 
@@ -15,14 +15,18 @@ public class NbtFurnaceProcess extends FurnaceProcess implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbttagcompound, String str) {
-        combustibleEnergy = nbttagcompound.getFloat(str + name + "Q");
-        setGain(nbttagcompound.getDouble(str + name + "gain"));
+    public void readFromNBT(CompoundTag nbttagcompound, String str) {
+        combustibleEnergy = nbttagcompound.getFloatOr(str + name + "Q", 0f);
+        setGain(nbttagcompound.getDoubleOr(str + name + "gain", 0.0));
+        // (saves from before the lag: the fire burns at its setting)
+        if (nbttagcompound.contains(str + name + "fire")) fire.read(nbttagcompound, str + name);
+        else fire.level = getGain();
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbttagcompound, String str) {
-        nbttagcompound.setFloat(str + name + "Q", (float) combustibleEnergy);
-        nbttagcompound.setDouble(str + name + "gain", getGain());
+    public void writeToNBT(CompoundTag nbttagcompound, String str) {
+        nbttagcompound.putFloat(str + name + "Q", (float) combustibleEnergy);
+        nbttagcompound.putDouble(str + name + "gain", getGain());
+        fire.write(nbttagcompound, str + name);
     }
 }

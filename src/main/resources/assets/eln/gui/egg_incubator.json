@@ -1,0 +1,29 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "50V Egg Incubator"
+  },
+  {
+   "row": [
+    {
+     "slot": "0"
+    },
+    {
+     "gauge": "voltage",
+     "sample": "99.9V",
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

@@ -1,10 +1,11 @@
 package mods.eln.sixnode.electricalswitch;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;

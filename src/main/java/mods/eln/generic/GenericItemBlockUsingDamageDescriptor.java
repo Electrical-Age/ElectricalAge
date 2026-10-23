@@ -1,26 +1,38 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import mods.eln.Eln;
-import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
+import mods.eln.misc.Utils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
+/**
+ * Descriptor of an EA device item (six-node and transparent-node devices; 1.12: a sub-item of SixNodeItem /
+ * TransparentNodeItem). On 26.x each has its own Item ({@link #parentItem}, an {@link IDescriptorItem}).
+ */
 public class GenericItemBlockUsingDamageDescriptor {
 
     String iconName;
-    IIcon iconIndex;
     public String name;
 
     public Item parentItem;
+    /** The 1.12 damage value (eln-ids.json, golden data); no meaning in game. */
     public int parentItemDamage;
+
+    /**
+     * R5: the item is drawn in 3D (the device's model) when held, dropped, framed or worn; the GUI keeps the flat
+     * icon. 1.12: renderItem for every type but INVENTORY.
+     */
+    public boolean hasItemDraw() {
+        return false;
+    }
+
+    /** The 3D item draw through the GL11 shim, centred on the origin. entity: dropped/framed/worn (1.12 ENTITY), else held. */
+    public void drawItem(boolean entity) {
+    }
 
     public GenericItemBlockUsingDamageDescriptor(String name) {
         this(name, name);
@@ -32,30 +44,19 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public void setDefaultIcon(String name) {
-        String iconName = name.replaceAll(" ", "").toLowerCase();
-
-        if (Eln.noSymbols &&
-            getClass().getClassLoader().getResource("assets/eln/textures/blocks/" + iconName + "-ni.png") != null) {
-            this.iconName = iconName + "-ni";
-        } else {
-            this.iconName = iconName;
-        }
+        this.iconName = name.replaceAll(" ", "").toLowerCase();
     }
 
-    public NBTTagCompound getDefaultNBT() {
+    public CompoundTag getDefaultNBT() {
         return null;
     }
 
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<String> list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List<String> list, boolean par4) {
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
+    /** What 1.7.10 getIconName() returned. */
+    public String getIconName() {
+        return "eln:" + iconName;
     }
 
     public String getName(ItemStack stack) {
@@ -68,33 +69,40 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public ItemStack newItemStack(int size) {
-        return new ItemStack(parentItem, size, parentItemDamage);
+        ItemStack stack = new ItemStack(parentItem, size);
+        ItemNbt.set(stack, getDefaultNBT());
+        return stack;
     }
 
     public ItemStack newItemStack() {
-        return new ItemStack(parentItem, 1, parentItemDamage);
+        return newItemStack(1);
     }
 
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack) {
-        if (stack == null) return null;
-        Item item = stack.getItem();
-        if (item instanceof GenericItemBlockUsingDamage == false) return null;
-        GenericItemBlockUsingDamage genItem = (GenericItemBlockUsingDamage) item;
-        return genItem.getDescriptor(stack);
+        if (Utils.isEmpty(stack)) return null;
+        if (stack.getItem() instanceof IDescriptorItem) {
+            Object d = ((IDescriptorItem) stack.getItem()).getEaDescriptor();
+            if (d instanceof GenericItemBlockUsingDamageDescriptor) return (GenericItemBlockUsingDamageDescriptor) d;
+        }
+        return null;
     }
 
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
         GenericItemBlockUsingDamageDescriptor desc = getDescriptor(stack);
         if (desc == null) return null;
-        if (extendClass.isAssignableFrom(desc.getClass()) == false) return null;
+        if (!extendClass.isAssignableFrom(desc.getClass())) return null;
         return desc;
     }
 
-    public boolean onEntityItemUpdate(EntityItem entityItem) {
+    public boolean checkSameItemStack(ItemStack stack) {
+        return !Utils.isEmpty(stack) && stack.getItem() == parentItem;
+    }
+
+    public boolean onEntityItemUpdate(ItemEntity entityItem) {
         return false;
     }
 
-    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player) {
+    public boolean onItemUseFirst(ItemStack stack, Player player) {
         return false;
     }
 }

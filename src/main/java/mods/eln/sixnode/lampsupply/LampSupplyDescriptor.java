@@ -1,13 +1,13 @@
 package mods.eln.sixnode.lampsupply;
 
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
     public int channelCount = 3;
 
     public LampSupplyDescriptor(String name, Obj3D obj, int range) {
-        super(name, LampSupplyElement.class, LampSupplyRender.class);
+        super(name, LampSupplyElement.class, null);
         this.isWireless = isWireless;
         this.range = range;
         this.obj = obj;
@@ -52,48 +52,40 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         //UtilsClient.disableDepthTest();
         UtilsClient.enableBlend();
         obj.bindTexture("Glass.png");
-        float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-        float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-        float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+        float rotYaw = UtilsClient.clientPlayerYaw() / 360.f;
+        float rotPitch = UtilsClient.clientPlayerPitch() / 180.f;
+        float pos = (((float) UtilsClient.clientPlayerX()) + ((float) UtilsClient.clientPlayerZ())) / 64.f;
         if (window != null)
             window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
         UtilsClient.disableBlend();
         //UtilsClient.enableDepthTest();
         UtilsClient.enableCulling();
     }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        draw(1f);
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(1f);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Supplies all lamps on the channel."));
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

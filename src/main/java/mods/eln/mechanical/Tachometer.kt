@@ -3,17 +3,12 @@ package mods.eln.mechanical
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
-import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
-import mods.eln.gui.GuiTextFieldEln
-import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
 import mods.eln.misc.Obj3D
 import mods.eln.node.NodeBase
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
@@ -22,10 +17,8 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
-import net.minecraft.client.gui.GuiButton
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.nbt.CompoundTag
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -34,7 +27,7 @@ import java.text.NumberFormat
 import java.text.ParseException
 
 class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
+    TachometerElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
@@ -75,7 +68,7 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
 
     override fun thermoMeterString(side: Direction?): String? = null
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
 
     override fun networkSerialize(stream: DataOutputStream) {
@@ -100,16 +93,16 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
         return type
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
-        minRads = nbt.getFloat("minRads")
-        maxRads = nbt.getFloat("maxRads")
+        minRads = nbt.getFloatOr("minRads", 0f)
+        maxRads = nbt.getFloatOr("maxRads", 0f)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setFloat("minRads", minRads)
-        nbt.setFloat("maxRads", maxRads)
+        nbt.putFloat("minRads", minRads)
+        nbt.putFloat("maxRads", maxRads)
     }
 
     override fun getWaila(): Map<String, String> {
@@ -125,7 +118,7 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     internal var maxRads = TachometerElement.DefaultMaxRads
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, Eln.instance.stdCableRenderSignal, connections, renderPreProcess)
+        renderPreProcess = drawCable(Direction.YN, Eln.stdCableRenderSignal, connections, renderPreProcess)
         super.draw()
     }
 
@@ -136,50 +129,8 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
         maxRads = stream.readFloat()
     }
 
-    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = TachometerGui(this)
 }
 
-class TachometerGui(val render: TachometerRender) : GuiScreenEln() {
-    val validate: GuiButton by lazy { newGuiButton(82, 12, 80, I18N.tr("Validate")) }
-    val lowValue: GuiTextFieldEln by lazy { newGuiTextField(8, 24, 70) }
-    val highValue: GuiTextFieldEln by lazy { newGuiTextField(8, 8, 70) }
 
-    override fun newHelper(): GuiHelper? = GuiHelper(this, 169, 44)
+// 26.x port: class TachometerGui removed (client; redone in P3/P4)
 
-    override fun initGui() {
-        super.initGui()
-        validate.enabled = true
-        lowValue.setComment(I18N.tr("Rads/s corresponding\nto 0% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
-        highValue.setComment(I18N.tr("Rads/s corresponding\nto 100% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
-        lowValue.setText(render.minRads)
-        highValue.setText(render.maxRads)
-    }
-
-    override fun guiObjectEvent(`object`: IGuiObject?) {
-        super.guiObjectEvent(`object`)
-        if (`object` === validate) {
-
-            try {
-                val minRads = NumberFormat.getInstance().parse(lowValue.text).toFloat()
-                val maxRads = NumberFormat.getInstance().parse(highValue.text).toFloat()
-
-                try {
-                    val bos = ByteArrayOutputStream()
-                    val stream = DataOutputStream(bos)
-
-                    render.preparePacketForServer(stream)
-
-                    stream.writeByte(TachometerElement.SetRangeEventId)
-                    stream.writeFloat(minRads)
-                    stream.writeFloat(maxRads)
-
-                    render.sendPacketToServer(bos)
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-
-            } catch (e: ParseException) {
-            }
-        }
-    }
-}

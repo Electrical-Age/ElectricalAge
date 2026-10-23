@@ -2,8 +2,7 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.misc.Direction;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.node.transparent.TransparentNodeElementRender;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class ElectricalMachineInventory extends TransparentNodeElementInventory {
     private ElectricalMachineElement machineElement;
@@ -12,13 +11,9 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
         super(size, stackLimit, machineElement);
         this.machineElement = machineElement;
     }
-
-    public ElectricalMachineInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
-        super(size, stackLimit, TransparentnodeRender);
-    }
+    // 26.x port: the client (render) constructor comes back with P4 menus
 
     ElectricalMachineDescriptor getDescriptor() {
-        if (transparentNodeRender != null) return ((ElectricalMachineRender) transparentNodeRender).descriptor;
         if (transparentNodeElement != null) return ((ElectricalMachineElement) transparentNodeElement).descriptor;
         return null;
     }
@@ -40,13 +35,20 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int side) {
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
         switch (Direction.fromIntMinecraftSide(side)) {
             case YP:
-                return true;
+                // only what the machine can process, so a hopper can't jam the input with something it can't use
+                return slot == machineElement.inSlotId && hasRecipe(stack);
             default:
                 return false;
         }
+    }
+
+    /** A recipe takes this item (in any quantity: recipes needing several items still accept one at a time). */
+    boolean hasRecipe(ItemStack stack) {
+        ElectricalMachineDescriptor d = getDescriptor();
+        return d != null && !stack.isEmpty() && d.recipe.getRecipe(stack.copyWithCount(stack.getMaxStackSize())) != null;
     }
 
     @Override

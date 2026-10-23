@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:low_voltage_cable",
+    "F": "minecraft:furnace",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "III",
+    "IFI",
+    "ICI"
+  ],
+  "result": {
+    "id": "eln:electrical_furnace"
+  }
+}

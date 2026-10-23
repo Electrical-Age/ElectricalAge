@@ -4,8 +4,8 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
 
 public class GhostElement implements INBTTReady {
 
@@ -36,24 +36,24 @@ public class GhostElement implements INBTTReady {
         if (observer != null) observer.ghostDestroyed(UUID);
     }
 
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         GhostObserver observer = Eln.ghostManager.getObserver(observatorCoordonate);
         if (observer != null) return observer.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
         return false;
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         elementCoordonate = new Coordonate(nbt, str + "elemCoord");
         observatorCoordonate = new Coordonate(nbt, str + "obserCoord");
-        UUID = nbt.getInteger(str + "UUID");
+        UUID = nbt.getIntOr(str + "UUID", 0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
 
         elementCoordonate.writeToNBT(nbt, str + "elemCoord");
         observatorCoordonate.writeToNBT(nbt, str + "obserCoord");
-        nbt.setInteger(str + "UUID", UUID);
+        nbt.putInt(str + "UUID", UUID);
     }
 }

@@ -1,13 +1,14 @@
 package mods.eln.sixnode.electricalwatch;
 
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Locale;
 
@@ -26,7 +27,7 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
     Obj3D obj;
 
     public ElectricalWatchDescriptor(String name, Obj3D obj, double powerConsumtion) {
-        super(name, ElectricalWatchElement.class, ElectricalWatchRender.class);
+        super(name, ElectricalWatchElement.class, null);
         this.obj = obj;
         this.powerConsumtion = powerConsumtion;
         kind = Kind.valueOf(obj.getString("type").toUpperCase(Locale.ROOT));
@@ -48,7 +49,6 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
-
     void draw(float hour, float min, boolean isEnergyAvailable) {
         if (kind == Kind.ANALOG) {
             if (base != null) base.draw();
@@ -88,48 +88,39 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
             UtilsClient.enableBlend();
             //UtilsClient.enableBilinear();
             obj.bindTexture("Reflection.png");
-            float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-            float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-            float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+            float rotYaw = UtilsClient.clientPlayerYaw() / 360.f;
+            float rotPitch = UtilsClient.clientPlayerPitch() / 180.f;
+            float pos = (((float) UtilsClient.clientPlayerX()) + ((float) UtilsClient.clientPlayerZ())) / 64.f;
             glass.draw(rotYaw + pos, rotPitch * 0.875f);
             //UtilsClient.disableBilinear(); //BUG: Not always disabled.
             UtilsClient.disableBlend();
         }
     }
-
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         //Data.addSignal(newItemStack());
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        GL11.glRotatef(90, 1, 0, 0);
+        draw(0.1f, 0.2f, true);
+
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glRotatef(90, 1, 0, 0);
-            draw(0.1f, 0.2f, true);
-        }
-    }
-
-    @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
 }

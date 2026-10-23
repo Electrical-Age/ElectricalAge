@@ -1,13 +1,16 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +25,7 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
     Obj3DPart main, led;
 
     public ElectricalRedstoneOutputDescriptor(String name, Obj3D obj) {
-        super(name, ElectricalRedstoneOutputElement.class, ElectricalRedstoneOutputRender.class);
+        super(name, ElectricalRedstoneOutputElement.class, null);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
@@ -33,7 +36,6 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-
     void draw(int redstone) {
         //LRDU.Down.glRotateOnX();
         if (main != null) main.draw();
@@ -49,38 +51,30 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        draw(15);
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(15);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Converts electrical voltage\ninto a Redstone signal.").split("\n"));
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).right();
     }
 }

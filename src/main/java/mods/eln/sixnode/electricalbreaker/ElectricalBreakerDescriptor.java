@@ -7,9 +7,9 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,7 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     float alphaOff, alphaOn, speed;
 
     public ElectricalBreakerDescriptor(String name, Obj3D obj) {
-        super(name, ElectricalBreakerElement.class, ElectricalBreakerRender.class);
+        super(name, ElectricalBreakerElement.class, null);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("case");
@@ -48,27 +48,20 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
         Data.addWiring(newItemStack());
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) /*GL11.glScalef(1.8f, 1.8f, 1.8f);*/ {
-            super.renderItem(type, item, data);
-        } else
-            draw(0f, 0f);
+    public void drawItem(boolean entity) {
+        draw(0f, 0f);
     }
 
     public void draw(float on, float distance) {
@@ -79,13 +72,13 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, (tr("Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit").split("\n")));
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

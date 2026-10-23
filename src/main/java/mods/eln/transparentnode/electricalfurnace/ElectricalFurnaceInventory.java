@@ -3,18 +3,14 @@ package mods.eln.transparentnode.electricalfurnace;
 import mods.eln.misc.Direction;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.node.transparent.TransparentNodeElementRender;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class ElectricalFurnaceInventory extends TransparentNodeElementInventory {
 
     public ElectricalFurnaceInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
         super(size, stackLimit, TransparentNodeElement);
     }
-
-    public ElectricalFurnaceInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
-        super(size, stackLimit, TransparentnodeRender);
-    }
+// 26.x port: ElectricalFurnaceInventory() removed (client rendering; redone in P3)
 
     @Override
     public int[] getAccessibleSlotsFromSide(int side) {
@@ -28,10 +24,12 @@ public class ElectricalFurnaceInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int side) {
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
         switch (Direction.fromIntMinecraftSide(side)) {
             case YP:
-                return true;
+                // only smeltable items, so a hopper can't jam the input
+                return slot == ElectricalFurnaceElement.inSlotId && transparentNodeElement != null
+                    && !mods.eln.misc.Utils.smeltResult(transparentNodeElement.node.coordonate.world(), stack).isEmpty();
             default:
                 return false;
         }

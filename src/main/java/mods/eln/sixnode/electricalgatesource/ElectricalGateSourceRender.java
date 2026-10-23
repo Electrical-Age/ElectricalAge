@@ -1,16 +1,18 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import mods.eln.misc.UtilsClient;
+
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -77,11 +79,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return ElnDeviceRegistry.signalCableDescriptor.render;
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalGateSourceGui(player, this);
-    }
 }

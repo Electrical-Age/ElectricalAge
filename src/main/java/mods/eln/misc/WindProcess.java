@@ -1,7 +1,7 @@
 package mods.eln.misc;
 
 import mods.eln.sim.IProcess;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class WindProcess implements IProcess, INBTTReady {
 
@@ -54,18 +54,18 @@ public class WindProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        windHit = nbt.getDouble(str + "windHit");
-        windTarget = nbt.getDouble(str + "windTarget");
-        windVariation = nbt.getDouble(str + "windVariation");
-        windTargetFiltred.setValue(nbt.getFloat(str + "windTargetFiltred"));
+    public void readFromNBT(CompoundTag nbt, String str) {
+        windHit = nbt.getDoubleOr(str + "windHit", 0.0);
+        windTarget = nbt.getDoubleOr(str + "windTarget", 0.0);
+        windVariation = nbt.getDoubleOr(str + "windVariation", 0.0);
+        windTargetFiltred.setValue(nbt.getFloatOr(str + "windTargetFiltred", 0f));
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setDouble(str + "windHit", windHit);
-        nbt.setDouble(str + "windTarget", windTarget);
-        nbt.setDouble(str + "windVariation", windVariation);
-        nbt.setFloat(str + "windTargetFiltred", windTargetFiltred.get());
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putDouble(str + "windHit", windHit);
+        nbt.putDouble(str + "windTarget", windTarget);
+        nbt.putDouble(str + "windVariation", windVariation);
+        nbt.putFloat(str + "windTargetFiltred", windTargetFiltred.get());
     }
 }

@@ -5,7 +5,7 @@ import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.CurrentState;
 import mods.eln.sim.mna.state.State;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 
 public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTReady {
@@ -74,17 +74,17 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTRe
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         str += name;
-        setU(nbt.getDouble(str + "U"));
-        currentState.state = (nbt.getDouble(str + "Istate"));
+        setU(nbt.getDoubleOr(str + "U", 0.0));
+        currentState.state = (nbt.getDoubleOr(str + "Istate", 0.0));
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
         str += name;
-        nbt.setDouble(str + "U", u);
-        nbt.setDouble(str + "Istate", currentState.state);
+        nbt.putDouble(str + "U", u);
+        nbt.putDouble(str + "Istate", currentState.state);
     }
 
     public double getP() {

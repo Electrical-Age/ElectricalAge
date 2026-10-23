@@ -1,0 +1,7 @@
+o rotor
+f originY -0.046875
+f originZ 0.0
+o main
+f ventX 0.21094
+f ventY 0.35938
+f ventZ 0.28516

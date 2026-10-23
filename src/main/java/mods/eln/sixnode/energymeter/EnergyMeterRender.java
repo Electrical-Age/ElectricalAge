@@ -1,26 +1,25 @@
 package mods.eln.sixnode.energymeter;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.energymeter.EnergyMeterElement.Mod;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class EnergyMeterRender extends SixNodeElementRender {
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
     EnergyMeterDescriptor descriptor;
 
     double timerCouter, energyStack;
@@ -92,7 +91,7 @@ public class EnergyMeterRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return cableRender;
+        return mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render; // built-in cable
     }
 
     @Override
@@ -105,22 +104,12 @@ public class EnergyMeterRender extends SixNodeElementRender {
             mod = Mod.valueOf(stream.readUTF());
             timerCouter = stream.readDouble();
             // energyStack = stream.readDouble();
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
             energyUnit = stream.readByte();
             timeUnit = stream.readByte();
-            if (desc == null)
-                cableRender = null;
-            else
-                cableRender = desc.render;
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new EnergyMeterGui(player, inventory, this);
     }
 
     @Override

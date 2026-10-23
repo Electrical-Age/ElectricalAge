@@ -16,8 +16,8 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.*;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxElement;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.util.HashMap;
@@ -134,7 +134,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             rot = rot.getNextClockwise();
             node.reconnect();
@@ -144,9 +144,9 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        if (nbt.getBoolean("rxCoordValid")) {
+        if (nbt.getBooleanOr("rxCoordValid", false)) {
             rxCoord = new Coordonate();
             rxCoord.readFromNBT(nbt, "rxCoord");
         }
@@ -155,12 +155,12 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         if (rxCoord == null)
-            nbt.setBoolean("rxCoordValid", false);
+            nbt.putBoolean("rxCoordValid", false);
         else {
-            nbt.setBoolean("rxCoordValid", true);
+            nbt.putBoolean("rxCoordValid", true);
             rxCoord.writeToNBT(nbt, "rxCoord");
         }
         rot.writeToNBT(nbt, "rot");

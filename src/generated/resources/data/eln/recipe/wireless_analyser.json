@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "E": "minecraft:redstone",
+    "G": "minecraft:glass_pane",
+    "R": "#c:rubbers",
+    "S": "eln:signal_antenna"
+  },
+  "pattern": [
+    " S ",
+    "RGR",
+    "RER"
+  ],
+  "result": {
+    "id": "eln:wireless_analyzer"
+  }
+}

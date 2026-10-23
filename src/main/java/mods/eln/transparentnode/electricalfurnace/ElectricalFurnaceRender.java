@@ -8,9 +8,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -19,12 +18,11 @@ import java.io.IOException;
 
 public class ElectricalFurnaceRender extends TransparentNodeElementRender {
 
-    TransparentNodeElementInventory inventory = new ElectricalFurnaceInventory(5, 64, this);
 
     public float temperature = 0;
     public boolean powerOn, heatingCorpOn;
     //float temperatureTarget;
-    EntityItem entityItemIn = null;
+    ItemEntity entityItemIn = null;
 
     long time;
 
@@ -68,11 +66,6 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
     }
 
     @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalFurnaceGuiDraw(player, inventory, this);
-    }
-
-    @Override
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
 
@@ -95,12 +88,7 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
 
             temperature = stream.readShort();
 
-            if ((read = stream.readShort()) == -1) {
-                entityItemIn = null;
-                stream.readShort();
-            } else {
-                entityItemIn = new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(read, 1, stream.readShort()));
-            }
+            entityItemIn = Utils.unserializeItemStackToEntityItem(stream, entityItemIn, tileEntity); // 26.x: registry id
 
             heatingCorpResistorP = stream.readShort();
             voltage = stream.readFloat();
@@ -112,7 +100,6 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
             e.printStackTrace();
         }
     }
-
     public void clientSetPowerOn(boolean value) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

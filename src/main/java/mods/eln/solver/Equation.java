@@ -4,7 +4,7 @@ import mods.eln.Eln;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -584,14 +584,14 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            counter = nbt.getDouble(str + "counter");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            counter = nbt.getDoubleOr(str + "counter", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public void writeToNBT(CompoundTag nbt, String str) {
 
-            nbt.setDouble(str + "counter", counter);
+            nbt.putDouble(str + "counter", counter);
         }
 
         @Override
@@ -623,13 +623,13 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            counter = nbt.getDouble(str + "counter");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            counter = nbt.getDoubleOr(str + "counter", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setDouble(str + "counter", counter);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putDouble(str + "counter", counter);
         }
 
         @Override
@@ -661,13 +661,13 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            counter = nbt.getDouble(str + "counter");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            counter = nbt.getDoubleOr(str + "counter", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setDouble(str + "counter", counter);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putDouble(str + "counter", counter);
         }
 
         @Override
@@ -700,15 +700,15 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            old = nbt.getDouble(str + "old");
-            value = nbt.getDouble(str + "value");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            old = nbt.getDoubleOr(str + "old", 0.0);
+            value = nbt.getDoubleOr(str + "value", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setDouble(str + "old", old);
-            nbt.setDouble(str + "value", value);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putDouble(str + "old", old);
+            nbt.putDouble(str + "value", value);
         }
 
         @Override
@@ -741,17 +741,17 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            iStack = nbt.getDouble(str + "iStack");
-            oldError = nbt.getDouble(str + "oldError");
-            dValue = nbt.getDouble(str + "dValue");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            iStack = nbt.getDoubleOr(str + "iStack", 0.0);
+            oldError = nbt.getDoubleOr(str + "oldError", 0.0);
+            dValue = nbt.getDoubleOr(str + "dValue", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setDouble(str + "iStack", iStack);
-            nbt.setDouble(str + "oldError", oldError);
-            nbt.setDouble(str + "dValue", dValue);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putDouble(str + "iStack", iStack);
+            nbt.putDouble(str + "oldError", oldError);
+            nbt.putDouble(str + "dValue", dValue);
         }
 
         @Override
@@ -855,13 +855,13 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            state = nbt.getBoolean(str + "state");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            state = nbt.getBooleanOr(str + "state", false);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setBoolean(str + "state", state);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putBoolean(str + "state", state);
         }
 
         @Override
@@ -893,13 +893,13 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            state = nbt.getDouble(str + "state");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            state = nbt.getDoubleOr(str + "state", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setDouble(str + "state", state);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putDouble(str + "state", state);
         }
 
         @Override
@@ -939,7 +939,7 @@ public class Equation implements IValue, INBTTReady {
 
     public static class BatteryCharge implements IOperator {
         public BatteryCharge() {
-            FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
+            FunctionTable uFq = Eln.batteryVoltageFunctionTable;
             double dq = 0.001;
             double q = 0;
             eMax = 0;
@@ -964,7 +964,7 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public double getValue() {
-            FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
+            FunctionTable uFq = Eln.batteryVoltageFunctionTable;
             double probeU = probe.getValue();
             if (probeU > 1.5) return 1;
             double q = 0, dq = 0.001;
@@ -1018,7 +1018,7 @@ public class Equation implements IValue, INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         if (!isValid()) return;
         int idx = 0;
         for (INBTTReady o : nbtList) {
@@ -1028,7 +1028,7 @@ public class Equation implements IValue, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
         if (!isValid()) return;
         int idx = 0;
         for (INBTTReady o : nbtList) {

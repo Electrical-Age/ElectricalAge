@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "c": "eln:copper_cable",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    "rcr",
+    "cCc",
+    "rcr"
+  ],
+  "result": {
+    "id": "eln:pal_chip"
+  }
+}

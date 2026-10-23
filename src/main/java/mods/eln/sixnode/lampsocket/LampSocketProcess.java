@@ -1,7 +1,8 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
-import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.LampDescriptor.Type;
@@ -11,12 +12,13 @@ import mods.eln.misc.Utils;
 import mods.eln.server.SaveConfig;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -54,9 +56,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     @Override
     public void process(double time) {
-        ItemStack lampStack = lamp.getInventory().getStackInSlot(0);
+        ItemStack lampStack = lamp.getInventory().getItem(0);
 
-        if (!lamp.poweredByLampSupply || lamp.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) {
+        if (!lamp.poweredByLampSupply) {
             lamp.setIsConnectedToLampSupply(false);
             oldLampSupply = null;
         } else {
@@ -66,6 +68,10 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             List<LampSupplyElement.PowerSupplyChannelHandle> list = LampSupplyElement.channelMap.get(lamp.channel);
             if (list != null) {
                 for (LampSupplyElement.PowerSupplyChannelHandle s : list) {
+                    if (s.element.isBurnt()) continue; // out of the simulation; its powerLoad is stale
+                    // 26.x: a supply that isn't simulated (removed without its destroy, e.g. /setblock, or frozen by
+                    // Stasis Delvers) would win as the nearest and leave its channel OFF for good (AdventurAgent)
+                    if (s.element.sixNode == null || !s.element.sixNode.isAdded() || s.element.sixNode.isDestructing()) continue;
                     float distance = (float) s.element.sixNode.coordonate.trueDistanceTo(myCoord);
                     if (distance < bestDistance && distance <= s.element.getRange()) {
                         bestDistance = distance;
@@ -74,8 +80,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                 }
             }
             if (best != null && best.element.getChannelState(best.id)) {
-                if (lampStack != null) {
-                    LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
+                if (!Utils.isEmpty(lampStack)) {
+                    LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamageDescriptor) Utils.getItemObject(lampStack));
                     best.element.addToRp(lampDescriptor.getR());
                 }
                 lamp.positiveLoad.state = best.element.powerLoad.state;
@@ -88,31 +94,29 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             lamp.setIsConnectedToLampSupply(best != null);
         }
 
-        if (lampStack != null) {
-            LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
+        if (!Utils.isEmpty(lampStack)) {
+            LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamageDescriptor) Utils.getItemObject(lampStack));
 
             if (lamp.getCoordonate().getBlockExist() && lampDescriptor.vegetableGrowRate != 0.0) {
                 double randTarget = 1.0 / lampDescriptor.vegetableGrowRate * time * (1.0 * light / lampDescriptor.nominalLight / 15.0);
                 if (randTarget > Math.random()) {
                     boolean exit = false;
-                    Vec3 vv = Vec3.createVectorHelper(1, 0, 0);
-                    Vec3 vp = Vec3.createVectorHelper(myCoord().x + 0.5, myCoord().y + 0.5, myCoord().z + 0.5);
+                    Vec3 vv = new Vec3(1, 0, 0);
+                    Vec3 vp = new Vec3(myCoord().x + 0.5, myCoord().y + 0.5, myCoord().z + 0.5);
 
-                    vv.rotateAroundZ((float) (alphaZ * Math.PI / 180.0));
+                    vv = rotateAroundZ(vv, (float) (alphaZ * Math.PI / 180.0));
 
-                    vv.rotateAroundY((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
-                    vv.rotateAroundZ((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
+                    vv = vv.yRot((float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
+                    vv = rotateAroundZ(vv, (float) ((Math.random() - 0.5) * 2 * Math.PI / 4));
 
-                    lamp.front.rotateOnXnLeft(vv);
-                    lamp.side.rotateFromXN(vv);
+                    vv = lamp.front.rotateOnXnLeft(vv);
+                    vv = lamp.side.rotateFromXN(vv);
 
                     Coordonate c = new Coordonate(myCoord());
 
                     for (int idx = 0; idx < lamp.socketDescriptor.range + light; idx++) {
                         // newCoord.move(lamp.side.getInverse());
-                        vp.xCoord += vv.xCoord;
-                        vp.yCoord += vv.yCoord;
-                        vp.zCoord += vv.zCoord;
+                        vp = vp.add(vv);
 
                         c.setPosition(vp);
                         Block b = c.getBlock();
@@ -121,9 +125,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                             break;
                         }
                         if (isOpaque(c)) {
-                            vp.xCoord -= vv.xCoord;
-                            vp.yCoord -= vv.yCoord;
-                            vp.zCoord -= vv.zCoord;
+                            vp = vp.subtract(vv); // this - vv (1.12 order)
 
                             c.setPosition(vp);
                             b = c.getBlock();
@@ -134,8 +136,10 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     if (!exit) {
                         Block b = c.getBlock();
 
-                        if (b != Blocks.air) {
-                            b.updateTick(c.world(), c.x, c.y, c.z, c.world().rand);
+                        if (!Utils.isAirBlock(b) && c.world() instanceof net.minecraft.server.level.ServerLevel sl) {
+                            // 1.12 Block.updateTick (random tick: plants grow under the lamp)
+                            BlockPos bp = new BlockPos(c.x, c.y, c.z);
+                            sl.getBlockState(bp).randomTick(sl, bp, sl.getRandom());
                         }
                     }
                 }
@@ -152,12 +156,12 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         int oldLight = light;
         int newLight = 0;
 
-        if (!boot && (lampStack != lampStackLast || lampStack == null)) {
+        if (!boot && (lampStack != lampStackLast || Utils.isEmpty(lampStack))) {
             stableProb = 0;
         }
 
-        if (lampStack != null) {
-            LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
+        if (!Utils.isEmpty(lampStack)) {
+            LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamageDescriptor) Utils.getItemObject(lampStack));
 
             if (stableProb < 0)
                 stableProb = 0;
@@ -243,7 +247,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     lampDescriptor.setLifeInTag(lampStack, life);
                 }
                 if (life < 0 || overFactor > 3) {
-                    lamp.getInventory().setInventorySlotContents(0, null);
+                    lamp.getInventory().setItem(0, null);
                     light = 0;
                 }
 
@@ -266,35 +270,32 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     // ElectricalConnectionOneWay connection = null;
 
-    public void rotateAroundZ(Vec3 v, float par1) {
-        float f1 = MathHelper.cos(par1);
-        float f2 = MathHelper.sin(par1);
-        double d0 = v.xCoord * (double) f1 + v.yCoord * (double) f2;
-        double d1 = v.yCoord * (double) f1 - v.xCoord * (double) f2;
-        double d2 = v.zCoord;
-        v.xCoord = d0;
-        v.yCoord = d1;
-        v.zCoord = d2;
+    /** 1.7.10 Vec3.rotateAroundZ (mutating); Vec3 is immutable in 1.12, so this returns the rotated vector. */
+    public static Vec3 rotateAroundZ(Vec3 v, float par1) {
+        float f1 = Mth.cos(par1);
+        float f2 = Mth.sin(par1);
+        double d0 = v.x * (double) f1 + v.y * (double) f2;
+        double d1 = v.y * (double) f1 - v.x * (double) f2;
+        double d2 = v.z;
+        return new Vec3(d0, d1, d2);
     }
 
     void placeSpot(int newLight) {
         boolean exit = false;
         if (!lbCoord.getBlockExist())
             return;
-        Vec3 vv = Vec3.createVectorHelper(1, 0, 0);
+        Vec3 vv = new Vec3(1, 0, 0);
         Vec3 vp = Utils.getVec05(myCoord());
 
-        rotateAroundZ(vv, (float) (alphaZ * Math.PI / 180.0));
+        vv = rotateAroundZ(vv, (float) (alphaZ * Math.PI / 180.0));
 
-        lamp.front.rotateOnXnLeft(vv);
-        lamp.side.rotateFromXN(vv);
+        vv = lamp.front.rotateOnXnLeft(vv);
+        vv = lamp.side.rotateFromXN(vv);
 
         Coordonate newCoord = new Coordonate(myCoord());
         for (int idx = 0; idx < lamp.socketDescriptor.range; idx++) {
             // newCoord.move(lamp.side.getInverse());
-            vp.xCoord += vv.xCoord;
-            vp.yCoord += vv.yCoord;
-            vp.zCoord += vv.zCoord;
+            vp = vp.add(vv);
 
             newCoord.setPosition(vp);
             if (!newCoord.getBlockExist()) {
@@ -302,9 +303,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                 break;
             }
             if (isOpaque(newCoord)) {
-                vp.xCoord -= vv.xCoord;
-                vp.yCoord -= vv.yCoord;
-                vp.zCoord -= vv.zCoord;
+                vp = vp.subtract(vv); // this - vv (1.12 order)
 
                 newCoord.setPosition(vp);
                 break;
@@ -314,15 +313,13 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             int count = 0;
             while (!newCoord.equals(myCoord())) {
                 Block block = newCoord.getBlock();
-                if (block == Blocks.air || block == Eln.lightBlock) {
+                if (Utils.isAirBlock(block) || block == ElnDeviceRegistry.lightBlock) {
                     count++;
                     if (count == 2)
                         break;
                 }
 
-                vp.xCoord -= vv.xCoord;
-                vp.yCoord -= vv.yCoord;
-                vp.zCoord -= vv.zCoord;
+                vp = vp.subtract(vv); // this - vv (1.12 order)
                 newCoord.setPosition(vp);
             }
         }
@@ -332,8 +329,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     public boolean isOpaque(Coordonate coord) {
         Block block = coord.getBlock();
-        boolean isNotOpaque = block == Blocks.air || !block.isOpaqueCube();
-        if (block == Blocks.farmland)
+        boolean isNotOpaque = Utils.isAirBlock(block) || !block.defaultBlockState().isSolidRender();
+        if (block == Blocks.FARMLAND)
             isNotOpaque = false;
         return !isNotOpaque;
     }
@@ -393,19 +390,19 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        stableProb = nbt.getDouble(str + "LSP" + "stableProb");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        stableProb = nbt.getDoubleOr(str + "LSP" + "stableProb", 0.0);
         lbCoord.readFromNBT(nbt, str + "lbCoordInst");
-        alphaZ = nbt.getFloat(str + "alphaZ");
-        light = nbt.getInteger(str + "light");
+        alphaZ = nbt.getFloatOr(str + "alphaZ", 0f);
+        light = nbt.getIntOr(str + "light", 0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setDouble(str + "LSP" + "stableProb", stableProb);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putDouble(str + "LSP" + "stableProb", stableProb);
         lbCoord.writeToNBT(nbt, str + "lbCoordInst");
-        nbt.setFloat(str + "alphaZ", (float) alphaZ);
-        nbt.setInteger(str + "light", light);
+        nbt.putFloat(str + "alphaZ", (float) alphaZ);
+        nbt.putInt(str + "light", light);
     }
 
     public int getBlockLight() {

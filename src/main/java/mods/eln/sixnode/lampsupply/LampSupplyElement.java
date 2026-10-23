@@ -17,7 +17,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
@@ -26,12 +26,12 @@ import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.SmallerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.ToogleAggregator;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -58,6 +58,10 @@ public class LampSupplyElement extends SixNodeElement {
     public Resistor loadResistor;
     public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
+    /**
+     * Cables extend the range (descriptor range + one block per cable). Baughn 2026-10-17: no longer needed to connect;
+     * the supply works with an empty slot, as with an LV cable, and no cable sets a watchdog.
+     */
     private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
         .acceptIfIncrement(0, 64, ElectricalCableDescriptor.class);
 
@@ -87,16 +91,11 @@ public class LampSupplyElement extends SixNodeElement {
     IWirelessSignalAggregator[][] aggregators;
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         if (inventory != null)
             return inventory.getInventory();
         else
             return null;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new LampSupplyContainer(player, inventory.getInventory());
     }
 
     public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -114,7 +113,7 @@ public class LampSupplyElement extends SixNodeElement {
         slowProcessList.add(voltageWatchdog);
         voltageWatchdog
             .set(powerLoad)
-            .set(new WorldExplosion(this).cableExplosion());
+            .set(new Failure(this).electronics());
         channelStates = new boolean[this.descriptor.channelCount];
         aggregators = new IWirelessSignalAggregator[this.descriptor.channelCount][3];
         for (int idx = 0; idx < this.descriptor.channelCount; idx++) {
@@ -194,7 +193,6 @@ public class LampSupplyElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
         if (front == lrdu) return powerLoad;
         return null;
     }
@@ -206,7 +204,6 @@ public class LampSupplyElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
         if (front == lrdu) return NodeBase.maskElectricalPower;
         return 0;
     }
@@ -253,14 +250,14 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
 
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+        return inventory.take(entityPlayer.getMainHandItem(), this, false, true);
     }
 
     @Override
-    public void destroy(EntityPlayerMP entityPlayer) {
+    public void destroy(ServerPlayer entityPlayer) {
         super.destroy(entityPlayer);
         unregister();
     }
@@ -278,15 +275,15 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         int idx = 0;
         for (Entry e : entries) {
-            nbt.setString("entry_p" + idx, e.powerChannel);
-            nbt.setString("entry_w" + idx, e.wirelessChannel);
-            nbt.setBoolean("channelStates" + idx, channelStates[idx]);
+            nbt.putString("entry_p" + idx, e.powerChannel);
+            nbt.putString("entry_w" + idx, e.wirelessChannel);
+            nbt.putBoolean("channelStates" + idx, channelStates[idx]);
 
-            nbt.setInteger("selectedAggregator" + idx, e.aggregator);
+            nbt.putInt("selectedAggregator" + idx, e.aggregator);
             ((ToogleAggregator) aggregators[idx][2]).writeToNBT(nbt, "toogleAggregator" + idx);
 
             idx++;
@@ -294,21 +291,21 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         int idx = 0;
         for (Entry e : entries) {
             channelRemove(this, idx++, e.powerChannel);
         }
 
         super.readFromNBT(nbt);
-        if (nbt.hasKey("channel")) {
-            entries.get(0).powerChannel = nbt.getString("channel");
+        if (nbt.contains("channel")) {
+            entries.get(0).powerChannel = nbt.getStringOr("channel", "");
 
         } else {
             idx = 0;
-            while (nbt.hasKey("entry_p" + idx)) {
-                entries.set(idx, new Entry(nbt.getString("entry_p" + idx), nbt.getString("entry_w" + idx), nbt.getInteger("selectedAggregator" + idx)));
-                channelStates[idx] = nbt.getBoolean("channelStates" + idx);
+            while (nbt.contains("entry_p" + idx)) {
+                entries.set(idx, new Entry(nbt.getStringOr("entry_p" + idx, ""), nbt.getStringOr("entry_w" + idx, ""), nbt.getIntOr("selectedAggregator" + idx, 0)));
+                channelStates[idx] = nbt.getBooleanOr("channelStates" + idx, false);
 
                 ((ToogleAggregator) aggregators[idx][2]).readFromNBT(nbt, "toogleAggregator" + idx);
 
@@ -324,15 +321,12 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     void setupFromInventory() {
-        ItemStack cableStack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
-        if (cableStack != null) {
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-            desc.applyTo(powerLoad);
-            voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
-        } else {
-            voltageWatchdog.setUNominal(10000);
-            powerLoad.highImpedance();
-        }
+        ItemStack cableStack = getInventory().getItem(LampSupplyContainer.cableSlotId);
+        ElectricalCableDescriptor desc = Utils.isEmpty(cableStack) ? null
+            : (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+        if (desc == null) desc = mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
+        desc.applyTo(powerLoad);
+        voltageWatchdog.setUNominal(10000); // 1.12's empty-slot value: off
     }
 
     @Override
@@ -384,7 +378,7 @@ public class LampSupplyElement extends SixNodeElement {
                 stream.writeChar(e.aggregator);
             }
 
-            Utils.serialiseItemStack(stream, getInventory().getStackInSlot(LampSupplyContainer.cableSlotId));
+            Utils.serialiseItemStack(stream, getInventory().getItem(LampSupplyContainer.cableSlotId));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -402,9 +396,9 @@ public class LampSupplyElement extends SixNodeElement {
         return getRange(descriptor, inventory.getInventory());
     }
 
-    private int getRange(LampSupplyDescriptor desc, IInventory inventory2) {
-        ItemStack stack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
-        if (stack == null) return desc.range;
-        return desc.range + stack.stackSize;
+    private int getRange(LampSupplyDescriptor desc, Container inventory2) {
+        ItemStack stack = getInventory().getItem(LampSupplyContainer.cableSlotId);
+        if (Utils.isEmpty(stack)) return desc.range;
+        return desc.range + stack.getCount();
     }
 }

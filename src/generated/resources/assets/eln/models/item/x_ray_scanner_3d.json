@@ -1,0 +1,6 @@
+{
+  "parent": "eln:item/device_obj",
+  "textures": {
+    "particle": "eln:item/x_ray_scanner"
+  }
+}

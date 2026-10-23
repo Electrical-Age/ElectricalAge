@@ -7,9 +7,9 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -17,19 +17,18 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 
-    boolean voltageOnly;
+    public boolean voltageOnly;
     Obj3DPart main;
 
     public ElectricalSensorDescriptor(
         String name, String modelName,
         boolean voltageOnly) {
-        super(name, ElectricalSensorElement.class, ElectricalSensorRender.class);
+        super(name, ElectricalSensorElement.class, null);
         this.voltageOnly = voltageOnly;
         main = Eln.obj.getPart(modelName, "main");
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
-
     void draw() {
         if (main != null) main.draw();
     }
@@ -41,23 +40,23 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
     }
     /*
 	
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
+	// 26.x port: handleRenderType() removed (client rendering; redone in P3)
+	
+	// 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+	public boolean hasItemDraw() {
+	    return true;
 	}
-	
+
 	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw();
-	}*/
+	public void drawItem(boolean entity) {
+	    draw();
+	}
+*/
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         if (voltageOnly) {
             list.add(tr("Measures voltage on cables."));
@@ -70,7 +69,7 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

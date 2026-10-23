@@ -5,11 +5,11 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
         String soundName,
         float nominalVolume
     ) {
-        super(name, WaterTurbineElement.class, WaterTurbineRender.class);
+        super(name, WaterTurbineElement.class, null);
 
         this.cable = cable;
         this.nominalPower = nominalPower;
@@ -47,7 +47,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
     Coordonate waterCoord;
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addEnergy(newItemStack());
     }
@@ -78,38 +78,31 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public Direction getFrontFromPlace(Direction side,
-                                       EntityLivingBase entityLiving) {
+                                       LivingEntity entityLiving) {
         return super.getFrontFromPlace(side, entityLiving);
     }
 
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    @Override
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
+    public void drawItem(boolean entity) {
+        objItemScale(obj);
+        Direction.ZN.glRotateXnRef();
+        draw(0f);
 
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            draw(0f);
-        }
     }
 
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+    public void addInformation(ItemStack itemStack, Player entityPlayer,
                                List list, boolean par4) {
 
         super.addInformation(itemStack, entityPlayer, list, par4);
@@ -120,9 +113,9 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    public Coordonate getWaterCoordonate(World w) {
+    public Coordonate getWaterCoordonate(Level w) {
         Coordonate coord = new Coordonate(waterCoord);
-        coord.setDimention(w.provider.dimensionId);
+        coord.setDimention(mods.eln.misc.Dimensions.id(w));
         return coord;
     }
 
@@ -141,7 +134,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
         Coordonate water = new Coordonate(waterCoord);
         water.applyTransformation(front, coord);
         if (coord.getBlockExist() == false) return true;
-        if (water.getBlock() == Blocks.air || Utils.isWater(water)) return true;
+        if (Utils.isAirBlock(water.getBlock()) || Utils.isWater(water)) return true;
         return false;
     }
 }

@@ -20,12 +20,12 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     private final NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
     final Resistor electricalResistor = new Resistor(electricalLoad, null);
 
-    private final ElectricalStackMachineProcess slowRefreshProcess;
+    protected final ElectricalStackMachineProcess slowRefreshProcess;
 
     private final ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
     private boolean powerOn = false;
@@ -69,23 +69,19 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         slowRefreshProcess.setObserver(this);
         slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
-        slowProcessList.add(voltageWatchdog.set(electricalLoad).setUNominal(this.descriptor.nominalU).set(exp));
+        Failure exp = new Failure(this).machine();
+        // (a resistor to ground on one pin shared by every side: either polarity runs it; Baughn: fed negative it burned)
+        slowProcessList.add(voltageWatchdog.set(electricalLoad).setUMaxMin(this.descriptor.nominalU).set(exp));
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
     @Override
     public boolean hasGui() {
         return true;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new ElectricalMachineContainer(this.node, player, inventory, descriptor);
     }
 
     @Override
@@ -122,7 +118,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
         setPhysicalValue();
         needPublish();
@@ -132,9 +128,9 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         ItemStack stack;
 
         int boosterCount = 0;
-        stack = getInventory().getStackInSlot(boosterSlotId);
-        if (stack != null) {
-            boosterCount = stack.stackSize;
+        stack = getInventory().getItem(boosterSlotId);
+        if (!Utils.isEmpty(stack)) {
+            boosterCount = stack.getCount();
         }
         double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount);
         slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
@@ -145,8 +141,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return booterAccepter.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        return booterAccepter.take(entityPlayer.getMainHandItem(), this, false, true);
     }
 
     public void networkSerialize(java.io.DataOutputStream stream) {
@@ -156,8 +152,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         if (fPower > 1.9) fPower = 1.9;
         try {
             stream.writeByte((int) (fPower * 64));
-            serialiseItemStack(stream, inventory.getStackInSlot(inSlotId));
-            serialiseItemStack(stream, inventory.getStackInSlot(outSlotId));
+            serialiseItemStack(stream, inventory.getItem(inSlotId));
+            serialiseItemStack(stream, inventory.getItem(outSlotId));
             stream.writeFloat((float) slowRefreshProcess.processState());
             stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
@@ -168,15 +164,15 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setBoolean("powerOn", powerOn);
+        nbt.putBoolean("powerOn", powerOn);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        powerOn = nbt.getBoolean("powerOn");
+        powerOn = nbt.getBooleanOr("powerOn", false);
     }
 
     @Override

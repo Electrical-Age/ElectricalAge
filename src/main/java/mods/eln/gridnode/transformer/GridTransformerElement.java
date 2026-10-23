@@ -11,8 +11,8 @@ import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.util.Vec3;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Created by svein on 07/08/15.
@@ -40,7 +40,7 @@ public class GridTransformerElement extends GridElement {
         electricalLoadList.add(secondaryLoad);
         electricalComponentList.add(primaryVoltageSource);
         electricalComponentList.add(secondaryVoltageSource);
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).transformer();
         slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
         slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
 

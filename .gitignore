@@ -1,26 +1,55 @@
-.gradle
-.classpath
-.project
-.settings
-.metadata
+
 bin
-/build
-eclipse
-/run
-/logs
-/config
-/saves
-*.json
-options.txt
-/out
-/classes
-
-# IntelliJ
-.idea
-*.iml
-*.ipr
-*.iws
-
-# Blender backup files
 *.blend1
 *.blend2
+# Blender backup files
+/build
+build
+build/
+/classes
+.classpath
+/config
+# eclipse
+eclipse
+# gradle
+.gradle
+.gradle/
+# idea
+.idea
+*.iml
+# IntelliJ
+*.ipr
+*.iws
+*.json
+!src/main/resources/**/*.json
+!golden/**/*.json
+!src/generated/**/*.json
+!tools/**/*.json
+# kate
+*.kate-swp
+*.launch
+/logs
+.metadata
+options.txt
+# other
+/out
+out
+.project
+/run
+run
+/saves
+.settings
+/libs/
+build/
+.gradle/
+run/
+runs/
+repo/
+
+# nix / direnv
+.direnv/
+result
+# tools/icons build output (out/ is already ignored)
+__pycache__/
+*.pyc
+tools/icons/refs/

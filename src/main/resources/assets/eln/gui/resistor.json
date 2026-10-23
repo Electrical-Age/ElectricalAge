@@ -1,0 +1,37 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Power Resistor"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "text": "line0",
+       "sample": "Resistance: 999.9kΩ"
+      }
+     ],
+     "gap": 2
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

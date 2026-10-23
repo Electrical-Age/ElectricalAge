@@ -17,8 +17,8 @@ import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.SmallerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.ToogleAggregator;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
 
 import javax.annotation.Nullable;
 import java.io.DataInputStream;
@@ -111,20 +111,20 @@ public class WirelessSignalRxElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setString("channel", channel);
-        nbt.setBoolean("connection", connection);
-        nbt.setInteger("selectedAggregator", selectedAggregator);
+        nbt.putString("channel", channel);
+        nbt.putBoolean("connection", connection);
+        nbt.putInt("selectedAggregator", selectedAggregator);
         toogleAggregator.writeToNBT(nbt, "toogleAggregator");
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        channel = nbt.getString("channel");
-        connection = nbt.getBoolean("connection");
-        selectedAggregator = nbt.getInteger("selectedAggregator");
+        channel = nbt.getStringOr("channel", "");
+        connection = nbt.getBooleanOr("connection", false);
+        selectedAggregator = nbt.getIntOr("selectedAggregator", 0);
         toogleAggregator.readFromNBT(nbt, "toogleAggregator");
     }
 

@@ -1,14 +1,17 @@
 package mods.eln.sixnode.modbusrtu;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class ModbusRtuDescriptor extends SixNodeDescriptor {
 
@@ -17,7 +20,7 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
     float alphaOff;
 
     public ModbusRtuDescriptor(String name, Obj3D obj) {
-        super(name, ModbusRtuElement.class, ModbusRtuRender.class);
+        super(name, ModbusRtuElement.class, null);
 
         this.obj = obj;
         if (obj != null) {
@@ -41,31 +44,23 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    public void drawItem(boolean entity) {
+        GL11.glTranslatef(-0.3f, -0.1f, 0f);
+        draw(0.7f, false, false);
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glTranslatef(-0.3f, -0.1f, 0f);
-            draw(0.7f, false, false);
-        }
     }
-
     void draw(float open, boolean activityLed, boolean errorLed) {
         if (main != null) main.draw();
         if (door != null) door.draw((1f - open) * alphaOff, 0f, 0f, 1f);

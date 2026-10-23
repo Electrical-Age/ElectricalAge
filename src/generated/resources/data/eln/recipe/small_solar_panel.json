@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:low_voltage_cable",
+    "I": "minecraft:iron_ingot",
+    "S": "#c:plates/silicon"
+  },
+  "pattern": [
+    "III",
+    "CSC",
+    "III"
+  ],
+  "result": {
+    "id": "eln:small_solar_panel"
+  }
+}

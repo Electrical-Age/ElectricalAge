@@ -1,13 +1,17 @@
 package mods.eln.transparentnode.powerinductor;
 
+
+
+import mods.eln.registry.ElnDeviceRegistry;
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.mna.misc.MnaConst;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
@@ -19,7 +23,7 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
         ISerie serie
 
     ) {
-        super(name, PowerInductorElement.class, PowerInductorRender.class);
+        super(name, PowerInductorElement.class, null);
         this.serie = serie;
         this.obj = obj;
         if (obj != null) {
@@ -35,26 +39,26 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
         return serie.getValue(cableCount - 1);
     }
 
-    public double getlValue(IInventory inventory) {
-        ItemStack core = inventory.getStackInSlot(PowerInductorContainer.cableId);
-        if (core == null)
+    public double getlValue(Container inventory) {
+        ItemStack core = inventory.getItem(PowerInductorContainer.cableId);
+        if (Utils.isEmpty(core))
             return getlValue(0);
         else
-            return getlValue(core.stackSize);
+            return getlValue(core.getCount());
     }
 
-    public double getRsValue(IInventory inventory) {
-        ItemStack core = inventory.getStackInSlot(PowerInductorContainer.coreId);
+    public double getRsValue(Container inventory) {
+        ItemStack core = inventory.getItem(PowerInductorContainer.coreId);
 
-        if (core == null) return MnaConst.highImpedance;
+        if (Utils.isEmpty(core)) return MnaConst.highImpedance;
         FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
         double coreFactor = coreDescriptor.cableMultiplicator;
 
-        return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
+        return ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs * coreFactor;
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         //Data.addEnergy(newItemStack());
     }
@@ -63,19 +67,17 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
     }
 
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return true;
+    public boolean hasItemDraw() {
+        return false; // its draw() is empty (an invisible block in 1.12 too): the flat icon everywhere
     }
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+    public void drawItem(boolean entity) {
         draw();
     }
 }

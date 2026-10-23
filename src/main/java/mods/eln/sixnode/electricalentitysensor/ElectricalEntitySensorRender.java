@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalentitysensor;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
@@ -10,9 +12,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -24,7 +25,6 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
     boolean state = false;
     EntitySensorFilterDescriptor filter = null;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public ElectricalEntitySensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -38,7 +38,6 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 
         descriptor.draw(state, filter);
     }
-
     @Override
     public void publishUnserialize(DataInputStream stream) {
         super.publishUnserialize(stream);
@@ -53,11 +52,7 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return Eln.instance.signalCableDescriptor.render;
+        return ElnDeviceRegistry.signalCableDescriptor.render;
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalEntitySensorGui(player, inventory, this);
-    }
 }

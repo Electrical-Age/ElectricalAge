@@ -1,23 +1,31 @@
 package mods.eln.transparentnode.autominer;
 
+
+
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import mods.eln.registry.ElnDeviceRegistry;
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
-import mods.eln.item.electricalitem.OreColorMapping;
-import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.ore.OreBlock;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockOre;
-import net.minecraft.block.BlockRedstoneOre;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,16 +62,16 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean isReadyToDrill() {
-        ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
+        ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.electricalDrillSlotId));
         if (drill == null) return false;
         return isStorageReady();
     }
 
     private boolean isStorageReady() {
-        IInventory i = getDropInventory();
-        if (i == null) return false;
-        for (int idx = 0; idx < i.getSizeInventory(); idx++) {
-            if (i.getStackInSlot(idx) == null)
+        ResourceHandler<ItemResource> h = getDropHandler();
+        if (h == null) return false;
+        for (int idx = 0; idx < h.size(); idx++) {
+            if (h.getResource(idx).isEmpty())
                 return true;
         }
         return false;
@@ -71,7 +79,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
     @Override
     public void process(double time) {
-        ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
+        ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.electricalDrillSlotId));
 
         if (++blinkCounter >= 9) {
             blinkCounter = 0;
@@ -96,21 +104,24 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case ore:
                         drillCount++;
 
-                        Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                        int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
+                        Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
+                        int meta = WorldCompat.getMeta(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
                         if (silkTouch) {
-                            itemsToDrop.add(new ItemStack(block, 1, meta));
+                            itemsToDrop.add(new ItemStack(block)); // 1.12: + meta
                         } else {
-                            itemsToDrop.addAll(block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0));
+                            // 1.12: drops go into a NonNullList (was getDrops(world, x, y, z, meta, fortune 0))
+                            BlockPos pos = new BlockPos(jobCoord.x, jobCoord.y, jobCoord.z);
+                            if (jobCoord.world() instanceof net.minecraft.server.level.ServerLevel sl)
+                                itemsToDrop.addAll(Block.getDrops(sl.getBlockState(pos), sl, pos, sl.getBlockEntity(pos)));
                         }
 
                         // Use cobblestone instead of air, everywhere except the mining shaft.
                         // This is so mobs won't spawn excessively.
                         int xDist = jobCoord.x - miner.node.coordonate.x, zDist = jobCoord.z - miner.node.coordonate.z;
                         if (xDist * xDist + zDist * zDist > 25) {
-                            jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, Blocks.cobblestone);
+                            WorldCompat.setBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, Blocks.COBBLESTONE);
                         } else {
-                            jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+                            WorldCompat.setBlockToAir(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
                         }
 
                         energyCounter -= energyTarget;
@@ -119,7 +130,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case pipeAdd:
                         // miner.pushLog("Pipe " + (pipeLength + 1) + " added");
                         Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, jobCoord.y);
-                        miner.getInventory().decrStackSize(AutoMinerContainer.MiningPipeSlotId, 1);
+                        miner.getInventory().removeItem(AutoMinerContainer.MiningPipeSlotId, 1);
 
                         pipeLength++;
                         miner.needPublish();
@@ -130,10 +141,11 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case pipeRemove:
                         // miner.pushLog("Pipe " + pipeLength + " removed");
                         Eln.ghostManager.removeGhostAndBlock(jobCoord);
-                        if (miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId) == null) {
-                            miner.getInventory().setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
+                        if (Utils.isEmpty(miner.getInventory().getItem(AutoMinerContainer.MiningPipeSlotId))) {
+                            miner.getInventory().setItem(AutoMinerContainer.MiningPipeSlotId, ElnDeviceRegistry.miningPipeDescriptor.newItemStack(1));
                         } else {
-                            miner.getInventory().decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
+                            miner.getInventory().getItem(AutoMinerContainer.MiningPipeSlotId).grow(1); // 1.12: decrStackSize(slot, -1)
+                            miner.getInventory().setChanged();
                         }
 
                         pipeLength--;
@@ -206,35 +218,47 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         oldJob = job;
     }
 
-    private IInventory getDropInventory() {
-        IInventory chestEntity = null;
+    /**
+     * Where mined items go: the block 1 (else 2) forward and 1 down, through its item capability from above (26.x:
+     * modded and EA inventories too), else a plain vanilla Container there as before.
+     */
+    public ResourceHandler<ItemResource> getDropHandler() {
+        ResourceHandler<ItemResource> handler = null;
         for (int x = 2; x >= 1; x--) {
             Coordonate c = new Coordonate(x, -1, 0, miner.world());
             c.applyTransformation(miner.front, miner.coordonate());
-            if (c.getTileEntity() instanceof IInventory) {
-                chestEntity = (IInventory) c.getTileEntity();
-            }
+            ResourceHandler<ItemResource> h = miner.world().getCapability(Capabilities.Item.BLOCK, c.pos(), net.minecraft.core.Direction.UP);
+            if (h == null && c.getTileEntity() instanceof Container chest) h = VanillaContainerWrapper.of(chest);
+            if (h != null) handler = h;
         }
-        return chestEntity;
+        return handler;
     }
 
-    private boolean drop(ItemStack stack) {
-        return Utils.tryPutStackInInventory(stack, getDropInventory());
+    /** Puts the whole stack into the drop inventory, or nothing (the stack stays queued). */
+    public boolean drop(ItemStack stack) {
+        if (Utils.isEmpty(stack)) return true;
+        ResourceHandler<ItemResource> h = getDropHandler();
+        if (h == null) return false;
+        try (Transaction tx = Transaction.openRoot()) {
+            if (ResourceHandlerUtil.insertStacking(h, ItemResource.of(stack), stack.getCount(), tx) < stack.getCount()) return false;
+            tx.commit();
+            return true;
+        }
     }
 
     private boolean isMinable(Block block) {
-        return block != Blocks.air
-            && (block) != Blocks.flowing_water && (block) != Blocks.water
-            && (block) != Blocks.flowing_lava && (block) != Blocks.lava
-            && (block) != Blocks.obsidian && (block) != Blocks.bedrock;
+        return !Utils.isAirBlock(block)
+            && (block) != Blocks.WATER // 1.12 also FLOWING_WATER / FLOWING_LAVA: one block each on 26.x
+            && (block) != Blocks.LAVA
+            && (block) != Blocks.OBSIDIAN && (block) != Blocks.BEDROCK;
     }
 
     private void setupJob() {
-        ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
-        // OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
-        MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
+        ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.electricalDrillSlotId));
+        // OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getItem(AutoMinerContainer.OreScannerSlotId));
+        MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.MiningPipeSlotId));
 
-        int scannerRadius = Eln.instance.autominerRange;
+        int scannerRadius = Eln.autominerRange;
         double scannerEnergy = 0;
 
         jobCoord.dimention = miner.node.coordonate.dimention;
@@ -247,6 +271,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
             int index = itemsToDrop.size() - 1;
             if (drop(itemsToDrop.get(index))) {
                 itemsToDrop.remove(index);
+            } else {
+                break; // 1.12 port bug fix: 1.7.10 spun here forever (server hang) when the chest filled up; the rest
+                       // stays queued and the job below becomes chestFull until there is room
             }
         }
 
@@ -257,8 +284,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
             setJob(jobType.none);
         } else if (drill == null) {
             if (jobCoord.y != miner.node.coordonate.y) {
-                ItemStack pipeStack = miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
-                if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.getInventory().getInventoryStackLimit())) {
+                ItemStack pipeStack = miner.getInventory().getItem(AutoMinerContainer.MiningPipeSlotId);
+                if (Utils.isEmpty(pipeStack) || (pipeStack.getCount() != pipeStack.getMaxStackSize() && pipeStack.getCount() != miner.getInventory().getMaxStackSize())) {
                     jobFind = true;
                     setJob(jobType.pipeRemove);
                 } else {
@@ -282,7 +309,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         double dy = 0;
                         double dz = jobCoord.z - miner.node.coordonate.z;
                         double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                        Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
+                        Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
                         if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
                             jobFind = true;
                             setJob(jobType.ore);
@@ -294,7 +321,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
             }
 
             if (!jobFind) {
-                if (jobCoord.y < 3) {
+                if (jobCoord.y < jobCoord.world().getMinY() + 3) { // 1.12: y < 3 (bedrock at 0..4); 26.x worlds go down to the min build height
                     jobFind = true;
                     setJob(jobType.done);
                 } else {
@@ -302,11 +329,11 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     jobCoord.y--;
                     jobCoord.z = miner.node.coordonate.z;
 
-                    Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                    if (block != Blocks.air
-                        && block != Blocks.flowing_water && block != Blocks.water
-                        && block != Blocks.flowing_lava && block != Blocks.lava) {
-                        if (block != Blocks.obsidian && block != Blocks.bedrock) {
+                    Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
+                    if (!Utils.isAirBlock(block)
+                        && block != Blocks.WATER
+                        && block != Blocks.LAVA) {
+                        if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK) {
                             jobFind = true;
                             setJob(jobType.ore);
                         } else {
@@ -349,12 +376,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean checkIsOre(Coordonate coordonate) {
-        Block block = coordonate.world().getBlock(coordonate.x, coordonate.y, coordonate.z);
-        if (block instanceof BlockOre) return true;
+        Block block = WorldCompat.getBlock(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
         if (block instanceof OreBlock) return true;
-        if (block instanceof BlockRedstoneOre) return true;
-        return OreColorMapping.INSTANCE.getMap()[Block.getIdFromBlock(block) +
-            (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0;
+        // 1.12: vanilla BlockOre / BlockRedstoneOre and the X-ray scanner's ore table (other mods' ores);
+        // 26.x: the common ore tag (vanilla and mod ores)
+        return coordonate.world().getBlockState(new BlockPos(coordonate.x, coordonate.y, coordonate.z))
+            .is(net.neoforged.neoforge.common.Tags.Blocks.ORES);
     }
 
     public void onBreakElement() {
@@ -371,7 +398,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     private void dropPipe() {
         Coordonate coord = new Coordonate(miner.node.coordonate);
         for (coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength; coord.y--) {
-            Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
+            Utils.dropItem(ElnDeviceRegistry.miningPipeDescriptor.newItemStack(1), coord);
         }
     }
 
@@ -380,15 +407,15 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        pipeLength = nbt.getInteger(str + "AMSP" + "pipeLength");
-        drillCount = nbt.getInteger(str + "AMSP" + "drillCount");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        pipeLength = nbt.getIntOr(str + "AMSP" + "pipeLength", 0);
+        drillCount = nbt.getIntOr(str + "AMSP" + "drillCount", 0);
         if (drillCount == 0) drillCount++;
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setInteger(str + "AMSP" + "pipeLength", pipeLength);
-        nbt.setInteger(str + "AMSP" + "drillCount", drillCount);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putInt(str + "AMSP" + "pipeLength", pipeLength);
+        nbt.putInt(str + "AMSP" + "drillCount", drillCount);
     }
 }

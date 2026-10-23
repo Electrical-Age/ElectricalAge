@@ -6,8 +6,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,7 +18,6 @@ public class BatteryRender extends TransparentNodeElementRender {
 
     public BatteryDescriptor descriptor;
 
-    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 
     boolean plus, minus;
 
@@ -39,10 +37,7 @@ public class BatteryRender extends TransparentNodeElementRender {
     }
 
 	/*
-    @Override
-	public GuiContainer newGuiDraw(Direction side, EntityPlayer player) {
-		return new TransformatorGuiDraw(player, inventory, this);
-	}*/
+*/
 
     @Override
     public void networkUnserialize(DataInputStream stream) {
@@ -67,8 +62,4 @@ public class BatteryRender extends TransparentNodeElementRender {
         }
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new BatteryGuiDraw(player, inventory, this);
-    }
 }

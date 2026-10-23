@@ -1,0 +1,40 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Power Inductor"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "text": "line0",
+       "sample": "Inductance: 999.9mH"
+      }
+     ],
+     "gap": 2
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    },
+    {
+     "slot": "1"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

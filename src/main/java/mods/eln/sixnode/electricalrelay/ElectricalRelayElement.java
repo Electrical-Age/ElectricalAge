@@ -15,12 +15,12 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -65,7 +65,7 @@ public class ElectricalRelayElement extends SixNodeElement {
         slowProcessList.add(voltageWatchDogA);
         slowProcessList.add(voltageWatchDogB);
 
-        WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+        Failure exp = new Failure(this).electronics();
 
         //currentWatchDog.set(switchResistor).setIAbsMax(this.descriptor.cable.electricalMaximalCurrent).set(exp);
         voltageWatchDogA.set(aLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp);
@@ -77,20 +77,20 @@ public class ElectricalRelayElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
+        byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
-        switchState = nbt.getBoolean("switchState");
-        defaultOutput = nbt.getBoolean("defaultOutput");
+        switchState = nbt.getBooleanOr("switchState", false);
+        defaultOutput = nbt.getBooleanOr("defaultOutput", false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
-        nbt.setBoolean("switchState", switchState);
-        nbt.setBoolean("defaultOutput", defaultOutput);
+        nbt.putByte("front", (byte) (front.toInt() << 0));
+        nbt.putBoolean("switchState", switchState);
+        nbt.putBoolean("defaultOutput", defaultOutput);
     }
 
     @Override

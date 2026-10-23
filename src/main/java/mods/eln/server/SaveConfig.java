@@ -1,12 +1,14 @@
 package mods.eln.server;
 
-import mods.eln.Eln;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.nbt.CompoundTag;
 
-public class SaveConfig extends WorldSavedData {
+/**
+ * Per-world EA settings (1.12: WorldSavedData "SaveConfig", toggled with /eln commands). Saved with the overworld's EA
+ * file (ElnWorldSaves, key "config"). The wind state that 1.12 also kept here moves with the wind process.
+ */
+public class SaveConfig {
 
-    public static SaveConfig instance;
+    public static SaveConfig instance = new SaveConfig();
 
     public boolean heatFurnaceFuel = true;
     public boolean electricalLampAging = true;
@@ -15,36 +17,22 @@ public class SaveConfig extends WorldSavedData {
     public boolean reGenOre = false;
     public double cableRsFactor_lastUsed = 1.0;
 
-    public SaveConfig(String par1Str) {
-        super(par1Str);
-        instance = this;
+    public void readFromNBT(CompoundTag nbt) {
+        heatFurnaceFuel = nbt.getBooleanOr("heatFurnaceFuel", true);
+        electricalLampAging = nbt.getBooleanOr("electricalLampAging", true);
+        batteryAging = nbt.getBooleanOr("batteryAging", true);
+        infinitePortableBattery = nbt.getBooleanOr("infinitPortableBattery", false);
+        reGenOre = nbt.getBooleanOr("reGenOre", false);
+        cableRsFactor_lastUsed = nbt.getDoubleOr("cableRsFactor_lastUsed", 1.0);
     }
 
-    @Override
-    public void readFromNBT(NBTTagCompound nbt) {
-        heatFurnaceFuel = nbt.getBoolean("heatFurnaceFuel");
-        electricalLampAging = nbt.getBoolean("electricalLampAging");
-        batteryAging = nbt.getBoolean("batteryAging");
-        infinitePortableBattery = nbt.getBoolean("infinitPortableBattery");
-        reGenOre = nbt.getBoolean("reGenOre");
-        cableRsFactor_lastUsed = nbt.getDouble("cableRsFactor_lastUsed");
-
-        Eln.wind.readFromNBT(nbt, "wind");
-    }
-
-    @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-        nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel);
-        nbt.setBoolean("electricalLampAging", electricalLampAging);
-        nbt.setBoolean("batteryAging", batteryAging);
-        nbt.setBoolean("infinitPortableBattery", infinitePortableBattery);
-        nbt.setBoolean("reGenOre", reGenOre);
-
-        Eln.wind.writeToNBT(nbt, "wind");
-    }
-
-    @Override
-    public boolean isDirty() {
-        return true;
+    public CompoundTag writeToNBT(CompoundTag nbt) {
+        nbt.putBoolean("heatFurnaceFuel", heatFurnaceFuel);
+        nbt.putBoolean("electricalLampAging", electricalLampAging);
+        nbt.putBoolean("batteryAging", batteryAging);
+        nbt.putBoolean("infinitPortableBattery", infinitePortableBattery);
+        nbt.putBoolean("reGenOre", reGenOre);
+        nbt.putDouble("cableRsFactor_lastUsed", cableRsFactor_lastUsed);
+        return nbt;
     }
 }

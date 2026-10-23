@@ -1,5 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.LampDescriptor.Type;
@@ -10,15 +12,14 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.EnumSkyBlock;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LightLayer;
+import mods.eln.gl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -32,7 +33,6 @@ public class LampSocketRender extends SixNodeElementRender {
     LampSocketDescriptor lampSocketDescriptor = null;
     LampSocketDescriptor descriptor;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
     boolean grounded = true;
     public boolean poweredByLampSupply;
 
@@ -51,22 +51,11 @@ public class LampSocketRender extends SixNodeElementRender {
 
     public boolean isConnectedToLampSupply;
 
-    ElectricalCableDescriptor cable;
 
     public LampSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (LampSocketDescriptor) descriptor;
         lampSocketDescriptor = (LampSocketDescriptor) descriptor;
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new LampSocketGuiDraw(player, inventory, this);
-    }
-
-    @Override
-    public IInventory getInventory() {
-        return inventory;
     }
 
     @Override
@@ -76,7 +65,6 @@ public class LampSocketRender extends SixNodeElementRender {
         GL11.glRotatef(descriptor.initialRotateDeg, 1.f, 0.f, 0.f);
         descriptor.render.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity));
     }
-
     @Override
     public void refresh(float deltaT) {
         if (descriptor.render instanceof LampSocketSuspendedObjRender) {
@@ -84,26 +72,26 @@ public class LampSocketRender extends SixNodeElementRender {
 
             entityTimout -= dt;
             if (entityTimout < 0) {
-                entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord, tileEntity.yCoord - 2, tileEntity.zCoord, tileEntity.getWorldObj()).getAxisAlignedBB(2));
+                entityList = tileEntity.getLevel().getEntitiesOfClass(Entity.class, new Coordonate(tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY() - 2, tileEntity.getBlockPos().getZ(), tileEntity.getLevel()).getAxisAlignedBB(2));
                 entityTimout = 0.1f;
             }
 
             for (Object o : entityList) {
                 Entity e = (Entity) o;
                 float eFactor = 0;
-                if (e instanceof EntityArrow)
+                if (e instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow)
                     eFactor = 1f;
-                if (e instanceof EntityLivingBase)
+                if (e instanceof net.minecraft.world.entity.LivingEntity)
                     eFactor = 4f;
 
                 if (eFactor == 0)
                     continue;
-                pertuVz += e.motionX * eFactor * dt;
-                pertuVy += e.motionZ * eFactor * dt;
+                pertuVz += e.getDeltaMovement().x * eFactor * dt;
+                pertuVy += e.getDeltaMovement().z * eFactor * dt;
             }
 
-            if (tileEntity.getWorldObj().getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord) > 3) {
-                float weather = (float) UtilsClient.getWeather(tileEntity.getWorldObj()) * 0.9f + 0.1f;
+            if (WorldCompat.getSavedLightValue(tileEntity.getLevel(), net.minecraft.world.level.LightLayer.SKY, tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ()) > 3) {
+                float weather = (float) UtilsClient.getWeather(tileEntity.getLevel()) * 0.9f + 0.1f;
 
                 weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
                 weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
@@ -127,7 +115,6 @@ public class LampSocketRender extends SixNodeElementRender {
             pertuPz += pertuVz;
         }
     }
-
     void setLight(byte newLight) {
         light = newLight;
         if (lampDescriptor != null && lampDescriptor.type == Type.eco && oldLight != -1 && oldLight < 9 && light >= 9) {
@@ -135,7 +122,7 @@ public class LampSocketRender extends SixNodeElementRender {
             if (rand > 0.1f)
                 play(new SoundCommand("eln:neon_lamp").mulVolume(0.7f, 1.0f + (rand / 6.0f)).smallRange());
             else
-                play(new SoundCommand("eln:NEON_LFNOISE").mulVolume(0.2f, 1f).verySmallRange());
+                play(new SoundCommand("eln:neon_lfnoise").mulVolume(0.2f, 1f).verySmallRange());
         }
         oldLight = light;
     }
@@ -151,7 +138,6 @@ public class LampSocketRender extends SixNodeElementRender {
             ItemStack lampStack = Utils.unserialiseItemStack(stream);
             lampDescriptor = (LampDescriptor) Utils.getItemObject(lampStack);
             alphaZ = stream.readFloat();
-            cable = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
             poweredByLampSupply = stream.readBoolean();
             channel = stream.readUTF();
@@ -181,13 +167,12 @@ public class LampSocketRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        if (cable == null
-            || (lrdu == front && !descriptor.cableFront)
+        if ((lrdu == front && !descriptor.cableFront)
             || (lrdu == front.left() && !descriptor.cableLeft)
             || (lrdu == front.right() && !descriptor.cableRight)
             || (lrdu == front.inverse() && !descriptor.cableBack))
             return null;
-        return cable.render;
+        return mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render; // built-in cable
     }
 
     public void clientSetGrounded(boolean value) {

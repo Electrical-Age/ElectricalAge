@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:cheap_ferromagnetic_core",
+    "P": "#c:plates/iron"
+  },
+  "pattern": [
+    "PCP"
+  ],
+  "result": {
+    "id": "eln:average_ferromagnetic_core"
+  }
+}

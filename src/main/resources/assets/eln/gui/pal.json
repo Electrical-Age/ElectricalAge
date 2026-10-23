@@ -1,0 +1,158 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "PAL"
+  },
+  {
+   "row": [
+    {
+     "canvas": "diagram",
+     "width": 114,
+     "height": 94
+    },
+    {
+     "column": [
+      {
+       "text": "legend0",
+       "sample": "C: bottom (green)"
+      },
+      {
+       "text": "legend1",
+       "sample": "C: bottom (green)"
+      },
+      {
+       "text": "legend2",
+       "sample": "C: bottom (green)"
+      }
+     ],
+     "gap": 2
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "header",
+   "sample": "Inputs A B C, then the output for each:"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "text": "in0",
+       "sample": "000"
+      },
+      {
+       "button": "t0",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in1",
+       "sample": "000"
+      },
+      {
+       "button": "t1",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in2",
+       "sample": "000"
+      },
+      {
+       "button": "t2",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in3",
+       "sample": "000"
+      },
+      {
+       "button": "t3",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in4",
+       "sample": "000"
+      },
+      {
+       "button": "t4",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in5",
+       "sample": "000"
+      },
+      {
+       "button": "t5",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in6",
+       "sample": "000"
+      },
+      {
+       "button": "t6",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    },
+    {
+     "column": [
+      {
+       "text": "in7",
+       "sample": "000"
+      },
+      {
+       "button": "t7",
+       "sample": "1"
+      }
+     ],
+     "gap": 2,
+     "align": "center"
+    }
+   ],
+   "gap": 3,
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

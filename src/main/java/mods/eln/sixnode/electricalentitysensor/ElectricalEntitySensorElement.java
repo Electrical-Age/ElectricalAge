@@ -16,9 +16,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -91,9 +91,9 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+        return inventory.take(entityPlayer.getMainHandItem());
     }
 
     @Override
@@ -102,16 +102,11 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         if (inventory != null)
             return inventory.getInventory();
         else
             return null;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new ElectricalEntitySensorContainer(player, inventory.getInventory());
     }
 
     @Override
@@ -125,7 +120,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeBoolean(slowProcess.state);
-            Utils.serialiseItemStack(stream, getInventory().getStackInSlot(ElectricalEntitySensorContainer.filterId));
+            Utils.serialiseItemStack(stream, getInventory().getItem(ElectricalEntitySensorContainer.filterId));
         } catch (IOException e) {
 
             e.printStackTrace();

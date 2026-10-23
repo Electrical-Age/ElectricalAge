@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "D": "eln:cheap_electrical_drill",
+    "R": "minecraft:redstone",
+    "d": "minecraft:diamond"
+  },
+  "pattern": [
+    "RCR",
+    " D ",
+    " d "
+  ],
+  "result": {
+    "id": "eln:average_electrical_drill"
+  }
+}

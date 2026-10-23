@@ -24,35 +24,20 @@ public class Obj3DFolder {
      * Load all obj models available in the release mod asset folder.
      */
     public void loadAllElnModels() {
-        try {
-            // Find location of electrical age jar file.
-            CodeSource codeSource = Obj3DFolder.class.getProtectionDomain().getCodeSource();
-            if (codeSource != null) {
-                String jarFilePath = codeSource.getLocation().getPath();
-                if (jarFilePath.contains("!")) {
-                    jarFilePath = jarFilePath.substring(5, jarFilePath.indexOf("!"));
-                    JarFile jarFile = new JarFile(URLDecoder.decode(jarFilePath, "UTF-8"));
-                    Enumeration<JarEntry> entries = jarFile.entries();
-                    int modelCount = 0;
-                    while (entries.hasMoreElements()) {
-                        String filename = entries.nextElement().getName();
-                        if (filename.startsWith("assets/eln/model/") && filename.toLowerCase().endsWith(".obj")) {
-                            filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
-                            Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
-                            loadObj(filename);
-                        }
-                    }
-                } else {
-                    Integer modelCount = 0;
-                    File modelFolder = new File(mods.eln.Eln.class.getResource("/assets/eln/model").toURI());
-                    if (modelFolder.isDirectory()) {
-                        loadModelsRecursive(modelFolder, modelCount);
-                    }
-                }
+        // 26.x: the mod jar can't be scanned under the module system, so script/gen_model_index.py lists the models
+        try (java.io.InputStream in = mods.eln.Eln.class.getResourceAsStream("/assets/eln/model/index.txt")) {
+            if (in == null) {
+                mods.eln.Eln.LOG.error("Electrical Age: assets/eln/model/index.txt missing, no models loaded");
+                return;
+            }
+            int modelCount = 0;
+            for (String line : new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).split("\n")) {
+                String filename = line.trim();
+                if (filename.isEmpty()) continue;
+                Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
+                loadObj(filename);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
     }
@@ -80,6 +65,7 @@ public class Obj3DFolder {
         if (obj.loadFile(modelPath)) {
             String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
             tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
+            tag = tag.toLowerCase(java.util.Locale.ROOT); // 1.12 port: asset names are lower case, lookups too
             if (nameToObjHash.containsKey(tag)) {
                 Utils.println("Double load of model " + tag);
             }
@@ -91,7 +77,7 @@ public class Obj3DFolder {
     }
 
     public Obj3D getObj(String obj3DName) {
-        return nameToObjHash.get(obj3DName);
+        return nameToObjHash.get(obj3DName.toLowerCase(java.util.Locale.ROOT));
     }
 
     public Obj3DPart getPart(String objName, String partName) {
@@ -99,6 +85,7 @@ public class Obj3DFolder {
         if (obj == null) return null;
         return obj.getPart(partName);
     }
+
 
     public void draw(String objName, String partName) {
         Obj3DPart part = getPart(objName, partName);

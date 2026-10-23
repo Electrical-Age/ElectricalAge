@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/root",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:copper_cable"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:copper_cable"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.copper_cable.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.copper_cable.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

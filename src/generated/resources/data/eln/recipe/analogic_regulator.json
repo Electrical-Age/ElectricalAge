@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "R R",
+    " C ",
+    " I "
+  ],
+  "result": {
+    "id": "eln:analogic_regulator"
+  }
+}

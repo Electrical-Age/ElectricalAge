@@ -1,25 +1,39 @@
 package mods.eln.entity;
 
 import mods.eln.misc.Utils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EnumCreatureAttribute;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.*;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MoveThroughVillageGoal;
+import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.ArrayList;
-import java.util.Map.Entry;
 import java.util.Random;
 
-public class ReplicatorEntity extends EntityMob {
+/**
+ * The replicator (1.12 ReplicatorEntity, an EntityMob): a small cable-eating mob. It looks for live (>= 30 V,
+ * non-signal) cables within 15 blocks, sits on them drawing power through a resistor (eating it lowers its hunger),
+ * duplicates when well fed, starves when hungry, and attacks players, villagers and (when hungry) other replicators.
+ * Thunderstorms pop them near players (ReplicatorPopProcess). Silverfish sounds; render (silverfish model) in P3.
+ */
+public class ReplicatorEntity extends Monster {
 
     boolean isSpawnedFromWeather = false;
     double hungerTime = 10 * 60;
@@ -30,64 +44,72 @@ public class ReplicatorEntity extends EntityMob {
 
     public static final ArrayList<ItemStack> dropList = new ArrayList<ItemStack>();
 
-    public ReplicatorEntity(World par1World) {
-        super(par1World);
+    double hunger = (Math.random() - 0.5) * 0.3;
 
-        func_110163_bv(); //persistenceRequired
+    public ReplicatorEntity(EntityType<? extends ReplicatorEntity> type, Level level) {
+        super(type, level);
+        setPersistenceRequired(); // 1.12 enablePersistence
+    }
 
-        this.setSize(0.3F, 0.7F);
+    /** 1.12 applyEntityAttributes. */
+    public static AttributeSupplier.Builder createAttributes() {
+        return Monster.createMonsterAttributes()
+            .add(Attributes.FOLLOW_RANGE, 8.0D)
+            .add(Attributes.MAX_HEALTH, 8.0D)
+            .add(Attributes.MOVEMENT_SPEED, 0.23000000417232513D)
+            .add(Attributes.ATTACK_DAMAGE, 3.0D);
+    }
 
-        ReplicatoCableAI replicatorIa = new ReplicatoCableAI(this);
+    @Override
+    protected void registerGoals() {
         int p = 0;
-
-        this.tasks.addTask(p++, new EntityAISwimming(this));
-        // this.tasks.addTask(p++, new EntityAIBreakDoor(this));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityVillager.class, 1.0D, true));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, ReplicatorEntity.class, 1.0D, true));
-        this.tasks.addTask(p++, replicatorIa);
-        this.tasks.addTask(p++, new EntityAIMoveTowardsRestriction(this, 1.0D));
-        this.tasks.addTask(p++, new EntityAIMoveThroughVillage(this, 1.0D, false));
-        this.tasks.addTask(p++, new ConfigurableAiWander(this, 1.0D, 20));
-        this.tasks.addTask(p, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(p++, new EntityAILookIdle(this));
+        this.goalSelector.addGoal(p++, new FloatGoal(this));
+        this.goalSelector.addGoal(p++, new AttackMeleeOfClass(this, Player.class, 1.0D, false));
+        this.goalSelector.addGoal(p++, new AttackMeleeOfClass(this, AbstractVillager.class, 1.0D, true));
+        this.goalSelector.addGoal(p++, new AttackMeleeOfClass(this, ReplicatorEntity.class, 1.0D, true));
+        this.goalSelector.addGoal(p++, new ReplicatoCableAI(this));
+        this.goalSelector.addGoal(p++, new MoveTowardsRestrictionGoal(this, 1.0D));
+        this.goalSelector.addGoal(p++, new MoveThroughVillageGoal(this, 1.0D, false, 4, () -> false));
+        this.goalSelector.addGoal(p++, new ConfigurableAiWander(this, 1.0D, 20));
+        this.goalSelector.addGoal(p, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(p++, new RandomLookAroundGoal(this));
         p = 1;
-        this.targetTasks.addTask(p++, new EntityAIHurtByTarget(this, true));
-        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
-        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityVillager.class, 0, false));
-        this.targetTasks.addTask(p++, new ReplicatorHungryAttack(this, ReplicatorEntity.class, 0, false));
-        // this.targetTasks.addTask(p++, new EntityAINearestAttackableTarget(this, ReplicatorEntity.class, 0, false));
-        // this.targetTasks.addTask(p++, replicatorIa);
+        this.targetSelector.addGoal(p++, new HurtByTargetGoal(this));
+        // 1.12 target chance 0: every tick
+        this.targetSelector.addGoal(p, new NearestAttackableTargetGoal<>(this, Player.class, 0, true, false, null));
+        this.targetSelector.addGoal(p, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, 0, false, false, null));
+        this.targetSelector.addGoal(p++, new ReplicatorHungryAttack(this));
     }
 
     @Override
-    public boolean attackEntityAsMob(Entity e) {
-        if (e instanceof ReplicatorEntity) {
+    public boolean doHurtTarget(ServerLevel level, Entity e) {
+        if (e instanceof ReplicatorEntity r) {
             this.hunger -= 0.4;
-            ((ReplicatorEntity) e).hunger += 0.4;
+            r.hunger += 0.4;
         }
-        return super.attackEntityAsMob(e);
+        return super.doHurtTarget(level, e);
     }
 
     @Override
-    protected void updateAITick() {
-        super.updateAITick();
-        //setDead();
+    protected void customServerAiStep(ServerLevel level) { // 1.12 updateAITasks
+        super.customServerAiStep(level);
         hunger += 0.05 / hungerTime;
 
         if (hunger > 1 && Math.random() < 0.05 / 5) {
-            attackEntityFrom(DamageSource.starve, 1);
+            hurtServer(level, level.damageSources().starve(), 1);
         }
         if (hunger < 0.5 && Math.random() * 10 < 0.05) {
             heal(1f);
         }
         if (hunger < hungerToDuplicate) {
-            ReplicatorEntity entityliving = new ReplicatorEntity(this.worldObj);
-            entityliving.setLocationAndAngles(this.posX, this.posY, this.posZ, 0f, 0f);
-            entityliving.rotationYawHead = entityliving.rotationYaw;
-            entityliving.renderYawOffset = entityliving.rotationYaw;
-            worldObj.spawnEntityInWorld(entityliving);
-            entityliving.playLivingSound();
+            ReplicatorEntity child = mods.eln.registry.ElnRegistry.REPLICATOR.get().create(level, net.minecraft.world.entity.EntitySpawnReason.BREEDING);
+            if (child != null) {
+                child.snapTo(getX(), getY(), getZ(), 0f, 0f);
+                child.yHeadRot = child.getYRot();
+                child.yBodyRot = child.getYRot();
+                level.addFreshEntity(child);
+                child.playAmbientSound();
+            }
             hunger = 0;
         }
     }
@@ -96,76 +118,42 @@ public class ReplicatorEntity extends EntityMob {
         hunger = hunger - Math.min(0.001, e / hungerToEnergy);
     }
 
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
-        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D);
-        // this.getAttributeMap().func_111150_b(field_110186_bp).setAttribute(this.rand.nextDouble() * ForgeDummyContainer.zombieSummonBaseChance);
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.SILVERFISH_AMBIENT; // 1.7.10 "mob.silverfish.say"
     }
-
-    protected boolean isAIEnabled() {
-        return true;
-    }
-
-    protected String getLivingSound() {
-        return "mob.silverfish.say";
-    }
-
-    protected String getHurtSound() {
-        return "mob.silverfish.hit";
-    }
-
-    protected String getDeathSound() {
-        return "mob.silverfish.kill";
-    }
-
-    /*protected void playStepSound(int par1, int par2, int par3, int par4) {
-        this.playSound("mob.silverfish.step", 0.15F, 1.0F);
-    }
-
-    protected int getDropItemId() {
-        return Item.getIdFromItem(Items.rotten_flesh);
-    }*/
 
     @Override
-    protected void dropFewItems(boolean par1, int par2) {
-        this.entityDropItem(dropList.get(new Random().nextInt(dropList.size())).copy(), 0.5f);
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.SILVERFISH_HURT;
+    }
 
-        if (isSpawnedFromWeather) {
-            if (Math.random() < 0.33) {
-                for (Object s : EntityList.IDtoClassMapping.entrySet()) {
-                    Entry e = (Entry) s;
-                    if (e.getValue() == ReplicatorEntity.class) {
-                        this.entityDropItem(new ItemStack((Item) Item.itemRegistry.getObject("spawn_egg"), 1, (Integer) e.getKey()), 0.5f);
-                        break;
-                    }
-                }
-            }
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.SILVERFISH_DEATH;
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+        super.dropCustomDeathLoot(level, source, killedByPlayer);
+        if (!dropList.isEmpty()) this.spawnAtLocation(level, dropList.get(new Random().nextInt(dropList.size())).copy(), 0.5f);
+        if (isSpawnedFromWeather && Math.random() < 0.33) {
+            this.spawnAtLocation(level, new ItemStack(mods.eln.registry.ElnRegistry.REPLICATOR_SPAWN_EGG.get()), 0.5f);
         }
     }
 
-    public EnumCreatureAttribute getCreatureAttribute() {
-        return EnumCreatureAttribute.UNDEFINED;
-    }
-
-    double hunger = (Math.random() - 0.5) * 0.3;
-
     @Override
-    public void writeEntityToNBT(NBTTagCompound nbt) {
-        super.writeEntityToNBT(nbt);
-        nbt.setDouble("ElnHunger", hunger);
-        nbt.setBoolean("isSpawnedFromWeather", isSpawnedFromWeather);
+    protected void addAdditionalSaveData(ValueOutput out) {
+        super.addAdditionalSaveData(out);
+        out.putDouble("ElnHunger", hunger);
+        out.putBoolean("isSpawnedFromWeather", isSpawnedFromWeather);
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound nbt) {
-        super.readEntityFromNBT(nbt);
-
-        hunger = nbt.getDouble("ElnHunger");
-        isSpawnedFromWeather = nbt.getBoolean("isSpawnedFromWeather");
-
-        Utils.println("[Replicator] " + posX + " " + posY + " " + posZ + " ");
+    protected void readAdditionalSaveData(ValueInput in) {
+        super.readAdditionalSaveData(in);
+        hunger = in.getDoubleOr("ElnHunger", 0.0);
+        isSpawnedFromWeather = in.getBooleanOr("isSpawnedFromWeather", false);
+        Utils.println("[Replicator] " + getX() + " " + getY() + " " + getZ() + " ");
     }
 }

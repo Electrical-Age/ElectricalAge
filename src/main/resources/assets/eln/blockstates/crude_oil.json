@@ -1,0 +1,5 @@
+{
+  "multipart": [
+    { "apply": { "model": "eln:block/oil_particle" } }
+  ]
+}

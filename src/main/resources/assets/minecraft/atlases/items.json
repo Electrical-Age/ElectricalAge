@@ -1,0 +1,5 @@
+{
+  "sources": [
+    {"type": "minecraft:directory", "prefix": "items/", "source": "items"}
+  ]
+}

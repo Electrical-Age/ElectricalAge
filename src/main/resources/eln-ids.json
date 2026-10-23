@@ -1,0 +1,1964 @@
+{
+ "eln:copper_axe@0": {
+  "descriptor": "",
+  "display": "Copper Axe",
+  "kind": "copper_axe",
+  "name": "copper_axe"
+ },
+ "eln:copper_boots@0": {
+  "descriptor": "",
+  "display": "Copper Boots",
+  "kind": "copper_boots",
+  "name": "copper_boots"
+ },
+ "eln:copper_chestplate@0": {
+  "descriptor": "",
+  "display": "Copper Chestplate",
+  "kind": "copper_chestplate",
+  "name": "copper_chestplate"
+ },
+ "eln:copper_helmet@0": {
+  "descriptor": "",
+  "display": "Copper Helmet",
+  "kind": "copper_helmet",
+  "name": "copper_helmet"
+ },
+ "eln:copper_hoe@0": {
+  "descriptor": "",
+  "display": "Copper Hoe",
+  "kind": "copper_hoe",
+  "name": "copper_hoe"
+ },
+ "eln:copper_leggings@0": {
+  "descriptor": "",
+  "display": "Copper Leggings",
+  "kind": "copper_leggings",
+  "name": "copper_leggings"
+ },
+ "eln:copper_pickaxe@0": {
+  "descriptor": "",
+  "display": "Copper Pickaxe",
+  "kind": "copper_pickaxe",
+  "name": "copper_pickaxe"
+ },
+ "eln:copper_shovel@0": {
+  "descriptor": "",
+  "display": "Copper Shovel",
+  "kind": "copper_shovel",
+  "name": "copper_shovel"
+ },
+ "eln:copper_sword@0": {
+  "descriptor": "",
+  "display": "Copper Sword",
+  "kind": "copper_sword",
+  "name": "copper_sword"
+ },
+ "eln:e_coal_boots@0": {
+  "descriptor": "",
+  "display": "E-Coal Boots",
+  "kind": "e_coal_boots",
+  "name": "e_coal_boots"
+ },
+ "eln:e_coal_chestplate@0": {
+  "descriptor": "",
+  "display": "E-Coal Chestplate",
+  "kind": "e_coal_chestplate",
+  "name": "e_coal_chestplate"
+ },
+ "eln:e_coal_helmet@0": {
+  "descriptor": "",
+  "display": "E-Coal Helmet",
+  "kind": "e_coal_helmet",
+  "name": "e_coal_helmet"
+ },
+ "eln:e_coal_leggings@0": {
+  "descriptor": "",
+  "display": "E-Coal Leggings",
+  "kind": "e_coal_leggings",
+  "name": "e_coal_leggings"
+ },
+ "eln:energy_converter_eln_to_other_hvublock@0": {
+  "descriptor": "",
+  "display": "800V Electrical Age to other energy exporter",
+  "kind": "energy_converter_eln_to_other_hvublock",
+  "name": "energy_converter_eln_to_other_hvublock"
+ },
+ "eln:energy_converter_eln_to_other_lvublock@0": {
+  "descriptor": "",
+  "display": "50V Electrical Age to other energy exporter",
+  "kind": "energy_converter_eln_to_other_lvublock",
+  "name": "energy_converter_eln_to_other_lvublock"
+ },
+ "eln:energy_converter_eln_to_other_mvublock@0": {
+  "descriptor": "",
+  "display": "200V Electrical Age to other energy exporter",
+  "kind": "energy_converter_eln_to_other_mvublock",
+  "name": "energy_converter_eln_to_other_mvublock"
+ },
+ "eln:item_creative_tab@0": {
+  "descriptor": "",
+  "display": "Electrical Age",
+  "kind": "item_creative_tab",
+  "name": "item_creative_tab"
+ },
+ "eln:ore@1": {
+  "descriptor": "OreDescriptor",
+  "display": "Copper Ore",
+  "kind": "ore",
+  "name": "copper_ore"
+ },
+ "eln:ore@4": {
+  "descriptor": "OreDescriptor",
+  "display": "Lead Ore",
+  "kind": "ore",
+  "name": "lead_ore"
+ },
+ "eln:ore@5": {
+  "descriptor": "OreDescriptor",
+  "display": "Tungsten Ore",
+  "kind": "ore",
+  "name": "tungsten_ore"
+ },
+ "eln:ore@6": {
+  "descriptor": "OreDescriptor",
+  "display": "Cinnabar Ore",
+  "kind": "ore",
+  "name": "cinnabar_ore"
+ },
+ "eln:ore@7": {
+  "descriptor": "OreDescriptor",
+  "display": "Deepslate Lead Ore",
+  "kind": "ore",
+  "name": "deepslate_lead_ore"
+ },
+ "eln:shared_item@10": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Cinnabar Dust",
+  "kind": "shared_item",
+  "name": "cinnabar_dust"
+ },
+ "eln:shared_item@1024": {
+  "descriptor": "OreScanner",
+  "display": "Ore Scanner",
+  "kind": "shared_item",
+  "name": "ore_scanner"
+ },
+ "eln:shared_item@1088": {
+  "descriptor": "MiningPipeDescriptor",
+  "display": "Mining Pipe",
+  "kind": "shared_item",
+  "name": "mining_pipe"
+ },
+ "eln:shared_item@192": {
+  "descriptor": "RegulatorOnOffDescriptor",
+  "display": "On/off regulator 1%",
+  "kind": "shared_item",
+  "name": "on_off_regulator_1"
+ },
+ "eln:shared_item@193": {
+  "descriptor": "RegulatorOnOffDescriptor",
+  "display": "On/off regulator 10%",
+  "kind": "shared_item",
+  "name": "on_off_regulator_10"
+ },
+ "eln:shared_item@200": {
+  "descriptor": "RegulatorAnalogDescriptor",
+  "display": "Analogic Regulator",
+  "kind": "shared_item",
+  "name": "analogic_regulator"
+ },
+ "eln:shared_item@256": {
+  "descriptor": "LampDescriptor",
+  "display": "Small 50V Incandescent Light Bulb",
+  "kind": "shared_item",
+  "name": "small_50v_incandescent_light_bulb"
+ },
+ "eln:shared_item@257": {
+  "descriptor": "LampDescriptor",
+  "display": "50V Incandescent Light Bulb",
+  "kind": "shared_item",
+  "name": "50v_incandescent_light_bulb"
+ },
+ "eln:shared_item@258": {
+  "descriptor": "LampDescriptor",
+  "display": "200V Incandescent Light Bulb",
+  "kind": "shared_item",
+  "name": "200v_incandescent_light_bulb"
+ },
+ "eln:shared_item@260": {
+  "descriptor": "LampDescriptor",
+  "display": "Small 50V Carbon Incandescent Light Bulb",
+  "kind": "shared_item",
+  "name": "small_50v_carbon_incandescent_light_bulb"
+ },
+ "eln:shared_item@261": {
+  "descriptor": "LampDescriptor",
+  "display": "50V Carbon Incandescent Light Bulb",
+  "kind": "shared_item",
+  "name": "50v_carbon_incandescent_light_bulb"
+ },
+ "eln:shared_item@272": {
+  "descriptor": "LampDescriptor",
+  "display": "Small 50V Economic Light Bulb",
+  "kind": "shared_item",
+  "name": "small_50v_economic_light_bulb"
+ },
+ "eln:shared_item@273": {
+  "descriptor": "LampDescriptor",
+  "display": "50V Economic Light Bulb",
+  "kind": "shared_item",
+  "name": "50v_economic_light_bulb"
+ },
+ "eln:shared_item@274": {
+  "descriptor": "LampDescriptor",
+  "display": "200V Economic Light Bulb",
+  "kind": "shared_item",
+  "name": "200v_economic_light_bulb"
+ },
+ "eln:shared_item@288": {
+  "descriptor": "LampDescriptor",
+  "display": "50V Farming Lamp",
+  "kind": "shared_item",
+  "name": "50v_farming_lamp"
+ },
+ "eln:shared_item@292": {
+  "descriptor": "LampDescriptor",
+  "display": "200V Farming Lamp",
+  "kind": "shared_item",
+  "name": "200v_farming_lamp"
+ },
+ "eln:shared_item@293": {
+  "descriptor": "LampDescriptor",
+  "display": "50V LED Bulb",
+  "kind": "shared_item",
+  "name": "50v_led_bulb"
+ },
+ "eln:shared_item@294": {
+  "descriptor": "LampDescriptor",
+  "display": "200V LED Bulb",
+  "kind": "shared_item",
+  "name": "200v_led_bulb"
+ },
+ "eln:shared_item@320": {
+  "descriptor": "OverHeatingProtectionDescriptor",
+  "display": "Overheating Protection",
+  "kind": "shared_item",
+  "name": "overheating_protection"
+ },
+ "eln:shared_item@321": {
+  "descriptor": "OverVoltageProtectionDescriptor",
+  "display": "Overvoltage Protection",
+  "kind": "shared_item",
+  "name": "overvoltage_protection"
+ },
+ "eln:shared_item@384": {
+  "descriptor": "CombustionChamber",
+  "display": "Combustion Chamber",
+  "kind": "shared_item",
+  "name": "combustion_chamber"
+ },
+ "eln:shared_item@385": {
+  "descriptor": "ThermalIsolatorElement",
+  "display": "Thermal Insulation",
+  "kind": "shared_item",
+  "name": "thermal_insulation"
+ },
+ "eln:shared_item@4096": {
+  "descriptor": "TreeResin",
+  "display": "Tree Resin",
+  "kind": "shared_item",
+  "name": "tree_resin"
+ },
+ "eln:shared_item@4097": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Rubber",
+  "kind": "shared_item",
+  "name": "rubber"
+ },
+ "eln:shared_item@4160": {
+  "descriptor": "CopperCableDescriptor",
+  "display": "Copper Cable",
+  "kind": "shared_item",
+  "name": "copper_cable"
+ },
+ "eln:shared_item@4161": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Iron Cable",
+  "kind": "shared_item",
+  "name": "iron_cable"
+ },
+ "eln:shared_item@4162": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Tungsten Cable",
+  "kind": "shared_item",
+  "name": "tungsten_cable"
+ },
+ "eln:shared_item@4163": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Copper Coil",
+  "kind": "shared_item",
+  "name": "copper_coil"
+ },
+ "eln:shared_item@448": {
+  "descriptor": "FerromagneticCoreDescriptor",
+  "display": "Cheap Ferromagnetic Core",
+  "kind": "shared_item",
+  "name": "cheap_ferromagnetic_core"
+ },
+ "eln:shared_item@449": {
+  "descriptor": "FerromagneticCoreDescriptor",
+  "display": "Average Ferromagnetic Core",
+  "kind": "shared_item",
+  "name": "average_ferromagnetic_core"
+ },
+ "eln:shared_item@450": {
+  "descriptor": "FerromagneticCoreDescriptor",
+  "display": "Optimal Ferromagnetic Core",
+  "kind": "shared_item",
+  "name": "optimal_ferromagnetic_core"
+ },
+ "eln:shared_item@5": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Lead Dust",
+  "kind": "shared_item",
+  "name": "lead_dust"
+ },
+ "eln:shared_item@513": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Copper Ingot",
+  "kind": "shared_item",
+  "name": "copper_ingot"
+ },
+ "eln:shared_item@516": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Lead Ingot",
+  "kind": "shared_item",
+  "name": "lead_ingot"
+ },
+ "eln:shared_item@517": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Tungsten Ingot",
+  "kind": "shared_item",
+  "name": "tungsten_ingot"
+ },
+ "eln:shared_item@518": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Ferrite Ingot",
+  "kind": "shared_item",
+  "name": "ferrite_ingot"
+ },
+ "eln:shared_item@519": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Alloy Ingot",
+  "kind": "shared_item",
+  "name": "alloy_ingot"
+ },
+ "eln:shared_item@520": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Mercury",
+  "kind": "shared_item",
+  "name": "mercury"
+ },
+ "eln:shared_item@577": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Copper Dust",
+  "kind": "shared_item",
+  "name": "copper_dust"
+ },
+ "eln:shared_item@578": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Iron Dust",
+  "kind": "shared_item",
+  "name": "iron_dust"
+ },
+ "eln:shared_item@6": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Tungsten Dust",
+  "kind": "shared_item",
+  "name": "tungsten_dust"
+ },
+ "eln:shared_item@6279": {
+  "descriptor": "ElectricalFuseDescriptor",
+  "display": "Lead Fuse for low voltage cables",
+  "kind": "shared_item",
+  "name": "lead_fuse_for_low_voltage_cables"
+ },
+ "eln:shared_item@6280": {
+  "descriptor": "ElectricalFuseDescriptor",
+  "display": "Lead Fuse for medium voltage cables",
+  "kind": "shared_item",
+  "name": "lead_fuse_for_medium_voltage_cables"
+ },
+ "eln:shared_item@6281": {
+  "descriptor": "ElectricalFuseDescriptor",
+  "display": "Lead Fuse for high voltage cables",
+  "kind": "shared_item",
+  "name": "lead_fuse_for_high_voltage_cables"
+ },
+ "eln:shared_item@6282": {
+  "descriptor": "ElectricalFuseDescriptor",
+  "display": "Lead Fuse for very high voltage cables",
+  "kind": "shared_item",
+  "name": "lead_fuse_for_very_high_voltage_cables"
+ },
+ "eln:shared_item@6283": {
+  "descriptor": "ElectricalFuseDescriptor",
+  "display": "Blown Lead Fuse",
+  "kind": "shared_item",
+  "name": "blown_lead_fuse"
+ },
+ "eln:shared_item@64": {
+  "descriptor": "HeatingCorpElement",
+  "display": "Small 50V Copper Heating Corp",
+  "kind": "shared_item",
+  "name": "small_50v_copper_heating_corp"
+ },
+ "eln:shared_item@640": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Electrical Motor",
+  "kind": "shared_item",
+  "name": "electrical_motor"
+ },
+ "eln:shared_item@641": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Advanced Electrical Motor",
+  "kind": "shared_item",
+  "name": "advanced_electrical_motor"
+ },
+ "eln:shared_item@65": {
+  "descriptor": "HeatingCorpElement",
+  "display": "50V Copper Heating Corp",
+  "kind": "shared_item",
+  "name": "50v_copper_heating_corp"
+ },
+ "eln:shared_item@66": {
+  "descriptor": "HeatingCorpElement",
+  "display": "Small 200V Copper Heating Corp",
+  "kind": "shared_item",
+  "name": "small_200v_copper_heating_corp"
+ },
+ "eln:shared_item@67": {
+  "descriptor": "HeatingCorpElement",
+  "display": "200V Copper Heating Corp",
+  "kind": "shared_item",
+  "name": "200v_copper_heating_corp"
+ },
+ "eln:shared_item@68": {
+  "descriptor": "HeatingCorpElement",
+  "display": "Small 50V Iron Heating Corp",
+  "kind": "shared_item",
+  "name": "small_50v_iron_heating_corp"
+ },
+ "eln:shared_item@69": {
+  "descriptor": "HeatingCorpElement",
+  "display": "50V Iron Heating Corp",
+  "kind": "shared_item",
+  "name": "50v_iron_heating_corp"
+ },
+ "eln:shared_item@7": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Gold Dust",
+  "kind": "shared_item",
+  "name": "gold_dust"
+ },
+ "eln:shared_item@70": {
+  "descriptor": "HeatingCorpElement",
+  "display": "Small 200V Iron Heating Corp",
+  "kind": "shared_item",
+  "name": "small_200v_iron_heating_corp"
+ },
+ "eln:shared_item@704": {
+  "descriptor": "SolarTrackerDescriptor",
+  "display": "Solar Tracker",
+  "kind": "shared_item",
+  "name": "solar_tracker"
+ },
+ "eln:shared_item@71": {
+  "descriptor": "HeatingCorpElement",
+  "display": "200V Iron Heating Corp",
+  "kind": "shared_item",
+  "name": "200v_iron_heating_corp"
+ },
+ "eln:shared_item@72": {
+  "descriptor": "HeatingCorpElement",
+  "display": "Small 50V Tungsten Heating Corp",
+  "kind": "shared_item",
+  "name": "small_50v_tungsten_heating_corp"
+ },
+ "eln:shared_item@73": {
+  "descriptor": "HeatingCorpElement",
+  "display": "50V Tungsten Heating Corp",
+  "kind": "shared_item",
+  "name": "50v_tungsten_heating_corp"
+ },
+ "eln:shared_item@74": {
+  "descriptor": "HeatingCorpElement",
+  "display": "Small 200V Tungsten Heating Corp",
+  "kind": "shared_item",
+  "name": "small_200v_tungsten_heating_corp"
+ },
+ "eln:shared_item@75": {
+  "descriptor": "HeatingCorpElement",
+  "display": "200V Tungsten Heating Corp",
+  "kind": "shared_item",
+  "name": "200v_tungsten_heating_corp"
+ },
+ "eln:shared_item@7616": {
+  "descriptor": "BrushDescriptor",
+  "display": "Black Brush",
+  "kind": "shared_item",
+  "name": "black_brush"
+ },
+ "eln:shared_item@7617": {
+  "descriptor": "BrushDescriptor",
+  "display": "Red Brush",
+  "kind": "shared_item",
+  "name": "red_brush"
+ },
+ "eln:shared_item@7618": {
+  "descriptor": "BrushDescriptor",
+  "display": "Green Brush",
+  "kind": "shared_item",
+  "name": "green_brush"
+ },
+ "eln:shared_item@7619": {
+  "descriptor": "BrushDescriptor",
+  "display": "Brown Brush",
+  "kind": "shared_item",
+  "name": "brown_brush"
+ },
+ "eln:shared_item@7620": {
+  "descriptor": "BrushDescriptor",
+  "display": "Blue Brush",
+  "kind": "shared_item",
+  "name": "blue_brush"
+ },
+ "eln:shared_item@7621": {
+  "descriptor": "BrushDescriptor",
+  "display": "Purple Brush",
+  "kind": "shared_item",
+  "name": "purple_brush"
+ },
+ "eln:shared_item@7622": {
+  "descriptor": "BrushDescriptor",
+  "display": "Cyan Brush",
+  "kind": "shared_item",
+  "name": "cyan_brush"
+ },
+ "eln:shared_item@7623": {
+  "descriptor": "BrushDescriptor",
+  "display": "Silver Brush",
+  "kind": "shared_item",
+  "name": "silver_brush"
+ },
+ "eln:shared_item@7624": {
+  "descriptor": "BrushDescriptor",
+  "display": "Gray Brush",
+  "kind": "shared_item",
+  "name": "gray_brush"
+ },
+ "eln:shared_item@7625": {
+  "descriptor": "BrushDescriptor",
+  "display": "Pink Brush",
+  "kind": "shared_item",
+  "name": "pink_brush"
+ },
+ "eln:shared_item@7626": {
+  "descriptor": "BrushDescriptor",
+  "display": "Lime Brush",
+  "kind": "shared_item",
+  "name": "lime_brush"
+ },
+ "eln:shared_item@7627": {
+  "descriptor": "BrushDescriptor",
+  "display": "Yellow Brush",
+  "kind": "shared_item",
+  "name": "yellow_brush"
+ },
+ "eln:shared_item@7628": {
+  "descriptor": "BrushDescriptor",
+  "display": "Light Blue Brush",
+  "kind": "shared_item",
+  "name": "light_blue_brush"
+ },
+ "eln:shared_item@7629": {
+  "descriptor": "BrushDescriptor",
+  "display": "Magenta Brush",
+  "kind": "shared_item",
+  "name": "magenta_brush"
+ },
+ "eln:shared_item@7630": {
+  "descriptor": "BrushDescriptor",
+  "display": "Orange Brush",
+  "kind": "shared_item",
+  "name": "orange_brush"
+ },
+ "eln:shared_item@7631": {
+  "descriptor": "BrushDescriptor",
+  "display": "White Brush",
+  "kind": "shared_item",
+  "name": "white_brush"
+ },
+ "eln:shared_item@7680": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Cheap Chip",
+  "kind": "shared_item",
+  "name": "cheap_chip"
+ },
+ "eln:shared_item@7681": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Advanced Chip",
+  "kind": "shared_item",
+  "name": "advanced_chip"
+ },
+ "eln:shared_item@7682": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Machine Block",
+  "kind": "shared_item",
+  "name": "machine_block"
+ },
+ "eln:shared_item@7683": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Electrical Probe Chip",
+  "kind": "shared_item",
+  "name": "electrical_probe_chip"
+ },
+ "eln:shared_item@7684": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Thermal Probe Chip",
+  "kind": "shared_item",
+  "name": "thermal_probe_chip"
+ },
+ "eln:shared_item@7686": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Copper Plate",
+  "kind": "shared_item",
+  "name": "copper_plate"
+ },
+ "eln:shared_item@7687": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Iron Plate",
+  "kind": "shared_item",
+  "name": "iron_plate"
+ },
+ "eln:shared_item@7688": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Gold Plate",
+  "kind": "shared_item",
+  "name": "gold_plate"
+ },
+ "eln:shared_item@7689": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Lead Plate",
+  "kind": "shared_item",
+  "name": "lead_plate"
+ },
+ "eln:shared_item@7690": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Silicon Plate",
+  "kind": "shared_item",
+  "name": "silicon_plate"
+ },
+ "eln:shared_item@7691": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Alloy Plate",
+  "kind": "shared_item",
+  "name": "alloy_plate"
+ },
+ "eln:shared_item@7692": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Coal Plate",
+  "kind": "shared_item",
+  "name": "coal_plate"
+ },
+ "eln:shared_item@7696": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Silicon Dust",
+  "kind": "shared_item",
+  "name": "silicon_dust"
+ },
+ "eln:shared_item@7697": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Silicon Ingot",
+  "kind": "shared_item",
+  "name": "silicon_ingot"
+ },
+ "eln:shared_item@7702": {
+  "descriptor": "MachineBoosterDescriptor",
+  "display": "Machine Booster",
+  "kind": "shared_item",
+  "name": "machine_booster"
+ },
+ "eln:shared_item@7703": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Advanced Machine Block",
+  "kind": "shared_item",
+  "name": "advanced_machine_block"
+ },
+ "eln:shared_item@7708": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Basic Magnet",
+  "kind": "shared_item",
+  "name": "basic_magnet"
+ },
+ "eln:shared_item@7709": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Advanced Magnet",
+  "kind": "shared_item",
+  "name": "advanced_magnet"
+ },
+ "eln:shared_item@7712": {
+  "descriptor": "DataLogsPrintDescriptor",
+  "display": "Data Logger Print",
+  "kind": "shared_item",
+  "name": "data_logger_print"
+ },
+ "eln:shared_item@7713": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Signal Antenna",
+  "kind": "shared_item",
+  "name": "signal_antenna"
+ },
+ "eln:shared_item@7720": {
+  "descriptor": "EntitySensorFilterDescriptor",
+  "display": "Player Filter",
+  "kind": "shared_item",
+  "name": "player_filter"
+ },
+ "eln:shared_item@7721": {
+  "descriptor": "EntitySensorFilterDescriptor",
+  "display": "Monster Filter",
+  "kind": "shared_item",
+  "name": "monster_filter"
+ },
+ "eln:shared_item@7722": {
+  "descriptor": "EntitySensorFilterDescriptor",
+  "display": "Animal Filter",
+  "kind": "shared_item",
+  "name": "animal_filter"
+ },
+ "eln:shared_item@7728": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Wrench",
+  "kind": "shared_item",
+  "name": "wrench"
+ },
+ "eln:shared_item@7732": {
+  "descriptor": "DielectricItem",
+  "display": "Dielectric",
+  "kind": "shared_item",
+  "name": "dielectric"
+ },
+ "eln:shared_item@7733": {
+  "descriptor": "CaseItemDescriptor",
+  "display": "Casing",
+  "kind": "shared_item",
+  "name": "casing"
+ },
+ "eln:shared_item@8": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Coal Dust",
+  "kind": "shared_item",
+  "name": "coal_dust"
+ },
+ "eln:shared_item@896": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Multimeter",
+  "kind": "shared_item",
+  "name": "multimeter"
+ },
+ "eln:shared_item@897": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Thermometer",
+  "kind": "shared_item",
+  "name": "thermometer"
+ },
+ "eln:shared_item@898": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Universal-Meter",
+  "kind": "shared_item",
+  "name": "universal_meter"
+ },
+ "eln:shared_item@9": {
+  "descriptor": "GenericItemUsingDamageDescriptorWithComment",
+  "display": "Alloy Dust",
+  "kind": "shared_item",
+  "name": "alloy_dust"
+ },
+ "eln:shared_item@904": {
+  "descriptor": "WirelessSignalAnalyserItemDescriptor",
+  "display": "Wireless Analyzer",
+  "kind": "shared_item",
+  "name": "wireless_analyzer"
+ },
+ "eln:shared_item@960": {
+  "descriptor": "ElectricalDrillDescriptor",
+  "display": "Cheap Electrical Drill",
+  "kind": "shared_item",
+  "name": "cheap_electrical_drill"
+ },
+ "eln:shared_item@961": {
+  "descriptor": "ElectricalDrillDescriptor",
+  "display": "Average Electrical Drill",
+  "kind": "shared_item",
+  "name": "average_electrical_drill"
+ },
+ "eln:shared_item@962": {
+  "descriptor": "ElectricalDrillDescriptor",
+  "display": "Fast Electrical Drill",
+  "kind": "shared_item",
+  "name": "fast_electrical_drill"
+ },
+ "eln:shared_item_stack_one@7744": {
+  "descriptor": "ElectricalLampItem",
+  "display": "Small Flashlight",
+  "kind": "shared_item_stack_one",
+  "name": "small_flashlight"
+ },
+ "eln:shared_item_stack_one@7745": {
+  "descriptor": "ElectricalLampItem",
+  "display": "Improved Flashlight",
+  "kind": "shared_item_stack_one",
+  "name": "improved_flashlight"
+ },
+ "eln:shared_item_stack_one@7752": {
+  "descriptor": "ElectricalPickaxe",
+  "display": "Portable Electrical Mining Drill",
+  "kind": "shared_item_stack_one",
+  "name": "portable_electrical_mining_drill"
+ },
+ "eln:shared_item_stack_one@7756": {
+  "descriptor": "ElectricalAxe",
+  "display": "Portable Electrical Axe",
+  "kind": "shared_item_stack_one",
+  "name": "portable_electrical_axe"
+ },
+ "eln:shared_item_stack_one@7808": {
+  "descriptor": "BatteryItem",
+  "display": "Portable Battery",
+  "kind": "shared_item_stack_one",
+  "name": "portable_battery"
+ },
+ "eln:shared_item_stack_one@7809": {
+  "descriptor": "BatteryItem",
+  "display": "Portable Battery Pack",
+  "kind": "shared_item_stack_one",
+  "name": "portable_battery_pack"
+ },
+ "eln:shared_item_stack_one@7824": {
+  "descriptor": "BatteryItem",
+  "display": "Portable Capacitor",
+  "kind": "shared_item_stack_one",
+  "name": "portable_capacitor"
+ },
+ "eln:shared_item_stack_one@7825": {
+  "descriptor": "BatteryItem",
+  "display": "Portable Capacitor Pack",
+  "kind": "shared_item_stack_one",
+  "name": "portable_capacitor_pack"
+ },
+ "eln:shared_item_stack_one@7840": {
+  "descriptor": "PortableOreScannerItem",
+  "display": "X-Ray Scanner",
+  "kind": "shared_item_stack_one",
+  "name": "x_ray_scanner"
+ },
+ "eln:shared_item_stack_one@7936": {
+  "descriptor": "FuelBurnerDescriptor",
+  "display": "Small Fuel Burner",
+  "kind": "shared_item_stack_one",
+  "name": "small_fuel_burner"
+ },
+ "eln:shared_item_stack_one@7937": {
+  "descriptor": "FuelBurnerDescriptor",
+  "display": "Medium Fuel Burner",
+  "kind": "shared_item_stack_one",
+  "name": "medium_fuel_burner"
+ },
+ "eln:shared_item_stack_one@7938": {
+  "descriptor": "FuelBurnerDescriptor",
+  "display": "Big Fuel Burner",
+  "kind": "shared_item_stack_one",
+  "name": "big_fuel_burner"
+ },
+ "eln:six_node@128": {
+  "descriptor": "GroundCableDescriptor",
+  "display": "Ground Cable",
+  "kind": "six_node",
+  "name": "ground_cable"
+ },
+ "eln:six_node@136": {
+  "descriptor": "HubDescriptor",
+  "display": "Hub",
+  "kind": "six_node",
+  "name": "hub"
+ },
+ "eln:six_node@192": {
+  "descriptor": "ElectricalSourceDescriptor",
+  "display": "Electrical Source",
+  "kind": "six_node",
+  "name": "electrical_source"
+ },
+ "eln:six_node@193": {
+  "descriptor": "ElectricalSourceDescriptor",
+  "display": "Signal Source",
+  "kind": "six_node",
+  "name": "signal_source"
+ },
+ "eln:six_node@2048": {
+  "descriptor": "ElectricalCableDescriptor",
+  "display": "Signal Cable",
+  "kind": "six_node",
+  "name": "signal_cable"
+ },
+ "eln:six_node@2052": {
+  "descriptor": "ElectricalCableDescriptor",
+  "display": "Low Voltage Cable",
+  "kind": "six_node",
+  "name": "low_voltage_cable"
+ },
+ "eln:six_node@2056": {
+  "descriptor": "ElectricalCableDescriptor",
+  "display": "Medium Voltage Cable",
+  "kind": "six_node",
+  "name": "medium_voltage_cable"
+ },
+ "eln:six_node@2060": {
+  "descriptor": "ElectricalCableDescriptor",
+  "display": "High Voltage Cable",
+  "kind": "six_node",
+  "name": "high_voltage_cable"
+ },
+ "eln:six_node@2064": {
+  "descriptor": "ElectricalCableDescriptor",
+  "display": "Very High Voltage Cable",
+  "kind": "six_node",
+  "name": "very_high_voltage_cable"
+ },
+ "eln:six_node@3072": {
+  "descriptor": "ThermalCableDescriptor",
+  "display": "Removed_from_mod_Copper_Thermal_Cable.name",
+  "kind": "six_node",
+  "name": "removed_from_mod_copper_thermal_cable"
+ },
+ "eln:six_node@3073": {
+  "descriptor": "ThermalCableDescriptor",
+  "display": "Copper Thermal Cable",
+  "kind": "six_node",
+  "name": "copper_thermal_cable"
+ },
+ "eln:six_node@4096": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Lamp Socket A",
+  "kind": "six_node",
+  "name": "lamp_socket_a"
+ },
+ "eln:six_node@4097": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Lamp Socket B Projector",
+  "kind": "six_node",
+  "name": "lamp_socket_b_projector"
+ },
+ "eln:six_node@4100": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Robust Lamp Socket",
+  "kind": "six_node",
+  "name": "robust_lamp_socket"
+ },
+ "eln:six_node@4101": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Flat Lamp Socket",
+  "kind": "six_node",
+  "name": "flat_lamp_socket"
+ },
+ "eln:six_node@4102": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Simple Lamp Socket",
+  "kind": "six_node",
+  "name": "simple_lamp_socket"
+ },
+ "eln:six_node@4103": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Fluorescent Lamp Socket",
+  "kind": "six_node",
+  "name": "fluorescent_lamp_socket"
+ },
+ "eln:six_node@4104": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Streetlight",
+  "kind": "six_node",
+  "name": "streetlight"
+ },
+ "eln:six_node@4105": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Sconce Lamp Socket",
+  "kind": "six_node",
+  "name": "sconce_lamp_socket"
+ },
+ "eln:six_node@4108": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Suspended Lamp Socket",
+  "kind": "six_node",
+  "name": "suspended_lamp_socket"
+ },
+ "eln:six_node@4109": {
+  "descriptor": "LampSocketDescriptor",
+  "display": "Long Suspended Lamp Socket",
+  "kind": "six_node",
+  "name": "long_suspended_lamp_socket"
+ },
+ "eln:six_node@4111": {
+  "descriptor": "EmergencyLampDescriptor",
+  "display": "50V Emergency Lamp",
+  "kind": "six_node",
+  "name": "50v_emergency_lamp"
+ },
+ "eln:six_node@4112": {
+  "descriptor": "EmergencyLampDescriptor",
+  "display": "200V Emergency Lamp",
+  "kind": "six_node",
+  "name": "200v_emergency_lamp"
+ },
+ "eln:six_node@4160": {
+  "descriptor": "LampSupplyDescriptor",
+  "display": "Lamp Supply",
+  "kind": "six_node",
+  "name": "lamp_supply"
+ },
+ "eln:six_node@4224": {
+  "descriptor": "BatteryChargerDescriptor",
+  "display": "Weak 50V Battery Charger",
+  "kind": "six_node",
+  "name": "weak_50v_battery_charger"
+ },
+ "eln:six_node@4225": {
+  "descriptor": "BatteryChargerDescriptor",
+  "display": "50V Battery Charger",
+  "kind": "six_node",
+  "name": "50v_battery_charger"
+ },
+ "eln:six_node@4228": {
+  "descriptor": "BatteryChargerDescriptor",
+  "display": "200V Battery Charger",
+  "kind": "six_node",
+  "name": "200v_battery_charger"
+ },
+ "eln:six_node@4289": {
+  "descriptor": "PowerSocketDescriptor",
+  "display": "50V Power Socket",
+  "kind": "six_node",
+  "name": "50v_power_socket"
+ },
+ "eln:six_node@4290": {
+  "descriptor": "PowerSocketDescriptor",
+  "display": "200V Power Socket",
+  "kind": "six_node",
+  "name": "200v_power_socket"
+ },
+ "eln:six_node@5888": {
+  "descriptor": "WirelessSignalRxDescriptor",
+  "display": "Wireless Signal Receiver",
+  "kind": "six_node",
+  "name": "wireless_signal_receiver"
+ },
+ "eln:six_node@5896": {
+  "descriptor": "WirelessSignalTxDescriptor",
+  "display": "Wireless Signal Transmitter",
+  "kind": "six_node",
+  "name": "wireless_signal_transmitter"
+ },
+ "eln:six_node@5904": {
+  "descriptor": "WirelessSignalRepeaterDescriptor",
+  "display": "Wireless Signal Repeater",
+  "kind": "six_node",
+  "name": "wireless_signal_repeater"
+ },
+ "eln:six_node@5952": {
+  "descriptor": "ElectricalDataLoggerDescriptor",
+  "display": "Data Logger",
+  "kind": "six_node",
+  "name": "data_logger"
+ },
+ "eln:six_node@5953": {
+  "descriptor": "ElectricalDataLoggerDescriptor",
+  "display": "Modern Data Logger",
+  "kind": "six_node",
+  "name": "modern_data_logger"
+ },
+ "eln:six_node@5954": {
+  "descriptor": "ElectricalDataLoggerDescriptor",
+  "display": "Industrial Data Logger",
+  "kind": "six_node",
+  "name": "industrial_data_logger"
+ },
+ "eln:six_node@6016": {
+  "descriptor": "ElectricalRelayDescriptor",
+  "display": "Low Voltage Relay",
+  "kind": "six_node",
+  "name": "low_voltage_relay"
+ },
+ "eln:six_node@6017": {
+  "descriptor": "ElectricalRelayDescriptor",
+  "display": "Medium Voltage Relay",
+  "kind": "six_node",
+  "name": "medium_voltage_relay"
+ },
+ "eln:six_node@6018": {
+  "descriptor": "ElectricalRelayDescriptor",
+  "display": "High Voltage Relay",
+  "kind": "six_node",
+  "name": "high_voltage_relay"
+ },
+ "eln:six_node@6019": {
+  "descriptor": "ElectricalRelayDescriptor",
+  "display": "Very High Voltage Relay",
+  "kind": "six_node",
+  "name": "very_high_voltage_relay"
+ },
+ "eln:six_node@6020": {
+  "descriptor": "ElectricalRelayDescriptor",
+  "display": "Signal Relay",
+  "kind": "six_node",
+  "name": "signal_relay"
+ },
+ "eln:six_node@6080": {
+  "descriptor": "ElectricalGateSourceDescriptor",
+  "display": "Signal Trimmer",
+  "kind": "six_node",
+  "name": "signal_trimmer"
+ },
+ "eln:six_node@6081": {
+  "descriptor": "ElectricalGateSourceDescriptor",
+  "display": "Signal Switch",
+  "kind": "six_node",
+  "name": "signal_switch"
+ },
+ "eln:six_node@6088": {
+  "descriptor": "ElectricalGateSourceDescriptor",
+  "display": "Signal Button",
+  "kind": "six_node",
+  "name": "signal_button"
+ },
+ "eln:six_node@6092": {
+  "descriptor": "WirelessSignalSourceDescriptor",
+  "display": "Wireless Button",
+  "kind": "six_node",
+  "name": "wireless_button"
+ },
+ "eln:six_node@6096": {
+  "descriptor": "WirelessSignalSourceDescriptor",
+  "display": "Wireless Switch",
+  "kind": "six_node",
+  "name": "wireless_switch"
+ },
+ "eln:six_node@6144": {
+  "descriptor": "DiodeDescriptor",
+  "display": "10A Diode",
+  "kind": "six_node",
+  "name": "10a_diode"
+ },
+ "eln:six_node@6145": {
+  "descriptor": "DiodeDescriptor",
+  "display": "25A Diode",
+  "kind": "six_node",
+  "name": "25a_diode"
+ },
+ "eln:six_node@6152": {
+  "descriptor": "DiodeDescriptor",
+  "display": "Signal Diode",
+  "kind": "six_node",
+  "name": "signal_diode"
+ },
+ "eln:six_node@6160": {
+  "descriptor": "SignalInductorDescriptor",
+  "display": "Signal 20H inductor",
+  "kind": "six_node",
+  "name": "signal_20h_inductor"
+ },
+ "eln:six_node@6176": {
+  "descriptor": "PowerCapacitorSixDescriptor",
+  "display": "Power Capacitor",
+  "kind": "six_node",
+  "name": "power_capacitor"
+ },
+ "eln:six_node@6178": {
+  "descriptor": "PowerInductorSixDescriptor",
+  "display": "Power Inductor",
+  "kind": "six_node",
+  "name": "power_inductor"
+ },
+ "eln:six_node@6180": {
+  "descriptor": "ResistorDescriptor",
+  "display": "Power Resistor",
+  "kind": "six_node",
+  "name": "power_resistor"
+ },
+ "eln:six_node@6181": {
+  "descriptor": "ResistorDescriptor",
+  "display": "Rheostat",
+  "kind": "six_node",
+  "name": "rheostat"
+ },
+ "eln:six_node@6182": {
+  "descriptor": "ResistorDescriptor",
+  "display": "Thermistor",
+  "kind": "six_node",
+  "name": "thermistor"
+ },
+ "eln:six_node@6208": {
+  "descriptor": "ElectricalSwitchDescriptor",
+  "display": "High Voltage Switch",
+  "kind": "six_node",
+  "name": "high_voltage_switch"
+ },
+ "eln:six_node@6209": {
+  "descriptor": "ElectricalSwitchDescriptor",
+  "display": "Low Voltage Switch",
+  "kind": "six_node",
+  "name": "low_voltage_switch"
+ },
+ "eln:six_node@6210": {
+  "descriptor": "ElectricalSwitchDescriptor",
+  "display": "Medium Voltage Switch",
+  "kind": "six_node",
+  "name": "medium_voltage_switch"
+ },
+ "eln:six_node@6211": {
+  "descriptor": "ElectricalSwitchDescriptor",
+  "display": "Signal Switch",
+  "kind": "six_node",
+  "name": "signal_cable_switch"
+ },
+ "eln:six_node@6212": {
+  "descriptor": "ElectricalSwitchDescriptor",
+  "display": "Very High Voltage Switch",
+  "kind": "six_node",
+  "name": "very_high_voltage_switch"
+ },
+ "eln:six_node@6216": {
+  "descriptor": "ElectricalSwitchDescriptor",
+  "display": "Signal Switch with LED",
+  "kind": "six_node",
+  "name": "signal_switch_with_led"
+ },
+ "eln:six_node@6272": {
+  "descriptor": "ElectricalBreakerDescriptor",
+  "display": "Electrical Breaker",
+  "kind": "six_node",
+  "name": "electrical_breaker"
+ },
+ "eln:six_node@6276": {
+  "descriptor": "EnergyMeterDescriptor",
+  "display": "Energy Meter",
+  "kind": "six_node",
+  "name": "energy_meter"
+ },
+ "eln:six_node@6277": {
+  "descriptor": "EnergyMeterDescriptor",
+  "display": "Advanced Energy Meter",
+  "kind": "six_node",
+  "name": "advanced_energy_meter"
+ },
+ "eln:six_node@6278": {
+  "descriptor": "ElectricalFuseHolderDescriptor",
+  "display": "Electrical Fuse Holder",
+  "kind": "six_node",
+  "name": "electrical_fuse_holder"
+ },
+ "eln:six_node@6400": {
+  "descriptor": "ElectricalSensorDescriptor",
+  "display": "Electrical Probe",
+  "kind": "six_node",
+  "name": "electrical_probe"
+ },
+ "eln:six_node@6401": {
+  "descriptor": "ElectricalSensorDescriptor",
+  "display": "Voltage Probe",
+  "kind": "six_node",
+  "name": "voltage_probe"
+ },
+ "eln:six_node@6464": {
+  "descriptor": "ThermalSensorDescriptor",
+  "display": "Thermal Probe",
+  "kind": "six_node",
+  "name": "thermal_probe"
+ },
+ "eln:six_node@6465": {
+  "descriptor": "ThermalSensorDescriptor",
+  "display": "Temperature Probe",
+  "kind": "six_node",
+  "name": "temperature_probe"
+ },
+ "eln:six_node@6528": {
+  "descriptor": "ElectricalVuMeterDescriptor",
+  "display": "Analog Gauge",
+  "kind": "six_node",
+  "name": "analog_gauge"
+ },
+ "eln:six_node@6536": {
+  "descriptor": "ElectricalVuMeterDescriptor",
+  "display": "LED vuMeter",
+  "kind": "six_node",
+  "name": "led_vumeter"
+ },
+ "eln:six_node@6592": {
+  "descriptor": "ElectricalAlarmDescriptor",
+  "display": "Nuclear Alarm",
+  "kind": "six_node",
+  "name": "nuclear_alarm"
+ },
+ "eln:six_node@6593": {
+  "descriptor": "ElectricalAlarmDescriptor",
+  "display": "Standard Alarm",
+  "kind": "six_node",
+  "name": "standard_alarm"
+ },
+ "eln:six_node@6656": {
+  "descriptor": "ElectricalLightSensorDescriptor",
+  "display": "Electrical Daylight Sensor",
+  "kind": "six_node",
+  "name": "electrical_daylight_sensor"
+ },
+ "eln:six_node@6657": {
+  "descriptor": "ElectricalLightSensorDescriptor",
+  "display": "Electrical Light Sensor",
+  "kind": "six_node",
+  "name": "electrical_light_sensor"
+ },
+ "eln:six_node@6660": {
+  "descriptor": "ElectricalWeatherSensorDescriptor",
+  "display": "Electrical Weather Sensor",
+  "kind": "six_node",
+  "name": "electrical_weather_sensor"
+ },
+ "eln:six_node@6664": {
+  "descriptor": "ElectricalWindSensorDescriptor",
+  "display": "Electrical Anemometer Sensor",
+  "kind": "six_node",
+  "name": "electrical_anemometer_sensor"
+ },
+ "eln:six_node@6668": {
+  "descriptor": "ElectricalEntitySensorDescriptor",
+  "display": "Electrical Entity Sensor",
+  "kind": "six_node",
+  "name": "electrical_entity_sensor"
+ },
+ "eln:six_node@6669": {
+  "descriptor": "ElectricalFireDetectorDescriptor",
+  "display": "Electrical Fire Detector",
+  "kind": "six_node",
+  "name": "electrical_fire_detector"
+ },
+ "eln:six_node@6670": {
+  "descriptor": "ElectricalFireDetectorDescriptor",
+  "display": "Electrical Fire Buzzer",
+  "kind": "six_node",
+  "name": "electrical_fire_buzzer"
+ },
+ "eln:six_node@6671": {
+  "descriptor": "ScannerDescriptor",
+  "display": "Scanner",
+  "kind": "six_node",
+  "name": "scanner"
+ },
+ "eln:six_node@6912": {
+  "descriptor": "ElectricalRedstoneInputDescriptor",
+  "display": "Redstone-to-Voltage Converter",
+  "kind": "six_node",
+  "name": "redstone_to_voltage_converter"
+ },
+ "eln:six_node@6913": {
+  "descriptor": "ElectricalRedstoneOutputDescriptor",
+  "display": "Voltage-to-Redstone Converter",
+  "kind": "six_node",
+  "name": "voltage_to_redstone_converter"
+ },
+ "eln:six_node@6976": {
+  "descriptor": "ElectricalTimeoutDescriptor",
+  "display": "Electrical Timer",
+  "kind": "six_node",
+  "name": "electrical_timer"
+ },
+ "eln:six_node@6980": {
+  "descriptor": "ElectricalMathDescriptor",
+  "display": "Signal Processor",
+  "kind": "six_node",
+  "name": "signal_processor"
+ },
+ "eln:six_node@7424": {
+  "descriptor": "TreeResinCollectorDescriptor",
+  "display": "Tree Resin Collector",
+  "kind": "six_node",
+  "name": "tree_resin_collector"
+ },
+ "eln:six_node@7488": {
+  "descriptor": "ModbusRtuDescriptor",
+  "display": "Modbus RTU.name",
+  "kind": "six_node",
+  "name": "modbus_rtu"
+ },
+ "eln:six_node@7492": {
+  "descriptor": "ElectricalWatchDescriptor",
+  "display": "Analog watch",
+  "kind": "six_node",
+  "name": "analog_watch"
+ },
+ "eln:six_node@7493": {
+  "descriptor": "ElectricalWatchDescriptor",
+  "display": "Digital Watch",
+  "kind": "six_node",
+  "name": "digital_watch"
+ },
+ "eln:six_node@7496": {
+  "descriptor": "TutorialSignDescriptor",
+  "display": "Tutorial Sign",
+  "kind": "six_node",
+  "name": "tutorial_sign"
+ },
+ "eln:six_node@7552": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "NOT Chip",
+  "kind": "six_node",
+  "name": "not_chip"
+ },
+ "eln:six_node@7553": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "AND Chip",
+  "kind": "six_node",
+  "name": "and_chip"
+ },
+ "eln:six_node@7554": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "NAND Chip",
+  "kind": "six_node",
+  "name": "nand_chip"
+ },
+ "eln:six_node@7555": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "OR Chip",
+  "kind": "six_node",
+  "name": "or_chip"
+ },
+ "eln:six_node@7556": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "NOR Chip",
+  "kind": "six_node",
+  "name": "nor_chip"
+ },
+ "eln:six_node@7557": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "XOR Chip",
+  "kind": "six_node",
+  "name": "xor_chip"
+ },
+ "eln:six_node@7558": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "XNOR Chip",
+  "kind": "six_node",
+  "name": "xnor_chip"
+ },
+ "eln:six_node@7559": {
+  "descriptor": "PalDescriptor",
+  "display": "PAL Chip",
+  "kind": "six_node",
+  "name": "pal_chip"
+ },
+ "eln:six_node@7560": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "Schmitt Trigger Chip",
+  "kind": "six_node",
+  "name": "schmitt_trigger_chip"
+ },
+ "eln:six_node@7561": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "D Flip Flop Chip",
+  "kind": "six_node",
+  "name": "d_flip_flop_chip"
+ },
+ "eln:six_node@7562": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "Oscillator Chip",
+  "kind": "six_node",
+  "name": "oscillator_chip"
+ },
+ "eln:six_node@7563": {
+  "descriptor": "LogicGateDescriptor",
+  "display": "JK Flip Flop Chip",
+  "kind": "six_node",
+  "name": "jk_flip_flop_chip"
+ },
+ "eln:six_node@7936": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "OpAmp",
+  "kind": "six_node",
+  "name": "opamp"
+ },
+ "eln:six_node@7937": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "PID Regulator",
+  "kind": "six_node",
+  "name": "pid_regulator"
+ },
+ "eln:six_node@7938": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Voltage controlled sawtooth oscillator",
+  "kind": "six_node",
+  "name": "voltage_controlled_sawtooth_oscillator"
+ },
+ "eln:six_node@7939": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Voltage controlled sine oscillator",
+  "kind": "six_node",
+  "name": "voltage_controlled_sine_oscillator"
+ },
+ "eln:six_node@7940": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Amplifier",
+  "kind": "six_node",
+  "name": "amplifier"
+ },
+ "eln:six_node@7941": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Voltage controlled amplifier",
+  "kind": "six_node",
+  "name": "voltage_controlled_amplifier"
+ },
+ "eln:six_node@7942": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Configurable summing unit",
+  "kind": "six_node",
+  "name": "configurable_summing_unit"
+ },
+ "eln:six_node@7943": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Sample and hold",
+  "kind": "six_node",
+  "name": "sample_and_hold"
+ },
+ "eln:six_node@7944": {
+  "descriptor": "AnalogChipDescriptor",
+  "display": "Lowpass filter",
+  "kind": "six_node",
+  "name": "lowpass_filter"
+ },
+ "eln:transparent_node@1024": {
+  "descriptor": "BatteryDescriptor",
+  "display": "Cost Oriented Battery",
+  "kind": "transparent_node",
+  "name": "cost_oriented_battery"
+ },
+ "eln:transparent_node@1025": {
+  "descriptor": "BatteryDescriptor",
+  "display": "Capacity Oriented Battery",
+  "kind": "transparent_node",
+  "name": "capacity_oriented_battery"
+ },
+ "eln:transparent_node@1026": {
+  "descriptor": "BatteryDescriptor",
+  "display": "Voltage Oriented Battery",
+  "kind": "transparent_node",
+  "name": "voltage_oriented_battery"
+ },
+ "eln:transparent_node@1027": {
+  "descriptor": "BatteryDescriptor",
+  "display": "Current Oriented Battery",
+  "kind": "transparent_node",
+  "name": "current_oriented_battery"
+ },
+ "eln:transparent_node@1028": {
+  "descriptor": "BatteryDescriptor",
+  "display": "Life Oriented Battery",
+  "kind": "transparent_node",
+  "name": "life_oriented_battery"
+ },
+ "eln:transparent_node@1029": {
+  "descriptor": "BatteryDescriptor",
+  "display": "Single-use Battery",
+  "kind": "transparent_node",
+  "name": "single_use_battery"
+ },
+ "eln:transparent_node@1056": {
+  "descriptor": "BatteryDescriptor",
+  "display": "50V Capacitor",
+  "kind": "transparent_node",
+  "name": "50v_capacitor"
+ },
+ "eln:transparent_node@1060": {
+  "descriptor": "BatteryDescriptor",
+  "display": "200V Capacitor",
+  "kind": "transparent_node",
+  "name": "200v_capacitor"
+ },
+ "eln:transparent_node@128": {
+  "descriptor": "TransformerDescriptor",
+  "display": "DC-DC Converter",
+  "kind": "transparent_node",
+  "name": "dc_dc_converter"
+ },
+ "eln:transparent_node@192": {
+  "descriptor": "HeatFurnaceDescriptor",
+  "display": "Stone Heat Furnace",
+  "kind": "transparent_node",
+  "name": "stone_heat_furnace"
+ },
+ "eln:transparent_node@193": {
+  "descriptor": "FuelHeatFurnaceDescriptor",
+  "display": "Fuel Heat Furnace",
+  "kind": "transparent_node",
+  "name": "fuel_heat_furnace"
+ },
+ "eln:transparent_node@2048": {
+  "descriptor": "ElectricalFurnaceDescriptor",
+  "display": "Electrical Furnace",
+  "kind": "transparent_node",
+  "name": "electrical_furnace"
+ },
+ "eln:transparent_node@2112": {
+  "descriptor": "MaceratorDescriptor",
+  "display": "50V Macerator",
+  "kind": "transparent_node",
+  "name": "50v_macerator"
+ },
+ "eln:transparent_node@2116": {
+  "descriptor": "MaceratorDescriptor",
+  "display": "200V Macerator",
+  "kind": "transparent_node",
+  "name": "200v_macerator"
+ },
+ "eln:transparent_node@2240": {
+  "descriptor": "CompressorDescriptor",
+  "display": "50V Compressor",
+  "kind": "transparent_node",
+  "name": "50v_compressor"
+ },
+ "eln:transparent_node@2244": {
+  "descriptor": "CompressorDescriptor",
+  "display": "200V Compressor",
+  "kind": "transparent_node",
+  "name": "200v_compressor"
+ },
+ "eln:transparent_node@2304": {
+  "descriptor": "MagnetizerDescriptor",
+  "display": "50V Magnetizer",
+  "kind": "transparent_node",
+  "name": "50v_magnetizer"
+ },
+ "eln:transparent_node@2308": {
+  "descriptor": "MagnetizerDescriptor",
+  "display": "200V Magnetizer",
+  "kind": "transparent_node",
+  "name": "200v_magnetizer"
+ },
+ "eln:transparent_node@2368": {
+  "descriptor": "PlateMachineDescriptor",
+  "display": "50V Plate Machine",
+  "kind": "transparent_node",
+  "name": "50v_plate_machine"
+ },
+ "eln:transparent_node@2372": {
+  "descriptor": "PlateMachineDescriptor",
+  "display": "200V Plate Machine",
+  "kind": "transparent_node",
+  "name": "200v_plate_machine"
+ },
+ "eln:transparent_node@257": {
+  "descriptor": "TurbineDescriptor",
+  "display": "50V Turbine",
+  "kind": "transparent_node",
+  "name": "50v_turbine"
+ },
+ "eln:transparent_node@2624": {
+  "descriptor": "EggIncubatorDescriptor",
+  "display": "50V Egg Incubator",
+  "kind": "transparent_node",
+  "name": "50v_egg_incubator"
+ },
+ "eln:transparent_node@264": {
+  "descriptor": "TurbineDescriptor",
+  "display": "200V Turbine",
+  "kind": "transparent_node",
+  "name": "200v_turbine"
+ },
+ "eln:transparent_node@265": {
+  "descriptor": "SteamTurbineDescriptor",
+  "display": "Steam Turbine",
+  "kind": "transparent_node",
+  "name": "steam_turbine"
+ },
+ "eln:transparent_node@266": {
+  "descriptor": "GeneratorDescriptor",
+  "display": "Generator",
+  "kind": "transparent_node",
+  "name": "generator"
+ },
+ "eln:transparent_node@267": {
+  "descriptor": "GasTurbineDescriptor",
+  "display": "Gas Turbine",
+  "kind": "transparent_node",
+  "name": "gas_turbine"
+ },
+ "eln:transparent_node@268": {
+  "descriptor": "StraightJointDescriptor",
+  "display": "Joint",
+  "kind": "transparent_node",
+  "name": "joint"
+ },
+ "eln:transparent_node@2688": {
+  "descriptor": "AutoMinerDescriptor",
+  "display": "Auto Miner",
+  "kind": "transparent_node",
+  "name": "auto_miner"
+ },
+ "eln:transparent_node@269": {
+  "descriptor": "JointHubDescriptor",
+  "display": "Joint hub",
+  "kind": "transparent_node",
+  "name": "joint_hub"
+ },
+ "eln:transparent_node@270": {
+  "descriptor": "FlywheelDescriptor",
+  "display": "Flywheel",
+  "kind": "transparent_node",
+  "name": "flywheel"
+ },
+ "eln:transparent_node@271": {
+  "descriptor": "TachometerDescriptor",
+  "display": "Tachometer",
+  "kind": "transparent_node",
+  "name": "tachometer"
+ },
+ "eln:transparent_node@3073": {
+  "descriptor": "SolarPanelDescriptor",
+  "display": "Small Solar Panel",
+  "kind": "transparent_node",
+  "name": "small_solar_panel"
+ },
+ "eln:transparent_node@3074": {
+  "descriptor": "SolarPanelDescriptor",
+  "display": "Small Rotating Solar Panel",
+  "kind": "transparent_node",
+  "name": "small_rotating_solar_panel"
+ },
+ "eln:transparent_node@3075": {
+  "descriptor": "SolarPanelDescriptor",
+  "display": "2x3 Solar Panel",
+  "kind": "transparent_node",
+  "name": "2x3_solar_panel"
+ },
+ "eln:transparent_node@3076": {
+  "descriptor": "SolarPanelDescriptor",
+  "display": "2x3 Rotating Solar Panel",
+  "kind": "transparent_node",
+  "name": "2x3_rotating_solar_panel"
+ },
+ "eln:transparent_node@3136": {
+  "descriptor": "WindTurbineDescriptor",
+  "display": "Wind Turbine",
+  "kind": "transparent_node",
+  "name": "wind_turbine"
+ },
+ "eln:transparent_node@3152": {
+  "descriptor": "WaterTurbineDescriptor",
+  "display": "Water Turbine",
+  "kind": "transparent_node",
+  "name": "water_turbine"
+ },
+ "eln:transparent_node@4096": {
+  "descriptor": "ThermalDissipatorPassiveDescriptor",
+  "display": "Small Passive Thermal Dissipator",
+  "kind": "transparent_node",
+  "name": "small_passive_thermal_dissipator"
+ },
+ "eln:transparent_node@4128": {
+  "descriptor": "ThermalDissipatorActiveDescriptor",
+  "display": "Small Active Thermal Dissipator",
+  "kind": "transparent_node",
+  "name": "small_active_thermal_dissipator"
+ },
+ "eln:transparent_node@4130": {
+  "descriptor": "ThermalDissipatorActiveDescriptor",
+  "display": "200V Active Thermal Dissipator",
+  "kind": "transparent_node",
+  "name": "200v_active_thermal_dissipator"
+ },
+ "eln:transparent_node@4160": {
+  "descriptor": "TeleporterDescriptor",
+  "display": "Experimental Transporter",
+  "kind": "transparent_node",
+  "name": "experimental_transporter"
+ },
+ "eln:transparent_node@4224": {
+  "descriptor": "TurretDescriptor",
+  "display": "800V Defence Turret",
+  "kind": "transparent_node",
+  "name": "800v_defence_turret"
+ },
+ "eln:transparent_node@4289": {
+  "descriptor": "FuelGeneratorDescriptor",
+  "display": "50V Fuel Generator",
+  "kind": "transparent_node",
+  "name": "50v_fuel_generator"
+ },
+ "eln:transparent_node@4290": {
+  "descriptor": "FuelGeneratorDescriptor",
+  "display": "200V Fuel Generator",
+  "kind": "transparent_node",
+  "name": "200v_fuel_generator"
+ },
+ "eln:transparent_node@448": {
+  "descriptor": "ElectricalAntennaTxDescriptor",
+  "display": "Low Power Transmitter Antenna",
+  "kind": "transparent_node",
+  "name": "low_power_transmitter_antenna"
+ },
+ "eln:transparent_node@449": {
+  "descriptor": "ElectricalAntennaRxDescriptor",
+  "display": "Low Power Receiver Antenna",
+  "kind": "transparent_node",
+  "name": "low_power_receiver_antenna"
+ },
+ "eln:transparent_node@450": {
+  "descriptor": "ElectricalAntennaTxDescriptor",
+  "display": "Medium Power Transmitter Antenna",
+  "kind": "transparent_node",
+  "name": "medium_power_transmitter_antenna"
+ },
+ "eln:transparent_node@451": {
+  "descriptor": "ElectricalAntennaRxDescriptor",
+  "display": "Medium Power Receiver Antenna",
+  "kind": "transparent_node",
+  "name": "medium_power_receiver_antenna"
+ },
+ "eln:transparent_node@452": {
+  "descriptor": "ElectricalAntennaTxDescriptor",
+  "display": "High Power Transmitter Antenna",
+  "kind": "transparent_node",
+  "name": "high_power_transmitter_antenna"
+ },
+ "eln:transparent_node@453": {
+  "descriptor": "ElectricalAntennaRxDescriptor",
+  "display": "High Power Receiver Antenna",
+  "kind": "transparent_node",
+  "name": "high_power_receiver_antenna"
+ },
+ "eln:transparent_node@6183": {
+  "descriptor": "LargeRheostatDescriptor",
+  "display": "Large Rheostat",
+  "kind": "transparent_node",
+  "name": "large_rheostat"
+ },
+ "eln:transparent_node@7876": {
+  "descriptor": "ElectricalPoleDescriptor",
+  "display": "Utility Pole",
+  "kind": "transparent_node",
+  "name": "utility_pole"
+ },
+ "eln:transparent_node@7877": {
+  "descriptor": "ElectricalPoleDescriptor",
+  "display": "Utility Pole w/DC-DC Converter",
+  "kind": "transparent_node",
+  "name": "utility_pole_w_dc_dc_converter"
+ },
+ "eln:transparent_node@80": {
+  "descriptor": "PowerInductorDescriptor",
+  "display": "Power inductor",
+  "kind": "transparent_node",
+  "name": "power_inductor_block"
+ },
+ "eln:transparent_node@84": {
+  "descriptor": "PowerCapacitorDescriptor",
+  "display": "Power capacitor",
+  "kind": "transparent_node",
+  "name": "power_capacitor_block"
+ },
+ "eln:transparent_node@5120": {
+  "descriptor": "OilSeparatorDescriptor",
+  "display": "50V Tar Sand Separator",
+  "kind": "transparent_node",
+  "name": "50v_tar_sand_separator"
+ },
+ "eln:transparent_node@5124": {
+  "descriptor": "OilSeparatorDescriptor",
+  "display": "200V Tar Sand Separator",
+  "kind": "transparent_node",
+  "name": "200v_tar_sand_separator"
+ },
+ "eln:transparent_node@5184": {
+  "descriptor": "OilPumpDescriptor",
+  "display": "50V Oil Pump",
+  "kind": "transparent_node",
+  "name": "50v_oil_pump"
+ },
+ "eln:transparent_node@5188": {
+  "descriptor": "OilPumpDescriptor",
+  "display": "200V Oil Pump",
+  "kind": "transparent_node",
+  "name": "200v_oil_pump"
+ },
+ "eln:transparent_node@5248": {
+  "descriptor": "ElectricHeaterDescriptor",
+  "display": "50V Electric Heater",
+  "kind": "transparent_node",
+  "name": "50v_electric_heater"
+ },
+ "eln:transparent_node@5252": {
+  "descriptor": "ElectricHeaterDescriptor",
+  "display": "200V Electric Heater",
+  "kind": "transparent_node",
+  "name": "200v_electric_heater"
+ },
+ "eln:transparent_node@5256": {
+  "descriptor": "BoilerDescriptor",
+  "display": "Boiler",
+  "kind": "transparent_node",
+  "name": "boiler"
+ },
+ "eln:transparent_node@5260": {
+  "descriptor": "SteamGeneratorDescriptor",
+  "display": "50V Steam Turbine",
+  "kind": "transparent_node",
+  "name": "50v_steam_turbine"
+ },
+ "eln:transparent_node@5264": {
+  "descriptor": "SteamGeneratorDescriptor",
+  "display": "200V Steam Turbine",
+  "kind": "transparent_node",
+  "name": "200v_steam_turbine"
+ },
+ "eln:transparent_node@5312": {
+  "descriptor": "ColumnDescriptor",
+  "display": "Fractionating Column Base",
+  "kind": "transparent_node",
+  "name": "fractionating_column_base"
+ },
+ "eln:transparent_node@5316": {
+  "descriptor": "ColumnDescriptor",
+  "display": "Fractionating Column Segment",
+  "kind": "transparent_node",
+  "name": "fractionating_column_segment"
+ },
+ "eln:transparent_node@5320": {
+  "descriptor": "FlareStackDescriptor",
+  "display": "Flare Stack",
+  "kind": "transparent_node",
+  "name": "flare_stack"
+ },
+ "eln:transparent_node@5376": {
+  "descriptor": "EnergyConverterElnToOtherDescriptor",
+  "display": "50V Electrical Age to other energy exporter",
+  "kind": "transparent_node",
+  "name": "energy_converter_eln_to_other_lvublock"
+ },
+ "eln:transparent_node@5380": {
+  "descriptor": "EnergyConverterElnToOtherDescriptor",
+  "display": "200V Electrical Age to other energy exporter",
+  "kind": "transparent_node",
+  "name": "energy_converter_eln_to_other_mvublock"
+ },
+ "eln:transparent_node@5384": {
+  "descriptor": "EnergyConverterElnToOtherDescriptor",
+  "display": "800V Electrical Age to other energy exporter",
+  "kind": "transparent_node",
+  "name": "energy_converter_eln_to_other_hvublock"
+ }
+}

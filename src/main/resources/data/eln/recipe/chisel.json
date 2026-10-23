@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["  I", " I ", "S  "],
+  "key": {"I": "minecraft:iron_ingot", "S": "minecraft:stick"},
+  "result": {"id": "eln:chisel"}
+}

@@ -4,8 +4,8 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.sim.IProcess;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady {
 
@@ -13,7 +13,9 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 
     double timeCounter = 0;
     static final double refreshPeriode = 0.2;
-    RcInterpolator rc = new RcInterpolator(3f);
+    // WP16b: 1.7.10 stepped rc (tau 3 s) with one tick once per refresh (0.2 s = 4 ticks), so the real tau was 12 s;
+    // now stepped with the refresh period, tau retuned to 12 s (unchanged behaviour).
+    RcInterpolator rc = new RcInterpolator(12f);
     final float premonitionTime = 120;
 
     public ElectricalWeatherSensorSlowProcess(ElectricalWeatherSensorElement element) {
@@ -31,7 +33,7 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
             float target = 0f;
 
             if (coord.getWorldExist()) {
-                World world = coord.world();
+                Level world = coord.world();
 
                 if (world.isRaining()) {
                     //float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
@@ -54,19 +56,19 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 	    	*/
             //Utils.println(target);
 
-            rc.step((float) time);
+            rc.step((float) refreshPeriode);
             element.outputGateProcess.setOutputNormalized(rc.get());
         }
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        rc.setValue(nbt.getFloat(str + "rc"));
+    public void readFromNBT(CompoundTag nbt, String str) {
+        rc.setValue(nbt.getFloatOr(str + "rc", 0f));
 
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setFloat(str + "rc", rc.get());
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putFloat(str + "rc", rc.get());
     }
 }

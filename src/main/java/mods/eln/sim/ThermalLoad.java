@@ -3,14 +3,17 @@ package mods.eln.sim;
 public class ThermalLoad {
 
     /**
-     * Current temperature, in celsius.
+     * Current temperature as a difference to ambient, in K (= degrees C above PhysicalConstant.Tamb, 20 C).
+     * The thermal step relaxes it to 0 through Rp; GUIs that show absolute temperatures add Tamb.
      */
     public double Tc;
+    /** Thermal resistance to ambient, K/W. */
     public double Rp;
     /**
-     * Thermal resistance, analogous to ohms.
+     * Thermal resistance (K/W) of this load's half of a ThermalConnection (a connection conducts dT/(Rs1+Rs2)).
      */
     public double Rs;
+    /** Heat capacity, J/K. */
     public double C;
     /**
      * Current thermal power, in watts, of this load.
@@ -35,6 +38,13 @@ public class ThermalLoad {
      * Relative heat transfer during this simulator tick.
      */
     public double PcTemp;
+    /**
+     * Heat energy (J) deposited since this load's last thermal step, by moveEnergyTo. Folded into PcTemp as
+     * energy / dt when the load steps, so a caller running at any rate (electrical step, fast or slow thermal
+     * step) heats the load correctly. Use this, not movePowerTo, from a process that does not run exactly once
+     * per step of this load (movePowerTo adds a power for one step of the load: called N times per step it heats N x).
+     */
+    public double EnergyTemp;
 
     boolean isSlow;
 
@@ -65,7 +75,12 @@ public class ThermalLoad {
         Rp = 1000000000.0;
     }
 
-    public static final ThermalLoad externalLoad = new ThermalLoad(0, 0, 0, 0);
+    /**
+     * Ambient as an infinite heat reservoir (other end of e.g. the electrical furnace's ThermalResistor): Tc stays 0
+     * whatever flows in. 1.7.10 had Rp = 0 and C = 0, so Tc/Rp (getPower, or the thermal step if it was ever put on
+     * a load list) was NaN.
+     */
+    public static final ThermalLoad externalLoad = new ThermalLoad(0, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY);
 
     public void setRp(double Rp) {
         this.Rp = Rp;
@@ -98,10 +113,16 @@ public class ThermalLoad {
         to.PspTemp += absI;
     }
 
+    /** Heat power (W) into this load for ITS current step; call once per step of this load (see EnergyTemp). */
     public void movePowerTo(double power) {
         double absI = Math.abs(power);
         PcTemp += power;
         PspTemp += absI;
+    }
+
+    /** Heat energy (J) into this load, from a process running at any rate (see EnergyTemp). */
+    public void moveEnergyTo(double energy) {
+        EnergyTemp += energy;
     }
 
     public double getT() {

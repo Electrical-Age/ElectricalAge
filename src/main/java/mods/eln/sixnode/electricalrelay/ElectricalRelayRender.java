@@ -1,5 +1,9 @@
 package mods.eln.sixnode.electricalrelay;
 
+import mods.eln.misc.UtilsClient;
+
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -9,15 +13,13 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class ElectricalRelayRender extends SixNodeElementRender {
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(0, 64, this);
     ElectricalRelayDescriptor descriptor;
     long time;
 
@@ -72,13 +74,8 @@ public class ElectricalRelayRender extends SixNodeElementRender {
     }
 
     @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalRelayGui(player, this);
-    }
-
-    @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        if (lrdu == front) return Eln.instance.signalCableDescriptor.render;
+        if (lrdu == front) return ElnDeviceRegistry.signalCableDescriptor.render;
         if (lrdu == front.left() || lrdu == front.right()) return descriptor.cable.render;
         return null;
     }

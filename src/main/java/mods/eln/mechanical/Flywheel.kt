@@ -2,12 +2,11 @@ package mods.eln.mechanical
 
 import mods.eln.misc.Obj3D
 import mods.eln.misc.Utils
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 
 class FlywheelDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    FlyWheelElement::class, ShaftRender::class, EntityMetaTag.Basic) {
+    FlyWheelElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Flywheel"), obj.getPart("Shaft"))

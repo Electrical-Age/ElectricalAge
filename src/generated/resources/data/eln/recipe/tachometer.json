@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/iron"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "c": "eln:signal_cable",
+    "i": "#c:ingots/iron",
+    "m": "eln:machine_block",
+    "p": "eln:electrical_probe_chip"
+  },
+  "pattern": [
+    "p  ",
+    "iii",
+    "cm "
+  ],
+  "result": {
+    "id": "eln:tachometer"
+  }
+}

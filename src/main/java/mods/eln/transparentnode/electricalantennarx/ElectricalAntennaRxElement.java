@@ -15,8 +15,8 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataOutputStream;
 import java.util.HashMap;
@@ -101,7 +101,7 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             rot = rot.getNextClockwise();
             node.reconnect();
@@ -111,13 +111,13 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         rot = LRDU.readFromNBT(nbt, "rot");
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
         rot.writeToNBT(nbt, "rot");

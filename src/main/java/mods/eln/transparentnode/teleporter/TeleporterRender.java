@@ -1,14 +1,17 @@
 package mods.eln.transparentnode.teleporter;
 
+
+
+import mods.eln.registry.ElnDeviceRegistry;
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -44,7 +47,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
         Coordonate lightCoordonate = new Coordonate(this.d.lightCoordonate);
         lightCoordonate.applyTransformation(front, c);
 
-        boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
+        boolean lightEnable = WorldCompat.getBlock(tileEntity.getLevel(), lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == ElnDeviceRegistry.lightBlock;
 
 
         front.glRotateXnRef();
@@ -116,7 +119,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
             d.scr1_cables.draw();
             d.scr2_transporter.draw();
 
-            if (!tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).isEmpty())
+            if (!tileEntity.getLevel().getEntitiesOfClass(Entity.class, d.getBB(c, front)).isEmpty())
                 d.scr3_userin.draw();
 
             if (doorState)
@@ -228,13 +231,6 @@ public class TeleporterRender extends TransparentNodeElementRender {
         processRatioInterpolator.setTarget(processRatio);
 
 
-    }
-
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-
-        return new TeleporterGui(player, this);
     }
 
 

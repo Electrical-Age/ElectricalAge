@@ -8,6 +8,8 @@ public class Capacitor extends Bipole implements ISubSystemProcessI {
 
     private double c = 0;
     double cdt;
+    /** Voltage across the capacitor at the previous step (the history term of backward Euler). */
+    double uPrev = 0;
 
     public Capacitor() {
     }
@@ -16,9 +18,10 @@ public class Capacitor extends Bipole implements ISubSystemProcessI {
         connectTo(aPin, bPin);
     }
 
+    /** Current aPin -> bPin during the last step: backward Euler i = C (U_n - U_{n-1}) / dt (1.7.10 returned 0). */
     @Override
     public double getCurrent() {
-        return 0;
+        return (getU() - uPrev) * cdt;
     }
 
     public void setC(double c) {
@@ -38,7 +41,8 @@ public class Capacitor extends Bipole implements ISubSystemProcessI {
 
     @Override
     public void simProcessI(SubSystem s) {
-        double add = (s.getXSafe(aPin) - s.getXSafe(bPin)) * cdt;
+        uPrev = s.getXSafe(aPin) - s.getXSafe(bPin);
+        double add = uPrev * cdt;
         s.addToI(aPin, add);
         s.addToI(bPin, -add);
     }

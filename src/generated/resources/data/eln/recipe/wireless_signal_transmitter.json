@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "S": "eln:signal_antenna"
+  },
+  "pattern": [
+    " S ",
+    " R ",
+    "ICI"
+  ],
+  "result": {
+    "id": "eln:wireless_signal_transmitter"
+  }
+}

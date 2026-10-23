@@ -5,14 +5,14 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.GhostNode;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 public class TeleporterPowerNode extends GhostNode {
 
     @Override
     public void initializeFromThat(Direction front,
-                                   EntityLivingBase entityLiving, ItemStack itemStack) {
+                                   LivingEntity entityLiving, ItemStack itemStack) {
         connect();
 
     }

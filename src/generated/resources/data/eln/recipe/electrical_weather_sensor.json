@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "R": "minecraft:redstone",
+    "r": "#c:rubbers"
+  },
+  "pattern": [
+    " r ",
+    "rRr",
+    " r "
+  ],
+  "result": {
+    "id": "eln:electrical_weather_sensor"
+  }
+}

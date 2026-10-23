@@ -9,8 +9,7 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -64,22 +63,15 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
             play(new SoundCommand(descriptor.soundName)
                 .mulVolume(descriptor.nominalVolume * (0.007f + 0.2f * (float) powerFactorFilter.get() * (float) powerFactorFilter.get()),
                     1.1f));
-            //SoundClient.playFromBlock(tileEntity.worldObj,coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);
+            //SoundClient.playFromBlock(tileEntity.getLevel(),coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);
             soundPlaying = true;
         } else
             soundPlaying = false;
     }
 
 
-    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0, 64, this);
     private float water;
     private float powerFactor;
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-
-        return new WaterTurbineGuiDraw(player, inventory, this);
-    }
 
     @Override
     public boolean cameraDrawOptimisation() {
@@ -98,11 +90,11 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
             e.printStackTrace();
         }
 
-        waterCoord = this.descriptor.getWaterCoordonate(tileEntity.getWorldObj());
-        waterCoord.setWorld(tileEntity.getWorldObj());
+        waterCoord = this.descriptor.getWaterCoordonate(tileEntity.getLevel());
+        waterCoord.setWorld(tileEntity.getLevel());
         waterCoord.applyTransformation(front, coordonate());
         waterCoordRight = new Coordonate(waterCoord);
-        waterCoordRight.setWorld(tileEntity.getWorldObj());
+        waterCoordRight.setWorld(tileEntity.getLevel());
         waterCoordRight.move(front.right());
     }
 }

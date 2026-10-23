@@ -1,35 +1,34 @@
 package mods.eln.transparentnode.eggincubator;
 
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class EggIncubatorRender extends TransparentNodeElementRender {
 
-    TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
     EggIncubatorDescriptor descriptor;
 
     float alpha = 0;
 
     byte eggStackSize;
 
-    EntityItem egg;
+    ItemEntity egg;
     public float voltage;
 
     LRDUMask priConn = new LRDUMask(), secConn = new LRDUMask(), eConn = new LRDUMask();
@@ -59,17 +58,12 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
     }
 
     @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new EggIncubatorGuiDraw(player, inventory, this);
-    }
-
-    @Override
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
         try {
             eggStackSize = stream.readByte();
             if (eggStackSize != 0) {
-                egg = new EntityItem(this.tileEntity.getWorldObj(), 0, 0, 0, new ItemStack(Items.egg));
+                egg = new ItemEntity(this.tileEntity.getLevel(), 0, 0, 0, new ItemStack(Items.EGG));
             } else {
                 egg = null;
             }

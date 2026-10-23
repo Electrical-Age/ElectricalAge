@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "P": "#c:plates/coal"
+  },
+  "pattern": [
+    "PPP",
+    "PCP"
+  ],
+  "result": {
+    "id": "eln:e_coal_helmet"
+  }
+}

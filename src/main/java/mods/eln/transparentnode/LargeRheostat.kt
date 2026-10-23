@@ -1,8 +1,7 @@
 package mods.eln.transparentnode
 
-import mods.eln.gui.GuiContainerEln
-import mods.eln.gui.GuiHelperContainer
-import mods.eln.gui.HelperStdContainer
+import mods.eln.gl.GL11
+
 import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
@@ -18,33 +17,31 @@ import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.resistor.ResistorContainer
 import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
-import net.minecraftforge.client.IItemRenderer
-import org.lwjgl.opengl.GL11
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
 // TODO: Make the whole thing brighter when it heats up, not just redder.
 
 class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPassiveDescriptor, val cable: ElectricalCableDescriptor, val series: SerieEE) :
-    TransparentNodeDescriptor(name, LargeRheostatElement::class.java, LargeRheostatRender::class.java) {
+    TransparentNodeDescriptor(name, LargeRheostatElement::class.java, null) {
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
-    fun getRsValue(inventory: IInventory): Double {
-        val core = inventory.getStackInSlot(ResistorContainer.coreId) ?: return series.getValue(0)
+    fun getRsValue(inventory: Container): Double {
+        val core = inventory.getItem(ResistorContainer.coreId)
+        if (core.isEmpty) return series.getValue(0)
 
-        return series.getValue(core.stackSize)
+        return series.getValue(core.count)
     }
 
     fun draw(position: Float = 0f) {
@@ -53,12 +50,13 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         dissipator.obj.getPart("wiper")?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
-                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
-        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) = draw()
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
@@ -92,7 +90,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         thermalFastProcessList.add(heater)
         slowProcessList.add(thermalWatchdog)
         thermalWatchdog.set(thermalLoad).setTMax(desc.dissipator.warmLimit)
-            .set(WorldExplosion(this).machineExplosion())
+            .set(Failure(this).machine())
     }
 
     inner class ControlProcess() : IProcess {
@@ -146,7 +144,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         controlProcess.process(0.0)
     }
 
-    override fun inventoryChange(inventory: IInventory?) {
+    override fun inventoryChange(inventory: Container?) {
         super.inventoryChange(inventory)
         setupPhysical()
     }
@@ -176,8 +174,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
 
     override fun hasGui() = true
     override fun getInventory() = inventory
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
-    override fun newContainer(side: Direction?, player: EntityPlayer?) = ResistorContainer(player, inventory)
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 
     override fun getWaila(): Map<String, String> = mutableMapOf(
         Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),
@@ -189,9 +186,9 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
 class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :
     TransparentNodeElementRender(entity, desc) {
     val desc = desc as LargeRheostatDescriptor
-    val inventory = TransparentNodeElementInventory(1, 64, this)
 
-    override fun getInventory(): IInventory {
+
+    override fun getInventory(): Container {
         return inventory
     }
 
@@ -232,21 +229,7 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
         }
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
-        return LargeRheostatGUI(player, inventory, this)
-    }
-
 }
 
-class LargeRheostatGUI(player: EntityPlayer, inventory: IInventory, internal var render: LargeRheostatRender) :
-    GuiContainerEln(ResistorContainer(player, inventory)) {
 
-    override fun postDraw(f: Float, x: Int, y: Int) {
-        helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %1$", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ohm")))
-        super.postDraw(f, x, y)
-    }
-
-    override fun newHelper(): GuiHelperContainer {
-        return HelperStdContainer(this)
-    }
-}
+// 26.x port: class LargeRheostatGUI removed (client; redone in P3/P4)

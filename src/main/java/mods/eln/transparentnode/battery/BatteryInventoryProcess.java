@@ -19,10 +19,13 @@ public class BatteryInventoryProcess implements IProcess {
 
         boolean cut = false;
         if (battery.hasOverHeatingProtection()) {
-            if (battery.thermalLoad.Tc * 1.1 > battery.descriptor.thermalHeatTime) {
+            // WP16b: 1.7.10 compared the temperature (K) to thermalHeatTime (30 s); compare to the warm limit
+            // instead, at half of it (= 30 K for every EA battery: warm limit 60), so the trip point is unchanged.
+            double cutT = battery.descriptor.thermalWarmLimit * 0.5;
+            if (battery.thermalLoad.Tc * 1.1 > cutT) {
                 thermalCut = true;
             }
-            if (battery.thermalLoad.Tc * 1.15 < battery.descriptor.thermalHeatTime) {
+            if (battery.thermalLoad.Tc * 1.15 < cutT) {
                 thermalCut = false;
             }
         } else {

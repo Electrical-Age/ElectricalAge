@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:iron_cable",
+    "R": "#c:rubbers"
+  },
+  "pattern": [
+    "R",
+    "C"
+  ],
+  "result": {
+    "id": "eln:signal_cable"
+  }
+}

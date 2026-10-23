@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.turret;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
@@ -19,13 +21,13 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -61,7 +63,7 @@ public class TurretElement extends TransparentNodeElement {
         simulation = new TurretMechanicsSimulation((TurretDescriptor) descriptor);
         slowProcessList.add(simulation);
 
-        Eln.instance.highVoltageCableDescriptor.applyTo(load);
+        ElnDeviceRegistry.highVoltageCableDescriptor.applyTo(load);
         electricalLoadList.add(load);
         electricalComponentList.add(powerResistor);
 
@@ -149,9 +151,9 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+    public boolean onBlockActivated(Player entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
-        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
+        return acceptingInventory.take(entityPlayer.getMainHandItem());
     }
 
     @Override
@@ -164,7 +166,7 @@ public class TurretElement extends TransparentNodeElement {
             stream.writeBoolean(simulation.inSeekMode());
             stream.writeBoolean(simulation.isShooting());
             stream.writeBoolean(simulation.isEnabled());
-            Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getStackInSlot(TurretContainer.filterId));
+            Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getItem(TurretContainer.filterId));
             stream.writeBoolean(filterIsSpare);
             stream.writeFloat((float) chargePower);
         } catch (IOException e) {
@@ -173,19 +175,19 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setDouble("chargePower", chargePower);
-        nbt.setBoolean("filterIsSpare", filterIsSpare);
-        nbt.setDouble("energyBuffer", energyBuffer);
+        nbt.putDouble("chargePower", chargePower);
+        nbt.putBoolean("filterIsSpare", filterIsSpare);
+        nbt.putDouble("energyBuffer", energyBuffer);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        chargePower = nbt.getDouble("chargePower");
-        filterIsSpare = nbt.getBoolean("filterIsSpare");
-        energyBuffer = nbt.getDouble("energyBuffer");
+        chargePower = nbt.getDoubleOr("chargePower", 0.0);
+        filterIsSpare = nbt.getBooleanOr("filterIsSpare", false);
+        energyBuffer = nbt.getDoubleOr("energyBuffer", 0.0);
     }
 
     @Override
@@ -194,17 +196,12 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return acceptingInventory.getInventory();
     }
 
     @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new TurretContainer(player, acceptingInventory.getInventory());
-    }
-
-    @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
         needPublish();
     }
@@ -237,8 +234,8 @@ public class TurretElement extends TransparentNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Charge power"), Utils.plotPower("", chargePower));
 
-        ItemStack filterStack = acceptingInventory.getInventory().getStackInSlot(TurretContainer.filterId);
-        if (filterStack != null) {
+        ItemStack filterStack = acceptingInventory.getInventory().getItem(TurretContainer.filterId);
+        if (!Utils.isEmpty(filterStack)) {
             GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
             if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
                 EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
@@ -246,11 +243,11 @@ public class TurretElement extends TransparentNodeElement {
                 if (filterIsSpare) {
                     target += "not ";
                 }
-                if (filter.entityClass == EntityPlayer.class) {
+                if (filter.entityClass == Player.class) {
                     target += I18N.tr("players");
-                } else if (filter.entityClass == IMob.class) {
+                } else if (filter.entityClass == Enemy.class) {
                     target += I18N.tr("monsters");
-                } else if (filter.entityClass == EntityAnimal.class) {
+                } else if (filter.entityClass == Animal.class) {
                     target += I18N.tr("animals");
                 } else {
                     target += I18N.tr("??");

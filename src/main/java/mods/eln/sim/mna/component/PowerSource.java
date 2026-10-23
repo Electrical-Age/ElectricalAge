@@ -4,7 +4,7 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.state.State;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class PowerSource extends VoltageSource implements IRootSystemPreStepProcess, INBTTReady {
 
@@ -46,9 +46,8 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 
     @Override
     public void addedTo(SubSystem s) {
-        super.addedTo(s);
-        getSubSystem().getRoot().addProcess(this);
-        s.addProcess(this);
+        super.addedTo(s); // VoltageSource.addedTo registers the RHS process (1.7.10 added it a second time here,
+        getSubSystem().getRoot().addProcess(this); // harmless only while SubSystem.addToI overwrote)
     }
 
     @Override
@@ -68,24 +67,24 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         super.readFromNBT(nbt, str);
 
         str += name;
 
-        setP(nbt.getDouble(str + "P"));
-        setUmax(nbt.getDouble(str + "Umax"));
-        setImax(nbt.getDouble(str + "Imax"));
+        setP(nbt.getDoubleOr(str + "P", 0.0));
+        setUmax(nbt.getDoubleOr(str + "Umax", 0.0));
+        setImax(nbt.getDoubleOr(str + "Imax", 0.0));
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public void writeToNBT(CompoundTag nbt, String str) {
         super.writeToNBT(nbt, str);
 
         str += name;
 
-        nbt.setDouble(str + "P", getP());
-        nbt.setDouble(str + "Umax", Umax);
-        nbt.setDouble(str + "Imax", Imax);
+        nbt.putDouble(str + "P", getP());
+        nbt.putDouble(str + "Umax", Umax);
+        nbt.putDouble(str + "Imax", Imax);
     }
 }

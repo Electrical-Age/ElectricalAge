@@ -1,5 +1,10 @@
 package mods.eln.node.six;
 
+import net.minecraft.world.entity.item.ItemEntity;
+
+
+import mods.eln.sim.process.destruct.Repair;
+import mods.eln.compat.WorldCompat;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -11,16 +16,16 @@ import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -37,11 +42,24 @@ public class SixNode extends Node {
     public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>(1);
     public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>(1);
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
     //public int sixNodeCacheMapId = -1;
 
     public LRDUCubeMask lrduElementMask = new LRDUCubeMask();
+
+    /**
+     * Sides whose saved device could not be built or loaded (a device this version lacks, or a load that threw): the
+     * raw {EID, ED} pair, written back unchanged on save so a version that can load it again still finds it. The side
+     * stays taken: a device placed on it would silently replace the saved one, so placement is refused. Breaking the
+     * whole block discards them.
+     */
+    private final CompoundTag[] keptSides = new CompoundTag[6];
+
+    /** Is this side holding a device that could not be loaded (kept as saved data, see keptSides)? */
+    public boolean isSideKept(int side) {
+        return keptSides[side] != null;
+    }
 
     public SixNodeElement getElement(Direction side) {
         return sideElementList[side.getInt()];
@@ -78,22 +96,25 @@ public class SixNode extends Node {
         lrduElementMask.clear();
     }
 
-    public boolean createSubBlock(ItemStack itemStack, Direction direction, EntityPlayer player) {
-
+    public boolean createSubBlock(ItemStack itemStack, Direction direction, Player player) {
+        if (keptSides[direction.getInt()] != null) {
+            if (player != null) Utils.sendMessage(player, "This side holds a device this version of Electrical Age cannot load; its data is kept. Break the block to discard it.");
+            return false;
+        }
         SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
         if (sideElementList[direction.getInt()] != null)
             return false;
         try {
             //Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
             //if((Boolean)bool == false) return false;
-            sideElementIdList[direction.getInt()] = itemStack.getItemDamage(); //Je sais c'est moche !
+            sideElementIdList[direction.getInt()] = descriptor.parentItemDamage; //Je sais c'est moche !
             sideElementList[direction.getInt()] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, direction, descriptor);
             sideElementIdList[direction.getInt()] = 0;
 
             disconnect();
             sideElementList[direction.getInt()].front = descriptor.getFrontFromPlace(direction, player);
             sideElementList[direction.getInt()].initialize();
-            sideElementIdList[direction.getInt()] = itemStack.getItemDamage();
+            sideElementIdList[direction.getInt()] = descriptor.parentItemDamage;
 
             connect();
 
@@ -127,20 +148,20 @@ public class SixNode extends Node {
         protected void dropItem(ItemStack itemStack)
 	    {
 	    	
-	        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
+	        if (coordonate.world().getGameRules().getBooleanOr("doTileDrops", false))
 	        {
 	            float var6 = 0.7F;
 	            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
 	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
-	            var13.delayBeforeCanPickup = 10;
-	            coordonate.world().spawnEntityInWorld(var13);
+	            ItemEntity var13 = new ItemEntity(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
+	            var13.setPickupDelay(10);
+	            coordonate.world().spawnEntity(var13);
 	        }
 	    }*/
 
 
-    public boolean playerAskToBreakSubBlock(EntityPlayerMP entityPlayer, Direction direction) {
+    public boolean playerAskToBreakSubBlock(ServerPlayer entityPlayer, Direction direction) {
 
         if (sideElementList[direction.getInt()] == null)
             return deleteSubBlock(entityPlayer, direction);
@@ -153,12 +174,48 @@ public class SixNode extends Node {
 
     }
 
-    public boolean deleteSubBlock(EntityPlayerMP entityPlayer, Direction direction) {
+    /** The block went another way (an explosion, a command, a piston): every remaining element drops (1.12 breakBlock). */
+    @Override
+    public void onBreakBlock() {
+        if (isAdded()) disconnect();   // first, while the elements are still there
+        for (int i = 0; i < 6; i++) {
+            if (keptSides[i] == null) continue;
+            Eln.LOG.warn("Electrical Age: the block at {} was broken; discarding the saved six-node device {} on side {} that this version could not load",
+                coordonate, keptSides[i].getShortOr("EID", (short) 0), Direction.fromInt(i));
+            keptSides[i] = null;
+        }
+        for (int i = 0; i < 6; i++) {
+            SixNodeElement e = sideElementList[i];
+            if (e == null) continue;
+            sideElementList[i] = null;
+            sideElementIdList[i] = 0;
+            try {
+                e.destroy(null);
+            } catch (RuntimeException ex) {
+                Utils.println("six node element destroy failed: " + ex);
+            }
+        }
+        super.onBreakBlock();
+    }
+
+    public boolean deleteSubBlock(ServerPlayer entityPlayer, Direction direction) {
 
         if (sideElementList[direction.getInt()] == null)
             return false;
 
         Utils.println("deleteSubBlock " + " " + direction);
+        try {
+            return deleteSubBlockImpl(entityPlayer, direction);
+        } finally {
+            afterSubBlockDeleted();
+        }
+    }
+
+    /** After an element went (a voxel node removes its block once nothing at all is left). */
+    protected void afterSubBlockDeleted() {
+    }
+
+    private boolean deleteSubBlockImpl(ServerPlayer entityPlayer, Direction direction) {
 
         disconnect();
         SixNodeElement e = sideElementList[direction.getInt()];
@@ -173,56 +230,49 @@ public class SixNode extends Node {
         return true;
     }
 
+    /** Is any side taken? Kept sides count, so the block stays when the last device that loaded goes. */
     public boolean getIfSideRemain() {
-        for (SixNodeElement sideElement : sideElementList) {
-            if (sideElement != null)
-                return true;
-        }
+        for (int i = 0; i < 6; i++) if (sideElementList[i] != null || keptSides[i] != null) return true;
         return false;
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
-        super.readFromNBT(nbt.getCompoundTag("node"));
+    public void readFromNBT(CompoundTag nbt) {
+        super.readFromNBT(nbt.getCompoundOrEmpty("node"));
 
-        sixNodeCacheBlock = Block.getBlockById(nbt.getInteger("cacheBlockId"));
-        sixNodeCacheBlockMeta = nbt.getByte("cacheBlockMeta");
+        // six-node cover blocks ("cache"): not ported yet (P2); 1.12 saved a numeric block id
+        sixNodeCacheBlock = Blocks.AIR;
+        sixNodeCacheBlockMeta = nbt.getByteOr("cacheBlockMeta", (byte) 0);
         int idx;
         for (idx = 0; idx < 6; idx++) {
 
-            short sideElementId = nbt.getShort("EID" + idx);
+            short sideElementId = nbt.getShortOr("EID" + idx, (short) 0);
+            keptSides[idx] = null;
             if (sideElementId == 0) {
                 sideElementList[idx] = null;
                 sideElementIdList[idx] = 0;
             } else {
                 try {
                     SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
+                    if (descriptor == null) throw new IllegalStateException("no six-node device " + sideElementId + " in this version");
                     sideElementIdList[idx] = sideElementId;
                     sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
-                    sideElementList[idx].readFromNBT(nbt.getCompoundTag("ED" + idx));
+                    sideElementList[idx].readFromNBT(nbt.getCompoundOrEmpty("ED" + idx));
                     sideElementList[idx].initialize();
-                } catch (InstantiationException e) {
-
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-
-                    e.printStackTrace();
-                } catch (IllegalArgumentException e) {
-
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-
-                    e.printStackTrace();
-                } catch (SecurityException e) {
-
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    // (a half-built element must not stay: it would run, save and drop as if it had loaded)
+                    sideElementList[idx] = null;
+                    sideElementIdList[idx] = 0;
+                    CompoundTag kept = new CompoundTag();
+                    kept.putShort("EID", sideElementId);
+                    kept.put("ED", nbt.getCompoundOrEmpty("ED" + idx).copy());
+                    keptSides[idx] = kept;
+                    Eln.LOG.warn("Electrical Age: the six-node device {} on side {} at {} cannot be loaded; keeping its saved data, "
+                        + "and the side stays taken", sideElementId, Direction.fromInt(idx), coordonate, e);
                 }
             }
         }
-        initializeFromNBT();
-
+        // (no connect here: NodeManager and the other loaders call initializeFromNBT once the node is added; a connect
+        // here too ran before addNode, and left the node's loads in the simulator if anything after it threw)
     }
 
     @Override
@@ -231,37 +281,40 @@ public class SixNode extends Node {
         return false;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         int idx = 0;
-        nbt.setInteger("cacheBlockId", Block.getIdFromBlock(sixNodeCacheBlock));
-        nbt.setByte("cacheBlockMeta", sixNodeCacheBlockMeta);
+        nbt.putInt("cacheBlockId", 0);
+        nbt.putByte("cacheBlockMeta", sixNodeCacheBlockMeta);
 
         for (SixNodeElement sideElement : sideElementList) {
 
-            if (sideElement == null) {
-                nbt.setShort("EID" + idx, (short) 0);
+            if (sideElement == null && keptSides[idx] != null) {
+                nbt.putShort("EID" + idx, keptSides[idx].getShortOr("EID", (short) 0));
+                nbt.put("ED" + idx, keptSides[idx].getCompoundOrEmpty("ED").copy());
+            } else if (sideElement == null) {
+                nbt.putShort("EID" + idx, (short) 0);
             } else {
-                nbt.setShort("EID" + idx, (short) sideElementIdList[idx]);
+                nbt.putShort("EID" + idx, (short) sideElementIdList[idx]);
                 sideElement.writeToNBT(Utils.newNbtTagCompund(nbt, "ED" + idx));
             }
             idx++;
         }
 
-        NBTTagCompound nodeNbt = new NBTTagCompound();
+        CompoundTag nodeNbt = new CompoundTag();
         super.writeToNBT(nodeNbt);
-        nbt.setTag("node", nodeNbt);
+        nbt.put("node", nodeNbt);
     }
 
+    /** Is the side taken (a device, or one kept as saved data)? */
     public boolean getSideEnable(Direction direction) {
-
-        return sideElementList[direction.getInt()] != null;
+        return sideElementList[direction.getInt()] != null || keptSides[direction.getInt()] != null;
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
-        if (element == null)
+        if (element == null || element.isBurnt())
             return null;
         return element.getElectricalLoad(elementSide.getLRDUGoingTo(side));
     }
@@ -270,7 +323,7 @@ public class SixNode extends Node {
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
-        if (element == null)
+        if (element == null || element.isBurnt())
             return null;
         return element.getThermalLoad(elementSide.getLRDUGoingTo(side));
     }
@@ -305,8 +358,9 @@ public class SixNode extends Node {
 
         super.publishSerialize(stream);
         try {
+            publishBeforeElements(stream);
             int idx = 0;
-            stream.writeInt(Block.getIdFromBlock(sixNodeCacheBlock));
+            stream.writeInt(0); // cover block: not ported yet
             stream.writeByte(sixNodeCacheBlockMeta);
             for (SixNodeElement sideElement : sideElementList) {
                 if (sideElement == null) {
@@ -323,6 +377,11 @@ public class SixNode extends Node {
         }
     }
 
+    /** For a voxel node: its parts, written before the elements (a client without an element's render stops reading at
+     *  that element). */
+    protected void publishBeforeElements(DataOutputStream stream) throws IOException {
+    }
+
     public void preparePacketForClient(DataOutputStream stream, SixNodeElement e) {
         try {
             super.preparePacketForClient(stream);
@@ -336,7 +395,7 @@ public class SixNode extends Node {
     }
 
     @Override
-    public void initializeFromThat(Direction front, EntityLivingBase entityLiving,
+    public void initializeFromThat(Direction front, LivingEntity entityLiving,
                                    ItemStack itemStack) {
         neighborBlockRead();
 
@@ -361,10 +420,15 @@ public class SixNode extends Node {
 
     @Override
     public void connectJob() {
-
         super.connectJob();
+        connectElements();
+    }
+
+    /** The elements' own connect jobs and their links inside the block (a voxel node hosting elements calls this). */
+    protected void connectElements() {
+        // Burnt elements stay out of the simulation (see SixNodeElement.burn).
         for (SixNodeElement element : sideElementList) {
-            if (element != null) {
+            if (element != null && !element.isBurnt()) {
                 element.connectJob();
             }
         }
@@ -419,7 +483,7 @@ public class SixNode extends Node {
     public void disconnectJob() {
         super.disconnectJob();
         for (SixNodeElement element : sideElementList) {
-            if (element != null) {
+            if (element != null && !element.isBurnt()) {
                 element.disconnectJob();
             }
         }
@@ -428,10 +492,53 @@ public class SixNode extends Node {
         Eln.simulator.removeAllThermalConnection(internalThermalConnectionList);
     }
 
+    @Override
+    protected void visualConnectInit() {
+        lrduElementMask.clear();
+    }
+
+    /** The mask half of connectJob's INTERNAL part (no connections). */
+    @Override
+    protected void visualConnectInternal() {
+        for (Direction side : new Direction[]{Direction.YN, Direction.YP}) {
+            SixNodeElement element = sideElementList[side.getInt()];
+            if (element == null) continue;
+            for (LRDU lrdu : LRDU.values()) {
+                Direction otherSide = side.applyLRDU(lrdu);
+                SixNodeElement otherElement = sideElementList[otherSide.getInt()];
+                if (otherElement != null) visualInternal(side, element, lrdu, otherSide, otherElement, otherSide.getLRDUGoingTo(side));
+            }
+        }
+        Direction side = Direction.XN;
+        for (int idx = 0; idx < 4; idx++) {
+            Direction otherSide = side.right();
+            SixNodeElement element = sideElementList[side.getInt()];
+            SixNodeElement otherElement = sideElementList[otherSide.getInt()];
+            if (element != null && otherElement != null) visualInternal(side, element, LRDU.Right, otherSide, otherElement, LRDU.Left);
+            side = otherSide;
+        }
+    }
+
+    private void visualInternal(Direction side, SixNodeElement element, LRDU lrdu, Direction otherSide, SixNodeElement otherElement, LRDU otherLRDU) {
+        if (compareConnectionMask(element.getConnectionMask(lrdu), otherElement.getConnectionMask(otherLRDU))) {
+            lrduElementMask.set(side, lrdu, true);
+            lrduElementMask.set(otherSide, otherLRDU, true);
+        }
+    }
+
+    @Override
+    protected int visualHash() {
+        int h = super.visualHash();
+        for (Direction d : Direction.values()) h = h * 31 + lrduElementMask.get(d).mask;
+        return h;
+    }
+
     public void tryConnectTwoInternalElement(Direction side, SixNodeElement element, LRDU lrdu, Direction otherSide, SixNodeElement otherElement, LRDU otherLRDU) {
         if (compareConnectionMask(element.getConnectionMask(lrdu), otherElement.getConnectionMask(otherLRDU))) {
             lrduElementMask.set(side, lrdu, true);
             lrduElementMask.set(otherSide, otherLRDU, true);
+            // A burnt element keeps its (visual) connection but carries nothing.
+            if (element.isBurnt() || otherElement.isBurnt()) return;
             ElectricalLoad eLoad;
             if ((eLoad = element.getElectricalLoad(lrdu)) != null) {
                 ElectricalLoad otherELoad = otherElement.getElectricalLoad(otherLRDU);
@@ -465,9 +572,9 @@ public class SixNode extends Node {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
         if (element == null) {
-            Utils.println("sixnode newConnectionAt error");
-            while (true)
-                ;
+            // (1.12 hung the server here on purpose: incognito crashed 2026-10-17 after a battery blow-up)
+            Utils.println("sixnode connection to an empty side " + elementSide + " at " + coordonate + ": ignored");
+            return;
         }
         lrduElementMask.set(elementSide, elementSide.getLRDUGoingTo(side), true);
 
@@ -477,36 +584,22 @@ public class SixNode extends Node {
         Direction elementSide = side.applyLRDU(lrdu);
         SixNodeElement element = sideElementList[elementSide.getInt()];
         if (element == null) {
-            Utils.println("sixnode newConnectionAt error");
-            while (true)
-                ;
+            // (1.12 hung the server here on purpose: incognito crashed 2026-10-17 after a battery blow-up)
+            Utils.println("sixnode connection to an empty side " + elementSide + " at " + coordonate + ": ignored");
+            return;
         }
         lrduElementMask.set(elementSide, elementSide.getLRDUGoingTo(side), false);
     }
 
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (sixNodeCacheBlock != Blocks.air) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (sixNodeCacheBlock != Blocks.AIR) {
             return false;
         } else {
 
-            ItemStack stack = entityPlayer.getCurrentEquippedItem();
+            ItemStack stack = entityPlayer.getMainHandItem();
 
-            Block b = Blocks.air;
-            if (stack != null)
-                b = Block.getBlockFromItem(stack.getItem());
-
+            // 1.12: with the interact key, a block in hand became the node's cover ("cache"); not ported yet (P2)
             boolean accepted = false;
-
-            if (Eln.playerManager.get(entityPlayer).getInteractEnable() && stack != null) {
-                for (ISixNodeCache a : sixNodeCacheList) {
-                    if (a.accept(stack)) {
-                        accepted = true;
-                        sixNodeCacheBlock = b;
-                        sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
-                        break;
-                    }
-                }
-            }
 			
 
 			/*if(entityPlayer.isSneaking() == false){
@@ -514,26 +607,13 @@ public class SixNode extends Node {
 			}*/
 
             if (accepted) {
-                Utils.println("ACACAC");
-
-
-                setNeedPublish(true);
-                if (Utils.isCreative((EntityPlayerMP) entityPlayer) == false)
-                    entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
-
-                //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
-                {
-                    Chunk chunk = coordonate.world().getChunkFromBlockCoords(coordonate.x, coordonate.z);
-                    Utils.generateHeightMap(chunk);
-                    Utils.updateSkylight(chunk);
-                    chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
-                }
                 return true;
             } else {
                 SixNodeElement element = sideElementList[side.getInt()];
                 if (element == null)
                     return false;
+                if (element.isBurnt() && Repair.onActivated(element, entityPlayer))
+                    return true;
                 if (element.onBlockActivated(entityPlayer, side, vx, vy, vz))
                     return true;
                 return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
@@ -548,16 +628,10 @@ public class SixNode extends Node {
         return sideElementList[side.getInt()].hasGui();
     }
 
-    public IInventory getInventory(Direction side) {
+    public Container getInventory(Direction side) {
         if (sideElementList[side.getInt()] == null)
             return null;
         return sideElementList[side.getInt()].getInventory();
-    }
-
-    public Container newContainer(Direction side, EntityPlayer player) {
-        if (sideElementList[side.getInt()] == null)
-            return null;
-        return sideElementList[side.getInt()].newContainer(side, player);
     }
 
     public float physicalSelfDestructionExplosionStrength() {
@@ -577,14 +651,16 @@ public class SixNode extends Node {
     }
 
     @Override
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream, player);
 
-        Direction side;
+        // (from a client: a side byte out of range, an empty side or another device's id are ignored)
         try {
-            side = Direction.fromInt(stream.readByte());
-            if (side != null & sideElementIdList[side.getInt()] == stream.readShort()) {
-                sideElementList[side.getInt()].networkUnserialize(stream, player);
+            Direction side = Direction.fromInt(stream.readByte());
+            short id = stream.readShort();
+            SixNodeElement element = side == null ? null : sideElementList[side.getInt()];
+            if (element != null && sideElementIdList[side.getInt()] == id) {
+                element.networkUnserialize(stream, player);
             } else {
                 Utils.println("sixnode unserialize miss");
             }
@@ -607,7 +683,7 @@ public class SixNode extends Node {
     @Override
     public String getNodeUuid() {
 
-        return Eln.sixNodeBlock.getNodeUuid();
+        return "s";
     }
 
     @Override

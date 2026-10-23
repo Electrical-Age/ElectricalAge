@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+
+import mods.eln.registry.ElnDeviceRegistry
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
@@ -9,21 +11,21 @@ import mods.eln.node.six.*
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.IInventory
-import net.minecraft.inventory.ISidedInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.tileentity.TileEntity
-import net.minecraftforge.common.util.ForgeDirection
-import net.minecraftforge.fluids.IFluidHandler
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.Container
+import net.minecraft.world.WorldlyContainer
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.core.BlockPos
+import net.neoforged.neoforge.capabilities.Capabilities
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
 /**
  * A comparator-alike. It doesn't "compare" anything, though.
  */
-class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, ScannerElement::class.java, ScannerRender::class.java) {
+class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, ScannerElement::class.java, null) {
 
     val main = obj.getPart("main")!!
     val leds = arrayOf("LED_0", "LED_1").map { obj.getPart(it) }.requireNoNulls()
@@ -31,19 +33,20 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
     init {
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
-
     fun draw(mode: ScanMode) {
         main.draw()
         leds[mode.value.toInt()].draw()
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
+
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Scans blocks to produce signals."))
-        list.add(tr("- For tanks, outputs fill percentage."))
-        list.add(tr("- For inventories, outputs either total fill or fraction of slots with any items."))
-        list.add(tr("Right-click to change mode."))
-        list.add(tr("Otherwise behaves as a vanilla comparator."))
+        // 26.x: says what it is for first (Baughn); 1.12 began with "Scans blocks to produce signals."
+        list.add(tr("Reads the block it faces and outputs a signal (0-%1\$V), like a comparator.", mods.eln.Eln.SVU.toInt()))
+        list.add(tr("- Tanks: how full they are."))
+        list.add(tr("- Inventories: how full, or the share of slots in use."))
+        list.add(tr("- Other blocks: what a vanilla comparator would read."))
+        list.add(tr("Right-click to switch the inventory mode."))
     }
 }
 
@@ -67,12 +70,12 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         val scannedCoord = Coordonate(coordonate).apply {
             move(appliedLRDU)
         }
-        val targetSide: ForgeDirection = appliedLRDU.inverse.toForge()
+        val targetSide: net.minecraft.core.Direction = appliedLRDU.inverse.toEnumFacing()
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
         var out: Double? = null
         if (te != null) {
-            out = scanTileEntity(te, targetSide)
+            out = scanTileEntity(scannedCoord, te, targetSide)
         }
         if (out == null) {
             out = scanBlock(scannedCoord, targetSide)
@@ -86,58 +89,52 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         slowProcessList.add(updater)
     }
 
-    private fun scanBlock(scannedCoord: Coordonate, targetSide: ForgeDirection): Double {
-        val block = scannedCoord.block
-        if (block.hasComparatorInputOverride()) {
-            return block.getComparatorInputOverride(scannedCoord.world(), scannedCoord.x, scannedCoord.y, scannedCoord.z, targetSide.ordinal) / 15.0
-        } else if (block.isOpaqueCube) {
+    private fun scanBlock(scannedCoord: Coordonate, targetSide: net.minecraft.core.Direction): Double {
+        val world = scannedCoord.world()
+        val pos = scannedCoord.pos()
+        val state = world.getBlockState(pos)
+        // 1.12: comparator input has no side parameter any more (1.7.10 passed targetSide)
+        if (state.hasAnalogOutputSignal()) {
+            return state.getAnalogOutputSignal(world, pos, targetSide) / 15.0
+        } else if (state.isSolidRender) {
             return 1.0
-        } else if (block.isAir(scannedCoord.world(), scannedCoord.x, scannedCoord.y, scannedCoord.z)) {
+        } else if (state.isAir) {
             return 0.0
         } else {
             return 1.0/3.0
         }
     }
 
-    private fun scanTileEntity(te: TileEntity, targetSide: ForgeDirection): Double? {
-        if (te is IFluidHandler) {
-            val info = te.getTankInfo(targetSide)
-            return info.sumByDouble {
-                (it.fluid?.amount ?: 0).toDouble() / it.capacity
-            } / info.size
-        } else if (te is ISidedInventory) {
-            var sum = 0
-            var limit = 0
-            val slots = te.getAccessibleSlotsFromSide(targetSide.ordinal)
-            when (mode) {
-                ScanMode.SIMPLE -> slots.forEach {
-                        sum += te.getStackInSlot(it)?.stackSize ?: 0
-                        limit += te.inventoryStackLimit
-                    }
-
-                ScanMode.SLOTS -> slots.forEach {
-                    sum += if ((te.getStackInSlot(it)?.stackSize ?: 0) > 0) 1 else 0
-                    limit += 1
-                }
-            }
-            return sum.toDouble() / limit
-        } else if (te is IInventory) {
+    private fun scanTileEntity(scannedCoord: Coordonate, te: BlockEntity, targetSide: net.minecraft.core.Direction): Double? {
+        val world = scannedCoord.world()
+        val pos = scannedCoord.pos()
+        // 1.12: the side's fluid handler capability; 26.x: the NeoForge transfer API
+        val fluids = world.getCapability(Capabilities.Fluid.BLOCK, pos, targetSide)
+        if (fluids != null && fluids.size() > 0) {
+            return (0 until fluids.size()).sumOf {
+                val cap = fluids.getCapacityAsLong(it, fluids.getResource(it))
+                if (cap > 0) fluids.getAmountAsLong(it).toDouble() / cap else 0.0
+            } / fluids.size()
+        } else if (te is Container) {
+            // 1.12 divided by inventoryStackLimit (64); 26.x containers allow 99, so use the vanilla comparator's
+            // per-slot limit min(container, item) instead (the same as 1.12 for 64-stacking items).
+            val slots = if (te is WorldlyContainer) te.getSlotsForFace(targetSide).toList() else (0 until te.containerSize).toList()
+            if (slots.isEmpty()) return 0.0
             val sum = when (mode) {
-                ScanMode.SIMPLE -> (0..te.sizeInventory - 1).sumBy {
-                    te.getStackInSlot(it)?.stackSize ?: 0
-                }.toDouble()
+                ScanMode.SIMPLE -> slots.sumOf {
+                    val stack = te.getItem(it)
+                    if (stack.isEmpty) 0.0 else stack.count.toDouble() / minOf(te.maxStackSize, stack.maxStackSize)
+                }
 
-                ScanMode.SLOTS -> (0..te.sizeInventory - 1).count {
-                    (te.getStackInSlot(it)?.stackSize ?: 0) > 0
-                }.toDouble() * te.inventoryStackLimit
+                ScanMode.SLOTS -> slots.count { !te.getItem(it).isEmpty }.toDouble()
             }
-            return sum / te.inventoryStackLimit / te.sizeInventory
+            return sum / slots.size
         } else {
             return null
         }
     }
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (onBlockActivatedRotate(entityPlayer)) return true
         if (entityPlayer.isHoldingMeter()) return false
         mode = when (mode) {
@@ -157,7 +154,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     }
 
     override fun multiMeterString(): String {
-        return "Mode: ${tr(mode.name.toLowerCase().capitalize())}, Value: ${Utils.plotPercent("", outputProcess.outputNormalized)}"
+        return "Mode: ${tr(mode.name.lowercase().replaceFirstChar { it.uppercase() })}, Value: ${Utils.plotPercent("", outputProcess.outputNormalized)}"
     }
 
     override fun thermoMeterString() = ""
@@ -170,14 +167,14 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         stream.writeByte(mode.value.toInt())
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setByte("mode", mode.value)
+        nbt.putByte("mode", mode.value)
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
-        mode = ScanMode.fromByte(nbt.getByte("mode"))!!
+        mode = ScanMode.fromByte(nbt.getByteOr("mode", 0.toByte()))!!
     }
 }
 
@@ -197,5 +194,6 @@ class ScannerRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeD
         mode = ScanMode.fromByte(stream.readByte())!!
     }
 
-    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor = Eln.instance.signalCableDescriptor.render
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor = ElnDeviceRegistry.signalCableDescriptor.render
 }
+

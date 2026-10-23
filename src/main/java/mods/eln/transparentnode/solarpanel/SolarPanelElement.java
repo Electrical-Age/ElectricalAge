@@ -19,10 +19,10 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SolarPanelElement extends TransparentNodeElement {
+    /** 1.12 SolarPanelContainer.trackerSlotId */
+    public static final int trackerSlotId = 0;
+
 
     SolarPanelDescriptor descriptor;
     NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
@@ -155,29 +158,29 @@ public class SolarPanelElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        return descriptor.canRotate && inventory.take(entityPlayer.getMainHandItem(), this, true, false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         powerSource.writeToNBT(nbt, "powerSource");
-        nbt.setDouble("panelAlpha", panelAlpha);
+        nbt.putDouble("panelAlpha", panelAlpha);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         powerSource.readFromNBT(nbt, "powerSource");
-        panelAlpha = nbt.getDouble("panelAlpha");
+        panelAlpha = nbt.getDoubleOr("panelAlpha", 0.0);
     }
 
 
     public void networkSerialize(java.io.DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            stream.writeBoolean(getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId) != null);
+            stream.writeBoolean(!Utils.isEmpty(getInventory().getItem(trackerSlotId)));
             stream.writeFloat((float) panelAlpha);
             node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
         } catch (IOException e) {
@@ -213,18 +216,13 @@ public class SolarPanelElement extends TransparentNodeElement {
             .acceptIfEmpty(0, SolarTrackerDescriptor.class);
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory.getInventory();
     }
 
     @Override
     public boolean hasGui() {
         return descriptor.canRotate;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new SolarPanelContainer(node, player, inventory.getInventory());
     }
 
     @Override

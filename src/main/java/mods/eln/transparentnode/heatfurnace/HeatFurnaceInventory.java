@@ -2,17 +2,13 @@ package mods.eln.transparentnode.heatfurnace;
 
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.node.transparent.TransparentNodeElementRender;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class HeatFurnaceInventory extends TransparentNodeElementInventory {
     public HeatFurnaceInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
         super(size, stackLimit, TransparentNodeElement);
     }
-
-    public HeatFurnaceInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
-        super(size, stackLimit, TransparentnodeRender);
-    }
+// 26.x port: HeatFurnaceInventory() removed (client rendering; redone in P3)
 
     @Override
     public int[] getAccessibleSlotsFromSide(int side) {
@@ -20,8 +16,9 @@ public class HeatFurnaceInventory extends TransparentNodeElementInventory {
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
-        return true;
+    public boolean canInsertItem(int slot, ItemStack stack, int side) {
+        // fuel only (the GUI's fuel slot filter)
+        return slot == HeatFurnaceContainer.combustibleId && mods.eln.misc.Utils.getItemEnergie(stack) > 0;
     }
 
     @Override

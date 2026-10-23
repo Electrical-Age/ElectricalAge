@@ -29,7 +29,6 @@ public class WindTurbineRender extends TransparentNodeElementRender {
     private final WindTurbineDescriptor descriptor;
     private float alpha = (float) (Math.random() * 360);
 
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0, 64, this);
     private float wind;
     private float powerFactor;
 

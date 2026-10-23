@@ -1,0 +1,48 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Long Suspended Lamp Socket"
+  },
+  {
+   "button": "supply",
+   "sample": [
+    "Powered by Lamp Supply",
+    "Powered by cable"
+   ],
+   "fill": true
+  },
+  {
+   "field": "channel",
+   "chars": 24,
+   "fill": true
+  },
+  {
+   "text": "status",
+   "sample": [
+    "connected to aaaaaaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaaaaaa is not in range!"
+   ]
+  },
+  {
+   "row": [
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

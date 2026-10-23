@@ -46,6 +46,15 @@ public abstract class Bipole extends Component {
 
     public abstract double getCurrent();
 
+    /**
+     * Current flowing from the node {@code pin} into this component. Default: getCurrent() at aPin, -getCurrent()
+     * at bPin (a two-terminal element). Overridden by components whose terminals carry different currents
+     * (Transformer: its two windings).
+     */
+    public double getCurrentInto(State pin) {
+        return pin == bPin && pin != aPin ? -getCurrent() : getCurrent();
+    }
+
     public double getU() {
         return (aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state);
     }

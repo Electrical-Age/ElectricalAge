@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "c": "eln:iron_cable",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    "crc",
+    "III"
+  ],
+  "result": {
+    "id": "eln:analog_watch"
+  }
+}

@@ -1,180 +1,102 @@
 package mods.eln.ghost;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
+import mods.eln.compat.BlockMeta;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
-import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.List;
-import java.util.Random;
-
+/**
+ * The invisible blocks that make up a multiblock device around its node (1.12 GhostBlock). META: tCube (full block),
+ * tFloor (thin floor plate), tLadder (climbable, no shape). Breaking or using one is forwarded to its GhostElement,
+ * i.e. to the device. 1.12's per-device collision boxes for tCube ghosts come with the multiblock batch (P2).
+ */
 public class GhostBlock extends Block {
-
     public static final int tCube = 0;
     public static final int tFloor = 1;
     public static final int tLadder = 2;
 
-    public GhostBlock() {
-        super(Material.iron);
+    private static final VoxelShape FLOOR = Block.box(0, 0, 0, 16, 1, 16);
+
+    public GhostBlock(Properties properties) {
+        super(properties);
+        registerDefaultState(stateDefinition.any().setValue(BlockMeta.META, tCube));
     }
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return null;
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(BlockMeta.META);
     }
 
-    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
-        int meta = world.getBlockMetadata(x, y, z);
-
-        switch (meta) {
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        switch (state.getValue(BlockMeta.META)) {
             case tFloor:
-                AxisAlignedBB axisalignedbb1 = AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
-                if (axisalignedbb1 != null && par5AxisAlignedBB.intersectsWith(axisalignedbb1)) {
-                    list.add(axisalignedbb1);
-                }
-                break;
+                return FLOOR;
             case tLadder:
-
-                break;
+                return Shapes.empty();
             default:
-                GhostElement element = getElement(world, x, y, z);
-                Coordonate coord = element == null ? null : element.observatorCoordonate;
-                TileEntity te = coord == null ? null : coord.getTileEntity();
-                if (te != null && te instanceof TransparentNodeEntity) {
-                    ((TransparentNodeEntity) te).addCollisionBoxesToList(par5AxisAlignedBB, list, element.elementCoordonate);
-                } else {
-                    super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
-                }
-                break;
+                return Shapes.block();
         }
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(World w, int x, int y, int z) {
-        int meta = w.getBlockMetadata(x, y, z);
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
+    }
 
-        switch (meta) {
-            case tFloor:
-                return AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 1, (double) y + 0.0625, (double) z + 1);
-            case tLadder:
-                return AxisAlignedBB.getBoundingBox((double) x, (double) y, (double) z, (double) x + 0, (double) y + 0.0, (double) z + 0);
-            default:
-                return super.getSelectedBoundingBoxFromPool(w, x, y, z);
+    @Override
+    public boolean isLadder(BlockState state, net.minecraft.world.level.LevelReader level, BlockPos pos, net.minecraft.world.entity.LivingEntity entity) {
+        return state.getValue(BlockMeta.META) == tLadder;
+    }
+
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        GhostElement element = getElement(level, pos);
+        if (element != null) element.breakBlock();
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return activate(level, pos, player, hit);
+    }
+
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+        return activate(level, pos, player, hit);
+    }
+
+    private InteractionResult activate(Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide()) {
+            GhostElement element = getElement(level, pos);
+            if (element != null) {
+                float vx = (float) (hit.getLocation().x - pos.getX()), vy = (float) (hit.getLocation().y - pos.getY()),
+                    vz = (float) (hit.getLocation().z - pos.getZ());
+                element.onBlockActivated(player, Direction.fromIntMinecraftSide(hit.getDirection().get3DDataValue()), vx, vy, vz);
+            }
         }
+        return InteractionResult.SUCCESS;
     }
 
-    @Override
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startVec, Vec3 endVec) {
-        int meta = world.getBlockMetadata(x, y, z);
-
-        switch (meta) {
-            case tFloor:
-                this.maxY = 0.0625;
-                break;
-            case tLadder:
-                this.maxX = 0.01;
-                this.maxY = 0.01;
-                this.maxZ = 0.01;
-                break;
-            default:
-                break;
-        }
-
-        MovingObjectPosition m = super.collisionRayTrace(world, x, y, z, startVec, endVec);
-
-        switch (meta) {
-            case tFloor:
-                this.maxY = 1;
-                break;
-            case tLadder:
-                this.maxX = 1;
-                this.maxY = 1;
-                this.maxZ = 1;
-                break;
-            default:
-                break;
-        }
-
-        return m;
-    }
-
-    @Override
-    public boolean isLadder(IBlockAccess world, int x, int y, int z, EntityLivingBase entity) {
-        return world.getBlockMetadata(x, y, z) == tLadder;
-    }
-
-	/*
-	 * @Override
-	 * 
-	 * @SideOnly(Side.CLIENT) public int idPicked(World par1World, int par2, int par3, int par4) {
-	 * 
-	 * return Block.dirt.blockID; }
-	 */
-
-    @Override
-    public boolean isOpaqueCube() {
-        return false;
-    }
-
-    @Override
-    public boolean renderAsNormalBlock() {
-        return false;
-    }
-
-    @Override
-    public int getRenderType() {
-        return -1;
-    }
-
-    @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        return null;
-    }
-
-    public boolean isBlockSolid(IBlockAccess blockAccess, int x, int y, int z, int side) {
-        return false;
-    }
-
-    @Override
-    public void breakBlock(World world, int x, int y, int z, Block par5, int par6) {
-        if (world.isRemote == false) {
-            GhostElement element = getElement(world, x, y, z);
-            if (element != null) element.breakBlock();
-        }
-        super.breakBlock(world, x, y, z, par5, par6);
-    }
-
-    public boolean onBlockActivated(World world, int x, int y, int z, net.minecraft.entity.player.EntityPlayer player, int side, float vx, float vy, float vz) {
-        if (world.isRemote == false) {
-            GhostElement element = getElement(world, x, y, z);
-            if (element != null)
-                return element.onBlockActivated(player, Direction.fromIntMinecraftSide(side), vx, vy, vz);
-        }
-        return true;
-    }
-
-    GhostElement getElement(World world, int x, int y, int z) {
-        return Eln.ghostManager.getGhost(new Coordonate(x, y, z, world));
-    }
-
-    @Override
-    public float getBlockHardness(World par1World, int par2, int par3, int par4) {
-        return 0.5f;
+    GhostElement getElement(Level world, BlockPos pos) {
+        return Eln.ghostManager.getGhost(new Coordonate(pos, world));
     }
 
     public String getNodeUuid() {

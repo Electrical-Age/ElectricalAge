@@ -1,173 +1,127 @@
 package mods.eln.node;
 
 import mods.eln.misc.Direction;
-import mods.eln.misc.Utils;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.phys.BlockHitResult;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import javax.annotation.Nullable;
 
-public abstract class NodeBlock extends Block {//BlockContainer
-    public int blockItemNbr;
-    Class tileEntityClass;
+/**
+ * Base of EA's node blocks (1.12 NodeBlock): the block forwards world events to its NodeBlockEntity, which forwards
+ * them to the node. Light comes from the BE (NeoForge position-aware light emission). Rendering: no block model in
+ * P1/P2 (INVISIBLE, as in 1.12); models come in P3.
+ */
+public abstract class NodeBlock extends Block implements EntityBlock {
 
-    public NodeBlock(Material material, Class tileEntityClass, int blockItemNbr) {
-        super(material);
-        setBlockName("NodeBlock");
-        this.tileEntityClass = tileEntityClass;
-        useNeighborBrightness = true;
-        this.blockItemNbr = blockItemNbr;
-        setHardness(1.0f);
-        setResistance(1.0f);
+    protected NodeBlock(Properties properties) {
+        super(properties);
+    }
+
+    @Nullable
+    public static <T> T tileAt(BlockGetter world, BlockPos pos, Class<T> type) {
+        if (world == null || pos == null) return null;
+        BlockEntity te = world.getBlockEntity(pos);
+        return type.isInstance(te) ? type.cast(te) : null;
     }
 
     @Override
-    public float getBlockHardness(World par1World, int par2, int par3, int par4) {
-
-        return 1.0f;
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
     }
 
+    /**
+     * The light each node block emits, per level and position, for the light engine: it asks from its own thread, where
+     * reading the chunk's block entities or the node list races the server thread (2026-10-18: a mass block change,
+     * the cable converter, threw in the light worker, which then died and the server hung on save). Written on the
+     * owning thread (Node.setLightValue, the client's publish), read here.
+     */
+    static final java.util.Map<Object, java.util.concurrent.ConcurrentHashMap<Long, Integer>> LIGHT =
+        java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
 
-    @Override
-    public int isProvidingWeakPower(IBlockAccess block, int x, int y, int z, int side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(x, y, z);
-        return entity.isProvidingWeakPower(Direction.fromIntMinecraftSide(side));
-    }
-
-    @Override
-    public boolean canConnectRedstone(IBlockAccess block, int x, int y, int z, int side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(x, y, z);
-        return entity.canConnectRedstone(Direction.XN);
-    }
-
-    @Override
-    public boolean canProvidePower() {
-
-        return super.canProvidePower();
+    public static void setLight(net.minecraft.world.level.Level level, BlockPos pos, int light) {
+        if (level == null) return;
+        var m = LIGHT.computeIfAbsent(level, k -> new java.util.concurrent.ConcurrentHashMap<>());
+        if (light <= 0) m.remove(pos.asLong());
+        else m.put(pos.asLong(), light);
     }
 
     @Override
-    public boolean isOpaqueCube() {
+    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+        Object key = level instanceof net.minecraft.world.level.chunk.LevelChunk c ? c.getLevel() : level;
+        var m = LIGHT.get(key);
+        Integer v = m == null ? null : m.get(pos.asLong());
+        return v == null ? 0 : v;
+    }
+
+    /** The light comes from the block entity (getLightEmission), not the state: chunk light scans must ask. */
+    @Override
+    public boolean hasDynamicLightEmission(BlockState state) {
         return true;
     }
 
     @Override
-    public boolean renderAsNormalBlock() {
-        return false;
-    }
-
-    @Override
-    public int getRenderType() {
-        return -1;
-    }
-
-    public int getLightValue(IBlockAccess world, int x, int y, int z) {
-        final TileEntity entity = world.getTileEntity(x, y, z);
-        if (entity == null || !(entity instanceof NodeBlockEntity)) return 0;
-        NodeBlockEntity tileEntity = (NodeBlockEntity) entity;
-        return tileEntity.getLightValue();
-    }
-
-
-    //client server
-    public boolean onBlockPlacedBy(World world, int x, int y, int z, Direction front, EntityLivingBase entityLiving, int metadata) {
-
-        NodeBlockEntity tileEntity = (NodeBlockEntity) world.getTileEntity(x, y, z);
-
-        tileEntity.onBlockPlacedBy(front, entityLiving, metadata);
-        return true;
-    }
-
-    //server   
-    public void onBlockAdded(World par1World, int x, int y, int z) {
-        if (par1World.isRemote == false) {
-            NodeBlockEntity entity = (NodeBlockEntity) par1World.getTileEntity(x, y, z);
-            entity.onBlockAdded();
-        }
-    }
-
-
-    //server
-    public void breakBlock(World par1World, int x, int y, int z, Block par5, int par6) {
-
-        //if(par1World.isRemote == false)
-        {
-            NodeBlockEntity entity = (NodeBlockEntity) par1World.getTileEntity(x, y, z);
-            entity.onBreakBlock();
-            super.breakBlock(par1World, x, y, z, par5, par6);
-        }
-    }
-
-    @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
-        if (Utils.isRemote(world) == false) {
-            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
-            entity.onNeighborBlockChange();
-        }
-    }
-
-
-    @Override
-    public int damageDropped(int metadata) {
-        return metadata;
-    }
-
-    //@SideOnly(Side.CLIENT)
-    public void getSubBlocks(int par1, CreativeTabs tab, List subItems) {
-        for (int ix = 0; ix < blockItemNbr; ix++) {
-            subItems.add(new ItemStack(this, 1, ix));
-        }
-    }
-
-    //client server
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float vx, float vy, float vz) {
-        NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
-//    	entityPlayer.openGui( Eln.instance, 0,world,x ,y, z);
-        return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side), vx, vy, vz);
-    }
-
-    @Override
-    public boolean hasTileEntity(int metadata) {
+    protected boolean isSignalSource(BlockState state) {
         return true;
     }
 
     @Override
-    public TileEntity createTileEntity(World var1, int meta) {
-        try {
-            return (TileEntity) tileEntityClass.getConstructor().newInstance();
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
-            e.printStackTrace();
-        }
-        while (true) ;
+    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.core.Direction side) {
+        NodeBlockEntity e = tileAt(level, pos, NodeBlockEntity.class);
+        if (e == null) return 0;
+        // 1.12 getWeakPower(side) took the side as seen from the neighbour, like vanilla
+        return e.isProvidingWeakPower(Direction.fromIntMinecraftSide(side.get3DDataValue()));
     }
 
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+    }
 
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+        if (!level.isClientSide()) {
+            NodeBlockEntity e = tileAt(level, pos, NodeBlockEntity.class);
+            if (e != null) e.onNeighborBlockChange();
+        }
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return activate(level, pos, player, hit);
+    }
+
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+        // a pipe kit routes from and to devices' ports: the kit's use, not the device's (AdventurAgent)
+        if (stack.getItem() instanceof mods.eln.node.voxel.PipeTool) return InteractionResult.PASS;
+        return activate(level, pos, player, hit);
+    }
+
+    protected InteractionResult activate(Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        NodeBlockEntity e = tileAt(level, pos, NodeBlockEntity.class);
+        if (e == null) return InteractionResult.PASS;
+        Direction side = Direction.fromIntMinecraftSide(hit.getDirection().get3DDataValue());
+        float vx = (float) (hit.getLocation().x - pos.getX()), vy = (float) (hit.getLocation().y - pos.getY()),
+            vz = (float) (hit.getLocation().z - pos.getZ());
+        return e.onBlockActivated(player, side, vx, vy, vz) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+    }
+
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+    }
 }
-
-
-
-

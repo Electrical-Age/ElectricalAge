@@ -1,26 +1,24 @@
 package mods.eln.node.transparent;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.*;
-import mods.eln.sound.LoopedSound;
-import mods.eln.sound.LoopedSoundManager;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import mods.eln.gl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * Client state and drawing of a transparent-node element (1.12, on the GL11 shim since P3). Server-safe on purpose
+ * (see SixNodeElementRender). Looped sounds (R4) and GUI screens (P4b) are not here yet.
+ */
 public abstract class TransparentNodeElementRender {
     public TransparentNodeEntity tileEntity;
     public Direction front;
@@ -32,18 +30,18 @@ public abstract class TransparentNodeElementRender {
         this.transparentNodedescriptor = descriptor;
     }
 
-    protected EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old) throws IOException {
+    protected ItemEntity unserializeItemStackToEntityItem(DataInputStream stream, ItemEntity old) throws IOException {
         return Utils.unserializeItemStackToEntityItem(stream, old, tileEntity);
 
     }
 
-    public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {/*
+    public void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {/*
         if(entityItem == null) return;
 		
 
 
 		entityItem.hoverStart = 0.0f;
-		entityItem.rotationYaw = 0.0f;
+		entityItem.setYRot(0.0f);
 		entityItem.motionX = 0.0;
 		entityItem.motionY = 0.0;
 		entityItem.motionZ =0.0;
@@ -68,22 +66,22 @@ public abstract class TransparentNodeElementRender {
 
     public abstract void draw();
 
+    /** The element burnt out (see TransparentNodeElement.burn); TransparentNodeRender scorches it. */
+    public boolean burnt;
+
     public void networkUnserialize(DataInputStream stream) {
         try {
             byte b = stream.readByte();
             front = Direction.fromInt(b & 0x7);
             grounded = (b & 8) != 0;
+            burnt = (b & TransparentNodeElement.HEADER_BURNT) != 0;
         } catch (IOException e) {
 
             e.printStackTrace();
         }
     }
 
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return null;
-    }
-
-    public IInventory getInventory() {
+    public Container getInventory() {
         return null;
     }
 
@@ -198,6 +196,15 @@ public abstract class TransparentNodeElementRender {
         return null;
     }
 
+    /**
+     * Height (px above the floor) of the terminal conductors on face FACE, where a floor cable draws a lug; 0 = none.
+     * Default: the descriptor's {@code cableTerminals}, relative to this render's front.
+     */
+    public float cableKnuckleHeight(Direction face) {
+        mods.eln.cable.CableTerminals t = transparentNodedescriptor == null ? null : transparentNodedescriptor.cableTerminals;
+        return t == null ? 0 : t.heightAt(front, face);
+    }
+
     static final LRDUMask maskTempDraw = new LRDUMask();
 
     public CableRenderType drawCable(Direction side, CableRenderDescriptor render, LRDUMask connection, CableRenderType renderPreProcess) {
@@ -230,7 +237,7 @@ public abstract class TransparentNodeElementRender {
 
     protected Coordonate coordonate() {
 
-        return new Coordonate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.getWorldObj());
+        return new Coordonate(tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ(), tileEntity.getLevel());
     }
 
 
@@ -254,21 +261,18 @@ public abstract class TransparentNodeElementRender {
         s.play();
     }
 
-    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
-
-    @SideOnly(Side.CLIENT)
-    protected void addLoopedSound(final LoopedSound loopedSound) {
-        loopedSoundManager.add(loopedSound);
-    }
 
     public void destructor() {
-        if (usedUuid())
-            ClientProxy.uuidManager.kill(uuid);
+        for (mods.eln.sound.LoopedSound l : loopedSounds) l.setActive(false);
+    }
 
-        loopedSoundManager.dispose();
+    /** Looped sounds of this render (1.12 LoopedSoundManager); the client plays them (R4). */
+    public final java.util.List<mods.eln.sound.LoopedSound> loopedSounds = new java.util.ArrayList<>();
+
+    protected void addLoopedSound(mods.eln.sound.LoopedSound sound) {
+        loopedSounds.add(sound);
     }
 
     public void refresh(float deltaT) {
-        loopedSoundManager.process(deltaT);
     }
 }

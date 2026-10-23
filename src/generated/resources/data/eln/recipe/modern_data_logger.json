@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "G": "minecraft:glass_pane",
+    "R": "#c:rubbers"
+  },
+  "pattern": [
+    "RRR",
+    "RGR",
+    "RCR"
+  ],
+  "result": {
+    "id": "eln:modern_data_logger"
+  }
+}

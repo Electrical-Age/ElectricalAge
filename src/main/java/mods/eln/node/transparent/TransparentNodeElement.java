@@ -11,19 +11,23 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.Failure;
+import mods.eln.sim.process.destruct.FailureCause;
+import mods.eln.sim.process.destruct.IBurnable;
+import mods.eln.sim.process.destruct.ValueWatchdog;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -32,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TransparentNodeElement implements GhostObserver, IPlayer, INodeElement {
+public abstract class TransparentNodeElement implements GhostObserver, IPlayer, INodeElement, IBurnable {
 
     public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
@@ -47,7 +51,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public static final byte unserializeGroundedId = -127;
     public static final byte unserializeNulldId = -128;
-    TransparentNodeDescriptor transparentNodeDescriptor;
+    public TransparentNodeDescriptor transparentNodeDescriptor;
 
     public TransparentNodeDescriptor getDescriptor() {
         return transparentNodeDescriptor;
@@ -93,7 +97,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         needPublish();
     }
 
-    public byte networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public byte networkUnserialize(DataInputStream stream, ServerPlayer player) {
         return networkUnserialize(stream);
     }
 
@@ -123,7 +127,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return false;
     }
 
-    public IInventory getInventory() {
+    public Container getInventory() {
         return null;
     }
 
@@ -170,17 +174,39 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         node.sendPacketToAllClient(bos);
     }
 
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return null;
-    }
-
     public TransparentNodeElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
         this.node = transparentNode;
         this.transparentNodeDescriptor = descriptor;
         if (descriptor.hasGhostGroup()) Eln.ghostManager.addObserver(this);
     }
 
-    public IFluidHandler getFluidHandler() {
+    /** The element's fluid handler (26.x fluid capability), null if none; fluid devices come with their batch. */
+    public Object getFluidHandler() {
+        return null;
+    }
+
+    /**
+     * The element's items as seen from a block face (26.x item capability: hoppers, pipes): the inventory's own sided
+     * rules (getAccessibleSlotsFromSide / canInsertItem / canExtractItem), null where it exposes no slot on that face,
+     * for the null side, and while burnt. Plain TransparentNodeElementInventory exposes nothing, so devices whose
+     * slots are upgrades (cores, cables, regulators...) stay closed. WorldlyContainerWrapper defers setChanged (and
+     * so inventoryChange) to the commit of the outermost transaction.
+     */
+    @Nullable
+    public net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> getItemHandler(
+        @Nullable net.minecraft.core.Direction side) {
+        if (side == null || isBurnt()) return null;
+        if (!(getInventory() instanceof net.minecraft.world.WorldlyContainer wc) || wc.getSlotsForFace(side).length == 0) return null;
+        return new net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper(wc, side);
+    }
+
+
+    /**
+     * The element's Forge Energy handler on a block face (26.x energy capability), null if none; TransparentNode
+     * hides it while burnt.
+     */
+    @Nullable
+    public net.neoforged.neoforge.transfer.energy.EnergyHandler getEnergyHandler(@Nullable net.minecraft.core.Direction side) {
         return null;
     }
 
@@ -194,7 +220,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         Block block;
         boolean needDestroy = false;
         if (transparentNodeDescriptor.mustHaveFloor()) {
-            if (!node.isBlockOpaque(Direction.YN)) needDestroy = true;
+            if (!node.isBlockOpaque(Direction.YN)) {
+                // (devices that may stand on more than solid blocks: a boiler on a turbine)
+                var below = node.coordonate.world().getBlockState(node.coordonate.pos().below()).getBlock();
+                if (!transparentNodeDescriptor.isFloor(below)) needDestroy = true;
+            }
         }
         if (transparentNodeDescriptor.mustHaveCeiling()) {
             if (!node.isBlockOpaque(Direction.YP)) needDestroy = true;
@@ -258,12 +288,12 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     public ItemStack getDropItemStack() {
-        ItemStack itemStack = new ItemStack(Eln.transparentNodeBlock, 1, node.elementId);
-        itemStack.setTagCompound(getItemStackNBT());
+        ItemStack itemStack = transparentNodeDescriptor.newItemStack();
+        mods.eln.generic.ItemNbt.set(itemStack, getItemStackNBT());
         return itemStack;
     }
 
-    public NBTTagCompound getItemStackNBT() {
+    public CompoundTag getItemStackNBT() {
         return null;
     }
 
@@ -280,9 +310,12 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public abstract String thermoMeterString(Direction side);
 
 
+    /** Bit in the header byte of networkSerialize: the element is burnt out. */
+    public static final int HEADER_BURNT = 0x10;
+
     public void networkSerialize(DataOutputStream stream) {
         try {
-            stream.writeByte(front.getInt() + (grounded ? 8 : 0));
+            stream.writeByte(front.getInt() + (grounded ? 8 : 0) + (isBurnt() ? HEADER_BURNT : 0));
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -290,7 +323,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
 
-    public void initializeFromThat(Direction front, EntityLivingBase entityLiving, NBTTagCompound itemStackNbt) {
+    public void initializeFromThat(Direction front, LivingEntity entityLiving, CompoundTag itemStackNbt) {
         this.front = front;
         readItemStackNBT(itemStackNbt);
         initialize();
@@ -298,93 +331,50 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public abstract void initialize();
 
-    public void readItemStackNBT(NBTTagCompound nbt) {
+    public void readItemStackNBT(CompoundTag nbt) {
 
     }
 
 
     //  public abstract void destroyFrom(SixNode sixNode);
 
-    public abstract boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+    public abstract boolean onBlockActivated(Player entityPlayer, Direction side,
                                              float vx, float vy, float vz);
 
 
-    public void readFromNBT(NBTTagCompound nbt) {
-
-        int idx;
-
-        IInventory inv = getInventory();
+    public void readFromNBT(CompoundTag nbt) {
+        Container inv = getInventory();
         if (inv != null) {
             Utils.readFromNBT(nbt, "inv", inv);
         }
 
-        idx = 0;
+        INBTTReady.readAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalFastProcessList);
 
-        for (State electricalLoad : electricalLoadList) {
-            if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
-        }
-
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.readFromNBT(nbt, "");
-        }
-
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).readFromNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-
-
-        byte b = nbt.getByte("others");
+        byte b = nbt.getByteOr("others", (byte) 0);
         front = Direction.fromInt(b & 0x7);
         grounded = (b & 8) != 0;
+        burnt = nbt.contains("burnt") ? FailureCause.fromOrdinal(nbt.getByteOr("burnt", (byte) 0) - 1) : null;
+        burntKind = burnt != null ? Failure.Kind.fromOrdinal(nbt.getByteOr("burntKind", (byte) 0)) : null;
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
-        int idx = 0;
+    public void writeToNBT(CompoundTag nbt) {
+        if (burnt != null) {
+            nbt.putByte("burnt", (byte) (burnt.ordinal() + 1));
+            nbt.putByte("burntKind", (byte) burntKind.ordinal());
+        }
 
-        IInventory inv = getInventory();
+        Container inv = getInventory();
         if (inv != null) {
             Utils.writeToNBT(nbt, "inv", inv);
         }
 
-        for (State electricalLoad : electricalLoadList) {
-            if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.writeToNBT(nbt, "");
-        }
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).writeToNBT(nbt, "");
+        INBTTReady.writeAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalFastProcessList);
 
 
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalFastProcessList) {
-            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-
-
-        nbt.setByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
+        nbt.putByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
     }
 
     public void reconnect() {
@@ -405,7 +395,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
     }
 
     public float getLightOpacity() {
@@ -424,7 +414,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         }
     }
 
-    public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean ghostBlockActivated(int UUID, Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (UUID == transparentNodeDescriptor.getGhostGroupUuid()) {
             return node.onBlockActivated(entityPlayer, side, vx, vy, vz);
         }
@@ -432,7 +422,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
 
-    public World world() {
+    public Level world() {
 
         return node.coordonate.world();
     }
@@ -465,13 +455,55 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     }
 
-/*	protected boolean hasSidedInventory(){
-		return false;
-	}
-	public int tileEntityMetaTag() {
-		return hasSidedInventory() ? 0x4 : 0;
-	}
-	*/
+    /** Set when the device burnt out (see Failure); null while it works. */
+    @Nullable
+    private FailureCause burnt;
+    @Nullable
+    private Failure.Kind burntKind;
+
+    @Override
+    @Nullable
+    public Failure.Kind getBurntKind() {
+        return burntKind;
+    }
+
+    @Override
+    @Nullable
+    public FailureCause getBurnt() {
+        return burnt;
+    }
+
+    @Override
+    public Coordonate getBurnableCoordonate() {
+        return coordonate();
+    }
+
+    /** Burn out: stay in the world but leave the simulation (TransparentNode skips burnt elements) until repaired. */
+    @Override
+    public void burn(FailureCause cause, Failure.Kind kind) {
+        if (burnt != null) return;
+        node.disconnect();
+        burnt = cause;
+        burntKind = kind;
+        node.connect();
+        needPublish();
+        node.invalidateCapabilities();
+    }
+
+    @Override
+    public void repair() {
+        if (burnt == null) return;
+        node.disconnect();
+        burnt = null;
+        burntKind = null;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : thermalFastProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        node.connect();
+        needPublish();
+        node.invalidateCapabilities();
+    }
 
     public Map<String, String> getWaila() {
         Map<String, String> wailaList = new HashMap<String, String>();

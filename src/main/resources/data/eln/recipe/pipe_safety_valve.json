@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": ["eln:pipe_valve", "minecraft:gold_nugget", "minecraft:iron_nugget"],
+  "result": {
+    "id": "eln:pipe_safety_valve"
+  }
+}

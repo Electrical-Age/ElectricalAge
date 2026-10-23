@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "G",
+    "I",
+    "I"
+  ],
+  "result": {
+    "id": "eln:streetlight"
+  }
+}

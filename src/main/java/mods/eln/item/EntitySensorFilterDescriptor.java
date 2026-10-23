@@ -1,6 +1,5 @@
 package mods.eln.item;
 
-import org.lwjgl.opengl.GL11;
 
 public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
@@ -17,14 +16,14 @@ public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescript
     }
 
     public void glColor() {
-        GL11.glColor3f(r, g, b);
+        mods.eln.gl.GL11.glColor3f(r, g, b);
     }
 
     public void glColor(float intensity) {
-        GL11.glColor3f(r * intensity, g * intensity, b * intensity);
+        mods.eln.gl.GL11.glColor3f(r * intensity, g * intensity, b * intensity);
     }
 
     public void glInverseColor(float intensity) {
-        GL11.glColor3f(1.0f - r * intensity, 1 - 0f - g * intensity, 1.0f - b * intensity);
+        mods.eln.gl.GL11.glColor3f(1.0f - r * intensity, 1 - 0f - g * intensity, 1.0f - b * intensity);
     }
 }

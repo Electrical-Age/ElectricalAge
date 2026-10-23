@@ -3,7 +3,7 @@ package mods.eln.sixnode.electricaltimeout;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class ElectricalTimeoutProcess implements IProcess, INBTTReady {
 
@@ -47,12 +47,12 @@ public class ElectricalTimeoutProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        inputState = nbt.getBoolean(str + "SProcinputState");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        inputState = nbt.getBooleanOr(str + "SProcinputState", false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setBoolean(str + "SProcinputState", inputState);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putBoolean(str + "SProcinputState", inputState);
     }
 }

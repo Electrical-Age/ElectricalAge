@@ -3,7 +3,7 @@ package mods.eln.sim;
 import mods.eln.Eln;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public abstract class NodeElectricalGateInputHysteresisProcess implements IProcess, INBTTReady {
 
@@ -22,12 +22,12 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
     @Override
     public void process(double time) {
         if (state) {
-            if (gate.getU() < Eln.instance.SVU * 0.3) {
+            if (gate.getU() < Eln.SVU * 0.3) {
                 state = false;
                 setOutput(false);
             } else setOutput(true);
         } else {
-            if (gate.getU() > Eln.instance.SVU * 0.7) {
+            if (gate.getU() > Eln.SVU * 0.7) {
                 state = true;
                 setOutput(true);
             } else setOutput(false);
@@ -35,12 +35,12 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        state = nbt.getBoolean(str + name + "state");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        state = nbt.getBooleanOr(str + name + "state", false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setBoolean(str + name + "state", state);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putBoolean(str + name + "state", state);
     }
 }

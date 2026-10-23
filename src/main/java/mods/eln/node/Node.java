@@ -1,8 +1,10 @@
 package mods.eln.node;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Direction;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.LightLayer;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,7 +19,9 @@ public abstract class Node extends NodeBase {
         if (light < 0) light = 0;
         if (lastLight != light) {
             lastLight = light;
-            coordonate.world().updateLightByType(EnumSkyBlock.Block, coordonate.x, coordonate.y, coordonate.z);
+            NodeBlock.setLight(coordonate.world(), coordonate.pos(), light);
+            // 26.x: the block's light emission comes from the BE (NodeBlock.getLightEmission); re-check it
+            if (coordonate.getBlockExist()) coordonate.world().getLightEngine().checkBlock(coordonate.pos());
             setNeedPublish(true);
         }
 
@@ -28,16 +32,17 @@ public abstract class Node extends NodeBase {
     }
 
 
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
-        lastLight = nbt.getByte("lastLight");
+        lastLight = nbt.getByteOr("lastLight", (byte) 0);
+        if (lastLight > 0 && coordonate.world() != null) NodeBlock.setLight(coordonate.world(), coordonate.pos(), lastLight);
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("lastLight", (byte) lastLight);
+        nbt.putByte("lastLight", (byte) lastLight);
     }
 
     boolean oldSendedRedstone = false;
@@ -59,7 +64,8 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
+        net.minecraft.world.level.block.entity.BlockEntity e = WorldCompat.getBlockEntity(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+        return e instanceof NodeBlockEntity ? (NodeBlockEntity) e : null;
     }
 
     public int isProvidingWeakPower(Direction side) {

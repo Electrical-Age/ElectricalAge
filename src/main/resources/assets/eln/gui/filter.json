@@ -1,0 +1,18 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Signal Filter"
+  },
+  {
+   "text": "cutoff",
+   "sample": "Cut-off frequency 5.000 Hz"
+  },
+  {
+   "slider": "cutoff",
+   "sample": "    ",
+   "fill": true
+  }
+ ],
+ "gap": 4
+}

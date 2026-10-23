@@ -5,8 +5,8 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Nominal:"));

@@ -1,0 +1,22 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "minecraft:planks"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "W": "#minecraft:planks"
+  },
+  "pattern": [
+    "W W",
+    " WW"
+  ],
+  "result": {
+    "id": "eln:tree_resin_collector"
+  }
+}

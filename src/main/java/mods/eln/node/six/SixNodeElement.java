@@ -11,14 +11,18 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.Failure;
+import mods.eln.sim.process.destruct.FailureCause;
+import mods.eln.sim.process.destruct.IBurnable;
+import mods.eln.sim.process.destruct.ValueWatchdog;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -29,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeElement {
+public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeElement, IBurnable {
     //private static Class[] idToClass = new Class[256];
     //private static Class[] idToRenderClass = new Class[256];
 
@@ -53,7 +57,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         inventoryChanged();
     }
 
@@ -70,7 +74,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return sixNode.coordonate;
     }
 
-    protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer) {
+    protected boolean onBlockActivatedRotate(Player entityPlayer) {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             front = front.getNextClockwise();
             sixNode.reconnect();
@@ -88,7 +92,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         sixNode.sendPacketToAllClient(bos, range);
     }
 
-    public void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {
+    public void sendPacketToClient(ByteArrayOutputStream bos, ServerPlayer player) {
         sixNode.sendPacketToClient(bos, player);
     }
 
@@ -124,7 +128,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     }
 
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         networkUnserialize(stream);
     }
 
@@ -136,11 +140,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return false;
     }
 
-    public IInventory getInventory() {
-        return null;
-    }
-
-    public Container newContainer(Direction side, EntityPlayer player) {
+    public Container getInventory() {
         return null;
     }
 
@@ -172,10 +172,13 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     private int itemStackDamageId;
 
+    /** Bit in the header byte of networkSerialize: the element is burnt out. */
+    public static final int HEADER_BURNT = 0x40;
+
     public void networkSerialize(DataOutputStream stream) {
 
         try {
-            stream.writeByte(sixNode.lrduElementMask.get(side).mask + (front.dir << 4));
+            stream.writeByte(sixNode.lrduElementMask.get(side).mask + (front.dir << 4) + (isBurnt() ? HEADER_BURNT : 0));
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -207,7 +210,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         }
     }
 
-    public void destroy(EntityPlayerMP entityPlayer) {
+    public void destroy(ServerPlayer entityPlayer) {
         if (useUuid()) {
             stop(uuid);
         }
@@ -219,7 +222,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
         sixNode.dropInventory(getInventory());
         //	getCoordonate().world().getWorldInfo().
-        if (Utils.mustDropItem(entityPlayer))
+        // A burnt device is slag: its contents drop, the device itself doesn't.
+        if (Utils.mustDropItem(entityPlayer) && !isBurnt())
             sixNode.dropItem(getDropItemStack());
     }
 
@@ -232,7 +236,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
      * @param vz ?
      * @return True if we've done something, otherwise false.
      */
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+    public boolean onBlockActivated(Player entityPlayer, Direction side,
                                              float vx, float vy, float vz) {
         return onBlockActivatedRotate(entityPlayer);
     }
@@ -245,92 +249,38 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 	}*/
 
     public ItemStack getDropItemStack() {
-        return new ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId); //sixNode.sideElementIdList[side.getInt()]
+        return sixNodeElementDescriptor.newItemStack();
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
-
-        int idx;
-
+    public void readFromNBT(CompoundTag nbt) {
         front = front.readFromNBT(nbt, "sixFront");
+        burnt = nbt.contains("burnt") ? FailureCause.fromOrdinal(nbt.getByteOr("burnt", (byte) 0) - 1) : null;
+        burntKind = burnt != null ? Failure.Kind.fromOrdinal(nbt.getByteOr("burntKind", (byte) 0)) : null;
 
-        IInventory inv = getInventory();
+        Container inv = getInventory();
         if (inv != null) {
             Utils.readFromNBT(nbt, "inv", inv);
         }
 
-        for (NbtElectricalLoad electricalLoad : electricalLoadList) {
-            electricalLoad.readFromNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.readFromNBT(nbt, "");
-        }
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).readFromNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
-        for (IProcess process : thermalSlowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).readFromNBT(nbt, "");
-        }
+        INBTTReady.readAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalProcessList, thermalSlowProcessList);
 
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
-
-        int idx;
-
+    public void writeToNBT(CompoundTag nbt) {
         front.writeToNBT(nbt, "sixFront");
+        if (burnt != null) {
+            nbt.putByte("burnt", (byte) (burnt.ordinal() + 1));
+            nbt.putByte("burntKind", (byte) burntKind.ordinal());
+        }
 
-        IInventory inv = getInventory();
+        Container inv = getInventory();
         if (inv != null) {
             Utils.writeToNBT(nbt, "inv", inv);
         }
 
-        for (NbtElectricalLoad electricalLoad : electricalLoadList) {
-            electricalLoad.writeToNBT(nbt, "");
-        }
-
-        for (NbtThermalLoad thermalLoad : thermalLoadList) {
-            thermalLoad.writeToNBT(nbt, "");
-        }
-
-        for (Component c : electricalComponentList)
-            if (c instanceof INBTTReady)
-                ((INBTTReady) c).writeToNBT(nbt, "");
-
-
-        for (IProcess process : slowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : electricalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
-        for (IProcess process : thermalSlowProcessList) {
-            if (process instanceof INBTTReady)
-                ((INBTTReady) process).writeToNBT(nbt, "");
-        }
+        INBTTReady.writeAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
+            slowProcessList, electricalProcessList, thermalProcessList, thermalSlowProcessList);
 
     }
 
@@ -378,7 +328,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         }
     }
 
-    public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean ghostBlockActivated(int UUID, Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
             sixNode.onBlockActivated(entityPlayer, this.side, vx, vy, vz);
         }
@@ -414,10 +364,59 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return true;
     }
 
+    /** Set when the device burnt out (see Failure); null while it works. */
+    @Nullable
+    private FailureCause burnt;
+    @Nullable
+    private Failure.Kind burntKind;
+
+    @Override
+    @Nullable
+    public Failure.Kind getBurntKind() {
+        return burntKind;
+    }
+
+    @Override
+    @Nullable
+    public FailureCause getBurnt() {
+        return burnt;
+    }
+
+    @Override
+    public Coordonate getBurnableCoordonate() {
+        return getCoordonate();
+    }
+
+    /** Burn out: stay in the world but leave the simulation (SixNode skips burnt elements) until repaired. */
+    @Override
+    public void burn(FailureCause cause, Failure.Kind kind) {
+        if (burnt != null) return;
+        sixNode.disconnect();
+        burnt = cause;
+        burntKind = kind;
+        sixNode.connect();
+        needPublish();
+    }
+
+    @Override
+    public void repair() {
+        if (burnt == null) return;
+        sixNode.disconnect();
+        burnt = null;
+        burntKind = null;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : thermalSlowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
+        sixNode.connect();
+        needPublish();
+    }
+
     @Nullable
     public Map<String, String> getWaila() {
         Map<String, String> wailaList = new HashMap<String, String>();
-        wailaList.put("Info", multiMeterString());
+        String info = multiMeterString();
+        if (info != null) wailaList.put("Info", info);   // (Baughn: Jade showed "null" for a resin collector)
         return wailaList;
     }
 }

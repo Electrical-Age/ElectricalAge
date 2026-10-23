@@ -1,16 +1,25 @@
 package mods.eln.i18n;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.registry.LanguageRegistry;
+import net.minecraft.locale.Language;
 
 /**
  * Internationalization and localization helper class.
  */
 public class I18N {
-    private final static LanguageRegistry languageRegistry = LanguageRegistry.instance();
+    // 1.12: LanguageRegistry is gone; util.text.translation.I18n reads the language map on both sides
+    // (client: current language; dedicated server: en_us).
 
     public static String getCurrentLanguage() {
-        return FMLCommonHandler.instance().getCurrentLanguage();
+        return "en_us"; // 26.x: only the client knows the player's language
+    }
+
+    /**
+     * Lang key of a descriptor name (item names: "<key>.name"). Whitespace runs -> '_' as in 1.7.10, plus '/' -> '_'
+     * like encodeLangKey (the lang files were generated with it: "On/OFF Regulator" -> On_OFF_Regulator...). 1.7.10
+     * left the '/' in, so those names were never translated.
+     */
+    public static String langKey(String name) {
+        return name == null ? null : name.replaceAll("\\s+", "_").replace("/", "_");
     }
 
     static String encodeLangKey(final String key) {
@@ -50,7 +59,10 @@ public class I18N {
      */
     public static String tr(final String text, Object... objects) {
         // Try to find the translation for the string using forge API.
-        String translation = languageRegistry.getStringLocalization(encodeLangKey(text));
+        String langKey = encodeLangKey(text);
+        // 26.x: the current Language (en_us on a dedicated server, the player's language on the client)
+        Language lang = Language.getInstance();
+        String translation = lang.has(langKey) ? lang.getOrDefault(langKey) : null;
 
         // If no translation was found, just use the original text.
         if (translation == null || "".equals(translation)) {

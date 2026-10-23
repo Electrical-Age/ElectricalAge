@@ -9,9 +9,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -19,6 +18,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class HeatFurnaceRender extends TransparentNodeElementRender {
+    /** The fire's real burn level (it lags the setting) and whether it's being lit. */
+    public float fire;
+    public boolean lighting;
+
 
     double temperature;
     float gainSyncValue = -1234, temperatureTargetSyncValue = -1234;
@@ -34,11 +37,10 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
     float counter = 0;
 
-    TransparentNodeElementInventory inventory = new HeatFurnaceInventory(4, 64, this);
 
     boolean boot = true;
 
-    EntityItem entityItemIn;
+    ItemEntity entityItemIn;
 
     public HeatFurnaceRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
@@ -58,7 +60,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(1)))
+        if (!Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(1)))
             interpolator.setTarget(0f);
         else
             interpolator.setTarget(1f);
@@ -67,11 +69,6 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
         counter += deltaT * 60;
         if (counter >= 360f)
             counter -= 360;
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new HeatFurnaceGuiDraw(player, inventory, this);
     }
 
     @Override
@@ -95,6 +92,8 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
             }
 
             power = stream.readShort();
+            fire = stream.readFloat();
+            lighting = stream.readBoolean();
 
             entityItemIn = unserializeItemStackToEntityItem(stream, entityItemIn);
 

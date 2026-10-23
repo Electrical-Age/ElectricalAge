@@ -1,13 +1,18 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.FMLLog;
-import net.minecraft.util.ResourceLocation;
+import mods.eln.gl.GL11;
+
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
 
 import java.io.*;
 import java.util.*;
 
+/**
+ * OBJ model: parsing, parts, bounding boxes and the .txt properties are common (the server uses the geometry, e.g.
+ * Utils.getSixNodePinDistance in descriptor constructors). Only the GL drawing (display lists, texture binds) is
+ * client-only (@SideOnly), and display lists are built lazily at first draw.
+ */
 public class Obj3D {
     private Timer updateTimer = null;
     private boolean locked = false;
@@ -24,15 +29,13 @@ public class Obj3D {
     public float dimMax, dimMaxInv;
 
     private String dirPath;
-
+    /** Bind a texture from this model's folder (screens, reflections). */
     public void bindTexture(String texFilename) {
-        ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
-        UtilsClient.bindTexture(textureResource);
+        mods.eln.gl.GL11.bindTexture(Identifier.fromNamespaceAndPath("eln", ("model/" + dirPath + "/" + texFilename).toLowerCase(java.util.Locale.ROOT)));
     }
-
     public static class FaceGroup {
         String mtlName = null;
-        public ResourceLocation textureResource;
+        public Identifier textureResource;
         List<Face> face = new ArrayList<Face>();
         boolean listReady = false;
         int glList;
@@ -244,21 +247,21 @@ public class Obj3D {
         public void draw() {
             if (locked) return;
 
-            //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+            //	Minecraft.getMinecraft().profiler.startSection("OBJ");
             for (FaceGroup fg : faceGroup) {
                 fg.draw();
             }
-            //	Minecraft.getMinecraft().mcProfiler.endSection();
+            //	Minecraft.getMinecraft().profiler.endSection();
         }
 
         public void draw(float texOffsetX, float texOffsetY) {
             if (locked) return;
 
-            //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+            //	Minecraft.getMinecraft().profiler.startSection("OBJ");
             for (FaceGroup fg : faceGroup) {
                 fg.drawVertex(texOffsetX, texOffsetY);
             }
-            //	Minecraft.getMinecraft().mcProfiler.endSection();
+            //	Minecraft.getMinecraft().profiler.endSection();
         }
 
         // Returns the bounding box of the vertices we'd draw.
@@ -356,8 +359,14 @@ public class Obj3D {
         public int vertexNbr;
     }
 
-    public ResourceLocation getModelResourceLocation(String name) {
-        return new ResourceLocation("eln", "model/" + dirPath + "/" + name);
+    public Identifier getModelResourceLocation(String name) {
+        if (name == null) return null; // 1.12 built "model/<dir>/null" for a missing key; nothing to load either way
+        // 26.x: resource paths must be lower case (the asset files are), and some MTL files name textures by an
+        // absolute Windows path of the original author's machine: keep the file name only (1.12 was lenient)
+        String file = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\')) + 1);
+        Identifier id = Identifier.tryBuild("eln", ("model/" + dirPath + "/" + file).toLowerCase(java.util.Locale.ROOT));
+        if (id == null) mods.eln.Eln.LOG.warn("Electrical Age: bad texture name '{}' in model {}", name, dirPath);
+        return id;
     }
 
     /**
@@ -369,6 +378,8 @@ public class Obj3D {
     @Nullable
     private BufferedReader getResourceAsStream(String filePath, boolean trySource) {
         BufferedReader reader = null;
+        // 1.12 port: asset files are lower case (Identifier lower-cases paths); .obj/.mtl references keep their case
+        filePath = filePath.toLowerCase(java.util.Locale.ROOT);
         if (trySource) {
             final String path = "../src/main/resources/assets/eln/" + filePath;
             try {
@@ -561,7 +572,7 @@ public class Obj3D {
                             }, refresh, refresh);
                         }
                     } else {
-                        FMLLog.warning("Invalid syntax in EA model text file %1$s on line %2$d: %3$s",
+                        mods.eln.Eln.LOG.warn("Invalid syntax in EA model text file {} on line {}: {}",
                             txtPath, lineNumber, line);
                     }
                 }
@@ -584,6 +595,11 @@ public class Obj3D {
         }
 
         return true;
+    }
+
+    /** 26.x: every part (placeholder models that draw a whole 1.12 model). */
+    public java.util.Collection<Obj3DPart> parts() {
+        return nameToPartHash.values();
     }
 
     public Obj3DPart getPart(String part) {

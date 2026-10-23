@@ -1,6 +1,6 @@
 package mods.eln.misc
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
@@ -39,11 +39,11 @@ class DirectionSet : TreeSet<Direction>() {
         fromInt(stream.readInt())
     }
 
-    fun writeToNBT(nbt: NBTTagCompound, name: String) {
-        nbt.setInteger(name, toInt())
+    fun writeToNBT(nbt: CompoundTag, name: String) {
+        nbt.putInt(name, toInt())
     }
 
-    fun readFromNBT(nbt: NBTTagCompound, name: String) {
-        fromInt(nbt.getInteger(name))
+    fun readFromNBT(nbt: CompoundTag, name: String) {
+        fromInt(nbt.getIntOr(name, 0))
     }
 }

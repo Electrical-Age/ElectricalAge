@@ -1,24 +1,26 @@
 package mods.eln.gridnode;
 
 import mods.eln.misc.UtilsClient;
+import mods.eln.gl.GL11;
+
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.lwjgl.opengl.GL11.*;
+import static mods.eln.gl.GL11.*;
 
 /**
  * Created by svein on 25/08/15.
  */
 public abstract class GridRender extends TransparentNodeElementRender {
     private final GridDescriptor descriptor;
-    private final ResourceLocation cableTexture;
+    private final Identifier cableTexture;
     private ArrayList<Catenary> catenaries = new ArrayList<Catenary>();
     private float idealRenderingAngle;
 
@@ -26,7 +28,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
         super(tileEntity, descriptor);
         this.descriptor = (GridDescriptor) descriptor;
 
-        cableTexture = new ResourceLocation("eln", this.descriptor.cableTexture);
+        cableTexture = Identifier.fromNamespaceAndPath("eln", this.descriptor.cableTexture);
     }
 
     @Override
@@ -43,7 +45,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
     }
 
     private Vec3 readVec(DataInputStream stream) throws IOException {
-        return Vec3.createVectorHelper(stream.readFloat(), stream.readFloat(), stream.readFloat());
+        return new Vec3(stream.readFloat(), stream.readFloat(), stream.readFloat());
     }
 
     @Override
@@ -62,12 +64,12 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 Vec3 tplus = readVec(stream);
                 Vec3 sgnd = readVec(stream);
                 Vec3 tgnd = readVec(stream);
-                Vec3 dplus = splus.subtract(tplus).normalize();
-                Vec3 dgnd = sgnd.subtract(tgnd).normalize();
-                double straightV = dplus.dotProduct(dgnd);
-                dplus = splus.subtract(tgnd).normalize();
-                dgnd = sgnd.subtract(tplus).normalize();
-                double crossV = dplus.dotProduct(dgnd);
+                Vec3 dplus = splus.vectorTo(tplus).normalize();
+                Vec3 dgnd = sgnd.vectorTo(tgnd).normalize();
+                double straightV = dplus.dot(dgnd);
+                dplus = splus.vectorTo(tgnd).normalize();
+                dgnd = sgnd.vectorTo(tplus).normalize();
+                double crossV = dplus.dot(dgnd);
                 if (crossV < straightV) {
                     catenaries.add(new Catenary(splus, tplus));
                     catenaries.add(new Catenary(sgnd, tgnd));
@@ -89,7 +91,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
     private class Catenary {
         final int list;
 
-        final Vec3 origin = Vec3.createVectorHelper(0, 0, 0);
+        final Vec3 origin = new Vec3(0, 0, 0);
         final int box[] = {
             3, 7, 5, 3, 5, 1,
             4, 8, 6, 4, 6, 2,
@@ -121,7 +123,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
             glNewList(list, GL_COMPILE);
             glBegin(GL_TRIANGLES);
 
-            if (start.xCoord == end.xCoord && start.zCoord == end.zCoord) {
+            if (start.x == end.x && start.z == end.z) {
                 // Poles right on top of each other? No catenaries here.
                 drawBox(spread(start, end), spread(end, start));
             } else {
@@ -134,7 +136,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
                     previous = next;
                 }
                 // Finally, at the ending pole. We'll just translate the second-to-last points to fit.
-                Vec3 last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
+                Vec3 last[] = translate(previous, catenary[catenary.length - 2].vectorTo(catenary[catenary.length - 1]));
                 drawBox(previous, last);
             }
             glEnd();
@@ -145,11 +147,11 @@ public abstract class GridRender extends TransparentNodeElementRender {
             Vec3 v[] = new Vec3[]{from[0], from[1], from[2], from[3], to[0], to[1], to[2], to[3]};
 
             // Figure out the lighting.
-//            Vec3 middle = Vec3.createVectorHelper(0, 0, 0);
+//            Vec3 middle = new Vec3(0, 0, 0);
 //            for (Vec3 x : v) {
-//                middle = middle.addVector(x.xCoord, x.yCoord, x.zCoord);
+//                middle = middle.add(x.x, x.y, x.z);
 //            }
-//            middle = multiply(middle, v.length).addVector(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+//            middle = multiply(middle, v.length).add(tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ());
 //            glColor3d(
 //                    139 / 255.0,
 //                    69 / 255.0,
@@ -159,14 +161,14 @@ public abstract class GridRender extends TransparentNodeElementRender {
             for (int i = 0; i < box.length; i++) {
                 final int bc = box[i] - 1;
                 glTexCoord2f(boxTex[bc * 2], boxTex[bc * 2 + 1]);
-                glVertex3f((float) v[bc].xCoord, (float) v[bc].yCoord, (float) v[bc].zCoord);
+                glVertex3f((float) v[bc].x, (float) v[bc].y, (float) v[bc].z);
             }
         }
 
         private Vec3[] translate(Vec3[] start, Vec3 delta) {
             Vec3 ret[] = new Vec3[start.length];
             for (int i = 0; i < start.length; i++) {
-                ret[i] = start[i].addVector(delta.xCoord, delta.yCoord, delta.zCoord);
+                ret[i] = start[i].add(delta.x, delta.y, delta.z);
             }
             return ret;
         }
@@ -175,30 +177,29 @@ public abstract class GridRender extends TransparentNodeElementRender {
             // We want to draw a box-shaped cable following the catenary.
             // To start with, compute a vector perpendicular to the first
             // catenary segment, then rotate it around the catenary to form four points.
-            final Vec3 delta = b.subtract(a);
+            final Vec3 delta = b.vectorTo(a);
             // This is just to copy.
             // We don't care what r is, so long as it's linearly independent of delta.
-            final Vec3 r = delta.normalize();
-            r.rotateAroundY(1);
-            r.rotateAroundX(1);
+            // 1.12: Vec3 is immutable (1.7.10 rotateAroundY/X mutated r in place)
+            final Vec3 r = delta.normalize().yRot(1).xRot(1);
             // This gives us one vector which is perpendicular to delta.
-            final Vec3 x1 = multiply(delta.crossProduct(r).normalize(), cableWidth);
+            final Vec3 x1 = multiply(delta.cross(r).normalize(), cableWidth);
             // And this, another, perpendicular to delta and x1.
-            final Vec3 y1 = multiply(delta.crossProduct(x1).normalize(), cableWidth);
+            final Vec3 y1 = multiply(delta.cross(x1).normalize(), cableWidth);
             // Now just invert those to get the other two corners.
             final Vec3 x2 = negate(x1), y2 = negate(y1);
             return translate(new Vec3[]{x1, y1, y2, x2}, a);
         }
 
         private Vec3 negate(Vec3 v) {
-            return v.subtract(origin);
+            return v.vectorTo(origin);
         }
 
         Vec3 multiply(Vec3 a, double b) {
-            return Vec3.createVectorHelper(
-                a.xCoord * b,
-                a.yCoord * b,
-                a.zCoord * b
+            return new Vec3(
+                a.x * b,
+                a.y * b,
+                a.z * b
             );
         }
 
@@ -208,9 +209,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
             final double slack = 1.005;
             final int vertices = 16;
 
-            double dx = (end.xCoord) - (start.xCoord);
-            double dy = (end.yCoord) - (start.yCoord);
-            double dz = (end.zCoord) - (start.zCoord);
+            double dx = (end.x) - (start.x);
+            double dy = (end.y) - (start.y);
+            double dz = (end.z) - (start.z);
             double dw = Math.sqrt(dx * dx + dz * dz);
             double k = Math.sqrt(dx * dx + dy * dy + dz * dz) * slack;
             double l = 0;
@@ -232,7 +233,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 double x1 = 0 + dx * n1;
                 double z1 = 0 + dz * n1;
                 double y1 = a * Math.cosh(((Math.sqrt(x1 * x1 + z1 * z1)) - p) / a) + q;
-                vex[i] = Vec3.createVectorHelper(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1);
+                vex[i] = new Vec3(start.x + x1, start.y + y1, start.z + z1);
             }
             return vex;
         }

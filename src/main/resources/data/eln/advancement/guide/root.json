@@ -1,0 +1,33 @@
+{
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:rubber"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:rubber"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.root.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.root.description"
+    },
+    "announce_to_chat": false,
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "show_toast": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

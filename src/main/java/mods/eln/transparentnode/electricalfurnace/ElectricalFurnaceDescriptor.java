@@ -6,9 +6,9 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +23,7 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
     //ThermalLoadInitializer thermal;
 
     public ElectricalFurnaceDescriptor(String name, IFunction PfT, IFunction thermalPlostfT, double thermalC) {
-        super(name, ElectricalFurnaceElement.class, ElectricalFurnaceRender.class);
+        super(name, ElectricalFurnaceElement.class, null);
         this.PfT = PfT;
         this.thermalPlostfT = thermalPlostfT;
         this.thermalC = thermalC;
@@ -47,27 +47,23 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
         Data.addMachine(newItemStack());
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        Eln.obj.draw("ElectricFurnace", "furnace");
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            Eln.obj.draw("ElectricFurnace", "furnace");
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Similar to a vanilla furnace,\nbut heats with electricity.").split("\n"));
     }

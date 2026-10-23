@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalsensor;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -10,22 +12,19 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class ElectricalSensorRender extends SixNodeElementRender {
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
     ElectricalSensorDescriptor descriptor;
     long time;
 
     int typeOfSensor = 0;
     float lowValue = 0, highValue = 50;
     byte dirType;
-    CableRenderDescriptor cableRender = null;
 
     public ElectricalSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -57,7 +56,6 @@ public class ElectricalSensorRender extends SixNodeElementRender {
             lowValue = stream.readFloat();
             highValue = stream.readFloat();
             dirType = stream.readByte();
-            cableRender = ElectricalCableDescriptor.getCableRender(Utils.unserialiseItemStack(stream));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,17 +64,13 @@ public class ElectricalSensorRender extends SixNodeElementRender {
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
         if (descriptor.voltageOnly) {
-            if (lrdu == front) return Eln.instance.signalCableDescriptor.render;
-            if (lrdu == front.inverse()) return cableRender;
+            if (lrdu == front) return ElnDeviceRegistry.signalCableDescriptor.render;
+            if (lrdu == front.inverse()) return ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         } else {
-            if (lrdu == front) return Eln.instance.signalCableDescriptor.render;
-            if (lrdu == front.left() || lrdu == front.right()) return cableRender;
+            if (lrdu == front) return ElnDeviceRegistry.signalCableDescriptor.render;
+            if (lrdu == front.left() || lrdu == front.right()) return ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         }
         return super.getCableRender(lrdu);
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalSensorGui(player, inventory, this);
-    }
 }

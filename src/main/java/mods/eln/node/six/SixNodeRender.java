@@ -1,49 +1,84 @@
 package mods.eln.node.six;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import mods.eln.client.render.ElnRenderErrors;
+import mods.eln.client.render.GlSubmit;
+import mods.eln.gl.GL11;
+import mods.eln.gl.GlFrame;
 import mods.eln.misc.Direction;
 import mods.eln.misc.UtilsClient;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-public class SixNodeRender extends TileEntitySpecialRenderer {
+/**
+ * Draws a six-node block's elements (1.12 SixNodeRender TESR). Each element render runs its 1.12 draw() against the
+ * GL11 shim inside a GlFrame; the frame's batches are submitted as custom geometry. The render objects are read in
+ * submit (not copied in extract): extract and submit run on the render thread in the same frame (P3 plan, point 5).
+ */
+public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRenderer<E, SixNodeRender.State> {
+    public static class State extends BlockEntityRenderState {
+        SixNodeElementRender[] renders = new SixNodeElementRender[6];
+    }
+
     @Override
-    public void renderTileEntityAt(TileEntity entity, double x, double y,
-                                   double z, float var8) {
-        Minecraft.getMinecraft().mcProfiler.startSection("SixNode");
+    public State createRenderState() {
+        return new State();
+    }
 
-        SixNodeEntity tileEntity = (SixNodeEntity) entity;
+    /** Only blocks with elements (voxel blocks of plain cables and pipes are drawn by their block model). */
+    @Override
+    public boolean shouldRender(E be, Vec3 cameraPosition) {
+        for (SixNodeElementRender r : be.elementRenderList) if (r != null) return BlockEntityRenderer.super.shouldRender(be, cameraPosition);
+        return false;
+    }
 
+    @Override
+    public void extractRenderState(E be, State state, float partialTicks, Vec3 cameraPosition,
+                                   ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
+        BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
+        System.arraycopy(be.elementRenderList, 0, state.renders, 0, 6);
+    }
 
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float) x + .5F, (float) y + .5F, (float) z + .5F);
-        /*if(tileEntity.sixNodeCacheMapId >= 0)
-		{
-			if(SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId] != null)
-			{
-				UtilsClient.glDefaultColor();
-				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.getWorldObj(),entity.xCoord,entity.yCoord,entity.zCoord);
-			}
-		}*/
-
-        int idx = 0;
-        for (SixNodeElementRender render : tileEntity.elementRenderList) {
-            if (render != null) {
+    @Override
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+        GlFrame frame = GlSubmit.open(poseStack);
+        try {
+            GL11.glTranslatef(.5f, .5f, .5f);
+            for (int idx = 0; idx < 6; idx++) {
+                SixNodeElementRender render = state.renders[idx];
+                if (render == null) continue;
                 UtilsClient.glDefaultColor();
                 GL11.glPushMatrix();
                 Direction.fromInt(idx).glRotateXnRef();
-                GL11.glTranslatef(-0.5F, 0f, 0f);
+                GL11.glTranslatef(-0.5f, 0f, 0f);
+                if (render.burnt && render.drawBurnt()) {
+                    GL11.glPopMatrix();
+                    continue;
+                }
                 render.draw();
                 GL11.glPopMatrix();
+                if (render.burnt) {
+                    // 1.12 BurntRender.overlay: the same draw again, multiplied in soot
+                    frame.soot = true;
+                    UtilsClient.glDefaultColor();
+                    GL11.glPushMatrix();
+                    Direction.fromInt(idx).glRotateXnRef();
+                    GL11.glTranslatef(-0.5f, 0f, 0f);
+                    render.draw();
+                    GL11.glPopMatrix();
+                    frame.soot = false;
+                }
             }
-            idx++;
+        } catch (RuntimeException e) {
+            ElnRenderErrors.report("six-node", e);
+        } finally {
+            GlFrame.close();
         }
-        GL11.glPopMatrix();
-        //Utils.glDefaultColor();
-        Minecraft.getMinecraft().mcProfiler.endSection();
-
+        GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
     }
-
-
 }

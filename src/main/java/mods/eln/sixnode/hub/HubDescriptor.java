@@ -1,5 +1,8 @@
 package mods.eln.sixnode.hub;
 
+import mods.eln.gl.GL11;
+
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -7,10 +10,9 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +26,7 @@ public class HubDescriptor extends SixNodeDescriptor {
     Obj3DPart[] connection = new Obj3DPart[6];
 
     public HubDescriptor(String name, Obj3D obj) {
-        super(name, HubElement.class, HubRender.class);
+        super(name, HubElement.class, null);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
@@ -34,7 +36,6 @@ public class HubDescriptor extends SixNodeDescriptor {
         }
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
-
     void draw(boolean[] connectionGrid) {
         if (main != null) main.draw();
         for (int idx = 0; idx < 6; idx++) {
@@ -49,20 +50,22 @@ public class HubDescriptor extends SixNodeDescriptor {
     }
 
 /*	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+	// 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+	// 26.x port: handleRenderType() removed (client rendering; redone in P3)
+*/
+
+	/*@Override
+	@Override
+	public boolean hasItemDraw() {
+	    return true;
 	}
 
 	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}*/
-
-	/*@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		//GL11.glTranslatef(-0.3f, -0.1f, 0f);
-		draw(new boolean[]{true, true, true, true, true, true});
-	}*/
+	public void drawItem(boolean entity) {
+	    draw(new boolean[]{true, true, true, true, true, true});
+	}
+*/
 
     @Override
     public void setParent(Item item, int damage) {
@@ -71,13 +74,13 @@ public class HubDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Allows crossing cables\non one single block.").split("\n"));
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return LRDU.Up;
     }
 }

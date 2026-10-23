@@ -14,9 +14,9 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -55,20 +55,20 @@ public class ElectricalTimeoutElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
+        byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
-        timeOutValue = nbt.getFloat("timeOutValue");
-        timeOutCounter = nbt.getFloat("timeOutCounter");
+        timeOutValue = nbt.getFloatOr("timeOutValue", 0f);
+        timeOutCounter = nbt.getFloatOr("timeOutCounter", 0f);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
-        nbt.setFloat("timeOutValue", (float) timeOutValue);
-        nbt.setFloat("timeOutCounter", (float) timeOutCounter);
+        nbt.putByte("front", (byte) (front.toInt() << 0));
+        nbt.putFloat("timeOutValue", (float) timeOutValue);
+        nbt.putFloat("timeOutCounter", (float) timeOutCounter);
     }
 
     @Override

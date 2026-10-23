@@ -16,9 +16,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -115,10 +115,10 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
 
-        return inventory != null && inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
+        return inventory != null && inventory.take(entityPlayer.getMainHandItem(), this, false, true);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         if (inventory != null)
             return inventory.getInventory();
         else
@@ -149,10 +149,5 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     protected void inventoryChanged() {
         super.inventoryChanged();
         needPublish();
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new ElectricalFireDetectorContainer(player, inventory.getInventory());
     }
 }

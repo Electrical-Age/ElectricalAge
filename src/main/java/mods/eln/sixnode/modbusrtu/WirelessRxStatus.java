@@ -1,7 +1,7 @@
 package mods.eln.sixnode.modbusrtu;
 
 import mods.eln.misc.INBTTReady;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -54,18 +54,18 @@ public class WirelessRxStatus implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        name = nbt.getString(str + "name");
-        id = nbt.getInteger(str + "id");
-        connected = nbt.getBoolean(str + "connected");
-        uuid = nbt.getInteger(str + "uuid");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        name = nbt.getStringOr(str + "name", "");
+        id = nbt.getIntOr(str + "id", 0);
+        connected = nbt.getBooleanOr(str + "connected", false);
+        uuid = nbt.getIntOr(str + "uuid", 0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setString(str + "name", name);
-        nbt.setInteger(str + "id", id);
-        nbt.setBoolean(str + "connected", connected);
-        nbt.setInteger(str + "uuid", uuid);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putString(str + "name", name);
+        nbt.putInt(str + "id", id);
+        nbt.putBoolean(str + "connected", connected);
+        nbt.putInt(str + "uuid", uuid);
     }
 }

@@ -8,9 +8,8 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -25,7 +24,6 @@ public class HubRender extends SixNodeElementRender {
     CableRenderDescriptor cableRender[] = new CableRenderDescriptor[4];
     boolean connectionGrid[] = new boolean[6];
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(4, 64, this);
 
     public HubRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -62,8 +60,4 @@ public class HubRender extends SixNodeElementRender {
         return cableRender[lrdu.toInt()];
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new HubGui(player, inventory, this);
-    }
 }

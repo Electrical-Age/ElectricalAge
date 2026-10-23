@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "F": "#eln:ingots/tungsten",
+    "G": "minecraft:glass_pane",
+    "S": "eln:low_voltage_cable"
+  },
+  "pattern": [
+    "GGG",
+    "FFF",
+    "GSG"
+  ],
+  "result": {
+    "count": 2,
+    "id": "eln:50v_farming_lamp"
+  }
+}

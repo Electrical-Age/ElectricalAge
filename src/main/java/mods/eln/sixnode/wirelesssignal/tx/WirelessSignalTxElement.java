@@ -15,9 +15,9 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
 
 import javax.annotation.Nullable;
 import java.io.DataInputStream;
@@ -67,7 +67,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
             if (glichedTimer > 0)
                 glichedTimer -= time/* * Utils.rand(0.2, 1.8)*/;
 
-            double strangth = range - Eln.instance.serverEventListener.getLightningClosestTo(c);
+            double strangth = range - Eln.serverEventListener.getLightningClosestTo(c);
             if (strangth > 0 && glichedTimer <= 0) {
                 glichedTimer = glitchLength;
                 glichedStrangth = (strangth) / range;
@@ -141,7 +141,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
     }
 
     @Override
-    public void destroy(EntityPlayerMP entityPlayer) {
+    public void destroy(ServerPlayer entityPlayer) {
         unregister();
         super.destroy(entityPlayer);
     }
@@ -157,17 +157,17 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setString("channel", channel);
+        nbt.putString("channel", channel);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         channelRemove(this);
 
         super.readFromNBT(nbt);
-        channel = nbt.getString("channel");
+        channel = nbt.getStringOr("channel", "");
 
         channelRegister(this);
     }

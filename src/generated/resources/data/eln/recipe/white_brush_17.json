@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:white_dye",
+    "eln:white_brush"
+  ],
+  "result": {
+    "id": "eln:white_brush"
+  }
+}

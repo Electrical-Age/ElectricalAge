@@ -1,10 +1,11 @@
 package mods.eln.misc;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Vec3;
-import net.minecraftforge.common.util.ForgeDirection;
-import org.lwjgl.opengl.GL11;
+import mods.eln.gl.GL11;
+
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Represents the 6 possible directions along the axis of a block.
@@ -123,22 +124,23 @@ public enum Direction {
      * @param tileEntity tile entity to check
      * @return Adjacent tile entity or null if none exists
      */
-    public TileEntity applyToTileEntity(TileEntity tileEntity) {
+    public BlockEntity applyToTileEntity(BlockEntity tileEntity) {
         if (tileEntity == null) return null;
-        int coords[] = {tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord};
+        int coords[] = {tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ()};
 
         coords[dir / 2] += getSign();
 
-        if (tileEntity.getWorldObj() != null && tileEntity.getWorldObj().blockExists(coords[0], coords[1], coords[2])) {
-            return tileEntity.getWorldObj().getTileEntity(coords[0], coords[1], coords[2]);
+        net.minecraft.core.BlockPos p = new net.minecraft.core.BlockPos(coords[0], coords[1], coords[2]);
+        if (tileEntity.getLevel() != null && tileEntity.getLevel().isLoaded(p)) {
+            return tileEntity.getLevel().getBlockEntity(p);
         } else {
             return null;
         }
     }
 
-    public TileEntity applyToTileEntityAndSameClassThan(TileEntity tileEntity, Class c) {
+    public BlockEntity applyToTileEntityAndSameClassThan(BlockEntity tileEntity, Class c) {
         if (tileEntity == null) return null;
-        TileEntity findedEntity = applyToTileEntity(tileEntity);
+        BlockEntity findedEntity = applyToTileEntity(tileEntity);
         if (findedEntity == null) return null;
         if (!Utils.isTheClass(findedEntity, c)) return null;
         return findedEntity;
@@ -418,7 +420,7 @@ public enum Direction {
         }
     }
 
-    public TileEntity getTileEntity(Coordonate coordonate) {
+    public BlockEntity getTileEntity(Coordonate coordonate) {
         int x = coordonate.x, y = coordonate.y, z = coordonate.z;
         switch (this) {
             case XN:
@@ -443,15 +445,15 @@ public enum Direction {
                 break;
         }
 
-        return coordonate.world().getTileEntity(x, y, z);
+        return coordonate.world().getBlockEntity(new net.minecraft.core.BlockPos(x, y, z));
     }
 
-    public void writeToNBT(NBTTagCompound nbt, String name) {
-        nbt.setByte(name, (byte) getInt());
+    public void writeToNBT(CompoundTag nbt, String name) {
+        nbt.putByte(name, (byte) getInt());
     }
 
-    static public Direction readFromNBT(NBTTagCompound nbt, String name) {
-        return Direction.fromInt(nbt.getByte(name));
+    static public Direction readFromNBT(CompoundTag nbt, String name) {
+        return Direction.fromInt(nbt.getByteOr(name, (byte) 0));
     }
 
     public void rotateFromXN(double[] p) {
@@ -518,35 +520,24 @@ public enum Direction {
         }
     }
 
-    public void rotateFromXN(Vec3 p) {
-        double x = p.xCoord, y = p.yCoord, z = p.zCoord;
+    /** 1.12: Vec3 is immutable, so this returns the rotated vector (callers assign it). */
+    public Vec3 rotateFromXN(Vec3 p) {
+        double x = p.x, y = p.y, z = p.z;
         switch (this) {
             case XN:
-                break;
+                return p;
             case XP:
-                p.xCoord = -x;
-                p.zCoord = -z;
-                break;
+                return new Vec3(-x, y, -z);
             case YN:
-                p.xCoord = y;
-                p.yCoord = x;
-                p.zCoord = -z;
-                break;
+                return new Vec3(y, x, -z);
             case YP:
-                p.xCoord = y;
-                p.yCoord = -x;
-                p.zCoord = z;
-                break;
+                return new Vec3(y, -x, z);
             case ZN:
-                p.xCoord = -z;
-                p.zCoord = x;
-                break;
+                return new Vec3(-z, y, x);
             case ZP:
-                p.xCoord = z;
-                p.zCoord = -x;
-                break;
+                return new Vec3(z, y, -x);
             default:
-                break;
+                return p;
         }
     }
 
@@ -607,7 +598,8 @@ public enum Direction {
         }
     }
 
-    public static Direction from(ForgeDirection direction) {
+    public static Direction fromEnumFacing(net.minecraft.core.Direction direction) {
+        if (direction == null) return YN;
         switch (direction) {
             case DOWN:
                 return YN;
@@ -626,22 +618,23 @@ public enum Direction {
         }
     }
 
-    public ForgeDirection toForge() {
+    /** Was toForge(); ForgeDirection.UNKNOWN -> null. */
+    public net.minecraft.core.Direction toEnumFacing() {
         switch (this) {
             case YN:
-                return ForgeDirection.DOWN;
+                return net.minecraft.core.Direction.DOWN;
             case XP:
-                return ForgeDirection.EAST;
+                return net.minecraft.core.Direction.EAST;
             case ZN:
-                return ForgeDirection.NORTH;
+                return net.minecraft.core.Direction.NORTH;
             case ZP:
-                return ForgeDirection.SOUTH;
+                return net.minecraft.core.Direction.SOUTH;
             case YP:
-                return ForgeDirection.UP;
+                return net.minecraft.core.Direction.UP;
             case XN:
-                return ForgeDirection.WEST;
+                return net.minecraft.core.Direction.WEST;
             default:
-                return ForgeDirection.UNKNOWN;
+                return null;
         }
     }
 

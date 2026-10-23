@@ -13,7 +13,7 @@ public class ElectricalPoleDescriptor extends GridDescriptor {
     public final boolean includeTransformer;
 
     public ElectricalPoleDescriptor(String name, Obj3D obj, String cableTexture, ElectricalCableDescriptor cableDescriptor, boolean includeTransformer) {
-        super(name, obj, ElectricalPoleElement.class, ElectricalPoleRender.class, cableTexture, cableDescriptor);
+        super(name, obj, ElectricalPoleElement.class, null, cableTexture, cableDescriptor);
         this.includeTransformer = includeTransformer;
         if (includeTransformer) {
             rotating_parts.add(obj.getPart("transformer"));

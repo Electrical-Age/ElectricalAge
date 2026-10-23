@@ -1,15 +1,16 @@
 package mods.eln.sixnode.TreeResinCollector;
 
+import mods.eln.gl.GL11;
+
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +25,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
     float emptyS, emptyT;
 
     public TreeResinCollectorDescriptor(String name, Obj3D obj) {
-        super(name, TreeResinCollectorElement.class, TreeResinCollectorRender.class);
+        super(name, TreeResinCollectorElement.class, null);
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
@@ -37,7 +38,6 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
-
     void draw(float factor) {
         if (main != null) main.draw();
         if (fill != null) {
@@ -55,59 +55,43 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
         Data.addMachine(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        draw(0.0f);
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0.0f);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Produces Tree Resin over\ntime when put on a tree.").split("\n"));
     }
 
+    // 1.12: ore dictionary treeWood/logWood and treeLeaves; 26.x: the block tags
     public static boolean isWood(Block b) {
-        for (ItemStack s : OreDictionary.getOres("treeWood")) {
-            if (s.getItem() == Item.getItemFromBlock(b)) return true;
-        }
-        for (ItemStack s : OreDictionary.getOres("logWood")) {
-            if (s.getItem() == Item.getItemFromBlock(b)) return true;
-        }
-
-        return false;
+        return b.defaultBlockState().is(net.minecraft.tags.BlockTags.LOGS);
     }
 
     public static boolean isLeaf(Block b) {
-        for (ItemStack s : OreDictionary.getOres("treeLeaves")) {
-            if (s.getItem() == Item.getItemFromBlock(b)) return true;
-        }
-        return false;
+        return b.defaultBlockState().is(net.minecraft.tags.BlockTags.LEAVES);
     }
 
     @Override
-    public boolean canBePlacedOnSide(EntityPlayer player, Coordonate c, Direction side) {
+    public boolean canBePlacedOnSide(Player player, Coordonate c, Direction side) {
         Block b = c.getBlock();
         if (!isWood(b) || side.isY()) {
-            Utils.addChatMessage(player, tr("This block can only be placed on the side of a tree!"));
+            Utils.sendMessage(player, tr("This block can only be placed on the side of a tree!"));
             return false;
         }
         return true;

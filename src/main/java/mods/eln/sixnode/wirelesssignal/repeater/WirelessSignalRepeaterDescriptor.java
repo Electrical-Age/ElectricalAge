@@ -1,5 +1,9 @@
 package mods.eln.sixnode.wirelesssignal.repeater;
 
+import mods.eln.gl.GL11;
+
+import mods.eln.misc.UtilsClient;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -7,10 +11,9 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
 
@@ -21,7 +24,7 @@ public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
     public WirelessSignalRepeaterDescriptor(String name,
                                             Obj3D obj,
                                             int range) {
-        super(name, WirelessSignalRepeaterElement.class, WirelessSignalRepeaterRender.class);
+        super(name, WirelessSignalRepeaterElement.class, null);
         this.range = range;
         this.obj = obj;
         if (obj != null) {
@@ -38,31 +41,24 @@ public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            if (type == ItemRenderType.ENTITY) {
-                GL11.glScalef(2.8f, 2.8f, 2.8f);
-            }
-            draw();
+    public void drawItem(boolean entity) {
+        if (entity) {
+            GL11.glScalef(2.8f, 2.8f, 2.8f);
         }
+        draw();
+
     }
 
     public void draw() {
@@ -75,7 +71,7 @@ public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

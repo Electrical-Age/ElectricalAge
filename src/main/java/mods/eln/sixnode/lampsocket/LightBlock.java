@@ -1,90 +1,56 @@
 package mods.eln.sixnode.lampsocket;
 
-import mods.eln.misc.Coordonate;
-import mods.eln.sixnode.lampsocket.LightBlockEntity.LightBlockObserver;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import mods.eln.compat.BlockMeta;
+import mods.eln.registry.ElnRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 
-import java.util.Random;
-
-public class LightBlock extends BlockContainer {
-
-    public LightBlock() {
-        super(Material.air);
-    }
-
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 start, Vec3 end) {
-        return null;
-    }
-
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4) {
-        return null;
-    }
-
-    @Override
-    public boolean isOpaqueCube() {
-        return false;
+/**
+ * Invisible air-like block that carries a lamp's light level in its META (0..15) state (1.12 LightBlock). No shape,
+ * no drops, replaceable; the light level comes from META (block properties' lightLevel, see ElnRegistry).
+ */
+public class LightBlock extends BaseEntityBlock {
+    public LightBlock(Properties properties) {
+        super(properties);
+        registerDefaultState(stateDefinition.any().setValue(BlockMeta.META, 0));
     }
 
     @Override
-    public boolean renderAsNormalBlock() {
-        return false;
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(BlockMeta.META);
     }
 
     @Override
-    public int getRenderType() {
-        return -1;
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return Shapes.empty();
     }
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
-        return null;
-    }
-
-    public int quantityDropped(Random par1Random) {
-        return 0;
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE; // 1.7.10: -1
     }
 
     @Override
-    public boolean isReplaceable(IBlockAccess access, int x, int y, int z) {
-        return true;
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new LightBlockEntity(pos, state);
     }
 
     @Override
-    public int getLightValue(IBlockAccess world, int x, int y, int z) {
-        /*if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-    		Utils.println("Light at " + x + ":" + y + ":" + z + " " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
-    	}*/
-        //	Utils.println("Light at " + x + ":" + y + ":" + z + " " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
-        return world.getBlockMetadata(x, y, z);
-
-        //return ((LightBlockEntity)world.getBlockTileEntity(x, y, z)).getClientLight();
-    }
-
-    @Override
-    public TileEntity createNewTileEntity(World arg0, int arg1) {
-        return new LightBlockEntity();
-    }
-
-    @Override
-    public void breakBlock(World world, int x, int y, int z, Block arg4, int arg5) {
-        Coordonate coord = new Coordonate(x, y, z, world);
-        for (LightBlockObserver o : LightBlockEntity.observers) {
-            o.lightBlockDestructor(coord);
-        }
-        super.breakBlock(world, x, y, z, arg4, arg5);
-    }
-
-    @Override
-    public int getLightOpacity() {
-        return 0;
+    public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide() || type != ElnRegistry.LIGHT_ENTITY.get()) return null;
+        return (l, p, s, be) -> ((LightBlockEntity) be).update();
     }
 }

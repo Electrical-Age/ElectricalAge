@@ -23,4 +23,10 @@ public class ResistorPowerWatchdog extends ValueWatchdog {
     double getValue() {
         return resistor.getP();
     }
+
+    // Too much power in a resistor heats it: treated as overheating.
+    @Override
+    FailureCause cause() {
+        return FailureCause.OVERHEAT;
+    }
 }

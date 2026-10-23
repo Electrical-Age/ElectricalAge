@@ -1,15 +1,16 @@
 package mods.eln.gridnode;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 
-import static org.lwjgl.opengl.GL11.*;
+import static mods.eln.gl.GL11.*;
 
 /**
  * Created by svein on 22/08/15.
@@ -42,7 +43,6 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         }
         this.cableTexture = cableTexture;
     }
-
     public void draw(float idealRenderingAngle) {
         final boolean fixed = rotationIsFixed();
         if (!fixed) {
@@ -61,30 +61,25 @@ public class GridDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glPushMatrix();
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            GL11.glTranslatef(0, -1, 0);
-            GL11.glScalef(0.6f, 0.6f, 0.6f);
-            draw(0);
-            GL11.glPopMatrix();
-        }
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        GL11.glPushMatrix();
+        objItemScale(obj);
+        Direction.ZN.glRotateXnRef();
+        GL11.glTranslatef(0, -1, 0);
+        GL11.glScalef(0.6f, 0.6f, 0.6f);
+        draw(0);
+        GL11.glPopMatrix();
+
     }
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
     public boolean rotationIsFixed() {
         return false;

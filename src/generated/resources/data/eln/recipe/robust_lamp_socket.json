@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "GIG"
+  ],
+  "result": {
+    "count": 3,
+    "id": "eln:robust_lamp_socket"
+  }
+}

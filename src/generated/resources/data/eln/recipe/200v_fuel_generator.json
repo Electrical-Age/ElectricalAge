@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "eln:analogic_regulator",
+    "B": "eln:advanced_machine_block",
+    "C": "eln:medium_voltage_cable",
+    "I": "#c:plates/iron",
+    "M": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "III",
+    " BA",
+    "CMC"
+  ],
+  "result": {
+    "id": "eln:200v_fuel_generator"
+  }
+}

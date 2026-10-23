@@ -1,12 +1,14 @@
 package mods.eln.transparentnode.powercapacitor;
 
+
+import mods.eln.misc.Utils;
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
@@ -19,7 +21,7 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
         double dischargeTao
 
     ) {
-        super(name, PowerCapacitorElement.class, PowerCapacitorRender.class);
+        super(name, PowerCapacitorElement.class, null);
         this.serie = serie;
         this.dischargeTao = dischargeTao;
         this.obj = obj;
@@ -38,27 +40,27 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
         return serie.getValue(cableCount - 1) / uTemp / uTemp;
     }
 
-    public double getCValue(IInventory inventory) {
-        ItemStack core = inventory.getStackInSlot(PowerCapacitorContainer.redId);
-        ItemStack diel = inventory.getStackInSlot(PowerCapacitorContainer.dielectricId);
-        if (core == null || diel == null)
+    public double getCValue(Container inventory) {
+        ItemStack core = inventory.getItem(PowerCapacitorContainer.redId);
+        ItemStack diel = inventory.getItem(PowerCapacitorContainer.dielectricId);
+        if (Utils.isEmpty(core) || Utils.isEmpty(diel))
             return getCValue(0, 0);
         else {
-            return getCValue(core.stackSize, getUNominalValue(inventory));
+            return getCValue(core.getCount(), getUNominalValue(inventory));
         }
     }
 
-    public double getUNominalValue(IInventory inventory) {
-        ItemStack diel = inventory.getStackInSlot(PowerCapacitorContainer.dielectricId);
-        if (diel == null)
+    public double getUNominalValue(Container inventory) {
+        ItemStack diel = inventory.getItem(PowerCapacitorContainer.dielectricId);
+        if (Utils.isEmpty(diel))
             return 10000;
         else {
             DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-            return desc.uNominal * diel.stackSize;
+            return desc.uNominal * diel.getCount();
         }
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         //Data.addEnergy(newItemStack());
     }
@@ -67,19 +69,17 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
     }
 
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return true;
+    public boolean hasItemDraw() {
+        return false; // its draw() is empty (an invisible block in 1.12 too): the flat icon everywhere
     }
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+    public void drawItem(boolean entity) {
         draw();
     }
 }

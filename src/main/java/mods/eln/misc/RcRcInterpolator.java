@@ -1,6 +1,6 @@
 package mods.eln.misc;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public class RcRcInterpolator implements INBTTReady {
 
@@ -40,16 +40,16 @@ public class RcRcInterpolator implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        c1 = nbt.getFloat(str + "c1");
-        c2 = nbt.getFloat(str + "c2");
-        target = nbt.getFloat(str + "target");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        c1 = nbt.getFloatOr(str + "c1", 0f);
+        c2 = nbt.getFloatOr(str + "c2", 0f);
+        target = nbt.getFloatOr(str + "target", 0f);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setFloat(str + "c1", c1);
-        nbt.setFloat(str + "c2", c2);
-        nbt.setFloat(str + "target", target);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putFloat(str + "c1", c1);
+        nbt.putFloat(str + "c2", c2);
+        nbt.putFloat(str + "target", target);
     }
 }

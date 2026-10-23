@@ -1,33 +1,64 @@
 package mods.eln.client;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import io.netty.channel.ChannelHandler.Sharable;
 import mods.eln.Eln;
+import mods.eln.misc.Dimensions;
+import mods.eln.misc.Utils;
+import mods.eln.node.INodeEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.NetworkManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
-@Sharable
-public class ClientPacketHandler {
-
-    public ClientPacketHandler() {
-        //FMLCommonHandler.instance().bus().register(this);
-        Eln.eventChannel.register(this);
+/**
+ * Client side of EA's byte protocol (server -> client), 1.12 ClientPacketHandler. Node publishes and node packets are
+ * handled; sounds (R4), local GUIs (P4b), uuid kills and shared config come later.
+ */
+public final class ClientPacketHandler {
+    private ClientPacketHandler() {
     }
 
-    @SubscribeEvent
-    public void onClientPacket(ClientCustomPacketEvent event) {
-        //Utils.println("onClientPacket");
-        FMLProxyPacket packet = event.packet;
-        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
-        NetworkManager manager = event.manager;
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer; // EntityClientPlayerMP
+    public static void packetRx(byte[] data) {
+        Minecraft mc = Minecraft.getInstance();
+        mc.execute(() -> {
+            Level level = mc.level;
+            if (level == null) return;
+            DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
+            try {
+                switch (stream.readByte()) {
+                    case Eln.packetNodeSingleSerialized -> forNode(stream, level, true);
+                    case Eln.packetForClientNode -> forNode(stream, level, false);
+                    case Eln.packetPlaySound -> {
+                        if (stream.readInt() == Dimensions.id(level))
+                            mods.eln.sound.SoundClient.play(mods.eln.sound.SoundCommand.fromStream(stream, level));
+                    }
+                    case Eln.packetKitPreview -> mods.eln.client.render.KitOutline.read(stream);
+                    default -> {
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-        Eln.packetHandler.packetRx(stream, manager, player);
+    /** publish = the node's publish data (serverPublishUnserialize), else a node packet (serverPacketUnserialize). */
+    static void forNode(DataInputStream stream, Level level, boolean publish) throws IOException {
+        int x = stream.readInt(), y = stream.readInt(), z = stream.readInt(), dim = stream.readInt();
+        if (Dimensions.id(level) != dim) return;
+        BlockEntity be = level.getBlockEntity(new BlockPos(x, y, z));
+        if (!(be instanceof INodeEntity node)) {
+            Utils.println("No node found for " + x + " " + y + " " + z);
+            return;
+        }
+        if (!node.getNodeUuid().equals(stream.readUTF())) {
+            Utils.println("Wrong node UUID warning");
+            return;
+        }
+        if (publish) node.serverPublishUnserialize(stream);
+        else node.serverPacketUnserialize(stream);
     }
 }

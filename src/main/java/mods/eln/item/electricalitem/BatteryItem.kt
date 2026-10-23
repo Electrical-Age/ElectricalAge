@@ -4,14 +4,11 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
-import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import kotlin.math.max
 
 class BatteryItem(name: String, private var energyStorage: Double, internal var chargePower: Double, internal var dischargePower: Double, private val priority: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
@@ -21,28 +18,28 @@ class BatteryItem(name: String, private var energyStorage: Double, internal var 
         Data.addPortable(newItemStack())
     }
 
-    override fun getDefaultNBT(): NBTTagCompound? {
-        val nbt = NBTTagCompound()
-        nbt.setDouble("energy", 0.0)
+    override fun getDefaultNBT(): CompoundTag? {
+        val nbt = CompoundTag()
+        nbt.putDouble("energy", 0.0)
         return nbt
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Charge power: %1\$W", Utils.plotValue(chargePower)))
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
-        if (itemStack != null) {
+        if (itemStack != null && !itemStack.isEmpty) {
             list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                     (getEnergy(itemStack) / energyStorage * 100).toInt()))
         }
     }
 
     override fun getEnergy(stack: ItemStack): Double {
-        return getNbt(stack).getDouble("energy")
+        return getNbt(stack).getDoubleOr("energy", 0.0)
     }
 
     override fun setEnergy(stack: ItemStack, value: Double) {
-        getNbt(stack).setDouble("energy", max(0.0, value))
+        editNbt(stack) { it.putDouble("energy", max(0.0, value)) }
     }
 
     override fun getEnergyMax(stack: ItemStack): Double {
@@ -61,20 +58,14 @@ class BatteryItem(name: String, private var energyStorage: Double, internal var 
         return priority
     }
 
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return true
-    }
 
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        super.renderItem(type, item, *data)
-        if (type == ItemRenderType.INVENTORY) {
-            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
-        }
-    }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
+
 
     override fun electricalItemUpdate(stack: ItemStack, time: Double) {}
 }

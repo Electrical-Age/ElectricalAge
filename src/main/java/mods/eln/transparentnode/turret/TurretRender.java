@@ -7,10 +7,9 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import mods.eln.gl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -21,7 +20,6 @@ public class TurretRender extends TransparentNodeElementRender {
 
     private final TurretDescriptor descriptor;
     private final TurretMechanicsSimulation simulation;
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
     EntitySensorFilterDescriptor filter = null;
     boolean filterIsSpare;
     float chargePower;
@@ -81,7 +79,6 @@ public class TurretRender extends TransparentNodeElementRender {
         descriptor.draw(this);
         GL11.glPopMatrix();
     }
-
     @Override
     public void refresh(float deltaT) {
         super.refresh(deltaT);
@@ -107,9 +104,5 @@ public class TurretRender extends TransparentNodeElementRender {
         }
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new TurretGui(player, inventory, this);
-    }
 }
 

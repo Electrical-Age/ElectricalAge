@@ -1,26 +1,25 @@
 package mods.eln.node;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+
+
+import net.minecraft.core.BlockPos;
 import mods.eln.Eln;
-import mods.eln.GuiHandler;
-import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNode;
 import mods.eln.sim.*;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerManager;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -70,22 +69,33 @@ public abstract class NodeBase {
 
     private boolean needPublish = false;
 
+    /**
+     * The node's last saved tag (from the file it was loaded from, then from each save that worked): NodeManager
+     * writes it in place of a save that throws, so one broken writeToNBT doesn't delete the node from the file.
+     */
+    CompoundTag lastSaved;
+
     // public static boolean canBePlacedOn(ItemStack itemStack,Direction side)
 
     public boolean mustBeSaved() {
         return true;
     }
 
-    public int getBlockMetadata() {
-        return 0;
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
+
     }
 
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
-
+    /**
+     * Tells capability caches (hoppers, other mods' pipes) to look again: what a face offers changed while the block
+     * entity stayed (an element bound, burnt out, repaired or gone; a pipe adapter added or removed).
+     */
+    public void invalidateCapabilities() {
+        if (coordonate != null && coordonate.world() instanceof ServerLevel l)
+            l.invalidateCapabilities(coordonate.pos());
     }
 
     public void notifyNeighbor() {
-        coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
+        Utils.notifyNeighbours(coordonate.world(), coordonate.pos());
     }
 
     //public abstract Block getBlock();
@@ -95,7 +105,7 @@ public abstract class NodeBase {
 
     public void neighborBlockRead() {
         int[] vector = new int[3];
-        World world = coordonate.world();
+        Level world = coordonate.world();
 
         neighborOpaque = 0;
         neighborWrapable = 0;
@@ -106,11 +116,15 @@ public abstract class NodeBase {
 
             direction.applyTo(vector, 1);
 
-            Block b = world.getBlock(vector[0], vector[1], vector[2]);
-            if (b.isOpaqueCube())
-                ;
-            neighborOpaque |= 1 << direction.getInt();
-            if (isBlockWrappable(b, world, coordonate.x, coordonate.y, coordonate.z))
+            BlockPos np = new BlockPos(vector[0], vector[1], vector[2]);
+            net.minecraft.world.level.block.state.BlockState bs = world.getBlockState(np);
+            Block b = bs.getBlock();
+            // 1.12 port, known bug fixed: 1.7.10 had `if (b.isSolidRender()) ;` (empty statement), so every neighbour
+            // counted as opaque and TransparentNodeElement.checkCanStay never removed unsupported devices. Same rule as
+            // TransparentNodeDescriptor.checkCanPlace (default-state opaque cube; a hopper counts as a floor).
+            if (bs.isSolidRender() || (direction == Direction.YN && b instanceof net.minecraft.world.level.block.HopperBlock))
+                neighborOpaque |= 1 << direction.getInt();
+            if (isBlockWrappable(bs, world, np))
                 neighborWrapable |= 1 << direction.getInt();
         }
     }
@@ -134,15 +148,17 @@ public abstract class NodeBase {
         return ((neighborOpaque >> direction.getInt()) & 1) != 0;
     }
 
-    public static boolean isBlockWrappable(Block block, World w, int x, int y, int z) {
-        if (block.isReplaceable(w, x, y, z)) return true;
-        if (block == Blocks.air) return true;
+    public static boolean isBlockWrappable(net.minecraft.world.level.block.state.BlockState state, Level w, BlockPos pos) {
+        Block block = state.getBlock();
+        if (state.canBeReplaced()) return true;
+        if (state.isAir()) return true;
         if (block == Eln.sixNodeBlock) return true;
-        if (block instanceof GhostBlock) return true;
-        if (block == Blocks.torch) return true;
-        if (block == Blocks.redstone_torch) return true;
-        if (block == Blocks.unlit_redstone_torch) return true;
-        if (block == Blocks.redstone_wire) return true;
+        // (a cable's knuckle round an outer corner may share the block with a six-node wrap: CableConverter)
+        if (block instanceof mods.eln.node.voxel.VoxelNodeBlock) return true;
+        if (block == Eln.ghostBlock) return true;
+        if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) return true;
+        if (block == Blocks.REDSTONE_TORCH || block == Blocks.REDSTONE_WALL_TORCH) return true; // 26.x: lit is a state
+        if (block == Blocks.REDSTONE_WIRE) return true;
 
         return false;
     }
@@ -160,17 +176,17 @@ public abstract class NodeBase {
     public void physicalSelfDestruction(float explosionStrength) {
         if (destructed == true) return;
         destructed = true;
-        if (Eln.instance.explosionEnable == false) explosionStrength = 0;
+        if (!Eln.explosionEnable) explosionStrength = 0;
         disconnect();
-        coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
+        coordonate.world().removeBlock(coordonate.pos(), false);
         NodeManager.instance.removeNode(this);
         if (explosionStrength != 0) {
-            coordonate.world().createExplosion((Entity) null, coordonate.x, coordonate.y, coordonate.z, explosionStrength, true);
+            coordonate.world().explode(null, coordonate.x, coordonate.y, coordonate.z, explosionStrength, Level.ExplosionInteraction.BLOCK);
         }
     }
 
     // NodeBaseTodo
-    public void onBlockPlacedBy(Coordonate coordonate, Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void onBlockPlacedBy(Coordonate coordonate, Direction front, LivingEntity entityLiving, ItemStack itemStack) {
         // this.entity = entity;
         this.coordonate = coordonate;
         neighborBlockRead();
@@ -178,12 +194,12 @@ public abstract class NodeBase {
 
         initializeFromThat(front, entityLiving, itemStack);
 
-        if (itemStack != null)
-            Utils.println("Node::constructor( meta = " + itemStack.getItemDamage() + ")");
+        if (!Utils.isEmpty(itemStack))
+            Utils.println("Node::constructor( " + itemStack + ")");
     }
 
     abstract public void initializeFromThat(Direction front,
-                                            EntityLivingBase entityLiving, ItemStack itemStack);
+                                            LivingEntity entityLiving, ItemStack itemStack);
 
     public NodeBase getNeighbor(Direction direction) {
         int[] position = new int[3];
@@ -203,39 +219,35 @@ public abstract class NodeBase {
         Utils.println("Node::onBreakBlock()");
     }
 
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!entityPlayer.worldObj.isRemote && entityPlayer.getCurrentEquippedItem() != null) {
-            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-                String str = multiMeterString(side);
-                if (str != null)
-                    Utils.addChatMessage(entityPlayer, str);
-                return true;
-            }
-            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-                String str = thermoMeterString(side);
-                if (str != null)
-                    Utils.addChatMessage(entityPlayer, str);
-                return true;
-            }
-            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-                String str1 = multiMeterString(side);
-                String str2 = thermoMeterString(side);
-                String str = "";
-                if (str1 != null)
-                    str += str1;
-                if (str2 != null)
-                    str += str2;
-                if (str.equals("") == false)
-                    Utils.addChatMessage(entityPlayer, str);
-                return true;
-            }
-        }
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (meterUse(entityPlayer, side)) return true;
         if (hasGui(side)) {
-            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
-            return true;
+            // 1.12 opened GuiHandler.nodeBaseOpen + side; 26.x: the eln:node menu (P4)
+            return NodeMenus.open(this, entityPlayer, side);
         }
 
         return false;
+    }
+
+    /** A meter in hand: its reading of side, to the player. True if it was a meter. */
+    protected boolean meterUse(Player entityPlayer, Direction side) {
+        ItemStack held = entityPlayer.getMainHandItem();
+        if (!entityPlayer.level().isClientSide() && !Utils.isEmpty(held)) {
+            // meters (MeterItems is filled when the meter items are ported)
+            boolean multi = MeterItems.isMultiMeter(held), thermo = MeterItems.isThermometer(held), all = MeterItems.isAllMeter(held);
+            if (multi || thermo || all) {
+                String str = "";
+                if (multi || all) str += nullToEmpty(multiMeterString(side));
+                if (thermo || all) str += nullToEmpty(thermoMeterString(side));
+                if (!str.isEmpty()) Utils.sendMessage(entityPlayer, str);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
     }
 
     public void reconnect() {
@@ -317,7 +329,11 @@ public abstract class NodeBase {
                         Direction otherDirection = elementSide.getInverse();
                         LRDU otherLRDU = otherDirection.getLRDUGoingTo(direction).inverse();
                         if (this instanceof SixNode || otherNode instanceof SixNode) {
-                            tryConnectTwoNode(this, direction, lrdu, otherNode, otherDirection, otherLRDU);
+                            // a frozen neighbour (Stasis) gets no link, only the look of one: a real link into a frozen
+                            // node outlived its parts and hung incognito (2026-10-17); without the look, cables at the
+                            // tower yard's edge seemed cut (Baughn)
+                            if (otherNode.isAdded) tryConnectTwoNode(this, direction, lrdu, otherNode, otherDirection, otherLRDU);
+                            else visualPair(direction, lrdu, otherNode, otherDirection, otherLRDU);
                         }
                     }
                 }
@@ -327,9 +343,10 @@ public abstract class NodeBase {
         {
             for (Direction dir : Direction.values()) {
                 NodeBase otherNode = getNeighbor(dir);
-                if (otherNode != null && otherNode.isAdded) {
+                if (otherNode != null) {
                     for (LRDU lrdu : LRDU.values()) {
-                        tryConnectTwoNode(this, dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
+                        if (otherNode.isAdded) tryConnectTwoNode(this, dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
+                        else visualPair(dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());   // (frozen: the look only)
                     }
                 }
 
@@ -338,8 +355,75 @@ public abstract class NodeBase {
 
     }
 
-    public void disconnectJob() {
+    /**
+     * 26.x, for Stasis Delvers: a node taken out of the simulation (time stopped) still shows the connections it would
+     * make, so frozen cables don't look cut. Masks only, on this node only; no electrical or thermal connection. Returns
+     * true if what the client sees changed (and then marks the node for publishing).
+     */
+    public boolean visualConnect() {
+        int before = visualHash();
+        lrduCubeMask.clear();
+        visualConnectInit();
+        int[] emptyBlockCoord = new int[3];
+        int[] otherBlockCoord = new int[3];
+        for (Direction direction : Direction.values()) {
+            if (!isBlockWrappable(direction)) continue;
+            emptyBlockCoord[0] = coordonate.x;
+            emptyBlockCoord[1] = coordonate.y;
+            emptyBlockCoord[2] = coordonate.z;
+            direction.applyTo(emptyBlockCoord, 1);
+            for (LRDU lrdu : LRDU.values()) {
+                Direction elementSide = direction.applyLRDU(lrdu);
+                otherBlockCoord[0] = emptyBlockCoord[0];
+                otherBlockCoord[1] = emptyBlockCoord[1];
+                otherBlockCoord[2] = emptyBlockCoord[2];
+                elementSide.applyTo(otherBlockCoord, 1);
+                NodeBase otherNode = NodeManager.instance.getNodeFromCoordonate(new Coordonate(otherBlockCoord[0], otherBlockCoord[1], otherBlockCoord[2], coordonate.dimention));
+                if (otherNode == null) continue;
+                Direction otherDirection = elementSide.getInverse();
+                LRDU otherLRDU = otherDirection.getLRDUGoingTo(direction).inverse();
+                if (this instanceof SixNode || otherNode instanceof SixNode) visualPair(direction, lrdu, otherNode, otherDirection, otherLRDU);
+            }
+        }
+        for (Direction dir : Direction.values()) {
+            NodeBase otherNode = getNeighbor(dir);
+            if (otherNode == null) continue;
+            for (LRDU lrdu : LRDU.values()) visualPair(dir, lrdu, otherNode, dir.getInverse(), lrdu.inverseIfLR());
+        }
+        visualConnectInternal();
+        boolean changed = visualHash() != before;
+        if (changed) setNeedPublish(true);
+        return changed;
+    }
 
+    private void visualPair(Direction directionA, LRDU lrduA, NodeBase nodeB, Direction directionB, LRDU lrduB) {
+        if (compareConnectionMask(getSideConnectionMask(directionA, lrduA), nodeB.getSideConnectionMask(directionB, lrduB))) {
+            lrduCubeMask.set(directionA, lrduA, true);
+            newConnectionAt(directionA, lrduA);
+        }
+    }
+
+    /** Clear what visualConnect recomputes (subclasses: their element masks). */
+    protected void visualConnectInit() {
+    }
+
+    /** Internal (within the block) visual connections, for subclasses. */
+    protected void visualConnectInternal() {
+    }
+
+    /** A hash of what the client sees of the connections. */
+    protected int visualHash() {
+        int h = 0;
+        for (Direction d : Direction.values()) h = h * 31 + lrduCubeMask.get(d).mask;
+        return h;
+    }
+
+    public void disconnectJob() {
+        dropConnections();
+    }
+
+    /** Remove every NodeConnection of this node, on both ends. */
+    protected void dropConnections() {
         for (NodeConnection c : nodeConnectionList) {
 
             if (c.N1 != this) {
@@ -377,10 +461,29 @@ public abstract class NodeBase {
         nodeConnectionList.clear();
     }
 
+    /**
+     * 26.x, for Stasis Delvers: if set and true for a node, connect() keeps it out of the simulation and only draws its
+     * connections (visualConnect). EA reconnects nodes from many places (a second device in a block, a switch toggled,
+     * a burn or repair); without this a frozen node could slip back into the simulation until the next freezer pass, and
+     * what got linked would depend on the order things happened (Baughn).
+     */
+    public static volatile java.util.function.Predicate<NodeBase> simulationVeto;
+
+    /** Is the node in the simulation (connected)? */
+    public boolean isAdded() {
+        return isAdded;
+    }
+
     public void connect() {
 
         if (isAdded) {
             disconnect();
+        }
+
+        var veto = simulationVeto;
+        if (veto != null && veto.test(this)) {
+            visualConnect();
+            return;
         }
 
         connectInit();
@@ -394,7 +497,10 @@ public abstract class NodeBase {
 
     public void disconnect() {
         if (!isAdded) {
-            Utils.println("Node destroy error already destroy");
+            // Not in the simulation (frozen by Stasis, or never connected), but a running neighbour may still have linked
+            // to it: drop those links too, or a part removed later leaves a link to an empty side (incognito hung on it,
+            // 2026-10-17: a frozen node's part mined after a tower collapse).
+            dropConnections();
             return;
         }
 
@@ -407,24 +513,24 @@ public abstract class NodeBase {
         return true;
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
 
         coordonate.readFromNBT(nbt, "c");
 
-        neighborOpaque = nbt.getByte("NBOpaque");
-        neighborWrapable = nbt.getByte("NBWrap");
+        neighborOpaque = nbt.getByteOr("NBOpaque", (byte) 0);
+        neighborWrapable = nbt.getByteOr("NBWrap", (byte) 0);
 
         initialized = true;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
 
         coordonate.writeToNBT(nbt, "c");
 
         int idx;
 
-        nbt.setByte("NBOpaque", neighborOpaque);
-        nbt.setByte("NBWrap", neighborWrapable);
+        nbt.putByte("NBOpaque", neighborOpaque);
+        nbt.putByte("NBWrap", neighborWrapable);
 
     }
 
@@ -465,7 +571,7 @@ public abstract class NodeBase {
             stream.writeInt(coordonate.y);
             stream.writeInt(coordonate.z);
 
-            stream.writeByte(coordonate.dimention);
+            stream.writeInt(coordonate.dimention); // 1.12 port: dimension as int (was byte)
 
             stream.writeUTF(getNodeUuid());
 
@@ -475,7 +581,7 @@ public abstract class NodeBase {
         }
     }
 
-    public void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {
+    public void sendPacketToClient(ByteArrayOutputStream bos, ServerPlayer player) {
         Utils.sendPacketToClient(bos, player);
     }
 
@@ -485,22 +591,14 @@ public abstract class NodeBase {
     }
 
     public void sendPacketToAllClient(ByteArrayOutputStream bos, double range) {
-        //Profiler p = new Profiler();
-
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-        for (Object obj : server.getConfigurationManager().playerEntityList) {
-
-            EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
-            if (player.dimension != this.coordonate.dimention) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
+        // 1.12: every player in the dimension who watches the chunk and is within range
+        Level w = coordonate.world();
+        if (!(w instanceof ServerLevel)) return;
+        for (ServerPlayer player : ((ServerLevel) w).players()) {
             if (coordonate.distanceTo(player) > range) continue;
-
+            if (!((ServerLevel) w).getChunkSource().chunkMap.isChunkTracked(player, coordonate.x >> 4, coordonate.z >> 4)) continue;
             Utils.sendPacketToClient(bos, player);
         }
-
     }
 
     public ByteArrayOutputStream getPublishPacket() {
@@ -515,7 +613,7 @@ public abstract class NodeBase {
             stream.writeInt(coordonate.x);
             stream.writeInt(coordonate.y);
             stream.writeInt(coordonate.z);
-            stream.writeByte(coordonate.dimention);
+            stream.writeInt(coordonate.dimention); // 1.12 port: dimension as int (was byte)
 
             stream.writeUTF(getNodeUuid());
 
@@ -531,16 +629,10 @@ public abstract class NodeBase {
     }
 
     public void publishToAllPlayer() {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-        for (Object obj : server.getConfigurationManager().playerEntityList) {
-            EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
-            if (player.dimension != this.coordonate.dimention) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
-
-            Utils.sendPacketToClient(getPublishPacket(), player);
+        Level w = coordonate.world();
+        if (w instanceof ServerLevel) {
+            ByteArrayOutputStream bos = getPublishPacket();
+            if (bos != null) mods.eln.network.ElnNet.sendToTracking((ServerLevel) w, coordonate.x, coordonate.z, bos);
         }
         if (needNotify) {
             needNotify = false;
@@ -549,27 +641,22 @@ public abstract class NodeBase {
         needPublish = false;
     }
 
-    public void publishToPlayer(EntityPlayerMP player) {
+    public void publishToPlayer(ServerPlayer player) {
         Utils.sendPacketToClient(getPublishPacket(), player);
     }
 
     public void dropItem(ItemStack itemStack) {
-        if (itemStack == null) return;
-        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops")) {
-            float var6 = 0.7F;
-            double var7 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            double var9 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            double var11 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            EntityItem var13 = new EntityItem(coordonate.world(), (double) coordonate.x + var7, (double) coordonate.y + var9, (double) coordonate.z + var11, itemStack);
-            var13.delayBeforeCanPickup = 10;
-            coordonate.world().spawnEntityInWorld(var13);
+        if (Utils.isEmpty(itemStack)) return;
+        Level w = coordonate.world();
+        if (w instanceof ServerLevel && ((ServerLevel) w).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.BLOCK_DROPS)) {
+            net.minecraft.world.level.block.Block.popResource(w, coordonate.pos(), itemStack);
         }
     }
 
-    public void dropInventory(IInventory inventory) {
+    public void dropInventory(Container inventory) {
         if (inventory == null) return;
-        for (int idx = 0; idx < inventory.getSizeInventory(); idx++) {
-            dropItem(inventory.getStackInSlot(idx));
+        for (int idx = 0; idx < inventory.getContainerSize(); idx++) {
+            dropItem(inventory.getItem(idx));
         }
     }
 

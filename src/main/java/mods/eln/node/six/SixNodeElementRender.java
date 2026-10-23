@@ -1,30 +1,31 @@
 package mods.eln.node.six;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.*;
-import mods.eln.sound.LoopedSound;
-import mods.eln.sound.LoopedSoundManager;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import mods.eln.gl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * Client state and drawing of one six-node element (1.12, on the GL11 shim since P3). Server-safe on purpose: the
+ * block entity holds these, so no client classes here; device subclasses are created only on the client (ElnRenders).
+ * Looped sounds (R4) and GUI screens (P4b) are not here yet.
+ */
 public abstract class SixNodeElementRender {
     public SixNodeEntity tileEntity;
     public Direction side;
     // public SixNodeDescriptor descriptor;
     public LRDUMask connectedSide = new LRDUMask();
+    /** The element burnt out (see SixNodeElement.burn); SixNodeRender scorches it. */
+    public boolean burnt;
     int glList, cableList[];
     boolean cableListReady[] = {false, false, false, false};
     boolean glListReady = false;
@@ -84,7 +85,7 @@ public abstract class SixNodeElementRender {
     }
 
     public void draw() {
-        // Minecraft.getMinecraft().mcProfiler.startSection("SixNodeRender");
+        // Minecraft.getMinecraft().profiler.startSection("SixNodeRender");
         if (needRedraw) {
             needRedraw = false;
             connectionType = CableRender.connectionType(this, side);
@@ -112,7 +113,15 @@ public abstract class SixNodeElementRender {
         }
 
         GL11.glColor3f(1f, 1f, 1f);
-        // Minecraft.getMinecraft().mcProfiler.endSection();
+        // Minecraft.getMinecraft().profiler.endSection();
+    }
+
+    /**
+     * Draw the burnt look yourself (true), or let SixNodeRender draw the soot overlay (false). Cables: burnt through,
+     * since they can be any colour (Baughn).
+     */
+    public boolean drawBurnt() {
+        return false;
     }
 
     public boolean drawCableAuto() {
@@ -139,6 +148,11 @@ public abstract class SixNodeElementRender {
 
     }
 
+    /** Rebuild the display list (glListDraw) on the next draw. */
+    protected void invalidateGlList() {
+        glListReady = false;
+    }
+
     public LRDU front;
     CableRenderType connectionType;
     public SixNodeDescriptor sixNodeDescriptor;
@@ -152,6 +166,7 @@ public abstract class SixNodeElementRender {
             byte b = stream.readByte();
             connectedSide.set(b & 0xF);
             front = front.fromInt((b >> 4) & 0x3);
+            burnt = (b & SixNodeElement.HEADER_BURNT) != 0;
 
             needRedraw = true;
 
@@ -186,9 +201,7 @@ public abstract class SixNodeElementRender {
     }
 
     public void destructor() {
-        if (usedUuid())
-            ClientProxy.uuidManager.kill(uuid);
-
+        for (mods.eln.sound.LoopedSound l : loopedSounds) l.setActive(false);
         if (glListEnable()) {
             UtilsClient.glDeleteListsSafe(glList);
         }
@@ -197,14 +210,9 @@ public abstract class SixNodeElementRender {
         UtilsClient.glDeleteListsSafe(cableList[2]);
         UtilsClient.glDeleteListsSafe(cableList[3]);
 
-        loopedSoundManager.dispose();
     }
 
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return null;
-    }
-
-    public IInventory getInventory() {
+    public Container getInventory() {
         return null;
     }
 
@@ -371,14 +379,13 @@ public abstract class SixNodeElementRender {
         needRedraw = true;
     }
 
-    private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
+    /** Looped sounds of this render (1.12 LoopedSoundManager); the client plays them (R4). */
+    public final java.util.List<mods.eln.sound.LoopedSound> loopedSounds = new java.util.ArrayList<>();
 
-    @SideOnly(Side.CLIENT)
-    protected void addLoopedSound(final LoopedSound loopedSound) {
-        loopedSoundManager.add(loopedSound);
+    protected void addLoopedSound(mods.eln.sound.LoopedSound sound) {
+        loopedSounds.add(sound);
     }
 
     public void refresh(float deltaT) {
-        loopedSoundManager.process(deltaT);
     }
 }

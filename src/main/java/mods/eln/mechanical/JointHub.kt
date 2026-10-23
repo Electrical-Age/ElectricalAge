@@ -1,28 +1,27 @@
 package mods.eln.mechanical
 
+import mods.eln.gl.GL11
+
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.nbt.NBTTagCompound
-import org.lwjgl.opengl.GL11
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
-    JointHubElement::class, JointHubRender::class, EntityMetaTag.Basic) {
+    JointHubElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
     val staticOnAllSides = arrayOf(obj.getPart("Cap"))
     val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
-
     override fun draw(angle: Double) {
         draw(angle, Direction.XP, DirectionSet());
     }
@@ -33,9 +32,9 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
         assert(rotatingOnAllSides.size > 0)
         val bb = rotatingOnAllSides[0].boundingBox()
         val centre = bb.centre()
-        val ox = centre.xCoord
-        val oy = centre.yCoord
-        val oz = centre.zCoord
+        val ox = centre.x
+        val oy = centre.y
+        val oz = centre.z
         var direction = front;
         for (i in 0..3) {
             if (connectedSides.contains(direction)) {
@@ -58,7 +57,8 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
         }
     }
 
-    override fun getFrontFromPlace(side: Direction?, entityLiving: EntityLivingBase?): Direction? = Direction.XP
+
+    override fun getFrontFromPlace(side: Direction?, entityLiving: LivingEntity?): Direction? = Direction.XP
 }
 
 class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
@@ -76,7 +76,7 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     override val shaftConnectivity: Array<Direction>
         get() = arrayOf(Direction.XP, Direction.ZP, Direction.XN, Direction.ZN)
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
 
     override fun connectedOnSide(direction: Direction) {
@@ -94,12 +94,12 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         connectedSides.serialize(stream)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         connectedSides.writeToNBT(nbt, "connectedSides")
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         connectedSides.readFromNBT(nbt, "connectedSides")
     }
@@ -127,3 +127,4 @@ class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescrip
         connectedSides.deserialize(stream)
     }
 }
+

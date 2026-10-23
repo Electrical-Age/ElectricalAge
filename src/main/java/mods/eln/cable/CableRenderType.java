@@ -8,6 +8,8 @@ public class CableRenderType {
     public float[] startAt = new float[4];
     public int[] otherdry = new int[4];
     public CableRenderDescriptor[] otherRender = new CableRenderDescriptor[4];
+    /** 26.x: floor cable ending at a device's terminal plate: conductor height in px (0 = no lug). See CableTerminals. */
+    public float[] knuckle = new float[4];
 
     public CableRenderType() {
         for (int idx = 0; idx < 4; idx++) {

@@ -26,7 +26,8 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
 
     @Override
     public boolean canBeReplacedByInterSystem() {
-        return ofInterSystem;
+        // a line ending at ground (null pin) has nothing on the other side to couple to
+        return ofInterSystem && aPin != null && bPin != null;
     }
 
     public void recalculateR() {
@@ -69,6 +70,9 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
             State stateAfter = last.aPin == states.getLast() ? last.bPin : last.aPin;
             //stateBefore.remove(first);
             //stateAfter.remove(last);
+            // ground at both ends: no state outside would reach the Line, so no SubSystem would take it; leave the
+            // resistors and states as they are (solved as a small SubSystem of their own)
+            if (stateBefore == null && stateAfter == null) return;
 
             Line l = new Line();
             l.resistors = resistors;
@@ -113,8 +117,10 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
 
     @Override
     public void simProcessFlush() {
-        double i = (aPin.state - bPin.state) * getRInv();
-        double u = aPin.state;
+        // either end may be ground (null): a chain of cable loads that ends in a resistor to ground
+        double ua = aPin == null ? 0 : aPin.state, ub = bPin == null ? 0 : bPin.state;
+        double i = (ua - ub) * getRInv();
+        double u = ua;
         Iterator<Resistor> ir = resistors.iterator();
         Iterator<State> is = states.iterator();
 

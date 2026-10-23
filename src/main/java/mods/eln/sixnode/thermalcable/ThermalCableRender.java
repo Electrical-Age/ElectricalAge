@@ -1,16 +1,17 @@
 package mods.eln.sixnode.thermalcable;
 
+import mods.eln.misc.UtilsClient;
+import mods.eln.gl.GL11;
+
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.Minecraft;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -33,14 +34,13 @@ public class ThermalCableRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
-        Minecraft.getMinecraft().mcProfiler.startSection("TCable");
 
-        //ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
+        //ItemStack i = Minecraft.getMinecraft().player.inventory.armorInventory[3];
 
         //	GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 /*
-        if (i != null && i.getItem() == Eln.thermoMeterHelmet) {
+        if (!Utils.isEmpty(i) && i.getItem() == Eln.thermoMeterHelmet) {
 			double factor = temperature  *MeterItemArmor.getBlockRenderColorFactor(i);
 			GL11.glColor4d(factor, 1.0 - factor, 0.0, 1.0);
 			GL11.glDisable(GL11.GL_LIGHTING);
@@ -57,7 +57,6 @@ public class ThermalCableRender extends SixNodeElementRender {
         //GL11.glEnable(GL11.GL_LIGHTING);
         //GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        Minecraft.getMinecraft().mcProfiler.endSection();
     }
 
     @Override

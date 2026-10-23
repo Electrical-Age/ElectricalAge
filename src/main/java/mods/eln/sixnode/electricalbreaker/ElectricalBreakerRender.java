@@ -7,8 +7,7 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -17,7 +16,6 @@ import java.io.IOException;
 
 public class ElectricalBreakerRender extends SixNodeElementRender {
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
     ElectricalBreakerDescriptor descriptor;
     long time;
 
@@ -129,8 +127,4 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
         }
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new ElectricalBreakerGui(player, inventory, this);
-    }
 }

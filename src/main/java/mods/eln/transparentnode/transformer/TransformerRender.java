@@ -10,18 +10,14 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.sound.LoopedSound;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import mods.eln.gl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class TransformerRender extends TransparentNodeElementRender {
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
     private final TransformerDescriptor descriptor;
 
     private SlewLimiter load = new SlewLimiter(0.5f);
@@ -29,7 +25,7 @@ public class TransformerRender extends TransparentNodeElementRender {
     public TransformerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (TransformerDescriptor) descriptor;
-        addLoopedSound(new LoopedSound("eln:Transformer", coordonate(), ISound.AttenuationType.LINEAR) {
+        addLoopedSound(new mods.eln.sound.LoopedSound("eln:transformer", coordonate(), mods.eln.sound.LoopedSound.Attenuation.LINEAR) {
             @Override
             public float getVolume() {
                 if (load.getPosition() > TransformerRender.this.descriptor.minimalLoadToHum)
@@ -52,11 +48,6 @@ public class TransformerRender extends TransparentNodeElementRender {
         GL11.glPopMatrix();
         cableRenderType = drawCable(front.down(), priRender, priConn, cableRenderType);
         cableRenderType = drawCable(front.down(), secRender, secConn, cableRenderType);
-    }
-
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new TransformerGuiDraw(player, inventory, this);
     }
 
     private byte primaryStackSize;
@@ -150,7 +141,7 @@ public class TransformerRender extends TransparentNodeElementRender {
         load.step(deltaT);
 
         if (hasCasing) {
-            if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coordinate.moved(front).getAxisAlignedBB(0)))
+            if (!Utils.isPlayerAround(tileEntity.getLevel(), coordinate.moved(front).getAxisAlignedBB(0)))
                 doorOpen.setTarget(0f);
             else
                 doorOpen.setTarget(1f);

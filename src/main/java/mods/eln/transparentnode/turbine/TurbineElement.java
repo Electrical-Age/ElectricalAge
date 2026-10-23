@@ -18,8 +18,8 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.player.EntityPlayer;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class TurbineElement extends TransparentNodeElement {
         electricalComponentList.add(electricalPowerSourceProcess);
         thermalFastProcessList.add(turbineThermaltProcess);
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        Failure exp = new Failure(this).machine();
 
         slowProcessList.add(thermalWatchdog);
 
@@ -144,7 +144,7 @@ public class TurbineElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         return false;
     }
 

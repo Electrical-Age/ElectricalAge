@@ -1,8 +1,11 @@
 package mods.eln.transparentnode.eggincubator;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.mna.component.Resistor;
@@ -10,13 +13,13 @@ import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -26,7 +29,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     Obj3D defaultFeroObj;
     public ElectricalCableDescriptor cable;
     private Obj3DPart lamp;
-    private EntityItem eggEntity;
+    private ItemEntity eggEntity;
     private Obj3DPart lampf;
 
     Obj3DPart main;
@@ -38,7 +41,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
                                   Obj3D obj,
                                   ElectricalCableDescriptor cable,
                                   double nominalVoltage, double nominalPower) {
-        super(name, EggIncubatorElement.class, EggIncubatorRender.class);
+        super(name, EggIncubatorElement.class, null);
         this.obj = obj;
         this.cable = cable;
         this.nominalVoltage = nominalVoltage;
@@ -51,7 +54,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
             lampf = obj.getPart("lampf");
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cable);
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
     }
 
     @Override
@@ -60,23 +63,19 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
         Data.addMachine(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0, 1f);
-        }
+    public void drawItem(boolean entity) {
+        draw(0, 1f);
+
     }
 
     void draw(int eggStackSize, float powerFactor) {
@@ -110,9 +109,10 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
-        AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z);
-        bb.maxY -= 0.5;
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+    public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
+        // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AABB is immutable now)
+        AABB bb = new AABB(x, y, z, x + 1, y + 1, z + 1);
+        bb = bb.setMaxY(bb.maxY - 0.5);
+        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

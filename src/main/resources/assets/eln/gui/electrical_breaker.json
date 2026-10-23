@@ -1,0 +1,72 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Electrical Breaker"
+  },
+  {
+   "row": [
+    {
+     "column": [
+      {
+       "row": [
+        {
+         "text": "maxl",
+         "sample": "max"
+        },
+        {
+         "field": "max",
+         "chars": 7
+        },
+        {
+         "text": "maxu",
+         "sample": "V"
+        }
+       ]
+      },
+      {
+       "row": [
+        {
+         "text": "minl",
+         "sample": "min"
+        },
+        {
+         "field": "min",
+         "chars": 7
+        },
+        {
+         "text": "minu",
+         "sample": "V"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "button": "switch",
+     "sample": [
+      "On",
+      "Off"
+     ],
+     "width": 40
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "slot": "0"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

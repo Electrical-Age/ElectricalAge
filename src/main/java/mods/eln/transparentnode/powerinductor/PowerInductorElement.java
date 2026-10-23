@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.powerinductor;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -11,10 +13,10 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 
@@ -70,8 +72,8 @@ public class PowerInductorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        //Eln.applySmallRs(positiveLoad);
-        //Eln.applySmallRs(negativeLoad);
+        //ElnDeviceRegistry.applySmallRs(positiveLoad);
+        //ElnDeviceRegistry.applySmallRs(negativeLoad);
 
         setupPhysical();
 
@@ -79,7 +81,7 @@ public class PowerInductorElement extends TransparentNodeElement {
     }
 
     @Override
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
         setupPhysical();
     }
@@ -101,19 +103,19 @@ public class PowerInductorElement extends TransparentNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+    public boolean onBlockActivated(Player entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
 
         return false;
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         fromNbt = true;
     }
@@ -149,7 +151,7 @@ public class PowerInductorElement extends TransparentNodeElement {
     TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
 
         return inventory;
     }
@@ -158,10 +160,4 @@ public class PowerInductorElement extends TransparentNodeElement {
     public boolean hasGui() {
         return true;
     }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new PowerInductorContainer(player, inventory);
-    }
-
 }

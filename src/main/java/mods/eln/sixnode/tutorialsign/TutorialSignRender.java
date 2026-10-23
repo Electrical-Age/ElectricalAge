@@ -5,8 +5,7 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -44,14 +43,10 @@ public class TutorialSignRender extends SixNodeElementRender {
         try {
             baliseName = stream.readUTF();
             text = stream.readUTF();
-            texts = text.split("\r\n");
+            texts = text.split("\r?\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new TutorialSignGui(this);
-    }
 }

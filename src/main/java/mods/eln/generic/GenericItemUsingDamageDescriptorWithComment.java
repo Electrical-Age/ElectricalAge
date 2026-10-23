@@ -1,7 +1,7 @@
 package mods.eln.generic;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,7 @@ public class GenericItemUsingDamageDescriptorWithComment extends GenericItemUsin
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         for (String str : description) {
             Collections.addAll(list, tr(str).split("\n"));

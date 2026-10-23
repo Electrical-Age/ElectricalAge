@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/heat_furnace",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:boiler"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:boiler"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.boiler.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.boiler.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}

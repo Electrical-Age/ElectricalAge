@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "H": "eln:200v_copper_heating_corp",
+    "I": "#c:ingots/alloy",
+    "M": "eln:advanced_machine_block",
+    "c": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "IBI",
+    "HMH",
+    "IcI"
+  ],
+  "result": {
+    "id": "eln:200v_tar_sand_separator"
+  }
+}

@@ -1,10 +1,12 @@
 package mods.eln.transparentnode.solarpanel;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 public class SolarPannelSlowProcess implements IProcess {
     SolarPanelElement solarPannel;
@@ -39,14 +41,14 @@ public class SolarPannelSlowProcess implements IProcess {
         //	Utils.print("solarAlpha : " + solarAlpha + "  ");
         if (solarAlpha >= Math.PI) return 0.0;
 
-        if (solarPannel.getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId) != null) {
+        if (!Utils.isEmpty(solarPannel.getInventory().getItem(SolarPanelElement.trackerSlotId))) {
             solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
         }
 
 
         Coordonate coordonate = solarPannel.node.coordonate;
         Vec3 v = Utils.getVec05(coordonate);
-        double x = v.xCoord + solarPannel.descriptor.solarOffsetX, y = v.yCoord + solarPannel.descriptor.solarOffsetY, z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
+        double x = v.x + solarPannel.descriptor.solarOffsetX, y = v.y + solarPannel.descriptor.solarOffsetY, z = v.z + solarPannel.descriptor.solarOffsetZ;
 
 
         double lightAlpha = solarPannel.panelAlpha - solarAlpha;
@@ -57,9 +59,9 @@ public class SolarPannelSlowProcess implements IProcess {
 
         if (coordonate.getWorldExist() == false) return light;
 
-        World world = coordonate.world();
-        if (world.getWorldInfo().isRaining()) light *= 0.5;
-        if (world.getWorldInfo().isThundering()) light *= 0.5;
+        Level world = coordonate.world();
+        if (world.isRaining()) light *= 0.5;
+        if (world.isThundering()) light *= 0.5;
 
 
         double xD = Math.cos(solarAlpha), yD = Math.sin(solarAlpha);
@@ -73,8 +75,8 @@ public class SolarPannelSlowProcess implements IProcess {
         }
         int count = 0;
         ///world.getChunkProvider().chunkExists(var1, var2)
-        while (world.getChunkProvider().chunkExists(((int) x) >> 4, ((int) z) >> 4)) {
-            double opacity = world.getBlockLightOpacity((int) x, (int) y, (int) z);
+        while (world.hasChunk(((int) x) >> 4, ((int) z) >> 4)) { // 1.7.10 chunkExists = loaded
+            double opacity = WorldCompat.getBlockLightOpacity(world, (int) x, (int) y, (int) z);
             light *= (255 - opacity) / 255;
             if (light == 0.0) {
                 break;
@@ -83,14 +85,14 @@ public class SolarPannelSlowProcess implements IProcess {
             x += xD;
             y += yD;
             count++;
-            if (y > 256.0) break;
+            if (y > world.getMaxY()) break; // 26.x: build height is no longer 256
         }
 //		Utils.print("count : " + count + "   ");
         return light;
     }
 
-    public static double getSolarAlpha(World world) {
-        double alpha = world.getCelestialAngleRadians(0f);
+    public static double getSolarAlpha(Level world) {
+        double alpha = mods.eln.misc.Utils.sunAngleRadians(world); // 1.12 getCelestialAngleRadians(0)
         if (alpha < Math.PI / 2 * 3) {
             alpha += Math.PI / 2;
         } else {

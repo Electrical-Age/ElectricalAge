@@ -1,10 +1,11 @@
 package mods.eln.mechanical
 
+import mods.eln.gl.GL11
+
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
-import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
@@ -13,16 +14,16 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.mna.component.VoltageSource
+import mods.eln.sim.mna.misc.DroopLaw
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
-import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.destruct.Failure
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import org.lwjgl.opengl.GL11
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import java.awt.Color
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -37,7 +38,7 @@ class GeneratorDescriptor(
     powerOutPerDeltaU: Float,
     nominalP: Float,
     thermalLoadInitializer: ThermalLoadInitializer) :
-    SimpleShaftDescriptor(name, GeneratorElement::class, GeneratorRender::class, EntityMetaTag.Basic) {
+    SimpleShaftDescriptor(name, GeneratorElement::class, null) {
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
     val cable = cable
@@ -47,13 +48,22 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
+    /** Steady temperature at nominal output, as a fraction of the thermal warm limit. */
+    val nominalHeatFraction = 0.65
     override val sound = "eln:generator"
 
     init {
-        thermalLoadInitializer.setMaximalPower(nominalP.toDouble() * (1 - generationEfficiency))
+        // WP16b: sized from the heat the generator really makes at nominal output (loss P(1/eff - 1) plus the
+        // drag share), so that it sits at nominalHeatFraction of its warm limit there and overheats only on
+        // overload (~1.6 x nominal). 1.7.10 sized it at P(1 - eff) but heated it with 1/20 of its loss.
+        thermalLoadInitializer.setMaximalPower(nominalHeatPower() / nominalHeatFraction)
 
         voltageLevelColor = VoltageLevelColor.VeryHighVoltage
     }
+
+    /** Heat (W) at nominal power and speed: electrical loss + drag heat (+ ~0.3 W cable I^2 R, ignored). */
+    fun nominalHeatPower() = nominalP.toDouble() * (1 / generationEfficiency - 1) +
+        defaultDrag * 20 * nominalRads * (1 - generationEfficiency)
 
     override val obj = obj
     override val static = arrayOf(
@@ -71,7 +81,7 @@ class GeneratorDescriptor(
         obj.getPart("LED_6")
     ).requireNoNulls()
 
-    override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
+    override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
         list.add("Nominal usage ->")
         list.add(Utils.plotVolt("  Voltage out: ", nominalU.toDouble()))
@@ -84,7 +94,7 @@ class GeneratorDescriptor(
 class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
-    override val cableRender = Eln.instance.stdCableRender3200V
+    override val cableRender = Eln.stdCableRender3200V
     val desc = desc_ as GeneratorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
@@ -136,7 +146,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
     }
 
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu == LRDU.Down && side == front) return Eln.instance.stdCableRender3200V
+        if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
         return null
     }
 
@@ -147,6 +157,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         volumeSetting.target = 0.05f + Math.abs(power / desc.nominalP).toFloat() / 4f
     }
 }
+
 
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     SimpleShaftElement(node, desc_) {
@@ -178,10 +189,14 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         desc.thermalLoadInitializer.applyTo(thermalLoadWatchDog)
         thermal.setAsSlow()
         thermalLoadList.add(thermal)
-        thermalLoadWatchDog.set(thermal).set(WorldExplosion(this).machineExplosion())
+        thermalLoadWatchDog.set(thermal).set(Failure(this).rotating { shaft.energy })
+        // Baughn 2026-10-05: enable the watchdog (1.7.10 created it but never ran it, so overheating did nothing)
+        slowProcessList.add(thermalLoadWatchDog)
 
         heater = ElectricalLoadHeatThermalLoad(inputLoad, thermal)
-        thermalFastProcessList.add(heater)
+        // WP16b: slow list (like poles/downlinks): the heater moves a power for one step of the load, and the
+        // thermal load is slow. 1.7.10 had it on the fast list, i.e. 20 x the cable's I^2 R per tick.
+        slowProcessList.add(heater)
 
         // TODO: Add running lights. (More. Electrical sparks, perhaps?)
         // TODO: Add the thermal explosions—there should be some.
@@ -191,20 +206,14 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         override fun process(time: Double) {
             val targetU = desc.RtoU.getValue(shaft.rads)
 
-            // Most things below were copied from TurbineElectricalProcess.
-            // Some comments on what math is going on would be great.
+            // P = k (E - U) both ways (see DroopLaw). 1.7.10 motored with Ut = 0.999 th.U + 0.001 E, i.e. a current
+            // 0.001 (th.U - E) / th.R set by the network's resistance, not the machine's: through an ideal (non-isolating)
+            // transformer the source side's R is reflected x n^2, and the motor drew next to nothing (2026-10-09,
+            // notes/xfmr-dual-source.md). Generating is unchanged.
+            // Motoring is deliberately uncapped (Baughn 2026-10-09): a stalled motor on a stiff supply draws k (U - E) and
+            // overheats; inrush protection is the player's job.
             val th = positiveLoad.getSubSystem().getTh(positiveLoad, electricalPowerSource)
-            var Ut: Double
-            if (targetU < th.U) {
-                Ut = th.U * 0.999 + targetU * 0.001
-            } else if (th.isHighImpedance()) {
-                Ut = targetU
-            } else {
-                val a = 1 / th.R
-                val b = desc.powerOutPerDeltaU - th.U / th.R
-                val c = -desc.powerOutPerDeltaU * targetU
-                Ut = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a)
-            }
+            val Ut = DroopLaw.terminalU(th, targetU, desc.powerOutPerDeltaU.toDouble())
             electricalPowerSource.setU(Ut)
         }
 
@@ -219,14 +228,25 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         override fun process(time: Double) {
             val p = electricalPowerSource.p
             powerFraction = (p / desc.nominalP).toFloat()
-            var E = p * time
+            val eff = desc.generationEfficiency
+            val electricalE = p * time // energy delivered to the circuit this step; < 0 when motoring
+            var E = electricalE
             if (E < 0)
-                E *= 0.75  // Not a very efficient motor.
+                E *= 0.9  // Not a very efficient motor. (Baughn 2026-10-05: 0.75 -> 0.9, so motoring up to ~58% of nominal stays under the warm limit now that the watchdog runs)
             maybePublishE(E / time)
+            // WP16: generating, the shaft has to supply E / eff (1.7.10 took E * eff: 5 % of the output was free
+            // energy). Motoring: shaft gain 0.9 * 0.95 (1.7.10: 0.75 * 0.95 of the absorbed energy); the rest is heat
+            // (1.7.10 moved a negative heat, i.e. motoring cooled the generator).
+            val shaftE = if (E >= 0) E / eff else E * eff
+            val lossE = if (E >= 0) shaftE - E else shaftE - electricalE
             // The Math.max makes the shaft harder to spin up without an auxilliary power source.
-            E += defaultDrag * Math.max(shaft.rads, 10.0)
-            shaft.energy -= (E * desc.generationEfficiency)
-            thermal.movePowerTo(E * (1 - desc.generationEfficiency))
+            // defaultDrag is J per tick (1/20 s) per rad/s; WP16b: scaled by the step length (1.7.10 applied it
+            // per electrical step, which is a tick only at the default electricalFrequency of 20 Hz).
+            val drag = defaultDrag * Math.max(shaft.rads, 10.0) * time * 20
+            shaft.energy -= shaftE + drag * eff
+            // WP16b: energy (J) of this step. 1.7.10 passed these joules to movePowerTo (W), i.e. heated with
+            // 1/20 of the loss; moveEnergyTo is right for a process at any rate (this one is electrical).
+            thermal.moveEnergyTo(lossE + drag * (1 - eff))
         }
     }
 
@@ -270,7 +290,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
 
     override fun thermoMeterString(side: Direction?) = Utils.plotCelsius("T", thermal.getT())
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 

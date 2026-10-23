@@ -1,9 +1,8 @@
 package mods.eln.sim;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import mods.eln.node.NodeBase;
+import mods.eln.sim.process.destruct.FaultNetwork;
+
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
@@ -32,6 +31,11 @@ public class Simulator /* ,IPacketHandler */ {
 
     boolean run;
 
+    /** Run d.destructImpl() at the end of this slow tick (only the worst of each circuit; see tick()). */
+    public void queueDestruct(IDestructable d) {
+        destructableSet.add(d);
+    }
+
     public double electricalPeriod, thermalPeriod, callPeriod;
     int electricalInterSystemOverSampling;
     int nodeCount = 0;
@@ -47,6 +51,19 @@ public class Simulator /* ,IPacketHandler */ {
     double thermalTimeout = 0;
 
     private int printTimeCounter = 0;
+
+    /** Per-tick timings for the cable benchmark (gametest CableBench); null outside it. */
+    public interface TickProbe {
+        void tick(long electricalNs, long thermalFastNs, long thermalSlowNs, long slowNs, long totalNs);
+    }
+
+    public static volatile TickProbe probe;
+
+    /** List sizes {electrical processes, thermal fast loads, fast connections, fast processes, slow loads, slow connections, slow processes, slow processes (non-thermal)}. */
+    public int[] counts() {
+        return new int[]{electricalProcessList.size(), thermalFastLoadList.size(), thermalFastConnectionList.size(), thermalFastProcessList.size(),
+            thermalSlowLoadList.size(), thermalSlowConnectionList.size(), thermalSlowProcessList.size(), slowProcessList.size()};
+    }
 
     public ArrayList<IProcess> getElectricalProcessList() {
         return electricalProcessList;
@@ -70,7 +87,6 @@ public class Simulator /* ,IPacketHandler */ {
         this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
         this.thermalPeriod = thermalPeriod;
 
-        FMLCommonHandler.instance().bus().register(this);
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
 
@@ -362,13 +378,13 @@ public class Simulator /* ,IPacketHandler */ {
 
     public boolean pleaseCrash = false;
 
-    @SubscribeEvent
-    public void tick(ServerTickEvent event) {
-        if (event.phase != Phase.START) return;
+    /** One server tick (50 ms). 26.x: called by Eln's ServerTickEvent.Pre listener (1.12: START phase). */
+    public void tick() {
         if (pleaseCrash) throw new StackOverflowError();
         long stackStart;
 
         long startTime = System.nanoTime();
+        long e0 = electricalNsStack, tf0 = thermalFastNsStack, ts0 = thermalSlowNsStack;
 
         for (Object o : slowPreProcessList.toArray()) {
             IProcess process = (IProcess) o;
@@ -428,12 +444,47 @@ public class Simulator /* ,IPacketHandler */ {
             process.process(0.05);
         }
 
-        for (IDestructable d : destructableSet) {
-            d.destructImpl();
+        if (!destructableSet.isEmpty()) {
+            // Failures queued by watchdogs during this tick; run here, where changing the simulation is safe.
+            IDestructable[] queued = destructableSet.toArray(new IDestructable[0]);
+            destructableSet.clear();
+            // One failure per network of connected nodes per tick, the worst: it opens the circuit, and the rest of the
+            // network is relieved (FaultNetwork.relieve). A fault through a run of cables burns the weakest one instead
+            // of every cable that went over its limit (26.x, Baughn's playtest).
+            java.util.Map<NodeBase, java.util.Set<NodeBase>> networkOf = new java.util.HashMap<>();
+            java.util.Map<java.util.Set<NodeBase>, IDestructable> worst = new java.util.IdentityHashMap<>();
+            java.util.List<IDestructable> run = new java.util.ArrayList<>();
+            for (IDestructable d : queued) {
+                if (!(d.circuit() instanceof NodeBase node)) {
+                    run.add(d);
+                    continue;
+                }
+                java.util.Set<NodeBase> net = networkOf.get(node);
+                if (net == null) {
+                    net = FaultNetwork.of(node);
+                    for (NodeBase n : net) networkOf.put(n, net);
+                }
+                IDestructable w = worst.get(net);
+                if (w == null || d.severity() > w.severity()) {
+                    if (w != null) w.cancelFail();
+                    worst.put(net, d);
+                } else {
+                    d.cancelFail();
+                }
+            }
+            for (IDestructable d : run) {
+                d.destructImpl();
+            }
+            for (java.util.Map.Entry<java.util.Set<NodeBase>, IDestructable> e : worst.entrySet()) {
+                e.getValue().destructImpl();
+                FaultNetwork.relieve(e.getKey());
+            }
         }
-        destructableSet.clear();
 
         slowNsStack += System.nanoTime() - stackStart;
+        TickProbe pr = probe;
+        if (pr != null) pr.tick(electricalNsStack - e0, thermalFastNsStack - tf0, thermalSlowNsStack - ts0,
+            System.nanoTime() - stackStart, System.nanoTime() - startTime);
         avgTickTime += 1.0 / 20 * ((int) (System.nanoTime() - startTime) / 1000);
 
 		/*stackStart = System.nanoTime();
@@ -449,14 +500,14 @@ public class Simulator /* ,IPacketHandler */ {
 			}
 			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-			for (Object obj : server.getConfigurationManager().playerEntityList) {
+			for (Object obj : server.getPlayerList().getPlayers()) {
 				EntityPlayerMP player = (EntityPlayerMP) obj;
-				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-				PlayerManager playerManager = worldServer.getPlayerManager();
+				WorldServer worldServer = (WorldServer) FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(player.dimension);
+				PlayerManager playerManager = worldServer.getPlayerChunkMap();
 				Utils.sendPacketToClient(bos, player);
 			}
-			//S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-			//Eln.instance.eventChannel.sendToAll(new FMLProxyPacket(packet));
+			//SPacketCustomPayload packet = new SPacketCustomPayload(Eln.channelName, bos.toByteArray());
+			//Eln.eventChannel.sendToAll(new FMLProxyPacket(packet));
 		}
 		
 		Utils.println((System.nanoTime() - stackStart) / 1000);*/
@@ -511,6 +562,11 @@ public class Simulator /* ,IPacketHandler */ {
             }
         }
         for (ThermalLoad load : loadList) {
+            if (load.EnergyTemp != 0) { // moveEnergyTo: joules since the last step of this load -> watts over dt
+                load.PcTemp += load.EnergyTemp / dt;
+                load.PspTemp += Math.abs(load.EnergyTemp) / dt;
+                load.EnergyTemp = 0;
+            }
             load.PcTemp -= load.Tc / load.Rp;
 
             load.Tc += load.PcTemp * dt / load.C;

@@ -1,20 +1,27 @@
 package mods.eln.sixnode.lampsocket;
 
-import mods.eln.Eln;
+import mods.eln.compat.BlockMeta;
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
-import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
+import mods.eln.registry.ElnDeviceRegistry;
+import mods.eln.registry.ElnRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class LightBlockEntity extends TileEntity {
+/**
+ * The light of lamps, the turret and the teleporter (1.12 LightBlockEntity): each source adds a (level, timeout in
+ * ticks) handle; every tick the block shows the brightest live handle and counts the timeouts down; without handles
+ * the block removes itself. Not saved (as in 1.12): sources refresh their handles while they run.
+ */
+public class LightBlockEntity extends BlockEntity {
 
     ArrayList<LightHandle> lightList = new ArrayList<LightHandle>();
 
@@ -28,97 +35,35 @@ public class LightBlockEntity extends TileEntity {
         observers.remove(observer);
     }
 
-
     public interface LightBlockObserver {
         void lightBlockDestructor(Coordonate coord);
     }
 
-    static class LightHandle implements INBTTReady {
+    static class LightHandle {
         byte value;
         int timeout;
-
-        public LightHandle() {
-            value = 0;
-            timeout = 0;
-        }
 
         public LightHandle(byte value, int timeout) {
             this.value = value;
             this.timeout = timeout;
         }
+    }
 
-        @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            value = nbt.getByte(str + "value");
-            timeout = nbt.getInteger(str + "timeout");
-        }
-
-        @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setByte(str + "value", value);
-            nbt.setInteger(str + "timeout", timeout);
-        }
+    public LightBlockEntity(BlockPos pos, BlockState state) {
+        super(ElnRegistry.LIGHT_ENTITY.get(), pos, state);
     }
 
     void addLight(int light, int timeout) {
         lightList.add(new LightHandle((byte) light, timeout));
-        lightManager();
     }
 
-	/*void removeLight(int light) {
-        //int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
-		for (int idx = 0; idx < lightList.size(); idx++) {
-			if (lightList.get(idx) == light) {
-				lightList.remove(idx);
-				lightManager();
-				return;
-			}
-		}
-		Utils.println("Assert void removeLight(int light)");
-	}*/
-	/*
-	void replaceLight(int oldLight, int newLight) {
-		for (int idx = 0; idx < lightList.size(); idx++) {
-			if (lightList.get(idx) == oldLight) {
-				lightList.set(idx, newLight);
-				lightManager();
-				return;
-			}
-		}	
-		Utils.println("Assert void replaceLight(int oldLight, int newLight)");
-	}*/
-
-	/*
-	int getLight() {
-		int light = 0;
-		for (LightHandle l : lightList) {
-			if (light < l.value) light = l.value;
-		}
-		return light;
-	}*/
-
-    void lightManager() {
-		/*if (lightList.size() == 0) {
-			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
-		} else {
-			int light = getLight();
-			if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-				worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
-			}
-		}*/
-    }
-
-    @Override
-    public void updateEntity() {
-        if (worldObj.isRemote) return;
-
+    /** Server tick (1.12 ITickable.update). */
+    void update() {
+        Level world = getLevel();
+        BlockPos pos = getBlockPos();
         if (lightList.isEmpty()) {
-            //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
-            //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
-            //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " ");
+            world.removeBlock(pos, false);
+            Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
             return;
         }
 
@@ -135,22 +80,25 @@ public class LightBlockEntity extends TileEntity {
             }
         }
 
-        if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+        BlockState state = world.getBlockState(pos);
+        if (state.hasProperty(BlockMeta.META) && light != state.getValue(BlockMeta.META)) {
+            // 26.x keeps the block entity when only a property changes (1.12 needed shouldRefresh for that)
+            world.setBlock(pos, state.setValue(BlockMeta.META, light), 2);
         }
     }
 
-    public static void addLight(World w, int x, int y, int z, int light, int timeout) {
-        Block block = w.getBlock(x, y, z);
-        if (block != Eln.lightBlock) {
-            if (block != Blocks.air) return;
-            w.setBlock(x, y, z, Eln.lightBlock, light, 2);
+    public static void addLight(Level w, int x, int y, int z, int light, int timeout) {
+        // block light is 0..15 (the turret asks for 25: 1.7.10 clamped it; here the meta property threw and crashed
+        // the server on the next tick)
+        light = Math.max(0, Math.min(15, light));
+        Block block = WorldCompat.getBlock(w, x, y, z);
+        if (block != ElnDeviceRegistry.lightBlock) {
+            if (!Utils.isAirBlock(block)) return; // 26.x: also cave/void air
+            WorldCompat.setBlock(w, x, y, z, ElnDeviceRegistry.lightBlock, light, 2);
         }
 
-        TileEntity t = w.getTileEntity(x, y, z);
-        if (t != null && t instanceof LightBlockEntity)
+        BlockEntity t = WorldCompat.getBlockEntity(w, x, y, z);
+        if (t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else
             Utils.println("ASSERT if(t != null && t instanceof LightBlockEntity)");
@@ -159,26 +107,4 @@ public class LightBlockEntity extends TileEntity {
     public static void addLight(Coordonate coord, int light, int timeout) {
         addLight(coord.world(), coord.x, coord.y, coord.z, light, timeout);
     }
-
-	/*public static void removeLight(Coordonate coord, int light) {
-		int blockId = coord.getBlockId();
-		if (blockId != Eln.lightBlockId) return;
-		((LightBlockEntity)coord.getTileEntity()).removeLight(light);
-	}
-	
-	public static void replaceLight(Coordonate coord, int oldLight, int newLight) {
-		int blockId = coord.getBlockId();
-		if (blockId != Eln.lightBlockId) {
-			//coord.setBlock(Eln.lightBlockId, newLight);
-			Utils.println("ASSERT public static void replaceLight(Coordonate coord, int oldLight, int newLight) " + coord);
-			return;
-		}
-		((LightBlockEntity)coord.getTileEntity()).replaceLight(oldLight,newLight);
-	}*/
-
-	/*public int getClientLight() {
-		return clientLight;
-	}
-	
-	int clientLight = 0;*/
 }

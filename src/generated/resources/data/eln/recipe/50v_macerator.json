@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "F": "minecraft:flint",
+    "I": "minecraft:iron_ingot",
+    "M": "eln:machine_block",
+    "R": "minecraft:redstone",
+    "c": "eln:electrical_motor"
+  },
+  "pattern": [
+    "IRI",
+    "FMF",
+    "IcI"
+  ],
+  "result": {
+    "id": "eln:50v_macerator"
+  }
+}

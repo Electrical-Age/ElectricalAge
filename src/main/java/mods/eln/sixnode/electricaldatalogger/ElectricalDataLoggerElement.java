@@ -12,11 +12,11 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -83,28 +83,28 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
+        byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
 
         logs.readFromNBT(nbt, "logs");
-        pause = nbt.getBoolean("pause");
-        timeToNextSample = nbt.getDouble("timeToNextSample");
-        sampleStack = nbt.getInteger("sampleStack");
-        sampleStackNbr = nbt.getInteger("sampleStackNbr");
+        pause = nbt.getBooleanOr("pause", false);
+        timeToNextSample = nbt.getDoubleOr("timeToNextSample", 0.0);
+        sampleStack = nbt.getIntOr("sampleStack", 0);
+        sampleStackNbr = nbt.getIntOr("sampleStackNbr", 0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
-        nbt.setDouble("timeToNextSample", timeToNextSample);
-        nbt.setBoolean("pause", pause);
+        nbt.putByte("front", (byte) (front.toInt() << 0));
+        nbt.putDouble("timeToNextSample", timeToNextSample);
+        nbt.putBoolean("pause", pause);
 
         logs.writeToNBT(nbt, "logs");
-        nbt.setInteger("sampleStack", sampleStack);
-        nbt.setInteger("sampleStackNbr", sampleStackNbr);
+        nbt.putInt("sampleStack", sampleStack);
+        nbt.putInt("sampleStackNbr", sampleStackNbr);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     }
 
     @Override
-    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+    public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream);
         byte header;
         try {
@@ -234,11 +234,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     @Override
     public boolean hasGui() {
         return true;
-    }
-
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new ElectricalDataLoggerContainer(player, inventory);
     }
 
     public void sampleStackReset() {

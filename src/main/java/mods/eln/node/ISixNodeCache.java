@@ -1,6 +1,6 @@
 package mods.eln.node;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public interface ISixNodeCache {
     boolean accept(ItemStack stack);

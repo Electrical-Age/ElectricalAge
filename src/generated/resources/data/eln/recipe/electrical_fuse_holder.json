@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "i",
+    " ",
+    "i"
+  ],
+  "result": {
+    "id": "eln:electrical_fuse_holder"
+  }
+}

@@ -1,5 +1,7 @@
 package mods.eln.sixnode.diode;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -11,10 +13,9 @@ import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
                            double stdU, double stdI,
                            ThermalLoadInitializer thermal,
                            ElectricalCableDescriptor cable, Obj3D obj) {
-        super(name, DiodeElement.class, DiodeRender.class);
+        super(name, DiodeElement.class, null);
 
         this.IfU = IfU;
 
@@ -70,31 +71,24 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    public void drawItem(boolean entity) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+        GL11.glScalef(1.25f, 1.25f, 1.25f);
+        GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+        draw();
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw();
-        }
     }
 
     /*	public void applyTo(DiodeProcess diode) {
@@ -114,7 +108,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\\\n"));
     }

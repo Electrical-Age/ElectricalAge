@@ -1,9 +1,7 @@
 package mods.eln.misc;
 
 import mods.eln.Eln;
-import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,6 +9,9 @@ import java.util.Map;
 //import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
 
 public class RecipesList {
+    /** Was ElectricalFurnaceProcess.energyNeededPerSmelt (device); that constant now refers to this one. */
+    public static final double electricalFurnaceEnergyPerSmelt = 1000;
+
 
     public static final ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();
 
@@ -60,28 +61,25 @@ public class RecipesList {
 
     public static ArrayList<Recipe> getGlobalRecipeWithOutput(ItemStack output) {
         output = output.copy();
-        output.stackSize = 1;
+        output.setCount(1);
         ArrayList<Recipe> list = new ArrayList<Recipe>();
         for (RecipesList recipesList : listOfList) {
             list.addAll(recipesList.getRecipeFromOutput(output));
         }
 
-        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
-
-        {
-            Iterator it = furnaceRecipes.getSmeltingList().entrySet().iterator();
-            while (it.hasNext()) {
-                try {
-                    Map.Entry pairs = (Map.Entry) it.next();
-                    Recipe recipe; // List<Integer>, ItemStack
-                    ItemStack stack = (ItemStack) pairs.getValue();
-                    ItemStack li = (ItemStack) pairs.getKey();
+        // 26.x: smelting recipes live in the server's recipe manager
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            for (net.minecraft.world.item.crafting.RecipeHolder<?> h : server.getRecipeManager().getRecipes()) {
+                if (!(h.value() instanceof net.minecraft.world.item.crafting.SmeltingRecipe r)) continue;
+                for (net.minecraft.core.Holder<net.minecraft.world.item.Item> in : r.input().items().toList()) {
+                    ItemStack li = new ItemStack(in);
+                    ItemStack stack = Utils.smeltResult(server.overworld(), li);
                     if (Utils.areSame(output, stack)) {
-                        list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
-                        recipe.setMachineList(Eln.instance.furnaceList);
+                        Recipe recipe;
+                        list.add(recipe = new Recipe(li, output, electricalFurnaceEnergyPerSmelt));
+                        recipe.setMachineList(Eln.furnaceList);
                     }
-                } catch (Exception e) {
-                    // TODO: handle exception
                 }
             }
         }
@@ -91,7 +89,7 @@ public class RecipesList {
 
     public static ArrayList<Recipe> getGlobalRecipeWithInput(ItemStack input) {
         input = input.copy();
-        input.stackSize = 64;
+        input.setCount(64);
         ArrayList<Recipe> list = new ArrayList<Recipe>();
         for (RecipesList recipesList : listOfList) {
             Recipe r = recipesList.getRecipe(input);
@@ -99,15 +97,15 @@ public class RecipesList {
                 list.add(r);
         }
 
-        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
-        ItemStack smeltResult = furnaceRecipes.getSmeltingResult(input);
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        ItemStack smeltResult = server == null ? ItemStack.EMPTY : Utils.smeltResult(server.overworld(), input);
         Recipe smeltRecipe;
-        if (smeltResult != null) {
+        if (!smeltResult.isEmpty()) {
             try {
                 ItemStack input1 = input.copy();
-                input1.stackSize = 1;
-                list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
-                smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
+                input1.setCount(1);
+                list.add(smeltRecipe = new Recipe(input1, smeltResult, electricalFurnaceEnergyPerSmelt));
+                smeltRecipe.machineList.addAll(Eln.furnaceList);
             } catch (Exception e) {
                 // TODO: handle exception
             }
@@ -116,5 +114,5 @@ public class RecipesList {
         return list;
     }
 }
-/*		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
+/*		FurnaceRecipes.instance().addSmelting(in.itemID, in.getMetadata(),
                 findItemStack("Copper ingot"), 0);*/

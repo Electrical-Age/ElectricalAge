@@ -6,10 +6,10 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.Level;
 
 public class TeleporterDescriptor extends TransparentNodeDescriptor {
 
@@ -31,7 +31,7 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
         GhostGroup ghostDoorOpen, GhostGroup ghostDoorClose
 
     ) {
-        super(name, TeleporterElement.class, TeleporterRender.class);
+        super(name, TeleporterElement.class, null);
         this.cable = cable;
         this.obj = obj;
         this.powerCoordonate = powerCoordonate;
@@ -74,12 +74,12 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
     int areaH;
     public Coordonate areaCoordonate, lightCoordonate;
 
-    public AxisAlignedBB getBB(Coordonate c, Direction front) {
+    public AABB getBB(Coordonate c, Direction front) {
         Coordonate temp = new Coordonate(areaCoordonate);
         temp.setDimention(c.dimention);
         temp.applyTransformation(front, c);
 
-        AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(temp.x, temp.y, temp.z, temp.x + 1, temp.y + areaH, temp.z + 1);
+        AABB bb = new AABB(temp.x, temp.y, temp.z, temp.x + 1, temp.y + areaH, temp.z + 1);
         return bb;
     }
 
@@ -111,11 +111,11 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
 
     Coordonate[] powerCoordonate;
 
-    public Coordonate[] getPowerCoordonate(World w) {
+    public Coordonate[] getPowerCoordonate(Level w) {
         Coordonate[] temp = new Coordonate[powerCoordonate.length];
         for (int idx = 0; idx < temp.length; idx++) {
             temp[idx] = new Coordonate(powerCoordonate[idx]);
-            temp[idx].setDimention(w.provider.dimensionId);
+            temp[idx].setDimention(mods.eln.misc.Dimensions.id(w));
         }
         return temp;
     }
@@ -137,30 +137,25 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
     }
 
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    public void drawItem(boolean entity) {
+        objItemScale(obj);
+        main.draw();
+        ext_control.draw();
+        ext_power.draw();
+        UtilsClient.disableCulling();
+        door_out.draw();
+        UtilsClient.enableCulling();
+        indoor_open.draw();
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            objItemScale(obj);
-            main.draw();
-            ext_control.draw();
-            ext_power.draw();
-            UtilsClient.disableCulling();
-            door_out.draw();
-            UtilsClient.enableCulling();
-            indoor_open.draw();
-        }
     }
 }

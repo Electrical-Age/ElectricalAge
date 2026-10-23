@@ -60,9 +60,17 @@ public class Transformer extends Bipole {
     }
 
 
+    /** Primary winding current (into aPin; the windings' other ends are ground). 1.7.10 returned 0. */
     @Override
     public double getCurrent() {
-        return 0;
+        return aCurrentState.state;
+    }
 
+    /** Each winding carries its own current: aCurrentState at aPin, bCurrentState at bPin. */
+    @Override
+    public double getCurrentInto(State pin) {
+        if (pin == aPin) return aCurrentState.state;
+        if (pin == bPin) return bCurrentState.state;
+        return 0;
     }
 }

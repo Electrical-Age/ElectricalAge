@@ -1,10 +1,11 @@
 package mods.eln.sixnode.logicgate
 
+import mods.eln.gl.GL11
+
+
+import mods.eln.registry.ElnDeviceRegistry
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
-import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
-import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
@@ -18,21 +19,17 @@ import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import mods.eln.sixnode.AnalogFunction
 import mods.eln.wiki.Data
-import net.minecraft.client.gui.GuiButton
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
-import org.lwjgl.opengl.GL11
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
 open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>,
-                               elementClass: Class<out LogicGateElement>, renderClass: Class<out LogicGateRender>) :
+                               elementClass: Class<out LogicGateElement>, renderClass: Class<*>?) :
     SixNodeDescriptor(name, elementClass, renderClass) {
     private val case = obj?.getPart("Case")
     private val top = obj?.getPart(functionName)
@@ -48,36 +45,32 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     }
 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>) :
-        this(name, obj, functionName, functionClass, LogicGateElement::class.java, LogicGateRender::class.java) {
+        this(name, obj, functionName, functionClass, LogicGateElement::class.java, null) {
     }
-
     fun draw() {
         pins.forEach { it?.draw() }
         case?.draw()
         top?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                       helper: IItemRenderer.ItemRendererHelper?): Boolean =
-        type != IItemRenderer.ItemRenderType.INVENTORY
 
-    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                          helper: IItemRenderer.ItemRendererHelper?): Boolean =
-        type != IItemRenderer.ItemRenderType.INVENTORY
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f)
-            GL11.glScalef(1.25f, 1.25f, 1.25f)
-            GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
-            draw()
-        }
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
+
+    override fun hasItemDraw() = true
+
+    override fun drawItem(entity: Boolean) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f)
+        GL11.glScalef(1.25f, 1.25f, 1.25f)
+        GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
+        draw()
+
     }
 
-    override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
+
+    override fun getFrontFromPlace(side: Direction?, player: Player?): LRDU? =
         super.getFrontFromPlace(side, player).left()
 
     override fun setParent(item: Item?, damage: Int) {
@@ -85,7 +78,7 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         Data.addSignal(newItemStack())
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>?, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         if (list != null) {
             function.infos.split("\n").forEach { list.add(it) }
@@ -159,12 +152,12 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.normalized else null }.toTypedArray(),
         outputPin.u / Eln.SVU)
 
-    override fun readFromNBT(nbt: NBTTagCompound?) {
+    override fun readFromNBT(nbt: CompoundTag?) {
         super.readFromNBT(nbt)
         function.readFromNBT(nbt, "function")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?) {
+    override fun writeToNBT(nbt: CompoundTag?) {
         super.writeToNBT(nbt)
         function.writeToNBT(nbt, "function")
     }
@@ -185,13 +178,14 @@ open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: S
     }
 
     override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when (lrdu) {
-        front -> Eln.instance.signalCableDescriptor.render
-        front.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance.signalCableDescriptor.render else null
-        front.left() -> if (descriptor.function.inputCount >= 2) Eln.instance.signalCableDescriptor.render else null
-        front.right() -> if (descriptor.function.inputCount >= 3) Eln.instance.signalCableDescriptor.render else null
+        front -> ElnDeviceRegistry.signalCableDescriptor.render
+        front.inverse() -> if (descriptor.function.inputCount >= 1) ElnDeviceRegistry.signalCableDescriptor.render else null
+        front.left() -> if (descriptor.function.inputCount >= 2) ElnDeviceRegistry.signalCableDescriptor.render else null
+        front.right() -> if (descriptor.function.inputCount >= 3) ElnDeviceRegistry.signalCableDescriptor.render else null
         else -> null
     }
 }
+
 
 abstract class LogicFunction : INBTTReady {
     open val hasState = false
@@ -219,8 +213,8 @@ abstract class LogicFunction : INBTTReady {
         Pair("Output", output.toDigitalString())
     )
 
-    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
+    override fun readFromNBT(nbt: CompoundTag?, str: String?) {}
+    override fun writeToNBT(nbt: CompoundTag?, str: String?) {}
 }
 
 class Not : LogicFunction() {
@@ -298,12 +292,12 @@ class SchmittTrigger : LogicFunction() {
         return state
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
-        state = nbt?.getBoolean(str + "state") ?: false
+    override fun readFromNBT(nbt: CompoundTag?, str: String?) {
+        state = nbt?.getBooleanOr(str + "state", false) ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
-        nbt?.setBoolean(str + "state", state)
+    override fun writeToNBT(nbt: CompoundTag?, str: String?) {
+        nbt?.putBoolean(str + "state", state)
     }
 }
 
@@ -329,14 +323,14 @@ class Oscillator : LogicFunction() {
         Pair("Output", output.toDigitalString())
     )
 
-    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
-        ramp = nbt?.getDouble(str + "ramp") ?: 0.0
-        state = nbt?.getBoolean(str + "state") ?: false
+    override fun readFromNBT(nbt: CompoundTag?, str: String?) {
+        ramp = nbt?.getDoubleOr(str + "ramp", 0.0) ?: 0.0
+        state = nbt?.getBooleanOr(str + "state", false) ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
-        nbt?.setDouble(str + "ramp", ramp)
-        nbt?.setBoolean(str + "state", state)
+    override fun writeToNBT(nbt: CompoundTag?, str: String?) {
+        nbt?.putDouble(str + "ramp", ramp)
+        nbt?.putBoolean(str + "state", state)
     }
 }
 
@@ -363,14 +357,14 @@ abstract class TriggeredLogicFunction(private val triggerIndex: Int) : LogicFunc
     open fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean = state
     open fun onFallingEdge(inputs: List<Boolean?>, state: Boolean): Boolean = state
 
-    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
-        trigger = nbt?.getBoolean(str + "trigger") ?: false
-        state = nbt?.getBoolean(str + "state") ?: false
+    override fun readFromNBT(nbt: CompoundTag?, str: String?) {
+        trigger = nbt?.getBooleanOr(str + "trigger", false) ?: false
+        state = nbt?.getBooleanOr(str + "state", false) ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
-        nbt?.setBoolean(str + "trigger", trigger)
-        nbt?.setBoolean(str + "state", state)
+    override fun writeToNBT(nbt: CompoundTag?, str: String?) {
+        nbt?.putBoolean(str + "trigger", trigger)
+        nbt?.putBoolean(str + "state", state)
     }
 }
 
@@ -397,7 +391,7 @@ class JKFlipFlop : TriggeredLogicFunction(0) {
 }
 
 class PalDescriptor(name: String, obj: Obj3D?) : LogicGateDescriptor(name, obj, "PAL", Pal::class.java,
-    PalElement::class.java, PalRender::class.java) {}
+    PalElement::class.java, null) {}
 
 class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor) :
     LogicGateElement(node, side, descriptor) {
@@ -439,10 +433,6 @@ class PalRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescr
     LogicGateRender(entity, side, descriptor) {
     val truthTable = Array(8, { false })
 
-    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? {
-        return PalGui(this)
-    }
-
     override fun publishUnserialize(stream: DataInputStream?) {
         super.publishUnserialize(stream)
         try {
@@ -455,45 +445,14 @@ class PalRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescr
     }
 }
 
-class PalGui(val render: PalRender) : GuiScreenEln() {
-    val buttons = arrayOfNulls<GuiButton>(8)
 
-    override fun initGui() {
-        super.initGui()
+// 26.x port: class PalGui removed (client; redone in P3/P4)
 
-        for (i in 0..7) {
-            buttons[i] = newGuiButton(42 + (i % 4) * 22, 34 + (i / 4) * 22, 20, "")
-        }
-    }
-
-    override fun preDraw(f: Float, x: Int, y: Int) {
-        super.preDraw(f, x, y)
-        for (i in 0..7) {
-            buttons[i]?.displayString = if (render.truthTable[i]) "1" else "0"
-        }
-    }
-
-    override fun guiObjectEvent(sender: IGuiObject?) {
-        try {
-            val bos = ByteArrayOutputStream()
-            val stream = DataOutputStream(bos)
-
-            render.preparePacketForServer(stream)
-
-            stream.writeByte(PalElement.TruthTablePositionClickedEvent)
-            stream.writeInt(buttons.indexOf(sender as GuiButton))
-
-            render.sendPacketToServer(bos)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-    }
-
-    override fun newHelper(): GuiHelper? = GuiHelper(this, 160, 110, "pal.png")
-}
 
 class Pal : LogicFunction() {
+    // Its truth table is per chip: without this, LogicGateElement shared the descriptor's one instance, so every PAL in
+    // the world had the same table (toggling one toggled all; on load the last chip read won). Found by the port26 selftest.
+    override val hasState = true
     override val inputCount = 3
     override val infos =
         tr("A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.")
@@ -517,11 +476,11 @@ class Pal : LogicFunction() {
             (inputs[2] ?: false) * 2 +
             ((inputs[2] ?: false) xor (inputs[1] ?: false)) * 1]
 
-    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
-        truthTable.fromInt(nbt?.getInteger(str + "truthTable") ?: 0)
+    override fun readFromNBT(nbt: CompoundTag?, str: String?) {
+        truthTable.fromInt(nbt?.getIntOr(str + "truthTable", 0) ?: 0)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
-        nbt?.setInteger(str + "truthTable", truthTable.toInt())
+    override fun writeToNBT(nbt: CompoundTag?, str: String?) {
+        nbt?.putInt(str + "truthTable", truthTable.toInt())
     }
 }

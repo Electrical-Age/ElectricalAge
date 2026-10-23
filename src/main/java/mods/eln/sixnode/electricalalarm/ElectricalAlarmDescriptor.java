@@ -1,14 +1,17 @@
 package mods.eln.sixnode.electricalalarm;
 
+import mods.eln.misc.UtilsClient;
+
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,14 +26,14 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     Obj3D obj;
     Obj3DPart main, rot, lightPart;
 
-    ResourceLocation onTexture, offTexture;
+    Identifier onTexture, offTexture;
     String soundName;
     double soundTime;
     float soundLevel;
     public float rotSpeed = 0f;
 
     public ElectricalAlarmDescriptor(String name, Obj3D obj, int light, String soundName, double soundTime, float soundLevel) {
-        super(name, ElectricalAlarmElement.class, ElectricalAlarmRender.class);
+        super(name, ElectricalAlarmElement.class, null);
         this.obj = obj;
         this.soundName = soundName;
         this.soundTime = soundTime;
@@ -58,7 +61,6 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addUtilities(newItemStack());
     }
-
     void draw(boolean warm, float rotAlpha) {
         if (warm) UtilsClient.bindTexture(onTexture);
         else UtilsClient.bindTexture(offTexture);
@@ -78,37 +80,29 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        }
+    public void drawItem(boolean entity) {
         draw(true, 0.0f);
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Emits an acoustic alarm if\nthe input signal is high").split("\n"));
     }
 
     @Override
-    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+    public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

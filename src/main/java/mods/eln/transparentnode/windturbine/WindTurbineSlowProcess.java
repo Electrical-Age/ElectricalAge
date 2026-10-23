@@ -1,12 +1,14 @@
 package mods.eln.transparentnode.windturbine;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 class WindTurbineSlowProcess implements IProcess, INBTTReady {
     //private static final double localWinDeriveMax = 0.1;
@@ -32,8 +34,7 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     }
 
     double getWind() {
-        return Math.abs(localWind + Utils.getWind(turbine.node.coordonate.dimention, turbine.node.coordonate.y +
-            turbine.descriptor.offY)) * environmentWindFactor;
+        return Math.abs(localWind + Utils.getWind(turbine.node.coordonate, turbine.descriptor.offY)) * environmentWindFactor;
     }
 
     void setWind(double wind) {
@@ -61,17 +62,17 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
             int blockBusyCount = -d.blockMalusSubCount;
             boolean notInCache = false;
             if (turbine.node.coordonate.getWorldExist()) {
-                World world = turbine.node.coordonate.world();
+                Level world = turbine.node.coordonate.world();
                 //IChunkProvider chunk = world.getChunkProvider();
 
                 for (int x = x1; x <= x2; x++) {
                     for (int y = y1; y <= y2; y++) {
                         for (int z = z1; z <= z2; z++) {
-                            if (!world.blockExists(x, y, z)) {
+                            if (!WorldCompat.blockExists(world, x, y, z)) {
                                 notInCache = true;
                                 break;
                             }
-                            if (world.getBlock(x, y, z) != Blocks.air) {
+                            if (!Utils.isAirBlock(WorldCompat.getBlock(world, x, y, z))) {
                                 blockBusyCount++;
                             }
                         }
@@ -130,14 +131,14 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
-        localWind = nbt.getDouble(str + name + "localWind");
-        environmentWindFactor = nbt.getDouble(str + name + "environementWindFactor");
+    public void readFromNBT(CompoundTag nbt, String str) {
+        localWind = nbt.getDoubleOr(str + name + "localWind", 0.0);
+        environmentWindFactor = nbt.getDoubleOr(str + name + "environementWindFactor", 0.0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setDouble(str + name + "localWind", localWind);
-        nbt.setDouble(str + name + "environementWindFactor", environmentWindFactor);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putDouble(str + name + "localWind", localWind);
+        nbt.putDouble(str + name + "environementWindFactor", environmentWindFactor);
     }
 }

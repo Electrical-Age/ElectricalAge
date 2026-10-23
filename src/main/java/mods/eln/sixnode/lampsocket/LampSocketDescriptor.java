@@ -1,11 +1,12 @@
 package mods.eln.sixnode.lampsocket;
 
+import mods.eln.gl.GL11;
+
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
                                 int range,
                                 float alphaZMin, float alphaZMax,
                                 float alphaZBoot) {
-        super(name, LampSocketElement.class, LampSocketRender.class);
+        super(name, LampSocketElement.class, null);
         this.socketType = socketType;
         this.paintable = paintable;
         this.range = range;
@@ -61,34 +62,26 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         return cameraOpt;
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addLight(newItemStack());
     }
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelperEln() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
-            super.renderItem(type, item, data);
-        else {
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            render.draw(this, type, 0.f);
-        }
+    public void drawItem(boolean entity) {
+        // 1.12 scaled by 1.25 here; at 26.x item poses that fills the first-person view
+        render.drawItem(this);
     }
 
     @Override
@@ -97,7 +90,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         //list.add("Socket Type : " + socketType.toString());
 

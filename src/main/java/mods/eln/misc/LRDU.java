@@ -1,8 +1,9 @@
 package mods.eln.misc;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
-import org.lwjgl.opengl.GL11;
+import mods.eln.gl.GL11;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.Vec3;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -189,24 +190,19 @@ public enum LRDU {
         }
     }
 
-    public void rotateOnXnLeft(Vec3 v) {
-        double y = v.yCoord;
-        double z = v.zCoord;
+    /** 1.12: Vec3 is immutable, so this returns the rotated vector (callers assign it). */
+    public Vec3 rotateOnXnLeft(Vec3 v) {
+        double y = v.y;
+        double z = v.z;
         switch (this) {
-            case Left:
-                break;
             case Up:
-                v.yCoord = -z;
-                v.zCoord = y;
-                break;
+                return new Vec3(v.x, -z, y);
             case Right:
-                v.yCoord = -y;
-                v.zCoord = -z;
-                break;
+                return new Vec3(v.x, -y, -z);
             case Down:
-                v.yCoord = z;
-                v.zCoord = -y;
-                break;
+                return new Vec3(v.x, z, -y);
+            default:
+                return v;
         }
     }
 
@@ -238,12 +234,12 @@ public enum LRDU {
         return Left;
     }
 
-    public void writeToNBT(NBTTagCompound nbt, String name) {
-        nbt.setByte(name, (byte) toInt());
+    public void writeToNBT(CompoundTag nbt, String name) {
+        nbt.putByte(name, (byte) toInt());
     }
 
-    static public LRDU readFromNBT(NBTTagCompound nbt, String name) {
-        return LRDU.fromInt(nbt.getByte(name));
+    static public LRDU readFromNBT(CompoundTag nbt, String name) {
+        return LRDU.fromInt(nbt.getByteOr(name, (byte) 0));
     }
 
     public void serialize(DataOutputStream stream) {

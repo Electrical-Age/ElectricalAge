@@ -11,8 +11,8 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
         double nominalP, double nominalT,
         double nominalTao, double nominalConnectionDrop
     ) {
-        super(name, ThermalDissipatorActiveElement.class, ThermalDissipatorActiveRender.class);
+        super(name, ThermalDissipatorActiveElement.class, null);
         this.cableDescriptor = cableDescriptor;
         this.electricalNominalP = electricalNominalP;
         this.nominalElectricalU = nominalElectricalU;
@@ -56,7 +56,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
             rot = obj.getPart("rot");
         }
 
-        voltageLevelColor = VoltageLevelColor.fromCable(cableDescriptor);
+        voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cableDescriptor);
     }
 
     double warmLimit, coolLimit;
@@ -67,7 +67,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
         load.set(thermalRs, thermalRp, thermalC);
     }
 
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(net.minecraft.world.item.Item item, int damage) {
         super.setParent(item, damage);
         Data.addThermal(newItemStack());
     }
@@ -90,28 +90,23 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
     }
 
 
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+    public boolean hasItemDraw() {
         return true;
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+    public void drawItem(boolean entity) {
+        draw(0f);
+
     }
 
     @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0f);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+    public void addInformation(ItemStack itemStack, Player entityPlayer,
                                List list, boolean par4) {
 
         super.addInformation(itemStack, entityPlayer, list, par4);

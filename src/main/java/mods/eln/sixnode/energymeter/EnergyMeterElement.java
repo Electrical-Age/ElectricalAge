@@ -1,5 +1,7 @@
 package mods.eln.sixnode.energymeter;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -17,13 +19,13 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -44,6 +46,10 @@ public class EnergyMeterElement extends SixNodeElement {
     public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
     public ResistorSwitch shunt = new ResistorSwitch("shunt", aLoad, bLoad);
 
+    /**
+     * 1.12's cable slot (Baughn 2026-10-17: removed, the meter has a built-in LV cable without watchdog). Kept, hidden,
+     * so a cable left in it by an older world stays in the saved data and drops when the meter is broken.
+     */
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public float voltageMax = (float) Eln.SVU, voltageMin = 0;
@@ -81,7 +87,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
         slowProcessList.add(slowProcess);
 
-        WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+        Failure exp = new Failure(this).electronics();
 
         // slowProcessList.add(currentWatchDog);
         slowProcessList.add(voltageWatchDogA);
@@ -111,7 +117,6 @@ public class EnergyMeterElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (inventory.getStackInSlot(EnergyMeterContainer.cableSlotId) == null) return 0;
         if (front == lrdu) return NodeBase.maskElectricalAll;
         if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
 
@@ -157,7 +162,6 @@ public class EnergyMeterElement extends SixNodeElement {
             stream.writeDouble(timeCounter);
 
             // stream.writeDouble(energyStack);
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(EnergyMeterContainer.cableSlotId));
 
             stream.writeByte(energyUnit);
             stream.writeByte(timeUnit);
@@ -179,31 +183,13 @@ public class EnergyMeterElement extends SixNodeElement {
         computeElectricalLoad();
     }
 
-    @Override
-    protected void inventoryChanged() {
-        computeElectricalLoad();
-        reconnect();
-    }
-
     public void computeElectricalLoad() {
-        ItemStack cable = inventory.getStackInSlot(EnergyMeterContainer.cableSlotId);
-
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-        if (cableDescriptor == null) {
-            aLoad.highImpedance();
-            bLoad.highImpedance();
-
-            voltageWatchDogA.disable();
-            voltageWatchDogB.disable();
-            // currentWatchDog.disable();
-        } else {
-            cableDescriptor.applyTo(aLoad);
-            cableDescriptor.applyTo(bLoad);
-
-            voltageWatchDogA.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
-            voltageWatchDogB.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
-            // currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
-        }
+        // built-in LV cable, without the watchdogs a cable in 1.12's slot set (Baughn 2026-10-17)
+        cableDescriptor = ElnDeviceRegistry.lowVoltageCableDescriptor;
+        cableDescriptor.applyTo(aLoad);
+        cableDescriptor.applyTo(bLoad);
+        voltageWatchDogA.disable();
+        voltageWatchDogB.disable();
     }
 
     @Override
@@ -253,37 +239,32 @@ public class EnergyMeterElement extends SixNodeElement {
     }
 
     @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new EnergyMeterContainer(player, inventory);
-    }
-
-    @Override
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         try {
-            mod = Mod.valueOf(nbt.getString("mode"));
+            mod = Mod.valueOf(nbt.getStringOr("mode", ""));
         } catch (Exception e) {
             mod = Mod.ModCounter;
         }
-        energyStack = nbt.getDouble("energyStack");
-        timeCounter = nbt.getDouble("timeCounter");
-        password = nbt.getString("password");
+        energyStack = nbt.getDoubleOr("energyStack", 0.0);
+        timeCounter = nbt.getDoubleOr("timeCounter", 0.0);
+        password = nbt.getStringOr("password", "");
         slowProcess.oldEnergyPublish = energyStack;
-        energyUnit = nbt.getByte("energyUnit");
-        timeUnit = nbt.getByte("timeUnit");
+        energyUnit = nbt.getByteOr("energyUnit", (byte) 0);
+        timeUnit = nbt.getByteOr("timeUnit", (byte) 0);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
-        nbt.setString("mode", mod.toString());
-        nbt.setDouble("energyStack", energyStack);
-        nbt.setDouble("timeCounter", timeCounter);
-        nbt.setString("password", password);
-        nbt.setByte("energyUnit", (byte) energyUnit);
-        nbt.setByte("timeUnit", (byte) timeUnit);
+        nbt.putString("mode", mod.toString());
+        nbt.putDouble("energyStack", energyStack);
+        nbt.putDouble("timeCounter", timeCounter);
+        nbt.putString("password", password);
+        nbt.putByte("energyUnit", (byte) energyUnit);
+        nbt.putByte("timeUnit", (byte) timeUnit);
     }
 
     class SlowProcess implements IProcess {
@@ -313,7 +294,7 @@ public class EnergyMeterElement extends SixNodeElement {
             }
 
             if (highImp) shunt.ultraImpedance();
-            else Eln.applySmallRs(shunt);
+            else ElnDeviceRegistry.applySmallRs(shunt);
 
             publishTimeout -= time;
             if (publishTimeout < 0) {

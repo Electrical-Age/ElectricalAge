@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "eln:item/improved_flashlight"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "eln:item/improved_flashlight_on"
+    },
+    "property": "eln:lit"
+  }
+}

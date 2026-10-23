@@ -1,14 +1,16 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+
+import mods.eln.compat.WorldCompat;
 import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalwatch.ElectricalWatchContainer;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockFire;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -28,8 +30,8 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
     }
 
     double getBatteryLevel() {
-        ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalWatchContainer.batteryId);
-        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+        ItemStack batteryStack = element.getInventory().getItem(ElectricalWatchContainer.batteryId);
+        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack, BatteryItem.class);
         if (battery != null) {
             return battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack);
         } else {
@@ -40,8 +42,8 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
     @Override
     public void process(double time) {
         if (element.descriptor.batteryPowered) {
-            ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalFireDetectorContainer.Companion.getBatteryId());
-            BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+            ItemStack batteryStack = element.getInventory().getItem(ElectricalFireDetectorContainer.Companion.getBatteryId());
+            BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack, BatteryItem.class);
             double energy;
             if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.PowerComsumption * time * 4) {
                 boolean changed = element.powered;
@@ -93,12 +95,15 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                     break;
             }
 
+            // WP16: the break below used to leave only the dz loop, so a later fire hidden behind a block reset
+            // fireDetected to false; stop the whole scan at the first visible fire.
+            scan:
             for (int dx = -maxRangeHalf; dx <= maxRangeHalf; ++dx)
                 for (int dy = -maxRangeHalf; dy <= maxRangeHalf; ++dy)
                     for (int dz = -maxRangeHalf; dz <= maxRangeHalf; ++dz) {
-                        Block block = detectionBBCenter.world().getBlock(detectionBBCenter.x + dx, detectionBBCenter.y + dy,
+                        Block block = WorldCompat.getBlock(detectionBBCenter.world(), detectionBBCenter.x + dx, detectionBBCenter.y + dy,
                             detectionBBCenter.z + dz);
-                        if (block.getClass() == BlockFire.class) {
+                        if (block instanceof BaseFireBlock) {
                             fireDetected = true;
 
                             Coordonate coord = element.getCoordonate();
@@ -106,13 +111,13 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                                 detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
 
                             for (Block b : blockList)
-                                if (b.isOpaqueCube()) {
+                                if (b.defaultBlockState().isSolidRender()) {
                                     fireDetected = false;
                                     break;
                                 }
 
                             if (fireDetected) {
-                                break;
+                                break scan;
                             }
                         }
                     }

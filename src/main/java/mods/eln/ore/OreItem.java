@@ -1,30 +1,26 @@
 package mods.eln.ore;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import mods.eln.generic.GenericItemBlockUsingDamage;
-import net.minecraft.block.Block;
+import mods.eln.generic.IDescriptorItem;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 
-public class OreItem extends GenericItemBlockUsingDamage<OreDescriptor> {
+/** The item of an EA ore block (1.12 OreItem, a damage sub-item of eln:ore). */
+public class OreItem extends BlockItem implements IDescriptorItem {
+    public final OreDescriptor descriptor;
 
-    public OreItem(Block b) {
-        super(b);
+    public OreItem(OreBlock block, Properties properties) {
+        super(block, properties);
+        this.descriptor = block.descriptor;
     }
 
     @Override
-    public int getMetadata(int par1) {
-        return par1;
+    public Object getEaDescriptor() {
+        return descriptor;
     }
 
-/*//caca1.5.1
     @Override
-	public String getTextureFile() {
-		return CommonProxy.BLOCK_PNG;
-	}
-	*/
-
-    @Override
-    public void addDescriptor(int damage, OreDescriptor descriptor) {
-        super.addDescriptor(damage, descriptor);
-        GameRegistry.registerWorldGenerator(descriptor, 0);
+    public Component getName(ItemStack stack) {
+        return Component.literal(descriptor.name);
     }
 }

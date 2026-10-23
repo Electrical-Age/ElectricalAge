@@ -1,5 +1,7 @@
 package mods.eln.sixnode.groundcable;
 
+
+import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -9,9 +11,8 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -25,7 +26,6 @@ public class GroundCableRender extends SixNodeElementRender {
 
     CableRenderDescriptor cableRender;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public GroundCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -51,14 +51,7 @@ public class GroundCableRender extends SixNodeElementRender {
             b = stream.readByte();
 
             color = (b >> 4) & 0xF;
-
-            ItemStack cableStack = Utils.unserialiseItemStack(stream);
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
-
-            if (desc == null)
-                cableRender = Eln.instance.lowVoltageCableDescriptor.render;
-            else
-                cableRender = desc.render;
+            cableRender = ElnDeviceRegistry.lowVoltageCableDescriptor.render; // no cable slot (Baughn 2026-10-17)
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,8 +61,4 @@ public class GroundCableRender extends SixNodeElementRender {
         return cableRender;
     }
 
-    @Override
-    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-        return new GroundCableGui(player, inventory, this);
-    }
 }

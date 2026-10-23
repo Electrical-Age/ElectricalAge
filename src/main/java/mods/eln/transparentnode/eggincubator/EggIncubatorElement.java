@@ -17,14 +17,15 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.passive.EntityChicken;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
+import mods.eln.sim.process.destruct.Failure;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -51,8 +52,9 @@ public class EggIncubatorElement extends TransparentNodeElement {
 
         this.descriptor = (EggIncubatorDescriptor) descriptor;
 
-        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
-        slowProcessList.add(voltageWatchdog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
+        Failure exp = new Failure(this).machine();
+        // (a resistor to ground on one pin shared by every side: either polarity runs it; Baughn: fed negative it burned)
+        slowProcessList.add(voltageWatchdog.set(powerLoad).setUMaxMin(this.descriptor.nominalVoltage).set(exp));
     }
 
     class EggIncubatorProcess implements IProcess, INBTTReady {
@@ -70,20 +72,20 @@ public class EggIncubatorElement extends TransparentNodeElement {
         @Override
         public void process(double time) {
             energy -= powerResistor.getP() * time;
-            if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null) {
+            if (!Utils.isEmpty(inventory.getItem(EggIncubatorContainer.EggSlotId))) {
                 descriptor.setState(powerResistor, true);
                 if (energy <= 0) {
-                    inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
-                    EntityChicken chicken = new EntityChicken(node.coordonate.world());
-                    chicken.setGrowingAge(-24000);
-                    EntityLiving entityliving = (EntityLiving) chicken;
-                    entityliving.setLocationAndAngles(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
-                    entityliving.rotationYawHead = entityliving.rotationYaw;
-                    entityliving.renderYawOffset = entityliving.rotationYaw;
-                    //entityliving.func_110161_a((EntityLivingData)null); 1.6.4
-                    node.coordonate.world().spawnEntityInWorld(entityliving);
-                    entityliving.playLivingSound();
-                    //node.coordonate.world().spawnEntityInWorld());
+                    inventory.removeItem(EggIncubatorContainer.EggSlotId, 1);
+                    Chicken chicken = net.minecraft.world.entity.EntityTypes.CHICKEN.create(node.coordonate.world(), EntitySpawnReason.TRIGGERED);
+                    if (chicken != null) {
+                        chicken.setAge(-24000);
+                        chicken.snapTo(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, Mth.wrapDegrees(node.coordonate.world().getRandom().nextFloat() * 360.0F), 0.0F);
+                        chicken.yHeadRot = chicken.getYRot();
+                        chicken.yBodyRot = chicken.getYRot();
+                        node.coordonate.world().addFreshEntity(chicken);
+                        chicken.playAmbientSound();
+                    }
+                    //node.coordonate.world().spawnEntity());
                     resetEnergy();
 
                     needPublish();
@@ -96,13 +98,13 @@ public class EggIncubatorElement extends TransparentNodeElement {
         }
 
         @Override
-        public void readFromNBT(NBTTagCompound nbt, String str) {
-            energy = nbt.getDouble(str + "energyCounter");
+        public void readFromNBT(CompoundTag nbt, String str) {
+            energy = nbt.getDoubleOr(str + "energyCounter", 0.0);
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
-            nbt.setDouble(str + "energyCounter", energy);
+        public void writeToNBT(CompoundTag nbt, String str) {
+            nbt.putDouble(str + "energyCounter", energy);
         }
     }
 
@@ -141,12 +143,12 @@ public class EggIncubatorElement extends TransparentNodeElement {
         connect();
     }
 
-    public void inventoryChange(IInventory inventory) {
+    public void inventoryChange(Container inventory) {
         needPublish();
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         return false;
     }
 
@@ -155,17 +157,12 @@ public class EggIncubatorElement extends TransparentNodeElement {
         return true;
     }
 
-    @Override
-    public Container newContainer(Direction side, EntityPlayer player) {
-        return new EggIncubatorContainer(player, inventory, node);
-    }
-
     public float getLightOpacity() {
         return 1.0f;
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -173,8 +170,8 @@ public class EggIncubatorElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
-            else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).stackSize);
+            if (Utils.isEmpty(inventory.getItem(EggIncubatorContainer.EggSlotId))) stream.writeByte(0);
+            else stream.writeByte(inventory.getItem(EggIncubatorContainer.EggSlotId).getCount());
 
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 
@@ -188,7 +185,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Has egg"), inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null ?
+        info.put(I18N.tr("Has egg"), !Utils.isEmpty(inventory.getItem(EggIncubatorContainer.EggSlotId)) ?
             I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Power consumption"), Utils.plotPower("", powerResistor.getP()));

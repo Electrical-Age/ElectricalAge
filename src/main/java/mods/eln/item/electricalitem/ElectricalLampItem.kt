@@ -2,25 +2,18 @@ package mods.eln.item.electricalitem
 
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
-import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.ResourceLocation
-import net.minecraft.world.World
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import net.minecraft.world.entity.player.Player
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.Level
 
 import mods.eln.i18n.I18N.tr
 
 class ElectricalLampItem(name: String, private var lightMin: Int, private var rangeMin: Int, private var dischargeMin: Double, private var lightMax: Int,
                          private var rangeMax: Int, internal var dischargeMax: Double, internal var energyStorage: Double, internal var chargePower: Double) : LampItem(name), IItemEnergyBattery {
-
-    internal var on: ResourceLocation = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "on.png")
-    internal var off: ResourceLocation = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "off.png")
 
     init {
         setDefaultIcon(name + "off")
@@ -53,35 +46,38 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         }
     }
 
-    override fun getDefaultNBT(): NBTTagCompound? {
-        val nbt = NBTTagCompound()
-        nbt.setDouble("energy", 0.0)
-        nbt.setBoolean("powerOn", false)
-        nbt.setInteger("rand", (Math.random() * 0xFFFFFFF).toInt())
+    override fun getDefaultNBT(): CompoundTag? {
+        val nbt = CompoundTag()
+        nbt.putDouble("energy", 0.0)
+        nbt.putBoolean("powerOn", false)
+        nbt.putInt("rand", (Math.random() * 0xFFFFFFF).toInt())
         return nbt
     }
 
+    /** R5: the item model shows the "on" icon (client property eln:lit). */
+    fun isLit(stack: ItemStack) = getLight(stack) != 0 && getLightState(stack) != 0
+
     internal override fun getLightState(stack: ItemStack): Int {
-        return getNbt(stack).getInteger("LightState")
+        return getNbt(stack).getIntOr("LightState", 0)
     }
 
     private fun setLightState(stack: ItemStack, value: Int) {
-        getNbt(stack).setInteger("LightState", value)
+        editNbt(stack) { it.putInt("LightState", value) }
     }
 
     private fun getLightLevel(stack: ItemStack): Int {
         return if (getLightState(stack) == 1) lightMin else lightMax
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ItemStack {
-        if (!w.isRemote) {
+    override fun onItemRightClick(s: ItemStack, w: Level, p: Player): ItemStack {
+        if (!w.isClientSide()) {
             var lightState = getLightState(s) + 1
             if (lightState > 2) lightState = 0
-            //((EntityPlayer) entity).addChatMessage("Flashlight !!!");
+            //((Player) entity).sendMessage("Flashlight !!!");
             when (lightState) {
-                0 -> Utils.addChatMessage(p as EntityPlayerMP, "Flashlight OFF")
-                1 -> Utils.addChatMessage(p as EntityPlayerMP, "Flashlight ON")
-                2 -> Utils.addChatMessage(p as EntityPlayerMP, "Flashlight BOOSTED")
+                0 -> Utils.sendMessage(p as ServerPlayer, "Flashlight OFF")
+                1 -> Utils.sendMessage(p as ServerPlayer, "Flashlight ON")
+                2 -> Utils.sendMessage(p as ServerPlayer, "Flashlight BOOSTED")
                 else -> {
                 }
             }
@@ -90,11 +86,11 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return s
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargeMin)))
-        if (itemStack != null) {
+        if (itemStack != null && !itemStack.isEmpty) {
             list.add(tr("Stored Energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))
             list.add(tr("State:") + " " + if (getLightState(itemStack) != 0) tr("On") else tr("Off"))
@@ -102,11 +98,11 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
     }
 
     override fun getEnergy(stack: ItemStack): Double {
-        return getNbt(stack).getDouble("energy")
+        return getNbt(stack).getDoubleOr("energy", 0.0)
     }
 
     override fun setEnergy(stack: ItemStack, value: Double) {
-        getNbt(stack).setDouble("energy", value)
+        editNbt(stack) { it.putDouble("energy", value) }
     }
 
     override fun getEnergyMax(stack: ItemStack): Double {
@@ -125,20 +121,14 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return 0
     }
 
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
+    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
 
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return true
-    }
 
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        UtilsClient.drawIcon(type, if (getLight(item) != 0 && getLightState(item) != 0) on else off)
-        if (type == ItemRenderType.INVENTORY) {
-            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
-        }
-    }
+    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+
+
+    // 26.x port: renderItem() removed (client rendering; redone in P3)
+
 
     override fun electricalItemUpdate(stack: ItemStack, time: Double) {
         val energy = getEnergy(stack)

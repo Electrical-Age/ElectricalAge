@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "F": "#eln:ingots/tungsten",
+    "G": "minecraft:glass_pane",
+    "S": "eln:copper_cable"
+  },
+  "pattern": [
+    " G ",
+    "GFG",
+    " S "
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:small_50v_incandescent_light_bulb"
+  }
+}

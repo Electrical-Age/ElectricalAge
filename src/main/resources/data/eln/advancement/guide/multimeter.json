@@ -1,0 +1,32 @@
+{
+  "parent": "eln:guide/copper_cable",
+  "criteria": {
+    "has": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:multimeter"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "eln:multimeter"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.multimeter.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.multimeter.description"
+    },
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has"
+    ]
+  ]
+}
