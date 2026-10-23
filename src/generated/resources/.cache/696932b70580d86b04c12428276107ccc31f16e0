@@ -1,4 +1,4 @@
-// 26.3	2026-10-23T16:34:26.476327708	eln-global/EA models
+// 26.3	2026-10-23T16:48:30.042904631	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -65,6 +65,7 @@ f0ed42296ed8f581741e53ea14400c53a04c1ba2 assets/eln/blockstates/light_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_passive_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_rotating_solar_panel.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_solar_panel.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/smelter.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/stone_heat_furnace.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/tachometer.json
@@ -358,6 +359,7 @@ bc142e6678b5721803461a88b3d575b6022288df assets/eln/items/small_fuel_burner.json
 209ffb384114cf11b0372609c1fc1575d3714a1d assets/eln/items/small_passive_thermal_dissipator.json
 e8a9c51d402495d833f811874ddeefcef4b9f35f assets/eln/items/small_rotating_solar_panel.json
 caf37c022349960f310f519f788548cc5f0d1df3 assets/eln/items/small_solar_panel.json
+f8750fe216f0ad07571216fdd59b94264a744d04 assets/eln/items/smelter.json
 c45e46494ad77465a8c06bb56e58edf1d6a747db assets/eln/items/solar_tracker.json
 e0ac63120912b77188f74155e43fa17b38d38223 assets/eln/items/standard_alarm.json
 f5be8cbae972b0a222f2b97523926ae36187a761 assets/eln/items/steam_turbine.json
@@ -805,6 +807,8 @@ da3ae1aab5841696f33ade1e4f5f58b2432faee5 assets/eln/models/item/small_rotating_s
 8ef0e79309f0b611634c52cbd0184f02b84b1e8d assets/eln/models/item/small_rotating_solar_panel_3d.json
 0bcb7dc20c0623d6efc7c4ee7fe8da9010ea13c8 assets/eln/models/item/small_solar_panel.json
 eb08a014886baf9cbb872a1626e139ba57968b6d assets/eln/models/item/small_solar_panel_3d.json
+5ccbab99b117c13629d3ab41a73123ab5bb3705c assets/eln/models/item/smelter.json
+ab4ccf32ae822a3b82f3f003b145d622fcf8a8a0 assets/eln/models/item/smelter_3d.json
 005372c73b7a9a304aa77f9f676fe124f1b31d8e assets/eln/models/item/solar_tracker.json
 32399a008ed75e65341ade5b864871dc9bf680f2 assets/eln/models/item/standard_alarm.json
 a125e471bfb6effc571f726e1993643a16652ef6 assets/eln/models/item/standard_alarm_3d.json

@@ -72,6 +72,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   (Baughn 2026-10-23; `ElectricalFurnaceProcess.CHAR_T`). Charcoal nuggets: four to a charcoal and back; fuel for 400
   ticks (a `cooking_fuel` component). Test `wp10a_electrical_oven_chars_food_above_300_c`.
 
+- New: the Smelter (`transparentnode/smelter`, Baughn 2026-10-23): heat from a thermal cable on its back, 20 W of
+  50 V for its controls on a side; smelts at the electrical oven's rate for its temperature (same PfT table), drawing
+  that heat; hoppers: top/sides in, bottom out. Model `tools/models/smelter.py`. Test `wp10a_smelter`.
+
 ## Bugs fixed
 
 From 1.7.10/1.12 (carried in from the 1.12 branch, before the port): the WP16 sim audit (`AuditFixesTest`), fuse and

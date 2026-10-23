@@ -1935,6 +1935,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Advanced Machine Block"),
             'E', findItemStack("Medium Voltage Cable"),
             'm', findItemStack("Advanced Electrical Motor"));
+        // the smelter (Baughn 2026-10-23): a furnace in a brick jacket on a thermal cable, with a hopper's funnel on top
+        addRecipe(findItemStack("Smelter", 1),
+            "BHB",
+            "BFB",
+            "BtB",
+            'B', stack(Items.BRICKS),
+            'H', stack(Items.HOPPER),
+            'F', stack(Items.FURNACE),
+            't', findItemStack("Copper Thermal Cable"));
         addRecipe(findItemStack("Fractionating Column Base", 1),
             "IBI",
             "ICI",

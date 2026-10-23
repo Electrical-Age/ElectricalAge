@@ -1,0 +1,43 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Smelter"
+  },
+  {
+   "row": [
+    {
+     "slot": "0"
+    },
+    {
+     "progress": "process"
+    },
+    {
+     "slot": "1",
+     "big": true
+    },
+    {
+     "space": 0,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "temperature",
+   "sample": "Temperature 1000°C"
+  },
+  {
+   "text": "power",
+   "sample": "Controls: no power (50V on a side)"
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

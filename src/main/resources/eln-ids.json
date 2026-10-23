@@ -1925,6 +1925,12 @@
   "kind": "transparent_node",
   "name": "200v_steam_turbine"
  },
+ "eln:transparent_node@5272": {
+  "descriptor": "SmelterDescriptor",
+  "display": "Smelter",
+  "kind": "transparent_node",
+  "name": "smelter"
+ },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",
   "display": "Fractionating Column Base",

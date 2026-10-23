@@ -44,6 +44,7 @@ public class Wp10aContent implements ElnContent {
         registerOilSeparator(80);
         registerOilPump(81);
         registerSteam(82);
+        registerSmelter(82);
         registerColumn(83);
     }
 
@@ -179,6 +180,16 @@ public class Wp10aContent implements ElnContent {
             // Utils.smeltRecipeList.addMachine(desc.newItemStack());
         }
         // Utils.smeltRecipeList.addMachine(new ItemStack(Blocks.FURNACE));
+    }
+
+    /** 26.x (Baughn 2026-10-23): the smelter, heated through a thermal cable; it smelts at the electrical oven's rate for its
+     *  temperature (the same PfT table). Model: tools/models/smelter.py. */
+    public static void registerSmelter(int id) {
+        double[] PfTTable = {0, 20, 40, 80, 160, 240, 360, 540, 756, 1058.4, 1481.76};
+        double[] lost = new double[PfTTable.length];
+        for (int idx = 0; idx < lost.length; idx++) lost[idx] = PfTTable[idx] * Math.pow((idx + 1.0) / lost.length, 2) * 2;
+        transparentNodeItem.addDescriptor(24 + (id << 6), new mods.eln.transparentnode.smelter.SmelterDescriptor(TR_NAME(Type.NONE, "Smelter"),
+            new FunctionTableYProtect(PfTTable, 800.0, 0, 100000.0), new FunctionTableYProtect(lost, 800.0, 0.001, 10000000.0), 40, "smelter"));
     }
 
     public static void registerMacerator(int id) {

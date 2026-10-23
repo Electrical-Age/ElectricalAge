@@ -91,6 +91,7 @@ simplelamp/simplelamp.obj
 smallsolarpannel/smallsolarpannel.obj
 smallsolarpannelrot/smallsolarpannelrot.obj
 smallwaterwheel/smallwaterwheel.obj
+smelter/smelter.obj
 solarpanel2x2/solarpanel2x2.obj
 solarpanel2x3/bigsolarpanel.obj
 solarpanel2x3/bigsolarpanelrot.obj

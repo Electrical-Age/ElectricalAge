@@ -13,6 +13,7 @@ final class ClientScreens {
     static void registerAll() {
         // screen layouts (assets/eln/gui/<name>.json)
         layout("transparentnode.electricalfurnace.ElectricalFurnaceDescriptor", "electrical_furnace");
+        layout("transparentnode.smelter.SmelterDescriptor", "smelter");
         layout("sixnode.electricalsource.ElectricalSourceDescriptor", "electrical_source");
         layout("sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor", "wireless_tx");
         layout("sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor", "wireless_source");
@@ -59,6 +60,7 @@ final class ClientScreens {
             d -> ((mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor) d).temperatureOnly ? "temperature_probe" : "thermal_sensor");
         ElnScreens.register(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class,
             mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceScreen::new);
+        ElnScreens.register(mods.eln.transparentnode.smelter.SmelterDescriptor.class, mods.eln.transparentnode.smelter.SmelterScreen::new);
         ElnScreens.register(mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor.class,
             mods.eln.sixnode.electricalsource.ElectricalSourceScreen::new);
         reg(mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor.class, mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxScreen::new);

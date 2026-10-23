@@ -138,6 +138,9 @@ public final class MenuSpecs {
             descriptor(3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot")),
             regulator(4, 150, 25, 1, new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM,
                 tr("Regulator slot"))).publishing(1).inventoryAt(122));
+        put(mods.eln.transparentnode.smelter.SmelterDescriptor.class, d -> MenuSpec.of(
+            SlotSpec.output(mods.eln.transparentnode.smelter.SmelterElement.outSlotId, 86, 25, BIG),
+            SlotSpec.smeltable(mods.eln.transparentnode.smelter.SmelterElement.inSlotId, 28, 25, MEDIUM, tr("Input"))).publishing(1).inventoryAt(122));
         put(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, d -> {
             SlotSpec[] s = new SlotSpec[2 + d.outStackCount];
             for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = SlotSpec.output(idx, 130 - 32 + idx * 18, 12, MEDIUM);

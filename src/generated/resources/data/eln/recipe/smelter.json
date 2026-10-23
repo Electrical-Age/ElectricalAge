@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bricks",
+    "F": "minecraft:furnace",
+    "H": "minecraft:hopper",
+    "t": "eln:copper_thermal_cable"
+  },
+  "pattern": [
+    "BHB",
+    "BFB",
+    "BtB"
+  ],
+  "result": {
+    "id": "eln:smelter"
+  }
+}

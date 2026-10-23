@@ -68,6 +68,7 @@ public final class ClientRenders {
             mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherRender::new);
         ElnRenders.transparent(mods.eln.oil.BoilerDescriptor.class, mods.eln.oil.BoilerRender::new);
         ElnRenders.transparent(mods.eln.oil.SteamGeneratorDescriptor.class, mods.eln.oil.SteamGeneratorRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.smelter.SmelterDescriptor.class, mods.eln.transparentnode.smelter.SmelterRender::new);
         ElnRenders.transparent(mods.eln.oil.ColumnDescriptor.class, mods.eln.oil.ColumnRender::new);
         ElnRenders.transparent(mods.eln.oil.FlareStackDescriptor.class, mods.eln.oil.FlareStackRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceRender::new);

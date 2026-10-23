@@ -113,8 +113,13 @@ public class ElectricalFurnaceProcess implements IProcess {
 
     public ItemStack getSmeltResult() {
         ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
-        if (furnace.thermalLoad.Tc > CHAR_T && charrable(in)) return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
+        if (chars(furnace.thermalLoad.Tc) && charrable(in)) return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
         return Utils.smeltResult(furnace.node.coordonate.world(), in);
+    }
+
+    /** Hot enough to char food? (Tc is above the room's temperature, as the GUI shows it plus Tamb.) */
+    public static boolean chars(double tc) {
+        return tc + mods.eln.sim.PhysicalConstant.Tamb > CHAR_T;
     }
 
     /** Food, raw or cooked: too hot an oven burns it to a charcoal nugget. */

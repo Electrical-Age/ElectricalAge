@@ -81,6 +81,7 @@ public final class Wp10aCases {
         cases.add(new EggIncubatorCase());
         cases.add(new FurnaceCase());
         cases.add(new FurnaceCharCase());
+        cases.add(new SmelterCase());
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
         cases.add(new MaceratorReverseCase());
@@ -311,6 +312,78 @@ public final class Wp10aCases {
 
         public void measure(TestContext ctx) {
             ctx.check("wp10a oven: beef cooks at 250 C, chars at 350 C; ore smelts; a nugget burns 400 ticks", ok, got);
+        }
+    }
+
+    /**
+     * The smelter (Baughn 2026-10-23): held at 400 °C it smelts at the electrical oven's rate for that heat (PfT 240 W,
+     * 1000 J an item: ~4.2 s), at 240 °C at 80 W (12.5 s); without 50 V for its controls it doesn't smelt; heat put into a
+     * thermal cable behind it reaches it; hoppers feed the top and empty the bottom only.
+     */
+    static final class SmelterCase implements TestCase {
+        static final int SMELTER = 24 + (82 << 6);
+        mods.eln.transparentnode.smelter.SmelterElement hot, warm, unpowered, cabled;
+        mods.eln.sim.IProcess hold;
+        SixNodeElement cable;
+        String hoppers;
+        boolean hoppersOk;
+
+        public String name() {
+            return "wp10a smelter";
+        }
+
+        public int width() {
+            return 15;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        mods.eln.transparentnode.smelter.SmelterElement place(TestContext ctx, Layout l, int x, boolean fed) {
+            var m = (mods.eln.transparentnode.smelter.SmelterElement) l.device(SMELTER, x, 1);
+            if (fed) l.feed(ctx.at(x, 1, 1), m.front.left());
+            m.getInventory().setItem(mods.eln.transparentnode.smelter.SmelterElement.inSlotId, new ItemStack(Items.RAW_IRON, 16));
+            m.getInventory().setChanged();
+            return m;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            hot = place(ctx, l, 1, true);
+            warm = place(ctx, l, 5, true);
+            unpowered = place(ctx, l, 9, false);
+            cabled = place(ctx, l, 13, true);
+            cable = l.six(Wp9bCases.THERMAL_CABLE, off(ctx.at(13, 1, 1), cabled.front.getInverse()));
+            ThermalLoad th = field(hot, "thermalLoad"), tw = field(warm, "thermalLoad"), tu = field(unpowered, "thermalLoad");
+            mods.eln.Eln.simulator.addSlowProcess(hold = t -> {
+                th.Tc = 400;   // (EA temperatures are above the room's, as the oven's PfT table)
+                tw.Tc = 240;
+                tu.Tc = 400;
+                cable.getThermalLoad(LRDU.Up).moveEnergyTo(3000 * t);   // (3 kW into the cable behind the fourth)
+            });
+            var inv = (mods.eln.transparentnode.smelter.SmelterInventory) hot.getInventory();
+            int up = net.minecraft.core.Direction.UP.get3DDataValue(), down = net.minecraft.core.Direction.DOWN.get3DDataValue();
+            boolean topIn = inv.canInsertItem(0, new ItemStack(Items.RAW_IRON), up), topJunk = inv.canInsertItem(0, new ItemStack(Items.STICK), up);
+            boolean botOut = inv.canExtractItem(1, new ItemStack(Items.IRON_INGOT), down), topOut = inv.canExtractItem(1, new ItemStack(Items.IRON_INGOT), up);
+            hoppers = "top takes raw iron " + topIn + ", sticks " + topJunk + "; bottom gives out " + botOut + ", top " + topOut;
+            hoppersOk = topIn && !topJunk && botOut && !topOut;
+        }
+
+        static int out(mods.eln.transparentnode.smelter.SmelterElement m) {
+            return m.getInventory().getItem(mods.eln.transparentnode.smelter.SmelterElement.outSlotId).getCount();
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(hold);
+            ThermalLoad tc = field(cabled, "thermalLoad");
+            ctx.line(String.format("smelter: 400 C made %d, 240 C %d, unpowered %d; cable-fed at %.0f C made %d", out(hot), out(warm), out(unpowered),
+                tc.Tc + mods.eln.sim.PhysicalConstant.Tamb, out(cabled)));
+            ctx.check("smelter at 400 C over the room: 240 W, ~4.2 s an ingot (3 in 15 s)", out(hot) == 3, "" + out(hot));
+            ctx.check("smelter at 240 C over the room: 80 W, 12.5 s an ingot (1 in 15 s)", out(warm) == 1, "" + out(warm));
+            ctx.check("smelter without 50 V: nothing", out(unpowered) == 0, "" + out(unpowered));
+            ctx.check("smelter: heat from the thermal cable behind it warms it", tc.Tc > 50, String.format("%.1f C above ambient", tc.Tc));
+            ctx.check("smelter: hoppers feed the top (only what smelts) and empty the bottom", hoppersOk, hoppers);
         }
     }
 
