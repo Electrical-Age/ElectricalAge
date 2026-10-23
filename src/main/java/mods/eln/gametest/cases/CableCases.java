@@ -452,7 +452,8 @@ public final class CableCases {
         String err;
         String endAt = "none";
         int plain, lugged;
-        String ends = "";
+        String ends = "", snapInfo = "";
+        boolean snapOk;
         boolean endsOk = true;
 
         public String name() {
@@ -464,11 +465,11 @@ public final class CableCases {
         }
 
         public int height() {
-            return 4;
+            return 5;
         }
 
         public int depth() {
-            return 3;
+            return 10;
         }
 
         public int ticks() {
@@ -484,6 +485,34 @@ public final class CableCases {
             var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 1), net.minecraft.core.Direction.EAST, hitS, true, j);
             var b = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(7, 1, 1), net.minecraft.core.Direction.WEST, hitR, false, j);
             err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, a, b);
+            // a click on the floor half a block from the device's port snaps to it (AdventurAgent, Baughn: never looks
+            // connected without being so)
+            var floorHit = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(6, 0, 1)).add(0.8, 1.0, 0.5);
+            var snapped = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(6, 0, 1), net.minecraft.core.Direction.UP, floorHit, false, new long[1][]);
+            snapInfo = snapped == null ? "none" : snapped + "";
+            snapOk = snapped != null && snapped.dir() >= 0 && snapped.x() == b.x() && snapped.z() == b.z();
+            // and a click in the middle of the floor cell beside a six-node source (in-world, hosted in a VoxelNode)
+            // snaps to the source's port, the same end as clicking the source
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            c.floor(c.at(0, 0, 6));
+            c.floor(c.at(1, 0, 6));
+            mods.eln.node.voxel.CableConverter.convertOnLoad = true;
+            try {
+                source(c, SOURCE, 0, 6, 50);
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+            }
+            var hitV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 6)).add(0.97, 0.03, 0.5);
+            var viaSource = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 6), net.minecraft.core.Direction.EAST, hitV, true, new long[1][]);
+            var midV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(1, 0, 6)).add(0.5, 1.0, 0.5);
+            var sixV = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 6), net.minecraft.core.Direction.UP, midV, true, new long[1][]);
+            snapInfo += " / voxel " + (sixV == null ? "none" : sixV) + " vs " + viaSource;
+            snapOk &= viaSource != null && viaSource.equals(sixV);
+            snapOk &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(0, 1, 6), c.level())) instanceof mods.eln.node.voxel.VoxelNode;
+            var midHit = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(1, 0, 1)).add(0.5, 1.0, 0.5);
+            var six = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 1), net.minecraft.core.Direction.UP, midHit, true, new long[1][]);
+            snapInfo += " / six " + (six == null ? "none" : six) + " vs " + a;
+            snapOk &= a.equals(six);
             // a 50V steam turbine: ends on its front and back (its terminal plates), none on its flanks
             var tb = c.placeTransparent(12 + (82 << 6), c.at(4, 1, 2));
             for (var d : new net.minecraft.core.Direction[]{net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH,
@@ -513,6 +542,7 @@ public final class CableCases {
             c.check("device end: the cable meets the device at the middle of the edge (16,0,8)", "16,0,8".equals(endAt), endAt);
             c.check("device end: a lug at a terminal plate (3 more boxes)", lugged == plain + 18, plain + " -> " + lugged + " quads");
             c.check("device end: a turbine takes cables on its front and back only", endsOk, ends);
+            c.check("device end: a floor click beside the device's port snaps to it", snapOk, snapInfo);
             double i = current(r);
             c.check("device end: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
         }

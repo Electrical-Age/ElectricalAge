@@ -261,7 +261,53 @@ public final class CablePlacer {
             p[w] = base[w] + 8;   // (the middle of the edge: the connector's centre, where a terminal plate's lug sits, Baughn)
             return new CableRouter.End(p[0], p[1], p[2], edge, start ? f : CableRouter.reverse(f));
         }
+        CableRouter.End snapped = snapToPort(level, pos, face, hx, hy, hz, start, join);
+        if (snapped != null) return snapped;
         return surface(pos, face, hx, hy, hz);
+    }
+
+    /**
+     * A click on the surface within three quarters of a block of a machine beside it (so anywhere from the middle of the
+     * next cell on), where the machine has a connector on that edge: the end goes to its port, as if the machine had
+     * been clicked (AdventurAgent: a run laid from the floor next to a Signal Source stopped short of it, looked
+     * connected and wasn't; Baughn: a cable must never look connected without being so). The machine is a transparent
+     * node, or a six-node device on the same surface (hosted in a VoxelNode). Null if there's no such machine.
+     */
+    static CableRouter.End snapToPort(Level level, BlockPos pos, Direction face, double hx, double hy, double hz, boolean start, long[][] join) {
+        BlockPos cb = pos.relative(face);
+        double[] h = {hx, hy, hz};
+        CableRouter.End best = null;
+        double bd = 0.75;
+        for (Direction d : Direction.values()) {
+            if (d.getAxis() == face.getAxis()) continue;
+            int ax = d.getAxis().ordinal();
+            double dist = d.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 - h[ax] : h[ax];
+            if (dist > bd) continue;
+            BlockPos nb = cb.relative(d);
+            var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(nb, level));
+            if (n == null) continue;
+            CableRouter.End e;
+            if (n instanceof VoxelNode v) {
+                // a device on the same surface: its edge toward the cable, if it has a connector there
+                var side = mods.eln.misc.Direction.fromEnumFacing(face.getOpposite());
+                if (v.sideElementList[side.getInt()] == null) continue;
+                var out = mods.eln.misc.Direction.fromEnumFacing(d.getOpposite());
+                if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
+                Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.47, -d.getStepY() * 0.47, -d.getStepZ() * 0.47)
+                    .add(-face.getStepX() * 0.47, -face.getStepY() * 0.47, -face.getStepZ() * 0.47);
+                e = endAt(level, nb, d.getOpposite(), hit, start, new long[1][]);
+                if (e == null || e.dir() < 0) continue;
+            } else {
+                // the machine's face toward the cable, low on the edge the cable lies along
+                Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.5, -d.getStepY() * 0.5, -d.getStepZ() * 0.5)
+                    .add(-face.getStepX() * 0.45, -face.getStepY() * 0.45, -face.getStepZ() * 0.45);
+                e = endAt(level, nb, d.getOpposite(), hit, start, join);
+                if (e == null) continue;   // (no connector on that edge)
+            }
+            best = e;
+            bd = dist;
+        }
+        return best;
     }
 
     /** A point on the surface clicked (a block's face, or a stair's step inside its block), the cable lying on it. */
