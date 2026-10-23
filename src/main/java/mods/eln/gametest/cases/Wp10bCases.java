@@ -96,6 +96,7 @@ public final class Wp10bCases {
         cases.add(new AntennaCase());
         cases.add(new TeleporterCase());
         cases.add(new IdleCase());
+        cases.add(new HeatFurnaceExternalCase());
     }
 
     // ------------------------------------------------------------------ helpers
@@ -532,6 +533,55 @@ public final class Wp10bCases {
             ctx.check("wp10b teleporter broken: ghosts removed, node gone", left == 0
                 && NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p.getX(), p.getY(), p.getZ(), ctx.world())) == null,
                 left + " ghost(s) left");
+        }
+    }
+
+    /**
+     * Stone heat furnace under external control (Baughn: a player's signal input didn't work): a signal source on its
+     * left at half the signal voltage gives the fire half gain and takes fuel; at 0 V it takes no fuel.
+     */
+    static final class HeatFurnaceExternalCase implements TestCase {
+        HeatFurnaceElement half, off;
+
+        public String name() {
+            return "wp10b heat furnace external control";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        HeatFurnaceElement place(TestContext ctx, Wp10aCases.Layout l, int x, float volts) {
+            BlockPos p = ctx.at(x, 1, 1);
+            HeatFurnaceElement f = (HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, p);
+            l.used.add(p);
+            // as a player: the GUI's toggle packet, and a signal cable between source and furnace
+            f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleControlExternalId)));
+            BlockPos cp = off(p, f.front.left());
+            l.six(0 + (32 << 6), cp);   // (signal cable)
+            ElectricalSourceElement s = (ElectricalSourceElement) l.six(SIGNAL_SOURCE, cp.south());   // (beside the cable, on the platform)
+            s.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(ElectricalSourceElement.setVoltageId);
+                o.writeFloat(volts);
+            }));
+            return f;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            half = place(ctx, l, 1, (float) (mods.eln.Eln.SVU / 2));
+            off = place(ctx, l, 5, 0f);
+        }
+
+        public void measure(TestContext ctx) {
+            within(ctx, "wp10b heat furnace: control input reads the signal [V]", half.electricalCmdLoad.getU(), mods.eln.Eln.SVU / 2, 0.05 * mods.eln.Eln.SVU);
+            within(ctx, "wp10b heat furnace: half the signal, half the gain", half.furnaceProcess.getGain(), 0.5, 0.05);
+            ctx.check("wp10b heat furnace: a signal takes fuel; none takes none", half.getTakeFuel() && !off.getTakeFuel(),
+                "half " + half.getTakeFuel() + ", off " + off.getTakeFuel());
         }
     }
 
