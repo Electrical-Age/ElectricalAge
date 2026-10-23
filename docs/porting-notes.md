@@ -76,6 +76,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   50 V for its controls on a side; smelts at the electrical oven's rate for its temperature (same PfT table), drawing
   that heat; hoppers: top/sides in, bottom out. Model `tools/models/smelter.py`. Test `wp10a_smelter`.
 
+- New: the Steam Oven (`oil/SteamOven*`, Baughn 2026-10-23): steam into a port on top (as the turbine's), a 10 W fan
+  on 50 V; cooks food only, at up to 280 W (twice the electrical oven's best food speed), condensing 280 W / 25% of the
+  steam's heat (~500 mB/s at full speed; the rest vents as a plume); hoppers: sides in, bottom out. Model
+  `tools/models/steamoven.py`. Test `steam_oven_cooks_with_steam`.
+
 ## Bugs fixed
 
 From 1.7.10/1.12 (carried in from the 1.12 branch, before the port): the WP16 sim audit (`AuditFixesTest`), fuse and

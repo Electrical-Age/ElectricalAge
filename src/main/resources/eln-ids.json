@@ -1925,6 +1925,12 @@
   "kind": "transparent_node",
   "name": "200v_steam_turbine"
  },
+ "eln:transparent_node@5268": {
+  "descriptor": "SteamOvenDescriptor",
+  "display": "Steam Oven",
+  "kind": "transparent_node",
+  "name": "steam_oven"
+ },
  "eln:transparent_node@5272": {
   "descriptor": "SmelterDescriptor",
   "display": "Smelter",

@@ -8,6 +8,7 @@ import mods.eln.oil.ReservoirData;
 import mods.eln.oil.Reservoirs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -36,6 +37,7 @@ public final class OilCases {
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
+        cases.add(new SteamOvenCase());
         cases.add(new SealedPlant());
         cases.add(new SafetyValvePlant());
         cases.add(new SteamJetScalds());
@@ -500,6 +502,76 @@ public final class OilCases {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             ctx.line(String.format("oil: runaway peak %.0f%%, burnt %s", peak * 100, run.isBurnt()));
             ctx.check("oil: the shaft ran away and burst", peak > 1.2 && (run.isBurnt() || run.node.isDestructing()), String.format("peak %.0f%%", peak * 100));
+        }
+    }
+
+    /**
+     * The steam oven (Baughn 2026-10-23): a boiler set on it (its dome into the oven's top port) on 2.5 kW of heat. With
+     * its fan on 50 V it cooks beef at up to twice the electrical oven's best food speed (280 W: 3.6 s an item), taking
+     * 280 W / 25% of the steam's heat (~500 mB/s); without the fan it cooks nothing; hoppers feed only food.
+     */
+    static final class SteamOvenCase implements TestCase {
+        mods.eln.oil.SteamOvenElement oven, unfed;
+        mods.eln.oil.BoilerElement b1, b2;
+        mods.eln.sim.IProcess fire;
+        String hoppers;
+        boolean hoppersOk;
+
+        public String id() {
+            return "steam_oven_cooks_with_steam";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        mods.eln.oil.BoilerElement boiler(TestContext ctx, int x) {
+            var b = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(x, 2, 1));
+            b.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            b.fromTanks(8000, 0);
+            b.showTanks();
+            return b;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            oven = (mods.eln.oil.SteamOvenElement) l.device(20 + (82 << 6), 1, 1);
+            l.feed(ctx.at(1, 1, 1), oven.front.left());
+            unfed = (mods.eln.oil.SteamOvenElement) l.device(20 + (82 << 6), 5, 1);
+            for (var o : new mods.eln.oil.SteamOvenElement[]{oven, unfed}) {
+                o.getInventory().setItem(mods.eln.oil.SteamOvenElement.inSlotId, new ItemStack(Items.BEEF, 32));
+                o.getInventory().setChanged();
+            }
+            b1 = boiler(ctx, 1);
+            b2 = boiler(ctx, 5);
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                b1.thermal.moveEnergyTo(2500 * t);
+                b2.thermal.moveEnergyTo(2500 * t);
+            });
+            var inv = (mods.eln.oil.SteamOvenInventory) oven.getInventory();
+            int side = net.minecraft.core.Direction.NORTH.get3DDataValue(), down = net.minecraft.core.Direction.DOWN.get3DDataValue();
+            boolean beef = inv.canInsertItem(0, new ItemStack(Items.BEEF), side), ore = inv.canInsertItem(0, new ItemStack(Items.RAW_IRON), side);
+            boolean out = inv.canExtractItem(1, new ItemStack(Items.COOKED_BEEF), down);
+            hoppers = "side takes beef " + beef + ", raw iron " + ore + "; bottom gives out " + out;
+            hoppersOk = beef && !ore && out;
+        }
+
+        static int cooked(mods.eln.oil.SteamOvenElement o) {
+            return o.getInventory().getItem(mods.eln.oil.SteamOvenElement.outSlotId).getCount();
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line("steam oven: " + cooked(oven) + " cooked, unfed " + cooked(unfed) + "; " + oven.getWaila() + "; boiler " + b1.getWaila());
+            // (the boiler needs a while to raise steam: count what the last 20 s should give at most, and that it cooked)
+            ctx.check("steam oven: cooks beef on a boiler's steam", cooked(oven) >= 3 && cooked(oven) <= 9, "" + cooked(oven));
+            ctx.check("steam oven: no fan (no 50 V), no cooking", cooked(unfed) == 0, "" + cooked(unfed));
+            ctx.check("steam oven: never faster than 280 W (3.6 s an item)", cooked(oven) <= 30 / 3.57 + 1, "" + cooked(oven));
+            ctx.check("steam oven: hoppers feed only food, the bottom empties", hoppersOk, hoppers);
         }
     }
 

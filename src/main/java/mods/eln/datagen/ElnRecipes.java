@@ -1935,6 +1935,16 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Advanced Machine Block"),
             'E', findItemStack("Medium Voltage Cable"),
             'm', findItemStack("Advanced Electrical Motor"));
+        // the steam oven (Baughn 2026-10-23): an iron box with a glass door, a pipe in on top and a fan
+        addRecipe(findItemStack("Steam Oven", 1),
+            "IpI",
+            "GMG",
+            "IEI",
+            'I', stack(Items.IRON_INGOT),
+            'p', stack(mods.eln.registry.ElnRegistry.PIPE_KIT_IRON.get()),
+            'G', stack(Items.GLASS_PANE),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Electrical Motor"));
         // the smelter (Baughn 2026-10-23): a furnace in a brick jacket on a thermal cable, with a hopper's funnel on top
         addRecipe(findItemStack("Smelter", 1),
             "BHB",

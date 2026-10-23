@@ -1,4 +1,4 @@
-// 26.3	2026-10-23T16:48:30.042904631	eln-global/EA models
+// 26.3	2026-10-23T16:53:37.617759854	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -66,6 +66,7 @@ f0ed42296ed8f581741e53ea14400c53a04c1ba2 assets/eln/blockstates/light_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_rotating_solar_panel.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_solar_panel.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/smelter.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_oven.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/stone_heat_furnace.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/tachometer.json
@@ -362,6 +363,7 @@ caf37c022349960f310f519f788548cc5f0d1df3 assets/eln/items/small_solar_panel.json
 f8750fe216f0ad07571216fdd59b94264a744d04 assets/eln/items/smelter.json
 c45e46494ad77465a8c06bb56e58edf1d6a747db assets/eln/items/solar_tracker.json
 e0ac63120912b77188f74155e43fa17b38d38223 assets/eln/items/standard_alarm.json
+0a5420dad554eca037ba807beb9837751b42e535 assets/eln/items/steam_oven.json
 f5be8cbae972b0a222f2b97523926ae36187a761 assets/eln/items/steam_turbine.json
 7673b321165d9e22db59d2bf13173c3dfa78066e assets/eln/items/stone_heat_furnace.json
 4f821cb69637a405c1e173be16701f19b1b9fdca assets/eln/items/streetlight.json
@@ -812,6 +814,8 @@ ab4ccf32ae822a3b82f3f003b145d622fcf8a8a0 assets/eln/models/item/smelter_3d.json
 005372c73b7a9a304aa77f9f676fe124f1b31d8e assets/eln/models/item/solar_tracker.json
 32399a008ed75e65341ade5b864871dc9bf680f2 assets/eln/models/item/standard_alarm.json
 a125e471bfb6effc571f726e1993643a16652ef6 assets/eln/models/item/standard_alarm_3d.json
+4a30621bce4da77ce01185947ca76d8110bdce49 assets/eln/models/item/steam_oven.json
+5e84f459a170388d992107a67a11427a8505a577 assets/eln/models/item/steam_oven_3d.json
 1ad10bb23f5a1ed79129d5cedc9760acd3a70ab7 assets/eln/models/item/steam_turbine.json
 8e835b5350ed3fe674a792114b186e8fb3906a03 assets/eln/models/item/steam_turbine_3d.json
 215449c06675518ad1f5a2b5af777d6ae2514cc3 assets/eln/models/item/stone_heat_furnace.json

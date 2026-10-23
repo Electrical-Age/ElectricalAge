@@ -67,6 +67,8 @@ public class Wp10aContent implements ElnContent {
             LVU, 1000, lowVoltageCableDescriptor, "steamturbine50v"));
         transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "200V Steam Turbine"),
             MVU, 4000, meduimVoltageCableDescriptor, "steamturbine200v"));
+        // the steam oven (Baughn 2026-10-23): food cooked with a pipe's steam; model tools/models/steamoven.py
+        transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.SteamOvenDescriptor(TR_NAME(Type.NONE, "Steam Oven"), "steamoven"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */

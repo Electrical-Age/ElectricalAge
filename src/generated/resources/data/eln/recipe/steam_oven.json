@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "E": "eln:electrical_motor",
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot",
+    "M": "eln:machine_block",
+    "p": "eln:pipe_kit_iron"
+  },
+  "pattern": [
+    "IpI",
+    "GMG",
+    "IEI"
+  ],
+  "result": {
+    "id": "eln:steam_oven"
+  }
+}
