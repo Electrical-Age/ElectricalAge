@@ -25,7 +25,7 @@ public final class Repair {
             case ELECTRONICS:
                 return Eln.findItemStack("Cheap Chip");
             case MACHINE:
-                return b.getBurnt() == FailureCause.OVERVOLTAGE ? Eln.findItemStack("Cheap Chip") : Eln.findItemStack("Machine Block");
+                return b.getBurnt() != null && b.getBurnt().electrical() ? Eln.findItemStack("Cheap Chip") : Eln.findItemStack("Machine Block");
             case TRANSFORMER:
                 return Eln.findItemStack("Cheap Ferromagnetic Core");
             case CAPACITOR:

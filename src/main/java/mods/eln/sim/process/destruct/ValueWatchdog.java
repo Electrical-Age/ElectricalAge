@@ -44,7 +44,7 @@ public abstract class ValueWatchdog implements IProcess {
                 getClass().getName(),
                 destructable.describe());
             // severity: overflow as a rate of the budget, comparable across watchdogs of different units
-            destructable.fail(cause(), value, overflow * rand / timeoutReset);
+            destructable.fail(cause(value), value, overflow * rand / timeoutReset);
             // re-arm: if the failure is deferred (a worse one in the circuit went first), trip again only if the
             // fault lasts another full budget
             timeout = timeoutReset;
@@ -59,6 +59,11 @@ public abstract class ValueWatchdog implements IProcess {
     abstract double getValue();
 
     abstract FailureCause cause();
+
+    /** The cause for a failure at this value (default: cause()). */
+    FailureCause cause(double value) {
+        return cause();
+    }
 
     public void disable() {
         this.max = 100000000;

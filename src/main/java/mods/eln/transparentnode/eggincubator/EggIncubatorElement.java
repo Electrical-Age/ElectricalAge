@@ -53,7 +53,8 @@ public class EggIncubatorElement extends TransparentNodeElement {
         this.descriptor = (EggIncubatorDescriptor) descriptor;
 
         Failure exp = new Failure(this).machine();
-        slowProcessList.add(voltageWatchdog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
+        // (a resistor to ground on one pin shared by every side: either polarity runs it; Baughn: fed negative it burned)
+        slowProcessList.add(voltageWatchdog.set(powerLoad).setUMaxMin(this.descriptor.nominalVoltage).set(exp));
     }
 
     class EggIncubatorProcess implements IProcess, INBTTReady {

@@ -41,4 +41,15 @@ public class VoltageStateWatchDog extends ValueWatchdog {
     FailureCause cause() {
         return FailureCause.OVERVOLTAGE;
     }
+
+    /** (Tests: the cause a failure at value would have.) */
+    public mods.eln.sim.process.destruct.FailureCause causeFor(double value) {
+        return cause(value);
+    }
+
+    /** Below the minimum (a negative voltage on a polar device): reverse voltage, not overvoltage. */
+    @Override
+    FailureCause cause(double value) {
+        return value < 0 && value < min ? FailureCause.REVERSE_VOLTAGE : FailureCause.OVERVOLTAGE;
+    }
 }

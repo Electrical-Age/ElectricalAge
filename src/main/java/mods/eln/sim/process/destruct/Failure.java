@@ -203,7 +203,7 @@ public class Failure implements IDestructable {
             case TRANSFORMER:
                 return Outcome.BURN_FIRE_WIDE;
             case CAPACITOR:
-                return cause == FailureCause.OVERVOLTAGE ? Outcome.POP : Outcome.BURN_FIRE;
+                return cause.electrical() ? Outcome.POP : Outcome.BURN_FIRE;
             case BATTERY:
                 return energy >= BATTERY_EXPLOSION_ENERGY ? Outcome.EXPLODE : Outcome.BURN_FIRE;
             case ROTATING:
@@ -212,7 +212,7 @@ public class Failure implements IDestructable {
             case PRESSURE_VESSEL:
                 return cause == FailureCause.OVERPRESSURE ? Outcome.EXPLODE : cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
             case HV_LINE:
-                if (cause == FailureCause.OVERVOLTAGE && Math.abs(value) >= ARC_FLASH_VOLTAGE) return Outcome.ARC_FLASH;
+                if (cause.electrical() && Math.abs(value) >= ARC_FLASH_VOLTAGE) return Outcome.ARC_FLASH;
                 return cause == FailureCause.OVERHEAT ? Outcome.BURN_FIRE : Outcome.BURN;
         }
         return Outcome.BURN;
@@ -263,7 +263,7 @@ public class Failure implements IDestructable {
             node.physicalSelfDestruction(0);
         }
         particles(w, pos, ParticleTypes.LARGE_SMOKE, 12, 0.3);
-        if (cause == FailureCause.OVERVOLTAGE) {
+        if (cause.electrical()) {
             particles(w, pos, ParticleTypes.CRIT, 20, 0.5);
             sound(w, pos, SoundEvents.FIRE_EXTINGUISH, 1.0f, 1.6f);
         } else {

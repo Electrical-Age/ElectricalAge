@@ -82,6 +82,7 @@ public final class Wp10aCases {
         cases.add(new FurnaceCase());
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
+        cases.add(new MaceratorReverseCase());
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
@@ -347,6 +348,50 @@ public final class Wp10aCases {
             ItemStack dust = Eln.findItemStack("Copper Dust");
             ctx.check("macerator: vanilla copper ingot (c:ingots/copper) -> 1 EA Copper Dust", in.isEmpty()
                 && out.getItem() == dust.getItem() && out.getCount() == 1, "in " + in + ", out " + out);
+        }
+    }
+
+    /**
+     * The macerator fed -50 V (Baughn: a generator on one side and a ground cable on the other burned one as "overvoltage"):
+     * a resistor to ground on one pin, so either polarity runs it: it processes the copper and isn't burnt; and a
+     * voltage watchdog tripped below its minimum names the cause reverse voltage.
+     */
+    static final class MaceratorReverseCase implements TestCase {
+        ElectricalMachineElement macerator;
+
+        public String name() {
+            return "wp10a macerator runs on reverse voltage";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return 260;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            macerator = (ElectricalMachineElement) l.device(MACHINES[0], 2, 1);
+            SixNodeElement[] f = l.feed(ctx.at(2, 1, 1), macerator.front.left());
+            ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat((float) -U);
+            }));
+            macerator.getInventory().setItem(macerator.inSlotId, new ItemStack(Items.COPPER_INGOT));
+            macerator.getInventory().setChanged();
+        }
+
+        public void measure(TestContext ctx) {
+            ItemStack in = macerator.getInventory().getItem(macerator.inSlotId);
+            ItemStack out = macerator.getInventory().getItem(macerator.outSlotId);
+            ctx.check("reverse-fed macerator not burnt", !macerator.isBurnt(), "burnt " + macerator.isBurnt());
+            ctx.check("reverse-fed macerator processes copper", in.isEmpty() && out.getCount() == 1, "in " + in + ", out " + out);
+            var wd = new mods.eln.sim.process.destruct.VoltageStateWatchDog().setUNominal(50);
+            ctx.check("a watchdog under its minimum names reverse voltage",
+                mods.eln.sim.process.destruct.FailureCause.REVERSE_VOLTAGE == wd.causeFor(-30)
+                    && mods.eln.sim.process.destruct.FailureCause.OVERVOLTAGE == wd.causeFor(80), "");
         }
     }
 

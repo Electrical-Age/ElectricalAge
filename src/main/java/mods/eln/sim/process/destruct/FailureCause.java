@@ -5,12 +5,20 @@ public enum FailureCause {
     OVERHEAT("overheated"),
     OVERVOLTAGE("overvoltage"),
     OVERSPEED("overspeed"),
-    OVERPRESSURE("burst");
+    OVERPRESSURE("burst"),
+    /** Burned by a voltage of the wrong sign (Baughn: a machine fed negative showed "overvoltage", exactly backwards).
+     *  Appended: causes are saved by ordinal. */
+    REVERSE_VOLTAGE("reverse voltage");
 
     public final String text;
 
     FailureCause(String text) {
         this.text = text;
+    }
+
+    /** A voltage fault, either sign (same outcomes and repair as overvoltage). */
+    public boolean electrical() {
+        return this == OVERVOLTAGE || this == REVERSE_VOLTAGE;
     }
 
     public static FailureCause fromOrdinal(int i) {

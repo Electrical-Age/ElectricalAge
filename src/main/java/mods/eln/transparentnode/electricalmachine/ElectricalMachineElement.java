@@ -70,7 +70,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
 
         Failure exp = new Failure(this).machine();
-        slowProcessList.add(voltageWatchdog.set(electricalLoad).setUNominal(this.descriptor.nominalU).set(exp));
+        // (a resistor to ground on one pin shared by every side: either polarity runs it; Baughn: fed negative it burned)
+        slowProcessList.add(voltageWatchdog.set(electricalLoad).setUMaxMin(this.descriptor.nominalU).set(exp));
     }
 
     @Override
