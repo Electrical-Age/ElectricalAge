@@ -57,6 +57,11 @@ public final class OreDropCases {
                 var mac = mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(raw));
                 c.check("raw " + m + " macerates to dust", mac != null, String.valueOf(mac));
             }
+            // tungsten needs an iron pickaxe (Baughn: it claimed a wooden one would do)
+            var tung = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("eln", "tungsten_ore")).defaultBlockState();
+            c.check("tungsten ore: a stone pickaxe can't mine it, an iron one can",
+                !new ItemStack(Items.STONE_PICKAXE).isCorrectToolForDrops(tung) && !new ItemStack(Items.WOODEN_PICKAXE).isCorrectToolForDrops(tung)
+                    && new ItemStack(Items.IRON_PICKAXE).isCorrectToolForDrops(tung), "");
         }
     }
 }

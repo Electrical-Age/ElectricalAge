@@ -83,6 +83,7 @@ public final class Wp10aCases {
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
         cases.add(new MaceratorReverseCase());
+        cases.add(new SingleUseChargeCase());
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
@@ -348,6 +349,50 @@ public final class Wp10aCases {
             ItemStack dust = Eln.findItemStack("Copper Dust");
             ctx.check("macerator: vanilla copper ingot (c:ingots/copper) -> 1 EA Copper Dust", in.isEmpty()
                 && out.getItem() == dust.getItem() && out.getCount() == 1, "in " + in + ", out " + out);
+        }
+    }
+
+    /**
+     * A single-use battery on a charger (Baughn: they could be charged): fed 100 V on its positive side, 0 V on its
+     * negative: it stores nothing (its charge doesn't rise) and heats until it burns (catches fire).
+     */
+    static final class SingleUseChargeCase implements TestCase {
+        mods.eln.transparentnode.battery.BatteryElement battery;
+        double startCharge;
+
+        public String name() {
+            return "wp10a single-use battery can't be charged";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 400;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            battery = (mods.eln.transparentnode.battery.BatteryElement) l.device(5 + (16 << 6), 3, 1);
+            startCharge = battery.batteryProcess.getCharge();
+            SixNodeElement[] plus = l.feed(ctx.at(3, 1, 1), battery.front.left());
+            ((ElectricalSourceElement) plus[0]).networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat(100f);
+            }));
+            SixNodeElement[] minus = l.feed(ctx.at(3, 1, 1), battery.front.right());
+            ((ElectricalSourceElement) minus[0]).networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat(0f);
+            }));
+        }
+
+        public void measure(TestContext ctx) {
+            double q = battery.batteryProcess.getCharge();
+            ctx.check("single-use battery: charging stores nothing", q <= startCharge + 1e-6, String.format("charge %.4f -> %.4f", startCharge, q));
+            ctx.check("single-use battery: charged, it overheats and burns", battery.isBurnt() || battery.thermalLoad.Tc > battery.descriptor.thermalWarmLimit * 0.8,
+                String.format("burnt %s, T %.1f (limit %.0f)", battery.isBurnt(), battery.thermalLoad.Tc, battery.descriptor.thermalWarmLimit));
         }
     }
 

@@ -37,8 +37,20 @@ public class ElnJeiPlugin implements IModPlugin {
         for (String k : MACHINES.keySet()) TYPES.put(k, mezz.jei.api.recipe.types.IRecipeType.create("eln", k, mods.eln.misc.Recipe.class));
     }
 
+    /**
+     * The machines' recipe lists are filled when a server starts (ElnMachineRecipes, after the registries are bound), so a
+     * client on a dedicated server had none, and no machine list either: JEI showed no EA machine recipes (Baughn, on
+     * Incognito; it worked in single player). JEI runs once the client has joined and its registries are bound: fill them
+     * here if they're empty.
+     */
+    static void ensureRecipes() {
+        mods.eln.registry.ElnRegistry.afterRegistration();
+        if (Eln.maceratorRecipes.getRecipes().isEmpty()) mods.eln.registry.ElnMachineRecipes.registerAll();
+    }
+
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        ensureRecipes();
         for (var e : MACHINES.entrySet()) {
             var list = e.getValue().get();
             if (list.getMachines().isEmpty() || list.getRecipes().isEmpty()) continue;
@@ -51,6 +63,7 @@ public class ElnJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
+        ensureRecipes();
         registration.addRecipes(RecipeTypes.CRAFTING, mods.eln.node.voxel.CableKitRecipes.examples());
         registration.addRecipes(RecipeTypes.CRAFTING, mods.eln.node.voxel.PipeKitRecipes.examples());
         for (var e : MACHINES.entrySet()) {

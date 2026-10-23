@@ -27,9 +27,18 @@ public class BatteryProcess implements IProcess {
         this.voltageSource = voltageSource;
     }
 
+    /** Where charging a battery that can't be recharged puts the energy (its thermal load), or null. */
+    public mods.eln.sim.ThermalLoad chargeHeat;
+
     @Override
     public void process(double time) {
-        Q = Math.max(Q - voltageSource.getCurrent() * time / QNominal, 0);
+        double I = voltageSource.getCurrent();
+        if (!isRechargeable && I < 0) {
+            // a single-use battery being charged stores nothing: the energy goes into heat, until it burns (Baughn)
+            if (chargeHeat != null) chargeHeat.moveEnergyTo(-I * voltageSource.getU() * time);
+            I = 0;
+        }
+        Q = Math.max(Q - I * time / QNominal, 0);
 
         double voltage = computeVoltage();
 

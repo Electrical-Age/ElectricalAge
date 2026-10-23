@@ -64,6 +64,20 @@ final class MachineMenuCase implements TestCase {
         }
         ctx.check("iron ore -> raw iron, mean about 1.75", ro.output[0].is(Items.RAW_IRON) && Math.abs(ore / 4000 - 1.75) < 0.05, "mean " + ore / 4000);
         ctx.check("raw iron -> iron dust, mean about 1.2", Math.abs(chunk / 4000 - 1.2) < 0.03, "mean " + chunk / 4000);
+        // every chunk: one dust, two 20 % of the time (Baughn asked for a test of exactly this)
+        for (var raw : new net.minecraft.world.item.Item[]{Items.RAW_IRON, Items.RAW_GOLD, Items.RAW_COPPER,
+            mods.eln.registry.ElnRegistry.RAW_LEAD.get(), mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get()}) {
+            var r = mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(raw));
+            int n = 20000, two = 0, other = 0;
+            for (int i = 0; i < n; i++) {
+                int c = r.getOutputCopy(rnd)[0].getCount();
+                if (c == 2) two++;
+                else if (c != 1) other++;
+            }
+            double share = two / (double) n;
+            ctx.check("macerating " + raw + ": 1 dust, 2 dust 20% of the time", other == 0 && Math.abs(share - 0.2) < 0.012,
+                String.format("2 dust %.1f%%, other counts %d", 100 * share, other));
+        }
         ctx.check("macerator: iron ore still in the input after 5 ticks",
             node.element.getInventory().getItem(4).is(Items.IRON_ORE), "input holds " + node.element.getInventory().getItem(4));
     }
