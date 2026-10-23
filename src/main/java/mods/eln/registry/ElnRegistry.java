@@ -110,7 +110,7 @@ public final class ElnRegistry {
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
     public static final DeferredItem<Item> RAW_TUNGSTEN = ITEMS.registerSimpleItem("raw_tungsten");
-    /** What food turns into in an electrical oven above 300 °C (Baughn); four make a charcoal, and it burns a quarter as long. */
+    /** What food turns into in an electrical oven above 280 °C (Baughn); four make a charcoal, and it burns a quarter as long. */
     public static final DeferredItem<Item> CHARCOAL_NUGGET = ITEMS.registerSimpleItem("charcoal_nugget",
         p -> p.component(net.minecraft.core.component.DataComponents.COOKING_FUEL, new net.minecraft.world.item.component.CookingFuel(
             new net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt.Constant(400),

@@ -84,7 +84,7 @@ public class SmelterElement extends TransparentNodeElement {
 
     static final double ENERGY_PER_ITEM = mods.eln.misc.RecipesList.electricalFurnaceEnergyPerSmelt;
 
-    /** What the input makes now: food chars above 300 °C, as in the oven. */
+    /** What the input makes now: food chars above 280 °C, as in the oven. */
     public ItemStack result() {
         ItemStack in = inventory.getItem(inSlotId);
         if (Utils.isEmpty(in)) return ItemStack.EMPTY;

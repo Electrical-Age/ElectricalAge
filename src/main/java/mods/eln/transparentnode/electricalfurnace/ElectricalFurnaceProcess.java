@@ -109,7 +109,7 @@ public class ElectricalFurnaceProcess implements IProcess {
     }
 
     /** Above this (°C) food chars instead of cooking (Baughn). */
-    public static final double CHAR_T = 300;
+    public static final double CHAR_T = 280;   // (Baughn: 280, so an iron heating element, which tops out at 300, can char)
 
     public ItemStack getSmeltResult() {
         ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);

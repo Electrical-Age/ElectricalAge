@@ -278,7 +278,7 @@ public final class Wp10aCases {
     }
 
     /**
-     * Baughn: above 300 °C an electrical oven chars food to a charcoal nugget instead of cooking it; below, beef cooks;
+     * Baughn: above 280 °C an electrical oven chars food to a charcoal nugget instead of cooking it; below, beef cooks;
      * ore smelts as ever at any heat. Four nuggets make a charcoal, and they burn (a quarter of a charcoal).
      */
     static final class FurnaceCharCase implements TestCase {
@@ -286,7 +286,7 @@ public final class Wp10aCases {
         boolean ok;
 
         public String name() {
-            return "wp10a electrical oven chars food above 300 C";
+            return "wp10a electrical oven chars food above 280 C";
         }
 
         public void build(TestContext ctx) {
@@ -298,20 +298,20 @@ public final class Wp10aCases {
             f.getInventory().setItem(ElectricalFurnaceElement.inSlotId, new ItemStack(Items.BEEF));
             t.Tc = 250;
             ItemStack cool = p.getSmeltResult();
-            t.Tc = 350;
+            t.Tc = 270;   // (+ the room: 290 °C)
             ItemStack hot = p.getSmeltResult();
             f.getInventory().setItem(ElectricalFurnaceElement.inSlotId, new ItemStack(Items.RAW_IRON));
             ItemStack ore = p.getSmeltResult();
             t.Tc = 0;
             var fuel = new ItemStack(nugget).get(net.minecraft.core.component.DataComponents.COOKING_FUEL);
             int burn = fuel != null && fuel.burnTime() instanceof net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt.Constant k ? k.value() : 0;
-            got = "250 C: " + cool + ", 350 C: " + hot + ", raw iron at 350 C: " + ore + ", nugget burns " + burn;
+            got = "250 C: " + cool + ", 270 C: " + hot + ", raw iron at 270 C: " + ore + ", nugget burns " + burn;
             ok = cool.is(Items.COOKED_BEEF) && hot.is(nugget) && ore.is(Items.IRON_INGOT) && burn == 400;
             f.getInventory().setItem(ElectricalFurnaceElement.inSlotId, ItemStack.EMPTY);
         }
 
         public void measure(TestContext ctx) {
-            ctx.check("wp10a oven: beef cooks at 250 C, chars at 350 C; ore smelts; a nugget burns 400 ticks", ok, got);
+            ctx.check("wp10a oven: beef cooks at 250 C, chars at 270 C over the room; ore smelts; a nugget burns 400 ticks", ok, got);
         }
     }
 
