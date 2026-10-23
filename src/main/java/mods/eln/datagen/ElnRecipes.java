@@ -1755,6 +1755,10 @@ public final class ElnRecipes extends ElnRecipesBase {
         addSmelting(mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get(), 0, findItemStack("Tungsten Ingot"));
         addBlasting(mods.eln.registry.ElnRegistry.RAW_LEAD.get(), findItemStack("ingotLead"), 0.7f);
         addBlasting(mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get(), findItemStack("Tungsten Ingot"), 0.7f);
+        // charcoal nuggets (an electrical oven's burnt food): four to a charcoal, and back
+        var nugget = mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get();
+        addShapelessRecipe(stack(net.minecraft.world.item.Items.CHARCOAL), stack(nugget), stack(nugget), stack(nugget), stack(nugget));
+        addShapelessRecipe(stack(nugget, 4), stack(net.minecraft.world.item.Items.CHARCOAL));
         in = findItemStack("ingotAlloy");
         // addSmelting(in.getItem().itemID, 0,
         // findItemStack("Ferrite Ingot"));

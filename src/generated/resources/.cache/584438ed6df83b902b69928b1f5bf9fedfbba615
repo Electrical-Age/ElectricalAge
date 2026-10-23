@@ -1,4 +1,4 @@
-// 26.3	2026-10-20T19:45:34.484314353	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-23T16:34:26.479677754	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -82,6 +82,8 @@ b85823dd74834547255b7d60faa1cc1280c8c423 data/eln/advancement/recipes/misc/boile
 7d99ddf6a770f2d9a3e99f992901d073c6e2cebf data/eln/advancement/recipes/misc/brown_brush.json
 727ff8c6105794cf50890d21503562ad91ba5af3 data/eln/advancement/recipes/misc/capacity_oriented_battery.json
 cd106d48bd6c7255ef6a10986204077dced4bc4d data/eln/advancement/recipes/misc/casing.json
+51678bd91fdf0fd4d45cf8945f27a844441ef9c4 data/eln/advancement/recipes/misc/charcoal.json
+c1c02f926058e1a5bf383be49d8fad52eb0c9dff data/eln/advancement/recipes/misc/charcoal_nugget.json
 2c691f10bb24f194337257bb610a228ff40c59ec data/eln/advancement/recipes/misc/cheap_chip.json
 f996e81fb80e515548a6e7a7c20e6807ff52a339 data/eln/advancement/recipes/misc/cheap_electrical_drill.json
 20786f52964ac84ab2f8e645c40b6af3e0d499dd data/eln/advancement/recipes/misc/cheap_ferromagnetic_core.json
@@ -408,6 +410,8 @@ bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2
 9bf14159b70a5eb86642c34c15c2aca5cd1233c6 data/eln/recipe/brown_brush.json
 2654bb694e4ec304ddc307586afb15f0bfdbe5d4 data/eln/recipe/capacity_oriented_battery.json
 4c74af168b68d306cd10b1bee766e37ccc437952 data/eln/recipe/casing.json
+56412ab86155c5379106a743c5f67611b5ed06c1 data/eln/recipe/charcoal.json
+3dda76ae8f0f3575454b313488ed551b28f72428 data/eln/recipe/charcoal_nugget.json
 622bc1964dde3ca540d6499d7117580000bad27d data/eln/recipe/cheap_chip.json
 afa583372447fddaf5707f783a659b8429a6b5d5 data/eln/recipe/cheap_electrical_drill.json
 ab676e2387186148a3df59b088cf2d1f4c3a15f4 data/eln/recipe/cheap_ferromagnetic_core.json

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:charcoal_nugget",
+    "eln:charcoal_nugget",
+    "eln:charcoal_nugget",
+    "eln:charcoal_nugget"
+  ],
+  "result": {
+    "id": "minecraft:charcoal"
+  }
+}

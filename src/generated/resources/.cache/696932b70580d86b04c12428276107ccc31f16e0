@@ -1,4 +1,4 @@
-// 26.3	2026-10-20T19:45:34.481372801	eln-global/EA models
+// 26.3	2026-10-23T16:34:26.476327708	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -158,6 +158,7 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 8a4e1e22bad335e63ea8671fc091833082a69edf assets/eln/items/cable_kit_vhv.json
 416d58aaae7250af7c091abfb63554244ca09aa6 assets/eln/items/capacity_oriented_battery.json
 a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
+3923dc921f4278cb2812659902b5100ef7d968f5 assets/eln/items/charcoal_nugget.json
 54c73cdeae61d72e7dfca65d5655d763c6a23b82 assets/eln/items/cheap_chip.json
 76b341a7ed092dde68fc920f40b4daf9645cea82 assets/eln/items/cheap_electrical_drill.json
 75599ffe285eb46bc0a5ed45a7da5ed746cc6cac assets/eln/items/cheap_ferromagnetic_core.json
@@ -522,6 +523,7 @@ fd4526b81d5d19c6111fb9ee420bc4e7c645ddbf assets/eln/models/item/cable_kit_signal
 1fb49930355446d40b68162bc471465a6ac1901d assets/eln/models/item/capacity_oriented_battery.json
 c01d247e009543b7b3371b07e7b8a45e28eea766 assets/eln/models/item/capacity_oriented_battery_3d.json
 ccab4471b309e90a6f273d50e50f9ad1052fb4ff assets/eln/models/item/casing.json
+61fdc35c2155e60b578b6788c4cf9b95d9114fe7 assets/eln/models/item/charcoal_nugget.json
 bf73432e1181339472b745af9693c30e46be8c6d assets/eln/models/item/cheap_chip.json
 826d5304e14e80c2632d1bb8f9b89c816d1450fe assets/eln/models/item/cheap_electrical_drill.json
 232731e48152ff4ac53adf38b3996ec6cf194cae assets/eln/models/item/cheap_ferromagnetic_core.json

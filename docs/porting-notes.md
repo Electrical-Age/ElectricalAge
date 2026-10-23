@@ -68,6 +68,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   throwing (`SixNodeLoadTest`). Voxel blocks invalidate capability caches when pipe adapters come and go.
 - Portable batteries charge items in the offhand too. Sounds: render loops play client-side (`sound/LoopedSoundPlayer`).
 
+- Electrical oven: above 300 °C food (anything with a food component) chars to a charcoal nugget instead of cooking
+  (Baughn 2026-10-23; `ElectricalFurnaceProcess.CHAR_T`). Charcoal nuggets: four to a charcoal and back; fuel for 400
+  ticks (a `cooking_fuel` component). Test `wp10a_electrical_oven_chars_food_above_300_c`.
+
 ## Bugs fixed
 
 From 1.7.10/1.12 (carried in from the 1.12 branch, before the port): the WP16 sim audit (`AuditFixesTest`), fuse and

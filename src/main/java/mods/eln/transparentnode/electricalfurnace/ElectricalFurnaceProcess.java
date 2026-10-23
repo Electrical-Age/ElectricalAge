@@ -38,7 +38,7 @@ public class ElectricalFurnaceProcess implements IProcess {
 
         ItemStack itemStackIn = inventory.getItem(ElectricalFurnaceElement.inSlotId);
         ItemStack itemStackOut = inventory.getItem(ElectricalFurnaceElement.outSlotId);
-        if (itemStackInOld != itemStackIn || (!smeltCan()) || !smeltInProcess) {
+        if (itemStackInOld != itemStackIn || (!smeltCan()) || !smeltInProcess) {   // (smeltCan: what it makes may change with the heat)
             smeltInit();
             itemStackInOld = itemStackIn;
         }
@@ -108,8 +108,18 @@ public class ElectricalFurnaceProcess implements IProcess {
         }
     }
 
+    /** Above this (°C) food chars instead of cooking (Baughn). */
+    public static final double CHAR_T = 300;
+
     public ItemStack getSmeltResult() {
-        return Utils.smeltResult(furnace.node.coordonate.world(), inventory.getItem(ElectricalFurnaceElement.inSlotId));
+        ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
+        if (furnace.thermalLoad.Tc > CHAR_T && charrable(in)) return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
+        return Utils.smeltResult(furnace.node.coordonate.world(), in);
+    }
+
+    /** Food, raw or cooked: too hot an oven burns it to a charcoal nugget. */
+    public static boolean charrable(ItemStack s) {
+        return !Utils.isEmpty(s) && s.has(net.minecraft.core.component.DataComponents.FOOD);
     }
 
     /**

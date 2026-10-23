@@ -110,6 +110,12 @@ public final class ElnRegistry {
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
     public static final DeferredItem<Item> RAW_TUNGSTEN = ITEMS.registerSimpleItem("raw_tungsten");
+    /** What food turns into in an electrical oven above 300 °C (Baughn); four make a charcoal, and it burns a quarter as long. */
+    public static final DeferredItem<Item> CHARCOAL_NUGGET = ITEMS.registerSimpleItem("charcoal_nugget",
+        p -> p.component(net.minecraft.core.component.DataComponents.COOKING_FUEL, new net.minecraft.world.item.component.CookingFuel(
+            new net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt.Constant(400),
+            new net.minecraft.world.level.storage.loot.providers.number.floats.ResolvableFloat.Reference(
+                net.minecraft.world.level.storage.loot.providers.number.floats.ContextFloatProviders.COOKING_DEFAULT_SPEED_MULTIPLIER))));
     /** The chisel (carving blocks voxel by voxel: a hole through a wall for a cable; art). */
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ChiselItem> CHISEL =
         ITEMS.registerItem("chisel", mods.eln.node.voxel.ChiselItem::new);
@@ -267,6 +273,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(RAW_LEAD);
         ALL_ITEMS.add(RAW_TUNGSTEN);
+        ALL_ITEMS.add(CHARCOAL_NUGGET);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

@@ -80,6 +80,7 @@ public final class Wp10aCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new EggIncubatorCase());
         cases.add(new FurnaceCase());
+        cases.add(new FurnaceCharCase());
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
         cases.add(new MaceratorReverseCase());
@@ -272,6 +273,44 @@ public final class Wp10aCases {
             ctx.checkValue("wp10a furnace heating resistor [ohm]", heat.getR(), rh);
             ctx.checkValue("wp10a furnace heating power [W]", heat.getP(), i * i * rh);
             ctx.check("wp10a furnace warms up", t.Tc > 0.1, String.format("T = %.3f C above ambient", t.Tc));
+        }
+    }
+
+    /**
+     * Baughn: above 300 °C an electrical oven chars food to a charcoal nugget instead of cooking it; below, beef cooks;
+     * ore smelts as ever at any heat. Four nuggets make a charcoal, and they burn (a quarter of a charcoal).
+     */
+    static final class FurnaceCharCase implements TestCase {
+        String got = "";
+        boolean ok;
+
+        public String name() {
+            return "wp10a electrical oven chars food above 300 C";
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            ElectricalFurnaceElement f = (ElectricalFurnaceElement) l.device(FURNACE, 3);
+            mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess p = field(f, "slowRefreshProcess");
+            ThermalLoad t = field(f, "thermalLoad");
+            var nugget = mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get();
+            f.getInventory().setItem(ElectricalFurnaceElement.inSlotId, new ItemStack(Items.BEEF));
+            t.Tc = 250;
+            ItemStack cool = p.getSmeltResult();
+            t.Tc = 350;
+            ItemStack hot = p.getSmeltResult();
+            f.getInventory().setItem(ElectricalFurnaceElement.inSlotId, new ItemStack(Items.RAW_IRON));
+            ItemStack ore = p.getSmeltResult();
+            t.Tc = 0;
+            var fuel = new ItemStack(nugget).get(net.minecraft.core.component.DataComponents.COOKING_FUEL);
+            int burn = fuel != null && fuel.burnTime() instanceof net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt.Constant k ? k.value() : 0;
+            got = "250 C: " + cool + ", 350 C: " + hot + ", raw iron at 350 C: " + ore + ", nugget burns " + burn;
+            ok = cool.is(Items.COOKED_BEEF) && hot.is(nugget) && ore.is(Items.IRON_INGOT) && burn == 400;
+            f.getInventory().setItem(ElectricalFurnaceElement.inSlotId, ItemStack.EMPTY);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("wp10a oven: beef cooks at 250 C, chars at 350 C; ore smelts; a nugget burns 400 ticks", ok, got);
         }
     }
 
