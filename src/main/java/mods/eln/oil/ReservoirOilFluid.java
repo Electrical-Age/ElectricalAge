@@ -17,7 +17,7 @@ import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * The oil of an underground lake: still, level 1-8 (8 = full: drawn 8/9 high like water), never flows. Its level is
- * set by the lake's Reservoir record (the sweep in Reservoirs), so the whole surface moves together; buckets and pumps
+ * set by the lake's reservoir record (mods.eln.reservoir.Reservoirs' sweep), so the whole surface moves together; buckets and pumps
  * take from the record (ReservoirOilBlock), not from the block.
  */
 public class ReservoirOilFluid extends Fluid {

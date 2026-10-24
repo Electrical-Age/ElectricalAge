@@ -62,7 +62,9 @@ public class OilPumpElement extends TransparentNodeElement {
                 look = 40;
                 findSource(level);
             }
-            boolean water = source < 0;
+            // (a water reservoir, a Watershed lake, is pumped like oil: from its record, Baughn: no infinite water)
+            mods.eln.reservoir.Reservoir res = source > 0 ? mods.eln.reservoir.ReservoirData.get(level).byId(source) : null;
+            boolean water = source < 0 || res != null && res.kind().equals(mods.eln.reservoir.ReservoirWater.KIND);
             boolean room = tank.getCapacity() - tank.getFluidAmount() >= 1
                 && (tank.getFluidAmount() == 0 || tank.getFluid().getFluid().isSame(water ? Fluids.WATER : Oil.CRUDE.get()));
             if (source == 0 || !room) {
@@ -78,16 +80,15 @@ public class OilPumpElement extends TransparentNodeElement {
             carry = mb - Math.floor(mb);
             long got = 0;
             if (whole > 0) {
-                if (water) got = whole;
+                if (source < 0) got = whole;
                 else {
-                    Reservoir r = ReservoirData.get(level).byId(source);
-                    if (r != null) got = Reservoirs.take(level, r, whole, false);
+                    if (res != null) got = mods.eln.reservoir.Reservoirs.take(level, res, whole, false);
                     if (got == 0) status = "the lake is empty";
                 }
                 if (got > 0) tank.fill(new FluidStack(water ? Fluids.WATER : Oil.CRUDE.get(), (int) got), true);
             }
             rate = 0.9 * rate + 0.1 * (got / Math.max(time, 1e-6));
-            if (got > 0) status = water ? "pumping water" : "pumping crude from lake #" + source;
+            if (got > 0) status = source < 0 ? "pumping water" : water ? "pumping water from lake #" + source : "pumping crude from lake #" + source;
         }
     }
 
@@ -105,7 +106,7 @@ public class OilPumpElement extends TransparentNodeElement {
         // the block under the casing, or around its bottom piece
         BlockPos bottom = p.above();
         for (BlockPos q : new BlockPos[]{p, bottom.north(), bottom.south(), bottom.east(), bottom.west()}) {
-            Reservoir r = ReservoirData.get(level).at(q);
+            mods.eln.reservoir.Reservoir r = mods.eln.reservoir.ReservoirData.get(level).at(level, q);
             if (r != null) {
                 source = r.id();
                 return;

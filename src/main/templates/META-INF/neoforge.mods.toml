@@ -44,8 +44,9 @@ Electrical Age: electrical and mechanical simulation (MNA solver), ported to Min
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
-#[[mixins]]
-#config="${mod_id}.mixins.json"
+# (reservoirs: vanilla water and reservoir water as one fluid; buckets take from a reservoir's record)
+[[mixins]]
+config="${mod_id}.mixins.json"
 
 # The [[accessTransformers]] block allows you to declare where your AT file is.
 # If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg

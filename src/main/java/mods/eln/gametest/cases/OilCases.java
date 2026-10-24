@@ -3,9 +3,9 @@ package mods.eln.gametest.cases;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
 import mods.eln.oil.Oil;
-import mods.eln.oil.Reservoir;
-import mods.eln.oil.ReservoirData;
-import mods.eln.oil.Reservoirs;
+import mods.eln.reservoir.Reservoir;
+import mods.eln.reservoir.ReservoirData;
+import mods.eln.reservoir.Reservoirs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -59,7 +59,7 @@ public final class OilCases {
                 mask[dx * 3 + dz] = deep ? 0b11 : 0b1;
                 if (!deep) ctx.level().setBlock(new BlockPos(x0 + dx, y1, z0 + dz), Blocks.STONE.defaultBlockState(), 3);
             }
-        Reservoir r = ReservoirData.get(ctx.level()).create(x0, z0, 7, 3, floor, mask, Long.MAX_VALUE);
+        Reservoir r = mods.eln.oil.OilReservoirs.create(ctx.level(), null, x0, z0, 7, 3, floor, mask, Long.MAX_VALUE);
         sweepAll(ctx, r);
         return r;
     }
@@ -160,7 +160,8 @@ public final class OilCases {
         }
     }
 
-    /** A block placed into the lake is a dam: the cell leaves the lake; the oil stays in the record. */
+    /** A block placed into the lake is a dam: the cell leaves the lake's area, the oil stays in the record (so the
+     *  surface rises a hair: Baughn), and when the block goes the cell fills again (Baughn: refill, for oil too). */
     static final class Dam extends Base {
         public String id() {
             return "oil_lake_dam";
@@ -177,10 +178,13 @@ public final class OilCases {
             BlockPos cell = ctx.at(5, 1, 0);
             ctx.level().setBlock(cell, Blocks.COBBLESTONE.defaultBlockState(), 3);
             sweepAll(ctx, r);
-            ctx.check("oil: the dammed cell left the lake", !r.contains(cell.getX(), cell.getY(), cell.getZ()), "");
-            ctx.check("oil: capacity one cell less", r.capacity() == cap - 1000, r.capacity() + " vs " + (cap - 1000));
+            ctx.check("oil: capacity one cell less with the dam", r.capacity() == cap - 1000, r.capacity() + " vs " + (cap - 1000));
             ctx.check("oil: the oil it held stays in the record", r.amount() == amount, "" + r.amount());
             ctx.check("oil: the dam block stays", ctx.level().getBlockState(cell).is(Blocks.COBBLESTONE), "");
+            ctx.level().setBlock(cell, Blocks.AIR.defaultBlockState(), 3);
+            sweepAll(ctx, r);
+            ctx.check("oil: the dam gone, the cell fills again", r.capacity() == cap && level(ctx, 5, 1, 0) > 0,
+                r.capacity() + " vs " + cap + ", level " + level(ctx, 5, 1, 0));
             cleanup(ctx, r);
         }
     }
@@ -263,7 +267,7 @@ public final class OilCases {
                 int[] floor = new int[9], mask = new int[9];
                 java.util.Arrays.fill(floor, under.getY());
                 java.util.Arrays.fill(mask, 1);
-                r = ReservoirData.get(ctx.level()).create(under.getX() - 1, under.getZ() - 1, 3, 3, floor, mask, Long.MAX_VALUE);
+                r = mods.eln.oil.OilReservoirs.create(ctx.level(), null, under.getX() - 1, under.getZ() - 1, 3, 3, floor, mask, Long.MAX_VALUE);
                 Reservoirs.sweep(ctx.level(), r, under.getX() >> 4, under.getZ() >> 4);
                 before = r.amount();
             }
@@ -278,7 +282,7 @@ public final class OilCases {
             var fluid = tank.getFluid().getFluid();
             BlockPos under = ctx.at(2, 0, 1).below();
             ctx.line("oil: pump " + (water ? "water" : "lake") + ": " + got + " mB in 5 s, " + pump.getWaila() + ", at(under) "
-                + ReservoirData.get(ctx.level()).at(under) + ", block under " + ctx.level().getBlockState(under) + ", casing " + ctx.level().getBlockState(ctx.at(2, 0, 1)));
+                + ReservoirData.get(ctx.level()).at(ctx.level(), under) + ", block under " + ctx.level().getBlockState(under) + ", casing " + ctx.level().getBlockState(ctx.at(2, 0, 1)));
             if (water) {
                 // 1000 W / (20 J/mB + lift) ~ 50 mB/s
                 ctx.check("oil: the pump draws water", fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) && got > 100, got + " mB of " + fluid);
@@ -1006,7 +1010,7 @@ public final class OilCases {
             ctx.line("oil: tar sand outcrop / buried columns per lake: " + outcrops);
             ctx.check("oil: most lakes hold 4-25k buckets", inRange >= n * 2 / 3, inRange + " of " + n + ": " + sb);
             // a lake below y 0 (negative heights): full means the surface at its top
-            var deep = ReservoirData.get(ctx.level()).create(0, 0, 2, 1, new int[]{-21, -22}, new int[]{0b111, 0b1111}, Long.MAX_VALUE);
+            var deep = mods.eln.oil.OilReservoirs.create(ctx.level(), null, 0, 0, 2, 1, new int[]{-21, -22}, new int[]{0b111, 0b1111}, Long.MAX_VALUE);
             ctx.check("oil: below y 0, a full lake's surface is its top (y -18)", deep.surface() == -18 * 8, "" + deep.surface());
             Reservoirs.take(ctx.level(), deep, 2000, false);
             ctx.check("oil: below y 0, draining 2 of 7 cells lowers it to y -19", deep.surface() == -19 * 8, "" + deep.surface());

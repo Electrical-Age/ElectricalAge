@@ -60,11 +60,10 @@ public final class LabCommands {
                     .then(Commands.literal("revert").then(Commands.argument("r", IntegerArgumentType.integer(0, 100000))
                         .executes(c -> voxelCables(c.getSource(), "revert", IntegerArgumentType.getInteger(c, "r"))))))
                 .then(Commands.literal("oil").executes(c -> {
-                    var data = mods.eln.oil.ReservoirData.get(c.getSource().getLevel());
-                    c.getSource().sendSuccess(() -> Component.literal(data.all().size() + " oil lake(s); " + mods.eln.oil.Reservoirs.debug()), false);
+                    var data = mods.eln.reservoir.ReservoirData.get(c.getSource().getLevel());
+                    c.getSource().sendSuccess(() -> Component.literal(data.all().size() + " reservoir(s); " + mods.eln.reservoir.Reservoirs.debug()), false);
                     for (var r : data.all()) {
-                        String line = String.format("  #%d: %s, %d / %d mB (%.0f%%), surface y %.3f", r.id(), r.describeBox(), r.amount(), r.capacity(),
-                            100.0 * r.amount() / Math.max(1, r.capacity()), r.surface() / 8.0);
+                        String line = "  " + r;
                         c.getSource().sendSuccess(() -> Component.literal(line), false);
                     }
                     return data.all().size();

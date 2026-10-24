@@ -2,7 +2,7 @@ package mods.eln.oil;
 
 /**
  * The shape of one generated oil lake (design v2 §3), a pure function of its spec, so worldgen (each chunk's carving,
- * on worker threads) and the lake's record (made on the main thread, Reservoirs.ensure) agree without talking.
+ * on worker threads) and the lake's record (made on the main thread, OilReservoirs.ensure) agree without talking.
  * <p>
  * An ellipse with a noise-warped shore, oil to baseY (the full surface), deeper towards the middle with a noisy floor;
  * islands (dry, a block above the oil) and pillars (rock to the ceiling); a beach ring of dry floor around the oil;
@@ -79,7 +79,7 @@ public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int
         return 2 * ((int) Math.ceil(rz * 1.6) + 2);
     }
 
-    /** The lake record's columns (Reservoir): bottom cell and mask per column over the box. */
+    /** The lake record's columns (OilReservoirs.create): bottom cell and mask per column over the box (MIN_VALUE: none). */
     public int[][] columns() {
         int sx = sizeX(), sz = sizeZ();
         int[] floor = new int[sx * sz], mask = new int[sx * sz];
@@ -87,7 +87,7 @@ public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int
             for (int k = 0; k < sz; k++) {
                 int x = minX() + i, z = minZ() + k, idx = i * sz + k;
                 if (kind(x, z) != Kind.OIL) {
-                    floor[idx] = Reservoir.NONE;
+                    floor[idx] = Integer.MIN_VALUE;
                     continue;
                 }
                 int d = Math.min(31, depth(x, z));

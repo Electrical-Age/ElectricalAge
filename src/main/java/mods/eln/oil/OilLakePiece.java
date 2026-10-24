@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 /**
  * Carves one chunk of an oil lake (LakeShape): the cavern, the oil (full; the lake's record then sets the level on the
  * chunk's first load), islands, pillars, gravel/clay/tar-sand beaches; seals fluids at the cavern's edges; and lays
- * tar sand under the surface above the lake (exposed in deserts). Registers the lake's record (Reservoirs.ensure).
+ * tar sand under the surface above the lake (exposed in deserts). Registers the lake's record (OilReservoirs.ensure).
  */
 public class OilLakePiece extends StructurePiece {
     final LakeShape shape;
@@ -53,7 +53,7 @@ public class OilLakePiece extends StructurePiece {
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator, RandomSource random, BoundingBox chunkBox,
                             ChunkPos chunkPos, BlockPos reference) {
-        Reservoirs.ensure(level.getLevel(), shape);
+        OilReservoirs.ensure(level.getLevel(), shape);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         BlockState air = Blocks.AIR.defaultBlockState(), stone = Blocks.STONE.defaultBlockState();
         BlockState oil = Oil.RESERVOIR_BLOCK.get().defaultBlockState();

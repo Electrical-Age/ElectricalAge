@@ -23,8 +23,8 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
  * Oil (26.x, design: notes/oil/DESIGN-v2.md, Baughn-approved). Crude oil as an ordinary NeoForge fluid (bucket, source,
- * flowing), and reservoir oil: the still, level 1-8 fluid underground lakes are made of, a view of a Reservoir's pooled
- * volume (ReservoirData) so the whole surface moves together.
+ * flowing), and reservoir oil: the still, level 1-8 fluid underground lakes are made of, a view of a reservoir's pooled
+ * volume (mods.eln.reservoir, OilReservoirs) so the whole surface moves together.
  */
 public final class Oil {
     private Oil() {
@@ -146,6 +146,8 @@ public final class Oil {
         FLUIDS.register(modBus);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
-        Reservoirs.register();
+        mods.eln.reservoir.Reservoirs.register(modBus);
+        OilReservoirs.register();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.ServerTickEvent.Post.class, OilReservoirs::tick);
     }
 }

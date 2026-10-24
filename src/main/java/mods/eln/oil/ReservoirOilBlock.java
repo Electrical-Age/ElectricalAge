@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * A cell of an underground oil lake (ReservoirOilFluid). A bucket takes 1000 mB from the lake's record (every cell's
  * level drops together on the next sweep); the block itself stays until the sweep says otherwise. Replaceable like
- * water: a block placed into the lake becomes a dam (Reservoirs removes that cell from the record).
+ * water: a block placed into the lake becomes a dam (mods.eln.reservoir.Reservoirs: it leaves the lake's area until the block goes).
  */
 public class ReservoirOilBlock extends Block implements BucketPickup {
     public ReservoirOilBlock(BlockBehaviour.Properties p) {
@@ -63,9 +63,9 @@ public class ReservoirOilBlock extends Block implements BucketPickup {
     public ItemStack pickupBlock(@Nullable LivingEntity user, LevelAccessor level, BlockPos pos, BlockState state) {
         // the client can't see the record: predict a full bucket (the server decides)
         if (!(level instanceof ServerLevel sl)) return new ItemStack(Oil.CRUDE_BUCKET.get());
-        Reservoir r = ReservoirData.get(sl).at(pos);
-        if (r == null || Reservoirs.take(sl, r, 1000, true) < 1000) return ItemStack.EMPTY;
-        Reservoirs.take(sl, r, 1000, false);
+        mods.eln.reservoir.Reservoir r = mods.eln.reservoir.ReservoirData.get(sl).at(sl, pos);
+        if (r == null || mods.eln.reservoir.Reservoirs.take(sl, r, 1000, true) < 1000) return ItemStack.EMPTY;
+        mods.eln.reservoir.Reservoirs.take(sl, r, 1000, false);
         return new ItemStack(Oil.CRUDE_BUCKET.get());
     }
 

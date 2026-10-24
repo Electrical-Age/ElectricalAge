@@ -34,6 +34,12 @@ public final class ElnClient {
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(still, flow, null, tint),
                 mods.eln.oil.Oil.CRUDE, mods.eln.oil.Oil.CRUDE_FLOWING);
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(still, flow, null, tint), mods.eln.oil.Oil.RESERVOIR_OIL);
+            // a water reservoir's partial surface (Watershed's lakes): water's textures and biome tint
+            e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(
+                new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_still")),
+                new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_flow")),
+                new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_overlay")),
+                net.neoforged.neoforge.client.fluid.FluidTintSources.water()), mods.eln.reservoir.ReservoirWater.FLUID);
             // the column's cuts: water's (greyscale) textures tinted, so each bucket differs from crude and the others
             var wStill = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_still"));
             var wFlow = new net.minecraft.client.resources.model.sprite.Material(net.minecraft.resources.Identifier.withDefaultNamespace("block/water_flow"));

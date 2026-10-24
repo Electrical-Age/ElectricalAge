@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "mods.eln.reservoir.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "LiquidBlockMixin",
+    "WaterFluidMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
