@@ -30,6 +30,11 @@ public interface ReservoirKind {
         return 0;
     }
 
+    /** Does a source of this kind found above the surface (a bucket poured in) join the record? */
+    default boolean pourable() {
+        return false;
+    }
+
     /** Is the state right for a cell at level lvl (0: none)? */
     default boolean matches(BlockState s, int lvl) {
         if (lvl == 0) return s.isAir();

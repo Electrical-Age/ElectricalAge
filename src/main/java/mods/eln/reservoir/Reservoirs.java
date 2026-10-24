@@ -185,7 +185,14 @@ public final class Reservoirs {
                     var data = level.getDataStorage().get(ReservoirData.TYPE);
                     if (data != null) for (Reservoir r : data.all()) refresh(level, r);
                 }
-                for (int n = 0; n < sweepsPerTick; n++) {
+                // (more a tick while a big lake's chunks are queued: AdventurAgent saw a step on the horizon for a while)
+                int queued;
+                synchronized (Reservoirs.class) {
+                    ArrayDeque<Job> q = QUEUE.get(level);
+                    queued = q == null ? 0 : q.size();
+                }
+                int budget = Math.min(32, sweepsPerTick + queued / 40);
+                for (int n = 0; n < budget; n++) {
                     Job j = poll(level);
                     if (j == null) break;
                     Reservoir r = ReservoirData.get(level).byId(j.reservoir());
@@ -251,6 +258,12 @@ public final class Reservoirs {
                 long key = p.asLong();
                 boolean dam = c.dams.contains(key);
                 BlockState want;
+                if (lvl == 0 && kind.ours(cur) && cur.getFluidState().isSource() && c.shown != Integer.MIN_VALUE && y * 8 >= c.shown
+                    && kind.pourable()) {
+                    // water above where this chunk's surface was: poured in (a bucket), it joins the record
+                    r.amount = Math.min(r.capacity(), r.amount + 1000);
+                    reshape = true;
+                }
                 if (kind.ours(cur) || kind.fillable(cur)) {
                     want = lvl == 0 ? (kind.ours(cur) ? air : cur) : kind.matches(cur, lvl) ? cur : kind.cell(lvl);
                 } else if (kind.waterlogs() && ReservoirKind.waterloggable(cur)) {
@@ -286,6 +299,10 @@ public final class Reservoirs {
             chunk.markUnsaved();
             data.changed();
             if (r.surface() != h) refresh(level, r);
+        }
+        if (c.shown != h) {
+            c.shown = h;
+            changed = true;
         }
         if (changed) chunk.markUnsaved();
         if (r.shown != h) {

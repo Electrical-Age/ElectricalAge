@@ -25,7 +25,7 @@ import java.util.Optional;
 
 /** A water reservoir's partial surface cell (ReservoirWaterFluid). A bucket takes 1000 mB from the reservoir's record
  *  (Baughn: no infinite water) and gives water; the cell stays until the sweep says otherwise. */
-public class ReservoirWaterBlock extends Block implements BucketPickup {
+public class ReservoirWaterBlock extends Block implements BucketPickup, net.minecraft.world.level.block.LiquidBlockContainer {
     public ReservoirWaterBlock(BlockBehaviour.Properties p) {
         super(p);
         registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.LEVEL_FLOWING, 8));
@@ -61,6 +61,21 @@ public class ReservoirWaterBlock extends Block implements BucketPickup {
         // the client can't see the record: predict a bucket (the server decides)
         if (level instanceof net.minecraft.server.level.ServerLevel sl && !Reservoirs.bucket(sl, pos)) return ItemStack.EMPTY;
         return new ItemStack(Items.WATER_BUCKET);
+    }
+
+    /** Water poured onto the surface goes back into the reservoir's record (AdventurAgent: it did nothing). */
+    @Override
+    public boolean canPlaceLiquid(@Nullable LivingEntity user, net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state,
+                                  net.minecraft.world.level.material.Fluid fluid) {
+        return fluid == net.minecraft.world.level.material.Fluids.WATER;
+    }
+
+    @Override
+    public boolean placeLiquid(LevelAccessor level, BlockPos pos, BlockState state, net.minecraft.world.level.material.FluidState fluid) {
+        if (!(level instanceof net.minecraft.server.level.ServerLevel sl)) return true;
+        Reservoir r = ReservoirData.get(sl).at(sl, pos);
+        if (r != null) Reservoirs.give(sl, r, 1000, false);
+        return true;
     }
 
     @Override

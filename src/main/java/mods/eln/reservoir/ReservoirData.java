@@ -90,6 +90,16 @@ public final class ReservoirData extends SavedData {
         return r;
     }
 
+    /** Remove the reservoirs whose maker's key matches (a maker replacing its lakes: Watershed after a recompute). */
+    public int removeKeyed(java.util.function.Predicate<String> which) {
+        List<Reservoir> gone = new ArrayList<>();
+        byKey.forEach((k, id) -> {
+            if (which.test(k) && byId.containsKey(id)) gone.add(byId.get(id));
+        });
+        for (Reservoir r : gone) remove(r);
+        return gone.size();
+    }
+
     public void remove(Reservoir r) {
         byId.remove(r.id);
         byKey.values().removeIf(v -> v == r.id);

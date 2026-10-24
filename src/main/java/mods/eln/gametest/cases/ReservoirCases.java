@@ -107,6 +107,18 @@ public final class ReservoirCases {
                 : us.getBlock() instanceof net.minecraft.world.level.block.BucketPickup bp ? bp.pickupBlock(null, level, under, us) : ItemStack.EMPTY;
             ctx.check("water: from a nearly empty lake, no bucket", none.isEmpty() && r.amount() == 500, none + ", " + r.amount() + " mB, " + us);
 
+            // poured back: onto the partial surface (the block takes it), or as a source above it (the sweep takes it)
+            Reservoirs.setAmount(level, r, r.volumeAt((y1 + 1) * 8 + 4));
+            sweep(ctx, r);
+            long half = r.amount();
+            BlockPos surf = ctx.at(1, 2, 0);
+            ((net.minecraft.world.level.block.LiquidBlockContainer) ReservoirWater.BLOCK.get()).placeLiquid(level, surf, level.getBlockState(surf),
+                Fluids.WATER.getSource(false));
+            ctx.check("water: a bucket poured on the surface goes into the record", r.amount() == half + 1000, "" + r.amount());
+            level.setBlock(ctx.at(3, 3, 0), Blocks.WATER.defaultBlockState(), 3);
+            sweep(ctx, r);
+            ctx.check("water: a source poured above the surface joins the record", r.amount() == half + 2000, "" + r.amount());
+
             // a dam: the cell leaves the area, the amount stays; gone, it fills again
             Reservoirs.setAmount(level, r, r.capacity());
             sweep(ctx, r);

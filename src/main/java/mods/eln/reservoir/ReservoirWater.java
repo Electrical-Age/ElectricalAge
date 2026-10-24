@@ -57,6 +57,11 @@ public final class ReservoirWater {
             public boolean waterlogs() {
                 return true;
             }
+
+            @Override
+            public boolean pourable() {
+                return true;
+            }
         });
     }
 

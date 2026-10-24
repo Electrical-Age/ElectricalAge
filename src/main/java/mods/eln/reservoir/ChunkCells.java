@@ -18,6 +18,8 @@ import java.util.List;
 public final class ChunkCells {
     final short[] bottom = new short[256], top = new short[256];
     final LongOpenHashSet dams = new LongOpenHashSet();
+    /** The surface (eighths) this chunk was last swept to (MIN_VALUE: never): water above it was poured in. */
+    int shown = Integer.MIN_VALUE;
 
     ChunkCells() {
         Arrays.fill(bottom, (short) Basin.NONE);
@@ -33,14 +35,15 @@ public final class ChunkCells {
     public static final class All {
         final Int2ObjectOpenHashMap<ChunkCells> byId = new Int2ObjectOpenHashMap<>();
 
-        record Entry(int id, List<Integer> bottom, List<Integer> top, List<Long> dams) {
+        record Entry(int id, List<Integer> bottom, List<Integer> top, List<Long> dams, int shown) {
         }
 
         static final Codec<Entry> ENTRY = RecordCodecBuilder.create(i -> i.group(
             Codec.INT.fieldOf("id").forGetter(Entry::id),
             Codec.INT.listOf().fieldOf("bottom").forGetter(Entry::bottom),
             Codec.INT.listOf().fieldOf("top").forGetter(Entry::top),
-            Codec.LONG.listOf().optionalFieldOf("dams", List.of()).forGetter(Entry::dams)
+            Codec.LONG.listOf().optionalFieldOf("dams", List.of()).forGetter(Entry::dams),
+            Codec.INT.optionalFieldOf("shown", Integer.MIN_VALUE).forGetter(Entry::shown)
         ).apply(i, Entry::new));
 
         public static final MapCodec<All> CODEC = ENTRY.listOf().fieldOf("reservoirs").xmap(All::of, All::entries);
@@ -54,6 +57,7 @@ public final class ChunkCells {
                     c.top[k] = (short) (int) e.top().get(k);
                 }
                 c.dams.addAll(e.dams());
+                c.shown = e.shown();
                 a.byId.put(e.id(), c);
             }
             return a;
@@ -68,7 +72,7 @@ public final class ChunkCells {
                     b.add((int) c.bottom[k]);
                     t.add((int) c.top[k]);
                 }
-                out.add(new Entry(en.getIntKey(), b, t, new ArrayList<>(c.dams)));
+                out.add(new Entry(en.getIntKey(), b, t, new ArrayList<>(c.dams), c.shown));
             }
             return out;
         }
