@@ -23,6 +23,11 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,6 +61,7 @@ public class SmelterElement extends TransparentNodeElement {
         electricalLoadList.add(electricalLoad);
         electricalComponentList.add(control);
         slowProcessList.add(process);
+        slowProcessList.add(pull);
         slowProcessList.add(new ThermalLoadWatchDog().set(thermalLoad).setTMax(SmelterDescriptor.T_MAX).set(new Failure(this).machine()));
         slowProcessList.add(new VoltageStateWatchDog().set(electricalLoad).setUNominal(mods.eln.Eln.LVU).set(new Failure(this).machine()));
         slowProcessList.add(new mods.eln.node.NodePeriodicPublishProcess(node, 2, 1));
@@ -82,11 +88,57 @@ public class SmelterElement extends TransparentNodeElement {
         } else smeltResistor.highImpedance();
     };
 
+    /** Seconds between pulls: a hopper's 8 ticks. */
+    static final double PULL_PERIOD = 0.4;
+    double pullTimer;
+
+    /**
+     * Its top is a hopper's funnel, so it acts as one (Baughn): one item every PULL_PERIOD from the inventory above into
+     * the input slot, only something it can smelt now and only while the slot can take it.
+     */
+    final IProcess pull = time -> {
+        pullTimer += time;
+        if (pullTimer < PULL_PERIOD) return;
+        pullTimer = 0;
+        pullOne();
+    };
+
+    boolean pullOne() {
+        net.minecraft.world.level.Level world = node.coordonate.world();
+        net.minecraft.core.BlockPos above = node.coordonate.pos().above();
+        if (!world.isLoaded(above)) return false;
+        ResourceHandler<ItemResource> h = world.getCapability(Capabilities.Item.BLOCK, above, net.minecraft.core.Direction.DOWN);
+        if (h == null && world.getBlockEntity(above) instanceof Container c) h = VanillaContainerWrapper.of(c);
+        if (h == null) return false;
+        ItemStack in = inventory.getItem(inSlotId);
+        for (int i = 0; i < h.size(); i++) {
+            ItemResource r = h.getResource(i);
+            if (r.isEmpty() || h.getAmountAsLong(i) <= 0) continue;
+            ItemStack one = r.toStack(1);
+            if (result(one).isEmpty()) continue;
+            if (!in.isEmpty() && (!ItemStack.isSameItemSameComponents(in, one) || in.getCount() >= Math.min(in.getMaxStackSize(), inventory.getMaxStackSize())))
+                continue;
+            try (Transaction tx = Transaction.openRoot()) {
+                if (h.extract(i, r, 1, tx) != 1) continue;
+                tx.commit();
+            }
+            if (in.isEmpty()) inventory.setItem(inSlotId, one);
+            else in.grow(1);
+            inventory.setChanged();
+            return true;
+        }
+        return false;
+    }
+
     static final double ENERGY_PER_ITEM = mods.eln.misc.RecipesList.electricalFurnaceEnergyPerSmelt;
 
     /** What the input makes now: food chars above 280 °C, as in the oven. */
     public ItemStack result() {
-        ItemStack in = inventory.getItem(inSlotId);
+        return result(inventory.getItem(inSlotId));
+    }
+
+    /** What stack in would make now. */
+    ItemStack result(ItemStack in) {
         if (Utils.isEmpty(in)) return ItemStack.EMPTY;
         if (mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.chars(thermalLoad.Tc)
             && mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.charrable(in))

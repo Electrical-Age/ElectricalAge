@@ -327,6 +327,7 @@ public final class Wp10aCases {
         SixNodeElement cable;
         String hoppers;
         boolean hoppersOk;
+        net.minecraft.world.level.block.entity.ChestBlockEntity chest;
 
         public String name() {
             return "wp10a smelter";
@@ -368,6 +369,12 @@ public final class Wp10aCases {
             boolean botOut = inv.canExtractItem(1, new ItemStack(Items.IRON_INGOT), down), topOut = inv.canExtractItem(1, new ItemStack(Items.IRON_INGOT), up);
             hoppers = "top takes raw iron " + topIn + ", sticks " + topJunk + "; bottom gives out " + botOut + ", top " + topOut;
             hoppersOk = topIn && !topJunk && botOut && !topOut;
+            // a chest on the unpowered one (which doesn't smelt): its funnel pulls the raw iron, not the sticks (Baughn)
+            net.minecraft.core.BlockPos cp = ctx.at(9, 2, 1);
+            ctx.world().setBlock(cp, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState(), 3);
+            chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) ctx.world().getBlockEntity(cp);
+            chest.setItem(0, new ItemStack(Items.STICK, 4));
+            chest.setItem(1, new ItemStack(Items.RAW_IRON, 5));
         }
 
         static int out(mods.eln.transparentnode.smelter.SmelterElement m) {
@@ -384,6 +391,10 @@ public final class Wp10aCases {
             ctx.check("smelter without 50 V: nothing", out(unpowered) == 0, "" + out(unpowered));
             ctx.check("smelter: heat from the thermal cable behind it warms it", tc.Tc > 50, String.format("%.1f C above ambient", tc.Tc));
             ctx.check("smelter: hoppers feed the top (only what smelts) and empty the bottom", hoppersOk, hoppers);
+            int pulled = unpowered.getInventory().getItem(mods.eln.transparentnode.smelter.SmelterElement.inSlotId).getCount() - 16;
+            ctx.check("smelter: its funnel pulls what smelts from a chest on top, and leaves the rest",
+                pulled == 5 && chest.getItem(1).isEmpty() && chest.getItem(0).getCount() == 4,
+                "pulled " + pulled + ", chest raw iron " + chest.getItem(1).getCount() + ", sticks " + chest.getItem(0).getCount());
         }
     }
 
