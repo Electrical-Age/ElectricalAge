@@ -2,7 +2,6 @@ package mods.eln.node
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptor
-import mods.eln.item.electricalinterface.IItemEnergyBattery
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
 
@@ -27,18 +26,18 @@ class AutoAcceptInventoryProxy(val inventory: Container) {
             if (inventory.getItem(index).isEmpty) { // 1.12: never null
                 GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
                     if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
-                        val newItemStack = desc.newItemStack()
-                        (desc as? IItemEnergyBattery)?.let { it.setEnergy(newItemStack, it.getEnergy(itemStack)) }
-                        itemStack!!.count -= 1
-                        inventory.setItem(index, newItemStack)
+                        // the stack itself, with all its data (1.12 made a new one and copied only the energy,
+                        // which lost an X-ray scanner's filters and renewed a used lamp)
+                        inventory.setItem(index, itemStack!!.copyWithCount(1))
+                        itemStack.count -= 1
                         return true
                     }
                 }
 
                 GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
                     if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
-                        itemStack!!.count -= 1
-                        inventory.setItem(index, desc.newItemStack())
+                        inventory.setItem(index, itemStack!!.copyWithCount(1))
+                        itemStack.count -= 1
                         return true
                     }
                 }
@@ -88,18 +87,18 @@ class AutoAcceptInventoryProxy(val inventory: Container) {
 
             GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let {
                 if (acceptedItems.contains(it.javaClass)) {
-                    itemStack!!.count -= 1
                     existingItemHandler?.handleExistingInventoryItem(inventory.getItem(index))
-                    inventory.setItem(index, it.newItemStack())
+                    inventory.setItem(index, itemStack!!.copyWithCount(1))
+                    itemStack.count -= 1
                     return true
                 }
             }
 
             GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack)?.let {
                 if (acceptedItems.contains(it.javaClass)) {
-                    itemStack!!.count -= 1
                     existingItemHandler?.handleExistingInventoryItem(inventory.getItem(index))
-                    inventory.setItem(index, it.newItemStack())
+                    inventory.setItem(index, itemStack!!.copyWithCount(1))
+                    itemStack.count -= 1
                     return true
                 }
             }

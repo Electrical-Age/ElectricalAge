@@ -27,8 +27,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   raw pieces like iron ore (`OreDropCases`).
 - Burnt electrical cables are drawn burnt through (geometry: stubs, charred cut, copper core), since dyed cables
   cannot show soot.
-- X-Ray Scanner recreated, not ported: 4 coloured filter slots (ore blocks or raw chunks via `c:ores` /
-  `c:raw_materials`), picture on the held item; range 7.5 (1.12: 5). `item/xray/`, `XRayCase`.
+- X-Ray Scanner recreated, not ported: 4 coloured filter slots (an ore block or what it drops, by tags only:
+  `ores/`, `raw_materials/`, `gems/`, `dusts/`, `nuggets/`, `ore_drops/` in `c:` and `eln:`; coal is
+  `eln:ore_drops/coal`; tungsten ore is also `c:ores/tungsten`, Baughn 2026-10-24), picture on the held item; range 7.5 (1.12: 5). `item/xray/`, `XRayCase`.
 - Copper Coil (`eln:copper_coil`, new): thin winding wire; windings (inductor, resistors, rheostat, thermistor,
   DC-DC, 50V copper heating corps) take coils; copper cable is 1 per ingot.
 - Cable slots removed: meters, electrical/voltage/thermal probes and lamp sockets have a built-in cable (LV, MV for the
@@ -95,6 +96,8 @@ In the port:
 - MNA: a cable Line ending at ground crashed the step; a removed Monopole left its pin.
 - Turret shots asked for light 25 and crashed the light block (now clamped; `TurretCases`).
 - Item capabilities (hoppers, pipes) never worked in any EA version; now they do.
+- Right-clicking an item into a device slot (battery charger) made a new stack and copied only its energy: an X-ray
+  scanner lost its filters and a used lamp came back new (lamp sockets use the same path). The stack goes in as it is (`XRayCase`).
 
 ## Deferred
 

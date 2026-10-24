@@ -36,7 +36,11 @@ final class XRayCase implements TestCase {
         return 1;
     }
 
+    mods.eln.sixnode.batterycharger.BatteryChargerElement charger;
+
     public void build(TestContext ctx) {
+        ctx.floor(ctx.at(7, 0, 5));
+        charger = (mods.eln.sixnode.batterycharger.BatteryChargerElement) ctx.placeSix(66 << 6, ctx.at(7, 1, 5));   // Weak 50V Battery Charger
     }
 
     public void measure(TestContext ctx) {
@@ -54,6 +58,34 @@ final class XRayCase implements TestCase {
             var lead = XRayFilter.blockSlots(List.of(new ItemStack(leadOre)));
             ctx.check("xray: EA lead ore finds itself", lead.values().contains(0) && !lead.isEmpty(), lead.keySet().toString());
         }
+
+        // every ore block in the game, and everything it drops when mined, is a filter that finds that block
+        // (Baughn 2026-10-24: tungsten ore and coal didn't work; by tags, so other mods' ores work too)
+        var level = ctx.level();
+        var pos = ctx.at(1, 1, 1);
+        var pick = new ItemStack(Items.NETHERITE_PICKAXE);
+        List<String> bad = new java.util.ArrayList<>();
+        int ores = 0, drops = 0;
+        for (var ore : XRayFilter.allOres()) {
+            ores++;
+            String name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(ore).toString();
+            if (!XRayFilter.blockSlots(List.of(new ItemStack(ore))).containsKey(ore)) bad.add(name + " (the ore itself)");
+            level.setBlock(pos, ore.defaultBlockState(), 3);
+            for (ItemStack d : net.minecraft.world.level.block.Block.getDrops(ore.defaultBlockState(), level, pos, null, null, pick)) {
+                drops++;
+                if (!XRayFilter.blockSlots(List.of(d)).containsKey(ore)) bad.add(name + " drop " + d.getItem());
+            }
+        }
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        ctx.check("xray: every ore and every ore's drop finds that ore", bad.isEmpty() && ores >= 20,
+            ores + " ores, " + drops + " drops; failing: " + bad);
+        for (var b : new net.minecraft.world.level.block.Block[]{Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE,
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tungsten_ore"))})
+            ctx.check("xray: " + b + " is an ore", XRayFilter.allOres().contains(b), "");
+        ctx.check("xray: coal finds coal ore, raw tungsten finds tungsten ore",
+            XRayFilter.blockSlots(List.of(new ItemStack(Items.COAL))).containsKey(Blocks.DEEPSLATE_COAL_ORE)
+                && XRayFilter.materials(new ItemStack(mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get())).contains("tungsten"), "");
+        ctx.check("xray: a gem with no ore (amethyst) is no filter", !XRayFilter.accepts(new ItemStack(Items.AMETHYST_SHARD)), "");
 
         ItemStack s = new ItemStack(mods.eln.Eln.itemsByName.get("X-Ray Scanner"));
         ctx.check("xray: the item exists", s.getItem() instanceof ElnItem i && i.descriptor instanceof XRayScannerDescriptor, s.toString());
@@ -98,5 +130,21 @@ final class XRayCase implements TestCase {
         ctx.check("xray: raw gold stored in filter 2", f.get(2).is(Items.RAW_GOLD) && f.get(0).isEmpty(), f.toString());
         ctx.check("xray: the scanner can't be taken out while open", !menu.getSlot(XRayScannerMenu.FILTERS + 27).mayPickup(fp), "");
         fp.getInventory().setItem(0, ItemStack.EMPTY);
+
+        // a charger fed by right-click keeps the scanner's filters, id and energy (1.12 rebuilt the stack: only energy)
+        ItemStack held = d.newItemStack();
+        XRayFilter.setFilters(held, List.of(new ItemStack(Items.COAL_ORE), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY));
+        d.setEnergy(held, 1234);
+        d.onUpdate(held, ctx.level(), fp, 0, false);   // the server gives it its id
+        long heldId = XRayScannerDescriptor.id(held);
+        fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+        charger.onBlockActivated(fp, mods.eln.misc.Direction.YP, 0.5f, 0.5f, 0.5f);
+        ItemStack in = ItemStack.EMPTY;
+        for (int k = 0; k < 4; k++) if (!charger.getInventory().getItem(k).isEmpty()) in = charger.getInventory().getItem(k);
+        ctx.check("xray: right-click puts the scanner in the charger", !in.isEmpty() && fp.getMainHandItem().isEmpty(), in + ", hand " + fp.getMainHandItem());
+        ctx.check("xray: in the charger it keeps its filters, id and energy", !in.isEmpty()
+                && XRayFilter.filters(in).get(0).is(Items.COAL_ORE) && heldId != 0 && XRayScannerDescriptor.id(in) == heldId && d.getEnergy(in) == 1234,
+            XRayFilter.filters(in) + ", id " + XRayScannerDescriptor.id(in) + " (was " + heldId + "), " + (in.isEmpty() ? 0 : d.getEnergy(in)) + " J");
+        fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
     }
 }

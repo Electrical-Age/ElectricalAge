@@ -14,29 +14,42 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Which ores a scanner shows (Baughn 2026-10-11): each of the 4 filter slots holds an ore block or a raw chunk; its
- * materials are the suffixes of its `c:ores/*` and `c:raw_materials/*` item tags (iron ore, deepslate iron ore and
- * raw iron all give "iron"). A block in the world matches a slot when its item is tagged `c:ores/<material>`.
+ * Which ores a scanner shows (Baughn 2026-10-11): each of the 4 filter slots holds an ore block or what an ore drops.
+ * Everything goes by item tags, so other mods' ores work too (Baughn 2026-10-24: tags, not special cases). The ore
+ * materials are the suffixes of the `c:ores/*` and `eln:ores/*` tags (EA's tungsten is EA-private); a block in the world
+ * matches a slot when its item carries one of the slot's. An item's materials are the suffixes of its `ores/`,
+ * `raw_materials/`, `gems/`, `dusts/`, `nuggets/` and `ore_drops/` tags in those namespaces that name an ore material
+ * (iron ore, deepslate iron ore and raw iron give "iron"; lapis, redstone dust and nether gold ore's nuggets work; coal
+ * has no convention tag, so EA tags it `eln:ore_drops/coal`).
  */
 public final class XRayFilter {
     private XRayFilter() {
     }
 
+    static final List<String> NAMESPACES = List.of("c", "eln");
+    static final List<String> DROP_KINDS = List.of("ores/", "raw_materials/", "gems/", "dusts/", "nuggets/", "ore_drops/");
+
     public static Set<String> materials(ItemStack stack) {
         Set<String> out = new HashSet<>();
         if (stack == null || stack.isEmpty()) return out;
-        stack.getItem().builtInRegistryHolder().tags().forEach(t -> material(t, out));
+        Set<String> known = ores().keySet();
+        stack.getItem().builtInRegistryHolder().tags().forEach(t -> {
+            String m = suffix(t, DROP_KINDS);
+            if (m != null && known.contains(m)) out.add(m);
+        });
         return out;
     }
 
-    static void material(TagKey<Item> t, Set<String> out) {
-        if (!t.location().getNamespace().equals("c")) return;
+    /** The material of tag t when it is `<ns>:<kind><material>` for one of kinds, else null. */
+    static String suffix(TagKey<Item> t, List<String> kinds) {
+        if (!NAMESPACES.contains(t.location().getNamespace())) return null;
         String p = t.location().getPath();
-        if (p.startsWith("ores/")) out.add(p.substring(5));
-        else if (p.startsWith("raw_materials/")) out.add(p.substring(14));
+        for (String k : kinds)
+            if (p.startsWith(k) && p.length() > k.length()) return p.substring(k.length());
+        return null;
     }
 
-    /** A filter slot takes it: an ore block or raw chunk of some material. */
+    /** A filter slot takes it: an ore block or an ore's drop. */
     public static boolean accepts(ItemStack stack) {
         return !materials(stack).isEmpty();
     }
@@ -55,13 +68,20 @@ public final class XRayFilter {
                 Item i = b.asItem();
                 if (i == net.minecraft.world.item.Items.AIR) continue;
                 i.builtInRegistryHolder().tags().forEach(t -> {
-                    if (t.location().getNamespace().equals("c") && t.location().getPath().startsWith("ores/"))
-                        m.computeIfAbsent(t.location().getPath().substring(5), k -> new HashSet<>()).add(b);
+                    String mat = suffix(t, List.of("ores/"));
+                    if (mat != null) m.computeIfAbsent(mat, k -> new HashSet<>()).add(b);
                 });
             }
             ores = m;
         }
         return ores;
+    }
+
+    /** Every ore block (an item in some `c:ores/*` or `eln:ores/*` tag). */
+    public static Set<Block> allOres() {
+        Set<Block> out = new HashSet<>();
+        ores().values().forEach(out::addAll);
+        return out;
     }
 
     /** Block -> filter slot (first slot wins) for these filter stacks; blocks not in the map match no slot. */
