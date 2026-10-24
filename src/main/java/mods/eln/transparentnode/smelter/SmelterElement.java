@@ -40,8 +40,9 @@ import java.util.Map;
  * temperature (smeltResistor, R = T / PfT(T)), 1000 J an item. Its controls: a 20 W load on a side (LV cable).
  */
 public class SmelterElement extends TransparentNodeElement {
-    public static final int inSlotId = 0, outSlotId = 1;
-    final TransparentNodeElementInventory inventory = new SmelterInventory(2, 64, this);
+    /** The input, then OUT_SLOTS output slots from outSlotId: a small chest, so no hopper is needed under it (Baughn). */
+    public static final int inSlotId = 0, outSlotId = 1, OUT_SLOTS = 4;
+    final TransparentNodeElementInventory inventory = new SmelterInventory(outSlotId + OUT_SLOTS, 64, this);
 
     final NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
     final ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ThermalLoad.externalLoad);
@@ -148,17 +149,29 @@ public class SmelterElement extends TransparentNodeElement {
 
     boolean canSmelt() {
         ItemStack r = result();
-        if (r.isEmpty()) return false;
-        ItemStack out = inventory.getItem(outSlotId);
-        if (out.isEmpty()) return true;
-        return ItemStack.isSameItemSameComponents(out, r) && out.getCount() + r.getCount() <= Math.min(out.getMaxStackSize(), inventory.getMaxStackSize());
+        return !r.isEmpty() && outFor(r) >= 0;
+    }
+
+    /** The output slot r goes into: a stack of it with room first, else an empty one; -1 if full. */
+    int outFor(ItemStack r) {
+        int empty = -1;
+        for (int i = outSlotId; i < outSlotId + OUT_SLOTS; i++) {
+            ItemStack out = inventory.getItem(i);
+            if (out.isEmpty()) {
+                if (empty < 0) empty = i;
+            } else if (ItemStack.isSameItemSameComponents(out, r) && out.getCount() + r.getCount() <= Math.min(out.getMaxStackSize(), inventory.getMaxStackSize()))
+                return i;
+        }
+        return empty;
     }
 
     void smeltOne() {
         ItemStack r = result();
-        if (r.isEmpty() || !canSmelt()) return;
-        ItemStack out = inventory.getItem(outSlotId);
-        if (out.isEmpty()) inventory.setItem(outSlotId, r.copy());
+        if (r.isEmpty()) return;
+        int slot = outFor(r);
+        if (slot < 0) return;
+        ItemStack out = inventory.getItem(slot);
+        if (out.isEmpty()) inventory.setItem(slot, r.copy());
         else out.grow(r.getCount());
         inventory.removeItem(inSlotId, 1);
         inventory.setChanged();

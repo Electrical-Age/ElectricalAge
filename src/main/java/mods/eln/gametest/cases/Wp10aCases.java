@@ -375,18 +375,26 @@ public final class Wp10aCases {
             chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) ctx.world().getBlockEntity(cp);
             chest.setItem(0, new ItemStack(Items.STICK, 4));
             chest.setItem(1, new ItemStack(Items.RAW_IRON, 5));
+            // four output slots: a nearly full first one overflows into the second
+            hot.getInventory().setItem(mods.eln.transparentnode.smelter.SmelterElement.outSlotId, new ItemStack(Items.IRON_INGOT, 63));
         }
 
+        /** Items in all its output slots (the hot one's first started with 63 ingots). */
         static int out(mods.eln.transparentnode.smelter.SmelterElement m) {
-            return m.getInventory().getItem(mods.eln.transparentnode.smelter.SmelterElement.outSlotId).getCount();
+            int n = 0;
+            for (int i = 0; i < mods.eln.transparentnode.smelter.SmelterElement.OUT_SLOTS; i++)
+                n += m.getInventory().getItem(mods.eln.transparentnode.smelter.SmelterElement.outSlotId + i).getCount();
+            return n;
         }
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(hold);
             ThermalLoad tc = field(cabled, "thermalLoad");
-            ctx.line(String.format("smelter: 400 C made %d, 240 C %d, unpowered %d; cable-fed at %.0f C made %d", out(hot), out(warm), out(unpowered),
+            ctx.line(String.format("smelter: 400 C made %d, 240 C %d, unpowered %d; cable-fed at %.0f C made %d", out(hot) - 63, out(warm), out(unpowered),
                 tc.Tc + mods.eln.sim.PhysicalConstant.Tamb, out(cabled)));
-            ctx.check("smelter at 400 C over the room: 240 W, ~4.2 s an ingot (3 in 15 s)", out(hot) == 3, "" + out(hot));
+            ctx.check("smelter at 400 C over the room: 240 W, ~4.2 s an ingot (3 in 15 s)", out(hot) - 63 == 3, "" + (out(hot) - 63));
+            int second = hot.getInventory().getItem(mods.eln.transparentnode.smelter.SmelterElement.outSlotId + 1).getCount();
+            ctx.check("smelter: a full output slot overflows into the next of its four", second == 2, "second slot " + second);
             ctx.check("smelter at 240 C over the room: 80 W, 12.5 s an ingot (1 in 15 s)", out(warm) == 1, "" + out(warm));
             ctx.check("smelter without 50 V: nothing", out(unpowered) == 0, "" + out(unpowered));
             ctx.check("smelter: heat from the thermal cable behind it warms it", tc.Tc > 50, String.format("%.1f C above ambient", tc.Tc));

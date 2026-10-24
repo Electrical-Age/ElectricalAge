@@ -5,7 +5,7 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.world.item.ItemStack;
 
-/** Hoppers: the top and the sides feed the input (only what smelts), the bottom takes the output (Baughn: hopper-friendly). */
+/** Hoppers: the top and the sides feed the input (only what smelts), the bottom takes the outputs (Baughn: hopper-friendly). */
 public class SmelterInventory extends TransparentNodeElementInventory {
     public SmelterInventory(int size, int stackLimit, TransparentNodeElement element) {
         super(size, stackLimit, element);
@@ -13,7 +13,10 @@ public class SmelterInventory extends TransparentNodeElementInventory {
 
     @Override
     public int[] getAccessibleSlotsFromSide(int side) {
-        return Direction.fromIntMinecraftSide(side) == Direction.YN ? new int[]{SmelterElement.outSlotId} : new int[]{SmelterElement.inSlotId};
+        if (Direction.fromIntMinecraftSide(side) != Direction.YN) return new int[]{SmelterElement.inSlotId};
+        int[] out = new int[SmelterElement.OUT_SLOTS];
+        for (int i = 0; i < out.length; i++) out[i] = SmelterElement.outSlotId + i;
+        return out;
     }
 
     @Override
@@ -24,6 +27,6 @@ public class SmelterInventory extends TransparentNodeElementInventory {
 
     @Override
     public boolean canExtractItem(int slot, ItemStack stack, int side) {
-        return Direction.fromIntMinecraftSide(side) == Direction.YN && slot == SmelterElement.outSlotId;
+        return Direction.fromIntMinecraftSide(side) == Direction.YN && slot >= SmelterElement.outSlotId;
     }
 }

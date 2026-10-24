@@ -141,9 +141,13 @@ public final class MenuSpecs {
         put(mods.eln.oil.SteamOvenDescriptor.class, d -> MenuSpec.of(
             SlotSpec.output(mods.eln.oil.SteamOvenElement.outSlotId, 86, 25, BIG),
             SlotSpec.smeltable(mods.eln.oil.SteamOvenElement.inSlotId, 28, 25, MEDIUM, tr("Input"))).publishing(1).inventoryAt(122));
-        put(mods.eln.transparentnode.smelter.SmelterDescriptor.class, d -> MenuSpec.of(
-            SlotSpec.output(mods.eln.transparentnode.smelter.SmelterElement.outSlotId, 86, 25, BIG),
-            SlotSpec.smeltable(mods.eln.transparentnode.smelter.SmelterElement.inSlotId, 28, 25, MEDIUM, tr("Input"))).publishing(1).inventoryAt(122));
+        put(mods.eln.transparentnode.smelter.SmelterDescriptor.class, d -> {
+            int out = mods.eln.transparentnode.smelter.SmelterElement.outSlotId, n = mods.eln.transparentnode.smelter.SmelterElement.OUT_SLOTS;
+            SlotSpec[] s = new SlotSpec[1 + n];
+            s[0] = SlotSpec.smeltable(mods.eln.transparentnode.smelter.SmelterElement.inSlotId, 28, 25, MEDIUM, tr("Input"));
+            for (int i = 0; i < n; i++) s[1 + i] = SlotSpec.output(out + i, 86 + i * 18, 25, MEDIUM);
+            return MenuSpec.of(s).publishing(1).inventoryAt(122);
+        });
         put(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, d -> {
             SlotSpec[] s = new SlotSpec[2 + d.outStackCount];
             for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = SlotSpec.output(idx, 130 - 32 + idx * 18, 12, MEDIUM);
