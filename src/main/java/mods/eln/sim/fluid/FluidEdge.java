@@ -23,7 +23,7 @@ public final class FluidEdge {
     /** This step's flow a -> b (kg/s; negative: b -> a), and what it carried: liquid, vapour, air (kg/s), enthalpy (W). */
     public double flow, fLiquid, fVapour, fAir, fEnthalpy;
     // the solve's coefficient and upstream properties (per step)
-    double g, rho, head, sA, sB;
+    double g, rho, head, sA, sB, xl;
     boolean fromA;
 
     public FluidEdge(FluidNode a, double portA, FluidNode b, double portB, double k) {
