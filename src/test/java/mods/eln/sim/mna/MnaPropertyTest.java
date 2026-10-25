@@ -170,6 +170,26 @@ public class MnaPropertyTest {
         }
     }
 
+    /**
+     * A net that failed once (2026-10-25): dead-end nodes hanging off 22..82 kohm next to 0.11 ohm came out ~2e-6
+     * relative off (the explicit QR inverse lost digits); fixed by solving the step with LU factors in SubSystem. Built 40 times, as
+     * the matrix order follows hash order.
+     */
+    @org.junit.jupiter.api.Test
+    void deadEndNodesMatchTheReference() {
+        for (int k = 0; k < 40; k++) {
+            RandomNet net = new RandomNet(8);
+            double[][] e = {{1, 0, 22417.56022850012}, {2, 1, 0.4579127041061821}, {3, 1, 57104.03485760915}, {4, 2, 0.20121733165678407},
+                {5, 4, 999.5625943812363}, {6, 1, 0.11211220728152951}, {7, 3, 82325.42344870533}, {4, 6, 146.18580691586544}, {6, -1, 46469.441288656366}};
+            for (double[] x : e) net.edges.add(new RandomNet.Edge((int) x[0], (int) x[1], x[2]));
+            net.cs.add(new RandomNet.Cs(6, 1, 5.602));
+            net.cs.add(new RandomNet.Cs(4, 1, -0.784));
+            Built b = new Built(net, 1, false, new Random(k));
+            b.root.step();
+            b.assertMatchesReference("step", 1e-7);
+        }
+    }
+
     /** The bare solver: one step of a resistive network is the exact DC answer. */
     @Property(tries = 300)
     void solverMatchesReferenceAndKcl(@ForAll @IntRange(min = 1, max = 12) int n, @ForAll long seed) {

@@ -41,6 +41,11 @@ public class SubSystem {
     boolean singularMatrix;
 
     double[][] AInvdata;
+    /** A's LU factors with partial pivoting (L below the diagonal, unit; U on and above) and the row order: the step
+     *  solves with them (backward stable). The inverse stays for one-state reads (solve(pin), Thevenin). */
+    double[][] lu;
+    int[] perm;
+    double[] invDiag; // 1 / U's diagonal
     double[] Idata;
 
     double[] XtempData;
@@ -158,6 +163,7 @@ public class SubSystem {
             //FieldLUDecomposition QRDecomposition  LUDecomposition RRQRDecomposition
             RealMatrix Ainv = new QRDecomposition(A).getSolver().getInverse();
             AInvdata = Ainv.getData();
+            factorLU(A.getData());
             singularMatrix = false;
         } catch (Exception e) {
             singularMatrix = true;
@@ -256,14 +262,52 @@ public class SubSystem {
         //Utils.println(profiler);
     }
 
+    /**
+     * X = A^-1 I, by the LU factors (forward and back substitution, as cheap as multiplying by the inverse). The
+     * explicit inverse loses digits on a badly conditioned matrix: nodes hanging off tens of kilohms next to a tenth of
+     * an ohm came out ~2e-6 relative off (MnaPropertyTest.deadEndNodesMatchTheReference).
+     */
     private void multiplyAInvI() {
-        for (int idx2 = 0; idx2 < stateCount; idx2++) {
-            double stack = 0;
-            for (int idx = 0; idx < stateCount; idx++) {
-                stack += AInvdata[idx2][idx] * Idata[idx];
-            }
-            XtempData[idx2] = stack;
+        int n = stateCount;
+        for (int i = 0; i < n; i++) {
+            double v = Idata[perm[i]];
+            double[] row = lu[i];
+            for (int k = 0; k < i; k++) v -= row[k] * XtempData[k];
+            XtempData[i] = v;
         }
+        for (int i = n - 1; i >= 0; i--) {
+            double v = XtempData[i];
+            double[] row = lu[i];
+            for (int k = i + 1; k < n; k++) v -= row[k] * XtempData[k];
+            XtempData[i] = v * invDiag[i];
+        }
+    }
+
+    /** Factor A (copied) into lu and perm (Doolittle, partial pivoting). */
+    private void factorLU(double[][] a) {
+        int n = a.length;
+        lu = a;
+        perm = new int[n];
+        for (int i = 0; i < n; i++) perm[i] = i;
+        for (int c = 0; c < n; c++) {
+            int p = c;
+            for (int r = c + 1; r < n; r++) if (Math.abs(lu[r][c]) > Math.abs(lu[p][c])) p = r;
+            if (p != c) {
+                double[] t = lu[c]; lu[c] = lu[p]; lu[p] = t;
+                int tp = perm[c]; perm[c] = perm[p]; perm[p] = tp;
+            }
+            double piv = lu[c][c];
+            if (piv == 0) throw new IllegalStateException("singular");
+            for (int r = c + 1; r < n; r++) {
+                double f = lu[r][c] / piv;
+                lu[r][c] = f;
+                if (f == 0) continue;
+                double[] rr = lu[r], rc = lu[c];
+                for (int k = c + 1; k < n; k++) rr[k] -= f * rc[k];
+            }
+        }
+        invDiag = new double[n];
+        for (int i = 0; i < n; i++) invDiag[i] = 1 / lu[i][i];
     }
 
     /** This step's solution for a state of this SubSystem (before stepFlush); ground (null) = 0. */
