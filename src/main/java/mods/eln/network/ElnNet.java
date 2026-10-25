@@ -47,7 +47,7 @@ public final class ElnNet {
     };
 
     public static void register(IEventBus modBus) {
-        modBus.addListener(RegisterPayloadHandlersEvent.class, e -> e.registrar("1").playBidirectional(Data.TYPE, Data.CODEC,
+        modBus.addListener(RegisterPayloadHandlersEvent.class, e -> e.registrar(BuildInfo.channelVersion("1")).playBidirectional(Data.TYPE, Data.CODEC,
             (Data d, IPayloadContext ctx) -> serverHandler.accept(d.bytes(), (ServerPlayer) ctx.player()),
             (Data d, IPayloadContext ctx) -> clientHandler.accept(d.bytes())));
     }

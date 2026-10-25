@@ -108,8 +108,18 @@ test {
     systemProperty 'eln.guiDir', file('src/main/resources/assets/eln/gui').absolutePath
 }
 
+// The commit this jar is built from (git describe; "-dirty" with uncommitted changes). Baked into the jar
+// (eln-build.properties): the network channel's version, so a client whose jar was built from another commit is refused at login instead
+// of joining with mismatched block states (Baughn, 2026-10-25: a pack ahead of the server shifted every state id).
+def buildCommit = providers.exec {
+    commandLine 'git', 'describe', '--always', '--dirty', '--abbrev=12', '--exclude=*'
+    ignoreExitValue = true
+}.standardOutput.asText.map { it.trim() }.getOrElse('')
+if (!buildCommit) buildCommit = 'unknown'
+
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
+            build_commit           : buildCommit,
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
