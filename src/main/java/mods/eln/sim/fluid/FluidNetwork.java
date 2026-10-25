@@ -23,6 +23,8 @@ public final class FluidNetwork {
 
     public final List<FluidNode> nodes = new ArrayList<>();
     public final List<FluidEdge> edges = new ArrayList<>();
+    /** This step's solved pressures (the bounds the limiters hold nodes to). */
+    private final java.util.Map<FluidNode, Double> solved = new java.util.IdentityHashMap<>();
 
     public FluidNode add(FluidNode n) {
         nodes.add(n);
@@ -73,9 +75,11 @@ public final class FluidNetwork {
             e.sB = ib == null ? 0 : e.xl * sL[ib] + (1 - e.xl) * sG[ib];
         }
         // 3. implicit pressures: P_i' = P_i + dt sum (dP/dm)_i,e x flow into i (flows at the new pressures); solved
-        //    again if a check valve would run backwards
+        //    again if a check valve would run backwards, or a flow runs against the side it was taken from (the edge
+        //    then takes its packet from the other side: a short pipe drained by its valve draws from its boiler even
+        //    when it started the step at a higher pressure)
         double[] P = new double[N];
-        for (int pass = 0; pass < 3; pass++) {
+        for (int pass = 0; pass < 4; pass++) {
             double[][] A = new double[N][N];
             double[] rhs = new double[N];
             for (int i = 0; i < N; i++) {
@@ -109,6 +113,12 @@ public final class FluidNetwork {
                     e.g = 0;
                     e.flow = 0;
                     again = true;
+                } else if (!e.oneWay() && e.flow != 0 && (e.flow > 0) != e.fromA && pass < 3) {
+                    props(e, !e.fromA);
+                    Integer ja = idx.get(e.a), jb = idx.get(e.b);
+                    e.sA = ja == null ? 0 : e.xl * sL[ja] + (1 - e.xl) * sG[ja];
+                    e.sB = jb == null ? 0 : e.xl * sL[jb] + (1 - e.xl) * sG[jb];
+                    again = true;
                 }
             }
             if (!again) break;
@@ -116,6 +126,8 @@ public final class FluidNetwork {
         // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
         //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
         //    what leaves each node
+        solved.clear();
+        for (int i = 0; i < N; i++) solved.put(free.get(i), P[i]);
         for (int pass = 0; pass < 3; pass++) {
             limitNoReversal(dt);
             limitToNeighbourRange(dt);
@@ -188,9 +200,15 @@ public final class FluidNetwork {
      * the same rate applies to it leaving. By a small flash step.
      */
     static double dPdm(FluidNode n, double xl, double xv, double xa, double h, Flash probe) {
-        double d = Math.max(1e-7, 1e-4 * n.mass());
-        probe.solve(n.mWater + (xl + xv) * d, n.mAir + xa * d, n.energy + h * d, n.volume, n.T());
-        double s = (probe.P - n.P()) / d;
+        // the stiffer of a small and a larger step: a node just on the saturation curve answers a small step on the flat
+        // two-phase branch, while the step's real change may carry it onto the steep single-phase one (a short pipe of
+        // saturated steam then pulled in twice its contents, overshot, and the flow reversed every other step)
+        double s = 0;
+        for (double frac : new double[]{1e-4, 2e-2}) {
+            double d = Math.max(1e-7, frac * n.mass());
+            probe.solve(n.mWater + (xl + xv) * d, n.mAir + xa * d, n.energy + h * d, n.volume, n.T());
+            s = Math.max(s, (probe.P - n.P()) / d);
+        }
         if (!(s > 0)) s = Water.R_AIR * Math.max(n.T(), Flash.T_MIN) / n.volume;   // (an empty node: as air)
         return s;
     }
@@ -236,10 +254,9 @@ public final class FluidNetwork {
         for (FluidEdge e : edges) {
             if (e.flow == 0) continue;
             double d = e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head;
-            if (d == 0 || (d > 0) != (e.flow > 0)) {
-                e.flow = 0;
-                continue;
-            }
+            // (a flow against the starting drive is the implicit solve's answer to what the step does at the other
+            // end: left alone; only an overshoot past the even point is cut back)
+            if (d == 0 || (d > 0) != (e.flow > 0)) continue;
             double d1 = d + r.getOrDefault(e.a, 0.0) - r.getOrDefault(e.b, 0.0);
             if (d1 != 0 && (d1 > 0) != (d > 0)) e.flow *= 0.9 * d / (d - d1);
         }
@@ -253,8 +270,10 @@ public final class FluidNetwork {
                 if (e.a != n && e.b != n) continue;
                 if (e.oneWay() && e.g == 0) continue;   // (a shut check valve pushes nothing either way)
                 double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
-                // the pressure this edge pushes n towards (where its drive would be zero)
-                double towards = e.b == n ? e.a.P() + offA - offB + e.head : e.b.P() + offB - offA - e.head;
+                // the pressure this edge pushes n towards (where its drive would be zero), by the other end's pressure at
+                // the end of the step as solved (by its start, a boiler couldn't feed a pipe its valve was emptying)
+                double pa = solved.getOrDefault(e.a, e.a.P()), pb = solved.getOrDefault(e.b, e.b.P());
+                double towards = e.b == n ? pa + offA - offB + e.head : pb + offB - offA - e.head;
                 lo = Math.min(lo, towards);
                 hi = Math.max(hi, towards);
                 if (e.flow == 0) continue;
