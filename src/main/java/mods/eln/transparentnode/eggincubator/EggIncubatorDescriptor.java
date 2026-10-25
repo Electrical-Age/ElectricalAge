@@ -81,7 +81,10 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     void draw(int eggStackSize, float powerFactor) {
         if (eggStackSize == 0) powerFactor = 0f;
         UtilsClient.disableCulling();
+        // the windows are glass (Baughn: the model looked half missing; 1.7.10's texture had them fully transparent)
+        UtilsClient.enableBlend();
         if (main != null) main.draw();
+        UtilsClient.disableBlend();
         if (lampf != null) {
             GL11.glColor3f(0.1f, 0.1f, 0.1f);
             lampf.draw();

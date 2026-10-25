@@ -44,7 +44,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
         GL11.glPushMatrix();
         front.glRotateXnRef();
         if (egg != null) {
-            UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
+            UtilsClient.drawEntityItem(egg, 0.0f, -0.25f, 0.13f, alpha, 0.7f);   // 1.12: -0.3, 0.6 (half sunk in the nest here)
         }
         descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
         GL11.glPopMatrix();

@@ -83,6 +83,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `tools/models/steamoven.py`. Test `steam_oven_cooks_with_steam`.
 - Devices (transparent and six-node) can be placed against any full face, not only opaque cubes (Baughn): a top
   slab, the underside of a bottom slab or stair, a stair's back, glass (`TransparentSupportCases`).
+- Egg incubator: its windows are glass (the 1.7.10 texture left them fully transparent, so the model looked like a bare
+  frame; Baughn), and the egg sits higher and larger in the nest (it was half sunk in the bowl).
 
 ## Bugs fixed
 
