@@ -260,37 +260,57 @@ public final class KitPreview {
         var server = level.getServer();
         WORKER.execute(() -> {
             if (GEN.getOrDefault(id, 0L) != gen) return;
-            PipeRouter.Space sp = PipePlacer.space(view);
-            if (join != null) sp = PipePlacer.spaceAround(sp, join, 6);
-            PipeRouter.Result r = PipeRouter.route(sp, PipePart.BORE[tier], start, wps, end, PREVIEW_BUDGET_MS);
-            List<int[]> bs = new ArrayList<>();
-            boolean ok = r.error == null;
-            String msg;
-            if (!ok) {
-                bs.add(new int[]{(int) end.x() - 1, (int) end.y() - 1, (int) end.z() - 1, (int) end.x() + 1, (int) end.y() + 1, (int) end.z() + 1});
-                msg = "Can't reach there: " + r.error;
-            } else {
-                for (var e : PipeRouter.perBlock(r.points).entrySet()) {
-                    long bx = e.getKey().get(0), by = e.getKey().get(1), bz = e.getKey().get(2);
-                    for (int[] pts : e.getValue())
-                        for (int[] b : new PipePart(tier, pts).boxes())
-                            bs.add(new int[]{(int) bx * 16 + b[0], (int) by * 16 + b[1], (int) bz * 16 + b[2], (int) bx * 16 + b[3], (int) by * 16 + b[4], (int) bz * 16 + b[5]});
-                }
-                int len = r.length();
-                if (have < len) {
-                    ok = false;
-                    msg = String.format("Too long: %.1f blocks of pipe, the kit holds %.1f", len / 16.0, have / 16.0);
-                } else msg = String.format("Route: %.1f blocks of pipe", len / 16.0) + (toPort ? "" : join != null ? " (joins the pipe)" : " (waypoint)");
+            Answer ans;
+            try {
+                ans = pipeAnswer(view, join, tier, start, wps, end, have, toPort);
+            } catch (RuntimeException ex) {
+                Eln.LOG.warn("Pipe route preview failed", ex);
+                return;
             }
-            boolean okF = ok;
-            String msgF = msg;
             server.execute(() -> {
                 if (GEN.getOrDefault(id, 0L) != gen) return;
                 ServerPlayer now = server.getPlayerList().getPlayer(id);
                 if (now == null) return;
-                send(now, okF, bs, okF && toPort);
-                now.sendOverlayMessage(net.minecraft.network.chat.Component.literal(msgF));
+                send(now, ans.ok(), ans.boxes(), ans.ok() && toPort);
+                now.sendOverlayMessage(net.minecraft.network.chat.Component.literal(ans.message()));
             });
         });
+    }
+
+    /** A pipe route's preview: the pipe as it would be laid from start over the waypoints to end (world voxels). */
+    public static Answer pipeAnswer(RouteView view, long[] join, int tier, PipeRouter.End start, List<PipeRouter.End> wps, PipeRouter.End end,
+                                    int have, boolean toPort) {
+        PipeRouter.Space sp = PipePlacer.space(view);
+        if (join != null) sp = PipePlacer.spaceAround(sp, join, 6);
+        PipeRouter.Result r = PipeRouter.route(sp, PipePart.BORE[tier], start, wps, end, PREVIEW_BUDGET_MS);
+        List<int[]> bs = new ArrayList<>();
+        boolean ok = r.error == null;
+        String msg;
+        if (!ok) {
+            bs.add(new int[]{(int) end.x() - 1, (int) end.y() - 1, (int) end.z() - 1, (int) end.x() + 1, (int) end.y() + 1, (int) end.z() + 1});
+            msg = "Can't reach there: " + r.error;
+        } else {
+            for (var e : PipeRouter.perBlock(r.points).entrySet()) {
+                long bx = e.getKey().get(0), by = e.getKey().get(1), bz = e.getKey().get(2);
+                for (int[] pts : e.getValue())
+                    for (int[] b : new PipePart(tier, pts).boxes())
+                        bs.add(new int[]{(int) bx * 16 + b[0], (int) by * 16 + b[1], (int) bz * 16 + b[2], (int) bx * 16 + b[3], (int) by * 16 + b[4], (int) bz * 16 + b[5]});
+            }
+            int len = r.length();
+            if (have < len) {
+                ok = false;
+                msg = String.format("Too long: %.1f blocks of pipe, the kit holds %.1f", len / 16.0, have / 16.0);
+            } else msg = String.format("Route: %.1f blocks of pipe", len / 16.0) + (toPort ? "" : join != null ? " (joins the pipe)" : " (waypoint)");
+        }
+        return new Answer(ok, bs, msg);
+    }
+
+    /** pipeAnswer from start to end with no waypoints, on a snapshot round them (GameTests). */
+    public static Answer pipeAnswerForTests(ServerLevel level, int tier, PipeRouter.End start, PipeRouter.End end) {
+        int m = CableRouter.MARGIN / 16 + 2;
+        int x0 = (int) Math.floorDiv(Math.min(start.x(), end.x()), 16) - m, y0 = (int) Math.floorDiv(Math.min(start.y(), end.y()), 16) - m;
+        int z0 = (int) Math.floorDiv(Math.min(start.z(), end.z()), 16) - m, x1 = (int) Math.floorDiv(Math.max(start.x(), end.x()), 16) + m;
+        int y1 = (int) Math.floorDiv(Math.max(start.y(), end.y()), 16) + m, z1 = (int) Math.floorDiv(Math.max(start.z(), end.z()), 16) + m;
+        return pipeAnswer(RouteView.snapshot(level, x0, y0, z0, x1, y1, z1), null, tier, start, List.of(), end, Integer.MAX_VALUE, false);
     }
 }

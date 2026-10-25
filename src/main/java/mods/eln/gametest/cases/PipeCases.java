@@ -37,6 +37,7 @@ public final class PipeCases {
         cases.add(new Adapter());
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
+        cases.add(new PipeRoutePreview());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -876,6 +877,46 @@ public final class PipeCases {
             ctx.check("pipe: taking the low pipe out leaves the high one", !emptyAfterFirst && partsLeft == 1, partsLeft + " left");
             ctx.check("pipe: it drops as a kit of its length (16 voxels)", dropped == 16, dropped + " voxels dropped");
             for (var it : items) it.discard();
+        }
+    }
+
+    /**
+     * The live route preview of a pipe kit (Baughn: pipes didn't show while picking waypoints; AdventurAgent saw none
+     * drawn): from the top of an upright pipe to an air cell three blocks on, the preview has the pipe's boxes.
+     */
+    static final class PipeRoutePreview implements TestCase {
+        String result = "not run";
+        boolean ok;
+
+        public String name() {
+            return "pipe kit: the live route preview has the pipe";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            String err = mods.eln.node.voxel.PipeKitItem.place(level, ctx.at(1, 1, 1), new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 16, 8}), null);
+            var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(1, 1, 1), net.minecraft.core.Direction.UP);
+            if (err != null || a == null) {
+                result = "setup: " + err + " port " + a;
+                return;
+            }
+            BlockPos at = ctx.at(4, 2, 1);
+            var end = new mods.eln.node.voxel.PipeRouter.End(at.getX() * 16L + 8, at.getY() * 16L + 8, at.getZ() * 16L + 8, -1);
+            try {
+                var ans = mods.eln.node.voxel.KitPreview.pipeAnswerForTests(level, 0, a, end);
+                result = ans.ok() + " " + ans.boxes().size() + " boxes: " + ans.message();
+                ok = ans.ok() && ans.boxes().size() >= 2;
+            } catch (RuntimeException e) {
+                result = "threw " + e;
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe preview: a route with boxes", ok, result);
         }
     }
 }
