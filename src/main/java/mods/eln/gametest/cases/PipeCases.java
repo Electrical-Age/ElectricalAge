@@ -670,7 +670,7 @@ public final class PipeCases {
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
             if (cap == null) return;
             try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 500, tx);
+                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 150, tx);
                 tx.commit();
             }
         }
@@ -682,14 +682,14 @@ public final class PipeCases {
             PipePart stub = null;
             for (VoxelPart p : n.parts) if (p instanceof PipePart pp) stub = pp;
             double run = stub == null ? 0 : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid).mWater / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
-            ctx.check("pipe: 500 mB of water went in through the capability (the stub holds ~950)", put == 500, put + " mB");
-            ctx.check("pipe: it is in the run (some evaporates into its air)", run > 495 && run < 505, run + " mB");
+            ctx.check("pipe: 150 mB of water went in through the capability (the stub holds ~190)", put == 150, put + " mB");
+            ctx.check("pipe: it is in the run (some evaporates into its air)", run > 145 && run < 155, run + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
             try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 200, tx);
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 100, tx);
                 tx.commit();
             }
-            ctx.check("pipe: water comes back out through it", took == 200, took + " mB");
+            ctx.check("pipe: water comes back out through it", took == 100, took + " mB");
             var other = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.UP);
             ctx.check("pipe: only on the adapter's face", other == null, "" + other);
 

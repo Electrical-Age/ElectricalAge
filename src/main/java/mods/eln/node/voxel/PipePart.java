@@ -18,7 +18,7 @@ public final class PipePart extends VoxelPart {
     public static final String KIND = "pipe";
     /** Per tier: bore (voxels), volume per block of length (m^3), conductance per block (m^3). Tunables (6a, 6b). */
     public static final int[] BORE = {4, 6};
-    public static final double[] VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25};
+    public static final double[] VOLUME_PER_BLOCK = {0.00003, 0.00003 * 2.25};
     public static final double[] K_PER_BLOCK = {3e-11, 3e-11 * 2.25};
     public static final String[] TIER_NAME = {"iron", "alloy"};
     /**
