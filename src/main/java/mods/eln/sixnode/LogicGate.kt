@@ -51,7 +51,9 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     /** Placed anywhere on a face of a voxel block, several to a face (Baughn: pack chips). */
     override fun placeAnywhere() = true
 
-    override fun drawPlaced(front: LRDU) {
+    override fun drawsOwnPins() = true
+
+    override fun drawPlaced(side: Direction, front: LRDU) {
         front.glRotateOnX()
         draw()
     }

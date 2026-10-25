@@ -56,7 +56,7 @@ public final class DevicePreviewRender {
                 GL11.glTranslatef(.5f + s.ox / 16f, .5f + s.oy / 16f, .5f + s.oz / 16f);
                 s.side.glRotateXnRef();
                 GL11.glTranslatef(-0.5f, 0f, 0f);
-                d.drawPlaced(s.front);
+                d.drawPlaced(s.side, s.front);
             } catch (RuntimeException ex) {
                 ElnRenderErrors.report("device preview", ex);
             } finally {

@@ -80,4 +80,17 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
+
+    /** Small: placed anywhere on a face of a voxel block (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        if (side.isY()) front.glRotateOnX();
+        else LRDU.Down.glRotateOnX();
+        draw(0, 0, null);
+    }
 }

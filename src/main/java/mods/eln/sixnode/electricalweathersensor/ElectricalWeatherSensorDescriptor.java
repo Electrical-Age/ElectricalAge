@@ -79,4 +79,15 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).right();
     }
+
+    /** Small: placed anywhere on a face of a voxel block (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        draw();
+    }
 }

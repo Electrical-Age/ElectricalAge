@@ -624,6 +624,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         int slot = freeSlot();
         if (slot < 0) return "No more devices fit in this block";
         int[] o = snap(d, face, hx, hy, hz);
+        // in the middle of a free face: the face's own slot, as before (ports at the face's edges, which meet the
+        // next block, a machine beside it, by EA's edge rule: a trimmer beside a furnace)
+        if (o[0] == 0 && o[1] == 0 && o[2] == 0 && sideElementList[face.getInt()] == null && canPlaceElement(face.getInt()))
+            return createSubBlock(stack, face, player) ? null : "Can't place that";
         String err = placeErrorAt(stack, slot, face, o[0], o[1], o[2], d.getFrontFromPlace(face, player));
         if (err != null) return err;
         return createSubBlockAt(stack, slot, face, o[0], o[1], o[2], player) ? null : "Can't place that";
@@ -640,13 +644,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /** Where a device placed anywhere goes for a click at the block-local point: its centre's offset (world voxels), snapped
-     *  to voxels and kept with its body and pins on the face. */
+     *  to even voxels (pins on the routers' 2-voxel lattice: a cable can be laid to them) and kept with its body and pins
+     *  on the face. */
     public static int[] snap(mods.eln.node.six.SixNodeDescriptor d, Direction face, double hx, double hy, double hz) {
         int half = d.bodyHalf() + 1, n = CablePart.normalAxis(face.toEnumFacing().get3DDataValue());
         double[] h = {hx, hy, hz};
         int[] o = new int[3];
         for (int a = 0; a < 3; a++)
-            if (a != n) o[a] = Math.max(half, Math.min(16 - half, (int) Math.round(h[a] * 16))) - 8;
+            if (a != n) o[a] = Math.max(half, Math.min(16 - half, 2 * (int) Math.round(h[a] * 8))) - 8;
         return o;
     }
 

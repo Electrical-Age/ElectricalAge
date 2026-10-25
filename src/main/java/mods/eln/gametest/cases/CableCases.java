@@ -47,6 +47,7 @@ public final class CableCases {
         cases.add(new ChipsPackedCase());
         cases.add(new CableToChipCase());
         cases.add(new PinsAcrossCase());
+        cases.add(new SmallDevicesAnywhereCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
@@ -937,7 +938,7 @@ public final class CableCases {
             // a NOT placed at a click; a Signal Source (50 V) in the next block west, a floor cable to the chip's input
             var w = block(c, c.at(4, 1, 1));
             String err = w.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.52, 0, 0.47, player);
-            e = w.getElement(6);
+            e = w.getElement(yn);
             if (e != null) Wp9aCases.orient(e, l -> l, xp);
             voxel(c, c.at(4, 1, 1), List.of(new CablePart(0, DOWN, new int[]{0, 0, 8, 4, 0, 8})));
             var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(3, 1, 1), yn);
@@ -946,7 +947,7 @@ public final class CableCases {
                 o.writeFloat(50f);
             }));
             placed = "click: " + err + ", slot " + (e == null ? -1 : e.slot) + " at " + (e == null ? "-" : e.ox + "," + e.oy + "," + e.oz);
-            placedOk = err == null && e != null && e.slot >= 6 && e.ox == 0 && e.oy == 0 && e.oz == 0;
+            placedOk = err == null && e != null && e.slot == yn.getInt();   // (the middle of a free face: its own slot)
             // beside a chip whose side toward it has no pin: too close
             var u = block(c, c.at(6, 1, 1));
             u.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
@@ -973,12 +974,55 @@ public final class CableCases {
         }
 
         public void measure(TestContext c) {
-            c.check("chips: placed at the click, off centre slot", placedOk, placed);
+            c.check("chips: placed at a click in the middle of a free face: the face's slot", placedOk, placed);
             c.check("chips: refused over a chip, and beside one with no pin toward it", refusedOk, refused);
             c.check("chips: four fit a face (pins met along x, two voxels of air along z)", fourOk, four);
             c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);
             Wp9cCases.within(c, "chips: the second NOT, its input on the first's output pin [V]", Wp9cCases.out(b), 0, 0.5);
             Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from 50 V [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.5);
+        }
+    }
+
+    /**
+     * Other small devices go anywhere on a face too (Baughn), the redstone converters stay centred: a Signal Trimmer off
+     * centre at 50 V, its output pin on a NOT chip's input pin: low.
+     */
+    static final class SmallDevicesAnywhereCase implements TestCase {
+        mods.eln.node.six.SixNodeElement not;
+        String redstone = "";
+
+        public String name() {
+            return "small devices anywhere on a face";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var yn = mods.eln.misc.Direction.YN;
+            var xp = mods.eln.misc.Direction.XP;
+            c.floor(c.at(1, 0, 1));
+            var v = ChipsPackedCase.block(c, c.at(1, 1, 1));
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).newItemStack(), 6, yn, -4, 0, 0, player);
+            var t = (mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement) v.getElement(6);
+            Wp9aCases.orient(t, l -> l, xp);
+            t.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement.setVoltagerId);
+                o.writeFloat((float) mods.eln.Eln.SVU);
+            }));
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 7, yn, 4, 0, 0, player);
+            not = v.getElement(7);
+            Wp9aCases.orient(not, l -> l, xp);
+            redstone = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9bCases.REDSTONE_IN).newItemStack(), yn, 0.5, 0, 0.9, player));
+        }
+
+        public void measure(TestContext c) {
+            c.check("small devices: the trimmer goes anywhere, the redstone converter doesn't",
+                mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).placeAnywhere()
+                    && !mods.eln.Eln.sixNodeItem.getDescriptor(Wp9bCases.REDSTONE_IN).placeAnywhere() && redstone.startsWith("That can't"), redstone);
+            Wp9cCases.within(c, "small devices: a NOT on an off-centre trimmer's pin at 50 V [V]", Wp9cCases.out(not), 0, 0.5);
         }
     }
 
@@ -1054,7 +1098,7 @@ public final class CableCases {
                 o.writeFloat(50f);
             }));
             var v = ChipsPackedCase.block(c, c.at(5, 1, 1));
-            err = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.5, 0, 0.5, player));
+            err = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.4, 0, 0.5, player));   // (two voxels off centre)
             chip = v.getElement(6);
             if (chip == null) return;
             Wp9aCases.orient(chip, l -> l, mods.eln.misc.Direction.XP);   // (input west, toward the source)
@@ -1062,7 +1106,7 @@ public final class CableCases {
             var a = mods.eln.node.voxel.CablePlacer.endAtForTests(level, sp, net.minecraft.core.Direction.EAST,
                 net.minecraft.world.phys.Vec3.atLowerCornerOf(sp).add(0.65, 0.1, 0.5), true, new long[1][]);
             var b = mods.eln.node.voxel.CablePlacer.endAtForTests(level, cp, net.minecraft.core.Direction.UP,
-                net.minecraft.world.phys.Vec3.atLowerCornerOf(cp).add(0.32, 0.1, 0.5), false, new long[1][]);
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(cp).add(0.27, 0.1, 0.5), false, new long[1][]);
             err = "ends " + a + " / " + b + "; lay " + (a == null || b == null ? "-" : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, 0, a, b));
         }
 

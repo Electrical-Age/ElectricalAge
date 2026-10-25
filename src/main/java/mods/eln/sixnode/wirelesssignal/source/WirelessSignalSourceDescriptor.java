@@ -53,4 +53,15 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
         draw(0f, 1f, null);
 
     }
+
+    /** Small: placed anywhere on a face of a voxel block (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        draw(0, 0, null);
+    }
 }

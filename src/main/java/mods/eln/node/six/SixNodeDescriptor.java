@@ -132,7 +132,12 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
 
     /** Client: its model in the frame SixNodeRender sets up for an element (on its face, centred), turned to front; for
      *  the placement preview of a device placed anywhere. */
-    public void drawPlaced(LRDU front) {
+    public void drawPlaced(Direction side, LRDU front) {
+    }
+
+    /** Does its model have pins (chips)? Else a device placed off centre gets small pin boxes drawn for it. */
+    public boolean drawsOwnPins() {
+        return false;
     }
 
     /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
