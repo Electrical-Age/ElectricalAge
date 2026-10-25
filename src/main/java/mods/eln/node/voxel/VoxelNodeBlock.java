@@ -121,8 +121,8 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
     }
 
     /** The parts' outline (grown) and the model boxes of six-node elements hosted here (as they are clicked; they don't
-     *  collide). deviceBoxes: per face (EA Direction int), null where there is none. */
-    static VoxelShape outlineOf(java.util.List<VoxelPart> parts, int[][] deviceBoxes) {
+     *  collide). deviceBoxes: every device's boxes (VoxelNodeEntity.deviceBoxes). */
+    static VoxelShape outlineOf(java.util.List<VoxelPart> parts, java.util.List<int[]> deviceBoxes) {
         java.util.List<int[]> boxes = new java.util.ArrayList<>();
         for (VoxelPart p : parts)
             for (int[] b : p.boxes())

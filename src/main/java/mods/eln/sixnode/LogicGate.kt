@@ -51,6 +51,13 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     /** Placed anywhere on a face of a voxel block, several to a face (Baughn: pack chips). */
     override fun placeAnywhere() = true
 
+    /** The case, without its pins (3 voxels at CHIP_SCALE). */
+    override fun bodyHalf(): Int {
+        val b = case?.boundingBox() ?: return super.bodyHalf()
+        val across = maxOf(-b.min.y, b.max.y, -b.min.z, b.max.z) * CHIP_SCALE * 16
+        return Math.ceil(across - 0.01).toInt().coerceIn(1, 8)
+    }
+
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>) :
         this(name, obj, functionName, functionClass, LogicGateElement::class.java, null) {
     }

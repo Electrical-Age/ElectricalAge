@@ -54,7 +54,7 @@ public abstract class VoxelPart {
     }
 
     /** Does the box (voxels, 0..16) hold the point (block-local, 0..1), give or take eps? */
-    static boolean contains(int[] b, double x, double y, double z, double eps) {
+    public static boolean contains(int[] b, double x, double y, double z, double eps) {
         return x * 16 >= b[0] - eps && x * 16 <= b[3] + eps && y * 16 >= b[1] - eps && y * 16 <= b[4] + eps
             && z * 16 >= b[2] - eps && z * 16 <= b[5] + eps;
     }

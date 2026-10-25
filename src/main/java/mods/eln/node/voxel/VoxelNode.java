@@ -42,7 +42,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         BitSet s = new BitSet(4096);
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(s, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(s, plate(f));
-        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) fill(s, elementBox(i));
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) for (int[] b : elementBoxes(i)) fill(s, b);
         return s;
     }
 
@@ -76,7 +76,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null || isSideKept(f)) fill(used, plate(f));
-        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) fill(used, elementBox(i));
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) for (int[] b : elementBoxes(i)) fill(used, b);
         for (int[] b : hostBoxes()) fill(used, b);
     }
 
@@ -123,6 +123,67 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         var e = sideElementList[slot];
         if (e == null || e.sixNodeElementDescriptor == null) return slot < 6 ? plate(slot) : new int[6];
         return slotBox(e.sixNodeElementDescriptor, e.side.getInt(), e.ox, e.oy, e.oz);
+    }
+
+    /** The boxes of the element in a slot: on a face, its model box; off centre, its body and its pins' boxes. */
+    public List<int[]> elementBoxes(int slot) {
+        var e = sideElementList[slot];
+        if (slot < 6 || e == null || e.sixNodeElementDescriptor == null) return List.of(elementBox(slot));
+        List<int[]> out = new ArrayList<>();
+        out.add(bodyBox(e.sixNodeElementDescriptor, e.side.getInt(), e.ox, e.oy, e.oz));
+        for (Pin p : pins(e)) out.add(p.box());
+        return out;
+    }
+
+    /** The body of a device off centre (its model without the pins: SixNodeDescriptor.bodyHalf), clipped to the block. */
+    public static int[] bodyBox(mods.eln.node.six.SixNodeDescriptor d, int f, int ox, int oy, int oz) {
+        int[] r = rawBodyBox(d, f, ox, oy, oz);
+        for (int k = 0; k < 6; k++) r[k] = Math.max(0, Math.min(16, r[k]));
+        return r;
+    }
+
+    static int[] rawBodyBox(mods.eln.node.six.SixNodeDescriptor d, int f, int ox, int oy, int oz) {
+        int face = Direction.fromInt(f).toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(face), bh = d.bodyHalf();
+        int[] c = {8 + ox, 8 + oy, 8 + oz};
+        int[] r = new int[6];
+        for (int a = 0; a < 3; a++) {
+            r[a] = c[a] - bh;
+            r[a + 3] = c[a] + bh;
+        }
+        int h = d.footprint()[1];
+        r[n] = CablePart.plane(face) == 0 ? 0 : 16 - h;
+        r[n + 3] = CablePart.plane(face) == 0 ? h : 16;
+        return r;
+    }
+
+    /** The pin boxes a device off centre would have on face f: one per edge whose render draws a cable (client). */
+    public static List<int[]> pinBoxes(mods.eln.node.six.SixNodeDescriptor d, Direction side, int ox, int oy, int oz, java.util.function.Predicate<LRDU> has) {
+        List<int[]> out = new ArrayList<>();
+        for (LRDU l : LRDU.values()) if (has.test(l)) out.add(pinGeometry(d, side, ox, oy, oz, l)[1]);
+        return out;
+    }
+
+    /** {tip (x, y, z), box, contact} of a pin toward edge l of a device off centre (block voxels). */
+    static int[][] pinGeometry(mods.eln.node.six.SixNodeDescriptor d, Direction side, int ox, int oy, int oz, LRDU l) {
+        int af = side.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(af), bh = d.bodyHalf();
+        int[] c = {8 + ox, 8 + oy, 8 + oz};
+        c[n] = CablePart.plane(af);
+        int dv = side.applyLRDU(l).toEnumFacing().get3DDataValue(), a = CablePart.normalAxis(dv), b = 3 - n - a;
+        boolean pos = dv % 2 == 1;
+        int[] tip = c.clone();
+        tip[a] += pos ? bh + 1 : -bh - 1;
+        int[] box = new int[6], contact = new int[6];
+        box[a] = pos ? c[a] + bh : c[a] - bh - 1;
+        box[a + 3] = box[a] + 1;
+        contact[a] = pos ? tip[a] : tip[a] - 1;
+        contact[a + 3] = contact[a] + 1;
+        for (int[] x : new int[][]{box, contact}) {
+            x[b] = c[b] - 1;
+            x[b + 3] = c[b] + 1;
+            x[n] = CablePart.plane(af) == 0 ? 0 : 15;
+            x[n + 3] = x[n] + 1;
+        }
+        return new int[][]{tip, box, contact};
     }
 
     /** A device's model box on face f (EA Direction int), its centre (ox, oy, oz) world voxels off the face's centre;
@@ -447,11 +508,30 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return -1;
         for (int f = 0; f < SLOTS; f++) {
             if (sideElementList[f] == null) continue;
-            int[] b = elementBox(f);
-            int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
-            if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
+            for (int[] b : elementBoxes(f)) {
+                int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
+                if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
+            }
         }
         return -1;
+    }
+
+    /** placeError for a device of this stack at that place and front (a probe element, not added). */
+    public String placeErrorAt(ItemStack stack, int slot, Direction face, int ox, int oy, int oz, LRDU front) {
+        var d = Eln.sixNodeItem.getDescriptor(stack);
+        mods.eln.node.six.SixNodeElement probe;
+        try {
+            probe = (mods.eln.node.six.SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
+                mods.eln.node.six.SixNodeDescriptor.class).newInstance(this, face, d);
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            return "Can't place that";
+        }
+        probe.slot = slot;
+        probe.ox = ox;
+        probe.oy = oy;
+        probe.oz = oz;
+        probe.front = front;
+        return placeError(probe);
     }
 
     /** A free slot past the faces, or -1. */
@@ -466,43 +546,57 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * of its pins touches a cable or meets another device's pin (connected, so legible).
      */
     public String placeError(mods.eln.node.six.SixNodeElement e) {
+        var d = e.sixNodeElementDescriptor;
         int f = e.side.getInt();
-        int[] raw = e.sixNodeElementDescriptor.footprintBox(f);
-        int[] o = {e.ox, e.oy, e.oz};
-        for (int k = 0; k < 6; k++) if (raw[k] + o[k % 3] < 0 || raw[k] + o[k % 3] > 16) return "It doesn't fit on the face there";
-        int[] box = slotBox(e.sixNodeElementDescriptor, f, e.ox, e.oy, e.oz);
-        BitSet want = new BitSet(4096);
-        fill(want, box);
-        if (want.intersects(used)) return "No room for it there";
-        int[] grown = new int[6];
-        for (int k = 0; k < 3; k++) {
-            grown[k] = box[k] - 1;
-            grown[k + 3] = box[k + 3] + 1;
-        }
         List<Pin> mine = pins(e);
+        int[] body = rawBodyBox(d, f, e.ox, e.oy, e.oz);
+        List<int[]> boxes = new ArrayList<>();
+        boxes.add(body);
+        for (Pin p : mine) boxes.add(p.box);
+        BitSet want = new BitSet(4096);
+        for (int[] b : boxes) {
+            for (int k = 0; k < 6; k++) if (b[k] < 0 || b[k] > 16) return "It doesn't fit on the face there";
+            fill(want, b);
+        }
+        if (want.intersects(used)) return "No room for it there";
+        // a voxel of air round its body and pins; a pin may touch a pin (tip to tip) or a cable of its kind
         for (int i = 0; i < SLOTS; i++) {
-            var o2 = sideElementList[i];
-            if (o2 == null || !overlaps(grown, elementBox(i))) continue;
-            boolean met = false;
-            if (i >= 6) for (Pin p : mine) for (Pin q : pins(o2)) met |= meet(p, q);
-            if (!met) return "Too close to the " + o2.sixNodeElementDescriptor.name + ": leave a voxel of air, or put their pins together";
+            var o = sideElementList[i];
+            if (o == null) continue;
+            List<Pin> theirs = i >= 6 ? pins(o) : List.of();
+            if (near(body, elementBoxes(i))) return tooClose(o);
+            for (Pin p : mine) {
+                if (near(p.box, List.of(elementBoxes(i).get(0)))) return tooClose(o);   // (their body)
+                for (Pin q : theirs) if (near(p.box, List.of(q.box)) && !meet(p, q)) return tooClose(o);
+            }
+            for (Pin q : theirs) if (near(body, List.of(q.box))) return tooClose(o);
         }
         for (VoxelPart part : parts) {
-            boolean near = false, touched = false;
-            for (int[] b : part.boxes()) {
-                near |= overlaps(grown, b);
-                if (part instanceof CablePart c) for (Pin p : mine) {
-                    if (!overlaps(b, p.contact)) continue;
-                    var d = c.tierInfo().descriptor();
-                    if (!compareConnectionMask(p.mask, d != null ? d.getNodeMask() : maskThermalWire))
-                        return "That cable doesn't fit its pin";   // (it would look connected and not be)
-                    touched = true;
-                }
-            }
-            if (near && !touched) return part instanceof CablePart ? "Too close to the cable: leave a voxel of air, or touch it with a pin"
+            if (near(body, part.boxes())) return part instanceof CablePart ? "Too close to the cable: leave a voxel of air, or touch it with a pin"
                 : "Too close to that: leave a voxel of air";
+            for (Pin p : mine) {
+                if (!near(p.box, part.boxes())) continue;
+                boolean touched = false;
+                if (part instanceof CablePart c) for (int[] b : c.boxes()) touched |= overlaps(b, p.contact);
+                if (!touched) return part instanceof CablePart ? "Too close to the cable: leave a voxel of air, or touch it with a pin"
+                    : "Too close to that: leave a voxel of air";
+                var cd = ((CablePart) part).tierInfo().descriptor();
+                if (!compareConnectionMask(p.mask, cd != null ? cd.getNodeMask() : maskThermalWire))
+                    return "That cable doesn't fit its pin";   // (it would look connected and not be)
+            }
         }
         return null;
+    }
+
+    /** Is any of the boxes within a voxel of b (b grown by one overlaps it)? */
+    static boolean near(int[] b, List<int[]> boxes) {
+        int[] g = {b[0] - 1, b[1] - 1, b[2] - 1, b[3] + 1, b[4] + 1, b[5] + 1};
+        for (int[] x : boxes) if (overlaps(g, x)) return true;
+        return false;
+    }
+
+    private static String tooClose(mods.eln.node.six.SixNodeElement o) {
+        return "Too close to the " + o.sixNodeElementDescriptor.name + ": leave a voxel of air, or put their pins together";
     }
 
     /** Could an element go on face f (EA Direction int): free face, and its plate clear of the parts? */
@@ -529,24 +623,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (d == null || !d.placeAnywhere() || d.hasGhostGroup()) return "That can't go off centre";
         int slot = freeSlot();
         if (slot < 0) return "No more devices fit in this block";
-        int half = d.footprint()[0], n = CablePart.normalAxis(face.toEnumFacing().get3DDataValue());
+        int half = d.bodyHalf() + 1, n = CablePart.normalAxis(face.toEnumFacing().get3DDataValue());   // (body and pins on the face)
         double[] h = {hx, hy, hz};
         int[] o = new int[3];
         for (int a = 0; a < 3; a++)
             if (a != n) o[a] = Math.max(half, Math.min(16 - half, (int) Math.round(h[a] * 16))) - 8;
-        mods.eln.node.six.SixNodeElement probe;
-        try {
-            probe = (mods.eln.node.six.SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
-                mods.eln.node.six.SixNodeDescriptor.class).newInstance(this, face, d);
-        } catch (ReflectiveOperationException | RuntimeException ex) {
-            return "Can't place that";
-        }
-        probe.slot = slot;
-        probe.ox = o[0];
-        probe.oy = o[1];
-        probe.oz = o[2];
-        probe.front = d.getFrontFromPlace(face, player);
-        String err = placeError(probe);
+        String err = placeErrorAt(stack, slot, face, o[0], o[1], o[2], d.getFrontFromPlace(face, player));
         if (err != null) return err;
         return createSubBlockAt(stack, slot, face, o[0], o[1], o[2], player) ? null : "Can't place that";
     }
@@ -732,6 +814,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      */
     @Override
     public void connectJob() {
+        markUsed();   // (an off-centre device's pins follow its front, which a wrench turns)
         connectElements();   // (six-node elements hosted here: their loads and links inside the block)
         cables.build();
         cables.addToSimulation();
@@ -795,30 +878,18 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * voxels just outside it that a touching cable takes (1 deep, 2 wide, 1 high), the direction it points (3D value),
      * and the element's mask and loads toward that edge.
      */
-    record Pin(int slot, LRDU lrdu, int[] tip, int[] contact, int out, int mask, ElectricalLoad load, ThermalLoad thermal) {}
+    record Pin(int slot, LRDU lrdu, int[] tip, int[] box, int[] contact, int out, int mask, ElectricalLoad load, ThermalLoad thermal) {}
 
     /** The pins of the element in a slot past the faces (one per edge with a connection). */
     static List<Pin> pins(mods.eln.node.six.SixNodeElement e) {
         List<Pin> out = new ArrayList<>();
-        int af = e.side.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(af);
-        int half = e.sixNodeElementDescriptor.footprint()[0];
-        int[] c = {8 + e.ox, 8 + e.oy, 8 + e.oz};
-        c[n] = CablePart.plane(af);
         for (LRDU l : LRDU.values()) {
             int mask = e.getConnectionMask(l);
             if (mask == 0) continue;
-            int dv = e.side.applyLRDU(l).toEnumFacing().get3DDataValue(), a = CablePart.normalAxis(dv), b = 3 - n - a;
-            int[] tip = c.clone();
-            tip[a] += dv % 2 == 0 ? -half : half;
-            int[] box = new int[6];
-            box[a] = dv % 2 == 0 ? tip[a] - 1 : tip[a];
-            box[a + 3] = box[a] + 1;
-            box[b] = c[b] - 1;
-            box[b + 3] = c[b] + 1;
-            box[n] = CablePart.plane(af) == 0 ? 0 : 15;
-            box[n + 3] = box[n] + 1;
+            int[][] g = pinGeometry(e.sixNodeElementDescriptor, e.side, e.ox, e.oy, e.oz, l);
+            int dv = e.side.applyLRDU(l).toEnumFacing().get3DDataValue();
             boolean burnt = e.isBurnt();
-            out.add(new Pin(e.slot, l, tip, box, dv, mask, burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l)));
+            out.add(new Pin(e.slot, l, g[0], g[1], g[2], dv, mask, burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l)));
         }
         return out;
     }

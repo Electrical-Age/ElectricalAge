@@ -115,23 +115,27 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         return c;
     }
 
-    /** The model box of the device in each slot (SixNode.SLOTS; 0..5 centred on that face), null where there is none:
-     *  server from the node, client from the last publish. */
-    public int[][] deviceBoxes() {
-        int[][] r = new int[mods.eln.node.six.SixNode.SLOTS][];
+    /** Every device's boxes (its model box on a face; off centre, its body and pins): server from the node, client from
+     *  the last publish. */
+    public List<int[]> deviceBoxes() {
+        List<int[]> out = new ArrayList<>();
+        for (int f = 0; f < mods.eln.node.six.SixNode.SLOTS; f++) out.addAll(slotBoxes(f));
+        return out;
+    }
+
+    /** The boxes of the device in a slot (none if empty). */
+    public List<int[]> slotBoxes(int f) {
         boolean server = level != null && !level.isClientSide();
-        VoxelNode v = server && getNode() instanceof VoxelNode n ? n : null;
-        for (int f = 0; f < r.length; f++) {
-            if (server) {
-                if (v != null && v.sideElementList[f] != null) r[f] = v.elementBox(f);
-            } else if (elementRenderIdList[f] != 0) {
-                var d = mods.eln.Eln.sixNodeItem.getDescriptor(elementRenderIdList[f]);
-                var er = elementRenderList[f];
-                if (f < 6) r[f] = d == null ? VoxelNode.plate(f) : d.footprintBox(f);
-                else if (d != null && er != null) r[f] = VoxelNode.slotBox(d, er.side.getInt(), er.ox, er.oy, er.oz);
-            }
-        }
-        return r;
+        if (server) return getNode() instanceof VoxelNode v && v.sideElementList[f] != null ? v.elementBoxes(f) : List.of();
+        if (elementRenderIdList[f] == 0) return List.of();
+        var d = mods.eln.Eln.sixNodeItem.getDescriptor(elementRenderIdList[f]);
+        var er = elementRenderList[f];
+        if (f < 6) return List.of(d == null ? VoxelNode.plate(f) : d.footprintBox(f));
+        if (d == null || er == null) return List.of();
+        List<int[]> out = new ArrayList<>();
+        out.add(VoxelNode.bodyBox(d, er.side.getInt(), er.ox, er.oy, er.oz));
+        out.addAll(VoxelNode.pinBoxes(d, er.side, er.ox, er.oy, er.oz, l -> er.getCableRender(l) != null));
+        return out;
     }
 
     /** Client: what the devices' boxes depend on (ids and, past the faces, place), for the shape cache. */

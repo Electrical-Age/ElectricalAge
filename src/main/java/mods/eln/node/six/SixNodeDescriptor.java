@@ -124,6 +124,12 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     /** The scale the device's model is drawn at (its footprint follows). */
     protected float modelScale = 1f;
 
+    /** Half the width of the device's body (its model without pins), voxels: an off-centre device's pins stick out one
+     *  voxel past it. */
+    public int bodyHalf() {
+        return footprint()[0];
+    }
+
     /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
     public boolean placeAnywhere() {
         return false;

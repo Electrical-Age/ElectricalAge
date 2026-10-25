@@ -892,15 +892,15 @@ public final class CableCases {
      */
     static final class ChipsPackedCase implements TestCase {
         mods.eln.node.six.SixNodeElement a, b, e;
-        String placed = "", refused = "";
-        boolean placedOk, refusedOk;
+        String placed = "", refused = "", four = "";
+        boolean placedOk, refusedOk, fourOk;
 
         public String name() {
             return "chips anywhere on a face: pins connect, air between";
         }
 
         public int width() {
-            return 8;
+            return 9;
         }
 
         public int ticks() {
@@ -922,7 +922,7 @@ public final class CableCases {
             var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
             var yn = mods.eln.misc.Direction.YN;
             var xp = mods.eln.misc.Direction.XP;
-            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            for (int x = 0; x < 9; x++) c.floor(c.at(x, 0, 1));
             // NOT -> NOT, pin to pin
             var v = block(c, c.at(1, 1, 1));
             v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
@@ -950,14 +950,31 @@ public final class CableCases {
             var u = block(c, c.at(6, 1, 1));
             u.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
             Wp9aCases.orient(u.getElement(6), l -> l, mods.eln.misc.Direction.ZP);   // (pins north and south)
-            String near = u.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.75, 0, 0.5, player);
+            mods.eln.misc.LRDU eastward = null;
+            for (var l : mods.eln.misc.LRDU.values()) if (yn.applyLRDU(l) == xp) eastward = l;
+            // (pins east and west: its west pin a voxel from u's body, which has no pin there)
+            String near = u.placeErrorAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 7, yn, 3, 0, 0, eastward);
             refused = "over: " + over + "; beside: " + near;
             refusedOk = over != null && over.startsWith("No room") && near != null && near.startsWith("Too close");
+            // four to a face (Baughn's mockup): centres (4, 4), (12, 4), (4, 12), (12, 12), pins east and west; the pairs
+            // along x meet pin to pin, the pairs along z face each other's pinless sides two voxels apart
+            var q = block(c, c.at(7, 1, 1));
+            var not = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT);
+            int[][] at = {{-4, -4}, {4, -4}, {-4, 4}};
+            for (int k = 0; k < 3; k++) {
+                q.createSubBlockAt(not.newItemStack(), 6 + k, yn, at[k][0], 0, at[k][1], player);
+                Wp9aCases.orient(q.getElement(6 + k), l -> l, xp);
+            }
+            mods.eln.misc.LRDU east = null;
+            for (var l : mods.eln.misc.LRDU.values()) if (yn.applyLRDU(l) == xp) east = l;
+            four = String.valueOf(q.placeErrorAt(not.newItemStack(), 9, yn, 4, 0, 4, east));
+            fourOk = four.equals("null");
         }
 
         public void measure(TestContext c) {
             c.check("chips: placed at the click, off centre slot", placedOk, placed);
             c.check("chips: refused over a chip, and beside one with no pin toward it", refusedOk, refused);
+            c.check("chips: four fit a face (pins met along x, two voxels of air along z)", fourOk, four);
             c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);
             Wp9cCases.within(c, "chips: the second NOT, its input on the first's output pin [V]", Wp9cCases.out(b), 0, 0.5);
             Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from 50 V [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.5);
