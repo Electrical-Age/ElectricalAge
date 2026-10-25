@@ -104,7 +104,17 @@ public final class FluidNetwork {
         }
         capOutflows(dt);
         // 7. move contents
-        for (FluidEdge e : edges) transfer(e, dt);
+        // (each edge's packet from the step's starting contents: transfers change mAir as they go, and an edge read
+        // after another had taken from its node drew a different mix)
+        double[][] pks = new double[edges.size()][];
+        for (int i = 0; i < edges.size(); i++) {
+            FluidEdge e = edges.get(i);
+            if (e.flow != 0) {
+                FluidNode u = e.flow > 0 ? e.a : e.b;
+                pks[i] = packet(u, port(e, u));
+            }
+        }
+        for (int i = 0; i < edges.size(); i++) transfer(edges.get(i), dt, pks[i]);
         // 8. new equilibria
         for (FluidNode n : free) n.update();
     }
@@ -312,12 +322,11 @@ public final class FluidNetwork {
         return 0;
     }
 
-    private static void transfer(FluidEdge e, double dt) {
+    private static void transfer(FluidEdge e, double dt, double[] pk) {
         e.fLiquid = e.fVapour = e.fAir = e.fEnthalpy = 0;
         e.power = 0;
         if (e.flow == 0) return;
         FluidNode u = e.flow > 0 ? e.a : e.b, d = e.flow > 0 ? e.b : e.a;
-        double[] pk = packet(u, port(e, u));
         if (pk[4] <= 0) return;
         double m = Math.abs(e.flow);
         double liq = m * pk[0], vap = m * pk[1], air = m * pk[2], h = m * pk[3];
