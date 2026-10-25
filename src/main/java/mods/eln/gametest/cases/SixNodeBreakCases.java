@@ -20,6 +20,7 @@ public final class SixNodeBreakCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BreakOneFace());
+        cases.add(new InnerCornerProbeHeat());
         cases.add(new BreakKeptOnlyVoxel());
         cases.add(new OrphanBlock());
         cases.add(new LostSupport());
@@ -212,6 +213,66 @@ public final class SixNodeBreakCases {
         public void measure(TestContext ctx) {
             ctx.check("orphan block: placement refused, block and data kept; removal drops the data",
                 result.equals("kept true, placed false, block stays true, kept after true, dropped true"), result);
+        }
+    }
+
+    /**
+     * Two devices on adjacent faces of one six-node block share heat through the corner: a Temperature Probe on the floor
+     * or ceiling, its back (its only thermal edge; an empty slot: it reads a cable's heat) toward an LV cable on each
+     * wall. 1.12 looked for the probe's load on the wall's edge name, found none on 6 of the 8 corners, and left them
+     * unlinked.
+     */
+    static final class InnerCornerProbeHeat implements TestCase {
+        String result = "";
+        boolean ok;
+
+        public String name() {
+            return "six-node inner corner: a temperature probe reads a wall cable's heat";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            // every corner a floor or ceiling device meets a wall at: 4 walls, floor and ceiling
+            Direction[] walls = {Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
+            ok = true;
+            int k = 0;
+            for (Direction y : new Direction[]{Direction.YN, Direction.YP})
+                for (Direction w : walls) {
+                    BlockPos p = c.at(1 + 2 * (k % 4), 2, 1 + 4 * (k / 4));
+                    k++;
+                    c.floor(p.relative(y.toEnumFacing()));
+                    c.floor(p.relative(w.toEnumFacing()));
+                    var probe = c.placeSix(Wp9bCases.TEMPERATURE_PROBE, p, y);
+                    var cable = c.placeSix(Wp9bCases.LV_CABLE, p, w);
+                    Wp9aCases.orient(probe, mods.eln.misc.LRDU::inverse, w);
+                    var node = (mods.eln.node.six.SixNode) probe.sixNode;
+                    var mine = probe.getThermalLoad(probe.front.inverse());
+                    var theirs = cable.getThermalLoad(w.getLRDUGoingTo(y));
+                    int links = 0;
+                    for (var t : node.internalThermalConnectionList)
+                        if (t.L1 == mine && t.L2 == theirs || t.L1 == theirs && t.L2 == mine) links++;
+                    result += y + "/" + w + ": " + links + "; ";
+                    ok &= mine != null && theirs != null && links == 1;
+                }
+        }
+
+        public void measure(TestContext c) {
+            c.check("inner corner: the probe's back and the wall cable share heat", ok, result);
         }
     }
 }

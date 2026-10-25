@@ -630,10 +630,12 @@ public class SixNode extends Node {
                     internalElectricalConnectionList.add(eCon);
                 }
             }
+            // (1.12 took this.getThermalLoad(side, lrdu), which is the other element's load, and the element's load toward
+            // otherLRDU, an edge name of the other face: on most corners that was nothing, and the heat never crossed)
             ThermalLoad tLoad;
-            if ((tLoad = this.getThermalLoad(side, lrdu)) != null) {
+            if ((tLoad = element.getThermalLoad(lrdu)) != null) {
 
-                ThermalLoad otherTLoad = element.getThermalLoad(otherLRDU);
+                ThermalLoad otherTLoad = otherElement.getThermalLoad(otherLRDU);
                 if (otherTLoad != null) {
                     ThermalConnection tCon;
                     tCon = new ThermalConnection(tLoad, otherTLoad);
