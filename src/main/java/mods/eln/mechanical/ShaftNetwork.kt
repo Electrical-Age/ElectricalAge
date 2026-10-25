@@ -135,8 +135,10 @@ class ShaftNetwork() : INBTTReady {
                     }
                 }
             }
-            // We ran out of network. Any elements remaining in unseen should thus form a new network.
+            // We ran out of network. Any elements remaining in unseen should thus form a new network, turning as
+            // fast as the shaft did (they started at 0 rad/s: a cut spinning shaft stopped dead past the cut; AGE 4fd31c68)
             shaft = ShaftNetwork()
+            shaft.rads = rads
         }
     }
 

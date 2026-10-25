@@ -27,6 +27,7 @@ public final class ShaftMoreCases {
         cases.add(new JointHubCase());
         cases.add(new GasTurbineCase(800, true));
         cases.add(new GasTurbineCase(300, false));
+        cases.add(new SplitKeepsSpeed());
     }
 
     /** Flywheel + tachometer at 500 rad/s: output = (rads - 0) / (1000 - 0) * SVU = SVU / 2 (default range). */
@@ -47,6 +48,32 @@ public final class ShaftMoreCases {
             double u = t.getElectricalLoad(t.front, LRDU.Down).getU();
             ctx.check("shaft tachometer on the flywheel's shaft", shaft(t) == shaft(parts[0]), "");
             Wp9cCases.within(ctx, "shaft tachometer output at 500 rad/s [V] (500/1000 * SVU)", u, 0.5 * Eln.SVU, 0.01 * Eln.SVU);
+        }
+    }
+
+    /**
+     * Cutting a spinning shaft in two: both halves keep turning at its speed (the half that got a new network used to
+     * start at 0 rad/s; AGE's 4fd31c68 found it).
+     */
+    static final class SplitKeepsSpeed implements TestCase {
+        TransparentNodeElement[] parts;
+
+        public String name() {
+            return "shaft cut in two keeps its speed";
+        }
+
+        public void build(TestContext ctx) {
+            parts = shaftLine(ctx, JOINT, FLYWHEEL, FLYWHEEL);
+            shaft(parts[0]).setRads(300.0);
+            ctx.level().removeBlock(parts[0].node.coordonate.pos(), false);   // the joint in the middle
+        }
+
+        public void measure(TestContext ctx) {
+            var a = shaft(parts[1]);
+            var b = shaft(parts[2]);
+            ctx.check("cut shaft: two networks", a != b, "");
+            ctx.check("cut shaft: both halves still at 300 rad/s", Math.abs(a.getRads() - 300) < 1e-6 && Math.abs(b.getRads() - 300) < 1e-6,
+                String.format("%.1f and %.1f rad/s", a.getRads(), b.getRads()));
         }
     }
 
