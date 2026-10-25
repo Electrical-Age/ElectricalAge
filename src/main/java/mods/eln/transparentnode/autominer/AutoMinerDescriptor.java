@@ -121,7 +121,8 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.").split("\n"));
-        list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
+        if (!Utils.nameShowsVoltage(name, nominalVoltage))
+            list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
     }
     void draw(boolean lampState, float[] buttonsState, boolean[] ledsAState, boolean[] ledsPState) {
         GL11.glRotatef(-90, 0, 1, 0);

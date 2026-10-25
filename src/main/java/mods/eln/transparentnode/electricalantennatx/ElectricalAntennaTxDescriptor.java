@@ -105,7 +105,8 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Wireless energy transmitter."));
         list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
+        if (!Utils.nameShowsVoltage(name, electricalNominalVoltage))
+            list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
         list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
         list.add("  " + tr("Range: %1$ blocks", rangeMax));
         list.add("  " + tr("Efficiency: %1$% up to %2$%", Utils.plotValue(electricalPowerRatioEffEnd * 100),
