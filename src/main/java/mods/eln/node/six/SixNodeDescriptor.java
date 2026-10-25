@@ -121,6 +121,14 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
 
     private int[] footprint;
 
+    /** The scale the device's model is drawn at (its footprint follows). */
+    protected float modelScale = 1f;
+
+    /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
+    public boolean placeAnywhere() {
+        return false;
+    }
+
     /**
      * What the device's model takes on its face, in voxels: {half its width across the face (square, so it needn't follow
      * front), its height off the face}. From the model parts the descriptor holds (its Obj3DPart fields, else its whole
@@ -138,8 +146,8 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         collectModels(this, 0, boxes, any);
         BoundingBox b = any[0] ? boxes[0] : any[1] ? boxes[1] : null;
         if (b == null || !(b.max.x > b.min.x)) return new int[]{6, 3};
-        double across = Math.max(Math.max(-b.min.y, b.max.y), Math.max(-b.min.z, b.max.z));
-        int half = (int) Math.ceil(across * 16 - 0.01), height = (int) Math.ceil(b.max.x * 16 - 0.01);
+        double across = Math.max(Math.max(-b.min.y, b.max.y), Math.max(-b.min.z, b.max.z)) * modelScale;
+        int half = (int) Math.ceil(across * 16 - 0.01), height = (int) Math.ceil(b.max.x * modelScale * 16 - 0.01);
         return new int[]{Math.max(2, Math.min(8, half)), Math.max(1, Math.min(16, height))};
     }
 

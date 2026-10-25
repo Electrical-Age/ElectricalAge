@@ -28,6 +28,9 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
+/** Chips are drawn at three quarters of their model: a case 6 voxels across (Baughn). */
+const val CHIP_SCALE = 0.75f
+
 open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>,
                                elementClass: Class<out LogicGateElement>, renderClass: Class<*>?) :
     SixNodeDescriptor(name, elementClass, renderClass) {
@@ -42,15 +45,22 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         for (i in 1..function.inputCount) pins[i] = obj?.getPart("Input$i")
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage
+        modelScale = CHIP_SCALE
     }
+
+    /** Placed anywhere on a face of a voxel block, several to a face (Baughn: pack chips). */
+    override fun placeAnywhere() = true
 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>) :
         this(name, obj, functionName, functionClass, LogicGateElement::class.java, null) {
     }
     fun draw() {
+        GL11.glPushMatrix()
+        GL11.glScalef(CHIP_SCALE, CHIP_SCALE, CHIP_SCALE)
         pins.forEach { it?.draw() }
         case?.draw()
         top?.draw()
+        GL11.glPopMatrix()
     }
 
 
@@ -63,7 +73,7 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
 
     override fun drawItem(entity: Boolean) {
         GL11.glTranslatef(0.0f, 0.0f, -0.2f)
-        GL11.glScalef(1.25f, 1.25f, 1.25f)
+        GL11.glScalef(1.25f / CHIP_SCALE, 1.25f / CHIP_SCALE, 1.25f / CHIP_SCALE)   // (the item as big as before)
         GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
         draw()
 

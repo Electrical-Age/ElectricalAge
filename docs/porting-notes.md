@@ -97,6 +97,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   flanks, a signal on the front sets the speed (no cable there: full speed). Model `tools/models/submersiblepump.py`
   (`submersible_pump_feeds_a_boiler`, `submersible_pump_water_and_signal`).
 
+- Logic and analog chips are drawn at 0.75 (a case 6 voxels across; Baughn) and, in voxel blocks, go anywhere on a
+  face; pins that touch connect (docs/voxel-cables.md, devices off centre).
+
 ## Bugs fixed
 
 From 1.7.10/1.12 (carried in from the 1.12 branch, before the port): the WP16 sim audit (`AuditFixesTest`), fuse and

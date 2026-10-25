@@ -96,7 +96,7 @@ public abstract class SixNodeElementRender {
             needRedraw = false;
             connectionType = CableRender.connectionType(this, side);
             newConnectionType(connectionType);
-            if (drawCableAuto()) {
+            if (drawCableAuto() && slot < 6) {   // (a device off centre has pins, no stubs to the block's edges)
                 for (int idx = 0; idx < 4; idx++) {
                     CableRenderDescriptor render = getCableRender(LRDU.fromInt(idx));
                     cableListReady[idx] = false;

@@ -150,7 +150,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Is any voxel of the box (local voxels, [x0, x1) etc.) used? */
     /** A copy of the used voxels (for a route snapshot, RouteView). */
     public BitSet usedCopy() {
-        return (BitSet) used.clone();
+        return (BitSet) used.clone();   // (routes keep a voxel of air from it themselves: CableRouter.CLEARANCE)
     }
 
     public boolean usedIn(int x0, int y0, int z0, int x1, int y1, int z1) {
@@ -454,6 +454,57 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return -1;
     }
 
+    /** A free slot past the faces, or -1. */
+    public int freeSlot() {
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] == null && !isSideKept(i)) return i;
+        return -1;
+    }
+
+    /**
+     * Why a device can't go off centre at e's place (its slot, face, offset and front set; not yet in the node), or null.
+     * Its box must be inside the block and clear of everything; and a voxel of air all round it (Baughn), except where one
+     * of its pins touches a cable or meets another device's pin (connected, so legible).
+     */
+    public String placeError(mods.eln.node.six.SixNodeElement e) {
+        int f = e.side.getInt();
+        int[] raw = e.sixNodeElementDescriptor.footprintBox(f);
+        int[] o = {e.ox, e.oy, e.oz};
+        for (int k = 0; k < 6; k++) if (raw[k] + o[k % 3] < 0 || raw[k] + o[k % 3] > 16) return "It doesn't fit on the face there";
+        int[] box = slotBox(e.sixNodeElementDescriptor, f, e.ox, e.oy, e.oz);
+        BitSet want = new BitSet(4096);
+        fill(want, box);
+        if (want.intersects(used)) return "No room for it there";
+        int[] grown = new int[6];
+        for (int k = 0; k < 3; k++) {
+            grown[k] = box[k] - 1;
+            grown[k + 3] = box[k + 3] + 1;
+        }
+        List<Pin> mine = pins(e);
+        for (int i = 0; i < SLOTS; i++) {
+            var o2 = sideElementList[i];
+            if (o2 == null || !overlaps(grown, elementBox(i))) continue;
+            boolean met = false;
+            if (i >= 6) for (Pin p : mine) for (Pin q : pins(o2)) met |= meet(p, q);
+            if (!met) return "Too close to the " + o2.sixNodeElementDescriptor.name + ": leave a voxel of air, or put their pins together";
+        }
+        for (VoxelPart part : parts) {
+            boolean near = false, touched = false;
+            for (int[] b : part.boxes()) {
+                near |= overlaps(grown, b);
+                if (part instanceof CablePart c) for (Pin p : mine) {
+                    if (!overlaps(b, p.contact)) continue;
+                    var d = c.tierInfo().descriptor();
+                    if (!compareConnectionMask(p.mask, d != null ? d.getNodeMask() : maskThermalWire))
+                        return "That cable doesn't fit its pin";   // (it would look connected and not be)
+                    touched = true;
+                }
+            }
+            if (near && !touched) return part instanceof CablePart ? "Too close to the cable: leave a voxel of air, or touch it with a pin"
+                : "Too close to that: leave a voxel of air";
+        }
+        return null;
+    }
+
     /** Could an element go on face f (EA Direction int): free face, and its plate clear of the parts? */
     public boolean canPlaceElement(int f) {
         if (sideElementList[f] != null || isSideKept(f)) return false;
@@ -463,10 +514,41 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     @Override
-    public boolean createSubBlock(ItemStack itemStack, Direction direction, Player player) {
-        boolean ok = super.createSubBlock(itemStack, direction, player);
+    public boolean createSubBlockAt(ItemStack itemStack, int slot, Direction direction, int ox, int oy, int oz, Player player) {
+        boolean ok = super.createSubBlockAt(itemStack, slot, direction, ox, oy, oz, player);
         markUsed();
         return ok;
+    }
+
+    /**
+     * A device that may go anywhere on a face (SixNodeDescriptor.placeAnywhere: chips) placed on face `face` where the
+     * block-local point (hx, hy, hz) is, snapped to voxels and kept on the face. Null if placed, else why not.
+     */
+    public String placeAnywhere(ItemStack stack, Direction face, double hx, double hy, double hz, Player player) {
+        var d = Eln.sixNodeItem.getDescriptor(stack);
+        if (d == null || !d.placeAnywhere() || d.hasGhostGroup()) return "That can't go off centre";
+        int slot = freeSlot();
+        if (slot < 0) return "No more devices fit in this block";
+        int half = d.footprint()[0], n = CablePart.normalAxis(face.toEnumFacing().get3DDataValue());
+        double[] h = {hx, hy, hz};
+        int[] o = new int[3];
+        for (int a = 0; a < 3; a++)
+            if (a != n) o[a] = Math.max(half, Math.min(16 - half, (int) Math.round(h[a] * 16))) - 8;
+        mods.eln.node.six.SixNodeElement probe;
+        try {
+            probe = (mods.eln.node.six.SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
+                mods.eln.node.six.SixNodeDescriptor.class).newInstance(this, face, d);
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            return "Can't place that";
+        }
+        probe.slot = slot;
+        probe.ox = o[0];
+        probe.oy = o[1];
+        probe.oz = o[2];
+        probe.front = d.getFrontFromPlace(face, player);
+        String err = placeError(probe);
+        if (err != null) return err;
+        return createSubBlockAt(stack, slot, face, o[0], o[1], o[2], player) ? null : "Can't place that";
     }
 
     /** Breaking by a player: the block's own break handles the last thing going. */
@@ -654,6 +736,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         cables.build();
         cables.addToSimulation();
         connectElementsToCables();
+        connectPins();
         cablesBuilt = !cables.conductors.isEmpty();
         for (Direction dir : Direction.values()) {
             mods.eln.node.NodeBase other = getNeighbor(dir);
@@ -706,6 +789,84 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Links between hosted elements and cables in this block (made in connectJob). */
     private final List<mods.eln.sim.ElectricalConnection> elementLinksE = new ArrayList<>();
     private final List<mods.eln.sim.ThermalConnection> elementLinksT = new ArrayList<>();
+
+    /**
+     * A pin of a device placed off centre (a slot past the faces): its tip on the face plane (block voxels), the box of
+     * voxels just outside it that a touching cable takes (1 deep, 2 wide, 1 high), the direction it points (3D value),
+     * and the element's mask and loads toward that edge.
+     */
+    record Pin(int slot, LRDU lrdu, int[] tip, int[] contact, int out, int mask, ElectricalLoad load, ThermalLoad thermal) {}
+
+    /** The pins of the element in a slot past the faces (one per edge with a connection). */
+    static List<Pin> pins(mods.eln.node.six.SixNodeElement e) {
+        List<Pin> out = new ArrayList<>();
+        int af = e.side.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(af);
+        int half = e.sixNodeElementDescriptor.footprint()[0];
+        int[] c = {8 + e.ox, 8 + e.oy, 8 + e.oz};
+        c[n] = CablePart.plane(af);
+        for (LRDU l : LRDU.values()) {
+            int mask = e.getConnectionMask(l);
+            if (mask == 0) continue;
+            int dv = e.side.applyLRDU(l).toEnumFacing().get3DDataValue(), a = CablePart.normalAxis(dv), b = 3 - n - a;
+            int[] tip = c.clone();
+            tip[a] += dv % 2 == 0 ? -half : half;
+            int[] box = new int[6];
+            box[a] = dv % 2 == 0 ? tip[a] - 1 : tip[a];
+            box[a + 3] = box[a] + 1;
+            box[b] = c[b] - 1;
+            box[b + 3] = c[b] + 1;
+            box[n] = CablePart.plane(af) == 0 ? 0 : 15;
+            box[n + 3] = box[n] + 1;
+            boolean burnt = e.isBurnt();
+            out.add(new Pin(e.slot, l, tip, box, dv, mask, burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l)));
+        }
+        return out;
+    }
+
+    static boolean overlaps(int[] a, int[] b) {
+        return a[0] < b[3] && b[0] < a[3] && a[1] < b[4] && b[1] < a[4] && a[2] < b[5] && b[2] < a[5];
+    }
+
+    /** Do two pins meet tip to tip, pointing at each other? */
+    static boolean meet(Pin p, Pin q) {
+        return java.util.Arrays.equals(p.tip, q.tip) && q.out == (p.out ^ 1);
+    }
+
+    private void link(ElectricalLoad a, ElectricalLoad b, ThermalLoad ta, ThermalLoad tb) {
+        if (a != null && b != null) {
+            var e = new mods.eln.sim.ElectricalConnection(a, b);
+            Eln.simulator.addElectricalComponent(e);
+            elementLinksE.add(e);
+        }
+        if (ta != null && tb != null) {
+            var t = new mods.eln.sim.ThermalConnection(ta, tb);
+            Eln.simulator.addThermalConnection(t);
+            elementLinksT.add(t);
+        }
+    }
+
+    /** Devices placed off centre: a pin touching a cable (the cable takes a voxel just past its tip) or another device's
+     *  pin tip to tip is connected to it (Baughn: chips whose pins touch are connected). */
+    private void connectPins() {
+        List<Pin> all = new ArrayList<>();
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) all.addAll(pins(sideElementList[i]));
+        for (Pin p : all) {
+            for (CableNet.Conductor k : cables.live()) {
+                if (!compareConnectionMask(p.mask, k.mask())) continue;
+                boolean touch = false;
+                for (CablePart c : k.parts) for (int[] b : c.boxes()) touch |= overlaps(b, p.contact);
+                if (!touch) continue;
+                sideElementList[p.slot].slotMask.set(p.lrdu, true);
+                link(p.load, k.load, p.thermal, k.thermal);
+            }
+            for (Pin q : all) {
+                if (q.slot <= p.slot || !meet(p, q) || !compareConnectionMask(p.mask, q.mask)) continue;
+                sideElementList[p.slot].slotMask.set(p.lrdu, true);
+                sideElementList[q.slot].slotMask.set(q.lrdu, true);
+                link(p.load, q.load, p.thermal, q.thermal);
+            }
+        }
+    }
 
     /** Hosted elements and cable ends meeting at a point in this block (on the element's face, or an inner corner). */
     private void connectElementsToCables() {

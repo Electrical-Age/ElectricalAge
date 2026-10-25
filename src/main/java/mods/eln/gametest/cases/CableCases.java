@@ -44,6 +44,8 @@ public final class CableCases {
         cases.add(new HostedCase());
         cases.add(new FootprintCase());
         cases.add(new SlotsCase());
+        cases.add(new ChipsPackedCase());
+        cases.add(new CableToChipCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
@@ -880,6 +882,129 @@ public final class CableCases {
         if (!v.canPlaceElement(side.getInt()) || !v.createSubBlock(d.newItemStack(), side, player))
             throw new IllegalStateException("can't host " + d.name + " at " + p + " " + side);
         return v.getElement(side);
+    }
+
+    /**
+     * Chips anywhere on a face (Baughn: 6 voxels across; pins that touch connect; a voxel of air otherwise):
+     * two NOT chips on one floor, pin to pin: the first's output (high, its input open) drives the second (low). A NOT
+     * placed at a click, its input pin touched by a floor cable from a Signal Source at 50 V next door: low. A chip with
+     * no pin toward another is refused beside it; a chip over another is refused.
+     */
+    static final class ChipsPackedCase implements TestCase {
+        mods.eln.node.six.SixNodeElement a, b, e;
+        String placed = "", refused = "";
+        boolean placedOk, refusedOk;
+
+        public String name() {
+            return "chips anywhere on a face: pins connect, air between";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        static mods.eln.node.voxel.VoxelNode block(TestContext c, BlockPos p) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var v = new mods.eln.node.voxel.VoxelNode();
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), mods.eln.misc.Direction.YN, player,
+                mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack());
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+            return v;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var yn = mods.eln.misc.Direction.YN;
+            var xp = mods.eln.misc.Direction.XP;
+            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            // NOT -> NOT, pin to pin
+            var v = block(c, c.at(1, 1, 1));
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 7, yn, 4, 0, 0, player);
+            a = v.getElement(6);
+            b = v.getElement(7);
+            Wp9aCases.orient(a, l -> l, xp);
+            Wp9aCases.orient(b, l -> l, xp);
+            // over chip a: no room
+            String over = v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.3, 0, 0.5, player);
+            // a NOT placed at a click; a Signal Source (50 V) in the next block west, a floor cable to the chip's input
+            var w = block(c, c.at(4, 1, 1));
+            String err = w.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.52, 0, 0.47, player);
+            e = w.getElement(6);
+            if (e != null) Wp9aCases.orient(e, l -> l, xp);
+            voxel(c, c.at(4, 1, 1), List.of(new CablePart(0, DOWN, new int[]{0, 0, 8, 4, 0, 8})));
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(3, 1, 1), yn);
+            src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(50f);
+            }));
+            placed = "click: " + err + ", slot " + (e == null ? -1 : e.slot) + " at " + (e == null ? "-" : e.ox + "," + e.oy + "," + e.oz);
+            placedOk = err == null && e != null && e.slot >= 6 && e.ox == 0 && e.oy == 0 && e.oz == 0;
+            // beside a chip whose side toward it has no pin: too close
+            var u = block(c, c.at(6, 1, 1));
+            u.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
+            Wp9aCases.orient(u.getElement(6), l -> l, mods.eln.misc.Direction.ZP);   // (pins north and south)
+            String near = u.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.75, 0, 0.5, player);
+            refused = "over: " + over + "; beside: " + near;
+            refusedOk = over != null && over.startsWith("No room") && near != null && near.startsWith("Too close");
+        }
+
+        public void measure(TestContext c) {
+            c.check("chips: placed at the click, off centre slot", placedOk, placed);
+            c.check("chips: refused over a chip, and beside one with no pin toward it", refusedOk, refused);
+            c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);
+            Wp9cCases.within(c, "chips: the second NOT, its input on the first's output pin [V]", Wp9cCases.out(b), 0, 0.5);
+            Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from 50 V [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.5);
+        }
+    }
+
+    /** The cable kit from a Signal Source (50 V) to a NOT chip placed at a click: a click on the chip ends the route at its
+     *  nearest pin (its input), and the laid cable drives it: low. */
+    static final class CableToChipCase implements TestCase {
+        mods.eln.node.six.SixNodeElement chip;
+        String err = "";
+
+        public String name() {
+            return "cable kit to a chip's pin";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var yn = mods.eln.misc.Direction.YN;
+            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), yn);
+            src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(50f);
+            }));
+            var v = ChipsPackedCase.block(c, c.at(5, 1, 1));
+            err = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.5, 0, 0.5, player));
+            chip = v.getElement(6);
+            if (chip == null) return;
+            Wp9aCases.orient(chip, l -> l, mods.eln.misc.Direction.XP);   // (input west, toward the source)
+            BlockPos sp = c.at(1, 1, 1), cp = c.at(5, 1, 1);
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(level, sp, net.minecraft.core.Direction.EAST,
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(sp).add(0.65, 0.1, 0.5), true, new long[1][]);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(level, cp, net.minecraft.core.Direction.UP,
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(cp).add(0.32, 0.1, 0.5), false, new long[1][]);
+            err = "ends " + a + " / " + b + "; lay " + (a == null || b == null ? "-" : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, 0, a, b));
+        }
+
+        public void measure(TestContext c) {
+            c.line(err);
+            Wp9cCases.within(c, "cable to chip: the NOT's input on the laid cable from 50 V [V]", chip == null ? -1 : Wp9cCases.out(chip), 0, 0.5);
+        }
     }
 
     /**

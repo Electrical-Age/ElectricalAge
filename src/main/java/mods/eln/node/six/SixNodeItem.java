@@ -51,14 +51,22 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         // clicking a voxel block (its cables or pipes): the device goes into that block, on the face behind the click
         if (world.getBlockState(ctx.getClickedPos()).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock)
             pos = ctx.getClickedPos();
-        boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction);
+        net.minecraft.world.phys.Vec3 h = ctx.getClickLocation();
+        boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction,
+            new double[]{h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ()});
         if (ok && ctx.getPlayer() != null && !ctx.getPlayer().isCreative()) ctx.getItemInHand().shrink(1);
         return ok ? InteractionResult.SUCCESS : InteractionResult.FAIL;
     }
 
     /** 1.12 placeBlockAt: place this device at pos on its face `direction` (pointing at the supporting block). */
     public boolean placeAt(ItemStack stack, Player player, Level world, BlockPos pos, Direction direction) {
+        return placeAt(stack, player, world, pos, direction, null);
+    }
+
+    /** The same; at, if given: where on the face (block-local), for a device that may go anywhere on it (chips). */
+    public boolean placeAt(ItemStack stack, Player player, Level world, BlockPos pos, Direction direction, double[] at) {
         SixNodeBlock block = SixNodeBlock.get();
+        boolean anywhere = at != null && descriptor.placeAnywhere() && mods.eln.node.voxel.CableConverter.convertOnLoad;
         BlockState old = world.getBlockState(pos);
         if (old.isAir() || old.canBeReplaced()) {
             Coordonate coord = new Coordonate(pos, world);
@@ -75,7 +83,10 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             if (mods.eln.node.voxel.CableConverter.convertOnLoad) {
                 var v = new mods.eln.node.voxel.VoxelNode();
                 v.onBlockPlacedBy(new Coordonate(pos, world), direction, player, stack);
-                v.createSubBlock(stack, direction, player);
+                if (anywhere) {
+                    String err = v.placeAnywhere(stack, direction, at[0], at[1], at[2], player);   // (an empty block: it fits)
+                    if (err != null) mods.eln.Eln.LOG.warn("Electrical Age: placing {} at {} in a new block: {}", descriptor.name, pos, err);
+                } else v.createSubBlock(stack, direction, player);
                 world.setBlock(pos, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().stateFor(world, pos), 3);
                 return true;
             }
@@ -88,6 +99,12 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             // a voxel block: on a free face whose plate is clear of its cables and pipes
             if (!(world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve) || !(ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v))
                 return false;
+            if (anywhere) {
+                if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
+                String err = v.placeAnywhere(stack, direction, at[0], at[1], at[2], player);
+                if (err != null && player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(err));
+                return err == null;
+            }
             if (v.isSideKept(direction.getInt())) return v.createSubBlock(stack, direction, player);   // (refuses, and says why)
             if (!v.canPlaceElement(direction.getInt())) {
                 if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No room for it on that face"));
