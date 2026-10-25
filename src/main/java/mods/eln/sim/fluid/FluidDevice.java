@@ -29,6 +29,8 @@ public interface FluidDevice {
         public double open = 1;
         /** CHECK: a check valve, passing flow only from a to b. */
         public FluidEdge.Kind kind = FluidEdge.Kind.PIPE;
+        /** A pump's head (Pa) pushing a -> b; the device sets it with open before each step. */
+        public double boost;
         /** This step's edge (set by the world). */
         public FluidEdge edge;
 

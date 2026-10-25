@@ -15,6 +15,8 @@ public final class FluidEdge {
     public double k;
     /** 0 closed .. 1 open (a valve). */
     public double open = 1;
+    /** A pump's head (Pa), pushing a -> b: added to the drive (a pump: its shutoff pressure above its sump). */
+    public double boost;
     public Kind kind = Kind.PIPE;
     /** TURBINE: electric power made this step (W), at EFFICIENCY of the steam's heat above liquid at 100 C. */
     public double power;

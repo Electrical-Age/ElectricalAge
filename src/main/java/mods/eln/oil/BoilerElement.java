@@ -228,6 +228,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             feed.energy = loadedFeed[2];
             feed.update();
         } else feed.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        feed.lumpable = true;   // (it merges into the pipe on its flange: no stub to fill first)
+        feed.resistance = 1 / PORT_K;
         feedCheck = new Link(feed, 0, vessel, FEED_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
         ports = List.of(new FluidPort(vessel, pos, 0, 0.97, PORT_K),    // the dome pipe's flange, underneath
             new FluidPort(vessel, pos, 1, 1.0, PORT_K));                  // the top port

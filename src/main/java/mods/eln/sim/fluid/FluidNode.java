@@ -54,6 +54,13 @@ public final class FluidNode {
         return n;
     }
 
+    /** A fixed body of liquid water at ambient temperature open to the air (1 atm on it): a pump's sump. */
+    public static FluidNode sump(double z) {
+        FluidNode n = new FluidNode(1e6, z, 1, true);
+        n.fill(0.9 * n.volume * Water.RHO_L, Water.P_ATM, Water.T_AMBIENT);   // (fuller would compress the liquid: fill keeps GAS_MIN of gas)
+        return n;
+    }
+
     /** Set the contents: liquid water mLiquid (kg), and air to make up the pressure p (Pa) above it, at T (K). */
     public FluidNode fill(double mLiquid, double p, double T) {
         mWater = mLiquid;

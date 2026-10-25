@@ -214,7 +214,7 @@ public final class FluidNetwork {
         e.fromA = fromA;
         e.rho = pk[4];
         e.xl = pk[0];
-        e.head = pk[6] * G * (e.zA() - e.zB());
+        e.head = pk[6] * G * (e.zA() - e.zB()) + e.boost;
         e.g = pk[4] * e.k * e.open / pk[5];
     }
 

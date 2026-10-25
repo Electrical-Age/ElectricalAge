@@ -26,6 +26,7 @@ public final class PipeCases {
         cases.add(new PumpFeedsBoiler());
         cases.add(new PumpWaterAndSignal());
         cases.add(new PumpUnderBoiler());
+        cases.add(new PumpDeadHeaded());
         cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
@@ -248,6 +249,36 @@ public final class PipeCases {
             ctx.line("pump under boiler: pump " + pump.getWaila() + ", boiler " + boiler.getWaila() + String.format(", pipe %.2f bar, feed %.2f bar, one network %s",
                 pipe.fluid.P() / 1e5, boiler.feed.P() / 1e5, net != null && net == mods.eln.fluid.FluidWorld.networkOf(pipe.fluid)));
             ctx.check("pump under boiler: the boiler fills", boiler.tanks.water() > 200, boiler.tanks.water() + " mB");
+        }
+    }
+
+    /** A pump with nowhere to push: its outlet rises to the shutoff pressure (3 bar) and no further, and the flow stops
+     *  (the pump is a stamped edge with that head, Baughn: not water injected per tick). */
+    static final class PumpDeadHeaded implements TestCase {
+        mods.eln.oil.SubmersiblePumpElement pump;
+
+        public String id() {
+            return "submersible_pump_dead_headed";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            pump = pumpInWater(ctx, l, 2, 1);
+            l.feed(ctx.at(2, 1, 1), pump.front.left());
+        }
+
+        public void measure(TestContext ctx) {
+            double p = pump.outlet.P();
+            ctx.check("pump dead-headed: its outlet stops at the shutoff pressure", p > 2.7e5 && p < 3.05e5, String.format("%.3f bar, %s", p / 1e5, pump.getWaila()));
+            ctx.check("pump dead-headed: no flow", pump.rate < 2, String.format("%.1f mB/s", pump.rate));
         }
     }
 

@@ -121,7 +121,10 @@ public final class FluidWorld implements IProcess {
         rebuildIfDirty();
         for (FluidDevice d : devices) d.beforeFluidStep(time);
         for (FluidDevice.Vent v : vents) v.edge.open = v.open;
-        for (FluidDevice.Link l : links) l.edge.open = l.open;
+        for (FluidDevice.Link l : links) {
+            l.edge.open = l.open;
+            l.edge.boost = l.boost;
+        }
         for (FluidNetwork n : networks) n.step(time);
         writeBack();
         burstThisStep.clear();
@@ -257,6 +260,7 @@ public final class FluidWorld implements IProcess {
             double r = 1 / l.k + (a != l.a ? runR.get(a) / 2 : 0) + (b != l.b ? runR.get(b) / 2 : 0);
             l.edge = byRoot.get(find(a, parent)).connect(a, drawOn(a, l.a, l.drawA), b, drawOn(b, l.b, l.drawB), 1 / r).kind(l.kind);
             l.edge.open = l.open;
+            l.edge.boost = l.boost;
             links.add(l);
         }
         Map<FluidNetwork, FluidNode> air = new IdentityHashMap<>();
