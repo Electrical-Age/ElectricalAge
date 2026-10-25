@@ -33,6 +33,13 @@ public class NanGuardTest {
     }
 
     @Test
+    public void infiniteResistanceIsOpenAndQuiet() {
+        int before = NanGuard.count();
+        new Resistor(null, null).setR(1 / 0.0);
+        assertEquals(before, NanGuard.count());
+    }
+
+    @Test
     public void nanHeatIsDropped() {
         ThermalLoad t = new ThermalLoad(0, 1e30, 1, 50);
         t.movePowerTo(Double.NaN);

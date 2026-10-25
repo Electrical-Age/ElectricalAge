@@ -47,7 +47,9 @@ public class Resistor extends Bipole {
     }
 
     public Resistor setR(double r) {
-        if (!Double.isFinite(r)) {   // (a NaN here made the whole subsystem NaN: an open circuit instead)
+        // (a NaN here made the whole subsystem NaN: an open circuit instead. +infinity is a fine open circuit,
+        // conductance 0: lamp supplies set 1 / 0 with no lamps)
+        if (Double.isNaN(r) || r == Double.NEGATIVE_INFINITY) {
             mods.eln.sim.NanGuard.report("Resistor.setR", r);
             r = MnaConst.highImpedance;
         }
