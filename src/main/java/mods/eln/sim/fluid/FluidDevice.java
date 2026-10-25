@@ -27,6 +27,8 @@ public interface FluidDevice {
         public final FluidNode a, b;
         public final double drawA, drawB, k;
         public double open = 1;
+        /** CHECK: a check valve, passing flow only from a to b. */
+        public FluidEdge.Kind kind = FluidEdge.Kind.PIPE;
         /** This step's edge (set by the world). */
         public FluidEdge edge;
 
@@ -36,6 +38,11 @@ public interface FluidDevice {
             this.b = b;
             this.drawB = drawB;
             this.k = k;
+        }
+
+        public Link kind(FluidEdge.Kind kind) {
+            this.kind = kind;
+            return this;
         }
     }
 

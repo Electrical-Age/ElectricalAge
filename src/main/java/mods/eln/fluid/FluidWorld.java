@@ -255,7 +255,7 @@ public final class FluidWorld implements IProcess {
             FluidNode a = repr.apply(l.a), b = repr.apply(l.b);
             if (a == b) continue;   // (both sides in one run: the valve can't hold anything back)
             double r = 1 / l.k + (a != l.a ? runR.get(a) / 2 : 0) + (b != l.b ? runR.get(b) / 2 : 0);
-            l.edge = byRoot.get(find(a, parent)).connect(a, drawOn(a, l.a, l.drawA), b, drawOn(b, l.b, l.drawB), 1 / r);
+            l.edge = byRoot.get(find(a, parent)).connect(a, drawOn(a, l.a, l.drawA), b, drawOn(b, l.b, l.drawB), 1 / r).kind(l.kind);
             l.edge.open = l.open;
             links.add(l);
         }

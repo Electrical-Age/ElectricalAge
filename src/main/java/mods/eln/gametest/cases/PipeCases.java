@@ -21,6 +21,7 @@ public final class PipeCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new BoilerPipeTurbine());
         cases.add(new BoilerBucket());
+        cases.add(new BoilerFeed());
         cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
@@ -46,6 +47,63 @@ public final class PipeCases {
      * Boiler and turbine side by side, an iron pipe from the boiler's top port up, across three blocks and down into the
      * turbine's inlet: the turbine runs off the boiler's steam (as the stacked plant, a little behind for the pipe).
      */
+    /**
+     * The feedwater flange on the boiler's right flank (Baughn: a water input): water under pressure in a pipe there
+     * goes into a cold, empty boiler; a hot boiler's pressure doesn't push water back out into an empty feed pipe (the
+     * check valve).
+     */
+    static final class BoilerFeed implements TestCase {
+        mods.eln.oil.BoilerElement cold, hot;
+        PipePart coldPipe, hotPipe;
+        mods.eln.sim.IProcess fire;
+        double m0;
+
+        public String id() {
+            return "boiler_feedwater_flange";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            cold = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            hot = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 3, 1);
+            for (var b : new mods.eln.oil.BoilerElement[]{cold, hot}) {
+                b.front = mods.eln.misc.Direction.XN;   // (its right: ZP, south)
+                b.reconnect();
+            }
+            cold.fromTanks(0, 0);
+            hot.fromTanks(4000, 0);
+            hot.thermal.Tc = 170;
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> hot.thermal.moveEnergyTo(3000 * t));
+            lay(ctx, ctx.at(1, 1, 2), 0, 8, 8, 0, 8, 8, 8);
+            lay(ctx, ctx.at(3, 1, 2), 0, 8, 8, 0, 8, 8, 8);
+            coldPipe = (PipePart) node(ctx, ctx.at(1, 1, 2)).parts.get(0);
+            hotPipe = (PipePart) node(ctx, ctx.at(3, 1, 2)).parts.get(0);
+            // the cold boiler's pipe: full of water at 10 bar (a feed pump's pressure)
+            m0 = coldPipe.fluid.volume * mods.eln.sim.fluid.Water.RHO_L * 0.9;
+            coldPipe.fluid.fill(m0, 10e5, mods.eln.sim.fluid.Water.T_AMBIENT);
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            cold.syncTanks();
+            cold.showTanks();
+            double back = hotPipe.fluid.mLiquid() / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+            ctx.line("feed: cold " + cold.getWaila() + ", hot " + hot.getWaila() + String.format(", hot's pipe %.1f mB water, %.2f bar", back, hotPipe.fluid.P() / 1e5));
+            ctx.check("feed: the pipe's water went into the cold boiler", cold.vessel.mLiquid() > 0.1 * m0
+                && mods.eln.fluid.FluidWorld.networkOf(cold.vessel) == mods.eln.fluid.FluidWorld.networkOf(coldPipe.fluid), String.format("%.4f kg", cold.vessel.mLiquid()));
+            ctx.check("feed: the hot boiler is under pressure", hot.vessel.P() > 1.5e5, String.format("%.2f bar", hot.vessel.P() / 1e5));
+            ctx.check("feed: nothing came back out through the check valve", back < 1, String.format("%.1f mB", back));
+        }
+    }
+
     /** A water bucket fills a boiler by hand (Baughn: buckets work, pipes only automate it); the bucket comes back empty. */
     static final class BoilerBucket implements TestCase {
         int before, after;
@@ -153,9 +211,9 @@ public final class PipeCases {
             VoxelNode n = node(ctx, first);
             var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
             ctx.line("pipe: boiler " + boiler.getWaila() + ", turbine " + turbine.getWaila() + ", network " + (net == null ? 0 : net.nodes.size()) + " nodes");
-            // (the 4 pipe blocks are one run: one lumped node; with the boiler and the turbine: 3 nodes)
+            // (the 4 pipe blocks are one run: one lumped node; with the boiler, its feed inlet and the turbine: 4 nodes)
             ctx.check("pipe: boiler, the pipe run and turbine are one network", net != null && n != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet)
-                && net == mods.eln.fluid.FluidWorld.networkOf(((PipePart) n.parts.get(0)).fluid) && net.nodes.size() == 3, net == null ? "none" : net.nodes.size() + " nodes");
+                && net == mods.eln.fluid.FluidWorld.networkOf(((PipePart) n.parts.get(0)).fluid) && net.nodes.size() == 4, net == null ? "none" : net.nodes.size() + " nodes");
             ctx.check("pipe: the turbine runs off the piped steam", p > 500 && p <= 1050, String.format("%.0f W", p));
             ctx.check("pipe: steam is in the pipe", n != null && ((PipePart) n.parts.get(0)).fluid.mVapour() > 0, "");
         }

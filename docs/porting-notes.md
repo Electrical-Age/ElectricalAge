@@ -85,6 +85,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   slab, the underside of a bottom slab or stair, a stair's back, glass (`TransparentSupportCases`).
 - Egg incubator: its windows are glass (the 1.7.10 texture left them fully transparent, so the model looked like a bare
   frame; Baughn), and the egg sits higher and larger in the nest (it was half sunk in the bowl).
+- Boiler: a feedwater pipe flange at the centre of its right flank (`front.right()`), into the vessel through a check
+  valve (Baughn). Device links can be check valves now (`FluidDevice.Link.kind`); a shut one is left out of the
+  network's pressure limiter (`boiler_feedwater_flange`, `FluidCoreTest.checkValvePassesOneWayOnly`).
 
 ## Bugs fixed
 

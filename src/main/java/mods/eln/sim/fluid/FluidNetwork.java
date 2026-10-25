@@ -216,6 +216,7 @@ public final class FluidNetwork {
             double P = n.P(), lo = P, hi = P, rise = 0, inRise = 0, outFall = 0;
             for (FluidEdge e : edges) {
                 if (e.a != n && e.b != n) continue;
+                if (e.oneWay() && e.g == 0) continue;   // (a shut check valve pushes nothing either way)
                 double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
                 // the pressure this edge pushes n towards (where its drive would be zero)
                 double towards = e.b == n ? e.a.P() + offA - offB + e.head : e.b.P() + offB - offA - e.head;

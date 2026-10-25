@@ -30,7 +30,8 @@ import java.util.Map;
 
 /**
  * BoilerDescriptor: a vessel (a fluid-core node, notes/pipes/DESIGN.md phase 2) heated through its shell, a thermal load
- * on its sides. Water comes in by pipe (the fluid capability); steam leaves by pipe, or through the dome port under it
+ * on its sides. Water comes in by pipe at the feedwater flange on its right flank (front.right(), through a check
+ * valve), or by the fluid capability; steam leaves by pipe, or through the dome port under it
  * straight into a turbine below (the dome pipe draws at the top of the vessel and comes down the outside), or through
  * its top port. No safety valve of its own (Baughn: pressure is real; fit a safety valve part on the line); it is
  * rated BURST_PA, above any pipe, so a sealed plant bursts a pipe first, and a boiler with nowhere to go bursts.
@@ -43,7 +44,12 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public static final double BURST_PA = 350e5, PORT_K = 6e-11;
     /** The vessel (built in initialize, where the block's height is known). */
     public FluidNode vessel;
-    private double[] loaded;
+    /** The feedwater inlet (Baughn: a water input flange): the pipe stub behind the right flank's flange, into the
+     *  vessel through a check valve, so a stopped feed pump doesn't take boiling water back. */
+    public FluidNode feed;
+    private FluidDevice.Link feedCheck;
+    public static final double FEED_VOLUME = 0.0005, FEED_DRAW = 0.3;
+    private double[] loaded, loadedFeed;
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
     public double steamRate;   // mB/s that left the vessel as steam, for WAILA
@@ -65,7 +71,16 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
 
     @Override
     public List<FluidPort> fluidPorts() {
-        return ports;
+        if (feed == null) return ports;
+        // (the feed flange turns with the boiler: a wrench turns it, and the network is rebuilt on the reconnect)
+        var all = new java.util.ArrayList<>(ports);
+        all.add(new FluidPort(feed, node.coordonate.pos().asLong(), front.right().toEnumFacing().get3DDataValue(), 0.5, PORT_K));
+        return all;
+    }
+
+    @Override
+    public List<Link> fluidLinks() {
+        return feedCheck == null ? List.of() : List.of(feedCheck);
     }
 
     @Override
@@ -180,6 +195,14 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         } else fromTanks(tanks.water(), tanks.steam());
         showTanks();
         long pos = c.pos().asLong();
+        feed = new FluidNode(FEED_VOLUME, c.y + FEED_DRAW, 0.1, false);
+        if (loadedFeed != null) {
+            feed.mWater = loadedFeed[0];
+            feed.mAir = loadedFeed[1];
+            feed.energy = loadedFeed[2];
+            feed.update();
+        } else feed.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        feedCheck = new Link(feed, 0, vessel, FEED_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
         ports = List.of(new FluidPort(vessel, pos, 0, 0.97, PORT_K),    // the dome pipe's flange, underneath
             new FluidPort(vessel, pos, 1, 1.0, PORT_K));                  // the top port
         connect();
@@ -215,6 +238,11 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             nbt.putDouble("vesselA", vessel.mAir);
             nbt.putDouble("vesselU", vessel.energy);
         }
+        if (feed != null) {
+            nbt.putDouble("feedW", feed.mWater);
+            nbt.putDouble("feedA", feed.mAir);
+            nbt.putDouble("feedU", feed.energy);
+        }
     }
 
     @Override
@@ -223,6 +251,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         tanks.readFromNBT(nbt, "boiler");
         if (nbt.contains("vesselW"))
             loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
+        if (nbt.contains("feedW"))
+            loadedFeed = new double[]{nbt.getDoubleOr("feedW", 0), nbt.getDoubleOr("feedA", 0), nbt.getDoubleOr("feedU", 0)};
     }
 
     @Override

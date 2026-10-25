@@ -69,6 +69,24 @@ public class FluidCoreTest {
     }
 
     @Test
+    void checkValvePassesOneWayOnly() {
+        // a high, b low: a check edge a -> b passes; b high, a low: it holds
+        for (boolean forward : new boolean[]{true, false}) {
+            FluidNetwork net = new FluidNetwork();
+            FluidNode a = net.add(new FluidNode(0.01, 0, 0.2, false).fill(0, forward ? 5e5 : 1e5, 300));
+            FluidNode b = net.add(new FluidNode(0.01, 0, 0.2, false).fill(0, forward ? 1e5 : 5e5, 300));
+            net.connect(a, 0.5, b, 0.5, 1e-11).kind(FluidEdge.Kind.CHECK);
+            double pa = a.P(), pb = b.P();
+            for (int i = 0; i < 400; i++) net.step(DT);
+            if (forward) assertTrue(a.P() < pa - 1e5 && b.P() > pb + 1e5, "forward: " + a.P() + " " + b.P());
+            else {
+                assertEquals(pa, a.P(), 1e-6 * pa, "backward: a");
+                assertEquals(pb, b.P(), 1e-6 * pb, "backward: b");
+            }
+        }
+    }
+
+    @Test
     void twoTanksEqualizeAndConserve() {
         FluidNetwork net = new FluidNetwork();
         FluidNode a = net.add(new FluidNode(0.01, 0, 0.2, false).fill(0, 5e5, 300));

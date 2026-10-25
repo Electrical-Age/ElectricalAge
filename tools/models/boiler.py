@@ -3,14 +3,14 @@
 
 Drawn by BoilerRender -> BoilerDescriptor.draw(), which draws the parts main/body/furnace that exist (this model:
 `main`), after front.glRotateXnRef(). Connections (BoilerElement): thermal on all four horizontal faces at the floor
-(LRDU Down); water in and steam out through the fluid capability (pipes on any side); the dome port under it (centred)
-couples to a turbine's inlet below; the other nozzles are decoration.
+(LRDU Down); pipe ports: the top flange (steam), the feedwater flange on the right flank (water, through a check
+valve) and the dome port under it (centred), which couples to a turbine's inlet below; also the fluid capability.
 
 Design frame: mcmodel px (0..16, corner origin), front XN (x = 0):
   base:  cast-iron heat collector with a heat-tinted copper contact pad (8 px wide, floor to 4 px) on every face;
   drum:  riveted plate, axis front-back, dished heads, two seam bands, oxide-red saddles;
   front: gauge glass (water level) between brass cocks, pressure gauge; top: steam dome with the outlet flange,
-         z+ flank: feedwater inlet with a check valve and handwheel (no safety valve: fit one on the line);
+         z+ flank (the right): feedwater inlet, check valve, handwheel and a pipe flange at the face's centre;
   dome pipe: from the dome down the z- flank into the base, out of a flange centred on the underside (the dome port).
 
 Usage: boiler.py RESOURCES_DIR  -> assets/eln/model/boiler/
@@ -64,13 +64,16 @@ def boiler():
     m.add(prism("y", sx, CZ, 2.75, 15.0, 16.0, "steel", n=12))                               # flange: an iron pipe's
 
     # (no built-in safety valve: Baughn, pressure is real; fit a safety valve part on the steam line)
-    # feedwater inlet on the z+ flank: pipe, check valve, handwheel, flange at the face
-    fx, fy = 11.25, 6.5
-    m.add(prism("z", fx, fy, 0.55, CZ + 3.5, 15.9, "darksteel", n=6, caps=(False, True)))
-    m.add(box(fx - 0.8, fy - 0.8, 12.6, fx + 0.8, fy + 0.8, 14.0, "castiron"))
-    m.add(prism("y", fx, 13.3, 0.25, fy + 0.8, fy + 1.7, "darksteel", n=6, caps=(False, False)))
-    m.add(*handwheel(fx, fy + 1.8, 13.3, r=0.9, axis="y"))
-    m.add(prism("z", fx, fy, 0.95, 15.3, 15.85, "steel", n=8))
+    # feedwater inlet on the z+ flank (BoilerElement.feed: the face's centre, where a pipe's flange meets it): pipe,
+    # check valve with its handwheel, reducer, an iron pipe's flange at the face
+    fx, fy = 8.0, 8.0
+    m.add(prism("z", fx, fy, 0.7, CZ + 4.0, 12.9, "darksteel", n=8, caps=(False, False)))
+    m.add(box(fx - 1.3, fy - 1.3, 12.9, fx + 1.3, fy + 1.3, 14.3, "castiron"))
+    m.add(prism("y", fx, 13.6, 0.25, fy + 1.3, fy + 2.3, "darksteel", n=6, caps=(False, False)))
+    m.add(*handwheel(fx, fy + 2.4, 13.6, r=0.9, axis="y"))
+    m.add(prism("z", fx, fy, 1.0, 14.3, 14.7, "steel", n=8, r_end=2.0, caps=(False, False)))
+    m.add(prism("z", fx, fy, 2.0, 14.7, 15.0, "steel", n=12, caps=(False, False)))
+    m.add(prism("z", fx, fy, 2.75, 15.0, 16.0, "steel", n=12))                                 # flange: an iron pipe's
     # dome pipe (pipes phase 2): steam taken at the dome comes down the z- flank into the base and out of a flange on
     # the underside (the dome port: a boiler set on a turbine feeds its inlet), as a locomotive's steam pipe does
     py, pz, pr = 14.4, 1.9, 0.6
