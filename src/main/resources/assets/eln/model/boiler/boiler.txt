@@ -1,0 +1,8 @@
+o level
+f originX -0.44375
+f originY -0.096875
+f originZ -0.15
+o needle
+f originX -0.46875
+f originY 0.240625
+f originZ 0.1

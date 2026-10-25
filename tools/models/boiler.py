@@ -2,14 +2,15 @@
 """Boiler: a riveted horizontal steam drum on saddles over a cast-iron heat-collector base.
 
 Drawn by BoilerRender -> BoilerDescriptor.draw(), which draws the parts main/body/furnace that exist (this model:
-`main`), after front.glRotateXnRef(). Connections (BoilerElement): thermal on all four horizontal faces at the floor
-(LRDU Down); pipe ports: the top flange (steam), the feedwater flange on the right flank (water, through a check
+`main`), after front.glRotateXnRef(). Connections (BoilerElement): thermal on the back and both flanks at the floor (LRDU Down), the phase
+signal (liquid or gas at half the gauge glass) on the front; pipe ports: the top flange (steam), the feedwater flange on the right flank (water, through a check
 valve) and the dome port under it (centred), which couples to a turbine's inlet below; also the fluid capability.
 
 Design frame: mcmodel px (0..16, corner origin), front XN (x = 0):
-  base:  cast-iron heat collector with a heat-tinted copper contact pad (8 px wide, floor to 4 px) on every face;
+  base:  cast-iron heat collector with a heat-tinted copper contact pad (8 px wide, floor to 4 px) on three faces
+         and the phase signal's terminal plate on the front (Baughn: where the dials are);
   drum:  riveted plate, axis front-back, dished heads, two seam bands, oxide-red saddles;
-  front: gauge glass (water level) between brass cocks, pressure gauge; top: steam dome with the outlet flange,
+  front: gauge glass (its water column follows the fill) between brass cocks, dial (the water temperature); top: steam dome with the outlet flange,
          z+ flank (the right): feedwater inlet, check valve, handwheel and a pipe flange at the face's centre;
   dome pipe: from the dome down the z- flank into the base, out of a flange centred on the underside (the dome port).
 
@@ -18,7 +19,7 @@ Usage: boiler.py RESOURCES_DIR  -> assets/eln/model/boiler/
 import math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcmodel import Model, box, prism
-from oilkit import atlas, write_parts, out_dir, turned, heat_pad, dial, handwheel, bolt_ring, PAINT
+from oilkit import atlas, write_parts, out_dir, turned, heat_pad, terminal_plate, dial, handwheel, bolt_ring, obox, PAINT
 
 CY, CZ, R = 9.25, 8.0, 5.25        # drum axis height, z, radius
 DX = (2.25, 13.75)                 # cylindrical shell x span; heads beyond it
@@ -28,8 +29,9 @@ def boiler():
     # base: heat collector, top plate, four heat pads
     m.add(box(1.25, 0, 1.25, 14.75, 3.25, 14.75, "castiron", faces="nsewu"))
     m.add(box(1.5, 3.25, 1.5, 14.5, 3.6, 14.5, "darksteel", faces="nsewu"))
-    for k in range(4):
+    for k in (1, 2, 3):                                     # (the front, k = 0, is the phase signal's terminal)
         m.add(*turned(heat_pad(depth=1.0, top=4.0), k))
+    m.add(*turned(terminal_plate(), 0))
     for k in range(4):                                       # corner ribs
         m.add(*turned([box(1.0, 0, 1.0, 2.0, 3.0, 2.0, "darksteel", faces="nsewu")], k))
     # saddles (cradle the drum)
@@ -46,16 +48,17 @@ def boiler():
     # manhole on the back head
     m.add(prism("x", CY - 0.5, CZ, 1.6, DX[1] + 1.0, DX[1] + 1.4, "darksteel", n=8))
     m.add(box(DX[1] + 1.4, CY - 0.75, CZ - 1.0, DX[1] + 1.7, CY - 0.25, CZ + 1.0, "darksteel"))
-    # gauge glass on the front head: glass tube between two brass cocks, guard rods
+    # gauge glass on the front head: the water column (part `level`, scaled by the fill: BoilerRender) between two
+    # brass cocks, guard rods; the lower cock is the phase signal's level switch, wired down to the front terminal
     gz = CZ - 2.4
-    m.add(prism("y", 0.9, gz, 0.4, 6.4, 11.6, "water", n=6, caps=(False, False)))
     for y in (5.9, 11.6):
         m.add(box(0.35, y, gz - 0.55, hx + 1.3, y + 0.6, gz + 0.55, "brass"))
     m.add(box(0.3, 6.5, gz - 0.65, 0.45, 11.5, gz - 0.5, "darksteel"), box(0.3, 6.5, gz + 0.5, 0.45, 11.5, gz + 0.65, "darksteel"))
     m.add(prism("y", 0.9, gz, 0.2, 5.1, 5.9, "brass", n=6))   # drain cock
+    m.add(box(0.35, 4.5, gz - 0.25, 0.85, 5.1, gz + 0.25, "darksteel"))   # (to the terminal)
     # pressure gauge on a siphon above the head
     m.add(prism("x", CY + 2.6, CZ + 1.6, 0.2, 0.9, hx + 0.6, "brass", n=6, caps=(False, False)))
-    m.add(*dial(0.5, CY + 2.6, CZ + 1.6, 1.1, "xn", depth=0.4))
+    m.add(*dial(0.5, CY + 2.6, CZ + 1.6, 1.1, "xn", depth=0.4)[:2])   # (its needle: part `needle`)
     # steam dome + outlet flange on top
     sx = 8.0   # (centred: the top port is the face's centre, where a pipe's flange meets it)
     top = CY + R * math.cos(math.pi / 16)
@@ -87,10 +90,29 @@ def boiler():
     m.add(box(12.7, 1.0, 1.15, 13.9, 2.5, 1.25, "brass", faces="n"))
     return m
 
+# the moving parts: BoilerRender scales `level` in y about its origin (the column's foot) by fill x LEVEL_SCALE and
+# turns `needle` about x at the dial's centre by the water temperature
+GAUGE = (0.9, 6.45, CZ - 2.4)                 # foot of the water column (x, y, z)
+DIAL = (0.5, CY + 2.6, CZ + 1.6)              # dial centre
+
+def level():
+    m = Model()
+    # half the glass's height, so it maps onto the water cell's blue half; the render stretches it (x 0..2)
+    m.add(prism("y", GAUGE[0], GAUGE[2], 0.4, GAUGE[1], GAUGE[1] + 2.575, "water", n=6))
+    return m
+
+def needle():
+    m = Model()
+    x, y, z = DIAL
+    m.add(obox((x - 0.1, y + 0.3, z), (1, 0, 0), (0, 1, 0), (0, 0, 1), 0.04, 0.38, 0.07, "darksteel"))   # (pointing up: 0)
+    m.add(prism("x", y, z, 0.15, x - 0.15, x - 0.05, "darksteel", n=6, caps=(True, False)))
+    return m
+
 def main():
     res = sys.argv[1]
     d = out_dir(res, "boiler")
-    counts = write_parts(d, "boiler", [("main", boiler())])
+    counts = write_parts(d, "boiler", [("main", boiler()), ("level", level()), ("needle", needle())],
+                         origins={"level": GAUGE, "needle": DIAL})
     atlas(os.path.join(d, "tex.png"), PAINT["boiler"])
     print("boiler", counts)
 

@@ -11,6 +11,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
@@ -30,7 +32,7 @@ import java.util.Map;
 
 /**
  * BoilerDescriptor: a vessel (a fluid-core node, notes/pipes/DESIGN.md phase 2) heated through its shell, a thermal load
- * on its sides. Water comes in by pipe at the feedwater flange on its right flank (front.right(), through a check
+ * on its back and flanks; the front carries the phase signal (liquid or gas at half the gauge glass). Water comes in by pipe at the feedwater flange on its right flank (front.right(), through a check
  * valve), or by the fluid capability; steam leaves by pipe, or through the dome port under it
  * straight into a turbine below (the dome pipe draws at the top of the vessel and comes down the outside), or through
  * its top port. No safety valve of its own (Baughn: pressure is real; fit a safety valve part on the line); it is
@@ -53,12 +55,29 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
     public double steamRate;   // mB/s that left the vessel as steam, for WAILA
+    /**
+     * The phase signal (Baughn: read the boiler's state as one reads a cable's temperature): a level switch with its
+     * probe at half height (half the water tank, fill()), high while it is in liquid, low in gas; on the front face, under the gauge glass (Baughn).
+     * PROBE_BAND either way is its deadband, so a feed pump run off it doesn't chatter.
+     */
+    public final NbtElectricalGateOutput phaseOut = new NbtElectricalGateOutput("phaseOut");
+    public final NbtElectricalGateOutputProcess phaseOutProcess = new NbtElectricalGateOutputProcess("phaseOutProcess", phaseOut);
+    public static final double PROBE = 0.5, PROBE_BAND = 0.03;
+    public boolean liquidAtProbe;
     double meterSteam, meterTime;
 
     public BoilerElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (BoilerDescriptor) d;
         thermalLoadList.add(thermal);
+        electricalLoadList.add(phaseOut);
+        electricalComponentList.add(phaseOutProcess);
+        slowProcessList.add((mods.eln.sim.IProcess) t -> {
+            if (vessel == null) return;
+            double level = fill();
+            if (liquidAtProbe ? level < PROBE - PROBE_BAND : level > PROBE + PROBE_BAND) liquidAtProbe = !liquidAtProbe;
+            phaseOutProcess.state(liquidAtProbe);
+        });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         // dry and very hot: it fails (no explosion this round)
         slowProcessList.add(new ThermalLoadWatchDog().set(thermal).setTMax(400).set(new Failure(this).machine()));
@@ -86,6 +105,12 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     @Override
     public List<Vent> fluidVents() {
         return vents;
+    }
+
+    /** How full it is, as its gauge glass shows it: liquid against the water tank's capacity (0..1; the vessel's
+     *  own volume is mostly steam space). */
+    public double fill() {
+        return vessel.mLiquid() / (BoilerTanks.WATER_MB * EaUnits.KG_PER_MB_WATER);
     }
 
     /** Take in what pipes put in or took out since the last step (each step, and before saving). */
@@ -155,23 +180,24 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        return null;
+        return side == front && lrdu == LRDU.Down ? phaseOut : null;
     }
 
     @Override
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-        return thermal;
+        return side == front ? null : thermal;
     }
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down || side == Direction.YN || side == Direction.YP) return 0;
-        return NodeBase.maskThermal;
+        // (one face can't take both: a heater against it would get the signal into its power load)
+        return side == front ? NodeBase.maskElectricalOutputGate : NodeBase.maskThermal;
     }
 
     @Override
     public String multiMeterString(Direction side) {
-        return "";
+        return side == front ? Utils.plotSignal(phaseOut.getU(), phaseOut.getCurrent()) : "";
     }
 
     @Override
@@ -220,6 +246,18 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         return true;
     }
 
+    /** For the gauges (BoilerRender): the fill and the water's temperature (C). */
+    @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeFloat(vessel == null ? 0 : (float) fill());
+            stream.writeFloat(vessel == null ? 0 : (float) (vessel.T() - Water.T0));
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public Object getFluidHandler() {
         return tanks;
@@ -233,6 +271,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             showTanks();
         }
         tanks.writeToNBT(nbt, "boiler");
+        nbt.putBoolean("liquidAtProbe", liquidAtProbe);
         if (vessel != null) {
             nbt.putDouble("vesselW", vessel.mWater);
             nbt.putDouble("vesselA", vessel.mAir);
@@ -249,6 +288,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         tanks.readFromNBT(nbt, "boiler");
+        liquidAtProbe = nbt.getBooleanOr("liquidAtProbe", false);
         if (nbt.contains("vesselW"))
             loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
         if (nbt.contains("feedW"))
@@ -266,6 +306,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
         info.put(I18N.tr("Steam"), tanks.steam() + " / " + BoilerTanks.STEAM_MB + " mB");
         info.put(I18N.tr("Steam made"), String.format("%.0f mB/s", steamRate));
+        info.put(I18N.tr("At half height"), liquidAtProbe ? I18N.tr("liquid") : I18N.tr("gas"));
         return info;
     }
 }

@@ -88,6 +88,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Boiler: a feedwater pipe flange at the centre of its right flank (`front.right()`), into the vessel through a check
   valve (Baughn). Device links can be check valves now (`FluidDevice.Link.kind`); a shut one is left out of the
   network's pressure limiter (`boiler_feedwater_flange`, `FluidCoreTest.checkValvePassesOneWayOnly`).
+- Boiler: a phase signal on its front (Baughn: where the dials are): high while the water is above half the gauge
+  glass (half the 8 B tank), with a deadband; heat now goes in on the back and flanks only. The gauge glass shows the
+  fill and the dial the water temperature (0..300 C) (`boiler_phase_signal`).
 
 ## Bugs fixed
 

@@ -22,6 +22,7 @@ public final class PipeCases {
         cases.add(new BoilerPipeTurbine());
         cases.add(new BoilerBucket());
         cases.add(new BoilerFeed());
+        cases.add(new BoilerPhase());
         cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
@@ -101,6 +102,44 @@ public final class PipeCases {
                 && mods.eln.fluid.FluidWorld.networkOf(cold.vessel) == mods.eln.fluid.FluidWorld.networkOf(coldPipe.fluid), String.format("%.4f kg", cold.vessel.mLiquid()));
             ctx.check("feed: the hot boiler is under pressure", hot.vessel.P() > 1.5e5, String.format("%.2f bar", hot.vessel.P() / 1e5));
             ctx.check("feed: nothing came back out through the check valve", back < 1, String.format("%.1f mB", back));
+        }
+    }
+
+    /**
+     * The phase signal on the boiler's front, under its gauges (Baughn: liquid or gas): high with water above half the gauge glass, low
+     * below it; a signal can connect on the front, heat only on the other faces.
+     */
+    static final class BoilerPhase implements TestCase {
+        mods.eln.oil.BoilerElement full, low;
+
+        public String id() {
+            return "boiler_phase_signal";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            full = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            low = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 3, 1);
+            full.fromTanks(6000, 0);
+            low.fromTanks(2000, 0);
+        }
+
+        public void measure(TestContext ctx) {
+            double uFull = full.phaseOut.getU(), uLow = low.phaseOut.getU();
+            var front = full.front;
+            ctx.check("phase: high with water at half height", uFull > 0.9 * mods.eln.Eln.SVU, String.format("%.2f V", uFull));
+            ctx.check("phase: low without", uLow < 0.1 * mods.eln.Eln.SVU, String.format("%.2f V", uLow));
+            ctx.check("phase: the front takes a signal, not heat; the back takes heat", full.getConnectionMask(front, mods.eln.misc.LRDU.Down) == mods.eln.node.NodeBase.maskElectricalOutputGate
+                && full.getThermalLoad(front, mods.eln.misc.LRDU.Down) == null
+                && full.getConnectionMask(front.back(), mods.eln.misc.LRDU.Down) == mods.eln.node.NodeBase.maskThermal, "");
         }
     }
 
