@@ -1,6 +1,6 @@
 package mods.eln.client.render;
 
-import mods.eln.node.voxel.CableKitItem;
+import mods.eln.node.voxel.KitItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.phys.Vec3;
@@ -32,7 +32,7 @@ public final class KitOutline {
     public static void onExtract(ExtractBlockOutlineRenderStateEvent e) {
         var player = Minecraft.getInstance().player;
         List<int[]> bs = boxes;
-        if (player == null || bs.isEmpty() || !(player.getMainHandItem().getItem() instanceof CableKitItem)) return;
+        if (player == null || bs.isEmpty() || !(player.getMainHandItem().getItem() instanceof KitItem)) return;   // (cable and pipe kits)
         int st = state;
         int color = st == 2 ? 0xE040D8FF : st == 1 ? 0xC040FF60 : 0xC0FF4040;   // (cyan: into a machine's port)
         e.addCustomRenderer((state, collector, pose, lrs) -> {
