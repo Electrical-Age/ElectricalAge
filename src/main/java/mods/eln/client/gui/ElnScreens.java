@@ -44,7 +44,7 @@ public final class ElnScreens {
         var level = Minecraft.getInstance().level;
         if (level == null) return null;
         BlockEntity be = level.getBlockEntity(menu.pos);
-        if (be instanceof SixNodeEntity six) return six.elementRenderList[menu.side.getInt()];
+        if (be instanceof SixNodeEntity six) return six.elementRenderList[menu.slot];
         if (be instanceof TransparentNodeEntity t) return t.elementRender;
         return null;
     }

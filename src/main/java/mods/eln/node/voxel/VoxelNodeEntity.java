@@ -99,7 +99,7 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         int stamp = server ? (v == null ? -1 : v.stamp) : partsHash;
         BlockState h = host();
         int mask = getSideMask();
-        int devices = java.util.Arrays.hashCode(elementRenderIdList);
+        int devices = deviceKey();
         Shapes c = shapes;
         if (c != null && c.stamp() == stamp && c.host() == h && c.sideMask() == mask && c.devices() == devices) return c;
         List<VoxelPart> ps = parts();
@@ -115,21 +115,33 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         return c;
     }
 
-    /** The model box of the device on each face (EA Direction int), null where there is none: server from the node,
-     *  client from the last publish. */
+    /** The model box of the device in each slot (SixNode.SLOTS; 0..5 centred on that face), null where there is none:
+     *  server from the node, client from the last publish. */
     public int[][] deviceBoxes() {
-        int[][] r = new int[6][];
+        int[][] r = new int[mods.eln.node.six.SixNode.SLOTS][];
         boolean server = level != null && !level.isClientSide();
         VoxelNode v = server && getNode() instanceof VoxelNode n ? n : null;
-        for (int f = 0; f < 6; f++) {
+        for (int f = 0; f < r.length; f++) {
             if (server) {
                 if (v != null && v.sideElementList[f] != null) r[f] = v.elementBox(f);
             } else if (elementRenderIdList[f] != 0) {
                 var d = mods.eln.Eln.sixNodeItem.getDescriptor(elementRenderIdList[f]);
-                r[f] = d == null ? VoxelNode.plate(f) : d.footprintBox(f);
+                var er = elementRenderList[f];
+                if (f < 6) r[f] = d == null ? VoxelNode.plate(f) : d.footprintBox(f);
+                else if (d != null && er != null) r[f] = VoxelNode.slotBox(d, er.side.getInt(), er.ox, er.oy, er.oz);
             }
         }
         return r;
+    }
+
+    /** Client: what the devices' boxes depend on (ids and, past the faces, place), for the shape cache. */
+    private int deviceKey() {
+        int h = java.util.Arrays.hashCode(elementRenderIdList);
+        for (int i = 6; i < elementRenderList.length; i++) {
+            var er = elementRenderList[i];
+            if (er != null) h = h * 31 + er.side.getInt() * 4096 + (er.ox & 15) * 256 + (er.oy & 15) * 16 + (er.oz & 15);
+        }
+        return h;
     }
 
     /** What's left of the imitated block, as boxes: server from the node, client from the last publish. */

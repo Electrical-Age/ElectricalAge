@@ -50,6 +50,15 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     public SixNode sixNode;
     public Direction side;
+    /**
+     * Where the element sits in its node: slots 0..5 are the six faces, centred (side.getInt()); a voxel block's further
+     * slots hold devices placed off centre on a face (offset: the model's centre from the face's centre, world
+     * voxels). Packets, menus and saves address an element by its slot.
+     */
+    public int slot;
+    public int ox, oy, oz;
+    /** The cable-stub mask of an element in a slot past the six faces (the faces' are in sixNode.lrduElementMask). */
+    public final mods.eln.misc.LRDUMask slotMask = new mods.eln.misc.LRDUMask();
     public SixNodeDescriptor sixNodeElementDescriptor;
 
     public int isProvidingWeakPower() {
@@ -148,7 +157,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         this.sixNode = sixNode;
         this.side = side;
         this.sixNodeElementDescriptor = descriptor;
-        this.itemStackDamageId = sixNode.sideElementIdList[side.getInt()];
+        this.slot = side.getInt();
+        this.itemStackDamageId = descriptor.parentItemDamage;
 
         if (descriptor.hasGhostGroup())
             Eln.ghostManager.addObserver(this);
@@ -178,11 +188,16 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
     public void networkSerialize(DataOutputStream stream) {
 
         try {
-            stream.writeByte(sixNode.lrduElementMask.get(side).mask + (front.dir << 4) + (isBurnt() ? HEADER_BURNT : 0));
+            stream.writeByte(stubMask().mask + (front.dir << 4) + (isBurnt() ? HEADER_BURNT : 0));
         } catch (IOException e) {
 
             e.printStackTrace();
         }
+    }
+
+    /** This element's cable-stub mask (by face for slots 0..5, its own past them). */
+    public mods.eln.misc.LRDUMask stubMask() {
+        return slot < 6 ? sixNode.lrduElementMask.get(side) : slotMask;
     }
 
     /* public void initializeFromThat(SixNodeDescriptor descriptor)
@@ -330,13 +345,13 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     public boolean ghostBlockActivated(int UUID, Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
-            sixNode.onBlockActivated(entityPlayer, this.side, vx, vy, vz);
+            sixNode.onSlotActivated(entityPlayer, slot, vx, vy, vz);
         }
         return false;
     }
 
     private void selfDestroy() {
-        sixNode.deleteSubBlock(null, side);
+        sixNode.deleteSlot(null, slot);
     }
 
     private int uuid = 0;

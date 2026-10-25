@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRenderer<E, SixNodeRender.State> {
     public static class State extends BlockEntityRenderState {
-        SixNodeElementRender[] renders = new SixNodeElementRender[6];
+        SixNodeElementRender[] renders = new SixNodeElementRender[SixNode.SLOTS];
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
     public void extractRenderState(E be, State state, float partialTicks, Vec3 cameraPosition,
                                    ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
-        System.arraycopy(be.elementRenderList, 0, state.renders, 0, 6);
+        System.arraycopy(be.elementRenderList, 0, state.renders, 0, SixNode.SLOTS);
     }
 
     @Override
@@ -60,12 +60,13 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         GlFrame frame = GlSubmit.open(poseStack);
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
-            for (int idx = 0; idx < 6; idx++) {
+            for (int idx = 0; idx < SixNode.SLOTS; idx++) {
                 SixNodeElementRender render = state.renders[idx];
                 if (render == null) continue;
                 UtilsClient.glDefaultColor();
                 GL11.glPushMatrix();
-                Direction.fromInt(idx).glRotateXnRef();
+                GL11.glTranslatef(render.ox / 16f, render.oy / 16f, render.oz / 16f);   // (off centre: a slot past the faces)
+                render.side.glRotateXnRef();
                 GL11.glTranslatef(-0.5f, 0f, 0f);
                 if (render.burnt && render.drawBurnt()) {
                     GL11.glPopMatrix();
@@ -78,7 +79,8 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                     frame.soot = true;
                     UtilsClient.glDefaultColor();
                     GL11.glPushMatrix();
-                    Direction.fromInt(idx).glRotateXnRef();
+                    GL11.glTranslatef(render.ox / 16f, render.oy / 16f, render.oz / 16f);
+                    render.side.glRotateXnRef();
                     GL11.glTranslatef(-0.5f, 0f, 0f);
                     render.draw();
                     GL11.glPopMatrix();

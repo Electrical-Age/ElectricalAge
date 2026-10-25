@@ -42,6 +42,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         BitSet s = new BitSet(4096);
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(s, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(s, plate(f));
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) fill(s, elementBox(i));
         return s;
     }
 
@@ -75,6 +76,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null || isSideKept(f)) fill(used, plate(f));
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) fill(used, elementBox(i));
         for (int[] b : hostBoxes()) fill(used, b);
     }
 
@@ -117,9 +119,20 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** The voxels the model of the element on face f (EA Direction int) takes: where it is clicked and outlined. Its
      *  room (what else may go in the block) is still its plate. */
-    public int[] elementBox(int f) {
-        var e = sideElementList[f];
-        return e == null || e.sixNodeElementDescriptor == null ? plate(f) : e.sixNodeElementDescriptor.footprintBox(f);
+    public int[] elementBox(int slot) {
+        var e = sideElementList[slot];
+        if (e == null || e.sixNodeElementDescriptor == null) return slot < 6 ? plate(slot) : new int[6];
+        return slotBox(e.sixNodeElementDescriptor, e.side.getInt(), e.ox, e.oy, e.oz);
+    }
+
+    /** A device's model box on face f (EA Direction int), its centre (ox, oy, oz) world voxels off the face's centre;
+     *  clipped to the block. */
+    public static int[] slotBox(mods.eln.node.six.SixNodeDescriptor d, int f, int ox, int oy, int oz) {
+        int[] b = d.footprintBox(f);
+        int[] o = {ox, oy, oz};
+        int[] r = new int[6];
+        for (int k = 0; k < 6; k++) r[k] = Math.max(0, Math.min(16, b[k] + o[k % 3]));   // (not past the block)
+        return r;
     }
 
     /** Elements changed (placed, broken): the plates in the grid. */
@@ -406,7 +419,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         int el = elementAt(vx, vy, vz, 0);
         int pi = partAt(vx, vy, vz);
         if (el < 0 && pi < 0) el = elementAt(vx, vy, vz, 2);
-        if (el >= 0) return super.onBlockActivated(player, Direction.fromInt(el), vx, vy, vz);
+        if (el >= 0) return onSlotActivated(player, el, vx, vy, vz);
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
@@ -427,12 +440,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return pi >= 0 && meterUse(player, side);
     }
 
-    /** The element (EA Direction int) whose model box, grown by grow voxels, holds the block-local point (0..1); -1, also
+    /** The element (its slot: 0..5 centred on that face) whose model box, grown by grow voxels, holds the block-local point (0..1); -1, also
      *  where a part is. */
     public int elementAt(double x, double y, double z, int grow) {
         for (VoxelPart p : parts)   // (a part's own box wins: a model box can reach past the plate, over a cable)
             for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return -1;
-        for (int f = 0; f < 6; f++) {
+        for (int f = 0; f < SLOTS; f++) {
             if (sideElementList[f] == null) continue;
             int[] b = elementBox(f);
             int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};

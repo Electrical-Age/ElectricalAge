@@ -249,9 +249,10 @@ public final class CablePlacer {
         return surface(pos, face, hx, hy, hz);
     }
 
-    /** The end at the hosted device on face el (EA Direction int) of v: the edge of its face nearest the block-local
+    /** The end at the hosted device in slot el (0..5: centred on that face) of v: the edge of its face nearest the block-local
      *  point h that has a connector; null if it has none. */
     static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start) {
+        if (el >= 6) return null;   // (a device placed off centre: no ports at its edges)
         var side = mods.eln.misc.Direction.fromInt(el);
         int f = side.toEnumFacing().get3DDataValue();
         int fa = CableRouter.axis(f);

@@ -30,10 +30,16 @@ public abstract class SixNodeElementRender {
     boolean cableListReady[] = {false, false, false, false};
     boolean glListReady = false;
 
+    /** Its slot in the block (SixNodeElement.slot) and, past the six faces, its offset from the face's centre (world
+     *  voxels); set by SixNodeEntity after construction. */
+    public int slot;
+    public int ox, oy, oz;
+
     public SixNodeElementRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         this.sixNodeDescriptor = descriptor;
         this.tileEntity = tileEntity;
         this.side = side;
+        this.slot = side.getInt();
         cableList = new int[4];
         // this.descriptor = descriptor;
         if (glListEnable()) {
@@ -220,8 +226,8 @@ public abstract class SixNodeElementRender {
         try {
             tileEntity.preparePacketForServer(stream);
 
-            stream.writeByte(side.getInt());
-            stream.writeShort(tileEntity.elementRenderIdList[side.getInt()]);
+            stream.writeByte(slot);
+            stream.writeShort(tileEntity.elementRenderIdList[slot]);
 
         } catch (IOException e) {
 

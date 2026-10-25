@@ -43,6 +43,7 @@ public final class CableCases {
         cases.add(new PreviewSnapshotCase());
         cases.add(new HostedCase());
         cases.add(new FootprintCase());
+        cases.add(new SlotsCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
@@ -879,6 +880,75 @@ public final class CableCases {
         if (!v.canPlaceElement(side.getInt()) || !v.createSubBlock(d.newItemStack(), side, player))
             throw new IllegalStateException("can't host " + d.name + " at " + p + " " + side);
         return v.getElement(side);
+    }
+
+    /**
+     * Slots past the six faces (devices off centre on a face; placement by players comes later): two AND chips and a
+     * Signal Trimmer on one floor, each in its own slot. Each is found where its model is, saved and loaded in place
+     * (also the harness's round trip), its GUI opens by slot, and breaking takes that one only.
+     */
+    static final class SlotsCase implements TestCase {
+        String found = "", loaded = "", gui = "", broke = "";
+        boolean foundOk, loadedOk, guiOk, brokeOk;
+
+        public String name() {
+            return "voxel block slots: devices off centre on a face";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            BlockPos p = c.at(1, 1, 1);
+            c.floor(c.at(1, 0, 1));
+            var yn = mods.eln.misc.Direction.YN;
+            var v = new mods.eln.node.voxel.VoxelNode();
+            var and = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.AND).newItemStack();
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), yn, player, and);
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+            boolean made = v.createSubBlockAt(and, 6, yn, -4, 0, -4, player)
+                & v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.AND).newItemStack(), 7, yn, 4, 0, -4, player)
+                & v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).newItemStack(), 9, yn, -4, 0, 4, player);
+            // the model of slot 6 is round (4, 4) voxels, slot 7's round (12, 4), slot 9's round (4, 12)
+            int a = v.elementAt(4 / 16.0, 1 / 16.0, 4 / 16.0, 0), b = v.elementAt(12 / 16.0, 1 / 16.0, 4 / 16.0, 0),
+                t = v.elementAt(4 / 16.0, 1 / 16.0, 12 / 16.0, 0), none = v.elementAt(12 / 16.0, 1 / 16.0, 12 / 16.0, 0);
+            found = "made " + made + "; at (4,4) " + a + ", (12,4) " + b + ", (4,12) " + t + ", (12,12) " + none + "; face slot " + v.getElement(yn);
+            foundOk = made && a == 6 && b == 7 && t == 9 && none < 0 && v.getElement(yn) == null && v.getElement(9).side == yn;
+            // saved and loaded: the same devices in the same slots and places
+            var tag = new net.minecraft.nbt.CompoundTag();
+            v.writeToNBT(tag);
+            var w = new mods.eln.node.voxel.VoxelNode();
+            w.readFromNBT(tag);
+            StringBuilder lb = new StringBuilder();
+            loadedOk = true;
+            for (int s : new int[]{6, 7, 9}) {
+                var x = v.getElement(s);
+                var y = w.getElement(s);
+                lb.append(s).append(": ").append(y == null ? "none" : y.sixNodeElementDescriptor.name + " " + y.side + " " + y.ox + "," + y.oy + "," + y.oz).append("; ");
+                loadedOk &= y != null && y.slot == s && y.side == x.side && y.ox == x.ox && y.oy == x.oy && y.oz == x.oz
+                    && y.sixNodeElementDescriptor == x.sixNodeElementDescriptor;
+            }
+            loadedOk &= !tag.contains("EID8") && tag.getShortOr("EID2", (short) -1) == 0;
+            loaded = lb.toString();
+            // the trimmer's GUI, by its slot
+            var menu = mods.eln.node.NodeMenus.menu(1, player, v, 9);
+            gui = menu == null ? "none" : "slot " + menu.slot + " id " + menu.descriptorId;
+            guiOk = menu != null && menu.slot == 9 && menu.descriptorId == Wp9cCases.SIGNAL_TRIMMER;
+            // breaking slot 7 takes that chip only
+            boolean gone = v.deleteSlot(null, 7);
+            broke = "deleted " + gone + "; left " + (v.getElement(6) != null) + "," + (v.getElement(7) != null) + "," + (v.getElement(9) != null);
+            brokeOk = gone && v.getElement(6) != null && v.getElement(7) == null && v.getElement(9) != null;
+        }
+
+        public void measure(TestContext c) {
+            c.check("slots: each device is where its model is", foundOk, found);
+            c.check("slots: saved and loaded in place", loadedOk, loaded);
+            c.check("slots: the trimmer's GUI opens by slot", guiOk, gui);
+            c.check("slots: breaking one takes that one", brokeOk, broke);
+        }
     }
 
     /**

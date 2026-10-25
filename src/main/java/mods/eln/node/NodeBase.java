@@ -232,14 +232,19 @@ public abstract class NodeBase {
 
     /** A meter in hand: its reading of side, to the player. True if it was a meter. */
     protected boolean meterUse(Player entityPlayer, Direction side) {
+        return meterUse(entityPlayer, () -> multiMeterString(side), () -> thermoMeterString(side));
+    }
+
+    /** A meter in hand: these readings, to the player. True if it was a meter. */
+    protected boolean meterUse(Player entityPlayer, java.util.function.Supplier<String> multiReading, java.util.function.Supplier<String> thermoReading) {
         ItemStack held = entityPlayer.getMainHandItem();
         if (!entityPlayer.level().isClientSide() && !Utils.isEmpty(held)) {
             // meters (MeterItems is filled when the meter items are ported)
             boolean multi = MeterItems.isMultiMeter(held), thermo = MeterItems.isThermometer(held), all = MeterItems.isAllMeter(held);
             if (multi || thermo || all) {
                 String str = "";
-                if (multi || all) str += nullToEmpty(multiMeterString(side));
-                if (thermo || all) str += nullToEmpty(thermoMeterString(side));
+                if (multi || all) str += nullToEmpty(multiReading.get());
+                if (thermo || all) str += nullToEmpty(thermoReading.get());
                 if (!str.isEmpty()) Utils.sendMessage(entityPlayer, str);
                 return true;
             }

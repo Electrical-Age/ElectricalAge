@@ -187,7 +187,7 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         if (e == null || player == null) return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
         if (level.isClientSide())
-            return e.parts().size() + Integer.bitCount(e.getSideMask()) <= 1 && super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
+            return e.parts().size() + e.deviceCount() <= 1 && super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
         if (!(e.getNode() instanceof VoxelNode node)) return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
         int index = -1, el = -1;
         var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
@@ -208,14 +208,14 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
             }
             // only faces this version could not load are left (no part, plate or host to aim at): the block goes, as a
             // six-node block's does; onBreakBlock logs each discarded face. Else the block could never be broken.
-            if (node.parts.isEmpty() && e.getSideMask() == 0)
+            if (node.parts.isEmpty() && e.deviceCount() == 0)
                 return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
             return false;
         }
         node.breakingByPlayer = true;
         try {
             if (el >= 0) {
-                if (!(player instanceof net.minecraft.server.level.ServerPlayer sp) || !node.playerAskToBreakSubBlock(sp, mods.eln.misc.Direction.fromInt(el))) return false;
+                if (!(player instanceof net.minecraft.server.level.ServerPlayer sp) || !node.playerAskToBreakSlot(sp, el)) return false;
             } else if (!node.playerAskToBreakPart(player, index)) return false;
         } finally {
             node.breakingByPlayer = false;
