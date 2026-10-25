@@ -1004,7 +1004,7 @@ public final class CableCases {
         }
 
         public int width() {
-            return 3;
+            return 8;
         }
 
         public void build(TestContext c) {
@@ -1030,10 +1030,30 @@ public final class CableCases {
             result = "block removed " + removed + ", node " + (v == null ? "gone" : v.getClass().getSimpleName())
                 + (v instanceof mods.eln.node.voxel.VoxelNode vn ? ", parts " + vn.parts.size() + ", floor element " + (vn.getElement(mods.eln.misc.Direction.YN) != null) : "")
                 + " (hit " + hit + ")";
+            cableOverResistor(c);
         }
 
         public void measure(TestContext c) {
             c.check("mixed block: mining the switch takes the switch only", result.startsWith("block removed false, node VoxelNode, parts 1, floor element false"), result);
+            c.check("mixed block: a wall cable inside a floor resistor's box is the cable's", resistorOk, resistor);
+        }
+
+        String resistor = "";
+        boolean resistorOk;
+
+        /** A Power Resistor's model box (16 x 16, 7 high) reaches over a cable down the north wall: a point on the
+         *  cable is the cable's, not the resistor's (elementAt yields to a part's own box). */
+        void cableOverResistor(TestContext c) {
+            BlockPos p = c.at(5, 1, 1);
+            c.floor(p.north());
+            voxel(c, p, CablePart.arms(LV, NORTH, DOWN));
+            host(c, POWER_RESISTOR, p, mods.eln.misc.Direction.YN);
+            var vn = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+            int yn = mods.eln.misc.Direction.YN.getInt();
+            double cy = 3 / 16.0, cz = 0.5 / 16;
+            resistor = "on the cable: element " + vn.elementAt(0.5, cy, cz, 0) + " part " + vn.partAt(0.5, cy, cz)
+                + "; beside it: element " + vn.elementAt(0.5, cy, 0.5, 0);
+            resistorOk = vn.elementAt(0.5, cy, cz, 0) < 0 && vn.partAt(0.5, cy, cz) >= 0 && vn.elementAt(0.5, cy, 0.5, 0) == yn;
         }
     }
 

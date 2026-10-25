@@ -427,8 +427,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return pi >= 0 && meterUse(player, side);
     }
 
-    /** The element (EA Direction int) whose model box, grown by grow voxels, holds the block-local point (0..1); -1. */
+    /** The element (EA Direction int) whose model box, grown by grow voxels, holds the block-local point (0..1); -1, also
+     *  where a part is. */
     public int elementAt(double x, double y, double z, int grow) {
+        for (VoxelPart p : parts)   // (a part's own box wins: a model box can reach past the plate, over a cable)
+            for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return -1;
         for (int f = 0; f < 6; f++) {
             if (sideElementList[f] == null) continue;
             int[] b = elementBox(f);
