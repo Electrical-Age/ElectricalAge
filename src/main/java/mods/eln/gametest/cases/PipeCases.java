@@ -25,6 +25,7 @@ public final class PipeCases {
         cases.add(new BoilerPhase());
         cases.add(new PumpFeedsBoiler());
         cases.add(new PumpWaterAndSignal());
+        cases.add(new PumpUnderBoiler());
         cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
@@ -196,6 +197,57 @@ public final class PipeCases {
             ctx.check("pump: in water, running", pump.submerged && pump.speed == 1 && pump.motor.getP() > 50, pump.getWaila().toString());
             // (57 mB/s for a minute, less what the pipe run holds)
             ctx.check("pump: the boiler filled through its feed flange", boiler.tanks.water() > 1000, boiler.tanks.water() + " mB");
+        }
+    }
+
+    /**
+     * Dysnomiaw's rig: the pump under the pipe block that turns into the boiler's feed flange, the boiler one block
+     * up and over (a single pipe block, in from below, out north). The riser's top port must spill once it is full: it
+     * drew only gas, and the pump pushed it to 9 bar with the boiler dry.
+     */
+    static final class PumpUnderBoiler implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SubmersiblePumpElement pump;
+        PipePart pipe;
+
+        public String id() {
+            return "submersible_pump_under_a_boiler";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 1600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            ctx.level().setBlockAndUpdate(ctx.at(2, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(2, 2, 1));
+            boiler.front = mods.eln.misc.Direction.XN;   // (feed flange south)
+            boiler.reconnect();
+            boiler.fromTanks(0, 0);
+            lay(ctx, ctx.at(2, 2, 2), 0, 8, 0, 8, 8, 8, 8, 8, 8, 0);   // up from the pump, then north into the flange
+            pipe = (PipePart) node(ctx, ctx.at(2, 2, 2)).parts.get(0);
+            pump = pumpInWater(ctx, l, 2, 2);
+            pump.front = mods.eln.misc.Direction.ZP;   // (power on the flanks: east and west)
+            pump.reconnect();
+            l.feed(ctx.at(2, 1, 2), mods.eln.misc.Direction.XN);
+        }
+
+        public void measure(TestContext ctx) {
+            boiler.syncTanks();
+            boiler.showTanks();
+            var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
+            ctx.line("pump under boiler: pump " + pump.getWaila() + ", boiler " + boiler.getWaila() + String.format(", pipe %.2f bar, feed %.2f bar, one network %s",
+                pipe.fluid.P() / 1e5, boiler.feed.P() / 1e5, net != null && net == mods.eln.fluid.FluidWorld.networkOf(pipe.fluid)));
+            ctx.check("pump under boiler: the boiler fills", boiler.tanks.water() > 200, boiler.tanks.water() + " mB");
         }
     }
 

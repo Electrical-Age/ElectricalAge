@@ -124,7 +124,11 @@ public final class FluidNetwork {
         if (u.mLiquid() <= 0) w = 0;
         else if (mg <= 0) w = 1;
         else {
-            double x = Math.max(0, Math.min(1, (u.level() - port) / BAND));   // (all liquid once the level is a band above the port)
+            // (all liquid once the level is a band above the port; a port at the very top counts as one band lower, or a
+            // node filling from below could never spill out of it: its level only approaches the top, as an inflow may
+            // fill at most half the free space per step. Dysnomiaw's pump pushed 9 bar into a full riser that drew
+            // only its last wisp of air into the boiler's feed.)
+            double x = Math.max(0, Math.min(1, (u.level() - Math.min(port, 1 - BAND)) / BAND));
             w = x * x * (3 - 2 * x);
         }
         double rhoG = mg > 0 ? mg / u.state.vGas : 0;
