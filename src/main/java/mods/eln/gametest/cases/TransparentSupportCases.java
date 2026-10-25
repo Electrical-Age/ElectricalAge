@@ -27,7 +27,7 @@ public final class TransparentSupportCases {
 
     static final class FloorRemoved implements TestCase {
         BlockPos p;
-        boolean gone;
+        boolean gone, nodeGone;
         int devices, eggs;
 
         public String name() {
@@ -44,6 +44,7 @@ public final class TransparentSupportCases {
             ItemStack item = incubator.transparentNodeDescriptor.newItemStack();
             level.setBlockAndUpdate(floor, Blocks.AIR.defaultBlockState());
             gone = level.getBlockState(p).isAir();
+            nodeGone = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) == null;
             for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(p).inflate(2))) {
                 if (e.getItem().is(Items.EGG)) eggs += e.getItem().getCount();
                 else if (ItemStack.isSameItemSameComponents(e.getItem(), item)) devices += e.getItem().getCount();
@@ -56,6 +57,8 @@ public final class TransparentSupportCases {
 
         public void measure(TestContext ctx) {
             ctx.check("floor gone: the device is gone", gone, "");
+            ctx.check("floor gone: its node is gone too", nodeGone && mods.eln.node.NodeManager.instance.getNodeFromCoordonate(
+                new mods.eln.misc.Coordonate(p, ctx.level())) == null, "");
             ctx.check("floor gone: the device drops", devices == 1, devices + " devices");
             ctx.check("floor gone: its eggs drop", eggs == 3, eggs + " eggs");
         }
