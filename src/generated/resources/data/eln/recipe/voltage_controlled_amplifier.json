@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/advanced",
+    "c": "eln:copper_cable",
+    "r": "minecraft:redstone",
+    "s": "eln:signal_cable"
+  },
+  "pattern": [
+    " sr",
+    "cCc",
+    "   "
+  ],
+  "result": {
+    "id": "eln:voltage_controlled_amplifier"
+  }
+}

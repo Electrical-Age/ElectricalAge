@@ -636,6 +636,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'c', findItemStack("Copper Cable"),
             'C', dictAdvancedChip);
 
+        // (1.12 registered the VCA without a recipe; AGE's: the amplifier's, plus a signal cable for the control input)
+        addRecipe(findItemStack("Voltage controlled amplifier"),
+            " sr",
+            "cCc",
+            "   ",
+            'r', stack(Items.REDSTONE),
+            's', findItemStack("Signal Cable"),
+            'c', findItemStack("Copper Cable"),
+            'C', dictAdvancedChip);
         addRecipe(findItemStack("Sample and hold"),
             " rr",
             "cCc",
@@ -1685,6 +1694,14 @@ public final class ElnRecipes extends ElnRecipesBase {
             " g",
             'g', stack(Blocks.GLASS_PANE),
             'c', dye(1));
+
+        // (1.12 registered the Animal Filter without a recipe; AGE's: blue dye, as the others' colours)
+        addRecipe(findItemStack("Animal Filter"),
+            " g",
+            "gc",
+            " g",
+            'g', stack(Blocks.GLASS_PANE),
+            'c', dye(4));
 
         addRecipe(findItemStack("Casing", 8),
             "ppp",

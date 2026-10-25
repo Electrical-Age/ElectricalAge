@@ -1,4 +1,4 @@
-// 26.3	2026-10-25T01:35:15.49097845	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-25T14:37:23.508380668	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -72,6 +72,7 @@ b212cca0dd14ced77939d219b39336d3c698ee0f data/eln/advancement/recipes/misc/analo
 6cddfe7a9dfb039f2080bc4d7cc09a1a31f72d91 data/eln/advancement/recipes/misc/analog_watch.json
 deef8d780422f077177f1d8075d975640f319ae2 data/eln/advancement/recipes/misc/analogic_regulator.json
 8adbb5fbd9a464b1637d56c80bac249461b0b459 data/eln/advancement/recipes/misc/and_chip.json
+9d88219c37e884c57072d6522173a6259b65b7ac data/eln/advancement/recipes/misc/animal_filter.json
 e397443c98e6b42bdb11364d1b6ce472b87c0a04 data/eln/advancement/recipes/misc/auto_miner.json
 9923be029e64dd1fabfd662d1f17778ee17721f6 data/eln/advancement/recipes/misc/average_electrical_drill.json
 95c342338728eb6fd711b224aeb60ab9c76f2ca1 data/eln/advancement/recipes/misc/average_ferromagnetic_core.json
@@ -294,6 +295,7 @@ aa8fd0f6d50cf3c54d56d97003bfc2ce7a1673bf data/eln/advancement/recipes/misc/utili
 71ae4dcc4d2fc3bba3565e539206485515305e6d data/eln/advancement/recipes/misc/very_high_voltage_cable.json
 6893fed10d74884eb15363bba761e76e78435764 data/eln/advancement/recipes/misc/very_high_voltage_relay.json
 cbd5e648fff3d8500ff78d476e14c6cf6b01a0c1 data/eln/advancement/recipes/misc/very_high_voltage_switch.json
+a08b0e0485550911d07ce90655cad5f364c863e6 data/eln/advancement/recipes/misc/voltage_controlled_amplifier.json
 a40fcd7d279708a277391dd6108470ef7b5bb454 data/eln/advancement/recipes/misc/voltage_controlled_sawtooth_oscillator.json
 9f7dafa5a37e029f9720bdb05d62116daf1171f8 data/eln/advancement/recipes/misc/voltage_controlled_sine_oscillator.json
 f1a2376059a68048f4a3344057c141cdfd14d4b7 data/eln/advancement/recipes/misc/voltage_oriented_battery.json
@@ -404,6 +406,7 @@ e174baf2191aceb8d51d7d0f30c0d4b2a17c0d9f data/eln/recipe/analog_vumeter_2.json
 f8bb79bdca45cf72f71e9c34109d2cd1f0ea3f7c data/eln/recipe/analog_watch.json
 8fd7923bf8a68d3d9b30fe0eb4eb4ba90ee7d117 data/eln/recipe/analogic_regulator.json
 f08a17f8c96555319fad60d61b2788c122fbf087 data/eln/recipe/and_chip.json
+805798fa44f9f1beb943bfdbbcaf390d5e5a0861 data/eln/recipe/animal_filter.json
 e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 035486821d9fa0d6a29ddf339b77c7a9c7034581 data/eln/recipe/average_electrical_drill.json
 08c28dacf73dce30b445d692fa1e1bef7c6c9f3f data/eln/recipe/average_ferromagnetic_core.json
@@ -626,6 +629,7 @@ dac1cc7568c77d968ce729665085384428966fb2 data/eln/recipe/utility_pole_w_dc_dc_co
 55fdfab7dcdd516966fdbd904c59ffcf6fd4575d data/eln/recipe/very_high_voltage_cable.json
 61c0db9640b8a7e996ef7a9d8ccbe11c01299164 data/eln/recipe/very_high_voltage_relay.json
 5d996779d5a3adeb2f1e7cc5fa9763deececb7ef data/eln/recipe/very_high_voltage_switch.json
+bd3870ffc583f98dd204f8fcdbb4bd24ceaf726f data/eln/recipe/voltage_controlled_amplifier.json
 8d266d2df296f5be689bc1f5a26e201e3a3d5801 data/eln/recipe/voltage_controlled_sawtooth_oscillator.json
 ce06b5890adb743b4cada0c09ea95ab820aff89a data/eln/recipe/voltage_controlled_sine_oscillator.json
 bcdf2586ebaa97d9afcb494bbf7070b497d0aa22 data/eln/recipe/voltage_oriented_battery.json

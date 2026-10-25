@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "c": "minecraft:blue_dye",
+    "g": "minecraft:glass_pane"
+  },
+  "pattern": [
+    " g",
+    "gc",
+    " g"
+  ],
+  "result": {
+    "id": "eln:animal_filter"
+  }
+}
