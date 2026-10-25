@@ -21,6 +21,7 @@ import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.Container;
@@ -57,6 +58,21 @@ public class EggIncubatorElement extends TransparentNodeElement {
         slowProcessList.add(voltageWatchdog.set(powerLoad).setUMaxMin(this.descriptor.nominalVoltage).set(exp));
     }
 
+    /** Eggs it takes (Baughn: all eggs, not only white hen eggs): every chicken egg (#minecraft:eggs, blue and brown
+     *  too), turtle and sniffer eggs. */
+    public static boolean incubates(ItemStack s) {
+        return s.is(net.minecraft.tags.ItemTags.EGGS) || s.is(net.minecraft.world.item.Items.TURTLE_EGG) || s.is(net.minecraft.world.item.Items.SNIFFER_EGG);
+    }
+
+    /** What hatches from an egg: a chick of the egg's variant (as a thrown egg's), a baby turtle, a snifflet. */
+    public static net.minecraft.world.entity.AgeableMob hatch(ItemStack egg, net.minecraft.world.level.Level level) {
+        if (egg.is(net.minecraft.world.item.Items.TURTLE_EGG)) return net.minecraft.world.entity.EntityTypes.TURTLE.create(level, EntitySpawnReason.TRIGGERED);
+        if (egg.is(net.minecraft.world.item.Items.SNIFFER_EGG)) return net.minecraft.world.entity.EntityTypes.SNIFFER.create(level, EntitySpawnReason.TRIGGERED);
+        Chicken chicken = net.minecraft.world.entity.EntityTypes.CHICKEN.create(level, EntitySpawnReason.TRIGGERED);
+        if (chicken != null) java.util.Optional.ofNullable(egg.get(net.minecraft.core.component.DataComponents.CHICKEN_VARIANT)).ifPresent(chicken::setVariant);
+        return chicken;
+    }
+
     class EggIncubatorProcess implements IProcess, INBTTReady {
 
         double energy = 5000;
@@ -75,15 +91,15 @@ public class EggIncubatorElement extends TransparentNodeElement {
             if (!Utils.isEmpty(inventory.getItem(EggIncubatorContainer.EggSlotId))) {
                 descriptor.setState(powerResistor, true);
                 if (energy <= 0) {
-                    inventory.removeItem(EggIncubatorContainer.EggSlotId, 1);
-                    Chicken chicken = net.minecraft.world.entity.EntityTypes.CHICKEN.create(node.coordonate.world(), EntitySpawnReason.TRIGGERED);
-                    if (chicken != null) {
-                        chicken.setAge(-24000);
-                        chicken.snapTo(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, Mth.wrapDegrees(node.coordonate.world().getRandom().nextFloat() * 360.0F), 0.0F);
-                        chicken.yHeadRot = chicken.getYRot();
-                        chicken.yBodyRot = chicken.getYRot();
-                        node.coordonate.world().addFreshEntity(chicken);
-                        chicken.playAmbientSound();
+                    ItemStack egg = inventory.removeItem(EggIncubatorContainer.EggSlotId, 1);
+                    var baby = hatch(egg, node.coordonate.world());
+                    if (baby != null) {
+                        baby.setAge(-24000);
+                        baby.snapTo(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, Mth.wrapDegrees(node.coordonate.world().getRandom().nextFloat() * 360.0F), 0.0F);
+                        baby.yHeadRot = baby.getYRot();
+                        baby.yBodyRot = baby.getYRot();
+                        node.coordonate.world().addFreshEntity(baby);
+                        baby.playAmbientSound();
                     }
                     //node.coordonate.world().spawnEntity());
                     resetEnergy();

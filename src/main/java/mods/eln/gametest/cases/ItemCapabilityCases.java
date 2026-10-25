@@ -135,6 +135,21 @@ public final class ItemCapabilityCases {
             ctx.check("egg incubator: takes eggs, not sticks", eggs != null && insert(eggs, new ItemStack(Items.STICK), true) == 0
                 && insert(eggs, new ItemStack(Items.EGG, 2), true) == 2, "");
             ctx.check("egg incubator: eggs can't be pulled back out", eggs != null && extract(eggs, new ItemStack(Items.EGG)) == 0, "");
+            // (Baughn 2026-10-25: all eggs, not only white hen eggs)
+            // (the slot holds the white eggs now: the filter itself, which the slot and the capability both use)
+            java.util.function.Predicate<ItemStack> takes = mods.eln.transparentnode.eggincubator.EggIncubatorElement::incubates;
+            ctx.check("egg incubator: blue and brown eggs, turtle and sniffer eggs too, not sticks", takes.test(new ItemStack(Items.BLUE_EGG))
+                && takes.test(new ItemStack(Items.BROWN_EGG)) && takes.test(new ItemStack(Items.TURTLE_EGG)) && takes.test(new ItemStack(Items.SNIFFER_EGG))
+                && !takes.test(new ItemStack(Items.STICK)), "");
+            var chick = mods.eln.transparentnode.eggincubator.EggIncubatorElement.hatch(new ItemStack(Items.BLUE_EGG), ctx.level());
+            var want = new ItemStack(Items.BLUE_EGG).get(net.minecraft.core.component.DataComponents.CHICKEN_VARIANT);
+            ctx.check("egg incubator: a blue egg hatches a chick of the blue egg's variant",
+                chick instanceof net.minecraft.world.entity.animal.chicken.Chicken ch && want != null && ch.getVariant().equals(want),
+                chick + " " + want);
+            var turtle = mods.eln.transparentnode.eggincubator.EggIncubatorElement.hatch(new ItemStack(Items.TURTLE_EGG), ctx.level());
+            ctx.check("egg incubator: a turtle egg hatches a turtle", turtle instanceof net.minecraft.world.entity.animal.turtle.Turtle, "" + turtle);
+            if (chick != null) chick.discard();
+            if (turtle != null) turtle.discard();
         }
 
         public void measure(TestContext ctx) {

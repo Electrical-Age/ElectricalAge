@@ -128,7 +128,7 @@ public final class MenuSpecs {
             descriptor(0, 130, 40, 1, OverVoltageProtectionDescriptor.class, MEDIUM, tr("Overvoltage protection")),
             descriptor(1, 130, 60, 1, OverHeatingProtectionDescriptor.class, MEDIUM, tr("Overheating protection"))).publishing(1));
         put(mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor.class, d -> MenuSpec.of(
-            filter(mods.eln.transparentnode.eggincubator.EggIncubatorContainer.EggSlotId, 176 / 2 - 8, 7, 64, item(Items.EGG),
+            filter(mods.eln.transparentnode.eggincubator.EggIncubatorContainer.EggSlotId, 176 / 2 - 8, 7, 64, mods.eln.transparentnode.eggincubator.EggIncubatorElement::incubates,
                 MEDIUM, tr("Egg slot"))).publishing(1).panel(202, 111, 8, 29));
         // P4b layout (ElectricalFurnaceScreen): input -> arrow -> output, heater and regulator to the right
         put(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, d -> MenuSpec.of(
