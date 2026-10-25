@@ -138,11 +138,13 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
         return Shapes.empty();
     }
 
-    /** The neighbour on that side can hold a wall device (1.12: opaque cube). */
+    /**
+     * The neighbour on that side can hold a wall device: its face toward this block is full (Baughn: a slab's top, a
+     * stair's back, glass; 1.12 asked for an opaque cube). Same rule as TransparentNodeDescriptor.holds.
+     */
     public boolean getIfOtherBlockIsSolid(Level world, BlockPos pos, Direction direction) {
         BlockPos o = pos.relative(direction.toEnumFacing());
-        BlockState s = world.getBlockState(o);
-        return !s.isAir() && s.isSolidRender();
+        return world.getBlockState(o).isFaceSturdy(world, o, direction.getInverse().toEnumFacing(), net.minecraft.world.level.block.SupportType.FULL);
     }
 
     public static SixNodeBlock get() {

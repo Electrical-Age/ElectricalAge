@@ -121,8 +121,9 @@ public abstract class NodeBase {
             Block b = bs.getBlock();
             // 1.12 port, known bug fixed: 1.7.10 had `if (b.isSolidRender()) ;` (empty statement), so every neighbour
             // counted as opaque and TransparentNodeElement.checkCanStay never removed unsupported devices. Same rule as
-            // TransparentNodeDescriptor.checkCanPlace (default-state opaque cube; a hopper counts as a floor).
-            if (bs.isSolidRender() || (direction == Direction.YN && b instanceof net.minecraft.world.level.block.HopperBlock))
+            // TransparentNodeDescriptor.holds (a full face toward this block; a hopper counts as a floor).
+            if (bs.isFaceSturdy(world, np, direction.getInverse().toEnumFacing(), net.minecraft.world.level.block.SupportType.FULL)
+                || (direction == Direction.YN && b instanceof net.minecraft.world.level.block.HopperBlock))
                 neighborOpaque |= 1 << direction.getInt();
             if (isBlockWrappable(bs, world, np))
                 neighborWrapable |= 1 << direction.getInt();

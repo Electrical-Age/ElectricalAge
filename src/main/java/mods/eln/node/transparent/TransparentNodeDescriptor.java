@@ -8,6 +8,7 @@ import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
@@ -85,55 +86,35 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return false;
     }
 
-    /** What this device can stand on (mustHaveFloor): a solid block or a hopper. */
+    /**
+     * Does the block next to coord, toward to, hold a device on its face toward it? Any full face does (Baughn): a full
+     * block, the top of a slab or of an upside-down stair, the back of a stair, glass. 1.12 asked for a whole opaque
+     * cube.
+     */
+    public static boolean holds(Coordonate coord, Direction to) {
+        Level w = coord.world();
+        var pos = coord.pos().relative(to.toEnumFacing());
+        return w.getBlockState(pos).isFaceSturdy(w, pos, to.getInverse().toEnumFacing(), SupportType.FULL);
+    }
+
+    /** What else this device can stand on (mustHaveFloor), beside a full face: a hopper. */
     public boolean isFloor(Block below) {
-        return below.defaultBlockState().isSolidRender() || below instanceof HopperBlock;
+        return below instanceof HopperBlock;
     }
 
     public String checkCanPlace(Coordonate coord, Direction front) {
-        Block block;
-        boolean needDestroy = false;
-        if (mustHaveFloor()) {
+        if (mustHaveFloor() && !holds(coord, Direction.YN)) {
             Coordonate temp = new Coordonate(coord);
             temp.move(Direction.YN);
-            block = temp.getBlock();
+            Block block = temp.getBlock();
             if (block == null || !isFloor(block))
                 return tr("You can't place this block at this side");
         }
-        if (mustHaveCeiling()) {
-            Coordonate temp = new Coordonate(coord);
-            temp.move(Direction.YP);
-            block = temp.getBlock();
-            if (block == null || !block.defaultBlockState().isSolidRender()) return tr("You can't place this block at this side");
-        }
-        if (mustHaveWallFrontInverse()) {
-            Coordonate temp = new Coordonate(coord);
-            temp.move(front.getInverse());
-            block = temp.getBlock();
-            if (block == null || !block.defaultBlockState().isSolidRender()) return tr("You can't place this block at this side");
-        }
-        if (mustHaveWall()) {
-            Coordonate temp;
-            boolean wall = false;
-            temp = new Coordonate(coord);
-            temp.move(Direction.XN);
-            block = temp.getBlock();
-            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
-            temp = new Coordonate(coord);
-            temp.move(Direction.XP);
-            block = temp.getBlock();
-            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
-            temp = new Coordonate(coord);
-            temp.move(Direction.ZN);
-            block = temp.getBlock();
-            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
-            temp = new Coordonate(coord);
-            temp.move(Direction.ZP);
-            block = temp.getBlock();
-            if (block != null && block.defaultBlockState().isSolidRender()) wall = true;
-
-            if (!wall) return tr("You can't place this block at this side");
-        }
+        if (mustHaveCeiling() && !holds(coord, Direction.YP)) return tr("You can't place this block at this side");
+        if (mustHaveWallFrontInverse() && !holds(coord, front.getInverse())) return tr("You can't place this block at this side");
+        if (mustHaveWall() && !holds(coord, Direction.XN) && !holds(coord, Direction.XP) && !holds(coord, Direction.ZN)
+            && !holds(coord, Direction.ZP))
+            return tr("You can't place this block at this side");
 
         GhostGroup ghostGroup = getGhostGroup(front);
         if (ghostGroup != null && ghostGroup.canBePloted(coord) == false) return tr("Not enough space for this block");

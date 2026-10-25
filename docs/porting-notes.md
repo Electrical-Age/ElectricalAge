@@ -81,6 +81,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   on 50 V; cooks food only, at up to 280 W (twice the electrical oven's best food speed), condensing 280 W / 25% of the
   steam's heat (~500 mB/s at full speed; the rest vents as a plume); hoppers: sides in, bottom out. Model
   `tools/models/steamoven.py`. Test `steam_oven_cooks_with_steam`.
+- Devices (transparent and six-node) can be placed against any full face, not only opaque cubes (Baughn): a top
+  slab, the underside of a bottom slab or stair, a stair's back, glass (`TransparentSupportCases`).
 
 ## Bugs fixed
 
