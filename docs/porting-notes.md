@@ -91,6 +91,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Boiler: a phase signal on its front (Baughn: where the dials are): high while the water is above half the gauge
   glass (half the 8 B tank), with a deadband; heat now goes in on the back and flanks only. The gauge glass shows the
   fill and the dial the water temperature (0..300 C) (`boiler_phase_signal`).
+- Submersible pumps, 50V (100 W) and 200V (400 W) (Baughn 2026-10-25): placed in a water source (transparent-node
+  blocks are waterloggable now, as six nodes were), they push the water they stand in up a pipe from the flange on
+  top: 3.5 turbines' worth of feedwater (57 / 230 mB/s), falling to nothing at 9 bar against the pipe. Power on the
+  flanks, a signal on the front sets the speed (no cable there: full speed). Model `tools/models/submersiblepump.py`
+  (`submersible_pump_feeds_a_boiler`, `submersible_pump_water_and_signal`).
 
 ## Bugs fixed
 

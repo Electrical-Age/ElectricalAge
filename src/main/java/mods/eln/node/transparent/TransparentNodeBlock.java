@@ -10,19 +10,47 @@ import javax.annotation.Nullable;
 /**
  * The block of one transparent-node device (1.12: one shared TransparentNodeBlock; 26.x: one block per device, all of
  * this class, for per-device models, drops and names). The device's node is a TransparentNode; ghosts make up the
- * rest of a multiblock.
+ * rest of a multiblock. Waterloggable, as six nodes are: a device placed in a water source keeps the water around it
+ * (Baughn: the submersible pump must be waterlogged).
  */
-public class TransparentNodeBlock extends NodeBlock {
+public class TransparentNodeBlock extends NodeBlock implements net.minecraft.world.level.block.SimpleWaterloggedBlock {
+    public static final net.minecraft.world.level.block.state.properties.BooleanProperty WATERLOGGED =
+        net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
     public final TransparentNodeDescriptor descriptor;
 
     public TransparentNodeBlock(Properties properties, TransparentNodeDescriptor descriptor) {
         super(properties);
         this.descriptor = descriptor;
+        registerDefaultState(stateDefinition.any().setValue(WATERLOGGED, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(WATERLOGGED);
+    }
+
+    @Override
+    protected net.minecraft.world.level.material.FluidState getFluidState(BlockState state) {
+        return state.getValue(WATERLOGGED) ? net.minecraft.world.level.material.Fluids.WATER.getSource(false) : super.getFluidState(state);
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess ticks,
+            BlockPos pos, net.minecraft.core.Direction dir, BlockPos neighbourPos, BlockState neighbour, net.minecraft.util.RandomSource random) {
+        if (state.getValue(WATERLOGGED))
+            ticks.scheduleTick(pos, net.minecraft.world.level.material.Fluids.WATER, net.minecraft.world.level.material.Fluids.WATER.getTickDelay(level));
+        return super.updateShape(state, level, ticks, pos, dir, neighbourPos, neighbour, random);
     }
 
     /** The state placed for a device facing FRONT (TransparentNodeItem); one without a front state: the default. */
     public BlockState stateForFront(mods.eln.misc.Direction front) {
         return defaultBlockState();
+    }
+
+    /** The state placed at pos for a device facing FRONT: waterlogged if a water source is there. */
+    public BlockState placedState(mods.eln.misc.Direction front, net.minecraft.world.level.Level world, BlockPos pos) {
+        var f = world.getFluidState(pos);
+        return stateForFront(front).setValue(WATERLOGGED, f.is(net.minecraft.world.level.material.Fluids.WATER) && f.isSource());
     }
 
     /** The device's collision and outline: its descriptor's 1.7.10 collision boxes (addCollisionBoxesToList, a block at

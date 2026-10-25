@@ -79,6 +79,7 @@ final class GoldenCase implements TestCase {
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
         "eln:transparent_node@5120", "eln:transparent_node@5124",   // 26.x oil: tar sand separators
         "eln:transparent_node@5184", "eln:transparent_node@5188",   // 26.x oil: pumps
+        "eln:transparent_node@5192", "eln:transparent_node@5196",   // submersible pumps (Baughn 2026-10-25)
         "eln:transparent_node@5248", "eln:transparent_node@5252", "eln:transparent_node@5256",  // heaters, boiler
         "eln:transparent_node@5260", "eln:transparent_node@5264",  // small steam turbines
         "eln:transparent_node@5268", "eln:transparent_node@5272",  // the steam oven and the smelter (Baughn 2026-10-23)

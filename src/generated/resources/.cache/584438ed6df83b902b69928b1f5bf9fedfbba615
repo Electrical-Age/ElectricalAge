@@ -1,4 +1,4 @@
-// 26.3	2026-10-23T16:53:37.6205827	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-25T01:35:15.49097845	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -19,6 +19,7 @@ e59b7d9677bc37a760b28ff12f607b09abdd5407 data/eln/advancement/recipes/misc/200v_
 e6861ea161f2d01ee0029b3c8e782a9a1fddc54f data/eln/advancement/recipes/misc/200v_plate_machine.json
 747f4ba0a62f6feff6fd0d7ba03081e89112a86b data/eln/advancement/recipes/misc/200v_power_socket.json
 6ae07b6c2dd7a83cfbaf3d4cb0bbf8656fed4374 data/eln/advancement/recipes/misc/200v_steam_turbine.json
+650549264270bb5cfeace6d4170901f99ca50291 data/eln/advancement/recipes/misc/200v_submersible_pump.json
 0a5df19babf77af85a8355a565bc7ce232529590 data/eln/advancement/recipes/misc/200v_tar_sand_separator.json
 d874405c2f0b96e6269c1dcb75a4bbdd7005544d data/eln/advancement/recipes/misc/200v_tungsten_heating_corp.json
 ebe9a5941cbab033c4ecd0805aa17c77ada664c1 data/eln/advancement/recipes/misc/25a_diode.json
@@ -52,6 +53,7 @@ b2eba69bdd077479b980974fc9a6c665aa1b9341 data/eln/advancement/recipes/misc/50v_m
 cd3449205d8535c147379b36fc881171fab688ef data/eln/advancement/recipes/misc/50v_plate_machine.json
 7c9f4976acb25a3392f0aaf5311c116fd47543e2 data/eln/advancement/recipes/misc/50v_power_socket.json
 e66dc6bbecb715722e880e211fe59913fadcbedb data/eln/advancement/recipes/misc/50v_steam_turbine.json
+6855731bcf2c58bfe93305297d6c42485dba06f2 data/eln/advancement/recipes/misc/50v_submersible_pump.json
 458625917ce956f38084559149825d267713c403 data/eln/advancement/recipes/misc/50v_tar_sand_separator.json
 8e3b85897658969af3d6d89f1f79f22619b924ac data/eln/advancement/recipes/misc/50v_tungsten_heating_corp.json
 2422a0e9ea7ec844761ef4e22a9f49b614483724 data/eln/advancement/recipes/misc/800v_defence_turret.json
@@ -349,6 +351,7 @@ f52b8037748b5855a326b573fe52f465705d9bea data/eln/recipe/200v_oil_pump.json
 6a57a0d23a063888039a8df934f92bdc7bd7265e data/eln/recipe/200v_plate_machine.json
 0ddcffca2bb069c00a8553ecb13de05752db4f80 data/eln/recipe/200v_power_socket.json
 3922ddff1257eb782d6c956bebb17d9fae806bed data/eln/recipe/200v_steam_turbine.json
+e25333ec84e2f843591d15dc724e02fd024fe100 data/eln/recipe/200v_submersible_pump.json
 8679563ab6e0e1e5d10c076891217a5ba2d08c9a data/eln/recipe/200v_tar_sand_separator.json
 9a75db92f399405442866f5db3fff39496170f65 data/eln/recipe/200v_tungsten_heating_corp.json
 9ec2d01e1165fcb7bd72aed5bae949d7d9b18a1e data/eln/recipe/25a_diode.json
@@ -382,6 +385,7 @@ d01ad86ab044c11612d4f5d583c593d8d2050917 data/eln/recipe/50v_oil_pump.json
 e3498ec55daf9124e4b38e6dfa6dd8810d4d2147 data/eln/recipe/50v_plate_machine.json
 41115032978023f7e16964aa9c883906562734cf data/eln/recipe/50v_power_socket.json
 1892fc085d38eb0b3345dd03abc22f76f7672c45 data/eln/recipe/50v_steam_turbine.json
+a2699653d83e94fba3176fed07eb9bc947098d52 data/eln/recipe/50v_submersible_pump.json
 597e59b2cb40ff96580947c9d42e4806e4aba461 data/eln/recipe/50v_tar_sand_separator.json
 26dd0e5b78d384e75a61dd3a288c91e7a056aed6 data/eln/recipe/50v_tungsten_heating_corp.json
 3c252398718236f524e1fa22cbb61b427356d014 data/eln/recipe/800v_defence_turret.json

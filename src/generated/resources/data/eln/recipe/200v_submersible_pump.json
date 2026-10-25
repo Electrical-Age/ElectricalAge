@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:iron_bars",
+    "I": "#c:ingots/alloy",
+    "c": "eln:advanced_electrical_motor",
+    "p": "eln:pipe_kit_iron"
+  },
+  "pattern": [
+    " p ",
+    "IcI",
+    "IBI"
+  ],
+  "result": {
+    "id": "eln:200v_submersible_pump"
+  }
+}

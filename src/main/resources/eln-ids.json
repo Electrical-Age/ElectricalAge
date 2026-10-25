@@ -1895,6 +1895,18 @@
   "kind": "transparent_node",
   "name": "200v_oil_pump"
  },
+ "eln:transparent_node@5192": {
+  "descriptor": "SubmersiblePumpDescriptor",
+  "display": "50V Submersible Pump",
+  "kind": "transparent_node",
+  "name": "50v_submersible_pump"
+ },
+ "eln:transparent_node@5196": {
+  "descriptor": "SubmersiblePumpDescriptor",
+  "display": "200V Submersible Pump",
+  "kind": "transparent_node",
+  "name": "200v_submersible_pump"
+ },
  "eln:transparent_node@5248": {
   "descriptor": "ElectricHeaterDescriptor",
   "display": "50V Electric Heater",

@@ -23,6 +23,7 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     public BoilerDescriptor(String name, String model) {
         super(name, BoilerElement.class, BoilerRender.class);
         obj = Eln.obj.getObj(model);
+        cableTerminals = mods.eln.cable.CableTerminals.FRONT;   // the phase signal's plate (tools/models/boiler.py)
     }
 
     /** A boiler may also stand on another EA device (a steam turbine: its dome port feeds the turbine's inlet below). */

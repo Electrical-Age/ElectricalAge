@@ -1892,6 +1892,23 @@ public final class ElnRecipes extends ElnRecipesBase {
             'P', stack(Blocks.PISTON),
             'W', stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get()),
             'I', stack(Items.IRON_INGOT));
+        // the submersible pumps (Baughn 2026-10-25): a motor in a can, an intake screen, a pipe out of the top
+        addRecipe(findItemStack("50V Submersible Pump", 1),
+            " p ",
+            "IcI",
+            "IBI",
+            'p', stack(mods.eln.registry.ElnRegistry.PIPE_KIT_IRON.get()),
+            'c', findItemStack("Electrical Motor"),
+            'B', stack(Items.IRON_BARS),
+            'I', stack(Items.IRON_INGOT));
+        addRecipe(findItemStack("200V Submersible Pump", 1),
+            " p ",
+            "IcI",
+            "IBI",
+            'p', stack(mods.eln.registry.ElnRegistry.PIPE_KIT_IRON.get()),
+            'c', findItemStack("Advanced Electrical Motor"),
+            'B', stack(Items.IRON_BARS),
+            'I', "ingotAlloy");
         addRecipe(findItemStack("200V Oil Pump", 1),
             "IPI",
             "cMc",

@@ -23,6 +23,8 @@ public final class PipeCases {
         cases.add(new BoilerBucket());
         cases.add(new BoilerFeed());
         cases.add(new BoilerPhase());
+        cases.add(new PumpFeedsBoiler());
+        cases.add(new PumpWaterAndSignal());
         cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
@@ -140,6 +142,110 @@ public final class PipeCases {
             ctx.check("phase: the front takes a signal, not heat; the back takes heat", full.getConnectionMask(front, mods.eln.misc.LRDU.Down) == mods.eln.node.NodeBase.maskElectricalOutputGate
                 && full.getThermalLoad(front, mods.eln.misc.LRDU.Down) == null
                 && full.getConnectionMask(front.back(), mods.eln.misc.LRDU.Down) == mods.eln.node.NodeBase.maskThermal, "");
+        }
+    }
+
+    static mods.eln.oil.SubmersiblePumpElement pumpInWater(TestContext ctx, Wp10aCases.Layout l, int dx, int dz) {
+        BlockPos p = ctx.at(dx, 1, dz);
+        ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 2);
+        var pump = (mods.eln.oil.SubmersiblePumpElement) l.device(8 + (81 << 6), dx, dz);
+        pump.front = mods.eln.misc.Direction.XN;   // (signal on the west, power north and south)
+        pump.reconnect();
+        return pump;
+    }
+
+    /**
+     * A 50V submersible pump (Baughn: a small waterlogged feed pump) standing in water, powered, piped from its top
+     * flange up, over and down into a cold empty boiler's feedwater flange: it fills the boiler.
+     */
+    static final class PumpFeedsBoiler implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SubmersiblePumpElement pump;
+
+        public String id() {
+            return "submersible_pump_feeds_a_boiler";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.front = mods.eln.misc.Direction.XN;   // (feed flange south)
+            boiler.reconnect();
+            boiler.fromTanks(0, 0);
+            lay(ctx, ctx.at(2, 2, 2), 0, 8, 0, 8, 8, 8, 8, 0, 8, 8);    // up out of the pump, then west
+            lay(ctx, ctx.at(1, 2, 2), 0, 16, 8, 8, 8, 8, 8, 8, 0, 8);   // east in, then down
+            lay(ctx, ctx.at(1, 1, 2), 0, 8, 16, 8, 8, 8, 8, 8, 8, 0);   // down in, then north into the flange
+            l.used.add(ctx.at(1, 1, 2));
+            ctx.level().setBlockAndUpdate(ctx.at(3, 1, 2), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            pump = pumpInWater(ctx, l, 2, 2);
+            l.feed(ctx.at(2, 1, 2), pump.front.left());
+        }
+
+        public void measure(TestContext ctx) {
+            boiler.syncTanks();
+            boiler.showTanks();
+            ctx.line("pump: " + pump.getWaila() + ", boiler " + boiler.getWaila());
+            ctx.check("pump: in water, running", pump.submerged && pump.speed == 1 && pump.motor.getP() > 50, pump.getWaila().toString());
+            // (57 mB/s for a minute, less what the pipe run holds)
+            ctx.check("pump: the boiler filled through its feed flange", boiler.tanks.water() > 1000, boiler.tanks.water() + " mB");
+        }
+    }
+
+    /** Out of water a pump doesn't run; a signal on its front sets its speed (0 V: stopped, half: half power). */
+    static final class PumpWaterAndSignal implements TestCase {
+        mods.eln.oil.SubmersiblePumpElement dry, stopped, half;
+
+        public String id() {
+            return "submersible_pump_water_and_signal";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            dry = pumpInWater(ctx, l, 1, 1);
+            stopped = pumpInWater(ctx, l, 4, 1);
+            half = pumpInWater(ctx, l, 7, 1);
+            // (the signals first: the power sources are then put where they don't touch them)
+            signal(ctx, l, stopped, 0);
+            signal(ctx, l, half, (float) (mods.eln.Eln.SVU / 2));
+            for (var p : new mods.eln.oil.SubmersiblePumpElement[]{dry, stopped, half}) {
+                l.feed(p.node.coordonate.pos(), p.front.left());
+            }
+            // the dry one: its water gone (as if drained)
+            BlockPos d = dry.node.coordonate.pos();
+            ctx.level().setBlock(d, ctx.level().getBlockState(d).setValue(mods.eln.node.transparent.TransparentNodeBlock.WATERLOGGED, false), 2);
+        }
+
+        static void signal(TestContext ctx, Wp10aCases.Layout l, mods.eln.oil.SubmersiblePumpElement p, float u) {
+            BlockPos cp = p.node.coordonate.pos().west();
+            var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) l.six(Wp10bCases.SIGNAL_SOURCE, cp);
+            s.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(u);
+            }));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("pumps: dry " + dry.getWaila() + "; stopped " + stopped.getWaila() + "; half " + half.getWaila());
+            ctx.check("pump: out of water it doesn't run", !dry.submerged && dry.outlet.mLiquid() == 0 && dry.motor.getP() < 1, dry.getWaila().toString());
+            ctx.check("pump: a 0 V signal stops it", stopped.outlet.mLiquid() == 0 && stopped.motor.getP() < 1, stopped.getWaila().toString());
+            ctx.check("pump: half the signal, half the power, and it pumps", Math.abs(half.speed - 0.5) < 0.05
+                && Math.abs(half.motor.getP() - 50) < 10 && half.outlet.mLiquid() > 0, half.getWaila().toString());
         }
     }
 

@@ -105,6 +105,8 @@ final class PublishRenderCase implements TestCase {
             NodeBase node;
             try {
                 ctx.floor(p.below());
+                if (d instanceof mods.eln.oil.SubmersiblePumpDescriptor)   // (it goes in water)
+                    ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 2);
                 node = ctx.placeTransparent(e.getKey(), p).node;
             } catch (RuntimeException ex) {
                 ctx.check("publish " + d.name + " placed", false, ex.getMessage());

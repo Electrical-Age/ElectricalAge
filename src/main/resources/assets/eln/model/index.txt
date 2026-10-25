@@ -101,6 +101,8 @@ steamturbine50v/steamturbine50v.obj
 stonecache/stonecache.obj
 stonefurnace/stonefurnace.obj
 streetlight/streetlight.obj
+submersiblepump200v/submersiblepump200v.obj
+submersiblepump50v/submersiblepump50v.obj
 tarsandseparator200v/tarsandseparator200v.obj
 tarsandseparator50v/tarsandseparator50v.obj
 temperaturesensor/temperaturesensor.obj

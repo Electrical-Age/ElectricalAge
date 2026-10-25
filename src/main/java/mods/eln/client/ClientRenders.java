@@ -62,6 +62,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, mods.eln.transparentnode.electricalmachine.ElectricalMachineRender::new);
         ElnRenders.transparent(mods.eln.oil.OilPumpDescriptor.class, mods.eln.oil.OilPumpRender::new);
+        ElnRenders.transparent(mods.eln.oil.SubmersiblePumpDescriptor.class, mods.eln.oil.SubmersiblePumpRender::new);
         ElnRenders.transparent(mods.eln.oil.ElectricHeaterDescriptor.class, mods.eln.oil.ElectricHeaterRender::new);
         // the exporter: GUI values only (drawn by its block model)
         ElnRenders.transparent(mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor.class,

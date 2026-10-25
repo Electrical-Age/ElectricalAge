@@ -67,7 +67,7 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
         TransparentNode node = new TransparentNode();
         node.onBlockPlacedBy(coord, front, player, stack);
         Block b = block.get();
-        world.setBlock(at, b instanceof TransparentNodeBlock tb ? tb.stateForFront(front) : b.defaultBlockState(), 3);
+        world.setBlock(at, b instanceof TransparentNodeBlock tb ? tb.placedState(front, world, at) : b.defaultBlockState(), 3);
         node.checkCanStay(true);
         return node;
     }
