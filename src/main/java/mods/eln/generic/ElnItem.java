@@ -21,6 +21,9 @@ public class ElnItem extends Item implements IDescriptorItem {
 
     /** The descriptor is a mining tool (overrides getStrVsBlock: electrical pickaxe / axe). */
     private final boolean tool;
+    /** The descriptor does something on a right-click in the air (overrides onItemRightClick: flashlights, x-ray
+     *  scanner, electrical tools' modes). */
+    public final boolean rightClick;
 
     public ElnItem(Properties properties, GenericItemUsingDamageDescriptor descriptor) {
         super(properties);
@@ -33,6 +36,14 @@ public class ElnItem extends Item implements IDescriptorItem {
             t = false;
         }
         tool = t;
+        boolean r;
+        try {
+            r = descriptor.getClass().getMethod("onItemRightClick", ItemStack.class, Level.class, Player.class)
+                .getDeclaringClass() != GenericItemUsingDamageDescriptor.class;
+        } catch (NoSuchMethodException e) {
+            r = false;
+        }
+        rightClick = r;
     }
 
     @Override
@@ -45,12 +56,20 @@ public class ElnItem extends Item implements IDescriptorItem {
         return Component.literal(descriptor.getName(stack));
     }
 
+    /**
+     * One right-click, one hand (Baughn): an EA item that handles it consumes it, so the other hand's (a flashlight in
+     * the off hand under an x-ray scanner) isn't toggled too; the main hand goes first. Items without a right-click
+     * action pass, as before.
+     */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (!rightClick) return InteractionResult.PASS;
+        if (hand == InteractionHand.OFF_HAND && player.getMainHandItem().getItem() instanceof ElnItem main && main.rightClick)
+            return InteractionResult.PASS;   // (the main hand had it)
         ItemStack s = player.getItemInHand(hand);
         ItemStack r = descriptor.onItemRightClick(s, level, player);
         if (r != s) player.setItemInHand(hand, r);
-        return InteractionResult.PASS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override

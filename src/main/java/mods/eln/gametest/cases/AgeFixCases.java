@@ -16,6 +16,7 @@ public final class AgeFixCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new EmptyFlashlight());
+        cases.add(new OneHandRightClick());
     }
 
     /** An empty flashlight doesn't switch on; one that drains goes off (it stayed "on" at 0 J). */
@@ -49,6 +50,47 @@ public final class AgeFixCases {
             ctx.check("flashlight: an empty one doesn't switch on", stayedOff, "");
             ctx.check("flashlight: a charged one does", litWhileCharged, "");
             ctx.check("flashlight: draining switches it off", wentOff, "");
+        }
+    }
+
+    /**
+     * Baughn: when both hands hold an item that handles a right-click, only the main hand's gets it. Two charged
+     * flashlights; one right-click as vanilla dispatches it (main hand, then the off hand unless the main consumed).
+     */
+    static final class OneHandRightClick implements TestCase {
+        boolean mainOn, offOff, offAlone;
+
+        public String name() {
+            return "right-click: main hand only";
+        }
+
+        public void build(TestContext ctx) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            ItemStack main = Eln.findItemStack("Small Flashlight", 1), off = Eln.findItemStack("Small Flashlight", 1);
+            var lamp = (ElectricalLampItem) GenericItemUsingDamageDescriptor.getDescriptor(main);
+            lamp.setEnergy(main, 1000);
+            lamp.setEnergy(off, 1000);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, main);
+            player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, off);
+            var r = main.getItem().use(ctx.level(), player, net.minecraft.world.InteractionHand.MAIN_HAND);
+            if (!r.consumesAction()) off.getItem().use(ctx.level(), player, net.minecraft.world.InteractionHand.OFF_HAND);
+            mainOn = lamp.isLit(player.getMainHandItem());
+            offOff = !lamp.isLit(player.getOffhandItem());
+            // an off-hand flashlight still works when the main hand is empty
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            off.getItem().use(ctx.level(), player, net.minecraft.world.InteractionHand.OFF_HAND);
+            offAlone = lamp.isLit(player.getOffhandItem());
+            player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("right-click: the main hand's flashlight switches on", mainOn, "");
+            ctx.check("right-click: the off hand's stays off", offOff, "");
+            ctx.check("right-click: alone, the off hand's switches on", offAlone, "");
         }
     }
 }
