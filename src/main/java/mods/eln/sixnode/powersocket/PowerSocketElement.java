@@ -30,7 +30,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//TODO Copy-pasted from LampSupply. PowerSocket behavior must be implemented.
+/**
+ * A wireless outlet (AGE's power socket, 3f3b28c5; 1.12 left it a copy of the lamp supply that did nothing): it takes
+ * power from the nearest lamp supply on its channel, within that supply's range and while the channel is on, and puts
+ * it on the cable at its front. An internal source follows the supply's voltage through LINK_R; what the socket's
+ * cable draws is charged to the supply as a load (as lamp sockets are). Without a supply it is a dead cable end.
+ */
 public class PowerSocketElement extends SixNodeElement {
 
     public static final HashMap<String, ArrayList<PowerSocketElement>> channelMap = new HashMap<String, ArrayList<PowerSocketElement>>();
@@ -39,7 +44,13 @@ public class PowerSocketElement extends SixNodeElement {
     public PowerSocketDescriptor descriptor;
 
     public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
-    public Resistor loadResistor = new Resistor(powerLoad, null);
+    /** The supply's side: a source at its voltage, linked to the socket's cable through LINK_R (open: no supply). */
+    final NbtElectricalLoad sourceLoad = new NbtElectricalLoad("sourceLoad");
+    final mods.eln.sim.mna.component.VoltageSource source = new mods.eln.sim.mna.component.VoltageSource("source", sourceLoad, null);
+    public final Resistor link = new Resistor(sourceLoad, powerLoad);
+    public static final double LINK_R = 0.1;
+    /** The supply feeding it at the last look, or null. */
+    public mods.eln.sixnode.lampsupply.LampSupplyElement supply;
     public IProcess PowerSocketSlowProcess = new PowerSocketSlowProcess();
 
     /**
@@ -54,7 +65,6 @@ public class PowerSocketElement extends SixNodeElement {
 
     public static final byte setChannelId = 1;
 
-    double RpStack = 0;
 
     @Override
     public Container getInventory() {
@@ -64,9 +74,11 @@ public class PowerSocketElement extends SixNodeElement {
     public PowerSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         electricalLoadList.add(powerLoad);
-        electricalComponentList.add(loadResistor);
+        electricalLoadList.add(sourceLoad);
+        electricalComponentList.add(source);
+        electricalComponentList.add(link);
         slowProcessList.add(PowerSocketSlowProcess);
-        loadResistor.highImpedance();
+        link.highImpedance();
         this.descriptor = (PowerSocketDescriptor) descriptor;
 
         slowProcessList.add(voltageWatchdog);
@@ -81,9 +93,37 @@ public class PowerSocketElement extends SixNodeElement {
 
         @Override
         public void process(double time) {
-            loadResistor.setR(1 / RpStack);
-            RpStack = 0;
+            var best = nearestSupply();
+            supply = best == null ? null : best.element;
+            if (best != null && best.element.getChannelState(best.id)) {
+                double u = best.element.powerLoad.getU();
+                source.setU(u);
+                link.setR(LINK_R);
+                // what the cable draws, charged to the supply as a resistance (U / I)
+                double i = link.getCurrent();
+                if (i > 1e-6 && u > 1e-3) best.element.addToRp(u / i);
+            } else {
+                link.highImpedance();
+                source.setU(0);
+            }
         }
+    }
+
+    /** The nearest live lamp supply on this channel within its range (as LampSocketProcess picks one). */
+    mods.eln.sixnode.lampsupply.LampSupplyElement.PowerSupplyChannelHandle nearestSupply() {
+        var list = mods.eln.sixnode.lampsupply.LampSupplyElement.channelMap.get(channel);
+        if (list == null) return null;
+        mods.eln.sixnode.lampsupply.LampSupplyElement.PowerSupplyChannelHandle best = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (var s : list) {
+            if (s.element.isBurnt() || s.element.sixNode == null || !s.element.sixNode.isAdded() || s.element.sixNode.isDestructing()) continue;
+            double d = s.element.sixNode.coordonate.trueDistanceTo(sixNode.coordonate);
+            if (d < bestDistance && d <= s.element.getRange()) {
+                bestDistance = d;
+                best = s;
+            }
+        }
+        return best;
     }
 
     static void channelRegister(PowerSocketElement tx) {
@@ -204,10 +244,6 @@ public class PowerSocketElement extends SixNodeElement {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void addToRp(double r) {
-        RpStack += 1 / r;
     }
 
     public int getRange() {

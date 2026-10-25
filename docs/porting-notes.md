@@ -110,6 +110,11 @@ In the port:
 - Six-node breaking takes one element and drops it (`SixNodeBreakCases`).
 - A transparent device that loses its floor, ceiling or wall is broken like a block and drops with its contents; it
   used to vanish through the failure path (`TransparentSupportCases`).
+- From the AGE fork's history (Baughn 2026-10-25, board #32): µ readings were 100x too small (plotValue; M added);
+  a cut spinning shaft stopped dead past the cut; an empty flashlight switched on; VCA and Animal Filter had no recipe;
+  NaN resistances poisoned whole subsystems (now an open circuit, reported by NanGuard); tall six-node lamps vanished
+  off screen; an open breaker at 1e16 ohm on the 51.2 kV grid solved to -3e20 V (ultraImpedance is 1e12 now); the power
+  socket was 1.12's stub and is now AGE's wireless outlet fed by a lamp supply's channel.
 - Six-node devices (also those hosted in voxel blocks) need their wall too (Baughn): when the face they sit on stops
   being full, they drop with their contents; a six-node block with nothing left goes (`SixNodeBreakCases.LostSupport`).
   1.12 never checked: they floated.
