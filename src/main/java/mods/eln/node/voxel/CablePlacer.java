@@ -182,24 +182,29 @@ public final class CablePlacer {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
         if (n instanceof VoxelNode v) {
-            // a device hosted here: the edge of its face nearest the click; the cable comes from the next block, on the
-            // same face plane, and ends at that edge's midpoint (its port)
+            // a device hosted here: the edge of its face nearest the click that has a connector (a trimmer has one, on
+            // its front); the cable comes from the next block, on the same face plane, and ends at that edge's midpoint
+            // (its port)
             int el = v.elementAt(hx, hy, hz, 0);
             if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
             if (el >= 0) {
-                int f = mods.eln.misc.Direction.fromInt(el).toEnumFacing().get3DDataValue();
+                var side = mods.eln.misc.Direction.fromInt(el);
+                int f = side.toEnumFacing().get3DDataValue();
                 int fa = CableRouter.axis(f);
                 double[] h = {hx, hy, hz};
                 int edge = -1;
                 double bd = Double.MAX_VALUE;
                 for (int g = 0; g < 6; g++) {
                     if (CableRouter.axis(g) == fa) continue;
+                    var out = mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g));
+                    if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
                     double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
                     if (d < bd) {
                         bd = d;
                         edge = g;
                     }
                 }
+                if (edge < 0) return null;   // (no connector at all, as a wireless button)
                 long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
                 long[] p = {base[0] + 8, base[1] + 8, base[2] + 8};
                 p[fa] = base[fa] + CablePart.plane(f);

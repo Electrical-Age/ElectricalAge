@@ -455,6 +455,8 @@ public final class CableCases {
         String ends = "", snapInfo = "";
         boolean snapOk;
         boolean endsOk = true;
+        boolean trimOk;
+        String trimEnds = "";
 
         public String name() {
             return "a cable to a device ends at its connector, with a lug";
@@ -513,6 +515,19 @@ public final class CableCases {
             var six = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 1), net.minecraft.core.Direction.UP, midHit, true, new long[1][]);
             snapInfo += " / six " + (six == null ? "none" : six) + " vs " + a;
             snapOk &= a.equals(six);
+            // a hosted Signal Trimmer has its connector on its front only: a click near any edge of it ends there
+            // (it used to take the nearest edge, which had no connector)
+            c.floor(c.at(4, 0, 7));
+            var tp = c.at(4, 1, 7);
+            var trim = host(c, Wp9cCases.SIGNAL_TRIMMER, tp, mods.eln.misc.Direction.YN);
+            Wp9aCases.orient(trim, x -> x, mods.eln.misc.Direction.XP);
+            trimOk = true;
+            for (double[] h : new double[][]{{0.05, 0.5}, {0.95, 0.5}, {0.5, 0.05}, {0.5, 0.95}}) {
+                var hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(h[0], 0.02, h[1]);
+                var e = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), tp, net.minecraft.core.Direction.UP, hit, true, new long[1][]);
+                trimEnds += (e == null ? "none" : e.x() - tp.getX() * 16L + "," + (e.z() - tp.getZ() * 16L)) + " ";
+                trimOk &= e != null && e.x() == tp.getX() * 16L + 16 && e.z() == tp.getZ() * 16L + 8;
+            }
             // a 50V steam turbine: ends on its front and back (its terminal plates), none on its flanks
             var tb = c.placeTransparent(12 + (82 << 6), c.at(4, 1, 2));
             for (var d : new net.minecraft.core.Direction[]{net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH,
@@ -542,6 +557,7 @@ public final class CableCases {
             c.check("device end: the cable meets the device at the middle of the edge (16,0,8)", "16,0,8".equals(endAt), endAt);
             c.check("device end: a lug at a terminal plate (3 more boxes)", lugged == plain + 18, plain + " -> " + lugged + " quads");
             c.check("device end: a turbine takes cables on its front and back only", endsOk, ends);
+            c.check("device end: a click anywhere on a hosted trimmer ends at its front connector (16,8)", trimOk, trimEnds);
             c.check("device end: a floor click beside the device's port snaps to it", snapOk, snapInfo);
             double i = current(r);
             c.check("device end: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
