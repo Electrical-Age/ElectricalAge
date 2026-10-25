@@ -120,17 +120,14 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         return s.isEmpty() ? Shapes.block() : s;
     }
 
-    /** The parts' outline (grown) and the plates of six-node elements hosted here (grown alike, for aiming; they don't collide). */
-    static VoxelShape outlineOf(java.util.List<VoxelPart> parts, int sideMask) {
+    /** The parts' outline (grown) and the model boxes of six-node elements hosted here (as they are clicked; they don't
+     *  collide). deviceBoxes: per face (EA Direction int), null where there is none. */
+    static VoxelShape outlineOf(java.util.List<VoxelPart> parts, int[][] deviceBoxes) {
         java.util.List<int[]> boxes = new java.util.ArrayList<>();
         for (VoxelPart p : parts)
             for (int[] b : p.boxes())
                 boxes.add(new int[]{Math.max(0, b[0] - 2), Math.max(0, b[1] - 2), Math.max(0, b[2] - 2), Math.min(16, b[3] + 2), Math.min(16, b[4] + 2), Math.min(16, b[5] + 2)});
-        for (int f = 0; f < 6; f++)
-            if ((sideMask & (1 << f)) != 0) {
-                int[] b = VoxelNode.plate(f);
-                boxes.add(new int[]{Math.max(0, b[0] - 2), Math.max(0, b[1] - 1), Math.max(0, b[2] - 2), Math.min(16, b[3] + 2), Math.min(16, b[4] + 1), Math.min(16, b[5] + 2)});
-            }
+        for (int[] b : deviceBoxes) if (b != null) boxes.add(b);
         return union(boxes, 0);
     }
 
@@ -168,8 +165,7 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         var h = bh.getLocation();
         double x = h.x - pos.getX(), y = h.y - pos.getY(), z = h.z - pos.getZ();
         for (VoxelPart p : e.parts()) for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return 1;
-        int mask = e.getSideMask();
-        for (int f = 0; f < 6; f++) if ((mask & (1 << f)) != 0 && VoxelPart.contains(VoxelNode.plate(f), x, y, z, 0.05)) return 1;
+        for (int[] b : e.deviceBoxes()) if (b != null && VoxelPart.contains(b, x, y, z, 0.05)) return 1;
         BlockState host = e.host();
         if (host != null) for (int[] b : e.hostBoxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return 2;
         return 1;

@@ -42,6 +42,7 @@ public final class CableCases {
         cases.add(new WaypointEndCase());
         cases.add(new PreviewSnapshotCase());
         cases.add(new HostedCase());
+        cases.add(new FootprintCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
@@ -504,8 +505,8 @@ public final class CableCases {
             } finally {
                 mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
             }
-            var hitV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 6)).add(0.97, 0.03, 0.5);
-            var viaSource = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 6), net.minecraft.core.Direction.EAST, hitV, true, new long[1][]);
+            var hitV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 6)).add(0.65, 0.1, 0.5);   // (on its model, east of its middle)
+            var viaSource = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 6), net.minecraft.core.Direction.UP, hitV, true, new long[1][]);
             var midV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(1, 0, 6)).add(0.5, 1.0, 0.5);
             var sixV = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 6), net.minecraft.core.Direction.UP, midV, true, new long[1][]);
             snapInfo += " / voxel " + (sixV == null ? "none" : sixV) + " vs " + viaSource;
@@ -515,15 +516,15 @@ public final class CableCases {
             var six = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 1), net.minecraft.core.Direction.UP, midHit, true, new long[1][]);
             snapInfo += " / six " + (six == null ? "none" : six) + " vs " + a;
             snapOk &= a.equals(six);
-            // a hosted Signal Trimmer has its connector on its front only: a click near any edge of it ends there
+            // a hosted Signal Trimmer has its connector on its front only: a click near any side of its model ends there
             // (it used to take the nearest edge, which had no connector)
             c.floor(c.at(4, 0, 7));
             var tp = c.at(4, 1, 7);
             var trim = host(c, Wp9cCases.SIGNAL_TRIMMER, tp, mods.eln.misc.Direction.YN);
             Wp9aCases.orient(trim, x -> x, mods.eln.misc.Direction.XP);
             trimOk = true;
-            for (double[] h : new double[][]{{0.05, 0.5}, {0.95, 0.5}, {0.5, 0.05}, {0.5, 0.95}}) {
-                var hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(h[0], 0.02, h[1]);
+            for (double[] h : new double[][]{{0.35, 0.5}, {0.65, 0.5}, {0.5, 0.35}, {0.5, 0.65}}) {
+                var hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(h[0], 0.1, h[1]);
                 var e = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), tp, net.minecraft.core.Direction.UP, hit, true, new long[1][]);
                 trimEnds += (e == null ? "none" : e.x() - tp.getX() * 16L + "," + (e.z() - tp.getZ() * 16L)) + " ";
                 trimOk &= e != null && e.x() == tp.getX() * 16L + 16 && e.z() == tp.getZ() * 16L + 8;
@@ -878,6 +879,62 @@ public final class CableCases {
         if (!v.canPlaceElement(side.getInt()) || !v.createSubBlock(d.newItemStack(), side, player))
             throw new IllegalStateException("can't host " + d.name + " at " + p + " " + side);
         return v.getElement(side);
+    }
+
+    /**
+     * A device hosted in a voxel block is clicked and outlined where its model is (Baughn: a Signal Trimmer's click area,
+     * the whole face, didn't match its 6 x 6 px model): on the floor and on a wall. Logs every device's footprint.
+     */
+    static final class FootprintCase implements TestCase {
+        String floor = "", wall = "", outline = "";
+        boolean floorOk, wallOk, outlineOk;
+
+        public String name() {
+            return "a hosted device is clicked and outlined at its model";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            var tp = c.at(1, 1, 1);
+            c.floor(c.at(1, 0, 1));
+            host(c, Wp9cCases.SIGNAL_TRIMMER, tp, mods.eln.misc.Direction.YN);
+            var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(tp, c.level()));
+            int yn = mods.eln.misc.Direction.YN.getInt();
+            int[] fp = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).footprint();
+            floor = "footprint " + fp[0] + "," + fp[1] + "; on the model " + v.elementAt(0.6, 0.08, 0.6, 0) + ", beside it " + v.elementAt(0.8, 0.08, 0.5, 0)
+                + ", above it " + v.elementAt(0.5, 0.3, 0.5, 0);
+            floorOk = fp[0] == 3 && fp[1] >= 2 && fp[1] <= 3 && v.elementAt(0.6, 0.08, 0.6, 0) == yn && v.elementAt(0.8, 0.08, 0.5, 0) < 0
+                && v.elementAt(0.5, 0.3, 0.5, 0) < 0;
+            if (c.level().getBlockEntity(tp) instanceof mods.eln.node.voxel.VoxelNodeEntity e) {
+                var b = e.shapes().outline().bounds();
+                outline = String.format("%.3f..%.3f, %.3f..%.3f, %.3f..%.3f", b.minX, b.maxX, b.minY, b.maxY, b.minZ, b.maxZ);
+                outlineOk = Math.abs(b.minX - 5 / 16.0) < 1e-6 && Math.abs(b.maxX - 11 / 16.0) < 1e-6 && b.minY == 0 && b.maxY <= 3 / 16.0 + 1e-6
+                    && Math.abs(b.minZ - 5 / 16.0) < 1e-6 && Math.abs(b.maxZ - 11 / 16.0) < 1e-6;
+            }
+            // on the wall to its west
+            var wp = c.at(3, 1, 1);
+            c.floor(c.at(2, 1, 1));
+            host(c, Wp9cCases.SIGNAL_TRIMMER, wp, mods.eln.misc.Direction.XN);
+            var w = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(wp, c.level()));
+            int xn = mods.eln.misc.Direction.XN.getInt();
+            wall = "on the model " + w.elementAt(0.08, 0.6, 0.4, 0) + ", beside it " + w.elementAt(0.08, 0.5, 0.8, 0) + " / " + w.elementAt(0.08, 0.2, 0.5, 0);
+            wallOk = w.elementAt(0.08, 0.6, 0.4, 0) == xn && w.elementAt(0.08, 0.5, 0.8, 0) < 0 && w.elementAt(0.08, 0.2, 0.5, 0) < 0;
+            StringBuilder all = new StringBuilder("footprints (half width, height; voxels):");
+            for (var d : new java.util.TreeMap<>(mods.eln.Eln.sixNodeItem.all()).values()) {
+                int[] f = d.footprint();
+                all.append(' ').append(d.name).append('=').append(f[0]).append(',').append(f[1]).append(';');
+            }
+            c.line(all.toString());
+        }
+
+        public void measure(TestContext c) {
+            c.check("footprint: a floor trimmer is clicked on its 6 x 6 model only", floorOk, floor);
+            c.check("footprint: its outline is the model's box", outlineOk, outline);
+            c.check("footprint: a wall trimmer likewise", wallOk, wall);
+        }
     }
 
     /**

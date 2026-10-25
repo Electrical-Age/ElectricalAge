@@ -187,30 +187,7 @@ public final class CablePlacer {
             // (its port)
             int el = v.elementAt(hx, hy, hz, 0);
             if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
-            if (el >= 0) {
-                var side = mods.eln.misc.Direction.fromInt(el);
-                int f = side.toEnumFacing().get3DDataValue();
-                int fa = CableRouter.axis(f);
-                double[] h = {hx, hy, hz};
-                int edge = -1;
-                double bd = Double.MAX_VALUE;
-                for (int g = 0; g < 6; g++) {
-                    if (CableRouter.axis(g) == fa) continue;
-                    var out = mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g));
-                    if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
-                    double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
-                    if (d < bd) {
-                        bd = d;
-                        edge = g;
-                    }
-                }
-                if (edge < 0) return null;   // (no connector at all, as a wireless button)
-                long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
-                long[] p = {base[0] + 8, base[1] + 8, base[2] + 8};
-                p[fa] = base[fa] + CablePart.plane(f);
-                p[CableRouter.axis(edge)] = base[CableRouter.axis(edge)] + (edge % 2 == 0 ? 0 : 16);
-                return new CableRouter.End(p[0], p[1], p[2], f, start ? edge : CableRouter.reverse(edge));
-            }
+            if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start);
             int idx = v.partAt(hx, hy, hz);
             if (idx >= 0 && v.parts.get(idx) instanceof CablePart c && !c.isKnuckle()) {
                 long[] best = null;
@@ -272,6 +249,32 @@ public final class CablePlacer {
         return surface(pos, face, hx, hy, hz);
     }
 
+    /** The end at the hosted device on face el (EA Direction int) of v: the edge of its face nearest the block-local
+     *  point h that has a connector; null if it has none. */
+    static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start) {
+        var side = mods.eln.misc.Direction.fromInt(el);
+        int f = side.toEnumFacing().get3DDataValue();
+        int fa = CableRouter.axis(f);
+        int edge = -1;
+        double bd = Double.MAX_VALUE;
+        for (int g = 0; g < 6; g++) {
+            if (CableRouter.axis(g) == fa) continue;
+            var out = mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g));
+            if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
+            double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
+            if (d < bd) {
+                bd = d;
+                edge = g;
+            }
+        }
+        if (edge < 0) return null;   // (no connector at all, as a wireless button)
+        long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
+        long[] p = {base[0] + 8, base[1] + 8, base[2] + 8};
+        p[fa] = base[fa] + CablePart.plane(f);
+        p[CableRouter.axis(edge)] = base[CableRouter.axis(edge)] + (edge % 2 == 0 ? 0 : 16);
+        return new CableRouter.End(p[0], p[1], p[2], f, start ? edge : CableRouter.reverse(edge));
+    }
+
     /**
      * A click on the surface within three quarters of a block of a machine beside it (so anywhere from the middle of the
      * next cell on), where the machine has a connector on that edge: the end goes to its port, as if the machine had
@@ -301,7 +304,7 @@ public final class CablePlacer {
                 if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
                 Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.47, -d.getStepY() * 0.47, -d.getStepZ() * 0.47)
                     .add(-face.getStepX() * 0.47, -face.getStepY() * 0.47, -face.getStepZ() * 0.47);
-                e = endAt(level, nb, d.getOpposite(), hit, start, new long[1][]);
+                e = deviceEnd(v, nb, side.getInt(), new double[]{hit.x - nb.getX(), hit.y - nb.getY(), hit.z - nb.getZ()}, start);
                 if (e == null || e.dir() < 0) continue;
             } else {
                 // the machine's face toward the cable, low on the edge the cable lies along

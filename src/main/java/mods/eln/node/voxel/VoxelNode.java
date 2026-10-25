@@ -115,6 +115,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return b;
     }
 
+    /** The voxels the model of the element on face f (EA Direction int) takes: where it is clicked and outlined. Its
+     *  room (what else may go in the block) is still its plate. */
+    public int[] elementBox(int f) {
+        var e = sideElementList[f];
+        return e == null || e.sixNodeElementDescriptor == null ? plate(f) : e.sixNodeElementDescriptor.footprintBox(f);
+    }
+
     /** Elements changed (placed, broken): the plates in the grid. */
     public void elementsChanged() {
         markUsed();
@@ -420,11 +427,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return pi >= 0 && meterUse(player, side);
     }
 
-    /** The element (EA Direction int) whose plate, grown by grow voxels, holds the block-local point (0..1); -1. */
+    /** The element (EA Direction int) whose model box, grown by grow voxels, holds the block-local point (0..1); -1. */
     public int elementAt(double x, double y, double z, int grow) {
         for (int f = 0; f < 6; f++) {
             if (sideElementList[f] == null) continue;
-            int[] b = plate(f);
+            int[] b = elementBox(f);
             int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
             if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
         }
