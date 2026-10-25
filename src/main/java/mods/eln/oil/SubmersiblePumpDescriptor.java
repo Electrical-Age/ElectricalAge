@@ -25,8 +25,11 @@ import static mods.eln.i18n.I18N.tr;
 public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
     /** Nominal flow, in turbines' worth of feedwater (a turbine of the same voltage at full power). */
     public static final double NOMINAL_TURBINES = 3.5;
-    /** Pressure against which the flow falls to nothing (Pa, absolute): under an iron pipe's working pressure. */
-    public static final double SHUTOFF_PA = 9e5;
+    /**
+     * Pressure against which the flow falls to nothing (Pa, absolute): a small submersible pump's ~20 m of head
+     * (Baughn: 9 bar was a pressure washer's). A running boiler sits near 1.3 bar, so it still feeds one well.
+     */
+    public static final double SHUTOFF_PA = 3e5;
 
     final double nominalU, nominalP, resistorR;
     /** Nominal flow (mB of water a second). */
