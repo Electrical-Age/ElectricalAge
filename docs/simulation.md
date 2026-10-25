@@ -119,6 +119,13 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
 - Fluids: `src/main/java/mods/eln/sim/fluid/` (`FluidNetwork` implicit pressure solve, `Flash`, `Water`, `EaUnits`),
   stepped by `src/main/java/mods/eln/fluid/FluidWorld.java` as a slow process; devices join with their node's
   connectJob. Tests: `FluidCoreTest`, `FluidPropertyTest`. See content.md for pipes/oil.
+  Per step (20 Hz): heat in; one compressibility per phase per node (the stiffer of a small and a 2% flash step); an
+  implicit pressure solve, repeated if a check valve runs backwards or a flow runs against the side its packet was
+  taken from; limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at
+  most half of each phase it holds, net of inflow, and the rest of its outflow is its inflow passed through, with the
+  mix and enthalpy from an implicit upwind solve (so pipe volume doesn't limit throughput or stability); then the
+  transfer and a flash per node. Pumps are one-way edges from a sump with a head (`FluidEdge.boost`). Iron pipe holds
+  0.03 L per block (tunable, not geometry); saves record the volume and older ones are rescaled on load.
 - `src/main/java/mods/eln/solver/Equation.java`: expression parser/evaluator for the math chip (`ElectricalMathElement`)
   and `AnalogChips.kt`; not part of the MNA.
 
