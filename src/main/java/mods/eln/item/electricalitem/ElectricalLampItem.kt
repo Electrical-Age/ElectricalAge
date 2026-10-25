@@ -73,6 +73,12 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         if (!w.isClientSide()) {
             var lightState = getLightState(s) + 1
             if (lightState > 2) lightState = 0
+            // an empty flashlight doesn't switch on (it did, and said ON; AGE 378dfa5e)
+            if (lightState != 0 && getEnergy(s) <= 0) {
+                Utils.sendMessage(p as ServerPlayer, "Flashlight is empty")
+                setLightState(s, 0)
+                return s
+            }
             //((Player) entity).sendMessage("Flashlight !!!");
             when (lightState) {
                 0 -> Utils.sendMessage(p as ServerPlayer, "Flashlight OFF")
@@ -142,7 +148,9 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
 
         if (energy > power)
             setEnergy(stack, energy - power)
-        else
+        else {
             setEnergy(stack, 0.0)
+            if (state != 0) setLightState(stack, 0)   // drained: it goes off (it stayed "on" at 0 J)
+        }
     }
 }
