@@ -136,6 +136,10 @@ public final class ItemCapabilityCases {
                 && insert(eggs, new ItemStack(Items.EGG, 2), true) == 2, "");
             ctx.check("egg incubator: eggs can't be pulled back out", eggs != null && extract(eggs, new ItemStack(Items.EGG)) == 0, "");
             // (Baughn 2026-10-25: all eggs, not only white hen eggs)
+            // the collision is the device's 1.7.10 box (Baughn: on a flat solar panel you stood on thin air)
+            var ip = incubator.node.coordonate.pos();
+            double incTop = ctx.level().getBlockState(ip).getCollisionShape(ctx.level(), ip).max(net.minecraft.core.Direction.Axis.Y);
+            ctx.check("egg incubator: half a block high to stand on", Math.abs(incTop - 0.5) < 1e-6, "" + incTop);
             // (the slot holds the white eggs now: the filter itself, which the slot and the capability both use)
             java.util.function.Predicate<ItemStack> takes = mods.eln.transparentnode.eggincubator.EggIncubatorElement::incubates;
             ctx.check("egg incubator: blue and brown eggs, turtle and sniffer eggs too, not sticks", takes.test(new ItemStack(Items.BLUE_EGG))
