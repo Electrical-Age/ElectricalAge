@@ -248,8 +248,14 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         }
     }
 
+    /**
+     * Lost its support (or a ghost of its group): broken like a block, with the break effects, and dropped with its
+     * contents by the block entity's removal (onBreakElement). Baughn: devices vanished instead of dropping, because
+     * physicalSelfDestruction (the failure path) drops nothing.
+     */
     public void selfDestroy() {
-        node.physicalSelfDestruction(0f);
+        if (node.isDestructing()) return;
+        node.coordonate.world().destroyBlock(node.coordonate.pos(), false);
     }
     /*
 	public static boolean canBePlacedOnSide(Direction side,int type)

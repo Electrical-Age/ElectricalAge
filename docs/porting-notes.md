@@ -93,6 +93,8 @@ In the port:
 - `while(true)` hang traps in `SixNode` connection/disconnection and the thermal cable check now log and continue;
   disconnecting a node outside the simulation still drops its links.
 - Six-node breaking takes one element and drops it (`SixNodeBreakCases`).
+- A transparent device that loses its floor, ceiling or wall is broken like a block and drops with its contents; it
+  used to vanish through the failure path (`TransparentSupportCases`).
 - MNA: a cable Line ending at ground crashed the step; a removed Monopole left its pin.
 - Turret shots asked for light 25 and crashed the light block (now clamped; `TurretCases`).
 - Item capabilities (hoppers, pipes) never worked in any EA version; now they do.
