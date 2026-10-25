@@ -841,7 +841,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (Direction dir : Direction.values()) {
             mods.eln.node.NodeBase other = getNeighbor(dir);
             if (other == null || !other.isAdded()) continue;
-            if (other instanceof VoxelNode v) connectVoxel(dir, v);
+            if (other instanceof VoxelNode v) {
+                connectVoxel(dir, v);
+                connectPinsAcross(dir, v);
+            }
             else for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
         }
         // only blocks with pipes in the fluid world (it steps every device every tick)
@@ -977,6 +980,70 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
             }
         }
+    }
+
+    /** A box moved by one block toward dir (block voxels: into the neighbour's coordinates, seen from there, it's -16). */
+    static int[] shifted(int[] b, Direction dir, int sign) {
+        int f = dir.toEnumFacing().get3DDataValue(), a = CablePart.normalAxis(f), d = (f % 2 == 1 ? -16 : 16) * sign;
+        int[] r = b.clone();
+        if (r.length == 6) {
+            r[a] += d;
+            r[a + 3] += d;
+        } else r[a] += d;
+        return r;
+    }
+
+    /**
+     * Pins on the face toward a neighbouring voxel block (a device off centre at the block's edge): a pin touching a
+     * cable there (its contact voxel in that block), or meeting a device's pin there tip to tip, either way round.
+     */
+    private void connectPinsAcross(Direction dir, VoxelNode v) {
+        List<Pin> mine = new ArrayList<>(), theirs = new ArrayList<>();
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) mine.addAll(pins(sideElementList[i]));
+        for (int i = 6; i < SLOTS; i++) if (v.sideElementList[i] != null) theirs.addAll(pins(v.sideElementList[i]));
+        if (mine.isEmpty() && theirs.isEmpty()) return;
+        // my pins against their cables, theirs against mine (contact boxes in the other block's coordinates)
+        for (Pin p : mine) pinToCables(dir, this, p, v, shifted(p.contact, dir, 1));
+        for (Pin q : theirs) pinToCables(dir.getInverse(), v, q, this, shifted(q.contact, dir, -1));
+        for (Pin p : mine) {
+            int[] tip = shifted(p.tip, dir, 1);
+            for (Pin q : theirs) {
+                if (!java.util.Arrays.equals(tip, q.tip) || q.out != (p.out ^ 1) || !compareConnectionMask(p.mask, q.mask)) continue;
+                sideElementList[p.slot].slotMask.set(p.lrdu, true);
+                v.sideElementList[q.slot].slotMask.set(q.lrdu, true);
+                across(dir, v, p.load, q.load, p.thermal, q.thermal);
+            }
+        }
+    }
+
+    private void pinToCables(Direction dir, VoxelNode a, Pin p, VoxelNode b, int[] contact) {
+        for (CableNet.Conductor k : b.cables.live()) {
+            if (!compareConnectionMask(p.mask, k.mask())) continue;
+            boolean touch = false;
+            for (CablePart c : k.parts) for (int[] bx : c.boxes()) touch |= overlaps(bx, contact);
+            if (!touch) continue;
+            a.sideElementList[p.slot].slotMask.set(p.lrdu, true);
+            if (a == this) across(dir, b, p.load, k.load, p.thermal, k.thermal);
+            else across(dir.getInverse(), a, k.load, p.load, k.thermal, p.thermal);
+        }
+    }
+
+    /** A link to the neighbour v toward dir, kept by both nodes (dropped when either disconnects). */
+    private void across(Direction dir, VoxelNode v, ElectricalLoad a, ElectricalLoad b, ThermalLoad ta, ThermalLoad tb) {
+        mods.eln.sim.ElectricalConnection e = null;
+        mods.eln.sim.ThermalConnection t = null;
+        if (a != null && b != null) {
+            e = new mods.eln.sim.ElectricalConnection(a, b);
+            Eln.simulator.addElectricalComponent(e);
+        }
+        if (ta != null && tb != null) {
+            t = new mods.eln.sim.ThermalConnection(ta, tb);
+            Eln.simulator.addThermalConnection(t);
+        }
+        var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
+        nodeConnectionList.add(c);
+        v.nodeConnectionList.add(c);
+        v.setNeedPublish(true);
     }
 
     /** Across a face to another voxel block: every end meeting one of its ends at the same point. */

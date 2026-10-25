@@ -66,8 +66,12 @@ transparent neighbour).
   `connectPins` links a pin to every cable conductor whose boxes take its contact box, and to another device's pin
   that meets it. These devices draw no cable stubs to the block's edges. The cable kit ends at the nearest pin; routes
   keep their usual clearance (`CableRouter.CLEARANCE`).
-- `CableConverter.revert` refuses a block holding such devices. Not yet: pins on the block's boundary don't link to
-  the next block, and a placement preview.
+- A pin at the block's edge reaches the next voxel block (`connectPinsAcross`): a cable there taking its contact voxel,
+  or a pin there tip to tip (a NodeConnection, dropped when either block disconnects).
+- Holding such a device shows it see-through where a click would put it (`DevicePreview`, client
+  `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A click on a device in a voxel block places on
+  that device's face (`placeFace`).
+- `CableConverter.revert` refuses a block holding such devices.
 
 ## Burn chain
 

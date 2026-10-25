@@ -46,6 +46,7 @@ public final class CableCases {
         cases.add(new SlotsCase());
         cases.add(new ChipsPackedCase());
         cases.add(new CableToChipCase());
+        cases.add(new PinsAcrossCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
@@ -978,6 +979,53 @@ public final class CableCases {
             c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);
             Wp9cCases.within(c, "chips: the second NOT, its input on the first's output pin [V]", Wp9cCases.out(b), 0, 0.5);
             Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from 50 V [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.5);
+        }
+    }
+
+    /**
+     * Pins at a block's edge reach the next voxel block: NOT chips at the east edge of one block and the west edge of the
+     * next, pin to pin across the boundary (the second low); and a NOT whose output pin at a block's edge touches a cable
+     * in the next block that runs to another NOT's input (low too).
+     */
+    static final class PinsAcrossCase implements TestCase {
+        mods.eln.node.six.SixNodeElement b, d;
+
+        public String name() {
+            return "chip pins across a block boundary";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var yn = mods.eln.misc.Direction.YN;
+            var xp = mods.eln.misc.Direction.XP;
+            var not = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT);
+            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            // pin to pin across
+            var v1 = ChipsPackedCase.block(c, c.at(1, 1, 1));
+            v1.createSubBlockAt(not.newItemStack(), 6, yn, 4, 0, 0, player);
+            Wp9aCases.orient(v1.getElement(6), l -> l, xp);
+            var v2 = ChipsPackedCase.block(c, c.at(2, 1, 1));
+            v2.createSubBlockAt(not.newItemStack(), 6, yn, -4, 0, 0, player);
+            b = v2.getElement(6);
+            Wp9aCases.orient(b, l -> l, xp);
+            // pin to a cable in the next block, the cable to a chip's input there
+            var v4 = ChipsPackedCase.block(c, c.at(4, 1, 1));
+            v4.createSubBlockAt(not.newItemStack(), 6, yn, 4, 0, 0, player);
+            Wp9aCases.orient(v4.getElement(6), l -> l, xp);
+            var v5 = ChipsPackedCase.block(c, c.at(5, 1, 1));
+            v5.createSubBlockAt(not.newItemStack(), 6, yn, 4, 0, 0, player);
+            d = v5.getElement(6);
+            Wp9aCases.orient(d, l -> l, xp);
+            voxel(c, c.at(5, 1, 1), List.of(new CablePart(0, DOWN, new int[]{0, 0, 8, 8, 0, 8})));
+        }
+
+        public void measure(TestContext c) {
+            Wp9cCases.within(c, "across: a NOT whose input pin meets the output pin of a NOT in the next block [V]", Wp9cCases.out(b), 0, 0.5);
+            Wp9cCases.within(c, "across: a NOT on a cable from the output pin of a NOT in the next block [V]", Wp9cCases.out(d), 0, 0.5);
         }
     }
 
