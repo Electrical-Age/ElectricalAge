@@ -47,6 +47,10 @@ public class Resistor extends Bipole {
     }
 
     public Resistor setR(double r) {
+        if (!Double.isFinite(r)) {   // (a NaN here made the whole subsystem NaN: an open circuit instead)
+            mods.eln.sim.NanGuard.report("Resistor.setR", r);
+            r = MnaConst.highImpedance;
+        }
         if (this.r != r) {
             this.r = r;
             this.rInv = 1 / r;

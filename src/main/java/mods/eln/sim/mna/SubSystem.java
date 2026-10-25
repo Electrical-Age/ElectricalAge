@@ -449,6 +449,11 @@ public class SubSystem {
             Uth = aU + Rth * aI;
         }
         voltageSource.setU(originalU);
+        if (!Double.isFinite(Uth) || Double.isNaN(Rth)) {   // (a singular system: as nothing connected)
+            mods.eln.sim.NanGuard.report("SubSystem.getTh", Double.isFinite(Uth) ? Rth : Uth);
+            Uth = originalU;
+            Rth = 10000000000000000000.0;
+        }
 
         th.R = Rth;
         th.U = Uth;

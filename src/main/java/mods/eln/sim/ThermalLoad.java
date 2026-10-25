@@ -115,6 +115,10 @@ public class ThermalLoad {
 
     /** Heat power (W) into this load for ITS current step; call once per step of this load (see EnergyTemp). */
     public void movePowerTo(double power) {
+        if (!Double.isFinite(power)) {
+            mods.eln.sim.NanGuard.report("ThermalLoad.movePowerTo", power);
+            return;
+        }
         double absI = Math.abs(power);
         PcTemp += power;
         PspTemp += absI;
@@ -122,6 +126,10 @@ public class ThermalLoad {
 
     /** Heat energy (J) into this load, from a process running at any rate (see EnergyTemp). */
     public void moveEnergyTo(double energy) {
+        if (!Double.isFinite(energy)) {
+            mods.eln.sim.NanGuard.report("ThermalLoad.moveEnergyTo", energy);
+            return;
+        }
         EnergyTemp += energy;
     }
 
