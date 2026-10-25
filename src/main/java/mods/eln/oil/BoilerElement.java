@@ -50,7 +50,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
      *  vessel through a check valve, so a stopped feed pump doesn't take boiling water back. */
     public FluidNode feed;
     private FluidDevice.Link feedCheck;
-    public static final double FEED_VOLUME = 0.0005, FEED_DRAW = 0.3;
+    public static final double FEED_VOLUME = 0.00002, FEED_DRAW = 0.3;
     private double[] loaded, loadedFeed;
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
@@ -281,6 +281,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             nbt.putDouble("feedW", feed.mWater);
             nbt.putDouble("feedA", feed.mAir);
             nbt.putDouble("feedU", feed.energy);
+            nbt.putDouble("feedV", FEED_VOLUME);
         }
     }
 
@@ -291,7 +292,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         liquidAtProbe = nbt.getBooleanOr("liquidAtProbe", false);
         if (nbt.contains("vesselW"))
             loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
-        if (nbt.contains("feedW"))
+        // (saved for a stub of another size, e.g. the first 0.5 L one: its contents would not fit; it starts empty)
+        if (nbt.contains("feedW") && nbt.getDoubleOr("feedV", 0) == FEED_VOLUME)
             loadedFeed = new double[]{nbt.getDoubleOr("feedW", 0), nbt.getDoubleOr("feedA", 0), nbt.getDoubleOr("feedU", 0)};
     }
 

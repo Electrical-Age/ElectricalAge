@@ -42,7 +42,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
     public final Resistor motor = new Resistor(load, null);
     final NbtElectricalGateInput control = new NbtElectricalGateInput("control");
     final VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
-    public static final double OUTLET_VOLUME = 0.0005, PORT_K = BoilerElement.PORT_K;
+    public static final double OUTLET_VOLUME = 0.00002, PORT_K = BoilerElement.PORT_K;
     public FluidNode outlet;
     private double[] loaded;
     private List<FluidPort> ports = List.of();
@@ -167,13 +167,15 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
             nbt.putDouble("outletW", outlet.mWater);
             nbt.putDouble("outletA", outlet.mAir);
             nbt.putDouble("outletU", outlet.energy);
+            nbt.putDouble("outletV", OUTLET_VOLUME);
         }
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        if (nbt.contains("outletW"))
+        // (saved for an outlet of another size, e.g. the first 0.5 L one: its contents would not fit; it starts empty)
+        if (nbt.contains("outletW") && nbt.getDoubleOr("outletV", 0) == OUTLET_VOLUME)
             loaded = new double[]{nbt.getDoubleOr("outletW", 0), nbt.getDoubleOr("outletA", 0), nbt.getDoubleOr("outletU", 0)};
     }
 
