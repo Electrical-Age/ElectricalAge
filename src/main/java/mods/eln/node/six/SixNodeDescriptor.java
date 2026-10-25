@@ -130,6 +130,11 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return footprint()[0];
     }
 
+    /** Client: its model in the frame SixNodeRender sets up for an element (on its face, centred), turned to front; for
+     *  the placement preview of a device placed anywhere. */
+    public void drawPlaced(LRDU front) {
+    }
+
     /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
     public boolean placeAnywhere() {
         return false;

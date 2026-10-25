@@ -128,6 +128,8 @@ public class Eln {
     public static final byte packetKitPreview = 23;
     /** 26.x, client -> server: the held chisel's brush from the radial menu (size byte, shape byte; ChiselItem.applyBrush). */
     public static final byte packetChiselBrush = 24;
+    /** 26.x: where a held device that goes anywhere on a face would be placed (node.voxel.DevicePreview). */
+    public static final byte packetDevicePreview = 25;
 
     // Voltage / power levels, as in 1.12
     public static final double gateOutputCurrent = 0.100;
@@ -273,8 +275,12 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ChiselItem::onLeftClick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class, mods.eln.node.voxel.ChiselItem::forget);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post.class, mods.eln.node.voxel.KitPreview::tick);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post.class, mods.eln.node.voxel.DevicePreview::tick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
-            e -> mods.eln.node.voxel.KitPreview.forget(e.getEntity().getUUID()));
+            e -> {
+                mods.eln.node.voxel.KitPreview.forget(e.getEntity().getUUID());
+                mods.eln.node.voxel.DevicePreview.forget(e.getEntity().getUUID());
+            });
         // pipe routes being laid: forgotten on logout and death
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
             e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));

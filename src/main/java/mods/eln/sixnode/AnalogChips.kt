@@ -52,6 +52,11 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     /** Placed anywhere on a face of a voxel block, several to a face (Baughn: pack chips). */
     override fun placeAnywhere() = true
 
+    override fun drawPlaced(front: LRDU) {
+        front.glRotateOnX()
+        draw()
+    }
+
     /** The case, without its pins (3 voxels at CHIP_SCALE). */
     override fun bodyHalf(): Int {
         val b = case?.boundingBox() ?: return super.bodyHalf()

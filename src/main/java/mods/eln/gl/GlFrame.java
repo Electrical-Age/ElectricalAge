@@ -64,6 +64,8 @@ public final class GlFrame {
 
     /** Burnt overlay (1.12 BurntRender): everything drawn while set is multiplied into the frame in a soot colour. */
     public boolean soot;
+    /** Placement preview: everything drawn while set (0 = off) is see-through in this ARGB (alpha and tint). */
+    public int ghost;
     static final float SOOT = Float.intBitsToFloat(0xFF4D4238); // 0.30, 0.26, 0.22
 
     public List<Extra> extras() {
@@ -175,6 +177,7 @@ public final class GlFrame {
         batches.clear();
         extras.clear();
         soot = false;
+        ghost = 0;
         droppedVertices = 0;
         rec = null;
         mode = -1;
@@ -405,7 +408,7 @@ public final class GlFrame {
     /** The batch for the current state (cached while the state doesn't change). */
     private Batch batch() {
         Identifier t = texture2d ? texture : null;
-        Blend bl = soot ? Blend.MULTIPLY : blend ? blendMode : Blend.NONE;
+        Blend bl = soot ? Blend.MULTIPLY : ghost != 0 ? Blend.ALPHA : blend ? blendMode : Blend.NONE;
         Key k = lastKey;
         if (k == null || k.texture != t || k.blend != bl || k.cull != cull || k.fullBright != fullBright || k.lit != lighting) {
             k = new Key(t, bl, cull, fullBright, lighting);
@@ -542,7 +545,7 @@ public final class GlFrame {
 
     /** Lines: transformed pairs into the line batch; u = width, normal = direction. */
     private void emitLines(float[] q, int floats, boolean colored) {
-        if (soot) return;
+        if (soot || ghost != 0) return;
         Key k = new Key(null, Blend.LINES, false, fullBright, false);
         Batch out = batches.get(k);
         if (out == null) {
@@ -593,6 +596,7 @@ public final class GlFrame {
         // soot over glow (additive halos, faint alpha light planes) would darken empty space: 1.12's overlay kept their
         // blending, where a soot colour adds next to nothing or is nearly transparent
         if (soot && blend && (blendMode == Blend.ADDITIVE || a < 0.5f)) return;
+        if (ghost != 0 && blend && blendMode == Blend.ADDITIVE) return;   // (no glow on a preview)
         Batch out = batch();
         out.ensure(floats);
         float[] d = out.data;
@@ -616,6 +620,11 @@ public final class GlFrame {
             n11 = normalMatrix.m11, n12 = normalMatrix.m12, n20 = normalMatrix.m20, n21 = normalMatrix.m21, n22 = normalMatrix.m22;
         float col = soot ? SOOT : Float.intBitsToFloat(argb(r, g, b, a));
         if (soot) colored = false;
+        if (ghost != 0) {
+            col = Float.intBitsToFloat(argb(r * ((ghost >> 16) & 255) / 255f, g * ((ghost >> 8) & 255) / 255f, b * (ghost & 255) / 255f,
+                ((ghost >>> 24) & 255) / 255f));
+            colored = false;
+        }
         for (int i = 0; i < floats; i += STRIDE) {
             float x = q[i], y = q[i + 1], z = q[i + 2];
             d[o] = m00 * x + m10 * y + m20 * z + m30;
