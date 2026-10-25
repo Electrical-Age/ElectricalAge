@@ -22,6 +22,7 @@ public final class SixNodeBreakCases {
         cases.add(new BreakOneFace());
         cases.add(new BreakKeptOnlyVoxel());
         cases.add(new OrphanBlock());
+        cases.add(new LostSupport());
     }
 
     static final class BreakOneFace implements TestCase {
@@ -62,6 +63,51 @@ public final class SixNodeBreakCases {
             ctx.check("breaking takes one face; the block stays for the other", stayed, "stayed " + stayed);
             ctx.check("that face drops its item", afterPick == 1, afterPick + " items");
             ctx.check("the rest drops when the block goes another way", afterRemove == 2, afterRemove + " items");
+        }
+    }
+
+    /**
+     * A device whose wall goes drops (Baughn: six nodes need support, as transparent devices do); the block stays for
+     * a device that still has its wall, and goes with the last one.
+     */
+    static final class LostSupport implements TestCase {
+        BlockPos p;
+        int afterWall, afterFloor;
+        boolean stayedAfterWall, goneAfterFloor;
+
+        public String name() {
+            return "six node device drops when its wall goes";
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            p = ctx.at(1, 2, 1);
+            BlockPos floor = p.below(), wall = p.west();
+            level.setBlockAndUpdate(floor, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            level.setBlockAndUpdate(wall, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            int cable = Ids.six("Low Voltage Cable");
+            ctx.placeSix(cable, p, Direction.YN);
+            ctx.placeSix(cable, p, Direction.XN);
+            level.setBlockAndUpdate(wall, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            afterWall = drops(ctx);
+            stayedAfterWall = level.getBlockState(p).is(mods.eln.node.six.SixNodeBlock.get());
+            level.setBlockAndUpdate(floor, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            afterFloor = drops(ctx);
+            goneAfterFloor = level.getBlockState(p).isAir()
+                && mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) == null;
+        }
+
+        int drops(TestContext ctx) {
+            return ctx.level().getEntitiesOfClass(ItemEntity.class, new AABB(p).inflate(2)).stream().mapToInt(e -> e.getItem().getCount()).sum();
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("wall gone: its cable drops, the floor one stays", afterWall == 1 && stayedAfterWall, afterWall + " items, block stayed " + stayedAfterWall);
+            ctx.check("floor gone too: that cable drops and the block goes", afterFloor == 2 && goneAfterFloor, afterFloor + " items, gone " + goneAfterFloor);
         }
     }
 

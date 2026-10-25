@@ -110,6 +110,9 @@ In the port:
 - Six-node breaking takes one element and drops it (`SixNodeBreakCases`).
 - A transparent device that loses its floor, ceiling or wall is broken like a block and drops with its contents; it
   used to vanish through the failure path (`TransparentSupportCases`).
+- Six-node devices (also those hosted in voxel blocks) need their wall too (Baughn): when the face they sit on stops
+  being full, they drop with their contents; a six-node block with nothing left goes (`SixNodeBreakCases.LostSupport`).
+  1.12 never checked: they floated.
 - MNA: a cable Line ending at ground crashed the step; a removed Monopole left its pin.
 - Turret shots asked for light 25 and crashed the light block (now clamped; `TurretCases`).
 - Item capabilities (hoppers, pipes) never worked in any EA version; now they do.

@@ -198,6 +198,33 @@ public class SixNode extends Node {
         super.onBreakBlock();
     }
 
+    @Override
+    public void onNeighborBlockChange() {
+        super.onNeighborBlockChange();
+        dropUnsupported();
+    }
+
+    /**
+     * A device whose wall went (its face toward this block isn't full any more: SixNodeBlock.getIfOtherBlockIsSolid,
+     * the placement rule) drops with its contents (Baughn: six nodes need support too). A plain six-node block with
+     * nothing left goes; a voxel block decides for itself (afterSubBlockDeleted).
+     */
+    protected void dropUnsupported() {
+        var w = coordonate.world();
+        if (w == null || isDestructing()) return;
+        var pos = coordonate.pos();
+        boolean dropped = false;
+        for (int i = 0; i < 6; i++) {
+            Direction side = Direction.fromInt(i);
+            if (sideElementList[i] != null && !SixNodeBlock.get().getIfOtherBlockIsSolid(w, pos, side)) {
+                deleteSubBlock(null, side);
+                dropped = true;
+            }
+        }
+        if (dropped && !(this instanceof mods.eln.node.voxel.VoxelNode) && !getIfSideRemain() && !isDestructing())
+            w.destroyBlock(pos, false);
+    }
+
     public boolean deleteSubBlock(ServerPlayer entityPlayer, Direction direction) {
 
         if (sideElementList[direction.getInt()] == null)
