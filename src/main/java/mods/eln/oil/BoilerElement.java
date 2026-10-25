@@ -308,7 +308,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
         info.put(I18N.tr("Steam"), tanks.steam() + " / " + BoilerTanks.STEAM_MB + " mB");
         info.put(I18N.tr("Steam made"), String.format("%.0f mB/s", steamRate));
-        info.put(I18N.tr("At half height"), liquidAtProbe ? I18N.tr("liquid") : I18N.tr("gas"));
+        // (Baughn: "At half height: liquid" didn't say what it meant)
+        info.put(I18N.tr("Front signal"), liquidAtProbe ? I18N.tr("high: water above half") : I18N.tr("low: water below half"));
         return info;
     }
 }
