@@ -37,6 +37,17 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         return false;
     }
 
+    /**
+     * A device whose model reaches out of its block (a street light, a long suspended lamp) widens the box, or it
+     * vanished whenever its own block was off screen (AGE 6a84416c). Plain blocks keep the block's box.
+     */
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox(E be) {
+        int reach = 0;
+        for (SixNodeElementRender r : be.elementRenderList) if (r != null) reach = Math.max(reach, r.renderReach());
+        return new net.minecraft.world.phys.AABB(be.getBlockPos()).inflate(reach);
+    }
+
     @Override
     public void extractRenderState(E be, State state, float partialTicks, Vec3 cameraPosition,
                                    ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {

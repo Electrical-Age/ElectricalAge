@@ -6,4 +6,10 @@ public interface LampSocketObjRender {
 
     /** The item in hand or on the ground (1.12 draw(descriptor, type, distance) without the GUI branch). */
     void drawItem(LampSocketDescriptor descriptor);
+
+    /** How far (blocks) the model reaches out of its block, for the render bounding box: a tall or hanging lamp is
+     *  drawn while only its far end is in view. */
+    default int reach() {
+        return 0;
+    }
 }

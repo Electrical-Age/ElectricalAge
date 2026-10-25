@@ -17,6 +17,11 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
     private int length;
     float baseLength, chainLength, chainFactor;
 
+    @Override
+    public int reach() {
+        return length + 1;
+    }
+
     public LampSocketSuspendedObjRender(Obj3D obj, boolean onOffModel, int length) {
         this.obj = obj;
         this.length = length;

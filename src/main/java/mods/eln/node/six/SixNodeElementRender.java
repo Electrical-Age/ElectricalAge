@@ -388,4 +388,9 @@ public abstract class SixNodeElementRender {
 
     public void refresh(float deltaT) {
     }
+
+    /** Blocks this device's model reaches out of its block (0: it stays inside), for SixNodeRender's bounding box. */
+    public int renderReach() {
+        return 0;
+    }
 }

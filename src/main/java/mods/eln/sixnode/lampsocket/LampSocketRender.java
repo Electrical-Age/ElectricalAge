@@ -52,6 +52,13 @@ public class LampSocketRender extends SixNodeElementRender {
     public boolean isConnectedToLampSupply;
 
 
+    /** Blocks the lamp's model reaches out of its block (SixNodeRender's bounding box). */
+    @Override
+    public int renderReach() {
+        // (a street light stands on ghost blocks above its own)
+        return Math.max(descriptor.render.reach(), descriptor.hasGhostGroup() ? 3 : 0);
+    }
+
     public LampSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (LampSocketDescriptor) descriptor;
