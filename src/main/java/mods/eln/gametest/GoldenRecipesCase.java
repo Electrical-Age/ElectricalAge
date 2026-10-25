@@ -71,7 +71,8 @@ final class GoldenRecipesCase implements TestCase {
         "eln:50_v_turbine", "eln:200_v_turbine");
 
     /** Macerator inputs 26.x changes on purpose: vanilla ores give raw chunks (Baughn, 2026-10-10; golden/README.md). */
-    static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore", "Lead Ore", "Tungsten Ore");   // (lead, tungsten: Baughn 2026-10-19)
+    static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore", "Lead Ore", "Tungsten Ore",   // (lead, tungsten: Baughn 2026-10-19)
+        "Coal Ore");   // (every other ore block as a Fortune II pickaxe gets it: Baughn 2026-10-25)
 
     static final String[] COLORS = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
         "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"};

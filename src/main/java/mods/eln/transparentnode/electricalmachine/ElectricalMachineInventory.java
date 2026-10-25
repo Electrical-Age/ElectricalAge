@@ -48,7 +48,7 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
     /** A recipe takes this item (in any quantity: recipes needing several items still accept one at a time). */
     boolean hasRecipe(ItemStack stack) {
         ElectricalMachineDescriptor d = getDescriptor();
-        return d != null && !stack.isEmpty() && d.recipe.getRecipe(stack.copyWithCount(stack.getMaxStackSize())) != null;
+        return d != null && !stack.isEmpty() && d.recipe.accepts(stack.copyWithCount(stack.getMaxStackSize()));
     }
 
     @Override

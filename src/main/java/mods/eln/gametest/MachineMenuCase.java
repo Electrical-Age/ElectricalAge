@@ -78,6 +78,37 @@ final class MachineMenuCase implements TestCase {
             ctx.check("macerating " + raw + ": 1 dust, 2 dust 20% of the time", other == 0 && Math.abs(share - 0.2) < 0.012,
                 String.format("2 dust %.1f%%, other counts %d", 100 * share, other));
         }
+        // every other ore block as a Fortune II pickaxe gets it (Baughn): its loot table, rolled per operation
+        Object[][] fortune = {{Items.DIAMOND_ORE, Items.DIAMOND, 1, 3, 1.75}, {Items.DEEPSLATE_COAL_ORE, Items.COAL, 1, 3, 1.75},
+            {Items.REDSTONE_ORE, Items.REDSTONE, 4, 7, 5.5}, {Items.NETHER_QUARTZ_ORE, Items.QUARTZ, 1, 3, 1.75},
+            {Items.EMERALD_ORE, Items.EMERALD, 1, 3, 1.75}, {Items.LAPIS_ORE, Items.LAPIS_LAZULI, 4, 27, 11.375}};
+        for (Object[] f : fortune) {
+            var item = (net.minecraft.world.item.Item) f[0];
+            var r = mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(item));
+            if (r == null) {
+                ctx.check("macerator recipe for " + item + " (Fortune II loot)", false, "none");
+                continue;
+            }
+            int n = 2000, lo = Integer.MAX_VALUE, hi = 0;
+            double sum = 0;
+            boolean only = true;
+            for (int i = 0; i < n; i++) {
+                int c = 0;
+                for (ItemStack o : r.getOutputCopy(rnd)) {
+                    if (o.is((net.minecraft.world.item.Item) f[1])) c += o.getCount();
+                    else only = false;
+                }
+                lo = Math.min(lo, c);
+                hi = Math.max(hi, c);
+                sum += c;
+            }
+            double mean = sum / n, want = (double) f[4];
+            ctx.check("macerating " + item + " as a Fortune II pickaxe: " + f[2] + ".." + f[3] + " " + f[1] + ", mean about " + want,
+                only && lo >= (int) f[2] && hi <= (int) f[3] && Math.abs(mean - want) < 0.08 * want,
+                String.format("%d..%d, mean %.2f%s", lo, hi, mean, only ? "" : ", other items"));
+        }
+        ctx.check("macerator: no recipe for ancient debris (it drops itself)",
+            mods.eln.Eln.maceratorRecipes.getRecipe(new ItemStack(Items.ANCIENT_DEBRIS)) == null, "");
         ctx.check("macerator: iron ore still in the input after 5 ticks",
             node.element.getInventory().getItem(4).is(Items.IRON_ORE), "input holds " + node.element.getInventory().getItem(4));
     }

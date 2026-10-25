@@ -105,6 +105,10 @@ public final class ElnMachineRecipes {
         // 26.x (Baughn, 2026-10-10): vanilla ore blocks macerate to raw chunks about like Fortune II (1-3, mean 1.75;
         // copper 2-5 base), and a chunk to one dust with a 20% chance of two. 1.12 gave 2 dust per ore block. EA's own
         // copper ore is gone (vanilla has copper).
+        // Every other ore block (coal, redstone, lapis, diamond, emerald, quartz, nether gold, other mods' ores): what a
+        // Fortune II pickaxe gets from it (Baughn: the macerator acts as a Fortune II pick on all ore blocks)
+        maceratorRecipes.fallback = mods.eln.misc.OreLootRecipe::of;
+        maceratorRecipes.fallbackMaybe = mods.eln.misc.OreLootRecipe::maybe;
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.IRON_ORE), new ItemStack(Items.RAW_IRON), 1.5 * f).withExtra(2, 1, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Blocks.GOLD_ORE), new ItemStack(Items.RAW_GOLD), 3.0 * f).withExtra(2, 1, 1));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.COPPER_ORE), new ItemStack(Items.RAW_COPPER, 3), 1.0 * f)
@@ -112,8 +116,6 @@ public final class ElnMachineRecipes {
         add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_IRON), new ItemStack[]{findItemStack("Iron Dust", 1)}, 1.5 * f).withExtra(4, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_GOLD), new ItemStack[]{findItemStack("Gold Dust", 1)}, 3.0 * f).withExtra(4, 1));
         add(maceratorRecipes, new Recipe(new ItemStack(Items.RAW_COPPER), new ItemStack[]{findItemStack("Copper Dust", 1)}, 1.0 * f).withExtra(4, 1));
-        add(maceratorRecipes, new Recipe(new ItemStack(Blocks.COAL_ORE, 1),
-            new ItemStack(Items.COAL, 3), 1.0 * f));
         // (lead and tungsten as iron: ore to raw, raw to dust; Baughn 2026-10-19)
         add(maceratorRecipes, new Recipe(findItemStack("Lead Ore"), new ItemStack(ElnRegistry.RAW_LEAD.get()), 2.0 * f).withExtra(2, 1, 1));
         add(maceratorRecipes, new Recipe(findItemStack("Deepslate Lead Ore"), new ItemStack(ElnRegistry.RAW_LEAD.get()), 2.0 * f).withExtra(2, 1, 1));

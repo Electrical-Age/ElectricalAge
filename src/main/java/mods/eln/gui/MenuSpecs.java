@@ -152,7 +152,7 @@ public final class MenuSpecs {
             SlotSpec[] s = new SlotSpec[2 + d.outStackCount];
             for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = SlotSpec.output(idx, 130 - 32 + idx * 18, 12, MEDIUM);
             // the input: only what this machine has a recipe for (Baughn: shift-click ignored which slot made sense)
-            s[d.outStackCount] = filter(d.outStackCount, 8 + 36, 12, 64, st -> d.recipe.getRecipe(st.copyWithCount(st.getMaxStackSize())) != null, MEDIUM, tr("Input"));
+            s[d.outStackCount] = filter(d.outStackCount, 8 + 36, 12, 64, st -> d.recipe.accepts(st.copyWithCount(st.getMaxStackSize())), MEDIUM, tr("Input"));
             s[d.outStackCount + 1] = descriptor(d.outStackCount + 1, 8, 12, 5, MachineBoosterDescriptor.class, MEDIUM, tr("Booster slot"));
             return MenuSpec.of(s).publishing(1).panel(204, 122, 8, 40);
         });
