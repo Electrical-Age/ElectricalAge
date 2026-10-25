@@ -19,7 +19,7 @@ Usage: boiler.py RESOURCES_DIR  -> assets/eln/model/boiler/
 import math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcmodel import Model, box, prism
-from oilkit import atlas, write_parts, out_dir, turned, heat_pad, terminal_plate, dial, handwheel, bolt_ring, obox, PAINT
+from oilkit import atlas, write_parts, out_dir, turned, heat_pad, signal_plate, dial, handwheel, bolt_ring, obox, PAINT
 
 CY, CZ, R = 9.25, 8.0, 5.25        # drum axis height, z, radius
 DX = (2.25, 13.75)                 # cylindrical shell x span; heads beyond it
@@ -31,7 +31,7 @@ def boiler():
     m.add(box(1.5, 3.25, 1.5, 14.5, 3.6, 14.5, "darksteel", faces="nsewu"))
     for k in (1, 2, 3):                                     # (the front, k = 0, is the phase signal's terminal)
         m.add(*turned(heat_pad(depth=1.0, top=4.0), k))
-    m.add(*turned(terminal_plate(), 0))
+    m.add(*turned(signal_plate(), 0))
     for k in range(4):                                       # corner ribs
         m.add(*turned([box(1.0, 0, 1.0, 2.0, 3.0, 2.0, "darksteel", faces="nsewu")], k))
     # saddles (cradle the drum)
