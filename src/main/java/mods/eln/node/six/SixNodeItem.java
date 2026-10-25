@@ -49,9 +49,12 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Direction direction = Direction.fromIntMinecraftSide(ctx.getClickedFace().get3DDataValue()).getInverse();
         // clicking a voxel block (its cables or pipes): the device goes into that block, on the face behind the click
-        if (world.getBlockState(ctx.getClickedPos()).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock)
-            pos = ctx.getClickedPos();
         net.minecraft.world.phys.Vec3 h = ctx.getClickLocation();
+        if (world.getBlockState(ctx.getClickedPos()).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock) {
+            pos = ctx.getClickedPos();
+            if (world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve && ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v)
+                direction = v.placeFace(ctx.getClickedFace(), h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
+        }
         boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction,
             new double[]{h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ()});
         if (ok && ctx.getPlayer() != null && !ctx.getPlayer().isCreative()) ctx.getItemInHand().shrink(1);

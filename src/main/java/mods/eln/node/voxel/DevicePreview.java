@@ -37,9 +37,13 @@ public final class DevicePreview {
             && p.pick(p.blockInteractionRange(), 1f, false) instanceof BlockHitResult bh && bh.getType() == HitResult.Type.BLOCK) {
             var face = bh.getDirection();
             BlockPos pos = bh.getBlockPos().relative(face);
-            if (level.getBlockState(bh.getBlockPos()).getBlock() instanceof VoxelNodeBlock) pos = bh.getBlockPos();
-            Direction side = Direction.fromIntMinecraftSide(face.get3DDataValue()).getInverse();
             var h = bh.getLocation();
+            Direction side = Direction.fromIntMinecraftSide(face.get3DDataValue()).getInverse();
+            if (level.getBlockState(bh.getBlockPos()).getBlock() instanceof VoxelNodeBlock) {
+                pos = bh.getBlockPos();
+                if (level.getBlockEntity(pos) instanceof VoxelNodeEntity ve && ve.getNode() instanceof VoxelNode v)
+                    side = v.placeFace(face, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
+            }
             int[] o = VoxelNode.snap(item.descriptor, side, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
             var front = item.descriptor.getFrontFromPlace(side, p);
             var st = level.getBlockState(pos);

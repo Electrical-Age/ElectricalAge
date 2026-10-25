@@ -629,6 +629,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return createSubBlockAt(stack, slot, face, o[0], o[1], o[2], player) ? null : "Can't place that";
     }
 
+    /**
+     * The face a device placed by a click into this block goes on: the face behind the clicked face, or, if the click is
+     * on a device here, that device's face (AdventurAgent: clicking a chip's side aimed at the wall beside it).
+     */
+    public Direction placeFace(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
+        int el = elementAt(hx, hy, hz, 0);
+        if (el >= 0) return sideElementList[el].side;
+        return Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
+    }
+
     /** Where a device placed anywhere goes for a click at the block-local point: its centre's offset (world voxels), snapped
      *  to voxels and kept with its body and pins on the face. */
     public static int[] snap(mods.eln.node.six.SixNodeDescriptor d, Direction face, double hx, double hy, double hz) {
