@@ -134,7 +134,7 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         if (d == null || er == null) return List.of();
         List<int[]> out = new ArrayList<>();
         out.add(VoxelNode.bodyBox(d, er.side.getInt(), er.ox, er.oy, er.oz));
-        out.addAll(VoxelNode.pinBoxes(d, er.side, er.ox, er.oy, er.oz, l -> er.getCableRender(l) != null));
+        out.addAll(VoxelNode.pinBoxes(d, er.side, er.ox, er.oy, er.oz, l -> (er.pinMask & (1 << l.toInt())) != 0));
         return out;
     }
 

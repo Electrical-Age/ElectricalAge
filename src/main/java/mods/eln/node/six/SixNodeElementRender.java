@@ -34,6 +34,8 @@ public abstract class SixNodeElementRender {
      *  voxels); set by SixNodeEntity after construction. */
     public int slot;
     public int ox, oy, oz;
+    /** Past the faces: the edges it connects on (bit LRDU.toInt()), where its pins are. */
+    public int pinMask;
 
     public SixNodeElementRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         this.sixNodeDescriptor = descriptor;
@@ -120,7 +122,7 @@ public abstract class SixNodeElementRender {
 
         if (slot >= 6 && !sixNodeDescriptor.drawsOwnPins()) {   // (off centre: a pin past its body on every connecting edge)
             float from = sixNodeDescriptor.bodyHalf() / 16f;
-            for (LRDU l : LRDU.values()) if (getCableRender(l) != null) drawPinBox(l, from, from + 1 / 16f, 1.8f / 16, 1 / 16f);
+            for (LRDU l : LRDU.values()) if ((pinMask & (1 << l.toInt())) != 0) drawPinBox(l, from, from + 1 / 16f, 1.8f / 16, 1 / 16f);
         }
 
         GL11.glColor3f(1f, 1f, 1f);

@@ -126,7 +126,7 @@ public class SixNodeEntity extends NodeBlockEntity {
         for (int k = 0; k < n; k++) {
             int slot = stream.readUnsignedByte();
             Direction face = Direction.fromInt(stream.readByte());
-            int ox = stream.readByte(), oy = stream.readByte(), oz = stream.readByte();
+            int ox = stream.readByte(), oy = stream.readByte(), oz = stream.readByte(), pins = stream.readByte();
             short id = stream.readShort();
             byte[] payload = new byte[stream.readInt()];
             stream.readFully(payload);
@@ -147,6 +147,7 @@ public class SixNodeEntity extends NodeBlockEntity {
             r.ox = ox;
             r.oy = oy;
             r.oz = oz;
+            r.pinMask = pins;
             r.publishUnserialize(new DataInputStream(new java.io.ByteArrayInputStream(payload)));
         }
         for (int slot = 6; slot < SixNode.SLOTS; slot++) {

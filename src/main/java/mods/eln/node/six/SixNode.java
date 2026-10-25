@@ -439,6 +439,9 @@ public class SixNode extends Node {
                 stream.writeByte(e.ox);
                 stream.writeByte(e.oy);
                 stream.writeByte(e.oz);
+                int pins = 0;   // (the edges it connects on: its pins)
+                for (LRDU l : LRDU.values()) if (e.getConnectionMask(l) != 0) pins |= 1 << l.toInt();
+                stream.writeByte(pins);
                 stream.writeShort((short) sideElementIdList[idx]);
                 java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
                 e.networkSerialize(new DataOutputStream(bos));

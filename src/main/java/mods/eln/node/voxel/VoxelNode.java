@@ -156,7 +156,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return r;
     }
 
-    /** The pin boxes a device off centre would have on face f: one per edge whose render draws a cable (client). */
+    /** The pin boxes of a device off centre on face f: one per edge `has` (client: the published pin mask). */
     public static List<int[]> pinBoxes(mods.eln.node.six.SixNodeDescriptor d, Direction side, int ox, int oy, int oz, java.util.function.Predicate<LRDU> has) {
         List<int[]> out = new ArrayList<>();
         for (LRDU l : LRDU.values()) if (has.test(l)) out.add(pinGeometry(d, side, ox, oy, oz, l)[1]);
