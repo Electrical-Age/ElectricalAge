@@ -19,6 +19,8 @@ public final class PipePart extends VoxelPart {
     /** Per tier: bore (voxels), volume per block of length (m^3), conductance per block (m^3). Tunables (6a, 6b). */
     public static final int[] BORE = {4, 6};
     public static final double[] VOLUME_PER_BLOCK = {0.00003, 0.00003 * 2.25};
+    /** What saves before 2026-10-25 had (no "v" key): read scales their contents to the new volume. */
+    static final double[] OLD_VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25};
     public static final double[] K_PER_BLOCK = {3e-11, 3e-11 * 2.25};
     public static final String[] TIER_NAME = {"iron", "alloy"};
     /**
@@ -174,6 +176,7 @@ public final class PipePart extends VoxelPart {
             t.putDouble("w", fluid.mWater);
             t.putDouble("a", fluid.mAir);
             t.putDouble("u", fluid.energy);
+            t.putDouble("v", fluid.volume);
         }
     }
 
@@ -183,6 +186,18 @@ public final class PipePart extends VoxelPart {
         p.burstDir = t.getIntOr("burstDir", -1);
         double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
         p.makeNode(blockY, saved);
+        // contents saved for another volume (before 2026-10-25 iron pipe held 0.15 L per block, now 0.03): kept at the
+        // same state (pressure, temperature, mix), scaled to the new volume, or they'd load at 5x the pressure
+        if (saved != null) {
+            double v0 = t.getDoubleOr("v", Math.max(1e-7, p.length() / 16.0 * OLD_VOLUME_PER_BLOCK[p.tier]));
+            if (v0 > 0 && Math.abs(v0 - p.fluid.volume) > 1e-12) {
+                double f = p.fluid.volume / v0;
+                p.fluid.mWater *= f;
+                p.fluid.mAir *= f;
+                p.fluid.energy *= f;
+                p.fluid.update();
+            }
+        }
         return p;
     }
 
