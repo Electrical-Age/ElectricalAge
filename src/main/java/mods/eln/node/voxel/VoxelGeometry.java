@@ -53,9 +53,24 @@ public final class VoxelGeometry {
                 int stem = v.axis == 1 ? 0 : 1;   // (the stem's axis: up, or along x for a vertical pipe)
                 int[] so = others(stem);
                 b.tube(stem, c[so[0]], c[so[1]], 0.75, c[stem] + h - 0.5, c[stem] + s);
-                if (v.open) b.color(0.3f, 0.75f, 0.3f);
-                else b.color(0.8f, 0.2f, 0.15f);
+                // (the control and throttle valves: red shut, through yellow, to green open)
+                float op = (float) (v.mode == ValvePart.ON_OFF ? (v.open ? 1 : 0) : v.opening());
+                b.color(0.8f - 0.5f * op, 0.2f + 0.55f * op, 0.15f + 0.15f * op);
                 double plane = c[stem] + s;
+                if (v.mode == ValvePart.CONTROL) {
+                    // an actuator: a square box on the stem (a signal cable touching its top drives it), its lid coloured by
+                    // the opening
+                    double[] lo = new double[3], hi = new double[3];
+                    lo[stem] = plane;
+                    hi[stem] = plane + 1;
+                    lo[so[0]] = c[so[0]] - 2;
+                    hi[so[0]] = c[so[0]] + 2;
+                    lo[so[1]] = c[so[1]] - 2;
+                    hi[so[1]] = c[so[1]] + 2;
+                    b.boxD(lo, hi);
+                    continue;
+                }
+                if (v.mode == ValvePart.THROTTLE) b.color(0.85f, 0.65f, 0.15f);   // (a brass handwheel: set by hand, on a screen)
                 // the rim: a ring (AdventurAgent: 16 cubes read as beads); two spokes across
                 b.ring(stem, c[so[0]], c[so[1]], r - 1.1, r, plane, plane + 1, 16);
                 for (int a = 0; a < 2; a++) {

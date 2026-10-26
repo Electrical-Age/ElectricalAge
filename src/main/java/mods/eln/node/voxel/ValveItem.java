@@ -5,10 +5,18 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 
-/** A pipe valve: right-click a straight stretch of pipe to fit it there (at the lattice point nearest the click). */
+/** A pipe valve: right-click a straight stretch of pipe to fit it there (at the lattice point nearest the click). Of a
+ *  kind (ValvePart.ON_OFF, CONTROL, THROTTLE). */
 public class ValveItem extends Item implements PipeTool {
+    final int mode;
+
     public ValveItem(Properties p) {
+        this(p, ValvePart.ON_OFF);
+    }
+
+    public ValveItem(Properties p, int mode) {
         super(p);
+        this.mode = mode;
     }
 
     @Override
@@ -24,7 +32,7 @@ public class ValveItem extends Item implements PipeTool {
         String err;
         var hit = ctx.getClickLocation();
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
-            err = n.addValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+            err = n.addValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), mode);
         else {
             err = "fit it on a pipe";
             mods.eln.misc.Utils.println("Valve: no pipe at " + pos.toShortString() + ": " + level.getBlockState(pos));

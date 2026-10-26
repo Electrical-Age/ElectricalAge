@@ -267,11 +267,20 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         markUsed();
         if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
         if (drop && p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
-        if (drop && p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+        if (drop && p instanceof ValvePart v) dropItem(valveItem(v));
         if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         changed();
         return isEmptyNode();
+    }
+
+    /** The item a valve was fitted from. */
+    static ItemStack valveItem(ValvePart v) {
+        return new ItemStack(switch (v.mode) {
+            case ValvePart.CONTROL -> mods.eln.registry.ElnRegistry.PIPE_CONTROL_VALVE.get();
+            case ValvePart.THROTTLE -> mods.eln.registry.ElnRegistry.PIPE_THROTTLE_VALVE.get();
+            default -> mods.eln.registry.ElnRegistry.PIPE_VALVE.get();
+        });
     }
 
     /** Nothing left: no parts, no elements (the block goes). */
@@ -290,6 +299,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     private void changed() {
         vents = null;
+        valveLinks = null;
         if (isAdded()) {
             if (hasFluid()) FluidWorld.add(this);
             FluidWorld.changed(this);
@@ -336,10 +346,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return out;
     }
 
-    /** Each valve links the two pipes that end at it, open or shut. */
+    /** Each valve links the two pipes that end at it, as far open as it is (kept while the parts don't change: the
+     *  control and throttle valves set their link's opening every step, beforeFluidStep). */
     @Override
     public List<Link> fluidLinks() {
-        List<Link> out = new ArrayList<>();
+        if (valveLinks != null) return new ArrayList<>(valveLinks.keySet());
+        valveLinks = new java.util.LinkedHashMap<>();
         for (VoxelPart p : parts) {
             if (!(p instanceof ValvePart v)) continue;
             List<PipePart> ends = new ArrayList<>();
@@ -350,11 +362,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             PipePart a = ends.get(0), b = ends.get(1);
             double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * 4;   // (a quarter block of pipe)
             Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k);
-            l.open = v.open ? 1 : 0;
-            out.add(l);
+            l.open = v.opening();
+            valveLinks.put(l, v);
         }
-        return out;
+        return new ArrayList<>(valveLinks.keySet());
     }
+
+    private java.util.Map<Link, ValvePart> valveLinks;
 
     /** The adapter on that face (for the fluid capability), or null. */
     public AdapterPart adapterOn(int face) {
@@ -422,6 +436,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** Fit a valve where the pipe under the click runs straight: the lattice point on it nearest the click. */
     public String addValveNear(double hx, double hy, double hz) {
+        return addValveNear(hx, hy, hz, ValvePart.ON_OFF);
+    }
+
+    /** A valve of a kind (ValvePart.ON_OFF, CONTROL, THROTTLE) at the lattice point on the pipe nearest the click. */
+    public String addValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
         int[] best = null;
@@ -436,10 +455,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                         best = new int[]{x, y, z};
                     }
                 }
-        return best == null ? "the pipe has no room for a valve here" : addValve(best[0], best[1], best[2]);
+        return best == null ? "the pipe has no room for a valve here" : addValve(best[0], best[1], best[2], mode);
     }
 
     public String addValve(int x, int y, int z) {
+        return addValve(x, y, z, ValvePart.ON_OFF);
+    }
+
+    public String addValve(int x, int y, int z, int mode) {
         for (VoxelPart p : parts) if (p instanceof ValvePart) return "there is a valve here already";
         for (int i = 0; i < parts.size(); i++) {
             if (!(parts.get(i) instanceof PipePart pipe) || !pipe.passes(x, y, z)) continue;
@@ -453,7 +476,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (axis < 0) return "the pipe turns here: fit a valve on a straight piece";
             BitSet others = new BitSet(4096), want = new BitSet(4096);
             for (int j = 0; j < parts.size(); j++) if (j != i) for (int[] b : parts.get(j).boxes()) fill(others, b);
-            for (int[] b : new ValvePart(x, y, z, axis, pipe.bore()).boxes()) fill(want, b);
+            for (int[] b : new ValvePart(x, y, z, axis, pipe.bore(), mode).boxes()) fill(want, b);
             if (want.intersects(others)) return "something is in the way";
             PipePart[] halves = pipe.splitAt(x, y, z);
             if (halves == null) return "the pipe ends here";
@@ -465,7 +488,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
                 parts.add(hp);
             }
-            parts.add(new ValvePart(x, y, z, axis, pipe.bore()));
+            parts.add(new ValvePart(x, y, z, axis, pipe.bore(), mode));
             markUsed();
             changed();
             return null;
@@ -491,14 +514,64 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 setNeedPublish(true);
                 return true;
             }
-            if (i >= 0 && parts.get(i) instanceof ValvePart v) {
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.ON_OFF) {
                 v.open = !v.open;
                 player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(v.open ? "Valve open" : "Valve shut"));
                 changed();
                 return true;
             }
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.CONTROL) {
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Control valve %.0f%% open: a signal cable on its actuator sets it",
+                    v.opening() * 100)));
+                return true;
+            }
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                openThrottleScreen(sp, i, v);
+                return true;
+            }
         }
         return pi >= 0 && meterUse(player, side);
+    }
+
+    /** A GUI packet's slot byte for a part of this block (ValvePart.THROTTLE's slider), not an element. */
+    public static final byte PART_PACKET = -2;
+
+    /** Open the throttle valve's screen on the player's client (ClientPacketHandler, Eln.packetValveScreen). */
+    void openThrottleScreen(net.minecraft.server.level.ServerPlayer player, int index, ValvePart v) {
+        try {
+            var bos = new java.io.ByteArrayOutputStream();
+            var out = new java.io.DataOutputStream(bos);
+            out.writeByte(Eln.packetValveScreen);
+            out.writeInt(coordonate.x);
+            out.writeInt(coordonate.y);
+            out.writeInt(coordonate.z);
+            out.writeByte(index);
+            out.writeFloat((float) v.setting);
+            mods.eln.network.ElnNet.sendToPlayer(player, bos);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** From a client: a throttle valve's new setting (PART_PACKET, part index, float 0..1); else an element's packet. */
+    @Override
+    public void networkUnserialize(java.io.DataInputStream stream, net.minecraft.server.level.ServerPlayer player) {
+        try {
+            stream.mark(64);
+            if (stream.readByte() == PART_PACKET) {
+                int i = stream.readByte();
+                float f = stream.readFloat();
+                if (i >= 0 && i < parts.size() && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && Float.isFinite(f)) {
+                    v.setting = Math.max(0, Math.min(1, f));
+                    setNeedPublish(true);
+                }
+                return;
+            }
+            stream.reset();
+        } catch (java.io.IOException e) {
+            return;
+        }
+        super.networkUnserialize(stream, player);
     }
 
     /** The element (its slot: 0..5 centred on that face) whose model box, grown by grow voxels, holds the block-local point (0..1); -1, also
@@ -770,6 +843,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void beforeFluidStep(double dt) {
         syncAdapters();
+        // valves: as far open as they are (a control valve by its signal, a throttle valve by its setting)
+        if (valveLinks != null)
+            for (var e : valveLinks.entrySet()) {
+                ValvePart v = e.getValue();
+                double o = v.opening();
+                e.getKey().open = o;
+                if (v.mode != ValvePart.ON_OFF && Math.abs(o - v.shown) > 0.02) {
+                    v.shown = o;
+                    setNeedPublish(true);   // (the drawing turns with it)
+                }
+            }
         // safety valves open by the pressure under them
         if (vents != null)
             for (var e : vents.entrySet())
@@ -842,6 +926,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         cables.addToSimulation();
         connectElementsToCables();
         connectPins();
+        connectValves();
         cablesBuilt = !cables.conductors.isEmpty();
         for (Direction dir : Direction.values()) {
             mods.eln.node.NodeBase other = getNeighbor(dir);
@@ -960,6 +1045,23 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 sideElementList[p.slot].slotMask.set(p.lrdu, true);
                 sideElementList[q.slot].slotMask.set(q.lrdu, true);
                 link(p.load, q.load, p.thermal, q.thermal);
+            }
+        }
+    }
+
+    /**
+     * Control valves (Baughn 2026-10-26): the signal input in the simulation, joined to a signal cable in this block
+     * that touches its actuator's top (ValvePart.contact), as a device's pin.
+     */
+    private void connectValves() {
+        for (VoxelPart p : parts) {
+            if (!(p instanceof ValvePart v) || v.signal == null) continue;
+            Eln.simulator.addElectricalLoad(v.signal);
+            for (CableNet.Conductor k : cables.live()) {
+                if (k.load == null || !compareConnectionMask(maskElectricalGate, k.mask())) continue;
+                boolean touch = false;
+                for (CablePart c : k.parts) for (int[] b : c.boxes()) touch |= overlaps(b, v.contact());
+                if (touch) link(v.signal, k.load, null, null);
             }
         }
     }
@@ -1094,6 +1196,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
+        for (VoxelPart p : parts) if (p instanceof ValvePart v && v.signal != null) Eln.simulator.removeElectricalLoad(v.signal);
         for (var e : elementLinksE) Eln.simulator.removeElectricalComponent(e);
         for (var t : elementLinksT) Eln.simulator.removeThermalConnection(t);
         elementLinksE.clear();
@@ -1170,7 +1273,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart p : parts) {
             if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
             if (p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
-            if (p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+            if (p instanceof ValvePart v) dropItem(valveItem(v));
             if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
             if (p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         }
@@ -1303,7 +1406,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
         out.put("Pressure", String.format("%.2f bar, %.0f °C", n.P() / 1e5, n.T() - 273.15));
-        for (VoxelPart p : parts) if (p instanceof ValvePart v) out.put("Valve", v.open ? "open" : "shut");
+        for (VoxelPart p : parts)
+            if (p instanceof ValvePart v) out.put(switch (v.mode) {
+                case ValvePart.CONTROL -> "Control valve";
+                case ValvePart.THROTTLE -> "Throttle valve";
+                default -> "Valve";
+            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut") : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",
                 String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));

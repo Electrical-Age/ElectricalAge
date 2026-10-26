@@ -32,6 +32,7 @@ public final class PipeCases {
         cases.add(new RoutedOverAWall());
         cases.add(new JoinMidRun());
         cases.add(new KitCrafting());
+        cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
         cases.add(new Valve());
         cases.add(new Adapter());
@@ -747,6 +748,95 @@ public final class PipeCases {
             ctx.check("pipe: shut, it holds (5 bar on one side, 1 on the other)", pa > 3e5 && pc < 1.5e5, String.format("%.2f / %.2f bar", pa / 1e5, pc / 1e5));
             var parts = node(ctx, b).parts;
             ctx.check("pipe: the pipe was cut in two around the valve", parts.size() == 3, parts.size() + " parts");
+        }
+    }
+
+    /**
+     * The two valves Baughn asked for (2026-10-26): three runs of three blocks, 5 bar on one end, a valve in the middle.
+     * A throttle valve set to 0 holds; one set to 100% by its screen's packet (VoxelNode.PART_PACKET) passes; a control
+     * valve with 50 V on its signal passes, and one with none holds.
+     */
+    static final class ThrottleAndControlValves implements TestCase {
+        BlockPos[][] runs = new BlockPos[4][];
+        String err = "";
+        mods.eln.sim.mna.component.VoltageSource source;
+        mods.eln.node.voxel.ValvePart control;
+
+        public String id() {
+            return "pipe_throttle_and_control_valves";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        static mods.eln.node.voxel.ValvePart valve(TestContext ctx, BlockPos p) {
+            for (VoxelPart q : node(ctx, p).parts) if (q instanceof mods.eln.node.voxel.ValvePart v) return v;
+            return null;
+        }
+
+        public void build(TestContext ctx) {
+            int[] modes = {mods.eln.node.voxel.ValvePart.THROTTLE, mods.eln.node.voxel.ValvePart.THROTTLE,
+                mods.eln.node.voxel.ValvePart.CONTROL, mods.eln.node.voxel.ValvePart.CONTROL};
+            for (int r = 0; r < 4; r++) {
+                runs[r] = new BlockPos[]{ctx.at(1, 1, r), ctx.at(2, 1, r), ctx.at(3, 1, r)};
+                for (BlockPos p : runs[r]) lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
+                String e = node(ctx, runs[r][1]).addValve(8, 8, 8, modes[r]);
+                if (e != null) err += "run " + r + ": " + e + "; ";
+            }
+            if (!err.isEmpty()) return;
+            valve(ctx, runs[0][1]).setting = 0;
+            // run 1: set open from its screen (the packet a client's slider sends)
+            try {
+                var bos = new java.io.ByteArrayOutputStream();
+                var out = new java.io.DataOutputStream(bos);
+                out.writeByte(mods.eln.node.voxel.VoxelNode.PART_PACKET);
+                int idx = node(ctx, runs[1][1]).parts.indexOf(valve(ctx, runs[1][1]));
+                valve(ctx, runs[1][1]).setting = 0;
+                out.writeByte(idx);
+                out.writeFloat(1f);
+                node(ctx, runs[1][1]).networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())),
+                    null);
+            } catch (java.io.IOException e) {
+                err += e;
+            }
+            // run 2: 50 V on the control valve's signal
+            control = valve(ctx, runs[2][1]);
+            source = new mods.eln.sim.mna.component.VoltageSource("test", control.signal, null).setU(mods.eln.Eln.SVU);
+            mods.eln.Eln.simulator.addElectricalComponent(source);
+            for (int r = 0; r < 4; r++) {
+                ((PipePart) node(ctx, runs[r][0]).parts.get(0)).fluid.fill(0, 5e5, 293.15);
+                mods.eln.fluid.FluidWorld.changed(node(ctx, runs[r][0]));
+            }
+        }
+
+        double[] p(TestContext ctx, int r) {
+            return new double[]{((PipePart) node(ctx, runs[r][0]).parts.get(0)).fluid.P(), ((PipePart) node(ctx, runs[r][2]).parts.get(0)).fluid.P()};
+        }
+
+        public void measure(TestContext ctx) {
+            if (source != null) mods.eln.Eln.simulator.removeElectricalComponent(source);
+            ctx.check("pipe: throttle and control valves fit", err.isEmpty(), err);
+            if (!err.isEmpty()) return;
+            double[] a = p(ctx, 0), b = p(ctx, 1), c = p(ctx, 2), d = p(ctx, 3);
+            ctx.line(String.format("valves: throttle 0%% %.2f/%.2f, throttle 100%% %.2f/%.2f, control 50 V %.2f/%.2f (%.0f%%), control 0 V %.2f/%.2f bar",
+                a[0] / 1e5, a[1] / 1e5, b[0] / 1e5, b[1] / 1e5, c[0] / 1e5, c[1] / 1e5, control.opening() * 100, d[0] / 1e5, d[1] / 1e5));
+            ctx.check("pipe: a throttle valve at 0% holds", a[0] > 3e5 && a[1] < 1.5e5, "");
+            ctx.check("pipe: a throttle valve set to 100% by its screen passes", valve(ctx, runs[1][1]).setting == 1 && Math.abs(b[0] - b[1]) < 0.3e5, "");
+            ctx.check("pipe: a control valve on 50 V is open and passes", control.opening() > 0.95 && Math.abs(c[0] - c[1]) < 0.3e5, "");
+            ctx.check("pipe: a control valve without a signal holds", d[0] > 3e5 && d[1] < 1.5e5, "");
         }
     }
 

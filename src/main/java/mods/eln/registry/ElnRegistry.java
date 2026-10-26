@@ -125,6 +125,11 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_kit_alloy", p -> new mods.eln.node.voxel.PipeKitItem(1, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_VALVE =
         ITEMS.registerItem("pipe_valve", mods.eln.node.voxel.ValveItem::new);
+    /** Baughn 2026-10-26: a valve opened by a signal (a turbine's throttle), and one set by hand on a slider. */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_CONTROL_VALVE =
+        ITEMS.registerItem("pipe_control_valve", p -> new mods.eln.node.voxel.ValveItem(p, mods.eln.node.voxel.ValvePart.CONTROL));
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_THROTTLE_VALVE =
+        ITEMS.registerItem("pipe_throttle_valve", p -> new mods.eln.node.voxel.ValveItem(p, mods.eln.node.voxel.ValvePart.THROTTLE));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.SafetyValveItem> PIPE_SAFETY_VALVE =
         ITEMS.registerItem("pipe_safety_valve", mods.eln.node.voxel.SafetyValveItem::new);
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.AdapterItem> PIPE_ADAPTER =
@@ -267,6 +272,8 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_KIT_IRON);   // (pipes, 26.x)
         ALL_ITEMS.add(PIPE_KIT_ALLOY);
         ALL_ITEMS.add(PIPE_VALVE);
+        ALL_ITEMS.add(PIPE_CONTROL_VALVE);
+        ALL_ITEMS.add(PIPE_THROTTLE_VALVE);
         ALL_ITEMS.add(PIPE_ADAPTER);
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)

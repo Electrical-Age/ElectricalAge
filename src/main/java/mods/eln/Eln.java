@@ -130,6 +130,8 @@ public class Eln {
     public static final byte packetChiselBrush = 24;
     /** 26.x: where a held device that goes anywhere on a face would be placed (node.voxel.DevicePreview). */
     public static final byte packetDevicePreview = 25;
+    /** 26.x, server -> client: open a throttle valve's screen (x, y, z, part index, setting; node.voxel.VoxelNode). */
+    public static final byte packetValveScreen = 26;
 
     // Voltage / power levels, as in 1.12
     public static final double gateOutputCurrent = 0.100;
