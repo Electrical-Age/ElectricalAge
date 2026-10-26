@@ -14,7 +14,8 @@ import java.util.List;
 
 /**
  * Pipe kits in the crafting grid (Baughn, notes/pipes/DESIGN.md 6a): kits of one tier put together merge (their lengths
- * add, up to a full kit); a lone kit splits in two halves (one is the result, the other stays in the grid).
+ * add; over a full kit the rest stays in the grid); a lone kit splits in two halves (one is the result, the other stays
+ * in the grid).
  */
 public final class PipeKitRecipes {
     private PipeKitRecipes() {
@@ -56,46 +57,7 @@ public final class PipeKitRecipes {
 
         /** Plates taken from each slot (in order), then tier, length and plates used; or null. */
         public static int[] use(List<ItemStack> items) {
-            int tier = -1, kitLen = 0, kits = 0, slots = 0, total = 0;
-            for (ItemStack s : items) {
-                if (s.isEmpty()) continue;
-                int t;
-                if (s.getItem() instanceof PipeKitItem k) {
-                    if (++kits > 1 || s.getCount() != 1) return null;
-                    t = k.tier;
-                    kitLen += PipeKitItem.length(s);
-                } else {
-                    t = plateTier(s);
-                    if (t < 0) return null;
-                    slots++;
-                    total += s.getCount();
-                }
-                if (tier >= 0 && t != tier) return null;
-                tier = t;
-            }
-            if (slots < 1) return null;
-            int per = PER_BLOCK[tier];
-            int blocks = Math.min((KitItem.MAX - kitLen) / 16, total / per);
-            int used = blocks * per;
-            if (blocks < 1 || used < slots) return null;   // (every slot gives one: the grid takes it)
-            int[] out = new int[items.size() + 3];
-            int taken = 0;
-            for (int i = 0; i < items.size(); i++)
-                if (!items.get(i).isEmpty() && !(items.get(i).getItem() instanceof PipeKitItem)) {
-                    out[i] = 1;
-                    taken++;
-                }
-            for (int i = 0; i < items.size() && taken < used; i++) {
-                ItemStack s = items.get(i);
-                if (s.isEmpty() || s.getItem() instanceof PipeKitItem) continue;
-                int more = Math.min(s.getCount() - 1, used - taken);
-                out[i] += more;
-                taken += more;
-            }
-            out[items.size()] = tier;
-            out[items.size() + 1] = kitLen + blocks * 16;
-            out[items.size() + 2] = used;
-            return out;
+            return KitRecipes.use(items, s -> s.getItem() instanceof PipeKitItem k ? k.tier : -1, PipeKitRecipes::plateTier, t -> PER_BLOCK[t]);
         }
 
         static int[] total(CraftingInput in) {
@@ -201,14 +163,7 @@ public final class PipeKitRecipes {
 
     /** A kit crafted from plates takes the plates it counted (the grid takes one from each slot after this). */
     public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
-        if (!ours(e, FromPlates.class)) return;
-        var grid = e.getInventory();
-        List<ItemStack> items = new java.util.ArrayList<>();
-        for (int i = 0; i < grid.getContainerSize(); i++) items.add(grid.getItem(i));
-        int[] use = FromPlates.use(items);
-        if (use == null) return;
-        for (int i = 0; i < items.size(); i++)
-            if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
+        KitRecipes.crafted(e, FromPlates.class, FromPlates::use);
     }
 
     /** JEI examples: per tier, 9 slots of plates to a kit. */
@@ -236,7 +191,11 @@ public final class PipeKitRecipes {
         public static final StreamCodec<RegistryFriendlyByteBuf, Merge> STREAM_CODEC = StreamCodec.unit(INSTANCE);
         public static final RecipeSerializer<Merge> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-        /** One of 2+ kits of one item (each a single item) and their total length, or null. */
+        /**
+         * One of 2+ kits of one item (each a single item, none full) and their total length, or null. Over a full kit
+         * the result is a full kit and the rest stays in the grid (Baughn: kits top up the same way, pipe and cable;
+         * 63 + 2 blocks gave nothing).
+         */
         static Object[] total(CraftingInput in) {
             ItemStack kit = null;
             int len = 0, n = 0;
@@ -244,11 +203,12 @@ public final class PipeKitRecipes {
                 ItemStack s = in.getItem(i);
                 if (s.isEmpty()) continue;
                 if (!(s.getItem() instanceof KitItem) || s.getCount() != 1 || (kit != null && s.getItem() != kit.getItem())) return null;
+                if (KitItem.length(s) >= KitItem.MAX) return null;
                 kit = s;
                 len += KitItem.length(s);
                 n++;
             }
-            return n >= 2 && len <= KitItem.MAX ? new Object[]{kit, len} : null;
+            return n >= 2 ? new Object[]{kit, len} : null;
         }
 
         @Override
@@ -259,7 +219,21 @@ public final class PipeKitRecipes {
         @Override
         public ItemStack assemble(CraftingInput input) {
             Object[] t = total(input);
-            return t == null ? ItemStack.EMPTY : ((KitItem) ((ItemStack) t[0]).getItem()).make((Integer) t[1]);
+            return t == null ? ItemStack.EMPTY : ((KitItem) ((ItemStack) t[0]).getItem()).make(Math.min(KitItem.MAX, (Integer) t[1]));
+        }
+
+        /** What's over a full kit stays in the grid, as one kit in the last kit's slot. */
+        @Override
+        public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
+            NonNullList<ItemStack> out = NonNullList.withSize(input.size(), ItemStack.EMPTY);
+            Object[] t = total(input);
+            if (t == null || (Integer) t[1] <= KitItem.MAX) return out;
+            for (int i = input.size() - 1; i >= 0; i--)
+                if (!input.getItem(i).isEmpty()) {
+                    out.set(i, ((KitItem) ((ItemStack) t[0]).getItem()).make((Integer) t[1] - KitItem.MAX));
+                    break;
+                }
+            return out;
         }
 
         @Override

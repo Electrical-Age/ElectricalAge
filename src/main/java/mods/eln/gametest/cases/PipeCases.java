@@ -837,6 +837,45 @@ public final class PipeCases {
             ctx.check("pipe: a one-block kit splits too (in a 3x3 grid: 8)", PipeKitItem.length(half16) == 8, "" + PipeKitItem.length(half16));
             ctx.check("pipe: a kit splits in halves (33: 16 out, 17 stays)", PipeKitItem.length(half) == 16 && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17,
                 PipeKitItem.length(half) + " / " + rest);
+            // kits top up (Baughn: pipe kits as cable kits, by the same code): 63 + 2 blocks give a full kit, 1 block stays
+            ItemStack full = craft(ctx, 2, 1, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
+            var left = remaining(ctx, 2, 1, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
+            ctx.check("pipe: 63 + 2 blocks top up to a full kit, 1 block stays", PipeKitItem.length(full) == 1024
+                && left.size() == 2 && left.get(0).isEmpty() && PipeKitItem.length(left.get(1)) == 16, PipeKitItem.length(full) + " / " + left);
+            ItemStack cfull = craft(ctx, 2, 1, mods.eln.node.voxel.CableKitItem.kit(0, 1000), mods.eln.node.voxel.CableKitItem.kit(0, 100));
+            var cleft = remaining(ctx, 2, 1, mods.eln.node.voxel.CableKitItem.kit(0, 1000), mods.eln.node.voxel.CableKitItem.kit(0, 100));
+            ctx.check("cable: 1000 + 100 voxels top up to a full kit, 76 stay", mods.eln.node.voxel.KitItem.length(cfull) == 1024
+                && cfull.getItem() instanceof mods.eln.node.voxel.CableKitItem && cleft.size() == 2 && mods.eln.node.voxel.KitItem.length(cleft.get(1)) == 76,
+                cfull + " / " + cleft);
+            ItemStack none = craft(ctx, 2, 1, PipeKitItem.kit(0, 1024), PipeKitItem.kit(0, 32));
+            ctx.check("pipe: a full kit and another don't merge (nothing to top up)", none.isEmpty() || !(none.getItem() instanceof PipeKitItem), "" + none);
+            // shift-click in a crafting table: the full kit, and nothing lost (the 1 block left over is then split again
+            // and again by Split while the result is a pipe kit: the quick-move loop repeats while the item is the same)
+            var shift = shiftCraft(ctx, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
+            ctx.check("pipe: shift-click 63 + 2 blocks: a full kit taken, nothing lost", shift.startsWith("1040 ") && shift.contains("1024"), shift);
+        }
+
+        /** Shift-click the result of a crafting table holding items (from slot 1): "total inv [kit lengths] grid [kit lengths]". */
+        static String shiftCraft(TestContext ctx, ItemStack... items) {
+            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.get(ctx.level(),
+                new com.mojang.authlib.GameProfile(java.util.UUID.fromString("e1a0c0de-0000-4000-8000-00000000c0de"), "eln_kit_shift"));
+            fp.getInventory().clearContent();
+            var cm = new net.minecraft.world.inventory.CraftingMenu(8, fp.getInventory(),
+                net.minecraft.world.inventory.ContainerLevelAccess.create(ctx.level(), BlockPos.ZERO));
+            for (int i = 0; i < items.length; i++) cm.getSlot(1 + i).set(items[i]);
+            cm.slotsChanged(cm.getSlot(1).container);
+            cm.clicked(0, 0, net.minecraft.world.inventory.ContainerInput.QUICK_MOVE, fp);
+            var inv = new java.util.ArrayList<Integer>();
+            for (int i = 0; i < fp.getInventory().getContainerSize(); i++)
+                if (fp.getInventory().getItem(i).getItem() instanceof mods.eln.node.voxel.KitItem) inv.add(mods.eln.node.voxel.KitItem.length(fp.getInventory().getItem(i)));
+            var grid = new java.util.ArrayList<Integer>();
+            for (int i = 1; i <= 9; i++)
+                if (cm.getSlot(i).getItem().getItem() instanceof mods.eln.node.voxel.KitItem) grid.add(mods.eln.node.voxel.KitItem.length(cm.getSlot(i).getItem()));
+            fp.getInventory().clearContent();
+            int total = 0;
+            for (int x : inv) total += x;
+            for (int x : grid) total += x;
+            return total + " inv " + inv + " grid " + grid;
         }
     }
 

@@ -78,43 +78,7 @@ public final class CableKitRecipes {
         }
 
         static int[] use(List<ItemStack> items) {
-            int tier = -1, kitLen = 0, kits = 0, slots = 0;
-            for (ItemStack s : items) {
-                if (s.isEmpty()) continue;
-                int t;
-                if (s.getItem() instanceof CableKitItem k) {
-                    if (++kits > 1 || s.getCount() != 1) return null;
-                    t = k.tier;
-                    kitLen += KitItem.length(s);
-                } else {
-                    t = coilTier(s);
-                    if (t < 0) return null;
-                    slots++;
-                }
-                if (tier >= 0 && t != tier) return null;
-                tier = t;
-            }
-            int room = (KitItem.MAX - kitLen) / 16;
-            if (slots < 1 || room < slots) return null;
-            int[] out = new int[items.size() + 3];
-            int used = 0;
-            // one from each slot first (the grid takes that anyway), then the rest in order while it fits
-            for (int i = 0; i < items.size(); i++)
-                if (!items.get(i).isEmpty() && !(items.get(i).getItem() instanceof CableKitItem)) {
-                    out[i] = 1;
-                    used++;
-                }
-            for (int i = 0; i < items.size() && used < room; i++) {
-                ItemStack s = items.get(i);
-                if (s.isEmpty() || s.getItem() instanceof CableKitItem) continue;
-                int more = Math.min(s.getCount() - 1, room - used);
-                out[i] += more;
-                used += more;
-            }
-            out[items.size()] = tier;
-            out[items.size() + 1] = kitLen + used * 16;
-            out[items.size() + 2] = used;
-            return out;
+            return KitRecipes.use(items, s -> s.getItem() instanceof CableKitItem k ? k.tier : -1, CableKitRecipes::coilTier, t -> 1);
         }
 
         @Override
@@ -238,14 +202,7 @@ public final class CableKitRecipes {
      * goes here (both sides, as the grid's own taking).
      */
     public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
-        if (!PipeKitRecipes.ours(e, FromCoils.class)) return;
-        var grid = e.getInventory();
-        List<ItemStack> items = new java.util.ArrayList<>();
-        for (int i = 0; i < grid.getContainerSize(); i++) items.add(grid.getItem(i));
-        int[] use = FromCoils.use(items);
-        if (use == null) return;
-        for (int i = 0; i < items.size(); i++)
-            if (use[i] > 1) grid.getItem(i).shrink(use[i] - 1);
+        KitRecipes.crafted(e, FromCoils.class, FromCoils::use);
     }
 
     /** Codecs for a recipe with a tier ({"tier": n}; absent: any tier). */

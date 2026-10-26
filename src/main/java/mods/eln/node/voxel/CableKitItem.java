@@ -61,33 +61,18 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
      * Cables of this tier into the kit, like filling a bundle (Baughn: a crafted kit couldn't be topped up past nine
      * cables): click a stack of them onto the kit, or the kit onto them. As many go in as fit (16 voxels each).
      */
-    int absorb(ItemStack kit, ItemStack coils, java.util.function.IntConsumer take) {
-        if (kit.getCount() != 1 || CableKitRecipes.coilTier(coils) != tier) return 0;
-        int n = Math.min(coils.getCount(), (MAX - KitItem.length(kit)) / 16);
-        if (n <= 0) return 0;
-        KitItem.setLength(kit, KitItem.length(kit) + 16 * n);
-        take.accept(n);
-        return n;
-    }
-
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack self, ItemStack other, net.minecraft.world.inventory.Slot slot,
                                             net.minecraft.world.inventory.ClickAction action, net.minecraft.world.entity.player.Player player,
                                             net.minecraft.world.entity.SlotAccess carried) {
-        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
-        if (absorb(self, other, other::shrink) == 0) return false;
-        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
-        return true;
+        return KitRecipes.clicked(self, tier, other, CableKitRecipes.coilTier(other), 1, other::shrink, slot, action, player);
     }
 
     @Override
     public boolean overrideStackedOnOther(ItemStack self, net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
                                           net.minecraft.world.entity.player.Player player) {
-        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
         ItemStack coils = slot.getItem();
-        if (absorb(self, coils, n -> slot.safeTake(n, n, player)) == 0) return false;
-        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
-        return true;
+        return KitRecipes.clicked(self, tier, coils, CableKitRecipes.coilTier(coils), 1, n -> slot.safeTake(n, n, player), slot, action, player);
     }
 
     @Override
