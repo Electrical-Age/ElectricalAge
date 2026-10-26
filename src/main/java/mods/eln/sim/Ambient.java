@@ -36,8 +36,20 @@ public final class Ambient {
         if (level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, pos)) return netherC;
         var climate = level.getBiome(pos).value().getModifiedClimateSettings();
         double t = climate.temperatureModifier().modifyTemperature(pos, climate.temperature());
-        int surface = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
-        return blend(surfaceC(t, pos.getY()), surface - 1 - pos.getY());
+        return blend(surfaceC(t, pos.getY()), surfaceY(level, pos) - 1 - pos.getY());
+    }
+
+    /**
+     * The column's surface (one above its top block). EA simulates nodes in chunks nobody has loaded (and connects them
+     * at startup): there, the terrain the generator would make, without loading the chunk (getBiome likewise falls back
+     * to the generator's biome).
+     */
+    static int surfaceY(Level level, BlockPos pos) {
+        int x = pos.getX(), z = pos.getZ();
+        if (level.hasChunk(x >> 4, z >> 4) || !(level instanceof net.minecraft.server.level.ServerLevel sl))
+            return level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z);
+        var src = sl.getChunkSource();
+        return src.getGenerator().getBaseHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, sl, src.randomState());
     }
 
     /** The surface value for a biome temperature t at height y (C). */
