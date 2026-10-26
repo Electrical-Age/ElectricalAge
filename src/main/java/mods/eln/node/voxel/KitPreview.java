@@ -123,7 +123,7 @@ public final class KitPreview {
         List<int[]> boxes = new ArrayList<>();
         if (r.error != null) {
             boxes.add(marker(at));
-            return new Answer(false, boxes, "Can't reach there: " + r.error);
+            return new Answer(false, boxes, "Can't reach there: " + r.error + " (sneak-click to cancel the route)");
         }
         for (CableRouter.Piece pc : CableRouter.pieces(r.steps, t.width(), t.height())) {
             CablePart part = pc.face() < 0 ? CablePart.knuckle(tier, pc.points()[0], pc.points()[1], pc.points()[2]) : new CablePart(tier, pc.face(), pc.points());
@@ -288,7 +288,7 @@ public final class KitPreview {
         String msg;
         if (!ok) {
             bs.add(new int[]{(int) end.x() - 1, (int) end.y() - 1, (int) end.z() - 1, (int) end.x() + 1, (int) end.y() + 1, (int) end.z() + 1});
-            msg = "Can't reach there: " + r.error;
+            msg = "Can't reach there: " + r.error + " (sneak-click to cancel the route)";
         } else {
             for (var e : PipeRouter.perBlock(r.points).entrySet()) {
                 long bx = e.getKey().get(0), by = e.getKey().get(1), bz = e.getKey().get(2);

@@ -408,7 +408,7 @@ public final class CablePlacer {
             CableRouter.Result r = route(level, plan, null, null);
             if (r.error != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error));
+                player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error + " (sneak-click to cancel the route)"));
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)));
                 show(player, level, r.steps);
@@ -420,7 +420,7 @@ public final class CablePlacer {
         CableRouter.Result r = route(level, plan, end, join[0]);
         if (r.error != null) {
             if (again) plan.waypoints.add(end);
-            player.sendOverlayMessage(Component.literal("No route: " + r.error));
+            player.sendOverlayMessage(Component.literal("No route: " + r.error + " (sneak-click to cancel the route)"));
             return true;
         }
         int len = r.length();
