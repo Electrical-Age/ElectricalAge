@@ -57,9 +57,9 @@ final class GoldenRecipesCase implements TestCase {
 
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
-    /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil.
-     *  Their output must still have a 26.x recipe. */
-    static final Set<String> CHANGED = Set.of("eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
+    /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil;
+     *  thermal insulation takes any wool (Baughn 2026-10-26). Their output must still have a 26.x recipe. */
+    static final Set<String> CHANGED = Set.of("eln:thermal_insulation", "eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
         "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp");
 
     /**

@@ -1,4 +1,4 @@
-// 26.3	2026-10-25T14:37:23.508380668	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-26T14:14:23.340443286	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -614,7 +614,7 @@ f4f9406ede6ea92137dd5caf98a20da982804e2e data/eln/recipe/street_light.json
 2dd44bbf82dca6fe077678b44dfae6276ea32cf7 data/eln/recipe/suspended_lamp_socket.json
 bc6f705dcd98d0320791535c98937a868e5c2998 data/eln/recipe/tachometer.json
 d3c9be2a659332bf91a00ce7d8970f72a6fbd853 data/eln/recipe/temperature_probe.json
-917aa4ec2cc201d6cb98cb13340bac98b273666d data/eln/recipe/thermal_insulation.json
+ad1c5258b30328edec6333acc45bcc1cba8d78e1 data/eln/recipe/thermal_insulation.json
 25bac59779dd19b1f79d0fc284cb4c789d4ad34f data/eln/recipe/thermal_probe.json
 611bff93cd14943556a294d4ab261bbb895db3fc data/eln/recipe/thermal_probe_chip.json
 bbb8492c52bd6c9e57cbb3939174670c02324371 data/eln/recipe/thermistor.json

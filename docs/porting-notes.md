@@ -32,6 +32,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `eln:ore_drops/coal`; tungsten ore is also `c:ores/tungsten`, Baughn 2026-10-24), picture on the held item; range 7.5 (1.12: 5). `item/xray/`, `XRayCase`.
 - Copper Coil (`eln:copper_coil`, new): thin winding wire; windings (inductor, resistors, rheostat, thermistor,
   DC-DC, 50V copper heating corps) take coils; copper cable is 1 per ingot.
+- Thermal Insulation takes any colour of wool (`#minecraft:wool`; 1.12: white only; Baughn 2026-10-26).
 - Cable slots removed: meters, electrical/voltage/thermal probes and lamp sockets have a built-in cable (LV, MV for the
   200V socket, copper thermal cable); Ground Cable has no GUI. Kept: transformer (turns), hub (side selection), breaker
   (trip rating); lamp supply and temperature probe slots are optional. Old cables stay in the hidden slot and drop on

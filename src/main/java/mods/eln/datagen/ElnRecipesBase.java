@@ -203,13 +203,21 @@ public abstract class ElnRecipesBase {
 
     static Ingredient ingredient(Object o) {
         if (o instanceof String ore) return Ingredient.of(items.getOrThrow(OreDictTags.tag(ore)));
+        if (o instanceof TagKey<?> t) return Ingredient.of(items.getOrThrow(itemTag(t)));
         if (o instanceof RStack s) return Ingredient.of(s.item());
         if (o instanceof ItemLike l) return Ingredient.of(l);
         throw new IllegalArgumentException("ingredient " + o);
     }
 
+    /** A vanilla item tag as an ingredient (a 26.x choice, not 1.12's: e.g. any wool). */
+    @SuppressWarnings("unchecked")
+    static TagKey<Item> itemTag(TagKey<?> t) {
+        return (TagKey<Item>) t;
+    }
+
     static Criterion<?> criterion(Object o) {
         if (o instanceof String ore) return hasTag.apply(OreDictTags.tag(ore));
+        if (o instanceof TagKey<?> t) return hasTag.apply(itemTag(t));
         if (o instanceof RStack s) return hasItem.apply(s.item());
         return hasItem.apply((ItemLike) o);
     }

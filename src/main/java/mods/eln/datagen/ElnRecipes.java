@@ -1317,7 +1317,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "SWS",
             "WSW",
             'S', stack(Blocks.STONE),
-            'W', wool(0));
+            'W', net.minecraft.tags.ItemTags.WOOL);   // any colour (Baughn 2026-10-26; 1.12: white)
     }
 
     public static void recipeFerromagneticCore() {
