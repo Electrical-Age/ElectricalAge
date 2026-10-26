@@ -82,13 +82,17 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
 
 ## Thermal network (`ThermalLoad`, `ThermalConnection`, `Simulator.thermalStep`)
 
-- Explicit Euler. `Tc` is K above ambient; `Rp` to ambient, `Rs` per connection half (flow `dT/(Rs1+Rs2)`), `C` J/K.
+- Explicit Euler. `Tc` is K above 20 C (`PhysicalConstant.Tamb`: a fixed scale, so limits, saves and displays are
+  absolute); each load relaxes through `Rp` to its `ambient` (same scale), which `Ambient` (biome x 25 C, cooler above
+  y 80, blended into a depth curve underground, 110 C in the Nether; config `ambient`) stamps when the device joins the
+  simulation (`TransparentNodeElement`/`SixNodeElement.connectJob`, `CableNet.addToSimulation`). GameTests hold it at
+  20 C (`Ambient.fixedC`; `AmbientCases`). `Rs` per connection half (flow `dT/(Rs1+Rs2)`), `C` J/K.
 - Fast loads step 20x per tick at 1/400 s; slow loads (`setAsSlow()`: six-node and voxel cables, poles, downlinks, resistor, diode) once at 0.05 s.
 - `addThermalConnection` between a fast and a slow load only prints `addThermalConnection ERROR` and drops it.
 - `checkThermalLoad(Rs, Rp, C)` throws if `C < getMinimalThermalC = 3 * thermalPeriod * (Rs || Rp)`. It uses the
   fast period even for slow loads; slow cable constants are stable anyway (`AuditFixesTest.slowCableJunctionIsStable`).
 - Heat input: `movePowerTo(W)` counts for one step of the load (call once per its step); `moveEnergyTo(J)` is folded
-  in as J/dt at the load's next step, correct from any rate. `ThermalLoad.externalLoad` = infinite ambient reservoir.
+  in as J/dt at the load's next step, correct from any rate. `ThermalLoad.ambientSink()` = an infinite reservoir per device, at its ambient (`sinkAt`).
 
 ## Failures (`src/main/java/mods/eln/sim/process/destruct/`)
 

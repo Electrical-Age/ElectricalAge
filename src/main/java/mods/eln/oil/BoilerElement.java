@@ -116,7 +116,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     /** Take in what pipes put in or took out since the last step (each step, and before saving). */
     public void syncTanks() {
         int in = tanks.takeWaterIn();
-        if (in > 0) EaUnits.addWater(vessel, in * EaUnits.KG_PER_MB_WATER, Water.T_AMBIENT, false);
+        if (in > 0) EaUnits.addWater(vessel, in * EaUnits.KG_PER_MB_WATER, ambient + mods.eln.sim.PhysicalConstant.Tref, false);   // (piped water: at the ambient)
         int out = tanks.takeSteamOut();
         if (out > 0) EaUnits.drainVapour(vessel, out * EaUnits.KG_PER_MB_STEAM);
         meterSteam += out;
@@ -233,7 +233,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             feed.mAir = loadedFeed[1];
             feed.energy = loadedFeed[2];
             feed.update();
-        } else feed.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        } else feed.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         feed.lumpable = true;   // (it merges into the pipe on its flange: no stub to fill first)
         feed.resistance = 1 / PORT_K;
         feedCheck = new Link(feed, 0, vessel, FEED_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);

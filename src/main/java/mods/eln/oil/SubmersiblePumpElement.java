@@ -162,10 +162,10 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
             outlet.mAir = loaded[1];
             outlet.energy = loaded[2];
             outlet.update();
-        } else outlet.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        } else outlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         outlet.lumpable = true;   // (it merges into the pipe on its flange)
         outlet.resistance = 1 / PORT_K;
-        sump = FluidNode.sump(c.y);
+        sump = FluidNode.sump(c.y, mods.eln.sim.Ambient.kelvin(c));
         // g = rho k / mu = nominal flow / shutoff head (kg/s/Pa): the nominal flow against 1 atm, none at the shutoff
         double dp = SubmersiblePumpDescriptor.SHUTOFF_PA - Water.P_ATM;
         double kgPerS = desc.nominalMbPerS * EaUnits.KG_PER_MB_WATER;

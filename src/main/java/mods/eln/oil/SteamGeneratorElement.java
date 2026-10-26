@@ -250,7 +250,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             inlet.update();
         } else {
             // new, or saved before the inlet: air, and the old tank's steam
-            inlet.fill(0, Water.P_ATM, Water.T_AMBIENT);
+            inlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
             EaUnits.addWater(inlet, tank.getFluidAmount() * EaUnits.KG_PER_MB_STEAM, Water.TB, true);
         }
         show();

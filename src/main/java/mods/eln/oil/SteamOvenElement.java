@@ -229,7 +229,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
             inlet.mAir = loaded[1];
             inlet.energy = loaded[2];
             inlet.update();
-        } else inlet.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        } else inlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         show();
         ports = List.of(new FluidPort(inlet, c.pos().asLong(), 1, 0.5, SteamGeneratorElement.PORT_K));   // the inlet on top
         connect();

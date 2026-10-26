@@ -90,13 +90,13 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement {
         ItemStack stack = entityPlayer.getMainHandItem();
         if (Utils.isEmpty(stack)) return false;
         if (stack.getItem() == Items.WATER_BUCKET) {
-            thermalLoad.Tc *= 0.5;
+            thermalLoad.towards(0.5);
 
             entityPlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
             return true;
         }
         if (stack.getItem() == Items.ICE) {
-            thermalLoad.Tc *= 0.2;
+            thermalLoad.towards(0.2);
             if (stack.getCount() != 0)
                 stack.shrink(1);
             else

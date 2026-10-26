@@ -109,6 +109,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         sixNode.notifyNeighbor();
     }
 
+    /** The ambient where it stands, on the Tc scale (Ambient; stamped on its thermal loads in connectJob). */
+    public double ambient;
+
     public void connectJob() {
         // If we are about to destruct ourselves, do not add any elements to the simulation anymore.
         if (sixNode != null && sixNode.isDestructing()) return;
@@ -118,6 +121,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
         for (NbtElectricalLoad load : electricalLoadList)
             Eln.simulator.addElectricalLoad(load);
+        ambient = mods.eln.sim.Ambient.relative(sixNode.coordonate);
+        mods.eln.sim.Ambient.stamp(thermalLoadList, ambient);
         for (NbtThermalLoad load : thermalLoadList)
             Eln.simulator.addThermalLoad(load);
 
@@ -419,7 +424,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         sixNode.disconnect();
         burnt = null;
         burntKind = null;
-        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = load.ambient;
         for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : thermalSlowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();

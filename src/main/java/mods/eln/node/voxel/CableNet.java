@@ -175,7 +175,7 @@ final class CableNet {
             node.disconnect();
             for (CablePart p : parts) {
                 p.burnt = null;
-                p.t = 0;
+                p.t = mods.eln.sim.Ambient.relative(node.coordonate);
             }
             node.connect();
             node.setNeedPublish(true);
@@ -249,7 +249,9 @@ final class CableNet {
     }
 
     void addToSimulation() {
+        double ambient = mods.eln.sim.Ambient.relative(node.coordonate);
         for (Conductor k : live()) {
+            if (k.thermal != null) k.thermal.ambient = ambient;
             if (k.load != null) Eln.simulator.addElectricalLoad(k.load);
             if (k.thermal != null) Eln.simulator.addThermalLoad(k.thermal);
             for (IProcess p : k.slow) Eln.simulator.addSlowProcess(p);

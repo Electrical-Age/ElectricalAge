@@ -252,7 +252,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public String addPart(VoxelPart p) {
         String why = canAdd(p);
         if (why != null) return why;
-        if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, null);
+        if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
         parts.add(p);
         markUsed();
         changed();
@@ -462,7 +462,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, pipe.length());
                 hp.burst = pipe.burst;
-                hp.makeNode(coordonate.y, saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
                 parts.add(hp);
             }
             parts.add(new ValvePart(x, y, z, axis, pipe.bore()));
@@ -689,11 +689,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             parts.remove(target);
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, old.length());
-                hp.makeNode(coordonate.y, saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
                 parts.add(hp);
             }
         }
-        if (part.fluid == null) part.makeNode(coordonate.y, null);
+        if (part.fluid == null) part.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
         parts.add(part);
         markUsed();
         changed();
@@ -739,7 +739,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (stub == null) continue;
             var run = mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
             int[] d = a.tanks.take();
-            if (d[0] > 0) EaUnits.addWater(run, d[0] * EaUnits.KG_PER_MB_WATER, mods.eln.sim.fluid.Water.T_AMBIENT, false);
+            if (d[0] > 0) EaUnits.addWater(run, d[0] * EaUnits.KG_PER_MB_WATER, mods.eln.sim.Ambient.kelvin(coordonate), false);   // (other mods' water: at the ambient)
             if (d[1] > 0) drainLiquid(run, d[1] * EaUnits.KG_PER_MB_WATER);
             if (d[2] > 0) EaUnits.addWater(run, d[2] * EaUnits.KG_PER_MB_STEAM, mods.eln.sim.fluid.Water.TB, true);
             if (d[3] > 0) EaUnits.drainVapour(run, d[3] * EaUnits.KG_PER_MB_STEAM);

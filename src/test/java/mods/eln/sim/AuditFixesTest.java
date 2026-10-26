@@ -16,30 +16,41 @@ import static org.junit.Assert.assertTrue;
 public class AuditFixesTest {
     SimHarness h = new SimHarness();
 
-    /** ThermalLoad.externalLoad is ambient (an infinite reservoir): a ThermalResistor to it is a plain loss. */
+    /**
+     * An ambient sink (ThermalLoad.ambientSink, one per device, at its ambient) is an infinite reservoir: a
+     * ThermalResistor to it is a plain loss, to the device's ambient (here 30 K above 20 C: a desert).
+     */
     @Test
-    public void externalLoadIsAnInfiniteReservoir() {
+    public void ambientSinkIsAnInfiniteReservoir() {
         ThermalLoad t = new ThermalLoad(0, 1e30, 1, 10);
+        t.ambient = 30;
+        ThermalLoad sink = ThermalLoad.ambientSink();
+        sink.sinkAt(30);
         h.sim.addThermalLoad(t);
-        ThermalResistor r = new ThermalResistor(t, ThermalLoad.externalLoad);
+        ThermalResistor r = new ThermalResistor(t, sink);
         r.setR(2);
         h.sim.addThermalFastProcess(r);
         h.sim.addThermalFastProcess(ThermalTest.heater(t, 50));
         h.seconds(200); // tau = 20 s
-        assertEquals(100, t.Tc, 1e-2);           // P * R (10 tau)
-        assertEquals(0, ThermalLoad.externalLoad.Tc, 0);
-        assertTrue(!Double.isNaN(ThermalLoad.externalLoad.getPower()));
+        assertEquals(130, t.Tc, 1e-2);           // ambient + P * R (10 tau)
+        assertEquals(30, sink.Tc, 0);
+        assertTrue(!Double.isNaN(sink.getPower()));
 
-        // even on a load list it stays at ambient (1.7.10: Tc/Rp = 0/0 = NaN)
-        h.sim.addThermalLoad(ThermalLoad.externalLoad);
-        try {
-            h.ticks(20);
-            assertEquals(0, ThermalLoad.externalLoad.Tc, 0);
-            assertEquals(100, t.Tc, 1e-2);
-        } finally {
-            h.sim.removeThermalLoad(ThermalLoad.externalLoad);
-            ThermalLoad.externalLoad.PcTemp = 0;
-        }
+        // even on a load list it stays at its ambient (1.7.10: Tc/Rp = 0/0 = NaN)
+        h.sim.addThermalLoad(sink);
+        h.ticks(20);
+        assertEquals(30, sink.Tc, 0);
+        assertEquals(130, t.Tc, 1e-2);
+    }
+
+    /** A load relaxes to its own ambient through Rp (biome ambient, Baughn 2026-10-26), not to 20 C. */
+    @Test
+    public void loadRelaxesToItsAmbient() {
+        ThermalLoad t = new ThermalLoad(0, 2, 1, 10);   // tau = Rp C = 20 s
+        t.ambient = -20;
+        h.sim.addThermalLoad(t);
+        h.seconds(200);
+        assertEquals(-20, t.Tc, 1e-2);
     }
 
     /** NbtResistor: name-qualified key (two resistors under one prefix don't collide), no name growth. */

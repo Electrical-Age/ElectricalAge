@@ -56,8 +56,13 @@ public final class FluidNode {
 
     /** A fixed body of liquid water at ambient temperature open to the air (1 atm on it): a pump's sump. */
     public static FluidNode sump(double z) {
+        return sump(z, Water.T_AMBIENT);
+    }
+
+    /** The same at T (K; the local ambient), at most just under boiling (it is open to 1 atm). */
+    public static FluidNode sump(double z, double T) {
         FluidNode n = new FluidNode(1e6, z, 1, true);
-        n.fill(0.9 * n.volume * Water.RHO_L, Water.P_ATM, Water.T_AMBIENT);   // (fuller would compress the liquid: fill keeps GAS_MIN of gas)
+        n.fill(0.9 * n.volume * Water.RHO_L, Water.P_ATM, Math.min(T, Water.TB - 1));   // (fuller would compress the liquid: fill keeps GAS_MIN of gas)
         return n;
     }
 

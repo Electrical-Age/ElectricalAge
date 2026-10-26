@@ -113,8 +113,13 @@ public final class PipePart extends VoxelPart {
         return WORKING_PA[tier] * derate(T);
     }
 
-    /** Make the contents node (server), for a pipe in the block at blockY: air at 1 atm if new. */
+    /** Make the contents node (server), for a pipe in the block at blockY: air at 1 atm if new (at 20 C). */
     void makeNode(int blockY, double[] saved) {
+        makeNode(blockY, Water.T_AMBIENT, saved);
+    }
+
+    /** The same, new air at the ambient T (K; Ambient). */
+    void makeNode(int blockY, double T, double[] saved) {
         double volume = Math.max(1e-7, length() / 16.0 * VOLUME_PER_BLOCK[tier]);
         double z = blockY + (minY() - (heightVoxels() == bore() ? bore() / 2.0 : 0)) / 16.0;
         fluid = new FluidNode(volume, z, heightVoxels() / 16.0, false);
@@ -125,7 +130,7 @@ public final class PipePart extends VoxelPart {
             fluid.mAir = saved[1];
             fluid.energy = saved[2];
             fluid.update();
-        } else fluid.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        } else fluid.fill(0, Water.P_ATM, T);
     }
 
     /** The ends on the block's boundary, as ports (face and spot), for the block at pos. */
