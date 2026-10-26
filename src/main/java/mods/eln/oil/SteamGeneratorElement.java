@@ -112,6 +112,33 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         super.repair();
     }
 
+    /** The low-pressure tip: under this inlet pressure (Pa) for this long (s) while loaded. */
+    static final double LOW_PA = 5e5, LOW_SECONDS = 30;
+    double lowSeconds;
+    /** Times the tip was due (GameTests). */
+    public int lowPressureTips;
+    /** Who placed it (for the low-pressure advancement); null for turbines placed before. */
+    java.util.UUID placer;
+
+    @Override
+    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, CompoundTag itemStackNbt) {
+        if (entityLiving instanceof net.minecraft.world.entity.player.Player p) placer = p.getUUID();
+        super.initializeFromThat(front, entityLiving, itemStackNbt);
+    }
+
+    /** "Under Pressure" (data/eln/advancement/guide/low_pressure.json) to its placer, if online. */
+    void awardLowPressure() {
+        if (!(node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl)) return;
+        var player = sl.getServer().getPlayerList().getPlayer(placer);
+        var adv = sl.getServer().getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "guide/low_pressure"));
+        if (player != null && adv != null) player.getAdvancements().award(adv, "low");
+    }
+
+    /** Work per kg now against its rating (10 bar venting to air), for WAILA: what pressure buys. */
+    public double pressureEfficiency() {
+        return inlet == null ? 0 : jPerKg() / SteamGeneratorDescriptor.NOMINAL_J_PER_KG;
+    }
+
     /** Shaft speed (1 = nominal), governor valve (0..1) and its integral. */
     public double omega, gate, gateI;
 
@@ -152,6 +179,15 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             else if (omega > 1.1 && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
                 sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.MINECART_RIDING, net.minecraft.sounds.SoundSource.BLOCKS,
                     0.8f, (float) Math.min(2, omega * 1.4));   // (the whine of a shaft over speed)
+            // (Baughn: a tip for players) loaded on under LOW_PA for LOW_SECONDS: an advancement telling its placer to
+            // throttle it with a valve, so the boiler can build pressure
+            if (omega > 0.2 && pe > 0.05 * pNom && inlet.P() < LOW_PA) lowSeconds += time;
+            else lowSeconds = 0;
+            if (lowSeconds > LOW_SECONDS) {
+                lowSeconds = 0;
+                lowPressureTips++;
+                if (placer != null) awardLowPressure();
+            }
             // meters
             meterSteam += got / EaUnits.KG_PER_MB_STEAM;
             meterTime += time;
@@ -295,6 +331,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         nbt.putDouble("omega", omega);
         nbt.putDouble("gate", gate);
         nbt.putDouble("gateI", gateI);
+        if (placer != null) nbt.putString("placer", placer.toString());
         if (inlet != null) {
             nbt.putDouble("inletW", inlet.mWater);
             nbt.putDouble("inletA", inlet.mAir);
@@ -309,6 +346,12 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         omega = nbt.getDoubleOr("omega", 0);
         gate = nbt.getDoubleOr("gate", 0);
         gateI = nbt.getDoubleOr("gateI", 0);
+        String who = nbt.getStringOr("placer", "");
+        try {
+            placer = who.isEmpty() ? null : java.util.UUID.fromString(who);
+        } catch (IllegalArgumentException e) {
+            placer = null;
+        }
         if (nbt.contains("inletW"))
             loaded = new double[]{nbt.getDoubleOr("inletW", 0), nbt.getDoubleOr("inletA", 0), nbt.getDoubleOr("inletU", 0)};
     }
@@ -319,6 +362,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         info.put(I18N.tr("Steam"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
         info.put(I18N.tr("Steam used"), String.format("%.0f mB/s", steamRate));
         if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar", inlet.P() / 1e5));
+        // (Baughn: so players see what pressure buys; 100% = its rating, 10 bar venting to air)
+        if (inlet != null) info.put(I18N.tr("Pressure efficiency"), String.format("%.0f%% of its %.0f bar rating", pressureEfficiency() * 100,
+            SteamGeneratorDescriptor.NOMINAL_PA / 1e5));
         if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));
         info.put(I18N.tr("Speed"), String.format("%.0f%%", omega * 100));
         info.put(I18N.tr("Steam valve"), String.format("%.0f%%", gate * 100));

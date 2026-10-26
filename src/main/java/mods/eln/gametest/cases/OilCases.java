@@ -36,6 +36,7 @@ public final class OilCases {
         cases.add(new ColdBoilerOtherPipes());
         cases.add(new SteamTurbine());
         cases.add(new TurbineFloods());
+        cases.add(new TurbineLowPressure());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -470,6 +471,60 @@ public final class OilCases {
             ctx.check("oil: its rating, 0.7 of the expansion from 10 bar to air: 286 kJ/kg", Math.abs(perKg - 0.7 * 409e3) < 3e3, perKg + " J/kg");
             ctx.check("oil: no more electricity than the expansion gives (+5%)", p <= used * mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM * perKg * 1.05,
                 String.format("%.0f W vs %.0f mB/s", p, used));
+        }
+    }
+
+    /**
+     * The low-pressure tip (Baughn: tell players to use a valve): a loaded turbine on 3 bar for over 30 s is due the
+     * "Under Pressure" advancement (its placer gets it, if online) and shows a low pressure efficiency; one on 10 bar
+     * isn't, at ~100%.
+     */
+    static final class TurbineLowPressure implements TestCase {
+        mods.eln.oil.SteamGeneratorElement low, rated;
+        mods.eln.sim.IProcess feed;
+
+        public String id() {
+            return "oil_steam_turbine_low_pressure";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 760;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            low = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            var h1 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 2, 1);
+            rated = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            var h2 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, 1);
+            for (var t : new mods.eln.oil.SteamGeneratorElement[]{low, rated}) {
+                t.front = mods.eln.misc.Direction.XN;
+                t.reconnect();
+            }
+            for (var h : new mods.eln.oil.ElectricHeaterElement[]{h1, h2}) {
+                h.front = mods.eln.misc.Direction.ZN;
+                h.reconnect();
+            }
+            double t3 = mods.eln.sim.fluid.Water.tsat(3e5);
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                if (low.inlet != null && low.inlet.P() < 3e5) mods.eln.sim.fluid.EaUnits.addWater(low.inlet, 5e-4, t3, true);
+                if (rated.inlet != null) steam(rated);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.line("oil: on 3 bar " + low.getWaila() + "; on 10 bar " + rated.getWaila());
+            var adv = ctx.level().getServer().getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "guide/low_pressure"));
+            ctx.check("oil: the Under Pressure advancement exists", adv != null, "");
+            ctx.check("oil: loaded on 3 bar for 30 s, the tip is due", low.lowPressureTips >= 1, "" + low.lowPressureTips);
+            ctx.check("oil: on 10 bar, no tip", rated.lowPressureTips == 0, "" + rated.lowPressureTips);
+            ctx.check("oil: pressure efficiency ~100% at 10 bar, about half at 3 bar", rated.pressureEfficiency() > 0.9 && rated.pressureEfficiency() < 1.1
+                && low.pressureEfficiency() < 0.6, String.format("%.2f / %.2f", rated.pressureEfficiency(), low.pressureEfficiency()));
         }
     }
 
