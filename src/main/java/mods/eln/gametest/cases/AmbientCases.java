@@ -86,7 +86,7 @@ public final class AmbientCases {
         }
 
         public int width() {
-            return 8;
+            return 12;
         }
 
         public int ticks() {
@@ -101,13 +101,13 @@ public final class AmbientCases {
             var server = ctx.level().getServer();
             var src = server.createCommandSourceStack().withSuppressedOutput().withLevel(ctx.level());
             var a = ctx.at(0, 0, 0);
-            var b = ctx.at(7, 3, 2);
+            var b = ctx.at(11, 3, 2);
             server.getCommands().performPrefixedCommand(src, String.format("fillbiome %d %d %d %d %d %d minecraft:desert",
                 Math.min(a.getX(), b.getX()), a.getY(), Math.min(a.getZ(), b.getZ()), Math.max(a.getX(), b.getX()), b.getY(), Math.max(a.getZ(), b.getZ())));
             var p1 = ctx.at(1, 1, 1);
-            var p2 = ctx.at(6, 1, 1);
+            var p2 = ctx.at(10, 1, 1);
             server.getCommands().performPrefixedCommand(src, String.format("fillbiome %d %d %d %d %d %d minecraft:snowy_plains",
-                p2.getX() - 1, p2.getY() - 1, p2.getZ() - 1, p2.getX() + 1, p2.getY() + 1, p2.getZ() + 1));
+                p2.getX() - 1, p2.getY() - 4, p2.getZ() - 4, p2.getX() + 4, p2.getY() + 4, p2.getZ() + 4));   // (biomes are in 4-block cells)
             mods.eln.sim.Ambient.fixedC = null;
             try {
                 hot = ctx.placeTransparent(DISSIPATOR_PASSIVE, p1);

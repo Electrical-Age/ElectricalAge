@@ -42,8 +42,8 @@ public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
         this.nominalU = nominalU;
         this.nominalP = nominalP;
         this.resistorR = nominalU * nominalU / nominalP;
-        // a turbine of turbineP: turbineP / (EFFICIENCY x 2.257 J/mB) mB/s of steam, 67.5 mB of steam per mB of water
-        double steam = turbineP / (SteamGeneratorDescriptor.EFFICIENCY * mods.eln.fluid.FuelRegistry.INSTANCE.heatEnergyPerMilliBucket("steam"));
+        // a turbine of turbineP at its rating (SteamGeneratorDescriptor.nominalSteam), 67.5 mB of steam per mB of water
+        double steam = SteamGeneratorDescriptor.nominalSteam(turbineP);
         this.nominalMbPerS = NOMINAL_TURBINES * steam * EaUnits.KG_PER_MB_STEAM / EaUnits.KG_PER_MB_WATER;
         this.cable = cable;
         this.obj = Eln.obj.getObj(model);

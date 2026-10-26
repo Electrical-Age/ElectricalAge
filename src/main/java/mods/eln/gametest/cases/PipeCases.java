@@ -432,7 +432,7 @@ public final class PipeCases {
             lay(ctx, ctx.at(2, 2, 1), 0, 0, 8, 8, 16, 8, 8);
             lay(ctx, ctx.at(3, 2, 1), 0, 0, 8, 8, 16, 8, 8);
             lay(ctx, ctx.at(4, 2, 1), 0, 0, 8, 8, 8, 8, 8, 8, 0, 8);   // east in, then down into the turbine
-            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(2500 * t));
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(9600 * t));
         }
 
         public void measure(TestContext ctx) {
@@ -499,7 +499,7 @@ public final class PipeCases {
             }
             length = r.length();
             err = mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
-            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(2500 * t));
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(9600 * t));
         }
 
         public void measure(TestContext ctx) {

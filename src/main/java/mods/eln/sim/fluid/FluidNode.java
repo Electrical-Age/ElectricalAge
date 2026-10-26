@@ -90,6 +90,11 @@ public final class FluidNode {
         return state.P;
     }
 
+    /** The vapour's partial pressure (Pa). */
+    public double pVapour() {
+        return state.pVapour;
+    }
+
     public double mLiquid() {
         return state.mLiquid;
     }

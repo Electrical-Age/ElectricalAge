@@ -43,7 +43,6 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     public final NbtElectricalLoad load = new NbtElectricalLoad("load");
     public final PowerSource source = new PowerSource("source", load);
     public final PreciseElementFluidHandler tank;
-    final double jPerMb = FuelRegistry.INSTANCE.heatEnergyPerMilliBucket("steam");
     public static final double PORT_K = 6e-11;   // (two coupled ports are in series: 3e-11 boiler to turbine)
     /** The inlet holds TANK_SECONDS of nominal steam at about this density (kg/m^3; ~5 bar). */
     static final double INLET_RHO = 2.5;
@@ -65,9 +64,17 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         slowProcessList.add(new Run());
     }
 
-    /** Heat value of the inlet's steam per kg, as EA counts it: above liquid at 100 C (2.257 MJ/kg at 100 C). */
+    /**
+     * Work per kg of the inlet's steam (Baughn 2026-10-26: by the expansion): ETA of its isentropic drop from the
+     * inlet (its temperature and vapour pressure) to the exhaust, 1 atm (venting to air).
+     */
     double jPerKg() {
-        return Water.hVapour(inlet.T()) - Water.hLiquid(Water.TB);
+        return SteamGeneratorDescriptor.ETA * Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
+    }
+
+    /** Where the exhaust goes: the air. */
+    double exhaustPa() {
+        return Water.P_ATM;
     }
 
     /**
@@ -77,7 +84,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
      * generator's EMF is in proportion to speed, so an overloaded turbine slows and its voltage sags. Above TRIP the shaft
      * bursts (EA's overspeed failure): an unloaded turbine fed very high-pressure steam runs away on the leak alone.
      */
-    static final double H = 4, GOV_TAU = 0.5, KP = 8, KI = 2, LEAK = 0.005, LOSS = 0.05, TRIP = 1.25, P_REF = 2e5, FLOW_MAX = 1.5;
+    static final double H = 4, GOV_TAU = 0.5, KP = 8, KI = 2, LEAK = 0.005, LOSS = 0.05, TRIP = 1.25, P_REF = SteamGeneratorDescriptor.NOMINAL_PA, FLOW_MAX = 1.5;
     /**
      * Water in the inlet a turning turbine survives, as a share of the inlet's volume (Baughn: if any significant
      * quantity of water goes into a steam turbine, it should be damaged): over WATER_MAX while the shaft turns faster
@@ -127,14 +134,17 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             double mv = inlet.mVapour(), mg = mv + inlet.mAir;
             double jpk = jPerKg();
             double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
-            double pMech = SteamGeneratorDescriptor.EFFICIENCY * got * jpk / time;
+            double pMech = got * jpk / time;
             // the shaft
             double pNom = desc.nominalP;
             double ek = H * pNom * omega * omega + (pMech - pe - LOSS * pNom * omega * omega) * time;
             omega = Math.sqrt(Math.max(0, ek) / (H * pNom));
             source.setUmax(desc.maxU * omega);
             source.setP(omega > 0.05 ? 10 * pNom : 0);
-            if (omega > TRIP)
+            if (inlet.P() > SteamGeneratorDescriptor.BURST_PA)   // (the casing: Baughn, 25 bar for a small turbine)
+                new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).pressureVessel(() -> inlet.energy - inlet.mWater * Water.uLiquid(Water.TB))
+                    .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, inlet.P());
+            else if (omega > TRIP)
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).rotating(() -> H * pNom * omega * omega)
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERSPEED, omega);
             else if (omega > WATER_SPEED && waterShare() > WATER_MAX)

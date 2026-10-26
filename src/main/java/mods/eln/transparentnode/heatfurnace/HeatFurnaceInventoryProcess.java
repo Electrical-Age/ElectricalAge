@@ -46,7 +46,7 @@ public class HeatFurnaceInventoryProcess implements IProcess, INBTTReady {
             if (!SaveConfig.instance.heatFurnaceFuel) {
                 combustibleBuffer = furnace.furnaceProcess.nominalCombustibleEnergy;
             } else if (!Utils.isEmpty(combustibleStack)) {
-                double itemEnergy = Utils.getItemEnergie(combustibleStack);
+                double itemEnergy = Utils.getItemEnergie(combustibleStack) * mods.eln.ElnConfig.heatFurnaceFuelFactor;   // (Baughn 2026-10-26: with turbines by the expansion)
                 if (itemEnergy != 0) {
                     if (furnace.furnaceProcess.combustibleEnergy + combustibleBuffer < furnace.furnaceProcess.nominalCombustibleEnergy) {
                         //	furnace.furnaceProcess.combustibleEnergy += itemEnergy;

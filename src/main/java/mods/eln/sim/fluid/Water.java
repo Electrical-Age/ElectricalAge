@@ -87,4 +87,36 @@ public final class Water {
     public static double hAir(double T) {
         return uAir(T) + R_AIR * T;
     }
+
+    /** Specific entropy of liquid (J/kg/K), from 0 C: constant heat capacity (as uLiquid below T_STEEP). */
+    public static double sLiquid(double T) {
+        return CP_L * Math.log(T / T0);
+    }
+
+    /** Entropy of vapour at 100 C and 1 atm: the liquid's plus the latent heat over TB. */
+    static final double S_V_REF = CP_L * Math.log(TB / T0) + L_TB / TB;
+
+    /** Specific entropy of vapour (J/kg/K) at T and its partial pressure p: an ideal gas, as hVapour. */
+    public static double sVapour(double T, double p) {
+        return S_V_REF + CP_V * Math.log(T / TB) - R_V * Math.log(p / P_ATM);
+    }
+
+    /**
+     * The enthalpy drop (J/kg) of vapour at T (K) and partial pressure p expanding without loss (at constant entropy) to
+     * the pressure pOut: the work an ideal turbine gets from it (Baughn 2026-10-26: steam turbines by the expansion).
+     * Wet below the saturation line (by its quality), superheated above. 0 if pOut is not below p. Consistent with this
+     * class's own model: within ~5% of steam tables to 10 bar, ~7% at 25 (10 bar saturated to 1 atm: 409 kJ/kg, tables 389).
+     */
+    public static double isentropicDrop(double T, double p, double pOut) {
+        if (!(pOut < p) || p <= 0 || pOut <= 0) return 0;
+        double s = sVapour(T, p), tOut = tsat(pOut);
+        double sl = sLiquid(tOut), sv = sVapour(tOut, pOut);
+        double hOut;
+        if (s >= sv) hOut = hVapour(TB * Math.exp((s - S_V_REF + R_V * Math.log(pOut / P_ATM)) / CP_V));
+        else {
+            double x = Math.max(0, (s - sl) / (sv - sl));
+            hOut = hLiquid(tOut) + x * (hVapour(tOut) - hLiquid(tOut));
+        }
+        return Math.max(0, hVapour(T) - hOut);
+    }
 }

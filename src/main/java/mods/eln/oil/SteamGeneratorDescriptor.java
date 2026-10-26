@@ -10,13 +10,19 @@ import java.util.List;
 
 /**
  * 26.x (Baughn, oil thread): the small steam turbine, a turbine with its generator built in that puts out 50 or 200 V
- * like the old heat turbine, which it replaces as early-game power (coal -> heat furnace -> boiler -> this). It turns
- * what steam it gets into electricity at {@link #EFFICIENCY} of steam's heat value (2.257 J/mB), up to its nominal
- * power; the stock shaft Steam Turbine (7,200 mB/s) stays for big plants. Model: tools/models/steamturbine.py.
+ * like the old heat turbine, which it replaces as early-game power (coal -> heat furnace -> boiler -> this). It gets
+ * {@link #ETA} of what the steam gives expanding from its inlet to the exhaust (Baughn 2026-10-26: by the expansion,
+ * Water.isentropicDrop), up to its nominal power, which it reaches on steam at {@link #NOMINAL_PA} venting to air; the
+ * stock shaft Steam Turbine (7,200 mB/s) stays for big plants. Model: tools/models/steamturbine.py.
  */
 public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
-    /** Electric out per steam heat in: low-pressure steam at ~100 C, generous for the game (Carnot ~21%). */
-    public static final double EFFICIENCY = 0.40;
+    /** Electric work per kg out of the ideal (isentropic) expansion: turbine and generator together. */
+    public static final double ETA = 0.70;
+    /** The inlet pressure it is rated for (saturated steam, venting to air), and the one its casing bursts over (Pa). */
+    public static final double NOMINAL_PA = 10e5, BURST_PA = 25e5;
+    /** Work per kg at the rating (J/kg): 0.7 x 409 kJ/kg. */
+    public static final double NOMINAL_J_PER_KG = ETA * mods.eln.sim.fluid.Water.isentropicDrop(
+        mods.eln.sim.fluid.Water.tsat(NOMINAL_PA), NOMINAL_PA, mods.eln.sim.fluid.Water.P_ATM);
     /** The tank holds this many seconds of nominal steam; the output follows the tank with this time constant. */
     public static final double TANK_SECONDS = 2, RESPONSE_SECONDS = 1;
 
@@ -35,9 +41,13 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
         cableTerminals = mods.eln.cable.CableTerminals.FRONT_AND_BACK; // terminal plates front and back (model)
     }
 
-    /** Steam (mB/s) at nominal power. */
+    /** Steam (mB/s) at nominal power, at the rating. */
     public double nominalSteam() {
-        return nominalP / (EFFICIENCY * mods.eln.fluid.FuelRegistry.INSTANCE.heatEnergyPerMilliBucket("steam"));
+        return nominalSteam(nominalP);
+    }
+
+    public static double nominalSteam(double nominalP) {
+        return nominalP / NOMINAL_J_PER_KG / mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM;
     }
 
     void draw() {
@@ -65,7 +75,8 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
         list.add(String.format("Steam in (any side), %.0f V out (front and back)", nominalU));
-        list.add(String.format("Up to %.0f W from %.0f mB/s of steam", nominalP, nominalSteam()));
+        list.add(String.format("Up to %.0f W from %.0f mB/s of steam at %.0f bar", nominalP, nominalSteam(), NOMINAL_PA / 1e5));
+        list.add(String.format("Its casing bursts over %.0f bar", BURST_PA / 1e5));
         list.add("Might want a boiler with that.");   // (Baughn: the heat turbine gave way to steam, with no hint)
     }
 }

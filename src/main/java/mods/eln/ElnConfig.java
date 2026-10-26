@@ -12,7 +12,7 @@ public final class ElnConfig {
     static final ModConfigSpec.BooleanValue PROBE_DETAILS;
     static final ModConfigSpec.BooleanValue CONVERT_CABLES;
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
-    static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C;
+    static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -20,6 +20,9 @@ public final class ElnConfig {
         BATTERY_LIFE_FACTOR = b.comment("Battery lifespan multiplier: wear is divided by it (1 = 1.12's wear; Baughn: 25). Wear also",
                 "doubles every 10 C above 30 C and rises up to 4x as the charge runs low.")
             .defineInRange("batteryLifeFactor", 25.0, 0.01, 10000.0);
+        HEAT_FURNACE_FUEL = b.comment("Heat a fuel gives in the heat furnaces (stone and fuel), times its 1.12 value. Baughn 2026-10-26: with",
+                "steam turbines working by the expansion, coal to electricity straddles the old 33%: ~24% venting, ~44% with a condenser.")
+            .defineInRange("heatFurnaceFuelFactor", 2.5, 0.01, 100.0);
         b.pop();
         b.push("fire");
         COAL_LAG = b.comment("Seconds a coal fire (the stone heat furnace) takes to follow its setting: a first-order lag (Baughn: coal",
@@ -52,9 +55,11 @@ public final class ElnConfig {
 
     /** Cached (the battery processes read it every second). */
     public static volatile double batteryLifeFactor = 25.0;
+    public static volatile double heatFurnaceFuelFactor = 2.5;
 
     static void refresh() {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
+        heatFurnaceFuelFactor = HEAT_FURNACE_FUEL.get();
         Eln.wailaEasyMode = PROBE_DETAILS.get();
         mods.eln.node.voxel.CableConverter.convertOnLoad = CONVERT_CABLES.get();
         mods.eln.sim.Fire.COAL.lag = COAL_LAG.get();
