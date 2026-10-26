@@ -166,7 +166,7 @@ public final class PipeKitRecipes {
         KitRecipes.crafted(e, FromPlates.class, FromPlates::use);
     }
 
-    /** JEI examples: per tier, 9 slots of plates to a kit, and a kit to plates. */
+    /** JEI examples: per tier, 9 slots of plates to a kit (kit to plates JEI lists itself, from display(): AdventurAgent saw it twice). */
     public static List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> examples() {
         List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
         var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
@@ -181,10 +181,6 @@ public final class PipeKitRecipes {
                     new net.minecraft.world.item.crafting.ShapelessRecipe(info, book,
                         net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(PipeKitItem.kit(t, 16 * (n / PER_BLOCK[t]))), ings)));
             }
-            out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
-                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "jei/pipe_kit_to_plates_" + t)),
-                new net.minecraft.world.item.crafting.ShapelessRecipe(info, book, net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(new ItemStack(plate(t), PER_BLOCK[t])),
-                    List.of(net.minecraft.world.item.crafting.Ingredient.of(PipeKitItem.kit(t, 32).getItem())))));
         }
         return out;
     }
