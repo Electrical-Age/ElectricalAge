@@ -22,19 +22,19 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
     public final int tier;
 
     public PipeKitItem(int tier, Properties p) {
-        super(p.durability(MAX));
+        super(p.stacksTo(1));
         this.tier = tier;
     }
 
     public static int length(ItemStack s) {
-        return s.getItem() instanceof PipeKitItem ? MAX - s.getDamageValue() : 0;
+        return s.getItem() instanceof PipeKitItem ? KitItem.length(s) : 0;
     }
 
     /** A kit holding len voxels of a tier's pipe (empty if none). */
     public static ItemStack kit(int tier, int len) {
         if (len <= 0) return ItemStack.EMPTY;
         ItemStack s = new ItemStack(tier == 0 ? ElnRegistry.PIPE_KIT_IRON.get() : ElnRegistry.PIPE_KIT_ALLOY.get());
-        s.setDamageValue(MAX - Math.min(MAX, len));
+        KitItem.setLength(s, len);
         return s;
     }
 
@@ -55,6 +55,16 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
     }
 
     @Override
+    public int getBarWidth(ItemStack stack) {
+        return KitItem.barWidth(stack);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        return KitItem.barColor(stack);
+    }
+
+    @Override
     public Component getName(ItemStack stack) {
         return Component.translatable(getDescriptionId()).append(String.format(" (%.2f blocks)", length(stack) / 16.0));
     }
@@ -68,7 +78,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         int per = PipeKitRecipes.PER_BLOCK[tier];
         int n = Math.min(plates.getCount() / per, (MAX - length(kit)) / 16);
         if (n <= 0) return 0;
-        kit.setDamageValue(MAX - (length(kit) + 16 * n));
+        KitItem.setLength(kit, length(kit) + 16 * n);
         take.accept(n * per);
         return n;
     }
@@ -122,7 +132,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         if (!creative) {
             int left = length(stack) - 16;
             if (left <= 0) stack.shrink(1);
-            else stack.setDamageValue(MAX - left);
+            else KitItem.setLength(stack, left);
         }
         return InteractionResult.SUCCESS;
     }

@@ -15,7 +15,7 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
     public final int tier;
 
     public CableKitItem(int tier, Properties p) {
-        super(p.durability(MAX));
+        super(p.stacksTo(1));
         this.tier = tier;
     }
 
@@ -40,6 +40,16 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
     @Override
     public boolean isBarVisible(ItemStack stack) {
         return true;
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        return KitItem.barWidth(stack);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        return KitItem.barColor(stack);
     }
 
     @Override

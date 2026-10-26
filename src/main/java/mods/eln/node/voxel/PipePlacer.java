@@ -211,7 +211,7 @@ public final class PipePlacer {
         if (!creative) {
             int left = PipeKitItem.length(kit) - len;
             if (left <= 0) kit.shrink(1);
-            else kit.setDamageValue(PipeKitItem.MAX - left);
+            else KitItem.setLength(kit, left);
         }
         player.sendOverlayMessage(Component.literal(String.format("Laid %.1f blocks of pipe", len / 16.0)));
         return true;

@@ -38,6 +38,7 @@ public final class PipeCases {
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
+        cases.add(new KitLengthNotDamage());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -917,6 +918,43 @@ public final class PipeCases {
 
         public void measure(TestContext ctx) {
             ctx.check("pipe preview: a route with boxes", ok, result);
+        }
+    }
+
+    /**
+     * A kit's length isn't damage (a player's report via Baughn: an Occultism blacksmith familiar repaired cable kits
+     * full): kits can't be damaged or repaired, a kit from before (its length as damage) still reads right, and changing
+     * it moves the length into the kit's data.
+     */
+    static final class KitLengthNotDamage implements TestCase {
+        String result = "";
+        boolean ok;
+
+        public String name() {
+            return "kits keep their length in data, not damage";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            ItemStack pipe = PipeKitItem.kit(0, 100);
+            ItemStack cable = mods.eln.node.voxel.CableKitItem.kit(1, 40);
+            // a kit saved before: damage 1000 of 1024 = 24 voxels
+            ItemStack old = new ItemStack(mods.eln.registry.ElnRegistry.CABLE_KITS.get(1).get());
+            old.set(net.minecraft.core.component.DataComponents.DAMAGE, 1000);
+            int oldLen = mods.eln.node.voxel.KitItem.length(old);
+            mods.eln.node.voxel.KitItem.setLength(old, oldLen + 16);
+            result = "pipe " + PipeKitItem.length(pipe) + " damageable " + pipe.isDamageableItem() + ", cable " + mods.eln.node.voxel.KitItem.length(cable)
+                + " damageable " + cable.isDamageableItem() + ", old " + oldLen + " -> " + mods.eln.node.voxel.KitItem.length(old)
+                + " damage left " + old.has(net.minecraft.core.component.DataComponents.DAMAGE);
+            ok = PipeKitItem.length(pipe) == 100 && !pipe.isDamageableItem() && mods.eln.node.voxel.KitItem.length(cable) == 40 && !cable.isDamageableItem()
+                && oldLen == 24 && mods.eln.node.voxel.KitItem.length(old) == 40 && !old.has(net.minecraft.core.component.DataComponents.DAMAGE);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("kits: length in data, not damage; old kits read right", ok, result);
         }
     }
 }
