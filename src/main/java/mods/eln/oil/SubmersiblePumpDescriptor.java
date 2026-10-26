@@ -19,17 +19,17 @@ import static mods.eln.i18n.I18N.tr;
 /**
  * The submersible pump (Baughn 2026-10-25): a small electric pump that stands in water (it must be waterlogged) and
  * pushes it up a pipe from the flange on its top, for a boiler's feed. Its nominal flow is a few times what a turbine of
- * its voltage turns into steam (NOMINAL_TURBINES), falling to nothing at SHUTOFF_PA against the pipe. Power on its
+ * its voltage turns into steam (NOMINAL_TURBINES), falling to nothing at shutoffPa against the pipe. Power on its
  * flanks; a signal on its front sets its speed (no cable there: full speed). Model: tools/models/submersiblepump.py.
  */
 public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
     /** Nominal flow, in turbines' worth of feedwater (a turbine of the same voltage at full power). */
     public static final double NOMINAL_TURBINES = 3.5;
     /**
-     * Pressure against which the flow falls to nothing (Pa, absolute): a small submersible pump's ~20 m of head
-     * (Baughn: 9 bar was a pressure washer's). A running boiler sits near 1.3 bar, so it still feeds one well.
+     * Pressure against which the flow falls to nothing (Pa, absolute). Baughn 2026-10-26, with turbines rated for 10
+     * bar: 6 bar for the 50V, 15 bar for the 200V (it was 3 for both: "9 bar was a pressure washer's").
      */
-    public static final double SHUTOFF_PA = 3e5;
+    public final double shutoffPa;
 
     final double nominalU, nominalP, resistorR;
     /** Nominal flow (mB of water a second). */
@@ -37,8 +37,9 @@ public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
     final ElectricalCableDescriptor cable;
     final Obj3D obj;
 
-    public SubmersiblePumpDescriptor(String name, double nominalU, double nominalP, double turbineP, ElectricalCableDescriptor cable, String model) {
+    public SubmersiblePumpDescriptor(String name, double nominalU, double nominalP, double turbineP, double shutoffPa, ElectricalCableDescriptor cable, String model) {
         super(name, SubmersiblePumpElement.class, SubmersiblePumpRender.class);
+        this.shutoffPa = shutoffPa;
         this.nominalU = nominalU;
         this.nominalP = nominalP;
         this.resistorR = nominalU * nominalU / nominalP;
@@ -79,7 +80,7 @@ public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("%.0f V, %.0f W: up to %.0f mB/s of water", nominalU, nominalP, nominalMbPerS));
+        list.add(String.format("%.0f V, %.0f W: up to %.0f mB/s of water, against up to %.0f bar", nominalU, nominalP, nominalMbPerS, shutoffPa / 1e5));
         Collections.addAll(list, tr("Place it in water; the pipe goes on top.\nPower on its sides, a signal on its front sets its speed.").split("\n"));
     }
 }

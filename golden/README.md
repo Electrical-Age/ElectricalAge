@@ -24,6 +24,8 @@ A port regenerates both with the same commands and diffs them against these file
   meters, electrical/voltage probes and the thermal probe (slot 0), lamp sockets (slot 1) have a built-in cable; the
   Ground Cable has no GUI at all (`GUI_REMOVED`). The lamp supply's and temperature probe's slots stay, now optional.
 - The stone heat furnace's fuel slot refuses paper. The E36 pack made paper a furnace fuel; vanilla 26.x has none.
+- The stone heat furnace takes 4 combustion chambers, not 2 (Baughn 2026-10-26, with steam turbines by the expansion;
+  `GoldenCase.CHANGED`, `GoldenSlotsCase`).
 
 `golden_recipes`: the macerator turns vanilla ore blocks (iron, gold, copper; deepslate too, by tag) into raw chunks
 about like Fortune II (iron/gold 1-3, mean 1.75; copper 3-8), and each chunk into one dust with a 20% chance of two

@@ -104,7 +104,7 @@ public class Wp10bContent implements ElnContent {
                 // nominalPower,
                 // double
                 // nominalCombustibleEnergy,
-                2, 500,// int combustionChamberMax,double
+                4, 500,// int combustionChamberMax (Baughn 2026-10-26: 4, was 2, with turbines by the expansion),double
                 // combustionChamberPower,
                 new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
             );

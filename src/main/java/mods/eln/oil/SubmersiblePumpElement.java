@@ -34,7 +34,7 @@ import java.util.Map;
  * The submersible pump (SubmersiblePumpDescriptor): a motor (a resistor at its nominal power, scaled by the speed the
  * front signal asks for) driving a pump that is part of the fluid solve (Baughn: a matrix stamp, not water injected per
  * tick): a one-way edge from its sump (the water it stands in, at 1 atm) to its outlet behind the flange on top, with
- * a head of SHUTOFF_PA above the sump and a conductance such that it delivers its nominal flow against 1 atm. So the
+ * a head of shutoffPa above the sump and a conductance such that it delivers its nominal flow against 1 atm. So the
  * flow falls linearly to nothing at the shutoff pressure, exactly, whatever the pipe; the speed and the motor's power
  * scale the conductance. The outlet stub merges into the pipe on it. Out of water (not waterlogged) it doesn't run.
  */
@@ -94,7 +94,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
     public void beforeFluidStep(double dt) {
         if (pumpEdge == null) return;
         pumpEdge.open = submerged ? Math.min(1.2, motor.getP() / desc.nominalP) : 0;
-        pumpEdge.boost = SubmersiblePumpDescriptor.SHUTOFF_PA - Water.P_ATM;
+        pumpEdge.boost = desc.shutoffPa - Water.P_ATM;
     }
 
     @Override
@@ -167,7 +167,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
         outlet.resistance = 1 / PORT_K;
         sump = FluidNode.sump(c.y, mods.eln.sim.Ambient.kelvin(c));
         // g = rho k / mu = nominal flow / shutoff head (kg/s/Pa): the nominal flow against 1 atm, none at the shutoff
-        double dp = SubmersiblePumpDescriptor.SHUTOFF_PA - Water.P_ATM;
+        double dp = desc.shutoffPa - Water.P_ATM;
         double kgPerS = desc.nominalMbPerS * EaUnits.KG_PER_MB_WATER;
         pumpEdge = new FluidDevice.Link(sump, 0, outlet, 0, kgPerS / dp * Water.MU_L / Water.RHO_L).kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
         pumpEdge.boost = dp;

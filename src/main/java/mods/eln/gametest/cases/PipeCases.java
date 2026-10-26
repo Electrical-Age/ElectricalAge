@@ -279,7 +279,7 @@ public final class PipeCases {
 
         public void measure(TestContext ctx) {
             double p = pump.outlet.P();
-            ctx.check("pump dead-headed: its outlet stops at the shutoff pressure", p > 2.7e5 && p < 3.05e5, String.format("%.3f bar, %s", p / 1e5, pump.getWaila()));
+            ctx.check("pump dead-headed: its outlet stops at the shutoff pressure", p > 0.9 * ((mods.eln.oil.SubmersiblePumpDescriptor) pump.transparentNodeDescriptor).shutoffPa && p < 1.02 * ((mods.eln.oil.SubmersiblePumpDescriptor) pump.transparentNodeDescriptor).shutoffPa, String.format("%.3f bar, %s", p / 1e5, pump.getWaila()));
             ctx.check("pump dead-headed: no flow", pump.rate < 2, String.format("%.1f mB/s", pump.rate));
         }
     }

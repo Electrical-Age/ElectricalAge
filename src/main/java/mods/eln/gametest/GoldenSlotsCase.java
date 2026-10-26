@@ -247,7 +247,13 @@ final class GoldenSlotsCase implements TestCase {
                     known.add(name + " slot " + i + " narrowed: takes " + got.size() + " of 1.12's " + want.size() + " probes");
                     want = got;
                 }
-                boolean ok = index == g.get("index").getAsInt() && limit == g.get("limit").getAsInt() && got.equals(want);
+                int wantLimit = g.get("limit").getAsInt();
+                // (Baughn 2026-10-26: 4 combustion chambers, was 2, with steam turbines by the expansion)
+                if ("Stone Heat Furnace".equals(name) && i == 2 && wantLimit == 2 && limit == 4) {
+                    known.add(name + " slot 2 takes 4 combustion chambers (1.12: 2; Baughn 2026-10-26)");
+                    wantLimit = 4;
+                }
+                boolean ok = index == g.get("index").getAsInt() && limit == wantLimit && got.equals(want);
                 slotsAll++;
                 if (ok) slotsOk++;
                 else {

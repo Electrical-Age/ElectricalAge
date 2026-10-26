@@ -79,9 +79,9 @@ public class Wp10aContent implements ElnContent {
             MVU, 4000, meduimVoltageCableDescriptor, "oilpump200v"));
         // Baughn 2026-10-25: small waterlogged pumps for a boiler's feed, a few turbines' worth of water each
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "50V Submersible Pump"),
-            LVU, 100, 1000, lowVoltageCableDescriptor, "submersiblepump50v"));
+            LVU, 100, 1000, 6e5, lowVoltageCableDescriptor, "submersiblepump50v"));
         transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "200V Submersible Pump"),
-            MVU, 400, 4000, meduimVoltageCableDescriptor, "submersiblepump200v"));
+            MVU, 400, 4000, 15e5, meduimVoltageCableDescriptor, "submersiblepump200v"));
     }
 
     /** 26.x oil: the tar sand separator (notes/oil; model tools/models/tarsandseparator.py, drawn as a macerator). */
