@@ -38,6 +38,7 @@ public final class OilCases {
         cases.add(new TurbineFloods());
         cases.add(new TurbineLowPressure());
         cases.add(new TurbineCondenser());
+        cases.add(new TurbineHoldsPressure());
         cases.add(new CondenserFloods());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
@@ -527,6 +528,72 @@ public final class OilCases {
             ctx.check("oil: on 10 bar, no tip", rated.lowPressureTips == 0, "" + rated.lowPressureTips);
             ctx.check("oil: pressure efficiency ~100% at 10 bar, about half at 3 bar", rated.pressureEfficiency() > 0.9 && rated.pressureEfficiency() < 1.1
                 && low.pressureEfficiency() < 0.6, String.format("%.2f / %.2f", rated.pressureEfficiency(), low.pressureEfficiency()));
+        }
+    }
+
+    /**
+     * The turbine's pressure regulator (Baughn 2026-10-26): two boilers on 2.5 kW of heat, each on a 50V turbine driving
+     * a 1 kW heater: more than the steam allows. Without a regulator the governor opens fully and the boiler sits near
+     * 2 bar; with an analog regulator set to 4 bar the turbine holds its inlet there (it slows instead), and makes more
+     * of the same heat. A third turbine on external control with no signal keeps its valve shut.
+     */
+    static final class TurbineHoldsPressure implements TestCase {
+        mods.eln.oil.SteamGeneratorElement free, held, ext;
+        mods.eln.oil.BoilerElement b1, b2;
+        mods.eln.sim.IProcess fire;
+        double e1, e2;
+        int tick;
+
+        public String id() {
+            return "oil_steam_turbine_holds_pressure";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int ticks() {
+            return 2400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            free = plant(l, 1, false)[0];
+            held = plant(l, 4, false)[0];
+            ext = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 7, 1);
+            b1 = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(1, 2, 1));
+            b2 = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(4, 2, 1));
+            for (var b : new mods.eln.oil.BoilerElement[]{b1, b2}) {
+                b.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+                b.fromTanks(8000, 0);
+                b.showTanks();
+            }
+            held.inventory.setItem(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, mods.eln.Eln.findItemStack("Analogic Regulator"));
+            held.inventoryChange(held.inventory);
+            held.targetBar = 4;
+            held.inventoryChange(held.inventory);
+            ext.controlExternal = true;
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                b1.thermal.moveEnergyTo(2500 * t);
+                b2.thermal.moveEnergyTo(2500 * t);
+                if (ext.inlet != null) steam(ext);
+                if (++tick > 1600) {
+                    e1 += free.source.getEffectiveP() * t;
+                    e2 += held.source.getEffectiveP() * t;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line("oil: free " + free.getWaila() + "; held " + held.getWaila() + "; external " + ext.getWaila());
+            ctx.check("oil: without a regulator, an overloaded turbine drains its boiler (under 4 bar)", free.inlet.P() < 4e5,
+                String.format("%.2f bar", free.inlet.P() / 1e5));
+            ctx.check("oil: with one set to 4 bar it holds its inlet there (3.5-5 bar)", held.inlet.P() > 3.5e5 && held.inlet.P() < 5e5,
+                String.format("%.2f bar", held.inlet.P() / 1e5));
+            ctx.check("oil: and makes more of the same heat", e2 > 1.3 * e1, String.format("%.0f J vs %.0f J", e2, e1));
+            ctx.check("oil: external control with no signal keeps the valve shut", ext.steamRate < 0.02 * mods.eln.oil.SteamGeneratorDescriptor.nominalSteam(1000)
+                && ext.omega < 0.5, String.format("%.0f mB/s, speed %.0f%%", ext.steamRate, ext.omega * 100));
         }
     }
 

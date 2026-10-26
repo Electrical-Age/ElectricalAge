@@ -156,6 +156,10 @@ public final class MenuSpecs {
             s[d.outStackCount + 1] = descriptor(d.outStackCount + 1, 8, 12, 5, MachineBoosterDescriptor.class, MEDIUM, tr("Booster slot"));
             return MenuSpec.of(s).publishing(1).panel(204, 122, 8, 40);
         });
+        // the steam turbines (Baughn 2026-10-26): a regulator holds a target inlet pressure
+        put(mods.eln.oil.SteamGeneratorDescriptor.class, d -> MenuSpec.of(
+            descriptor(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, 8, 58, 1, IRegulatorDescriptor.class, MEDIUM, tr("Regulator slot"),
+                tr("(Holds a target inlet pressure)"))).publishing(0));
         put(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId, 70, 58, 64,
                 s -> mods.eln.misc.Utils.getItemEnergie(s) > 0, MEDIUM, tr("Fuel slot")),

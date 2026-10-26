@@ -60,7 +60,7 @@ public class ElnLang extends LanguageProvider {
         add("advancements.eln.guide.steam_turbine.title", "Full Steam Ahead");
         // (Baughn 2026-10-26: an anti-achievement with the cure; SteamGeneratorElement.awardLowPressure)
         add("advancements.eln.guide.low_pressure.title", "Under Pressure");
-        add("advancements.eln.guide.low_pressure.description", "Your steam turbine asks for more steam than its boiler makes: the pressure falls, and it gets little from each kg. Add heat, or lighten its load.");
+        add("advancements.eln.guide.low_pressure.description", "Your steam turbine asks for more steam than its boiler makes: the pressure falls, and it gets little from each kg. Add heat, lighten its load, or give it a regulator to hold a target pressure.");
         add("advancements.eln.guide.steam_turbine.description", "Set it under the boiler. Or don't.");
         add("advancements.eln.guide.big_iron.title", "Big Iron");
         add("advancements.eln.guide.big_iron.description", "Mind the rads.");

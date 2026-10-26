@@ -1,0 +1,58 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "200V Steam Turbine"
+  },
+  {
+   "button": "external",
+   "sample": [
+    "Internal control",
+    "External control (signal, left side)"
+   ],
+   "fill": true
+  },
+  {
+   "text": "throttle",
+   "sample": "Throttle: 100%"
+  },
+  {
+   "slider": "throttle",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "text": "target",
+   "sample": "Hold the inlet at: 25.0 bar  (now 25.0 bar)"
+  },
+  {
+   "slider": "target",
+   "sample": "    ",
+   "fill": true
+  },
+  {
+   "text": "valve",
+   "sample": "Steam valve may open: 100%"
+  },
+  {
+   "row": [
+    {
+     "slot": "0"
+    },
+    {
+     "space": 0,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 4
+}

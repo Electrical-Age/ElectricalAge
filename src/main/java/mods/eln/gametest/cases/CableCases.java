@@ -534,14 +534,14 @@ public final class CableCases {
                 trimEnds += (e == null ? "none" : e.x() - tp.getX() * 16L + "," + (e.z() - tp.getZ() * 16L)) + " ";
                 trimOk &= e != null && e.x() == tp.getX() * 16L + 16 && e.z() == tp.getZ() * 16L + 8;
             }
-            // a 50V steam turbine: ends on its front and back (its terminal plates), none on its flanks
+            // a 50V steam turbine: ends on its front and back (its terminal plates) and its left flank (the control signal's)
             var tb = c.placeTransparent(12 + (82 << 6), c.at(4, 1, 2));
             for (var d : new net.minecraft.core.Direction[]{net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH,
                 net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST}) {
                 var hit = net.minecraft.world.phys.Vec3.atCenterOf(c.at(4, 1, 2)).add(d.getStepX() * 0.5, -0.45, d.getStepZ() * 0.5);
                 boolean got = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(4, 1, 2), d, hit, false, new long[1][]) != null;
                 var ed = mods.eln.misc.Direction.fromEnumFacing(d);
-                boolean want = ed == tb.front || ed == tb.front.back();
+                boolean want = ed == tb.front || ed == tb.front.back() || ed == tb.front.left();   // (left: its control signal)
                 ends += d + (got ? "+ " : "- ");
                 endsOk &= got == want;
             }
@@ -562,7 +562,7 @@ public final class CableCases {
             c.check("device end: laid", err == null, String.valueOf(err));
             c.check("device end: the cable meets the device at the middle of the edge (16,0,8)", "16,0,8".equals(endAt), endAt);
             c.check("device end: a lug at a terminal plate (3 more boxes)", lugged == plain + 18, plain + " -> " + lugged + " quads");
-            c.check("device end: a turbine takes cables on its front and back only", endsOk, ends);
+            c.check("device end: a turbine takes cables on its front, back and left (signal) only", endsOk, ends);
             c.check("device end: a click anywhere on a hosted trimmer ends at its front connector (16,8)", trimOk, trimEnds);
             c.check("device end: a floor click beside the device's port snaps to it", snapOk, snapInfo);
             double i = current(r);

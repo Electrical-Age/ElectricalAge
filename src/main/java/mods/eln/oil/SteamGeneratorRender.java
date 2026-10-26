@@ -20,6 +20,21 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
     float due;
     /** A condenser against its exhaust side: the duct into it, no vent stack (and no puffs). */
     boolean condenser;
+    /** Its controls, for the screen (SteamGeneratorScreen). */
+    public boolean controlExternal, throttleNew, targetNew;
+    public float throttle = -1, targetBar = -1, limit, inletBar;
+
+    public void clientToggleControl() {
+        clientSendId(SteamGeneratorElement.TOGGLE_EXTERNAL);
+    }
+
+    public void clientSetThrottle(float v) {
+        clientSendFloat(SteamGeneratorElement.SET_THROTTLE, v);
+    }
+
+    public void clientSetTarget(float v) {
+        clientSendFloat(SteamGeneratorElement.SET_TARGET, v);
+    }
     float angle = (float) (Math.random() * 360);
 
     public SteamGeneratorRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
@@ -66,6 +81,18 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
             speed.setTarget(stream.readFloat());
             steam.setTarget(stream.readFloat());
             condenser = stream.readBoolean();
+            controlExternal = stream.readBoolean();
+            float t = stream.readFloat(), p = stream.readFloat();
+            if (t != throttle) {
+                throttle = t;
+                throttleNew = true;
+            }
+            if (p != targetBar) {
+                targetBar = p;
+                targetNew = true;
+            }
+            limit = stream.readFloat();
+            inletBar = stream.readFloat();
         } catch (IOException e) {
             e.printStackTrace();
         }

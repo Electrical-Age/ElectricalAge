@@ -138,6 +138,9 @@ def turbine(tier):
     # --- terminal plates (electric out, front and back, floor level)
     terminal_plate(m, 0.1, 0.85, 0.1, 0.0)
     terminal_plate(m, 15.15, 15.9, 15.9, 16.0)
+    # --- signal plate on the z- flank (left, seen from the front): external control of the throttle (Baughn 2026-10-26)
+    from oilkit import signal_plate, turned
+    m.add(*turned(signal_plate(), 3))
     vent = (tcx / 16 - 0.5, 13.75 / 16 - 0.5, ez / 16 - 0.5)   # (the outlet's centre, model coordinates; it faces up)
     return m, rotor, vent, vent_m, ex_m
 

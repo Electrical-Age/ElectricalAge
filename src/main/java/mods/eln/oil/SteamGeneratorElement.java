@@ -41,6 +41,91 @@ import java.util.Map;
 public class SteamGeneratorElement extends TransparentNodeElement implements FluidDevice {
     final SteamGeneratorDescriptor desc;
     public final NbtElectricalLoad load = new NbtElectricalLoad("load");
+    /**
+     * Its controls (Baughn 2026-10-26: a screen as the heat furnace's): a regulator slot; internal control sets the
+     * throttle (the most the steam valve may open) or, with a regulator, a target inlet pressure the regulator holds by
+     * closing the valve when the inlet falls below it (so the boiler keeps its pressure); external control: a signal on
+     * its left flank sets the throttle (0-50 V: 0-100%). The speed governor works within that limit.
+     */
+    public final mods.eln.node.transparent.TransparentNodeElementInventory inventory = new mods.eln.node.transparent.TransparentNodeElementInventory(1, 1, this);
+    public static final int REGULATOR_SLOT = 0;
+    public final mods.eln.sim.nbt.NbtElectricalGateInput control = new mods.eln.sim.nbt.NbtElectricalGateInput("control");
+    public boolean controlExternal;
+    /** Internal throttle (0..1), target inlet pressure (bar), and the valve's limit now (0..1). */
+    public double throttle = 1, targetBar = SteamGeneratorDescriptor.NOMINAL_PA / 1e5, limit = 1;
+    public static final double TARGET_MIN_BAR = 1, TARGET_MAX_BAR = 25;
+    public static final byte TOGGLE_EXTERNAL = 1, SET_THROTTLE = 2, SET_TARGET = 3;
+    /** The pressure regulator: its hit is minus the inlet pressure (bar), so it opens the valve as the pressure rises. */
+    final mods.eln.sim.RegulatorProcess pressure = new mods.eln.sim.RegulatorProcess("pressure") {
+        @Override
+        protected double getHit() {
+            return inlet == null ? 0 : -inlet.P() / 1e5;
+        }
+
+        @Override
+        protected void setCmd(double cmd) {
+            regulated = Math.max(0, Math.min(1, cmd));
+        }
+    };
+    double regulated = 1;
+
+    boolean hasRegulator() {
+        return !Utils.isEmpty(inventory.getItem(REGULATOR_SLOT));
+    }
+
+    /** The regulator item in the slot sets the regulator's kind (as the heat furnace's; working point 10 bar). */
+    void computeInventory() {
+        var stack = inventory.getItem(REGULATOR_SLOT);
+        if (!Utils.isEmpty(stack) && Utils.getItemObject(stack) instanceof mods.eln.item.regulator.IRegulatorDescriptor r)
+            r.applyTo(pressure, 10.0, 10.0, 2.0, 0.1);
+        else pressure.setNone();
+        pressure.setTarget(-targetBar);
+    }
+
+    /** The most the steam valve may open now. */
+    double limit() {
+        if (controlExternal) return control.getNormalized();
+        return hasRegulator() ? regulated : throttle;
+    }
+
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
+
+    @Override
+    public net.minecraft.world.Container getInventory() {
+        return inventory;
+    }
+
+    @Override
+    public void inventoryChange(net.minecraft.world.Container inv) {
+        super.inventoryChange(inv);
+        computeInventory();
+        needPublish();
+    }
+
+    @Override
+    public byte networkUnserialize(java.io.DataInputStream stream) {
+        byte type = super.networkUnserialize(stream);
+        try {
+            switch (type) {
+                case TOGGLE_EXTERNAL -> controlExternal = !controlExternal;
+                case SET_THROTTLE -> throttle = Math.max(0, Math.min(1, stream.readFloat()));
+                case SET_TARGET -> {
+                    targetBar = Math.max(TARGET_MIN_BAR, Math.min(TARGET_MAX_BAR, stream.readFloat()));
+                    pressure.setTarget(-targetBar);
+                }
+                default -> {
+                    return type;
+                }
+            }
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+        needPublish();
+        return unserializeNulldId;
+    }
     public final PowerSource source = new PowerSource("source", load);
     public final PreciseElementFluidHandler tank;
     public static final double PORT_K = 6e-11;   // (two coupled ports are in series: 3e-11 boiler to turbine)
@@ -61,7 +146,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         electricalLoadList.add(load);
         electricalComponentList.add(source);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
+        slowProcessList.add(pressure);
         slowProcessList.add(new Run());
+        electricalLoadList.add(control);
     }
 
     /**
@@ -164,7 +251,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             gate += (target - gate) * Math.min(1, time / GOV_TAU);
             // steam through the nozzle (choked: by the inlet pressure), and only what the inlet has above 1 atm
             double mNom = desc.nominalSteam() * EaUnits.KG_PER_MB_STEAM;   // kg/s at nominal power
-            double want = (LEAK + (1 - LEAK) * gate) * FLOW_MAX * mNom * inlet.P() / P_REF * time;
+            limit = limit();
+            double open = Math.min(gate, limit);   // (the governor within its controls' limit)
+            double want = (LEAK + (1 - LEAK) * open) * FLOW_MAX * mNom * inlet.P() / P_REF * time;
             want = Math.min(want, EaUnits.steamAvailable(inlet));
             CondenserElement was = condenser;
             condenser = findCondenser();
@@ -270,6 +359,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        if (lrdu == LRDU.Down && side == front.left()) return control;
         return lrdu == LRDU.Down && (side == front || side == front.back()) ? load : null;
     }
 
@@ -280,6 +370,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
+        if (lrdu == LRDU.Down && side == front.left()) return NodeBase.maskElectricalInputGate;   // (external control)
         return lrdu == LRDU.Down && (side == front || side == front.back()) ? NodeBase.maskElectricalPower : 0;
     }
 
@@ -296,6 +387,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     @Override
     public void initialize() {
         desc.cable.applyTo(load);
+        computeInventory();
         source.setUmax(desc.maxU * omega);   // (the EMF follows the shaft: Run)
         source.setImax(desc.nominalP * 5 / desc.maxU);
         var c = node.coordonate;
@@ -328,6 +420,11 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             stream.writeFloat((float) omega);   // (the rotor's turn, SteamGeneratorRender)
             stream.writeFloat((float) (steamRate / desc.nominalSteam()));   // (the steam out of its vent)
             stream.writeBoolean(condenser != null);   // (no vent: the exhaust duct into the condenser)
+            stream.writeBoolean(controlExternal);
+            stream.writeFloat((float) throttle);
+            stream.writeFloat((float) targetBar);
+            stream.writeFloat((float) limit);
+            stream.writeFloat(inlet == null ? 0 : (float) (inlet.P() / 1e5));
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
@@ -344,6 +441,10 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         nbt.putDouble("omega", omega);
         nbt.putDouble("gate", gate);
         nbt.putDouble("gateI", gateI);
+        nbt.putBoolean("controlExternal", controlExternal);
+        nbt.putDouble("throttle", throttle);
+        nbt.putDouble("targetBar", targetBar);
+        pressure.writeToNBT(nbt, "pressure");
         if (placer != null) nbt.putString("placer", placer.toString());
         if (inlet != null) {
             nbt.putDouble("inletW", inlet.mWater);
@@ -359,6 +460,10 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         omega = nbt.getDoubleOr("omega", 0);
         gate = nbt.getDoubleOr("gate", 0);
         gateI = nbt.getDoubleOr("gateI", 0);
+        controlExternal = nbt.getBooleanOr("controlExternal", false);
+        throttle = nbt.getDoubleOr("throttle", 1);
+        targetBar = nbt.getDoubleOr("targetBar", SteamGeneratorDescriptor.NOMINAL_PA / 1e5);
+        pressure.readFromNBT(nbt, "pressure");
         String who = nbt.getStringOr("placer", "");
         try {
             placer = who.isEmpty() ? null : java.util.UUID.fromString(who);
@@ -381,7 +486,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             SteamGeneratorDescriptor.NOMINAL_PA / 1e5));
         if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));
         info.put(I18N.tr("Speed"), String.format("%.0f%%", omega * 100));
-        info.put(I18N.tr("Steam valve"), String.format("%.0f%%", gate * 100));
+        info.put(I18N.tr("Steam valve"), String.format("%.0f%%", Math.min(gate, limit) * 100));
+        info.put(I18N.tr("Control"), controlExternal ? String.format("external, %.0f%%", limit * 100)
+            : hasRegulator() ? String.format("holds %.1f bar at the inlet", targetBar) : String.format("throttle %.0f%%", throttle * 100));
         info.put(I18N.tr("Generated power"), Utils.plotPower("", source.getEffectiveP()));
         info.put(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
         return info;
