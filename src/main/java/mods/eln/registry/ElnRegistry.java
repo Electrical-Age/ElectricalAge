@@ -92,8 +92,8 @@ public final class ElnRegistry {
         RECIPE_SERIALIZERS.register("pipe_kit_from_plates", () -> mods.eln.node.voxel.PipeKitRecipes.FromPlates.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Merge>> PIPE_KIT_MERGE =
         RECIPE_SERIALIZERS.register("pipe_kit_merge", () -> mods.eln.node.voxel.PipeKitRecipes.Merge.SERIALIZER);
-    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.Split>> PIPE_KIT_SPLIT =
-        RECIPE_SERIALIZERS.register("pipe_kit_split", () -> mods.eln.node.voxel.PipeKitRecipes.Split.SERIALIZER);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.PipeKitRecipes.ToPlates>> PIPE_KIT_TO_PLATES =
+        RECIPE_SERIALIZERS.register("pipe_kit_to_plates", () -> mods.eln.node.voxel.PipeKitRecipes.ToPlates.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.CableKitRecipes.FromCoils>> CABLE_KIT_FROM_COILS =
         RECIPE_SERIALIZERS.register("cable_kit_from_coils", () -> mods.eln.node.voxel.CableKitRecipes.FromCoils.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.CableKitRecipes.ToCoil>> CABLE_KIT_TO_COIL =

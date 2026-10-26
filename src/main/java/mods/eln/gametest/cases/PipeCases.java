@@ -830,13 +830,19 @@ public final class PipeCases {
             ctx.check("pipe: two iron kits merge (16 + 40)", PipeKitItem.length(m) == 56, "" + PipeKitItem.length(m));
             ItemStack mix = craft(ctx, 2, 1, PipeKitItem.kit(0, 16), PipeKitItem.kit(1, 16));
             ctx.check("pipe: iron and alloy kits don't merge", mix.isEmpty() || !(mix.getItem() instanceof PipeKitItem), "" + mix);
-            ItemStack half = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
+            // a lone kit gives a block's worth of plates back, as a cable kit gives a coil (Baughn: not halves)
+            ItemStack back = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
             var rest = remaining(ctx, 1, 1, PipeKitItem.kit(1, 33));
-            ItemStack half16 = craft(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
+            ctx.check("pipe: an alloy kit gives 3 alloy plates back and keeps the rest (33: 17 stays)", mods.eln.node.voxel.PipeKitRecipes.plateTier(back) == 1 && back.getCount() == 3
+                && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17, back + " / " + rest);
+            ItemStack back16 = craft(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
                 ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
-            ctx.check("pipe: a one-block kit splits too (in a 3x3 grid: 8)", PipeKitItem.length(half16) == 8, "" + PipeKitItem.length(half16));
-            ctx.check("pipe: a kit splits in halves (33: 16 out, 17 stays)", PipeKitItem.length(half) == 16 && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17,
-                PipeKitItem.length(half) + " / " + rest);
+            var rest16 = remaining(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
+                ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            ctx.check("pipe: a one-block iron kit gives 2 plates and is used up (in a 3x3 grid)", mods.eln.node.voxel.PipeKitRecipes.plateTier(back16) == 0 && back16.getCount() == 2
+                && rest16.stream().allMatch(ItemStack::isEmpty), back16 + " / " + rest16);
+            ItemStack short8 = craft(ctx, 1, 1, PipeKitItem.kit(0, 8));
+            ctx.check("pipe: a kit under a block gives nothing back", short8.isEmpty() || !(mods.eln.node.voxel.PipeKitRecipes.plateTier(short8) >= 0), "" + short8);
             // kits top up (Baughn: pipe kits as cable kits, by the same code): 63 + 2 blocks give a full kit, 1 block stays
             ItemStack full = craft(ctx, 2, 1, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
             var left = remaining(ctx, 2, 1, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
@@ -849,13 +855,14 @@ public final class PipeCases {
                 cfull + " / " + cleft);
             ItemStack none = craft(ctx, 2, 1, PipeKitItem.kit(0, 1024), PipeKitItem.kit(0, 32));
             ctx.check("pipe: a full kit and another don't merge (nothing to top up)", none.isEmpty() || !(none.getItem() instanceof PipeKitItem), "" + none);
-            // shift-click in a crafting table: the full kit, and nothing lost (the 1 block left over is then split again
-            // and again by Split while the result is a pipe kit: the quick-move loop repeats while the item is the same)
+            // shift-click in a crafting table: the full kit (the rest stays: its plates are another item, so the loop stops)
             var shift = shiftCraft(ctx, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
-            ctx.check("pipe: shift-click 63 + 2 blocks: a full kit taken, nothing lost", shift.startsWith("1040 ") && shift.contains("1024"), shift);
+            ctx.check("pipe: shift-click 63 + 2 blocks: a full kit, the block left over stays in the grid", shift.equals("kits [1024] plates 0 grid [16]"), shift);
+            var unroll = shiftCraft(ctx, PipeKitItem.kit(0, 40));
+            ctx.check("pipe: shift-click a 2.5-block kit: 4 plates, half a block stays", unroll.equals("kits [] plates 4 grid [8]"), unroll);
         }
 
-        /** Shift-click the result of a crafting table holding items (from slot 1): "total inv [kit lengths] grid [kit lengths]". */
+        /** Shift-click the result of a crafting table holding items (from slot 1): "kits [lengths] plates n grid [kit lengths]". */
         static String shiftCraft(TestContext ctx, ItemStack... items) {
             var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.get(ctx.level(),
                 new com.mojang.authlib.GameProfile(java.util.UUID.fromString("e1a0c0de-0000-4000-8000-00000000c0de"), "eln_kit_shift"));
@@ -866,16 +873,17 @@ public final class PipeCases {
             cm.slotsChanged(cm.getSlot(1).container);
             cm.clicked(0, 0, net.minecraft.world.inventory.ContainerInput.QUICK_MOVE, fp);
             var inv = new java.util.ArrayList<Integer>();
-            for (int i = 0; i < fp.getInventory().getContainerSize(); i++)
-                if (fp.getInventory().getItem(i).getItem() instanceof mods.eln.node.voxel.KitItem) inv.add(mods.eln.node.voxel.KitItem.length(fp.getInventory().getItem(i)));
+            int plates = 0;
+            for (int i = 0; i < fp.getInventory().getContainerSize(); i++) {
+                var s = fp.getInventory().getItem(i);
+                if (s.getItem() instanceof mods.eln.node.voxel.KitItem) inv.add(mods.eln.node.voxel.KitItem.length(s));
+                else if (mods.eln.node.voxel.PipeKitRecipes.plateTier(s) >= 0) plates += s.getCount();
+            }
             var grid = new java.util.ArrayList<Integer>();
             for (int i = 1; i <= 9; i++)
                 if (cm.getSlot(i).getItem().getItem() instanceof mods.eln.node.voxel.KitItem) grid.add(mods.eln.node.voxel.KitItem.length(cm.getSlot(i).getItem()));
             fp.getInventory().clearContent();
-            int total = 0;
-            for (int x : inv) total += x;
-            for (int x : grid) total += x;
-            return total + " inv " + inv + " grid " + grid;
+            return "kits " + inv + " plates " + plates + " grid " + grid;
         }
     }
 

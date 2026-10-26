@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * Pipe kits in the crafting grid (Baughn, notes/pipes/DESIGN.md 6a): kits of one tier put together merge (their lengths
- * add; over a full kit the rest stays in the grid); a lone kit splits in two halves (one is the result, the other stays
- * in the grid).
+ * add; over a full kit the rest stays in the grid); a lone kit gives a block's worth of plates back and keeps the rest
+ * (Baughn: as cable kits, not halves).
  */
 public final class PipeKitRecipes {
     private PipeKitRecipes() {
@@ -31,7 +31,7 @@ public final class PipeKitRecipes {
     }
 
     /** The pipe tier a stack of plates makes, or -1. */
-    static int plateTier(ItemStack s) {
+    public static int plateTier(ItemStack s) {
         if (s.isEmpty()) return -1;
         for (int t = 0; t < PLATE.length; t++) if (s.is(plate(t))) return t;
         return -1;
@@ -143,7 +143,7 @@ public final class PipeKitRecipes {
         if (!(level instanceof net.minecraft.server.level.ServerLevel sl)) return false;
         for (var h : sl.recipeAccess().recipeMap().byType(net.minecraft.world.item.crafting.RecipeType.CRAFTING)) {
             var r = h.value();
-            if (r instanceof FromPlates || r instanceof CableKitRecipes.FromCoils || r instanceof Merge || r instanceof Split) continue;
+            if (r instanceof FromPlates || r instanceof CableKitRecipes.FromCoils || r instanceof Merge || r instanceof KitRecipes.Unroll) continue;
             if (r.matches(input, level)) return true;
         }
         return false;
@@ -166,7 +166,7 @@ public final class PipeKitRecipes {
         KitRecipes.crafted(e, FromPlates.class, FromPlates::use);
     }
 
-    /** JEI examples: per tier, 9 slots of plates to a kit. */
+    /** JEI examples: per tier, 9 slots of plates to a kit, and a kit to plates. */
     public static List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> examples() {
         List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
         var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
@@ -181,6 +181,10 @@ public final class PipeKitRecipes {
                     new net.minecraft.world.item.crafting.ShapelessRecipe(info, book,
                         net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(PipeKitItem.kit(t, 16 * (n / PER_BLOCK[t]))), ings)));
             }
+            out.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "jei/pipe_kit_to_plates_" + t)),
+                new net.minecraft.world.item.crafting.ShapelessRecipe(info, book, net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(new ItemStack(plate(t), PER_BLOCK[t])),
+                    List.of(net.minecraft.world.item.crafting.Ingredient.of(PipeKitItem.kit(t, 32).getItem())))));
         }
         return out;
     }
@@ -242,51 +246,34 @@ public final class PipeKitRecipes {
         }
     }
 
-    public static final class Split extends CustomRecipe {
-        public static final Split INSTANCE = new Split();
-        public static final MapCodec<Split> MAP_CODEC = MapCodec.unit(INSTANCE);
-        public static final StreamCodec<RegistryFriendlyByteBuf, Split> STREAM_CODEC = StreamCodec.unit(INSTANCE);
-        public static final RecipeSerializer<Split> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+    /** A lone kit gives a block's worth of plates back and keeps the rest (KitRecipes.Unroll, as cable kits). */
+    public static final class ToPlates extends KitRecipes.Unroll {
+        public static final ToPlates INSTANCE = new ToPlates(-1);
+        public static final MapCodec<ToPlates> MAP_CODEC = CableKitRecipes.tierCodec(ToPlates::new, r -> r.tier);
+        public static final StreamCodec<RegistryFriendlyByteBuf, ToPlates> STREAM_CODEC = CableKitRecipes.tierStream(ToPlates::new, r -> r.tier);
+        public static final RecipeSerializer<ToPlates> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-        /** The one kit (2+ voxels long) in the grid, or null. */
-        static ItemStack lone(CraftingInput in) {
-            ItemStack found = null;
-            for (int i = 0; i < in.size(); i++) {
-                ItemStack s = in.getItem(i);
-                if (s.isEmpty()) continue;
-                if (found != null || !(s.getItem() instanceof PipeKitItem) || s.getCount() != 1) return null;
-                found = s;
-            }
-            return found != null && PipeKitItem.length(found) >= 2 ? found : null;
+        public ToPlates(int tier) {
+            super(tier);
         }
 
         @Override
-        public boolean matches(CraftingInput input, Level level) {
-            return lone(input) != null;
+        protected int kitTier(ItemStack s) {
+            return s.getItem() instanceof PipeKitItem k ? k.tier : -1;
         }
 
         @Override
-        public ItemStack assemble(CraftingInput input) {
-            ItemStack s = lone(input);
-            return s == null ? ItemStack.EMPTY : PipeKitItem.kit(((PipeKitItem) s.getItem()).tier, PipeKitItem.length(s) / 2);
-        }
-
-        /** The other half stays in the grid. */
-        @Override
-        public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
-            NonNullList<ItemStack> out = NonNullList.withSize(input.size(), ItemStack.EMPTY);
-            for (int i = 0; i < input.size(); i++) {
-                ItemStack s = input.getItem(i);
-                if (s.getItem() instanceof PipeKitItem k) {
-                    int len = PipeKitItem.length(s);
-                    out.set(i, PipeKitItem.kit(k.tier, len - len / 2));
-                }
-            }
-            return out;
+        protected ItemStack unit(int tier) {
+            return new ItemStack(plate(tier), PER_BLOCK[tier]);
         }
 
         @Override
-        public RecipeSerializer<Split> getSerializer() {
+        protected ItemStack kit(int tier, int len) {
+            return PipeKitItem.kit(tier, len);
+        }
+
+        @Override
+        public RecipeSerializer<ToPlates> getSerializer() {
             return SERIALIZER;
         }
     }

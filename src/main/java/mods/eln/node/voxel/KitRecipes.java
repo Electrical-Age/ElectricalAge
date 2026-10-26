@@ -107,4 +107,82 @@ public final class KitRecipes {
         for (int i = 0; i < items.size(); i++)
             if (u[i] > 1) grid.getItem(i).shrink(u[i] - 1);
     }
+
+    /**
+     * A lone kit gives one block's worth of what it's made of back and keeps the rest in the grid (cable kits: a coil;
+     * pipe kits: PipeKitRecipes.PER_BLOCK plates; Baughn: the same way for both, not halving pipe kits, whose shift-click
+     * halved again and again). Shift-click unrolls the kit. One recipe per tier; -1 matches any (tests).
+     */
+    public abstract static class Unroll extends net.minecraft.world.item.crafting.CustomRecipe {
+        public final int tier;
+
+        protected Unroll(int tier) {
+            this.tier = tier;
+        }
+
+        /** The tier of a kit of this kind, or -1. */
+        protected abstract int kitTier(ItemStack s);
+
+        /** What a block of a tier's kit gives back (empty if none). */
+        protected abstract ItemStack unit(int tier);
+
+        /** A kit of this kind and tier holding len voxels. */
+        protected abstract ItemStack kit(int tier, int len);
+
+        /** The one kit (a block or more) in the grid, or null. */
+        ItemStack lone(net.minecraft.world.item.crafting.CraftingInput in) {
+            ItemStack found = null;
+            for (int i = 0; i < in.size(); i++) {
+                ItemStack s = in.getItem(i);
+                if (s.isEmpty()) continue;
+                if (found != null || kitTier(s) < 0 || s.getCount() != 1) return null;
+                found = s;
+            }
+            if (found != null && tier >= 0 && kitTier(found) != tier) return null;
+            return found != null && KitItem.length(found) >= 16 ? found : null;
+        }
+
+        @Override
+        public boolean matches(net.minecraft.world.item.crafting.CraftingInput input, net.minecraft.world.level.Level level) {
+            return lone(input) != null;
+        }
+
+        @Override
+        public ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput input) {
+            ItemStack s = lone(input);
+            return s == null ? ItemStack.EMPTY : unit(kitTier(s));
+        }
+
+        /** The rest of the kit stays in the grid. */
+        @Override
+        public net.minecraft.core.NonNullList<ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput input) {
+            var out = net.minecraft.core.NonNullList.withSize(input.size(), ItemStack.EMPTY);
+            for (int i = 0; i < input.size(); i++) {
+                ItemStack s = input.getItem(i);
+                int t = kitTier(s);
+                if (t >= 0) out.set(i, kit(t, KitItem.length(s) - 16));
+            }
+            return out;
+        }
+
+        /** In the recipe book too, per tier (the any-tier instance stays out). */
+        @Override
+        public boolean isSpecial() {
+            return tier < 0;
+        }
+
+        @Override
+        public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
+            if (tier < 0) return net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE;
+            return net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(kit(tier, 32).getItem()));
+        }
+
+        @Override
+        public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+            ItemStack u = tier < 0 ? ItemStack.EMPTY : unit(tier);
+            if (u.isEmpty()) return List.of();
+            return List.of(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
+                List.of(CableKitRecipes.slot(kit(tier, 32))), CableKitRecipes.slot(u), CableKitRecipes.table()));
+        }
+    }
 }

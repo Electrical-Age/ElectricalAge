@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Cable kits and the old cable items ("coils": still crafting ingredients and device components; Baughn 2026-10-18):
  * coils of one tier, with or without a kit of that tier, make a kit 16 voxels longer per coil; a lone cable kit gives
- * one coil and keeps the rest (16 voxels less) in the grid.
+ * one coil and keeps the rest (16 voxels less) in the grid (KitRecipes.Unroll, as pipe kits).
  */
 public final class CableKitRecipes {
     private CableKitRecipes() {
@@ -124,76 +124,35 @@ public final class CableKitRecipes {
         }
     }
 
-    public static final class ToCoil extends CustomRecipe {
+    public static final class ToCoil extends KitRecipes.Unroll {
         /** Any tier (tests); the recipes are one per tier, as FromCoils. */
         public static final ToCoil INSTANCE = new ToCoil(-1);
         public static final MapCodec<ToCoil> MAP_CODEC = tierCodec(ToCoil::new, r -> r.tier);
         public static final StreamCodec<RegistryFriendlyByteBuf, ToCoil> STREAM_CODEC = tierStream(ToCoil::new, r -> r.tier);
         public static final RecipeSerializer<ToCoil> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-        public final int tier;
-
         public ToCoil(int tier) {
-            this.tier = tier;
-        }
-
-        ItemStack lone(CraftingInput in) {
-            ItemStack found = null;
-            for (int i = 0; i < in.size(); i++) {
-                ItemStack s = in.getItem(i);
-                if (s.isEmpty()) continue;
-                if (found != null || !(s.getItem() instanceof CableKitItem) || s.getCount() != 1) return null;
-                found = s;
-            }
-            if (found != null && tier >= 0 && ((CableKitItem) found.getItem()).tier != tier) return null;
-            return found != null && KitItem.length(found) >= 16 ? found : null;
+            super(tier);
         }
 
         @Override
-        public boolean matches(CraftingInput input, Level level) {
-            return lone(input) != null;
+        protected int kitTier(ItemStack s) {
+            return s.getItem() instanceof CableKitItem k ? k.tier : -1;
         }
 
         @Override
-        public ItemStack assemble(CraftingInput input) {
-            ItemStack s = lone(input);
-            return s == null ? ItemStack.EMPTY : coil(((CableKitItem) s.getItem()).tier);
+        protected ItemStack unit(int tier) {
+            return coil(tier);
         }
 
-        /** The rest of the kit stays in the grid. */
         @Override
-        public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
-            NonNullList<ItemStack> out = NonNullList.withSize(input.size(), ItemStack.EMPTY);
-            for (int i = 0; i < input.size(); i++) {
-                ItemStack s = input.getItem(i);
-                if (s.getItem() instanceof CableKitItem k) out.set(i, CableKitItem.kit(k.tier, KitItem.length(s) - 16));
-            }
-            return out;
+        protected ItemStack kit(int tier, int len) {
+            return CableKitItem.kit(tier, len);
         }
 
         @Override
         public RecipeSerializer<ToCoil> getSerializer() {
             return SERIALIZER;
-        }
-
-        /** In the recipe book too: a kit gives a cable back (and keeps the rest), per tier. */
-        @Override
-        public boolean isSpecial() {
-            return tier < 0;
-        }
-
-        @Override
-        public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
-            if (tier < 0) return net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE;
-            return net.minecraft.world.item.crafting.PlacementInfo.create(net.minecraft.world.item.crafting.Ingredient.of(CableKitItem.kit(tier, 32).getItem()));
-        }
-
-        @Override
-        public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
-            ItemStack c = tier < 0 ? ItemStack.EMPTY : coil(tier);
-            if (c.isEmpty()) return List.of();
-            return List.of(new net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay(
-                List.of(slot(CableKitItem.kit(tier, 32))), slot(c), table()));
         }
     }
 

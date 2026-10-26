@@ -70,7 +70,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
   and recipe ids are `eln:<snake_case output>[_n]`. `ElnRecipeProvider` runs it from `GatherDataRegistryEntriesEvent`
   (`RecipeProvider.asBootstrap`). Any recipe problem fails the datagen run.
 - Hand-written: `src/main/resources/data/eln/recipe/` (cable kits, pipe kits, valves, adapter, chisel). Kit
-  merge/split and coil conversions use the serializers in `ElnRegistry.RECIPE_SERIALIZERS`.
+  merge and coil/plate conversions use the serializers in `ElnRegistry.RECIPE_SERIALIZERS`.
 - Machine lists (macerator, compressor, plate machine, magnetizer): runtime code in
   `src/main/java/mods/eln/registry/ElnMachineRecipes.java`, filled at server start into `Eln.*Recipes`
   (`misc/RecipesList`, `misc/Recipe`). An input also matches other items in its 1.12 ore name's tag (so deepslate
