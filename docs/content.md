@@ -70,14 +70,16 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
   and recipe ids are `eln:<snake_case output>[_n]`. `ElnRecipeProvider` runs it from `GatherDataRegistryEntriesEvent`
   (`RecipeProvider.asBootstrap`). Any recipe problem fails the datagen run.
 - Hand-written: `src/main/resources/data/eln/recipe/` (cable kits, pipe kits, valves, adapter, chisel). Kit
-  merge/split and coil conversions use the serializers in `ElnRegistry.RECIPE_SERIALIZERS`.
+  merge and coil/plate conversions use the serializers in `ElnRegistry.RECIPE_SERIALIZERS`.
 - Machine lists (macerator, compressor, plate machine, magnetizer): runtime code in
   `src/main/java/mods/eln/registry/ElnMachineRecipes.java`, filled at server start into `Eln.*Recipes`
   (`misc/RecipesList`, `misc/Recipe`). An input also matches other items in its 1.12 ore name's tag (so deepslate
   ores macerate too).
 - Macerator rule (decision fc0a18ec, extended 41e71a8f): an ore block gives raw chunks, about like Fortune II
   (`Recipe.withExtra`: iron/gold/lead/tungsten 1-3, copper more); a raw chunk gives 1 dust, with a 20% chance of 2.
-  1.12 gave 2 dust per ore.
+  1.12 gave 2 dust per ore. Every other ore block (`c:ores`: coal, redstone, lapis, diamond, emerald, quartz, other
+  mods' ores) gives what a Fortune II pickaxe gets from its loot table, rolled per operation (`OreLootRecipe`, the
+  macerator list's `RecipesList.fallback`; Baughn 2026-10-25). An ore that drops itself (ancient debris) has none.
 - Golden comparison against 1.12 (crafting, smelting and the machine lists): `gametest/GoldenRecipesCase`
   (`golden_recipes`). See testing.md.
 

@@ -36,6 +36,8 @@ public final class ClientPacketHandler {
                             mods.eln.sound.SoundClient.play(mods.eln.sound.SoundCommand.fromStream(stream, level));
                     }
                     case Eln.packetKitPreview -> mods.eln.client.render.KitOutline.read(stream);
+                    case Eln.packetDevicePreview -> mods.eln.client.render.DevicePreviewRender.read(stream);
+                    case Eln.packetValveScreen -> mods.eln.client.ThrottleValveScreen.open(stream, level);
                     default -> {
                     }
                 }

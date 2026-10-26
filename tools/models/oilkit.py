@@ -8,7 +8,7 @@ Builds on mcmodel (px frame, 0..16, corner origin) without changing it:
     NAME.txt with rotation origins (centred block coordinates).
   - turned(meshes, k): rotate meshes k quarter turns about the vertical axis through the block centre, so a piece
     designed for the front face (x = 0) can be put on any side: k=1 -> z = 16 face, k=2 -> x = 16, k=3 -> z = 0.
-  - obox(): oriented box (paddles, gear teeth, levers); terminal_plate(), heat_pad(), bolt_ring(), handwheel(), dial().
+  - obox(): oriented box (paddles, gear teeth, levers); terminal_plate(), signal_plate(), heat_pad(), bolt_ring(), handwheel(), dial().
   - compose(): preview several OBJs side by side through elncheck.preview.
 """
 import math, os, random, sys
@@ -127,6 +127,12 @@ def terminal_plate(paint="paint"):
     for z in (5.75, 8.0, 10.25):
         ms.append(box(0.0, 1.75, z - 0.5, 0.1, 2.75, z + 0.5, "copper", faces="nsewu"))
     return ms
+
+def signal_plate():
+    """Signal terminal for the x = 0 face (turn it for other faces): a narrow plate, 3 px wide, floor to 4 px, with a
+    single small copper stud at the conductor height (Baughn: signal I/O has one small conductor, power three)."""
+    return [box(0.1, 0, 6.5, 0.85, 3.5, 9.5, "steel", faces="nsewu"), box(0.1, 3.5, 6.5, 0.85, 3.9, 9.5, "darksteel", faces="nsewu"),
+            box(0.0, 1.9, 7.6, 0.1, 2.6, 8.4, "copper", faces="nsewu")]
 
 def heat_pad(depth=1.0, top=4.0):
     """Thermal floor contact for the x = 0 face: a heat-tinted copper pad 8 px wide from the floor, recessed

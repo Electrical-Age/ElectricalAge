@@ -32,6 +32,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `eln:ore_drops/coal`; tungsten ore is also `c:ores/tungsten`, Baughn 2026-10-24), picture on the held item; range 7.5 (1.12: 5). `item/xray/`, `XRayCase`.
 - Copper Coil (`eln:copper_coil`, new): thin winding wire; windings (inductor, resistors, rheostat, thermistor,
   DC-DC, 50V copper heating corps) take coils; copper cable is 1 per ingot.
+- Thermal Insulation takes any colour of wool (`#minecraft:wool`; 1.12: white only; Baughn 2026-10-26).
+- Ambient temperature by biome (Baughn 2026-10-26): loads cool towards the local ambient (`sim/Ambient`), not 20 C;
+  limits stay absolute temperatures. Fluid nodes fill at it; other mods' water enters pipes and boilers at it.
+- 50V/200V steam turbines work by the expansion (Baughn 2026-10-26): 0.7 x the isentropic drop from the inlet to the
+  exhaust (Water.isentropicDrop), rated at 10 bar venting to air (3.5 g/s for 1 kW), casing bursts over 25 bar. WAILA
+  shows the pressure efficiency; loaded under 5 bar for 30 s gives the placer the advancement Under Pressure (use a
+  valve). Heat furnace fuel x2.5 (config heatFurnaceFuelFactor), stone heat furnace 4 combustion chambers, submersible
+  pumps 6 / 15 bar. `oil_steam_turbine*`.
+- Steam condensers (new, Baughn 2026-10-26): against a turbine's exhaust side (right of its front); a vessel cooled
+  through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
+  turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
+  condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Pipe Control Valve (signal 0-50 V on its actuator's top) and Pipe Throttle Valve (slider screen), kinds of ValvePart
+  (Baughn 2026-10-26). `pipe_throttle_and_control_valves`.
+- 50V/200V steam turbines take water damage: over 10% of the inlet liquid while the shaft turns above 20% speed burns them out (`FailureCause.WATER`, repairable; the repair drains the inlet). Baughn 2026-10-26; `oil_steam_turbine_floods`.
 - Cable slots removed: meters, electrical/voltage/thermal probes and lamp sockets have a built-in cable (LV, MV for the
   200V socket, copper thermal cable); Ground Cable has no GUI. Kept: transformer (turns), hub (side selection), breaker
   (trip rating); lamp supply and temperature probe slots are optional. Old cables stay in the hidden slot and drop on
@@ -93,9 +108,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   fill and the dial the water temperature (0..300 C) (`boiler_phase_signal`).
 - Submersible pumps, 50V (100 W) and 200V (400 W) (Baughn 2026-10-25): placed in a water source (transparent-node
   blocks are waterloggable now, as six nodes were), they push the water they stand in up a pipe from the flange on
-  top: 3.5 turbines' worth of feedwater (57 / 230 mB/s), falling to nothing at 9 bar against the pipe. Power on the
+  top: 3.5 turbines' worth of feedwater (57 / 230 mB/s), falling to nothing at 3 bar against the pipe. Power on the
   flanks, a signal on the front sets the speed (no cable there: full speed). Model `tools/models/submersiblepump.py`
   (`submersible_pump_feeds_a_boiler`, `submersible_pump_water_and_signal`).
+
+- Logic and analog chips are drawn at 0.75 (a case 6 voxels across; Baughn) and, in voxel blocks, go anywhere on a
+  face; pins that touch connect (docs/voxel-cables.md, devices off centre).
 
 ## Bugs fixed
 
@@ -123,6 +141,9 @@ In the port:
 - Item capabilities (hoppers, pipes) never worked in any EA version; now they do.
 - Right-clicking an item into a device slot (battery charger) made a new stack and copied only its energy: an X-ray
   scanner lost its filters and a used lamp came back new (lamp sockets use the same path). The stack goes in as it is (`XRayCase`).
+
+- Two devices on adjacent faces of one block shared heat only on some corners: `SixNode.tryConnectTwoInternalElement`
+  paired the wrong thermal loads (1.12). Test: `six_node_inner_corner_a_temperature_probe_reads_a_wall_cable_s_heat`.
 
 ## Deferred
 

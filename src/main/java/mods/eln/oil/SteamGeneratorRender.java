@@ -18,6 +18,23 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
     /** Puffs a second out of the vent at nominal steam: a calm stream (Baughn). */
     static final float PUFFS_PER_S = 6;
     float due;
+    /** A condenser against its exhaust side: the duct into it, no vent stack (and no puffs). */
+    boolean condenser;
+    /** Its controls, for the screen (SteamGeneratorScreen). */
+    public boolean controlExternal, throttleNew, targetNew;
+    public float throttle = -1, targetBar = -1, limit, inletBar;
+
+    public void clientToggleControl() {
+        clientSendId(SteamGeneratorElement.TOGGLE_EXTERNAL);
+    }
+
+    public void clientSetThrottle(float v) {
+        clientSendFloat(SteamGeneratorElement.SET_THROTTLE, v);
+    }
+
+    public void clientSetTarget(float v) {
+        clientSendFloat(SteamGeneratorElement.SET_TARGET, v);
+    }
     float angle = (float) (Math.random() * 360);
 
     public SteamGeneratorRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
@@ -28,7 +45,7 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
     @Override
     public void draw() {
         front.glRotateXnRef();
-        desc.draw(angle);
+        desc.draw(angle, condenser);
     }
 
     @Override
@@ -38,7 +55,7 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
         steam.step(deltaT);
         var level = tileEntity.getLevel();
         float[] v = desc.vent();
-        if (level == null || v == null || steam.get() < 0.01f) return;
+        if (level == null || v == null || condenser || steam.get() < 0.01f) return;
         due += deltaT * PUFFS_PER_S * (0.25f + 0.75f * Math.min(1.5f, steam.get()));   // (an idling turbine still wisps)
         // the outlet in the world: the model turned as glRotateXnRef turns it (about y: XN 0, ZP 90, XP 180, ZN 270)
         double th = Math.toRadians(switch (front) {
@@ -63,6 +80,19 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
         try {
             speed.setTarget(stream.readFloat());
             steam.setTarget(stream.readFloat());
+            condenser = stream.readBoolean();
+            controlExternal = stream.readBoolean();
+            float t = stream.readFloat(), p = stream.readFloat();
+            if (t != throttle) {
+                throttle = t;
+                throttleNew = true;
+            }
+            if (p != targetBar) {
+                targetBar = p;
+                targetNew = true;
+            }
+            limit = stream.readFloat();
+            inletBar = stream.readFloat();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -3,10 +3,15 @@ package mods.eln.sim;
 public class ThermalLoad {
 
     /**
-     * Current temperature as a difference to ambient, in K (= degrees C above PhysicalConstant.Tamb, 20 C).
-     * The thermal step relaxes it to 0 through Rp; GUIs that show absolute temperatures add Tamb.
+     * Current temperature in K above PhysicalConstant.Tamb (20 C): a fixed scale, so limits, saves and displays are
+     * absolute temperatures. The thermal step relaxes it to {@link #ambient} through Rp; GUIs add Tamb.
      */
     public double Tc;
+    /**
+     * The local ambient on the Tc scale (Ambient: by biome, height, depth; Baughn 2026-10-26), stamped when the device
+     * joins the simulation. 0 (20 C) until then, and for loads nobody stamps.
+     */
+    public double ambient;
     /** Thermal resistance to ambient, K/W. */
     public double Rp;
     /**
@@ -76,18 +81,31 @@ public class ThermalLoad {
     }
 
     /**
-     * Ambient as an infinite heat reservoir (other end of e.g. the electrical furnace's ThermalResistor): Tc stays 0
-     * whatever flows in. 1.7.10 had Rp = 0 and C = 0, so Tc/Rp (getPower, or the thermal step if it was ever put on
-     * a load list) was NaN.
+     * Ambient as an infinite heat reservoir (other end of e.g. the electrical furnace's ThermalResistor): its Tc stays
+     * put whatever flows in. One per device, so it can sit at the device's ambient (set it with {@link #sinkAt}).
+     * 1.7.10 had Rp = 0 and C = 0, so Tc/Rp (getPower, or the thermal step if it was ever put on a load list) was NaN.
      */
-    public static final ThermalLoad externalLoad = new ThermalLoad(0, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY);
+    public static ThermalLoad ambientSink() {
+        return new ThermalLoad(0, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY);
+    }
+
+    /** Put an ambient sink at an ambient (Tc scale). */
+    public void sinkAt(double ambient) {
+        this.ambient = ambient;
+        this.Tc = ambient;
+    }
+
+    /** Back to its ambient (repair; a bucket of water halves the way there: towards(0.5)). */
+    public void towards(double keep) {
+        Tc = ambient + (Tc - ambient) * keep;
+    }
 
     public void setRp(double Rp) {
         this.Rp = Rp;
     }
 
     public double getPower() {
-        return (Prs + Math.abs(Pc) + Tc / Rp + Psp) / 2;
+        return (Prs + Math.abs(Pc) + (Tc - ambient) / Rp + Psp) / 2;
     }
 
     public void set(double Rs, double Rp, double C) {

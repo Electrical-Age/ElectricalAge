@@ -50,6 +50,15 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     public SixNode sixNode;
     public Direction side;
+    /**
+     * Where the element sits in its node: slots 0..5 are the six faces, centred (side.getInt()); a voxel block's further
+     * slots hold devices placed off centre on a face (offset: the model's centre from the face's centre, world
+     * voxels). Packets, menus and saves address an element by its slot.
+     */
+    public int slot;
+    public int ox, oy, oz;
+    /** The cable-stub mask of an element in a slot past the six faces (the faces' are in sixNode.lrduElementMask). */
+    public final mods.eln.misc.LRDUMask slotMask = new mods.eln.misc.LRDUMask();
     public SixNodeDescriptor sixNodeElementDescriptor;
 
     public int isProvidingWeakPower() {
@@ -100,6 +109,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         sixNode.notifyNeighbor();
     }
 
+    /** The ambient where it stands, on the Tc scale (Ambient; stamped on its thermal loads in connectJob). */
+    public double ambient;
+
     public void connectJob() {
         // If we are about to destruct ourselves, do not add any elements to the simulation anymore.
         if (sixNode != null && sixNode.isDestructing()) return;
@@ -109,6 +121,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
         for (NbtElectricalLoad load : electricalLoadList)
             Eln.simulator.addElectricalLoad(load);
+        ambient = mods.eln.sim.Ambient.relative(sixNode.coordonate);
+        mods.eln.sim.Ambient.stamp(thermalLoadList, ambient);
         for (NbtThermalLoad load : thermalLoadList)
             Eln.simulator.addThermalLoad(load);
 
@@ -148,7 +162,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         this.sixNode = sixNode;
         this.side = side;
         this.sixNodeElementDescriptor = descriptor;
-        this.itemStackDamageId = sixNode.sideElementIdList[side.getInt()];
+        this.slot = side.getInt();
+        this.itemStackDamageId = descriptor.parentItemDamage;
 
         if (descriptor.hasGhostGroup())
             Eln.ghostManager.addObserver(this);
@@ -178,11 +193,16 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
     public void networkSerialize(DataOutputStream stream) {
 
         try {
-            stream.writeByte(sixNode.lrduElementMask.get(side).mask + (front.dir << 4) + (isBurnt() ? HEADER_BURNT : 0));
+            stream.writeByte(stubMask().mask + (front.dir << 4) + (isBurnt() ? HEADER_BURNT : 0));
         } catch (IOException e) {
 
             e.printStackTrace();
         }
+    }
+
+    /** This element's cable-stub mask (by face for slots 0..5, its own past them). */
+    public mods.eln.misc.LRDUMask stubMask() {
+        return slot < 6 ? sixNode.lrduElementMask.get(side) : slotMask;
     }
 
     /* public void initializeFromThat(SixNodeDescriptor descriptor)
@@ -330,13 +350,13 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     public boolean ghostBlockActivated(int UUID, Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
-            sixNode.onBlockActivated(entityPlayer, this.side, vx, vy, vz);
+            sixNode.onSlotActivated(entityPlayer, slot, vx, vy, vz);
         }
         return false;
     }
 
     private void selfDestroy() {
-        sixNode.deleteSubBlock(null, side);
+        sixNode.deleteSlot(null, slot);
     }
 
     private int uuid = 0;
@@ -404,7 +424,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         sixNode.disconnect();
         burnt = null;
         burntKind = null;
-        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = load.ambient;
         for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : thermalSlowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();

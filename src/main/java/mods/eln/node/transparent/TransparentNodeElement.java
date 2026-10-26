@@ -72,9 +72,14 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         Eln.simulator.addAllElectricalProcess(electricalProcessList);
 
         Eln.simulator.addAllThermalConnection(thermalConnectionList);
+        ambient = mods.eln.sim.Ambient.relative(node.coordonate);
+        mods.eln.sim.Ambient.stamp(thermalLoadList, ambient);
         for (NbtThermalLoad load : thermalLoadList) Eln.simulator.addThermalLoad(load);
         Eln.simulator.addAllThermalFastProcess(thermalFastProcessList);
     }
+
+    /** The ambient where it stands, on the Tc scale (Ambient; stamped on its thermal loads in connectJob). */
+    public double ambient;
 
     public void disconnectJob() {
         Eln.simulator.removeAllSlowProcess(slowProcessList);
@@ -502,7 +507,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         node.disconnect();
         burnt = null;
         burntKind = null;
-        for (NbtThermalLoad load : thermalLoadList) load.Tc = 0;
+        for (NbtThermalLoad load : thermalLoadList) load.Tc = load.ambient;
         for (IProcess p : slowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : thermalFastProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();

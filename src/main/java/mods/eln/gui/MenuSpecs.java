@@ -152,10 +152,14 @@ public final class MenuSpecs {
             SlotSpec[] s = new SlotSpec[2 + d.outStackCount];
             for (int idx = 0; idx < d.outStackCount; idx++) s[idx] = SlotSpec.output(idx, 130 - 32 + idx * 18, 12, MEDIUM);
             // the input: only what this machine has a recipe for (Baughn: shift-click ignored which slot made sense)
-            s[d.outStackCount] = filter(d.outStackCount, 8 + 36, 12, 64, st -> d.recipe.getRecipe(st.copyWithCount(st.getMaxStackSize())) != null, MEDIUM, tr("Input"));
+            s[d.outStackCount] = filter(d.outStackCount, 8 + 36, 12, 64, st -> d.recipe.accepts(st.copyWithCount(st.getMaxStackSize())), MEDIUM, tr("Input"));
             s[d.outStackCount + 1] = descriptor(d.outStackCount + 1, 8, 12, 5, MachineBoosterDescriptor.class, MEDIUM, tr("Booster slot"));
             return MenuSpec.of(s).publishing(1).panel(204, 122, 8, 40);
         });
+        // the steam turbines (Baughn 2026-10-26): a regulator holds a target inlet pressure
+        put(mods.eln.oil.SteamGeneratorDescriptor.class, d -> MenuSpec.of(
+            descriptor(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, 8, 58, 1, IRegulatorDescriptor.class, MEDIUM, tr("Regulator slot"),
+                tr("(Holds a target inlet pressure)"))).publishing(0));
         put(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId, 70, 58, 64,
                 s -> mods.eln.misc.Utils.getItemEnergie(s) > 0, MEDIUM, tr("Fuel slot")),

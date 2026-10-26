@@ -30,8 +30,9 @@ public abstract class BatterySlowProcess implements IProcess {
             double newLife = batteryProcess.life;
             double normalisedCurrent = Math.abs(batteryProcess.getDischargeCurrent()) / lifeNominalCurrent;
             // (Baughn 2026-10-17: lead-acid wore out far too fast: config batteryLifeFactor, default 25; and more like the real
-            // thing: wear doubles every 10 C above ambient, and a battery cycled low wears faster, up to 4x when empty)
-            double hot = thermalLoad == null ? 1 : Math.min(16, Math.pow(2, Math.max(0, thermalLoad.getT()) / 10.0));
+            // thing: wear doubles every 10 C above 30 C (Baughn 2026-10-26, with ambient by biome: from 30, not 20), and a
+            // battery cycled low wears faster, up to 4x when empty)
+            double hot = thermalLoad == null ? 1 : Math.min(16, Math.pow(2, Math.max(0, thermalLoad.getT() - 10) / 10.0));
             double soc = Math.max(0, Math.min(1, batteryProcess.getCharge()));
             double low = 1 + 3 * (1 - soc) * (1 - soc);
             newLife -= normalisedCurrent * normalisedCurrent * lifeNominalLost * time * hot * low / mods.eln.ElnConfig.batteryLifeFactor;

@@ -46,12 +46,17 @@ public final class NodeMenus {
 
     /** The server-side menu of a node's GUI at a side, or null if there is none. */
     public static @Nullable ElnNodeMenu menu(int containerId, Player player, NodeBase node, Direction side) {
+        return menu(containerId, player, node, side.getInt());
+    }
+
+    /** The same by slot (a six-node element's slot; a transparent node's side). */
+    public static @Nullable ElnNodeMenu menu(int containerId, Player player, NodeBase node, int slot) {
         byte kind;
         int id = 0;
         Object descriptor;
         Container inventory;
         if (node instanceof SixNode six) {
-            SixNodeElement e = six.getElement(side);
+            SixNodeElement e = six.getElement(slot);
             if (e == null) return null;
             kind = ElnNodeMenu.SIX;
             descriptor = e.sixNodeElementDescriptor;
@@ -69,18 +74,22 @@ public final class NodeMenus {
         MenuSpec spec = descriptor == null ? MenuSpec.SCREEN_ONLY : MenuSpecs.of(descriptor);
         if (inventory == null || inventory.getContainerSize() < spec.inventorySize())
             inventory = new SimpleContainer(Math.max(1, spec.inventorySize())); // a spec slot past the element inventory: 1.12 would crash
-        return new ElnNodeMenu(containerId, player.getInventory(), inventory, spec, node, node.coordonate.pos(), side, kind, id);
+        return new ElnNodeMenu(containerId, player.getInventory(), inventory, spec, node, node.coordonate.pos(), slot, kind, id);
     }
 
     /** GameTests: told of every menu opened (a FakePlayer's openMenu does nothing). */
     public static java.util.function.BiConsumer<Player, ElnNodeMenu> openedHook;
 
     public static boolean open(NodeBase node, Player player, Direction side) {
+        return open(node, player, side.getInt());
+    }
+
+    public static boolean open(NodeBase node, Player player, int slot) {
         if (!(player instanceof ServerPlayer sp)) return true; // the client waits for the server's open packet
-        ElnNodeMenu probe = menu(0, player, node, side);
+        ElnNodeMenu probe = menu(0, player, node, slot);
         if (probe == null) return false;
         if (openedHook != null) openedHook.accept(player, probe);
-        sp.openMenu(new SimpleMenuProvider((id, inv, p) -> menu(id, p, node, side), Component.literal(node.getNodeUuid())),
+        sp.openMenu(new SimpleMenuProvider((id, inv, p) -> menu(id, p, node, slot), Component.literal(node.getNodeUuid())),
             probe::writeOpenData);
         return true;
     }

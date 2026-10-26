@@ -25,16 +25,21 @@ public final class PipeCases {
         cases.add(new BoilerPhase());
         cases.add(new PumpFeedsBoiler());
         cases.add(new PumpWaterAndSignal());
+        cases.add(new PumpUnderBoiler());
+        cases.add(new PumpDeadHeaded());
         cases.add(new GuideAdvancements());
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
         cases.add(new JoinMidRun());
         cases.add(new KitCrafting());
+        cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
         cases.add(new Valve());
         cases.add(new Adapter());
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
+        cases.add(new PipeRoutePreview());
+        cases.add(new KitLengthNotDamage());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -199,6 +204,87 @@ public final class PipeCases {
         }
     }
 
+    /**
+     * Dysnomiaw's rig: the pump under the pipe block that turns into the boiler's feed flange, the boiler one block
+     * up and over (a single pipe block, in from below, out north). The riser's top port must spill once it is full: it
+     * drew only gas, and the pump pushed it to 9 bar with the boiler dry.
+     */
+    static final class PumpUnderBoiler implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SubmersiblePumpElement pump;
+        PipePart pipe;
+
+        public String id() {
+            return "submersible_pump_under_a_boiler";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 1600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            ctx.level().setBlockAndUpdate(ctx.at(2, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(2, 2, 1));
+            boiler.front = mods.eln.misc.Direction.XN;   // (feed flange south)
+            boiler.reconnect();
+            boiler.fromTanks(0, 0);
+            lay(ctx, ctx.at(2, 2, 2), 0, 8, 0, 8, 8, 8, 8, 8, 8, 0);   // up from the pump, then north into the flange
+            pipe = (PipePart) node(ctx, ctx.at(2, 2, 2)).parts.get(0);
+            pump = pumpInWater(ctx, l, 2, 2);
+            pump.front = mods.eln.misc.Direction.ZP;   // (power on the flanks: east and west)
+            pump.reconnect();
+            l.feed(ctx.at(2, 1, 2), mods.eln.misc.Direction.XN);
+        }
+
+        public void measure(TestContext ctx) {
+            boiler.syncTanks();
+            boiler.showTanks();
+            var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
+            ctx.line("pump under boiler: pump " + pump.getWaila() + ", boiler " + boiler.getWaila() + String.format(", pipe %.2f bar, feed %.2f bar, one network %s",
+                pipe.fluid.P() / 1e5, boiler.feed.P() / 1e5, net != null && net == mods.eln.fluid.FluidWorld.networkOf(pipe.fluid)));
+            ctx.check("pump under boiler: the boiler fills", boiler.tanks.water() > 200, boiler.tanks.water() + " mB");
+        }
+    }
+
+    /** A pump with nowhere to push: its outlet rises to the shutoff pressure (3 bar) and no further, and the flow stops
+     *  (the pump is a stamped edge with that head, Baughn: not water injected per tick). */
+    static final class PumpDeadHeaded implements TestCase {
+        mods.eln.oil.SubmersiblePumpElement pump;
+
+        public String id() {
+            return "submersible_pump_dead_headed";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            pump = pumpInWater(ctx, l, 2, 1);
+            l.feed(ctx.at(2, 1, 1), pump.front.left());
+        }
+
+        public void measure(TestContext ctx) {
+            double p = pump.outlet.P();
+            ctx.check("pump dead-headed: its outlet stops at the shutoff pressure", p > 0.9 * ((mods.eln.oil.SubmersiblePumpDescriptor) pump.transparentNodeDescriptor).shutoffPa && p < 1.02 * ((mods.eln.oil.SubmersiblePumpDescriptor) pump.transparentNodeDescriptor).shutoffPa, String.format("%.3f bar, %s", p / 1e5, pump.getWaila()));
+            ctx.check("pump dead-headed: no flow", pump.rate < 2, String.format("%.1f mB/s", pump.rate));
+        }
+    }
+
     /** Out of water a pump doesn't run; a signal on its front sets its speed (0 V: stopped, half: half power). */
     static final class PumpWaterAndSignal implements TestCase {
         mods.eln.oil.SubmersiblePumpElement dry, stopped, half;
@@ -347,7 +433,7 @@ public final class PipeCases {
             lay(ctx, ctx.at(2, 2, 1), 0, 0, 8, 8, 16, 8, 8);
             lay(ctx, ctx.at(3, 2, 1), 0, 0, 8, 8, 16, 8, 8);
             lay(ctx, ctx.at(4, 2, 1), 0, 0, 8, 8, 8, 8, 8, 8, 0, 8);   // east in, then down into the turbine
-            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(2500 * t));
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(9600 * t));
         }
 
         public void measure(TestContext ctx) {
@@ -414,7 +500,7 @@ public final class PipeCases {
             }
             length = r.length();
             err = mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
-            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(2500 * t));
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> boiler.thermal.moveEnergyTo(9600 * t));
         }
 
         public void measure(TestContext ctx) {
@@ -587,7 +673,7 @@ public final class PipeCases {
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
             if (cap == null) return;
             try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 500, tx);
+                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 150, tx);
                 tx.commit();
             }
         }
@@ -599,14 +685,14 @@ public final class PipeCases {
             PipePart stub = null;
             for (VoxelPart p : n.parts) if (p instanceof PipePart pp) stub = pp;
             double run = stub == null ? 0 : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid).mWater / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
-            ctx.check("pipe: 500 mB of water went in through the capability (the stub holds ~950)", put == 500, put + " mB");
-            ctx.check("pipe: it is in the run (some evaporates into its air)", run > 495 && run < 505, run + " mB");
+            ctx.check("pipe: 150 mB of water went in through the capability (the stub holds ~190)", put == 150, put + " mB");
+            ctx.check("pipe: it is in the run (some evaporates into its air)", run > 145 && run < 155, run + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
             try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 200, tx);
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 100, tx);
                 tx.commit();
             }
-            ctx.check("pipe: water comes back out through it", took == 200, took + " mB");
+            ctx.check("pipe: water comes back out through it", took == 100, took + " mB");
             var other = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.UP);
             ctx.check("pipe: only on the adapter's face", other == null, "" + other);
 
@@ -662,6 +748,100 @@ public final class PipeCases {
             ctx.check("pipe: shut, it holds (5 bar on one side, 1 on the other)", pa > 3e5 && pc < 1.5e5, String.format("%.2f / %.2f bar", pa / 1e5, pc / 1e5));
             var parts = node(ctx, b).parts;
             ctx.check("pipe: the pipe was cut in two around the valve", parts.size() == 3, parts.size() + " parts");
+        }
+    }
+
+    /**
+     * The two valves Baughn asked for (2026-10-26): three runs of three blocks, 5 bar on one end, a valve in the middle.
+     * A throttle valve set to 0 holds; one set to 100% by its screen's packet (VoxelNode.PART_PACKET) passes; a control
+     * valve with 50 V on its signal passes, and one with none holds.
+     */
+    static final class ThrottleAndControlValves implements TestCase {
+        BlockPos[][] runs = new BlockPos[4][];
+        String err = "";
+        mods.eln.sim.mna.component.VoltageSource source;
+        mods.eln.node.voxel.ValvePart control;
+
+        public String id() {
+            return "pipe_throttle_and_control_valves";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        static mods.eln.node.voxel.ValvePart valve(TestContext ctx, BlockPos p) {
+            for (VoxelPart q : node(ctx, p).parts) if (q instanceof mods.eln.node.voxel.ValvePart v) return v;
+            return null;
+        }
+
+        public void build(TestContext ctx) {
+            int[] modes = {mods.eln.node.voxel.ValvePart.THROTTLE, mods.eln.node.voxel.ValvePart.THROTTLE,
+                mods.eln.node.voxel.ValvePart.CONTROL, mods.eln.node.voxel.ValvePart.CONTROL};
+            for (int r = 0; r < 4; r++) {
+                runs[r] = new BlockPos[]{ctx.at(1, 1, r), ctx.at(2, 1, r), ctx.at(3, 1, r)};
+                for (BlockPos p : runs[r]) lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
+                String e = node(ctx, runs[r][1]).addValve(8, 8, 8, modes[r]);
+                if (e != null) err += "run " + r + ": " + e + "; ";
+            }
+            if (!err.isEmpty()) return;
+            valve(ctx, runs[0][1]).setting = 0;
+            // run 1: set open from its screen (the packet a client's slider sends)
+            try {
+                var bos = new java.io.ByteArrayOutputStream();
+                var out = new java.io.DataOutputStream(bos);
+                out.writeByte(mods.eln.node.voxel.VoxelNode.PART_PACKET);
+                int idx = node(ctx, runs[1][1]).parts.indexOf(valve(ctx, runs[1][1]));
+                valve(ctx, runs[1][1]).setting = 0;
+                out.writeByte(idx);
+                out.writeFloat(1f);
+                node(ctx, runs[1][1]).networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())),
+                    null);
+            } catch (java.io.IOException e) {
+                err += e;
+            }
+            // run 2: 50 V on the control valve's signal
+            control = valve(ctx, runs[2][1]);
+            source = new mods.eln.sim.mna.component.VoltageSource("test", control.signal, null).setU(mods.eln.Eln.SVU);
+            mods.eln.Eln.simulator.addElectricalComponent(source);
+            for (int r = 0; r < 4; r++) {
+                ((PipePart) node(ctx, runs[r][0]).parts.get(0)).fluid.fill(0, 5e5, 293.15);
+                mods.eln.fluid.FluidWorld.changed(node(ctx, runs[r][0]));
+            }
+        }
+
+        double[] p(TestContext ctx, int r) {
+            return new double[]{((PipePart) node(ctx, runs[r][0]).parts.get(0)).fluid.P(), ((PipePart) node(ctx, runs[r][2]).parts.get(0)).fluid.P()};
+        }
+
+        public void measure(TestContext ctx) {
+            if (source != null) mods.eln.Eln.simulator.removeElectricalComponent(source);
+            ctx.check("pipe: throttle and control valves fit", err.isEmpty(), err);
+            if (!err.isEmpty()) return;
+            double[] a = p(ctx, 0), b = p(ctx, 1), c = p(ctx, 2), d = p(ctx, 3);
+            ctx.line(String.format("valves: throttle 0%% %.2f/%.2f, throttle 100%% %.2f/%.2f, control 50 V %.2f/%.2f (%.0f%%), control 0 V %.2f/%.2f bar",
+                a[0] / 1e5, a[1] / 1e5, b[0] / 1e5, b[1] / 1e5, c[0] / 1e5, c[1] / 1e5, control.opening() * 100, d[0] / 1e5, d[1] / 1e5));
+            ctx.check("pipe: a throttle valve at 0% holds", a[0] > 3e5 && a[1] < 1.5e5, "");
+            ctx.check("pipe: a throttle valve set to 100% by its screen passes", valve(ctx, runs[1][1]).setting == 1 && Math.abs(b[0] - b[1]) < 0.3e5, "");
+            ctx.check("pipe: a control valve on 50 V is open and passes", control.opening() > 0.95 && Math.abs(c[0] - c[1]) < 0.3e5, "");
+            ctx.check("pipe: a control valve without a signal holds", d[0] > 3e5 && d[1] < 1.5e5, "");
+            // a cable kit clicked on a control valve lays to the floor under it (AdventurAgent: "not a place for a cable")
+            var pos = runs[3][1];
+            var e = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), pos, net.minecraft.core.Direction.UP,
+                new net.minecraft.world.phys.Vec3(pos.getX() + 0.5, pos.getY() + 14.5 / 16, pos.getZ() + 0.5), true, new long[1][]);
+            ctx.check("pipe: a cable ends on the floor under a control valve", e != null && e.y() == pos.getY() * 16L && e.attach() == 0, "" + e);
         }
     }
 
@@ -745,13 +925,60 @@ public final class PipeCases {
             ctx.check("pipe: two iron kits merge (16 + 40)", PipeKitItem.length(m) == 56, "" + PipeKitItem.length(m));
             ItemStack mix = craft(ctx, 2, 1, PipeKitItem.kit(0, 16), PipeKitItem.kit(1, 16));
             ctx.check("pipe: iron and alloy kits don't merge", mix.isEmpty() || !(mix.getItem() instanceof PipeKitItem), "" + mix);
-            ItemStack half = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
+            // a lone kit gives a block's worth of plates back, as a cable kit gives a coil (Baughn: not halves)
+            ItemStack back = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
             var rest = remaining(ctx, 1, 1, PipeKitItem.kit(1, 33));
-            ItemStack half16 = craft(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
+            ctx.check("pipe: an alloy kit gives 3 alloy plates back and keeps the rest (33: 17 stays)", mods.eln.node.voxel.PipeKitRecipes.plateTier(back) == 1 && back.getCount() == 3
+                && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17, back + " / " + rest);
+            ItemStack back16 = craft(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
                 ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
-            ctx.check("pipe: a one-block kit splits too (in a 3x3 grid: 8)", PipeKitItem.length(half16) == 8, "" + PipeKitItem.length(half16));
-            ctx.check("pipe: a kit splits in halves (33: 16 out, 17 stays)", PipeKitItem.length(half) == 16 && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17,
-                PipeKitItem.length(half) + " / " + rest);
+            var rest16 = remaining(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
+                ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            ctx.check("pipe: a one-block iron kit gives 2 plates and is used up (in a 3x3 grid)", mods.eln.node.voxel.PipeKitRecipes.plateTier(back16) == 0 && back16.getCount() == 2
+                && rest16.stream().allMatch(ItemStack::isEmpty), back16 + " / " + rest16);
+            ItemStack short8 = craft(ctx, 1, 1, PipeKitItem.kit(0, 8));
+            ctx.check("pipe: a kit under a block gives nothing back", short8.isEmpty() || !(mods.eln.node.voxel.PipeKitRecipes.plateTier(short8) >= 0), "" + short8);
+            // kits top up (Baughn: pipe kits as cable kits, by the same code): 63 + 2 blocks give a full kit, 1 block stays
+            ItemStack full = craft(ctx, 2, 1, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
+            var left = remaining(ctx, 2, 1, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
+            ctx.check("pipe: 63 + 2 blocks top up to a full kit, 1 block stays", PipeKitItem.length(full) == 1024
+                && left.size() == 2 && left.get(0).isEmpty() && PipeKitItem.length(left.get(1)) == 16, PipeKitItem.length(full) + " / " + left);
+            ItemStack cfull = craft(ctx, 2, 1, mods.eln.node.voxel.CableKitItem.kit(0, 1000), mods.eln.node.voxel.CableKitItem.kit(0, 100));
+            var cleft = remaining(ctx, 2, 1, mods.eln.node.voxel.CableKitItem.kit(0, 1000), mods.eln.node.voxel.CableKitItem.kit(0, 100));
+            ctx.check("cable: 1000 + 100 voxels top up to a full kit, 76 stay", mods.eln.node.voxel.KitItem.length(cfull) == 1024
+                && cfull.getItem() instanceof mods.eln.node.voxel.CableKitItem && cleft.size() == 2 && mods.eln.node.voxel.KitItem.length(cleft.get(1)) == 76,
+                cfull + " / " + cleft);
+            ItemStack none = craft(ctx, 2, 1, PipeKitItem.kit(0, 1024), PipeKitItem.kit(0, 32));
+            ctx.check("pipe: a full kit and another don't merge (nothing to top up)", none.isEmpty() || !(none.getItem() instanceof PipeKitItem), "" + none);
+            // shift-click in a crafting table: the full kit (the rest stays: its plates are another item, so the loop stops)
+            var shift = shiftCraft(ctx, PipeKitItem.kit(0, 1008), PipeKitItem.kit(0, 32));
+            ctx.check("pipe: shift-click 63 + 2 blocks: a full kit, the block left over stays in the grid", shift.equals("kits [1024] plates 0 grid [16]"), shift);
+            var unroll = shiftCraft(ctx, PipeKitItem.kit(0, 40));
+            ctx.check("pipe: shift-click a 2.5-block kit: 4 plates, half a block stays", unroll.equals("kits [] plates 4 grid [8]"), unroll);
+        }
+
+        /** Shift-click the result of a crafting table holding items (from slot 1): "kits [lengths] plates n grid [kit lengths]". */
+        static String shiftCraft(TestContext ctx, ItemStack... items) {
+            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.get(ctx.level(),
+                new com.mojang.authlib.GameProfile(java.util.UUID.fromString("e1a0c0de-0000-4000-8000-00000000c0de"), "eln_kit_shift"));
+            fp.getInventory().clearContent();
+            var cm = new net.minecraft.world.inventory.CraftingMenu(8, fp.getInventory(),
+                net.minecraft.world.inventory.ContainerLevelAccess.create(ctx.level(), BlockPos.ZERO));
+            for (int i = 0; i < items.length; i++) cm.getSlot(1 + i).set(items[i]);
+            cm.slotsChanged(cm.getSlot(1).container);
+            cm.clicked(0, 0, net.minecraft.world.inventory.ContainerInput.QUICK_MOVE, fp);
+            var inv = new java.util.ArrayList<Integer>();
+            int plates = 0;
+            for (int i = 0; i < fp.getInventory().getContainerSize(); i++) {
+                var s = fp.getInventory().getItem(i);
+                if (s.getItem() instanceof mods.eln.node.voxel.KitItem) inv.add(mods.eln.node.voxel.KitItem.length(s));
+                else if (mods.eln.node.voxel.PipeKitRecipes.plateTier(s) >= 0) plates += s.getCount();
+            }
+            var grid = new java.util.ArrayList<Integer>();
+            for (int i = 1; i <= 9; i++)
+                if (cm.getSlot(i).getItem().getItem() instanceof mods.eln.node.voxel.KitItem) grid.add(mods.eln.node.voxel.KitItem.length(cm.getSlot(i).getItem()));
+            fp.getInventory().clearContent();
+            return "kits " + inv + " plates " + plates + " grid " + grid;
         }
     }
 
@@ -793,6 +1020,83 @@ public final class PipeCases {
             ctx.check("pipe: taking the low pipe out leaves the high one", !emptyAfterFirst && partsLeft == 1, partsLeft + " left");
             ctx.check("pipe: it drops as a kit of its length (16 voxels)", dropped == 16, dropped + " voxels dropped");
             for (var it : items) it.discard();
+        }
+    }
+
+    /**
+     * The live route preview of a pipe kit (Baughn: pipes didn't show while picking waypoints; AdventurAgent saw none
+     * drawn): from the top of an upright pipe to an air cell three blocks on, the preview has the pipe's boxes.
+     */
+    static final class PipeRoutePreview implements TestCase {
+        String result = "not run";
+        boolean ok;
+
+        public String name() {
+            return "pipe kit: the live route preview has the pipe";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            String err = mods.eln.node.voxel.PipeKitItem.place(level, ctx.at(1, 1, 1), new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 16, 8}), null);
+            var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(1, 1, 1), net.minecraft.core.Direction.UP);
+            if (err != null || a == null) {
+                result = "setup: " + err + " port " + a;
+                return;
+            }
+            BlockPos at = ctx.at(4, 2, 1);
+            var end = new mods.eln.node.voxel.PipeRouter.End(at.getX() * 16L + 8, at.getY() * 16L + 8, at.getZ() * 16L + 8, -1);
+            try {
+                var ans = mods.eln.node.voxel.KitPreview.pipeAnswerForTests(level, 0, a, end);
+                result = ans.ok() + " " + ans.boxes().size() + " boxes: " + ans.message();
+                ok = ans.ok() && ans.boxes().size() >= 2;
+            } catch (RuntimeException e) {
+                result = "threw " + e;
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe preview: a route with boxes", ok, result);
+        }
+    }
+
+    /**
+     * A kit's length isn't damage (a player's report via Baughn: an Occultism blacksmith familiar repaired cable kits
+     * full): kits can't be damaged or repaired, a kit from before (its length as damage) still reads right, and changing
+     * it moves the length into the kit's data.
+     */
+    static final class KitLengthNotDamage implements TestCase {
+        String result = "";
+        boolean ok;
+
+        public String name() {
+            return "kits keep their length in data, not damage";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            ItemStack pipe = PipeKitItem.kit(0, 100);
+            ItemStack cable = mods.eln.node.voxel.CableKitItem.kit(1, 40);
+            // a kit saved before: damage 1000 of 1024 = 24 voxels
+            ItemStack old = new ItemStack(mods.eln.registry.ElnRegistry.CABLE_KITS.get(1).get());
+            old.set(net.minecraft.core.component.DataComponents.DAMAGE, 1000);
+            int oldLen = mods.eln.node.voxel.KitItem.length(old);
+            mods.eln.node.voxel.KitItem.setLength(old, oldLen + 16);
+            result = "pipe " + PipeKitItem.length(pipe) + " damageable " + pipe.isDamageableItem() + ", cable " + mods.eln.node.voxel.KitItem.length(cable)
+                + " damageable " + cable.isDamageableItem() + ", old " + oldLen + " -> " + mods.eln.node.voxel.KitItem.length(old)
+                + " damage left " + old.has(net.minecraft.core.component.DataComponents.DAMAGE);
+            ok = PipeKitItem.length(pipe) == 100 && !pipe.isDamageableItem() && mods.eln.node.voxel.KitItem.length(cable) == 40 && !cable.isDamageableItem()
+                && oldLen == 24 && mods.eln.node.voxel.KitItem.length(old) == 40 && !old.has(net.minecraft.core.component.DataComponents.DAMAGE);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("kits: length in data, not damage; old kits read right", ok, result);
         }
     }
 }

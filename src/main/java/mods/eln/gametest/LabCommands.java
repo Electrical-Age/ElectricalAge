@@ -234,6 +234,8 @@ public final class LabCommands {
             out.add(node.getClass().getSimpleName() + " at " + pos + ", in simulation " + node.isAdded() + ", light " + (node instanceof mods.eln.node.Node n ? n.getLightValue() : -1));
             if (node instanceof mods.eln.node.transparent.TransparentNode tn && tn.element != null) {
                 out.add("- " + tn.element.getClass().getSimpleName() + " " + new TreeMap<>(tn.element.getWaila()));
+                out.add(String.format("  ambient: stamped %.1f C, here now %.1f C", tn.element.ambient + mods.eln.sim.PhysicalConstant.Tamb,
+                    mods.eln.sim.Ambient.celsius(src.getLevel(), pos)));
                 if (tn.getFluidHandler() instanceof mods.eln.fluid.ElementFluidHandler h)
                     out.add("  tank: " + h.getFluidAmount() + " / " + h.getCapacity() + " mB of " + h.getFluid().getFluid());
             }

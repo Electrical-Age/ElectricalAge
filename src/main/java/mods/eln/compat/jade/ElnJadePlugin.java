@@ -61,6 +61,18 @@ public class ElnJadePlugin implements IWailaPlugin {
         return Map.of();
     }
 
+    /** Does the device under the crosshair have thermal loads (so its ambient matters)? */
+    static boolean hasHeat(BlockAccessor acc) {
+        if (!(acc.getBlockEntity() instanceof NodeBlockEntity be)) return false;
+        var node = be.getNode();
+        if (node instanceof mods.eln.node.voxel.VoxelNode) return true;   // (cables and pipes)
+        if (node instanceof mods.eln.node.transparent.TransparentNode t) return t.element != null && !t.element.thermalLoadList.isEmpty();
+        if (node instanceof mods.eln.node.six.SixNode s) {
+            for (var e : s.sideElementList) if (e != null && !e.thermalLoadList.isEmpty()) return true;
+        }
+        return false;
+    }
+
     /** A voxel block's header: the device, pipe or cable under the crosshair (the block is "Pipes and Cables"). */
     static String title(BlockAccessor acc) {
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be) || !(be.getNode() instanceof mods.eln.node.voxel.VoxelNode v)) return null;
@@ -93,6 +105,10 @@ public class ElnJadePlugin implements IWailaPlugin {
             String title = title(acc);
             if (title != null) tag.putString("elnTitle", title);
             if (m == null || m.isEmpty()) return;
+            if (hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
+                m = new java.util.LinkedHashMap<>(m);
+                m.put(mods.eln.i18n.I18N.tr("Ambient"), mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition())));
+            }
             ListTag list = new ListTag();
             for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
             tag.put("elnProbe", list);

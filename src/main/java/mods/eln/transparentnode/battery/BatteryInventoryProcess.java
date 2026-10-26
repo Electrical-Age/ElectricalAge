@@ -19,9 +19,10 @@ public class BatteryInventoryProcess implements IProcess {
 
         boolean cut = false;
         if (battery.hasOverHeatingProtection()) {
-            // WP16b: 1.7.10 compared the temperature (K) to thermalHeatTime (30 s); compare to the warm limit
-            // instead, at half of it (= 30 K for every EA battery: warm limit 60), so the trip point is unchanged.
-            double cutT = battery.descriptor.thermalWarmLimit * 0.5;
+            // WP16b: 1.7.10 compared the temperature (K) to thermalHeatTime (30 s); compare to the warm limit instead.
+            // Baughn 2026-10-26 (ambient by biome): at 60 C (two thirds of the limit, 40 K above 20 C), not 50 C, so
+            // desert banks (50 C) keep working.
+            double cutT = battery.descriptor.thermalWarmLimit * 2 / 3;
             if (battery.thermalLoad.Tc * 1.1 > cutT) {
                 thermalCut = true;
             }

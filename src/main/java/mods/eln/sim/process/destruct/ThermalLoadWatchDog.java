@@ -20,7 +20,7 @@ public class ThermalLoadWatchDog extends ValueWatchdog {
 
     public ThermalLoadWatchDog setTMax(double tMax) {
         this.max = tMax;
-        this.min = -40;
+        this.min = -150;   // (Tc scale, -130 C: no biome is that cold; 1.12 had -40, which a cold biome could reach)
         this.timeoutReset = tMax * 0.1 * 10;
         return this;
     }

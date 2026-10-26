@@ -53,7 +53,7 @@ That key exists only in the network tag and is never saved to disk.
 ## Client -> server: GUI packets
 
 Header: `NodeBlockEntity.preparePacketForServer` writes `packetPublishForNode, x, y, z, dim, nodeUuid`, then
-- six-node: `SixNodeElementRender.preparePacketForServer` adds side byte + element id short;
+- six-node: `SixNodeElementRender.preparePacketForServer` adds slot byte (SixNodeElement.slot; 0..5 = the face) + element id short;
 - transparent: `TransparentNodeEntity.preparePacketForServer` adds the element id short.
 
 Helpers (client, on the render): six-node `clientSetFloat` (1 or 2 floats), `clientSetDouble`, `clientSetString`,
@@ -73,7 +73,7 @@ within 16 blocks (`MAX_DISTANCE_SQ`, 26.x hardening) -> `NodeBase.networkUnseria
 
 | Class | Side | Role |
 |---|---|---|
-| `src/main/java/mods/eln/gui/ElnNodeMenu.java` | both | The one menu type (`ElnRegistry.NODE_MENU`). Device slots from a `MenuSpec`, then player inventory 27 + 9. Open data: pos, side, kind (`SIX`/`TRANSPARENT`), descriptor id. Client copy: `node == null`, device inventory is a stand-in `SimpleContainer` synced by vanilla slot sync. |
+| `src/main/java/mods/eln/gui/ElnNodeMenu.java` | both | The one menu type (`ElnRegistry.NODE_MENU`). Device slots from a `MenuSpec`, then player inventory 27 + 9. Open data: pos, slot (six-node: the element's slot, 0..5 = centred on that face; transparent: the side), kind (`SIX`/`TRANSPARENT`), descriptor id. Client copy: `node == null`, device inventory is a stand-in `SimpleContainer` synced by vanilla slot sync. |
 | `src/main/java/mods/eln/node/NodeMenus.java` | server (`open`, `menu`), both (`spec`, `descriptor`) | `NodeBase.onBlockActivated` -> `hasGui(side)` -> `NodeMenus.open`. Pads a too-small element inventory with a `SimpleContainer`. `openedHook` for GameTests. |
 | `src/main/java/mods/eln/gui/MenuSpecs.java` | both | Descriptor class -> `MenuSpec` (walks superclasses); no entry = `MenuSpec.SCREEN_ONLY`. The 1.12 container constructors as data. |
 | `src/main/java/mods/eln/gui/MenuSpec.java`, `SlotSpec.java`, `ElnSlot.java` | both | Slots, player-inventory position, panel size, `refreshRateDivider` (-1: no periodic publish). `SlotSpec` kinds: `any`, `descriptor`, `six`, `filter`, `battery`, `lamp`, `regulator`. `ElnSlot` = `mayPlace` from the filter, `getMaxStackSize` = spec limit. |
@@ -93,7 +93,7 @@ Rules:
   `ClientScreens.registerAll()`, and sets `ElnNodeMenu.clientLayout = ElnLayouts::apply`. That is how the client menu
   takes its slot positions and panel size from the layout; the server keeps `MenuSpec`'s positions.
 - `src/main/java/mods/eln/client/gui/ElnScreens.java`: factory by descriptor class (superclass walk). It needs the
-  element render at `menu.pos`/`side`, otherwise it falls back to the generic `ElnScreen` (slots only).
+  element render at `menu.pos`/`slot`, otherwise it falls back to the generic `ElnScreen` (slots only).
 - `src/main/java/mods/eln/client/ClientScreens.java`: every layout name and screen factory. Analog chips share
   `AnalogChipDescriptor`, so they are chosen by element / render class. `info(...)` devices use `InfoScreen` (value
   lines computed from the slots).
@@ -145,7 +145,5 @@ needs the stack in that slot to still be a scanner. Screen: `client/gui/XRayScan
 
 - The old "ElnNet sends without a hasChannel check" problem is fixed (3a4dd2ce): `sendToPlayer` and `sendToTracking`
   skip players without the channel (vanilla clients, mock players). `sendToServer` has no such check.
-- `SixNode.networkUnserialize` tests `side != null & ...` with a non-short-circuit `&`, so a bad side byte throws
-  NPE instead of logging the miss.
 - Packets carry no version beyond the payload version `"1"`. Publish and GUI formats are positional: change writer and
   reader together, and keep `PublishRenderCase` green.

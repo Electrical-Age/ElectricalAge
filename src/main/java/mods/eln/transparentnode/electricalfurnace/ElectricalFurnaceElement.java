@@ -49,7 +49,9 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     ResistorSwitch heatingCorpResistor = new ResistorSwitch("heatResistor", electricalLoad, ElectricalLoad.groundLoad);
 
     NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
-    ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ThermalLoad.externalLoad);
+    /** Where the smelting heat goes: the ambient where it stands (set in connectJob). */
+    final ThermalLoad ambientSink = ThermalLoad.ambientSink();
+    ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ambientSink);
 
     RegulatorThermalLoadToElectricalResistor thermalRegulator = new RegulatorThermalLoadToElectricalResistor("thermalRegulator", thermalLoad, heatingCorpResistor);
 
@@ -124,6 +126,12 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     @Override
     public String thermoMeterString(Direction side) {
         return Utils.plotCelsius("T:", thermalLoad.Tc);
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        ambientSink.sinkAt(ambient);
     }
 
     @Override

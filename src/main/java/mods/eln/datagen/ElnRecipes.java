@@ -1317,7 +1317,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "SWS",
             "WSW",
             'S', stack(Blocks.STONE),
-            'W', wool(0));
+            'W', net.minecraft.tags.ItemTags.WOOL);   // any colour (Baughn 2026-10-26; 1.12: white)
     }
 
     public static void recipeFerromagneticCore() {
@@ -1968,6 +1968,23 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', "itemRubber",
             'M', findItemStack("Advanced Machine Block"),
             'E', findItemStack("Medium Voltage Cable"),
+            'm', findItemStack("Advanced Electrical Motor"));
+        // the turbines' condensers (Baughn 2026-10-26): a shell of copper tubes (the cooler) round a vessel, and a pump
+        addRecipe(findItemStack("Small Steam Condenser", 1),
+            "PCP",
+            "CMC",
+            "PmP",
+            'P', findItemStack("Iron Plate"),
+            'C', findItemStack("Copper Plate"),
+            'M', findItemStack("Machine Block"),
+            'm', findItemStack("Electrical Motor"));
+        addRecipe(findItemStack("Steam Condenser", 1),
+            "PCP",
+            "CMC",
+            "PmP",
+            'P', findItemStack("Alloy Plate"),
+            'C', findItemStack("Copper Plate"),
+            'M', findItemStack("Advanced Machine Block"),
             'm', findItemStack("Advanced Electrical Motor"));
         // the steam oven (Baughn 2026-10-23): an iron box with a glass door, a pipe in on top and a fan
         addRecipe(findItemStack("Steam Oven", 1),

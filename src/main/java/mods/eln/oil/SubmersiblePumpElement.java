@@ -32,9 +32,11 @@ import java.util.Map;
 
 /**
  * The submersible pump (SubmersiblePumpDescriptor): a motor (a resistor at its nominal power, scaled by the speed the
- * front signal asks for) that pushes the water it stands in into its outlet, a small fluid-core node behind the flange
- * on top. The flow follows the motor's power and falls to nothing as the outlet's pressure nears SHUTOFF_PA; out of
- * water (not waterlogged) it doesn't run.
+ * front signal asks for) driving a pump that is part of the fluid solve (Baughn: a matrix stamp, not water injected per
+ * tick): a one-way edge from its sump (the water it stands in, at 1 atm) to its outlet behind the flange on top, with
+ * a head of shutoffPa above the sump and a conductance such that it delivers its nominal flow against 1 atm. So the
+ * flow falls linearly to nothing at the shutoff pressure, exactly, whatever the pipe; the speed and the motor's power
+ * scale the conductance. The outlet stub merges into the pipe on it. Out of water (not waterlogged) it doesn't run.
  */
 public class SubmersiblePumpElement extends TransparentNodeElement implements FluidDevice {
     final SubmersiblePumpDescriptor desc;
@@ -42,8 +44,11 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
     public final Resistor motor = new Resistor(load, null);
     final NbtElectricalGateInput control = new NbtElectricalGateInput("control");
     final VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
-    public static final double OUTLET_VOLUME = 0.0005, PORT_K = BoilerElement.PORT_K;
+    public static final double OUTLET_VOLUME = 0.00002, PORT_K = BoilerElement.PORT_K;
     public FluidNode outlet;
+    /** The water it stands in, and the pump between it and the outlet. */
+    FluidNode sump;
+    private FluidDevice.Link pumpEdge;
     private double[] loaded;
     private List<FluidPort> ports = List.of();
     /** In water (waterlogged), and the speed asked for (0..1; no cable on the front: 1). */
@@ -79,20 +84,22 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
         return ports;
     }
 
-    /** Push water into the outlet: by the motor's power, less as the outlet's pressure nears the shutoff. */
+    @Override
+    public List<FluidDevice.Link> fluidLinks() {
+        return pumpEdge == null ? List.of() : List.of(pumpEdge);
+    }
+
+    /** The pump this step: its conductance scaled by the motor's power (the speed asked for, and the voltage it gets). */
     @Override
     public void beforeFluidStep(double dt) {
-        if (!submerged || outlet == null) return;
-        double power = Math.min(1.2, motor.getP() / desc.nominalP);
-        double head = Math.max(0, Math.min(1, (SubmersiblePumpDescriptor.SHUTOFF_PA - outlet.P()) / (SubmersiblePumpDescriptor.SHUTOFF_PA - Water.P_ATM)));
-        double mb = desc.nominalMbPerS * power * head * dt;
-        if (mb <= 0) return;
-        EaUnits.addWater(outlet, mb * EaUnits.KG_PER_MB_WATER, Water.T_AMBIENT, false);
-        meter += mb;
+        if (pumpEdge == null) return;
+        pumpEdge.open = submerged ? Math.min(1.2, motor.getP() / desc.nominalP) : 0;
+        pumpEdge.boost = desc.shutoffPa - Water.P_ATM;
     }
 
     @Override
     public void afterFluidStep(double dt) {
+        if (pumpEdge != null && pumpEdge.edge != null) meter += Math.max(0, pumpEdge.edge.fLiquid) / EaUnits.KG_PER_MB_WATER * dt;
         meterTime += dt;
         if (meterTime >= 1) {
             rate = meter / meterTime;
@@ -155,7 +162,16 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
             outlet.mAir = loaded[1];
             outlet.energy = loaded[2];
             outlet.update();
-        } else outlet.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        } else outlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        outlet.lumpable = true;   // (it merges into the pipe on its flange)
+        outlet.resistance = 1 / PORT_K;
+        sump = FluidNode.sump(c.y, mods.eln.sim.Ambient.kelvin(c));
+        // g = rho k / mu = nominal flow / shutoff head (kg/s/Pa): the nominal flow against 1 atm, none at the shutoff
+        double dp = desc.shutoffPa - Water.P_ATM;
+        double kgPerS = desc.nominalMbPerS * EaUnits.KG_PER_MB_WATER;
+        pumpEdge = new FluidDevice.Link(sump, 0, outlet, 0, kgPerS / dp * Water.MU_L / Water.RHO_L).kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
+        pumpEdge.boost = dp;
+        pumpEdge.open = 0;
         ports = List.of(new FluidPort(outlet, c.pos().asLong(), 1, 0.0, PORT_K));   // the flange on top
         connect();
     }
@@ -167,13 +183,15 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
             nbt.putDouble("outletW", outlet.mWater);
             nbt.putDouble("outletA", outlet.mAir);
             nbt.putDouble("outletU", outlet.energy);
+            nbt.putDouble("outletV", OUTLET_VOLUME);
         }
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        if (nbt.contains("outletW"))
+        // (saved for an outlet of another size, e.g. the first 0.5 L one: its contents would not fit; it starts empty)
+        if (nbt.contains("outletW") && nbt.getDoubleOr("outletV", 0) == OUTLET_VOLUME)
             loaded = new double[]{nbt.getDoubleOr("outletW", 0), nbt.getDoubleOr("outletA", 0), nbt.getDoubleOr("outletU", 0)};
     }
 

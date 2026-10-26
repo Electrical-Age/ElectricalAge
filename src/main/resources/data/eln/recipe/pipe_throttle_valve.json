@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "eln:pipe_valve",
+    "eln:iron_plate"
+  ],
+  "result": {
+    "id": "eln:pipe_throttle_valve"
+  }
+}

@@ -45,7 +45,9 @@ public class SmelterElement extends TransparentNodeElement {
     final TransparentNodeElementInventory inventory = new SmelterInventory(outSlotId + OUT_SLOTS, 64, this);
 
     final NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
-    final ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ThermalLoad.externalLoad);
+    /** Where the smelting heat goes: the ambient where it stands (set in connectJob). */
+    final ThermalLoad ambientSink = ThermalLoad.ambientSink();
+    final ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ambientSink);
     final NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
     final Resistor control = new Resistor(electricalLoad, null);
     SmelterDescriptor descriptor;
@@ -214,6 +216,12 @@ public class SmelterElement extends TransparentNodeElement {
         if (side == front.getInverse()) return NodeBase.maskThermal;
         if (side == front.left() || side == front.right()) return NodeBase.maskElectricalPower;
         return 0;
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        ambientSink.sinkAt(ambient);
     }
 
     @Override

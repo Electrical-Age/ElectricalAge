@@ -100,7 +100,6 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         list.add(tr("Produces electricity using gasoline."))
-        list.add("  " + tr("Nominal voltage: %1$ V", Utils.plotValue(cable.electricalNominalVoltage)))
         list.add("  " + tr("Nominal power: %1$ W", Utils.plotValue(nominalPower)))
     }
 }

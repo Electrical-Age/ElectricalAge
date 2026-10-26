@@ -8,6 +8,13 @@ import java.util.List;
  * ((C/dt + G) P' = C/dt P + gravity head), then the flows at those pressures move water, air and energy upwind, and
  * every node finds its new equilibrium (Flash). Mass is conserved exactly: each flow leaves one node and enters the
  * other. Small networks (tens of nodes): a dense solve each step.
+ * <p>
+ * The transport is implicit (as in reactor thermal-hydraulics codes): a node gives at most DRAIN_CAP of each phase it
+ * holds per step, and what leaves it beyond that is what flowed in during the step, passed through. The mix and
+ * enthalpy passed through come from a linear solve over the network, so a small node (a short pipe) can carry many
+ * times its contents per step without its outflow carrying its old contents (that drove a pipe to 1268 K), and pipe
+ * volume no longer limits throughput. Each node answers pressure with one compressibility per phase, whichever edge
+ * the mass comes through, so through-flow doesn't fake a mass imbalance (Gemini's review, 2026-10-25).
  */
 public final class FluidNetwork {
     public static final double G = 9.81;
@@ -16,6 +23,8 @@ public final class FluidNetwork {
 
     public final List<FluidNode> nodes = new ArrayList<>();
     public final List<FluidEdge> edges = new ArrayList<>();
+    /** This step's solved pressures (the bounds the limiters hold nodes to). */
+    private final java.util.Map<FluidNode, Double> solved = new java.util.IdentityHashMap<>();
 
     public FluidNode add(FluidNode n) {
         nodes.add(n);
@@ -49,15 +58,28 @@ public final class FluidNetwork {
             }
         int N = free.size();
         Flash probe = new Flash();
+        // each free node's pressure response per kg of liquid and per kg of its own gas (one per phase, whichever edge
+        // brings or takes it: per-edge responses made in != out at a small node in a steady through-flow)
+        double[] sL = new double[N], sG = new double[N];
+        for (int i = 0; i < N; i++) {
+            FluidNode n = free.get(i);
+            double T = n.T();
+            sL[i] = dPdm(n, 1, 0, 0, Water.hLiquid(T), probe);
+            double[] z = gasMix(n);
+            sG[i] = dPdm(n, 0, z[0], z[1], z[2], probe);
+        }
         for (FluidEdge e : edges) {
             chooseUpstream(e);
-            e.sA = e.a.fixed ? 0 : dPdm(e.a, e, probe);
-            e.sB = e.b.fixed ? 0 : dPdm(e.b, e, probe);
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            e.sA = ia == null ? 0 : e.xl * sL[ia] + (1 - e.xl) * sG[ia];
+            e.sB = ib == null ? 0 : e.xl * sL[ib] + (1 - e.xl) * sG[ib];
         }
         // 3. implicit pressures: P_i' = P_i + dt sum (dP/dm)_i,e x flow into i (flows at the new pressures); solved
-        //    again if a check valve would run backwards
+        //    again if a check valve would run backwards, or a flow runs against the side it was taken from (the edge
+        //    then takes its packet from the other side: a short pipe drained by its valve draws from its boiler even
+        //    when it started the step at a higher pressure)
         double[] P = new double[N];
-        for (int pass = 0; pass < 3; pass++) {
+        for (int pass = 0; pass < 4; pass++) {
             double[][] A = new double[N][N];
             double[] rhs = new double[N];
             for (int i = 0; i < N; i++) {
@@ -91,6 +113,12 @@ public final class FluidNetwork {
                     e.g = 0;
                     e.flow = 0;
                     again = true;
+                } else if (!e.oneWay() && e.flow != 0 && (e.flow > 0) != e.fromA && pass < 3) {
+                    props(e, !e.fromA);
+                    Integer ja = idx.get(e.a), jb = idx.get(e.b);
+                    e.sA = ja == null ? 0 : e.xl * sL[ja] + (1 - e.xl) * sG[ja];
+                    e.sB = jb == null ? 0 : e.xl * sL[jb] + (1 - e.xl) * sG[jb];
+                    again = true;
                 }
             }
             if (!again) break;
@@ -98,13 +126,28 @@ public final class FluidNetwork {
         // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
         //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
         //    what leaves each node
+        solved.clear();
+        for (int i = 0; i < N; i++) solved.put(free.get(i), P[i]);
         for (int pass = 0; pass < 3; pass++) {
             limitNoReversal(dt);
             limitToNeighbourRange(dt);
         }
         capOutflows(dt);
-        // 7. move contents
-        for (FluidEdge e : edges) transfer(e, dt);
+        // 7. move contents: each edge's liquid and gas shares from its upstream port (the step's starting contents);
+        //    the phase caps; what passes through each node (an implicit upwind solve); then the transfer
+        int E = edges.size();
+        double[] xl = new double[E];
+        for (int k = 0; k < E; k++) {
+            FluidEdge e = edges.get(k);
+            if (e.flow == 0) continue;
+            FluidNode u = e.flow > 0 ? e.a : e.b;
+            double[] pk = packet(u, port(e, u));
+            xl[k] = pk[4] > 0 ? pk[0] : 0;
+            if (pk[4] <= 0) e.flow = 0;
+        }
+        double[][] theta = capPhases(dt, free, idx, xl);
+        double[][] pass = passThrough(free, idx, xl, theta);
+        for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], free, idx, theta, pass);
         // 8. new equilibria
         for (FluidNode n : free) n.update();
     }
@@ -124,7 +167,11 @@ public final class FluidNetwork {
         if (u.mLiquid() <= 0) w = 0;
         else if (mg <= 0) w = 1;
         else {
-            double x = Math.max(0, Math.min(1, (u.level() - port) / BAND));   // (all liquid once the level is a band above the port)
+            // (all liquid once the level is a band above the port; a port at the very top counts as one band lower, or a
+            // node filling from below could never spill out of it: its level only approaches the top, as an inflow may
+            // fill at most half the free space per step. Dysnomiaw's pump pushed 9 bar into a full riser that drew
+            // only its last wisp of air into the boiler's feed.)
+            double x = Math.max(0, Math.min(1, (u.level() - Math.min(port, 1 - BAND)) / BAND));
             w = x * x * (3 - 2 * x);
         }
         double rhoG = mg > 0 ? mg / u.state.vGas : 0;
@@ -149,14 +196,19 @@ public final class FluidNetwork {
     }
 
     /**
-     * How n's pressure rises per kg of e's packet arriving (from the upstream side, with its enthalpy); the same rate
-     * applies to it leaving. By a small flash step.
+     * How n's pressure rises per kg arriving of a packet with these shares (liquid, vapour, air) and specific enthalpy;
+     * the same rate applies to it leaving. By a small flash step.
      */
-    static double dPdm(FluidNode n, FluidEdge e, Flash probe) {
-        double[] pk = e.fromA ? packet(e.a, e.portA) : packet(e.b, e.portB);
-        double d = Math.max(1e-7, 1e-4 * n.mass());
-        probe.solve(n.mWater + (pk[0] + pk[1]) * d, n.mAir + pk[2] * d, n.energy + pk[3] * d, n.volume, n.T());
-        double s = (probe.P - n.P()) / d;
+    static double dPdm(FluidNode n, double xl, double xv, double xa, double h, Flash probe) {
+        // the stiffer of a small and a larger step: a node just on the saturation curve answers a small step on the flat
+        // two-phase branch, while the step's real change may carry it onto the steep single-phase one (a short pipe of
+        // saturated steam then pulled in twice its contents, overshot, and the flow reversed every other step)
+        double s = 0;
+        for (double frac : new double[]{1e-4, 2e-2}) {
+            double d = Math.max(1e-7, frac * n.mass());
+            probe.solve(n.mWater + (xl + xv) * d, n.mAir + xa * d, n.energy + h * d, n.volume, n.T());
+            s = Math.max(s, (probe.P - n.P()) / d);
+        }
         if (!(s > 0)) s = Water.R_AIR * Math.max(n.T(), Flash.T_MIN) / n.volume;   // (an empty node: as air)
         return s;
     }
@@ -179,7 +231,8 @@ public final class FluidNetwork {
         double[] pk = fromA ? packet(e.a, e.portA) : packet(e.b, e.portB);
         e.fromA = fromA;
         e.rho = pk[4];
-        e.head = pk[6] * G * (e.zA() - e.zB());
+        e.xl = pk[0];
+        e.head = pk[6] * G * (e.zA() - e.zB()) + e.boost;
         e.g = pk[4] * e.k * e.open / pk[5];
     }
 
@@ -201,10 +254,9 @@ public final class FluidNetwork {
         for (FluidEdge e : edges) {
             if (e.flow == 0) continue;
             double d = e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head;
-            if (d == 0 || (d > 0) != (e.flow > 0)) {
-                e.flow = 0;
-                continue;
-            }
+            // (a flow against the starting drive is the implicit solve's answer to what the step does at the other
+            // end: left alone; only an overshoot past the even point is cut back)
+            if (d == 0 || (d > 0) != (e.flow > 0)) continue;
             double d1 = d + r.getOrDefault(e.a, 0.0) - r.getOrDefault(e.b, 0.0);
             if (d1 != 0 && (d1 > 0) != (d > 0)) e.flow *= 0.9 * d / (d - d1);
         }
@@ -218,8 +270,10 @@ public final class FluidNetwork {
                 if (e.a != n && e.b != n) continue;
                 if (e.oneWay() && e.g == 0) continue;   // (a shut check valve pushes nothing either way)
                 double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
-                // the pressure this edge pushes n towards (where its drive would be zero)
-                double towards = e.b == n ? e.a.P() + offA - offB + e.head : e.b.P() + offB - offA - e.head;
+                // the pressure this edge pushes n towards (where its drive would be zero), by the other end's pressure at
+                // the end of the step as solved (by its start, a boiler couldn't feed a pipe its valve was emptying)
+                double pa = solved.getOrDefault(e.a, e.a.P()), pb = solved.getOrDefault(e.b, e.b.P());
+                double towards = e.b == n ? pa + offA - offB + e.head : pb + offB - offA - e.head;
                 lo = Math.min(lo, towards);
                 hi = Math.max(hi, towards);
                 if (e.flow == 0) continue;
@@ -239,27 +293,8 @@ public final class FluidNetwork {
         }
     }
 
+    /** The liquid level limits (the phase caps and pass-through come after: capPhases). */
     private void capOutflows(double dt) {
-        for (FluidNode n : nodes) {
-            if (n.fixed) continue;
-            double outL = 0, outG = 0;
-            for (FluidEdge e : edges) {
-                double f = out(e, n);
-                if (f <= 0) continue;
-                double xl = packet(n, port(e, n))[0];
-                outL += f * xl;
-                outG += f * (1 - xl);
-            }
-            double haveL = n.mLiquid(), haveG = n.mVapour() + n.mAir;
-            double sL = outL * dt > DRAIN_CAP * haveL ? DRAIN_CAP * haveL / (outL * dt) : 1;
-            double sG = outG * dt > DRAIN_CAP * haveG ? DRAIN_CAP * haveG / (outG * dt) : 1;
-            if (sL < 1 || sG < 1)
-                for (FluidEdge e : edges) {
-                    if (out(e, n) <= 0) continue;
-                    double xl = packet(n, port(e, n))[0];
-                    e.flow *= Math.min(xl > 0 ? sL : 1, xl < 1 ? sG : 1);
-                }
-        }
         // ... and the liquid level: a node may fill at most half its free space per step (the pressure answers
         // liquid steeply only once it is full; without this a step can overfill it far into its stiff range), and
         // its level may move at most half a port band per step either way (else a port near the level flips between
@@ -293,6 +328,134 @@ public final class FluidNetwork {
         }
     }
 
+    /** A node's gas: vapour share, air share, specific enthalpy (J/kg); all vapour if it holds no gas. */
+    static double[] gasMix(FluidNode n) {
+        double T = n.T(), mv = n.mVapour(), ma = n.mAir, mg = mv + ma;
+        if (mg <= 0) return new double[]{1, 0, Water.hVapour(T)};
+        double yv = mv / mg, ya = ma / mg;
+        return new double[]{yv, ya, yv * Water.hVapour(T) + ya * Water.hAir(T)};
+    }
+
+    /**
+     * Per free node: theta[i] = {liquid, gas}, the share of what leaves it of that phase that comes out of what it holds
+     * (the rest is what flowed in, passed through). A node gives at most DRAIN_CAP of each phase it holds per step, net
+     * of what of that phase flows in; outflows beyond that are cut (each edge by its tighter phase). Cutting one node's
+     * outflows lowers its neighbours' inflows, so a few passes.
+     */
+    private double[][] capPhases(double dt, List<FluidNode> free, java.util.Map<FluidNode, Integer> idx, double[] xl) {
+        int N = free.size(), E = edges.size();
+        double[] haveL = new double[N], haveG = new double[N];
+        for (int i = 0; i < N; i++) {
+            FluidNode n = free.get(i);
+            haveL[i] = Math.max(0, n.mLiquid());
+            haveG[i] = Math.max(0, n.mVapour() + n.mAir);
+        }
+        double[] outL = new double[N], outG = new double[N], inL = new double[N], inG = new double[N];
+        for (int pass = 0; pass < 200; pass++) {   // (usually 1 or 2; the last pass finds nothing to cut, so the sums are current)
+            java.util.Arrays.fill(outL, 0);
+            java.util.Arrays.fill(outG, 0);
+            java.util.Arrays.fill(inL, 0);
+            java.util.Arrays.fill(inG, 0);
+            for (int k = 0; k < E; k++) {
+                FluidEdge e = edges.get(k);
+                if (e.flow == 0) continue;
+                FluidNode u = e.flow > 0 ? e.a : e.b, d = e.flow > 0 ? e.b : e.a;
+                double m = Math.abs(e.flow);
+                Integer iu = idx.get(u), id = idx.get(d);
+                if (iu != null) {
+                    outL[iu] += m * xl[k];
+                    outG[iu] += m * (1 - xl[k]);
+                }
+                if (id != null) {
+                    inL[id] += m * xl[k];
+                    inG[id] += m * (1 - xl[k]);
+                }
+            }
+            boolean cut = false;
+            for (int i = 0; i < N; i++) {
+                double capL = DRAIN_CAP * haveL[i] / dt + inL[i], capG = DRAIN_CAP * haveG[i] / dt + inG[i];
+                double fL = outL[i] > capL * (1 + 1e-9) ? capL / outL[i] : 1, fG = outG[i] > capG * (1 + 1e-9) ? capG / outG[i] : 1;
+                if (fL >= 1 && fG >= 1) continue;
+                cut = true;
+                FluidNode n = free.get(i);
+                for (int k = 0; k < E; k++) {
+                    FluidEdge e = edges.get(k);
+                    if (out(e, n) <= 0) continue;
+                    double f = 1;
+                    if (xl[k] > 0) f = Math.min(f, fL);
+                    if (xl[k] < 1) f = Math.min(f, fG);
+                    e.flow *= f;
+                }
+            }
+            if (!cut) break;
+        }
+        double[][] theta = new double[N][2];
+        for (int i = 0; i < N; i++) {
+            theta[i][0] = outL[i] > 0 && outL[i] * dt > DRAIN_CAP * haveL[i] ? DRAIN_CAP * haveL[i] / (outL[i] * dt) : 1;
+            theta[i][1] = outG[i] > 0 && outG[i] * dt > DRAIN_CAP * haveG[i] ? DRAIN_CAP * haveG[i] / (outG[i] * dt) : 1;
+        }
+        return theta;
+    }
+
+    /**
+     * What passes through each free node this step, as an implicit upwind solve: pass[i] = {liquid enthalpy (J/kg),
+     * gas vapour share, gas air share, gas enthalpy (J/kg)}, the flow-weighted mix of what flows in, where what flows
+     * in from a node is its own contents' share (theta) plus its own pass-through for the rest. A node nothing flows
+     * into passes its own contents.
+     */
+    private double[][] passThrough(List<FluidNode> free, java.util.Map<FluidNode, Integer> idx, double[] xl, double[][] theta) {
+        int N = free.size(), E = edges.size();
+        double[][] own = new double[N][4];
+        for (int i = 0; i < N; i++) {
+            FluidNode n = free.get(i);
+            double[] z = gasMix(n);
+            own[i] = new double[]{Water.hLiquid(n.T()), z[0], z[1], z[2]};
+        }
+        double[][] pass = new double[N][8];   // (4..7: its own contents, read once: transfers change mAir as they go)
+        for (int i = 0; i < N; i++) System.arraycopy(own[i], 0, pass[i], 4, 4);
+        // liquid (column 0) and gas (columns 1..3): (sum in) X_i - sum_in q (1 - theta_u) X_u = sum_in q theta_u own_u
+        for (int phase = 0; phase < 2; phase++) {
+            double[][] A = new double[N][N];
+            double[][] b = new double[phase == 0 ? 1 : 3][N];
+            double[] inSum = new double[N];
+            for (int k = 0; k < E; k++) {
+                FluidEdge e = edges.get(k);
+                if (e.flow == 0) continue;
+                double q = Math.abs(e.flow) * (phase == 0 ? xl[k] : 1 - xl[k]);
+                if (q <= 0) continue;
+                FluidNode u = e.flow > 0 ? e.a : e.b, d = e.flow > 0 ? e.b : e.a;
+                Integer iu = idx.get(u), id = idx.get(d);
+                if (id == null) continue;
+                inSum[id] += q;
+                double th = iu == null ? 1 : theta[iu][phase];
+                double[] ownU = iu == null ? fixedOwn(u) : own[iu];
+                if (iu != null && th < 1) A[id][iu] -= q * (1 - th);
+                for (int c = 0; c < b.length; c++) b[c][id] += q * th * ownU[phase == 0 ? 0 : 1 + c];
+            }
+            for (int i = 0; i < N; i++) {
+                if (inSum[i] > 0) A[i][i] += inSum[i];
+                else {   // (nothing flows in: it passes its own)
+                    java.util.Arrays.fill(A[i], 0);
+                    A[i][i] = 1;
+                    for (int c = 0; c < b.length; c++) b[c][i] = own[i][phase == 0 ? 0 : 1 + c];
+                }
+            }
+            for (int c = 0; c < b.length; c++) {
+                double[][] Ac = new double[N][];
+                for (int i = 0; i < N; i++) Ac[i] = A[i].clone();
+                double[] x = solve(Ac, b[c]);
+                for (int i = 0; i < N; i++) pass[i][phase == 0 ? 0 : 1 + c] = x[i];
+            }
+        }
+        return pass;
+    }
+
+    /** A fixed node's contents as passThrough reads them (it always gives its own). */
+    private static double[] fixedOwn(FluidNode u) {
+        double[] z = gasMix(u);
+        return new double[]{Water.hLiquid(u.T()), z[0], z[1], z[2]};
+    }
+
     private static FluidNode other(FluidEdge e, FluidNode n) {
         return e.a == n ? e.b : e.a;
     }
@@ -308,15 +471,37 @@ public final class FluidNetwork {
         return 0;
     }
 
-    private static void transfer(FluidEdge e, double dt) {
+    /**
+     * Move one edge's flow: its liquid share at the liquid enthalpy, its gas share at the gas mix and enthalpy, each from
+     * the upstream node's own contents (theta) and from what passes through it (the rest).
+     */
+    private static void transfer(FluidEdge e, double dt, double xl, List<FluidNode> free, java.util.Map<FluidNode, Integer> idx,
+                                 double[][] theta, double[][] pass) {
         e.fLiquid = e.fVapour = e.fAir = e.fEnthalpy = 0;
         e.power = 0;
         if (e.flow == 0) return;
         FluidNode u = e.flow > 0 ? e.a : e.b, d = e.flow > 0 ? e.b : e.a;
-        double[] pk = packet(u, port(e, u));
-        if (pk[4] <= 0) return;
+        Integer iu = idx.get(u);
+        double[] own = fixedOwn(u);
+        double thL = 1, thG = 1;
+        double[] through = own;
+        if (iu != null) {
+            thL = theta[iu][0];
+            thG = theta[iu][1];
+            through = pass[iu];
+            own = java.util.Arrays.copyOfRange(pass[iu], 4, 8);
+        }
         double m = Math.abs(e.flow);
-        double liq = m * pk[0], vap = m * pk[1], air = m * pk[2], h = m * pk[3];
+        double liq = m * xl, gas = m * (1 - xl);
+        double hL = thL * own[0] + (1 - thL) * through[0];
+        double yv = thG * own[1] + (1 - thG) * through[1], ya = thG * own[2] + (1 - thG) * through[2];
+        double hG = thG * own[3] + (1 - thG) * through[3];
+        double ys = yv + ya;
+        if (ys > 0) {
+            yv /= ys;
+            ya /= ys;
+        }
+        double vap = gas * yv, air = gas * ya, h = liq * hL + gas * hG;
         double toD = h;
         if (e.kind == FluidEdge.Kind.TURBINE) {
             e.power = Math.max(0, FluidEdge.TURBINE_EFFICIENCY * vap * (Water.hVapour(u.T()) - Water.hLiquid(Water.TB)));

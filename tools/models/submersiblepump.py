@@ -17,7 +17,7 @@ Usage: submersiblepump.py RESOURCES_DIR  -> assets/eln/model/submersiblepump{50v
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcmodel import Model, box, prism
-from oilkit import atlas, write_parts, out_dir, turned, terminal_plate, bolt_ring, PAINT
+from oilkit import atlas, write_parts, out_dir, turned, terminal_plate, signal_plate, bolt_ring, PAINT
 
 TIERS = {
     # r: can radius; top: can top; head: pump head radius
@@ -33,8 +33,9 @@ def pump(t):
     m.add(box(2.0, 0, 2.0, 14.0, 1.25, 14.0, "castiron", faces="nsewu"))
     m.add(box(14.0, 0, 6.5, 16.0, 0.75, 9.5, "castiron", faces="nsewu"))          # tongue with the lifting eye, back
     m.add(box(14.75, 0.75, 7.5, 15.5, 2.25, 8.5, "darksteel", faces="nsewu"))
-    for k in (0, 1, 3):
+    for k in (1, 3):
         m.add(*turned([*terminal_plate(), box(0.85, 1.9, 7.4, C - r + 0.2, 2.6, 8.6, "darksteel")], k))
+    m.add(*turned([*signal_plate(), box(0.85, 2.0, 7.7, C - r + 0.2, 2.5, 8.3, "darksteel")], 0))   # (the speed signal)
     # intake screen, can, seam bands
     m.add(prism("y", C, C, r - 0.3, 1.25, 1.5, "darksteel", n=12))
     m.add(prism("y", C, C, r, 1.5, 3.75, "louvre", n=12, caps=(False, False)))

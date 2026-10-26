@@ -82,13 +82,17 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
 
 ## Thermal network (`ThermalLoad`, `ThermalConnection`, `Simulator.thermalStep`)
 
-- Explicit Euler. `Tc` is K above ambient; `Rp` to ambient, `Rs` per connection half (flow `dT/(Rs1+Rs2)`), `C` J/K.
+- Explicit Euler. `Tc` is K above 20 C (`PhysicalConstant.Tamb`: a fixed scale, so limits, saves and displays are
+  absolute); each load relaxes through `Rp` to its `ambient` (same scale), which `Ambient` (biome x 25 C, cooler above
+  y 80, blended into a depth curve underground, 90 C in the Nether; config `ambient`) stamps when the device joins the
+  simulation (`TransparentNodeElement`/`SixNodeElement.connectJob`, `CableNet.addToSimulation`). GameTests hold it at
+  20 C (`Ambient.fixedC`; `AmbientCases`). `Rs` per connection half (flow `dT/(Rs1+Rs2)`), `C` J/K.
 - Fast loads step 20x per tick at 1/400 s; slow loads (`setAsSlow()`: six-node and voxel cables, poles, downlinks, resistor, diode) once at 0.05 s.
 - `addThermalConnection` between a fast and a slow load only prints `addThermalConnection ERROR` and drops it.
 - `checkThermalLoad(Rs, Rp, C)` throws if `C < getMinimalThermalC = 3 * thermalPeriod * (Rs || Rp)`. It uses the
   fast period even for slow loads; slow cable constants are stable anyway (`AuditFixesTest.slowCableJunctionIsStable`).
 - Heat input: `movePowerTo(W)` counts for one step of the load (call once per its step); `moveEnergyTo(J)` is folded
-  in as J/dt at the load's next step, correct from any rate. `ThermalLoad.externalLoad` = infinite ambient reservoir.
+  in as J/dt at the load's next step, correct from any rate. `ThermalLoad.ambientSink()` = an infinite reservoir per device, at its ambient (`sinkAt`).
 
 ## Failures (`src/main/java/mods/eln/sim/process/destruct/`)
 
@@ -119,6 +123,13 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
 - Fluids: `src/main/java/mods/eln/sim/fluid/` (`FluidNetwork` implicit pressure solve, `Flash`, `Water`, `EaUnits`),
   stepped by `src/main/java/mods/eln/fluid/FluidWorld.java` as a slow process; devices join with their node's
   connectJob. Tests: `FluidCoreTest`, `FluidPropertyTest`. See content.md for pipes/oil.
+  Per step (20 Hz): heat in; one compressibility per phase per node (the stiffer of a small and a 2% flash step); an
+  implicit pressure solve, repeated if a check valve runs backwards or a flow runs against the side its packet was
+  taken from; limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at
+  most half of each phase it holds, net of inflow, and the rest of its outflow is its inflow passed through, with the
+  mix and enthalpy from an implicit upwind solve (so pipe volume doesn't limit throughput or stability); then the
+  transfer and a flash per node. Pumps are one-way edges from a sump with a head (`FluidEdge.boost`). Iron pipe holds
+  0.03 L per block (tunable, not geometry); saves record the volume and older ones are rescaled on load.
 - `src/main/java/mods/eln/solver/Equation.java`: expression parser/evaluator for the math chip (`ElectricalMathElement`)
   and `AnalogChips.kt`; not part of the MNA.
 

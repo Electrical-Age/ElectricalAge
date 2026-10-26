@@ -132,7 +132,8 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Generates energy from wind."));
-        list.add(tr("Voltage: %1$V", Utils.plotValue(maxVoltage)));
+        if (!Utils.nameShowsVoltage(name, maxVoltage))
+            list.add(tr("Voltage: %1$V", Utils.plotValue(maxVoltage)));
         list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
         list.add(tr("Wind area:"));
         list.add("  " + tr("Front: %1$", rayX));

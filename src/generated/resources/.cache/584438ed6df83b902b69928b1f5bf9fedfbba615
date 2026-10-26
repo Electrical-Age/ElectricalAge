@@ -1,4 +1,4 @@
-// 26.3	2026-10-25T14:37:23.508380668	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-26T16:39:13.339159847	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -253,6 +253,7 @@ e59c6ad0e07b9b48314e08c95f6455a8a9d76f0d data/eln/advancement/recipes/misc/small
 a1f2052271b5b4cde232bda63d2947bd9aa0b28d data/eln/advancement/recipes/misc/small_passive_thermal_dissipator.json
 d5c59bcfcc64138299c7921fca8ae46ebaf2ad4b data/eln/advancement/recipes/misc/small_rotating_solar_panel.json
 e8c327e1c267ab8bef14abf96413256c1701bf8f data/eln/advancement/recipes/misc/small_solar_panel.json
+4f28deff8a4378a2b5f54bb760d21ef51cba173f data/eln/advancement/recipes/misc/small_steam_condenser.json
 3fb42e1931825bbb784635e6d6808258c47b88b8 data/eln/advancement/recipes/misc/smelter.json
 0e1846cb14bb77c9b58bd829e28b9000af6b5047 data/eln/advancement/recipes/misc/smelting_alloy_dust_2.json
 47a8de424dce982c10245c4d8b9548ee43c7fa28 data/eln/advancement/recipes/misc/smelting_cinnabar_dust.json
@@ -270,6 +271,7 @@ e8c327e1c267ab8bef14abf96413256c1701bf8f data/eln/advancement/recipes/misc/small
 fe7580a5cab94e3b2a53fc81c07fc52050eb51e3 data/eln/advancement/recipes/misc/smelting_tungsten_ore.json
 d745c0a06786c255ec7cf4ebac2a0bd8da10121b data/eln/advancement/recipes/misc/solar_tracker.json
 91ecd892a2a111989dbc8ae5cd7292830389e96f data/eln/advancement/recipes/misc/standard_alarm.json
+31565c5cbbe2a6ea2fc63c518d031be1d5c285ca data/eln/advancement/recipes/misc/steam_condenser.json
 3b3894bb499e10bccea06d0524264277edaa9371 data/eln/advancement/recipes/misc/steam_oven.json
 ca2f8a0f26291613f84a226e9e99d0312ac72383 data/eln/advancement/recipes/misc/steam_turbine.json
 80d2514f5559c045fad856c766d9b349f59b0d1a data/eln/advancement/recipes/misc/steam_turbine_2.json
@@ -587,6 +589,7 @@ e1c6f55b036e2a967f23435250ad0a6b6928b22d data/eln/recipe/small_fuel_burner.json
 817114c9d7122415faafd35fe091ec574164bba4 data/eln/recipe/small_passive_thermal_dissipator.json
 275a076fa3ff6ac9d7088ad773a105652203922e data/eln/recipe/small_rotating_solar_panel.json
 10c21f03a4d5331fb59f4c8f39eb603fe0a2fd3b data/eln/recipe/small_solar_panel.json
+22da8548d938340651ee33d28a281dee3a0ed101 data/eln/recipe/small_steam_condenser.json
 753d689ebe55a8f211013c23790f5fddfd974813 data/eln/recipe/smelter.json
 ec0dc1526a744fa5c8004aa7b3edfa80d6e1ae46 data/eln/recipe/smelting_alloy_dust_2.json
 001f874620fbf5fe9aa3356b35af5b60ce5715ef data/eln/recipe/smelting_cinnabar_dust.json
@@ -604,6 +607,7 @@ f8d98570968cecc459a14f0cd820a44af3560cf9 data/eln/recipe/smelting_tungsten_dust.
 7021b95b0c11d5bc733cc073169c93ec0ff815c5 data/eln/recipe/smelting_tungsten_ore.json
 5bfee752b7a7f8c89009a59ae6e95f13ce11aacc data/eln/recipe/solar_tracker.json
 4ab93d287ce3eeee14c2bf3bb7c860f4ebacbd27 data/eln/recipe/standard_alarm.json
+19e9b86c9d73cadce9c6cf03b5a3d722da968efa data/eln/recipe/steam_condenser.json
 ad38d8978faeb5e64094fb9e2d5f61f950b2a9c1 data/eln/recipe/steam_oven.json
 d73dbee890e5b032106e12119ea9857489e8714d data/eln/recipe/steam_turbine.json
 90cc99ddc75685fa0dab1231a0fdc71e1ab0fd62 data/eln/recipe/steam_turbine_2.json
@@ -614,7 +618,7 @@ f4f9406ede6ea92137dd5caf98a20da982804e2e data/eln/recipe/street_light.json
 2dd44bbf82dca6fe077678b44dfae6276ea32cf7 data/eln/recipe/suspended_lamp_socket.json
 bc6f705dcd98d0320791535c98937a868e5c2998 data/eln/recipe/tachometer.json
 d3c9be2a659332bf91a00ce7d8970f72a6fbd853 data/eln/recipe/temperature_probe.json
-917aa4ec2cc201d6cb98cb13340bac98b273666d data/eln/recipe/thermal_insulation.json
+ad1c5258b30328edec6333acc45bcc1cba8d78e1 data/eln/recipe/thermal_insulation.json
 25bac59779dd19b1f79d0fc284cb4c789d4ad34f data/eln/recipe/thermal_probe.json
 611bff93cd14943556a294d4ab261bbb895db3fc data/eln/recipe/thermal_probe_chip.json
 bbb8492c52bd6c9e57cbb3939174670c02324371 data/eln/recipe/thermistor.json

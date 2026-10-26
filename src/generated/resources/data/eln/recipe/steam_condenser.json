@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_plate",
+    "M": "eln:advanced_machine_block",
+    "P": "eln:alloy_plate",
+    "m": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "PCP",
+    "CMC",
+    "PmP"
+  ],
+  "result": {
+    "id": "eln:steam_condenser"
+  }
+}

@@ -1949,6 +1949,18 @@
   "kind": "transparent_node",
   "name": "smelter"
  },
+ "eln:transparent_node@5276": {
+  "descriptor": "CondenserDescriptor",
+  "display": "Small Steam Condenser",
+  "kind": "transparent_node",
+  "name": "small_steam_condenser"
+ },
+ "eln:transparent_node@5280": {
+  "descriptor": "CondenserDescriptor",
+  "display": "Steam Condenser",
+  "kind": "transparent_node",
+  "name": "steam_condenser"
+ },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",
   "display": "Fractionating Column Base",

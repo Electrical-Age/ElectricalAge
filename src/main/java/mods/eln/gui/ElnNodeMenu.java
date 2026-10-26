@@ -21,14 +21,15 @@ import org.jspecify.annotations.Nullable;
 /**
  * The menu of every EA device GUI (P4; 1.12: the device's Container from GuiHandler, or none). Device slots from the
  * descriptor's {@link MenuSpec}, then the player inventory (27 + 9) as 1.12 BasicContainer. GUI controls keep using EA
- * packets. The open-data buffer carries pos, side, node kind and descriptor id: the client rebuilds the same slots
+ * packets. The open-data buffer carries pos, slot (six-node: SixNodeElement.slot; transparent: side), node kind and descriptor id: the client rebuilds the same slots
  * from the descriptor (it has no nodes).
  */
 public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer {
     public static final byte SIX = 0, TRANSPARENT = 1;
 
     public final BlockPos pos;
-    public final Direction side;
+    /** Six-node: the element's slot (0..5: centred on that face); transparent node: the side clicked. */
+    public final int slot;
     public final byte kind;
     public final int descriptorId;
     public final MenuSpec spec;
@@ -38,10 +39,10 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     public final int deviceSlots;
 
     public ElnNodeMenu(int containerId, Inventory playerInventory, Container deviceInventory, MenuSpec spec, @Nullable NodeBase node,
-                       BlockPos pos, Direction side, byte kind, int descriptorId) {
+                       BlockPos pos, int slot, byte kind, int descriptorId) {
         super(ElnRegistry.NODE_MENU.get(), containerId);
         this.pos = pos;
-        this.side = side;
+        this.slot = slot;
         this.kind = kind;
         this.descriptorId = descriptorId;
         this.spec = spec;
@@ -66,17 +67,17 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     /** Client side: rebuilt from the open data; the device inventory is a stand-in the server keeps in sync. */
     public static ElnNodeMenu fromNetwork(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
-        Direction side = Direction.fromInt(buf.readByte());
+        int slot = buf.readByte();
         byte kind = buf.readByte();
         int id = buf.readInt();
         MenuSpec spec = clientLayout.apply(NodeMenus.spec(kind, id), NodeMenus.descriptor(kind, id));
         return new ElnNodeMenu(containerId, playerInventory, new SimpleContainer(Math.max(1, spec.inventorySize())), spec, null,
-            pos, side, kind, id);
+            pos, slot, kind, id);
     }
 
     public void writeOpenData(RegistryFriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
-        buf.writeByte(side.getInt());
+        buf.writeByte(slot);
         buf.writeByte(kind);
         buf.writeInt(descriptorId);
     }

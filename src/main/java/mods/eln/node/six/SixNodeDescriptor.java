@@ -118,4 +118,96 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                 return LRDU.Up;
         }
     }
+
+    private int[] footprint;
+
+    /** The scale the device's model is drawn at (its footprint follows). */
+    protected float modelScale = 1f;
+
+    /** Half the width of the device's body (its model without pins), voxels: an off-centre device's pins stick out one
+     *  voxel past it. */
+    public int bodyHalf() {
+        return footprint()[0];
+    }
+
+    /** Client: its model in the frame SixNodeRender sets up for an element (on its face, centred), turned to front; for
+     *  the placement preview of a device placed anywhere. */
+    public void drawPlaced(Direction side, LRDU front) {
+    }
+
+    /** Does its model have pins (chips)? Else a device placed off centre gets small pin boxes drawn for it. */
+    public boolean drawsOwnPins() {
+        return false;
+    }
+
+    /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
+    public boolean placeAnywhere() {
+        return false;
+    }
+
+    /**
+     * What the device's model takes on its face, in voxels: {half its width across the face (square, so it needn't follow
+     * front), its height off the face}. From the model parts the descriptor holds (its Obj3DPart fields, else its whole
+     * Obj3D), once; a device without a model takes the old plate (12 x 12, 3 high). Hosted in a voxel block, this is
+     * where it is clicked and outlined (Baughn: the click area of a Signal Trimmer didn't match its model).
+     */
+    public int[] footprint() {
+        if (footprint == null) footprint = measureFootprint();
+        return footprint;
+    }
+
+    private int[] measureFootprint() {
+        BoundingBox[] boxes = {BoundingBox.mergeIdentity(), BoundingBox.mergeIdentity()};   // (its parts, its whole models)
+        boolean[] any = new boolean[2];
+        collectModels(this, 0, boxes, any);
+        BoundingBox b = any[0] ? boxes[0] : any[1] ? boxes[1] : null;
+        if (b == null || !(b.max.x > b.min.x)) return new int[]{6, 3};
+        double across = Math.max(Math.max(-b.min.y, b.max.y), Math.max(-b.min.z, b.max.z)) * modelScale;
+        int half = (int) Math.ceil(across * 16 - 0.01), height = (int) Math.ceil(b.max.x * modelScale * 16 - 0.01);
+        return new int[]{Math.max(2, Math.min(8, half)), Math.max(1, Math.min(16, height))};
+    }
+
+    /** The model parts and models held by o's fields, and by the fields of EA objects it holds (as a render obj). */
+    private static void collectModels(Object o, int depth, BoundingBox[] boxes, boolean[] any) {
+        for (Class<?> c = o.getClass(); c != null && c != Object.class; c = c.getSuperclass())
+            for (var f : c.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(f.getModifiers()) || f.getType().isPrimitive()) continue;
+                Object v;
+                try {
+                    f.setAccessible(true);
+                    v = f.get(o);
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    continue;
+                }
+                if (v instanceof Obj3D.Obj3DPart part) {
+                    boxes[0] = boxes[0].merge(part.boundingBox());
+                    any[0] = true;
+                } else if (v instanceof Obj3D.Obj3DPart[] a) {
+                    for (var part : a)
+                        if (part != null) {
+                            boxes[0] = boxes[0].merge(part.boundingBox());
+                            any[0] = true;
+                        }
+                } else if (v instanceof Obj3D m) {
+                    for (var part : m.parts()) boxes[1] = boxes[1].merge(part.boundingBox());
+                    any[1] |= !m.parts().isEmpty();
+                } else if (depth == 0 && v != null && !(v instanceof GenericItemBlockUsingDamageDescriptor) && !v.getClass().isEnum()
+                    && v.getClass().getName().startsWith("mods.eln.sixnode.")) {
+                    collectModels(v, 1, boxes, any);
+                }
+            }
+    }
+
+    /** The voxels (minX, minY, minZ, maxX, maxY, maxZ) the model takes on face f (EA Direction int). */
+    public int[] footprintBox(int f) {
+        int[] fp = footprint();
+        int face = Direction.fromInt(f).toEnumFacing().get3DDataValue();
+        int n = face / 2;   // (DOWN/UP: y, NORTH/SOUTH: z, WEST/EAST: x)
+        n = n == 0 ? 1 : n == 1 ? 2 : 0;
+        int[] b = {8 - fp[0], 8 - fp[0], 8 - fp[0], 8 + fp[0], 8 + fp[0], 8 + fp[0]};
+        boolean low = face % 2 == 0;
+        b[n] = low ? 0 : 16 - fp[1];
+        b[n + 3] = low ? fp[1] : 16;
+        return b;
+    }
 }

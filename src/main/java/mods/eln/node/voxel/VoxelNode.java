@@ -42,6 +42,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         BitSet s = new BitSet(4096);
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(s, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null) fill(s, plate(f));
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) for (int[] b : elementBoxes(i)) fill(s, b);
         return s;
     }
 
@@ -75,6 +76,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         used.clear();
         for (VoxelPart p : parts) for (int[] b : p.boxes()) fill(used, b);
         for (int f = 0; f < 6; f++) if (sideElementList[f] != null || isSideKept(f)) fill(used, plate(f));
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) for (int[] b : elementBoxes(i)) fill(used, b);
         for (int[] b : hostBoxes()) fill(used, b);
     }
 
@@ -115,6 +117,85 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return b;
     }
 
+    /** The voxels the model of the element on face f (EA Direction int) takes: where it is clicked and outlined. Its
+     *  room (what else may go in the block) is still its plate. */
+    public int[] elementBox(int slot) {
+        var e = sideElementList[slot];
+        if (e == null || e.sixNodeElementDescriptor == null) return slot < 6 ? plate(slot) : new int[6];
+        return slotBox(e.sixNodeElementDescriptor, e.side.getInt(), e.ox, e.oy, e.oz);
+    }
+
+    /** The boxes of the element in a slot: on a face, its model box; off centre, its body and its pins' boxes. */
+    public List<int[]> elementBoxes(int slot) {
+        var e = sideElementList[slot];
+        if (slot < 6 || e == null || e.sixNodeElementDescriptor == null) return List.of(elementBox(slot));
+        List<int[]> out = new ArrayList<>();
+        out.add(bodyBox(e.sixNodeElementDescriptor, e.side.getInt(), e.ox, e.oy, e.oz));
+        for (Pin p : pins(e)) out.add(p.box());
+        return out;
+    }
+
+    /** The body of a device off centre (its model without the pins: SixNodeDescriptor.bodyHalf), clipped to the block. */
+    public static int[] bodyBox(mods.eln.node.six.SixNodeDescriptor d, int f, int ox, int oy, int oz) {
+        int[] r = rawBodyBox(d, f, ox, oy, oz);
+        for (int k = 0; k < 6; k++) r[k] = Math.max(0, Math.min(16, r[k]));
+        return r;
+    }
+
+    static int[] rawBodyBox(mods.eln.node.six.SixNodeDescriptor d, int f, int ox, int oy, int oz) {
+        int face = Direction.fromInt(f).toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(face), bh = d.bodyHalf();
+        int[] c = {8 + ox, 8 + oy, 8 + oz};
+        int[] r = new int[6];
+        for (int a = 0; a < 3; a++) {
+            r[a] = c[a] - bh;
+            r[a + 3] = c[a] + bh;
+        }
+        int h = d.footprint()[1];
+        r[n] = CablePart.plane(face) == 0 ? 0 : 16 - h;
+        r[n + 3] = CablePart.plane(face) == 0 ? h : 16;
+        return r;
+    }
+
+    /** The pin boxes of a device off centre on face f: one per edge `has` (client: the published pin mask). */
+    public static List<int[]> pinBoxes(mods.eln.node.six.SixNodeDescriptor d, Direction side, int ox, int oy, int oz, java.util.function.Predicate<LRDU> has) {
+        List<int[]> out = new ArrayList<>();
+        for (LRDU l : LRDU.values()) if (has.test(l)) out.add(pinGeometry(d, side, ox, oy, oz, l)[1]);
+        return out;
+    }
+
+    /** {tip (x, y, z), box, contact} of a pin toward edge l of a device off centre (block voxels). */
+    static int[][] pinGeometry(mods.eln.node.six.SixNodeDescriptor d, Direction side, int ox, int oy, int oz, LRDU l) {
+        int af = side.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(af), bh = d.bodyHalf();
+        int[] c = {8 + ox, 8 + oy, 8 + oz};
+        c[n] = CablePart.plane(af);
+        int dv = side.applyLRDU(l).toEnumFacing().get3DDataValue(), a = CablePart.normalAxis(dv), b = 3 - n - a;
+        boolean pos = dv % 2 == 1;
+        int[] tip = c.clone();
+        tip[a] += pos ? bh + 1 : -bh - 1;
+        int[] box = new int[6], contact = new int[6];
+        box[a] = pos ? c[a] + bh : c[a] - bh - 1;
+        box[a + 3] = box[a] + 1;
+        contact[a] = pos ? tip[a] : tip[a] - 1;
+        contact[a + 3] = contact[a] + 1;
+        for (int[] x : new int[][]{box, contact}) {
+            x[b] = c[b] - 1;
+            x[b + 3] = c[b] + 1;
+            x[n] = CablePart.plane(af) == 0 ? 0 : 15;
+            x[n + 3] = x[n] + 1;
+        }
+        return new int[][]{tip, box, contact};
+    }
+
+    /** A device's model box on face f (EA Direction int), its centre (ox, oy, oz) world voxels off the face's centre;
+     *  clipped to the block. */
+    public static int[] slotBox(mods.eln.node.six.SixNodeDescriptor d, int f, int ox, int oy, int oz) {
+        int[] b = d.footprintBox(f);
+        int[] o = {ox, oy, oz};
+        int[] r = new int[6];
+        for (int k = 0; k < 6; k++) r[k] = Math.max(0, Math.min(16, b[k] + o[k % 3]));   // (not past the block)
+        return r;
+    }
+
     /** Elements changed (placed, broken): the plates in the grid. */
     public void elementsChanged() {
         markUsed();
@@ -130,7 +211,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Is any voxel of the box (local voxels, [x0, x1) etc.) used? */
     /** A copy of the used voxels (for a route snapshot, RouteView). */
     public BitSet usedCopy() {
-        return (BitSet) used.clone();
+        return (BitSet) used.clone();   // (routes keep a voxel of air from it themselves: CableRouter.CLEARANCE)
     }
 
     public boolean usedIn(int x0, int y0, int z0, int x1, int y1, int z1) {
@@ -171,7 +252,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public String addPart(VoxelPart p) {
         String why = canAdd(p);
         if (why != null) return why;
-        if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, null);
+        if (p instanceof PipePart pipe && pipe.fluid == null) pipe.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
         parts.add(p);
         markUsed();
         changed();
@@ -186,11 +267,20 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         markUsed();
         if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
         if (drop && p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
-        if (drop && p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+        if (drop && p instanceof ValvePart v) dropItem(valveItem(v));
         if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         changed();
         return isEmptyNode();
+    }
+
+    /** The item a valve was fitted from. */
+    static ItemStack valveItem(ValvePart v) {
+        return new ItemStack(switch (v.mode) {
+            case ValvePart.CONTROL -> mods.eln.registry.ElnRegistry.PIPE_CONTROL_VALVE.get();
+            case ValvePart.THROTTLE -> mods.eln.registry.ElnRegistry.PIPE_THROTTLE_VALVE.get();
+            default -> mods.eln.registry.ElnRegistry.PIPE_VALVE.get();
+        });
     }
 
     /** Nothing left: no parts, no elements (the block goes). */
@@ -209,6 +299,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     private void changed() {
         vents = null;
+        valveLinks = null;
         if (isAdded()) {
             if (hasFluid()) FluidWorld.add(this);
             FluidWorld.changed(this);
@@ -255,10 +346,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return out;
     }
 
-    /** Each valve links the two pipes that end at it, open or shut. */
+    /** Each valve links the two pipes that end at it, as far open as it is (kept while the parts don't change: the
+     *  control and throttle valves set their link's opening every step, beforeFluidStep). */
     @Override
     public List<Link> fluidLinks() {
-        List<Link> out = new ArrayList<>();
+        if (valveLinks != null) return new ArrayList<>(valveLinks.keySet());
+        valveLinks = new java.util.LinkedHashMap<>();
         for (VoxelPart p : parts) {
             if (!(p instanceof ValvePart v)) continue;
             List<PipePart> ends = new ArrayList<>();
@@ -269,11 +362,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             PipePart a = ends.get(0), b = ends.get(1);
             double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * 4;   // (a quarter block of pipe)
             Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k);
-            l.open = v.open ? 1 : 0;
-            out.add(l);
+            l.open = v.opening();
+            valveLinks.put(l, v);
         }
-        return out;
+        return new ArrayList<>(valveLinks.keySet());
     }
+
+    private java.util.Map<Link, ValvePart> valveLinks;
 
     /** The adapter on that face (for the fluid capability), or null. */
     public AdapterPart adapterOn(int face) {
@@ -341,7 +436,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** Fit a valve where the pipe under the click runs straight: the lattice point on it nearest the click. */
     public String addValveNear(double hx, double hy, double hz) {
+        return addValveNear(hx, hy, hz, ValvePart.ON_OFF);
+    }
+
+    /** A valve of a kind (ValvePart.ON_OFF, CONTROL, THROTTLE) at the lattice point on the pipe nearest the click. */
+    public String addValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
+        if (idx >= 0 && parts.get(idx) instanceof ValvePart) return "there is a valve here already";
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
         int[] best = null;
         double bd = Double.MAX_VALUE;
@@ -355,10 +456,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                         best = new int[]{x, y, z};
                     }
                 }
-        return best == null ? "the pipe has no room for a valve here" : addValve(best[0], best[1], best[2]);
+        return best == null ? "the pipe has no room for a valve here" : addValve(best[0], best[1], best[2], mode);
     }
 
     public String addValve(int x, int y, int z) {
+        return addValve(x, y, z, ValvePart.ON_OFF);
+    }
+
+    public String addValve(int x, int y, int z, int mode) {
         for (VoxelPart p : parts) if (p instanceof ValvePart) return "there is a valve here already";
         for (int i = 0; i < parts.size(); i++) {
             if (!(parts.get(i) instanceof PipePart pipe) || !pipe.passes(x, y, z)) continue;
@@ -372,7 +477,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (axis < 0) return "the pipe turns here: fit a valve on a straight piece";
             BitSet others = new BitSet(4096), want = new BitSet(4096);
             for (int j = 0; j < parts.size(); j++) if (j != i) for (int[] b : parts.get(j).boxes()) fill(others, b);
-            for (int[] b : new ValvePart(x, y, z, axis, pipe.bore()).boxes()) fill(want, b);
+            for (int[] b : new ValvePart(x, y, z, axis, pipe.bore(), mode).boxes()) fill(want, b);
             if (want.intersects(others)) return "something is in the way";
             PipePart[] halves = pipe.splitAt(x, y, z);
             if (halves == null) return "the pipe ends here";
@@ -381,10 +486,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, pipe.length());
                 hp.burst = pipe.burst;
-                hp.makeNode(coordonate.y, saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
                 parts.add(hp);
             }
-            parts.add(new ValvePart(x, y, z, axis, pipe.bore()));
+            parts.add(new ValvePart(x, y, z, axis, pipe.bore(), mode));
             markUsed();
             changed();
             return null;
@@ -399,7 +504,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         int el = elementAt(vx, vy, vz, 0);
         int pi = partAt(vx, vy, vz);
         if (el < 0 && pi < 0) el = elementAt(vx, vy, vz, 2);
-        if (el >= 0) return super.onBlockActivated(player, Direction.fromInt(el), vx, vy, vz);
+        if (el >= 0) return onSlotActivated(player, el, vx, vy, vz);
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
@@ -410,25 +515,162 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 setNeedPublish(true);
                 return true;
             }
-            if (i >= 0 && parts.get(i) instanceof ValvePart v) {
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.ON_OFF) {
                 v.open = !v.open;
                 player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(v.open ? "Valve open" : "Valve shut"));
                 changed();
+                return true;
+            }
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.CONTROL) {
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Control valve %.0f%% open: a signal cable laid into its block sets it",
+                    v.opening() * 100)));
+                return true;
+            }
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                openThrottleScreen(sp, i, v);
                 return true;
             }
         }
         return pi >= 0 && meterUse(player, side);
     }
 
-    /** The element (EA Direction int) whose plate, grown by grow voxels, holds the block-local point (0..1); -1. */
+    /** A GUI packet's slot byte for a part of this block (ValvePart.THROTTLE's slider), not an element. */
+    public static final byte PART_PACKET = -2;
+
+    /** Open the throttle valve's screen on the player's client (ClientPacketHandler, Eln.packetValveScreen). */
+    void openThrottleScreen(net.minecraft.server.level.ServerPlayer player, int index, ValvePart v) {
+        try {
+            var bos = new java.io.ByteArrayOutputStream();
+            var out = new java.io.DataOutputStream(bos);
+            out.writeByte(Eln.packetValveScreen);
+            out.writeInt(coordonate.x);
+            out.writeInt(coordonate.y);
+            out.writeInt(coordonate.z);
+            out.writeByte(index);
+            out.writeFloat((float) v.setting);
+            mods.eln.network.ElnNet.sendToPlayer(player, bos);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** From a client: a throttle valve's new setting (PART_PACKET, part index, float 0..1); else an element's packet. */
+    @Override
+    public void networkUnserialize(java.io.DataInputStream stream, net.minecraft.server.level.ServerPlayer player) {
+        try {
+            stream.mark(64);
+            if (stream.readByte() == PART_PACKET) {
+                int i = stream.readByte();
+                float f = stream.readFloat();
+                if (i >= 0 && i < parts.size() && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && Float.isFinite(f)) {
+                    v.setting = Math.max(0, Math.min(1, f));
+                    setNeedPublish(true);
+                }
+                return;
+            }
+            stream.reset();
+        } catch (java.io.IOException e) {
+            return;
+        }
+        super.networkUnserialize(stream, player);
+    }
+
+    /** The element (its slot: 0..5 centred on that face) whose model box, grown by grow voxels, holds the block-local point (0..1); -1, also
+     *  where a part is. */
     public int elementAt(double x, double y, double z, int grow) {
-        for (int f = 0; f < 6; f++) {
+        for (VoxelPart p : parts)   // (a part's own box wins: a model box can reach past the plate, over a cable)
+            for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return -1;
+        for (int f = 0; f < SLOTS; f++) {
             if (sideElementList[f] == null) continue;
-            int[] b = plate(f);
-            int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
-            if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
+            for (int[] b : elementBoxes(f)) {
+                int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
+                if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
+            }
         }
         return -1;
+    }
+
+    /** placeError for a device of this stack at that place and front (a probe element, not added). */
+    public String placeErrorAt(ItemStack stack, int slot, Direction face, int ox, int oy, int oz, LRDU front) {
+        var d = Eln.sixNodeItem.getDescriptor(stack);
+        mods.eln.node.six.SixNodeElement probe;
+        try {
+            probe = (mods.eln.node.six.SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
+                mods.eln.node.six.SixNodeDescriptor.class).newInstance(this, face, d);
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            return "Can't place that";
+        }
+        probe.slot = slot;
+        probe.ox = ox;
+        probe.oy = oy;
+        probe.oz = oz;
+        probe.front = front;
+        return placeError(probe);
+    }
+
+    /** A free slot past the faces, or -1. */
+    public int freeSlot() {
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] == null && !isSideKept(i)) return i;
+        return -1;
+    }
+
+    /**
+     * Why a device can't go off centre at e's place (its slot, face, offset and front set; not yet in the node), or null.
+     * Its box must be inside the block and clear of everything; and a voxel of air all round it (Baughn), except where one
+     * of its pins touches a cable or meets another device's pin (connected, so legible).
+     */
+    public String placeError(mods.eln.node.six.SixNodeElement e) {
+        var d = e.sixNodeElementDescriptor;
+        int f = e.side.getInt();
+        List<Pin> mine = pins(e);
+        int[] body = rawBodyBox(d, f, e.ox, e.oy, e.oz);
+        List<int[]> boxes = new ArrayList<>();
+        boxes.add(body);
+        for (Pin p : mine) boxes.add(p.box);
+        BitSet want = new BitSet(4096);
+        for (int[] b : boxes) {
+            for (int k = 0; k < 6; k++) if (b[k] < 0 || b[k] > 16) return "It doesn't fit on the face there";
+            fill(want, b);
+        }
+        if (want.intersects(used)) return "No room for it there";
+        // a voxel of air round its body and pins; a pin may touch a pin (tip to tip) or a cable of its kind
+        for (int i = 0; i < SLOTS; i++) {
+            var o = sideElementList[i];
+            if (o == null) continue;
+            List<Pin> theirs = i >= 6 ? pins(o) : List.of();
+            if (near(body, elementBoxes(i))) return tooClose(o);
+            for (Pin p : mine) {
+                if (near(p.box, List.of(elementBoxes(i).get(0)))) return tooClose(o);   // (their body)
+                for (Pin q : theirs) if (near(p.box, List.of(q.box)) && !meet(p, q)) return tooClose(o);
+            }
+            for (Pin q : theirs) if (near(body, List.of(q.box))) return tooClose(o);
+        }
+        for (VoxelPart part : parts) {
+            if (near(body, part.boxes())) return part instanceof CablePart ? "Too close to the cable: leave a voxel of air, or touch it with a pin"
+                : "Too close to that: leave a voxel of air";
+            for (Pin p : mine) {
+                if (!near(p.box, part.boxes())) continue;
+                boolean touched = false;
+                if (part instanceof CablePart c) for (int[] b : c.boxes()) touched |= overlaps(b, p.contact);
+                if (!touched) return part instanceof CablePart ? "Too close to the cable: leave a voxel of air, or touch it with a pin"
+                    : "Too close to that: leave a voxel of air";
+                var cd = ((CablePart) part).tierInfo().descriptor();
+                if (!compareConnectionMask(p.mask, cd != null ? cd.getNodeMask() : maskThermalWire))
+                    return "That cable doesn't fit its pin";   // (it would look connected and not be)
+            }
+        }
+        return null;
+    }
+
+    /** Is any of the boxes within a voxel of b (b grown by one overlaps it)? */
+    static boolean near(int[] b, List<int[]> boxes) {
+        int[] g = {b[0] - 1, b[1] - 1, b[2] - 1, b[3] + 1, b[4] + 1, b[5] + 1};
+        for (int[] x : boxes) if (overlaps(g, x)) return true;
+        return false;
+    }
+
+    private static String tooClose(mods.eln.node.six.SixNodeElement o) {
+        return "Too close to the " + o.sixNodeElementDescriptor.name + ": leave a voxel of air, or put their pins together";
     }
 
     /** Could an element go on face f (EA Direction int): free face, and its plate clear of the parts? */
@@ -440,10 +682,51 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     @Override
-    public boolean createSubBlock(ItemStack itemStack, Direction direction, Player player) {
-        boolean ok = super.createSubBlock(itemStack, direction, player);
+    public boolean createSubBlockAt(ItemStack itemStack, int slot, Direction direction, int ox, int oy, int oz, Player player) {
+        boolean ok = super.createSubBlockAt(itemStack, slot, direction, ox, oy, oz, player);
         markUsed();
         return ok;
+    }
+
+    /**
+     * A device that may go anywhere on a face (SixNodeDescriptor.placeAnywhere: chips) placed on face `face` where the
+     * block-local point (hx, hy, hz) is, snapped to voxels and kept on the face. Null if placed, else why not.
+     */
+    public String placeAnywhere(ItemStack stack, Direction face, double hx, double hy, double hz, Player player) {
+        var d = Eln.sixNodeItem.getDescriptor(stack);
+        if (d == null || !d.placeAnywhere() || d.hasGhostGroup()) return "That can't go off centre";
+        int slot = freeSlot();
+        if (slot < 0) return "No more devices fit in this block";
+        int[] o = snap(d, face, hx, hy, hz);
+        // in the middle of a free face: the face's own slot, as before (ports at the face's edges, which meet the
+        // next block, a machine beside it, by EA's edge rule: a trimmer beside a furnace)
+        if (o[0] == 0 && o[1] == 0 && o[2] == 0 && sideElementList[face.getInt()] == null && canPlaceElement(face.getInt()))
+            return createSubBlock(stack, face, player) ? null : "Can't place that";
+        String err = placeErrorAt(stack, slot, face, o[0], o[1], o[2], d.getFrontFromPlace(face, player));
+        if (err != null) return err;
+        return createSubBlockAt(stack, slot, face, o[0], o[1], o[2], player) ? null : "Can't place that";
+    }
+
+    /**
+     * The face a device placed by a click into this block goes on: the face behind the clicked face, or, if the click is
+     * on a device here, that device's face (AdventurAgent: clicking a chip's side aimed at the wall beside it).
+     */
+    public Direction placeFace(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
+        int el = elementAt(hx, hy, hz, 0);
+        if (el >= 0) return sideElementList[el].side;
+        return Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
+    }
+
+    /** Where a device placed anywhere goes for a click at the block-local point: its centre's offset (world voxels), snapped
+     *  to even voxels (pins on the routers' 2-voxel lattice: a cable can be laid to them) and kept with its body and pins
+     *  on the face. */
+    public static int[] snap(mods.eln.node.six.SixNodeDescriptor d, Direction face, double hx, double hy, double hz) {
+        int half = d.bodyHalf() + 1, n = CablePart.normalAxis(face.toEnumFacing().get3DDataValue());
+        double[] h = {hx, hy, hz};
+        int[] o = new int[3];
+        for (int a = 0; a < 3; a++)
+            if (a != n) o[a] = Math.max(half, Math.min(16 - half, 2 * (int) Math.round(h[a] * 8))) - 8;
+        return o;
     }
 
     /** Breaking by a player: the block's own break handles the last thing going. */
@@ -480,11 +763,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             parts.remove(target);
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, old.length());
-                hp.makeNode(coordonate.y, saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
                 parts.add(hp);
             }
         }
-        if (part.fluid == null) part.makeNode(coordonate.y, null);
+        if (part.fluid == null) part.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
         parts.add(part);
         markUsed();
         changed();
@@ -530,7 +813,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (stub == null) continue;
             var run = mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
             int[] d = a.tanks.take();
-            if (d[0] > 0) EaUnits.addWater(run, d[0] * EaUnits.KG_PER_MB_WATER, mods.eln.sim.fluid.Water.T_AMBIENT, false);
+            if (d[0] > 0) EaUnits.addWater(run, d[0] * EaUnits.KG_PER_MB_WATER, mods.eln.sim.Ambient.kelvin(coordonate), false);   // (other mods' water: at the ambient)
             if (d[1] > 0) drainLiquid(run, d[1] * EaUnits.KG_PER_MB_WATER);
             if (d[2] > 0) EaUnits.addWater(run, d[2] * EaUnits.KG_PER_MB_STEAM, mods.eln.sim.fluid.Water.TB, true);
             if (d[3] > 0) EaUnits.drainVapour(run, d[3] * EaUnits.KG_PER_MB_STEAM);
@@ -561,6 +844,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void beforeFluidStep(double dt) {
         syncAdapters();
+        // valves: as far open as they are (a control valve by its signal, a throttle valve by its setting)
+        if (valveLinks != null)
+            for (var e : valveLinks.entrySet()) {
+                ValvePart v = e.getValue();
+                double o = v.opening();
+                e.getKey().open = o;
+                if (v.mode != ValvePart.ON_OFF && Math.abs(o - v.shown) > 0.02) {
+                    v.shown = o;
+                    setNeedPublish(true);   // (the drawing turns with it)
+                }
+            }
         // safety valves open by the pressure under them
         if (vents != null)
             for (var e : vents.entrySet())
@@ -627,15 +921,21 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      */
     @Override
     public void connectJob() {
+        markUsed();   // (an off-centre device's pins follow its front, which a wrench turns)
         connectElements();   // (six-node elements hosted here: their loads and links inside the block)
         cables.build();
         cables.addToSimulation();
         connectElementsToCables();
+        connectPins();
+        connectValves();
         cablesBuilt = !cables.conductors.isEmpty();
         for (Direction dir : Direction.values()) {
             mods.eln.node.NodeBase other = getNeighbor(dir);
             if (other == null || !other.isAdded()) continue;
-            if (other instanceof VoxelNode v) connectVoxel(dir, v);
+            if (other instanceof VoxelNode v) {
+                connectVoxel(dir, v);
+                connectPinsAcross(dir, v);
+            }
             else for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
         }
         // only blocks with pipes in the fluid world (it steps every device every tick)
@@ -684,6 +984,86 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     private final List<mods.eln.sim.ElectricalConnection> elementLinksE = new ArrayList<>();
     private final List<mods.eln.sim.ThermalConnection> elementLinksT = new ArrayList<>();
 
+    /**
+     * A pin of a device placed off centre (a slot past the faces): its tip on the face plane (block voxels), the box of
+     * voxels just outside it that a touching cable takes (1 deep, 2 wide, 1 high), the direction it points (3D value),
+     * and the element's mask and loads toward that edge.
+     */
+    record Pin(int slot, LRDU lrdu, int[] tip, int[] box, int[] contact, int out, int mask, ElectricalLoad load, ThermalLoad thermal) {}
+
+    /** The pins of the element in a slot past the faces (one per edge with a connection). */
+    static List<Pin> pins(mods.eln.node.six.SixNodeElement e) {
+        List<Pin> out = new ArrayList<>();
+        for (LRDU l : LRDU.values()) {
+            int mask = e.getConnectionMask(l);
+            if (mask == 0) continue;
+            int[][] g = pinGeometry(e.sixNodeElementDescriptor, e.side, e.ox, e.oy, e.oz, l);
+            int dv = e.side.applyLRDU(l).toEnumFacing().get3DDataValue();
+            boolean burnt = e.isBurnt();
+            out.add(new Pin(e.slot, l, g[0], g[1], g[2], dv, mask, burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l)));
+        }
+        return out;
+    }
+
+    static boolean overlaps(int[] a, int[] b) {
+        return a[0] < b[3] && b[0] < a[3] && a[1] < b[4] && b[1] < a[4] && a[2] < b[5] && b[2] < a[5];
+    }
+
+    /** Do two pins meet tip to tip, pointing at each other? */
+    static boolean meet(Pin p, Pin q) {
+        return java.util.Arrays.equals(p.tip, q.tip) && q.out == (p.out ^ 1);
+    }
+
+    private void link(ElectricalLoad a, ElectricalLoad b, ThermalLoad ta, ThermalLoad tb) {
+        if (a != null && b != null) {
+            var e = new mods.eln.sim.ElectricalConnection(a, b);
+            Eln.simulator.addElectricalComponent(e);
+            elementLinksE.add(e);
+        }
+        if (ta != null && tb != null) {
+            var t = new mods.eln.sim.ThermalConnection(ta, tb);
+            Eln.simulator.addThermalConnection(t);
+            elementLinksT.add(t);
+        }
+    }
+
+    /** Devices placed off centre: a pin touching a cable (the cable takes a voxel just past its tip) or another device's
+     *  pin tip to tip is connected to it (Baughn: chips whose pins touch are connected). */
+    private void connectPins() {
+        List<Pin> all = new ArrayList<>();
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) all.addAll(pins(sideElementList[i]));
+        for (Pin p : all) {
+            for (CableNet.Conductor k : cables.live()) {
+                if (!compareConnectionMask(p.mask, k.mask())) continue;
+                boolean touch = false;
+                for (CablePart c : k.parts) for (int[] b : c.boxes()) touch |= overlaps(b, p.contact);
+                if (!touch) continue;
+                sideElementList[p.slot].slotMask.set(p.lrdu, true);
+                link(p.load, k.load, p.thermal, k.thermal);
+            }
+            for (Pin q : all) {
+                if (q.slot <= p.slot || !meet(p, q) || !compareConnectionMask(p.mask, q.mask)) continue;
+                sideElementList[p.slot].slotMask.set(p.lrdu, true);
+                sideElementList[q.slot].slotMask.set(q.lrdu, true);
+                link(p.load, q.load, p.thermal, q.thermal);
+            }
+        }
+    }
+
+    /**
+     * Control valves (Baughn 2026-10-26): the signal input in the simulation, joined to the signal cables laid in this
+     * block (cables never run in mid-air, so not to the actuator itself: AdventurAgent; a cable kit clicked on the valve
+     * lays to the floor under it, CablePlacer).
+     */
+    private void connectValves() {
+        for (VoxelPart p : parts) {
+            if (!(p instanceof ValvePart v) || v.signal == null) continue;
+            Eln.simulator.addElectricalLoad(v.signal);
+            for (CableNet.Conductor k : cables.live())
+                if (k.load != null && k.d != null && k.d.signalWire) link(v.signal, k.load, null, null);
+        }
+    }
+
     /** Hosted elements and cable ends meeting at a point in this block (on the element's face, or an inner corner). */
     private void connectElementsToCables() {
         elementLinksE.clear();
@@ -705,6 +1085,70 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
             }
         }
+    }
+
+    /** A box moved by one block toward dir (block voxels: into the neighbour's coordinates, seen from there, it's -16). */
+    static int[] shifted(int[] b, Direction dir, int sign) {
+        int f = dir.toEnumFacing().get3DDataValue(), a = CablePart.normalAxis(f), d = (f % 2 == 1 ? -16 : 16) * sign;
+        int[] r = b.clone();
+        if (r.length == 6) {
+            r[a] += d;
+            r[a + 3] += d;
+        } else r[a] += d;
+        return r;
+    }
+
+    /**
+     * Pins on the face toward a neighbouring voxel block (a device off centre at the block's edge): a pin touching a
+     * cable there (its contact voxel in that block), or meeting a device's pin there tip to tip, either way round.
+     */
+    private void connectPinsAcross(Direction dir, VoxelNode v) {
+        List<Pin> mine = new ArrayList<>(), theirs = new ArrayList<>();
+        for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) mine.addAll(pins(sideElementList[i]));
+        for (int i = 6; i < SLOTS; i++) if (v.sideElementList[i] != null) theirs.addAll(pins(v.sideElementList[i]));
+        if (mine.isEmpty() && theirs.isEmpty()) return;
+        // my pins against their cables, theirs against mine (contact boxes in the other block's coordinates)
+        for (Pin p : mine) pinToCables(dir, this, p, v, shifted(p.contact, dir, 1));
+        for (Pin q : theirs) pinToCables(dir.getInverse(), v, q, this, shifted(q.contact, dir, -1));
+        for (Pin p : mine) {
+            int[] tip = shifted(p.tip, dir, 1);
+            for (Pin q : theirs) {
+                if (!java.util.Arrays.equals(tip, q.tip) || q.out != (p.out ^ 1) || !compareConnectionMask(p.mask, q.mask)) continue;
+                sideElementList[p.slot].slotMask.set(p.lrdu, true);
+                v.sideElementList[q.slot].slotMask.set(q.lrdu, true);
+                across(dir, v, p.load, q.load, p.thermal, q.thermal);
+            }
+        }
+    }
+
+    private void pinToCables(Direction dir, VoxelNode a, Pin p, VoxelNode b, int[] contact) {
+        for (CableNet.Conductor k : b.cables.live()) {
+            if (!compareConnectionMask(p.mask, k.mask())) continue;
+            boolean touch = false;
+            for (CablePart c : k.parts) for (int[] bx : c.boxes()) touch |= overlaps(bx, contact);
+            if (!touch) continue;
+            a.sideElementList[p.slot].slotMask.set(p.lrdu, true);
+            if (a == this) across(dir, b, p.load, k.load, p.thermal, k.thermal);
+            else across(dir.getInverse(), a, k.load, p.load, k.thermal, p.thermal);
+        }
+    }
+
+    /** A link to the neighbour v toward dir, kept by both nodes (dropped when either disconnects). */
+    private void across(Direction dir, VoxelNode v, ElectricalLoad a, ElectricalLoad b, ThermalLoad ta, ThermalLoad tb) {
+        mods.eln.sim.ElectricalConnection e = null;
+        mods.eln.sim.ThermalConnection t = null;
+        if (a != null && b != null) {
+            e = new mods.eln.sim.ElectricalConnection(a, b);
+            Eln.simulator.addElectricalComponent(e);
+        }
+        if (ta != null && tb != null) {
+            t = new mods.eln.sim.ThermalConnection(ta, tb);
+            Eln.simulator.addThermalConnection(t);
+        }
+        var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
+        nodeConnectionList.add(c);
+        v.nodeConnectionList.add(c);
+        v.setNeedPublish(true);
     }
 
     /** Across a face to another voxel block: every end meeting one of its ends at the same point. */
@@ -750,6 +1194,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
+        for (VoxelPart p : parts) if (p instanceof ValvePart v && v.signal != null) Eln.simulator.removeElectricalLoad(v.signal);
         for (var e : elementLinksE) Eln.simulator.removeElectricalComponent(e);
         for (var t : elementLinksT) Eln.simulator.removeThermalConnection(t);
         elementLinksE.clear();
@@ -826,7 +1271,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart p : parts) {
             if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
             if (p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
-            if (p instanceof ValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()));
+            if (p instanceof ValvePart v) dropItem(valveItem(v));
             if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
             if (p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
         }
@@ -959,7 +1404,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
         out.put("Pressure", String.format("%.2f bar, %.0f °C", n.P() / 1e5, n.T() - 273.15));
-        for (VoxelPart p : parts) if (p instanceof ValvePart v) out.put("Valve", v.open ? "open" : "shut");
+        for (VoxelPart p : parts)
+            if (p instanceof ValvePart v) out.put(switch (v.mode) {
+                case ValvePart.CONTROL -> "Control valve";
+                case ValvePart.THROTTLE -> "Throttle valve";
+                default -> "Valve";
+            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut") : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",
                 String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));

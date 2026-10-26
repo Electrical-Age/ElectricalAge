@@ -57,9 +57,9 @@ final class GoldenRecipesCase implements TestCase {
 
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
-    /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil.
-     *  Their output must still have a 26.x recipe. */
-    static final Set<String> CHANGED = Set.of("eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
+    /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil;
+     *  thermal insulation takes any wool (Baughn 2026-10-26). Their output must still have a 26.x recipe. */
+    static final Set<String> CHANGED = Set.of("eln:thermal_insulation", "eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
         "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp");
 
     /**
@@ -71,7 +71,8 @@ final class GoldenRecipesCase implements TestCase {
         "eln:50_v_turbine", "eln:200_v_turbine");
 
     /** Macerator inputs 26.x changes on purpose: vanilla ores give raw chunks (Baughn, 2026-10-10; golden/README.md). */
-    static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore", "Lead Ore", "Tungsten Ore");   // (lead, tungsten: Baughn 2026-10-19)
+    static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore", "Lead Ore", "Tungsten Ore",   // (lead, tungsten: Baughn 2026-10-19)
+        "Coal Ore");   // (every other ore block as a Fortune II pickaxe gets it: Baughn 2026-10-25)
 
     static final String[] COLORS = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
         "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"};

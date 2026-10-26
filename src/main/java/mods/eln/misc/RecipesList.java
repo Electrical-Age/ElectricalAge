@@ -43,7 +43,17 @@ public class RecipesList {
         for (Recipe r : recipeList) {
             if (r.canBeCraftedBy(input)) return r;
         }
-        return null;
+        return fallback != null && !Utils.isEmpty(input) ? fallback.apply(input) : null;
+    }
+
+    /** For an input no recipe takes: a recipe made for it, or null (the macerator's ore loot: OreLootRecipe.of). */
+    public java.util.function.Function<ItemStack, Recipe> fallback;
+    /** Where fallback can't tell (a client without the server's loot tables): may it take this input? */
+    public java.util.function.Predicate<ItemStack> fallbackMaybe;
+
+    /** May a machine of this list take the input (its input slot's filter)? */
+    public boolean accepts(ItemStack input) {
+        return getRecipe(input) != null || fallbackMaybe != null && fallbackMaybe.test(input);
     }
 
     public ArrayList<Recipe> getRecipeFromOutput(ItemStack output) {

@@ -51,6 +51,7 @@ final class ClientScreens {
         layout("transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor", "energy_converter");
         layout("sixnode.hub.HubDescriptor", "hub");
         layout("transparentnode.heatfurnace.HeatFurnaceDescriptor", "heat_furnace");
+        layout("oil.SteamGeneratorDescriptor", "steam_turbine");
         layout("transparentnode.FuelHeatFurnaceDescriptor", "fuel_heat_furnace");
         layout("oil.ElectricHeaterDescriptor", "electric_heater");
         mods.eln.client.gui.ElnLayouts.register(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class,
@@ -91,6 +92,7 @@ final class ClientScreens {
         reg(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, mods.eln.sixnode.electricalsensor.ElectricalSensorScreen::new);
         reg(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, mods.eln.sixnode.thermalsensor.ThermalSensorScreen::new);
         reg(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceScreen::new);
+        reg(mods.eln.oil.SteamGeneratorDescriptor.class, mods.eln.oil.SteamGeneratorScreen::new);
         reg(mods.eln.transparentnode.FuelHeatFurnaceDescriptor.class, mods.eln.transparentnode.FuelHeatFurnaceScreen::new);
         reg(mods.eln.oil.ElectricHeaterDescriptor.class, mods.eln.oil.ElectricHeaterScreen::new);
         // S1e

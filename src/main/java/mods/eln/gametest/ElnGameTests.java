@@ -55,6 +55,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.AgeFixCases.addTo(l);
         mods.eln.gametest.cases.OilCases.addTo(l);
         mods.eln.gametest.cases.ReservoirCases.addTo(l);
+        mods.eln.gametest.cases.AmbientCases.addTo(l);
         mods.eln.gametest.cases.PipeCases.addTo(l);
         mods.eln.gametest.cases.CableCases.addTo(l);
         mods.eln.gametest.cases.Wp12Cases.addTo(l);
@@ -74,6 +75,9 @@ public final class ElnGameTests {
     }
 
     static void run(GameTestHelper helper, TestCase c) {
+        // the test world's biomes vary from test to test: 20 C everywhere, as the cases' numbers assume (AmbientCases
+        // lift it for their own devices)
+        mods.eln.sim.Ambient.fixedC = 20.0;
         GameTestContext ctx = new GameTestContext(helper, c.id());
         // tests share one level: a node left by an earlier test here would join this test's circuits
         net.minecraft.world.phys.AABB bounds = helper.getBounds();

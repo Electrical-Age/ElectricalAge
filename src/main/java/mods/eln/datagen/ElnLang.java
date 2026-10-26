@@ -21,7 +21,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("e_coal_helmet", "E-Coal Helmet"), Map.entry("e_coal_chestplate", "E-Coal Chestplate"),
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
-        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"),
+        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"),
         Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
         Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("chisel", "Chisel"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
         Map.entry("item_creative_tab", "Electrical Age"));
@@ -58,6 +58,9 @@ public class ElnLang extends LanguageProvider {
         add("advancements.eln.guide.safety_valve.title", "Safety First");
         add("advancements.eln.guide.safety_valve.description", "A safety valve beats a burst.");
         add("advancements.eln.guide.steam_turbine.title", "Full Steam Ahead");
+        // (Baughn 2026-10-26: an anti-achievement with the cure; SteamGeneratorElement.awardLowPressure)
+        add("advancements.eln.guide.low_pressure.title", "Under Pressure");
+        add("advancements.eln.guide.low_pressure.description", "Your steam turbine asks for more steam than its boiler makes: the pressure falls, and it gets little from each kg. Add heat, lighten its load, or give it a regulator to hold a target pressure.");
         add("advancements.eln.guide.steam_turbine.description", "Set it under the boiler. Or don't.");
         add("advancements.eln.guide.big_iron.title", "Big Iron");
         add("advancements.eln.guide.big_iron.description", "Mind the rads.");

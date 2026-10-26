@@ -130,7 +130,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             super.process(time)
 
             fire.step(heaterControlValue, nominalPower > 0 && tank.fluidAmount > 0, time)
-            val availableEnergy = tank.drainEnergy(fire.level * nominalPower * time)
+            // (each mB gives heatFurnaceFuelFactor times its heat value: Baughn 2026-10-26, with turbines by the expansion)
+            val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
+            val availableEnergy = tank.drainEnergy(fire.level * nominalPower * time / f) * f
             actualHeatPower = availableEnergy / time
             thermalLoad.PcTemp += actualHeatPower
         }

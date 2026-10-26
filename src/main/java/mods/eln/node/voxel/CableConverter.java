@@ -192,6 +192,7 @@ public final class CableConverter {
      */
     public static String revert(VoxelNode v) {
         if (v.legacy == null) return "not converted";
+        for (int i = 6; i < SixNode.SLOTS; i++) if (v.getElement(i) != null) return "holds devices placed off centre";
         Level level = v.coordonate.world();
         BlockPos pos = v.coordonate.pos();
         // the devices as they are now; the cables as they were (from the six-node NBT kept at the conversion)

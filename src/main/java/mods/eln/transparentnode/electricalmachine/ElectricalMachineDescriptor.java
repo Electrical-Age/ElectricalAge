@@ -81,7 +81,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Nominal voltage: %1V$", Utils.plotValue(nominalU)));
         list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalP)));
     }
 

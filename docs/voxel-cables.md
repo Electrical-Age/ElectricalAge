@@ -15,7 +15,7 @@ unless a path says otherwise. Fluid physics and the MNA itself: see simulation.m
 | `CableNet` | server | Groups a node's cable pieces into `Conductor`s and builds their loads |
 | `CableRouter`, `PipeRouter` | server | A* routers, pure Java (world behind a `Space` interface) |
 | `CablePlacer`, `PipePlacer`, `KitPreview` | server | Kit UX: start, waypoints, finish; preview outlines sent as `Eln.packetKitPreview` |
-| `KitItem`, `CableKitItem`, `PipeKitItem`, `CableKitRecipes`, `PipeKitRecipes` | both | Kits: length = MAX - damage (1024 voxels); coils <-> kit recipes |
+| `KitItem`, `KitRecipes`, `CableKitItem`, `PipeKitItem`, `CableKitRecipes`, `PipeKitRecipes` | both | Kits: length in custom data "kitLen" (1024 voxels max). One shared fill/unroll code for both kinds (`KitRecipes`): coils or plates into a kit, a lone kit back to one block of coil or plates, kits merge up to a full kit with the rest left in the grid |
 | `Mimic`, `ChiselItem`, `ChiselBrush` | server (`ChiselBrush`: both, pure) | Imitate passive decorative blocks (stairs, slabs, fences, walls, panes, bars, carpets); carve plain blocks (see Chisel) |
 | `CableConverter` | server | Six-node block -> voxel node and back |
 | `VoxelGeometry` | both (pure) | Parts -> textured quads; no client classes |
@@ -51,6 +51,27 @@ transparent neighbour).
   that face would be. No outer-corner wraps through air: an outer corner is a knuckle in the corner block.
 - A straight block = 2 x Rs (`ElectricalConnection` adds both ends' Rs), as six-node cables.
 - Hosted elements' edges are `End`s too (`VoxelNode.ends()`), linked to cables at the same point.
+
+## Devices off centre (chips)
+
+- A voxel block has `SixNode.SLOTS` element slots: 0..5 are the faces (a device centred on face f, as six-node blocks
+  have), the rest hold devices placed anywhere on a face (`SixNodeDescriptor.placeAnywhere()`: the logic and analog
+  chips). Such an element keeps its face in `side` and its centre's offset from the face's centre in `ox/oy/oz` (world
+  voxels); packets, menus, activation and breaking address it by `slot`.
+- `VoxelNode.placeAnywhere` snaps the click to voxels, keeps the model on the face, and `placeError` applies Baughn's
+  rule: the model box (`SixNodeDescriptor.footprint()`, chips drawn at `CHIP_SCALE` 0.75: a case 6 voxels across) is
+  clear, with a voxel of air all round, except where a pin touches a cable of a matching kind or meets another
+  device's pin tip to tip.
+- Ports are pins (`VoxelNode.pins`): a tip on the face plane at the model's edge, and a contact box just outside it.
+  `connectPins` links a pin to every cable conductor whose boxes take its contact box, and to another device's pin
+  that meets it. These devices draw no cable stubs to the block's edges. The cable kit ends at the nearest pin; routes
+  keep their usual clearance (`CableRouter.CLEARANCE`).
+- A pin at the block's edge reaches the next voxel block (`connectPinsAcross`): a cable there taking its contact voxel,
+  or a pin there tip to tip (a NodeConnection, dropped when either block disconnects).
+- Holding such a device shows it see-through where a click would put it (`DevicePreview`, client
+  `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A click on a device in a voxel block places on
+  that device's face (`placeFace`).
+- `CableConverter.revert` refuses a block holding such devices.
 
 ## Burn chain
 

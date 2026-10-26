@@ -22,19 +22,19 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
     public final int tier;
 
     public PipeKitItem(int tier, Properties p) {
-        super(p.durability(MAX));
+        super(p.stacksTo(1));
         this.tier = tier;
     }
 
     public static int length(ItemStack s) {
-        return s.getItem() instanceof PipeKitItem ? MAX - s.getDamageValue() : 0;
+        return s.getItem() instanceof PipeKitItem ? KitItem.length(s) : 0;
     }
 
     /** A kit holding len voxels of a tier's pipe (empty if none). */
     public static ItemStack kit(int tier, int len) {
         if (len <= 0) return ItemStack.EMPTY;
         ItemStack s = new ItemStack(tier == 0 ? ElnRegistry.PIPE_KIT_IRON.get() : ElnRegistry.PIPE_KIT_ALLOY.get());
-        s.setDamageValue(MAX - Math.min(MAX, len));
+        KitItem.setLength(s, len);
         return s;
     }
 
@@ -55,6 +55,16 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
     }
 
     @Override
+    public int getBarWidth(ItemStack stack) {
+        return KitItem.barWidth(stack);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        return KitItem.barColor(stack);
+    }
+
+    @Override
     public Component getName(ItemStack stack) {
         return Component.translatable(getDescriptionId()).append(String.format(" (%.2f blocks)", length(stack) / 16.0));
     }
@@ -63,34 +73,18 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
      * Plates of this tier into the kit, like filling a bundle (as cable kits): click a stack onto the kit, or the kit
      * onto them. As many blocks as fit go in, PipeKitRecipes.PER_BLOCK plates each.
      */
-    int absorb(ItemStack kit, ItemStack plates, java.util.function.IntConsumer take) {
-        if (kit.getCount() != 1 || PipeKitRecipes.plateTier(plates) != tier) return 0;
-        int per = PipeKitRecipes.PER_BLOCK[tier];
-        int n = Math.min(plates.getCount() / per, (MAX - length(kit)) / 16);
-        if (n <= 0) return 0;
-        kit.setDamageValue(MAX - (length(kit) + 16 * n));
-        take.accept(n * per);
-        return n;
-    }
-
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack self, ItemStack other, net.minecraft.world.inventory.Slot slot,
-                                            net.minecraft.world.inventory.ClickAction action, Player player,
+                                            net.minecraft.world.inventory.ClickAction action, net.minecraft.world.entity.player.Player player,
                                             net.minecraft.world.entity.SlotAccess carried) {
-        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
-        if (absorb(self, other, other::shrink) == 0) return false;
-        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
-        return true;
+        return KitRecipes.clicked(self, tier, other, PipeKitRecipes.plateTier(other), PipeKitRecipes.PER_BLOCK[tier], other::shrink, slot, action, player);
     }
 
     @Override
     public boolean overrideStackedOnOther(ItemStack self, net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
-                                          Player player) {
-        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
+                                          net.minecraft.world.entity.player.Player player) {
         ItemStack plates = slot.getItem();
-        if (absorb(self, plates, n -> slot.safeTake(n, n, player)) == 0) return false;
-        player.playSound(net.minecraft.sounds.SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + player.level().getRandom().nextFloat() * 0.4f);
-        return true;
+        return KitRecipes.clicked(self, tier, plates, PipeKitRecipes.plateTier(plates), PipeKitRecipes.PER_BLOCK[tier], n -> slot.safeTake(n, n, player), slot, action, player);
     }
 
     @Override
@@ -122,7 +116,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         if (!creative) {
             int left = length(stack) - 16;
             if (left <= 0) stack.shrink(1);
-            else stack.setDamageValue(MAX - left);
+            else KitItem.setLength(stack, left);
         }
         return InteractionResult.SUCCESS;
     }

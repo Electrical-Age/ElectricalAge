@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "S": "minecraft:stone",
-    "W": "minecraft:white_wool"
+    "W": "#minecraft:wool"
   },
   "pattern": [
     "WSW",

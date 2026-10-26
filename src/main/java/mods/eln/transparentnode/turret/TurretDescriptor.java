@@ -96,7 +96,6 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Scans for entities and shoots if the\nentity matches the configurable filter criteria.").split("\n"));
-        list.add(tr("Nominal voltage: %1$V", 800));
         list.add(tr("Standby power: %1$W", Utils.plotValue(getProperties().basePower)));
         list.add(tr("Laser charge power: %1$W...%2$kW", 100, 10));
         list.add(tr("CAUTION: Cables can get quite hot!"));

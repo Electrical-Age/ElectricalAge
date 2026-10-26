@@ -97,4 +97,16 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
             return super.getFrontFromPlace(side, player);
         }
     }
+
+    /** Small: placed anywhere on a face of a voxel block (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        front.glRotateOnX();
+        draw(false);
+    }
 }

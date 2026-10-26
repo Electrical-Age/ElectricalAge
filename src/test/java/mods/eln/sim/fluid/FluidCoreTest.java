@@ -69,6 +69,29 @@ public class FluidCoreTest {
     }
 
     @Test
+    void pumpCirculatesRoundALoop() {
+        // a closed loop of three small, full nodes; a pump edge (head) in it: water goes round, the books stay exact,
+        // and the flow settles where the pump's head meets the loop's resistance (the transport solve handles loops)
+        FluidNetwork net = new FluidNetwork();
+        FluidNode a = net.add(new FluidNode(2e-5, 0, 0.5, false).fill(0.9 * 2e-5 * Water.RHO_L, 2e5, 300));
+        FluidNode b = net.add(new FluidNode(2e-5, 0, 0.5, false).fill(0.9 * 2e-5 * Water.RHO_L, 2e5, 300));
+        FluidNode c = net.add(new FluidNode(2e-5, 0, 0.5, false).fill(0.9 * 2e-5 * Water.RHO_L, 2e5, 300));
+        FluidEdge pump = net.connect(a, 0, b, 0, 1e-12).kind(FluidEdge.Kind.CHECK);
+        pump.boost = 1e5;
+        net.connect(b, 0, c, 0, 1e-12);
+        net.connect(c, 0, a, 0, 1e-12);
+        double[] t0 = totals(net);
+        for (int i = 0; i < 400; i++) net.step(DT);
+        double[] t1 = totals(net);
+        assertEquals(t0[0], t1[0], 1e-12, "water");
+        assertEquals(t0[2], t1[2], 1e-6 * Math.abs(t0[2]), "energy");
+        // three equal resistances in series: each takes a third of the head
+        double expect = 1e-12 * Water.RHO_L / Water.MU_L * 1e5 / 3;
+        assertEquals(expect, pump.flow, 0.05 * expect, "loop flow");
+        for (FluidNode n : net.nodes) assertTrue(Double.isFinite(n.P()) && n.mWater > 0, "finite and positive");
+    }
+
+    @Test
     void checkValvePassesOneWayOnly() {
         // a high, b low: a check edge a -> b passes; b high, a low: it holds
         for (boolean forward : new boolean[]{true, false}) {

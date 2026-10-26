@@ -50,7 +50,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
      *  vessel through a check valve, so a stopped feed pump doesn't take boiling water back. */
     public FluidNode feed;
     private FluidDevice.Link feedCheck;
-    public static final double FEED_VOLUME = 0.0005, FEED_DRAW = 0.3;
+    public static final double FEED_VOLUME = 0.00002, FEED_DRAW = 0.3;
     private double[] loaded, loadedFeed;
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
@@ -116,7 +116,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     /** Take in what pipes put in or took out since the last step (each step, and before saving). */
     public void syncTanks() {
         int in = tanks.takeWaterIn();
-        if (in > 0) EaUnits.addWater(vessel, in * EaUnits.KG_PER_MB_WATER, Water.T_AMBIENT, false);
+        if (in > 0) EaUnits.addWater(vessel, in * EaUnits.KG_PER_MB_WATER, ambient + mods.eln.sim.PhysicalConstant.Tref, false);   // (piped water: at the ambient)
         int out = tanks.takeSteamOut();
         if (out > 0) EaUnits.drainVapour(vessel, out * EaUnits.KG_PER_MB_STEAM);
         meterSteam += out;
@@ -162,8 +162,14 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         EaUnits.addWater(vessel, steamMb * EaUnits.KG_PER_MB_STEAM, T, true);
     }
 
+    /**
+     * Show the vessel through the capability: its water, and the steam it can give, but only once it boils (at 100 C or
+     * more). Other mods' pipes know no pressure: an Energized Power pipe drew the vapour over a cold boiler's water, which
+     * evaporated, cooled the water below ambient and fed a turbine with it (Baughn).
+     */
     public void showTanks() {
-        tanks.show((int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER), (int) Math.floor(EaUnits.steamAvailable(vessel) / EaUnits.KG_PER_MB_STEAM));
+        int steam = vessel.T() >= Water.TB ? (int) Math.floor(EaUnits.steamAvailable(vessel) / EaUnits.KG_PER_MB_STEAM) : 0;
+        tanks.show((int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER), steam);
     }
 
     @Override
@@ -227,7 +233,9 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             feed.mAir = loadedFeed[1];
             feed.energy = loadedFeed[2];
             feed.update();
-        } else feed.fill(0, Water.P_ATM, Water.T_AMBIENT);
+        } else feed.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        feed.lumpable = true;   // (it merges into the pipe on its flange: no stub to fill first)
+        feed.resistance = 1 / PORT_K;
         feedCheck = new Link(feed, 0, vessel, FEED_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
         ports = List.of(new FluidPort(vessel, pos, 0, 0.97, PORT_K),    // the dome pipe's flange, underneath
             new FluidPort(vessel, pos, 1, 1.0, PORT_K));                  // the top port
@@ -281,6 +289,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             nbt.putDouble("feedW", feed.mWater);
             nbt.putDouble("feedA", feed.mAir);
             nbt.putDouble("feedU", feed.energy);
+            nbt.putDouble("feedV", FEED_VOLUME);
         }
     }
 
@@ -291,7 +300,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         liquidAtProbe = nbt.getBooleanOr("liquidAtProbe", false);
         if (nbt.contains("vesselW"))
             loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
-        if (nbt.contains("feedW"))
+        // (saved for a stub of another size, e.g. the first 0.5 L one: its contents would not fit; it starts empty)
+        if (nbt.contains("feedW") && nbt.getDoubleOr("feedV", 0) == FEED_VOLUME)
             loadedFeed = new double[]{nbt.getDoubleOr("feedW", 0), nbt.getDoubleOr("feedA", 0), nbt.getDoubleOr("feedU", 0)};
     }
 
@@ -306,7 +316,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
         info.put(I18N.tr("Steam"), tanks.steam() + " / " + BoilerTanks.STEAM_MB + " mB");
         info.put(I18N.tr("Steam made"), String.format("%.0f mB/s", steamRate));
-        info.put(I18N.tr("At half height"), liquidAtProbe ? I18N.tr("liquid") : I18N.tr("gas"));
+        // (Baughn: "At half height: liquid" didn't say what it meant)
+        info.put(I18N.tr("Front signal"), liquidAtProbe ? I18N.tr("high: water above half") : I18N.tr("low: water below half"));
         return info;
     }
 }

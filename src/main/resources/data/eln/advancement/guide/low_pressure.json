@@ -1,0 +1,26 @@
+{
+  "parent": "eln:guide/steam_turbine",
+  "criteria": {
+    "low": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:lever"
+    },
+    "title": {
+      "translate": "advancements.eln.guide.low_pressure.title"
+    },
+    "description": {
+      "translate": "advancements.eln.guide.low_pressure.description"
+    },
+    "frame": "goal",
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "low"
+    ]
+  ]
+}

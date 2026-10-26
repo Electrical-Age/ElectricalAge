@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import mods.eln.sixnode.logicgate.CHIP_SCALE
 import mods.eln.gl.GL11
 
 
@@ -45,14 +46,35 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
         for (i in 1..function.inputCount) pins[i] = obj?.getPart("Input$i")
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage
+        modelScale = CHIP_SCALE
+    }
+
+    /** Placed anywhere on a face of a voxel block, several to a face (Baughn: pack chips). */
+    override fun placeAnywhere() = true
+
+    override fun drawsOwnPins() = true
+
+    override fun drawPlaced(side: Direction, front: LRDU) {
+        front.glRotateOnX()
+        draw()
+    }
+
+    /** The case, without its pins (3 voxels at CHIP_SCALE). */
+    override fun bodyHalf(): Int {
+        val b = case?.boundingBox() ?: return super.bodyHalf()
+        val across = maxOf(-b.min.y, b.max.y, -b.min.z, b.max.z) * CHIP_SCALE * 16
+        return Math.ceil(across - 0.01).toInt().coerceIn(1, 8)
     }
 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out AnalogFunction>) :
         this(name, obj, functionName, functionClass, AnalogChipElement::class.java, null)
     fun draw() {
+        GL11.glPushMatrix()
+        GL11.glScalef(CHIP_SCALE, CHIP_SCALE, CHIP_SCALE)
         pins.forEach { it?.draw() }
         case?.draw()
         top?.draw()
+        GL11.glPopMatrix()
     }
 
 
@@ -65,7 +87,7 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
 
     override fun drawItem(entity: Boolean) {
         GL11.glTranslatef(0.0f, 0.0f, -0.2f)
-        GL11.glScalef(1.25f, 1.25f, 1.25f)
+        GL11.glScalef(1.25f / CHIP_SCALE, 1.25f / CHIP_SCALE, 1.25f / CHIP_SCALE)   // (the item as big as before)
         GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
         draw()
 

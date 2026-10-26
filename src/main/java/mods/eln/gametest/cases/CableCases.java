@@ -42,6 +42,12 @@ public final class CableCases {
         cases.add(new WaypointEndCase());
         cases.add(new PreviewSnapshotCase());
         cases.add(new HostedCase());
+        cases.add(new FootprintCase());
+        cases.add(new SlotsCase());
+        cases.add(new ChipsPackedCase());
+        cases.add(new CableToChipCase());
+        cases.add(new PinsAcrossCase());
+        cases.add(new SmallDevicesAnywhereCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
         cases.add(new MimicCase());
@@ -455,6 +461,8 @@ public final class CableCases {
         String ends = "", snapInfo = "";
         boolean snapOk;
         boolean endsOk = true;
+        boolean trimOk;
+        String trimEnds = "";
 
         public String name() {
             return "a cable to a device ends at its connector, with a lug";
@@ -502,8 +510,8 @@ public final class CableCases {
             } finally {
                 mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
             }
-            var hitV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 6)).add(0.97, 0.03, 0.5);
-            var viaSource = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 6), net.minecraft.core.Direction.EAST, hitV, true, new long[1][]);
+            var hitV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 6)).add(0.65, 0.1, 0.5);   // (on its model, east of its middle)
+            var viaSource = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(0, 1, 6), net.minecraft.core.Direction.UP, hitV, true, new long[1][]);
             var midV = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(1, 0, 6)).add(0.5, 1.0, 0.5);
             var sixV = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 6), net.minecraft.core.Direction.UP, midV, true, new long[1][]);
             snapInfo += " / voxel " + (sixV == null ? "none" : sixV) + " vs " + viaSource;
@@ -513,14 +521,27 @@ public final class CableCases {
             var six = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 1), net.minecraft.core.Direction.UP, midHit, true, new long[1][]);
             snapInfo += " / six " + (six == null ? "none" : six) + " vs " + a;
             snapOk &= a.equals(six);
-            // a 50V steam turbine: ends on its front and back (its terminal plates), none on its flanks
+            // a hosted Signal Trimmer has its connector on its front only: a click near any side of its model ends there
+            // (it used to take the nearest edge, which had no connector)
+            c.floor(c.at(4, 0, 7));
+            var tp = c.at(4, 1, 7);
+            var trim = host(c, Wp9cCases.SIGNAL_TRIMMER, tp, mods.eln.misc.Direction.YN);
+            Wp9aCases.orient(trim, x -> x, mods.eln.misc.Direction.XP);
+            trimOk = true;
+            for (double[] h : new double[][]{{0.35, 0.5}, {0.65, 0.5}, {0.5, 0.35}, {0.5, 0.65}}) {
+                var hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(h[0], 0.1, h[1]);
+                var e = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), tp, net.minecraft.core.Direction.UP, hit, true, new long[1][]);
+                trimEnds += (e == null ? "none" : e.x() - tp.getX() * 16L + "," + (e.z() - tp.getZ() * 16L)) + " ";
+                trimOk &= e != null && e.x() == tp.getX() * 16L + 16 && e.z() == tp.getZ() * 16L + 8;
+            }
+            // a 50V steam turbine: ends on its front and back (its terminal plates) and its left flank (the control signal's)
             var tb = c.placeTransparent(12 + (82 << 6), c.at(4, 1, 2));
             for (var d : new net.minecraft.core.Direction[]{net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH,
                 net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST}) {
                 var hit = net.minecraft.world.phys.Vec3.atCenterOf(c.at(4, 1, 2)).add(d.getStepX() * 0.5, -0.45, d.getStepZ() * 0.5);
                 boolean got = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(4, 1, 2), d, hit, false, new long[1][]) != null;
                 var ed = mods.eln.misc.Direction.fromEnumFacing(d);
-                boolean want = ed == tb.front || ed == tb.front.back();
+                boolean want = ed == tb.front || ed == tb.front.back() || ed == tb.front.left();   // (left: its control signal)
                 ends += d + (got ? "+ " : "- ");
                 endsOk &= got == want;
             }
@@ -541,7 +562,8 @@ public final class CableCases {
             c.check("device end: laid", err == null, String.valueOf(err));
             c.check("device end: the cable meets the device at the middle of the edge (16,0,8)", "16,0,8".equals(endAt), endAt);
             c.check("device end: a lug at a terminal plate (3 more boxes)", lugged == plain + 18, plain + " -> " + lugged + " quads");
-            c.check("device end: a turbine takes cables on its front and back only", endsOk, ends);
+            c.check("device end: a turbine takes cables on its front, back and left (signal) only", endsOk, ends);
+            c.check("device end: a click anywhere on a hosted trimmer ends at its front connector (16,8)", trimOk, trimEnds);
             c.check("device end: a floor click beside the device's port snaps to it", snapOk, snapInfo);
             double i = current(r);
             c.check("device end: the circuit conducts", Math.abs(i) > 1, String.format("%.4f A", i));
@@ -865,6 +887,361 @@ public final class CableCases {
     }
 
     /**
+     * Chips anywhere on a face (Baughn: 6 voxels across; pins that touch connect; a voxel of air otherwise):
+     * two NOT chips on one floor, pin to pin: the first's output (high, its input open) drives the second (low). A NOT
+     * placed at a click, its input pin touched by a floor cable from a Signal Source at 50 V next door: low. A chip with
+     * no pin toward another is refused beside it; a chip over another is refused.
+     */
+    static final class ChipsPackedCase implements TestCase {
+        mods.eln.node.six.SixNodeElement a, b, e;
+        String placed = "", refused = "", four = "";
+        boolean placedOk, refusedOk, fourOk;
+
+        public String name() {
+            return "chips anywhere on a face: pins connect, air between";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        static mods.eln.node.voxel.VoxelNode block(TestContext c, BlockPos p) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var v = new mods.eln.node.voxel.VoxelNode();
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), mods.eln.misc.Direction.YN, player,
+                mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack());
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+            return v;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var yn = mods.eln.misc.Direction.YN;
+            var xp = mods.eln.misc.Direction.XP;
+            for (int x = 0; x < 9; x++) c.floor(c.at(x, 0, 1));
+            // NOT -> NOT, pin to pin
+            var v = block(c, c.at(1, 1, 1));
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 7, yn, 4, 0, 0, player);
+            a = v.getElement(6);
+            b = v.getElement(7);
+            Wp9aCases.orient(a, l -> l, xp);
+            Wp9aCases.orient(b, l -> l, xp);
+            // over chip a: no room
+            String over = v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.3, 0, 0.5, player);
+            // a NOT placed at a click; a Signal Source (50 V) in the next block west, a floor cable to the chip's input
+            var w = block(c, c.at(4, 1, 1));
+            String err = w.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.52, 0, 0.47, player);
+            e = w.getElement(yn);
+            if (e != null) Wp9aCases.orient(e, l -> l, xp);
+            voxel(c, c.at(4, 1, 1), List.of(new CablePart(0, DOWN, new int[]{0, 0, 8, 4, 0, 8})));
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(3, 1, 1), yn);
+            src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(50f);
+            }));
+            placed = "click: " + err + ", slot " + (e == null ? -1 : e.slot) + " at " + (e == null ? "-" : e.ox + "," + e.oy + "," + e.oz);
+            placedOk = err == null && e != null && e.slot == yn.getInt();   // (the middle of a free face: its own slot)
+            // beside a chip whose side toward it has no pin: too close
+            var u = block(c, c.at(6, 1, 1));
+            u.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
+            Wp9aCases.orient(u.getElement(6), l -> l, mods.eln.misc.Direction.ZP);   // (pins north and south)
+            mods.eln.misc.LRDU eastward = null;
+            for (var l : mods.eln.misc.LRDU.values()) if (yn.applyLRDU(l) == xp) eastward = l;
+            // (pins east and west: its west pin a voxel from u's body, which has no pin there)
+            String near = u.placeErrorAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 7, yn, 3, 0, 0, eastward);
+            refused = "over: " + over + "; beside: " + near;
+            refusedOk = over != null && over.startsWith("No room") && near != null && near.startsWith("Too close");
+            // four to a face (Baughn's mockup): centres (4, 4), (12, 4), (4, 12), (12, 12), pins east and west; the pairs
+            // along x meet pin to pin, the pairs along z face each other's pinless sides two voxels apart
+            var q = block(c, c.at(7, 1, 1));
+            var not = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT);
+            int[][] at = {{-4, -4}, {4, -4}, {-4, 4}};
+            for (int k = 0; k < 3; k++) {
+                q.createSubBlockAt(not.newItemStack(), 6 + k, yn, at[k][0], 0, at[k][1], player);
+                Wp9aCases.orient(q.getElement(6 + k), l -> l, xp);
+            }
+            mods.eln.misc.LRDU east = null;
+            for (var l : mods.eln.misc.LRDU.values()) if (yn.applyLRDU(l) == xp) east = l;
+            four = String.valueOf(q.placeErrorAt(not.newItemStack(), 9, yn, 4, 0, 4, east));
+            fourOk = four.equals("null");
+        }
+
+        public void measure(TestContext c) {
+            c.check("chips: placed at a click in the middle of a free face: the face's slot", placedOk, placed);
+            c.check("chips: refused over a chip, and beside one with no pin toward it", refusedOk, refused);
+            c.check("chips: four fit a face (pins met along x, two voxels of air along z)", fourOk, four);
+            c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);
+            Wp9cCases.within(c, "chips: the second NOT, its input on the first's output pin [V]", Wp9cCases.out(b), 0, 0.5);
+            Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from 50 V [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.5);
+        }
+    }
+
+    /**
+     * Other small devices go anywhere on a face too (Baughn), the redstone converters stay centred: a Signal Trimmer off
+     * centre at 50 V, its output pin on a NOT chip's input pin: low.
+     */
+    static final class SmallDevicesAnywhereCase implements TestCase {
+        mods.eln.node.six.SixNodeElement not;
+        String redstone = "";
+
+        public String name() {
+            return "small devices anywhere on a face";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var yn = mods.eln.misc.Direction.YN;
+            var xp = mods.eln.misc.Direction.XP;
+            c.floor(c.at(1, 0, 1));
+            var v = ChipsPackedCase.block(c, c.at(1, 1, 1));
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).newItemStack(), 6, yn, -4, 0, 0, player);
+            var t = (mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement) v.getElement(6);
+            Wp9aCases.orient(t, l -> l, xp);
+            t.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement.setVoltagerId);
+                o.writeFloat((float) mods.eln.Eln.SVU);
+            }));
+            v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 7, yn, 4, 0, 0, player);
+            not = v.getElement(7);
+            Wp9aCases.orient(not, l -> l, xp);
+            redstone = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9bCases.REDSTONE_IN).newItemStack(), yn, 0.5, 0, 0.9, player));
+        }
+
+        public void measure(TestContext c) {
+            c.check("small devices: the trimmer goes anywhere, the redstone converter doesn't",
+                mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).placeAnywhere()
+                    && !mods.eln.Eln.sixNodeItem.getDescriptor(Wp9bCases.REDSTONE_IN).placeAnywhere() && redstone.startsWith("That can't"), redstone);
+            Wp9cCases.within(c, "small devices: a NOT on an off-centre trimmer's pin at 50 V [V]", Wp9cCases.out(not), 0, 0.5);
+        }
+    }
+
+    /**
+     * Pins at a block's edge reach the next voxel block: NOT chips at the east edge of one block and the west edge of the
+     * next, pin to pin across the boundary (the second low); and a NOT whose output pin at a block's edge touches a cable
+     * in the next block that runs to another NOT's input (low too).
+     */
+    static final class PinsAcrossCase implements TestCase {
+        mods.eln.node.six.SixNodeElement b, d;
+
+        public String name() {
+            return "chip pins across a block boundary";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var yn = mods.eln.misc.Direction.YN;
+            var xp = mods.eln.misc.Direction.XP;
+            var not = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT);
+            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            // pin to pin across
+            var v1 = ChipsPackedCase.block(c, c.at(1, 1, 1));
+            v1.createSubBlockAt(not.newItemStack(), 6, yn, 4, 0, 0, player);
+            Wp9aCases.orient(v1.getElement(6), l -> l, xp);
+            var v2 = ChipsPackedCase.block(c, c.at(2, 1, 1));
+            v2.createSubBlockAt(not.newItemStack(), 6, yn, -4, 0, 0, player);
+            b = v2.getElement(6);
+            Wp9aCases.orient(b, l -> l, xp);
+            // pin to a cable in the next block, the cable to a chip's input there
+            var v4 = ChipsPackedCase.block(c, c.at(4, 1, 1));
+            v4.createSubBlockAt(not.newItemStack(), 6, yn, 4, 0, 0, player);
+            Wp9aCases.orient(v4.getElement(6), l -> l, xp);
+            var v5 = ChipsPackedCase.block(c, c.at(5, 1, 1));
+            v5.createSubBlockAt(not.newItemStack(), 6, yn, 4, 0, 0, player);
+            d = v5.getElement(6);
+            Wp9aCases.orient(d, l -> l, xp);
+            voxel(c, c.at(5, 1, 1), List.of(new CablePart(0, DOWN, new int[]{0, 0, 8, 8, 0, 8})));
+        }
+
+        public void measure(TestContext c) {
+            Wp9cCases.within(c, "across: a NOT whose input pin meets the output pin of a NOT in the next block [V]", Wp9cCases.out(b), 0, 0.5);
+            Wp9cCases.within(c, "across: a NOT on a cable from the output pin of a NOT in the next block [V]", Wp9cCases.out(d), 0, 0.5);
+        }
+    }
+
+    /** The cable kit from a Signal Source (50 V) to a NOT chip placed at a click: a click on the chip ends the route at its
+     *  nearest pin (its input), and the laid cable drives it: low. */
+    static final class CableToChipCase implements TestCase {
+        mods.eln.node.six.SixNodeElement chip;
+        String err = "";
+
+        public String name() {
+            return "cable kit to a chip's pin";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            var yn = mods.eln.misc.Direction.YN;
+            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), yn);
+            src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(50f);
+            }));
+            var v = ChipsPackedCase.block(c, c.at(5, 1, 1));
+            err = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.4, 0, 0.5, player));   // (two voxels off centre)
+            chip = v.getElement(6);
+            if (chip == null) return;
+            Wp9aCases.orient(chip, l -> l, mods.eln.misc.Direction.XP);   // (input west, toward the source)
+            BlockPos sp = c.at(1, 1, 1), cp = c.at(5, 1, 1);
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(level, sp, net.minecraft.core.Direction.EAST,
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(sp).add(0.65, 0.1, 0.5), true, new long[1][]);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(level, cp, net.minecraft.core.Direction.UP,
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(cp).add(0.27, 0.1, 0.5), false, new long[1][]);
+            err = "ends " + a + " / " + b + "; lay " + (a == null || b == null ? "-" : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, 0, a, b));
+        }
+
+        public void measure(TestContext c) {
+            c.line(err);
+            Wp9cCases.within(c, "cable to chip: the NOT's input on the laid cable from 50 V [V]", chip == null ? -1 : Wp9cCases.out(chip), 0, 0.5);
+        }
+    }
+
+    /**
+     * Slots past the six faces (devices off centre on a face; placement by players comes later): two AND chips and a
+     * Signal Trimmer on one floor, each in its own slot. Each is found where its model is, saved and loaded in place
+     * (also the harness's round trip), its GUI opens by slot, and breaking takes that one only.
+     */
+    static final class SlotsCase implements TestCase {
+        String found = "", loaded = "", gui = "", broke = "";
+        boolean foundOk, loadedOk, guiOk, brokeOk;
+
+        public String name() {
+            return "voxel block slots: devices off centre on a face";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            BlockPos p = c.at(1, 1, 1);
+            c.floor(c.at(1, 0, 1));
+            var yn = mods.eln.misc.Direction.YN;
+            var v = new mods.eln.node.voxel.VoxelNode();
+            var and = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.AND).newItemStack();
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), yn, player, and);
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+            boolean made = v.createSubBlockAt(and, 6, yn, -4, 0, -4, player)
+                & v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.AND).newItemStack(), 7, yn, 4, 0, -4, player)
+                & v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).newItemStack(), 9, yn, -4, 0, 4, player);
+            // the model of slot 6 is round (4, 4) voxels, slot 7's round (12, 4), slot 9's round (4, 12)
+            int a = v.elementAt(4 / 16.0, 1 / 16.0, 4 / 16.0, 0), b = v.elementAt(12 / 16.0, 1 / 16.0, 4 / 16.0, 0),
+                t = v.elementAt(4 / 16.0, 1 / 16.0, 12 / 16.0, 0), none = v.elementAt(12 / 16.0, 1 / 16.0, 12 / 16.0, 0);
+            found = "made " + made + "; at (4,4) " + a + ", (12,4) " + b + ", (4,12) " + t + ", (12,12) " + none + "; face slot " + v.getElement(yn);
+            foundOk = made && a == 6 && b == 7 && t == 9 && none < 0 && v.getElement(yn) == null && v.getElement(9).side == yn;
+            // saved and loaded: the same devices in the same slots and places
+            var tag = new net.minecraft.nbt.CompoundTag();
+            v.writeToNBT(tag);
+            var w = new mods.eln.node.voxel.VoxelNode();
+            w.readFromNBT(tag);
+            StringBuilder lb = new StringBuilder();
+            loadedOk = true;
+            for (int s : new int[]{6, 7, 9}) {
+                var x = v.getElement(s);
+                var y = w.getElement(s);
+                lb.append(s).append(": ").append(y == null ? "none" : y.sixNodeElementDescriptor.name + " " + y.side + " " + y.ox + "," + y.oy + "," + y.oz).append("; ");
+                loadedOk &= y != null && y.slot == s && y.side == x.side && y.ox == x.ox && y.oy == x.oy && y.oz == x.oz
+                    && y.sixNodeElementDescriptor == x.sixNodeElementDescriptor;
+            }
+            loadedOk &= !tag.contains("EID8") && tag.getShortOr("EID2", (short) -1) == 0;
+            loaded = lb.toString();
+            // the trimmer's GUI, by its slot
+            var menu = mods.eln.node.NodeMenus.menu(1, player, v, 9);
+            gui = menu == null ? "none" : "slot " + menu.slot + " id " + menu.descriptorId;
+            guiOk = menu != null && menu.slot == 9 && menu.descriptorId == Wp9cCases.SIGNAL_TRIMMER;
+            // breaking slot 7 takes that chip only
+            boolean gone = v.deleteSlot(null, 7);
+            broke = "deleted " + gone + "; left " + (v.getElement(6) != null) + "," + (v.getElement(7) != null) + "," + (v.getElement(9) != null);
+            brokeOk = gone && v.getElement(6) != null && v.getElement(7) == null && v.getElement(9) != null;
+        }
+
+        public void measure(TestContext c) {
+            c.check("slots: each device is where its model is", foundOk, found);
+            c.check("slots: saved and loaded in place", loadedOk, loaded);
+            c.check("slots: the trimmer's GUI opens by slot", guiOk, gui);
+            c.check("slots: breaking one takes that one", brokeOk, broke);
+        }
+    }
+
+    /**
+     * A device hosted in a voxel block is clicked and outlined where its model is (Baughn: a Signal Trimmer's click area,
+     * the whole face, didn't match its 6 x 6 px model): on the floor and on a wall. Logs every device's footprint.
+     */
+    static final class FootprintCase implements TestCase {
+        String floor = "", wall = "", outline = "";
+        boolean floorOk, wallOk, outlineOk;
+
+        public String name() {
+            return "a hosted device is clicked and outlined at its model";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            var tp = c.at(1, 1, 1);
+            c.floor(c.at(1, 0, 1));
+            host(c, Wp9cCases.SIGNAL_TRIMMER, tp, mods.eln.misc.Direction.YN);
+            var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(tp, c.level()));
+            int yn = mods.eln.misc.Direction.YN.getInt();
+            int[] fp = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).footprint();
+            floor = "footprint " + fp[0] + "," + fp[1] + "; on the model " + v.elementAt(0.6, 0.08, 0.6, 0) + ", beside it " + v.elementAt(0.8, 0.08, 0.5, 0)
+                + ", above it " + v.elementAt(0.5, 0.3, 0.5, 0);
+            floorOk = fp[0] == 3 && fp[1] >= 2 && fp[1] <= 3 && v.elementAt(0.6, 0.08, 0.6, 0) == yn && v.elementAt(0.8, 0.08, 0.5, 0) < 0
+                && v.elementAt(0.5, 0.3, 0.5, 0) < 0;
+            if (c.level().getBlockEntity(tp) instanceof mods.eln.node.voxel.VoxelNodeEntity e) {
+                var b = e.shapes().outline().bounds();
+                outline = String.format("%.3f..%.3f, %.3f..%.3f, %.3f..%.3f", b.minX, b.maxX, b.minY, b.maxY, b.minZ, b.maxZ);
+                outlineOk = Math.abs(b.minX - 5 / 16.0) < 1e-6 && Math.abs(b.maxX - 11 / 16.0) < 1e-6 && b.minY == 0 && b.maxY <= 3 / 16.0 + 1e-6
+                    && Math.abs(b.minZ - 5 / 16.0) < 1e-6 && Math.abs(b.maxZ - 11 / 16.0) < 1e-6;
+            }
+            // on the wall to its west
+            var wp = c.at(3, 1, 1);
+            c.floor(c.at(2, 1, 1));
+            host(c, Wp9cCases.SIGNAL_TRIMMER, wp, mods.eln.misc.Direction.XN);
+            var w = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(wp, c.level()));
+            int xn = mods.eln.misc.Direction.XN.getInt();
+            wall = "on the model " + w.elementAt(0.08, 0.6, 0.4, 0) + ", beside it " + w.elementAt(0.08, 0.5, 0.8, 0) + " / " + w.elementAt(0.08, 0.2, 0.5, 0);
+            wallOk = w.elementAt(0.08, 0.6, 0.4, 0) == xn && w.elementAt(0.08, 0.5, 0.8, 0) < 0 && w.elementAt(0.08, 0.2, 0.5, 0) < 0;
+            StringBuilder all = new StringBuilder("footprints (half width, height; voxels):");
+            for (var d : new java.util.TreeMap<>(mods.eln.Eln.sixNodeItem.all()).values()) {
+                int[] f = d.footprint();
+                all.append(' ').append(d.name).append('=').append(f[0]).append(',').append(f[1]).append(';');
+            }
+            c.line(all.toString());
+        }
+
+        public void measure(TestContext c) {
+            c.check("footprint: a floor trimmer is clicked on its 6 x 6 model only", floorOk, floor);
+            c.check("footprint: its outline is the model's box", outlineOk, outline);
+            c.check("footprint: a wall trimmer likewise", wallOk, wall);
+        }
+    }
+
+    /**
      * A device hosted in a voxel block works as in a six-node block: source -> six-node cables -> a Power Resistor in a
      * voxel block (which also holds a pipe on its ceiling) -> ground; the current equals the all-six-node row's.
      */
@@ -931,7 +1308,7 @@ public final class CableCases {
         }
 
         public int width() {
-            return 3;
+            return 8;
         }
 
         public void build(TestContext c) {
@@ -957,10 +1334,30 @@ public final class CableCases {
             result = "block removed " + removed + ", node " + (v == null ? "gone" : v.getClass().getSimpleName())
                 + (v instanceof mods.eln.node.voxel.VoxelNode vn ? ", parts " + vn.parts.size() + ", floor element " + (vn.getElement(mods.eln.misc.Direction.YN) != null) : "")
                 + " (hit " + hit + ")";
+            cableOverResistor(c);
         }
 
         public void measure(TestContext c) {
             c.check("mixed block: mining the switch takes the switch only", result.startsWith("block removed false, node VoxelNode, parts 1, floor element false"), result);
+            c.check("mixed block: a wall cable inside a floor resistor's box is the cable's", resistorOk, resistor);
+        }
+
+        String resistor = "";
+        boolean resistorOk;
+
+        /** A Power Resistor's model box (16 x 16, 7 high) reaches over a cable down the north wall: a point on the
+         *  cable is the cable's, not the resistor's (elementAt yields to a part's own box). */
+        void cableOverResistor(TestContext c) {
+            BlockPos p = c.at(5, 1, 1);
+            c.floor(p.north());
+            voxel(c, p, CablePart.arms(LV, NORTH, DOWN));
+            host(c, POWER_RESISTOR, p, mods.eln.misc.Direction.YN);
+            var vn = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+            int yn = mods.eln.misc.Direction.YN.getInt();
+            double cy = 3 / 16.0, cz = 0.5 / 16;
+            resistor = "on the cable: element " + vn.elementAt(0.5, cy, cz, 0) + " part " + vn.partAt(0.5, cy, cz)
+                + "; beside it: element " + vn.elementAt(0.5, cy, 0.5, 0);
+            resistorOk = vn.elementAt(0.5, cy, cz, 0) < 0 && vn.partAt(0.5, cy, cz) >= 0 && vn.elementAt(0.5, cy, 0.5, 0) == yn;
         }
     }
 

@@ -5,7 +5,7 @@ EA transparent node, drawn by SteamGeneratorRender through Obj3D (see README.md,
 mcmodel's px frame (0..16, corner origin); write_eln centres it. The shaft runs front-back along x:
   x = 0  (west, XN)  FRONT: generator end, terminal plate at floor level (electric out, LRDU Down)
   x = 16 (east, XP)  BACK:  turbine end, second terminal plate, fed by a bus duct along the z- skid rail
-  top: steam inlet stub + flange on the scroll, a riser to a flange centred on the top face (a boiler set on top feeds it); z+ side: exhaust vent stack, open at the top: the renderer puffs steam from it.
+  top: steam inlet stub + flange on the scroll, a riser to a flange centred on the top face (a boiler set on top feeds it); z+ side: exhaust vent stack, open at the top: the renderer puffs steam from it (part "vent"); with a condenser against z+, part "exhaust" instead: a duct to a flange on that face.
 
 Usage: steamturbine.py RESOURCES_DIR   (e.g. src/main/resources)
   Writes RESOURCES_DIR/assets/eln/model/steamturbine{50v,200v}/steamturbine*.{obj,mtl} + tex.png (atlas).
@@ -24,6 +24,7 @@ TIERS = {
 }
 CZ = 8.0
 PIPE_R = 2.0                      # an iron pipe's radius (PipePart.BORE[0] / 2 voxels)
+EXHAUST_R = 2.25                  # the exhaust duct into a condenser (condenser.py: the same, at the tier's shaft height)
 START = math.radians(40)          # scroll tongue angle (0 = up, 90 = +z); the radius grows from there round to it
 
 # atlas: material -> (col, row), 4x2 cells of 16 px (64x32 png)
@@ -112,19 +113,36 @@ def turbine(tier):
     m.add(prism("x", yh, CZ, 0.25, gx - 0.5, gx + 0.2, "brass", n=6, caps=(False, False)))
     m.add(prism("x", yh, CZ, 0.9, gx - 1.0, gx - 0.5, "brass", n=10))
     m.add(prism("x", yh, CZ, 0.7, gx - 1.05, gx - 1.0, "glass", n=10, caps=(True, False)))
-    # --- exhaust vent stack on the z+ side (vents to air; the turbine has no steam output)
+    # --- exhaust vent stack on the z+ side (vents to air): a part of its own ("vent"), drawn unless a condenser stands
+    # against that side; then the "exhaust" part, a duct out to a flange on the z+ face, joins the condenser's
     ez = CZ + scroll_r(t, math.pi / 2) + 1.0
-    m.add(prism("z", tcx, cy - 0.25, 0.9, CZ + 1.0, ez + 0.9, "castiron", n=8, caps=(False, True)))
+    vent_m = Model()
+    vent_m.add(prism("z", tcx, cy - 0.25, 0.9, CZ + 1.0, ez + 0.9, "castiron", n=8, caps=(False, True)))
     # straight up to an open outlet: the steam leaves there (Baughn). (A boiler set on top would hide it, but nobody
     # builds like that, Baughn: pipes are cheap.)
-    m.add(prism("y", tcx, ez, 0.9, cy - 0.25, 12.75, "castiron", n=8, caps=(True, False)))
-    m.add(tube("y", tcx, ez, 0.8, 1.25, 12.75, 13.75, "darksteel", n=8))                      # open outlet
-    m.add(prism("y", tcx, ez, 0.85, 12.0, 12.5, "rubber", n=8, caps=(False, True)))           # (dark inside the bore)
+    vent_m.add(prism("y", tcx, ez, 0.9, cy - 0.25, 12.75, "castiron", n=8, caps=(True, False)))
+    vent_m.add(tube("y", tcx, ez, 0.8, 1.25, 12.75, 13.75, "darksteel", n=8))                      # open outlet
+    vent_m.add(prism("y", tcx, ez, 0.85, 12.0, 12.5, "rubber", n=8, caps=(False, True)))           # (dark inside the bore)
+    # (out of the scroll along z, an elbow, along x to the face's middle, out to the flange: the condenser's duct meets
+    # it at the middle of its face whichever way it faces)
+    ex_m = Model()
+    zr = 13.0
+    ex_m.add(prism("z", tcx, cy, EXHAUST_R, CZ + 1.0, zr + EXHAUST_R, "castiron", n=12, caps=(False, True)))
+    ex_m.add(prism("x", cy, zr, EXHAUST_R, 8.0 - EXHAUST_R, tcx + EXHAUST_R, "castiron", n=12, caps=(True, True)))
+    ex_m.add(prism("z", 8.0, cy, EXHAUST_R, zr, 15.0, "castiron", n=12, caps=(False, False)))
+    ex_m.add(prism("z", 8.0, cy, EXHAUST_R + 0.75, 15.0, 16.0, "steel", n=12, caps=(True, False)))   # flange on the face
+    for k in range(t["bolts"]):
+        a = 2 * math.pi * (k + 0.5) / t["bolts"]
+        br = EXHAUST_R + 0.4
+        ex_m.add(prism("z", 8.0 + br * math.cos(a), cy + br * math.sin(a), 0.25, 14.75, 15.0, "brass", n=6))
     # --- terminal plates (electric out, front and back, floor level)
     terminal_plate(m, 0.1, 0.85, 0.1, 0.0)
     terminal_plate(m, 15.15, 15.9, 15.9, 16.0)
+    # --- signal plate on the z- flank (left, seen from the front): external control of the throttle (Baughn 2026-10-26)
+    from oilkit import signal_plate, turned
+    m.add(*turned(signal_plate(), 3))
     vent = (tcx / 16 - 0.5, 13.75 / 16 - 0.5, ez / 16 - 0.5)   # (the outlet's centre, model coordinates; it faces up)
-    return m, rotor, vent
+    return m, rotor, vent, vent_m, ex_m
 
 # ---------- textures: 16x16 cells of one atlas (procedural, deterministic) ----------
 def atlas(path, tier):
@@ -157,8 +175,8 @@ def main():
         name = "steamturbine" + tier
         out = os.path.join(res, "assets/eln/model", name)
         os.makedirs(out, exist_ok=True)
-        m, rotor, vent = turbine(tier)
-        tris = m.write_eln(out, name, CELLS, GRID, extra=[("rotor", rotor)])
+        m, rotor, vent, vent_m, ex_m = turbine(tier)
+        tris = m.write_eln(out, name, CELLS, GRID, extra=[("rotor", rotor), ("vent", vent_m), ("exhaust", ex_m)])
         with open(os.path.join(out, name + ".txt"), "w") as f:   # the rotor turns about the shaft (Obj3D part origin); the vent
             f.write(f"o rotor\nf originY {TIERS[tier]['cy'] / 16 - 0.5}\nf originZ {CZ / 16 - 0.5}\n")
             f.write(f"o main\nf ventX {vent[0]:.5f}\nf ventY {vent[1]:.5f}\nf ventZ {vent[2]:.5f}\n")

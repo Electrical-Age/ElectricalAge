@@ -197,7 +197,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(Utils.plotVolt(tr("Nominal voltage: "), electricalU));
+        if (!Utils.nameShowsVoltage(name, electricalU))
+            list.add(Utils.plotVolt(tr("Nominal voltage: "), electricalU));
         list.add(Utils.plotPower(tr("Nominal power: "), electricalStdP));
         list.add(Utils.plotEnergy(tr("Energy capacity: "), electricalStdDischargeTime * electricalStdP));
         list.add(Utils.plotOhm(tr("Internal resistance: "), electricalRs * 2));

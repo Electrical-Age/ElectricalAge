@@ -30,10 +30,18 @@ public abstract class SixNodeElementRender {
     boolean cableListReady[] = {false, false, false, false};
     boolean glListReady = false;
 
+    /** Its slot in the block (SixNodeElement.slot) and, past the six faces, its offset from the face's centre (world
+     *  voxels); set by SixNodeEntity after construction. */
+    public int slot;
+    public int ox, oy, oz;
+    /** Past the faces: the edges it connects on (bit LRDU.toInt()), where its pins are. */
+    public int pinMask;
+
     public SixNodeElementRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         this.sixNodeDescriptor = descriptor;
         this.tileEntity = tileEntity;
         this.side = side;
+        this.slot = side.getInt();
         cableList = new int[4];
         // this.descriptor = descriptor;
         if (glListEnable()) {
@@ -90,7 +98,7 @@ public abstract class SixNodeElementRender {
             needRedraw = false;
             connectionType = CableRender.connectionType(this, side);
             newConnectionType(connectionType);
-            if (drawCableAuto()) {
+            if (drawCableAuto() && slot < 6) {   // (a device off centre has pins, no stubs to the block's edges)
                 for (int idx = 0; idx < 4; idx++) {
                     CableRenderDescriptor render = getCableRender(LRDU.fromInt(idx));
                     cableListReady[idx] = false;
@@ -112,8 +120,39 @@ public abstract class SixNodeElementRender {
             }
         }
 
+        if (slot >= 6 && !sixNodeDescriptor.drawsOwnPins()) {   // (off centre: a pin past its body on every connecting edge)
+            float from = sixNodeDescriptor.bodyHalf() / 16f;
+            for (LRDU l : LRDU.values()) if ((pinMask & (1 << l.toInt())) != 0) drawPinBox(l, from, from + 1 / 16f, 1.8f / 16, 1 / 16f);
+        }
+
         GL11.glColor3f(1f, 1f, 1f);
         // Minecraft.getMinecraft().profiler.endSection();
+    }
+
+    /** A small grey box on the face toward edge l, from `from` to `to` off the centre (element frame: x off the face,
+     *  Left/Right along z, Down/Up along y), w wide and h high. */
+    static void drawPinBox(LRDU l, float from, float to, float w, float h) {
+        float s = l == LRDU.Left || l == LRDU.Down ? -1 : 1;
+        float a0 = s * from, a1 = s * to, b0 = -w / 2, b1 = w / 2;
+        boolean alongZ = l == LRDU.Left || l == LRDU.Right;
+        UtilsClient.disableTexture();
+        GL11.glColor3f(0.78f, 0.78f, 0.78f);
+        GL11.glBegin(GL11.GL_QUADS);
+        float[][] faces = {
+            {h, a0, b0, h, a1, b0, h, a1, b1, h, a0, b1},     // top
+            {0, a1, b0, 0, a1, b1, h, a1, b1, h, a1, b0},     // end
+            {0, a0, b0, 0, a1, b0, h, a1, b0, h, a0, b0},     // sides
+            {0, a0, b1, h, a0, b1, h, a1, b1, 0, a1, b1},
+        };
+        for (float[] f : faces)
+            for (int i = 0; i < 12; i += 3) {
+                float x = f[i], a = f[i + 1], b = f[i + 2];
+                if (alongZ) GL11.glVertex3f(x, b, a);
+                else GL11.glVertex3f(x, a, b);
+            }
+        GL11.glEnd();
+        UtilsClient.enableTexture();
+        GL11.glColor3f(1f, 1f, 1f);
     }
 
     /**
@@ -220,8 +259,8 @@ public abstract class SixNodeElementRender {
         try {
             tileEntity.preparePacketForServer(stream);
 
-            stream.writeByte(side.getInt());
-            stream.writeShort(tileEntity.elementRenderIdList[side.getInt()]);
+            stream.writeByte(slot);
+            stream.writeShort(tileEntity.elementRenderIdList[slot]);
 
         } catch (IOException e) {
 

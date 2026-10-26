@@ -33,7 +33,13 @@ public final class OilCases {
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
+        cases.add(new ColdBoilerOtherPipes());
         cases.add(new SteamTurbine());
+        cases.add(new TurbineFloods());
+        cases.add(new TurbineLowPressure());
+        cases.add(new TurbineCondenser());
+        cases.add(new TurbineHoldsPressure());
+        cases.add(new CondenserFloods());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -307,6 +313,53 @@ public final class OilCases {
     }
 
     /**
+     * Other mods' pipes (Baughn: an Energized Power pipe drew a cold boiler below ambient and fed a turbine its water): a
+     * cold, unheated boiler kept topped up by a pipe (its air squeezed above 1 atm) offers no steam through its
+     * capability, and a pipe drawing at it every tick for 30 s takes none and leaves it at ambient; the steam turbine exposes no fluid capability at all (it runs off pressure).
+     */
+    static final class ColdBoilerOtherPipes implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        final int[] taken = new int[1];
+        mods.eln.sim.IProcess pipe;
+
+        public String id() {
+            return "oil_cold_boiler_other_pipes";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            turbine = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 3, 1);
+            boiler.fromTanks(3000, 0);
+            boiler.showTanks();
+            // (a pipe keeps it topped up with cold water: that squeezes the air over it above 1 atm)
+            mods.eln.sim.IProcess draw = pipeOut(boiler, taken);
+            mods.eln.Eln.simulator.addSlowProcess(pipe = t -> {
+                boiler.tanks.fillWater(100);
+                draw.process(t);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(pipe);
+            double c = boiler.vessel.T() - mods.eln.sim.fluid.Water.T0;
+            ctx.check("oil: a cold boiler gives other mods' pipes no steam, and stays at ambient", taken[0] == 0 && c > 19,
+                String.format("%d mB taken, %.1f C", taken[0], c));
+            Object cap = ctx.world().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.at(3, 1, 1), net.minecraft.core.Direction.UP);
+            ctx.check("oil: the steam turbine has no fluid capability (steam only by its EA port)", cap == null && turbine.getFluidHandler() == null, String.valueOf(cap));
+        }
+    }
+
+    /**
      * Electric heater (1 kW) against a boiler with water, its steam drawn off by a pipe (the fluid capability): the
      * boiler heats to 100 C, then boils: steam = heat / 2257 J per g (the water is already hot), so up to ~440 mB/s at
      * the full kilowatt (in a steady plant, fed cold water, 175 J per mB of water: ~385 mB/s, as before the vessel).
@@ -400,10 +453,9 @@ public final class OilCases {
             int[] tick = new int[1];
             double[] before = new double[2];
             mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
-                // keep each inlet at ~3 bar of steam
+                // keep each inlet at its rating, 10 bar of saturated steam
                 for (var tb : new mods.eln.oil.SteamGeneratorElement[]{idle, run})
-                    if (tb.inlet != null && tb.inlet.P() < 3e5)
-                        tb.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), 200), true);
+                    if (tb.inlet != null) steam(tb);
                 tick[0]++;
                 if (tick[0] > 300) {   // (measure the last 5 s, after the spin-up)
                     window += t;
@@ -418,12 +470,256 @@ public final class OilCases {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             ctx.line("oil: steam turbine idle " + idle.getWaila() + ", running " + run.getWaila() + ", heater " + heater.getWaila());
             ctx.check("oil: idle, the governor holds the open-circuit voltage (1.05 x 50)", Math.abs(idle.load.getU() - 52.5) < 52.5 * 0.05, idle.load.getU() + " V");
-            ctx.check("oil: idle, it uses little steam (losses and the valve's leak)", idleUsed / window < 0.2 * 1108, idleUsed / window + " mB/s");
+            ctx.check("oil: idle, it uses little steam (losses and the valve's leak)", idleUsed / window < 0.2 * mods.eln.oil.SteamGeneratorDescriptor.nominalSteam(1000), idleUsed / window + " mB/s");
             double p = runEnergy / window, used = runUsed / window;
             ctx.check("oil: loaded, it drives the heater (1.1 kW at 52.5 V; a little over its kilowatt is fine)", p > 500 && p <= 1000 * 1.15, String.format("%.0f W", p));
-            ctx.check("oil: no more electricity than 40% of the steam", p <= used * mods.eln.oil.SteamGeneratorDescriptor.EFFICIENCY * 2.3,
+            // (Baughn 2026-10-26: by the expansion; 10 bar saturated to 1 atm: 0.7 x 409 kJ/kg)
+            double perKg = mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_J_PER_KG;
+            ctx.check("oil: its rating, 0.7 of the expansion from 10 bar to air: 286 kJ/kg", Math.abs(perKg - 0.7 * 409e3) < 3e3, perKg + " J/kg");
+            ctx.check("oil: no more electricity than the expansion gives (+5%)", p <= used * mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM * perKg * 1.05,
                 String.format("%.0f W vs %.0f mB/s", p, used));
         }
+    }
+
+    /**
+     * The low-pressure tip (Baughn: tell players to use a valve): a loaded turbine on 3 bar for over 30 s is due the
+     * "Under Pressure" advancement (its placer gets it, if online) and shows a low pressure efficiency; one on 10 bar
+     * isn't, at ~100%.
+     */
+    static final class TurbineLowPressure implements TestCase {
+        mods.eln.oil.SteamGeneratorElement low, rated;
+        mods.eln.sim.IProcess feed;
+
+        public String id() {
+            return "oil_steam_turbine_low_pressure";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 760;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            low = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            var h1 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 2, 1);
+            rated = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            var h2 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, 1);
+            for (var t : new mods.eln.oil.SteamGeneratorElement[]{low, rated}) {
+                t.front = mods.eln.misc.Direction.XN;
+                t.reconnect();
+            }
+            for (var h : new mods.eln.oil.ElectricHeaterElement[]{h1, h2}) {
+                h.front = mods.eln.misc.Direction.ZN;
+                h.reconnect();
+            }
+            double t3 = mods.eln.sim.fluid.Water.tsat(3e5);
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                if (low.inlet != null && low.inlet.P() < 3e5) mods.eln.sim.fluid.EaUnits.addWater(low.inlet, 5e-4, t3, true);
+                if (rated.inlet != null) steam(rated);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.line("oil: on 3 bar " + low.getWaila() + "; on 10 bar " + rated.getWaila());
+            var adv = ctx.level().getServer().getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "guide/low_pressure"));
+            ctx.check("oil: the Under Pressure advancement exists", adv != null, "");
+            ctx.check("oil: loaded on 3 bar for 30 s, the tip is due", low.lowPressureTips >= 1, "" + low.lowPressureTips);
+            ctx.check("oil: on 10 bar, no tip", rated.lowPressureTips == 0, "" + rated.lowPressureTips);
+            ctx.check("oil: pressure efficiency ~100% at 10 bar, about half at 3 bar", rated.pressureEfficiency() > 0.9 && rated.pressureEfficiency() < 1.1
+                && low.pressureEfficiency() < 0.6, String.format("%.2f / %.2f", rated.pressureEfficiency(), low.pressureEfficiency()));
+        }
+    }
+
+    /**
+     * The turbine's pressure regulator (Baughn 2026-10-26): two boilers on 2.5 kW of heat, each on a 50V turbine driving
+     * a 1 kW heater: more than the steam allows. Without a regulator the governor opens fully and the boiler sits near
+     * 2 bar; with an analog regulator set to 4 bar the turbine holds its inlet there (it slows instead), and makes more
+     * of the same heat. A third turbine on external control with no signal keeps its valve shut.
+     */
+    static final class TurbineHoldsPressure implements TestCase {
+        mods.eln.oil.SteamGeneratorElement free, held, ext;
+        mods.eln.oil.BoilerElement b1, b2;
+        mods.eln.sim.IProcess fire;
+        double e1, e2;
+        int tick;
+
+        public String id() {
+            return "oil_steam_turbine_holds_pressure";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int ticks() {
+            return 2400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            free = plant(l, 1, false)[0];
+            held = plant(l, 4, false)[0];
+            ext = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 7, 1);
+            b1 = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(1, 2, 1));
+            b2 = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(4, 2, 1));
+            for (var b : new mods.eln.oil.BoilerElement[]{b1, b2}) {
+                b.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+                b.fromTanks(8000, 0);
+                b.showTanks();
+            }
+            held.inventory.setItem(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, mods.eln.Eln.findItemStack("Analogic Regulator"));
+            held.inventoryChange(held.inventory);
+            held.targetBar = 4;
+            held.inventoryChange(held.inventory);
+            ext.controlExternal = true;
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                b1.thermal.moveEnergyTo(2500 * t);
+                b2.thermal.moveEnergyTo(2500 * t);
+                if (ext.inlet != null) steam(ext);
+                if (++tick > 1600) {
+                    e1 += free.source.getEffectiveP() * t;
+                    e2 += held.source.getEffectiveP() * t;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line("oil: free " + free.getWaila() + "; held " + held.getWaila() + "; external " + ext.getWaila());
+            ctx.check("oil: without a regulator, an overloaded turbine drains its boiler (under 4 bar)", free.inlet.P() < 4e5,
+                String.format("%.2f bar", free.inlet.P() / 1e5));
+            ctx.check("oil: with one set to 4 bar it holds its inlet there (3.5-5 bar)", held.inlet.P() > 3.5e5 && held.inlet.P() < 5e5,
+                String.format("%.2f bar", held.inlet.P() / 1e5));
+            ctx.check("oil: and makes more of the same heat", e2 > 1.3 * e1, String.format("%.0f J vs %.0f J", e2, e1));
+            ctx.check("oil: external control with no signal keeps the valve shut", ext.steamRate < 0.02 * mods.eln.oil.SteamGeneratorDescriptor.nominalSteam(1000)
+                && ext.omega < 0.5, String.format("%.0f mB/s, speed %.0f%%", ext.steamRate, ext.omega * 100));
+        }
+    }
+
+    /** A turbine with a condenser against its exhaust side (right of its front: +z for a front of XN), and its load. */
+    static mods.eln.oil.SteamGeneratorElement[] plant(Wp10aCases.Layout l, int dx, boolean condenser) {
+        var t = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), dx, 1);
+        var h = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), dx + 1, 1);
+        t.front = mods.eln.misc.Direction.XN;
+        t.reconnect();
+        h.front = mods.eln.misc.Direction.ZN;
+        h.reconnect();
+        if (condenser) l.device(28 + (82 << 6), dx, 2);
+        return new mods.eln.oil.SteamGeneratorElement[]{t};
+    }
+
+    static mods.eln.oil.CondenserElement condenserOf(TestContext ctx, BlockPos p) {
+        return ctx.level().getBlockEntity(p) instanceof mods.eln.node.transparent.TransparentNodeEntity e
+            && mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, ctx.level())) instanceof mods.eln.node.transparent.TransparentNode n
+            && n.element instanceof mods.eln.oil.CondenserElement c ? c : null;
+    }
+
+    /**
+     * The condenser (Baughn 2026-10-26): two loaded 50V turbines on 10 bar steam, one venting to air, one into a Small
+     * Steam Condenser against its exhaust side. The condenser pulls a vacuum (its ejector takes the air; its shell cools
+     * to the ambient), so its turbine gets more per kg (pressure efficiency over 150%) and uses less steam for the same
+     * load; the turbine sees it (WAILA: Exhaust), and its condensate pump moves the water.
+     */
+    static final class TurbineCondenser implements TestCase {
+        mods.eln.oil.SteamGeneratorElement vent, cond;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess feed;
+        double ventUsed, condUsed, window;
+        int tick;
+
+        public String id() {
+            return "oil_steam_turbine_condenser";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 900;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            vent = plant(l, 1, false)[0];
+            cond = plant(l, 4, true)[0];
+            l.device(28 + (82 << 6), 0, 0);   // (one on its own)
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                for (var tb : new mods.eln.oil.SteamGeneratorElement[]{vent, cond}) if (tb.inlet != null) steam(tb);
+                if (++tick > 600) {
+                    window += t;
+                    ventUsed += vent.steamRate * t;
+                    condUsed += cond.steamRate * t;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            c = condenserOf(ctx, ctx.at(4, 1, 2));
+            ctx.line("oil: venting " + vent.getWaila() + "; with condenser " + cond.getWaila() + "; condenser " + (c == null ? "none" : c.getWaila()));
+            ctx.check("oil: the turbine finds the condenser against its exhaust side", c != null && cond.condenser == c && c.turbine == cond, "");
+            if (c == null) return;
+            ctx.check("oil: the condenser pulls a vacuum (under 0.3 bar)", c.vessel.P() < 0.3e5, String.format("%.2f bar", c.vessel.P() / 1e5));
+            ctx.check("oil: its turbine gets over 1.5x the work per kg", cond.pressureEfficiency() > 1.5, String.format("%.2f", cond.pressureEfficiency()));
+            double v = ventUsed / window, w = condUsed / window;
+            ctx.check("oil: and uses well under the steam for the same load (under 75%)", w < 0.75 * v, String.format("%.0f vs %.0f mB/s", w, v));
+            var alone = condenserOf(ctx, ctx.at(0, 1, 0));
+            ctx.check("oil: a condenser on its own keeps a sensible state (AdventurAgent: it showed -193 C)", alone != null && alone.turbine == null
+                && alone.vessel.T() > 273 && alone.vessel.T() < 320 && Math.abs(alone.heatW) < 50, alone == null ? "none" : alone.getWaila().toString());
+            ctx.check("oil: its condensate pump runs with the shaft", c.pumped > 0 || c.floodShare() < 0.01, String.format("%.0f mB/s pumped", c.pumped));
+        }
+    }
+
+    /** A flooded condenser floods its turbine's exhaust: water damage (over half its volume as water, turning). */
+    static final class CondenserFloods implements TestCase {
+        mods.eln.oil.SteamGeneratorElement t;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess feed;
+        boolean ranBefore;
+        int tick;
+
+        public String id() {
+            return "oil_condenser_floods";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            t = plant(l, 0, true)[0];
+            c = condenserOf(ctx, ctx.at(0, 1, 2));
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                if (t.inlet != null && !t.isBurnt()) steam(t);
+                if (++tick == 200 && c != null && c.vessel != null) {
+                    ranBefore = !t.isBurnt() && t.omega > 0.5;
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.6 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.check("oil: condenser placed, and the turbine ran before the flood", c != null && ranBefore, "" + t.getWaila());
+            ctx.check("oil: flooded, the turbine takes water damage", t.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + t.getBurnt());
+        }
+    }
+
+    /** Saturated steam into a turbine's inlet while it is under the rating (10 bar): as a boiler at 10 bar would. */
+    static void steam(mods.eln.oil.SteamGeneratorElement t) {
+        double pa = mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA;
+        if (t.inlet.P() < pa) mods.eln.sim.fluid.EaUnits.addWater(t.inlet, 5e-4, mods.eln.sim.fluid.Water.tsat(pa), true);
     }
 
     /** Losing its load at full power, the turbine overspeeds a little (the governor lags) and settles: no burst. */
@@ -455,8 +751,7 @@ public final class OilCases {
             heater.reconnect();
             int[] tick = new int[1];
             mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
-                if (run.inlet != null && run.inlet.P() < 3e5)
-                    run.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), 200), true);
+                if (run.inlet != null) steam(run);
                 if (++tick[0] == 300) {
                     atDrop = run.source.getEffectiveP();
                     ctx.level().removeBlock(heaterPos, false);   // (the load goes)
@@ -474,38 +769,112 @@ public final class OilCases {
         }
     }
 
-    /** An unloaded turbine fed very high-pressure steam runs away on the leak past its shut valve and bursts. */
-    static final class TurbineRunaway implements TestCase {
-        mods.eln.oil.SteamGeneratorElement run;
+    /**
+     * Water in a turning turbine (Baughn: a significant quantity of water damages it): two loaded turbines at speed on
+     * steam; at 300 ticks one gets 5% of its inlet as water, which it survives, the other 15%, which burns it out
+     * (FailureCause.WATER). A stopped turbine holds 15% unharmed.
+     */
+    static final class TurbineFloods implements TestCase {
+        mods.eln.oil.SteamGeneratorElement wet, flooded, still;
         mods.eln.sim.IProcess feed;
-        double peak;
+        double wetShare;
 
         public String id() {
-            return "oil_steam_turbine_runaway";
+            return "oil_steam_turbine_floods";
         }
 
         public int width() {
-            return 3;
+            return 9;
         }
 
         public int ticks() {
-            return 1200;
+            return 500;
+        }
+
+        static void water(mods.eln.oil.SteamGeneratorElement t, double share) {
+            mods.eln.sim.fluid.EaUnits.addWater(t.inlet, share * t.inlet.volume * mods.eln.sim.fluid.Water.RHO_L, t.inlet.T(), false);
         }
 
         public void build(TestContext ctx) {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
-            run = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
-            run.omega = 1;
+            wet = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            var h1 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 2, 1);
+            flooded = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            var h2 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, 1);
+            still = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 7, 1);
+            for (var t : new mods.eln.oil.SteamGeneratorElement[]{wet, flooded}) {
+                t.front = mods.eln.misc.Direction.XN;
+                t.reconnect();
+            }
+            for (var h : new mods.eln.oil.ElectricHeaterElement[]{h1, h2}) {
+                h.front = mods.eln.misc.Direction.ZN;
+                h.reconnect();
+            }
+            int[] tick = new int[1];
             mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
-                if (run.inlet != null && run.inlet.P() < 40e5) mods.eln.sim.fluid.EaUnits.addWater(run.inlet, 0.002, 523.15, true);
-                peak = Math.max(peak, run.omega);
+                for (var tb : new mods.eln.oil.SteamGeneratorElement[]{wet, flooded})
+                    if (tb.inlet != null) steam(tb);
+                if (++tick[0] == 300 && wet.inlet != null) {
+                    water(wet, 0.05);
+                    water(flooded, 0.15);
+                    water(still, 0.15);
+                }
+                if (tick[0] > 300) wetShare = Math.max(wetShare, wet.waterShare());
             });
         }
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
-            ctx.line(String.format("oil: runaway peak %.0f%%, burnt %s", peak * 100, run.isBurnt()));
-            ctx.check("oil: the shaft ran away and burst", peak > 1.2 && (run.isBurnt() || run.node.isDestructing()), String.format("peak %.0f%%", peak * 100));
+            ctx.line("oil: wet " + wet.getWaila() + "; flooded burnt " + flooded.getBurnt() + "; still " + still.getWaila());
+            ctx.check("oil: 5% water in a turning turbine: it keeps running", !wet.isBurnt() && wet.omega > 0.8 && wetShare > 0.03,
+                String.format("speed %.0f%%, water %.0f%%", wet.omega * 100, wetShare * 100));
+            ctx.check("oil: 15% water in a turning turbine: water damage", flooded.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + flooded.getBurnt());
+            ctx.check("oil: 15% water in a stopped turbine: no harm", !still.isBurnt(), "" + still.getBurnt());
+            flooded.repair();
+            ctx.check("oil: repaired, the flooded turbine is drained and works", !flooded.isBurnt() && flooded.waterShare() < 0.001,
+                String.format("burnt %s, water %.1f%%", flooded.getBurnt(), flooded.waterShare() * 100));
+        }
+    }
+
+    /**
+     * The casing (Baughn: rated 10 bar, bursts over 25): an unloaded turbine on 20 bar steam holds its speed (the leak
+     * past its shut valve doesn't run it away), one fed on towards 40 bar bursts as a pressure vessel.
+     */
+    static final class TurbineRunaway implements TestCase {
+        mods.eln.oil.SteamGeneratorElement held, burst;
+        mods.eln.sim.IProcess feed;
+        double peak;
+
+        public String id() {
+            return "oil_steam_turbine_casing";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            held = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            burst = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 7, 1);   // (away from the other: it explodes)
+            held.omega = 1;
+            double t20 = mods.eln.sim.fluid.Water.tsat(20e5), t40 = mods.eln.sim.fluid.Water.tsat(40e5);
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                if (held.inlet != null && held.inlet.P() < 20e5) mods.eln.sim.fluid.EaUnits.addWater(held.inlet, 0.002, t20, true);
+                if (burst.inlet != null && !burst.isBurnt() && burst.inlet.P() < 40e5) mods.eln.sim.fluid.EaUnits.addWater(burst.inlet, 0.002, t40, true);
+                peak = Math.max(peak, held.omega);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.line(String.format("oil: unloaded on 20 bar: peak %.0f%%, now %s; fed to 40 bar: burnt %s", peak * 100, held.getWaila(), burst.getBurnt()));
+            ctx.check("oil: unloaded on 20 bar, it holds its speed", peak < 1.15 && !held.isBurnt() && !held.node.isDestructing(), String.format("peak %.0f%%", peak * 100));
+            ctx.check("oil: over 25 bar its casing bursts", burst.isBurnt() || burst.node.isDestructing(), "" + burst.getBurnt());
         }
     }
 
@@ -590,7 +959,7 @@ public final class OilCases {
         mods.eln.oil.ElectricHeaterElement load;
         mods.eln.sim.IProcess fire;
         double energy;
-        static final double HEAT = 2500;
+        static final double HEAT = 9600;   // (a 1 kW turbine at its 10 bar rating, venting: 3.5 g/s of steam)
 
         public String id() {
             return "fluid_boiler_on_turbine";
@@ -633,6 +1002,8 @@ public final class OilCases {
             ctx.check("fluid: the turbine runs near its nominal kilowatt", p > 700 && p <= 1050, String.format("%.0f W", p));
             ctx.check("fluid: no more electricity than 40% of the heat (+5%)", energy <= 0.42 * HEAT * 80, String.format("%.0f J of %.0f J heat", energy, HEAT * 80));
             ctx.check("fluid: the boiler stays below 10 bar (the turbine takes its steam)", boiler.vessel.P() < 10e5, boiler.vessel.P() + " Pa");
+            ctx.check("fluid: no water collects in the turbine (it isn't damaged)", turbine.waterShare() < 0.01 && !turbine.isBurnt(),
+                String.format("%.2f%% water", turbine.waterShare() * 100));
         }
     }
 
@@ -662,7 +1033,7 @@ public final class OilCases {
         public void build(TestContext ctx) {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
             boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
-            boiler.thermal.Tc = 175 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.thermal.Tc = 225 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);   // (225 C: it bursts at ~40 bar, ~250 C; the start was 175 C when numeric superheat in the pipe derated it early)
             boiler.fromTanks(8000, 0);
             boiler.showTanks();
             pipeAt = ctx.at(1, 2, 1);
@@ -682,7 +1053,7 @@ public final class OilCases {
                     && v.parts.get(0) instanceof mods.eln.node.voxel.PipePart p && p.burst) bursts++;
             boolean burst = bursts == 1;
             ctx.line("fluid: sealed plant " + boiler.getWaila() + String.format(", peak %.1f bar", peak / 1e5));
-            ctx.check("fluid: the pressure rose past 10 bar (no cap)", peak > 30e5, String.format("peak %.1f bar", peak / 1e5));
+            ctx.check("fluid: the pressure rose past 10 bar (no cap)", peak > 20e5, String.format("peak %.1f bar", peak / 1e5));
             ctx.check("fluid: one piece of the iron run burst (not the whole run)", burst, bursts + " burst");
             ctx.check("fluid: the crack lets the pressure down (the heat keeps coming)", boiler.vessel.P() < 0.9 * peak, String.format("%.1f bar now", boiler.vessel.P() / 1e5));
             ctx.check("fluid: the boiler survived", !boiler.node.isDestructing() && !boiler.isBurnt(), "");

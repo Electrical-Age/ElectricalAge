@@ -182,31 +182,17 @@ public final class CablePlacer {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
         if (n instanceof VoxelNode v) {
-            // a device hosted here: the edge of its face nearest the click; the cable comes from the next block, on the
-            // same face plane, and ends at that edge's midpoint (its port)
+            // a device hosted here: the edge of its face nearest the click that has a connector (a trimmer has one, on
+            // its front); the cable comes from the next block, on the same face plane, and ends at that edge's midpoint
+            // (its port)
             int el = v.elementAt(hx, hy, hz, 0);
             if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
-            if (el >= 0) {
-                int f = mods.eln.misc.Direction.fromInt(el).toEnumFacing().get3DDataValue();
-                int fa = CableRouter.axis(f);
-                double[] h = {hx, hy, hz};
-                int edge = -1;
-                double bd = Double.MAX_VALUE;
-                for (int g = 0; g < 6; g++) {
-                    if (CableRouter.axis(g) == fa) continue;
-                    double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
-                    if (d < bd) {
-                        bd = d;
-                        edge = g;
-                    }
-                }
-                long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
-                long[] p = {base[0] + 8, base[1] + 8, base[2] + 8};
-                p[fa] = base[fa] + CablePart.plane(f);
-                p[CableRouter.axis(edge)] = base[CableRouter.axis(edge)] + (edge % 2 == 0 ? 0 : 16);
-                return new CableRouter.End(p[0], p[1], p[2], f, start ? edge : CableRouter.reverse(edge));
-            }
+            if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start);
             int idx = v.partAt(hx, hy, hz);
+            // a control valve: its signal comes from a signal cable laid into its block: the floor under it (Baughn
+            // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
+            if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && cv.mode == ValvePart.CONTROL)
+                return new CableRouter.End(pos.getX() * 16L + cv.x, pos.getY() * 16L, pos.getZ() * 16L + cv.z, 0, -1);
             if (idx >= 0 && v.parts.get(idx) instanceof CablePart c && !c.isKnuckle()) {
                 long[] best = null;
                 double bd = Double.MAX_VALUE;
@@ -267,6 +253,49 @@ public final class CablePlacer {
         return surface(pos, face, hx, hy, hz);
     }
 
+    /** The end at the hosted device in slot el (0..5: centred on that face) of v: the edge of its face nearest the block-local
+     *  point h that has a connector; null if it has none. */
+    static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start) {
+        if (el >= 6) {   // (a device placed off centre: its pins, the one nearest the click)
+            var e = v.getElement(el);
+            if (e == null) return null;
+            VoxelNode.Pin best = null;
+            double bd = Double.MAX_VALUE;
+            for (VoxelNode.Pin p : VoxelNode.pins(e)) {
+                double d = sq(p.tip()[0] - h[0] * 16) + sq(p.tip()[1] - h[1] * 16) + sq(p.tip()[2] - h[2] * 16);
+                if (d < bd) {
+                    bd = d;
+                    best = p;
+                }
+            }
+            if (best == null) return null;
+            int f = e.side.toEnumFacing().get3DDataValue();
+            return new CableRouter.End(pos.getX() * 16L + best.tip()[0], pos.getY() * 16L + best.tip()[1], pos.getZ() * 16L + best.tip()[2], f,
+                start ? best.out() : CableRouter.reverse(best.out()));
+        }
+        var side = mods.eln.misc.Direction.fromInt(el);
+        int f = side.toEnumFacing().get3DDataValue();
+        int fa = CableRouter.axis(f);
+        int edge = -1;
+        double bd = Double.MAX_VALUE;
+        for (int g = 0; g < 6; g++) {
+            if (CableRouter.axis(g) == fa) continue;
+            var out = mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g));
+            if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
+            double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
+            if (d < bd) {
+                bd = d;
+                edge = g;
+            }
+        }
+        if (edge < 0) return null;   // (no connector at all, as a wireless button)
+        long[] base = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
+        long[] p = {base[0] + 8, base[1] + 8, base[2] + 8};
+        p[fa] = base[fa] + CablePart.plane(f);
+        p[CableRouter.axis(edge)] = base[CableRouter.axis(edge)] + (edge % 2 == 0 ? 0 : 16);
+        return new CableRouter.End(p[0], p[1], p[2], f, start ? edge : CableRouter.reverse(edge));
+    }
+
     /**
      * A click on the surface within three quarters of a block of a machine beside it (so anywhere from the middle of the
      * next cell on), where the machine has a connector on that edge: the end goes to its port, as if the machine had
@@ -296,7 +325,7 @@ public final class CablePlacer {
                 if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
                 Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.47, -d.getStepY() * 0.47, -d.getStepZ() * 0.47)
                     .add(-face.getStepX() * 0.47, -face.getStepY() * 0.47, -face.getStepZ() * 0.47);
-                e = endAt(level, nb, d.getOpposite(), hit, start, new long[1][]);
+                e = deviceEnd(v, nb, side.getInt(), new double[]{hit.x - nb.getX(), hit.y - nb.getY(), hit.z - nb.getZ()}, start);
                 if (e == null || e.dir() < 0) continue;
             } else {
                 // the machine's face toward the cable, low on the edge the cable lies along
@@ -379,7 +408,7 @@ public final class CablePlacer {
             CableRouter.Result r = route(level, plan, null, null);
             if (r.error != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error));
+                player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error + " (sneak-click to cancel the route)"));
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)));
                 show(player, level, r.steps);
@@ -391,7 +420,7 @@ public final class CablePlacer {
         CableRouter.Result r = route(level, plan, end, join[0]);
         if (r.error != null) {
             if (again) plan.waypoints.add(end);
-            player.sendOverlayMessage(Component.literal("No route: " + r.error));
+            player.sendOverlayMessage(Component.literal("No route: " + r.error + " (sneak-click to cancel the route)"));
             return true;
         }
         int len = r.length();
