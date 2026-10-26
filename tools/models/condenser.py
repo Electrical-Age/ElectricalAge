@@ -51,7 +51,7 @@ def main_part(t):
     m.add(*bolt_ring("x", 2.75, C, 1.6, 1.0, 1.25, 4, rb=0.2))
     # thermal pads on the floor of the three other sides (cables there take its heat)
     for k in (1, 2, 3):
-        m.add(*turned(heat_pad(depth=0.75, top=1.0), k))
+        m.add(*turned(heat_pad(depth=0.75, top=3.0), k))
     return m
 
 def duct(t):
