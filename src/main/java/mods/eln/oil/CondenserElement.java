@@ -104,11 +104,17 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         // the shell takes the vessel's heat (EA thermal temperatures are on the 20 C scale)
         double shellK = shell.Tc + mods.eln.sim.PhysicalConstant.Tref;
         double q = (vessel.T() - shellK) / (CondenserDescriptor.DT_VESSEL / desc.nominalHeat);
+        // (at most half the way to the shell's temperature in a step: a vessel of thin air has next to no heat capacity,
+        // and the explicit step overshot to -193 C: AdventurAgent)
+        double toShell = (vessel.energy - mods.eln.sim.fluid.Flash.energyAt(vessel.mWater, vessel.mAir, vessel.volume, shellK)) / dt;
+        q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
         vessel.heat -= q;
         shell.moveEnergyTo(q * dt);
         meterHeat += q * dt;
-        // the air ejector
-        double air = vessel.mAir * (1 - Math.exp(-dt / CondenserDescriptor.EJECTOR_TAU));
+        // the air ejector, down to EJECTOR_FLOOR_PA of air (an empty vessel with nothing in it has no temperature:
+        // AdventurAgent saw -193 C)
+        double tNow = vessel.T(), floor = CondenserDescriptor.EJECTOR_FLOOR_PA * vessel.volume / (Water.R_AIR * Math.max(250, tNow));
+        double air = Math.max(0, vessel.mAir - floor) * (1 - Math.exp(-dt / CondenserDescriptor.EJECTOR_TAU));
         if (air > 0) {
             double T = vessel.T();
             vessel.mAir -= air;

@@ -26,11 +26,14 @@ public class ValveItem extends Item implements PipeTool {
         var pos = ctx.getClickedPos();
         var player = ctx.getPlayer();
         // (thin pipes are easy to miss: if the click went past, the pipe the player looks at)
+        var hit = ctx.getClickLocation();
         if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity) && player != null
             && player.pick(player.blockInteractionRange(), 1f, false) instanceof net.minecraft.world.phys.BlockHitResult bh
-            && level.getBlockEntity(bh.getBlockPos()) instanceof VoxelNodeEntity) pos = bh.getBlockPos();
+            && level.getBlockEntity(bh.getBlockPos()) instanceof VoxelNodeEntity) {
+            pos = bh.getBlockPos();
+            hit = bh.getLocation();   // (AdventurAgent: with the other block's click spot, no part was found there)
+        }
         String err;
-        var hit = ctx.getClickLocation();
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
             err = n.addValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), mode);
         else {

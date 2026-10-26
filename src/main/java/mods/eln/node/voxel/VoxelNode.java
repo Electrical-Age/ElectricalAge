@@ -442,6 +442,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** A valve of a kind (ValvePart.ON_OFF, CONTROL, THROTTLE) at the lattice point on the pipe nearest the click. */
     public String addValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
+        if (idx >= 0 && parts.get(idx) instanceof ValvePart) return "there is a valve here already";
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
         int[] best = null;
         double bd = Double.MAX_VALUE;

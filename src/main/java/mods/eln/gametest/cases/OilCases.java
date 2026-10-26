@@ -577,6 +577,7 @@ public final class OilCases {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
             vent = plant(l, 1, false)[0];
             cond = plant(l, 4, true)[0];
+            l.device(28 + (82 << 6), 0, 0);   // (one on its own)
             mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
                 for (var tb : new mods.eln.oil.SteamGeneratorElement[]{vent, cond}) if (tb.inlet != null) steam(tb);
                 if (++tick > 600) {
@@ -597,6 +598,9 @@ public final class OilCases {
             ctx.check("oil: its turbine gets over 1.5x the work per kg", cond.pressureEfficiency() > 1.5, String.format("%.2f", cond.pressureEfficiency()));
             double v = ventUsed / window, w = condUsed / window;
             ctx.check("oil: and uses well under the steam for the same load (under 75%)", w < 0.75 * v, String.format("%.0f vs %.0f mB/s", w, v));
+            var alone = condenserOf(ctx, ctx.at(0, 1, 0));
+            ctx.check("oil: a condenser on its own keeps a sensible state (AdventurAgent: it showed -193 C)", alone != null && alone.turbine == null
+                && alone.vessel.T() > 273 && alone.vessel.T() < 320 && Math.abs(alone.heatW) < 50, alone == null ? "none" : alone.getWaila().toString());
             ctx.check("oil: its condensate pump runs with the shaft", c.pumped > 0 || c.floodShare() < 0.01, String.format("%.0f mB/s pumped", c.pumped));
         }
     }

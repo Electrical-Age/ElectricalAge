@@ -28,6 +28,8 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
     public static final double DT_VESSEL = 6, DT_SHELL = 20;
     /** The air ejector's time constant (s): the air in it falls by e in this time. */
     public static final double EJECTOR_TAU = 3;
+    /** ... down to this much air (Pa): a good condenser's leak-in. */
+    public static final double EJECTOR_FLOOR_PA = 1000;
     /** Over this share of its volume as water, the turbine's exhaust floods: water damage. */
     public static final double FLOOD = 0.5;
     final Obj3D obj;
