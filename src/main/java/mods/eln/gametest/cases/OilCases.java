@@ -33,6 +33,7 @@ public final class OilCases {
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
+        cases.add(new ColdBoilerOtherPipes());
         cases.add(new SteamTurbine());
         cases.add(new TurbineFloods());
         cases.add(new TurbineLoadDrop());
@@ -301,6 +302,53 @@ public final class OilCases {
                 tx.commit();
             }
         };
+    }
+
+    /**
+     * Other mods' pipes (Baughn: an Energized Power pipe drew a cold boiler below ambient and fed a turbine its water): a
+     * cold, unheated boiler kept topped up by a pipe (its air squeezed above 1 atm) offers no steam through its
+     * capability, and a pipe drawing at it every tick for 30 s takes none and leaves it at ambient; the steam turbine exposes no fluid capability at all (it runs off pressure).
+     */
+    static final class ColdBoilerOtherPipes implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        final int[] taken = new int[1];
+        mods.eln.sim.IProcess pipe;
+
+        public String id() {
+            return "oil_cold_boiler_other_pipes";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            turbine = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 3, 1);
+            boiler.fromTanks(3000, 0);
+            boiler.showTanks();
+            // (a pipe keeps it topped up with cold water: that squeezes the air over it above 1 atm)
+            mods.eln.sim.IProcess draw = pipeOut(boiler, taken);
+            mods.eln.Eln.simulator.addSlowProcess(pipe = t -> {
+                boiler.tanks.fillWater(100);
+                draw.process(t);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(pipe);
+            double c = boiler.vessel.T() - mods.eln.sim.fluid.Water.T0;
+            ctx.check("oil: a cold boiler gives other mods' pipes no steam, and stays at ambient", taken[0] == 0 && c > 19,
+                String.format("%d mB taken, %.1f C", taken[0], c));
+            Object cap = ctx.world().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.at(3, 1, 1), net.minecraft.core.Direction.UP);
+            ctx.check("oil: the steam turbine has no fluid capability (steam only by its EA port)", cap == null && turbine.getFluidHandler() == null, String.valueOf(cap));
+        }
     }
 
     /**

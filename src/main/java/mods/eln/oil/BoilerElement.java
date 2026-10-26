@@ -162,8 +162,14 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         EaUnits.addWater(vessel, steamMb * EaUnits.KG_PER_MB_STEAM, T, true);
     }
 
+    /**
+     * Show the vessel through the capability: its water, and the steam it can give, but only once it boils (at 100 C or
+     * more). Other mods' pipes know no pressure: an Energized Power pipe drew the vapour over a cold boiler's water, which
+     * evaporated, cooled the water below ambient and fed a turbine with it (Baughn).
+     */
     public void showTanks() {
-        tanks.show((int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER), (int) Math.floor(EaUnits.steamAvailable(vessel) / EaUnits.KG_PER_MB_STEAM));
+        int steam = vessel.T() >= Water.TB ? (int) Math.floor(EaUnits.steamAvailable(vessel) / EaUnits.KG_PER_MB_STEAM) : 0;
+        tanks.show((int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER), steam);
     }
 
     @Override

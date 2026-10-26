@@ -32,7 +32,9 @@ import java.util.Map;
 /**
  * SteamGeneratorDescriptor: steam in, electricity out of the front and back (like the fuel generator). The steam
  * collects in an inlet (a fluid-core node, notes/pipes/DESIGN.md phase 2): from a boiler set on top (its dome port
- * couples to the inlet port on top) or by pipe (the fluid capability). The power source offers what the inlet's steam
+ * couples to the inlet port on top) or by EA pipe on that port. No fluid capability (Baughn: the turbine runs off
+ * pressure, and other mods' pipes have none; an Energized Power pipe fed it a cold boiler's water); tank stays as the
+ * inlet's steam gauge. The power source offers what the inlet's steam
  * above 1 atm can give over the next second, up to nominal; the steam actually used (exhausted) follows the power the
  * load really takes, so an idle turbine keeps its steam.
  */
@@ -155,6 +157,12 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         }
     }
 
+    /** None: steam comes only through the inlet port (see the class comment). */
+    @Override
+    public Object getFluidHandler() {
+        return null;
+    }
+
     @Override
     public Object fluidLevel() {
         return node.coordonate.dimention;
@@ -182,7 +190,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         show();
     }
 
-    /** The tank shows the inlet's steam above 1 atm (what pipes see and fill up to). */
+    /** The tank shows the inlet's steam above 1 atm (WAILA; the GameTests feed through it). */
     private void show() {
         int n = (int) Math.min(tank.getCapacity(), Math.floor(EaUnits.steamAvailable(inlet) / EaUnits.KG_PER_MB_STEAM));
         if (tank.getFluidAmount() > 0) tank.drain(tank.getFluidAmount(), true);
@@ -253,11 +261,6 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     @Override
     public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
         return false;
-    }
-
-    @Override
-    public Object getFluidHandler() {
-        return tank;
     }
 
     @Override
