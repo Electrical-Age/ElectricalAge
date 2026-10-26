@@ -67,7 +67,7 @@ public final class AmbientCases {
             mods.eln.sim.Ambient.fixedC = null;
             double n = nether == null ? Double.NaN : mods.eln.sim.Ambient.celsius(nether, new net.minecraft.core.BlockPos(0, 64, 0));
             mods.eln.sim.Ambient.fixedC = 20.0;
-            ctx.checkValue("ambient: the Nether [C]", n, 110);
+            ctx.checkValue("ambient: the Nether [C]", n, 90);
         }
     }
 

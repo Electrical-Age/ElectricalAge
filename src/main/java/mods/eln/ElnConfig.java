@@ -18,7 +18,7 @@ public final class ElnConfig {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("balancing");
         BATTERY_LIFE_FACTOR = b.comment("Battery lifespan multiplier: wear is divided by it (1 = 1.12's wear; Baughn: 25). Wear also",
-                "doubles every 10 C above 20 C and rises up to 4x as the charge runs low.")
+                "doubles every 10 C above 30 C and rises up to 4x as the charge runs low.")
             .defineInRange("batteryLifeFactor", 25.0, 0.01, 10000.0);
         b.pop();
         b.push("fire");
@@ -35,7 +35,7 @@ public final class ElnConfig {
             .defineInRange("depthC", 15.0, -50.0, 200.0);
         DEPTH_PER_BLOCK = b.comment("Geothermal gradient: C warmer per block of depth under the surface.")
             .defineInRange("depthPerBlock", 0.1, 0.0, 10.0);
-        NETHER_C = b.comment("Ambient temperature (C) where water evaporates (the Nether).").defineInRange("netherC", 110.0, -50.0, 1000.0);
+        NETHER_C = b.comment("Ambient temperature (C) where water evaporates (the Nether).").defineInRange("netherC", 90.0, -50.0, 1000.0);
         b.pop();
         b.push("cables");
         CONVERT_CABLES = b.comment("Convert six-node cables to voxel cables as their chunks load (blocks holding only cables; the",

@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
  * <li>Underground (by depth under the column's surface, so a roof doesn't count) it blends from that towards the
  * depth curve (cooler under a desert, warmer under snow; Baughn): from BLEND_FROM blocks down, fully at BLEND_FULL;
  * the curve is {@link #depthC} plus {@link #depthPerBlock} per block of depth.</li>
- * <li>Where water evaporates (the Nether): {@link #netherC} (Baughn: 110 C, "a different set of challenges").</li>
+ * <li>Where water evaporates (the Nether): {@link #netherC} (Baughn: 90 C, so things just barely work; air conditioning later).</li>
  * </ul>
  * Neighbouring blocks (lava, ice) don't count (Baughn: too exploitable); neither does freezing, for now.
  */
@@ -22,7 +22,7 @@ public final class Ambient {
     }
 
     /** Config (ElnConfig, section ambient). */
-    public static volatile double depthC = 15, depthPerBlock = 0.1, netherC = 110;
+    public static volatile double depthC = 15, depthPerBlock = 0.1, netherC = 90;
 
     public static final double C_PER_UNIT = 25, COOL_ABOVE_Y = 80, COOL_PER_BLOCK = 0.05 / 40, BLEND_FROM = 4, BLEND_FULL = 32;
 

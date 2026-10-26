@@ -84,7 +84,7 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
 
 - Explicit Euler. `Tc` is K above 20 C (`PhysicalConstant.Tamb`: a fixed scale, so limits, saves and displays are
   absolute); each load relaxes through `Rp` to its `ambient` (same scale), which `Ambient` (biome x 25 C, cooler above
-  y 80, blended into a depth curve underground, 110 C in the Nether; config `ambient`) stamps when the device joins the
+  y 80, blended into a depth curve underground, 90 C in the Nether; config `ambient`) stamps when the device joins the
   simulation (`TransparentNodeElement`/`SixNodeElement.connectJob`, `CableNet.addToSimulation`). GameTests hold it at
   20 C (`Ambient.fixedC`; `AmbientCases`). `Rs` per connection half (flow `dT/(Rs1+Rs2)`), `C` J/K.
 - Fast loads step 20x per tick at 1/400 s; slow loads (`setAsSlow()`: six-node and voxel cables, poles, downlinks, resistor, diode) once at 0.05 s.
