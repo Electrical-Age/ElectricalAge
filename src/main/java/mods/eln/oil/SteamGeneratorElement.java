@@ -76,6 +76,33 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
      * bursts (EA's overspeed failure): an unloaded turbine fed very high-pressure steam runs away on the leak alone.
      */
     static final double H = 4, GOV_TAU = 0.5, KP = 8, KI = 2, LEAK = 0.005, LOSS = 0.05, TRIP = 1.25, P_REF = 2e5, FLOW_MAX = 1.5;
+    /**
+     * Water in the inlet a turning turbine survives, as a share of the inlet's volume (Baughn: if any significant
+     * quantity of water goes into a steam turbine, it should be damaged): over WATER_MAX while the shaft turns faster
+     * than WATER_SPEED of nominal, the blades take the slug and it burns out in place (FailureCause.WATER, repairable).
+     * A stopped turbine only holds the water.
+     */
+    static final double WATER_MAX = 0.1, WATER_SPEED = 0.2;
+
+    /** The share of the inlet's volume that is liquid water. */
+    public double waterShare() {
+        return inlet == null ? 0 : inlet.mLiquid() / Water.RHO_L / inlet.volume;
+    }
+
+    /** Repaired, the turbine is drained of the water that damaged it (or it would fail again as it spins up). */
+    @Override
+    public void repair() {
+        if (isBurnt() && inlet != null) {
+            double mL = inlet.mLiquid(), T = inlet.T();
+            inlet.mWater -= mL;
+            inlet.energy -= mL * Water.hLiquid(T);
+            inlet.update();
+            omega = 0;
+            source.setUmax(0);
+        }
+        super.repair();
+    }
+
     /** Shaft speed (1 = nominal), governor valve (0..1) and its integral. */
     public double omega, gate, gateI;
 
@@ -108,6 +135,8 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             if (omega > TRIP)
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).rotating(() -> H * pNom * omega * omega)
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERSPEED, omega);
+            else if (omega > WATER_SPEED && waterShare() > WATER_MAX)
+                new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).fail(mods.eln.sim.process.destruct.FailureCause.WATER, waterShare());
             else if (omega > 1.1 && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
                 sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.MINECART_RIDING, net.minecraft.sounds.SoundSource.BLOCKS,
                     0.8f, (float) Math.min(2, omega * 1.4));   // (the whine of a shaft over speed)
@@ -277,6 +306,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         info.put(I18N.tr("Steam"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
         info.put(I18N.tr("Steam used"), String.format("%.0f mB/s", steamRate));
         if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar", inlet.P() / 1e5));
+        if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));
         info.put(I18N.tr("Speed"), String.format("%.0f%%", omega * 100));
         info.put(I18N.tr("Steam valve"), String.format("%.0f%%", gate * 100));
         info.put(I18N.tr("Generated power"), Utils.plotPower("", source.getEffectiveP()));

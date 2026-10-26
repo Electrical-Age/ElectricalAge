@@ -34,6 +34,7 @@ public final class OilCases {
         cases.add(new Pump(true));
         cases.add(new Boiler());
         cases.add(new SteamTurbine());
+        cases.add(new TurbineFloods());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -470,6 +471,74 @@ public final class OilCases {
         }
     }
 
+    /**
+     * Water in a turning turbine (Baughn: a significant quantity of water damages it): two loaded turbines at speed on
+     * steam; at 300 ticks one gets 5% of its inlet as water, which it survives, the other 15%, which burns it out
+     * (FailureCause.WATER). A stopped turbine holds 15% unharmed.
+     */
+    static final class TurbineFloods implements TestCase {
+        mods.eln.oil.SteamGeneratorElement wet, flooded, still;
+        mods.eln.sim.IProcess feed;
+        double wetShare;
+
+        public String id() {
+            return "oil_steam_turbine_floods";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int ticks() {
+            return 500;
+        }
+
+        static void water(mods.eln.oil.SteamGeneratorElement t, double share) {
+            mods.eln.sim.fluid.EaUnits.addWater(t.inlet, share * t.inlet.volume * mods.eln.sim.fluid.Water.RHO_L, t.inlet.T(), false);
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            wet = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            var h1 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 2, 1);
+            flooded = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            var h2 = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, 1);
+            still = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 7, 1);
+            for (var t : new mods.eln.oil.SteamGeneratorElement[]{wet, flooded}) {
+                t.front = mods.eln.misc.Direction.XN;
+                t.reconnect();
+            }
+            for (var h : new mods.eln.oil.ElectricHeaterElement[]{h1, h2}) {
+                h.front = mods.eln.misc.Direction.ZN;
+                h.reconnect();
+            }
+            int[] tick = new int[1];
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                for (var tb : new mods.eln.oil.SteamGeneratorElement[]{wet, flooded})
+                    if (tb.inlet != null && tb.inlet.P() < 3e5)
+                        tb.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), 200), true);
+                if (++tick[0] == 300 && wet.inlet != null) {
+                    water(wet, 0.05);
+                    water(flooded, 0.15);
+                    water(still, 0.15);
+                }
+                if (tick[0] > 300) wetShare = Math.max(wetShare, wet.waterShare());
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.line("oil: wet " + wet.getWaila() + "; flooded burnt " + flooded.getBurnt() + "; still " + still.getWaila());
+            ctx.check("oil: 5% water in a turning turbine: it keeps running", !wet.isBurnt() && wet.omega > 0.8 && wetShare > 0.03,
+                String.format("speed %.0f%%, water %.0f%%", wet.omega * 100, wetShare * 100));
+            ctx.check("oil: 15% water in a turning turbine: water damage", flooded.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + flooded.getBurnt());
+            ctx.check("oil: 15% water in a stopped turbine: no harm", !still.isBurnt(), "" + still.getBurnt());
+            flooded.repair();
+            ctx.check("oil: repaired, the flooded turbine is drained and works", !flooded.isBurnt() && flooded.waterShare() < 0.001,
+                String.format("burnt %s, water %.1f%%", flooded.getBurnt(), flooded.waterShare() * 100));
+        }
+    }
+
     /** An unloaded turbine fed very high-pressure steam runs away on the leak past its shut valve and bursts. */
     static final class TurbineRunaway implements TestCase {
         mods.eln.oil.SteamGeneratorElement run;
@@ -629,6 +698,8 @@ public final class OilCases {
             ctx.check("fluid: the turbine runs near its nominal kilowatt", p > 700 && p <= 1050, String.format("%.0f W", p));
             ctx.check("fluid: no more electricity than 40% of the heat (+5%)", energy <= 0.42 * HEAT * 80, String.format("%.0f J of %.0f J heat", energy, HEAT * 80));
             ctx.check("fluid: the boiler stays below 10 bar (the turbine takes its steam)", boiler.vessel.P() < 10e5, boiler.vessel.P() + " Pa");
+            ctx.check("fluid: no water collects in the turbine (it isn't damaged)", turbine.waterShare() < 0.01 && !turbine.isBurnt(),
+                String.format("%.2f%% water", turbine.waterShare() * 100));
         }
     }
 

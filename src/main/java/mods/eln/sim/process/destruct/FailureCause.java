@@ -8,7 +8,9 @@ public enum FailureCause {
     OVERPRESSURE("burst"),
     /** Burned by a voltage of the wrong sign (Baughn: a machine fed negative showed "overvoltage", exactly backwards).
      *  Appended: causes are saved by ordinal. */
-    REVERSE_VOLTAGE("reverse voltage");
+    REVERSE_VOLTAGE("reverse voltage"),
+    /** A turning steam turbine flooded with water (Baughn: a significant quantity of water damages it). Appended. */
+    WATER("water damage");
 
     public final String text;
 

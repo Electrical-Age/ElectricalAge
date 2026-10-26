@@ -33,6 +33,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Copper Coil (`eln:copper_coil`, new): thin winding wire; windings (inductor, resistors, rheostat, thermistor,
   DC-DC, 50V copper heating corps) take coils; copper cable is 1 per ingot.
 - Thermal Insulation takes any colour of wool (`#minecraft:wool`; 1.12: white only; Baughn 2026-10-26).
+- 50V/200V steam turbines take water damage: over 10% of the inlet liquid while the shaft turns above 20% speed burns them out (`FailureCause.WATER`, repairable; the repair drains the inlet). Baughn 2026-10-26; `oil_steam_turbine_floods`.
 - Cable slots removed: meters, electrical/voltage/thermal probes and lamp sockets have a built-in cable (LV, MV for the
   200V socket, copper thermal cable); Ground Cable has no GUI. Kept: transformer (turns), hub (side selection), breaker
   (trip rating); lamp supply and temperature probe slots are optional. Old cables stay in the hidden slot and drop on
