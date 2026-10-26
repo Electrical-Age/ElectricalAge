@@ -72,9 +72,17 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         return SteamGeneratorDescriptor.ETA * Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
     }
 
-    /** Where the exhaust goes: the air. */
+    /** Where the exhaust goes: the condenser's vessel, or the air. */
     double exhaustPa() {
-        return Water.P_ATM;
+        return condenser != null ? condenser.vessel.P() : Water.P_ATM;
+    }
+
+    /** The condenser against its exhaust side (right, seen from its front), if any (Baughn: optional, beside it). */
+    public CondenserElement condenser;
+
+    CondenserElement findCondenser() {
+        return node.getNeighbor(front.right()) instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof CondenserElement c
+            && c.vessel != null ? c : null;
     }
 
     /**
@@ -158,9 +166,13 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             double mNom = desc.nominalSteam() * EaUnits.KG_PER_MB_STEAM;   // kg/s at nominal power
             double want = (LEAK + (1 - LEAK) * gate) * FLOW_MAX * mNom * inlet.P() / P_REF * time;
             want = Math.min(want, EaUnits.steamAvailable(inlet));
-            double mv = inlet.mVapour(), mg = mv + inlet.mAir;
-            double jpk = jPerKg();
+            CondenserElement was = condenser;
+            condenser = findCondenser();
+            if ((condenser == null) != (was == null)) needPublish();   // (the models join)
+            double mv = inlet.mVapour(), mg = mv + inlet.mAir, air0 = inlet.mAir, tIn = inlet.T();
+            double jpk = jPerKg(), hIn = Water.hVapour(tIn);
             double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
+            if (condenser != null) condenser.exhaust(got, Math.max(0, air0 - inlet.mAir), hIn - jpk, tIn);   // (into it, after the work)
             double pMech = got * jpk / time;
             // the shaft
             double pNom = desc.nominalP;
@@ -174,7 +186,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             else if (omega > TRIP)
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).rotating(() -> H * pNom * omega * omega)
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERSPEED, omega);
-            else if (omega > WATER_SPEED && waterShare() > WATER_MAX)
+            else if (omega > WATER_SPEED && (waterShare() > WATER_MAX || condenser != null && condenser.floodShare() > CondenserDescriptor.FLOOD))
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).fail(mods.eln.sim.process.destruct.FailureCause.WATER, waterShare());
             else if (omega > 1.1 && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
                 sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.MINECART_RIDING, net.minecraft.sounds.SoundSource.BLOCKS,
@@ -315,6 +327,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         try {
             stream.writeFloat((float) omega);   // (the rotor's turn, SteamGeneratorRender)
             stream.writeFloat((float) (steamRate / desc.nominalSteam()));   // (the steam out of its vent)
+            stream.writeBoolean(condenser != null);   // (no vent: the exhaust duct into the condenser)
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
@@ -363,6 +376,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         info.put(I18N.tr("Steam used"), String.format("%.0f mB/s", steamRate));
         if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar", inlet.P() / 1e5));
         // (Baughn: so players see what pressure buys; 100% = its rating, 10 bar venting to air)
+        if (condenser != null) info.put(I18N.tr("Exhaust"), String.format("condenser, %.2f bar", condenser.vessel.P() / 1e5));
         if (inlet != null) info.put(I18N.tr("Pressure efficiency"), String.format("%.0f%% of its %.0f bar rating", pressureEfficiency() * 100,
             SteamGeneratorDescriptor.NOMINAL_PA / 1e5));
         if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));

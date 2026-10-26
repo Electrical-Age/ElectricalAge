@@ -37,6 +37,8 @@ public final class OilCases {
         cases.add(new SteamTurbine());
         cases.add(new TurbineFloods());
         cases.add(new TurbineLowPressure());
+        cases.add(new TurbineCondenser());
+        cases.add(new CondenserFloods());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -525,6 +527,117 @@ public final class OilCases {
             ctx.check("oil: on 10 bar, no tip", rated.lowPressureTips == 0, "" + rated.lowPressureTips);
             ctx.check("oil: pressure efficiency ~100% at 10 bar, about half at 3 bar", rated.pressureEfficiency() > 0.9 && rated.pressureEfficiency() < 1.1
                 && low.pressureEfficiency() < 0.6, String.format("%.2f / %.2f", rated.pressureEfficiency(), low.pressureEfficiency()));
+        }
+    }
+
+    /** A turbine with a condenser against its exhaust side (right of its front: +z for a front of XN), and its load. */
+    static mods.eln.oil.SteamGeneratorElement[] plant(Wp10aCases.Layout l, int dx, boolean condenser) {
+        var t = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), dx, 1);
+        var h = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), dx + 1, 1);
+        t.front = mods.eln.misc.Direction.XN;
+        t.reconnect();
+        h.front = mods.eln.misc.Direction.ZN;
+        h.reconnect();
+        if (condenser) l.device(28 + (82 << 6), dx, 2);
+        return new mods.eln.oil.SteamGeneratorElement[]{t};
+    }
+
+    static mods.eln.oil.CondenserElement condenserOf(TestContext ctx, BlockPos p) {
+        return ctx.level().getBlockEntity(p) instanceof mods.eln.node.transparent.TransparentNodeEntity e
+            && mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, ctx.level())) instanceof mods.eln.node.transparent.TransparentNode n
+            && n.element instanceof mods.eln.oil.CondenserElement c ? c : null;
+    }
+
+    /**
+     * The condenser (Baughn 2026-10-26): two loaded 50V turbines on 10 bar steam, one venting to air, one into a Small
+     * Steam Condenser against its exhaust side. The condenser pulls a vacuum (its ejector takes the air; its shell cools
+     * to the ambient), so its turbine gets more per kg (pressure efficiency over 150%) and uses less steam for the same
+     * load; the turbine sees it (WAILA: Exhaust), and its condensate pump moves the water.
+     */
+    static final class TurbineCondenser implements TestCase {
+        mods.eln.oil.SteamGeneratorElement vent, cond;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess feed;
+        double ventUsed, condUsed, window;
+        int tick;
+
+        public String id() {
+            return "oil_steam_turbine_condenser";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 900;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            vent = plant(l, 1, false)[0];
+            cond = plant(l, 4, true)[0];
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                for (var tb : new mods.eln.oil.SteamGeneratorElement[]{vent, cond}) if (tb.inlet != null) steam(tb);
+                if (++tick > 600) {
+                    window += t;
+                    ventUsed += vent.steamRate * t;
+                    condUsed += cond.steamRate * t;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            c = condenserOf(ctx, ctx.at(4, 1, 2));
+            ctx.line("oil: venting " + vent.getWaila() + "; with condenser " + cond.getWaila() + "; condenser " + (c == null ? "none" : c.getWaila()));
+            ctx.check("oil: the turbine finds the condenser against its exhaust side", c != null && cond.condenser == c && c.turbine == cond, "");
+            if (c == null) return;
+            ctx.check("oil: the condenser pulls a vacuum (under 0.3 bar)", c.vessel.P() < 0.3e5, String.format("%.2f bar", c.vessel.P() / 1e5));
+            ctx.check("oil: its turbine gets over 1.5x the work per kg", cond.pressureEfficiency() > 1.5, String.format("%.2f", cond.pressureEfficiency()));
+            double v = ventUsed / window, w = condUsed / window;
+            ctx.check("oil: and uses well under the steam for the same load (under 75%)", w < 0.75 * v, String.format("%.0f vs %.0f mB/s", w, v));
+            ctx.check("oil: its condensate pump runs with the shaft", c.pumped > 0 || c.floodShare() < 0.01, String.format("%.0f mB/s pumped", c.pumped));
+        }
+    }
+
+    /** A flooded condenser floods its turbine's exhaust: water damage (over half its volume as water, turning). */
+    static final class CondenserFloods implements TestCase {
+        mods.eln.oil.SteamGeneratorElement t;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess feed;
+        boolean ranBefore;
+        int tick;
+
+        public String id() {
+            return "oil_condenser_floods";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            t = plant(l, 0, true)[0];
+            c = condenserOf(ctx, ctx.at(0, 1, 2));
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                if (t.inlet != null && !t.isBurnt()) steam(t);
+                if (++tick == 200 && c != null && c.vessel != null) {
+                    ranBefore = !t.isBurnt() && t.omega > 0.5;
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.6 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.check("oil: condenser placed, and the turbine ran before the flood", c != null && ranBefore, "" + t.getWaila());
+            ctx.check("oil: flooded, the turbine takes water damage", t.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + t.getBurnt());
         }
     }
 
