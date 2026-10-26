@@ -522,7 +522,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.CONTROL) {
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Control valve %.0f%% open: a signal cable on its actuator sets it",
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Control valve %.0f%% open: a signal cable laid into its block sets it",
                     v.opening() * 100)));
                 return true;
             }
@@ -1051,19 +1051,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /**
-     * Control valves (Baughn 2026-10-26): the signal input in the simulation, joined to a signal cable in this block
-     * that touches its actuator's top (ValvePart.contact), as a device's pin.
+     * Control valves (Baughn 2026-10-26): the signal input in the simulation, joined to the signal cables laid in this
+     * block (cables never run in mid-air, so not to the actuator itself: AdventurAgent; a cable kit clicked on the valve
+     * lays to the floor under it, CablePlacer).
      */
     private void connectValves() {
         for (VoxelPart p : parts) {
             if (!(p instanceof ValvePart v) || v.signal == null) continue;
             Eln.simulator.addElectricalLoad(v.signal);
-            for (CableNet.Conductor k : cables.live()) {
-                if (k.load == null || !compareConnectionMask(maskElectricalGate, k.mask())) continue;
-                boolean touch = false;
-                for (CablePart c : k.parts) for (int[] b : c.boxes()) touch |= overlaps(b, v.contact());
-                if (touch) link(v.signal, k.load, null, null);
-            }
+            for (CableNet.Conductor k : cables.live())
+                if (k.load != null && k.d != null && k.d.signalWire) link(v.signal, k.load, null, null);
         }
     }
 

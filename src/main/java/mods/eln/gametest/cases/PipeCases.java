@@ -837,6 +837,11 @@ public final class PipeCases {
             ctx.check("pipe: a throttle valve set to 100% by its screen passes", valve(ctx, runs[1][1]).setting == 1 && Math.abs(b[0] - b[1]) < 0.3e5, "");
             ctx.check("pipe: a control valve on 50 V is open and passes", control.opening() > 0.95 && Math.abs(c[0] - c[1]) < 0.3e5, "");
             ctx.check("pipe: a control valve without a signal holds", d[0] > 3e5 && d[1] < 1.5e5, "");
+            // a cable kit clicked on a control valve lays to the floor under it (AdventurAgent: "not a place for a cable")
+            var pos = runs[3][1];
+            var e = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), pos, net.minecraft.core.Direction.UP,
+                new net.minecraft.world.phys.Vec3(pos.getX() + 0.5, pos.getY() + 14.5 / 16, pos.getZ() + 0.5), true, new long[1][]);
+            ctx.check("pipe: a cable ends on the floor under a control valve", e != null && e.y() == pos.getY() * 16L && e.attach() == 0, "" + e);
         }
     }
 

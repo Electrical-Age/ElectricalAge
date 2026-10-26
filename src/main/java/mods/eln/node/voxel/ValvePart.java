@@ -14,8 +14,8 @@ import java.util.List;
  * piece of pipe would; shut, nothing. Three kinds (Baughn 2026-10-26: two more pipe modules):
  * <ul>
  * <li>{@link #ON_OFF}: a right-click turns it open or shut.</li>
- * <li>{@link #CONTROL}: opened by a signal (0-50 V) on its actuator: a signal cable touching the actuator's top
- * ({@link #contact}) connects. A turbine's throttle.</li>
+ * <li>{@link #CONTROL}: opened by a signal (0-50 V): a signal cable laid into its block (on the floor under it)
+ * connects (VoxelNode.connectValves). A turbine's throttle.</li>
  * <li>{@link #THROTTLE}: a handwheel set anywhere from shut to open on a screen with a slider (right-click).</li>
  * </ul>
  */
@@ -55,15 +55,6 @@ public final class ValvePart extends VoxelPart {
         };
     }
 
-    /**
-     * CONTROL: the voxels just past the actuator's top (the end of its stem) that a touching signal cable takes, as a
-     * device's pin (VoxelNode.connectValves).
-     */
-    public int[] contact() {
-        int h = bore / 2 + 1, s = reach();
-        return axis == 1 ? clamp(new int[]{x + s + 1, y - 1, z - 1, x + s + 2, y + 1, z + 1})
-            : clamp(new int[]{x - 1, y + s + 1, z - 1, x + 1, y + s + 2, z + 1});
-    }
 
     @Override
     public String kind() {

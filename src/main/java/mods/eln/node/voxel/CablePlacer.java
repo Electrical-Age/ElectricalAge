@@ -189,6 +189,10 @@ public final class CablePlacer {
             if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
             if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start);
             int idx = v.partAt(hx, hy, hz);
+            // a control valve: its signal comes from a signal cable laid into its block: the floor under it (Baughn
+            // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
+            if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && cv.mode == ValvePart.CONTROL)
+                return new CableRouter.End(pos.getX() * 16L + cv.x, pos.getY() * 16L, pos.getZ() * 16L + cv.z, 0, -1);
             if (idx >= 0 && v.parts.get(idx) instanceof CablePart c && !c.isKnuckle()) {
                 long[] best = null;
                 double bd = Double.MAX_VALUE;
