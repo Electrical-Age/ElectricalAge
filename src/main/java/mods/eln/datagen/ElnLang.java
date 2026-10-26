@@ -58,9 +58,9 @@ public class ElnLang extends LanguageProvider {
         add("advancements.eln.guide.safety_valve.title", "Safety First");
         add("advancements.eln.guide.safety_valve.description", "A safety valve beats a burst.");
         add("advancements.eln.guide.steam_turbine.title", "Full Steam Ahead");
-        // (Baughn 2026-10-26: an anti-achievement that tells you to use a valve; SteamGeneratorElement.awardLowPressure)
+        // (Baughn 2026-10-26: an anti-achievement with the cure; SteamGeneratorElement.awardLowPressure)
         add("advancements.eln.guide.low_pressure.title", "Under Pressure");
-        add("advancements.eln.guide.low_pressure.description", "Your steam turbine runs on under 5 bar and gets little from it. Put a valve before it, so the boiler can build pressure.");
+        add("advancements.eln.guide.low_pressure.description", "Your steam turbine asks for more steam than its boiler makes: the pressure falls, and it gets little from each kg. Add heat, or lighten its load.");
         add("advancements.eln.guide.steam_turbine.description", "Set it under the boiler. Or don't.");
         add("advancements.eln.guide.big_iron.title", "Big Iron");
         add("advancements.eln.guide.big_iron.description", "Mind the rads.");
