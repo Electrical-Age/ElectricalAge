@@ -90,6 +90,7 @@ public final class Wp10aCases {
         cases.add(new ProtectedEmptyBatteryCase());
         cases.add(new LowVoltageDisconnectCase());
         cases.add(new TransformerCase());
+        cases.add(new TransformerIncompleteCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
         cases.add(new AutoMinerCase());
@@ -774,6 +775,52 @@ public final class Wp10aCases {
                 return;
             }
             ctx.checkValue("wp10a transformer secondary open-circuit voltage [V] (U1 * 1/2)", loadU(secondary), U / 2);
+        }
+    }
+
+    /**
+     * Baughn 2026-10-27: a DC-DC converter with any of its three slots empty connects to nothing. Fed on its primary,
+     * windings in but no core: no connection on any side, its secondary cable dead; the core put in, it connects and
+     * transforms.
+     */
+    static final class TransformerIncompleteCase implements TestCase {
+        TransformerElement tr;
+        SixNodeElement secondary;
+        boolean noCoreMasks, core;
+        double deadU;
+
+        public String name() {
+            return "wp10a transformer connects only when complete";
+        }
+
+        public int ticks() {
+            return 80;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            BlockPos p = ctx.at(3, 1, 1);
+            tr = (TransformerElement) l.device(TRANSFORMER, 3);
+            l.feed(p, tr.front.left());
+            secondary = l.six(LV_CABLE, off(p, tr.front.right()));
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            tr.getInventory().setChanged();
+        }
+
+        public void measure(TestContext ctx) {
+            noCoreMasks = true;
+            for (mods.eln.misc.Direction d : mods.eln.misc.Direction.values())
+                if (tr.getConnectionMask(d, mods.eln.misc.LRDU.Down) != 0 || tr.getElectricalLoad(d, mods.eln.misc.LRDU.Down) != null) noCoreMasks = false;
+            deadU = loadU(secondary);
+            ctx.check("wp10a transformer without a core connects on no side", noCoreMasks, "");
+            ctx.check("wp10a transformer without a core: its secondary cable is dead", Math.abs(deadU) < 0.5, String.format("%.2f V", deadU));
+            ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
+            if (c.isEmpty()) return;
+            tr.getInventory().setItem(TransformerContainer.ferromagneticSlotId, c);
+            tr.getInventory().setChanged();
+            ctx.check("wp10a transformer with the core in connects", tr.getConnectionMask(tr.front.left(), mods.eln.misc.LRDU.Down) != 0
+                && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) != null, "");
         }
     }
 
