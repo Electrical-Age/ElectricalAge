@@ -22,6 +22,7 @@ public final class PipeCases {
         cases.add(new BoilerPipeTurbine());
         cases.add(new HighQualityPlates());
         cases.add(new Sensors());
+        cases.add(new DeviceGoneMidStep());
         cases.add(new BoilerBucket());
         cases.add(new BoilerFeed());
         cases.add(new BoilerPhase());
@@ -368,6 +369,63 @@ public final class PipeCases {
         public void measure(TestContext ctx) {
             ctx.check("boiler bucket: taken, 1000 mB more water", took && after - before == 1000, before + " -> " + after);
             ctx.check("boiler bucket: the bucket comes back empty", emptied, "");
+        }
+    }
+
+    /**
+     * A device that takes another out of the fluid world during its step (a steam turbine's casing burst and its
+     * explosion broke a neighbour: the lab server crashed on a ConcurrentModificationException in FluidWorld.process):
+     * the step carries on, and the one taken out isn't stepped after it.
+     */
+    static final class DeviceGoneMidStep implements TestCase {
+        final int[] stepped = new int[2];
+        mods.eln.sim.fluid.FluidDevice a, b;
+        boolean crashed;
+        mods.eln.sim.IProcess guard;
+
+        public String id() {
+            return "fluid_device_gone_mid_step";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        mods.eln.sim.fluid.FluidDevice device(int i, java.util.function.Supplier<mods.eln.sim.fluid.FluidDevice> other) {
+            return new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return "test";
+                }
+
+                public java.util.List<FluidPort> fluidPorts() {
+                    return java.util.List.of();
+                }
+
+                public void beforeFluidStep(double dt) {
+                    stepped[i]++;
+                    if (i == 0 && other.get() != null) {
+                        mods.eln.fluid.FluidWorld.remove(other.get());   // (as an explosion breaking the neighbour would)
+                        mods.eln.fluid.FluidWorld.remove(this);
+                    }
+                }
+
+                public void afterFluidStep(double dt) {
+                }
+            };
+        }
+
+        public void build(TestContext ctx) {
+            a = device(0, () -> b);
+            b = device(1, () -> null);
+            mods.eln.fluid.FluidWorld.add(a);
+            mods.eln.fluid.FluidWorld.add(b);
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.fluid.FluidWorld.remove(a);
+            mods.eln.fluid.FluidWorld.remove(b);
+            ctx.check("fluid world: a device taken out mid-step doesn't crash the step, and isn't stepped after",
+                stepped[0] == 1 && stepped[1] == 0, stepped[0] + " / " + stepped[1]);
         }
     }
 

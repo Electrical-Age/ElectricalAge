@@ -119,7 +119,10 @@ public final class FluidWorld implements IProcess {
     @Override
     public void process(double time) {
         rebuildIfDirty();
-        for (FluidDevice d : devices) d.beforeFluidStep(time);
+        // (over a copy: a device may fail in its step, and its explosion take others out of the set: a lab server
+        // crashed on a ConcurrentModificationException when a steam turbine's casing burst; the ones gone are skipped)
+        List<FluidDevice> stepping = new ArrayList<>(devices);
+        for (FluidDevice d : stepping) if (devices.contains(d)) d.beforeFluidStep(time);
         for (FluidDevice.Vent v : vents) v.edge.open = v.open;
         for (FluidDevice.Link l : links) {
             l.edge.open = l.open;
@@ -128,7 +131,7 @@ public final class FluidWorld implements IProcess {
         for (FluidNetwork n : networks) n.step(time);
         writeBack();
         burstThisStep.clear();
-        for (FluidDevice d : devices) d.afterFluidStep(time);
+        for (FluidDevice d : stepping) if (devices.contains(d)) d.afterFluidStep(time);
     }
 
     /** Each lumped run's contents back into its members, by volume (they are what is saved and what is rebuilt from). */
