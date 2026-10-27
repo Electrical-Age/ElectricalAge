@@ -684,7 +684,13 @@ public class Utils {
 
     /** Day fraction 0..1 (1.12: world time / 23999). */
     public static double getWorldTime(net.minecraft.world.level.Level world) {
-        return world.getOverworldClockTime() / (23999.0);
+        return dayFraction(world.getOverworldClockTime());
+    }
+
+    /** The time of day of a clock time in ticks, 0..1 (1.12 divided the total time, so after the first day it only
+     *  grew: the signal processor's daytime > 0.5 stayed true; LabAssistant's handbook check). */
+    public static double dayFraction(long ticks) {
+        return Math.floorMod(ticks, 24000L) / 23999.0;
     }
 
     /**
