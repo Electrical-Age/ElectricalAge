@@ -310,6 +310,9 @@ public final class Wp9cCases {
             ctx.checkValue("wp9c signal processor output [V] (A = 40 V -> 0.8 * 0.5 * SVU)", out(withRedstone), 20);
             boolean ready2 = field(without, "redstoneReady");
             within(ctx, "wp9c signal processor without redstone: not ready, output 0 V", ready2 ? 999 : out(without), 0, 0.01);
+            // daytime wraps each day (1.12 divided the total time: after day 1 it only grew)
+            ctx.check("wp9c signal processor: daytime is the time of day", Math.abs(mods.eln.misc.Utils.dayFraction(36000) - 12000 / 23999.0) < 1e-9
+                && mods.eln.misc.Utils.dayFraction(23999) == 1 && mods.eln.misc.Utils.dayFraction(48000) == 0, "");
         }
     }
 

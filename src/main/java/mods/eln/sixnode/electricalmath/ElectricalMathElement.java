@@ -133,7 +133,7 @@ public class ElectricalMathElement extends SixNodeElement {
 
         @Override
         public double getValue() {
-            return sixNode.coordonate.world().getOverworldClockTime() / (24000.0 - 1.0);
+            return Utils.getWorldTime(sixNode.coordonate.world());
         }
 
         @Override
