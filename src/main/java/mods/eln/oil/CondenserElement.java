@@ -27,15 +27,21 @@ import java.util.Map;
  * The condenser (CondenserDescriptor): a vessel the turbine beside it exhausts into (SteamGeneratorElement.condenser),
  * its shell an EA thermal load cooled to the ambient through its own air cooler and through thermal cables on its sides.
  * Each fluid step: the shell takes the vessel's heat, the air ejector pulls air out, the condensate pump (open as far as
- * the turbine turns) pushes water from the vessel's bottom to the front flange. Makeup water by the flange on top.
+ * the turbine turns) pushes water from the vessel's bottom to the front flange. Makeup water by the flange on top,
+ * through a float valve: open below MAKEUP_OPEN of its volume as water, shut by MAKEUP_SHUT (Baughn's makeup pump
+ * filled one to the flood line).
  */
 public class CondenserElement extends TransparentNodeElement implements FluidDevice {
     final CondenserDescriptor desc;
     public final NbtThermalLoad shell = new NbtThermalLoad("shell");
-    public FluidNode vessel, outlet;
-    private FluidDevice.Link pump;
+    public FluidNode vessel, outlet, inlet;
+    private FluidDevice.Link pump, makeup;
+    /** The float valve: open below this share of the vessel as water, shut at the other. */
+    public static final double MAKEUP_OPEN = 0.15, MAKEUP_SHUT = 0.25;
     private List<FluidPort> ports = List.of();
-    private double[] loaded, loadedOut;
+    private double[] loaded, loadedOut, loadedIn;
+    /** Saved before the tanks shrank (no "tank2" tag): its water is trimmed once on load. */
+    private boolean oldTank;
     public static final double OUTLET_VOLUME = 0.00002, PORT_K = BoilerElement.PORT_K;
     /** The turbine exhausting into it, and the side it is on (3D value; -1: none). */
     public SteamGeneratorElement turbine;
@@ -95,7 +101,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
 
     @Override
     public List<FluidDevice.Link> fluidLinks() {
-        return pump == null ? List.of() : List.of(pump);
+        return pump == null ? List.of() : List.of(pump, makeup);
     }
 
     @Override
@@ -121,6 +127,8 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
             vessel.energy -= air * Water.uAir(T);
             vessel.update();
         }
+        // the makeup's float valve
+        if (makeup != null) makeup.open = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
         // the condensate pump, on the turbine's shaft
         if (pump != null) {
             pump.open = turbine == null ? 0 : Math.max(0, Math.min(1.2, turbine.omega));
@@ -190,6 +198,12 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         restore(outlet, loadedOut, OUTLET_VOLUME);
         outlet.lumpable = true;
         outlet.resistance = 1 / PORT_K;
+        inlet = new FluidNode(OUTLET_VOLUME, c.y, 0.25, false);
+        restore(inlet, loadedIn, OUTLET_VOLUME);
+        inlet.lumpable = true;
+        inlet.resistance = 1 / PORT_K;
+        // (into the vessel's top: the makeup falls in, it doesn't run back out)
+        makeup = new FluidDevice.Link(inlet, 0, vessel, 1.0, PORT_K).kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
         // g = rho k / mu: its condensate flow against 1 atm, none at the shutoff
         double dp = CondenserDescriptor.PUMP_PA - Water.P_ATM;
         pump = new FluidDevice.Link(vessel, 0, outlet, 0, desc.pumpKgPerS / dp * Water.MU_L / Water.RHO_L).kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
@@ -197,15 +211,15 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         pump.open = 0;
         long at = c.pos().asLong();
         ports = List.of(new FluidPort(outlet, at, front.toEnumFacing().get3DDataValue(), 0.0, PORT_K),   // condensate out, front
-            new FluidPort(vessel, at, 1, 1.0, PORT_K));                                                     // makeup in, top
+            new FluidPort(inlet, at, 1, 1.0, PORT_K));                                                      // makeup in, top (float valve)
         connect();
     }
 
     private void restore(FluidNode n, double[] saved, double volume) {
         if (saved != null) {
-            // (a vessel saved fuller than it now holds, from before Baughn's smaller tanks: the excess water goes, with
-            // its share of the energy)
-            double max = 0.9 * volume * Water.RHO_L, keep = saved[0] > max ? max / saved[0] : 1;
+            // (a vessel saved before Baughn's smaller tanks, fuller than the float valve's level of its new one: the excess
+            // water goes, with its share of the energy; else it was over FLOOD at once, and the turbine took water damage)
+            double max = n == vessel && oldTank ? MAKEUP_SHUT * volume * Water.RHO_L : Double.MAX_VALUE, keep = saved[0] > max ? max / saved[0] : 1;
             n.mWater = saved[0] * keep;
             n.mAir = saved[1];
             n.energy = saved[2] * keep;
@@ -231,6 +245,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        nbt.putBoolean("tank2", true);
         if (vessel != null) {
             nbt.putDouble("vesselW", vessel.mWater);
             nbt.putDouble("vesselA", vessel.mAir);
@@ -238,16 +253,22 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
             nbt.putDouble("outletW", outlet.mWater);
             nbt.putDouble("outletA", outlet.mAir);
             nbt.putDouble("outletU", outlet.energy);
+            nbt.putDouble("inletW", inlet.mWater);
+            nbt.putDouble("inletA", inlet.mAir);
+            nbt.putDouble("inletU", inlet.energy);
         }
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        oldTank = !nbt.contains("tank2");
         if (nbt.contains("vesselW"))
             loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
         if (nbt.contains("outletW"))
             loadedOut = new double[]{nbt.getDoubleOr("outletW", 0), nbt.getDoubleOr("outletA", 0), nbt.getDoubleOr("outletU", 0)};
+        if (nbt.contains("inletW"))
+            loadedIn = new double[]{nbt.getDoubleOr("inletW", 0), nbt.getDoubleOr("inletA", 0), nbt.getDoubleOr("inletU", 0)};
     }
 
     @Override
@@ -260,6 +281,8 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
             info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)", floodShare() * 100, vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", heatW));
+        if (makeup != null) info.put(I18N.tr("Makeup valve"), makeup.open >= 0.99 ? I18N.tr("open") : makeup.open <= 0.01 ? I18N.tr("shut (full enough)")
+            : String.format("%.0f%% open", makeup.open * 100));
         // (Baughn: on a cold start nothing said why no water reached the boiler: the pump turns with the turbine)
         double open = pump == null ? 0 : pump.open;
         info.put(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("stopped: no turbine")
