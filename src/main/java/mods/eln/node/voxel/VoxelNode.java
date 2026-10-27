@@ -270,8 +270,15 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (drop && p instanceof ValvePart v) dropItem(valveItem(v));
         if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
         if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
+        if (drop && p instanceof PipeSensorPart s) dropItem(sensorItem(s));
         changed();
         return isEmptyNode();
+    }
+
+    /** The item a pipe sensor was fitted from. */
+    static ItemStack sensorItem(PipeSensorPart s) {
+        return new ItemStack(s.sensing == PipeSensorPart.PRESSURE ? mods.eln.registry.ElnRegistry.PIPE_PRESSURE_SENSOR.get()
+            : mods.eln.registry.ElnRegistry.PIPE_TEMPERATURE_SENSOR.get());
     }
 
     /** The item a valve was fitted from. */
@@ -497,6 +504,63 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return "the pipe doesn't run straight there";
     }
 
+    /** The pipe passing through a point of this block, or null. */
+    PipePart pipeAt(int x, int y, int z) {
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe && pipe.fluid != null && pipe.passes(x, y, z)) return pipe;
+        return null;
+    }
+
+    /**
+     * Fit a pipe sensor (Baughn 2026-10-27) on the pipe under the click, as a safety valve: at the lattice point nearest
+     * the click on a straight stretch, its dial out of the pipe's most open side (up first). One per block: its output
+     * joins every signal cable in the block, so two would drive the same wire.
+     */
+    public String addSensorNear(double hx, double hy, double hz, int sensing) {
+        for (VoxelPart q : parts)
+            if (q instanceof PipeSensorPart) return "one sensor per block (its signal goes on every signal cable in the block)";
+        int idx = partAt(hx, hy, hz);
+        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
+        int[] best = null;
+        double bd = Double.MAX_VALUE;
+        for (int x = 4; x <= 12; x += 4)
+            for (int y = 4; y <= 12; y += 4)
+                for (int z = 4; z <= 12; z += 4) {
+                    if (!pipe.passes(x, y, z)) continue;
+                    boolean taken = false;
+                    for (VoxelPart q : parts)
+                        if (q instanceof ValvePart v && v.x == x && v.y == y && v.z == z || q instanceof SafetyValvePart v2 && v2.x == x && v2.y == y && v2.z == z
+                            || q instanceof PipeSensorPart s && s.x == x && s.y == y && s.z == z) taken = true;
+                    if (taken) continue;
+                    double d = (x - hx * 16) * (x - hx * 16) + (y - hy * 16) * (y - hy * 16) + (z - hz * 16) * (z - hz * 16);
+                    if (d < bd) {
+                        bd = d;
+                        best = new int[]{x, y, z};
+                    }
+                }
+        if (best == null) return "the pipe has no room for it here";
+        int axis = -1;
+        for (int a = 0; a < 3; a++) {
+            int[] lo = best.clone(), hi = best.clone();
+            lo[a] -= 2;
+            hi[a] += 2;
+            if (pipe.passes(lo[0], lo[1], lo[2]) && pipe.passes(hi[0], hi[1], hi[2])) axis = a;
+        }
+        if (axis < 0) return "the pipe turns there";
+        double scale = sensing == PipeSensorPart.PRESSURE ? PipeSensorPart.DEFAULT_BAR : PipeSensorPart.DEFAULT_C;
+        for (int d : axis == 1 ? new int[]{2, 3, 4, 5} : new int[]{1, 2, 3, 4, 5, 0}) {
+            var s = new PipeSensorPart(best[0], best[1], best[2], d, pipe.bore(), sensing, scale);
+            int[] b = s.boxes().get(0);
+            if (b[3] - b[0] < 3 || b[4] - b[1] < 3 || b[5] - b[2] < 3) continue;   // (cut off by the block's edge)
+            if (fits(s)) {
+                parts.add(s);
+                markUsed();
+                changed();
+                return null;
+            }
+        }
+        return "no room around the pipe there";
+    }
+
     /** A right-click on a valve (empty hand) turns it. */
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
@@ -512,6 +576,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 for (double b : SafetyValvePart.PRESETS) if (b * 1e5 > sv.setPa + 1) { next = b * 1e5; break; }
                 sv.setPa = next;
                 player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Safety valve set to %.0f bar", next / 1e5)));
+                setNeedPublish(true);
+                return true;
+            }
+            if (i >= 0 && parts.get(i) instanceof PipeSensorPart s) {
+                s.scale = s.nextScale();
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("%s: full scale (50 V) %.0f %s", s.name(), s.scale, s.unit())));
                 setNeedPublish(true);
                 return true;
             }
@@ -855,6 +925,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     setNeedPublish(true);   // (the drawing turns with it)
                 }
             }
+        // pipe sensors read the run under them (Baughn 2026-10-27)
+        for (VoxelPart p : parts)
+            if (p instanceof PipeSensorPart s && s.outProcess != null) {
+                PipePart under = pipeAt(s.x, s.y, s.z);
+                if (under == null) continue;
+                s.read(mods.eln.fluid.FluidWorld.nodeFor(under.fluid));
+                if (Math.abs(s.share() - s.shown) > 0.05) {
+                    s.shown = s.share();
+                    setNeedPublish(true);   // (the dial's colour)
+                }
+            }
         // safety valves open by the pressure under them
         if (vents != null)
             for (var e : vents.entrySet())
@@ -928,6 +1009,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         connectElementsToCables();
         connectPins();
         connectValves();
+        connectSensors();
         cablesBuilt = !cables.conductors.isEmpty();
         for (Direction dir : Direction.values()) {
             mods.eln.node.NodeBase other = getNeighbor(dir);
@@ -1064,6 +1146,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
     }
 
+    /** Pipe sensors: their signal outputs in the simulation, joined to the signal cables laid in this block (as valves). */
+    private void connectSensors() {
+        for (VoxelPart p : parts) {
+            if (!(p instanceof PipeSensorPart s) || s.out == null) continue;
+            Eln.simulator.addElectricalLoad(s.out);
+            Eln.simulator.addElectricalComponent(s.outProcess);
+            for (CableNet.Conductor k : cables.live())
+                if (k.load != null && k.d != null && k.d.signalWire) link(s.out, k.load, null, null);
+        }
+    }
+
     /** Hosted elements and cable ends meeting at a point in this block (on the element's face, or an inner corner). */
     private void connectElementsToCables() {
         elementLinksE.clear();
@@ -1195,6 +1288,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public void disconnectJob() {
         super.disconnectJob();
         for (VoxelPart p : parts) if (p instanceof ValvePart v && v.signal != null) Eln.simulator.removeElectricalLoad(v.signal);
+        for (VoxelPart p : parts)
+            if (p instanceof PipeSensorPart s && s.out != null) {
+                Eln.simulator.removeElectricalComponent(s.outProcess);
+                Eln.simulator.removeElectricalLoad(s.out);
+            }
         for (var e : elementLinksE) Eln.simulator.removeElectricalComponent(e);
         for (var t : elementLinksT) Eln.simulator.removeThermalConnection(t);
         elementLinksE.clear();
@@ -1274,6 +1372,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (p instanceof ValvePart v) dropItem(valveItem(v));
             if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
             if (p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
+            if (p instanceof PipeSensorPart s) dropItem(sensorItem(s));
         }
         parts.clear();
         super.onBreakBlock();
@@ -1415,6 +1514,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",
                 String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));
+        for (VoxelPart p : parts)
+            if (p instanceof PipeSensorPart s) out.put(s.name(), String.format(s.sensing == PipeSensorPart.PRESSURE ? "%.2f %s (absolute) of %.0f: %.1f V" : "%.0f %s of %.0f: %.1f V",
+                s.reading, s.unit(), s.scale, s.share() * mods.eln.Eln.SVU));
         if (!details) return out;
         out.put("Water", String.format("%.0f mB", n.mLiquid() / EaUnits.KG_PER_MB_WATER));
         out.put("Run volume", String.format("%.2f L", n.volume * 1000));

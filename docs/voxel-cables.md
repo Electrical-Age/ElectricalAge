@@ -11,7 +11,7 @@ unless a path says otherwise. Fluid physics and the MNA itself: see simulation.m
 | `VoxelNode` | server | `extends SixNode implements FluidDevice`; uuid `"v"` (registered in `Eln.java` via `NodeManager.registerUuid`). Holds `parts`, a `used` voxel BitSet, `legacy` (six-node NBT for revert), `host` (imitated BlockState), `carved` |
 | `VoxelPart` | both | Base of the parts; `read`/`deserialize` dispatch on `kind` |
 | `CablePart` (`"cable"`) | both | Polyline on one face (`face` 0..5, 3D value) or a knuckle (`face == -1`, a point on an edge); `TIERS[]` maps tiers to the six-node cable descriptors by name (Signal, LV, MV, HV, VHV, Copper Thermal) |
-| `PipePart` / `ValvePart` / `SafetyValvePart` / `AdapterPart` | both | Pipes and fittings; `AdapterPart.tanks` is the fluid capability (capabilities.md) |
+| `PipePart` / `ValvePart` / `SafetyValvePart` / `PipeSensorPart` / `AdapterPart` | both | Pipes and fittings (`PipeSensorPart`: a signal output joined to the block's signal cables, as a control valve's input); `AdapterPart.tanks` is the fluid capability (capabilities.md) |
 | `CableNet` | server | Groups a node's cable pieces into `Conductor`s and builds their loads |
 | `CableRouter`, `PipeRouter` | server | A* routers, pure Java (world behind a `Space` interface) |
 | `CablePlacer`, `PipePlacer`, `KitPreview` | server | Kit UX: start, waypoints, finish; preview outlines sent as `Eln.packetKitPreview` |
@@ -91,7 +91,7 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
   converter), `"paid"` (voxels returned on break), `"u"`, `"t"` (voltage, temperature: `CableNet.save()` copies them in
   before a write or rebuild).
 - `PipePart`: `"tier"`, `"pts"`, `"burst"`, `"burstDir"`, `"w"`, `"a"`, `"u"`. `ValvePart`: `"at"`, `"open"`.
-  `SafetyValvePart`: `"at"`, `"set"`. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
+  `SafetyValvePart`: `"at"`, `"set"`. `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
 - Client publish: part count, then kind + length-prefixed bytes per part, then SixNode's elements
   (`publishBeforeElements`).
 

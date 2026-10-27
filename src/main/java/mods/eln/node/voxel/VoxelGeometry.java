@@ -94,6 +94,22 @@ public final class VoxelGeometry {
                 b.color(0.75f, 0.15f, 0.12f);
                 boolean up = sv.outlet % 2 == 1;
                 b.tube(ax, c[o[0]], c[o[1]], 2.0, up ? hi - 1 : lo, up ? hi : lo + 1);
+            } else if (part instanceof PipeSensorPart ps) {
+                // (Baughn 2026-10-27) a stem (steel for pressure, copper for temperature) and a dial whose face goes green
+                // to red with the reading's share of full scale
+                b.sprite = PIPE[0];
+                int[] bx = ps.boxes().get(0);
+                int ax = ps.outlet / 2 == 0 ? 1 : ps.outlet / 2 == 1 ? 2 : 0;
+                double[] c = {(bx[0] + bx[3]) / 2.0, (bx[1] + bx[4]) / 2.0, (bx[2] + bx[5]) / 2.0};
+                int[] o = others(ax);
+                double lo = bx[ax], hi = bx[ax + 3];
+                boolean up = ps.outlet % 2 == 1;
+                if (ps.sensing == PipeSensorPart.PRESSURE) b.color(0.7f, 0.7f, 0.72f);
+                else b.color(0.8f, 0.5f, 0.3f);
+                b.tube(ax, c[o[0]], c[o[1]], 0.6, up ? lo : hi - 2, up ? lo + 2 : hi);
+                float f = (float) Math.max(0, Math.min(1, ps.shown));
+                b.color(0.2f + 0.7f * f, 0.75f - 0.55f * f, 0.15f);
+                b.tube(ax, c[o[0]], c[o[1]], 2.0, up ? hi - 1 : lo, up ? hi : lo + 1);
             } else if (part instanceof AdapterPart a) {
                 b.sprite = PIPE[0];
                 b.color(0.75f, 0.55f, 0.3f);   // (brass)
