@@ -47,6 +47,14 @@ public class ElnItemTags extends ItemTagsProvider {
                 tag(parent).addTag(tag);
             }
         }
+        // what EA's recipes take for a plate (OreDictTags.recipeTag): its own plates; a modpack may add others
+        for (Map.Entry<String, List<Object>> e : OreDictTags.EA_ENTRIES.entrySet()) {
+            String id = OreDictTags.tagId(e.getKey());
+            if (!id.startsWith("c:plates/")) continue;
+            TagKey<Item> hq = OreDictTags.highQualityPlates(id.substring("c:plates/".length()));
+            for (Object d : e.getValue()) tag(hq).add(ResourceKey.create(Registries.ITEM, BuiltInRegistries.ITEM.getKey(itemOf(d))));
+            tag(itemTag("eln", "high_quality_plates")).addTag(hq);
+        }
         // tungsten ore is also a convention ore (Baughn 2026-10-24), so other mods (and the X-ray scanner) see it; its
         // dust and ingot stay EA-private, as 1.12's dictionary.tungsten=false
         tag(itemTag("c", "ores/tungsten")).add(key(BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("eln", "tungsten_ore")).asItem()));

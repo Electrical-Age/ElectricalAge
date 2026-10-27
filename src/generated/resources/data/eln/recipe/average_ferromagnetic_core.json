@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": "eln:cheap_ferromagnetic_core",
-    "P": "#c:plates/iron"
+    "P": "#eln:high_quality_plates/iron"
   },
   "pattern": [
     "PCP"

@@ -1,4 +1,4 @@
-// 26.3	2026-10-24T12:42:50.394009786	eln-global/Tags for minecraft:item mod id eln
+// 26.3	2026-10-27T14:38:20.757373795	eln-global/Tags for minecraft:item mod id eln
 84e660d99ec050723c2cbcd48806f26355cdd0fa data/c/tags/item/casings.json
 b1c2dbaac22ebe066a8de4d98af4e881ddef621f data/c/tags/item/casings/machine.json
 864234b02478871ab4edcaaf9bbb5976971370f5 data/c/tags/item/casings/machine_advanced.json
@@ -35,6 +35,14 @@ aca86e4c84265cd09de64008155bce3e927dd7be data/c/tags/item/quicksilver.json
 782abd588def34c0d4e0648f9478b5b5b32a4a9a data/c/tags/item/resins.json
 bef2cd2c742a51a1e23388e3f409007fbf110b7a data/c/tags/item/rubbers.json
 f48af7320030e33b00ea9fac50efbed71c48854a data/eln/tags/item/dusts/tungsten.json
+8e84049e1cf467c4c7bfeaff864a1123888d30fe data/eln/tags/item/high_quality_plates.json
+7fe7afa47a6e8e04a942b77894cf4b0d86288101 data/eln/tags/item/high_quality_plates/alloy.json
+6020d39ad18818e53600b5547d7ad1698ba6a5cf data/eln/tags/item/high_quality_plates/coal.json
+414cc75622b6339360be79e9e8eee1867dbffa3d data/eln/tags/item/high_quality_plates/copper.json
+f0ef06d4846a9e0b80384bccd9cca8a906d47ec6 data/eln/tags/item/high_quality_plates/gold.json
+35bf23f5b836093d190c34499a26839d82953bd5 data/eln/tags/item/high_quality_plates/iron.json
+c878309f02ed8719e9c1b955f3d2e5791fda50fc data/eln/tags/item/high_quality_plates/lead.json
+663df367a4ee8cc025e31b87950547b1ec0b812e data/eln/tags/item/high_quality_plates/silicon.json
 1e45613c086e995b0dd09f0caa446f850b1fb151 data/eln/tags/item/ingots/tungsten.json
 05abdd0d8560b0671f8c122f795fcb1bc2155276 data/eln/tags/item/ore_drops/coal.json
 c4d5e840a138209dffa934f3802ed4e360f264eb data/eln/tags/item/ores/tungsten.json

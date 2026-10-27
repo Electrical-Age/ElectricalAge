@@ -3,7 +3,7 @@
   "key": {
     "C": "eln:low_voltage_cable",
     "I": "minecraft:iron_ingot",
-    "S": "#c:plates/silicon"
+    "S": "#eln:high_quality_plates/silicon"
   },
   "pattern": [
     "III",

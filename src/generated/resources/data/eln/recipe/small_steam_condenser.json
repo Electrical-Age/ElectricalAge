@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:copper_plate",
+    "C": "#eln:high_quality_plates/copper",
     "M": "eln:machine_block",
-    "P": "eln:iron_plate",
+    "P": "#eln:high_quality_plates/iron",
     "m": "eln:electrical_motor"
   },
   "pattern": [

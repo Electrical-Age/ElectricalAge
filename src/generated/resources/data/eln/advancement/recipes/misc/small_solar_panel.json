@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:plates/silicon"
+            "items": "#eln:high_quality_plates/silicon"
           }
         ]
       },

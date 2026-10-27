@@ -20,6 +20,7 @@ public final class PipeCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BoilerPipeTurbine());
+        cases.add(new HighQualityPlates());
         cases.add(new BoilerBucket());
         cases.add(new BoilerFeed());
         cases.add(new BoilerPhase());
@@ -366,6 +367,41 @@ public final class PipeCases {
         public void measure(TestContext ctx) {
             ctx.check("boiler bucket: taken, 1000 mB more water", took && after - before == 1000, before + " -> " + after);
             ctx.check("boiler bucket: the bucket comes back empty", emptied, "");
+        }
+    }
+
+    /**
+     * EA's recipes take plates by eln:high_quality_plates/<metal> (Baughn 2026-10-27: hammered plates don't fit; a tag so
+     * a modpack can add some): EA's plates are in it, the casing recipe takes it, an iron ingot isn't a plate, and pipe kits
+     * are made of what the tag holds.
+     */
+    static final class HighQualityPlates implements TestCase {
+        public String id() {
+            return "recipes_take_high_quality_plates";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var iron = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("eln:iron_plate")));
+            ctx.check("plates: EA's iron plate is a high-quality iron plate", iron.is(mods.eln.misc.OreDictTags.highQualityPlates("iron")), "");
+            ItemStack[] grid = new ItemStack[9];
+            java.util.Arrays.fill(grid, iron.copy());
+            grid[4] = ItemStack.EMPTY;
+            var casing = KitCrafting.craft(ctx, 3, 3, grid);
+            ctx.line("plates: a ring of 8 EA iron plates makes " + casing);
+            ctx.check("plates: a recipe that takes the tag accepts EA's plates", !casing.isEmpty(), "" + casing);
+            var level = ctx.level();
+            var recipe = level.getServer().getRecipeManager().byKey(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
+                net.minecraft.resources.Identifier.parse("eln:casing")));
+            ctx.check("plates: the casing recipe exists", recipe.isPresent(), "");
+            ctx.check("plates: pipe kits take what the tag holds", mods.eln.node.voxel.PipeKitRecipes.plateTier(iron) == 0
+                && mods.eln.node.voxel.PipeKitRecipes.plateTier(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT)) == -1, "");
         }
     }
 

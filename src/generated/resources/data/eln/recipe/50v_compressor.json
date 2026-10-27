@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "F": "#c:plates/iron",
+    "F": "#eln:high_quality_plates/iron",
     "I": "minecraft:iron_ingot",
     "M": "eln:machine_block",
     "R": "minecraft:redstone",

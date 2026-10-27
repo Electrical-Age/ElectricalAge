@@ -4,7 +4,7 @@
     "A": "eln:analogic_regulator",
     "B": "eln:machine_block",
     "C": "eln:low_voltage_cable",
-    "I": "#c:plates/iron",
+    "I": "#eln:high_quality_plates/iron",
     "M": "eln:electrical_motor"
   },
   "pattern": [

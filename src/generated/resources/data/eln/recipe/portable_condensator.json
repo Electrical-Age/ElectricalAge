@@ -3,7 +3,7 @@
   "key": {
     "C": "minecraft:redstone",
     "R": "#c:rubbers",
-    "c": "#c:plates/copper",
+    "c": "#eln:high_quality_plates/copper",
     "w": "eln:copper_cable"
   },
   "pattern": [

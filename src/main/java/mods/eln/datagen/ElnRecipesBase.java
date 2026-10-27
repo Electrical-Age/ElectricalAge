@@ -202,7 +202,7 @@ public abstract class ElnRecipesBase {
     }
 
     static Ingredient ingredient(Object o) {
-        if (o instanceof String ore) return Ingredient.of(items.getOrThrow(OreDictTags.tag(ore)));
+        if (o instanceof String ore) return Ingredient.of(items.getOrThrow(OreDictTags.recipeTag(ore)));
         if (o instanceof TagKey<?> t) return Ingredient.of(items.getOrThrow(itemTag(t)));
         if (o instanceof RStack s) return Ingredient.of(s.item());
         if (o instanceof ItemLike l) return Ingredient.of(l);
@@ -216,7 +216,7 @@ public abstract class ElnRecipesBase {
     }
 
     static Criterion<?> criterion(Object o) {
-        if (o instanceof String ore) return hasTag.apply(OreDictTags.tag(ore));
+        if (o instanceof String ore) return hasTag.apply(OreDictTags.recipeTag(ore));
         if (o instanceof TagKey<?> t) return hasTag.apply(itemTag(t));
         if (o instanceof RStack s) return hasItem.apply(s.item());
         return hasItem.apply((ItemLike) o);
@@ -253,7 +253,7 @@ public abstract class ElnRecipesBase {
             if (!(o instanceof String ore) || o instanceof String && isPatternRow(ore, params)) continue;
             if (OreDictTags.EA_ENTRIES.containsKey(ore) || !seen.add(ore)) continue;
             c.add(new net.neoforged.neoforge.common.conditions.NotCondition(
-                new net.neoforged.neoforge.common.conditions.TagEmptyCondition<>(OreDictTags.tag(ore))));
+                new net.neoforged.neoforge.common.conditions.TagEmptyCondition<>(OreDictTags.recipeTag(ore))));
         }
         return c.isEmpty() ? null : c.toArray(new ICondition[0]);
     }
@@ -304,7 +304,7 @@ public abstract class ElnRecipesBase {
             List<ICondition> cond = new ArrayList<>();
             for (int c = 0; c < choices.size(); c++) {
                 FirstOf f = (FirstOf) params[choices.get(c)];
-                var tag = new net.neoforged.neoforge.common.conditions.TagEmptyCondition<>(OreDictTags.tag(f.first()));
+                var tag = new net.neoforged.neoforge.common.conditions.TagEmptyCondition<>(OreDictTags.recipeTag(f.first()));
                 if ((mask & (1 << c)) == 0) {
                     p[choices.get(c)] = f.first();
                     cond.add(new net.neoforged.neoforge.common.conditions.NotCondition(tag));
