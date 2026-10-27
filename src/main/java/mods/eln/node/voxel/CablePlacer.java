@@ -193,6 +193,9 @@ public final class CablePlacer {
             // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
             if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && cv.mode == ValvePart.CONTROL)
                 return new CableRouter.End(pos.getX() * 16L + cv.x, pos.getY() * 16L, pos.getZ() * 16L + cv.z, 0, -1);
+            // a pipe sensor likewise (AdventurAgent: its dial and the pipe were "not a place for a cable")
+            if (idx >= 0 && v.parts.get(idx) instanceof PipeSensorPart ps)
+                return new CableRouter.End(pos.getX() * 16L + ps.x, pos.getY() * 16L, pos.getZ() * 16L + ps.z, 0, -1);
             if (idx >= 0 && v.parts.get(idx) instanceof CablePart c && !c.isKnuckle()) {
                 long[] best = null;
                 double bd = Double.MAX_VALUE;
