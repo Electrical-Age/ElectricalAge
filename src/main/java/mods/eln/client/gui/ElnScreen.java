@@ -185,12 +185,19 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
         for (Slot s : menu.slots) {
             if (s.x < -100 || s.y < -100) continue; // 1.12 hid some slots off-screen (thermal isolator)
             boolean big = s instanceof mods.eln.gui.ElnSlot es && SlotSpec.BIG.equals(es.spec.skin());
+            int frame = s instanceof mods.eln.gui.ElnSlot es2 ? slotFrame(es2.getContainerSlot()) : 0;
+            if (frame != 0) g.fill(leftPos + s.x - 3, topPos + s.y - 3, leftPos + s.x + 19, topPos + s.y + 19, frame);
             if (big) g.blitSprite(RenderPipelines.GUI_TEXTURED, INSET, leftPos + s.x - 5, topPos + s.y - 5, 26, 26);
             else g.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, leftPos + s.x - 1, topPos + s.y - 1, 18, 18);
         }
         drawing = g;
         for (Runnable d : drawers) d.run();
         extractDevice(g, mouseX, mouseY, a);
+    }
+
+    /** A coloured frame round a device slot (its index in the device inventory), ARGB; 0 for none. */
+    protected int slotFrame(int index) {
+        return 0;
     }
 
     /** Device graphics under the widgets (progress arrows, gauges' backgrounds). Screen coordinates. */

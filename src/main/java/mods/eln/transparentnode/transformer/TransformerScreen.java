@@ -19,6 +19,15 @@ public class TransformerScreen extends ElnScreen {
         this.render = (TransformerRender) render;
     }
 
+    /** The windings' slots in the model's colours (Baughn 2026-10-27: primary green, secondary yellow, as its label and
+     *  the 1.12 screen's marks). */
+    @Override
+    protected int slotFrame(int index) {
+        if (index == TransformerContainer.primaryCableSlotId) return 0xFF09B700;
+        if (index == TransformerContainer.secondaryCableSlotId) return 0xFFEDEA00;
+        return 0;
+    }
+
     @Override
     protected void init() {
         super.init();

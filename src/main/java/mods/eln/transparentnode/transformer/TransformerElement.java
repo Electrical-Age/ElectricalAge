@@ -83,9 +83,16 @@ public class TransformerElement extends TransparentNodeElement {
         super.connectJob();
     }
 
+    /** Both windings and the core are in (Baughn 2026-10-27: with any of the three slots empty it connects to nothing). */
+    boolean complete() {
+        return !Utils.isEmpty(inventory.getItem(TransformerContainer.primaryCableSlotId))
+            && !Utils.isEmpty(inventory.getItem(TransformerContainer.secondaryCableSlotId))
+            && !Utils.isEmpty(inventory.getItem(TransformerContainer.ferromagneticSlotId));
+    }
+
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        if (lrdu != LRDU.Down) return null;
+        if (lrdu != LRDU.Down || !complete()) return null;
         if (side == front.left()) return primaryLoad;
         if (side == front.right()) return secondaryLoad;
         return null;
@@ -98,7 +105,7 @@ public class TransformerElement extends TransparentNodeElement {
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        if (lrdu == LRDU.Down) {
+        if (lrdu == LRDU.Down && complete()) {
             if (side == front.left()) return NodeBase.maskElectricalPower;
             if (side == front.right()) return NodeBase.maskElectricalPower;
             if (side == front && !grounded) return NodeBase.maskElectricalPower;

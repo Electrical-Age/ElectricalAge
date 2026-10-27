@@ -44,6 +44,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- DC-DC converter (Baughn 2026-10-27): connects to nothing (no masks, no loads) unless both winding slots and the core
+  slot are filled (1.12 kept its sides connected through high-impedance loads); its screen frames the primary slot green
+  and the secondary yellow, as the model's marks. `wp10a_transformer_connects_only_when_complete`.
 - Safety valve (Baughn 2026-10-27): its set pressure on a screen with a slider (1.5-150 bar, log scale; the
   empty-hand right-click opens it, it no longer steps presets), and it acts on the pressure averaged over 2 s, wide
   open 10% over its setting (was the instant pressure and 5%: a boiler's tick-to-tick jitter made it pulse shut/open).
