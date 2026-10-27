@@ -30,6 +30,11 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
         return super.setR(state ? r : (ultraImpedance ? MnaConst.ultraImpedance : MnaConst.highImpedance));
     }
 
+    /** The resistance when on. */
+    public double getBaseR() {
+        return baseR;
+    }
+
     public boolean getState() {
         return state;
     }
