@@ -108,6 +108,8 @@ public class BatteryChargerElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Charge Current"), Utils.plotAmpere("", powerLoad.getCurrent()));
+        // (Erisi's chat review: a voxel cable running beside it gave it nothing; it takes power on one edge only)
+        if (powerLoad.getU() < 1) info.put(I18N.tr("Power in"), I18N.tr("none: it connects on one edge only (its connector); run a cable to that edge"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
             info.put(I18N.tr("Power"), Utils.plotPower("", powerLoad.getI() * powerLoad.getU()));

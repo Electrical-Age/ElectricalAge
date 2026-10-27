@@ -513,7 +513,7 @@ public final class Wp9aCases {
     static final class SocketChargerCase implements TestCase {
         ElectricalSourceElement srcC;
         PowerSocketElement socket;
-        BatteryChargerElement charger;
+        BatteryChargerElement charger, unfed;
         final List<BlockPos> wall = new ArrayList<>();
 
         /** The socket only goes on walls (placeDirection XP/XN/ZP/ZN, checked by placeBlockAt): place like a player
@@ -570,6 +570,7 @@ public final class Wp9aCases {
             charger = (BatteryChargerElement) ctx.placeSix(CHARGER_WEAK, ctx.at(1, 1, 2));
             orient(charger, f -> f, Direction.XN);
             charger.networkUnserialize(ctx.stream(out -> out.writeByte(BatteryChargerElement.toogleCharge)));
+            unfed = (BatteryChargerElement) ctx.placeSix(CHARGER_WEAK, ctx.at(1, 1, 0));
         }
 
         public void measure(TestContext ctx) {
@@ -590,6 +591,9 @@ public final class Wp9aCases {
             // slow process (every 1 s): while the buffer is below 2 s * nominal power it draws up to the nominal power
             ctx.check("wp9a battery charger on, drawing at most nominal power", charger.isPowerOn() && p >= -1e-6 && p <= pNom * 1.01,
                 f("on %s, P = %.2f W at %.3f V (expected 0 <= P <= nominal %.0f W)", charger.isPowerOn(), p, uC, pNom));
+            // (Erisi's chat review: Jade says why an unfed charger gets nothing)
+            ctx.check("wp9a battery charger: Jade says an unfed one has no power in, and a fed one doesn't",
+                unfed.getWaila().containsKey("Power in") && !charger.getWaila().containsKey("Power in"), "" + unfed.getWaila());
             ctx.check("wp9a battery charger took energy", e > 0.01 * pNom && e <= 2 * pNom * 1.01,
                 f("buffer %.1f J (expected 0 < E <= 2 s * %.0f W, no batteries to give it to)", e, pNom));
         }
