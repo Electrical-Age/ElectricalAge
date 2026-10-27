@@ -832,7 +832,7 @@ public final class CableCases {
             // the table crafts from build()
             for (int q = 0; q < TABLE.length; q++) {
                 int[] t = TABLE[q];
-                int per = t[0] == 0 ? 2 : 3, blocks = t[1] / per, left = menus[q].getSlot(1).getItem().getCount();
+                int per = t[0] == 0 ? 2 : 1, blocks = t[1] / per, left = menus[q].getSlot(1).getItem().getCount();
                 c.check("pipe kit: a table craft of " + t[1] + (t[0] == 0 ? " iron" : " alloy") + " plates makes " + blocks + " blocks and leaves " + (t[1] - blocks * per),
                     mods.eln.node.voxel.PipeKitItem.length(results[q]) == 16 * blocks && left == t[1] - blocks * per,
                     "result " + mods.eln.node.voxel.PipeKitItem.length(results[q]) / 16 + " blocks, " + left + " left");

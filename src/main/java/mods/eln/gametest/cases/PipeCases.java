@@ -921,6 +921,10 @@ public final class PipeCases {
             ItemStack k = craft(ctx, 2, 1, plate.copy(), plate.copy());
             ctx.check("pipe: 2 iron plates make an iron kit of one block (16 voxels)", k.getItem() == mods.eln.registry.ElnRegistry.PIPE_KIT_IRON.get()
                 && PipeKitItem.length(k) == 16, k + " " + PipeKitItem.length(k));
+            ItemStack alloy = mods.eln.Eln.findItemStack("Alloy Plate");
+            ItemStack k3 = craft(ctx, 3, 1, alloy.copy(), alloy.copy(), alloy.copy());
+            ctx.check("pipe: 3 alloy plates make an alloy kit of three blocks (Baughn: 3 m per craft)", k3.getItem() == mods.eln.registry.ElnRegistry.PIPE_KIT_ALLOY.get()
+                && PipeKitItem.length(k3) == 48, k3 + " " + PipeKitItem.length(k3));
             ItemStack m = craft(ctx, 2, 1, PipeKitItem.kit(0, 16), PipeKitItem.kit(0, 40));
             ctx.check("pipe: two iron kits merge (16 + 40)", PipeKitItem.length(m) == 56, "" + PipeKitItem.length(m));
             ItemStack mix = craft(ctx, 2, 1, PipeKitItem.kit(0, 16), PipeKitItem.kit(1, 16));
@@ -928,7 +932,7 @@ public final class PipeCases {
             // a lone kit gives a block's worth of plates back, as a cable kit gives a coil (Baughn: not halves)
             ItemStack back = craft(ctx, 1, 1, PipeKitItem.kit(1, 33));
             var rest = remaining(ctx, 1, 1, PipeKitItem.kit(1, 33));
-            ctx.check("pipe: an alloy kit gives 3 alloy plates back and keeps the rest (33: 17 stays)", mods.eln.node.voxel.PipeKitRecipes.plateTier(back) == 1 && back.getCount() == 3
+            ctx.check("pipe: an alloy kit gives an alloy plate back and keeps the rest (33: 17 stays)", mods.eln.node.voxel.PipeKitRecipes.plateTier(back) == 1 && back.getCount() == 1
                 && rest.size() == 1 && PipeKitItem.length(rest.get(0)) == 17, back + " / " + rest);
             ItemStack back16 = craft(ctx, 3, 3, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, PipeKitItem.kit(0, 16),
                 ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);

@@ -21,10 +21,10 @@ public final class PipeKitRecipes {
     private PipeKitRecipes() {
     }
 
-    /** The plate a tier's pipe is made of, and how many make one block (16 voxels) of it (the old recipes: 2 iron
-     *  plates or 3 alloy plates to a one-block kit). */
+    /** The plate a tier's pipe is made of, and how many make one block (16 voxels) of it: 2 iron plates (the old
+     *  recipe), 1 alloy plate (Baughn: 3 m per craft of 3 plates instead of 1). */
     static final String[] PLATE = {"eln:iron_plate", "eln:alloy_plate"};
-    static final int[] PER_BLOCK = {2, 3};
+    static final int[] PER_BLOCK = {2, 1};
 
     static net.minecraft.world.item.Item plate(int tier) {
         return net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(PLATE[tier]));
