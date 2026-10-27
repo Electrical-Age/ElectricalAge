@@ -67,6 +67,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   50V/200V heat turbines (replaced by steam turbines with built-in generators), the Modbus TCP server.
 - New in 26.x: oil (lakes, tar sand, pumps, heaters, boiler, column, flare stack), pipes and the fluid core, steam
   turbines, voxel cables (see voxel-cables.md), cable kits, chisel, item capabilities on machines (`ItemCapabilityCases`).
+- Lamp sockets remove monsters that appear within 9 blocks only while lit (Baughn 2026-10-27; 1.12 did it for every
+  socket, lit or not). Mobs already near a lamp when it lights stay (`MonsterPopFreeProcess`, `LampMonsterCases`).
 
 ## Behaviour changes vs 1.12
 
