@@ -592,6 +592,10 @@ public final class Wp9aCases {
             ctx.check("wp9a battery charger on, drawing at most nominal power", charger.isPowerOn() && p >= -1e-6 && p <= pNom * 1.01,
                 f("on %s, P = %.2f W at %.3f V (expected 0 <= P <= nominal %.0f W)", charger.isPowerOn(), p, uC, pNom));
             // (Erisi's chat review: Jade says why an unfed charger gets nothing)
+            boolean allEdges = true;
+            for (mods.eln.misc.LRDU l : mods.eln.misc.LRDU.values())
+                allEdges &= unfed.getElectricalLoad(l) != null && unfed.getConnectionMask(l) == NodeBase.maskElectricalPower;
+            ctx.check("wp9a battery charger takes power on any edge (Baughn)", allEdges, "");
             ctx.check("wp9a battery charger: Jade says an unfed one has no power in, and a fed one doesn't",
                 unfed.getWaila().containsKey("Power in") && !charger.getWaila().containsKey("Power in"), "" + unfed.getWaila());
             ctx.check("wp9a battery charger took energy", e > 0.01 * pNom && e <= 2 * pNom * 1.01,

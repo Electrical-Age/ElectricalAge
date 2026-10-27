@@ -83,9 +83,10 @@ public class BatteryChargerElement extends SixNodeElement {
     }
 
     @Override
+    /** Power on any edge (Baughn 2026-10-27: 1.12 took it on its front edge only, and a voxel cable along another edge
+     *  gave it nothing; no downside, and it helps building). */
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (front == lrdu) return powerLoad;
-        return null;
+        return powerLoad;
     }
 
     @Override
@@ -95,8 +96,7 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front == lrdu) return NodeBase.maskElectricalPower;
-        return 0;
+        return NodeBase.maskElectricalPower;
     }
 
     @Override
@@ -108,8 +108,7 @@ public class BatteryChargerElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Charge Current"), Utils.plotAmpere("", powerLoad.getCurrent()));
-        // (Erisi's chat review: a voxel cable running beside it gave it nothing; it takes power on one edge only)
-        if (powerLoad.getU() < 1) info.put(I18N.tr("Power in"), I18N.tr("none: it connects on one edge only (its connector); run a cable to that edge"));
+        if (powerLoad.getU() < 1) info.put(I18N.tr("Power in"), I18N.tr("none: run a cable to any edge"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
             info.put(I18N.tr("Power"), Utils.plotPower("", powerLoad.getI() * powerLoad.getU()));
