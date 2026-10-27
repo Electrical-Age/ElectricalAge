@@ -13,7 +13,7 @@ import java.util.List;
  * condenser in one block, with all its control built in. Heat in on its left flank (a heat furnace against it), water
  * by bucket, by EA pipe on its top flange or by the fluid capability, 50 V out of the front and back. It turns
  * {@link #ETA} of the heat it takes into electricity (Baughn: 10%, so one stone heat furnace with all its combustion
- * chambers runs it at full), against ~10% for a boiler and steam turbine venting and ~18% condensing; the cost of not
+ * chambers runs it at nearly full, ~270 W), against ~10% for a boiler and steam turbine venting and ~18% condensing; the cost of not
  * having to run a plant. Model: tools/models/compactturbine.py.
  */
 public class CompactTurbineDescriptor extends TransparentNodeDescriptor {
@@ -83,6 +83,6 @@ public class CompactTurbineDescriptor extends TransparentNodeDescriptor {
         list.add(String.format("Water: a bucket, or a pipe on top (%d mB tank)", WATER_MB));
         list.add(String.format("%.0f V out, front and back; nothing to set", nominalU));
         list.add(String.format("Up to %.0f W from %.0f W of heat (%.0f%%)", nominalP, nominalHeat(), ETA * 100));
-        list.add("A stone heat furnace with 4 combustion chambers runs it at full");
+        list.add("A stone heat furnace with 4 combustion chambers gives ~270 W");   // (it keeps ~2.7 kW going: AdventurAgent)
     }
 }

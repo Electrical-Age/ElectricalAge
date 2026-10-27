@@ -145,6 +145,14 @@ def rotor_part():
     for k in range(4):
         a = math.pi / 2 * k + math.pi / 4
         r.add(prism("x", CY + 0.85 * math.cos(a), CZ + 0.85 * math.sin(a), 0.22, cx - 0.5, cx + 0.5, "brass", n=4))
+    # a spoked flywheel on the generator's front end (the coupling alone, 1 px across, didn't show it turning:
+    # AdventurAgent): a rim, a hub and four spokes, painted so the spin reads
+    fx0, fx1 = 0.5, 1.2
+    r.add(prism("x", CY, CZ, 0.3, fx1, GX[0] - 1.0, "darksteel", n=8, caps=(False, False)))
+    r.add(tube("x", CY, CZ, 1.7, 2.3, fx0, fx1, "castiron", n=12))
+    r.add(prism("x", CY, CZ, 0.55, fx0, fx1, "brass", n=8))
+    r.add(box(fx0 + 0.1, CY - 1.75, CZ - 0.25, fx1 - 0.1, CY + 1.75, CZ + 0.25, "paint"))
+    r.add(box(fx0 + 0.1, CY - 0.25, CZ - 1.75, fx1 - 0.1, CY + 0.25, CZ + 1.75, "castiron"))
     return r
 
 def main():
