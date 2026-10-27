@@ -1,5 +1,3 @@
-{/* No navigation entry: a content mod's own start page heads the index instead. */}
-
 # Electrical Engineer's Ledger
 
 The pages of this ledger haven't been written yet.
