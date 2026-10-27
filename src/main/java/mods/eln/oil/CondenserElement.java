@@ -203,9 +203,12 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
 
     private void restore(FluidNode n, double[] saved, double volume) {
         if (saved != null) {
-            n.mWater = saved[0];
+            // (a vessel saved fuller than it now holds, from before Baughn's smaller tanks: the excess water goes, with
+            // its share of the energy)
+            double max = 0.9 * volume * Water.RHO_L, keep = saved[0] > max ? max / saved[0] : 1;
+            n.mWater = saved[0] * keep;
             n.mAir = saved[1];
-            n.energy = saved[2];
+            n.energy = saved[2] * keep;
             n.update();
         } else n.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
     }
@@ -254,10 +257,14 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         if (vessel != null) {
             info.put(I18N.tr("Pressure"), String.format("%.2f bar", vessel.P() / 1e5));
             info.put(I18N.tr("Temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
-            info.put(I18N.tr("Condensate"), String.format("%.0f mB (%.0f%% full)", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, floodShare() * 100));
+            info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)", floodShare() * 100, vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", heatW));
-        info.put(I18N.tr("Condensate pumped"), String.format("%.0f mB/s", pumped));
+        // (Baughn: on a cold start nothing said why no water reached the boiler: the pump turns with the turbine)
+        double open = pump == null ? 0 : pump.open;
+        info.put(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("stopped: no turbine")
+            : open <= 0.01 ? I18N.tr("stopped: it turns with the turbine; feed the boiler directly to start")
+            : String.format("%.0f%%, %.0f mB/s", Math.min(1, open) * 100, pumped));
         return info;
     }
 }
