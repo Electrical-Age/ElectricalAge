@@ -44,6 +44,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Battery chargers take power on any edge (Baughn 2026-10-27; 1.12: the front edge only, so a voxel cable along another
+  edge gave nothing). `wp9a_power_socket_battery_charger`.
 - Signal processor `daytime` is the time of day (Utils.dayFraction: clock mod 24000 / 23999); 1.12 divided the total
   clock time, so after the first day it only grew and `daytime>0.5` stayed true. `wp9c_signal_processor`.
 - Plates in EA recipes (Baughn 2026-10-27): crafting recipes and pipe kits take `eln:high_quality_plates/<metal>`
