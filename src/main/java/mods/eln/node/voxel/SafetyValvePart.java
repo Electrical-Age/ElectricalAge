@@ -9,18 +9,27 @@ import java.util.List;
 
 /**
  * A pressure-relief valve with a whistle (Baughn): a tap on a pipe, its outlet pointing out of the pipe's side. Shut
- * below its set pressure, wide open 5% above it (the second opinion: no leak at the set pressure; a 5% band damps
- * chatter). What it lets out whistles if it's steam and sputters if it's water, and scalds a short way past the
- * outlet. An empty-hand right-click steps the set pressure through PRESETS.
+ * below its set pressure, wide open BAND above it (the second opinion: no leak at the set pressure), by the pressure
+ * averaged over AVG_TAU (below). What it lets out whistles if it's steam and sputters if it's water, and scalds a short way past the
+ * outlet. An empty-hand right-click opens its screen, a slider for the set pressure (Baughn
+ * 2026-10-27; MIN_BAR..MAX_BAR).
  */
 public final class SafetyValvePart extends VoxelPart {
     public static final String KIND = "safety_valve";
-    /** Set pressures to step through (bar). */
-    public static final double[] PRESETS = {2, 5, 8, 10, 15, 20, 30, 50, 75, 100, 150};
+    /** The screen's slider range (bar). */
+    public static final double MIN_BAR = 1.5, MAX_BAR = 150;
     /** Wide open, it passes this (m^3): about an iron pipe's bore. */
     static final double VENT_K = 2e-11;
     public final int x, y, z, outlet, bore;
     public double setPa;
+    /**
+     * Baughn 2026-10-27: it pulsed, popping open and shut every second or so. A boiler's pressure jitters by several
+     * percent from tick to tick, more than the old 5% band, so the valve flapped between shut and wide open. It now acts
+     * on the pressure averaged over AVG_TAU seconds (pAvg), and opens over a wider band, BAND above its set pressure.
+     * Server only, not saved: pAvg starts from the first reading.
+     */
+    public double lift, pAvg = Double.NaN;
+    public static final double AVG_TAU = 2.0, BAND = 0.10;
 
     public SafetyValvePart(int x, int y, int z, int outlet, int bore, double setPa) {
         this.x = x;
@@ -36,9 +45,16 @@ public final class SafetyValvePart extends VoxelPart {
         return KIND;
     }
 
+    /** Take in the pressure P under it for dt seconds; returns the lift (by the averaged pressure). */
+    public double follow(double P, double dt) {
+        pAvg = Double.isNaN(pAvg) ? P : pAvg + (P - pAvg) * Math.min(1, dt / AVG_TAU);
+        lift = opening(pAvg);
+        return lift;
+    }
+
     /** Opening (0..1) at pressure P. */
     public double opening(double P) {
-        return Math.max(0, Math.min(1, (P / setPa - 1) / 0.05));
+        return Math.max(0, Math.min(1, (P / setPa - 1) / BAND));
     }
 
     /** The body: a short stack 4 voxels across standing on the pipe, towards the outlet. */

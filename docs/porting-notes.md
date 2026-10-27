@@ -44,6 +44,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Safety valve (Baughn 2026-10-27): its set pressure on a screen with a slider (1.5-150 bar, log scale; the
+  empty-hand right-click opens it, it no longer steps presets), and it acts on the pressure averaged over 2 s, wide
+  open 10% over its setting (was the instant pressure and 5%: a boiler's tick-to-tick jitter made it pulse shut/open).
+  `fluid_safety_valve_*`.
 - Pipe Pressure Sensor and Pipe Temperature Sensor (new, Baughn 2026-10-27; `PipeSensorPart`): fitted on a straight pipe
   like the safety valve, one per block; the run's absolute pressure or temperature as 0-50 V on every signal cable in the
   block (full scale stepped by an empty-hand right-click: 2-100 bar, 100-500 C); the dial goes green to red.
