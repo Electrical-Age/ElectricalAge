@@ -93,8 +93,9 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
             } else {
                 element.powerEfficency = 1 - (element.descriptor.electricalPowerRatioLostOffset + element.descriptor.electricalPowerRatioLostPerBlock * distance);
 
-                if (world.isRaining()) element.powerEfficency *= 0.707;
-                if (world.isThundering()) element.powerEfficency *= 0.707;
+                // (rain and thunder each cost 30 %, graded, at the transmitter)
+                double[] weather = mods.eln.misc.Utils.weatherAt(world, element.node.coordonate.pos());
+                element.powerEfficency *= Math.pow(0.707, weather[0]) * Math.pow(0.707, weather[1]);
 
                 element.rxCoord = node.coordonate;
                 element.rxElement = (ElectricalAntennaRxElement) node.element;

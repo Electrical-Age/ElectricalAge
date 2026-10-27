@@ -61,7 +61,7 @@ public class WaterTurbineSlowProcess implements IProcess, INBTTReady {
         }
 
         double timeFactor = 1 + 0.2 * Math.sin((time - 0.20) * Math.PI * 2);
-        double weatherFactor = 1 + Utils.getWeatherNoLoad(turbine.coordonate().dimention) * 2;
+        double weatherFactor = 1 + Utils.getWeatherNoLoad(turbine.coordonate()) * 2;
         return timeFactor * weatherFactor;
     }
 

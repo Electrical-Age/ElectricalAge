@@ -35,13 +35,8 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
             if (coord.getWorldExist()) {
                 Level world = coord.world();
 
-                if (world.isRaining()) {
-                    //float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
-                    target = 0.5f;
-                }
-                if (world.isThundering()) {
-                    target = 1.0f;
-                }
+                // 0.5 in rain, 1 in a thunderstorm, graded between (at the sensor: Watershed's showers are local)
+                target = (float) mods.eln.misc.Utils.getWeatherNoLoad(coord);
                 rc.setTarget(target);
             }
 

@@ -60,8 +60,9 @@ public class SolarPannelSlowProcess implements IProcess {
         if (coordonate.getWorldExist() == false) return light;
 
         Level world = coordonate.world();
-        if (world.isRaining()) light *= 0.5;
-        if (world.isThundering()) light *= 0.5;
+        // (rain halves it, a thunderstorm halves it again; graded, at the panel: Watershed's showers are local)
+        double[] weather = Utils.weatherAt(world, coordonate.pos());
+        light *= (1 - 0.5 * weather[0]) * (1 - 0.5 * weather[1]);
 
 
         double xD = Math.cos(solarAlpha), yD = Math.sin(solarAlpha);

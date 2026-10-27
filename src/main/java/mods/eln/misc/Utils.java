@@ -687,6 +687,30 @@ public class Utils {
         return world.getOverworldClockTime() / (23999.0);
     }
 
+    /**
+     * Where the rain comes from, if another mod models it locally (Watershed's showers, by IMC "eln"/"weather": a supplier
+     * of this function): {rain, thunder}, each 0..1, at a place now; null where it doesn't. Null: the world's weather.
+     */
+    public static volatile java.util.function.BiFunction<net.minecraft.world.level.Level, net.minecraft.core.BlockPos, double[]> weatherSource;
+
+    /** {rain, thunder} 0..1 over pos (Baughn: EA's solar panels see Watershed's showers): the weather source's there,
+     *  else the world's rain and thunder levels. */
+    public static double[] weatherAt(net.minecraft.world.level.Level world, net.minecraft.core.BlockPos pos) {
+        var src = weatherSource;
+        if (src != null) {
+            double[] w = src.apply(world, pos);
+            if (w != null) return w;
+        }
+        return new double[]{world.getRainLevel(1), world.getThunderLevel(1)};
+    }
+
+    /** The weather at c, 0 clear, 0.5 rain, 1 thunder (graded in between), as getWeatherNoLoad; 0 if c's world isn't loaded. */
+    public static double getWeatherNoLoad(Coordonate c) {
+        if (c == null || !c.getWorldExist()) return 0.0;
+        double[] w = weatherAt(c.world(), c.pos());
+        return Math.max(w[0] * 0.5, w[1]);
+    }
+
     public static double getWeatherNoLoad(int dim) {
         net.minecraft.world.level.Level world = Dimensions.level(dim);
         if (world == null) return 0.0;
