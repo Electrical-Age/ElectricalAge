@@ -53,6 +53,7 @@ public final class OilCases {
         cases.add(new CompactTurbinePipe());
         cases.add(new SteamOvenCase());
         cases.add(new SealedPlant());
+        cases.add(new DryBoiler());
         cases.add(new SafetyValvePlant(4000, 1200, "fluid_safety_valve_holds_the_plant"));
         cases.add(new SafetyValvePlant(8000, 1400, "fluid_safety_valve_relieves_steadily"));
         cases.add(new SteamJetScalds());
@@ -1261,6 +1262,61 @@ public final class OilCases {
             ctx.check("fluid: one piece of the iron run burst (not the whole run)", burst, bursts + " burst");
             ctx.check("fluid: the crack lets the pressure down (the heat keeps coming)", boiler.vessel.P() < 0.9 * peak, String.format("%.1f bar now", boiler.vessel.P() / 1e5));
             ctx.check("fluid: the boiler survived", !boiler.node.isDestructing() && !boiler.isBurnt(), "");
+        }
+    }
+
+    /**
+     * A boiler boiled dry on a hot shell (420 C), a capped iron pipe on top (AdventurAgent: a dry boiler filled its pipes
+     * with "air" at up to 1800 C, the pressure swinging 0.5-3.6 bar second to second): its gas stays at or under the
+     * shell's temperature, the pipe's too, and the pressure steady.
+     */
+    static final class DryBoiler implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.sim.IProcess fire;
+        net.minecraft.core.BlockPos pipeAt;
+        double hotGas, hotPipe, time, lo = 1e9, hi;
+
+        public String id() {
+            return "fluid_dry_boiler_stays_sane";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.thermal.Tc = 420 - mods.eln.sim.PhysicalConstant.Tamb;
+            boiler.fromTanks(0, 0);
+            boiler.showTanks();
+            pipeAt = ctx.at(1, 2, 1);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                boiler.thermal.Tc = 420 - mods.eln.sim.PhysicalConstant.Tamb;   // (a furnace holding the shell hot)
+                time += t;
+                if (boiler.vessel == null) return;
+                hotGas = Math.max(hotGas, boiler.vessel.T() - 273.15);
+                var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
+                var pipe = mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) n.parts.get(0)).fluid);
+                hotPipe = Math.max(hotPipe, pipe.T() - 273.15);
+                if (time > 20) {
+                    lo = Math.min(lo, pipe.P());
+                    hi = Math.max(hi, pipe.P());
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line(String.format("dry boiler: gas up to %.0f C, pipe up to %.0f C, pipe %.2f-%.2f bar after 20 s; %s", hotGas, hotPipe, lo / 1e5, hi / 1e5, boiler.getWaila()));
+            ctx.check("dry boiler: its gas stays at or under the shell's 420 C", hotGas < 425, String.format("%.0f C", hotGas));
+            ctx.check("dry boiler: its pipe too", hotPipe < 425, String.format("%.0f C", hotPipe));
+            ctx.check("dry boiler: the pressure holds steady", hi - lo < 0.1e5, String.format("%.2f-%.2f bar", lo / 1e5, hi / 1e5));
         }
     }
 
