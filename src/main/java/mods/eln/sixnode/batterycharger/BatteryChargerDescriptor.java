@@ -113,6 +113,8 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...").split("\\\n"));
         list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalPower)));
+        // (Erisi's chat review: a cable beside it didn't connect)
+        list.add(tr("Power in on one edge only: on a floor, the edge nearest you as you place it"));
     }
 
     @Override
