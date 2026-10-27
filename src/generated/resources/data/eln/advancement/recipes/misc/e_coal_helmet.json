@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:plates/coal"
+            "items": "#eln:high_quality_plates/coal"
           }
         ]
       },

@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "#c:plates/alloy",
+    "C": "#eln:high_quality_plates/alloy",
     "c": "eln:copper_cable"
   },
   "pattern": [

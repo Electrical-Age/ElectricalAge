@@ -65,6 +65,20 @@ public final class OreDictTags {
         return TagKey.create(Registries.ITEM, Identifier.parse(tagId(oreName)));
     }
 
+    /**
+     * The tag EA's recipes take for an ore name: a plate is eln:high_quality_plates/&lt;metal&gt; (Baughn 2026-10-27: EA's
+     * plates hold their tolerances, a hammered one doesn't; a tag of its own so a modpack can add other plates), the rest
+     * as {@link #tag}.
+     */
+    public static TagKey<Item> recipeTag(String oreName) {
+        String id = tagId(oreName);
+        return id.startsWith("c:plates/") ? highQualityPlates(id.substring("c:plates/".length())) : tag(oreName);
+    }
+
+    public static TagKey<Item> highQualityPlates(String metal) {
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("eln", "high_quality_plates/" + metal));
+    }
+
     /** "CertusQuartz" -> "certus_quartz". */
     static String snake(String camel) {
         return camel.replaceAll("([a-z0-9])([A-Z])", "$1_$2").toLowerCase(java.util.Locale.ROOT);

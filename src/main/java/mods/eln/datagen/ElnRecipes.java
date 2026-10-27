@@ -299,15 +299,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             "RUR",
             "ACA",
             'R', "itemRubber",
-            'U', findItemStack("Copper Plate"),
-            'A', findItemStack("Alloy Plate"),
+            'U', "plateCopper",
+            'A', "plateAlloy",
             'C', findItemStack("Low Voltage Cable"));
         addRecipe(findItemStack("200V Power Socket", 16),
             "RUR",
             "ACA",
             'R', "itemRubber",
-            'U', findItemStack("Copper Plate"),
-            'A', findItemStack("Alloy Plate"),
+            'U', "plateCopper",
+            'A', "plateAlloy",
             'C', findItemStack("Medium Voltage Cable"));
     }
 
@@ -591,7 +591,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "cCc",
             " p ",
             'C', dictAdvancedChip,
-            'p', findItemStack("Copper Plate"),
+            'p', "plateCopper",
             'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Oscillator Chip"),
@@ -599,7 +599,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "cCc",
             "   ",
             'C', dictAdvancedChip,
-            'p', findItemStack("Copper Plate"),
+            'p', "plateCopper",
             'c', findItemStack("Copper Cable"),
             'd', findItemStack("Dielectric"));
 
@@ -608,7 +608,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "cCc",
             " p ",
             'C', dictAdvancedChip,
-            'p', findItemStack("Copper Plate"),
+            'p', "plateCopper",
             'c', findItemStack("Copper Cable"));
 
 
@@ -683,7 +683,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             " s ",
             'd', findItemStack("Dielectric"),
             'c', findItemStack("Copper Cable"),
-            'C', findItemStack("Copper Plate"),
+            'C', "plateCopper",
             'D', findItemStack("Coal Dust"),
             's', dictCheapChip);
     }
@@ -943,7 +943,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             " c ",
             'c', findItemStack("Copper Cable"),
             'R', dictAdvancedChip,
-            'P', findItemStack("Iron Plate"));
+            'P', "plateIron");
 
     }
 
@@ -1707,7 +1707,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "ppp",
             "p p",
             "ppp",
-            'p', findItemStack("Iron Plate"));
+            'p', "plateIron");
 
     }
 
@@ -1975,7 +1975,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "CBC",
             "ImI",
             "IEI",
-            'C', findItemStack("Copper Plate"),
+            'C', "plateCopper",
             'B', stack(Items.BUCKET),
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
@@ -1985,16 +1985,16 @@ public final class ElnRecipes extends ElnRecipesBase {
             "PCP",
             "CMC",
             "PmP",
-            'P', findItemStack("Iron Plate"),
-            'C', findItemStack("Copper Plate"),
+            'P', "plateIron",
+            'C', "plateCopper",
             'M', findItemStack("Machine Block"),
             'm', findItemStack("Electrical Motor"));
         addRecipe(findItemStack("Steam Condenser", 1),
             "PCP",
             "CMC",
             "PmP",
-            'P', findItemStack("Alloy Plate"),
-            'C', findItemStack("Copper Plate"),
+            'P', "plateAlloy",
+            'C', "plateCopper",
             'M', findItemStack("Advanced Machine Block"),
             'm', findItemStack("Advanced Electrical Motor"));
         // the steam oven (Baughn 2026-10-23): an iron box with a glass door, a pipe in on top and a fan

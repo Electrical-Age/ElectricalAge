@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:copper_plate",
+    "C": "#eln:high_quality_plates/copper",
     "D": "eln:coal_dust",
     "c": "eln:copper_cable",
     "d": "eln:dielectric",

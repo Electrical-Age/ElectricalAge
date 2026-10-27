@@ -30,12 +30,15 @@ public final class PipeKitRecipes {
         return net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(PLATE[tier]));
     }
 
-    /** The pipe tier a stack of plates makes, or -1. */
+    /** The pipe tier a stack of plates makes, or -1: any plate in the tier's eln:high_quality_plates tag (Baughn
+     *  2026-10-27: EA's own, and what a modpack adds; a lone kit gives back EA's). */
     public static int plateTier(ItemStack s) {
         if (s.isEmpty()) return -1;
-        for (int t = 0; t < PLATE.length; t++) if (s.is(plate(t))) return t;
+        for (int t = 0; t < PLATE.length; t++) if (s.is(mods.eln.misc.OreDictTags.highQualityPlates(METAL[t]))) return t;
         return -1;
     }
+
+    static final String[] METAL = {"iron", "alloy"};
 
     /**
      * Pipe kits from plates (Baughn: pipe kits didn't stack up or craft many at a time; cable kits had been fixed):

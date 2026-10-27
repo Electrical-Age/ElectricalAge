@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": "#c:circuits/advanced",
-    "P": "#c:plates/coal"
+    "P": "#eln:high_quality_plates/coal"
   },
   "pattern": [
     "P P",

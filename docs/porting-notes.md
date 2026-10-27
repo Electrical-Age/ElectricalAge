@@ -44,6 +44,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Plates in EA recipes (Baughn 2026-10-27): crafting recipes and pipe kits take `eln:high_quality_plates/<metal>`
+  (OreDictTags.recipeTag), which holds EA's own plates, instead of `c:plates/<metal>` or the exact item; a modpack can
+  add plates to it. EA's plates say so in their tooltip. `recipes_take_high_quality_plates`.
 - 50V Compact Steam Turbine (new, Baughn 2026-10-27: the bootstrap option, eln:transparent_node@5284): heat on its left
   flank, water by bucket / top flange (float valve) / capability, 50 V front and back, no settings. 10% of the heat
   (Baughn) up to 300 W, so a stone heat furnace with 4 chambers runs it at full; governor from 105 to 140 C, bypass to

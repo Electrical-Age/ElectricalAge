@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "p": "eln:iron_plate"
+    "p": "#eln:high_quality_plates/iron"
   },
   "pattern": [
     "ppp",

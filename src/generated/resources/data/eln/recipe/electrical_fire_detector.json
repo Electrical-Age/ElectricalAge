@@ -3,7 +3,7 @@
   "key": {
     "b": "#c:circuits/basic",
     "c": "eln:signal_cable",
-    "p": "#c:plates/copper",
+    "p": "#eln:high_quality_plates/copper",
     "r": "#c:rubbers"
   },
   "pattern": [

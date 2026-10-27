@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#eln:high_quality_plates/copper",
+    "#eln:high_quality_plates/iron",
+    "#eln:high_quality_plates/gold",
+    "#eln:high_quality_plates/lead",
+    "#eln:high_quality_plates/silicon",
+    "#eln:high_quality_plates/alloy",
+    "#eln:high_quality_plates/coal"
+  ]
+}

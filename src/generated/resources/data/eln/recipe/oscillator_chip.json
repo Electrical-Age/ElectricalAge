@@ -4,7 +4,7 @@
     "C": "#c:circuits/advanced",
     "c": "eln:copper_cable",
     "d": "eln:dielectric",
-    "p": "eln:copper_plate"
+    "p": "#eln:high_quality_plates/copper"
   },
   "pattern": [
     "pdp",

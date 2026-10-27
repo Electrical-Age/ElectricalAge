@@ -3,7 +3,7 @@
   "key": {
     "C": "#c:circuits/advanced",
     "c": "eln:copper_cable",
-    "p": "eln:copper_plate"
+    "p": "#eln:high_quality_plates/copper"
   },
   "pattern": [
     " p ",

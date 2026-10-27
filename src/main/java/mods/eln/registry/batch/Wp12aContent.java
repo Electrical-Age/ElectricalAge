@@ -57,6 +57,9 @@ public class Wp12aContent implements ElnContent {
         registerFuelBurnerItem(124);
     }
 
+    /** On EA's plates (Erisi's chat review: players' hammered plates didn't fit, and nothing said why; Baughn 2026-10-27). */
+    static final String[] PLATE_NOTE = {"A high-quality plate: EA's recipes need these,", "a hammered plate won't do"};
+
     public static void registerHeatingCorp(int id) {
         int subId, completId;
         String name;
@@ -780,7 +783,7 @@ public class Wp12aContent implements ElnContent {
             subId = 6;
             name = TR_NAME(Type.NONE, "Copper Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateCopper", desc);
@@ -789,7 +792,7 @@ public class Wp12aContent implements ElnContent {
             subId = 7;
             name = TR_NAME(Type.NONE, "Iron Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateIron", desc);
@@ -798,7 +801,7 @@ public class Wp12aContent implements ElnContent {
             subId = 8;
             name = TR_NAME(Type.NONE, "Gold Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateGold", desc);
@@ -807,7 +810,7 @@ public class Wp12aContent implements ElnContent {
             subId = 9;
             name = TR_NAME(Type.NONE, "Lead Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateLead", desc);
@@ -816,7 +819,7 @@ public class Wp12aContent implements ElnContent {
             subId = 10;
             name = TR_NAME(Type.NONE, "Silicon Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateSilicon", desc);
@@ -825,7 +828,7 @@ public class Wp12aContent implements ElnContent {
             subId = 11;
             name = TR_NAME(Type.NONE, "Alloy Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateAlloy", desc);
@@ -834,7 +837,7 @@ public class Wp12aContent implements ElnContent {
             subId = 12;
             name = TR_NAME(Type.NONE, "Coal Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+                name, PLATE_NOTE);
             sharedItem.addElement(subId + (id << 6), desc);
             // wiki (P4): Data.addResource(desc.newItemStack());
             mods.eln.misc.OreDictTags.addToOre("plateCoal", desc);

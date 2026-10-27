@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": "#c:circuits/advanced",
-    "D": "#c:plates/alloy",
+    "D": "#eln:high_quality_plates/alloy",
     "M": "eln:advanced_machine_block",
     "c": "eln:advanced_electrical_motor"
   },
