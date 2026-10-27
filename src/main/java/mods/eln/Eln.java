@@ -234,6 +234,17 @@ public class Eln {
                 org.slf4j.LoggerFactory.getLogger("eln").info("Wind from {}", m.senderModId());
             }
         }));
+        // and its rain and thunder (Watershed's showers) for solar panels, the weather sensor and the rest: IMC "weather",
+        // a supplier of BiFunction<Level, BlockPos, double[]> ({rain, thunder} 0..1; null = none there), see Utils.rainAt
+        modBus.addListener(net.neoforged.fml.event.lifecycle.InterModProcessEvent.class, e -> e.getIMCStream("weather"::equals).forEach(m -> {
+            Object f = m.messageSupplier().get();
+            if (f instanceof java.util.function.BiFunction<?, ?, ?> fn) {
+                @SuppressWarnings("unchecked")
+                var w = (java.util.function.BiFunction<net.minecraft.world.level.Level, net.minecraft.core.BlockPos, double[]>) fn;
+                mods.eln.misc.Utils.weatherSource = w;
+                org.slf4j.LoggerFactory.getLogger("eln").info("Weather from {}", m.senderModId());
+            }
+        }));
         modBus.addListener(net.neoforged.fml.event.config.ModConfigEvent.Loading.class, e -> {
             if (e.getConfig().getSpec() == ElnConfig.SPEC) ElnConfig.refresh();
         });

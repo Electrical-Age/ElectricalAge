@@ -62,6 +62,24 @@ public final class SolarCases {
             ctx.check(String.format("solar power [W] (Pmax %.1f * light %.4f)", pmax, light),
                 Math.abs(src.getP() - pmax * light) <= tol, String.format("measured %.4f, expected %.4f +- %.3f", src.getP(), pmax * light, tol));
             ctx.check("solar: noon, clear sky: light > 0.5 (sun angle source on 26.x)", light > 0.5, String.format("light %.4f", light));
+            // local weather (Watershed's showers, by IMC): asked at the panel; rain halves the light, thunder halves it
+            // again; where the source has none (null), the world's weather (clear here)
+            var saved = mods.eln.misc.Utils.weatherSource;
+            BlockPos at = panel.node.coordonate.pos();
+            try {
+                double[][] cases = {{1, 0, 0.5}, {1, 1, 0.25}, {0.4, 0, 0.8}};
+                for (double[] c : cases) {
+                    mods.eln.misc.Utils.weatherSource = (lvl, pos) -> pos.equals(at) ? new double[]{c[0], c[1]} : new double[]{0, 0};
+                    double l = process.getSolarLight();
+                    ctx.check(String.format("solar: rain %.1f, thunder %.1f at the panel: light x %.2f", c[0], c[1], c[2]),
+                        Math.abs(l - light * c[2]) < 1e-9, String.format("light %.4f, clear %.4f", l, light));
+                }
+                mods.eln.misc.Utils.weatherSource = (lvl, pos) -> null;
+                double l = process.getSolarLight();
+                ctx.check("solar: no local weather there: the world's (clear)", Math.abs(l - light) < 1e-9, String.format("light %.4f", l));
+            } finally {
+                mods.eln.misc.Utils.weatherSource = saved;
+            }
         }
     }
 
