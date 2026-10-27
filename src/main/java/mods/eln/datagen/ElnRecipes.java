@@ -1969,6 +1969,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Advanced Machine Block"),
             'E', findItemStack("Medium Voltage Cable"),
             'm', findItemStack("Advanced Electrical Motor"));
+        // the bootstrap turbine (Baughn 2026-10-27): cheaper than the 50V Steam Turbine and no boiler to buy; a bucket for
+        // its tank, copper plates for its condenser
+        addRecipe(findItemStack("50V Compact Steam Turbine", 1),
+            "CBC",
+            "ImI",
+            "IEI",
+            'C', findItemStack("Copper Plate"),
+            'B', stack(Items.BUCKET),
+            'I', stack(Items.IRON_INGOT),
+            'm', findItemStack("Electrical Motor"),
+            'E', findItemStack("Low Voltage Cable"));
         // the turbines' condensers (Baughn 2026-10-26): a shell of copper tubes (the cooler) round a vessel, and a pump
         addRecipe(findItemStack("Small Steam Condenser", 1),
             "PCP",

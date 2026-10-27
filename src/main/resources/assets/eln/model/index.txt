@@ -13,6 +13,7 @@ boiler/boiler.obj
 classiclampsocket/classiclampsocket.obj
 columnbase/columnbase.obj
 columnsegment/columnsegment.obj
+compactturbine50v/compactturbine50v.obj
 compressora/compressora.obj
 compressorb/compressorb.obj
 condenser200v/condenser200v.obj

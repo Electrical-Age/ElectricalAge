@@ -1,4 +1,4 @@
-// 26.3	2026-10-26T16:40:43.792460579	eln-global/EA models
+// 26.3	2026-10-27T14:19:52.006717912	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -13,6 +13,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/2x3_rotating_solar_panel.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/2x3_solar_panel.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_compact_steam_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_egg_incubator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_electric_heater.json
@@ -112,6 +113,7 @@ d1f94e7fb1a9bc16ffa9e0f8524ae70d6917f64b assets/eln/items/25a_diode.json
 861291c51eba402c3930f1b4a65d550c96054a14 assets/eln/items/2x3_solar_panel.json
 55fc5a17b18fc0b2c2300c914ec12011790942f1 assets/eln/items/50v_battery_charger.json
 37a4b70ca3294977e668f4d53f321c6dfe13804a assets/eln/items/50v_carbon_incandescent_light_bulb.json
+dda2f3d7cd8abeb93378f9704a853487dc58c3e2 assets/eln/items/50v_compact_steam_turbine.json
 df761356f972c2ef468238567908f9b444265705 assets/eln/items/50v_compressor.json
 ec16bb43a53a66496192fbaa1f69dd342e09ac4f assets/eln/items/50v_copper_heating_corp.json
 a9c7be41917ed0d012de250710e8a5c0d4ec0a3c assets/eln/items/50v_economic_light_bulb.json
@@ -469,6 +471,7 @@ f0ccd44245eafc70c0ee233a21c51ed9e4d42191 assets/eln/models/item/25a_diode_3d.jso
 4ff3fae23b56570fd74cda7ca80f44533441111b assets/eln/models/item/50v_battery_charger.json
 6df47b30dbf44675490226b28834d475197d6cb2 assets/eln/models/item/50v_battery_charger_3d.json
 449866fb75db036bc53204a0fd8f2c78041382eb assets/eln/models/item/50v_carbon_incandescent_light_bulb.json
+a67e6dcb8020e78ad48a94d67e13e7f5ad1c5fc6 assets/eln/models/item/50v_compact_steam_turbine.json
 6cc62f4c36b3248f592ce3d191775049b2c53c54 assets/eln/models/item/50v_compressor.json
 7a8b60d912deb154f5ec2c28503e0fc012a3e4aa assets/eln/models/item/50v_compressor_3d.json
 802b04a13b534f57100302af0acfcc1c0a6dac50 assets/eln/models/item/50v_copper_heating_corp.json

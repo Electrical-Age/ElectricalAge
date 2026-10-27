@@ -44,6 +44,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- 50V Compact Steam Turbine (new, Baughn 2026-10-27: the bootstrap option, eln:transparent_node@5284): heat on its left
+  flank, water by bucket / top flange (float valve) / capability, 50 V front and back, no settings. 10% of the heat
+  (Baughn) up to 300 W, so a stone heat furnace with 4 chambers runs it at full; governor from 105 to 140 C, bypass to
+  its built-in condenser over 150 C (3.5 kW, costs fuel), safety valve over 180 C (costs water); 3% makeup water.
+  Dry it stops without failing. `compact_turbine_*`.
 - Pipe Control Valve (signal 0-50 V on its actuator's top) and Pipe Throttle Valve (slider screen), kinds of ValvePart
   (Baughn 2026-10-26). `pipe_throttle_and_control_valves`.
 - 50V/200V steam turbines take water damage: over 10% of the inlet liquid while the shaft turns above 20% speed burns them out (`FailureCause.WATER`, repairable; the repair drains the inlet). Baughn 2026-10-26; `oil_steam_turbine_floods`.

@@ -74,6 +74,9 @@ public class Wp10aContent implements ElnContent {
             1000, 0.005, "condenser50v"));
         transparentNodeItem.addDescriptor(32 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Steam Condenser"),
             4000, 0.02, "condenser200v"));
+        // the bootstrap turbine (Baughn 2026-10-27): heat and water in, 50 V out, its control and condenser built in
+        transparentNodeItem.addDescriptor(36 + (id << 6), new mods.eln.oil.CompactTurbineDescriptor(TR_NAME(Type.NONE, "50V Compact Steam Turbine"),
+            LVU, 300, lowVoltageCableDescriptor, "compactturbine50v"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */
