@@ -128,6 +128,11 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         // the shell heats the water (EA thermal temperatures are relative to the ambient, Tref)
         double shellK = thermal.Tc + mods.eln.sim.PhysicalConstant.Tref;
         double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W;
+        // (at most half the way to the shell's temperature in a step, as the condenser: a boiler boiled dry holds only
+        // a little air and vapour, next to no heat capacity, and the explicit step overshot it to 1300 C and on into its
+        // pipes, with the pressure swinging 0.5-3.6 bar: AdventurAgent)
+        double toShell = (mods.eln.sim.fluid.Flash.energyAt(vessel.mWater, vessel.mAir, vessel.volume, shellK) - vessel.energy) / dt;
+        q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
         vessel.heat += q;
         thermal.moveEnergyTo(-q * dt);
     }
@@ -310,7 +315,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         Map<String, String> info = new HashMap<>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
         if (vessel != null) {
-            info.put(I18N.tr("Water temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
+            // (dry, it is the gas's: AdventurAgent read "Water temperature" with no water)
+            info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
         }
         info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
