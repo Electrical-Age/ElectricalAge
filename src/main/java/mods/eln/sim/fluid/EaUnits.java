@@ -10,6 +10,19 @@ public final class EaUnits {
 
     public static final double KG_PER_MB_WATER = 6.75e-5, KG_PER_MB_STEAM = 1e-6;
 
+    /** Steam for players (Baughn: mB of a gas never made sense; grams do): mB of steam (or a rate in mB/s) as grams. */
+    public static String steamGrams(double mB) {
+        double g = mB * KG_PER_MB_STEAM * 1000;
+        return String.format(g < 10 ? "%.2f g" : "%.1f g", g);
+    }
+
+    /** What a node's pressure is of, for its label: water when it is full of it, else its gas (steam, air or both). */
+    public static String contents(FluidNode n) {
+        if (n.mLiquid() / Water.RHO_L > 0.95 * n.volume) return "water";
+        double share = n.P() > 0 ? n.pVapour() / n.P() : 0;
+        return share > 0.9 ? "steam" : share < 0.1 ? "air" : "steam and air";
+    }
+
     /** The vapour a node can give out (kg): what is above what 1 atm would hold. */
     public static double steamAvailable(FluidNode n) {
         double p = n.P();

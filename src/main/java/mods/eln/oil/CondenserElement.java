@@ -276,7 +276,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         Map<String, String> info = new HashMap<>();
         info.put(I18N.tr("Turbine"), turbine == null ? I18N.tr("none: place it against a turbine's exhaust side") : I18N.tr("connected"));
         if (vessel != null) {
-            info.put(I18N.tr("Pressure"), String.format("%.2f bar", vessel.P() / 1e5));
+            info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
             info.put(I18N.tr("Temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
             info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)", floodShare() * 100, vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
         }

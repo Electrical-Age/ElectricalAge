@@ -477,9 +477,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Steam"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
-        info.put(I18N.tr("Steam used"), String.format("%.0f mB/s", steamRate));
-        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar", inlet.P() / 1e5));
+        // (Baughn: steam in grams, and the pressure of what)
+        info.put(I18N.tr("Steam used"), EaUnits.steamGrams(steamRate) + "/s");
+        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, EaUnits.contents(inlet)));
         // (Baughn: so players see what pressure buys; 100% = its rating, 10 bar venting to air)
         if (condenser != null) info.put(I18N.tr("Exhaust"), String.format("condenser, %.2f bar", condenser.vessel.P() / 1e5));
         if (inlet != null) info.put(I18N.tr("Pressure efficiency"), String.format("%.0f%% of its %.0f bar rating", pressureEfficiency() * 100,

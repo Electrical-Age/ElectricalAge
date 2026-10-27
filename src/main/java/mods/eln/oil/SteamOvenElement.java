@@ -294,8 +294,8 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
-        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar", inlet.P() / 1e5));
-        info.put(I18N.tr("Steam used"), String.format("%.0f mB/s", steamRate));
+        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, mods.eln.sim.fluid.EaUnits.contents(inlet)));
+        info.put(I18N.tr("Steam used"), mods.eln.sim.fluid.EaUnits.steamGrams(steamRate) + "/s");
         info.put(I18N.tr("Cooking"), cooking ? Utils.plotPower("", cookW) : I18N.tr("No"));
         return info;
     }

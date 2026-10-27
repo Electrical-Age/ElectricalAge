@@ -311,11 +311,12 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
         if (vessel != null) {
             info.put(I18N.tr("Water temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
-            info.put(I18N.tr("Pressure"), String.format("%.2f bar", vessel.P() / 1e5));
+            info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
         }
         info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
-        info.put(I18N.tr("Steam"), tanks.steam() + " / " + BoilerTanks.STEAM_MB + " mB");
-        info.put(I18N.tr("Steam made"), String.format("%.0f mB/s", steamRate));
+        // (Baughn: steam in grams, not mB)
+        info.put(I18N.tr("Steam to give"), EaUnits.steamGrams(tanks.steam()));
+        info.put(I18N.tr("Steam made"), EaUnits.steamGrams(steamRate) + "/s");
         // (Baughn: "At half height: liquid" didn't say what it meant)
         info.put(I18N.tr("Front signal"), liquidAtProbe ? I18N.tr("high: water above half") : I18N.tr("low: water below half"));
         return info;
