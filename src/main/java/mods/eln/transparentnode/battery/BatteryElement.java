@@ -91,6 +91,7 @@ public class BatteryElement extends TransparentNodeElement {
         electricalComponentList.add(cutSwitch);
         thermalLoadList.add(thermalLoad);
         electricalProcessList.add(batteryProcess);
+        electricalProcessList.add(inventoryProcess.new Step());   // (the protection chips, every step)
         batteryProcess.chargeHeat = thermalLoad;
         thermalFastProcessList.add(negativeETProcess);
 
@@ -184,7 +185,8 @@ public class BatteryElement extends TransparentNodeElement {
         descriptor.applyTo(thermalLoad);
         descriptor.applyTo(dischargeResistor);
         descriptor.applyTo(batterySlowProcess);
-        cutSwitch.setR(descriptor.electricalRs / 2);
+        // (a saved one keeps its resistance: the charge limiter may have raised it; BatteryInventoryProcess.Step)
+        if (!fromNBT || !(cutSwitch.getBaseR() >= descriptor.electricalRs / 2)) cutSwitch.setR(descriptor.electricalRs / 2);
         cutLoad.setRs(descriptor.electricalRs / 2);
         negativeLoad.setRs(descriptor.electricalRs);
         if (fromItemStack) {
@@ -264,6 +266,8 @@ public class BatteryElement extends TransparentNodeElement {
         wailaList.put(I18N.tr("Charge"), Utils.plotPercent("", batteryProcess.getCharge()));
         wailaList.put(I18N.tr("Energy"), Utils.plotEnergy("", batteryProcess.getEnergy()));
         wailaList.put(I18N.tr("Life"), Utils.plotPercent("", batteryProcess.life));
+        String p = inventoryProcess.describe();
+        if (p != null) wailaList.put(I18N.tr("Protection"), p);
         if (Eln.wailaEasyMode) {
             wailaList.put(I18N.tr("Voltage"), Utils.plotVolt("", batteryProcess.getU()));
             wailaList.put(I18N.tr("Current"), Utils.plotAmpere("", batteryProcess.getDischargeCurrent()));

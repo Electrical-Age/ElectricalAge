@@ -727,7 +727,12 @@ public final class OilCases {
                 }
                 // (a pump on each makeup flange: water kept at 10 bar behind the valve)
                 for (var c : new mods.eln.oil.CondenserElement[]{full, low})
-                    for (int k = 0; k < 100 && c.inlet.P() < 10e5; k++) mods.eln.sim.fluid.EaUnits.addWater(c.inlet, 2e-5, 300, false);
+                    {
+                        // (into the run's lump, which the fluid step works on: water put into the flange's own node was lost
+                        // or not, by where this process ran in the slow list: the test failed by its place in the grid)
+                        var n = mods.eln.fluid.FluidWorld.nodeFor(c.inlet);
+                        for (int k = 0; k < 100 && n.P() < 10e5; k++) mods.eln.sim.fluid.EaUnits.addWater(n, 2e-5, 300, false);
+                    }
             });
         }
 
@@ -1190,7 +1195,12 @@ public final class OilCases {
                 // (a pump on each flange: water kept at 3 bar)
                 for (var c : new mods.eln.oil.CompactTurbineElement[]{empty, full})
                     if (c.inlet != null)
-                        for (int k = 0; k < 100 && c.inlet.P() < 3e5; k++) mods.eln.sim.fluid.EaUnits.addWater(c.inlet, 2e-5, 300, false);
+                        {
+                        // (into the run's lump, which the fluid step works on: water put into the flange's own node was lost
+                        // or not, by where this process ran in the slow list: the test failed by its place in the grid)
+                        var n = mods.eln.fluid.FluidWorld.nodeFor(c.inlet);
+                        for (int k = 0; k < 100 && n.P() < 3e5; k++) mods.eln.sim.fluid.EaUnits.addWater(n, 2e-5, 300, false);
+                    }
             });
         }
 

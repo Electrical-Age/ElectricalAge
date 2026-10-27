@@ -87,6 +87,8 @@ public final class Wp10aCases {
         cases.add(new MaceratorReverseCase());
         cases.add(new MaceratorFieldSpeedCase());
         cases.add(new SingleUseChargeCase());
+        cases.add(new ProtectedEmptyBatteryCase());
+        cases.add(new LowVoltageDisconnectCase());
         cases.add(new TransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
@@ -525,6 +527,117 @@ public final class Wp10aCases {
             ctx.check("single-use battery: charging stores nothing", q <= startCharge + 1e-6, String.format("charge %.4f -> %.4f", startCharge, q));
             ctx.check("single-use battery: charged, it overheats and burns", battery.isBurnt() || battery.thermalLoad.Tc > battery.descriptor.thermalWarmLimit * 0.8,
                 String.format("burnt %s, T %.1f (limit %.0f)", battery.isBurnt(), battery.thermalLoad.Tc, battery.descriptor.thermalWarmLimit));
+        }
+    }
+
+    /**
+     * Baughn 2026-10-27, a live Cost Oriented Battery with both protection chips burnt (OVERHEAT, 76): nearly empty (1.5%,
+     * ~4 V) on a 50 V bus. Here: the same battery at 1.5%, both chips fitted, 50 V on its positive side, its negative
+     * grounded. It must not burn, and must stay under its warm limit.
+     */
+    static final class ProtectedEmptyBatteryCase implements TestCase {
+        mods.eln.transparentnode.battery.BatteryElement battery;
+        mods.eln.sim.IProcess watch;
+        double peak = -999, peakCharge;
+        int cuts;
+        boolean wasCut, limited;
+
+        public String name() {
+            return "battery protection: an empty battery put on 50 V";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            battery = (mods.eln.transparentnode.battery.BatteryElement) l.device(0 + (16 << 6), 3, 1);
+            battery.batteryProcess.setCharge(0.015);
+            battery.getInventory().setItem(0, new ItemStack(mods.eln.Eln.itemsByName.get("Overvoltage Protection")));
+            battery.getInventory().setItem(1, new ItemStack(mods.eln.Eln.itemsByName.get("Overheating Protection")));
+            SixNodeElement[] plus = l.feed(ctx.at(3, 1, 1), battery.front.left());
+            ((ElectricalSourceElement) plus[0]).networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat(50f);
+            }));
+            SixNodeElement[] minus = l.feed(ctx.at(3, 1, 1), battery.front.right());
+            ((ElectricalSourceElement) minus[0]).networkUnserialize(ctx.stream(out -> {
+                out.writeByte(ElectricalSourceElement.setVoltageId);
+                out.writeFloat(0f);
+            }));
+            mods.eln.Eln.simulator.addSlowProcess(watch = t -> {
+                peak = Math.max(peak, battery.thermalLoad.Tc);
+                peakCharge = Math.max(peakCharge, -battery.batteryProcess.getDischargeCurrent());
+                if ("limiting".equals(String.valueOf(battery.inventoryProcess.describe()).split(" ")[0])) limited = true;
+                boolean cut = !battery.cutSwitch.getState();
+                if (cut && !wasCut) cuts++;
+                wasCut = cut;
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(watch);
+            ctx.line(String.format("battery protection: peak Tc %.1f (warm limit %.0f), %d cuts, charge %.3f, burnt %s, current %.1f A",
+                peak, battery.descriptor.thermalWarmLimit, cuts, battery.batteryProcess.getCharge(), battery.isBurnt(), battery.batteryProcess.getDischargeCurrent()));
+            ctx.check("battery protection: an empty protected battery on 50 V doesn't burn", !battery.isBurnt(), "");
+            ctx.check("battery protection: it stays under its cut (no cut needed)", peak < battery.descriptor.thermalWarmLimit * 2 / 3, String.format("peak %.1f, %d cuts", peak, cuts));
+            ctx.check("battery protection: the chip limits the charge current to about the rated current", limited
+                && peakCharge < battery.descriptor.electricalStdI * 1.3, String.format("peak %.1f A, rated %.1f A", peakCharge, battery.descriptor.electricalStdI));
+            ctx.check("battery protection: it charges", battery.batteryProcess.getCharge() > 0.016, String.format("%.4f", battery.batteryProcess.getCharge()));
+        }
+    }
+
+    /** The overvoltage chip's low-voltage disconnect (Baughn 2026-10-27): a battery at 8% with the chip, shorted to 0 V
+     *  through a cable, gives nothing (its charge holds); one without the chip discharges. */
+    static final class LowVoltageDisconnectCase implements TestCase {
+        mods.eln.transparentnode.battery.BatteryElement chip, bare;
+
+        public String name() {
+            return "battery protection: low-voltage disconnect";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        mods.eln.transparentnode.battery.BatteryElement battery(TestContext ctx, Layout l, int z, boolean withChip) {
+            int x = 3;
+            var b = (mods.eln.transparentnode.battery.BatteryElement) l.device(0 + (16 << 6), x, z);
+            b.batteryProcess.setCharge(0.08);
+            if (withChip) b.getInventory().setItem(0, new ItemStack(mods.eln.Eln.itemsByName.get("Overvoltage Protection")));
+            for (var side : new mods.eln.misc.Direction[]{b.front.left(), b.front.right()}) {
+                SixNodeElement[] f = l.feed(ctx.at(x, 1, z), side);
+                ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
+                    out.writeByte(ElectricalSourceElement.setVoltageId);
+                    out.writeFloat(0f);
+                }));
+            }
+            return b;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            chip = battery(ctx, l, 0, true);
+            bare = battery(ctx, l, 2, false);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line(String.format("low-voltage disconnect: with chip %.4f (%s), without %.4f", chip.batteryProcess.getCharge(),
+                chip.inventoryProcess.describe(), bare.batteryProcess.getCharge()));
+            // (its own self-discharge, inside the cut, still runs)
+            ctx.check("battery protection: with the chip, a battery at 8% gives (almost) nothing", 0.08 - chip.batteryProcess.getCharge() < 0.1 * (0.08 - bare.batteryProcess.getCharge()),
+                String.format("%.4f", chip.batteryProcess.getCharge()));
+            ctx.check("battery protection: without it, it discharges", bare.batteryProcess.getCharge() < 0.079 || bare.isBurnt(),
+                String.format("%.4f", bare.batteryProcess.getCharge()));
         }
     }
 
