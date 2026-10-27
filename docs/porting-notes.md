@@ -73,6 +73,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   turbines, voxel cables (see voxel-cables.md), cable kits, chisel, item capabilities on machines (`ItemCapabilityCases`).
 - Lamp sockets remove monsters that appear within 9 blocks only while lit (Baughn 2026-10-27; 1.12 did it for every
   socket, lit or not). Mobs already near a lamp when it lights stay (`MonsterPopFreeProcess`, `LampMonsterCases`).
+- New in 26.x: the Electrical Engineer's Ledger (`eln:handbook`, Baughn 2026-10-27), a GuideME guide (`eln:handbook`;
+  GuideME optional). Book + 4 copper cables; every player gets one once, when a slot is free (persisted NBT
+  `eln_handbook_given`). EA ships a stub start page; a content mod adds pages under `guides/eln/handbook/` in its own
+  namespace and calls `Handbook.setStartPage` (`mods/eln/handbook`, `HandbookCases`).
 
 ## Behaviour changes vs 1.12
 

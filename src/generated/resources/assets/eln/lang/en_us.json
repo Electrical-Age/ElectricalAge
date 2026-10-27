@@ -302,6 +302,8 @@
   "item.eln.gray_brush": "Gray Brush",
   "item.eln.green_brush": "Green Brush",
   "item.eln.ground_cable": "Ground Cable",
+  "item.eln.handbook": "Electrical Engineer's Ledger",
+  "item.eln.handbook.no_guideme": "The Ledger's pages are blank: it needs the GuideME mod.",
   "item.eln.heavyoil_bucket": "Heavy Oil Bucket",
   "item.eln.high_power_receiver_antenna": "High Power Receiver Antenna",
   "item.eln.high_power_transmitter_antenna": "High Power Transmitter Antenna",

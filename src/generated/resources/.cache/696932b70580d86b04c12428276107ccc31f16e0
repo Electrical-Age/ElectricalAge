@@ -1,4 +1,4 @@
-// 26.3	2026-10-27T14:19:52.006717912	eln-global/EA models
+// 26.3	2026-10-27T17:40:12.384218608	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -234,6 +234,7 @@ c5bec09b544a1b17e38e0199fc64d913404e29b6 assets/eln/items/gold_plate.json
 12d8fcfd796a694035bd05fdd7dce7da9163aa76 assets/eln/items/gray_brush.json
 69b0f5a9932f8a27ea63cded262a9a9976c7c64c assets/eln/items/green_brush.json
 68db4992640bbf3df85227400237375dfe6c8c0a assets/eln/items/ground_cable.json
+6c06cb30635979c30b010d037a6c41d65432bd3d assets/eln/items/handbook.json
 50461a5034c917cad11b6e411503a3efed7e6b9c assets/eln/items/high_power_receiver_antenna.json
 2809d653915303c6821208594d7efdf6d8a7e1b0 assets/eln/items/high_power_transmitter_antenna.json
 a85c47bd1ce8e932ded9ef01dd78e0ccb9f5d970 assets/eln/items/high_voltage_cable.json
@@ -632,6 +633,7 @@ a2c5bd268f992cc8110ae2d483799a2772b7ef3a assets/eln/models/item/gold_dust.json
 a226cf403dbdfeeb44c3bf58de0c6cf852269566 assets/eln/models/item/gray_brush.json
 f7d7b0915063be54ce1e56e3bbebdf8d27e71cae assets/eln/models/item/green_brush.json
 201074a4b4e260eea17fddafbfd0f08a956cf1e8 assets/eln/models/item/ground_cable.json
+aa44c20d680f6244c69507baaafa048cb1faa5e7 assets/eln/models/item/handbook.json
 41bda0ea22ab2fb464f1bdf14fe5f9214f02582a assets/eln/models/item/high_power_receiver_antenna.json
 fabbeb42459aab19fee4bfe63949f87ae03fe494 assets/eln/models/item/high_power_receiver_antenna_3d.json
 063ea20dd2538699a5032c23e67a3c2f68459fb4 assets/eln/models/item/high_power_transmitter_antenna.json
