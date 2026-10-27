@@ -1,9 +1,4 @@
----
-navigation:
-  title: Electrical Engineer's Ledger
-  icon: eln:handbook
-  position: 0
----
+{/* No navigation entry: a content mod's own start page heads the index instead. */}
 
 # Electrical Engineer's Ledger
 
