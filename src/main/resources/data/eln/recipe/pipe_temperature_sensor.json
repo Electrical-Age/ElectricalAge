@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "eln:pipe_valve",
+    "eln:signal_cable",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "eln:pipe_temperature_sensor"
+  }
+}

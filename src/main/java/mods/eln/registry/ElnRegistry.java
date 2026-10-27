@@ -135,6 +135,11 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_throttle_valve", p -> new mods.eln.node.voxel.ValveItem(p, mods.eln.node.voxel.ValvePart.THROTTLE));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.SafetyValveItem> PIPE_SAFETY_VALVE =
         ITEMS.registerItem("pipe_safety_valve", mods.eln.node.voxel.SafetyValveItem::new);
+    /** Baughn 2026-10-27: pipe sensors, a 0-50 V signal of a run's pressure or temperature. */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeSensorItem> PIPE_PRESSURE_SENSOR =
+        ITEMS.registerItem("pipe_pressure_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.PRESSURE));
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeSensorItem> PIPE_TEMPERATURE_SENSOR =
+        ITEMS.registerItem("pipe_temperature_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.AdapterItem> PIPE_ADAPTER =
         ITEMS.registerItem("pipe_adapter", mods.eln.node.voxel.AdapterItem::new);
 
@@ -279,6 +284,8 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_THROTTLE_VALVE);
         ALL_ITEMS.add(PIPE_ADAPTER);
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
+        ALL_ITEMS.add(PIPE_PRESSURE_SENSOR);
+        ALL_ITEMS.add(PIPE_TEMPERATURE_SENSOR);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(HANDBOOK);

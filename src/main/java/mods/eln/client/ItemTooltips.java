@@ -26,6 +26,10 @@ public final class ItemTooltips {
 
     public static void onTooltip(ItemTooltipEvent e) {
         ItemStack stack = e.getItemStack();
+        if (stack.getItem() instanceof mods.eln.node.voxel.PipeSensorItem ps) {
+            for (String l : ps.tooltip()) e.getToolTip().add(Component.literal(l));
+            return;
+        }
         if (!(stack.getItem() instanceof IDescriptorItem di)) return;
         Object d = di.getEaDescriptor();
         if (d == null || broken.contains(d)) return;

@@ -44,6 +44,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Pipe Pressure Sensor and Pipe Temperature Sensor (new, Baughn 2026-10-27; `PipeSensorPart`): fitted on a straight pipe
+  like the safety valve, one per block; the run's absolute pressure or temperature as 0-50 V on every signal cable in the
+  block (full scale stepped by an empty-hand right-click: 2-100 bar, 100-500 C); the dial goes green to red.
+  `pipe_pressure_and_temperature_sensors`.
 - Battery protection chips (Baughn 2026-10-27, after a protected, nearly empty battery burnt on a 50 V bus): the
   overheating chip is a charge limiter, run every electrical step (BatteryInventoryProcess.Step): charging held to the
   rated current (electricalStdI) by the cut switch's resistance, tapering to none as it nears the cut; the cut is at

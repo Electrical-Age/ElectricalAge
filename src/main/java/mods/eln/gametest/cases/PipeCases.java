@@ -21,6 +21,7 @@ public final class PipeCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new BoilerPipeTurbine());
         cases.add(new HighQualityPlates());
+        cases.add(new Sensors());
         cases.add(new BoilerBucket());
         cases.add(new BoilerFeed());
         cases.add(new BoilerPhase());
@@ -367,6 +368,75 @@ public final class PipeCases {
         public void measure(TestContext ctx) {
             ctx.check("boiler bucket: taken, 1000 mB more water", took && after - before == 1000, before + " -> " + after);
             ctx.check("boiler bucket: the bucket comes back empty", emptied, "");
+        }
+    }
+
+    /**
+     * Pipe sensors (Baughn 2026-10-27): a run of three blocks holding hot steam, a pressure sensor on the first block and a
+     * temperature sensor on the last, each with a signal cable in its block; a second sensor in a block is refused. Their signals are the reading over full scale (25 bar, 200 C), and an
+     * empty-hand right-click steps the full scale.
+     */
+    static final class Sensors implements TestCase {
+        BlockPos a, b, c;
+        String errP, errT, second;
+
+        public String id() {
+            return "pipe_pressure_and_temperature_sensors";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        static mods.eln.node.voxel.PipeSensorPart sensor(TestContext ctx, BlockPos p, int sensing) {
+            for (VoxelPart q : node(ctx, p).parts) if (q instanceof mods.eln.node.voxel.PipeSensorPart s && s.sensing == sensing) return s;
+            return null;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            b = ctx.at(2, 1, 1);
+            c = ctx.at(3, 1, 1);
+            for (BlockPos p : new BlockPos[]{a, b, c}) lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
+            errP = node(ctx, a).addSensorNear(0.5, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.PRESSURE);
+            errT = node(ctx, c).addSensorNear(0.5, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
+            second = node(ctx, a).addSensorNear(0.25, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
+            // a signal cable along the floor of each block: the sensor's output joins it
+            for (BlockPos p : new BlockPos[]{a, c}) {
+                String ce = PipeKitItem.place(ctx.level(), p, new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 3, 16, 0, 3}), null);
+                if (ce != null) errP = "cable: " + ce;
+            }
+            for (BlockPos p : new BlockPos[]{a, b, c}) {
+                var f = ((PipePart) node(ctx, p).parts.get(0)).fluid;
+                f.fill(0, 1, 423.15);
+                mods.eln.sim.fluid.EaUnits.addWater(f, 6e5 * f.volume / (461.5 * 423.15), 423.15, true);   // (~6 bar of vapour at 150 C)
+                mods.eln.fluid.FluidWorld.changed(node(ctx, p));
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe sensors fit on a straight pipe", errP == null && errT == null, errP + " / " + errT);
+            if (errP != null || errT != null) return;
+            ctx.check("a second sensor in a block is refused", second != null, "" + second);
+            var ps = sensor(ctx, a, mods.eln.node.voxel.PipeSensorPart.PRESSURE);
+            var ts = sensor(ctx, c, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
+            var n = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) node(ctx, b).parts.get(0)).fluid);
+            ctx.line(String.format("pipe sensors: run %.2f bar %.0f C; pressure sensor %.2f bar -> %.2f V; temperature sensor %.0f C -> %.2f V; %s",
+                n.P() / 1e5, n.T() - 273.15, ps.reading, ps.out.getU(), ts.reading, ts.out.getU(), node(ctx, a).getWaila(false)));
+            ctx.check("pressure sensor reads the run (absolute)", Math.abs(ps.reading - n.P() / 1e5) < 0.05 && ps.reading > 2, String.format("%.2f", ps.reading));
+            ctx.check("pressure sensor: its signal is the reading over 25 bar", Math.abs(ps.out.getU() - ps.reading / 25 * 50) < 0.5, String.format("%.2f V", ps.out.getU()));
+            ctx.check("temperature sensor reads the run", Math.abs(ts.reading - (n.T() - 273.15)) < 1 && ts.reading > 50, String.format("%.0f", ts.reading));
+            ctx.check("temperature sensor: its signal is the reading over 200 C (50 V over it)", Math.abs(ts.out.getU() - Math.min(1, ts.reading / 200) * 50) < 0.5, String.format("%.2f V", ts.out.getU()));
+            double before = ps.scale;
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            int idx = node(ctx, a).parts.indexOf(ps);
+            int[] bx = ps.boxes().get(0);
+            node(ctx, a).onBlockActivated(player, mods.eln.misc.Direction.YP, (bx[0] + bx[3]) / 32f, (bx[1] + bx[4]) / 32f, (bx[2] + bx[5]) / 32f);
+            ctx.check("a right-click steps the full scale (25 -> 50 bar)", before == 25 && ps.scale == 50, ps.scale + " (part " + idx + ")");
         }
     }
 
