@@ -14,27 +14,43 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
- * A throttle valve's screen (Baughn 2026-10-26: a manual valve with a slider): how far open, 0-100%. Opened by the
- * server (Eln.packetValveScreen); the slider sends each setting back as the voxel node's part packet
- * (VoxelNode.PART_PACKET).
+ * A pipe part's slider screen. A throttle valve's (Baughn 2026-10-26: a manual valve with a slider): how far open,
+ * 0-100%. A safety valve's (Baughn 2026-10-27): its set pressure, SafetyValvePart.MIN_BAR..MAX_BAR on a log scale.
+ * Opened by the server (Eln.packetValveScreen); the slider sends each value back as the voxel node's part packet
+ * (VoxelNode.PART_PACKET): 0..1 open, or bar.
  */
 public class ThrottleValveScreen extends Screen {
     final BlockPos pos;
-    final int index;
+    final int index, kind;
+    /** The slider's position (0..1). */
     double setting;
 
-    ThrottleValveScreen(BlockPos pos, int index, double setting) {
-        super(Component.literal("Throttle Valve"));
+    ThrottleValveScreen(BlockPos pos, int index, int kind, double value) {
+        super(Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? "Safety Valve" : "Throttle Valve"));
         this.pos = pos;
         this.index = index;
-        this.setting = setting;
+        this.kind = kind;
+        this.setting = kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toSlider(value) : value;
+    }
+
+    static final double LO = mods.eln.node.voxel.SafetyValvePart.MIN_BAR, HI = mods.eln.node.voxel.SafetyValvePart.MAX_BAR;
+
+    static double toSlider(double bar) {
+        return Math.max(0, Math.min(1, Math.log(bar / LO) / Math.log(HI / LO)));
+    }
+
+    /** A safety valve's set pressure at a slider position: log scale, to half a bar under 20 bar, whole bars over. */
+    static double toBar(double v) {
+        double b = LO * Math.pow(HI / LO, v);
+        return b < 20 ? Math.round(b * 2) / 2.0 : Math.round(b);
     }
 
     static void open(DataInputStream in, Level level) throws IOException {
         BlockPos pos = new BlockPos(in.readInt(), in.readInt(), in.readInt());
         int index = in.readByte();
-        double setting = in.readFloat();
-        Minecraft.getInstance().gui.setScreen(new ThrottleValveScreen(pos, index, setting));
+        double value = in.readFloat();
+        int kind = in.readByte();
+        Minecraft.getInstance().gui.setScreen(new ThrottleValveScreen(pos, index, kind, value));
     }
 
     @Override
@@ -49,12 +65,13 @@ public class ThrottleValveScreen extends Screen {
             @Override
             protected void applyValue() {
                 setting = value;
-                send(value);
+                send(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toBar(value) : value);
             }
         });
     }
 
-    static Component label(double v) {
+    Component label(double v) {
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) return Component.literal(String.format("Lifts at: %.1f bar", toBar(v)));
         return Component.literal(String.format("Open: %.0f%%", v * 100));
     }
 
@@ -78,7 +95,8 @@ public class ThrottleValveScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         super.extractRenderState(g, mouseX, mouseY, partial);
         g.centeredText(font, title, width / 2, height / 2 - 30, 0xFFFFFFFF);
-        g.centeredText(font, Component.literal("Shut at 0%, fully open at 100%"), width / 2, height / 2 + 16, 0xFFA0A0A0);
+        g.centeredText(font, Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY
+            ? "Opens over this pressure (absolute), wide open 10% above" : "Shut at 0%, fully open at 100%"), width / 2, height / 2 + 16, 0xFFA0A0A0);
     }
 
     @Override

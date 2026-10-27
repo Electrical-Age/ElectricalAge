@@ -53,7 +53,8 @@ public final class OilCases {
         cases.add(new CompactTurbinePipe());
         cases.add(new SteamOvenCase());
         cases.add(new SealedPlant());
-        cases.add(new SafetyValvePlant());
+        cases.add(new SafetyValvePlant(4000, 1200, "fluid_safety_valve_holds_the_plant"));
+        cases.add(new SafetyValvePlant(8000, 1400, "fluid_safety_valve_relieves_steadily"));
         cases.add(new SteamJetScalds());
         cases.add(new OldBoilerSave());
         cases.add(new Buckets2());
@@ -1271,12 +1272,23 @@ public final class OilCases {
     static final class SafetyValvePlant implements TestCase {
         mods.eln.oil.BoilerElement boiler;
         mods.eln.sim.IProcess fire;
-        double peak;
+        double peak, time, lo = 1e9, hi, lastLift, liftSum;
+        int flips;
         net.minecraft.core.BlockPos pipeAt;
         String err;
+        mods.eln.node.voxel.SafetyValvePart valve;
+        final double heat;
+        final int ticks;
+        final String id;
+
+        SafetyValvePlant(double heat, int ticks, String id) {
+            this.heat = heat;
+            this.ticks = ticks;
+            this.id = id;
+        }
 
         public String id() {
-            return "fluid_safety_valve_holds_the_plant";
+            return id;
         }
 
         public int width() {
@@ -1284,7 +1296,7 @@ public final class OilCases {
         }
 
         public int ticks() {
-            return 1200;
+            return ticks;
         }
 
         public void build(TestContext ctx) {
@@ -1297,9 +1309,19 @@ public final class OilCases {
             mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
             var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
             err = n.addSafetyValveNear(0.5, 8 / 16.0, 0.5);
+            for (var p : n.parts) if (p instanceof mods.eln.node.voxel.SafetyValvePart sv) valve = sv;
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
-                boiler.thermal.moveEnergyTo(4000 * t);
+                boiler.thermal.moveEnergyTo(heat * t);
                 peak = Math.max(peak, boiler.vessel.P());
+                time += t;
+                // the last 20 s (it lifts after ~25 s): the boiler's swing, and how often the valve goes from shut to over half open
+                if (time > ticks / 20.0 - 20 && valve != null) {
+                    lo = Math.min(lo, boiler.vessel.P());
+                    hi = Math.max(hi, boiler.vessel.P());
+                    if (lastLift < 0.02 && valve.lift >= 0.02) flips++;
+                    lastLift = valve.lift;
+                    liftSum += valve.lift * t;
+                }
             });
         }
 
@@ -1308,10 +1330,34 @@ public final class OilCases {
             var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
             boolean burst = false;
             for (var p : n.parts) if (p instanceof mods.eln.node.voxel.PipePart pp && pp.burst) burst = true;
-            ctx.line("fluid: plant with a safety valve " + boiler.getWaila() + String.format(", peak %.1f bar", peak / 1e5));
+            ctx.line("fluid: plant with a safety valve " + boiler.getWaila() + String.format(", peak %.1f bar; last 20 s %.2f-%.2f bar, %d openings, mean lift %.3f, lift %.2f",
+                peak / 1e5, lo / 1e5, hi / 1e5, flips, liftSum / 20, valve == null ? -1 : valve.lift));
             ctx.check("fluid: a safety valve fits on the pipe", err == null, "" + err);
             ctx.check("fluid: it holds the plant near its 10 bar setting", peak > 9e5 && peak < 12e5, String.format("peak %.1f bar", peak / 1e5));
             ctx.check("fluid: the pipe doesn't burst", !burst, "");
+            // (Baughn 2026-10-27) its screen's slider sets the pressure (bar), within its range
+            if (heat < 5000 && valve != null) {
+                double[] got = new double[2];
+                float[] send = {12.5f, 500f};
+                for (int k = 0; k < 2; k++)
+                    try {
+                        var bos = new java.io.ByteArrayOutputStream();
+                        var out = new java.io.DataOutputStream(bos);
+                        out.writeByte(mods.eln.node.voxel.VoxelNode.PART_PACKET);
+                        out.writeByte(n.parts.indexOf(valve));
+                        out.writeFloat(send[k]);
+                        n.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())),
+                            (net.minecraft.server.level.ServerPlayer) net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level()));
+                        got[k] = valve.setPa;
+                    } catch (java.io.IOException e) {
+                        got[k] = -1;
+                    }
+                ctx.check("fluid: the safety valve's slider sets 12.5 bar, and 500 is held to its 150 bar top",
+                    Math.abs(got[0] - 12.5e5) < 1 && Math.abs(got[1] - 150e5) < 1, got[0] + " / " + got[1]);
+            }
+            // (Baughn 2026-10-27: it pulsed; it acts on the averaged pressure now) relieving 8 kW, it holds steady
+            if (heat > 5000) ctx.check("fluid: relieving, it holds the boiler steady (no pulsing)", flips <= 1 && hi - lo < 0.5e5,
+                String.format("%d openings, %.2f-%.2f bar in the last 20 s", flips, lo / 1e5, hi / 1e5));
         }
     }
 

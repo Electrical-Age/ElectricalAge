@@ -572,11 +572,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
-                double next = SafetyValvePart.PRESETS[0] * 1e5;
-                for (double b : SafetyValvePart.PRESETS) if (b * 1e5 > sv.setPa + 1) { next = b * 1e5; break; }
-                sv.setPa = next;
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Safety valve set to %.0f bar", next / 1e5)));
-                setNeedPublish(true);
+                // (Baughn 2026-10-27: a screen with a slider, not stepping through presets)
+                if (player instanceof net.minecraft.server.level.ServerPlayer sp) openPartScreen(sp, i, SCREEN_SAFETY, sv.setPa / 1e5);
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof PipeSensorPart s) {
@@ -597,7 +594,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && player instanceof net.minecraft.server.level.ServerPlayer sp) {
-                openThrottleScreen(sp, i, v);
+                openPartScreen(sp, i, SCREEN_THROTTLE, v.setting);
                 return true;
             }
         }
@@ -607,8 +604,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** A GUI packet's slot byte for a part of this block (ValvePart.THROTTLE's slider), not an element. */
     public static final byte PART_PACKET = -2;
 
-    /** Open the throttle valve's screen on the player's client (ClientPacketHandler, Eln.packetValveScreen). */
-    void openThrottleScreen(net.minecraft.server.level.ServerPlayer player, int index, ValvePart v) {
+    /** The part screens (client ThrottleValveScreen): a throttle valve's opening, a safety valve's set pressure. */
+    public static final byte SCREEN_THROTTLE = 0, SCREEN_SAFETY = 1;
+
+    /** Open a part's slider screen on the player's client (ClientPacketHandler, Eln.packetValveScreen): the part's
+     *  index, the kind of screen and its value (0..1 open, or bar). */
+    void openPartScreen(net.minecraft.server.level.ServerPlayer player, int index, byte screen, double value) {
         try {
             var bos = new java.io.ByteArrayOutputStream();
             var out = new java.io.DataOutputStream(bos);
@@ -617,14 +618,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             out.writeInt(coordonate.y);
             out.writeInt(coordonate.z);
             out.writeByte(index);
-            out.writeFloat((float) v.setting);
+            out.writeFloat((float) value);
+            out.writeByte(screen);
             mods.eln.network.ElnNet.sendToPlayer(player, bos);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
     }
 
-    /** From a client: a throttle valve's new setting (PART_PACKET, part index, float 0..1); else an element's packet. */
+    /** From a client: a throttle valve's new setting (PART_PACKET, part index, float 0..1) or a safety valve's set
+     *  pressure (bar); else an element's packet. */
     @Override
     public void networkUnserialize(java.io.DataInputStream stream, net.minecraft.server.level.ServerPlayer player) {
         try {
@@ -634,6 +637,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 float f = stream.readFloat();
                 if (i >= 0 && i < parts.size() && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && Float.isFinite(f)) {
                     v.setting = Math.max(0, Math.min(1, f));
+                    setNeedPublish(true);
+                }
+                if (i >= 0 && i < parts.size() && parts.get(i) instanceof SafetyValvePart sv && Float.isFinite(f)) {
+                    sv.setPa = Math.max(SafetyValvePart.MIN_BAR, Math.min(SafetyValvePart.MAX_BAR, f)) * 1e5;
                     setNeedPublish(true);
                 }
                 return;
@@ -939,7 +946,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // safety valves open by the pressure under them
         if (vents != null)
             for (var e : vents.entrySet())
-                if (e.getValue() instanceof SafetyValvePart sv) e.getKey().open = sv.opening(mods.eln.fluid.FluidWorld.nodeFor(e.getKey().node).P());
+                if (e.getValue() instanceof SafetyValvePart sv) e.getKey().open = sv.follow(mods.eln.fluid.FluidWorld.nodeFor(e.getKey().node).P(), dt);
     }
 
     /** Over its rating a pipe bursts (the weakest of a run goes first: each piece checks its own rating against the
