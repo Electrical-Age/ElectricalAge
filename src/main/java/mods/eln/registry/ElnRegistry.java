@@ -119,6 +119,9 @@ public final class ElnRegistry {
     /** The chisel (carving blocks voxel by voxel: a hole through a wall for a cable; art). */
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ChiselItem> CHISEL =
         ITEMS.registerItem("chisel", mods.eln.node.voxel.ChiselItem::new);
+    /** The Electrical Engineer's Ledger, EA's handbook (Baughn 2026-10-27; mods.eln.handbook.Handbook). */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.handbook.HandbookItem> HANDBOOK =
+        ITEMS.registerItem("handbook", mods.eln.handbook.HandbookItem::new);
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_IRON =
         ITEMS.registerItem("pipe_kit_iron", p -> new mods.eln.node.voxel.PipeKitItem(0, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_ALLOY =
@@ -278,6 +281,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);
+        ALL_ITEMS.add(HANDBOOK);
         ALL_ITEMS.add(RAW_LEAD);
         ALL_ITEMS.add(RAW_TUNGSTEN);
         ALL_ITEMS.add(CHARCOAL_NUGGET);

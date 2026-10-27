@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [" C ", "CBC", " C "],
+  "key": {"C": "eln:copper_cable", "B": "minecraft:book"},
+  "result": {"id": "eln:handbook"}
+}
