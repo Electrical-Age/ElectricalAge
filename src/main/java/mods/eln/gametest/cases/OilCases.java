@@ -673,6 +673,11 @@ public final class OilCases {
             ctx.check("oil: a condenser on its own keeps a sensible state (AdventurAgent: it showed -193 C)", alone != null && alone.turbine == null
                 && alone.vessel.T() > 273 && alone.vessel.T() < 320 && Math.abs(alone.heatW) < 50, alone == null ? "none" : alone.getWaila().toString());
             ctx.check("oil: its condensate pump runs with the shaft", c.pumped > 0 || c.floodShare() < 0.01, String.format("%.0f mB/s pumped", c.pumped));
+            // Jade says whether the pump runs, and why not (Baughn: a cold start gave no hint)
+            String running = c.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump")), idle = alone.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump"));
+            ctx.check("oil: Jade: the running condenser's pump shows its share and flow", running != null && running.endsWith("mB/s"), "" + running);
+            ctx.check("oil: Jade: a condenser without a turning turbine says its pump is stopped", idle != null && idle.startsWith("stopped"), "" + idle);
+            ctx.check("oil: Jade: its fill", c.getWaila().containsKey(mods.eln.i18n.I18N.tr("Fill")), "" + c.getWaila());
         }
     }
 

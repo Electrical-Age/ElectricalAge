@@ -71,9 +71,9 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.SteamOvenDescriptor(TR_NAME(Type.NONE, "Steam Oven"), "steamoven"));
         // the turbines' condensers (Baughn 2026-10-26: optional, beside the turbine, the models join); model tools/models/condenser.py
         transparentNodeItem.addDescriptor(28 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Small Steam Condenser"),
-            1000, 0.02, "condenser50v"));
+            1000, 0.005, "condenser50v"));
         transparentNodeItem.addDescriptor(32 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Steam Condenser"),
-            4000, 0.08, "condenser200v"));
+            4000, 0.02, "condenser200v"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */
