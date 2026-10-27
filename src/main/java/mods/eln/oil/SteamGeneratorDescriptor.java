@@ -83,7 +83,7 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
         super.addInformation(stack, player, list, adv);
         list.add(String.format("Steam in (any side), %.0f V out (front and back)", nominalU));
         list.add("Its screen: throttle, or a regulator holding a target inlet pressure; a signal on its left side for external control");
-        list.add(String.format("Up to %.0f W from %.0f mB/s of steam at %.0f bar", nominalP, nominalSteam(), NOMINAL_PA / 1e5));
+        list.add(String.format("Up to %.0f W from %s/s of steam at %.0f bar", nominalP, mods.eln.sim.fluid.EaUnits.steamGrams(nominalSteam()), NOMINAL_PA / 1e5));
         list.add(String.format("Its casing bursts over %.0f bar", BURST_PA / 1e5));
         list.add("Might want a boiler with that.");   // (Baughn: the heat turbine gave way to steam, with no hint)
     }

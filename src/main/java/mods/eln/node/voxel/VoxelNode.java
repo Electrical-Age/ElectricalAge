@@ -1403,7 +1403,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
-        out.put("Pressure", String.format("%.2f bar, %.0f °C", n.P() / 1e5, n.T() - 273.15));
+        // (Baughn: say what the pressure is of; steam in grams)
+        out.put("Pressure", String.format("%.2f bar of %s, %.0f °C", n.P() / 1e5, EaUnits.contents(n), n.T() - 273.15));
+        if (n.mVapour() > 1e-7) out.put("Steam", EaUnits.steamGrams(n.mVapour() / EaUnits.KG_PER_MB_STEAM));
         for (VoxelPart p : parts)
             if (p instanceof ValvePart v) out.put(switch (v.mode) {
                 case ValvePart.CONTROL -> "Control valve";
@@ -1415,7 +1417,6 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));
         if (!details) return out;
         out.put("Water", String.format("%.0f mB", n.mLiquid() / EaUnits.KG_PER_MB_WATER));
-        out.put("Steam", String.format("%.0f mB", n.mVapour() / EaUnits.KG_PER_MB_STEAM));
         out.put("Run volume", String.format("%.2f L", n.volume * 1000));
         out.put("Rating", String.format("works to %.0f bar, bursts at %.0f", pipe.workingPa(n.T()) / 1e5, pipe.burstPa(n.T()) / 1e5));
         for (VoxelPart p : parts) if (p instanceof AdapterPart a) out.put("Adapter", net.minecraft.core.Direction.from3DDataValue(a.face).getName());
@@ -1432,7 +1433,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (p instanceof PipePart pipe && pipe.fluid != null) {
                 var n = pipe.fluid;
                 double lq = n.mLiquid() / EaUnits.KG_PER_MB_WATER, st = n.mVapour() / EaUnits.KG_PER_MB_STEAM;
-                return String.format("%.2f bar  water %.0f mB  steam %.0f mB%s  ", n.P() / 1e5, lq, st, pipe.burst ? "  BURST" : "");
+                return String.format("%.2f bar  water %.0f mB  steam %s%s  ", n.P() / 1e5, lq, EaUnits.steamGrams(st), pipe.burst ? "  BURST" : "");
             }
         return "";
     }
