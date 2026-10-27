@@ -40,6 +40,7 @@ public final class OilCases {
         cases.add(new TurbineCondenser());
         cases.add(new TurbineHoldsPressure());
         cases.add(new CondenserFloods());
+        cases.add(new CondenserMakeupFloat());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -678,6 +679,57 @@ public final class OilCases {
             ctx.check("oil: Jade: the running condenser's pump shows its share and flow", running != null && running.endsWith("mB/s"), "" + running);
             ctx.check("oil: Jade: a condenser without a turning turbine says its pump is stopped", idle != null && idle.startsWith("stopped"), "" + idle);
             ctx.check("oil: Jade: its fill", c.getWaila().containsKey(mods.eln.i18n.I18N.tr("Fill")), "" + c.getWaila());
+        }
+    }
+
+    /** The makeup flange's float valve (Baughn: a 200V pump on it filled a condenser to the flood line): with makeup
+     *  water at 10 bar behind it, a condenser 30 % full takes none, one 5 % full takes it in. */
+    static final class CondenserMakeupFloat implements TestCase {
+        mods.eln.oil.CondenserElement full, low;
+        mods.eln.sim.IProcess feed;
+        double full0, low0;
+        boolean primed;
+
+        public String id() {
+            return "oil_condenser_makeup_float";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            l.device(28 + (82 << 6), 1, 1);
+            l.device(28 + (82 << 6), 3, 1);
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                if (full == null) full = condenserOf(ctx, ctx.at(1, 1, 1));
+                if (low == null) low = condenserOf(ctx, ctx.at(3, 1, 1));
+                if (full == null || low == null || full.inlet == null || low.inlet == null) return;
+                if (!primed) {
+                    primed = true;
+                    double rho = mods.eln.sim.fluid.Water.RHO_L;
+                    mods.eln.sim.fluid.EaUnits.addWater(full.vessel, 0.30 * full.vessel.volume * rho, 300, false);
+                    mods.eln.sim.fluid.EaUnits.addWater(low.vessel, 0.05 * low.vessel.volume * rho, 300, false);
+                    full0 = full.vessel.mWater;
+                    low0 = low.vessel.mWater;
+                }
+                // (a pump on each makeup flange: water kept at 10 bar behind the valve)
+                for (var c : new mods.eln.oil.CondenserElement[]{full, low})
+                    for (int k = 0; k < 100 && c.inlet.P() < 10e5; k++) mods.eln.sim.fluid.EaUnits.addWater(c.inlet, 2e-5, 300, false);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.check("oil: makeup at 10 bar: a condenser 30 % full takes none (float valve shut)", full != null
+                && full.vessel.mWater <= full0 + 1e-6, full == null ? "none" : String.format("%.4f -> %.4f kg; %s", full0, full.vessel.mWater, full.getWaila()));
+            ctx.check("oil: makeup at 10 bar: one 5 % full takes it in", low != null
+                && low.vessel.mWater > low0 + 0.001, low == null ? "none" : String.format("%.4f -> %.4f kg; %s", low0, low.vessel.mWater, low.getWaila()));
         }
     }
 
