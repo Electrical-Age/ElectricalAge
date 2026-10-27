@@ -431,6 +431,11 @@ public final class PipeCases {
             ctx.check("pressure sensor: its signal is the reading over 25 bar", Math.abs(ps.out.getU() - ps.reading / 25 * 50) < 0.5, String.format("%.2f V", ps.out.getU()));
             ctx.check("temperature sensor reads the run", Math.abs(ts.reading - (n.T() - 273.15)) < 1 && ts.reading > 50, String.format("%.0f", ts.reading));
             ctx.check("temperature sensor: its signal is the reading over 200 C (50 V over it)", Math.abs(ts.out.getU() - Math.min(1, ts.reading / 200) * 50) < 0.5, String.format("%.2f V", ts.out.getU()));
+            // a cable kit clicked on the sensor lays to the floor under it (AdventurAgent: "not a place for a cable")
+            int[] db = ps.boxes().get(0);
+            var end = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), a, net.minecraft.core.Direction.UP,
+                new net.minecraft.world.phys.Vec3(a.getX() + (db[0] + db[3]) / 32.0, a.getY() + (db[1] + db[4]) / 32.0, a.getZ() + (db[2] + db[5]) / 32.0), true, new long[1][]);
+            ctx.check("a cable ends on the floor under a pipe sensor", end != null && end.y() == a.getY() * 16L && end.attach() == 0, "" + end);
             double before = ps.scale;
             var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
             int idx = node(ctx, a).parts.indexOf(ps);
