@@ -1961,6 +1961,12 @@
   "kind": "transparent_node",
   "name": "steam_condenser"
  },
+ "eln:transparent_node@5284": {
+  "descriptor": "CompactTurbineDescriptor",
+  "display": "50V Compact Steam Turbine",
+  "kind": "transparent_node",
+  "name": "50v_compact_steam_turbine"
+ },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",
   "display": "Fractionating Column Base",

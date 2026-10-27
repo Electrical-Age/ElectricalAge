@@ -44,6 +44,13 @@ public final class OilCases {
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
+        cases.add(new CompactTurbine("compact_turbine_full_power", 3000, 4000, true, 99, 1200));
+        cases.add(new CompactTurbine("compact_turbine_short_of_heat", 1000, 4000, true, 99, 1200));
+        cases.add(new CompactTurbine("compact_turbine_no_load_bypass", 3000, 4000, false, 99, 1200));
+        cases.add(new CompactTurbine("compact_turbine_vents_surplus", 6000, 4000, false, 99, 1200));
+        cases.add(new CompactTurbine("compact_turbine_dry", 1000, 0, true, 99, 600));
+        cases.add(new CompactTurbine("compact_turbine_cold_start", 1000, 4000, true, 20, 3600));
+        cases.add(new CompactTurbinePipe());
         cases.add(new SteamOvenCase());
         cases.add(new SealedPlant());
         cases.add(new SafetyValvePlant());
@@ -1057,6 +1064,139 @@ public final class OilCases {
             ctx.check("fluid: the boiler stays below 10 bar (the turbine takes its steam)", boiler.vessel.P() < 10e5, boiler.vessel.P() + " Pa");
             ctx.check("fluid: no water collects in the turbine (it isn't damaged)", turbine.waterShare() < 0.01 && !turbine.isBurnt(),
                 String.format("%.2f%% water", turbine.waterShare() * 100));
+        }
+    }
+
+    /**
+     * The compact steam turbine (Baughn 2026-10-27, the bootstrap option): heat put straight into its boiler, a 50 V
+     * heater on its back as the load, or none. ETA 10%: 3 kW gives its 300 W, 1 kW a third of it; with no load the
+     * bypass takes a stone heat furnace's 3 kW at a little over 150 C without venting; 6 kW vents; dry it stops and
+     * doesn't fail; from cold on 1 kW it makes power within 3 minutes.
+     */
+    static final class CompactTurbine implements TestCase {
+        final String id;
+        final double heat, water0, startC;
+        final boolean loaded;
+        final int ticks;
+        mods.eln.oil.CompactTurbineElement turbine;
+        mods.eln.sim.IProcess fire;
+        double energy, heatGiven, peakC;
+
+        CompactTurbine(String id, double heat, double water0, boolean loaded, double startC, int ticks) {
+            this.id = id;
+            this.heat = heat;
+            this.water0 = water0;
+            this.loaded = loaded;
+            this.startC = startC;
+            this.ticks = ticks;
+        }
+
+        public String id() {
+            return id;
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return ticks;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            turbine = (mods.eln.oil.CompactTurbineElement) l.device(36 + (82 << 6), 3, 1);
+            turbine.front = mods.eln.misc.Direction.XN;
+            turbine.reconnect();
+            if (loaded) {
+                var load = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 4, 1);
+                load.front = mods.eln.misc.Direction.ZN;
+                load.reconnect();
+            }
+            turbine.water = water0;
+            turbine.boiler.Tc = startC - mods.eln.sim.PhysicalConstant.Tamb;
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                turbine.boiler.moveEnergyTo(heat * t);
+                heatGiven += heat * t;
+                energy += turbine.source.getEffectiveP() * t;
+                peakC = Math.max(peakC, turbine.celsius());
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            double p = turbine.powerOut, used = water0 - turbine.water, c = turbine.celsius();
+            ctx.line(id + ": " + turbine.getWaila() + String.format("; %.0f J out of %.0f J heat, %.1f mB used, peak %.0f C", energy, heatGiven, used, peakC));
+            ctx.check(id + ": not burnt", !turbine.isBurnt(), "");
+            ctx.check(id + ": never more than 10% of the heat (+1%)", energy <= 0.11 * heatGiven, String.format("%.0f of %.0f J", energy, heatGiven));
+            switch (id) {
+                case "compact_turbine_full_power" -> {
+                    ctx.check(id + ": 3 kW of heat gives its 300 W", p > 270 && p < 310, String.format("%.0f W", p));
+                    ctx.check(id + ": about 50 V at the load", turbine.load.getU() > 25 && turbine.load.getU() < 53, String.format("%.1f V", turbine.load.getU()));
+                    ctx.check(id + ": the condenser keeps the water (under 1 mB/s)", used < 60, String.format("%.1f mB in 60 s", used));
+                }
+                case "compact_turbine_short_of_heat" -> {
+                    ctx.check(id + ": 1 kW of heat gives ~100 W", p > 80 && p < 110, String.format("%.0f W", p));
+                    ctx.check(id + ": it says it is short of heat", turbine.state().contains("short of heat"), turbine.state());
+                }
+                case "compact_turbine_no_load_bypass" -> {
+                    ctx.check(id + ": no load, a stone furnace's 3 kW: it doesn't vent", turbine.ventW == 0 && peakC < 180, String.format("%.0f C peak", peakC));
+                    ctx.check(id + ": the bypass takes it", turbine.bypassW > 2000, String.format("%.0f W", turbine.bypassW));
+                    ctx.check(id + ": little water (the condenser returns the bypass)", used < 60, String.format("%.1f mB in 60 s", used));
+                }
+                case "compact_turbine_vents_surplus" -> {
+                    ctx.check(id + ": 6 kW with no load vents", turbine.ventW > 1500 && c > 180, String.format("%.0f W at %.0f C", turbine.ventW, c));
+                    ctx.check(id + ": venting costs water", used > 100, String.format("%.1f mB in 60 s", used));
+                }
+                case "compact_turbine_dry" -> {
+                    ctx.check(id + ": dry, no power", p == 0 && turbine.source.getEffectiveP() < 1, String.format("%.1f W", p));
+                    ctx.check(id + ": it says it is out of water", turbine.state().contains("out of water"), turbine.state());
+                }
+                case "compact_turbine_cold_start" ->
+                    ctx.check(id + ": from cold on 1 kW, ~100 W within 3 minutes", p > 70, String.format("%.0f W at %.0f C", p, c));
+                default -> {
+                }
+            }
+        }
+    }
+
+    /** Water by pipe on its top flange: an empty tank takes it in; a nearly full one shuts its float valve. */
+    static final class CompactTurbinePipe implements TestCase {
+        mods.eln.oil.CompactTurbineElement empty, full;
+        mods.eln.sim.IProcess feed;
+
+        public String id() {
+            return "compact_turbine_pipe_feed";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            empty = (mods.eln.oil.CompactTurbineElement) l.device(36 + (82 << 6), 1, 1);
+            full = (mods.eln.oil.CompactTurbineElement) l.device(36 + (82 << 6), 3, 1);
+            full.water = 3500;
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                // (a pump on each flange: water kept at 3 bar)
+                for (var c : new mods.eln.oil.CompactTurbineElement[]{empty, full})
+                    if (c.inlet != null)
+                        for (int k = 0; k < 100 && c.inlet.P() < 3e5; k++) mods.eln.sim.fluid.EaUnits.addWater(c.inlet, 2e-5, 300, false);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            ctx.line("compact turbine pipe: empty " + empty.getWaila() + "; full " + full.getWaila());
+            ctx.check("compact turbine: an empty one fills by pipe", empty.water > 100, String.format("%.0f mB", empty.water));
+            ctx.check("compact turbine: a nearly full one takes none (float valve)", full.water <= 3500.01 && full.water > 3400,
+                String.format("%.1f mB", full.water));
+            ctx.check("compact turbine: the tank shows its water", empty.tank.water() == (int) Math.floor(empty.water), empty.tank.water() + "");
         }
     }
 

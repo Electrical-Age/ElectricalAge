@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "C": "eln:copper_plate",
+    "E": "eln:low_voltage_cable",
+    "I": "minecraft:iron_ingot",
+    "m": "eln:electrical_motor"
+  },
+  "pattern": [
+    "CBC",
+    "ImI",
+    "IEI"
+  ],
+  "result": {
+    "id": "eln:50v_compact_steam_turbine"
+  }
+}

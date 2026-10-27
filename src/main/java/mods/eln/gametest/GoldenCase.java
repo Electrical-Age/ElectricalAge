@@ -85,6 +85,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5260", "eln:transparent_node@5264",  // small steam turbines
         "eln:transparent_node@5268", "eln:transparent_node@5272",  // the steam oven and the smelter (Baughn 2026-10-23)
         "eln:transparent_node@5276", "eln:transparent_node@5280",  // the turbines' condensers (Baughn 2026-10-26)
+        "eln:transparent_node@5284",  // the compact steam turbine (Baughn 2026-10-27)
         "eln:transparent_node@5312", "eln:transparent_node@5316", "eln:transparent_node@5320",  // column, flare stack
         // the FE exporters: 1.12 simple-node blocks (eln:energy_converter_eln_to_other_*block), transparent nodes since 26.x
         "eln:transparent_node@5376", "eln:transparent_node@5380", "eln:transparent_node@5384",
@@ -92,7 +93,7 @@ final class GoldenCase implements TestCase {
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
         "50V Electric Heater", "200V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
-        "50V Steam Turbine", "200V Steam Turbine");   // (their screen: Baughn 2026-10-26)
+        "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine");   // (their screen: Baughn 2026-10-26)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);

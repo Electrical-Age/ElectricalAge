@@ -1,4 +1,4 @@
-// 26.3	2026-10-26T16:39:13.339159847	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-27T14:19:52.009623975	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -35,6 +35,7 @@ cf9a542869d932b0467be73079c897ff6e4c4e30 data/eln/advancement/recipes/misc/2x3_s
 360410e4aa3afcc317d46454202ab05055fe3e78 data/eln/advancement/recipes/misc/50v_battery_charger.json
 cfa1b1325b4147e7565231411cf883d5bdf4482f data/eln/advancement/recipes/misc/50v_carbon_incandescent_light_bulb.json
 6cdd2a2fa50ffd476d43244a450f534e5bb4a6ea data/eln/advancement/recipes/misc/50v_carbon_incandescent_light_bulb_2.json
+555fda89f747d718dda28d019019f64073079eac data/eln/advancement/recipes/misc/50v_compact_steam_turbine.json
 cfc63eb99912c5bbe0f73e1d793a1df1e4b4c5d7 data/eln/advancement/recipes/misc/50v_compressor.json
 0c2ffa5dab4cda894540b8f08905f63e1775536f data/eln/advancement/recipes/misc/50v_copper_heating_corp.json
 6e1c8814a88d0fa7361ed417b4ed336e495966f2 data/eln/advancement/recipes/misc/50v_economic_light_bulb.json
@@ -371,6 +372,7 @@ d222dad695bf0df4e61a765b79857892e1119ead data/eln/recipe/2x3_solar_panel_8.json
 2f4cacf4f0fd6c140714632b687c9fca6a3b75e4 data/eln/recipe/50v_battery_charger.json
 71340d95d6699e4ee5d0d4fe4aa6442fbd63c985 data/eln/recipe/50v_carbon_incandescent_light_bulb.json
 913cb13fc06e3fc07dfef94143ff05b66dd1a9d6 data/eln/recipe/50v_carbon_incandescent_light_bulb_2.json
+b70c28ead4584a2e52387a404aa24d75abc31d7e data/eln/recipe/50v_compact_steam_turbine.json
 e27181e42fe09c785177948282c93838ef7eaaaf data/eln/recipe/50v_compressor.json
 e1960b93a58994794aa02ebdfc31cf8726fb789b data/eln/recipe/50v_copper_heating_corp.json
 8933e3a8f0174cdb804e4a25548a7c3aab4a43e2 data/eln/recipe/50v_economic_light_bulb.json
