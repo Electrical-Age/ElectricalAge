@@ -53,6 +53,9 @@ public final class BeltCases {
             beltItem.setEnergy(belt, max - 1000);   // (a tool drawing on it)
             ctx.check("drawn on, it gives what was asked", Math.abs(beltItem.getEnergy(belt) - (max - 1000)) < 1, "" + beltItem.getEnergy(belt));
             ctx.check("its discharge power is its pockets'", Math.abs(beltItem.getDischagePower(belt) - bb.getDischagePower(bat) - cb.getDischagePower(cond)) < 1e-6, "");
+            // empty, it offers no power (a capacitor's charge, counted in getEnergy for chargers, isn't power)
+            beltItem.setEnergy(belt, 0);
+            ctx.check("emptied, it offers no discharge power", beltItem.getDischagePower(belt) == 0, "" + beltItem.getDischagePower(belt));
             ctx.check("a source for tools, like a portable battery (priority 2)", beltItem.getPriority(belt) == 2, "");
         }
     }

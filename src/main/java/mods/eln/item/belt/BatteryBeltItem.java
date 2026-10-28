@@ -136,11 +136,18 @@ public class BatteryBeltItem extends Item implements IItemEnergyBattery {
         return p;
     }
 
+    /** The batteries' discharge power, held to what they hold over EA's item-energy step (0.5 s): getEnergy counts the
+     *  capacitors too (so a charger fills them), and ItemEnergyInventoryProcess takes min(energy, power x step) from a
+     *  source, which must not reach into a capacitor's charge. */
     @Override
     public double getDischagePower(ItemStack stack) {
-        double p = 0;
-        for (ItemStack s : contents(stack)) if (isBattery(s)) p += battery(s).getDischagePower(s);
-        return p;
+        double p = 0, e = 0;
+        for (ItemStack s : contents(stack))
+            if (isBattery(s)) {
+                p += battery(s).getDischagePower(s);
+                e += battery(s).getEnergy(s);
+            }
+        return Math.min(p, e / 0.5);
     }
 
     /** As a Portable Battery's (2): a source for tools, not a sink (ItemEnergyInventoryProcess moves energy from the
