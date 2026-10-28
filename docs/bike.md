@@ -78,9 +78,18 @@ GameTest `bike_recipe` crafts it.
     same stack object they were read from (another player's change in between voids them);
   - shift-click out of the panel takes the items out first, then places them (what doesn't fit goes back); from the
     inventory, the open item takes what it can before the trunk does.
+  Tabs and sizes come from the server (menu data: a mask of the trunk slots whose item has a handler with slots, the
+  open handler's size), since a bag's contents may live only there; an item whose handler has no slots gets no tab.
+  Sophisticated Backpacks (checked in its jar, 3.26.13): its `Capabilities.Item.ITEM` provider ignores the ItemAccess,
+  builds a `BackpackWrapper` from the stack, and returns an empty handler until the backpack has a contents id, which it
+  gets the first time it's opened. `bike/BagStorage` does that for a backpack in the trunk (server, each menu tick, by
+  reflection, no compile dependency: `BackpackWrapper.fromStack(stack).getInventoryHandler()`), so a fresh one opens too;
+  its contents then live in the backpack's world storage, and the panel shows its first 27 slots.
+  JEI: `compat/jei/ElnJeiPlugin.registerGuiHandlers` gives JEI the open panel's rectangle (`BikeTrunkScreen.extraAreas`),
+  so its ingredient list keeps clear of it.
   On the client the panel is a plain mirror the server fills; `BikeTrunkScreen` draws the tabs and the panel, and a click
   on the panel isn't "outside" (which would drop the held stack). Sophisticated Backpacks registers `Capabilities.Item.ITEM`
-  for its backpacks (seen in its jar), so they should open too, showing their first 27 slots (not tested).
+  for its backpacks; see above.
 - **Energy** (server): the speed it moved this tick (from the client's moves) gives the motor's draw, taken from the
   battery item.
 

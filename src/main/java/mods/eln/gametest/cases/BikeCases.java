@@ -92,6 +92,10 @@ public final class BikeCases {
                 bike.trunk.setItem(1, new ItemStack(Items.SHULKER_BOX));
                 ctx.check("a shulker box opens; dirt doesn't", mods.eln.bike.BikeTrunkMenu.opens(bike.trunk.getItem(1))
                     && !mods.eln.bike.BikeTrunkMenu.opens(new ItemStack(Items.DIRT)), "");
+                bike.trunk.setItem(3, new ItemStack(Items.DIRT));
+                ctx.check("the server marks a tab for the box's slot, none for dirt or an empty slot (the client draws tabs from that)",
+                    m.hasTab(1) && !m.hasTab(2) && !m.hasTab(3), "");
+                bike.trunk.setItem(3, ItemStack.EMPTY);
                 m.clickMenuButton(p, 1);
                 ctx.check("its tab opens 27 slots", m.openTab() == 1 && m.panelSize() == 27, m.openTab() + " " + m.panelSize());
                 m.slots.get(P + 5).set(new ItemStack(Items.DIAMOND, 10));

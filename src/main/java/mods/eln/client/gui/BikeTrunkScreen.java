@@ -35,7 +35,15 @@ public class BikeTrunkScreen extends AbstractContainerScreen<BikeTrunkMenu> {
     }
 
     boolean hasTab(int k) {
-        return BikeTrunkMenu.opens(menu.slots.get(k).getItem());
+        return menu.hasTab(k);   // (the server's say: a bag's contents may live only there)
+    }
+
+    /** For JEI (ElnJeiPlugin): the open panel and the tab strip, which lie outside the trunk's own rectangle. */
+    public java.util.List<net.minecraft.client.renderer.Rect2i> extraAreas() {
+        java.util.List<net.minecraft.client.renderer.Rect2i> out = new java.util.ArrayList<>();
+        if (menu.openTab() != 0 && menu.panelSize() > 0)
+            out.add(new net.minecraft.client.renderer.Rect2i(leftPos + PANEL_LEFT, topPos + PANEL_TOP, PANEL_W, 14 + panelRows() * 18 + 8));
+        return out;
     }
 
     int panelRows() {

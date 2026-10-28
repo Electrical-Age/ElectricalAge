@@ -75,6 +75,18 @@ public class ElnJeiPlugin implements IModPlugin {
             registration.addRecipes(ResinCategory.TYPE, List.of(new ResinCategory.Resin(collector, resin)));
     }
 
+    /** The bike trunk's panel lies right of the trunk's rectangle: JEI keeps its ingredient list off it (AdventurAgent). */
+    @Override
+    public void registerGuiHandlers(mezz.jei.api.registration.IGuiHandlerRegistration registration) {
+        registration.addGuiContainerHandler(mods.eln.client.gui.BikeTrunkScreen.class,
+            new mezz.jei.api.gui.handlers.IGuiContainerHandler<mods.eln.client.gui.BikeTrunkScreen>() {
+                @Override
+                public List<net.minecraft.client.renderer.Rect2i> getGuiExtraAreas(mods.eln.client.gui.BikeTrunkScreen screen) {
+                    return screen.extraAreas();
+                }
+            });
+    }
+
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for (var e : MACHINES.entrySet()) {

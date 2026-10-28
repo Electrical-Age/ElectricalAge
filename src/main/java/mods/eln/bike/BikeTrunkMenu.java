@@ -41,7 +41,7 @@ public class BikeTrunkMenu extends AbstractContainerMenu {
 
     /** Client side (MenuType factory). */
     public BikeTrunkMenu(int id, Inventory inv) {
-        this(id, inv, null, new SimpleContainer(ElectricBike.TRUNK_SLOTS), new SimpleContainerData(3));
+        this(id, inv, null, new SimpleContainer(ElectricBike.TRUNK_SLOTS), new SimpleContainerData(4));
     }
 
     public BikeTrunkMenu(int id, Inventory inv, ElectricBike bike) {
@@ -58,9 +58,14 @@ public class BikeTrunkMenu extends AbstractContainerMenu {
                 return switch (i) {
                     case 0 -> Math.round(bike.charge() * 1000);
                     case 1 -> handler() == null ? 0 : open;
-                    default -> {
+                    case 2 -> {
                         var h = handler();
                         yield h == null ? 0 : Math.min(PANEL, h.size());
+                    }
+                    default -> {   // which trunk slots get a tab: the server's handlers, as the contents may live server-side
+                        int mask = 0;
+                        for (int k = 1; k < ElectricBike.TRUNK_SLOTS; k++) if (handler(k) != null) mask |= 1 << k;
+                        yield mask;
                     }
                 };
             }
@@ -69,7 +74,7 @@ public class BikeTrunkMenu extends AbstractContainerMenu {
             }
 
             public int getCount() {
-                return 3;
+                return 4;
             }
         };
         addSlot(new Slot(trunk, ElectricBike.BATTERY_SLOT, BATTERY_X, SLOT_Y) {
@@ -116,15 +121,35 @@ public class BikeTrunkMenu extends AbstractContainerMenu {
         return data.get(2);
     }
 
-    /** Whether an item shows its insides here: it has NeoForge's item capability (both sides: the client draws tabs). */
+    /** Whether trunk slot k gets a tab: the server found a handler with slots for its item (client: from menu data). */
+    public boolean hasTab(int k) {
+        return (data.get(3) & 1 << k) != 0;
+    }
+
+    /** Whether an item shows its insides here (server): it has NeoForge's item capability with at least one slot. */
     public static boolean opens(ItemStack s) {
-        return s.getCount() == 1 && ItemAccess.forStack(s.copy()).getCapability(Capabilities.Item.ITEM) != null;
+        if (s.getCount() != 1) return false;
+        var h = ItemAccess.forStack(s.copy()).getCapability(Capabilities.Item.ITEM);
+        return h != null && h.size() > 0;
     }
 
     /** Server: the open item's handler, through the trunk slot (its edits replace the slot's stack); null if none. */
     @Nullable ResourceHandler<ItemResource> handler() {
-        if (open < 1 || open >= ElectricBike.TRUNK_SLOTS || trunk.getItem(open).getCount() != 1) return null;   // (one item, not a stack)
-        return ItemAccess.forHandlerIndexStrict(VanillaContainerWrapper.of(trunk), open).getCapability(Capabilities.Item.ITEM);
+        return handler(open);
+    }
+
+    /** Server: trunk slot k's item's handler, if it has slots; null if none (a bag with no storage yet has none). */
+    @Nullable ResourceHandler<ItemResource> handler(int k) {
+        if (k < 1 || k >= ElectricBike.TRUNK_SLOTS || trunk.getItem(k).getCount() != 1) return null;   // (one item, not a stack)
+        var h = ItemAccess.forHandlerIndexStrict(VanillaContainerWrapper.of(trunk), k).getCapability(Capabilities.Item.ITEM);
+        return h != null && h.size() > 0 ? h : null;
+    }
+
+    /** Server, each tick: bags whose storage is made on first opening (Sophisticated Backpacks) get it now, so they open. */
+    @Override
+    public void broadcastChanges() {
+        if (bike != null) for (int k = 1; k < ElectricBike.TRUNK_SLOTS; k++) BagStorage.prepare(trunk, k);
+        super.broadcastChanges();
     }
 
     /** A tab clicked (1-3): open that slot's item, or close it if it's open. */
