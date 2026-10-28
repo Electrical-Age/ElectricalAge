@@ -66,7 +66,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   rated current (electricalStdI) by the cut switch's resistance, tapering to none as it nears the cut; the cut is at
   ~56 C and reconnects at ~45 C (1.12: on/off every 0.05 s with 1.6 K hysteresis, so an empty battery's inrush heated
   it past its limit before the check). The overvoltage chip adds a low-voltage disconnect (no discharge under 10%,
-  charging still goes in, back over 15%). Jade shows what the protection does. `battery_protection_*`.
+  charging still goes in, back over 15%; by energy, the share the battery's screen shows). Jade shows what the protection does. `battery_protection_*`.
 - Battery chargers take power on any edge (Baughn 2026-10-27; 1.12: the front edge only, so a voxel cable along another
   edge gave nothing). `wp9a_power_socket_battery_charger`.
 - Signal processor `daytime` is the time of day (Utils.dayFraction: clock mod 24000 / 23999); 1.12 divided the total

@@ -88,7 +88,7 @@ public final class Wp10aCases {
         cases.add(new MaceratorFieldSpeedCase());
         cases.add(new SingleUseChargeCase());
         cases.add(new ProtectedEmptyBatteryCase());
-        cases.add(new LowVoltageDisconnectCase());
+        cases.add(new LowVoltageDisconnectCase(false));
         cases.add(new TransformerCase());
         cases.add(new TransformerIncompleteCase());
         cases.add(new CapacitorCase());
@@ -597,9 +597,14 @@ public final class Wp10aCases {
      *  through a cable, gives nothing (its charge holds); one without the chip discharges. */
     static final class LowVoltageDisconnectCase implements TestCase {
         mods.eln.transparentnode.battery.BatteryElement chip, bare;
+        final boolean onlyPlus;
+
+        LowVoltageDisconnectCase(boolean onlyPlus) {
+            this.onlyPlus = onlyPlus;
+        }
 
         public String name() {
-            return "battery protection: low-voltage disconnect";
+            return "battery protection: low-voltage disconnect" + (onlyPlus ? " (only its positive side wired)" : "");
         }
 
         public int width() {
@@ -611,11 +616,16 @@ public final class Wp10aCases {
         }
 
         mods.eln.transparentnode.battery.BatteryElement battery(TestContext ctx, Layout l, int z, boolean withChip) {
+            return battery(ctx, l, z, withChip, false);
+        }
+
+        /** onlyPlus: only its positive side wired (its negative open: Baughn's live battery ran down to 5% that way). */
+        mods.eln.transparentnode.battery.BatteryElement battery(TestContext ctx, Layout l, int z, boolean withChip, boolean onlyPlus) {
             int x = 3;
             var b = (mods.eln.transparentnode.battery.BatteryElement) l.device(0 + (16 << 6), x, z);
-            b.batteryProcess.setCharge(0.08);
+            b.batteryProcess.setCharge(0.15);   // (over 10% charge, under 10% energy: the share its screen shows)
             if (withChip) b.getInventory().setItem(0, new ItemStack(mods.eln.Eln.itemsByName.get("Overvoltage Protection")));
-            for (var side : new mods.eln.misc.Direction[]{b.front.left(), b.front.right()}) {
+            for (var side : onlyPlus ? new mods.eln.misc.Direction[]{b.front.left()} : new mods.eln.misc.Direction[]{b.front.left(), b.front.right()}) {
                 SixNodeElement[] f = l.feed(ctx.at(x, 1, z), side);
                 ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
                     out.writeByte(ElectricalSourceElement.setVoltageId);
@@ -627,18 +637,21 @@ public final class Wp10aCases {
 
         public void build(TestContext ctx) {
             Layout l = new Layout(ctx, width());
-            chip = battery(ctx, l, 0, true);
-            bare = battery(ctx, l, 2, false);
+            chip = battery(ctx, l, 0, true, onlyPlus);
+            bare = battery(ctx, l, 2, false, onlyPlus);
         }
 
         public void measure(TestContext ctx) {
-            ctx.line(String.format("low-voltage disconnect: with chip %.4f (%s), without %.4f", chip.batteryProcess.getCharge(),
-                chip.inventoryProcess.describe(), bare.batteryProcess.getCharge()));
+            double share = chip.batteryProcess.getEnergy() / chip.batteryProcess.getEnergyMax();
+            ctx.line(String.format("low-voltage disconnect: at 15%% charge the energy is %.1f%%; with chip %.4f (%s), without %.4f; Jade %s",
+                share * 100, chip.batteryProcess.getCharge(), chip.inventoryProcess.describe(), bare.batteryProcess.getCharge(), chip.getWaila()));
             // (its own self-discharge, inside the cut, still runs)
-            ctx.check("battery protection: with the chip, a battery at 8% gives (almost) nothing", 0.08 - chip.batteryProcess.getCharge() < 0.1 * (0.08 - bare.batteryProcess.getCharge()),
-                String.format("%.4f", chip.batteryProcess.getCharge()));
-            ctx.check("battery protection: without it, it discharges", bare.batteryProcess.getCharge() < 0.079 || bare.isBurnt(),
+            ctx.check("battery protection: under 10% energy (as its screen shows), with the chip it gives (almost) nothing",
+                0.15 - chip.batteryProcess.getCharge() < 0.1 * (0.15 - bare.batteryProcess.getCharge()), String.format("%.4f", chip.batteryProcess.getCharge()));
+            ctx.check("battery protection: without it, it discharges", bare.batteryProcess.getCharge() < 0.149 || bare.isBurnt(),
                 String.format("%.4f", bare.batteryProcess.getCharge()));
+            ctx.check("Jade's charge is the energy's share, as the battery's screen", String.valueOf(chip.getWaila().get("Charge")).contains(
+                mods.eln.misc.Utils.plotPercent("", chip.batteryProcess.getEnergy() / chip.batteryProcess.getEnergyMax()).trim()), "" + chip.getWaila());
         }
     }
 
