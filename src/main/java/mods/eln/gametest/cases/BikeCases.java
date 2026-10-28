@@ -39,6 +39,47 @@ public final class BikeCases {
         cases.add(new Motor());
         cases.add(new Recipe());
         cases.add(new Charge());
+        cases.add(new DeepWater());
+    }
+
+    /** Water over the hubs throws the rider off (AdventurAgent rode one along a pool's bottom); shallow water doesn't. */
+    static final class DeepWater implements TestCase {
+        public String id() {
+            return "bike_deep_water_throws_you_off";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        ElectricBike bike;
+
+        public void build(TestContext ctx) {
+            ctx.level().setBlockAndUpdate(ctx.at(1, 1, 1), net.minecraft.world.level.block.Blocks.WATER.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(1, 2, 1), net.minecraft.world.level.block.Blocks.WATER.defaultBlockState());
+            bike = spawn(ctx, ctx.at(2, 1, 2), 0);
+        }
+
+        public void measure(TestContext ctx) {
+            var fp = rider(ctx, "w", bike);
+            try {
+                fp.startRiding(bike);
+                for (int t = 0; t < 3; t++) bike.tick();
+                ctx.check("on dry ground it stays up", bike.mode() == ElectricBike.Mode.RIDDEN, "" + bike.mode());
+                var w = ctx.at(1, 1, 1);
+                bike.setPos(w.getX() + 0.5, w.getY(), w.getZ() + 0.5);
+                for (int t = 0; t < 3; t++) bike.tick();
+                ctx.check("in water over the hubs the rider comes off and it goes down",
+                    bike.mode() == ElectricBike.Mode.FALLEN && fp.getVehicle() == null, bike.mode() + " " + fp.getVehicle());
+            } finally {
+                fp.stopRiding();
+                bike.discard();
+            }
+        }
     }
 
     /** The speedometer's battery (Baughn: show it needs one): the charge the server syncs, NO_BATTERY without one. */

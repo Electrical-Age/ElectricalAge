@@ -70,6 +70,11 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     int jumpCooldown;
     /** Server: ticks ridden while stopped; the position last tick; this tick's speed (b/t). */
     int stillTicks;
+    /** Server: ticks until the no-charge hint, after mounting. */
+    int hintTicks;
+    static final int HINT_DELAY = 65;
+    /** Water deeper than this (blocks) throws the rider off: above the hubs. */
+    static final double DEEP_WATER = 0.5;
     double lastX = Double.NaN, lastZ;
     double serverSpeed;
     /** Client: wheel turn (radians) now and last tick; the kickstand's fold (0 down, 1 up) now and last tick. */
@@ -223,6 +228,14 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         lastX = getX();
         lastZ = getZ();
         if (mode() == Mode.RIDDEN && getControllingPassenger() == null) setMode(Mode.PARKED);
+        // getting on without charge: a quiet word over the hotbar (the speedometer shows it too), once vanilla's
+        // "press shift to dismount" (60 ticks) is gone, or it overwrote ours (AdventurAgent)
+        if (hintTicks > 0 && --hintTicks == 0 && mode() == Mode.RIDDEN && getControllingPassenger() instanceof Player p
+            && syncedCharge() <= 0)
+            p.sendOverlayMessage(Component.translatable(syncedCharge() < 0 ? "message.eln.electric_bike.no_battery"
+                : "message.eln.electric_bike.flat_battery").withStyle(net.minecraft.ChatFormatting.GRAY));
+        // water over the hubs: you come off and it goes down (AdventurAgent found it riding along a pool's bottom)
+        if (mode() == Mode.RIDDEN && getFluidHeight(net.minecraft.tags.FluidTags.WATER) > DEEP_WATER) fall();
         // stopped with you on it: after 5 s, 10% a second that it goes over (Baughn)
         if (mode() == Mode.RIDDEN && serverSpeed < STOPPED) {
             stillTicks++;
@@ -296,11 +309,8 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
             setMode(Mode.RIDDEN);
             stillTicks = 0;
             playSound(SoundEvents.CHAIN_PLACE, 0.5f, 1.5f);   // (the kickstand folds)
-            // getting on without charge: a quiet word over the hotbar (the speedometer shows it too)
             syncCharge();
-            if (passenger instanceof Player p && syncedCharge() <= 0)
-                p.sendOverlayMessage(Component.translatable(syncedCharge() < 0 ? "message.eln.electric_bike.no_battery"
-                    : "message.eln.electric_bike.flat_battery").withStyle(net.minecraft.ChatFormatting.GRAY));
+            hintTicks = HINT_DELAY;
         }
     }
 

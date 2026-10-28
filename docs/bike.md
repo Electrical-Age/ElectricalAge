@@ -53,6 +53,8 @@ GameTest `bike_recipe` crafts it.
   `serverTick`).
 - **Crash**: the controlling client sees a horizontal collision above 3 b/s and sends `BikeCrash(entityId)`
   (`bike/BikeCrash`, C2S payload `eln:bike_crash` on EA's channel); the server checks the sender rides it, then `fall()`.
+- **Deep water**: water more than 0.5 deep at the bike (over the hubs) throws the rider off and it goes down (server).
+  Shallower water just slows it to 30%.
 - **Fallen**: lies on its side; nobody can get on; a right-click stands it up (PARKED).
 - **Trunk**: `SimpleContainer(4)`: slot 0 the battery (what `ElectricBike.accepts`: EA's portable batteries, packs,
   condensators, a battery belt), 1-3 anything. Shift-right-click opens it, or the inventory key while riding
