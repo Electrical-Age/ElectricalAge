@@ -1,4 +1,4 @@
-// 26.3	2026-10-27T21:20:37.663908762	eln-global/EA models
+// 26.3	2026-10-28T00:49:49.678080027	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -154,6 +154,7 @@ f1b439b4872961c132440fde0c2da04142ebe0dd assets/eln/items/and_chip.json
 baa0cd956442fa677d9e0ab1592afcab01987080 assets/eln/items/average_electrical_drill.json
 cfc7d310bae170bdd71866984830ffe65cc3ec79 assets/eln/items/average_ferromagnetic_core.json
 0dc4d37d18564b8e0ebb45dfda7636f1a564adeb assets/eln/items/basic_magnet.json
+36e8e765b4c0e0edf7e9f0550940d2bc5a4c3f82 assets/eln/items/battery_belt.json
 efc871520b472181cabd857e1e3a7fcd5a2d616b assets/eln/items/big_fuel_burner.json
 ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 5596f719bb5de83a04831ac250f8c3413c8f9fac assets/eln/items/blown_lead_fuse.json
@@ -532,6 +533,7 @@ d6582993701d030fe87342eaede2d81e2a49c4d1 assets/eln/models/item/animal_filter.js
 c455a84370f11dc398c16d1dc12df534fdf26d2d assets/eln/models/item/average_electrical_drill.json
 afb974bdfa9b0bd1730e8e9b6e699824338ca1c0 assets/eln/models/item/average_ferromagnetic_core.json
 cb0c60ca6903ab2e88fabeca47d89b57cf34c990 assets/eln/models/item/basic_magnet.json
+f5f36eb93c2ddaea7b5ab1c2f64be3b7cf753d7a assets/eln/models/item/battery_belt.json
 cc01262a7072282f9a8e435c335e9705c390a999 assets/eln/models/item/big_fuel_burner.json
 d7d836ec1eddb214839388b90698ac9053b7e8b9 assets/eln/models/item/black_brush.json
 a156b4526875a4a67867cba5f6306a8bfde04fb7 assets/eln/models/item/blown_lead_fuse.json

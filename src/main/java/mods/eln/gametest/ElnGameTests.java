@@ -65,6 +65,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.OreDropCases.addTo(l);
         mods.eln.gametest.cases.ItemCapabilityCases.addTo(l);
         mods.eln.gametest.cases.LampMonsterCases.addTo(l);
+        mods.eln.gametest.cases.BeltCases.addTo(l);
         mods.eln.gametest.cases.HandbookCases.addTo(l);
         mods.eln.gametest.cases.OilPondCases.addTo(l);
         return l;

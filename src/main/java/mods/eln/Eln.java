@@ -315,6 +315,7 @@ public class Eln {
         mods.eln.registry.ElnDeviceRegistry.registerBatch1();
         for (ElnContent c : CONTENT) c.preInit();
         mods.eln.registry.ElnRegistry.register(modBus);
+        mods.eln.item.belt.CuriosCompat.register(modBus);
         mods.eln.oil.Oil.register(modBus);
         mods.eln.sound.ElnSounds.register(modBus);
         mods.eln.datagen.ElnDataGen.register(modBus);

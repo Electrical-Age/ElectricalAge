@@ -44,6 +44,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
+  `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
+  batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item
+  battery standing for its contents (charged whole; gives only from what can discharge). Worn, it joins the player's
+  item energy (ItemEnergyInventoryProcess) and shows a HUD bar (client BeltHud; `BatteryBeltItem.hudAbove` for a mod's bar
+  above it). `battery_belt_pockets_and_charge`.
 - DC-DC converter (Baughn 2026-10-27): connects to nothing (no masks, no loads) unless both winding slots and the core
   slot are filled (1.12 kept its sides connected through high-impedance loads); its screen frames the primary slot green
   and the secondary yellow, as the model's marks. `wp10a_transformer_connects_only_when_complete`.
