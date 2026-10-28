@@ -48,10 +48,9 @@ public class ElnJadePlugin implements IWailaPlugin {
             var h = acc.getHitResult().getLocation();
             var p = acc.getPosition();
             double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
-            int el = v.elementAt(x, y, z, 0), pi = v.partAt(x, y, z);
-            if (el < 0 && pi < 0) el = v.elementAt(x, y, z, 2);
-            if (el >= 0 && v.sideElementList[el] != null) return v.sideElementList[el].getWaila();
-            return v.getWaila(details, pi);   // (the pipe or cable under the crosshair: Baughn)
+            var a = v.aimed(x, y, z);   // (the device, pipe or cable under the crosshair: Baughn)
+            if (a.element() >= 0 && v.sideElementList[a.element()] != null) return v.sideElementList[a.element()].getWaila();
+            return v.getWaila(details, a.part());
         }
         if (node instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) return t.element.getWaila();
         if (node instanceof mods.eln.node.six.SixNode s && be instanceof mods.eln.node.six.SixNodeEntity se) {
@@ -79,9 +78,8 @@ public class ElnJadePlugin implements IWailaPlugin {
         var h = acc.getHitResult().getLocation();
         var p = acc.getPosition();
         double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
-        int pi = v.partAt(x, y, z);
-        int el = v.elementAt(x, y, z, 0);
-        if (el < 0 && pi < 0) el = v.elementAt(x, y, z, 2);
+        var a = v.aimed(x, y, z);
+        int el = a.element(), pi = a.part();
         if (el >= 0 && v.sideElementList[el] != null) return v.sideElementList[el].sixNodeElementDescriptor.name;
         if (pi < 0) return null;
         var part = v.parts.get(pi);

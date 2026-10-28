@@ -572,13 +572,44 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return "no room around the pipe there";
     }
 
+    /**
+     * What the crosshair (or a click) is on, at block-relative hit (x, y, z): a hosted device's slot (a device's own face
+     * first, then within reach of a face), else a part's index; -1 for none. One rule for clicks, meters and Jade
+     * (Baughn 2026-10-28: each worked it out alone, and the meters read the block's first cable or pipe).
+     */
+    public record Aimed(int element, int part) {
+    }
+
+    public Aimed aimed(double x, double y, double z) {
+        int el = elementAt(x, y, z, 0), pi = partAt(x, y, z);
+        if (el < 0 && pi < 0) el = elementAt(x, y, z, 2);
+        return new Aimed(el, pi);
+    }
+
+    /** The pipe a part stands for: itself, or the pipe a valve, safety valve or sensor sits on; null if none. */
+    public PipePart pipeOf(int part) {
+        VoxelPart p = part >= 0 && part < parts.size() ? parts.get(part) : null;
+        if (p instanceof PipePart pp && pp.fluid != null) return pp;
+        if (p instanceof ValvePart v) return pipeNear(v.x, v.y, v.z);
+        if (p instanceof SafetyValvePart sv) return pipeAt(sv.x, sv.y, sv.z);
+        if (p instanceof PipeSensorPart ps) return pipeAt(ps.x, ps.y, ps.z);
+        return null;
+    }
+
+    /** The cable conductor a part belongs to, or null. */
+    public CableNet.Conductor conductorOf(int part) {
+        VoxelPart p = part >= 0 && part < parts.size() ? parts.get(part) : null;
+        if (!(p instanceof CablePart)) return null;
+        for (CableNet.Conductor k : cables.conductors) if (k.valid() && k.parts.contains(p)) return k;
+        return null;
+    }
+
     /** A right-click on a valve (empty hand) turns it. */
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         // a six-node element hosted here: as in a six-node block (its own use, GUI, repair, meters)
-        int el = elementAt(vx, vy, vz, 0);
-        int pi = partAt(vx, vy, vz);
-        if (el < 0 && pi < 0) el = elementAt(vx, vy, vz, 2);
+        Aimed a = aimed(vx, vy, vz);
+        int el = a.element(), pi = a.part();
         if (el >= 0) return onSlotActivated(player, el, vx, vy, vz);
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
@@ -609,7 +640,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 return true;
             }
         }
-        return pi >= 0 && meterUse(player, side);
+        // meters: the part clicked (its cable or pipe), not the block's first
+        return pi >= 0 && meterUse(player, () -> multiMeterString(pi), () -> thermoMeterString(pi));
     }
 
     /** A GUI packet's slot byte for a part of this block (ValvePart.THROTTLE's slider), not an element. */
@@ -1506,23 +1538,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      */
     public java.util.LinkedHashMap<String, String> getWaila(boolean details, int hit) {
         var out = new java.util.LinkedHashMap<String, String>();
-        PipePart pipe = null;
         VoxelPart aimed = hit >= 0 && hit < parts.size() ? parts.get(hit) : null;
-        if (aimed instanceof PipePart pp && pp.fluid != null) pipe = pp;
-        else if (aimed instanceof ValvePart v) pipe = pipeNear(v.x, v.y, v.z);
-        else if (aimed instanceof SafetyValvePart sv) pipe = pipeAt(sv.x, sv.y, sv.z);
-        else if (aimed instanceof PipeSensorPart ps) pipe = pipeAt(ps.x, ps.y, ps.z);
+        PipePart pipe = pipeOf(hit);
         if (pipe == null && !(aimed instanceof CablePart))
             for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null && (pipe == null || pp.burst)) pipe = pp;
         if (pipe == null) {
             // cables: each conductor's tier, voltage and current (temperature with details)
             int n = 0;
             // (looking at a cable: only its own conductor, Baughn 2026-10-28; else all of the block's)
-            boolean only = false;
-            if (aimed instanceof CablePart)
-                for (CableNet.Conductor k : cables.conductors) if (k.valid() && k.parts.contains(aimed)) only = true;
+            CableNet.Conductor only = conductorOf(hit);
             for (CableNet.Conductor k : cables.conductors) {
-                if (!k.valid() || (only ? !k.parts.contains(aimed) : k.face < 0)) continue;
+                if (!k.valid() || (only != null ? k != only : k.face < 0)) continue;
                 String key = n++ == 0 ? "Cable" : "Cable " + n;
                 if (k.isBurntNow()) {
                     out.put(key, k.name() + ", BURNT");
@@ -1562,29 +1588,46 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return out;
     }
 
-    /** The multimeter on a pipe: its run's pressure and what's in it (a gauge until there's a gauge part). */
+    /** The multimeter on a part: its cable's voltage and current, or its pipe run's pressure and contents (the run's
+     *  lump: the piece's own node is only written back after each step). */
+    public String multiMeterString(int part) {
+        CableNet.Conductor k = conductorOf(part);
+        if (k != null && k.load != null)
+            return k.d.signalWire ? mods.eln.misc.Utils.plotSignal(k.load.getU(), k.load.getI()) : mods.eln.misc.Utils.plotUIP(k.load.getU(), k.load.getI());
+        PipePart pipe = pipeOf(part);
+        if (pipe == null) return "";
+        var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
+        double lq = n.mLiquid() / EaUnits.KG_PER_MB_WATER, st = n.mVapour() / EaUnits.KG_PER_MB_STEAM;
+        return String.format("%.2f bar of %s  water %.0f mB  steam %s%s  ", n.P() / 1e5, EaUnits.contents(n), lq, EaUnits.steamGrams(st), pipe.burst ? "  BURST" : "");
+    }
+
+    /** The thermometer on a part: its cable's or its pipe run's temperature. */
+    public String thermoMeterString(int part) {
+        CableNet.Conductor k = conductorOf(part);
+        if (k != null && k.thermal != null) return mods.eln.misc.Utils.plotCelsius("T", k.thermal.Tc);
+        PipePart pipe = pipeOf(part);
+        return pipe == null ? "" : String.format("%.0f °C  ", mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid).T() - 273.15);
+    }
+
+    /** By side (a face's hosted device; else the block's first cable, then its first pipe: callers without a hit). */
     @Override
     public String multiMeterString(Direction side) {
         if (sideElementList[side.getInt()] != null) return super.multiMeterString(side);
-        for (CableNet.Conductor k : cables.live())
-            if (k.load != null) return k.d.signalWire ? mods.eln.misc.Utils.plotSignal(k.load.getU(), k.load.getI()) : mods.eln.misc.Utils.plotUIP(k.load.getU(), k.load.getI());
-        for (VoxelPart p : parts)
-            if (p instanceof PipePart pipe && pipe.fluid != null) {
-                var n = pipe.fluid;
-                double lq = n.mLiquid() / EaUnits.KG_PER_MB_WATER, st = n.mVapour() / EaUnits.KG_PER_MB_STEAM;
-                return String.format("%.2f bar  water %.0f mB  steam %s%s  ", n.P() / 1e5, lq, EaUnits.steamGrams(st), pipe.burst ? "  BURST" : "");
-            }
-        return "";
+        return multiMeterString(firstPart());
     }
 
     @Override
     public String thermoMeterString(Direction side) {
         if (sideElementList[side.getInt()] != null) return super.thermoMeterString(side);
+        return thermoMeterString(firstPart());
+    }
+
+    /** The first live cable's piece, else the first pipe (the readings without a hit). */
+    private int firstPart() {
         for (CableNet.Conductor k : cables.live())
-            if (k.thermal != null) return mods.eln.misc.Utils.plotCelsius("T", k.thermal.Tc);
-        for (VoxelPart p : parts)
-            if (p instanceof PipePart pipe && pipe.fluid != null) return String.format("%.0f °C  ", pipe.fluid.T() - 273.15);
-        return "";
+            if (!k.parts.isEmpty()) return parts.indexOf(k.parts.get(0));
+        for (int i = 0; i < parts.size(); i++) if (parts.get(i) instanceof PipePart pp && pp.fluid != null) return i;
+        return -1;
     }
 
     public boolean playerAskToBreakPart(Player player, int index) {
