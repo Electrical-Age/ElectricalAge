@@ -47,6 +47,18 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
         this.descriptor = (HeatFurnaceDescriptor) descriptor;
         interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
         coord = new Coordonate(tileEntity);
+        // the fire roars and crackles as hard as it burns
+        addLoopedSound(new mods.eln.sound.LoopedSound("eln:heat_furnace_fire", coordonate()) {
+            @Override
+            public float getVolume() {
+                return 0.2f * Math.min(1, fire);
+            }
+
+            @Override
+            public float getPitch() {
+                return 0.72f + 0.08f * Math.min(1, fire);
+            }
+        });
     }
 
     @Override

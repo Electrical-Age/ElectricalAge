@@ -58,7 +58,14 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
   its own item, named from `src/main/resources/eln-ids.json`. New cases use `cases/Ids.six(name)` /
   `Ids.transparent(name)` (descriptor names as in `golden/1.12/inventory.json`).
 - `ElnGameTests` (`register` called unconditionally from `Eln.java`): `cases()` lists every case; each becomes test
-  `eln:<id>` in structure `eln:floor_<W>x<H>x<D>`, timeout `ticks()+40`. Per case:
+  `eln:<id>` in structure `eln:floor_<W>x<H>x<D>`, timeout `ticks()+40`, with `PADDING` (8) empty blocks round
+  the structure. The test server keeps every batch's structures in one grid, 5 blocks apart; the padding puts 21
+  blocks between neighbours (past a light's reach of 15 and a biome cell), so a test's outcome can't depend on which
+  tests ran next to it (Baughn). Per case:
+  0. `forceLoadPadding`: the chunks under the padding are forced too (the server forces only the structure's; the
+     runner releases all forced chunks after each batch), so a case may write into its padding, e.g. a biome box.
+     Padding is on every side and the server clears it to air, so the floor floats 8 blocks above stone (Stasis
+     refills it; here that light work kept `port26_light_block`'s unsettled reading at 0 once);
   1. leaked-node check: any node already in the test bounds (same dimension) fails the case;
   2. lays the stone floor (`width x floorDepth`);
   3. `build` -> wait `ticks()` -> `measure` (exceptions become failed checks);

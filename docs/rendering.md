@@ -70,7 +70,7 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 
 ## Sounds (client)
 
-- Looped: render objects describe loops (`sound/LoopedSound.kt`, server-safe) and register them with `addLoopedSound`; `sound/LoopedSoundPlayer.java` (client) gives every loop within 32 blocks a ticking sound instance that follows its volume/pitch, refreshed every half second.
+- Looped: render objects describe loops (`sound/LoopedSound.kt`, server-safe) and register them with `addLoopedSound`; `sound/LoopedSoundPlayer.java` (client) ranks the audible loops every half second (volume faded over 16 blocks of linear attenuation) and gives the `MAX_PLAYING` (24) loudest a ticking sound instance that follows its volume/pitch; an instance stops after 2 s of silence or when it drops out of the ranking, so idle machines hold no OpenAL source (the pool is ~247 and a full pool silences vanilla too).
 - One-shots: server packet `Eln.packetPlaySound` -> `SoundCommand.clientPlayer` = `sound/SoundClient::play` (linear falloff; 1.12 block muffling not ported). Event names: `sound/ElnSounds.java` + `assets/eln/sounds.json`.
 - Decision (Baughn): later, synthesize machine sound client-side from device state instead of server packets.
 
