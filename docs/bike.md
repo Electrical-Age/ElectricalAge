@@ -72,10 +72,18 @@ GameTest `bike_recipe` crafts it.
 - `BikeRenderer`: parked it leans 8° onto the kickstand; fallen it lies on its side; hit, it rocks like a boat.
 - `BikeSound`: EA's `rotor_tone`, quiet, pitch with speed, only while the motor runs; it takes a sound source only then
   (started when it runs, stopped after 2 s quiet).
+- `client/BikeHud` (GUI layer `eln:bike_speedometer`, above the hotbar; Baughn: tell players it needs a battery): while
+  the local player rides a bike, a round dial left of the hotbar (past the offhand slot): needle 0 to `poweredSpeed` in
+  km/h (b/s x 3.6) over 270 degrees, ticks every tenth (the last red), a digital readout; the speed is the bike's
+  horizontal speed, smoothed. Beside it the battery, filled by charge (green, yellow under 50%, red under 20%); with no
+  battery or a flat one, a red outlined battery with a slash, blinking (1 s on, 0.5 s off). Drawn with fills.
+- The charge comes from the synced `charge` (0..1, `NO_BATTERY` = -1 when the slot holds no battery), sent by the server
+  when it moves by half a percent, reaches 0 or 1, or the battery comes or goes (`syncCharge`). Getting on with no
+  battery, or a flat one, also says so once over the hotbar ("No battery: pedalling only ...").
 - `BikeTrunkScreen`: EA's panel, the battery slot with a charge bar and %, three slots, the inventory.
 
 ## Tests
 
 `BikePhysicsTest` (rules), GameTests `gametest/cases/BikeCases`: trunk slots, save, break drops; kickstand, tip-over
 timing, rider off, stand up; half slab rides, full block stops; motor draw (~1 kJ in 10 s at full speed) and
-powered/pedalling; the recipe. Riding itself is client-side and needs a client to test.
+powered/pedalling; the recipe; the synced charge (missing, flat, partial, half-percent threshold). Riding itself is client-side and needs a client to test.

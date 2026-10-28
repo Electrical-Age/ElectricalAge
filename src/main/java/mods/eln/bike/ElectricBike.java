@@ -49,6 +49,9 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
 
     static final EntityDataAccessor<Byte> DATA_MODE = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.BYTE);
     static final EntityDataAccessor<Boolean> DATA_POWERED = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.BOOLEAN);
+    /** The battery's charge for the rider's speedometer: 0..1, NO_BATTERY when the slot is empty (Baughn: show it needs one). */
+    static final EntityDataAccessor<Float> DATA_CHARGE = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.FLOAT);
+    public static final float NO_BATTERY = -1;
 
     /** The trunk: slot 0 the battery, 1-3 anything (Baughn). */
     public static final int TRUNK_SLOTS = 4, BATTERY_SLOT = 0;
@@ -89,6 +92,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         super.defineSynchedData(data);
         data.define(DATA_MODE, (byte) Mode.PARKED.ordinal());
         data.define(DATA_POWERED, false);
+        data.define(DATA_CHARGE, NO_BATTERY);
     }
 
     public Mode mode() {
@@ -102,6 +106,17 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     /** Whether the battery in the trunk has charge to give (the server decides; both sides ride by it). */
     public boolean powered() {
         return entityData.get(DATA_POWERED);
+    }
+
+    /** The charge as the server last sent it: 0..1, or NO_BATTERY. */
+    public float syncedCharge() {
+        return entityData.get(DATA_CHARGE);
+    }
+
+    /** Server: send the charge when it moved by half a percent, or crossed empty or the battery came or went. */
+    public void syncCharge() {
+        float now = accepts(trunk.getItem(BATTERY_SLOT)) ? charge() : NO_BATTERY, was = syncedCharge();
+        if (now != was && (Math.abs(now - was) >= 0.005f || now <= 0 || was <= 0 || now >= 1)) entityData.set(DATA_CHARGE, now);
     }
 
     @Override
@@ -229,6 +244,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
             has = b.getEnergy(s) > 1;
         }
         if (has != powered()) entityData.set(DATA_POWERED, has);
+        syncCharge();
     }
 
     /** It goes over (server): the rider comes off and it lies on its side until stood up. */
@@ -280,6 +296,11 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
             setMode(Mode.RIDDEN);
             stillTicks = 0;
             playSound(SoundEvents.CHAIN_PLACE, 0.5f, 1.5f);   // (the kickstand folds)
+            // getting on without charge: a quiet word over the hotbar (the speedometer shows it too)
+            syncCharge();
+            if (passenger instanceof Player p && syncedCharge() <= 0)
+                p.sendOverlayMessage(Component.translatable(syncedCharge() < 0 ? "message.eln.electric_bike.no_battery"
+                    : "message.eln.electric_bike.flat_battery").withStyle(net.minecraft.ChatFormatting.GRAY));
         }
     }
 

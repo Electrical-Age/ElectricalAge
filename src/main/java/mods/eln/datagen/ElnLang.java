@@ -34,6 +34,8 @@ public class ElnLang extends LanguageProvider {
     protected void addTranslations() {
         add("item.eln.electric_bike.tooltip", "Not a motorcycle");   // (Baughn)
         add("container.eln.electric_bike", "Bike Trunk");
+        add("message.eln.electric_bike.no_battery", "No battery: pedalling only (shift-right-click the bike for its trunk)");
+        add("message.eln.electric_bike.flat_battery", "The battery is flat: pedalling only");
         add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
         add("item.eln.chisel.shape.cube", "cube");
         add("item.eln.chisel.shape.flat", "flat");

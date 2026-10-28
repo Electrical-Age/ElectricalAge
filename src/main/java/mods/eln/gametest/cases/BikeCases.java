@@ -38,6 +38,50 @@ public final class BikeCases {
         cases.add(new Steps());
         cases.add(new Motor());
         cases.add(new Recipe());
+        cases.add(new Charge());
+    }
+
+    /** The speedometer's battery (Baughn: show it needs one): the charge the server syncs, NO_BATTERY without one. */
+    static final class Charge implements TestCase {
+        public String id() {
+            return "bike_synced_charge_for_the_speedometer";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        ElectricBike bike;
+
+        public void build(TestContext ctx) {
+            bike = spawn(ctx, ctx.at(1, 1, 1), 0);
+        }
+
+        public void measure(TestContext ctx) {
+            try {
+                bike.serverTick();
+                ctx.check("no battery: NO_BATTERY", bike.syncedCharge() == ElectricBike.NO_BATTERY, "" + bike.syncedCharge());
+                bike.trunk.setItem(ElectricBike.BATTERY_SLOT, battery(0));
+                bike.serverTick();
+                ctx.check("a flat battery: 0", bike.syncedCharge() == 0, "" + bike.syncedCharge());
+                bike.trunk.setItem(ElectricBike.BATTERY_SLOT, battery(0.62));
+                bike.serverTick();
+                ctx.check("a battery at 62%: 0.62", Math.abs(bike.syncedCharge() - 0.62f) < 1e-3, "" + bike.syncedCharge());
+                var b = BatteryBeltItem.battery(bike.trunk.getItem(0));
+                b.setEnergy(bike.trunk.getItem(0), b.getEnergyMax(bike.trunk.getItem(0)) * 0.618);
+                bike.serverTick();
+                ctx.check("a change under half a percent isn't sent", Math.abs(bike.syncedCharge() - 0.62f) < 1e-3, "" + bike.syncedCharge());
+                bike.trunk.setItem(ElectricBike.BATTERY_SLOT, new ItemStack(Items.DIRT));
+                bike.serverTick();
+                ctx.check("dirt in the slot: NO_BATTERY", bike.syncedCharge() == ElectricBike.NO_BATTERY, "" + bike.syncedCharge());
+            } finally {
+                bike.discard();
+            }
+        }
     }
 
     /** Baughn's recipe: chest (trunk) and leather (saddle) over an iron frame round an electrical motor, two rubber wheels. */
