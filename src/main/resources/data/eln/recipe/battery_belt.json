@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "C": "eln:low_voltage_cable",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "LLL",
+    "CIC",
+    "L  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:battery_belt"
+  }
+}

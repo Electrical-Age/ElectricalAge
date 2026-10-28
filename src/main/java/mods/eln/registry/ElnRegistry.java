@@ -45,6 +45,8 @@ public final class ElnRegistry {
     /** Every EA device GUI (P4): ElnNodeMenu, rebuilt on the client from its open data. */
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.gui.ElnNodeMenu>> NODE_MENU =
         MENUS.register("node", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.gui.ElnNodeMenu::fromNetwork));
+    public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.item.belt.BeltMenu>> BELT_MENU =
+        MENUS.register("battery_belt", () -> new net.minecraft.world.inventory.MenuType<>(mods.eln.item.belt.BeltMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.item.xray.XRayScannerMenu>> XRAY_MENU =
         MENUS.register("xray_scanner", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.item.xray.XRayScannerMenu::fromNetwork));
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
@@ -140,6 +142,9 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_pressure_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.PRESSURE));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeSensorItem> PIPE_TEMPERATURE_SENSOR =
         ITEMS.registerItem("pipe_temperature_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE));
+    /** Baughn 2026-10-27: the battery belt (moved from Stasis Delvers, which keeps an alias for its old id). */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.item.belt.BatteryBeltItem> BATTERY_BELT =
+        ITEMS.registerItem("battery_belt", mods.eln.item.belt.BatteryBeltItem::new, p -> p.stacksTo(1));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.AdapterItem> PIPE_ADAPTER =
         ITEMS.registerItem("pipe_adapter", mods.eln.node.voxel.AdapterItem::new);
 
@@ -286,6 +291,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
         ALL_ITEMS.add(PIPE_PRESSURE_SENSOR);
         ALL_ITEMS.add(PIPE_TEMPERATURE_SENSOR);
+        ALL_ITEMS.add(BATTERY_BELT);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(HANDBOOK);

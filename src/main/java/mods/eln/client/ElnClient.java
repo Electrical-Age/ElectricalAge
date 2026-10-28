@@ -59,6 +59,8 @@ public final class ElnClient {
             e -> e.registerModel(mods.eln.client.render.VoxelModel.ID, mods.eln.client.render.VoxelModel.Unbaked.CODEC));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "lit"), mods.eln.client.render.LitProperty.MAP_CODEC));
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
+            net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "battery_belt"), BeltHud::render));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class,
             e -> e.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tutorial_sign"),
                 mods.eln.sixnode.tutorialsign.TutorialSignHud::render));
@@ -79,6 +81,7 @@ public final class ElnClient {
             e -> {
                 e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create);
                 e.register(ElnRegistry.XRAY_MENU.get(), mods.eln.client.gui.XRayScannerScreen::new);
+                e.register(ElnRegistry.BELT_MENU.get(), mods.eln.client.gui.BeltScreen::new);
             });
         XRayScan.install();
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent.class, ItemTooltips::onTooltip);

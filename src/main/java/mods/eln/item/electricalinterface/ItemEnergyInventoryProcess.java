@@ -123,6 +123,10 @@ public class ItemEnergyInventoryProcess implements IProcess {
                 }
             }
 
+            // the worn battery belt (Baughn 2026-10-27): its batteries power the player's tools as carried ones do
+            ItemStack belt = mods.eln.item.belt.BatteryBeltItem.worn(player);
+            if (!belt.isEmpty() && belt.getItem() instanceof IItemEnergyBattery bb) list.add(new Element(belt, bb));
+
             for (Element e : list) {
                 e.i.electricalItemUpdate(e.stack, energyUpdatePeriod);
             }
