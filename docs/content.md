@@ -54,7 +54,9 @@ oil, residue). `oil/OilWorldgen.java` registers the oil lake structure and its p
 lakes) and well casing. Lake records are the saved data `eln:oil_reservoirs` (`ReservoirData`; codec fields
 `next_id`, `reservoirs`, `keys`), kept in step with the blocks by `Reservoirs`. Devices (oil pump, boiler,
 fractionating column, flare stack, electric heater, steam generator) are registered in `registry/batch/Wp10aContent`.
-Tests: `gametest/cases/OilCases`. The tar sand separator's list is `Eln.separatorRecipes`.
+Over half the lakes (a fixed roll on the lake's key) a small surface pond, its own reservoir `oil-pond:<lake>`, rimmed
+with tar sand, is dug once the chunks over the lake's middle are loaded, in new and old worlds alike (`oil/OilPonds`,
+Baughn 2026-10-28; none where the ground isn't flat, dry and natural). Tests: `gametest/cases/OilCases`. The tar sand separator's list is `Eln.separatorRecipes`.
 
 ## Entities
 

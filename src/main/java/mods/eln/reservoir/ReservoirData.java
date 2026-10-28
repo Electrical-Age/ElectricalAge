@@ -69,6 +69,11 @@ public final class ReservoirData extends SavedData {
         for (long k : r.basin.chunks()) byChunk.computeIfAbsent(k, q -> new ArrayList<>(1)).add(r);
     }
 
+    /** Every maker's key (OilPonds: the oil lakes made so far). */
+    public java.util.Set<String> keys() {
+        return java.util.Collections.unmodifiableSet(byKey.keySet());
+    }
+
     public Reservoir byKey(String key) {
         Integer id = byKey.get(key);
         return id == null ? null : byId.get(id);

@@ -13,6 +13,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 | Save-wide config (`heatFurnaceFuel`, `electricalLampAging`, `batteryAging`, `infinitPortableBattery`, `reGenOre`, `cableRsFactor_lastUsed`) | same file, key `config`, dim 0 only | `server/SaveConfig` |
 | Wind (`windHit`, `windTarget`, `windVariation`, `windTargetFiltred`) | same file, key `wind`, dim 0 only | `misc/WindProcess` |
 | Oil reservoirs | vanilla SavedData `eln:oil_reservoirs` (codec keys `next_id`, `reservoirs`, `keys`) | `oil/ReservoirData` |
+| Oil ponds done | vanilla SavedData `eln:oil_ponds` (codec key `lakes`: the oil lakes whose pond was placed or skipped) | `oil/OilPonds` |
 | Tutorial sign texts | `<world>/EA/tutorialSign.txt`, read only (the `.xml` reader is commented out) | `sixnode/tutorialsign/TutorialSignElement` via `Utils.readMapFile` |
 | Block entities | nothing persistent | `node/NodeBlockEntity` |
 

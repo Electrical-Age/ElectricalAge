@@ -92,6 +92,7 @@ public final class OilReservoirs {
                 Reservoir r = make((ServerLevel) p[0], (LakeShape) p[1]);
                 Reservoirs.refresh((ServerLevel) p[0], r);
             }
+            OilPonds.tick(e);
         } catch (Throwable t) {
             mods.eln.Eln.LOG.error("Oil: reservoir tick failed", t);
         }
