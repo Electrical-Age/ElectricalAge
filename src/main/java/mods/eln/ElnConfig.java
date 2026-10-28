@@ -15,7 +15,7 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
         BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
-    static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP;
+    static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
     static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, BANK_AMPS;
 
@@ -78,7 +78,9 @@ public final class ElnConfig {
         ANVIL_UNIT = b.comment("Energy for a unit of repair material's worth of repair (a quarter of the tool), J (40000: 8 s at 5 kW).")
             .defineInRange("joulesPerUnit", 40000.0, 0.0, 1e9);
         ANVIL_NAME = b.comment("Energy to engrave a new name, J.").defineInRange("joulesPerName", 2000.0, 0.0, 1e9);
-        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 800 V...").defineInRange("resumeFraction", 0.98, 0.0, 2.0);
+        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 800 V...").defineInRange("resumeFraction", 0.95, 0.0, 2.0);
+        ANVIL_PLATEAU = b.comment("...or, when the line has stopped rising for 2 s, at this share or more (a bank on a weak plant levels off",
+                "below resumeFraction: its leak).").defineInRange("plateauFraction", 0.93, 0.0, 2.0);
         ANVIL_SAG = b.comment("...and pauses (keeping its progress) when it sags below this share.").defineInRange("sagFraction", 0.9, 0.0, 2.0);
         ANVIL_BURSTS = b.comment("A unit's weld comes in this many bursts (Baughn: two, so a capacitor bank can recover between them).")
             .defineInRange("burstsPerUnit", 2, 1, 100);
@@ -133,6 +135,7 @@ public final class ElnConfig {
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerUnit = ANVIL_UNIT.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerName = ANVIL_NAME.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.resume = ANVIL_RESUME.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.plateau = ANVIL_PLATEAU.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.sag = ANVIL_SAG.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.bursts = ANVIL_BURSTS.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.burstGapS = ANVIL_GAP.get();

@@ -94,8 +94,8 @@ public final class CapacitorBankCases {
             ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(b, r));
             held.cellLoad.setU(800);
             held.positiveLoad.setU(800);
-            over.cellLoad.setU(1350);
-            over.positiveLoad.setU(1350);
+            over.cellLoad.setU(1600);   // (300 V over: the watchdog's budget, 500 V s, goes in a few seconds)
+            over.positiveLoad.setU(1600);
         }
 
         public void measure(TestContext ctx) {

@@ -24,6 +24,6 @@ public class SmelterScreen extends ElnScreen {
         progress("process", () -> render.progress);
         text("temperature", () -> tr("Temperature %1$", Utils.plotValue(render.temperature + PhysicalConstant.Tamb) + "°C"));
         text("power", () -> render.powered ? tr("Controls: powered") : tr("Controls: no power (50V on a side)"),
-            () -> render.powered ? 0x404040 : 0xA02020);
+            () -> render.powered ? LABEL : 0xFFA02020);   // (ARGB: alpha 0 drew nothing)
     }
 }

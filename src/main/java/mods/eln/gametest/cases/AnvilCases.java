@@ -32,11 +32,69 @@ public final class AnvilCases {
         cases.add(new Rules());
         cases.add(new Pulse());
         cases.add(new Sag());
+        cases.add(new WeakPlant());
+    }
+
+    /**
+     * A bank on a weak plant: an 800 V source behind a 100 ohm Power Resistor, a capacitor bank on the line. The bank's
+     * leak levels the line off near 784 V, below the old 98% start, where the desk waited forever (AdventurAgent); now it
+     * welds. The bank starts charged to 780 V to save the test a minute and a half.
+     */
+    static final class WeakPlant implements TestCase {
+        public String id() {
+            return "anvil_welds_from_a_bank_on_a_weak_plant";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int floorDepth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        ElectricalAnvilElement a;
+        mods.eln.transparentnode.capacitorbank.CapacitorBankElement bank;
+
+        public void build(TestContext ctx) {
+            // along x (the fake placer faces so that a bank's + flank is east, a resistor's terminals east-west):
+            // ground x2 | bank x3 | line cable x4 (the desk on its south side) | resistor x5 | source x6
+            bank = (mods.eln.transparentnode.capacitorbank.CapacitorBankElement) ctx.placeTransparent(CapacitorBankCases.BANK, ctx.at(3, 1, 3));
+            Direction plus = bank.front.left();
+            int sx = plus == Direction.XP ? 1 : -1;
+            ctx.placeSix(Wp10aCases.GROUND, ctx.at(3 - sx, 1, 3));
+            BlockPos line = ctx.at(3 + sx, 1, 3);
+            ctx.placeSix(HV_CABLE, line);
+            Batch1Cases.resistor(ctx, 3 + 2 * sx, 3, 48);   // 100 ohm
+            Batch1Cases.source(ctx, 3 + 3 * sx, 3, 800);
+            a = (ElectricalAnvilElement) ctx.placeTransparent(ANVIL, Wp10aCases.off(line, bank.front));
+            put(a, pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
+            bank.cellLoad.setU(780);
+            bank.positiveLoad.setU(780);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("anvil weak plant: anvil " + a.getWaila() + String.format(" energy %.0f", a.energy) + "; bank " + bank.getWaila());
+            ctx.check("anvil: a bank on a weak plant (100 ohm) gets it welding", a.energy > 10000 || tool(a).getDamageValue() < 1500,
+                String.format("%.0f J, damage %d", a.energy, tool(a).getDamageValue()));
+        }
     }
 
     /**
      * A line that can't carry it: the pulse stops below 90% of 800 V, keeps its progress, and waits a second before it
-     * tries again (no chattering); it starts only at 98%. The line's voltage is set by hand, tick by tick.
+     * tries again (no chattering); it starts at 95%, or on a line levelled off above 93%. The line's voltage is set by hand, tick by tick.
      */
     static final class Sag implements TestCase {
         public String id() {
@@ -66,8 +124,14 @@ public final class AnvilCases {
         }
 
         public void measure(TestContext ctx) {
-            tick(760, 5);
-            ctx.check("anvil: at 760 V (95%) it doesn't start", !a.welding && a.status == ElectricalAnvilElement.WAITING && a.energy == 0, "" + a.status);
+            tick(740, 60);
+            ctx.check("anvil: at 740 V (92.5%), level for 3 s, it doesn't start", !a.welding && a.status == ElectricalAnvilElement.WAITING && a.energy == 0, "" + a.status);
+            tick(750, 45);
+            ctx.check("anvil: a line levelled off at 750 V (93.75%) starts it after 2 s", a.welding, "" + a.status);
+            ItemStack t = tool(a);   // (take the tool out and back: the step starts afresh)
+            a.getInventory().setItem(ElectricalAnvilElement.TOOL, ItemStack.EMPTY);
+            tick(800, 1);
+            a.getInventory().setItem(ElectricalAnvilElement.TOOL, t);
             tick(800, 20);
             double e = a.energy;
             ctx.check("anvil: at 800 V it welds (1 s: ~5 kJ)", a.welding && Math.abs(e - 5000) < 300, a.welding + " " + e);

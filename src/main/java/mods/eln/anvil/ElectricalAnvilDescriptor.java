@@ -24,8 +24,13 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
     public static double powerW = Eln.HVP();
     /** Energy for a unit of material's worth of repair (config [anvil] joulesPerUnit), and for engraving a name. */
     public static double joulesPerUnit = 40_000, joulesPerName = 2_000;
-    /** It starts a pulse at RESUME of 800 V and pauses below SAG (config [anvil]). */
-    public static double resume = 0.98, sag = 0.9;
+    /**
+     * It starts a pulse at RESUME of 800 V, or, on a line that has levelled off (rising under PLATEAU_V_PER_S for
+     * PLATEAU_S) above PLATEAU of 800 V, there; it pauses below SAG (config [anvil]). 98% was too high for a real bank
+     * on a weak plant: the bank's own leak held the line at ~780 V and the desk waited forever (AdventurAgent).
+     */
+    public static double resume = 0.95, sag = 0.9, plateau = 0.93;
+    public static final double PLATEAU_V_PER_S = 1, PLATEAU_S = 2;
     /**
      * A unit's weld comes in this many bursts, with at least burstGapS between them and the line back at RESUME
      * (Baughn: keep the 40 kJ, in two bursts, so a bank has a chance to recover). Config [anvil].

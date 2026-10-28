@@ -31,17 +31,19 @@ new data component and would leak into other mods' views of the item.
 ## Power (the pulse)
 - One electrical connection: the 800 V terminal plate low on the back (`CableTerminals.BACK`), HV cable resistance.
 - Working, it is a resistor `R = 800^2 / power` (128 ohm at 5 kW): it draws its rating at 800 V. Idle, it's open.
-- It switches in when the line is at `resume` (98%) of 800 V and drops out below `sag` (90%), keeping its progress, then
-  holds off 1 s (no chattering on a line that can't carry it). A weak plant with a capacitor bank (or an inductor) behind
+- It switches in when the line is at `resume` (95%: 760 V) of 800 V, or when the line has levelled off (rising under
+  1 V/s for 2 s) at `plateau` (93%: 744 V) or more; it drops out below `sag` (90%), keeping its progress, then holds off
+  1 s (no chattering on a line that can't carry it). 98% was too high: a bank's own leak through a 100 ohm feed holds
+  the line near 780 V, and the desk waited forever (AdventurAgent). A weak plant with a capacitor bank (or an inductor) behind
   the desk charges between pulses and lets it work.
 - Energy: `joulesPerUnit` (40 kJ: 8 s at 5 kW) for a unit's worth of repair, pro rata for less; `joulesPerName` (2 kJ).
 - **Bursts** (Baughn 2026-10-28): the 40 kJ of a unit come in `burstsPerUnit` (2) bursts of 20 kJ. After each it rests
-  (state "Between bursts", `RECOVERING`) for at least `burstGapSeconds` (3 s) and until the line is back at 98%, so a
+  (state "Between bursts", `RECOVERING`) for at least `burstGapSeconds` (3 s) and until it may start again, so a
   bank (or a battery bank) recovers. Engraving stays one small pulse. `burstStart` is saved with `energy`.
 - Over 800 V by the usual margin it fails like other machines (`VoltageStateWatchDog`).
 
 ## Config (`[anvil]` in `config/eln-synced.toml`)
-`power` 5000 W, `joulesPerUnit` 40000, `joulesPerName` 2000, `resumeFraction` 0.98, `sagFraction` 0.9, `burstsPerUnit` 2,
+`power` 5000 W, `joulesPerUnit` 40000, `joulesPerName` 2000, `resumeFraction` 0.95, `plateauFraction` 0.93, `sagFraction` 0.9, `burstsPerUnit` 2,
 `burstGapSeconds` 3.
 
 ## The capacitor bank (`transparentnode/capacitorbank`, `eln:transparent_node@5444`, `capacitor_bank`)
@@ -93,6 +95,8 @@ New in 26.x (`GoldenCase.NEW_IN_26`, `GoldenSlotsCase.NEW_SPECS`).
 ## Tests
 `AnvilRulesTest` (floor, annealing, units, credit), GameTests `anvil_repairs_without_xp_and_anneals` (steps, credit,
 refusals, plain copy, engraving), `anvil_800v_pulse` (5 kW on a stiff 800 V line, one quarter in 8 s; waits on 700 V),
-`anvil_pauses_on_a_sag` (start at 98%, pause below 90% keeping progress, 1 s hold-off; a 20 kJ burst, then a 3 s rest),
+`anvil_pauses_on_a_sag` (no start at a level 740 V; a level 750 V starts it after 2 s; pause below 90% keeping progress,
+1 s hold-off; a 20 kJ burst, then a 3 s rest), `anvil_welds_from_a_bank_on_a_weak_plant` (800 V behind 100 ohm, a bank at
+780 V: it welds),
 `capacitor_bank_charges_holds_and_pops` (3 A charging through the limiter, the cable cool; 800 V kept; pops past 1300 V),
 `capacitor_bank_carries_an_anvil_burst` (a charged bank alone carries one 20 kJ burst, left at ~723 V).

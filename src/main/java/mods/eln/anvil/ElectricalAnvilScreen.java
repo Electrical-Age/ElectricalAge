@@ -37,9 +37,10 @@ public class ElectricalAnvilScreen extends ElnScreen {
         text("status", () -> ElectricalAnvilElement.statusText(render.status, render.voltage)
                 + (render.welding ? " " + mods.eln.misc.Utils.plotPower("", render.powerW) : ""),
             () -> switch (render.status) {
-                case ElectricalAnvilElement.SAGGING, ElectricalAnvilElement.CANT, ElectricalAnvilElement.NO_MATERIAL -> 0xA02020;
-                case ElectricalAnvilElement.WELDING, ElectricalAnvilElement.ENGRAVING -> 0x206020;
-                default -> 0x404040;
+                // (ARGB: 26.x draws no text whose alpha is 0, which hid this line: AdventurAgent)
+                case ElectricalAnvilElement.SAGGING, ElectricalAnvilElement.CANT, ElectricalAnvilElement.NO_MATERIAL -> 0xFFA02020;
+                case ElectricalAnvilElement.WELDING, ElectricalAnvilElement.ENGRAVING -> 0xFF206020;
+                default -> LABEL;
             });
         text("credit", () -> {
             var m = new HashMap<String, Double>();

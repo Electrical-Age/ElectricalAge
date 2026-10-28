@@ -75,6 +75,8 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
     static final double HOLD_OFF_S = 1;
     /** Joules into the step when the current burst began; whether it's resting between bursts. */
     public double burstStart;
+    /** The line's voltage last tick, and how long it has been level (not rising), for the plateau start. */
+    double lastU, levelFor;
     public boolean recovering;
     String jobKey = "";
     Job current;
@@ -212,8 +214,14 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
         current = j;
         double u = load.getU();
         holdOff = Math.max(0, holdOff - dt);
+        // (a line that has stopped rising: it won't get any higher, so start if there's room above the stop)
+        double rate = (u - lastU) / Math.max(1e-6, dt);
+        lastU = u;
+        levelFor = welding || rate > ElectricalAnvilDescriptor.PLATEAU_V_PER_S ? 0 : levelFor + dt;
+        boolean ready = u >= ElectricalAnvilDescriptor.resume * Eln.HVU
+            || levelFor >= ElectricalAnvilDescriptor.PLATEAU_S && u >= ElectricalAnvilDescriptor.plateau * Eln.HVU;
         if (j == null) welding = false;
-        else if (!welding && holdOff <= 0 && u >= ElectricalAnvilDescriptor.resume * Eln.HVU) {
+        else if (!welding && holdOff <= 0 && ready) {
             welding = true;
             recovering = false;
         }

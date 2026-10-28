@@ -22,6 +22,6 @@ public class SteamOvenScreen extends ElnScreen {
         progress("process", () -> render.progress);
         text("steam", () -> tr("Steam %1$ bar, using %2$ mB/s", String.format("%.2f", render.pressureBar), String.format("%.0f", render.steamMbS)));
         text("power", () -> render.powered ? tr("Fan: powered") : tr("Fan: no power (50V on a side)"),
-            () -> render.powered ? 0x404040 : 0xA02020);
+            () -> render.powered ? LABEL : 0xFFA02020);   // (ARGB: alpha 0 drew nothing)
     }
 }
