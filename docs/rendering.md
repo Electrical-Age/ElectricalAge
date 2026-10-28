@@ -16,7 +16,7 @@ BER.submit -> GlSubmit.open(poseStack)            GlFrame.open(pose, normal): fr
    vertices transformed into pose space, grouped into Batch by Key(texture, blend, cull, fullBright, lit)
 GlFrame.close()                                     current = DISCARD (stray GL11 calls do nothing)
 GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitCustomGeometry(ElnPipelines.type(key, tex))
-   extras: GlFrame.Text -> collector.submitText; ItemStack -> ItemStackRenderState (items on machines)
+   extras: GlFrame.Text -> collector.submitText; ItemStack -> ItemStackRenderState (items on machines); GlFrame.FlatItem -> the FIXED (item-frame) view, lying flat at the matrix (UtilsClient.drawFlatItem: the battery charger's batteries, scaled to their cubicles and thickened 4x; Baughn 2026-10-28)
 ```
 
 | Class | Side | Role |
@@ -102,3 +102,13 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - `GlFrame` is single-threaded and shared; drawing an EA item inside a device draw reopens it (hence GlSubmit's extras copy).
 - A render's `networkUnserialize` must read exactly what the element wrote; a short read garbles the following six-node faces (guarded by `PublishRenderCase`).
 - Stale comments: `GL11` javadoc says lines are dropped (they are recorded as LINES batches now); element render javadocs still say looped sounds are "not here yet".
+
+## Battery charger (Baughn 2026-10-28)
+
+- LEDs: green and steady when a battery is charged; red and blinking (1 Hz, 0.5 s on, 0.5 s off) while it charges, so
+  the two read apart without colour; all off without power (switched off, or under a tenth of the rated voltage at
+  the input: `BatteryChargerElement.powered`, published when it changes; the render reads `powerOn` and the voltage).
+- The batteries lie flat in their cubicles (3/16 square, a pixel deep), 0.18 across and four times an item frame's
+  thickness, instead of small spinning items.
+- The cubicles are grey: their faces map to the top-left 5 x 5 px of `model/batterychargera/batterychargera.png`,
+  painted by `tools/textures/charger_cubicles.py`.
