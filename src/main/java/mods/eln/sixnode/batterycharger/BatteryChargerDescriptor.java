@@ -65,12 +65,20 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
     }
 
     public void draw(boolean[] presence, boolean[] charged) {
+        draw(presence, charged, true, true);
+    }
+
+    /**
+     * The charger, its LEDs by slot: green and steady when charged; red and blinking while charging, so they read apart
+     * without colour (Baughn); all off without power. blinkOn: the red's phase now.
+     */
+    public void draw(boolean[] presence, boolean[] charged, boolean powered, boolean blinkOn) {
         if (main != null)
             main.draw();
 
         int idx = 0;
         for (Obj3DPart led : leds) {
-            if (presence != null && presence[idx]) {
+            if (presence != null && presence[idx] && powered && (charged[idx] || blinkOn)) {
                 UtilsClient.ledOnOffColor(charged[idx]);
                 UtilsClient.drawLight(led);
             } else {

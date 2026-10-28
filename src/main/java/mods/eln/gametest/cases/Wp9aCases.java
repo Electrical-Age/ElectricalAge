@@ -596,6 +596,9 @@ public final class Wp9aCases {
             for (mods.eln.misc.LRDU l : mods.eln.misc.LRDU.values())
                 allEdges &= unfed.getElectricalLoad(l) != null && unfed.getConnectionMask(l) == NodeBase.maskElectricalPower;
             ctx.check("wp9a battery charger takes power on any edge (Baughn)", allEdges, "");
+            // (Baughn: its LEDs go dark without power; the client reads this from the publish)
+            ctx.check("wp9a battery charger: on and fed counts as powered; the unfed one doesn't", charger.powered() && !unfed.powered(),
+                f("%.3f V", uC));
             ctx.check("wp9a battery charger: Jade says an unfed one has no power in, and a fed one doesn't",
                 unfed.getWaila().containsKey("Power in") && !charger.getWaila().containsKey("Power in"), "" + unfed.getWaila());
             ctx.check("wp9a battery charger took energy", e > 0.01 * pNom && e <= 2 * pNom * 1.01,

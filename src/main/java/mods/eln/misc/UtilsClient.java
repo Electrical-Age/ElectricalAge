@@ -241,6 +241,20 @@ public final class UtilsClient {
         GL11.glPopMatrix();
     }
 
+    /**
+     * An item lying flat at (x, y, z), face up along +x (a six-node's outward axis), size blocks across and thick times its
+     * usual one-pixel depth (Baughn: the battery charger's items lie in their cubicles, thickened, as large as will fit).
+     */
+    public static void drawFlatItem(net.minecraft.world.item.ItemStack stack, double x, double y, double z, float size, float thick) {
+        if (stack == null || stack.isEmpty()) return;
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float) x, (float) y, (float) z);
+        GL11.glRotatef(90, 0, 1, 0);   // (the item frame's view faces +z; here the face is +x)
+        GL11.glScalef(size, size, size * thick);
+        mods.eln.gl.GlFrame.current().extra(new mods.eln.gl.GlFrame.FlatItem(stack));
+        GL11.glPopMatrix();
+    }
+
     public static boolean isGameInPause() {
         return hooks.isGameInPause();
     }

@@ -60,6 +60,10 @@ public final class GlFrame {
     public record Text(String text, int x, int y, int color, boolean fullBright) {
     }
 
+    /** An item lying flat, as in an item frame (FIXED): one block across, in the current matrix's x-y plane. */
+    public record FlatItem(net.minecraft.world.item.ItemStack stack) {
+    }
+
     private final ArrayList<Extra> extras = new ArrayList<>();
 
     /** Burnt overlay (1.12 BurntRender): everything drawn while set is multiplied into the frame in a soot colour. */
