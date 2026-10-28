@@ -504,6 +504,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return "the pipe doesn't run straight there";
     }
 
+    /** A pipe ending at or passing through a point of this block (a valve sits between two that end there), or null. */
+    PipePart pipeNear(int x, int y, int z) {
+        PipePart at = pipeAt(x, y, z);
+        if (at != null) return at;
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.fluid != null)
+                for (int i = 0; i + 2 < pipe.points.length; i += 3)
+                    if (pipe.points[i] == x && pipe.points[i + 1] == y && pipe.points[i + 2] == z) return pipe;
+        return null;
+    }
+
     /** The pipe passing through a point of this block, or null. */
     PipePart pipeAt(int x, int y, int z) {
         for (VoxelPart p : parts) if (p instanceof PipePart pipe && pipe.fluid != null && pipe.passes(x, y, z)) return pipe;
@@ -1485,9 +1496,24 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** For the probe (Jade): a headline, and with details the run's contents, ratings and fittings. */
     public java.util.LinkedHashMap<String, String> getWaila(boolean details) {
+        return getWaila(details, -1);
+    }
+
+    /**
+     * The lines for the part under the crosshair (its index in parts, or -1): that pipe, the pipe a fitting sits on, the
+     * cables if it is a cable (Baughn 2026-10-28: with several pipes in a block, Jade showed one, not the one looked at);
+     * with none, a burst pipe, else the first pipe, else the cables.
+     */
+    public java.util.LinkedHashMap<String, String> getWaila(boolean details, int hit) {
         var out = new java.util.LinkedHashMap<String, String>();
         PipePart pipe = null;
-        for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null && (pipe == null || pp.burst)) pipe = pp;
+        VoxelPart aimed = hit >= 0 && hit < parts.size() ? parts.get(hit) : null;
+        if (aimed instanceof PipePart pp && pp.fluid != null) pipe = pp;
+        else if (aimed instanceof ValvePart v) pipe = pipeNear(v.x, v.y, v.z);
+        else if (aimed instanceof SafetyValvePart sv) pipe = pipeAt(sv.x, sv.y, sv.z);
+        else if (aimed instanceof PipeSensorPart ps) pipe = pipeAt(ps.x, ps.y, ps.z);
+        if (pipe == null && !(aimed instanceof CablePart))
+            for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null && (pipe == null || pp.burst)) pipe = pp;
         if (pipe == null) {
             // cables: each conductor's tier, voltage and current (temperature with details)
             int n = 0;
