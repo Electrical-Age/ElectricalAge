@@ -407,6 +407,16 @@ public final class PipeCases {
             String a = String.valueOf(n.getWaila(false, 0).get("Pressure")), c = String.valueOf(n.getWaila(false, 1).get("Pressure"));
             ctx.line("jade aimed pipe: part 0 " + a + "; part 1 " + c);
             ctx.check("Jade on each of two pipes in a block shows that pipe's run", a.startsWith("5.0") && c.startsWith("2.0"), a + " / " + c);
+            // two cables in a block, one signal, one LV (not touching): each shows only its own
+            var cb = ctx.at(1, 1, 0);
+            PipeKitItem.place(ctx.level(), cb, new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 3, 16, 0, 3}), null);
+            PipeKitItem.place(ctx.level(), cb, new mods.eln.node.voxel.CablePart(1, 0, new int[]{0, 0, 12, 16, 0, 12}), null);
+            var cn = node(ctx, cb);
+            var w0 = cn.getWaila(false, 0);
+            var w1 = cn.getWaila(false, 1);
+            ctx.line("jade aimed cable: part 0 " + w0 + "; part 1 " + w1 + "; none " + cn.getWaila(false, -1));
+            ctx.check("Jade on each of two cables in a block shows only that cable", w0.size() == 1 && w1.size() == 1
+                && !String.valueOf(w0.get("Cable")).equals(String.valueOf(w1.get("Cable"))) && cn.getWaila(false, -1).size() == 2, w0 + " / " + w1);
         }
     }
 

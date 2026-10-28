@@ -1517,8 +1517,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (pipe == null) {
             // cables: each conductor's tier, voltage and current (temperature with details)
             int n = 0;
+            // (looking at a cable: only its own conductor, Baughn 2026-10-28; else all of the block's)
+            boolean only = false;
+            if (aimed instanceof CablePart)
+                for (CableNet.Conductor k : cables.conductors) if (k.valid() && k.parts.contains(aimed)) only = true;
             for (CableNet.Conductor k : cables.conductors) {
-                if (!k.valid() || k.face < 0) continue;
+                if (!k.valid() || (only ? !k.parts.contains(aimed) : k.face < 0)) continue;
                 String key = n++ == 0 ? "Cable" : "Cable " + n;
                 if (k.isBurntNow()) {
                     out.put(key, k.name() + ", BURNT");
