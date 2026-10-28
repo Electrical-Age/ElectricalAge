@@ -512,5 +512,5 @@
   "key.category.eln.keys": "Electrical Age",
   "key.eln.wrench": "Wrench (hold: a switch's screen on click; the chisel's brush menu)",
   "message.eln.electric_bike.flat_battery": "The battery is flat: pedalling only",
-  "message.eln.electric_bike.no_battery": "No battery: pedalling only (shift-right-click the bike for its trunk)"
+  "message.eln.electric_bike.no_battery": "No battery: pedalling only"
 }
