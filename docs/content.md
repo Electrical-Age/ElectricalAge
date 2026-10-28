@@ -62,7 +62,8 @@ The electric bike (`bike/ElectricBike`, `ElnRegistry.ELECTRIC_BIKE_ENTITY`, item
 see [bike.md](bike.md).
 
 The electrical anvil (`anvil/ElectricalAnvil*`, transparent node `eln:transparent_node@5440`, `electrical_anvil`; Baughn
-2026-10-28): see [anvil.md](anvil.md).
+2026-10-28): see [anvil.md](anvil.md). Its companion, the capacitor bank (`transparentnode/capacitorbank`,
+`eln:transparent_node@5444`, `capacitor_bank`) and its Capacitor Cell (`eln:capacitor_cell`), is in the same file.
 
 `entity/ReplicatorEntity` (`ElnRegistry.REPLICATOR`, spawn egg `REPLICATOR_SPAWN_EGG`), plus its AI classes in
 `entity/`. `entity/ReplicatorPopProcess`: during thunderstorms it spawns replicators near players in the overworld
@@ -117,6 +118,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
 | `tools/icons/` | Icon production, two sets: `vanilla/` (default 16 px) and `schematic/` (the pack). Rules: `tools/icons/CONTRACT.md`; generators `*/build.py`, per-icon scripts in `*/icons/`. |
 | `tools/bike/texture.py` | The electric bike's entity texture and item icon (`docs/bike.md`). |
 | `tools/models/electricalanvil.py` | The electrical anvil's desk model, atlas and item icon (`docs/anvil.md`). |
+| `tools/models/capacitorbank.py` | The capacitor bank's model, atlas, item icon and the Capacitor Cell icon (`docs/anvil.md`). |
 | `tools/models/` | Code-CAD device models (Python -> OBJ, `mcmodel.py`); see `tools/models/README.md`. |
 | `script/gen_ids.py` | Wrote `eln-ids.json` (run once). |
 | `script/gen_model_index.py` | Writes `assets/eln/model/index.txt` for `misc/Obj3DFolder`; re-run after adding or removing OBJ models. |
@@ -128,7 +130,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
 
 Not "none": `src/main/java/mods/eln/ElnConfig.java` is a SYNCED `ModConfigSpec` (`config/eln-synced.toml`):
 `balancing.batteryLifeFactor` (25), `fire.*` lags and kindle times, `cables.convertOnLoad` (false),
-`probe.details`, `bike.*` (the electric bike's tunables, [bike.md](bike.md)), `anvil.*` (the electrical anvil's, [anvil.md](anvil.md)). It is registered in the `Eln` constructor and copied into statics on load and reload. Every other
+`probe.details`, `bike.*` (the electric bike's tunables, [bike.md](bike.md)), `anvil.*` and `capacitorBank.*` (the electrical anvil's and the capacitor bank's, [anvil.md](anvil.md)). It is registered in the `Eln` constructor and copied into statics on load and reload. Every other
 1.12 config value is a plain static with its 1.12 default in `Eln.java` (power factors, lamp lives, ranges,
 `xRayScannerRange` 7.5...).
 

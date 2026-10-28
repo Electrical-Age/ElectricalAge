@@ -52,6 +52,8 @@ public class Wp10aContent implements ElnContent {
     /** The electrical anvil (Baughn 2026-10-28): a workshop desk on 800 V; model tools/models/electricalanvil.py. */
     public static void registerAnvil(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.anvil.ElectricalAnvilDescriptor(TR_NAME(Type.NONE, "Electrical Anvil"), "electricalanvil"));
+        // the capacitor bank (Baughn 2026-10-28): one carries one of the anvil's bursts; model tools/models/capacitorbank.py
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor(TR_NAME(Type.NONE, "Capacitor Bank"), "capacitorbank"));
     }
 
     /** 26.x oil: the fractionating column (base + segments) and the flare stack (placeholder models). */

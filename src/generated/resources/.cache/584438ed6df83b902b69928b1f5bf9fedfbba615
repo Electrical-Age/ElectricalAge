@@ -1,4 +1,4 @@
-// 26.3	2026-10-28T19:46:09.838850417	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-28T20:30:15.068948417	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -84,6 +84,8 @@ f289486095d89988f698c37c5d367dc83b161c16 data/eln/advancement/recipes/misc/big_f
 0422be25ff77f9d9a6e621f5f9e381118a147066 data/eln/advancement/recipes/misc/blue_brush.json
 b85823dd74834547255b7d60faa1cc1280c8c423 data/eln/advancement/recipes/misc/boiler.json
 7d99ddf6a770f2d9a3e99f992901d073c6e2cebf data/eln/advancement/recipes/misc/brown_brush.json
+1ed758878c96ccb177e26898cf87b3eb6ba6799d data/eln/advancement/recipes/misc/capacitor_bank.json
+721b24687736891e1289922bce10b7a2f728030f data/eln/advancement/recipes/misc/capacitor_cell.json
 727ff8c6105794cf50890d21503562ad91ba5af3 data/eln/advancement/recipes/misc/capacity_oriented_battery.json
 9fcd80d4de5e8f37f7005751e6fb2b566937432a data/eln/advancement/recipes/misc/casing.json
 51678bd91fdf0fd4d45cf8945f27a844441ef9c4 data/eln/advancement/recipes/misc/charcoal.json
@@ -423,6 +425,8 @@ bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2
 351b690d7cf1b517859cc5b1d42e1e8a944e9634 data/eln/recipe/blue_brush.json
 21f310666ea330b0b32639f49e4acdeb5f6c1be0 data/eln/recipe/boiler.json
 9bf14159b70a5eb86642c34c15c2aca5cd1233c6 data/eln/recipe/brown_brush.json
+8f3770f590d7cdb62e0753002b395d1954da7459 data/eln/recipe/capacitor_bank.json
+50b17ae4822cc8fe7f74e6b92a4e7bbc84ab9af8 data/eln/recipe/capacitor_cell.json
 2654bb694e4ec304ddc307586afb15f0bfdbe5d4 data/eln/recipe/capacity_oriented_battery.json
 6642247514f8b88b66706cab4b85fe4cc818527e data/eln/recipe/casing.json
 56412ab86155c5379106a743c5f67611b5ed06c1 data/eln/recipe/charcoal.json

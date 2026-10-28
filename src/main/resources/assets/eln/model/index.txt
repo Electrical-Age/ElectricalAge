@@ -10,6 +10,7 @@ batterybig/batterybighv.obj
 batterychargera/batterychargera.obj
 batterychargerb/batterychargerb.obj
 boiler/boiler.obj
+capacitorbank/capacitorbank.obj
 classiclampsocket/classiclampsocket.obj
 columnbase/columnbase.obj
 columnsegment/columnsegment.obj

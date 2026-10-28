@@ -2008,5 +2008,11 @@
   "display": "Electrical Anvil",
   "kind": "transparent_node",
   "name": "electrical_anvil"
+ },
+ "eln:transparent_node@5444": {
+  "descriptor": "CapacitorBankDescriptor",
+  "display": "Capacitor Bank",
+  "kind": "transparent_node",
+  "name": "capacitor_bank"
  }
 }

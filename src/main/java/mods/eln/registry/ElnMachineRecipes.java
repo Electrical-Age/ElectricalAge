@@ -183,8 +183,9 @@ public final class ElnMachineRecipes {
         add(compressorRecipes, new Recipe(findItemStack("Coal Dust", 4),
             findItemStack("Coal Plate"), 4000.0));
 
+        // four Dielectrics a sand, not one (Baughn 2026-10-28: a capacitor bank takes 36)
         add(compressorRecipes, new Recipe(new ItemStack(Blocks.SAND),
-            findItemStack("Dielectric"), 2000.0));
+            findItemStack("Dielectric", 4), 2000.0));
 
         add(compressorRecipes, new Recipe(new ItemStack(Blocks.OAK_LOG),
             findItemStack("Tree Resin"), 3000.0));

@@ -1991,6 +1991,22 @@ public final class ElnRecipes extends ElnRecipesBase {
             'p', "plateIron",
             'M', findItemStack("Advanced Machine Block"),
             'i', "ingotIron");
+        // the capacitor bank (Baughn 2026-10-28: lots of dielectrics): six cells, each six Dielectrics round a block of
+        // redstone between copper foils; the bank is six cells over an iron base with its 800 V lead
+        addRecipe(stack(mods.eln.registry.ElnRegistry.CAPACITOR_CELL.get()),
+            "dpd",
+            "dRd",
+            "dpd",
+            'd', findItemStack("Dielectric"),
+            'p', "plateCopper",
+            'R', stack(Items.REDSTONE_BLOCK));
+        addRecipe(findItemStack("Capacitor Bank", 1),
+            "CCC",
+            "CCC",
+            "pHp",
+            'C', stack(mods.eln.registry.ElnRegistry.CAPACITOR_CELL.get()),
+            'p', "plateIron",
+            'H', findItemStack("High Voltage Cable"));
         // the electric bike (Baughn 2026-10-28): a chest for its trunk and a leather saddle, an iron frame round an electrical
         // motor, two rubber wheels
         addRecipe(stack(mods.eln.registry.ElnRegistry.ELECTRIC_BIKE.get()),

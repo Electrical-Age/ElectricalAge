@@ -57,6 +57,8 @@ final class GoldenRecipesCase implements TestCase {
 
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
+    /** Machine recipes changed on purpose (list:input): sand makes four Dielectrics, not one (Baughn 2026-10-28). */
+    static final Set<String> MACHINE_CHANGED = Set.of("compressor:Sand");
     /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil;
      *  thermal insulation takes any wool (Baughn 2026-10-26). Their output must still have a 26.x recipe. */
     static final Set<String> CHANGED = Set.of("eln:thermal_insulation", "eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
@@ -310,6 +312,10 @@ final class GoldenRecipesCase implements TestCase {
                 JsonObject g = e.getAsJsonObject();
                 JsonObject inJ = g.getAsJsonObject("input");
                 if (l.getKey().equals("macerator") && ORES_TO_CHUNKS.contains(inJ.get("name").getAsString())) {
+                    changed++;
+                    continue;
+                }
+                if (MACHINE_CHANGED.contains(l.getKey() + ":" + inJ.get("name").getAsString())) {
                     changed++;
                     continue;
                 }
