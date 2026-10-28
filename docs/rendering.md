@@ -109,6 +109,7 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
   the two read apart without colour; all off without power (switched off, or under a tenth of the rated voltage at
   the input: `BatteryChargerElement.powered`, published when it changes; the render reads `powerOn` and the voltage).
 - The batteries lie flat in their cubicles (3/16 square, a pixel deep), 0.18 across and four times an item frame's
-  thickness, instead of small spinning items.
+  thickness, instead of small spinning items. On a ceiling the body (cubicles, LEDs, batteries) is turned half round, so it reads as on a floor
+  or wall from where it was placed: battery tops away from the viewer, slots in the same order.
 - The cubicles are grey: their faces map to the top-left 5 x 5 px of `model/batterychargera/batterychargera.png`,
   painted by `tools/textures/charger_cubicles.py`.
