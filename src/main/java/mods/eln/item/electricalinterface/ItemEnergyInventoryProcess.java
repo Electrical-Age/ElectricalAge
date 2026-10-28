@@ -103,6 +103,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
                 // 26.x: the offhand too (it isn't in the main inventory list; Baughn: a flashlight there never recharged)
                 net.minecraft.world.entity.EquipmentSlot.OFFHAND}) {
                 ItemStack stack = player.getItemBySlot(slot); // 1.12 armorInventory (feet..head)
+                if (stack.getItem() instanceof IItemEnergySelfManaged) continue;   // (Stasis suit pieces charge themselves)
 
                 Object o = Utils.getItemObject(stack);
 
@@ -114,6 +115,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
             }
 
             for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+                if (stack.getItem() instanceof IItemEnergySelfManaged) continue;
                 Object o = Utils.getItemObject(stack);
 
                 if (o instanceof IItemEnergyBattery) {
