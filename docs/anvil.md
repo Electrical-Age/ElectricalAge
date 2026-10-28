@@ -71,7 +71,7 @@ Baughn 2026-10-28: a workshop-sized store for the anvil's bursts. Six capacitor 
 | Store | Voltage | Energy | Usable for the anvil (800 -> 720 V) | Power | Self-discharge | Cost |
 |---|---|---|---|---|---|---|
 | Capacitor Bank | up to 1000 V | 115 kJ at 800 V | 21.9 kJ | any out, 3 A (2.4 kW) in | RC 30 min (~128 W at 800 V) | 36 Dielectric (9 sand), 54 redstone, 12 copper plate, 2 iron plate, HV cable |
-| Power Capacitor (six-node), 13 redstone, 16 Dielectric | 800 V rating | 12.5 kJ | 2.4 kJ | any | RC 33 h | 13 redstone, 16 Dielectric (4 sand), 2 iron cable, iron plate, 3 iron |
+| Power Capacitor (six-node), 13 redstone, 16 Dielectric | 800 V rating | 12.5 kJ | 2.4 kJ | any | RC 30 min (was 33 h in 1.12; Baughn 2026-10-28) | 13 redstone, 16 Dielectric (4 sand), 2 iron cable, iron plate, 3 iron |
 | Cost Oriented Battery | 50 V | 60 kJ | - (needs a converter) | 250 W (300 max) | none (wears with use: half-life 2 MC days of nominal current) | 6 lead, 2 LV cable |
 | Capacity Oriented Battery | 12.5 V | 240 kJ | - | 125 W | none (wears) | 14 lead, 2 LV cable |
 | Voltage Oriented Battery | 200 V | 60 kJ | - | 250 W | none (wears) | 6 lead, 8 iron, 2 LV cable |

@@ -155,8 +155,10 @@ public class Wp9aContent implements ElnContent {
 
             name = TR_NAME(Type.NONE, "Power Capacitor");
 
+            // it leaks as the capacitor bank does, RC half an hour (1.12: 33 h; Baughn 2026-10-28: with four Dielectrics a
+            // sand a row of them was a cheap bulk store, and batteries stay the only sensible one); config overrides it
             PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
-                name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1), 60 * 2000
+                name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1), mods.eln.ElnConfig.powerCapacitorLeakTauS
             );
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);

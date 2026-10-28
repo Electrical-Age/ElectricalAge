@@ -208,3 +208,8 @@ In the port:
 The 1.12 tree is `upstream/ports/1.12` (local `port-1.12`); this port is pushed as `ports/26.3`. Phase Q (after
 parity and Baughn's sign-off): port the age-series fork's features (github.com/age-series/ElectricalAge, ~654 commits
 on 1.7.10) onto 26.x.
+
+- Power Capacitor (six-node) leaks with RC 30 min, not 1.12's 33 h (Baughn 2026-10-28; config
+  `capacitorBank.powerCapacitorLeakTauSeconds`, `GoldenCase.CHANGED`). With the compressor's four Dielectrics a sand (was
+  one) a row of them would have been a cheap, non-wearing bulk store; batteries stay the only sensible one. Saved
+  capacitors keep their charge and take the new leak on load. GameTest `power_capacitor_leaks_like_the_bank`.

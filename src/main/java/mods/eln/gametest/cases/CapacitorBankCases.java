@@ -29,6 +29,49 @@ public final class CapacitorBankCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new Charge());
         cases.add(new Burst());
+        cases.add(new PowerCapacitorLeak());
+    }
+
+    /**
+     * The six-node Power Capacitor leaks as the bank (Baughn 2026-10-28; 1.12: RC 33 h): 13 redstone, 16 Dielectrics
+     * (39 mF), charged to 800 V and left 20 s: U = 800 e^(-20/1800) = 791.2 V, so over an hour it falls to e^-2 (13.5%)
+     * of its voltage, 1.8% of its energy.
+     */
+    static final class PowerCapacitorLeak implements TestCase {
+        mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixElement cap;
+
+        public String id() {
+            return "power_capacitor_leaks_like_the_bank";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 400;   // 20 s
+        }
+
+        public void build(TestContext ctx) {
+            cap = (mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixElement) ctx.placeSix(Wp9aCases.POWER_CAPACITOR, ctx.at(1, 1, 1));
+            Batch1Cases.orient(cap, mods.eln.misc.LRDU::left, Direction.XN);   // (its - terminal, the front's left, west)
+            ctx.placeSix(Wp10aCases.GROUND, ctx.at(0, 1, 1));
+            cap.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 13));
+            cap.getInventory().setItem(1, mods.eln.Eln.findItemStack("Dielectric", 16));
+            cap.getInventory().setChanged();
+            cap.positiveLoad.setU(800);
+            cap.negativeLoad.setU(0);
+        }
+
+        public void measure(TestContext ctx) {
+            double c = cap.capacitor.getC(), u = cap.capacitor.getU(), want = 800 * Math.exp(-20.0 / 1800);
+            ctx.line(String.format("power capacitor: C %.4f F, R %.0f ohm, %.2f V after 20 s (want %.2f)", c, cap.dischargeResistor.getR(), u, want));
+            ctx.check("power capacitor: 13 redstone, 16 Dielectrics is 39 mF", Math.abs(c - 10.0 / 256) < 1e-6, String.format("%.5f F", c));
+            ctx.check("power capacitor: its leak is RC 30 min (R = 1800 s / C)", Math.abs(cap.dischargeResistor.getR() * c - 1800) < 1,
+                String.format("RC %.1f s", cap.dischargeResistor.getR() * c));
+            ctx.check("power capacitor: 800 V falls to 800 e^(-20/1800) = 791.2 V in 20 s (e^-2 in an hour)", Math.abs(u - want) < 1.0,
+                String.format("%.2f V", u));
+        }
     }
 
     /** A 9x7x7 platform (an existing structure), floor everywhere: room round a device in the middle. */

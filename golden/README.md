@@ -27,6 +27,10 @@ A port regenerates both with the same commands and diffs them against these file
 - The stone heat furnace takes 4 combustion chambers, not 2 (Baughn 2026-10-26, with steam turbines by the expansion;
   `GoldenCase.CHANGED`, `GoldenSlotsCase`).
 
+`golden_descriptors` (`GoldenCase.CHANGED`): the six-node Power Capacitor's `dischargeTao` is 1800 s (1.12: 120000), the
+capacitor bank's leak (Baughn 2026-10-28: with four Dielectrics a sand, a row of them was a cheap bulk store; batteries
+stay the only sensible one). Config `capacitorBank.powerCapacitorLeakTauSeconds`.
+
 `golden_descriptors` (`GoldenCase.CHANGED`): the shaft Generator has no `sound` (1.12 `eln:generator`); its render plays
 the three `MachineSounds` layers instead (fixed hum by current, rotor tones and air by speed; Baughn 2026-10-28).
 

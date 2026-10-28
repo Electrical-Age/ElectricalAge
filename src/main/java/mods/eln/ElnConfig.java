@@ -17,7 +17,7 @@ public final class ElnConfig {
         BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
     static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
-    static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, BANK_AMPS;
+    static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, BANK_AMPS, POWER_CAP_LEAK;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -96,6 +96,9 @@ public final class ElnConfig {
                 "Batteries are for keeping energy (Baughn); this is for bursts.").defineInRange("leakTauSeconds", 1800.0, 1.0, 1e9);
         BANK_AMPS = b.comment("It charges at up to this current, A (3: 2.4 kW at 800 V); it gives it back at any. Without a limit an empty",
                 "bank on a stiff line burns its cable.").defineInRange("chargeAmps", 3.0, 0.01, 1000.0);
+        POWER_CAP_LEAK = b.comment("The six-node Power Capacitor's leakage time constant R C, s (1800, as the bank; 1.12 had 120000). With four",
+                "Dielectrics a sand a row of them was a cheap bulk store (Baughn 2026-10-28: batteries stay the only sensible one).")
+            .defineInRange("powerCapacitorLeakTauSeconds", 1800.0, 1.0, 1e9);
         b.pop();
         b.push("probe");
         PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
@@ -108,6 +111,8 @@ public final class ElnConfig {
     /** Cached (the battery processes read it every second). */
     public static volatile double batteryLifeFactor = 25.0;
     public static volatile double heatFurnaceFuelFactor = 2.5;
+    /** The six-node Power Capacitor's leak, RC (s): config capacitorBank.powerCapacitorLeakTauSeconds. */
+    public static volatile double powerCapacitorLeakTauS = 1800;
 
     static void refresh() {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
@@ -143,5 +148,9 @@ public final class ElnConfig {
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.ratedVolts = BANK_VOLTS.get();
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.leakTauS = BANK_LEAK.get();
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.chargeAmps = BANK_AMPS.get();
+        powerCapacitorLeakTauS = POWER_CAP_LEAK.get();
+        if (mods.eln.Eln.sixNodeItem != null)   // (config can load before the devices register; they take it from the field)
+            for (Object d : mods.eln.Eln.sixNodeItem.all().values())
+                if (d instanceof mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor p) p.dischargeTao = powerCapacitorLeakTauS;
     }
 }
