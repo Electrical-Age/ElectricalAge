@@ -15,6 +15,7 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
         BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
+    static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -68,6 +69,16 @@ public final class ElnConfig {
         BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.6: slabs and stairs; 1 or more climbs full blocks).")
             .defineInRange("stepHeight", 0.6, 0.0, 2.0);
         b.pop();
+        // the electrical anvil (Baughn 2026-10-28: an 800 V pulse, maxed out, so players build capacitor banks)
+        b.push("anvil");
+        ANVIL_POWER = b.comment("The electrical anvil's draw while it welds, W, at 800 V (the high-voltage cable's rating: 5000).")
+            .defineInRange("power", 5000.0, 10.0, 1e6);
+        ANVIL_UNIT = b.comment("Energy for a unit of repair material's worth of repair (a quarter of the tool), J (40000: 8 s at 5 kW).")
+            .defineInRange("joulesPerUnit", 40000.0, 0.0, 1e9);
+        ANVIL_NAME = b.comment("Energy to engrave a new name, J.").defineInRange("joulesPerName", 2000.0, 0.0, 1e9);
+        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 800 V...").defineInRange("resumeFraction", 0.98, 0.0, 2.0);
+        ANVIL_SAG = b.comment("...and pauses (keeping its progress) when it sags below this share.").defineInRange("sagFraction", 0.9, 0.0, 2.0);
+        b.pop();
         b.push("probe");
         PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
                 "Also 1.12's wailaEasyMode: more detail on some machines.")
@@ -102,5 +113,10 @@ public final class ElnConfig {
         mods.eln.bike.BikePhysics.CRASH_SPEED = BIKE_CRASH.get() / 20;
         mods.eln.bike.BikePhysics.JUMP_VY = mods.eln.bike.BikePhysics.velocityForPeak(BIKE_JUMP.get());
         mods.eln.bike.BikePhysics.STEP_HEIGHT = (float) (double) BIKE_STEP.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.powerW = ANVIL_POWER.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerUnit = ANVIL_UNIT.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerName = ANVIL_NAME.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.resume = ANVIL_RESUME.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.sag = ANVIL_SAG.get();
     }
 }

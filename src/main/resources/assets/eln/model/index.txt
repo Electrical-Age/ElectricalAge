@@ -23,6 +23,7 @@ daylightsensor/daylightsensor.obj
 digitalwallclock/digitalwallclock.obj
 distributionboard/distributionboard.obj
 eggincubator/eggincubator.obj
+electricalanvil/electricalanvil.obj
 electricalbreaker/electricalbreaker.obj
 electricalfuse/electricalfuse.obj
 electricalsensor/electricalsensor.obj

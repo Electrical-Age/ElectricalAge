@@ -1,0 +1,27 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/iron"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "minecraft:anvil",
+    "H": "eln:high_voltage_cable",
+    "M": "eln:advanced_machine_block",
+    "i": "#c:ingots/iron",
+    "p": "#eln:high_quality_plates/iron"
+  },
+  "pattern": [
+    "HAH",
+    "pMp",
+    "i i"
+  ],
+  "result": {
+    "id": "eln:electrical_anvil"
+  }
+}

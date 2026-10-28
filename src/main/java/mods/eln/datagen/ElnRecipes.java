@@ -1980,6 +1980,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
             'E', findItemStack("Low Voltage Cable"));
+        // the electrical anvil (Baughn 2026-10-28: late-midgame gear): an anvil fed by 800 V cable on an advanced machine
+        // block, a steel-plate top and two legs
+        addRecipe(findItemStack("Electrical Anvil", 1),
+            "HAH",
+            "pMp",
+            "i i",
+            'H', findItemStack("High Voltage Cable"),
+            'A', stack(Items.ANVIL),
+            'p', "plateIron",
+            'M', findItemStack("Advanced Machine Block"),
+            'i', "ingotIron");
         // the electric bike (Baughn 2026-10-28): a chest for its trunk and a leather saddle, an iron frame round an electrical
         // motor, two rubber wheels
         addRecipe(stack(mods.eln.registry.ElnRegistry.ELECTRIC_BIKE.get()),

@@ -2002,5 +2002,11 @@
   "display": "800V Electrical Age to other energy exporter",
   "kind": "transparent_node",
   "name": "energy_converter_eln_to_other_hvublock"
+ },
+ "eln:transparent_node@5440": {
+  "descriptor": "ElectricalAnvilDescriptor",
+  "display": "Electrical Anvil",
+  "kind": "transparent_node",
+  "name": "electrical_anvil"
  }
 }

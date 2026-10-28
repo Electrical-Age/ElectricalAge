@@ -46,6 +46,12 @@ public class Wp10aContent implements ElnContent {
         registerSteam(82);
         registerSmelter(82);
         registerColumn(83);
+        registerAnvil(85);
+    }
+
+    /** The electrical anvil (Baughn 2026-10-28): a workshop desk on 800 V; model tools/models/electricalanvil.py. */
+    public static void registerAnvil(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.anvil.ElectricalAnvilDescriptor(TR_NAME(Type.NONE, "Electrical Anvil"), "electricalanvil"));
     }
 
     /** 26.x oil: the fractionating column (base + segments) and the flare stack (placeholder models). */
