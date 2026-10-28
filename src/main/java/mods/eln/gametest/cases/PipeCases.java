@@ -407,6 +407,11 @@ public final class PipeCases {
             String a = String.valueOf(n.getWaila(false, 0).get("Pressure")), c = String.valueOf(n.getWaila(false, 1).get("Pressure"));
             ctx.line("jade aimed pipe: part 0 " + a + "; part 1 " + c);
             ctx.check("Jade on each of two pipes in a block shows that pipe's run", a.startsWith("5.0") && c.startsWith("2.0"), a + " / " + c);
+            // the meters read the part clicked, too (they read the block's first)
+            String m0 = n.multiMeterString(0), m1 = n.multiMeterString(1);
+            ctx.check("the multimeter on each pipe reads that pipe's run", m0.startsWith("5.0") && m1.startsWith("2.0"), m0 + " / " + m1);
+            var a0 = n.aimed(0.5, 4.5 / 16, 8.5 / 16);
+            ctx.check("aimed: the crosshair on the low pipe is part 0", a0.part() == 0 && a0.element() < 0, "" + a0);
             // two cables in a block, one signal, one LV (not touching): each shows only its own
             var cb = ctx.at(1, 1, 0);
             PipeKitItem.place(ctx.level(), cb, new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 3, 16, 0, 3}), null);
@@ -415,6 +420,7 @@ public final class PipeCases {
             var w0 = cn.getWaila(false, 0);
             var w1 = cn.getWaila(false, 1);
             ctx.line("jade aimed cable: part 0 " + w0 + "; part 1 " + w1 + "; none " + cn.getWaila(false, -1));
+            ctx.check("the multimeter on each cable reads that cable", !cn.multiMeterString(0).equals(cn.multiMeterString(1)), cn.multiMeterString(0) + " / " + cn.multiMeterString(1));
             ctx.check("Jade on each of two cables in a block shows only that cable", w0.size() == 1 && w1.size() == 1
                 && !String.valueOf(w0.get("Cable")).equals(String.valueOf(w1.get("Cable"))) && cn.getWaila(false, -1).size() == 2, w0 + " / " + w1);
         }
