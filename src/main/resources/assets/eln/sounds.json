@@ -259,5 +259,41 @@
                 "stream": false
             }
         ]
+    },
+    "steam_turbine_spin": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:steam_turbine_spin",
+                "stream": false
+            }
+        ]
+    },
+    "steam_hiss": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:steam_hiss",
+                "stream": false
+            }
+        ]
+    },
+    "boiler_boil": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:boiler_boil",
+                "stream": false
+            }
+        ]
+    },
+    "heat_furnace_fire": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:heat_furnace_fire",
+                "stream": false
+            }
+        ]
     }
 }

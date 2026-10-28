@@ -65,6 +65,10 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public static final double PROBE = 0.5, PROBE_BAND = 0.03;
     public boolean liquidAtProbe;
     double meterSteam, meterTime;
+    /** Heat going into water at its boiling point (W, averaged over a second like steamRate): how hard it boils, for
+     *  the sound (BoilerRender). A sealed boiler under heat still boils as its pressure climbs. */
+    public double boilW;
+    double meterBoil;
 
     public BoilerElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -135,6 +139,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
         vessel.heat += q;
         thermal.moveEnergyTo(-q * dt);
+        if (q > 0 && vessel.mLiquid() > 1e-6 && vessel.T() > Water.tsat(vessel.P()) - 2) meterBoil += q * dt;
     }
 
     @Override
@@ -146,7 +151,9 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         meterTime += dt;
         if (meterTime >= 1) {
             steamRate = meterSteam / meterTime;
+            boilW = meterBoil / meterTime;
             meterSteam = 0;
+            meterBoil = 0;
             meterTime = 0;
         }
         showTanks();
@@ -266,6 +273,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         try {
             stream.writeFloat(vessel == null ? 0 : (float) fill());
             stream.writeFloat(vessel == null ? 0 : (float) (vessel.T() - Water.T0));
+            stream.writeFloat(vessel == null ? 0 : (float) boilW);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
