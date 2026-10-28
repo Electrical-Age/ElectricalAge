@@ -23,6 +23,7 @@ public final class PipeCases {
         cases.add(new HighQualityPlates());
         cases.add(new Sensors());
         cases.add(new DeviceGoneMidStep());
+        cases.add(new JadeAimedPipe());
         cases.add(new BoilerBucket());
         cases.add(new BoilerFeed());
         cases.add(new BoilerPhase());
@@ -369,6 +370,43 @@ public final class PipeCases {
         public void measure(TestContext ctx) {
             ctx.check("boiler bucket: taken, 1000 mB more water", took && after - before == 1000, before + " -> " + after);
             ctx.check("boiler bucket: the bucket comes back empty", emptied, "");
+        }
+    }
+
+    /**
+     * Two pipes in one block, 5 bar in one and 2 in the other (Baughn 2026-10-28: Jade showed one of them, not the one
+     * looked at): each part's Jade lines are its own run's.
+     */
+    static final class JadeAimedPipe implements TestCase {
+        BlockPos b;
+
+        public String id() {
+            return "pipe_jade_shows_the_aimed_pipe";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext ctx) {
+            b = ctx.at(1, 1, 1);
+            lay(ctx, b, 0, 0, 4, 8, 16, 4, 8);
+            lay(ctx, b, 0, 8, 12, 0, 8, 12, 16);
+            var n = node(ctx, b);
+            ((PipePart) n.parts.get(0)).fluid.fill(0, 5e5, 293.15);
+            ((PipePart) n.parts.get(1)).fluid.fill(0, 2e5, 293.15);
+            mods.eln.fluid.FluidWorld.changed(n);
+        }
+
+        public void measure(TestContext ctx) {
+            var n = node(ctx, b);
+            String a = String.valueOf(n.getWaila(false, 0).get("Pressure")), c = String.valueOf(n.getWaila(false, 1).get("Pressure"));
+            ctx.line("jade aimed pipe: part 0 " + a + "; part 1 " + c);
+            ctx.check("Jade on each of two pipes in a block shows that pipe's run", a.startsWith("5.0") && c.startsWith("2.0"), a + " / " + c);
         }
     }
 
