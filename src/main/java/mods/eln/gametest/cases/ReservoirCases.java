@@ -172,10 +172,12 @@ public final class ReservoirCases {
             int[] area = {SX * SZ};   // the (wrong) estimate: one layer
             r = ReservoirData.get(ctx.level()).create(ctx.level(), null, ReservoirWater.KIND, TYPE,
                 ArrayBasin.spec(o.getX(), o.getZ(), SX, SZ, col(y1), col(2)), y1, area, Long.MAX_VALUE);
+            // read at once: Reservoirs re-sweeps every loaded reservoir when gameTime % RESWEEP == 0, which fell inside
+            // the 40 ticks before measure() about 1 run in 5 and had calibrated it already
+            ctx.check("calibrate: before any sweep, the estimate (15 cells)", r.capacity() == 15_000, "" + r.capacity());
         }
 
         public void measure(TestContext ctx) {
-            ctx.check("calibrate: before any sweep, the estimate (15 cells)", r.capacity() == 15_000, "" + r.capacity());
             sweep(ctx, r);
             ctx.check("calibrate: after the sweep, the truth (30 cells)", r.capacity() == 30_000, "" + r.capacity());
             sweep(ctx, r);
