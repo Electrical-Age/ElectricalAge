@@ -260,15 +260,6 @@
             }
         ]
     },
-    "steam_turbine_spin": {
-        "category": "block",
-        "sounds": [
-            {
-                "name": "eln:steam_turbine_spin",
-                "stream": false
-            }
-        ]
-    },
     "steam_hiss": {
         "category": "block",
         "sounds": [
@@ -292,6 +283,33 @@
         "sounds": [
             {
                 "name": "eln:heat_furnace_fire",
+                "stream": false
+            }
+        ]
+    },
+    "electric_hum": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:electric_hum",
+                "stream": false
+            }
+        ]
+    },
+    "rotor_tone": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:rotor_tone",
+                "stream": false
+            }
+        ]
+    },
+    "rotor_air": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:rotor_air",
                 "stream": false
             }
         ]

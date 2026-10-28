@@ -25,6 +25,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import java.awt.Color
+import mods.eln.sound.MachineSounds
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -50,7 +51,7 @@ class GeneratorDescriptor(
     val generationEfficiency = 0.95
     /** Steady temperature at nominal output, as a fraction of the thermal warm limit. */
     val nominalHeatFraction = 0.65
-    override val sound = "eln:generator"
+    // (no single shaft loop: GeneratorRender plays MachineSounds)
 
     init {
         // WP16b: sized from the heat the generator really makes at nominal output (loss P(1/eff - 1) plus the
@@ -96,6 +97,19 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 
     override val cableRender = Eln.stdCableRender3200V
     val desc = desc_ as GeneratorDescriptor
+    /** Current over nominal, either way (motor or generator): the electrical hum's loudness. */
+    val load = SlewLimiter(1f)
+
+    init {
+        // hum by current, rotor tones and air by speed: running up as a motor, it chirps (jrddunbr)
+        MachineSounds.electric(coordonate(), { rads / desc.nominalRads }, { load.position.toDouble() }, 1f, 0f, 1f)
+            .forEach { addLoopedSound(it) }
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        load.step(deltaT)
+    }
 
     val ledColors: Array<Color> = arrayOf(
         java.awt.Color.black,
@@ -154,7 +168,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         super.networkUnserialize(stream)
         val power = stream.readDouble()
         calcPower(power)
-        volumeSetting.target = 0.05f + Math.abs(power / desc.nominalP).toFloat() / 4f
+        load.target = Math.min(1.0, Math.abs(power / desc.nominalP)).toFloat()
     }
 }
 

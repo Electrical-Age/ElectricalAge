@@ -5,6 +5,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sound.LoopedSound;
+import mods.eln.sound.MachineSounds;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -20,20 +21,10 @@ public class CompactTurbineRender extends TransparentNodeElementRender {
     public CompactTurbineRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
         desc = (CompactTurbineDescriptor) d;
-        // the 50 V steam turbine's sounds at the same rotor speed (Baughn), but a cheaper rotor: its whine wavers; the
+        // the 50 V steam turbine's sounds at the same rotor speed (Baughn), but a cheaper rotor: its tones waver; the
         // safety valve letting go hisses loud
-        addLoopedSound(new LoopedSound("eln:steam_turbine_spin", coordonate()) {
-            @Override
-            public float getVolume() {
-                return 0.13f * Math.min(1, speed.get() * 1.4f);
-            }
-
-            @Override
-            public float getPitch() {
-                float waver = 1 + 0.015f * (float) Math.sin(System.nanoTime() * 1e-9 * 2 * Math.PI * 2.7);
-                return waver * (0.5f + 0.5f * Math.min(2, speed.get()));
-            }
-        });
+        for (LoopedSound l : MachineSounds.electric(coordonate(), speed::get, () -> Math.min(1, speed.get()), 1, 0.015f, 0.8f))
+            addLoopedSound(l);
         addLoopedSound(new LoopedSound("eln:steam_hiss", coordonate()) {
             @Override
             public float getVolume() {

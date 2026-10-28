@@ -5,6 +5,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sound.LoopedSound;
+import mods.eln.sound.MachineSounds;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,8 +20,8 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
     /** Puffs a second out of the vent at nominal steam: a calm stream (Baughn). */
     static final float PUFFS_PER_S = 6;
     float due;
-    /** Loudness at full speed and nominal steam (the loops are ~-18 dBFS; EA's older loops play quieter still). */
-    static final float SPIN_VOLUME = 0.18f, HISS_VOLUME = 0.15f;
+    /** The steam's loudness at nominal flow (the loops are ~-18 dBFS; EA's older loops play quieter still). */
+    static final float HISS_VOLUME = 0.1f;
     /** The rotor's pitch: the 50 V turbine turns as fast as the compact one; the bigger 200 V rotor sounds lower
      *  (Baughn). */
     final float PITCH;
@@ -47,18 +48,10 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
         super(entity, d);
         desc = (SteamGeneratorDescriptor) d;
         PITCH = desc.nominalU > 100 ? 0.8f : 1f;
-        // the rotor's whine climbs with its speed; the steam rushing through follows the flow, muffled by a condenser
-        addLoopedSound(new LoopedSound("eln:steam_turbine_spin", coordonate()) {
-            @Override
-            public float getVolume() {
-                return SPIN_VOLUME * Math.min(1, speed.get() * 1.4f);
-            }
-
-            @Override
-            public float getPitch() {
-                return PITCH * (0.5f + 0.5f * Math.min(2, speed.get()));
-            }
-        });
+        // a generator's hum (by the steam it takes, as its output follows it), rotor tones and air (MachineSounds),
+        // and the steam rushing through, muffled by a condenser
+        for (LoopedSound l : MachineSounds.electric(coordonate(), speed::get, () -> Math.min(1, steam.get()), PITCH, 0, 1))
+            addLoopedSound(l);
         addLoopedSound(new LoopedSound("eln:steam_hiss", coordonate()) {
             @Override
             public float getVolume() {
