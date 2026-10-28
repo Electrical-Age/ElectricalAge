@@ -79,6 +79,11 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     double serverSpeed;
     /** Client: wheel turn (radians) now and last tick; the kickstand's fold (0 down, 1 up) now and last tick. */
     public float wheel, wheelO, stand, standO;
+    /** Client: the cranks' turn (radians) now and last tick, for the pedals and the rider's legs (RiderPose). */
+    public float crank, crankO;
+    float lastAlong;
+    /** Wheel turns per crank turn (a cadence of ~130 rpm at full speed on battery, ~90 pedalling). */
+    public static final float GEAR = 2.0f;
 
     /** Client, every tick: the bike's motor sound (ElnClient sets it; nothing on a server). */
     public static java.util.function.Consumer<ElectricBike> clientSound = b -> {
@@ -213,6 +218,10 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         float yr = getYRot() * Mth.DEG_TO_RAD;
         double along = -Mth.sin(yr) * dx + Mth.cos(yr) * dz;
         wheel += (float) (along / WHEEL_RADIUS);
+        // the cranks turn with the wheel while it's driven (rolling forward and not slowing); coasting, they freewheel
+        crankO = crank;
+        if (mode() == Mode.RIDDEN && along > 0.001 && along >= lastAlong - 0.002) crank += (float) (along / WHEEL_RADIUS / GEAR);
+        lastAlong = (float) along;
         standO = stand;
         stand = Mth.approach(stand, mode() == Mode.RIDDEN ? 1 : 0, 0.25f);
         clientSound.accept(this);
@@ -332,11 +341,16 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     /** On the seat: above the frame, a little behind the middle. */
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-        return new Vec3(0, SEAT_Y, -0.15).yRot(-getYRot() * Mth.DEG_TO_RAD);
+        return new Vec3(0, SEAT_Y, SEAT_Z).yRot(-getYRot() * Mth.DEG_TO_RAD);
     }
 
-    /** Where the attachment puts the rider's feet (with the player's 0.6 vehicle attachment): hips on the saddle. */
-    public static final double SEAT_Y = 0.8;
+    /**
+     * Where the attachment puts the rider's feet, with the player's 0.6 vehicle attachment: hips (12 px above the feet) a
+     * pixel into the saddle, whose top is 17.3 px up (BikeModel), so the legs reach the pedals; over it, 3.5 px behind the
+     * middle (Baughn: the legs should reach the
+     * pedals; RiderPose takes its geometry from these).
+     */
+    public static final double SEAT_Y = 0.87, SEAT_Z = -0.22;
 
     @Override
     protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {

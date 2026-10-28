@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "mods.eln.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "HumanoidModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

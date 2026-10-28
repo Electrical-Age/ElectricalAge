@@ -100,6 +100,15 @@ GameTest `bike_recipe` crafts it.
   motor in the back wheel, octagon-rim wheels with four spokes across that turn with the distance rolled
   (`ElectricBike.wheel`), saddle, bars with grips, a lamp, a rack with the trunk, a kickstand that folds up when ridden.
 - `BikeRenderer`: parked it leans 8° onto the kickstand; fallen it lies on its side; hit, it rocks like a boat.
+- **The rider pedals** (Baughn 2026-10-28: the legs should sit on the pedals): `ElectricBike.crank` turns with the wheel
+  (`GEAR` 2 wheel turns per crank turn) while the bike is driven (rolling forward and not slowing); coasting it
+  freewheels, so the legs rest. Computed from motion on every client, so other players' riders pedal too. The bike's
+  cranks turn with it (`BikeModel`). A NeoForge render-state modifier on `AvatarRenderer` (`client/entity/RiderPose`)
+  puts the crank angle in a riding player's render state; `mixin/client/HumanoidModelMixin` (EA's first mixin,
+  `eln.client.mixins.json`, client, not required) calls `RiderPose.apply` after vanilla's `setupAnim`: each leg points from the
+  hip at its pedal (the bike's left crank under the right leg), and with no knee in the player model the hip rises up
+  to 4 px (or drops 1.5) so the foot meets the pedal within 2 px (`RiderPoseTest`); the arms reach forward to the
+  grips. `SEAT_Y` 0.87, `SEAT_Z` -0.22: the hips a pixel into the saddle, over it.
 - `BikeSound`: EA's `rotor_tone`, quiet, pitch with speed, only while the motor runs; it takes a sound source only then
   (started when it runs, stopped after 2 s quiet).
 - `client/BikeHud` (GUI layer `eln:bike_speedometer`, above the hotbar; Baughn: tell players it needs a battery): while
@@ -110,7 +119,7 @@ GameTest `bike_recipe` crafts it.
 - The charge comes from the synced `charge` (0..1, `NO_BATTERY` = -1 when the slot holds no battery), sent by the server
   when it moves by half a percent, reaches 0 or 1, or the battery comes or goes (`syncCharge`). Getting on with no
   battery, or a flat one, also says so once over the hotbar ("No battery: pedalling only ...").
-- `BikeTrunkScreen`: EA's panel, the battery slot with a charge bar and %, three slots, the inventory.
+- `BikeTrunkScreen` (its container panel's top level with the trunk window's, Baughn): EA's panel, the battery slot with a charge bar and %, three slots, the inventory.
 
 ## Tests
 

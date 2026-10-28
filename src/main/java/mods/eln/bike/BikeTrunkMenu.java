@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
 public class BikeTrunkMenu extends AbstractContainerMenu {
     public static final int BATTERY_X = 26, ITEMS_X = 80, SLOT_Y = 20, INV_Y = 51;
     /** The panel: at most this many of an item's slots (a shulker box's 27), 9 to a row, right of the trunk. */
-    public static final int PANEL = 27, PANEL_X = 188, PANEL_Y = 36;
+    public static final int PANEL = 27, PANEL_X = 188, PANEL_Y = 14;   // (its window's top level with the trunk's: Baughn)
     /** Slot index ranges: the trunk, the player's inventory, the panel. */
     public static final int INV_START = ElectricBike.TRUNK_SLOTS, INV_END = INV_START + 36, PANEL_START = INV_END, PANEL_END = PANEL_START + PANEL;
     final Container trunk;

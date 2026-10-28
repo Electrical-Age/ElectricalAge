@@ -72,6 +72,15 @@ public final class ElnClient {
                 e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer);
                 e.registerLayerDefinition(mods.eln.client.entity.BikeModel.LAYER, mods.eln.client.entity.BikeModel::createLayer);
             });
+        // a bike rider's legs follow the pedals (RiderPose, HumanoidModelMixin)
+        modBus.addListener(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent.class,
+            e -> e.registerAvatarEntityModifier(new net.neoforged.neoforge.client.renderstate.AvatarRenderStateModifier() {
+                @Override
+                public <T extends net.minecraft.world.entity.Avatar & net.minecraft.client.entity.ClientAvatarEntity> void accept(T avatar,
+                        net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+                    mods.eln.client.entity.RiderPose.extract(avatar, state);
+                }
+            }));
         mods.eln.bike.ElectricBike.clientSound = mods.eln.client.entity.BikeSound::tick;
         mods.eln.bike.ElectricBike.clientCrash = b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new mods.eln.bike.BikeCrash(b.getId()));
         if (mods.eln.handbook.Handbook.guideAvailable())

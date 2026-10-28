@@ -28,13 +28,15 @@ public class BikeModel extends EntityModel<BikeRenderState> {
     static final int[] PAINT = {0, 0}, TIRE = {32, 0}, METAL = {0, 38}, SADDLE = {32, 8}, TRUNK = {0, 16}, BATTERY = {24, 16},
         MOTOR = {44, 16}, BLACK = {44, 24}, LID = {0, 28};
 
-    private final ModelPart frontWheel, rearWheel, kickstand;
+    private final ModelPart frontWheel, rearWheel, kickstand, crankL, crankR;
 
     public BikeModel(ModelPart root) {
         super(root);
         frontWheel = root.getChild("front_wheel");
         rearWheel = root.getChild("rear_wheel");
         kickstand = root.getChild("kickstand");
+        crankL = root.getChild("crank_l");
+        crankR = root.getChild("crank_r");
     }
 
     /** A tube of thickness t from (y0, z0) to (y1, z1) at x, as a box along z turned about x. */
@@ -117,6 +119,9 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         super.setupAnim(s);
         frontWheel.xRot = s.wheel;
         rearWheel.xRot = s.wheel;
+        // the cranks, half a turn apart (RiderPose puts the rider's feet where these put the pedals)
+        crankL.xRot = s.crank;
+        crankR.xRot = s.crank + Mth.PI;
         // down: splayed out to the side; up: folded back along the chain stay
         kickstand.zRot = Mth.lerp(s.stand, 0.35f, 0.15f);
         kickstand.xRot = Mth.lerp(s.stand, 0.05f, 1.45f);

@@ -47,6 +47,10 @@ Electrical Age: electrical and mechanical simulation (MNA solver), ported to Min
 #[[mixins]]
 #config="${mod_id}.mixins.json"
 
+# Client look-only mixins (not required: if one can't apply, only that look is lost): a bike rider's legs on the pedals.
+[[mixins]]
+config="${mod_id}.client.mixins.json"
+
 # The [[accessTransformers]] block allows you to declare where your AT file is.
 # If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg
 #[[accessTransformers]]

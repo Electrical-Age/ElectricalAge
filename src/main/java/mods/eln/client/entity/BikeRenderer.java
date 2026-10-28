@@ -36,6 +36,7 @@ public class BikeRenderer extends EntityRenderer<ElectricBike, BikeRenderState> 
         s.yRot = bike.getYRot(a);
         s.wheel = Mth.lerp(a, bike.wheelO, bike.wheel);
         s.stand = Mth.lerp(a, bike.standO, bike.stand);
+        s.crank = Mth.lerp(a, bike.crankO, bike.crank);
         s.mode = bike.mode();
         s.hurtTime = bike.getHurtTime() - a;
         s.hurtDir = bike.getHurtDir();
