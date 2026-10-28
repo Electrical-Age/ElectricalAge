@@ -115,6 +115,8 @@ public final class ElnRegistry {
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
     public static final DeferredItem<Item> RAW_TUNGSTEN = ITEMS.registerSimpleItem("raw_tungsten");
+    /** A Capacitor Bank's can (Baughn 2026-10-28): six Dielectrics round a block of redstone; six make a bank. */
+    public static final DeferredItem<Item> CAPACITOR_CELL = ITEMS.registerSimpleItem("capacitor_cell");
     /** What food turns into in an electrical oven above 280 °C (Baughn); four make a charcoal, and it burns a quarter as long. */
     public static final DeferredItem<Item> CHARCOAL_NUGGET = ITEMS.registerSimpleItem("charcoal_nugget",
         p -> p.component(net.minecraft.core.component.DataComponents.COOKING_FUEL, new net.minecraft.world.item.component.CookingFuel(
@@ -310,6 +312,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(RAW_LEAD);
         ALL_ITEMS.add(RAW_TUNGSTEN);
         ALL_ITEMS.add(CHARCOAL_NUGGET);
+        ALL_ITEMS.add(CAPACITOR_CELL);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

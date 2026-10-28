@@ -284,7 +284,8 @@ final class GoldenSlotsCase implements TestCase {
     }
 
     /** Other device classes new in 26.x with a menu spec (no 1.12 container to match). */
-    static final Set<Class<?>> NEW_SPECS = Set.of(mods.eln.transparentnode.smelter.SmelterDescriptor.class);
+    static final Set<Class<?>> NEW_SPECS = Set.of(mods.eln.transparentnode.smelter.SmelterDescriptor.class,
+        mods.eln.anvil.ElectricalAnvilDescriptor.class);   // (the electrical anvil: Baughn 2026-10-28)
 
     /** A spec without its filters (lambdas): kind, index, position, limit per slot. */
     static List<String> shape(MenuSpec spec) {

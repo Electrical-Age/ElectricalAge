@@ -22,6 +22,8 @@ public final class CableTerminals {
 
     /** The front face only (the energy converters: EA side). */
     public static final CableTerminals FRONT = new CableTerminals(M_FRONT, CONDUCTOR_HEIGHT_PX);
+    /** The back face only (the electrical anvil: its 800 V plate behind the bench). */
+    public static final CableTerminals BACK = new CableTerminals(M_BACK, CONDUCTOR_HEIGHT_PX);
     /** Front and back (the steam turbines). */
     public static final CableTerminals FRONT_AND_BACK = new CableTerminals(M_FRONT | M_BACK, CONDUCTOR_HEIGHT_PX);
     /** The two flanks, left and right of the front (electric heaters, tar sand separators). */

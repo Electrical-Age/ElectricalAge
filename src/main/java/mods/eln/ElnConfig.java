@@ -15,6 +15,9 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
         BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
+    static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
+    static final ModConfigSpec.IntValue ANVIL_BURSTS;
+    static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, POWER_CAP_LEAK;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -68,6 +71,33 @@ public final class ElnConfig {
         BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.6: slabs and stairs; 1 or more climbs full blocks).")
             .defineInRange("stepHeight", 0.6, 0.0, 2.0);
         b.pop();
+        // the electrical anvil (Baughn 2026-10-28: an 800 V pulse, maxed out, so players build capacitor banks)
+        b.push("anvil");
+        ANVIL_POWER = b.comment("The electrical anvil's draw while it welds, W, at 800 V (the high-voltage cable's rating: 5000).")
+            .defineInRange("power", 5000.0, 10.0, 1e6);
+        ANVIL_UNIT = b.comment("Energy for a unit of repair material's worth of repair (a quarter of the tool), J (40000: 8 s at 5 kW).")
+            .defineInRange("joulesPerUnit", 40000.0, 0.0, 1e9);
+        ANVIL_NAME = b.comment("Energy to engrave a new name, J.").defineInRange("joulesPerName", 2000.0, 0.0, 1e9);
+        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 800 V...").defineInRange("resumeFraction", 0.95, 0.0, 2.0);
+        ANVIL_PLATEAU = b.comment("...or, when the line has stopped rising for 2 s, at this share or more (a bank on a weak plant levels off",
+                "below resumeFraction: its leak).").defineInRange("plateauFraction", 0.93, 0.0, 2.0);
+        ANVIL_SAG = b.comment("...and pauses (keeping its progress) when it sags below this share.").defineInRange("sagFraction", 0.9, 0.0, 2.0);
+        ANVIL_BURSTS = b.comment("A unit's weld comes in this many bursts (Baughn: two, so a capacitor bank can recover between them).")
+            .defineInRange("burstsPerUnit", 2, 1, 100);
+        ANVIL_GAP = b.comment("Seconds of rest between bursts, at least; it also waits for the line to be back at resumeFraction.")
+            .defineInRange("burstGapSeconds", 3.0, 0.0, 600.0);
+        b.pop();
+        // the capacitor bank (Baughn 2026-10-28): one carries one anvil burst (20 kJ from 800 V down to 720 V)
+        b.push("capacitorBank");
+        BANK_FARADS = b.comment("The capacitor bank's capacitance, F (0.36: one anvil burst from 800 V to 720 V needs 0.33).")
+            .defineInRange("farads", 0.36, 0.001, 100.0);
+        BANK_VOLTS = b.comment("Its rating, V: it pops above 1.3 times it, as the Power Capacitor does.").defineInRange("ratedVolts", 1000.0, 1.0, 100000.0);
+        BANK_LEAK = b.comment("Its leakage time constant R C, s (1800: at 800 V it leaks ~130 W, and keeps 2% of its charge after an hour).",
+                "Batteries are for keeping energy (Baughn); this is for bursts.").defineInRange("leakTauSeconds", 1800.0, 1.0, 1e9);
+        POWER_CAP_LEAK = b.comment("The six-node Power Capacitor's leakage time constant R C, s (1800, as the bank; 1.12 had 120000). With four",
+                "Dielectrics a sand a row of them was a cheap bulk store (Baughn 2026-10-28: batteries stay the only sensible one).")
+            .defineInRange("powerCapacitorLeakTauSeconds", 1800.0, 1.0, 1e9);
+        b.pop();
         b.push("probe");
         PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
                 "Also 1.12's wailaEasyMode: more detail on some machines.")
@@ -79,6 +109,8 @@ public final class ElnConfig {
     /** Cached (the battery processes read it every second). */
     public static volatile double batteryLifeFactor = 25.0;
     public static volatile double heatFurnaceFuelFactor = 2.5;
+    /** The six-node Power Capacitor's leak, RC (s): config capacitorBank.powerCapacitorLeakTauSeconds. */
+    public static volatile double powerCapacitorLeakTauS = 1800;
 
     static void refresh() {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
@@ -102,5 +134,20 @@ public final class ElnConfig {
         mods.eln.bike.BikePhysics.CRASH_SPEED = BIKE_CRASH.get() / 20;
         mods.eln.bike.BikePhysics.JUMP_VY = mods.eln.bike.BikePhysics.velocityForPeak(BIKE_JUMP.get());
         mods.eln.bike.BikePhysics.STEP_HEIGHT = (float) (double) BIKE_STEP.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.powerW = ANVIL_POWER.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerUnit = ANVIL_UNIT.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerName = ANVIL_NAME.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.resume = ANVIL_RESUME.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.plateau = ANVIL_PLATEAU.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.sag = ANVIL_SAG.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.bursts = ANVIL_BURSTS.get();
+        mods.eln.anvil.ElectricalAnvilDescriptor.burstGapS = ANVIL_GAP.get();
+        mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.farads = BANK_FARADS.get();
+        mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.ratedVolts = BANK_VOLTS.get();
+        mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.leakTauS = BANK_LEAK.get();
+        powerCapacitorLeakTauS = POWER_CAP_LEAK.get();
+        if (mods.eln.Eln.sixNodeItem != null)   // (config can load before the devices register; they take it from the field)
+            for (Object d : mods.eln.Eln.sixNodeItem.all().values())
+                if (d instanceof mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor p) p.dischargeTao = powerCapacitorLeakTauS;
     }
 }

@@ -32,11 +32,11 @@ import java.util.Map;
 public class PowerCapacitorSixElement extends SixNodeElement {
 
     PowerCapacitorSixDescriptor descriptor;
-    NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-    NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
+    public final NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
+    public final NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 
-    Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
-    Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
+    public final Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
+    public final Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
     PunkProcess punkProcess = new PunkProcess();
     BipoleVoltageWatchdog watchdog = new BipoleVoltageWatchdog().set(capacitor);
 

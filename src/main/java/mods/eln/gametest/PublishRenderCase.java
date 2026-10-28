@@ -55,6 +55,8 @@ final class PublishRenderCase implements TestCase {
     /** Transparent devices 1.12 drew nothing for (empty descriptor draw; see gallery-1.12 close-ups 111, 112). */
     static final java.util.Set<String> INVISIBLE_IN_112 = java.util.Set.of("Power inductor", "Power capacitor",
         "Signal 20H inductor"); // the last: lines to connected sides only, none here
+    /** Devices with no render class in the port yet (Modbus RTU: modbus is off, the device unregistered). */
+    static final java.util.Set<String> NO_RENDER_YET = java.util.Set.of("Modbus RTU");
     /** Need a setting this box can't give (water; a 3x3x4 free volume beside the floor): drawn in the gallery instead. */
     static final java.util.Set<String> NOT_HERE = java.util.Set.of("Water Turbine", "Experimental Transporter");
 
@@ -64,6 +66,12 @@ final class PublishRenderCase implements TestCase {
         BlockPos p = ctx.at(4, 1, 1);
         Map<Object, Boolean> seen = new IdentityHashMap<>();
         int ok = 0, all = 0;
+        // every device has a render registered (ClientRenders): without one its node draws nothing in the world, while
+        // its item (drawn from the descriptor) looks fine (the electrical anvil, 2026-10-28)
+        java.util.Set<String> noRender = new java.util.TreeSet<>();
+        for (SixNodeDescriptor d : Eln.sixNodeItem.all().values()) if (ElnRenders.six(d) == null && !NO_RENDER_YET.contains(d.name)) noRender.add(d.name);
+        for (TransparentNodeDescriptor d : Eln.transparentNodeItem.all().values()) if (ElnRenders.transparent(d) == null) noRender.add(d.name);
+        ctx.check("publish: every device has a render (ClientRenders)", noRender.isEmpty(), "none for " + noRender);
         for (var e : Eln.sixNodeItem.all().entrySet()) {
             SixNodeDescriptor d = e.getValue();
             if (ElnRenders.six(d) == null || seen.put(d, true) != null) continue;

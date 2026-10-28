@@ -75,7 +75,8 @@ final class GoldenCase implements TestCase {
     static final Map<String, Map<String, String>> CHANGED = Map.of(
         "Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"),
         "Stone Heat Furnace", Map.of("combustionChamberMax", "4 combustion chambers, was 2 (Baughn 2026-10-26: steam turbines by the expansion)"),
-        "Generator", Map.of("sound", "no single shaft loop: GeneratorRender plays MachineSounds' hum, rotor and air (Baughn 2026-10-28)"));
+        "Generator", Map.of("sound", "no single shaft loop: GeneratorRender plays MachineSounds' hum, rotor and air (Baughn 2026-10-28)"),
+        "Power Capacitor", Map.of("dischargeTao", "leaks with RC 30 min, as the capacitor bank (Baughn 2026-10-28: batteries stay the bulk store)"));
 
     /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
@@ -90,11 +91,13 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5312", "eln:transparent_node@5316", "eln:transparent_node@5320",  // column, flare stack
         // the FE exporters: 1.12 simple-node blocks (eln:energy_converter_eln_to_other_*block), transparent nodes since 26.x
         "eln:transparent_node@5376", "eln:transparent_node@5380", "eln:transparent_node@5384",
+        "eln:transparent_node@5440", "eln:transparent_node@5444",   // the electrical anvil, the capacitor bank (Baughn 2026-10-28)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
         "50V Electric Heater", "200V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
-        "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine");   // (their screen: Baughn 2026-10-26)
+        "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine",
+        "Electrical Anvil");   // (their screen: Baughn 2026-10-26)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);

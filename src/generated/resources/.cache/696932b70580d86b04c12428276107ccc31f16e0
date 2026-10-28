@@ -1,4 +1,4 @@
-// 26.3	2026-10-28T16:14:44.172738714	eln-global/EA models
+// 26.3	2026-10-28T20:30:15.065677781	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -29,12 +29,14 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/800v_defence_turret.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/auto_miner.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/boiler.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacitor_bank.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacity_oriented_battery.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/current_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/dc_dc_converter.json
 18a289fab3462a60a4549341ddffcafd418d5077 assets/eln/blockstates/deepslate_lead_ore.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/electrical_anvil.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/electrical_furnace.json
 4a42da1e82c1939cf3a66afa4c1ecd3700d3e92a assets/eln/blockstates/energy_converter_eln_to_other_hvublock.json
 9709513d5760ab267fc435e7fbf1f37d4815c53b assets/eln/blockstates/energy_converter_eln_to_other_lvublock.json
@@ -167,6 +169,8 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 0186f2aa540c8b8064b3472eec57f8a636962873 assets/eln/items/cable_kit_signal.json
 79b870e1f7fbe75896ae51704698975ea8bca766 assets/eln/items/cable_kit_thermal.json
 8a4e1e22bad335e63ea8671fc091833082a69edf assets/eln/items/cable_kit_vhv.json
+26f935fcd5d24d65bcd332e8a9e8eecbecc9f049 assets/eln/items/capacitor_bank.json
+1b0fda30d7df88dad46da130272273a8d88d9be8 assets/eln/items/capacitor_cell.json
 416d58aaae7250af7c091abfb63554244ca09aa6 assets/eln/items/capacity_oriented_battery.json
 a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
 3923dc921f4278cb2812659902b5100ef7d968f5 assets/eln/items/charcoal_nugget.json
@@ -201,6 +205,7 @@ d4caa32f84633e85483a40ba15e10644cd0b9559 assets/eln/items/e_coal_chestplate.json
 f4dc5f5232b85e25a38e952409ce0c226af95e8d assets/eln/items/e_coal_leggings.json
 2d61393843303c27649a49ff067ba95dd01a5403 assets/eln/items/electric_bike.json
 ef3d6d12e9ec59bbd00e14c8ade9c11e190b476d assets/eln/items/electrical_anemometer_sensor.json
+54097e9cb2beb1f9a0cada369dc2dbc6504b15b4 assets/eln/items/electrical_anvil.json
 3a42d7c323882358f7a1e772c0b80a581f3749bc assets/eln/items/electrical_breaker.json
 629bf770d32bd601f233f89fa656ca7062146140 assets/eln/items/electrical_daylight_sensor.json
 e1b22b45ee95e500dd5b12c4d0cf222f2de30cb0 assets/eln/items/electrical_entity_sensor.json
@@ -547,6 +552,9 @@ f9992078b5ec44355c3a62df7588c097c1cc330c assets/eln/models/item/cable_kit_mv.jso
 fd4526b81d5d19c6111fb9ee420bc4e7c645ddbf assets/eln/models/item/cable_kit_signal.json
 80f5ba728226c8bad50fbfde58ff21fdd9494563 assets/eln/models/item/cable_kit_thermal.json
 56d88a337caf4d4b80b1b429e38e515ea613ee3c assets/eln/models/item/cable_kit_vhv.json
+dc755ad6fcb99f65397dddcfa3331bfd1517ee2c assets/eln/models/item/capacitor_bank.json
+433d1762b9fdcfbfa4f67dec5f133557e1929b13 assets/eln/models/item/capacitor_bank_3d.json
+decdbe8d8a1c921126077d1ab6667f7c765adea2 assets/eln/models/item/capacitor_cell.json
 1fb49930355446d40b68162bc471465a6ac1901d assets/eln/models/item/capacity_oriented_battery.json
 c01d247e009543b7b3371b07e7b8a45e28eea766 assets/eln/models/item/capacity_oriented_battery_3d.json
 ccab4471b309e90a6f273d50e50f9ad1052fb4ff assets/eln/models/item/casing.json
@@ -588,6 +596,8 @@ d85d53158285965ca93fd0d3377faf4113e14abe assets/eln/models/item/e_coal_chestplat
 0fcc76c45b44f545d178aab491d65e24b49052e6 assets/eln/models/item/electric_bike.json
 9ab7adf080b729d531498f341e3a09d63e6fb9df assets/eln/models/item/electrical_anemometer_sensor.json
 2a447b95487f0b9d0fcf75592f82cc9485789299 assets/eln/models/item/electrical_anemometer_sensor_3d.json
+65e178adc79486b09d8f9c663f1f1ae9c0dcf50e assets/eln/models/item/electrical_anvil.json
+b59c01c9b22461b15c0943f95cbdd6e732b778b2 assets/eln/models/item/electrical_anvil_3d.json
 b8310e5536b0fac7b72723fea6ec5b0b957edb4b assets/eln/models/item/electrical_breaker.json
 0819fcfbd5b4b8558de78728edb0554bc4fd9e2e assets/eln/models/item/electrical_breaker_3d.json
 fd6e7ac1a43ab3193f7fb02082a4d3b717f11154 assets/eln/models/item/electrical_daylight_sensor.json

@@ -10,6 +10,7 @@ batterybig/batterybighv.obj
 batterychargera/batterychargera.obj
 batterychargerb/batterychargerb.obj
 boiler/boiler.obj
+capacitorbank/capacitorbank.obj
 classiclampsocket/classiclampsocket.obj
 columnbase/columnbase.obj
 columnsegment/columnsegment.obj
@@ -23,6 +24,7 @@ daylightsensor/daylightsensor.obj
 digitalwallclock/digitalwallclock.obj
 distributionboard/distributionboard.obj
 eggincubator/eggincubator.obj
+electricalanvil/electricalanvil.obj
 electricalbreaker/electricalbreaker.obj
 electricalfuse/electricalfuse.obj
 electricalsensor/electricalsensor.obj

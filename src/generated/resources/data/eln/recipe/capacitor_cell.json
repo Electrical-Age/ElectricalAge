@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "R": "minecraft:redstone_block",
+    "d": "eln:dielectric",
+    "p": "#eln:high_quality_plates/copper"
+  },
+  "pattern": [
+    "dpd",
+    "dRd",
+    "dpd"
+  ],
+  "result": {
+    "id": "eln:capacitor_cell"
+  }
+}

@@ -138,6 +138,11 @@ public final class MenuSpecs {
             descriptor(3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot")),
             regulator(4, 150, 25, 1, new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM,
                 tr("Regulator slot"))).publishing(1).inventoryAt(122));
+        // the electrical anvil (Baughn 2026-10-28): the tool (one, mended in place) and its repair material
+        put(mods.eln.anvil.ElectricalAnvilDescriptor.class, d -> MenuSpec.of(
+            SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.TOOL, 28, 25, 1, s -> s.isDamageableItem() || s.getMaxStackSize() == 1, BIG, tr("Tool")),
+            SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.MATERIAL, 86, 25, 64, mods.eln.anvil.ElectricalAnvilElement::materialMayGo, MEDIUM,
+                tr("Repair material"))).publishing(1).inventoryAt(150));
         put(mods.eln.oil.SteamOvenDescriptor.class, d -> MenuSpec.of(
             SlotSpec.output(mods.eln.oil.SteamOvenElement.outSlotId, 86, 25, BIG),
             SlotSpec.smeltable(mods.eln.oil.SteamOvenElement.inSlotId, 28, 25, MEDIUM, tr("Input"))).publishing(1).inventoryAt(122));

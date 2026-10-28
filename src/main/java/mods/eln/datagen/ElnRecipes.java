@@ -1980,6 +1980,33 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
             'E', findItemStack("Low Voltage Cable"));
+        // the electrical anvil (Baughn 2026-10-28: late-midgame gear): an anvil fed by 800 V cable on an advanced machine
+        // block, a steel-plate top and two legs
+        addRecipe(findItemStack("Electrical Anvil", 1),
+            "HAH",
+            "pMp",
+            "i i",
+            'H', findItemStack("High Voltage Cable"),
+            'A', stack(Items.ANVIL),
+            'p', "plateIron",
+            'M', findItemStack("Advanced Machine Block"),
+            'i', "ingotIron");
+        // the capacitor bank (Baughn 2026-10-28: lots of dielectrics): six cells, each six Dielectrics round a block of
+        // redstone between copper foils; the bank is six cells over an iron base with its 800 V lead
+        addRecipe(stack(mods.eln.registry.ElnRegistry.CAPACITOR_CELL.get()),
+            "dpd",
+            "dRd",
+            "dpd",
+            'd', findItemStack("Dielectric"),
+            'p', "plateCopper",
+            'R', stack(Items.REDSTONE_BLOCK));
+        addRecipe(findItemStack("Capacitor Bank", 1),
+            "CCC",
+            "CCC",
+            "pHp",
+            'C', stack(mods.eln.registry.ElnRegistry.CAPACITOR_CELL.get()),
+            'p', "plateIron",
+            'H', findItemStack("High Voltage Cable"));
         // the electric bike (Baughn 2026-10-28): a chest for its trunk and a leather saddle, an iron frame round an electrical
         // motor, two rubber wheels
         addRecipe(stack(mods.eln.registry.ElnRegistry.ELECTRIC_BIKE.get()),
