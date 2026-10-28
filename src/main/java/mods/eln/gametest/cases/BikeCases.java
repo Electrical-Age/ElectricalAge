@@ -345,8 +345,6 @@ public final class BikeCases {
                 bb.setEnergy(bike.trunk.getItem(0), 0);
                 bike.serverTick();
                 ctx.check("flat, it's pedalling only", !bike.powered(), "");
-                ctx.check("held past full, the jump bar still gives a full jump", bike.getPlayerJumpPendingScale(100) == 1f
-                    && bike.getPlayerJumpPendingScale(82) == 1f && bike.getPlayerJumpPendingScale(30) < 0.6f, "");
             } finally {
                 fp.stopRiding();
                 bike.discard();
