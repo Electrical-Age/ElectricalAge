@@ -62,6 +62,25 @@ GameTest `bike_recipe` crafts it.
   saved (RIDDEN loads as PARKED).
 - Broken up (hit, like a boat) it drops `eln:electric_bike` and spills its trunk (`remove` with a destroying reason,
   creative too).
+- **Container items in the trunk** (Baughn 2026-10-28, Discord 1565048425525944382): an item in slots 1-3 with NeoForge's
+  item capability (`Capabilities.Item.ITEM`: shulker boxes, bundles, other mods' bags that register it), one item, not a
+  stack, gets a tab under its slot; clicked (menu button 1-3), its insides open in a panel right of the trunk, clicked
+  again it closes. `BikeTrunkMenu` has a fixed panel of 27 slots (`PANEL`; a bigger handler shows its first 27; menu data:
+  charge, open tab, the handler's size, so the client hides the rest). On the server each panel slot is an `InsideSlot`:
+  - every access finds the handler again: `ItemAccess.forHandlerIndexStrict(VanillaContainerWrapper.of(trunk), tab)`, so
+    edits replace the trunk slot's stack and nothing outlives the item: taken out or swapped, the panel reads empty and
+    refuses everything (a stale `set` gives the stack back to the player);
+  - changes go through the handler's insert/extract in a transaction (`remove`, `safeInsert`, `tryRemove` and the delta
+    `set` for swaps and drags), so its rules hold (a bundle's weight); vanilla's rule that a shulker box goes in no
+    container item (`canFitInsideContainerItems`) is checked here, the handlers don't; what a handler won't take goes back
+    to the player, never lost;
+  - vanilla's in-place edits (`getItem` copy changed, then `setChanged`) are written back only if the trunk still holds the
+    same stack object they were read from (another player's change in between voids them);
+  - shift-click out of the panel takes the items out first, then places them (what doesn't fit goes back); from the
+    inventory, the open item takes what it can before the trunk does.
+  On the client the panel is a plain mirror the server fills; `BikeTrunkScreen` draws the tabs and the panel, and a click
+  on the panel isn't "outside" (which would drop the held stack). Sophisticated Backpacks registers `Capabilities.Item.ITEM`
+  for its backpacks (seen in its jar), so they should open too, showing their first 27 slots (not tested).
 - **Energy** (server): the speed it moved this tick (from the client's moves) gives the motor's draw, taken from the
   battery item.
 
@@ -88,4 +107,5 @@ GameTest `bike_recipe` crafts it.
 
 `BikePhysicsTest` (rules), GameTests `gametest/cases/BikeCases`: trunk slots, save, break drops; kickstand, tip-over
 timing, rider off, stand up; half slab rides, full block stops; motor draw (~1 kJ in 10 s at full speed) and
-powered/pedalling; the recipe; the synced charge (missing, flat, partial, half-percent threshold). Riding itself is client-side and needs a client to test.
+powered/pedalling; the recipe; container insides (shulker read/write lands in its CONTAINER, inert when taken out, stale edits void,
+shift-click both ways conserves items, a bundle's weight limit); the synced charge (missing, flat, partial, half-percent threshold). Riding itself is client-side and needs a client to test.

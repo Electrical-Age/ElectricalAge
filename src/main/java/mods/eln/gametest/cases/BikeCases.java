@@ -40,6 +40,121 @@ public final class BikeCases {
         cases.add(new Recipe());
         cases.add(new Charge());
         cases.add(new DeepWater());
+        cases.add(new Insides());
+    }
+
+    /** What a shulker box in trunk slot k holds (from the item itself). */
+    static net.minecraft.core.NonNullList<ItemStack> shulker(ElectricBike b, int k) {
+        var out = net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+        b.trunk.getItem(k).getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER,
+            net.minecraft.world.item.component.ItemContainerContents.EMPTY).copyInto(out);
+        return out;
+    }
+
+    /** Every item of a kind: the player's inventory, the shulker boxes and the bundle in the trunk. */
+    static int count(net.minecraft.world.entity.player.Player p, ElectricBike b, net.minecraft.world.item.Item item) {
+        int n = p.getInventory().countItem(item);
+        for (int k = 1; k < ElectricBike.TRUNK_SLOTS; k++) for (ItemStack s : shulker(b, k)) if (s.is(item)) n += s.getCount();
+        var bundle = b.trunk.getItem(2).get(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS);
+        if (bundle != null) for (var t : bundle.items()) if (t.item().value() == item) n += t.count();
+        return n;
+    }
+
+    /**
+     * Container items in the trunk show their insides (Baughn 2026-10-28): a shulker box's 27 slots read and write the
+     * item; taken out, its panel goes inert and gives back what's put in it; a bundle keeps its weight limit; shift-clicks
+     * move items without making or losing any; a stale in-place edit from before a swap doesn't land in the new box.
+     */
+    static final class Insides implements TestCase {
+        public String id() {
+            return "bike_trunk_container_insides";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        ElectricBike bike;
+
+        public void build(TestContext ctx) {
+            bike = spawn(ctx, ctx.at(1, 1, 1), 0);
+        }
+
+        public void measure(TestContext ctx) {
+            var p = rider(ctx, "insides", bike);
+            try {
+                var m = new mods.eln.bike.BikeTrunkMenu(1, p.getInventory(), bike);
+                int P = mods.eln.bike.BikeTrunkMenu.PANEL_START;
+                bike.trunk.setItem(1, new ItemStack(Items.SHULKER_BOX));
+                ctx.check("a shulker box opens; dirt doesn't", mods.eln.bike.BikeTrunkMenu.opens(bike.trunk.getItem(1))
+                    && !mods.eln.bike.BikeTrunkMenu.opens(new ItemStack(Items.DIRT)), "");
+                m.clickMenuButton(p, 1);
+                ctx.check("its tab opens 27 slots", m.openTab() == 1 && m.panelSize() == 27, m.openTab() + " " + m.panelSize());
+                m.slots.get(P + 5).set(new ItemStack(Items.DIAMOND, 10));
+                ctx.check("written through the panel, it's in the box's own contents", shulker(bike, 1).get(5).is(Items.DIAMOND)
+                    && shulker(bike, 1).get(5).getCount() == 10, "" + shulker(bike, 1).get(5));
+                ctx.check("and reads back", m.slots.get(P + 5).getItem().getCount() == 10, "" + m.slots.get(P + 5).getItem());
+                ctx.check("no shulker box in a shulker box", !m.slots.get(P + 6).mayPlace(new ItemStack(Items.SHULKER_BOX)), "");
+                // shift-click out of the box and back: nothing made, nothing lost
+                m.quickMoveStack(p, P + 5);
+                ctx.check("shift-click out of the box: all 10 in the inventory, none left in it",
+                    p.getInventory().countItem(Items.DIAMOND) == 10 && shulker(bike, 1).get(5).isEmpty(), count(p, bike, Items.DIAMOND) + " in all");
+                int invSlot = -1;
+                for (int i = mods.eln.bike.BikeTrunkMenu.INV_START; i < mods.eln.bike.BikeTrunkMenu.INV_END; i++)
+                    if (m.slots.get(i).getItem().is(Items.DIAMOND)) invSlot = i;
+                if (invSlot >= 0) m.quickMoveStack(p, invSlot);
+                ctx.check("shift-click back in: the box has them, still 10 in all",
+                    p.getInventory().countItem(Items.DIAMOND) == 0 && count(p, bike, Items.DIAMOND) == 10, count(p, bike, Items.DIAMOND) + " in all");
+                // a stale in-place edit: read, then the box is swapped, then the edit lands nowhere
+                ItemStack copy = ItemStack.EMPTY;
+                for (int i = 0; i < 27 && copy.isEmpty(); i++) copy = m.slots.get(P + i).getItem();
+                ItemStack boxA = bike.trunk.getItem(1);
+                bike.trunk.setItem(1, new ItemStack(Items.SHULKER_BOX));
+                copy.grow(5);
+                for (int i = 0; i < 27; i++) m.slots.get(P + i).setChanged();
+                ctx.check("an edit read from one box doesn't land in the box swapped in", count(p, bike, Items.DIAMOND) == 0,
+                    count(p, bike, Items.DIAMOND) + " in the new box");
+                int inA = 0;
+                var a = net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+                boxA.getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER, net.minecraft.world.item.component.ItemContainerContents.EMPTY).copyInto(a);
+                for (ItemStack s : a) if (s.is(Items.DIAMOND)) inA += s.getCount();
+                ctx.check("the box taken out keeps its 10 diamonds", inA == 10, inA + "");
+                // out of the trunk: the panel is inert, and what's forced into it goes back to the player
+                bike.trunk.setItem(1, ItemStack.EMPTY);
+                var slot = m.slots.get(P);
+                ctx.check("the box taken out: the panel reads empty and takes nothing", !slot.hasItem() && !slot.mayPlace(new ItemStack(Items.DIRT))
+                    && !slot.mayPickup(p) && m.panelSize() == 0, "");
+                int dirt = p.getInventory().countItem(Items.DIRT);
+                slot.set(new ItemStack(Items.DIRT, 3));
+                ctx.check("set on an inert slot gives it back", p.getInventory().countItem(Items.DIRT) == dirt + 3, "");
+                // a bundle: 64 dirt fill it; ender pearls then don't fit
+                bike.trunk.setItem(2, new ItemStack(Items.BUNDLE));
+                m.clickMenuButton(p, 2);
+                p.getInventory().clearContent();
+                p.getInventory().add(new ItemStack(Items.DIRT, 64));
+                p.getInventory().add(new ItemStack(Items.ENDER_PEARL, 4));
+                for (int i = mods.eln.bike.BikeTrunkMenu.INV_START; i < mods.eln.bike.BikeTrunkMenu.INV_END; i++)
+                    if (m.slots.get(i).getItem().is(Items.DIRT)) m.quickMoveStack(p, i);
+                for (int i = mods.eln.bike.BikeTrunkMenu.INV_START; i < mods.eln.bike.BikeTrunkMenu.INV_END; i++)
+                    if (m.slots.get(i).getItem().is(Items.ENDER_PEARL)) m.quickMoveStack(p, i);
+                var bc = bike.trunk.getItem(2).get(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS);
+                int pearlsIn = 0;
+                if (bc != null) for (var t : bc.items()) if (t.item().value() == Items.ENDER_PEARL) pearlsIn += t.count();
+                ctx.check("a bundle takes 64 dirt, then no pearl (its weight limit), nothing lost",
+                    count(p, bike, Items.DIRT) == 64 && p.getInventory().countItem(Items.DIRT) == 0 && pearlsIn == 0
+                        && p.getInventory().countItem(Items.ENDER_PEARL) + bike.trunk.countItem(Items.ENDER_PEARL) == 4,
+                    "bundle " + (bc == null ? "-" : bc.items()) + ", pearls left " + p.getInventory().countItem(Items.ENDER_PEARL) + " + " + bike.trunk.countItem(Items.ENDER_PEARL) + " loose in the trunk");
+                // (its one slot holds the dirt: a pearl there would swap with it; there is no free slot to add one)
+                ctx.check("the full bundle shows no free slot to add a pearl", m.panelSize() == 1 && !m.slots.get(P + 1).mayPlace(new ItemStack(Items.ENDER_PEARL)),
+                    m.panelSize() + "");
+            } finally {
+                bike.discard();
+            }
+        }
     }
 
     /** Water over the hubs throws the rider off (AdventurAgent rode one along a pool's bottom); shallow water doesn't. */
