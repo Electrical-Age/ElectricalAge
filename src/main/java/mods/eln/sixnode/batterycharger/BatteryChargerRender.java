@@ -55,6 +55,10 @@ public class BatteryChargerRender extends SixNodeElementRender {
         if (side.isY()) {
             front.right().glRotateOnX();
         }
+        // on a ceiling the frame comes out half a turn round from the floor's, as seen by whoever placed it: batteries read
+        // upside down from below, slot 0 nearest (AdventurAgent). Turn the body round (it's symmetric; the LEDs and the
+        // batteries turn together, so each stays by its own LED, in the floor's order).
+        if (side == Direction.YP) GL11.glRotatef(180, 1, 0, 0);
 
         // the batteries lie in their cubicles (3 px square, a pixel deep, floor at x = 0.125), as large as fits and
         // thickened (Baughn: they were small, spinning upright)
