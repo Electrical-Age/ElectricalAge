@@ -12,7 +12,8 @@ import mods.eln.sim.IProcess;
  * it, by the cut switch's resistance; and still cuts at {@link #CUT_K} under ⅔ of the warm limit (60 C for the stock
  * batteries), reconnecting {@link #RECONNECT_K} under it.</li>
  * <li>Overvoltage protection: no charging over U·1.1 > Umax (as before), and a low-voltage disconnect: below
- * {@link #LVD_OFF} charge it stops discharging (charging still goes in) until it is back over {@link #LVD_ON}.</li>
+ * {@link #LVD_OFF} of its energy (as its screen shows it) it stops discharging (charging still goes in) until it is
+ * back over {@link #LVD_ON}.</li>
  * </ul>
  */
 public class BatteryInventoryProcess implements IProcess {
@@ -49,7 +50,9 @@ public class BatteryInventoryProcess implements IProcess {
             thermalCut = false;
         }
         if (battery.hasOverVoltageProtection()) {
-            double q = battery.batteryProcess.getCharge();
+            // (by energy, the share the battery's screen shows: Baughn read 5% there while the charge, which the
+            // voltage curve makes run ahead of the energy, was still over 10%, and took the chip for broken)
+            double q = battery.batteryProcess.getEnergy() / Math.max(1e-9, battery.batteryProcess.getEnergyMax());
             if (q < LVD_OFF) lowVoltage = true;
             if (q > LVD_ON) lowVoltage = false;
         } else {

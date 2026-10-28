@@ -263,7 +263,9 @@ public class BatteryElement extends TransparentNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> wailaList = new HashMap<String, String>();
-        wailaList.put(I18N.tr("Charge"), Utils.plotPercent("", batteryProcess.getCharge()));
+        // (the energy's share, as the battery's screen shows it: Jade showed the charge, 10% while the screen said 2.5%;
+        // the voltage falls as it empties, so the last tenth of the charge holds a fortieth of the energy: Baughn)
+        wailaList.put(I18N.tr("Charge"), Utils.plotPercent("", batteryProcess.getEnergy() / Math.max(1e-9, batteryProcess.getEnergyMax())));
         wailaList.put(I18N.tr("Energy"), Utils.plotEnergy("", batteryProcess.getEnergy()));
         wailaList.put(I18N.tr("Life"), Utils.plotPercent("", batteryProcess.life));
         String p = inventoryProcess.describe();
