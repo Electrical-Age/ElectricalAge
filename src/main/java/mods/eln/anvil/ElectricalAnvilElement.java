@@ -55,7 +55,8 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
     public static final int TOOL = 0, MATERIAL = 1;
     public static final byte SET_NAME = 1;
     /** What it's doing, for the screen and Jade. */
-    public static final byte EMPTY = 0, CANT = 1, DONE = 2, NO_MATERIAL = 3, WAITING = 4, SAGGING = 5, WELDING = 6, ENGRAVING = 7;
+    public static final byte EMPTY = 0, CANT = 1, DONE = 2, NO_MATERIAL = 3, WAITING = 4, SAGGING = 5, WELDING = 6, ENGRAVING = 7,
+        RECOVERING = 8;
     static final int MAX_NAME = 50;   // (vanilla's anvil)
 
     final TransparentNodeElementInventory inventory = new ElectricalAnvilInventory(2, 64, this);
@@ -72,6 +73,9 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
     /** Seconds before it may try again after a sag (a line that can't carry it would otherwise chatter on and off). */
     double holdOff;
     static final double HOLD_OFF_S = 1;
+    /** Joules into the step when the current burst began; whether it's resting between bursts. */
+    public double burstStart;
+    public boolean recovering;
     String jobKey = "";
     Job current;
 
@@ -202,13 +206,17 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
         String k = j == null ? "" : (j.rename() ? "name:" : "fix:") + key(inventory.getItem(TOOL).getItem());
         if (!k.equals(jobKey)) {   // (another tool, or another kind of job: start the step afresh)
             jobKey = k;
-            energy = 0;
+            energy = burstStart = 0;
+            recovering = false;
         }
         current = j;
         double u = load.getU();
         holdOff = Math.max(0, holdOff - dt);
         if (j == null) welding = false;
-        else if (!welding && holdOff <= 0 && u >= ElectricalAnvilDescriptor.resume * Eln.HVU) welding = true;
+        else if (!welding && holdOff <= 0 && u >= ElectricalAnvilDescriptor.resume * Eln.HVU) {
+            welding = true;
+            recovering = false;
+        }
         else if (welding && u < ElectricalAnvilDescriptor.sag * Eln.HVU) {
             welding = false;
             holdOff = HOLD_OFF_S;
@@ -221,9 +229,18 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
             energy += u * u / r * dt;
             if (energy >= j.joules()) {
                 complete(j);
-                energy = 0;
+                energy = burstStart = 0;
+            } else if (energy - burstStart >= ElectricalAnvilDescriptor.burstJoules()) {
+                // a unit's weld comes in bursts with a rest between, so a bank (or a battery bank) can recover (Baughn)
+                welding = false;
+                recovering = true;
+                status = RECOVERING;
+                holdOff = ElectricalAnvilDescriptor.burstGapS;
+                burstStart = energy;
+                arc.setR(mods.eln.sim.mna.misc.MnaConst.highImpedance);
             }
-        } else status = holdOff > 0 || (energy > 0 && u < ElectricalAnvilDescriptor.sag * Eln.HVU) ? SAGGING : WAITING;
+        } else status = recovering ? RECOVERING
+            : holdOff > 0 || (energy > 0 && u < ElectricalAnvilDescriptor.sag * Eln.HVU) ? SAGGING : WAITING;
     };
 
     /** The current step's progress (0..1). */
@@ -339,6 +356,7 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
         credit.forEach(c::putDouble);
         nbt.put("credit", c);
         nbt.putDouble("energy", energy);
+        nbt.putDouble("burstStart", burstStart);
         if (pendingName != null) nbt.putString("pendingName", pendingName);
     }
 
@@ -349,6 +367,7 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
         CompoundTag c = nbt.getCompoundOrEmpty("credit");
         for (String k : c.keySet()) credit.put(k, c.getDoubleOr(k, 0));
         energy = nbt.getDoubleOr("energy", 0);
+        burstStart = nbt.getDoubleOr("burstStart", 0);
         pendingName = nbt.getString("pendingName").orElse(null);
         ItemStack tool = inventory.getItem(TOOL);
         Job j = job();
@@ -375,6 +394,7 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
             case SAGGING -> I18N.tr("Supply too weak (%1$V): paused", String.format("%.0f", u));
             case WELDING -> I18N.tr("Welding");
             case ENGRAVING -> I18N.tr("Engraving");
+            case RECOVERING -> I18N.tr("Between bursts: waiting for %1$V (now %2$V)", String.format("%.0f", ElectricalAnvilDescriptor.resume * Eln.HVU), String.format("%.0f", u));
             default -> "";
         };
     }

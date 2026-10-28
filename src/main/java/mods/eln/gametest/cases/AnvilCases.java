@@ -78,6 +78,15 @@ public final class AnvilCases {
             ctx.check("anvil: back at 800 V it holds off for a second", !a.welding && a.energy == e, "" + a.welding);
             tick(800, 12);
             ctx.check("anvil: ... then welds on from where it was", a.welding && a.energy > e, a.welding + " " + a.energy);
+            // half a unit (20 kJ) is a burst: then it rests at least burstGapSeconds (3 s), however good the line
+            int n = 0;
+            while (a.welding && n++ < 400) tick(800, 1);
+            ctx.check("anvil: after a 20 kJ burst it rests between bursts", !a.welding && a.recovering && a.status == ElectricalAnvilElement.RECOVERING
+                && Math.abs(a.energy - 20000) < 300, a.status + " " + a.energy);
+            tick(800, 50);
+            ctx.check("anvil: ... for 3 s, even on a full line", !a.welding, "" + a.welding);
+            tick(800, 12);
+            ctx.check("anvil: ... then the second burst", a.welding && !a.recovering, "" + a.welding);
             a.getInventory().setItem(ElectricalAnvilElement.TOOL, ItemStack.EMPTY);
             tick(0, 1);
         }
@@ -221,7 +230,7 @@ public final class AnvilCases {
         }
 
         public int ticks() {
-            return 220;   // 11 s: one step, a second under way
+            return 280;   // 14 s: one step (two 4 s bursts with a 3 s rest), a second under way
         }
 
         ElectricalAnvilElement fed, weak;
@@ -249,7 +258,7 @@ public final class AnvilCases {
 
         public void measure(TestContext ctx) {
             ctx.line("anvil pulse: fed " + fed.getWaila() + " damage " + tool(fed).getDamageValue() + "; weak " + weak.getWaila());
-            ctx.check("anvil: on 800 V it welds (one quarter in 11 s, at ~5 kW)", tool(fed).getDamageValue() == 1500 - 390 && fed.welding
+            ctx.check("anvil: on 800 V it welds (one quarter in two bursts, at ~5 kW)", tool(fed).getDamageValue() == 1500 - 390 && fed.welding
                 && fed.powerNow() > 4500 && fed.powerNow() < 5100, tool(fed).getDamageValue() + " " + fed.powerNow() + " W");
             ctx.check("anvil: ... and is part way into the next", fed.progress() > 0.2 && fed.progress() < 0.6, "" + fed.progress());
             ctx.check("anvil: on 700 V it waits for the line (no load, no progress)", !weak.welding && weak.status == ElectricalAnvilElement.WAITING

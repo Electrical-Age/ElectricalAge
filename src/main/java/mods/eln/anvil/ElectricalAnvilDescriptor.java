@@ -26,6 +26,12 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
     public static double joulesPerUnit = 40_000, joulesPerName = 2_000;
     /** It starts a pulse at RESUME of 800 V and pauses below SAG (config [anvil]). */
     public static double resume = 0.98, sag = 0.9;
+    /**
+     * A unit's weld comes in this many bursts, with at least burstGapS between them and the line back at RESUME
+     * (Baughn: keep the 40 kJ, in two bursts, so a bank has a chance to recover). Config [anvil].
+     */
+    public static int bursts = 2;
+    public static double burstGapS = 3;
     final Obj3D obj;
 
     public ElectricalAnvilDescriptor(String name, String model) {
@@ -33,6 +39,11 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
         obj = Eln.obj.getObj(model);
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(mods.eln.registry.ElnDeviceRegistry.highVoltageCableDescriptor);
         cableTerminals = mods.eln.cable.CableTerminals.BACK;   // the 800 V plate low on the back
+    }
+
+    /** Energy in one burst. */
+    public static double burstJoules() {
+        return joulesPerUnit / Math.max(1, bursts);
     }
 
     /** The welder's resistance: its rating at 800 V. */
