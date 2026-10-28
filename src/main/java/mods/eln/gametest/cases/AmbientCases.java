@@ -98,16 +98,14 @@ public final class AmbientCases {
         }
 
         public void build(TestContext ctx) {
-            var server = ctx.level().getServer();
-            var src = server.createCommandSourceStack().withSuppressedOutput().withLevel(ctx.level());
-            var a = ctx.at(0, 0, 0);
-            var b = ctx.at(11, 3, 2);
-            server.getCommands().performPrefixedCommand(src, String.format("fillbiome %d %d %d %d %d %d minecraft:desert",
-                Math.min(a.getX(), b.getX()), a.getY(), Math.min(a.getZ(), b.getZ()), Math.max(a.getX(), b.getX()), b.getY(), Math.max(a.getZ(), b.getZ())));
             var p1 = ctx.at(1, 1, 1);
             var p2 = ctx.at(10, 1, 1);
-            server.getCommands().performPrefixedCommand(src, String.format("fillbiome %d %d %d %d %d %d minecraft:snowy_plains",
-                p2.getX() - 1, p2.getY() - 4, p2.getZ() - 4, p2.getX() + 4, p2.getY() + 4, p2.getZ() + 4));   // (biomes are in 4-block cells)
+            // a block's biome is read from the 4-block cells within 2 blocks of it (BiomeManager's fuzzy zoom), so each box
+            // reaches 2 blocks round its dissipator, out into the padding, whose chunks the harness keeps loaded (a box
+            // reaching an unloaded chunk failed as a whole, silently, and the snowy one stayed desert); 9 blocks apart,
+            // the two boxes' cells never meet
+            fillBiome(ctx, p1.offset(-2, -2, -2), p1.offset(2, 2, 2), net.minecraft.world.level.biome.Biomes.DESERT);
+            fillBiome(ctx, p2.offset(-2, -2, -2), p2.offset(2, 2, 2), net.minecraft.world.level.biome.Biomes.SNOWY_PLAINS);
             mods.eln.sim.Ambient.fixedC = null;
             try {
                 hot = ctx.placeTransparent(DISSIPATOR_PASSIVE, p1);
@@ -116,6 +114,20 @@ public final class AmbientCases {
                 mods.eln.sim.Ambient.fixedC = 20.0;
             }
             t0 = ctx.world().getGameTime();
+        }
+
+        /** /fillbiome between two corners; a failure (an unloaded chunk, say) is a failed check, not a silent no-op. */
+        static void fillBiome(TestContext ctx, net.minecraft.core.BlockPos a, net.minecraft.core.BlockPos b,
+                              net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome> biome) {
+            var level = ctx.level();
+            var r = net.minecraft.server.commands.FillBiomeCommand.fill(level,
+                new net.minecraft.core.BlockPos(Math.min(a.getX(), b.getX()), Math.min(a.getY(), b.getY()), Math.min(a.getZ(), b.getZ())),
+                new net.minecraft.core.BlockPos(Math.max(a.getX(), b.getX()), Math.max(a.getY(), b.getY()), Math.max(a.getZ(), b.getZ())),
+                level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BIOME).getOrThrow(biome));
+            // (no change needed counts: the test world may already be desert there)
+            boolean ok = r.left().isPresent() || r.right().get().getType() == net.minecraft.server.commands.FillBiomeCommand.ERROR_NO_BIOMES_SET;
+            ctx.check("ambient: fillbiome " + biome.identifier().getPath(), ok,
+                r.right().map(Object::toString).orElse(r.left().map(n -> n + " cells").orElse("?")));
         }
 
         public void measure(TestContext ctx) {

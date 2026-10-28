@@ -76,7 +76,24 @@ public final class ElnGameTests {
         modBus.addListener(RegisterGameTestsEvent.class, ElnGameTests::registerTests);
     }
 
+    /**
+     * Empty blocks round every test structure. The test server lays every batch's structures out in one grid and
+     * keeps the old ones, 5 blocks apart: a neighbour's torch lit this test's blocks, its biome cells and its mobs
+     * reached in, and the outcome hung on which tests ran beside it. 2 x 8 + 5 = 21 blocks is past a light's reach (15)
+     * and a 4-block biome cell. Baughn: the order of the tests must not matter.
+     */
+    public static final int PADDING = 8;
+
+    /** The chunks under the structure and its padding stay loaded for the test (the server forces only the structure's). */
+    public static void forceLoadPadding(GameTestHelper helper) {
+        net.minecraft.world.phys.AABB b = helper.getBoundsWithPadding();
+        for (int cx = (int) Math.floor(b.minX) >> 4; cx <= (int) Math.floor(b.maxX) >> 4; cx++)
+            for (int cz = (int) Math.floor(b.minZ) >> 4; cz <= (int) Math.floor(b.maxZ) >> 4; cz++)
+                helper.getLevel().setChunkForced(cx, cz, true);   // (the runner releases every forced chunk after the batch)
+    }
+
     static void run(GameTestHelper helper, TestCase c) {
+        forceLoadPadding(helper);
         // the test world's biomes vary from test to test: 20 C everywhere, as the cases' numbers assume (AmbientCases
         // lift it for their own devices)
         mods.eln.sim.Ambient.fixedC = 20.0;
@@ -120,8 +137,8 @@ public final class ElnGameTests {
             Identifier structure = Identifier.fromNamespaceAndPath(Eln.MODID,
                 "floor_" + c.width() + "x" + c.height() + "x" + c.depth());
             ResourceKey<Consumer<GameTestHelper>> fn = ResourceKey.create(Registries.TEST_FUNCTION, id);
-            event.registerTest(id, new FunctionGameTestInstance(fn,
-                new TestData<>(env, structure, c.ticks() + 40, 0, true)));
+            event.registerTest(id, new FunctionGameTestInstance(fn, new TestData<>(env, net.minecraft.world.level.Level.OVERWORLD,
+                structure, c.ticks() + 40, 0, true, net.minecraft.world.level.block.Rotation.NONE, false, 1, 1, false, PADDING)));
         }
     }
 
