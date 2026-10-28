@@ -49,7 +49,9 @@ public final class ElnNet {
     public static void register(IEventBus modBus) {
         modBus.addListener(RegisterPayloadHandlersEvent.class, e -> e.registrar(BuildInfo.channelVersion("1")).playBidirectional(Data.TYPE, Data.CODEC,
             (Data d, IPayloadContext ctx) -> serverHandler.accept(d.bytes(), (ServerPlayer) ctx.player()),
-            (Data d, IPayloadContext ctx) -> clientHandler.accept(d.bytes())));
+            (Data d, IPayloadContext ctx) -> clientHandler.accept(d.bytes()))
+            .playToServer(mods.eln.bike.BikeCrash.TYPE, mods.eln.bike.BikeCrash.CODEC,
+                (mods.eln.bike.BikeCrash c, IPayloadContext ctx) -> mods.eln.bike.ElectricBike.onCrash((ServerPlayer) ctx.player(), c.entityId())));
     }
 
     public static void sendToPlayer(ServerPlayer player, ByteArrayOutputStream bos) {

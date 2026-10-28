@@ -8,6 +8,7 @@ device menus (`eln:node`), screens and the JSON layout engine. Node internals: a
 | Class | Side | Role |
 |---|---|---|
 | `src/main/java/mods/eln/network/ElnNet.java` | both | One payload `ElnNet.Data(byte[])`, id `eln:data`, `playBidirectional`, version `"1+<build commit>"` (`BuildInfo`: the commit baked into the jar by build.gradle, so a client built from another commit is refused at login; Baughn 2026-10-25). The bytes are the 1.12 packet unchanged: first byte = EA packet id, then whatever a `DataOutputStream` wrote. |
+| `src/main/java/mods/eln/bike/BikeCrash.java` | both | `eln:bike_crash`, client -> server on the same channel: the rider's client says it crashed the bike it rides (`docs/bike.md`). |
 | `src/main/java/mods/eln/network/ServerPacketHandler.java` | server | Sets `ElnNet.serverHandler`; hops to the server thread, then `handle()`. |
 | `src/main/java/mods/eln/client/ClientPacketHandler.java` | client | `packetRx`, set as `ElnNet.clientHandler` by `client/ElnClient`; runs on the client thread. |
 
