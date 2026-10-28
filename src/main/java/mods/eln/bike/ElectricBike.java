@@ -361,6 +361,15 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         if (amount > 0 && mode() == Mode.RIDDEN) pendingJump = getPlayerJumpPendingScale(amount);
     }
 
+    /**
+     * The jump bar's charge to a jump: full from 80 on, so holding on past full (where the bar sinks back towards 0.8)
+     * still clears the block. The horse's curve gave a full jump only in a ~0.1 s window (AdventurAgent).
+     */
+    @Override
+    public float getPlayerJumpPendingScale(int amount) {
+        return amount >= 80 ? 1f : 0.3f + 0.7f * amount / 80f;
+    }
+
     @Override
     public boolean canJump() {
         return mode() == Mode.RIDDEN;
