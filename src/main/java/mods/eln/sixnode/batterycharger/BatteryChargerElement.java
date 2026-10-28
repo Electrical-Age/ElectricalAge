@@ -60,6 +60,14 @@ public class BatteryChargerElement extends SixNodeElement {
     public static final byte toogleCharge = 1;
 
     byte charged, presence;
+    boolean lastPowered;
+
+    /** On and fed: switched on, with at least a tenth of its rated voltage at the input (BatteryChargerRender.powered). */
+    public boolean powered() {
+        return powerOn && powerLoad.getU() >= descriptor.nominalVoltage * POWERED_SHARE;
+    }
+
+    public static final double POWERED_SHARE = 0.1;
 
     @Override
     public Container getInventory() {
@@ -263,8 +271,11 @@ public class BatteryChargerElement extends SixNodeElement {
                 }
             }
 
-            if (charged != oldCharged)
+            // the LEDs go dark without power: tell the clients when it comes or goes
+            boolean powered = powered();
+            if (charged != oldCharged || powered != lastPowered)
                 needPublish();
+            lastPowered = powered;
             if (invChanged) {
                 invChanged = false;
                 needPublish();

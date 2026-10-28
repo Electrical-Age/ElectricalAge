@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:chest",
+    "I": "minecraft:iron_ingot",
+    "L": "minecraft:leather",
+    "R": "#c:rubbers",
+    "m": "eln:electrical_motor"
+  },
+  "pattern": [
+    "CL ",
+    "ImI",
+    "R R"
+  ],
+  "result": {
+    "id": "eln:electric_bike"
+  }
+}

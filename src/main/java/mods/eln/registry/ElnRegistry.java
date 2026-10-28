@@ -49,6 +49,9 @@ public final class ElnRegistry {
         MENUS.register("battery_belt", () -> new net.minecraft.world.inventory.MenuType<>(mods.eln.item.belt.BeltMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.item.xray.XRayScannerMenu>> XRAY_MENU =
         MENUS.register("xray_scanner", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.item.xray.XRayScannerMenu::fromNetwork));
+    /** The electric bike's trunk (Baughn 2026-10-28). */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.bike.BikeTrunkMenu>> BIKE_TRUNK_MENU =
+        MENUS.register("electric_bike", () -> new net.minecraft.world.inventory.MenuType<>(mods.eln.bike.BikeTrunkMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
 
     /** Every EA item, in 1.12 id order (creative tab, tests). */
@@ -170,6 +173,15 @@ public final class ElnRegistry {
             .<mods.eln.entity.ReplicatorEntity>of(mods.eln.entity.ReplicatorEntity::new, net.minecraft.world.entity.MobCategory.MONSTER)
             .sized(0.3f, 0.7f).clientTrackingRange(5).updateInterval(3)
             .build(net.minecraft.resources.ResourceKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "replicator"))));
+
+    /** The electric bike (Baughn 2026-10-28: "Not a motorcycle"): 0.8 wide (it fits a one-block gap), 1 tall. */
+    public static final DeferredHolder<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.entity.EntityType<mods.eln.bike.ElectricBike>> ELECTRIC_BIKE_ENTITY =
+        ENTITY_TYPES.register("electric_bike", () -> net.minecraft.world.entity.EntityType.Builder
+            .<mods.eln.bike.ElectricBike>of(mods.eln.bike.ElectricBike::new, net.minecraft.world.entity.MobCategory.MISC)
+            .noLootTable().sized(0.8f, 1.0f).clientTrackingRange(10)
+            .build(net.minecraft.resources.ResourceKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "electric_bike"))));
+    public static final DeferredItem<mods.eln.bike.ElectricBikeItem> ELECTRIC_BIKE =
+        registerListed("electric_bike", mods.eln.bike.ElectricBikeItem::new, p -> p.stacksTo(1));
 
     /** 1.12 dropped a vanilla spawn egg tagged eln:replicator; 26.x eggs are per entity type. */
     public static final DeferredItem<net.minecraft.world.item.SpawnEggItem> REPLICATOR_SPAWN_EGG =

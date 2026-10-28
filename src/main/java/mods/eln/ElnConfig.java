@@ -13,6 +13,8 @@ public final class ElnConfig {
     static final ModConfigSpec.BooleanValue CONVERT_CABLES;
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
+    static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
+        BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -45,6 +47,27 @@ public final class ElnConfig {
                 "six-node block is kept inside for /elnlab voxelcables revert). Off until the conversion is approved.")
             .define("convertOnLoad", false);
         b.pop();
+        // the electric bike (Baughn 2026-10-28: "might adjust values in playtesting"): synced, as the rider's client moves it
+        b.push("bike");
+        BIKE_POWERED = b.comment("The electric bike's top speed on battery, blocks per second (an average horse: 9.5).")
+            .defineInRange("poweredSpeed", 9.5, 0.5, 40.0);
+        BIKE_PEDALLING = b.comment("Its top speed without charge, pedalling, blocks per second (sprinting is 5.6).")
+            .defineInRange("pedallingSpeed", 6.6, 0.5, 40.0);
+        BIKE_WINDOW = b.comment("Seconds of the rider's input averaged into its speed (Baughn: 2-3, so it feels like a bicycle).")
+            .defineInRange("inputAverageSeconds", 2.5, 0.05, 10.0);
+        BIKE_MOTOR = b.comment("Its motor's draw at full speed, W (falls with the square of speed; capped by the battery's discharge power).")
+            .defineInRange("motorWatts", 100.0, 0.0, 10000.0);
+        BIKE_TIP_DELAY = b.comment("Seconds it stays up when stopped with a rider, before it may fall over.")
+            .defineInRange("tipOverDelaySeconds", 5.0, 0.0, 3600.0);
+        BIKE_TIP_CHANCE = b.comment("Chance per second, after that, that it falls over with its rider (0 never).")
+            .defineInRange("tipOverChancePerSecond", 0.1, 0.0, 1.0);
+        BIKE_CRASH = b.comment("Running into a full block or a wall faster than this (blocks per second) throws the rider off.")
+            .defineInRange("crashSpeed", 3.0, 0.0, 100.0);
+        BIKE_JUMP = b.comment("Height of a full-charge jump, blocks (1.31: one block with room, never 1.5).")
+            .defineInRange("jumpHeight", 1.31, 0.0, 5.0);
+        BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.6: slabs and stairs; 1 or more climbs full blocks).")
+            .defineInRange("stepHeight", 0.6, 0.0, 2.0);
+        b.pop();
         b.push("probe");
         PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
                 "Also 1.12's wailaEasyMode: more detail on some machines.")
@@ -70,5 +93,14 @@ public final class ElnConfig {
         mods.eln.sim.Ambient.depthC = DEPTH_C.get();
         mods.eln.sim.Ambient.depthPerBlock = DEPTH_PER_BLOCK.get();
         mods.eln.sim.Ambient.netherC = NETHER_C.get();
+        mods.eln.bike.BikePhysics.VMAX_POWERED = BIKE_POWERED.get() / 20;
+        mods.eln.bike.BikePhysics.VMAX_PEDALLING = BIKE_PEDALLING.get() / 20;
+        mods.eln.bike.BikePhysics.AVERAGE_TICKS = Math.max(1, (int) Math.round(BIKE_WINDOW.get() * 20));
+        mods.eln.bike.BikePhysics.MOTOR_WATTS = BIKE_MOTOR.get();
+        mods.eln.bike.ElectricBike.STILL_TICKS = (int) Math.round(BIKE_TIP_DELAY.get() * 20);
+        mods.eln.bike.ElectricBike.TIP_CHANCE = (float) (double) BIKE_TIP_CHANCE.get();
+        mods.eln.bike.BikePhysics.CRASH_SPEED = BIKE_CRASH.get() / 20;
+        mods.eln.bike.BikePhysics.JUMP_VY = mods.eln.bike.BikePhysics.velocityForPeak(BIKE_JUMP.get());
+        mods.eln.bike.BikePhysics.STEP_HEIGHT = (float) (double) BIKE_STEP.get();
     }
 }

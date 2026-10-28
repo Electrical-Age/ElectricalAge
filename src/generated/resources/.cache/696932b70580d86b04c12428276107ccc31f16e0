@@ -1,4 +1,4 @@
-// 26.3	2026-10-28T00:49:49.678080027	eln-global/EA models
+// 26.3	2026-10-28T16:14:44.172738714	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -199,6 +199,7 @@ dabc42c459d0bb6ae8a7c0e3945baef444a86c66 assets/eln/items/e_coal_boots.json
 d4caa32f84633e85483a40ba15e10644cd0b9559 assets/eln/items/e_coal_chestplate.json
 63e74dcf5b58fe5f4c1e8add6ca4c4f28dfd9113 assets/eln/items/e_coal_helmet.json
 f4dc5f5232b85e25a38e952409ce0c226af95e8d assets/eln/items/e_coal_leggings.json
+2d61393843303c27649a49ff067ba95dd01a5403 assets/eln/items/electric_bike.json
 ef3d6d12e9ec59bbd00e14c8ade9c11e190b476d assets/eln/items/electrical_anemometer_sensor.json
 3a42d7c323882358f7a1e772c0b80a581f3749bc assets/eln/items/electrical_breaker.json
 629bf770d32bd601f233f89fa656ca7062146140 assets/eln/items/electrical_daylight_sensor.json
@@ -584,6 +585,7 @@ eb4d39eba7a938dcc40b838e6caff91f646239b1 assets/eln/models/item/e_coal_boots.jso
 d85d53158285965ca93fd0d3377faf4113e14abe assets/eln/models/item/e_coal_chestplate.json
 2a158be780ed5ec520b9fc12881aa9a16d4059b0 assets/eln/models/item/e_coal_helmet.json
 0cc163329de91bae9d50eaa74060f0630cfbe1ee assets/eln/models/item/e_coal_leggings.json
+0fcc76c45b44f545d178aab491d65e24b49052e6 assets/eln/models/item/electric_bike.json
 9ab7adf080b729d531498f341e3a09d63e6fb9df assets/eln/models/item/electrical_anemometer_sensor.json
 2a447b95487f0b9d0fcf75592f82cc9485789299 assets/eln/models/item/electrical_anemometer_sensor_3d.json
 b8310e5536b0fac7b72723fea6ec5b0b957edb4b assets/eln/models/item/electrical_breaker.json

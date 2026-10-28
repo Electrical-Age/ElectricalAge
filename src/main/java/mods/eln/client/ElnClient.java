@@ -57,6 +57,7 @@ public final class ElnClient {
             e.registerBlockEntityRenderer(ElnRegistry.VOXEL_NODE_ENTITY.get(), ctx -> new SixNodeRender<>());
             // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
+            e.registerEntityRenderer(ElnRegistry.ELECTRIC_BIKE_ENTITY.get(), mods.eln.client.entity.BikeRenderer::new);
         });
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "device"),
@@ -67,11 +68,27 @@ public final class ElnClient {
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "lit"), mods.eln.client.render.LitProperty.MAP_CODEC));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
             net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "battery_belt"), BeltHud::render));
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
+            net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "bike_speedometer"), BikeHud::render));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class,
             e -> e.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tutorial_sign"),
                 mods.eln.sixnode.tutorialsign.TutorialSignHud::render));
         modBus.addListener(EntityRenderersEvent.RegisterLayerDefinitions.class,
-            e -> e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer));
+            e -> {
+                e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer);
+                e.registerLayerDefinition(mods.eln.client.entity.BikeModel.LAYER, mods.eln.client.entity.BikeModel::createLayer);
+            });
+        // a bike rider's legs follow the pedals (RiderPose, HumanoidModelMixin)
+        modBus.addListener(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent.class,
+            e -> e.registerAvatarEntityModifier(new net.neoforged.neoforge.client.renderstate.AvatarRenderStateModifier() {
+                @Override
+                public <T extends net.minecraft.world.entity.Avatar & net.minecraft.client.entity.ClientAvatarEntity> void accept(T avatar,
+                        net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+                    mods.eln.client.entity.RiderPose.extract(avatar, state);
+                }
+            }));
+        mods.eln.bike.ElectricBike.clientSound = mods.eln.client.entity.BikeSound::tick;
+        mods.eln.bike.ElectricBike.clientCrash = b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new mods.eln.bike.BikeCrash(b.getId()));
         if (mods.eln.handbook.Handbook.guideAvailable())
             modBus.addListener(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent.class, HandbookGuide::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
@@ -88,6 +105,7 @@ public final class ElnClient {
                 e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create);
                 e.register(ElnRegistry.XRAY_MENU.get(), mods.eln.client.gui.XRayScannerScreen::new);
                 e.register(ElnRegistry.BELT_MENU.get(), mods.eln.client.gui.BeltScreen::new);
+                e.register(ElnRegistry.BIKE_TRUNK_MENU.get(), mods.eln.client.gui.BikeTrunkScreen::new);
             });
         XRayScan.install();
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent.class, ItemTooltips::onTooltip);

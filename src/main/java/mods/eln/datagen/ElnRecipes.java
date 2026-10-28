@@ -1980,6 +1980,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
             'E', findItemStack("Low Voltage Cable"));
+        // the electric bike (Baughn 2026-10-28): a chest for its trunk and a leather saddle, an iron frame round an electrical
+        // motor, two rubber wheels
+        addRecipe(stack(mods.eln.registry.ElnRegistry.ELECTRIC_BIKE.get()),
+            "CL ",
+            "ImI",
+            "R R",
+            'C', stack(Items.CHEST),
+            'L', stack(Items.LEATHER),
+            'I', stack(Items.IRON_INGOT),
+            'm', findItemStack("Electrical Motor"),
+            'R', "itemRubber");
         // the turbines' condensers (Baughn 2026-10-26): a shell of copper tubes (the cooler) round a vessel, and a pump
         addRecipe(findItemStack("Small Steam Condenser", 1),
             "PCP",

@@ -27,11 +27,17 @@ public class BatteryChargerRender extends SixNodeElementRender {
     boolean[] charged = new boolean[]{false, false, false, false};
     boolean[] batteryPresence = new boolean[]{false, false, false, false};
 
-    float alpha = 0;
-
     ItemEntity[] b = new ItemEntity[4];
     boolean powerOn;
     private float voltage;
+
+    /** A cubicle is 3/16 square: the item fills it less a sliver; four times as thick as an item frame's (0.75 px). */
+    static final float ITEM_SIZE = 0.18f, ITEM_THICK = 4, ITEM_X = 0.125f + 0.18f / 16 * 4 / 2 + 0.002f;
+
+    /** Switched on and fed (BatteryChargerElement.powered: a tenth of the rated voltage); else the LEDs are dark. */
+    boolean powered() {
+        return powerOn && voltage >= descriptor.nominalVoltage * BatteryChargerElement.POWERED_SHARE;
+    }
 
     public BatteryChargerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -49,18 +55,18 @@ public class BatteryChargerRender extends SixNodeElementRender {
         if (side.isY()) {
             front.right().glRotateOnX();
         }
+        // on a ceiling the frame comes out half a turn round from the floor's, as seen by whoever placed it: batteries read
+        // upside down from below, slot 0 nearest (AdventurAgent). Turn the body round (it's symmetric; the LEDs and the
+        // batteries turn together, so each stays by its own LED, in the floor's order).
+        if (side == Direction.YP) GL11.glRotatef(180, 1, 0, 0);
 
-        UtilsClient.drawEntityItem(b[0], 0.1875, 0.15625, 0.15625, alpha, 0.2f);
-        UtilsClient.drawEntityItem(b[1], 0.1875, 0.15625, -0.15625, alpha, 0.2f);
-        UtilsClient.drawEntityItem(b[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
-        UtilsClient.drawEntityItem(b[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
+        // the batteries lie in their cubicles (3 px square, a pixel deep, floor at x = 0.125), as large as fits and
+        // thickened (Baughn: they were small, spinning upright)
+        for (int i = 0; i < 4; i++)
+            if (b[i] != null)
+                UtilsClient.drawFlatItem(b[i].getItem(), ITEM_X, i < 2 ? 0.15625 : -0.15625, i % 2 == 0 ? 0.15625 : -0.15625, ITEM_SIZE, ITEM_THICK);
 
-        descriptor.draw(batteryPresence, charged);
-    }
-    @Override
-    public void refresh(float deltaT) {
-        alpha += 90 * deltaT;
-        if (alpha > 360) alpha -= 360;
+        descriptor.draw(batteryPresence, charged, powered(), (System.currentTimeMillis() / 500) % 2 == 0);
     }
 
     @Override

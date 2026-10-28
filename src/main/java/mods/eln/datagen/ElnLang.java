@@ -21,7 +21,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("e_coal_helmet", "E-Coal Helmet"), Map.entry("e_coal_chestplate", "E-Coal Chestplate"),
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
-        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"), Map.entry("pipe_pressure_sensor", "Pipe Pressure Sensor"), Map.entry("pipe_temperature_sensor", "Pipe Temperature Sensor"), Map.entry("battery_belt", "Battery Belt"),
+        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"), Map.entry("pipe_pressure_sensor", "Pipe Pressure Sensor"), Map.entry("pipe_temperature_sensor", "Pipe Temperature Sensor"), Map.entry("battery_belt", "Battery Belt"), Map.entry("electric_bike", "Electric Bike"),
         Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
         Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("chisel", "Chisel"), Map.entry("handbook", "Electrical Engineer's Ledger"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
         Map.entry("item_creative_tab", "Electrical Age"));
@@ -32,6 +32,10 @@ public class ElnLang extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("item.eln.electric_bike.tooltip", "Not a motorcycle");   // (Baughn)
+        add("container.eln.electric_bike", "Bike Trunk");
+        add("message.eln.electric_bike.no_battery", "No battery: pedalling only");
+        add("message.eln.electric_bike.flat_battery", "The battery is flat: pedalling only");
         add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
         add("item.eln.chisel.shape.cube", "cube");
         add("item.eln.chisel.shape.flat", "flat");
@@ -104,6 +108,7 @@ public class ElnLang extends LanguageProvider {
                 add(b.getBlock(), name);
         }
         add(ElnRegistry.REPLICATOR.get(), "Replicator");
+        add(ElnRegistry.ELECTRIC_BIKE_ENTITY.get(), "Electric Bike");
         add(ElnRegistry.SIX_NODE_BLOCK.get(), "Electrical Age Device");
         add(ElnRegistry.VOXEL_NODE_BLOCK.get(), "Pipes and Cables");
         add(ElnRegistry.VOXEL_NODE_WOODEN_FENCE.get(), "Pipes and Cables");
