@@ -1,4 +1,4 @@
-// 26.3	2026-10-27T14:38:20.758860173	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-28T16:25:47.952243926	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -108,6 +108,7 @@ ac2011fba37a0aed61ad00c01aebe821b0cdf556 data/eln/advancement/recipes/misc/digit
 3fa697d38d42571a5858828ab1357da704173ce8 data/eln/advancement/recipes/misc/e_coal_chestplate.json
 30ac3768665b2602132d8c152ca72340a9278464 data/eln/advancement/recipes/misc/e_coal_helmet.json
 725d0cb22deeba21bcac49e1001afc544813d90f data/eln/advancement/recipes/misc/e_coal_leggings.json
+e8229001b2e6f5f4cd0f4162a618ac5b42cd108d data/eln/advancement/recipes/misc/electric_bike.json
 cd57f474f8d1480acb959a2c973a132bec70d432 data/eln/advancement/recipes/misc/electrical_anemometer_sensor.json
 3e38628f9bd3e9b12519b3863e64ec05b93db5af data/eln/advancement/recipes/misc/electrical_breaker.json
 8d34731b424df9c8c6a6f11d6215817e320ecea3 data/eln/advancement/recipes/misc/electrical_daylight_sensor.json
@@ -445,6 +446,7 @@ e0f38bc4eb3608f2f34e79e22d8e2b7999b3f5ea data/eln/recipe/dc_dc_converter.json
 8970f591dff2d2758fdf86d1f6916ff7ac561f8e data/eln/recipe/e_coal_chestplate.json
 8c15da5bfb0ee48d25f7a1c520188985e514b2ba data/eln/recipe/e_coal_helmet.json
 5fd7652fd6f4163bd70e90c8dba4ff7bcbcc61ba data/eln/recipe/e_coal_leggings.json
+011105395c8876f42483b267e81a390f6a3254fc data/eln/recipe/electric_bike.json
 8b9ee2b8504e1b559b8e3feea2996c631270b84e data/eln/recipe/electrical_anemometer_sensor.json
 3159c3856a8b4755829e1fdc175fab0cfc057ab2 data/eln/recipe/electrical_breaker.json
 319261f31e8a8eaf97a188e58b4a2d263016931c data/eln/recipe/electrical_daylight_sensor.json

@@ -17,6 +17,30 @@ Baughn's brief (2026-10-28): a ridden electric bike, "Not a motorcycle" (its too
 | Fall gravity | a living entity's: 0.08 b/t², drag 0.98 |
 | Motor | 100 W at full speed, falling with the square of speed, capped by the battery's discharge power: a Portable Battery (40 kJ) lasts ~7 min at full speed, a Pack ~20 min |
 
+## Config (`[bike]` in `config/eln-synced.toml`, `ElnConfig`)
+
+Baughn (2026-10-28): "Might adjust values in playtesting, and the obvious config options can be config options." EA's
+config is SYNCED, so the server's values reach the rider's client, which does the moving. `ElnConfig.refresh` copies
+them into the statics of `BikePhysics` and `ElectricBike`; the defaults are the values above.
+
+| Key | Default | Becomes |
+|---|---|---|
+| `poweredSpeed` | 9.5 b/s | `BikePhysics.VMAX_POWERED` (/20, b/t) |
+| `pedallingSpeed` | 6.6 b/s | `VMAX_PEDALLING` |
+| `inputAverageSeconds` | 2.5 | `AVERAGE_TICKS` (x20; the input window resizes on the next tick) |
+| `motorWatts` | 100 | `MOTOR_WATTS` |
+| `tipOverDelaySeconds` | 5 | `ElectricBike.STILL_TICKS` (x20) |
+| `tipOverChancePerSecond` | 0.1 | `ElectricBike.TIP_CHANCE` |
+| `crashSpeed` | 3 b/s | `CRASH_SPEED` (/20) |
+| `jumpHeight` | 1.31 blocks | `JUMP_VY` = `velocityForPeak(jumpHeight)` (0.43 b/t) |
+| `stepHeight` | 0.6 blocks | `STEP_HEIGHT` (1 or more climbs full blocks) |
+
+## Recipe (Baughn 2026-10-28)
+
+Shaped, in `datagen/ElnRecipes`: `CL ` / `ImI` / `R R`: C chest (the trunk), L leather (the saddle), I iron ingot (the
+frame), m Electrical Motor, R rubber (`c:rubbers`, EA's Rubber). New in 26.x, so not in the 1.12 golden recipes;
+GameTest `bike_recipe` crafts it.
+
 ## The entity (`bike/ElectricBike`, `eln:electric_bike`, 0.8 x 1.0)
 
 - A `VehicleEntity` ridden the boat's way: the controlling player's client simulates it (`isLocalInstanceAuthoritative`),
@@ -54,4 +78,4 @@ Baughn's brief (2026-10-28): a ridden electric bike, "Not a motorcycle" (its too
 
 `BikePhysicsTest` (rules), GameTests `gametest/cases/BikeCases`: trunk slots, save, break drops; kickstand, tip-over
 timing, rider off, stand up; half slab rides, full block stops; motor draw (~1 kJ in 10 s at full speed) and
-powered/pedalling. Riding itself is client-side and needs a client to test.
+powered/pedalling; the recipe. Riding itself is client-side and needs a client to test.

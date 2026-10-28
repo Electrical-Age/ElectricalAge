@@ -37,6 +37,35 @@ public final class BikeCases {
         cases.add(new ParkAndFall());
         cases.add(new Steps());
         cases.add(new Motor());
+        cases.add(new Recipe());
+    }
+
+    /** Baughn's recipe: chest (trunk) and leather (saddle) over an iron frame round an electrical motor, two rubber wheels. */
+    static final class Recipe implements TestCase {
+        public String id() {
+            return "bike_recipe";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            ServerLevel w = ctx.level();
+            ItemStack rubber = new ItemStack(mods.eln.Eln.itemsByName.get("Rubber")), motor = new ItemStack(mods.eln.Eln.itemsByName.get("Electrical Motor"));
+            ItemStack iron = new ItemStack(Items.IRON_INGOT);
+            var grid = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, List.of(
+                new ItemStack(Items.CHEST), new ItemStack(Items.LEATHER), ItemStack.EMPTY,
+                iron, motor, iron.copy(),
+                rubber, ItemStack.EMPTY, rubber.copy()));
+            var found = w.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, grid, w);
+            ItemStack out = found.map(h -> h.value().assemble(grid)).orElse(ItemStack.EMPTY);
+            ctx.check("chest, leather, iron, an electrical motor and rubber make an electric bike", out.is(ElnRegistry.ELECTRIC_BIKE.get()),
+                found.map(h -> h.id().identifier().toString()).orElse("no recipe") + " -> " + out);
+        }
     }
 
     static ElectricBike spawn(TestContext ctx, BlockPos p, float yaw) {
