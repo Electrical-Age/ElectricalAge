@@ -17,7 +17,7 @@ public final class ElnConfig {
         BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
     static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
-    static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, BANK_AMPS, POWER_CAP_LEAK;
+    static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, POWER_CAP_LEAK;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -94,8 +94,6 @@ public final class ElnConfig {
         BANK_VOLTS = b.comment("Its rating, V: it pops above 1.3 times it, as the Power Capacitor does.").defineInRange("ratedVolts", 1000.0, 1.0, 100000.0);
         BANK_LEAK = b.comment("Its leakage time constant R C, s (1800: at 800 V it leaks ~130 W, and keeps 2% of its charge after an hour).",
                 "Batteries are for keeping energy (Baughn); this is for bursts.").defineInRange("leakTauSeconds", 1800.0, 1.0, 1e9);
-        BANK_AMPS = b.comment("It charges at up to this current, A (3: 2.4 kW at 800 V); it gives it back at any. Without a limit an empty",
-                "bank on a stiff line burns its cable.").defineInRange("chargeAmps", 3.0, 0.01, 1000.0);
         POWER_CAP_LEAK = b.comment("The six-node Power Capacitor's leakage time constant R C, s (1800, as the bank; 1.12 had 120000). With four",
                 "Dielectrics a sand a row of them was a cheap bulk store (Baughn 2026-10-28: batteries stay the only sensible one).")
             .defineInRange("powerCapacitorLeakTauSeconds", 1800.0, 1.0, 1e9);
@@ -147,7 +145,6 @@ public final class ElnConfig {
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.farads = BANK_FARADS.get();
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.ratedVolts = BANK_VOLTS.get();
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.leakTauS = BANK_LEAK.get();
-        mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.chargeAmps = BANK_AMPS.get();
         powerCapacitorLeakTauS = POWER_CAP_LEAK.get();
         if (mods.eln.Eln.sixNodeItem != null)   // (config can load before the devices register; they take it from the field)
             for (Object d : mods.eln.Eln.sixNodeItem.all().values())

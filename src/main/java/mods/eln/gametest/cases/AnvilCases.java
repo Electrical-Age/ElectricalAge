@@ -81,7 +81,6 @@ public final class AnvilCases {
             Batch1Cases.source(ctx, 3 + 3 * sx, 3, 800);
             a = (ElectricalAnvilElement) ctx.placeTransparent(ANVIL, Wp10aCases.off(line, bank.front));
             put(a, pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
-            bank.cellLoad.setU(780);
             bank.positiveLoad.setU(780);
         }
 

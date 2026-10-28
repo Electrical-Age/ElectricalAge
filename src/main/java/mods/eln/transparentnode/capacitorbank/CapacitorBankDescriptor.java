@@ -24,8 +24,6 @@ import static mods.eln.i18n.I18N.tr;
 public class CapacitorBankDescriptor extends TransparentNodeDescriptor {
     /** Its capacitance (F), rating (V) and leakage time constant R C (s); config [capacitorBank]. */
     public static double farads = 0.36, ratedVolts = 1000, leakTauS = 1800;
-    /** It charges at up to this current (A): 3 A is 2.4 kW at 800 V, inside an HV cable's rating (config). */
-    public static double chargeAmps = 3;
     final Obj3D obj;
 
     public CapacitorBankDescriptor(String name, String model) {
@@ -60,8 +58,7 @@ public class CapacitorBankDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("%1$F, rated %2$V: %3$ at 800V.\n+ on the left of its front, - on the right.\nCharges at up to %4$A; gives back at any.\nFor bursts, not for keeping: it leaks\nmost of its charge within the hour.",
-            String.format("%.2f", farads), String.format("%.0f", ratedVolts), Utils.plotEnergy(energyAt(800)),
-            String.format("%.0f", chargeAmps)).split("\n"));
+        Collections.addAll(list, tr("%1$F, rated %2$V: %3$ at 800V.\n+ on the left of its front, - on the right.\nEmpty, it draws a huge inrush: charge it\nthrough a resistor or from a soft plant.\nFor bursts, not for keeping: it leaks\nmost of its charge within the hour.",
+            String.format("%.2f", farads), String.format("%.0f", ratedVolts), Utils.plotEnergy(energyAt(800))).split("\n"));
     }
 }

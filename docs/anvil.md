@@ -53,15 +53,17 @@ Baughn 2026-10-28: a workshop-sized store for the anvil's bursts. Six capacitor 
   = 0.33 F; it has **0.36 F** (21.9 kJ between 800 and 720 V; 115 kJ at 800 V).
 - **Polar:** + on the left of its front (HV-tier band on the plate), - on the right (black band), low on the flanks.
 - **Rating:** 1000 V; it pops above 1.3 x that (`BipoleVoltageWatchdog`, as the Power Capacitor).
-- **Inrush limiter:** between the + terminal and the capacitor a resistor that passes discharge freely (0.05 ohm) and
-  holds charging to `chargeAmps` (3 A, 2.4 kW at 800 V). Without it an empty bank on a stiff 800 V line burnt its HV
-  cable in the first second. A burst's 20 kJ comes back in ~7 s at 3 A, so with the anvil's rests a bank and a modest
-  plant weld a unit in about 25 s.
+- **Inrush:** none limited (Baughn 2026-10-28: "inrush current is supposed to be a problem; inductors are the solution.
+  There are other solutions, like not using a stiff source"). An empty bank straight on a stiff 800 V source draws
+  hundreds of amps and burns its HV cable (GameTest `capacitor_bank_inrush`). Charge it through a resistor: 1 kohm
+  (Power Resistor, 60 Coal Dust) peaks at 0.8 A, RC 6 min. An inductor alone can't: with EA's largest, 100 H, an empty
+  0.36 F bank on 800 V rings with a peak of 800 sqrt(C/L) = 48 A and overshoots towards 1.6 kV, past its 1.3 kV limit;
+  an inductor helps smooth a plant's draw once the bank is charged, in series with some resistance.
 - **Leakage:** a resistor across it, R = `leakTauS` / C (RC = 30 min): ~128 W at 800 V; the charge halves in ~10 min
   (energy), 2% is left after an hour. It's for bursts, not for keeping (Baughn: lead-acid batteries stay the only
   sensible bulk store).
 - No GUI; Jade shows voltage, stored energy, capacitance. Config `[capacitorBank]`: `farads`, `ratedVolts`,
-  `leakTauSeconds`, `chargeAmps`.
+  `leakTauSeconds` (and `powerCapacitorLeakTauSeconds`, the six-node Power Capacitor's).
 - **Recipe:** Capacitor Cell (`eln:capacitor_cell`): `dpd` / `dRd` / `dpd` (6 Dielectric, 2 copper plate, a redstone block);
   bank: `CCC` / `CCC` / `pHp` (6 cells, 2 iron plate, High Voltage Cable): 36 Dielectrics. The compressor now makes 4
   Dielectrics a sand (was 1), so that's 9 sand.
@@ -70,7 +72,7 @@ Baughn 2026-10-28: a workshop-sized store for the anvil's bursts. Six capacitor 
 
 | Store | Voltage | Energy | Usable for the anvil (800 -> 720 V) | Power | Self-discharge | Cost |
 |---|---|---|---|---|---|---|
-| Capacitor Bank | up to 1000 V | 115 kJ at 800 V | 21.9 kJ | any out, 3 A (2.4 kW) in | RC 30 min (~128 W at 800 V) | 36 Dielectric (9 sand), 54 redstone, 12 copper plate, 2 iron plate, HV cable |
+| Capacitor Bank | up to 1000 V | 115 kJ at 800 V | 21.9 kJ | any, either way (empty, its inrush burns a stiff line's cable) | RC 30 min (~128 W at 800 V) | 36 Dielectric (9 sand), 54 redstone, 12 copper plate, 2 iron plate, HV cable |
 | Power Capacitor (six-node), 13 redstone, 16 Dielectric | 800 V rating | 12.5 kJ | 2.4 kJ | any | RC 30 min (was 33 h in 1.12; Baughn 2026-10-28) | 13 redstone, 16 Dielectric (4 sand), 2 iron cable, iron plate, 3 iron |
 | Cost Oriented Battery | 50 V | 60 kJ | - (needs a converter) | 250 W (300 max) | none (wears with use: half-life 2 MC days of nominal current) | 6 lead, 2 LV cable |
 | Capacity Oriented Battery | 12.5 V | 240 kJ | - | 125 W | none (wears) | 14 lead, 2 LV cable |
@@ -98,5 +100,6 @@ refusals, plain copy, engraving), `anvil_800v_pulse` (5 kW on a stiff 800 V line
 `anvil_pauses_on_a_sag` (no start at a level 740 V; a level 750 V starts it after 2 s; pause below 90% keeping progress,
 1 s hold-off; a 20 kJ burst, then a 3 s rest), `anvil_welds_from_a_bank_on_a_weak_plant` (800 V behind 100 ohm, a bank at
 780 V: it welds),
-`capacitor_bank_charges_holds_and_pops` (3 A charging through the limiter, the cable cool; 800 V kept; pops past 1300 V),
+`capacitor_bank_inrush` (straight on 800 V its cable burns; behind 1 kohm it charges to 43 V in 20 s, nothing harmed),
+`capacitor_bank_holds_and_pops` (800 V kept; pops past 1300 V), `power_capacitor_leaks_like_the_bank`,
 `capacitor_bank_carries_an_anvil_burst` (a charged bank alone carries one 20 kJ burst, left at ~723 V).

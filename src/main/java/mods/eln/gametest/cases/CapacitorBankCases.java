@@ -28,6 +28,7 @@ public final class CapacitorBankCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new Charge());
+        cases.add(new Hold());
         cases.add(new Burst());
         cases.add(new PowerCapacitorLeak());
     }
@@ -93,7 +94,7 @@ public final class CapacitorBankCases {
         }
     }
 
-    static SixNodeElement source(TestContext ctx, BlockPos p, double volts) {
+    static SixNodeElement source(TestContext ctx, BlockPos p, double volts) {   // (an Electrical Source at volts)
         SixNodeElement src = ctx.placeSix(Wp10aCases.SOURCE, p);
         src.networkUnserialize(ctx.stream(out -> {
             out.writeByte(ElectricalSourceElement.setVoltageId);
@@ -103,15 +104,17 @@ public final class CapacitorBankCases {
     }
 
     /**
-     * A bank charged from a stiff 800 V source on its + flank (- to ground): the inrush limiter holds it to 3 A, so the
-     * cable survives; a charged bank holds 0.5 C U^2 and leaks slowly; one charged past 1.3 x its rating pops.
+     * Inrush (Baughn 2026-10-28: "inrush current is supposed to be a problem"): an empty bank straight on a stiff 800 V
+     * source draws hundreds of amps and burns its HV cable; the same bank behind a 1 kohm Power Resistor (60 Coal Dust)
+     * charges gently, RC = 360 s: 800 (1 - e^(-20/360)) = 43 V in 20 s, at ~0.8 A, nothing harmed.
      */
     static final class Charge extends Room {
-        CapacitorBankElement bank, held, over;
-        SixNodeElement cable;
+        CapacitorBankElement stiff, soft;
+        SixNodeElement stiffCable, softCable;
+        mods.eln.sixnode.resistor.ResistorElement resistor;
 
         public String id() {
-            return "capacitor_bank_charges_holds_and_pops";
+            return "capacitor_bank_inrush";
         }
 
         public int ticks() {
@@ -120,34 +123,62 @@ public final class CapacitorBankCases {
 
         public void build(TestContext ctx) {
             BlockPos c = ctx.at(4, 1, 3);
-            bank = (CapacitorBankElement) ctx.placeTransparent(BANK, c);
-            Direction f = bank.front, l = f.left(), r = f.right();
-            cable = ctx.placeSix(HV_CABLE, Wp10aCases.off(c, l));
+            stiff = (CapacitorBankElement) ctx.placeTransparent(BANK, c);
+            Direction f = stiff.front, l = f.left(), r = f.right();
+            stiffCable = ctx.placeSix(HV_CABLE, Wp10aCases.off(c, l));
             source(ctx, Wp10aCases.off(Wp10aCases.off(c, l), l), 800);
             ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(c, r));
-            // two more, three blocks either way along its front, only grounded: one charged to 800 V, one past its rating
-            BlockPos a = c, b = c;
-            for (int i = 0; i < 3; i++) {
-                a = Wp10aCases.off(a, f);
-                b = Wp10aCases.off(b, f.getInverse());
-            }
-            held = (CapacitorBankElement) ctx.placeTransparent(BANK, a);
-            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(a, r));   // (a floating bank has no reference: grounded, it keeps its charge)
-            over = (CapacitorBankElement) ctx.placeTransparent(BANK, b);
-            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(b, r));
-            held.cellLoad.setU(800);
-            held.positiveLoad.setU(800);
-            over.cellLoad.setU(1600);   // (300 V over: the watchdog's budget, 500 V s, goes in a few seconds)
-            over.positiveLoad.setU(1600);
+            // three blocks along its front: cable, resistor, source (the resistor helper lays its terminals east-west,
+            // along a bank's flanks for this placer)
+            BlockPos a = c;
+            for (int i = 0; i < 3; i++) a = Wp10aCases.off(a, f);
+            soft = (CapacitorBankElement) ctx.placeTransparent(BANK, a);
+            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(a, r));
+            BlockPos w = Wp10aCases.off(a, l);
+            softCable = ctx.placeSix(HV_CABLE, w);
+            w = Wp10aCases.off(w, l);
+            resistor = Batch1Cases.resistor(ctx, w.getX() - ctx.at(0, 0, 0).getX(), w.getZ() - ctx.at(0, 0, 0).getZ(), 60);   // 1 kohm
+            w = Wp10aCases.off(w, l);
+            source(ctx, w, 800);
         }
 
         public void measure(TestContext ctx) {
-            double u = bank.voltage(), i = bank.capacitor.getCurrent();
-            ctx.line("capacitor bank: charging " + bank.getWaila() + String.format(" %.2f A", i) + "; held " + held.getWaila()
-                + "; over burnt " + over.isBurnt() + "; cable " + cable.getWaila());
-            ctx.check("capacitor bank: an empty bank on a stiff 800 V line charges at ~3 A (the limiter), the cable unharmed",
-                Math.abs(i - 3) < 0.3 && !cable.isBurnt(), String.format("%.2f A, cable burnt %s", i, cable.isBurnt()));
-            ctx.check("capacitor bank: ... ~3 A x 20 s / 0.36 F = ~167 V", u > 140 && u < 190, String.format("%.0f V", u));
+            ctx.line("capacitor bank inrush: stiff " + stiff.getWaila() + " cable burnt " + stiffCable.isBurnt() + "; soft " + soft.getWaila()
+                + String.format(" %.2f A", soft.capacitor.getCurrent()) + " cable " + softCable.getWaila() + " resistor burnt " + resistor.isBurnt());
+            ctx.check("capacitor bank: empty, straight on a stiff 800 V source, it burns its HV cable", stiffCable.isBurnt(), "");
+            double u = soft.voltage(), want = 800 * (1 - Math.exp(-20 / (1000 * CapacitorBankDescriptor.farads)));
+            ctx.check("capacitor bank: behind 1 kohm it charges gently (RC 360 s: ~43 V in 20 s)", Math.abs(u - want) < 6,
+                String.format("%.1f V, want %.1f", u, want));
+            ctx.check("capacitor bank: ... nothing harmed", !softCable.isBurnt() && !resistor.isBurnt() && !soft.isBurnt(), "");
+        }
+    }
+
+    /** A charged bank holds 0.5 C U^2 and leaks slowly; one charged past 1.3 x its rating pops. */
+    static final class Hold extends Room {
+        CapacitorBankElement held, over;
+
+        public String id() {
+            return "capacitor_bank_holds_and_pops";
+        }
+
+        public int ticks() {
+            return 400;   // 20 s
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos c = ctx.at(4, 1, 3);
+            held = (CapacitorBankElement) ctx.placeTransparent(BANK, c);
+            Direction f = held.front, r = f.right();
+            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(c, r));   // (a floating bank has no reference: grounded, it keeps its charge)
+            BlockPos b = c;
+            for (int i = 0; i < 3; i++) b = Wp10aCases.off(b, f);
+            over = (CapacitorBankElement) ctx.placeTransparent(BANK, b);
+            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(b, r));
+            held.positiveLoad.setU(800);
+            over.positiveLoad.setU(1600);   // (300 V over: the watchdog's budget, 500 V s, goes in a few seconds)
+        }
+
+        public void measure(TestContext ctx) {
             double hu = held.voltage(), he = held.energy();
             ctx.check("capacitor bank: a charged bank keeps its charge for a while (800 V, 20 s later >= 785 V)", hu > 785 && hu <= 800.5,
                 String.format("%.1f V", hu));
@@ -184,7 +215,6 @@ public final class CapacitorBankCases {
             anvil = (ElectricalAnvilElement) ctx.placeTransparent(AnvilCases.ANVIL, Wp10aCases.off(c, f));
             AnvilCases.put(anvil, AnvilCases.pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
             // charged to 800 V, as a plant would leave it (the capacitor's history is its loads' voltages)
-            bank.cellLoad.setU(800);
             bank.positiveLoad.setU(800);
             bank.negativeLoad.setU(0);
         }
