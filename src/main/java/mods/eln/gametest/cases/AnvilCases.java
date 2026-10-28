@@ -122,6 +122,17 @@ public final class AnvilCases {
         }
 
         public void measure(TestContext ctx) {
+            // the material slot refuses books and enchanted things outright (screen and hoppers)
+            var spec = mods.eln.gui.MenuSpecs.of(a.transparentNodeDescriptor).slots().stream()
+                .filter(x -> x.index() == ElectricalAnvilElement.MATERIAL).findFirst().orElseThrow();
+            var inv = (mods.eln.anvil.ElectricalAnvilInventory) a.getInventory();
+            ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
+            book.set(DataComponents.STORED_ENCHANTMENTS, pick(ctx, 0, 0, true).get(DataComponents.ENCHANTMENTS));
+            boolean slotOk = !spec.filter().test(book) && !spec.filter().test(pick(ctx, 0, 0, true))
+                && spec.filter().test(new ItemStack(Items.DIAMOND)) && spec.filter().test(pick(ctx, 0, 0, false));
+            boolean hopperOk = !inv.canInsertItem(ElectricalAnvilElement.MATERIAL, book, 2) && inv.canInsertItem(ElectricalAnvilElement.MATERIAL, new ItemStack(Items.DIAMOND), 2)
+                && !inv.canInsertItem(ElectricalAnvilElement.TOOL, pick(ctx, 10, 0, false), 2);
+            ctx.check("anvil: the material slot refuses books and enchanted tools (screen and hoppers)", slotOk && hopperOk, slotOk + " " + hopperOk);
             // a well-used enchanted pick (penalty 31): one diamond mends a quarter (390), the penalty steps down a notch
             put(a, pick(ctx, 1500, 31, true), new ItemStack(Items.DIAMOND, 5));
             var j = a.job();

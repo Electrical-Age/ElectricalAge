@@ -17,7 +17,7 @@ public class ElectricalAnvilInventory extends TransparentNodeElementInventory {
 
     @Override
     public boolean canInsertItem(int slot, ItemStack stack, int side) {
-        return slot == ElectricalAnvilElement.MATERIAL;
+        return slot == ElectricalAnvilElement.MATERIAL && ElectricalAnvilElement.materialMayGo(stack);
     }
 
     @Override

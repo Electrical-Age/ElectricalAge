@@ -105,6 +105,14 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
             || o instanceof IItemEnergyBattery || o instanceof IItemEnergySelfManaged;
     }
 
+    /**
+     * What the material slot takes (the screen and hoppers): nothing enchanted, no books. The desk repairs and never
+     * combines, so refusing them at the slot says so (AdventurAgent: they went in and were just ignored).
+     */
+    public static boolean materialMayGo(ItemStack s) {
+        return !s.has(DataComponents.STORED_ENCHANTMENTS) && !EnchantmentHelper.hasAnyEnchantments(s);
+    }
+
     /** An unenchanted copy of the tool counts as its material (vanilla's two-tools repair, without the enchantments). */
     public static boolean plainCopy(ItemStack tool, ItemStack m) {
         return !m.isEmpty() && m.is(tool.getItem()) && m.isDamageableItem() && !EnchantmentHelper.hasAnyEnchantments(m)
