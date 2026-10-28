@@ -59,6 +59,12 @@ public class BikePhysicsTest {
     }
 
     @Test
+    void theConfiguredJumpHeightGivesItsVelocity() {
+        assertEquals(BikePhysics.JUMP_VY, BikePhysics.velocityForPeak(BikePhysics.jumpPeak(BikePhysics.JUMP_VY)), 1e-6);
+        assertEquals(1.31, BikePhysics.jumpPeak(BikePhysics.velocityForPeak(1.31)), 1e-3);
+    }
+
+    @Test
     void turnsTowardTheRidersLookTheShortWay() {
         assertEquals(10, BikePhysics.turn(0, 10), 1e-6);
         assertEquals(BikePhysics.TURN_PER_TICK, BikePhysics.turn(0, 90), 1e-6);

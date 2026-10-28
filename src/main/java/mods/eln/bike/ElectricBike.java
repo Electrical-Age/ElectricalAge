@@ -53,8 +53,8 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     /** The trunk: slot 0 the battery, 1-3 anything (Baughn). */
     public static final int TRUNK_SLOTS = 4, BATTERY_SLOT = 0;
     /** Stopped this long with a rider (ticks), then each second a TIP_CHANCE it goes over (Baughn: 5 s, 10%/s). */
-    public static final int STILL_TICKS = 100;
-    public static final float TIP_CHANCE = 0.1f;
+    public static volatile int STILL_TICKS = 100;
+    public static volatile float TIP_CHANCE = 0.1f;
     /** Slower than this (b/t) counts as stopped: 0.05 b/s. */
     static final double STOPPED = 0.0025;
     /** The wheels' radius in blocks, for turning them with the distance rolled. */

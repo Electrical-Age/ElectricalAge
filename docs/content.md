@@ -124,7 +124,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
 
 Not "none": `src/main/java/mods/eln/ElnConfig.java` is a SYNCED `ModConfigSpec` (`config/eln-synced.toml`):
 `balancing.batteryLifeFactor` (25), `fire.*` lags and kindle times, `cables.convertOnLoad` (false),
-`probe.details`. It is registered in the `Eln` constructor and copied into statics on load and reload. Every other
+`probe.details`, `bike.*` (the electric bike's tunables, [bike.md](bike.md)). It is registered in the `Eln` constructor and copied into statics on load and reload. Every other
 1.12 config value is a plain static with its 1.12 default in `Eln.java` (power factors, lamp lives, ranges,
 `xRayScannerRange` 7.5...).
 
