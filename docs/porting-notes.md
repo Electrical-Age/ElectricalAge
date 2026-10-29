@@ -88,9 +88,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   by any pipe or capability; an open cycle, 28 % of the fuel's heat onto the shaft at rated speed, none under half speed
   (it must be spun up: a Shaft Motor); 10 kW; H 1 s, fuel valve 0.3 s; governor/trip/windage as the steam turbines, a
   signal on its front sets the valve by hand; the rest of the heat leaves as air at 500 C out of its back (a large
-  pipe's port) or vents. Counterflow Heat Exchanger (transparent_node@5304): 4 L a side, UA 2 kW/K, effectiveness-NTU
-  for counterflow from last step's inflows (cp very large on a side holding water and steam), A in left / out right,
-  B in back (bottom) / out front (top). `GasPlantCases`.
+  pipe's port) or vents. Counterflow Heat Exchanger (transparent_node@5304): blocks stack 2 x 2 across and up to 8 long along their
+  fronts into one exchanger (HeatExchangerGroup, as tank boxes: merge, split on break, shares saved per block), 50 W/K
+  a 2 x 2 slice (Baughn 2026-10-29), 8 L a side a block; a lone block or any other shape is a quarter slice (12.5 W/K).
+  Effectiveness-NTU for counterflow from last step's inflows (a boiling or condensing side, steam nearly all of its
+  pressure, takes any heat at saturation); ports on the two end faces, A at their centres, B up high: A in at the back
+  end, B in at the front. Separate jobs (economizer, steam raiser, reheat) are separate exchangers piped in series.
+  `GasPlantCases`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

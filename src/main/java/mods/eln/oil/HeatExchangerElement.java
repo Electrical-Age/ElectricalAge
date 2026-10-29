@@ -23,13 +23,17 @@ import java.util.Map;
 /**
  * HeatExchangerDescriptor: a node per side. Each fluid step, from what flowed into each side last step (its mass flow and
  * the temperature it came from) the counterflow effectiveness gives the heat; with one side still, the plain UA x dT
- * between the two. At most half the way to even in a step (a side of thin gas has little heat capacity). Each side's
- * heat capacity rate is its flow times its specific heat: liquid water 4186, vapour 1900, air 1005 J/kg K, and a side
- * holding water and steam together (boiling or condensing) a very large one: its temperature stays at saturation.
+ * between the two. At most (90 % of) the way to even in a step. Each side's heat capacity rate is its flow times its
+ * specific heat: liquid water 4186, vapour 1900, air 1005 J/kg K, and a side holding water and steam together (boiling
+ * or condensing) a very large one: its temperature stays at saturation. Blocks stack into one exchanger
+ * (HeatExchangerGroup): `ownA`/`ownB` are this block's shares, `a`/`b` the sides in use (its own, or the stack's); the
+ * stack's lowest corner steps it.
  */
 public class HeatExchangerElement extends TransparentNodeElement implements FluidDevice {
     final HeatExchangerDescriptor desc;
-    public FluidNode a, b;
+    public FluidNode a, b, ownA, ownB;
+    /** The stack it is part of, or null alone. */
+    public HeatExchangerGroup group;
     private double[] loadedA, loadedB;
     private List<FluidPort> ports = List.of();
     /** Heat A to B now (W), the inlet temperatures (K, last step's), and totals (J) since loaded. */
@@ -43,7 +47,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     }
 
     /** What flows into n (kg/s) and the flow-weighted temperature it comes from (K), from the edges' last flows. */
-    static double[] inflow(FluidNode n) {
+    public static double[] inflow(FluidNode n) {
         var me = FluidWorld.nodeFor(n);
         double m = 0, mT = 0;
         for (var e : FluidWorld.edgesOf(n)) {
@@ -61,7 +65,10 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     /** A side's specific heat (J/kg K) for its heat capacity rate: very large while it holds water and steam together. */
     static double cp(FluidNode n) {
         double mw = n.mWater, ml = n.mLiquid(), mv = n.mVapour(), ma = n.mAir;
-        if (ml > 1e-6 && mv > 1e-6 && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return BOILING;   // (boiling or condensing)
+        // (boiling or condensing: water and steam, the steam nearly all the pressure, so at saturation; water held at 16
+        // bar with a trace of vapour at its own vapour pressure is not: taken so, cold feed soaked up any heat at 20 C,
+        // and feed at 178 C, 9.5 bar of its 16, held an economizer to 1.6 kW of 5)
+        if (ml > 1e-6 && mv > 1e-6 && n.pVapour() > 0.9 * n.P() && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return BOILING;
         double m = mw + ma;
         if (m <= 0) return 1005;
         return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
@@ -69,7 +76,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     @Override
     public void beforeFluidStep(double dt) {
-        if (a == null) return;
+        if (a == null || group != null && group.master() != this) return;   // (a stack is stepped once, by its corner)
         var ia = inflow(a);
         var ib = inflow(b);
         double cpA = cp(a), cpB = cp(b);
@@ -78,9 +85,11 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         tAin = ia[1];
         tBin = ib[1];
         double inA = cpA >= BOILING ? a.T() : tAin, inB = cpB >= BOILING ? b.T() : tBin;
-        double ua = desc.ua, heat;
-        double cA = ia[0] * cpA, cB = ib[0] * cpB;
-        if (cA > 1e-6 && cB > 1e-6) {
+        double ua = ua(), heat;
+        boolean flowing;
+        // (a side boiling or condensing takes any heat at its saturation temperature, fed or not: a pool boiling off)
+        double cA = cpA >= BOILING ? BOILING : ia[0] * cpA, cB = cpB >= BOILING ? BOILING : ib[0] * cpB;
+        if (flowing = cA > 1e-6 && cB > 1e-6) {
             // counterflow effectiveness-NTU, from the two inlets
             double cMin = Math.min(cA, cB), cMax = Math.max(cA, cB), cr = cMin / cMax, ntu = ua / cMin, eps;
             if (cr > 0.999) eps = ntu / (1 + ntu);
@@ -94,7 +103,9 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         // heat to reach the other's (1 / (1/fromA + 1/intoB): half the smaller for two like sides, nearly all of a thin
         // gas's heat against boiling water; capped at half the smaller, 4 L of exhaust gave 8 kW of the 13 it could. It
         // is taken before this step's inflow arrives, so its holding, not its through-flow, is the most it can give.)
-        double ta = a.T(), tb = b.T();
+        // Both flowing, each side goes at most to the other's inlet (counterflow: the gas leaving meets the feed coming
+        // in, colder than the warm water the economizer holds, which held it to 1.6 kW of 5)
+        double ta = flowing ? inA : a.T(), tb = flowing ? inB : b.T();
         if (heat > 0) {
             double fromA = (a.energy - mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb)) / dt;
             double intoB = (mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta) - b.energy) / dt;
@@ -104,9 +115,10 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
             double intoA = (mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb) - a.energy) / dt;
             heat = fromB <= 0 || intoA <= 0 ? 0 : Math.max(heat, -0.9 / (1 / fromB + 1 / intoA));
         }
-        // (what leaves each side: its inlet less the heat over its flow; the node's own temperature swings within a step)
-        tAout = cA > 1e-6 && cpA < BOILING ? tAin - heat / cA : a.T();
-        tBout = cB > 1e-6 && cpB < BOILING ? tBin + heat / cB : b.T();
+        // (what leaves each side: a gas, its inlet less the heat over its flow, since a few litres of gas swing within a
+        // step; water, what it holds: 64 L warms over hours, and that is what leaves)
+        tAout = cA > 1e-6 && cpA < BOILING && a.mLiquid() < 1e-3 ? tAin - heat / cA : a.T();
+        tBout = cB > 1e-6 && cpB < BOILING && b.mLiquid() < 1e-3 ? tBin + heat / cB : b.T();
         a.heat -= heat;
         b.heat += heat;
         q = heat;
@@ -129,13 +141,46 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         return ports;
     }
 
+    /** Its UA (W/K): a block's, times the blocks in its stack. */
+    public double ua() {
+        return desc.ua * (group == null ? 1 : group.members.size());
+    }
+
+    /** The exchanger it is part of (its stack's corner, or itself): it holds the readings. */
+    HeatExchangerElement head() {
+        return group == null ? this : group.master();
+    }
+
+    /**
+     * Ports on its two end faces (along its front's axis), both sides on each: A at the face's centre, B up high on it
+     * (TankElement.sideSpot), each drawing at its height in the side (a stack's top row draws B's steam). Counterflow:
+     * A in at the back end and out at the front, B in at the front and out at the back.
+     */
     void makePorts() {
         long at = node.coordonate.pos().asLong();
         double k = mods.eln.node.voxel.PipePart.LARGE_END_K;
-        ports = List.of(new FluidPort(a, at, front.left().toEnumFacing().get3DDataValue(), 0.5, k),    // A in: left
-            new FluidPort(a, at, front.right().toEnumFacing().get3DDataValue(), 0.5, k),                  // A out: right
-            new FluidPort(b, at, front.back().toEnumFacing().get3DDataValue(), 0.0, k),                   // B in: back (to its bottom)
-            new FluidPort(b, at, front.toEnumFacing().get3DDataValue(), 1.0, k));                         // B out: front (from its top)
+        List<FluidPort> out = new java.util.ArrayList<>();
+        int j = group == null ? 0 : node.coordonate.y - group.y0, h = group == null ? 1 : group.sy;
+        for (Direction d : new Direction[]{front.back(), front}) {
+            if (group != null) {
+                HeatExchangerElement o = HeatExchangerGroup.neighbour(this, d, null);
+                if (o != null && group.members.contains(o)) continue;   // (not an end)
+            }
+            int f = d.toEnumFacing().get3DDataValue();
+            out.add(new FluidPort(a, at, f, (j * 16 + 8) / (16.0 * h), k));
+            out.add(new FluidPort(b, at, f, (j * 16 + TankElement.HIGH) / (16.0 * h), k, TankElement.sideSpot(f, TankElement.HIGH)));
+        }
+        ports = out;
+    }
+
+    /** The exchangers of its kind on its six sides (for regrouping). */
+    List<HeatExchangerElement> neighbours() {
+        List<HeatExchangerElement> out = new java.util.ArrayList<>();
+        for (Direction d : HeatExchangerGroup.DIRS) {
+            HeatExchangerElement o = HeatExchangerGroup.neighbour(this, d, null);
+            if (o != null) out.add(o);
+        }
+        return out;
     }
 
     @Override
@@ -144,6 +189,9 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         if (a != null) {
             makePorts();
             FluidWorld.add(this);
+            List<HeatExchangerElement> seeds = neighbours();
+            seeds.add(this);
+            HeatExchangerGroup.regroup(seeds, null);
         }
     }
 
@@ -151,6 +199,17 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public void disconnectJob() {
         super.disconnectJob();
         FluidWorld.remove(this);
+        if (group != null) {
+            // (the stack without it: its share leaves with it, the rest re-form)
+            HeatExchangerGroup g = group;
+            g.writeBack();
+            List<HeatExchangerElement> rest = new java.util.ArrayList<>(g.members);
+            rest.remove(this);
+            group = null;
+            a = ownA;
+            b = ownB;
+            HeatExchangerGroup.regroup(rest, this);
+        }
     }
 
     private FluidNode node(double[] saved) {
@@ -166,8 +225,8 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     @Override
     public void initialize() {
-        a = node(loadedA);
-        b = node(loadedB);
+        a = ownA = node(loadedA);
+        b = ownB = node(loadedB);
         makePorts();
         connect();
     }
@@ -203,11 +262,31 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     }
 
     @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            // the stack: whether it draws it (its lowest corner), and its size (alone: 1 1 1)
+            stream.writeBoolean(group == null || group.master() == this);
+            stream.writeByte(group == null ? 1 : group.sx);
+            stream.writeByte(group == null ? 1 : group.sy);
+            stream.writeByte(group == null ? 1 : group.sz);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        if (a != null) {
-            CondenserVessel.put(nbt, "sideA", a);
-            CondenserVessel.put(nbt, "sideB", b);
+        if (group != null) group.writeBack();   // (its share of the stack)
+        if (ownA != null) {
+            // (to float precision, as tanks: a stack re-formed on load from the shares differs in the last bits)
+            for (Object[] s : new Object[][]{{"sideA", ownA}, {"sideB", ownB}}) {
+                FluidNode n = (FluidNode) s[1];
+                nbt.putDouble(s[0] + "W", (float) n.mWater);
+                nbt.putDouble(s[0] + "A", (float) n.mAir);
+                nbt.putDouble(s[0] + "U", (float) n.energy);
+            }
         }
     }
 
@@ -222,11 +301,14 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
         if (a == null) return info;
-        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", tAin - Water.T0, tAout - Water.T0, a.P() / 1e5,
+        HeatExchangerElement h = head();
+        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", h.tAin - Water.T0, h.tAout - Water.T0, a.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(a)));
-        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", tBin - Water.T0, tBout - Water.T0, b.P() / 1e5,
+        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", h.tBin - Water.T0, h.tBout - Water.T0, b.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(b)));
-        info.put(I18N.tr("Heat A to B"), Utils.plotPower("", qShown));
+        info.put(I18N.tr("Heat A to B"), Utils.plotPower("", h.qShown));
+        info.put(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("one block (a quarter slice): %.1f W/K"), ua())
+            : String.format(I18N.tr("2 x 2 x %d blocks: %.0f W/K"), group.length(), ua()));
         return info;
     }
 }

@@ -27,7 +27,7 @@ import static mods.eln.gametest.cases.Wp11Cases.*;
 
 /**
  * The shaft redo, part 4 (Baughn 2026-10-29): the Gas Turbine (motor-started peaker, hot exhaust) and the
- * Counterflow Heat Exchanger (economizer, condensing, combined cycle).
+ * Counterflow Heat Exchanger, stacked 2 x 2 x N (steam raiser, reheat, combined cycle with an economizer).
  */
 public final class GasPlantCases {
     private GasPlantCases() {
@@ -36,19 +36,21 @@ public final class GasPlantCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new MotorStart());
         cases.add(new NoSelfStart());
-        cases.add(new Economizer());
-        cases.add(new CondensingSteamHeatsWater());
+        cases.add(new SteamRaiser());
+        cases.add(new StackMergesAndSplits());
+        cases.add(new Reheat());
         cases.add(new CombinedCycle());
     }
 
     static final int GAS_TURBINE = 11 + (4 << 6), HX = 56 + (82 << 6);
 
-    /** Fixed nodes behind ports on the faces of blocks (a lake, a drain, a steam main): {pos, face, node} each. */
+    /** Fixed nodes behind ports on the faces of blocks (a lake, a drain, a steam main): {pos, face, node[, spot]} each. */
     static FluidDevice fixtures(Object level, Object[]... ports) {
         List<FluidDevice.FluidPort> list = new ArrayList<>();
         for (Object[] p : ports)
             // (an iron pipe's end: a lake or a main through a modest pipe, not a firehose)
-            list.add(new FluidDevice.FluidPort((FluidNode) p[2], ((BlockPos) p[0]).asLong(), (Integer) p[1], 0.5, 2 * mods.eln.node.voxel.PipePart.K_PER_BLOCK[0] * 16));
+            list.add(new FluidDevice.FluidPort((FluidNode) p[2], ((BlockPos) p[0]).asLong(), (Integer) p[1], 0.5, 2 * mods.eln.node.voxel.PipePart.K_PER_BLOCK[0] * 16,
+                p.length > 3 ? (Integer) p[3] : FluidDevice.FluidPort.CENTRE));
         var d = new FluidDevice() {
             public Object fluidLevel() {
                 return level;
@@ -117,14 +119,6 @@ public final class GasPlantCases {
             var fuels = FuelRegistry.INSTANCE.fluidListToFluids(FuelRegistry.INSTANCE.getGasolineList());
             if (fuels.length > 0) gt.tank.fill(new FluidStack(fuels[0], GasTurbineElement.TANK_MB), true);
         }
-    }
-
-    /** A heat exchanger at (3,1,5), facing ZP: its left (A in) against the gas turbine's exhaust. */
-    static HeatExchangerElement hx(TestContext ctx, BlockPos at, Direction front) {
-        var h = (HeatExchangerElement) ctx.placeTransparent(HX, at);
-        h.front = front;
-        h.reconnect();
-        return h;
     }
 
     /**
@@ -201,18 +195,74 @@ public final class GasPlantCases {
         }
     }
 
-    /** An economizer: the gas turbine's exhaust through side A, cold water (3 bar, 20 C) through side B: the water warms. */
-    static final class Economizer extends PlumbingCases.Big {
+    /** B's port spot on an exchanger's east or west end face (up high: TankElement.sideSpot). */
+    static final int B_AT = mods.eln.oil.TankElement.sideSpot(4, mods.eln.oil.TankElement.HIGH);
+
+    /**
+     * A stack of heat exchangers 2 x 2 across and `len` long along X from its lowest corner, fronts XP: A in at its west
+     * end, out at its east; B in at the east, out at the west.
+     */
+    static List<HeatExchangerElement> stack(TestContext ctx, BlockPos corner, int len) {
+        List<HeatExchangerElement> out = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            for (int y = 0; y < 2; y++)
+                for (int z = 0; z < 2; z++) out.add((HeatExchangerElement) ctx.placeTransparent(HX, corner.offset(i, y, z)));
+        for (HeatExchangerElement h : out) {
+            h.front = Direction.XP;
+            h.reconnect();
+        }
+        return out;
+    }
+
+    /** The stack's corner (it steps the stack and keeps its readings). */
+    static HeatExchangerElement head(List<HeatExchangerElement> s) {
+        return s.get(0).group == null ? s.get(0) : s.get(0).group.master();
+    }
+
+    static boolean stacked(List<HeatExchangerElement> s, double ua) {
+        return s.get(0).group != null && s.get(0).group.members.size() == s.size() && Math.abs(s.get(0).ua() - ua) < 1e-9;
+    }
+
+    /** Air drained at 1 atm off an exchanger's A outlet: the heat it still carries over ambient (W), from a window's start. */
+    static final class AirMeter {
+        final FluidNode node;
+        double e0, m0;
+
+        AirMeter(FluidNode node) {
+            this.node = node;
+        }
+
+        void start() {
+            e0 = node.energy;
+            m0 = node.mAir;
+        }
+
+        double heat(double window) {
+            return ((node.energy - e0) - (node.mAir - m0) * Water.hAir(293.15)) / window;
+        }
+
+        /** The temperature it left at (K). */
+        double tOut(double window) {
+            return 293.15 + heat(window) / Math.max(1e-9, (node.mAir - m0) / window * 1005);
+        }
+    }
+
+    /**
+     * A 2 x 2 x 2 steam raiser on the gas turbine's exhaust (Baughn 2026-10-29: 50 W/K a slice, 100 here, NTU 2.5 on the
+     * exhaust's 40 W/K): its side B half full of water boiling at 15 bar, steam off to a 15 bar main. It takes ~92 % of
+     * what the exhaust can give down to the water's 198 C; the exhaust's heat goes into the water or out with the air.
+     */
+    static final class SteamRaiser extends PlumbingCases.Big {
         GasLine l;
-        HeatExchangerElement h;
+        List<HeatExchangerElement> s;
         FluidDevice fx;
         IProcess watch;
+        AirMeter drain;
         int tick;
-        double j0, window, x0, e0, ea0;
-        FluidNode drainA;   // (side A's outlet)
+        double j0, x0, window;
 
         public String id() {
-            return "heat_exchanger_economizer";
+            return "heat_exchanger_steam_raiser";
         }
 
         public int ticks() {
@@ -221,13 +271,19 @@ public final class GasPlantCases {
 
         public void build(TestContext ctx) {
             l = new GasLine(ctx, true, 7000);
-            BlockPos hp = ctx.at(3, 1, 5);
-            h = hx(ctx, hp, Direction.ZP);
-            fx = fixtures(h.fluidLevel(), new Object[]{hp.east(), 4, drainA = air(hp.getY())}, new Object[]{hp.north(), 3, water(hp.getY(), 1.3e5, 293.15)},
-                new Object[]{hp.south(), 2, air(hp.getY())});
+            s = stack(ctx, ctx.at(3, 1, 5), 2);
+            var b = head(s).b;
+            PlumbingCases.fill(b, 0.5 * b.volume * Water.RHO_L, 15e5, Water.tsat(15e5));
+            drain = new AirMeter(air(ctx.at(5, 1, 5).getY()));
+            fx = fixtures(head(s).fluidLevel(), new Object[]{ctx.at(5, 1, 5), 4, drain.node},
+                new Object[]{ctx.at(2, 2, 6), 5, steam(ctx.at(2, 2, 6).getY(), 15e5), B_AT});   // (steam off its west end's top row)
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
-                if (++tick == 500) { j0 = h.totalJ; x0 = l.gt.totalExhaustJ; e0 = drainA.energy; ea0 = drainA.mAir; }
+                if (++tick == 500) {
+                    j0 = head(s).totalJ;
+                    x0 = l.gt.totalExhaustJ;
+                    drain.start();
+                }
                 if (tick > 500) window += dt;
             });
         }
@@ -236,68 +292,151 @@ public final class GasPlantCases {
             Eln.simulator.removeSlowProcess(watch);
             Eln.simulator.removeElectricalComponent(l.load);
             mods.eln.fluid.FluidWorld.remove(fx);
-            double kw = (h.totalJ - j0) / Math.max(1e-9, window) / 1000;
-            // (energy: the exhaust's heat over ambient goes into the water or out with the air; the air leaves no colder than the
-            // water: taking heat before a step's inflow, a looser cap once cooled it below ambient and made 21 kW of 19)
-            double ex = (l.gt.totalExhaustJ - x0) / window, left = ((drainA.energy - e0) - (drainA.mAir - ea0) * Water.hAir(293.15)) / window,
-                tOut = 293.15 + left / Math.max(1e-9, (drainA.mAir - ea0) / window * 1005);
-            ctx.line(String.format("economizer: exhaust %.1f kW = %.1f kW to the water + %.1f kW left in the air, which leaves at %.0f C", ex / 1000, kw, left / 1000, tOut - Water.T0));
-            ctx.check("economizer: heat is conserved (within 5 %)", Math.abs(kw * 1000 + left - ex) < 0.05 * ex, String.format("%.1f + %.1f vs %.1f kW", kw, left / 1000, ex / 1000));
-            ctx.check("economizer: the air leaves no colder than the water", tOut > h.b.T() - 2, String.format("%.0f vs %.0f C", tOut - Water.T0, h.b.T() - Water.T0));
-            ctx.line(String.format("economizer: %.1f kW from the exhaust (gas turbine %.1f kW fuel, %.1f kW on the shaft); %s", kw, l.gt.fuelW / 1000, l.gt.shaftW / 1000, h.getWaila()));
-            ctx.check("economizer: the exhaust heats the water (over 3 kW)", kw > 3, String.format("%.1f kW", kw));
-            ctx.check("economizer: the water warms (B over 30 C)", h.b.T() > 303, String.format("%.0f C", h.b.T() - Water.T0));
-        }
-    }
-
-    /** Condensing steam (5 bar) in side A heats cold water in side B; A holds condensate. */
-    static final class CondensingSteamHeatsWater extends PlumbingCases.Big {
-        HeatExchangerElement h;
-        FluidDevice fx;
-
-        public String id() {
-            return "heat_exchanger_condensing_steam";
-        }
-
-        public int ticks() {
-            return 400;
-        }
-
-        public void build(TestContext ctx) {
-            BlockPos hp = ctx.at(5, 1, 5);
-            h = hx(ctx, hp, Direction.ZP);
-            fx = fixtures(h.fluidLevel(), new Object[]{hp.west(), 5, steam(hp.getY(), 5e5)}, new Object[]{hp.east(), 4, steam(hp.getY(), 4.5e5)},
-                new Object[]{hp.north(), 3, water(hp.getY(), 1.3e5, 293.15)}, new Object[]{hp.south(), 2, air(hp.getY())});
-        }
-
-
-
-        public void measure(TestContext ctx) {
-            mods.eln.fluid.FluidWorld.remove(fx);
-            ctx.line("condensing steam: " + h.getWaila());
-            ctx.check("condensing: the water is heated (B over 40 C)", h.b.T() > 313, String.format("%.0f C", h.b.T() - Water.T0));
-            ctx.check("condensing: the steam side holds condensate", h.a.mLiquid() > 1e-4, String.format("%.4f kg", h.a.mLiquid()));
-            ctx.check("condensing: kilowatts across (over 2)", h.q > 2000, String.format("%.1f kW", h.q / 1000));
+            HeatExchangerElement h = head(s);
+            double q = (h.totalJ - j0) / window, ex = (l.gt.totalExhaustJ - x0) / window, left = drain.heat(window);
+            double cEx = ex / (GasTurbineElement.EXHAUST_T - 293.15), most = cEx * (GasTurbineElement.EXHAUST_T - h.b.T());
+            ctx.line(String.format("steam raiser 2x2x2 (%.0f W/K): %.1f of %.1f kW the exhaust can give down to %.0f C (%.0f %%); exhaust %.1f kW = %.1f + %.1f left in air leaving at %.0f C; %s",
+                h.ua(), q / 1000, most / 1000, h.b.T() - Water.T0, q / most * 100, ex / 1000, q / 1000, left / 1000, drain.tOut(window) - Water.T0, h.getWaila()));
+            ctx.check("steam raiser: one 2 x 2 x 2 exchanger (100 W/K)", stacked(s, 100), "");
+            ctx.check("steam raiser: takes 85-97 % of what the exhaust can give (NTU 2.5)", q > 0.85 * most && q < 0.97 * most, String.format("%.0f %%", q / most * 100));
+            ctx.check("steam raiser: heat is conserved (within 5 %)", Math.abs(q + left - ex) < 0.05 * ex, String.format("%.1f + %.1f vs %.1f kW", q / 1000, left / 1000, ex / 1000));
+            ctx.check("steam raiser: the air leaves no colder than the water", drain.tOut(window) > h.b.T() - 2, String.format("%.0f C", drain.tOut(window) - Water.T0));
         }
     }
 
     /**
-     * A combined cycle (Argon's pinnacle): the gas turbine's exhaust raises steam in the heat exchanger's side B (a drum
-     * fed from a 16 bar reservoir), which drives an HP turbine. Numbers logged: fuel, both shafts, combined efficiency.
+     * Stacking (Baughn 2026-10-29): 2 x 2 x 2 exchangers are one, 100 W/K, its sides the blocks' summed; a block broken
+     * out leaves seven quarter slices (12.5 W/K each) keeping 7/8 of the water; put back, one again with all of it. Nine
+     * long is past the most (8): nine-and-thirty quarter slices.
+     */
+    static final class StackMergesAndSplits extends PlumbingCases.Big {
+        List<HeatExchangerElement> s, longOne;
+        IProcess watch;
+        int tick;
+        double before, afterSplit;
+        boolean wasStacked, split;
+
+        public String id() {
+            return "heat_exchanger_stack_merges_and_splits";
+        }
+
+        public int ticks() {
+            return 30;
+        }
+
+        static double water(List<HeatExchangerElement> s) {
+            double m = 0;
+            for (HeatExchangerElement h : s) m += h.group == null ? h.b.mWater : 0;
+            return s.get(0).group != null ? s.get(0).group.b.mWater : m;
+        }
+
+        public void build(TestContext ctx) {
+            s = stack(ctx, ctx.at(1, 1, 1), 2);
+            longOne = stack(ctx, ctx.at(0, 1, 5), 9);
+            wasStacked = stacked(s, 100) && Math.abs(s.get(0).b.volume - 8 * 0.008) < 1e-9;
+            var b = head(s).b;
+            PlumbingCases.fill(b, 0.5 * b.volume * Water.RHO_L, Water.P_ATM, 293.15);
+            before = water(s);
+            HeatExchangerElement gone = s.get(s.size() - 1);
+            ctx.level().removeBlock(gone.node.coordonate.pos(), false);
+            List<HeatExchangerElement> rest = new ArrayList<>(s.subList(0, s.size() - 1));
+            split = true;
+            for (HeatExchangerElement h : rest) split &= h.group == null && h.b == h.ownB && Math.abs(h.ua() - 12.5) < 1e-9;
+            afterSplit = water(rest);
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                if (++tick == 5) s.set(s.size() - 1, (HeatExchangerElement) placeBack(ctx, gone.node.coordonate.pos()));
+            });
+        }
+
+        static HeatExchangerElement placeBack(TestContext ctx, BlockPos abs) {
+            var h = (HeatExchangerElement) ctx.placeTransparent(HX, abs);
+            h.front = Direction.XP;
+            h.reconnect();
+            return h;
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            ctx.check("stack: 2 x 2 x 2 blocks are one exchanger, 100 W/K, 64 L a side", wasStacked, "");
+            ctx.check("stack: one broken out leaves seven quarter slices of 12.5 W/K", split, "");
+            ctx.check("stack: they keep 7/8 of the water", Math.abs(afterSplit - before * 7 / 8) < 0.02 * before, String.format("%.3f of %.3f kg", afterSplit, before));
+            ctx.check("stack: put back, one exchanger again with all they had", stacked(s, 100) && Math.abs(water(s) - afterSplit) < 0.02 * before,
+                String.format("%.3f kg", water(s)));
+            boolean apart = true;
+            for (HeatExchangerElement h : longOne) apart &= h.group == null;
+            ctx.check("stack: nine long is past the most (8): quarter slices", apart, "");
+        }
+    }
+
+    /**
+     * Reheat between the HP and LP turbines (Baughn 2026-10-29): a 2 x 2 x 4 exchanger (200 W/K), live steam at 20 bar
+     * condensing in side A, the crossover's ~40 g/s of 2.4 bar steam through side B: it gets ~6 kW, the steam ~75 K hotter.
+     */
+    static final class Reheat extends PlumbingCases.Big {
+        List<HeatExchangerElement> s;
+        FluidDevice fx;
+        IProcess watch;
+        int tick, n;
+        double j0, window, flow;
+
+        public String id() {
+            return "heat_exchanger_reheat";
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            s = stack(ctx, ctx.at(1, 1, 1), 4);
+            int y = ctx.at(0, 1, 1).getY();
+            // (A: live steam into its west end; B: crossover steam in at its east end, out at its west end's top row to a
+            // main a little lower)
+            fx = fixtures(head(s).fluidLevel(), new Object[]{ctx.at(0, 1, 1), 5, steam(y, 20e5)},
+                new Object[]{ctx.at(5, 1, 2), 4, steam(y, 2.4e5), B_AT}, new Object[]{ctx.at(0, 2, 2), 5, steam(y, 2.4e5 - 900), B_AT});
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                if (++tick == 300) j0 = head(s).totalJ;
+                if (tick > 300) {
+                    window += dt;
+                    flow += HeatExchangerElement.inflow(head(s).b)[0];
+                    n++;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            mods.eln.fluid.FluidWorld.remove(fx);
+            HeatExchangerElement h = head(s);
+            double q = (h.totalJ - j0) / window, m = flow / Math.max(1, n);
+            ctx.line(String.format("reheat 2x2x4 (%.0f W/K): %.1f kW into %.1f g/s of crossover steam; %s", h.ua(), q / 1000, m * 1000, h.getWaila()));
+            ctx.check("reheat: one 2 x 2 x 4 exchanger (200 W/K)", stacked(s, 200), "");
+            ctx.check("reheat: ~40 g/s of crossover steam (30-55)", m > 0.030 && m < 0.055, String.format("%.1f g/s", m * 1000));
+            ctx.check("reheat: 5-8 kW into it", q > 5000 && q < 8000, String.format("%.1f kW", q / 1000));
+            ctx.check("reheat: the live steam condenses in side A", h.a.mLiquid() > 1e-3, String.format("%.4f kg", h.a.mLiquid()));
+        }
+    }
+
+    /**
+     * A combined cycle (Argon's pinnacle): the gas turbine's exhaust through a 2 x 2 x 2 steam raiser, a pipe, then a 2 x 2 x
+     * 2 economizer; feedwater (16 bar) the other way: through the economizer, a throttle valve, the raiser's water side; its
+     * steam to a separator tank and an HP turbine. Separate jobs, separate exchangers in series. Numbers logged: fuel, both
+     * shafts, combined efficiency.
      */
     static final class CombinedCycle extends PlumbingCases.Big {
-        /** The feed valve, an iron one ~0.6 % open on 16 bar against a drum near 15: ~2 g/s (the orifice law; the level is the
-         *  player's circuit to hold, Baughn: here it runs a little short of the ~4 g/s boiled over the window). */
-        static final double FEED_OPEN = 0.006;
+        /** The feed valve (alloy) between the economizer and the raiser, against ~2 bar: ~6 g/s (the orifice law; the
+         *  level is the player's circuit to hold, Baughn). */
+        static final double FEED_OPEN = 0.008;
         GasLine l;
-        HeatExchangerElement h;
+        List<HeatExchangerElement> raiser, econ;
         ShaftSteamTurbineElement hp;
         Resistor hpLoad;
         FluidDevice fx;
         IProcess watch;
-        int tick;
-        double f0, g0, s0, k0, j0, w0, window;
+        AirMeter drain;
         FluidNode feed;
+        int tick;
+        double f0, g0, s0, k0, j0, e0, w0, x0, window;
 
         public String id() {
             return "gas_plant_combined_cycle";
@@ -309,39 +448,51 @@ public final class GasPlantCases {
 
         public void build(TestContext ctx) {
             l = new GasLine(ctx, true, 7000);
-            BlockPos hxAt = ctx.at(3, 1, 5);
-            h = hx(ctx, hxAt, Direction.ZP);
-            // B out (front, south) -> alloy pipe into the high side port of a separator tank at (3,1,7) -> its top -> pipe
-            // south and down into an HP turbine at (3,1,8); its generator at z 9 (Argon: a drum / separator keeps the
-            // water out of the turbine)
-            PipeCases.lay(ctx, ctx.at(3, 1, 6), 1, 8, 8, 0, 8, 8, 8, 8, 12, 8, 8, 12, 16);
-            PlumbingCases.tank(ctx, PlumbingCases.ALLOY_TANK, ctx.at(3, 1, 7), Direction.ZP);   // (its back, north, to the pipe)
-            PipeCases.lay(ctx, ctx.at(3, 2, 7), 1, 8, 0, 8, 8, 8, 8, 8, 8, 16);
-            PipeCases.lay(ctx, ctx.at(3, 2, 8), 1, 8, 8, 0, 8, 8, 8, 8, 0, 8);
-            hp = (ShaftSteamTurbineElement) orient(ctx.placeTransparent(STEAM_TURBINE, ctx.at(3, 1, 8)));
-            var g = (GeneratorElement) orient(ctx.placeTransparent(GENERATOR, ctx.at(3, 1, 9)));
-            hpLoad = load(g, 2000);
+            raiser = stack(ctx, ctx.at(3, 1, 5), 2);
+            econ = stack(ctx, ctx.at(6, 1, 5), 2);
+            // exhaust: raiser east end -> alloy pipe -> economizer west end; water: economizer west end -> valve -> raiser
+            // east end (B's spot, up high)
+            PipeCases.lay(ctx, ctx.at(5, 1, 5), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(5, 1, 6), 1, 0, 12, 8, 8, 12, 8, 16, 12, 8);
+            var valveNode = PipeCases.node(ctx, ctx.at(5, 1, 6));
+            valveNode.addValve(8, 12, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
+            for (var part : valveNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) v.setting = FEED_OPEN;
+            // steam: the raiser's west end, top row -> pipe west and south into a separator tank's high side port at (2,2,7)
+            // -> its top -> up, south, down into an HP turbine at (2,1,8); its generator at z 9
+            PipeCases.lay(ctx, ctx.at(2, 2, 6), 1, 16, 12, 8, 8, 12, 8, 8, 12, 16);
+            ctx.level().setBlockAndUpdate(ctx.at(2, 1, 7), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());   // (under it)
+            PlumbingCases.tank(ctx, PlumbingCases.ALLOY_TANK, ctx.at(2, 2, 7), Direction.ZP);   // (its back, north, to the pipe)
+            PipeCases.lay(ctx, ctx.at(2, 3, 7), 1, 8, 0, 8, 8, 8, 8, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(2, 3, 8), 1, 8, 8, 0, 8, 8, 8, 8, 0, 8);
+            PipeCases.lay(ctx, ctx.at(2, 2, 8), 1, 8, 16, 8, 8, 0, 8);
+            hp = (ShaftSteamTurbineElement) orient(ctx.placeTransparent(STEAM_TURBINE, ctx.at(2, 1, 8)));
+            var g = (GeneratorElement) orient(ctx.placeTransparent(GENERATOR, ctx.at(2, 1, 9)));
+            hpLoad = load(g, 3000);
             // (its nozzle is made for 39 g/s at 20 bar: on a few g/s it would let the drum down to 1 bar; a throttle holds
             // the pressure up, as a regulator on its screen would)
-            hp.controls.throttle = 0.08;
-            // side B: half full of water at 20 bar, saturated; fed from a 16 bar reservoir through an iron throttle valve
-            // about 0.6 % open (a feed that floods it fills the line and the turbine: the water must come no faster than it
-            // boils)
-            h.b.fill(0.5 * h.b.volume * Water.RHO_L, 20e5, Water.tsat(20e5));
-            PipeCases.lay(ctx, hxAt.north(), 0, 8, 8, 0, 8, 8, 8, 8, 8, 16);
-            var feedNode = PipeCases.node(ctx, hxAt.north());
-            feedNode.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
-            for (var part : feedNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) v.setting = FEED_OPEN;
-            fx = fixtures(h.fluidLevel(), new Object[]{hxAt.east(), 4, air(hxAt.getY())}, new Object[]{hxAt.north().north(), 3, feed = water(hxAt.getY(), 16e5, 293.15)});
+            hp.controls.throttle = 0.15;
+            // the raiser's water side half full at 15 bar, saturated; the economizer's full of feed at about its running
+            // temperature (64 L of water takes hours to warm from cold on 5 kW: the test measures the plant running)
+            var rb = head(raiser).b;
+            PlumbingCases.fill(rb, 0.5 * rb.volume * Water.RHO_L, 15e5, Water.tsat(15e5));
+            var eb = head(econ).b;
+            PlumbingCases.fill(eb, 0.97 * eb.volume * Water.RHO_L, 16e5, 453.15);
+            int y = ctx.at(8, 1, 5).getY();
+            drain = new AirMeter(air(y));
+            fx = fixtures(head(raiser).fluidLevel(), new Object[]{ctx.at(8, 1, 5), 4, drain.node},
+                new Object[]{ctx.at(8, 1, 6), 4, feed = water(y, 16e5, 293.15), B_AT});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
                 if (++tick == 1000) {
                     f0 = l.gt.totalFuelJ;
                     g0 = l.gt.totalWork;
+                    x0 = l.gt.totalExhaustJ;
                     s0 = hp.totalWork;
                     k0 = hp.totalKg;
-                    j0 = h.totalJ;
+                    j0 = head(raiser).totalJ;
+                    e0 = head(econ).totalJ;
                     w0 = feed.mWater;
+                    drain.start();
                 }
                 if (tick > 1000) window += dt;
             });
@@ -353,20 +504,19 @@ public final class GasPlantCases {
             Eln.simulator.removeElectricalComponent(hpLoad);
             mods.eln.fluid.FluidWorld.remove(fx);
             double fuel = (l.gt.totalFuelJ - f0) / window, gas = (l.gt.totalWork - g0) / window, st = (hp.totalWork - s0) / window,
-                kg = (hp.totalKg - k0) / window, q = (h.totalJ - j0) / window;
-            ctx.line(String.format("combined cycle: fuel %.1f kW; gas turbine %.1f kW (%.1f %%); exhaust -> %.1f kW raising %.1f g/s of steam at %.1f bar; "
-                    + "HP %.1f kW; together %.1f kW = %.1f %% of the fuel (+%.0f %% over the gas turbine alone)",
-                fuel / 1000, gas / 1000, gas / fuel * 100, q / 1000, kg * 1000, h.b.P() / 1e5, st / 1000, (gas + st) / 1000, (gas + st) / fuel * 100, st / Math.max(1, gas) * 100));
-            ctx.line("combined cycle: HX " + h.getWaila() + "; HP " + hp.getWaila());
-            ctx.line(String.format("combined cycle: feed %.2f g/s; drum B %.0f g of water", (w0 - feed.mWater) / window * 1000, h.b.mWater * 1000));
-            // (the exhaust's heat capacity rate: its heat over ambient spread over 500 K; at most it can give down to the drum)
-            double cEx = (fuel - gas) / (GasTurbineElement.EXHAUST_T - 293.15), most = cEx * (GasTurbineElement.EXHAUST_T - h.b.T());
-            ctx.line(String.format("combined cycle: exhaust %.1f W/K (%.1f g/s of air); out of the HX at %.0f C against the drum's %.0f C; %.1f of %.1f kW it could give",
-                cEx, cEx / 1.005, h.tAout - Water.T0, h.b.T() - Water.T0, q / 1000, most / 1000));
-            ctx.check("combined cycle: the exchanger takes most of what the exhaust can give down to the drum (over 85 %)", q > 0.85 * most,
-                String.format("%.1f of %.1f kW", q / 1000, most / 1000));
-            ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 0.5 kW)", st > 500, String.format("%.1f kW", st / 1000));
-            ctx.check("combined cycle: together they beat the gas turbine alone", gas + st > 1.05 * gas, "");
+                kg = (hp.totalKg - k0) / window, qr = (head(raiser).totalJ - j0) / window, qe = (head(econ).totalJ - e0) / window,
+                ex = (l.gt.totalExhaustJ - x0) / window, left = drain.heat(window), fed = (w0 - feed.mWater) / window;
+            ctx.line(String.format("combined cycle: fuel %.1f kW; gas turbine %.1f kW (%.1f %%); exhaust %.1f kW -> raiser %.1f + economizer %.1f kW, %.1f left in air at %.0f C; "
+                    + "feed %.1f g/s, HP %.1f g/s at %.1f bar, %.1f kW; together %.1f kW = %.1f %% of the fuel (+%.0f %% over the gas turbine alone)",
+                fuel / 1000, gas / 1000, gas / fuel * 100, ex / 1000, qr / 1000, qe / 1000, left / 1000, drain.tOut(window) - Water.T0,
+                fed * 1000, kg * 1000, head(raiser).b.P() / 1e5, st / 1000, (gas + st) / 1000, (gas + st) / fuel * 100, st / Math.max(1, gas) * 100));
+            ctx.line("combined cycle: raiser " + head(raiser).getWaila() + "; economizer " + head(econ).getWaila() + "; HP " + hp.getWaila());
+            ctx.check("combined cycle: two exchangers of 100 W/K", stacked(raiser, 100) && stacked(econ, 100), "");
+            ctx.check("combined cycle: heat is conserved (within 5 %)", Math.abs(qr + qe + left - ex) < 0.05 * ex,
+                String.format("%.1f + %.1f + %.1f vs %.1f kW", qr / 1000, qe / 1000, left / 1000, ex / 1000));
+            ctx.check("combined cycle: the exchangers take most of the exhaust's heat (over 70 %)", qr + qe > 0.7 * ex, String.format("%.0f %%", (qr + qe) / ex * 100));
+            ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 1.5 kW)", st > 1500, String.format("%.1f kW", st / 1000));
+            ctx.check("combined cycle: together they beat the gas turbine alone by over 20 %", gas + st > 1.2 * gas, "");
         }
     }
 }
