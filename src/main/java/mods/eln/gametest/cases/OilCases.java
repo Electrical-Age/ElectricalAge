@@ -580,9 +580,9 @@ public final class OilCases {
             }
             held.inventory.setItem(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, mods.eln.Eln.findItemStack("Analogic Regulator"));
             held.inventoryChange(held.inventory);
-            held.targetBar = 4;
+            held.controls.targetBar = 4;
             held.inventoryChange(held.inventory);
-            ext.controlExternal = true;
+            ext.controls.controlExternal = true;
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
                 b1.thermal.moveEnergyTo(2500 * t);
                 b2.thermal.moveEnergyTo(2500 * t);

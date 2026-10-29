@@ -14,12 +14,13 @@ import static mods.eln.i18n.I18N.tr;
  * (with one).
  */
 public class SteamGeneratorScreen extends ElnScreen {
-    final SteamGeneratorRender render;
+    final SteamValveControl.Render render;
     EaSlider throttle, target;
 
     public SteamGeneratorScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
         super(menu, inventory, title);
-        this.render = (SteamGeneratorRender) render;
+        // (the 50V/200V turbines' render or the shaft Steam Turbine's: both hold their controls' client side)
+        this.render = ((SteamValveControl.Rendered) render).controls();
     }
 
     @Override
@@ -30,7 +31,7 @@ public class SteamGeneratorScreen extends ElnScreen {
         throttle = slider("throttle", 0, 1, 0.01, Math.max(0, render.throttle),
             v -> Component.literal(tr("Throttle: %1$%", (int) Math.round(v * 100))),
             v -> render.clientSetThrottle((float) v));
-        target = slider("target", SteamGeneratorElement.TARGET_MIN_BAR, SteamGeneratorElement.TARGET_MAX_BAR, 0.5, Math.max(1, render.targetBar),
+        target = slider("target", SteamValveControl.TARGET_MIN_BAR, render.targetMaxBar, 0.5, Math.max(1, render.targetBar),
             v -> Component.literal(tr("Hold the inlet at: %1$ bar", String.format("%.1f", v)) + "  (" + tr("now %1$ bar", String.format("%.1f", render.inletBar)) + ")"),
             v -> render.clientSetTarget((float) v));
         text("valve", () -> tr("Steam valve may open: %1$%", (int) Math.round(render.limit * 100)));
@@ -40,7 +41,7 @@ public class SteamGeneratorScreen extends ElnScreen {
 
     @Override
     protected void update() {
-        boolean regulator = !deviceItem(SteamGeneratorElement.REGULATOR_SLOT).isEmpty();
+        boolean regulator = !deviceItem(SteamValveControl.REGULATOR_SLOT).isEmpty();
         throttle.active = !regulator && !render.controlExternal;
         target.active = regulator && !render.controlExternal;
         if (render.throttleNew) {
