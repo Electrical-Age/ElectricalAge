@@ -38,6 +38,7 @@ public class BikeRenderer extends EntityRenderer<ElectricBike, BikeRenderState> 
         s.stand = Mth.lerp(a, bike.standO, bike.stand);
         s.crank = Mth.lerp(a, bike.crankO, bike.crank);
         s.mode = bike.mode();
+        s.colors = bike.colors();
         s.hurtTime = bike.getHurtTime() - a;
         s.hurtDir = bike.getHurtDir();
         s.damageTime = Math.max(bike.getDamage() - a, 0);
@@ -55,7 +56,12 @@ public class BikeRenderer extends EntityRenderer<ElectricBike, BikeRenderState> 
         if (s.hurtTime > 0) pose.rotateDegrees(Axis.XP, Mth.sin(s.hurtTime) * s.hurtTime * s.damageTime / 10f * s.hurtDir);
         pose.scale(-1, -1, 1);
         pose.translate(0, -1.5f, 0);
-        out.submitModel(model, s, pose, TEXTURE, s.lightCoords, OverlayTexture.NO_OVERLAY, s.outlineColor);
+        // one draw per dye group, each tinted with its paint (the dyeable parts are neutral grey in the texture)
+        var type = model.renderType(TEXTURE);
+        for (BikeModel.Group g : BikeModel.Group.values()) {
+            int tint = g == BikeModel.Group.BASE ? -1 : 0xFF000000 | mods.eln.bike.BikeColors.tint(g.ordinal() - 1, s.colors[g.ordinal() - 1]);
+            out.submitModel(model, s.forGroup(g), pose, type, s.lightCoords, OverlayTexture.NO_OVERLAY, tint, null, s.outlineColor);
+        }
         pose.popPose();
         super.submit(s, pose, out, camera);
     }

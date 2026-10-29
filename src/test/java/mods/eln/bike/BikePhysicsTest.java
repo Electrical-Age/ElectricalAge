@@ -72,6 +72,17 @@ public class BikePhysicsTest {
     }
 
     @Test
+    void steeringSlowsWithSpeed() {
+        assertEquals(BikePhysics.TURN_PER_TICK, BikePhysics.turnRate(0), 1e-6);
+        assertEquals(BikePhysics.TURN_AT_TOP, BikePhysics.turnRate(BikePhysics.VMAX_POWERED), 1e-6);
+        assertEquals(BikePhysics.TURN_AT_TOP, BikePhysics.turnRate(2 * BikePhysics.VMAX_POWERED), 1e-6);   // (no slower past top speed)
+        assertEquals((BikePhysics.TURN_PER_TICK + BikePhysics.TURN_AT_TOP) / 2, BikePhysics.turnRate(BikePhysics.VMAX_POWERED / 2), 1e-5);
+        assertTrue(BikePhysics.TURN_AT_TOP < BikePhysics.TURN_PER_TICK);
+        assertEquals(BikePhysics.TURN_AT_TOP, BikePhysics.turn(0, 90, BikePhysics.VMAX_POWERED), 1e-6);
+        assertEquals(-BikePhysics.turnRate(-0.2), BikePhysics.turn(0, -90, -0.2), 1e-6);   // (backing up counts by its speed too)
+    }
+
+    @Test
     void crashesOnlyAboveThreeBlocksASecond() {
         assertFalse(BikePhysics.crashes(2.9 / 20));
         assertTrue(BikePhysics.crashes(3.1 / 20));
