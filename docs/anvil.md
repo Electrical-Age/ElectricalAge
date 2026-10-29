@@ -51,12 +51,16 @@ Baughn 2026-10-28: a workshop-sized store for the anvil's bursts. Six capacitor 
 `tools/models/capacitorbank.py`), one capacitor inside.
 - **Size:** one bank carries one 20 kJ burst from 800 V down to the anvil's 720 V: C >= 20000 / (0.5 (800^2 - 720^2))
   = 0.33 F; it has **0.36 F** (21.9 kJ between 800 and 720 V; 115 kJ at 800 V).
-- **Polar:** + on the left of its front (HV-tier band on the plate), - on the right (black band), low on the flanks.
+- **Polar:** + on the left of its front, - on the right, low on the flanks: the terminal plates' bands and the cans'
+  studs are red (+) and blue (-) (Baughn); the cans' sleeve bands keep the HV tier colour.
 - **Rating:** 1000 V; it pops above 1.3 x that (`BipoleVoltageWatchdog`, as the Power Capacitor).
 - **Inrush:** none limited (Baughn 2026-10-28: "inrush current is supposed to be a problem; inductors are the solution.
   There are other solutions, like not using a stiff source"). An empty bank straight on a stiff 800 V source draws
-  hundreds of amps and burns its HV cable (GameTest `capacitor_bank_inrush`). Charge it through a resistor: 1 kohm
-  (Power Resistor, 60 Coal Dust) peaks at 0.8 A, RC 6 min. An inductor alone can't: with EA's largest, 100 H, an empty
+  hundreds of amps and burns its HV cable (GameTest `capacitor_bank_inrush`). Charge it through a resistance, and mind
+  the bank's own leak (~5 kohm): it makes a divider with the feed, so the bank parks at 800 x 5000 / (5000 + R). A
+  1 kohm feed parks it at ~667 V, under the anvil's 720 V stop: useless. Use a Large Rheostat at ~330 ohm from empty
+  (peak ~2.4 A; it parks at ~750 V, enough for the anvil's levelled-line start at 744 V), and turn it down to ~100 ohm
+  once the bank is past ~600 V (2 A at that point; it parks at ~784 V). An inductor alone can't: with EA's largest, 100 H, an empty
   0.36 F bank on 800 V rings with a peak of 800 sqrt(C/L) = 48 A and overshoots towards 1.6 kV, past its 1.3 kV limit;
   an inductor helps smooth a plant's draw once the bank is charged, in series with some resistance.
 - **Leakage:** a resistor across it, R = `leakTauS` / C (RC = 30 min): ~128 W at 800 V; the charge halves in ~10 min

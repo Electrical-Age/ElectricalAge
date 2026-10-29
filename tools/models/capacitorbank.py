@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Capacitor bank (Baughn 2026-10-28): six big capacitor cans in two layers of three on a steel rack, joined by copper
-busbars, with a terminal plate on each flank: + (the HV tier's colour band) on the left of the front, - (black band)
+busbars, with a terminal plate on each flank: + (red band, Baughn: polarities red/blue) on the left of the front, - (blue band)
 on the right, as you face its front. Internally it is one large capacitor (CapacitorBankElement). A small window on the front shows a charge
 gauge the renderer doesn't animate (the cans' band carries the tier colour instead).
 
@@ -15,8 +15,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcmodel import Model, box, prism, tube
 
 CELLS = {"steel": (0, 0), "darksteel": (1, 0), "can": (2, 0), "cantop": (3, 0),
-         "copper": (0, 1), "hvtier": (1, 1), "black": (2, 1), "label": (3, 1)}
-GRID = (4, 2)
+         "copper": (0, 1), "hvtier": (1, 1), "blue": (2, 1), "label": (3, 1),
+         "red": (0, 2)}
+GRID = (4, 3)
 CAN_R = 2.3
 ZS = (3.0, 8.0, 13.0)          # the three cans of a layer, along z
 LAYERS = ((1.5, 7.0), (8.5, 14.0))
@@ -39,14 +40,16 @@ def bank():
             m.add(prism("y", 8.0, z, CAN_R, y0, y1 - 0.6, "can", n=12))
             m.add(tube("y", 8.0, z, CAN_R - 0.05, CAN_R + 0.08, y0 + 1.0, y0 + 1.8, "hvtier", n=12, inner=False))
             m.add(prism("y", 8.0, z, CAN_R - 0.2, y1 - 0.6, y1 - 0.3, "cantop", n=12))
-            m.add(prism("y", 6.9, z, 0.45, y1 - 0.3, y1, "copper", n=6), prism("y", 9.1, z, 0.45, y1 - 0.3, y1, "copper", n=6))
+            # the studs, marked: + red (the + busbar's side), - blue
+            m.add(prism("y", 6.9, z, 0.45, y1 - 0.3, y1, "red", n=6), prism("y", 9.1, z, 0.45, y1 - 0.3, y1, "blue", n=6))
         m.add(box(6.6, y1, 1.0, 7.2, y1 + 0.35, 15.0, "copper"))            # the + busbar of the layer
         m.add(box(8.8, y1, 1.0, 9.4, y1 + 0.35, 15.0, "copper"))            # the - busbar
     # the risers joining the layers' busbars, down the flanks
     m.add(box(6.6, LAYERS[0][1], 0.5, 7.2, LAYERS[1][1] + 0.35, 1.0, "copper"))     # + side (z 0)
     m.add(box(8.8, LAYERS[0][1], 15.0, 9.4, LAYERS[1][1] + 0.35, 15.5, "copper"))   # - side (z 16)
-    # the terminal plates, low on the flanks: + (left of the front: z = 0) with the tier colour, - (z = 16) black
-    for z0, z1, band in ((0.0, 0.6, "hvtier"), (15.4, 16.0, "black")):
+    # the terminal plates, low on the flanks: + (left of the front: z = 0) red, - (z = 16) blue (Baughn); the cans' sleeve
+    # bands keep the HV tier colour
+    for z0, z1, band in ((0.0, 0.6, "red"), (15.4, 16.0, "blue")):
         m.add(box(4.5, 0.5, z0, 11.5, 4.5, z1, "steel"), box(4.5, 4.5, z0, 11.5, 5.0, z1, band))
         for x in (5.75, 8.0, 10.25):
             m.add(box(x - 0.5, 1.75, z0 - 0.1, x + 0.5, 2.75, z1 + 0.1, "copper"))
@@ -75,7 +78,8 @@ def atlas(path):
     cell("cantop", (34, 36, 40), 4, shade=lambda x, y: 30 if (x - 8) ** 2 + (y - 8) ** 2 in range(20, 26) else 0)   # a vent ring
     cell("copper", (196, 110, 70), 12)
     cell("hvtier", (245, 204, 143), 8)        # the 800 V (HV) tier colour
-    cell("black", (24, 24, 26), 3)
+    cell("blue", (40, 84, 200), 6)
+    cell("red", (200, 36, 32), 6)
     cell("label", (232, 228, 214), 4, shade=lambda x, y: -150 if y in (6, 9) and 3 <= x <= 12 else 0)   # two printed lines
     im.save(path)
 
