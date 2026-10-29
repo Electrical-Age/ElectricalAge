@@ -278,8 +278,8 @@ public final class GasPlantCases {
      * fed from an 18 bar reservoir), which drives an HP turbine. Numbers logged: fuel, both shafts, combined efficiency.
      */
     static final class CombinedCycle extends PlumbingCases.Big {
-        /** (liquid passes a valve freely: a thousandth of a percent open lets ~4 g/s through at a few bar) */
-        static final double FEED_OPEN = 1e-5;
+        /** The feed valve, an iron one ~1 % open on 16 bar against a drum near 12: a few g/s (the orifice law). */
+        static final double FEED_OPEN = 0.01;
         GasLine l;
         HeatExchangerElement h;
         ShaftSteamTurbineElement hp;
@@ -314,14 +314,15 @@ public final class GasPlantCases {
             // (its nozzle is made for 39 g/s at 20 bar: on a few g/s it would let the drum down to 1 bar; a throttle holds
             // the pressure up, as a regulator on its screen would)
             hp.controls.throttle = 0.08;
-            // side B: half full of water at 20 bar, saturated; fed from a 25 bar reservoir through a throttle valve barely
-            // open (a feed that floods it fills the line and the turbine: the water must come no faster than it boils)
+            // side B: half full of water at 20 bar, saturated; fed from a 16 bar reservoir through an iron throttle valve
+            // about 1 % open (a feed that floods it fills the line and the turbine: the water must come no faster than it
+            // boils)
             h.b.fill(0.5 * h.b.volume * Water.RHO_L, 20e5, Water.tsat(20e5));
-            PipeCases.lay(ctx, hxAt.north(), 1, 8, 8, 0, 8, 8, 8, 8, 8, 16);
+            PipeCases.lay(ctx, hxAt.north(), 0, 8, 8, 0, 8, 8, 8, 8, 8, 16);
             var feedNode = PipeCases.node(ctx, hxAt.north());
             feedNode.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
             for (var part : feedNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) v.setting = FEED_OPEN;
-            fx = fixtures(h.fluidLevel(), new Object[]{hxAt.east(), 4, air(hxAt.getY())}, new Object[]{hxAt.north().north(), 3, water(hxAt.getY(), 25e5, 293.15)});
+            fx = fixtures(h.fluidLevel(), new Object[]{hxAt.east(), 4, air(hxAt.getY())}, new Object[]{hxAt.north().north(), 3, water(hxAt.getY(), 16e5, 293.15)});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
                 if (++tick == 1000) {

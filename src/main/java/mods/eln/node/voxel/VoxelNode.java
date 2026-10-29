@@ -377,7 +377,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
             double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * (v.mode == ValvePart.PRESSURE ? 1 : 4);   // (a quarter block of pipe; a
             // pressure valve's seat is narrower, a block's worth, so it can hold its set point without overshooting)
-            Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k);
+            // (a valve meters by the orifice law, its seat the smaller pipe's bore area: VOLUME_PER_BLOCK is m^3 a metre)
+            Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k).area(PipePart.VOLUME_PER_BLOCK[Math.min(a.tier, b.tier)]);
             if (v.mode == ValvePart.PRESSURE) l.kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
             l.open = v.opening();
             valveLinks.put(l, v);

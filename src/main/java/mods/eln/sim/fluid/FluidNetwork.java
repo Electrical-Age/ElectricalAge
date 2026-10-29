@@ -79,7 +79,7 @@ public final class FluidNetwork {
         //    then takes its packet from the other side: a short pipe drained by its valve draws from its boiler even
         //    when it started the step at a higher pressure)
         double[] P = new double[N];
-        for (int pass = 0; pass < 4; pass++) {
+        for (int pass = 0; pass < 8; pass++) {
             double[][] A = new double[N][N];
             double[] rhs = new double[N];
             for (int i = 0; i < N; i++) {
@@ -113,7 +113,15 @@ public final class FluidNetwork {
                     e.g = 0;
                     e.flow = 0;
                     again = true;
-                } else if (!e.oneWay() && e.flow != 0 && (e.flow > 0) != e.fromA && pass < 3) {
+                } else if (e.area > 0 && e.g != 0 && pass < 7) {
+                    // a valve's orifice law, at the drop just solved (between its guess and this, for a quiet fixed point)
+                    double gt = orificeG(e, pa + offA - pb - offB + e.head);
+                    if (Math.abs(gt - e.g) > 0.05 * e.g) {
+                        e.g = Math.sqrt(e.g * gt);
+                        again = true;
+                    }
+                }
+                if (!e.oneWay() && e.flow != 0 && (e.flow > 0) != e.fromA && pass < 3) {
                     props(e, !e.fromA);
                     Integer ja = idx.get(e.a), jb = idx.get(e.b);
                     e.sA = ja == null ? 0 : e.xl * sL[ja] + (1 - e.xl) * sG[ja];
@@ -233,7 +241,17 @@ public final class FluidNetwork {
         e.rho = pk[4];
         e.xl = pk[0];
         e.head = pk[6] * G * (e.zA() - e.zB()) + e.boost;
-        e.g = pk[4] * e.k * e.open / pk[5];
+        e.g = e.area > 0 ? orificeG(e, e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head) : pk[4] * e.k * e.open / pk[5];
+    }
+
+    /**
+     * A metering edge's (a valve's) conductance g = m / dP for a drop dP, by the orifice law m = CD A open sqrt(2 rho
+     * dP): both phases by their density (liquid ~14 x steam at 10 bar), linear under DP_LINEAR. The network's other
+     * edges stay on their linear lossless law; a valve on it with that law was 2 % of a lossless pipe, still 10 kg/s of
+     * water at 5 bar: a feed valve couldn't meter (found 2026-10-29 building the combined cycle).
+     */
+    static double orificeG(FluidEdge e, double dP) {
+        return FluidEdge.CD * e.area * e.open * Math.sqrt(2 * Math.max(e.rho, 1e-6) / Math.max(Math.abs(dP), FluidEdge.DP_LINEAR));
     }
 
     /** Each node's pressure change this step if the flows run as they are (net, by each edge's dP/dm at that end). */
