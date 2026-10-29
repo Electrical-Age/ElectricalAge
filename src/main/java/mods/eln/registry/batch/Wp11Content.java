@@ -81,7 +81,7 @@ public class Wp11Content implements ElnContent {
             subId = 9;
             SteamTurbineDescriptor desc = new SteamTurbineDescriptor(
                 TR_NAME(Type.NONE, "Steam Turbine"),
-                obj.getObj("Turbine"),
+                obj.getObj("shaftsteamhp"),
                 mods.eln.mechanical.SteamTurbineSpec.HP
             );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -92,13 +92,12 @@ public class Wp11Content implements ElnContent {
             float nominalP = 4000;
             GeneratorDescriptor desc = new GeneratorDescriptor(
                 TR_NAME(Type.NONE, "Generator"),
-                obj.getObj("Generator"),
+                obj.getObj("shaftgen4kw"),
                 highVoltageCableDescriptor,
                 nominalRads, nominalU,
                 nominalP / (nominalU / 25),
                 nominalP,
-                sixNodeThermalLoadInitializer.copy(),
-                0.75f   // (the small one: Baughn 2026-10-29)
+                sixNodeThermalLoadInitializer.copy()
             );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -109,13 +108,12 @@ public class Wp11Content implements ElnContent {
             float nominalP = 8000;
             GeneratorDescriptor desc = new GeneratorDescriptor(
                 TR_NAME(Type.NONE, "8kW Generator"),
-                obj.getObj("Generator"),
+                obj.getObj("shaftgen8kw"),
                 highVoltageCableDescriptor,
                 nominalRads, nominalU,
                 nominalP / (nominalU / 25),
                 nominalP,
-                sixNodeThermalLoadInitializer.copy(),
-                1f
+                sixNodeThermalLoadInitializer.copy()
             );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -124,18 +122,17 @@ public class Wp11Content implements ElnContent {
             subId = 17;
             ShaftMotorDescriptor desc = new ShaftMotorDescriptor(
                 TR_NAME(Type.NONE, "200V Shaft Motor"),
-                obj.getObj("Generator"),
+                obj.getObj("shaftmotor"),
                 meduimVoltageCableDescriptor,
                 MVU, 2000);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
-            // Baughn 2026-10-29: the low-pressure stage, between an HP turbine's exhaust and a plant condenser (1.12 model
-            // until its own)
+            // Baughn 2026-10-29: the low-pressure stage, between an HP turbine's exhaust and a plant condenser
             subId = 18;
             SteamTurbineDescriptor desc = new SteamTurbineDescriptor(
                 TR_NAME(Type.NONE, "LP Steam Turbine"),
-                obj.getObj("Turbine"),
+                obj.getObj("shaftsteamlp"),
                 mods.eln.mechanical.SteamTurbineSpec.LP
             );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -144,7 +141,7 @@ public class Wp11Content implements ElnContent {
             subId = 11;
             GasTurbineDescriptor desc = new GasTurbineDescriptor(
                 TR_NAME(Type.NONE, "Gas Turbine"),
-                obj.getObj("GasTurbine")
+                obj.getObj("shaftgas")
             );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -152,28 +149,28 @@ public class Wp11Content implements ElnContent {
             subId = 12;
             StraightJointDescriptor desc = new StraightJointDescriptor(
                 TR_NAME(Type.NONE, "Joint"),
-                obj.getObj("StraightJoint"));
+                obj.getObj("shaftjoint"));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
             subId = 13;
             JointHubDescriptor desc = new JointHubDescriptor(
                 TR_NAME(Type.NONE, "Joint hub"),
-                obj.getObj("JointHub"));
+                obj.getObj("shafthub"));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
             subId = 14;
             FlywheelDescriptor desc = new FlywheelDescriptor(
                 TR_NAME(Type.NONE, "Flywheel"),
-                obj.getObj("Flywheel"));
+                obj.getObj("shaftflywheel"));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
             subId = 15;
             TachometerDescriptor desc = new TachometerDescriptor(
                 TR_NAME(Type.NONE, "Tachometer"),
-                obj.getObj("Tachometer"));
+                obj.getObj("shafttacho"));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }

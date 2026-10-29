@@ -59,9 +59,32 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     /** A shaft motor against any of its sides drives its pumps (its shaft end). */
     void findMotor() {
         mods.eln.mechanical.ShaftMotorElement found = null;
+        Direction at = null;
         for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP})
-            if (node.getNeighbor(d) instanceof TransparentNode t && t.element instanceof mods.eln.mechanical.ShaftMotorElement m) found = m;
+            if (node.getNeighbor(d) instanceof TransparentNode t && t.element instanceof mods.eln.mechanical.ShaftMotorElement m) {
+                found = m;
+                at = d;
+            }
         motor = found;
+        // (its drive coupling is drawn on its left or front, where the pumps' shaft comes out: Baughn's art pass)
+        int side = at == null ? 0 : at == front.left() ? 1 : at == front ? 2 : 0;
+        if (side != motorSide) {
+            motorSide = side;
+            needPublish();
+        }
+    }
+
+    /** Which drive coupling it draws: 0 none, 1 left, 2 front (a motor there). */
+    int motorSide;
+
+    @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte(motorSide);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public double floodShare() {

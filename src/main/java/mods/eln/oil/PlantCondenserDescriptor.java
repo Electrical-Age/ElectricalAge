@@ -15,7 +15,7 @@ import java.util.List;
  * condensate pump and air ejector run on a Shaft Motor against its side: no motor, no pump and no vacuum (a cold start:
  * pull the vacuum with the motor, warm the lines, then roll the turbines). Air leaks in while it holds a vacuum, so
  * without the ejector the vacuum is lost and an LP turbine's power sags (no bang). Over FLOOD of water its tubes drown
- * and it cools less; full, water backs up its exhaust pipe into the turbine. Model: the Steam Condenser's until its own.
+ * and it cools less; full, water backs up its exhaust pipe into the turbine. Model: tools/models/plantcondenser.py.
  */
 public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
     public final double volume, nominalHeat, pumpKgPerS;
@@ -32,10 +32,22 @@ public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
         this.obj = Eln.obj.getObj(model);
     }
 
-    void draw() {
+    private mods.eln.node.transparent.ModelHitbox hitbox;
+
+    /** Its model's hitbox (tools/models/plantcondenser.py), turned with its front. */
+    @Override
+    public mods.eln.node.transparent.ModelHitbox modelHitbox() {
+        if (hitbox == null && obj != null) hitbox = mods.eln.node.transparent.ModelHitbox.of(obj);
+        return hitbox;
+    }
+
+    /** The condenser, and its drive coupling on the side a motor drives it from (1 left, 2 front; tools/models/plantcondenser.py). */
+    void draw(int motorSide) {
         if (obj == null) return;
         var p = obj.getPart("main");
         if (p != null) p.draw();
+        var d = motorSide == 1 ? obj.getPart("drive_left") : motorSide == 2 ? obj.getPart("drive_front") : null;
+        if (d != null) d.draw();
     }
 
     @Override

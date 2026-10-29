@@ -171,6 +171,11 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return 0;
     }
 
+    /** Its model's hitbox, turned with its front (ModelHitbox), or null: then addCollisionBoxesToList's boxes. */
+    public ModelHitbox modelHitbox() {
+        return null;
+    }
+
     public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
         AABB bb = new AABB(x, y, z, x + 1, y + 1, z + 1); // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute)
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);

@@ -35,10 +35,8 @@ class ShaftMotorDescriptor(
     /** Electrical to shaft. */
     val efficiency = 0.85
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Cowl"), obj.getPart("Stand")).requireNoNulls()
-    override val rotating = arrayOf(obj.getPart("Shaft")).requireNoNulls()
-    /** (The Generator's model, thinner, until its own.) */
-    override val drawScaleX = 0.5f
+    override val static = arrayOf(obj.getPart("main")).requireNoNulls()
+    override val rotating = arrayOf(obj.getPart("rotor")).requireNoNulls()
 
     init {
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable)

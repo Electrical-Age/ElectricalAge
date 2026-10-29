@@ -39,10 +39,8 @@ class GeneratorDescriptor(
     powerOutPerDeltaU: Float,
     nominalP: Float,
     thermalLoadInitializer: ThermalLoadInitializer,
-    /** Drawn this much thinner (the 4 kW one is the small one: Baughn 2026-10-29). */
-    scaleX: Float) :
+    ) :
     SimpleShaftDescriptor(name, GeneratorElement::class, null) {
-    override val drawScaleX = scaleX
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
     val cable = cable
@@ -70,20 +68,8 @@ class GeneratorDescriptor(
         defaultDrag * 20 * nominalRads * (1 - generationEfficiency)
 
     override val obj = obj
-    override val static = arrayOf(
-        obj.getPart("Cowl"),
-        obj.getPart("Stand")
-    ).requireNoNulls()
-    override val rotating = arrayOf(obj.getPart("Shaft")).requireNoNulls()
-    val powerLights = arrayOf(
-        obj.getPart("LED_0"),
-        obj.getPart("LED_1"),
-        obj.getPart("LED_2"),
-        obj.getPart("LED_3"),
-        obj.getPart("LED_4"),
-        obj.getPart("LED_5"),
-        obj.getPart("LED_6")
-    ).requireNoNulls()
+    override val static = arrayOf(obj.getPart("main")).requireNoNulls()
+    override val rotating = arrayOf(obj.getPart("rotor")).requireNoNulls()
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
@@ -114,54 +100,6 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         load.step(deltaT)
     }
 
-    val ledColors: Array<Color> = arrayOf(
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black
-    )
-    val ledColorBase: Array<HSLColor> = arrayOf(
-        GREEN,
-        GREEN,
-        GREEN,
-        GREEN,
-        YELLOW,
-        RED,
-        RED
-    )
-
-    fun calcPower(power: Double) {
-        if (power < 0) {
-            for (i in 1..6) {
-                ledColors[i] = Color.black
-            }
-            ledColors[0] = RED.adjustLuminanceClamped((-power / desc.nominalP * 4 * 100).toFloat(), 0f, 60f)
-        } else {
-            val slice = desc.nominalP / 5
-            var remainder = power
-            for (i in 0..6) {
-                ledColors[i] = ledColorBase[i].adjustLuminanceClamped((remainder / slice * 100).toFloat(), 0f, 65f)
-                remainder -= slice
-            }
-        }
-    }
-
-    override fun draw() {
-        draw {
-            ledColors.forEachIndexed { i, color ->
-                GL11.glColor3f(
-                    color.red / 255f,
-                    color.green / 255f,
-                    color.blue / 255f
-                )
-                desc.powerLights[i].draw()
-            }
-        }
-    }
-
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
         if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
         return null
@@ -170,7 +108,6 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         val power = stream.readDouble()
-        calcPower(power)
         load.target = Math.min(1.0, Math.abs(power / desc.nominalP)).toFloat()
     }
 }

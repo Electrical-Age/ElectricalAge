@@ -4,7 +4,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 
-/** The plant condenser (the Steam Condenser's model until its own). */
+/** The plant condenser (tools/models/plantcondenser.py), its drive coupling toward the motor that drives it. */
 public class PlantCondenserRender extends TransparentNodeElementRender {
     final PlantCondenserDescriptor desc;
 
@@ -13,9 +13,21 @@ public class PlantCondenserRender extends TransparentNodeElementRender {
         desc = (PlantCondenserDescriptor) d;
     }
 
+    int motorSide;
+
     @Override
     public void draw() {
         front.glRotateXnRef();
-        desc.draw();
+        desc.draw(motorSide);
+    }
+
+    @Override
+    public void networkUnserialize(java.io.DataInputStream stream) {
+        super.networkUnserialize(stream);
+        try {
+            motorSide = stream.readByte();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }

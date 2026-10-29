@@ -26,19 +26,12 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     // If you set this you should also set volumeSetting in render.
     // (Otherwise it'll stick to 100% volume.)
     internal open val sound: String? = null
-    /** The model drawn this much thinner across the shaft (a smaller machine on the same model until its own). */
-    open val drawScaleX = 1f
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
     open fun draw(angle: Double) {
-        if (drawScaleX != 1f) {
-            preserveMatrix {
-                GL11.glScalef(drawScaleX, 1f, 1f)
-                drawModel(angle)
-            }
-        } else drawModel(angle)
+        drawModel(angle)
     }
 
     private fun drawModel(angle: Double) {
@@ -47,11 +40,11 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
         preserveMatrix {
             assert(rotating.size > 0)
-            val bb = rotating[0].boundingBox()
-            val centre = bb.centre()
-            val ox = centre.x
-            val oy = centre.y
-            val oz = centre.z
+            // (about the shaft line through the rotor's origin, from its NAME.txt: tools/models/README-shaft.md)
+            val r = rotating[0]
+            val ox = r.getFloat("originX").toDouble()
+            val oy = r.getFloat("originY").toDouble()
+            val oz = r.getFloat("originZ").toDouble()
             GL11.glTranslated(ox, oy, oz)
             GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)
@@ -60,6 +53,22 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             }
         }
     }
+
+    /** A valve's stem (part `valve`, if the model has one), lifted by up to 1.5 px with the valve's opening (0..1). */
+    val valve: Obj3D.Obj3DPart? get() = obj.getPart("valve")
+
+    fun drawValve(opening: Float) {
+        val v = valve ?: return
+        preserveMatrix {
+            GL11.glTranslatef(0f, Math.max(0f, Math.min(1f, opening)) * 1.5f / 16f, 0f)
+            v.draw()
+        }
+    }
+
+    /** Its model's hitbox (NAME.hitbox, tools/models/README-shaft.md), turned with its front. */
+    private val hitbox by lazy { mods.eln.node.transparent.ModelHitbox.of(obj) }
+
+    override fun modelHitbox() = hitbox
 
     override fun hasItemDraw() = true
 

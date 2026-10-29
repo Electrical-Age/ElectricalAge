@@ -203,6 +203,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         super.networkSerialize(stream);
         try {
             stream.writeFloat((float) Math.min(1, shaftW / NOMINAL_P));
+            stream.writeFloat(tripped ? 0 : (float) gate);   // (the fuel valve's stem)
+            stream.writeBoolean(burning);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -206,9 +206,9 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             double e = Math.min(getShaft().getEnergy(), brakeW * time);
             getShaft().setEnergy(getShaft().getEnergy() - e);
             totalBrake += e;
-            if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 6 == 0)
-                sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.ANVIL_LAND, net.minecraft.sounds.SoundSource.BLOCKS,
-                    (float) Math.min(0.6, 0.15 + w), 0.6f);   // (the knock of water on the blades)
+            if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
+                sl.playSound(null, node.coordonate.pos(), mods.eln.sound.ElnSounds.event("eln:steam_knock"), net.minecraft.sounds.SoundSource.BLOCKS,
+                    (float) Math.min(0.8, 0.25 + w), 0.85f + 0.3f * (float) Math.random());   // (the knock of water on the blades)
         }
         wetSeconds = r > WATER_SPEED && w > WATER_MAX ? wetSeconds + time : Math.max(0, wetSeconds - time);
         if (wetSeconds > WET_BURN_S) new Failure(ShaftSteamTurbineElement.this).fail(FailureCause.WATER, w);
@@ -380,6 +380,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         try {
             stream.writeFloat((float) Math.min(1, steamKgPerS / spec.nominalKgPerS));   // (the sound's loudness)
             controls.serialize(stream);
+            stream.writeFloat(tripped ? 0 : (float) Math.min(gate, controls.limit));   // (the governor valve's stem)
+            stream.writeBoolean(brakeW > 0);   // (wet steam knocking)
         } catch (IOException e) {
             e.printStackTrace();
         }

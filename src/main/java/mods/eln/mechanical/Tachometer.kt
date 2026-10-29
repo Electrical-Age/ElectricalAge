@@ -29,8 +29,10 @@ import java.text.ParseException
 class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     TachometerElement::class, null) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
-    override val rotating = arrayOf(obj.getPart("Shaft"))
+    override val static = arrayOf(obj.getPart("main"))
+    override val rotating = arrayOf(obj.getPart("rotor"))
+    /** The dial's pointer: up at 0, turned about x (positive: clockwise seen from the front). */
+    val needle = obj.getPart("needle")
 }
 
 open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
@@ -117,9 +119,13 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     internal var minRads = TachometerElement.DefaultMinRads
     internal var maxRads = TachometerElement.DefaultMaxRads
 
+    private val tdesc = desc as TachometerDescriptor
+
     override fun draw() {
         renderPreProcess = drawCable(Direction.YN, Eln.stdCableRenderSignal, connections, renderPreProcess)
-        super.draw()
+        // the dial: 7:30 at its minimum, 4:30 at its maximum
+        val frac = ((rads - minRads) / Math.max(1f, maxRads - minRads)).coerceIn(0.0, 1.0)
+        draw { tdesc.needle?.draw((-135 + 270 * frac).toFloat(), 1f, 0f, 0f) }
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

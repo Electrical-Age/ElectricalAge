@@ -45,6 +45,7 @@ fuelgenerator200v/fuelgenerator200v.obj
 fuelgenerator50v/fuelgenerator50v.obj
 fuelheater/fuelheater.obj
 groundcable/groundcable.obj
+heatexchanger/heatexchanger.obj
 highcapacitybattery/highcapacitybattery.obj
 highcurrentbattery/highcurrentbattery.obj
 highvoltagebattery/highvoltagebattery.obj
@@ -73,6 +74,7 @@ mediumvoltageswitch/mediumvoltageswitch.obj
 oilpump200v/oilpump200v.obj
 oilpump50v/oilpump50v.obj
 passivethermaldissipatora/passivethermaldissipatora.obj
+plantcondenser/plantcondenser.obj
 platemachinea/platemachinea.obj
 platemachineb/platemachineb.obj
 plc/plc.obj
@@ -91,6 +93,16 @@ robustlampsuspended/robustlampsuspended.obj
 rtu/rtu.obj
 scanner/scanner.obj
 sconcelamp/sconcelamp.obj
+shaftflywheel/shaftflywheel.obj
+shaftgas/shaftgas.obj
+shaftgen4kw/shaftgen4kw.obj
+shaftgen8kw/shaftgen8kw.obj
+shafthub/shafthub.obj
+shaftjoint/shaftjoint.obj
+shaftmotor/shaftmotor.obj
+shaftsteamhp/shaftsteamhp.obj
+shaftsteamlp/shaftsteamlp.obj
+shafttacho/shafttacho.obj
 signalsource/signalsource.obj
 signalsourcepot/signalsourcepot.obj
 simplelamp/simplelamp.obj

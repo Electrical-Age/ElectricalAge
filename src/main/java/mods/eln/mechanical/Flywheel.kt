@@ -8,8 +8,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 class FlywheelDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     FlyWheelElement::class, null) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
-    override val rotating = arrayOf(obj.getPart("Flywheel"), obj.getPart("Shaft"))
+    override val static = arrayOf(obj.getPart("main"))
+    override val rotating = arrayOf(obj.getPart("rotor"))
 }
 
 class FlyWheelElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : StraightJointElement(node, desc_) {

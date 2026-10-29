@@ -19,14 +19,13 @@ import java.io.DataOutputStream
 
 /**
  * The shaft Steam Turbine (ShaftSteamTurbineElement): steam by EA pipe in on top and out of its back, work onto the
- * shaft (Baughn 2026-10-29). The 1.12 model until its own.
+ * shaft (Baughn 2026-10-29). Models: tools/models/shaftturbines.py (`main`, `rotor`, `valve`: the governor valve).
  */
 class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbineSpec) :
     SimpleShaftDescriptor(baseName, ShaftSteamTurbineElement::class, null) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Cowl"), obj.getPart("Stand"))
-    override val rotating = arrayOf(obj.getPart("Shaft"), obj.getPart("Fan"))
-    override val sound = "eln:steam_turbine"
+    override val static = arrayOf(obj.getPart("main"))
+    override val rotating = arrayOf(obj.getPart("rotor"))
 
     fun spec() = spec
 
@@ -53,31 +52,52 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbin
     }
 }
 
-/** Its render: the shaft, the steam's roar by flow, and the controls for the screen (SteamGeneratorScreen). */
+/**
+ * Its render: the shaft, the governor valve's stem by its opening, and its sounds (MachineSounds.turbine: steam hiss by
+ * flow, rotor tones by speed, a whistle over 105 %); the controls for the screen (SteamGeneratorScreen).
+ */
 class SteamTurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc),
     mods.eln.oil.SteamValveControl.Rendered {
     override val cableRender = Eln.stdCableRenderSignal
     val controls = mods.eln.oil.SteamValveControl.Render(this, (desc as SteamTurbineDescriptor).spec.targetMaxBar)
+    private val sdesc = desc as SteamTurbineDescriptor
+    val valve = SlewLimiter(0.5f)
+    var wet = false
+
+    init {
+        mods.eln.sound.MachineSounds.turbine(coordonate(), { rads / ShaftSteamTurbineElement.RATED_RADS }, { volumeSetting.position.toDouble() }, false, 1f)
+            .forEach { addLoopedSound(it) }
+    }
 
     override fun controls() = controls
+
+    override fun draw() {
+        draw { sdesc.drawValve(valve.position) }
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        valve.step(deltaT)
+    }
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         volumeSetting.target = stream.readFloat()
         controls.read(stream)
+        valve.target = stream.readFloat()
+        wet = stream.readBoolean()
     }
 }
 
 /**
- * The Gas Turbine (GasTurbineElement; Baughn 2026-10-29, the shaft redo): a light, fast peaker. The 1.12 model until
- * its own (its fuel flange and exhaust duct aren't drawn yet).
+ * The Gas Turbine (GasTurbineElement; Baughn 2026-10-29, the shaft redo): a light, fast peaker. Model:
+ * tools/models/shaftgas.py (`main`, `rotor`: its compressor behind the intake, `valve`: the fuel valve).
  */
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     SimpleShaftDescriptor(basename, GasTurbineElement::class, null) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Cowl"), obj.getPart("Stand"))
-    override val rotating = arrayOf(obj.getPart("Shaft"), obj.getPart("Fan"))
-    override val sound = "eln:gas_turbine"
+    override val static = arrayOf(obj.getPart("main"))
+    override val rotating = arrayOf(obj.getPart("rotor"))
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add(Utils.plotPower("A fast peaker: up to ", GasTurbineElement.NOMINAL_P) + String.format(" onto the shaft at %.0f%% of its fuel's heat.",
@@ -91,12 +111,32 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     }
 }
 
-/** Its render: the shaft, its roar by power. */
+/** Its render: the shaft, the fuel valve's stem, its roar by power and pitch by speed (MachineSounds.turbine). */
 class GasTurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender = Eln.stdCableRenderSignal
+    private val gdesc = desc as GasTurbineDescriptor
+    val valve = SlewLimiter(0.5f)
+    var burning = false
+
+    init {
+        mods.eln.sound.MachineSounds.turbine(coordonate(), { rads / GasTurbineElement.RATED_RADS },
+            { if (burning) Math.max(0.15, volumeSetting.position.toDouble()) else 0.0 }, true, 1f)
+            .forEach { addLoopedSound(it) }
+    }
+
+    override fun draw() {
+        draw { gdesc.drawValve(valve.position) }
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        valve.step(deltaT)
+    }
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         volumeSetting.target = stream.readFloat()
+        valve.target = stream.readFloat()
+        burning = stream.readBoolean()
     }
 }

@@ -113,8 +113,8 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         double u = load.getU();
         resistor.setR(wantW > 1 && u > 1 ? u * u / wantW : 1e9);
         if (cavitating && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 8 == 0)
-            sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.GRINDSTONE_USE, net.minecraft.sounds.SoundSource.BLOCKS,
-                0.4f, 1.6f);   // (the rattle of cavitation)
+            sl.playSound(null, node.coordonate.pos(), mods.eln.sound.ElnSounds.event("eln:pump_cavitation"), net.minecraft.sounds.SoundSource.BLOCKS,
+                0.5f, 0.9f + 0.2f * (float) Math.random());   // (the rattle of cavitation)
     }
 
     @Override
