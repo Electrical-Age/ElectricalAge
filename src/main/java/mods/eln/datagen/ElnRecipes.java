@@ -799,6 +799,13 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', findItemStack("Steam Condenser"),
             'M', findItemStack("Advanced Machine Block")
         );
+        addRecipe(findItemStack("Counterflow Heat Exchanger"),
+            "cIc",
+            "ccc",
+            "cIc",
+            'c', findItemStack("Copper Thermal Cable"),
+            'I', findItemStack("Iron Tank")
+        );
         // cheap on purpose (Baughn 2026-10-29): what a water slug costs
         addRecipe(findItemStack("Turbine Blade Set"),
             "I I",

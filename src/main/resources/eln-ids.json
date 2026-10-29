@@ -2015,6 +2015,12 @@
   "kind": "transparent_node",
   "name": "plant_steam_condenser"
  },
+ "eln:transparent_node@5304": {
+  "descriptor": "HeatExchangerDescriptor",
+  "display": "Counterflow Heat Exchanger",
+  "kind": "transparent_node",
+  "name": "counterflow_heat_exchanger"
+ },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",
   "display": "Fractionating Column Base",

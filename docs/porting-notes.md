@@ -83,6 +83,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   ones saved before (their "at" arrays held 4 or 6, no "g" key) load at 2. LP turbine, HP exhaust, plant condenser
   and tank ports take a large pipe (PipePart.LARGE_END_K). Kit: 8 alloy plates in a ring. `PipeSizeCases`,
   `shaft_plant_large_crossover_full_flow` (42 g/s, HP 13.7 + LP 15.0 kW on one shaft, 33 m/s in the crossover).
+- Shaft redo, part 4 (Baughn 2026-10-29). Gas Turbine (same id, GasTurbineElement): fuel (FuelRegistry's gasoline,
+  gas and diesel lists, by energy per mB: e.g. gasoline 1.74 kJ/mB, diesel 2.64, natural gas 2.43) from a 16-bucket tank
+  by any pipe or capability; an open cycle, 28 % of the fuel's heat onto the shaft at rated speed, none under half speed
+  (it must be spun up: a Shaft Motor); 10 kW; H 1 s, fuel valve 0.3 s; governor/trip/windage as the steam turbines, a
+  signal on its front sets the valve by hand; the rest of the heat leaves as air at 500 C out of its back (a large
+  pipe's port) or vents. Counterflow Heat Exchanger (transparent_node@5304): 4 L a side, UA 2 kW/K, effectiveness-NTU
+  for counterflow from last step's inflows (cp very large on a side holding water and steam), A in left / out right,
+  B in back (bottom) / out front (top). `GasPlantCases`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

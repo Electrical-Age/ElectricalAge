@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T15:29:05.47837335	eln-global/EA models
+// 26.3	2026-10-29T15:58:41.986605667	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -37,6 +37,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacity_oriented_battery.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/counterflow_heat_exchanger.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/current_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/dc_dc_converter.json
 18a289fab3462a60a4549341ddffcafd418d5077 assets/eln/blockstates/deepslate_lead_ore.json
@@ -201,6 +202,7 @@ b01ecca3f3ec4b91a29e92cd48c43a2203625944 assets/eln/items/copper_coil.json
 1f7628d711e81955b8043ecc443341a2ab866db3 assets/eln/items/copper_plate.json
 bfa33d12496a132b673051b4b75a8e6f6c0ade17 assets/eln/items/copper_thermal_cable.json
 ae4529679393fdd0da412ff7ec147a6e1f502f8b assets/eln/items/cost_oriented_battery.json
+8478a4b8c99c153aab0281b7741da35628d6600e assets/eln/items/counterflow_heat_exchanger.json
 510704363c9c2101d95522808883862bd4af1936 assets/eln/items/current_oriented_battery.json
 46774c7c0c9bc757504f13a6afc7cbe45cd1614f assets/eln/items/cyan_brush.json
 b6a86730122c1e3e042892a19167fc2e440ca338 assets/eln/items/d_flip_flop_chip.json
@@ -601,6 +603,7 @@ b358e230dd062a8df2c2e2f608f1fe8f16e7cfa5 assets/eln/models/item/copper_dust.json
 4417ef24ef1a588e9a886ecd4fcda40e28837755 assets/eln/models/item/copper_thermal_cable.json
 ab5f489ce7ccc43e91645bb66ee6ee1cab07742b assets/eln/models/item/cost_oriented_battery.json
 b2a10d604e646d4b250b589bc69d7b136e1e73a2 assets/eln/models/item/cost_oriented_battery_3d.json
+1870838a52b647683b6575ed51e8cec48e009c0c assets/eln/models/item/counterflow_heat_exchanger.json
 2d55f400a53da004175402102047ed397eebe632 assets/eln/models/item/current_oriented_battery.json
 d21f22ce19eafce8807be27945e6df9d787ba164 assets/eln/models/item/current_oriented_battery_3d.json
 2f3c76e5e017396bfe8efe4edd6a5a2bdf7893a8 assets/eln/models/item/cyan_brush.json

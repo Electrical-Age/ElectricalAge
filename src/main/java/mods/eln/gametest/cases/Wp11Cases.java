@@ -10,7 +10,6 @@ import mods.eln.mechanical.GeneratorDescriptor;
 import mods.eln.mechanical.GeneratorElement;
 import mods.eln.mechanical.ShaftElement;
 import mods.eln.mechanical.ShaftNetwork;
-import mods.eln.mechanical.TurbineElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;

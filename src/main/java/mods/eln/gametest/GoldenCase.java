@@ -72,7 +72,9 @@ final class GoldenCase implements TestCase {
         "X-Ray Scanner", java.util.Set.of("energyStorage", "chargePower", "dischargePower"), // Baughn 2026-10-11
         // rebuilt on the steam network (Baughn 2026-10-29): steam by pipe, work by the expansion; no 1.12 number keeps
         // its meaning (it took 7,200 mB/s of capability steam at a fixed 2.257 J/mB)
-        "Steam Turbine", java.util.Set.of());
+        "Steam Turbine", java.util.Set.of(),
+        // the same for the Gas Turbine (Baughn 2026-10-29): its 4 mB of capability fuel at a fixed rate gave way to a cycle
+        "Gas Turbine", java.util.Set.of());
 
     /** Fields changed on purpose (golden/README.md): name -> field -> why. */
     static final Map<String, Map<String, String>> CHANGED = Map.of(
@@ -98,6 +100,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@272", "eln:transparent_node@273", "eln:shared_item@4164",   // 8 kW generator, shaft motor, blades (Baughn 2026-10-29)
         "eln:transparent_node@5288", "eln:transparent_node@5292", "eln:transparent_node@5296",   // tanks, inline pump (Baughn 2026-10-29)
         "eln:transparent_node@274", "eln:transparent_node@5300",   // LP turbine, plant condenser (Baughn 2026-10-29)
+        "eln:transparent_node@5304",   // the counterflow heat exchanger (Baughn 2026-10-29)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",

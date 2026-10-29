@@ -95,6 +95,9 @@ public class Wp10aContent implements ElnContent {
         // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)
         transparentNodeItem.addDescriptor(52 + (id << 6), new mods.eln.oil.PlantCondenserDescriptor(TR_NAME(Type.NONE, "Plant Steam Condenser"),
             0.06, 40000, 0.1, "condenser200v"));
+        // the counterflow heat exchanger (economizer, reheater, steam raiser: Baughn 2026-10-29); UA 2 kW/K, 4 L a side
+        transparentNodeItem.addDescriptor(56 + (id << 6), new mods.eln.oil.HeatExchangerDescriptor(TR_NAME(Type.NONE, "Counterflow Heat Exchanger"),
+            2000, 0.004, "condenser50v"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */

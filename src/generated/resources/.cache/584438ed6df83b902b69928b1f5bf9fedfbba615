@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T14:48:29.480998818	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-29T15:58:41.989708825	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -105,6 +105,7 @@ a4bc5c8521cddcafc66204673564d0f12cd4a473 data/eln/advancement/recipes/misc/coppe
 eae89276a850bb472186bce9bd10a536f029cc93 data/eln/advancement/recipes/misc/copper_thermal_cable.json
 2a3ff9592a14b04f39eec41e7a86d8a86bb54afb data/eln/advancement/recipes/misc/copper_thermal_cable_2.json
 eb063b091ad07eb5f06a39702afbdcd703ebc5fd data/eln/advancement/recipes/misc/cost_oriented_battery.json
+100b24db0bc1b9095127ad791f3008b257633754 data/eln/advancement/recipes/misc/counterflow_heat_exchanger.json
 d3db4b32cbde30526cac24c0dc87ff6b8e4fc85c data/eln/advancement/recipes/misc/current_oriented_battery.json
 dbbb12bd98f307467cefd19fa6a0ec1f7271eaa5 data/eln/advancement/recipes/misc/cyan_brush.json
 00fa837c4a13e0176ea6eded44c13316368cbb97 data/eln/advancement/recipes/misc/d_flip_flop_chip.json
@@ -459,6 +460,7 @@ b99487bebe5fb5db55128da9327d630d8b0b2ade data/eln/recipe/copper_coil.json
 8c328672129b25913e931b652ce23f22576e63d7 data/eln/recipe/copper_thermal_cable.json
 836168ec2234349f8e92493da4fb6e2578ce81bc data/eln/recipe/copper_thermal_cable_2.json
 72f0e9a2cd5c0819a4ff08e2502cc6fb094d9012 data/eln/recipe/cost_oriented_battery.json
+1706c766097ce60b9eddf7b274b547650e38c338 data/eln/recipe/counterflow_heat_exchanger.json
 ce6d0ac0cea12579d72058660fd90558a03db127 data/eln/recipe/current_oriented_battery.json
 e70d02238ffa719c088ac138dab88c1d69bfd4d5 data/eln/recipe/cyan_brush.json
 c40890deab3ed13bca080d4d8684932603c57add data/eln/recipe/d_flip_flop_chip.json
