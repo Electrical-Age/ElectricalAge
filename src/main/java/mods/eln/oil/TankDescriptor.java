@@ -51,6 +51,11 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         drawLevel(fill);
     }
 
+    void drawPart(String name) {
+        var p = obj == null ? null : obj.getPart(name);
+        if (p != null) p.draw();
+    }
+
     void drawLevel(float fill) {
         if (obj == null) return;
         var l = obj.getPart("level");

@@ -48,6 +48,20 @@ def ports_part(t):
             m.add(*turned(flange_x0(y), k))
     return m
 
+def disc_part(y):
+    """A flange disc alone on the x = 0 face at height y (a merged box's port with a pipe on it: TankRender turns it to
+    the face)."""
+    m = Model()
+    m.add(prism("x", y, C, 3.75, 0.0, 0.75, "steel", n=14, caps=(True, True)))
+    m.add(*bolt_ring("x", y, C, 3.3, 0.75, 1.0, 6, rb=0.25))
+    return m
+
+def top_disc_part():
+    m = Model()
+    m.add(prism("y", C, C, 3.75, 15.25, 16.0, "steel", n=14))
+    m.add(*bolt_ring("y", C, C, 3.3, 15.0, 15.25, 6, rb=0.25))
+    return m
+
 def glass_part(t):
     """The sight glass on the front: brass frame, dark backing, 1.5..14.5 px."""
     m = Model()
@@ -66,7 +80,8 @@ def main():
     for tier, t in TIERS.items():
         name = "tank" + tier
         d = out_dir(res, name)
-        counts = write_parts(d, name, [("shell", shell_part(t)), ("ports", ports_part(t)), ("glass", glass_part(t)), ("level", level_part())])
+        counts = write_parts(d, name, [("shell", shell_part(t)), ("ports", ports_part(t)), ("glass", glass_part(t)), ("level", level_part()),
+                                       ("disc_low", disc_part(4.0)), ("disc_high", disc_part(12.0)), ("disc_top", top_disc_part())])
         atlas(os.path.join(d, "tex.png"), t["paint"])
         print(name, counts)
 

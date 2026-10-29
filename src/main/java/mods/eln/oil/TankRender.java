@@ -14,6 +14,8 @@ public class TankRender extends TransparentNodeElementRender {
     /** Whether it draws the tank (a lone tank, or a box's lowest corner), and the box's size. */
     boolean draws = true;
     int sx = 1, sy = 1, sz = 1;
+    /** In a box: its ports with a pipe on them (TankElement.coupled): a flange each. */
+    int coupled;
 
     public TankRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -22,6 +24,18 @@ public class TankRender extends TransparentNodeElementRender {
 
     @Override
     public void draw() {
+        // a box's flanges, where pipes meet it, on this block's faces
+        if (coupled != 0) {
+            for (int face = 2; face <= 5; face++)
+                for (int hi = 0; hi < 2; hi++) {
+                    if ((coupled & 1 << (2 * face + hi)) == 0) continue;
+                    mods.eln.gl.GL11.glPushMatrix();
+                    mods.eln.misc.Direction.fromEnumFacing(net.minecraft.core.Direction.from3DDataValue(face)).glRotateXnRef();
+                    desc.drawPart(hi == 0 ? "disc_low" : "disc_high");
+                    mods.eln.gl.GL11.glPopMatrix();
+                }
+            if ((coupled & 1 << 12) != 0) desc.drawPart("disc_top");
+        }
         if (!draws) return;
         if (sx == 1 && sy == 1 && sz == 1) {
             front.glRotateXnRef();
@@ -52,6 +66,7 @@ public class TankRender extends TransparentNodeElementRender {
             sx = stream.readByte();
             sy = stream.readByte();
             sz = stream.readByte();
+            coupled = stream.readShort();
         } catch (IOException e) {
             e.printStackTrace();
         }

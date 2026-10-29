@@ -292,6 +292,16 @@ public final class PlumbingCases {
                 String.format("%.4f kg", b.vessel.mWater));
             ctx.check("tank box: a low port of its bottom layer gives water (C got water)", c.vessel.mLiquid() > cWater0 + 0.01,
                 String.format("%.3f kg", c.vessel.mLiquid() - cWater0));
+            // (Baughn: a box draws a flange only where a pipe meets it)
+            int withPipes = 0, top = 0, east = 0;
+            for (TankElement t : ts) {
+                if (t.coupled != 0) withPipes++;
+                var cc = t.node.coordonate;
+                if (cc.equals(new mods.eln.misc.Coordonate(ctx.at(2, 3, 2), ctx.level()))) top = t.coupled;
+                if (cc.equals(new mods.eln.misc.Coordonate(ctx.at(3, 1, 3), ctx.level()))) east = t.coupled;
+            }
+            ctx.check("tank box: flanges only where pipes meet it (two blocks: the top one, the east low one)",
+                withPipes == 2 && top == 1 << 12 && east == 1 << 10, String.format("%d blocks; top %x, east %x", withPipes, top, east));
         }
     }
 

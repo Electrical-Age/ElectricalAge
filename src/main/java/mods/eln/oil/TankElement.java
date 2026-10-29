@@ -40,6 +40,12 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
     private List<FluidPort> ports = List.of();
     /** The water's share of its volume, last published (the sight glass). */
     float shownFill = -1;
+    /**
+     * In a box: which of its ports have something coupled to them (Baughn 2026-10-29: a merged box draws a flange only
+     * where a pipe meets it): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D values 2..5), bit 12 the
+     * top. Published when it changes.
+     */
+    public int coupled;
 
     public TankElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -51,6 +57,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
                 new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
             if (Math.abs(fill() - shownFill) > 0.02) needPublish();
+            int c = group == null ? 0 : coupledPorts();
+            if (c != coupled) {
+                coupled = c;
+                needPublish();
+            }
         });
     }
 
@@ -99,6 +110,26 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
             }
         }
         ports = out;
+    }
+
+    /** Which of its ports meet a port of whatever is beside it (a pipe's end, a device's flange): see `coupled`. */
+    int coupledPorts() {
+        int mask = 0;
+        var level = node.coordonate.world();
+        for (FluidPort p : ports) {
+            var f = net.minecraft.core.Direction.from3DDataValue(p.face());
+            var there = net.minecraft.core.BlockPos.of(p.pos()).relative(f);
+            var other = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(there, level));
+            FluidDevice d = other instanceof FluidDevice fd ? fd
+                : other instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof FluidDevice fe ? fe : null;
+            if (d == null) continue;
+            for (FluidPort q : d.fluidPorts())
+                if (q.pos() == there.asLong() && q.face() == f.getOpposite().get3DDataValue() && q.at() == p.at()) {
+                    if (p.face() == 1) mask |= 1 << 12;
+                    else if (p.face() >= 2) mask |= 1 << (2 * p.face() + (p.at() == sideSpot(p.face(), HIGH) ? 1 : 0));
+                }
+        }
+        return mask;
     }
 
     /** The tanks of its tier on its six sides (for regrouping). */
@@ -197,6 +228,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
             stream.writeByte(group == null ? 1 : group.sx);
             stream.writeByte(group == null ? 1 : group.sy);
             stream.writeByte(group == null ? 1 : group.sz);
+            stream.writeShort(group == null ? 0 : coupled);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
