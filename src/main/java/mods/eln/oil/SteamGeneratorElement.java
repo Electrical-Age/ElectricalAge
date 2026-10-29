@@ -187,6 +187,22 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
      * A stopped turbine only holds the water.
      */
     static final double WATER_MAX = 0.1, WATER_SPEED = 0.2;
+    /**
+     * The casing drain (Baughn: water must get out of the inlet, slowly; large quantities stay fatal): it throws away
+     * this share of the inlet's volume in liquid water a second, so condensate from a cooling line trickles out, while a
+     * slug over WATER_MAX arrives faster than it can leave.
+     */
+    static final double DRAIN_SHARE_PER_S = 0.005;
+
+    /** The casing drain over time (s): liquid water leaves the inlet, with its heat. */
+    void drain(double time) {
+        double mL = Math.min(inlet.mLiquid(), DRAIN_SHARE_PER_S * inlet.volume * Water.RHO_L * time);
+        if (mL <= 0) return;
+        double T = inlet.T();
+        inlet.mWater -= mL;
+        inlet.energy -= mL * Water.hLiquid(T);
+        inlet.update();
+    }
 
     /** The share of the inlet's volume that is liquid water. */
     public double waterShare() {
@@ -262,6 +278,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             double jpk = jPerKg(), hIn = Water.hVapour(tIn);
             double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
             if (condenser != null) condenser.exhaust(got, Math.max(0, air0 - inlet.mAir), hIn - jpk, tIn);   // (into it, after the work)
+            drain(time);
             double pMech = got * jpk / time;
             // the shaft
             double pNom = desc.nominalP;
