@@ -1232,9 +1232,24 @@ public final class CableCases {
                 all.append(' ').append(d.name).append('=').append(f[0]).append(',').append(f[1]).append(';');
             }
             c.line(all.toString());
+            // Baughn 2026-10-29: a lamp supply's and a signal processor's open door made their box almost a full block
+            StringBuilder doors = new StringBuilder();
+            doorsOk = true;
+            for (var d : mods.eln.Eln.sixNodeItem.all().values())
+                if (d instanceof mods.eln.sixnode.lampsupply.LampSupplyDescriptor || d instanceof mods.eln.sixnode.electricalmath.ElectricalMathDescriptor
+                    || d instanceof mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor || d instanceof mods.eln.sixnode.EmergencyLampDescriptor) {
+                    int[] f = d.footprint();
+                    doors.append(d.name).append('=').append(f[0]).append(',').append(f[1]).append("; ");
+                    doorsOk &= f[1] <= 8 && f[0] < 8;
+                }
+            this.doors = doors.toString();
         }
 
+        boolean doorsOk;
+        String doors;
+
         public void measure(TestContext c) {
+            c.check("footprint: devices with doors are boxed closed, emergency lamps without their glow (at most half a block high, narrower than the face)", doorsOk && !doors.isEmpty(), doors);
             c.check("footprint: a floor trimmer is clicked on its 6 x 6 model only", floorOk, floor);
             c.check("footprint: its outline is the model's box", outlineOk, outline);
             c.check("footprint: a wall trimmer likewise", wallOk, wall);

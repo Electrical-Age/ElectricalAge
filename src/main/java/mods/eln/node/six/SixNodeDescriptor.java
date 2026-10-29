@@ -156,10 +156,16 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return footprint;
     }
 
+    /** Model parts left out of the footprint: hinged ones, whose raw geometry is drawn open (Baughn: a lamp supply's
+     *  and a signal processor's open door made their box almost a full block). */
+    protected java.util.Set<Obj3D.Obj3DPart> footprintIgnores() {
+        return java.util.Set.of();
+    }
+
     private int[] measureFootprint() {
         BoundingBox[] boxes = {BoundingBox.mergeIdentity(), BoundingBox.mergeIdentity()};   // (its parts, its whole models)
         boolean[] any = new boolean[2];
-        collectModels(this, 0, boxes, any);
+        collectModels(this, 0, boxes, any, footprintIgnores());
         BoundingBox b = any[0] ? boxes[0] : any[1] ? boxes[1] : null;
         if (b == null || !(b.max.x > b.min.x)) return new int[]{6, 3};
         double across = Math.max(Math.max(-b.min.y, b.max.y), Math.max(-b.min.z, b.max.z)) * modelScale;
@@ -168,7 +174,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     }
 
     /** The model parts and models held by o's fields, and by the fields of EA objects it holds (as a render obj). */
-    private static void collectModels(Object o, int depth, BoundingBox[] boxes, boolean[] any) {
+    private static void collectModels(Object o, int depth, BoundingBox[] boxes, boolean[] any, java.util.Set<Obj3D.Obj3DPart> ignore) {
         for (Class<?> c = o.getClass(); c != null && c != Object.class; c = c.getSuperclass())
             for (var f : c.getDeclaredFields()) {
                 if (java.lang.reflect.Modifier.isStatic(f.getModifiers()) || f.getType().isPrimitive()) continue;
@@ -180,11 +186,12 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                     continue;
                 }
                 if (v instanceof Obj3D.Obj3DPart part) {
+                    if (ignore.contains(part)) continue;
                     boxes[0] = boxes[0].merge(part.boundingBox());
                     any[0] = true;
                 } else if (v instanceof Obj3D.Obj3DPart[] a) {
                     for (var part : a)
-                        if (part != null) {
+                        if (part != null && !ignore.contains(part)) {
                             boxes[0] = boxes[0].merge(part.boundingBox());
                             any[0] = true;
                         }
@@ -193,7 +200,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                     any[1] |= !m.parts().isEmpty();
                 } else if (depth == 0 && v != null && !(v instanceof GenericItemBlockUsingDamageDescriptor) && !v.getClass().isEnum()
                     && v.getClass().getName().startsWith("mods.eln.sixnode.")) {
-                    collectModels(v, 1, boxes, any);
+                    collectModels(v, 1, boxes, any, ignore);
                 }
             }
     }

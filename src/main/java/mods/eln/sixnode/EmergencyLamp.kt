@@ -81,6 +81,9 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
             add(Utils.plotEnergy("Battery capacity:", batteryCapacity))
         }
     }
+
+    /** The glow quads span the whole face: not part of the box (Baughn 2026-10-29: hitboxes larger than the model). */
+    override fun footprintIgnores(): Set<Obj3D.Obj3DPart> = setOfNotNull(lightWall, lightCeiling)
 }
 
 class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor)

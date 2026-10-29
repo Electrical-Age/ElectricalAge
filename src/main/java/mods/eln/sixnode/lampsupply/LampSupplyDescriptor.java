@@ -88,4 +88,10 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
+
+    /** Its window is drawn open in the model: not part of the box (Baughn 2026-10-29). */
+    @Override
+    protected java.util.Set<Obj3DPart> footprintIgnores() {
+        return window == null ? java.util.Set.of() : java.util.Set.of(window);
+    }
 }

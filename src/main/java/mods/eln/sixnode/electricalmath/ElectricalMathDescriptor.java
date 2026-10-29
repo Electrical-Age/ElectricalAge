@@ -101,4 +101,10 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 
     // 26.x port: top() removed (client rendering; redone in P3)
     // 26.x port: bottom() removed (client rendering; redone in P3)
+
+    /** Its door is drawn open in the model: not part of the box (Baughn 2026-10-29). */
+    @Override
+    protected java.util.Set<Obj3DPart> footprintIgnores() {
+        return door == null ? java.util.Set.of() : java.util.Set.of(door);
+    }
 }
