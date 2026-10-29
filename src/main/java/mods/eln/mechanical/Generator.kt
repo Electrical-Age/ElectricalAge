@@ -176,6 +176,8 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     SimpleShaftElement(node, desc_) {
     val desc = desc_ as GeneratorDescriptor
+    /** H = 1.5 s of its nominal power at its nominal speed (Argon's sizing; Baughn 2026-10-29: realistic inertia). */
+    override val shaftInertia = inertiaOf(1.5, desc.nominalP.toDouble(), desc.nominalRads.toDouble())
 
     internal val inputLoad = NbtElectricalLoad("inputLoad")
     internal val positiveLoad = NbtElectricalLoad("positiveLoad")

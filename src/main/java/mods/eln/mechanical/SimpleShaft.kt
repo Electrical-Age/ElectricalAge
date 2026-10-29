@@ -164,7 +164,8 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
 
 abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     TransparentNodeElement(node, desc_), ShaftElement {
-    override val shaftMass = 5.0
+    /** A plain shaft piece: 0.05 s of 16 kW at 800 rad/s (a machine sets its own). */
+    override val shaftInertia = inertiaOf(0.05, 16000.0)
     override var shaft = ShaftNetwork(this)
 
     init {

@@ -112,6 +112,8 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
 class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     SimpleShaftElement(node, desc_) {
     val desc = desc_ as TurbineDescriptor
+    /** H = 1 s of its best power at 800 rad/s: a gas turbine is light (fast to start, quick to answer). */
+    override val shaftInertia = inertiaOf(1.0, desc.maxFluidPower)
 
     val tank = PreciseElementFluidHandler(desc.fluidConsumption.toInt())
     var fluidRate = 0f
@@ -145,7 +147,8 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             fluidRate = rc.get()
 
             val power = fluidRate * tank.heatEnergyPerMilliBucket * efficiency
-            shaft.energy += power * time.toFloat()
+            // (with a torque limit: twice its best power at its optimal speed)
+            shaft.drive(power.toDouble(), time, 2 * desc.maxFluidPower / desc.optimalRads)
 
             volume = power / desc.maxFluidPower.toFloat()
         }

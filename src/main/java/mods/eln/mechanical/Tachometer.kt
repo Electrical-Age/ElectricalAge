@@ -41,7 +41,7 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
         val DefaultMaxRads = 1000f
     }
 
-    override val shaftMass = 0.5
+    override val shaftInertia = inertiaOf(0.02, 16000.0)
     private val outputGate = NbtElectricalGateOutput("rpmOutput")
     private val outputGateProcess = NbtElectricalGateOutputProcess("rpmOutputProcess", outputGate)
     private var minRads = DefaultMinRads

@@ -62,7 +62,7 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
 }
 
 class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
-    override val shaftMass = 0.5
+    override val shaftInertia = inertiaOf(0.02, 16000.0)
     private var connectedSides = DirectionSet()
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? = null

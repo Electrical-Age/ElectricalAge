@@ -126,8 +126,8 @@ public final class Wp11Cases {
     // ---- cases ----
 
     /**
-     * Joint + flywheel + joint on one axis merge into one ShaftNetwork: mass = 0.5 + 100 + 0.5 = 101, J/rad =
-     * m^2 * shapeFactor(0.5) / 2. Passive parts have no drag, so 100 rad/s set at build stays 100 rad/s.
+     * Joint + flywheel + joint on one axis merge into one ShaftNetwork: inertia = the sum of theirs, energy 1/2 I w^2
+     * (Baughn 2026-10-29; 1.7.10 stored mass^2 / 4 J per rad/s). Passive parts have no drag, so 100 rad/s set at build stays 100 rad/s.
      */
     static final class ShaftNetworkCase implements TestCase {
         TransparentNodeElement[] parts;
@@ -145,9 +145,10 @@ public final class Wp11Cases {
             ShaftNetwork s = shaft(parts[0]);
             boolean same = s == shaft(parts[1]) && s == shaft(parts[2]) && s.getElements().size() == 3;
             ctx.check("wp11 joint + flywheel + joint share one shaft network", same, s.getElements().size() + " element(s)");
-            ctx.checkValue("wp11 shaft mass [kg] (0.5 + 100 + 0.5)", s.getMass(), 101.0);
+            double i = mods.eln.mechanical.ShaftNetworkKt.inertiaOf(12.5, 16000.0, 800.0) + 2 * mods.eln.mechanical.ShaftNetworkKt.inertiaOf(0.02, 16000.0, 800.0);
+            ctx.checkValue("wp11 shaft inertia [kg m^2] (flywheel 12.5 s + two joints 0.02 s, of 16 kW at 800 rad/s)", s.getInertia(), i);
             ctx.checkValue("wp11 shaft speed [rad/s] (no drag in passive parts: 100 kept)", s.getRads(), 100.0);
-            ctx.checkValue("wp11 shaft energy [J] (m^2*0.5/2 * rads = 255025)", s.getEnergy(), 101.0 * 101.0 * 0.25 * 100.0);
+            ctx.checkValue("wp11 shaft energy [J] (1/2 I w^2)", s.getEnergy(), 0.5 * i * 100.0 * 100.0);
         }
     }
 
@@ -178,7 +179,8 @@ public final class Wp11Cases {
             GeneratorDescriptor d = gen.getDesc();
             ElectricalLoad input = field(gen, "inputLoad");
             ctx.check("wp11 generator shaft slowed by drag only (400 > rads > 200)", rads < 400.0 && rads > 200.0, String.format("%.3f rad/s", rads));
-            ctx.checkValue("wp11 generator mass [kg] (5 + 100)", s.getMass(), 105.0);
+            ctx.checkValue("wp11 generator + flywheel inertia [kg m^2] (1.5 s of 4 kW + 12.5 s of 16 kW, at 800 rad/s)", s.getInertia(),
+                mods.eln.mechanical.ShaftNetworkKt.inertiaOf(1.5, 4000.0, 800.0) + mods.eln.mechanical.ShaftNetworkKt.inertiaOf(12.5, 16000.0, 800.0));
             ctx.checkValue("wp11 generator open-circuit voltage [V] (3200 * rads / 800)", input.getU(), d.getRtoU().getValue(rads));
             ctx.checkValue("wp11 generator open-circuit voltage = 4 V per rad/s [V]", input.getU(), 4.0 * rads);
             mods.eln.sim.ThermalLoad th = field(gen, "thermal");
