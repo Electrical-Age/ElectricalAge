@@ -419,9 +419,24 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         return new double[]{nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0)};
     }
 
+    /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */
+    public String status() {
+        double rads = getShaft().getRads();
+        if (tripped) return I18N.tr("Tripped: overspeed (resets below rated speed)");
+        if (brakeW > 0) return I18N.tr("Braking: wet steam (dry it: a separator tank)");
+        if (spec.wetBraking && exhaustPiped && exhaustPa() > 3 * spec.ratedExhaustPa)
+            return String.format(I18N.tr("Low vacuum: %.2f bar behind it (condenser hot, flooded or without its motor?)"), exhaustPa() / 1e5);
+        if (spec.wetBraking && !exhaustPiped) return I18N.tr("Venting to air: an LP stage wants a condenser at its back");
+        if (inlet == null || steamKgPerS < 1e-4) return controls.limit <= 0.001 ? I18N.tr("Shut: its valve is closed") : I18N.tr("No steam at its inlet");
+        if (controls.isManual()) return I18N.tr("Manual control: no governor or trip");
+        if (rads > RATED_RADS) return I18N.tr("Governing: speed held, valve easing");
+        return I18N.tr("Running");
+    }
+
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new java.util.LinkedHashMap<>();
+        info.put(I18N.tr("Status"), status());
         info.put(I18N.tr("Speed"), Utils.plotRads("", getShaft().getRads()));
         info.put(I18N.tr("Shaft power"), Utils.plotPower("", shaftW));
         info.put(I18N.tr("Steam used"), String.format("%.1f g/s", steamKgPerS * 1000));

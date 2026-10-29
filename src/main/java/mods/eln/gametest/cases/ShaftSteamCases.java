@@ -451,6 +451,7 @@ public final class ShaftSteamCases {
         double max;
         boolean burst, sawTrip;
         int tick;
+        String status;
 
         Overspeed(boolean manual) {
             this.manual = manual;
@@ -475,6 +476,7 @@ public final class ShaftSteamCases {
                 }
                 steam(t);
                 if (++tick == 200) shaft(t).setRads(920);   // (as if a load fell off: over the trip)
+                if (tick == 20) status = t.status();
                 sawTrip |= t.tripped;
                 if (tick < 200) max = Math.max(max, shaft(t).getRads());
             });
@@ -488,6 +490,7 @@ public final class ShaftSteamCases {
                 ctx.check("overspeed: under manual control nothing stops it: past the trip to the burst speed, and it fails",
                     burst && max > 880, String.format("max %.0f rad/s, burst %s", max, burst));
                 ctx.check("overspeed: manual control never trips", !sawTrip, "");
+                ctx.check("overspeed: Jade says why: manual control, no governor or trip", status != null && status.startsWith("Manual control"), String.valueOf(status));
             } else {
                 ctx.check("overspeed: automatic, the governor holds it under 880 rad/s", !burst && max < 880 && max > 700,
                     String.format("max %.0f rad/s", max));

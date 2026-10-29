@@ -233,10 +233,22 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             loadedEx = new double[]{nbt.getDoubleOr("exhaustW", 0), nbt.getDoubleOr("exhaustA", 0), nbt.getDoubleOr("exhaustU", 0)};
     }
 
+    /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */
+    public String status() {
+        double rads = getShaft().getRads();
+        if (tripped) return I18N.tr("Tripped: overspeed (resets below rated speed)");
+        if (tank.getFluidAmount() <= 0) return I18N.tr("No fuel");
+        if (!burning && rads < CUTOFF * RATED_RADS) return String.format(I18N.tr("Needs a starter: spin it over %.0f rad/s (a Shaft Motor)"), CUTOFF * RATED_RADS);
+        if (!burning) return I18N.tr("Fuel valve shut");
+        if (manual()) return I18N.tr("Manual control: no governor or trip");
+        return exhaustPiped ? I18N.tr("Running") : I18N.tr("Running, venting its heat (pipe its exhaust to a heat exchanger)");
+    }
+
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new java.util.LinkedHashMap<>();
         double rads = getShaft().getRads();
+        info.put(I18N.tr("Status"), status());
         info.put(I18N.tr("Speed"), Utils.plotRads("", rads));
         info.put(I18N.tr("State"), burning ? I18N.tr("burning") : rads < CUTOFF * RATED_RADS ? String.format(I18N.tr("cold: spin it over %.0f rad/s to light"), CUTOFF * RATED_RADS)
             : tank.getFluidAmount() <= 0 ? I18N.tr("out of fuel") : I18N.tr("idle"));

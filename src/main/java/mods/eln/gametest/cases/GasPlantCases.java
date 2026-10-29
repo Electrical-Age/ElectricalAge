@@ -192,6 +192,7 @@ public final class GasPlantCases {
             Eln.simulator.removeElectricalComponent(l.load);
             ctx.check("gas turbine without a starter: still, no fuel used", l.gt.getShaft().getRads() < 1 && l.gt.tank.getFluidAmount() == fuel0 && fuel0 > 0,
                 String.format("%.1f rad/s, %d of %d mB", l.gt.getShaft().getRads(), l.gt.tank.getFluidAmount(), fuel0));
+            ctx.check("gas turbine without a starter: Jade says it needs one", l.gt.status().startsWith("Needs a starter"), l.gt.status());
         }
     }
 

@@ -242,9 +242,21 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         loadedTubes = CondenserVessel.get(nbt, "tubes");
     }
 
+    /** What holds its vacuum back, first (Baughn 2026-10-29: Jade says why). */
+    public String status() {
+        var n = v.vessel;
+        if (motor == null) return I18N.tr("No motor: no pump, no air ejector, no vacuum");
+        if (v.floodShare() > PlantCondenserDescriptor.FLOOD) return I18N.tr("Flooding: drain its condensate (a feed pump at its front)");
+        if (motorShare < 0.5) return I18N.tr("Motor slow: its pumps lag");
+        if (n != null && n.P() > 0.3e5)
+            return tubesW < 1000 ? I18N.tr("Low vacuum: condenser hot (no cooling water through its tubes?)") : I18N.tr("Low vacuum: condenser hot (more cooling)");
+        return I18N.tr("Holding vacuum");
+    }
+
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new java.util.LinkedHashMap<>();
+        info.put(I18N.tr("Status"), status());
         var n = v.vessel;
         if (n != null) {
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", n.P() / 1e5, EaUnits.contents(n)));

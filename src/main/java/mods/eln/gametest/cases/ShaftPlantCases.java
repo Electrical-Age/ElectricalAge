@@ -474,6 +474,10 @@ public final class ShaftPlantCases {
             ctx.check("flooding: its LP turbine gets less per kg (power sags), and nothing bursts",
                 flooded.jPerKg() < 0.8 * ok.jPerKg() && !flooded.isBurnt() && !cFlooded.isBurnt(),
                 String.format("%.0f vs %.0f kJ/kg", flooded.jPerKg() / 1000, ok.jPerKg() / 1000));
+            // (the working one runs on its shell alone here, 0.46 bar: Jade rightly calls it hot too)
+            ctx.check("flooding: Jade says why: the condenser floods, its LP has a low vacuum",
+                cFlooded.status().startsWith("Flooding") && flooded.status().startsWith("Low vacuum") && !cOk.status().startsWith("Flooding"),
+                cFlooded.status() + " / " + flooded.status() + " / " + cOk.status());
         }
     }
 
