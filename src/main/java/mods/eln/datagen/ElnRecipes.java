@@ -781,6 +781,24 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Machine Block"),
             'E', findItemStack("Medium Voltage Cable")
         );
+        addRecipe(findItemStack("LP Steam Turbine"),
+            "aAa",
+            "ASA",
+            "aMa",
+            'a', firstExistingOre("ingotAluminum", "ingotIron"),
+            'A', firstExistingOre("blockAluminum", "blockIron"),
+            'S', findItemStack("Steam Turbine"),
+            'M', findItemStack("Advanced Machine Block")
+        );
+        addRecipe(findItemStack("Plant Steam Condenser"),
+            "cTc",
+            "cCc",
+            "cMc",
+            'c', findItemStack("Copper Thermal Cable"),
+            'T', findItemStack("Iron Tank"),
+            'C', findItemStack("Steam Condenser"),
+            'M', findItemStack("Advanced Machine Block")
+        );
         // cheap on purpose (Baughn 2026-10-29): what a water slug costs
         addRecipe(findItemStack("Turbine Blade Set"),
             "I I",

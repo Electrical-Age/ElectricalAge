@@ -46,25 +46,26 @@ import java.util.Map;
  */
 public class ShaftSteamTurbineElement extends SimpleShaftElement implements FluidDevice {
     /** Shaft power at its rating (W), the rating (saturated steam, venting to air), the casing's burst (Pa). */
-    public static final double NOMINAL_P = 16000, NOMINAL_PA = 20e5, BURST_PA = 60e5;
+    public static final double NOMINAL_P = SteamTurbineSpec.HP.nominalP, NOMINAL_PA = SteamTurbineSpec.HP.nominalPa, BURST_PA = SteamTurbineSpec.HP.burstPa;
     /** Work per kg out of the ideal (isentropic) expansion: a big multi-stage turbine does better than the 50V/200V. */
-    public static final double ETA = 0.75;
-    public static final double NOMINAL_J_PER_KG = ETA * Water.isentropicDrop(Water.tsat(NOMINAL_PA), NOMINAL_PA, Water.P_ATM);
+    public static final double ETA = SteamTurbineSpec.HP.eta;
+    public static final double NOMINAL_J_PER_KG = SteamTurbineSpec.HP.nominalJPerKg;
     /** Rated speed (rad/s), droop, valve lag (s), leak past the shut valve, nozzle capacity over nominal, trip (x rated). */
     public static final double RATED_RADS = ShaftNetworkKt.nominalShaftRads, DROOP = 0.05, GOV_TAU = 0.2, LEAK = 0.005, FLOW_MAX = 1.5, TRIP = 1.1;
     /** Windage and bearings: this share of rated power at rated speed, growing with the cube of speed (so the leak
      *  past a shut valve can't run an unloaded turbine away: it settles under rated speed). */
     public static final double WINDAGE = 0.02;
     /** Its inertia constant (s of rated power at rated speed) and the most torque it gives (N m): twice rated. */
-    public static final double H = 2.5, MAX_TORQUE = 2 * NOMINAL_P / RATED_RADS;
+    public static final double H = SteamTurbineSpec.HP.h;
     /** Water in the inlet a turning turbine survives (share of its volume), the speed share it must turn at, and the
      *  casing drain (share of the volume a second), as on the 50V/200V. */
     public static final double WATER_MAX = 0.1, WATER_SPEED = 0.2, DRAIN_SHARE_PER_S = 0.005;
     /** Inlet and exhaust: two seconds of nominal steam at ~10 bar (kg/m^3), and the ports (m^3: an alloy pipe's end). */
-    static final double INLET_RHO = 5, PORT_K = 2 * 3e-11 * 2.25 * 16;
-    public static final double TARGET_MAX_BAR = 50;
+    public static final double TARGET_MAX_BAR = SteamTurbineSpec.HP.targetMaxBar;
 
     final SteamTurbineDescriptor desc;
+    /** Its ratings (HP or LP). */
+    public final SteamTurbineSpec spec;
     public final SteamValveControl controls;
     public FluidNode inlet, exhaust;
     private double[] loadedIn, loadedEx;
@@ -80,21 +81,31 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     public ShaftSteamTurbineElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (SteamTurbineDescriptor) d;
-        controls = new SteamValveControl(this, () -> this.inlet == null ? 0 : this.inlet.P(), NOMINAL_PA / 1e5, TARGET_MAX_BAR);
+        spec = desc.spec();
+        controls = new SteamValveControl(this, () -> this.inlet == null ? 0 : this.inlet.P(), spec.nominalPa / 1e5, spec.targetMaxBar);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(controls.pressure);
         slowProcessList.add(new Run());
         electricalLoadList.add(controls.control);
     }
 
+    private SteamTurbineDescriptor desc() {
+        return (SteamTurbineDescriptor) transparentNodeDescriptor;
+    }
+
     @Override
     public double getShaftInertia() {
-        return ShaftNetworkKt.inertiaOf(H, NOMINAL_P, RATED_RADS);
+        return ShaftNetworkKt.inertiaOf(desc().spec().h, desc().spec().nominalP, RATED_RADS);
     }
 
     /** Steam (kg/s) at its rating. */
     public static double nominalKgPerS() {
-        return NOMINAL_P / NOMINAL_J_PER_KG;
+        return SteamTurbineSpec.HP.nominalKgPerS;
+    }
+
+    /** Its steam (kg/s) at its rating. */
+    public double kgPerS() {
+        return spec.nominalKgPerS;
     }
 
     /** The exhaust's pressure (Pa): what the steam expands to. */
@@ -104,13 +115,28 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
 
     /** Work per kg of the inlet's steam expanding to the exhaust's pressure (J/kg). */
     public double jPerKg() {
-        return ETA * Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
+        return spec.eta * Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
     }
 
     /** The share of the inlet's volume that is liquid water. */
     public double waterShare() {
         return inlet == null ? 0 : inlet.mLiquid() / Water.RHO_L / inlet.volume;
     }
+
+    /** Water in its blades' way: in the inlet, or backed up into the exhaust from a flooded condenser (share of the
+     *  node's volume). */
+    public double wetShare() {
+        return Math.max(waterShare(), exhaust == null ? 0 : exhaust.mLiquid() / Water.RHO_L / exhaust.volume);
+    }
+
+    /**
+     * Wet steam in an LP turbine (spec.wetBraking; Baughn 2026-10-29): water over WET_START of a node at speed brakes
+     * the shaft (up to WET_BRAKE of rated power at WATER_MAX, with its speed) and knocks; over WATER_MAX for WET_BURN_S
+     * (counting down as fast while it's under), it strips its blades.
+     */
+    public static final double WET_START = 0.01, WET_BRAKE = 0.5, WET_BURN_S = 12;
+    /** Braking now (W), seconds over WATER_MAX, and the braking energy since loaded (J; GameTests). */
+    public double brakeW, wetSeconds, totalBrake;
 
     class Run implements IProcess {
         @Override
@@ -127,7 +153,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             double open = Math.min(gate, controls.limit());
             // steam through the nozzle (choked: by the inlet pressure), only what the inlet has above the exhaust
             double pEx = exhaustPa(), p = inlet.P();
-            double want = (LEAK + (1 - LEAK) * open) * FLOW_MAX * nominalKgPerS() * p / NOMINAL_PA * time;
+            double want = (LEAK + (1 - LEAK) * open) * FLOW_MAX * spec.nominalKgPerS * p / spec.nominalPa * time;
             double mv = inlet.mVapour(), mg = mv + inlet.mAir;
             want = Math.min(want, p > pEx ? mv * (1 - pEx / p) : 0);
             double tIn = inlet.T(), air0 = inlet.mAir;
@@ -135,9 +161,9 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
             double air = Math.max(0, air0 - inlet.mAir);
             // the work onto the shaft, under its torque limit; what the shaft can't take stays in the steam
-            double work = getShaft().drive(got * jpk / time, time, MAX_TORQUE);
+            double work = getShaft().drive(got * jpk / time, time, 2 * spec.nominalP / RATED_RADS);
             double r = rads / RATED_RADS;
-            double windage = Math.min(getShaft().getEnergy(), WINDAGE * NOMINAL_P * r * r * r * time);
+            double windage = Math.min(getShaft().getEnergy(), WINDAGE * spec.nominalP * r * r * r * time);
             getShaft().setEnergy(getShaft().getEnergy() - windage);
             totalWindage += windage;
             exhaust.mWater += got;
@@ -152,11 +178,12 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             if (!exhaustPiped) exhaust.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
             drain(time);
             // failures
-            if (inlet.P() > BURST_PA)
+            if (inlet.P() > spec.burstPa)
                 new Failure(ShaftSteamTurbineElement.this).pressureVessel(() -> inlet.energy - inlet.mWater * Water.uLiquid(Water.TB))
                     .fail(FailureCause.OVERPRESSURE, inlet.P());
-            else if (rads > WATER_SPEED * RATED_RADS && waterShare() > WATER_MAX)
-                new Failure(ShaftSteamTurbineElement.this).fail(FailureCause.WATER, waterShare());
+            else if (!spec.wetBraking && rads > WATER_SPEED * RATED_RADS && wetShare() > WATER_MAX)
+                new Failure(ShaftSteamTurbineElement.this).fail(FailureCause.WATER, wetShare());
+            else if (spec.wetBraking) wet(rads, time);
             // meters
             meterKg += got;
             meterJ += work;
@@ -170,9 +197,26 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         }
     }
 
+    /** An LP turbine's wet steam this step (spec.wetBraking): braking, knocking, and its blades if it lasts. */
+    void wet(double rads, double time) {
+        double w = wetShare(), r = rads / RATED_RADS;
+        brakeW = 0;
+        if (r > WATER_SPEED && w > WET_START) {
+            brakeW = WET_BRAKE * spec.nominalP * Math.min(1, w / WATER_MAX) * r;
+            double e = Math.min(getShaft().getEnergy(), brakeW * time);
+            getShaft().setEnergy(getShaft().getEnergy() - e);
+            totalBrake += e;
+            if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 6 == 0)
+                sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.ANVIL_LAND, net.minecraft.sounds.SoundSource.BLOCKS,
+                    (float) Math.min(0.6, 0.15 + w), 0.6f);   // (the knock of water on the blades)
+        }
+        wetSeconds = r > WATER_SPEED && w > WATER_MAX ? wetSeconds + time : Math.max(0, wetSeconds - time);
+        if (wetSeconds > WET_BURN_S) new Failure(ShaftSteamTurbineElement.this).fail(FailureCause.WATER, w);
+    }
+
     /** The casing drain over time (s): liquid water leaves the inlet, with its heat. */
     void drain(double time) {
-        double mL = Math.min(inlet.mLiquid(), DRAIN_SHARE_PER_S * inlet.volume * Water.RHO_L * time);
+        double mL = Math.min(inlet.mLiquid(), spec.drainShare * inlet.volume * Water.RHO_L * time);
         if (mL <= 0) return;
         double T = inlet.T();
         inlet.mWater -= mL;
@@ -198,7 +242,14 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             inlet.mWater -= mL;
             inlet.energy -= mL * Water.hLiquid(T);
             inlet.update();
+            if (exhaust != null) {
+                double mE = exhaust.mLiquid(), tE = exhaust.T();
+                exhaust.mWater -= mE;
+                exhaust.energy -= mE * Water.hLiquid(tE);
+                exhaust.update();
+            }
             gate = 0;
+            wetSeconds = 0;
         }
         super.repair();
     }
@@ -250,8 +301,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     /** Its ports, from where it faces now (a turned turbine's exhaust moves with it). */
     void makePorts() {
         long pos = node.coordonate.pos().asLong();
-        ports = List.of(new FluidPort(inlet, pos, 1, 1.0, PORT_K),   // the inlet on top
-            new FluidPort(exhaust, pos, exhaustSide().toEnumFacing().get3DDataValue(), 0.5, PORT_K));   // the exhaust behind
+        ports = List.of(new FluidPort(inlet, pos, 1, 1.0, spec.portK),   // the inlet on top
+            new FluidPort(exhaust, pos, exhaustSide().toEnumFacing().get3DDataValue(), 0.5, spec.portK));   // the exhaust behind
     }
 
     @Override
@@ -278,7 +329,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     public void initialize() {
         controls.computeInventory();
         var c = node.coordonate;
-        double volume = nominalKgPerS() * 2 / INLET_RHO;
+        double volume = spec.nominalKgPerS * 2 / spec.inletRho;
         inlet = new FluidNode(volume, c.y, 1.0, false);
         exhaust = new FluidNode(volume, c.y, 1.0, false);
         double T = mods.eln.sim.Ambient.kelvin(c);
@@ -326,7 +377,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            stream.writeFloat((float) Math.min(1, steamKgPerS / nominalKgPerS()));   // (the sound's loudness)
+            stream.writeFloat((float) Math.min(1, steamKgPerS / spec.nominalKgPerS));   // (the sound's loudness)
             controls.serialize(stream);
         } catch (IOException e) {
             e.printStackTrace();
@@ -355,7 +406,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         super.readFromNBT(nbt);
         gate = nbt.getDoubleOr("gate", 0);
         tripped = nbt.getBooleanOr("tripped", false);
-        controls.readFromNBT(nbt, NOMINAL_PA / 1e5);
+        controls.readFromNBT(nbt, spec.nominalPa / 1e5);
         loadedIn = read(nbt, "inlet");
         loadedEx = read(nbt, "exhaust");
     }
@@ -374,7 +425,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, EaUnits.contents(inlet)));
         info.put(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.2f bar, piped", exhaustPa() / 1e5) : I18N.tr("to the air"));
         if (inlet != null) info.put(I18N.tr("Work per kg"), String.format("%.0f kJ/kg", jPerKg() / 1000));
-        if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));
+        if (wetShare() > 0.01) info.put(I18N.tr("Water in its way"), String.format("%.0f%%%s", wetShare() * 100,
+            brakeW > 0 ? String.format(", braking %.1f kW: dry the steam (a separator tank)", brakeW / 1000) : ""));
         info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped (overspeed)") : String.format("%.0f%%", Math.min(gate, controls.limit) * 100));
         info.put(I18N.tr("Governor"), controls.isManual() ? I18N.tr("off: manual control, no overspeed trip") : I18N.tr("automatic, trips over 880 rad/s"));
         info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", controls.limit * 100)

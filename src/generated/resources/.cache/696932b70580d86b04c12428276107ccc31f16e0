@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T14:25:49.137273988	eln-global/EA models
+// 26.3	2026-10-29T14:48:29.477441016	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -65,8 +65,10 @@ c2bee1c6fc75056694c923c1c2dcff8af9479337 assets/eln/blockstates/lead_ore.json
 f0ed42296ed8f581741e53ea14400c53a04c1ba2 assets/eln/blockstates/light_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/low_power_receiver_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/low_power_transmitter_antenna.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/lp_steam_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/medium_power_receiver_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/medium_power_transmitter_antenna.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/plant_steam_condenser.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/power_capacitor_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/power_inductor_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/single_use_battery.json
@@ -290,6 +292,7 @@ e87eedd22db0873881c0383bd256ceecbbfab2da assets/eln/items/long_suspended_lamp_so
 69f494d796ee3064be9e3a7f8f837cbbc13e54ee assets/eln/items/low_voltage_relay.json
 6aff2f7e567ebfc95b438fac0e9175e5ffa6b217 assets/eln/items/low_voltage_switch.json
 3701eae7ac3a2a46f824a5e65a7cf3a25a18f4d4 assets/eln/items/lowpass_filter.json
+9fdce0e31bc98613bacf63de02c21e83d40ad8e3 assets/eln/items/lp_steam_turbine.json
 f1aa268d71a8998363baa178af18902cba42f05f assets/eln/items/machine_block.json
 08922ae779502bb08d499f6a10525c5fa02ce99e assets/eln/items/machine_booster.json
 6e14ed3aa9789802e8ca510cdd77119a0d347a0b assets/eln/items/magenta_brush.json
@@ -333,6 +336,7 @@ f8015433745159342a7e0bcd5f1b12d3813d64dc assets/eln/items/pipe_safety_valve.json
 e1c7df200fbe53eff0440d11993e5a25d66567d5 assets/eln/items/pipe_temperature_sensor.json
 71760c57281d6ac3c96b02fbf0116daf4e454dd1 assets/eln/items/pipe_throttle_valve.json
 73d8a7e3731c0a46b7e6e80712e8ab03d1ab94e2 assets/eln/items/pipe_valve.json
+62aae6d44e8a75521b676252b916b5f601d6e0c1 assets/eln/items/plant_steam_condenser.json
 a222de97919a80552ca8b6461dd1152c42f9343b assets/eln/items/player_filter.json
 fe78eef8cbad6b2ea4f1ee7ca815c53bd607e714 assets/eln/items/portable_battery.json
 03e549623a3e9b8e499ad90f96537ef46fcf636c assets/eln/items/portable_battery_pack.json
@@ -729,6 +733,8 @@ e7c38f5c8aa4b9c35b4ca7ffe058e93894019cdc assets/eln/models/item/low_voltage_swit
 89169c1072a11c2362a1e4647fc89ba849e99f39 assets/eln/models/item/low_voltage_switch_3d.json
 0c08013b75d3497b5bf91f984c0c27e48365557a assets/eln/models/item/lowpass_filter.json
 859f74c91877d4d92821d60f68c24e7c02f08f54 assets/eln/models/item/lowpass_filter_3d.json
+1ad10bb23f5a1ed79129d5cedc9760acd3a70ab7 assets/eln/models/item/lp_steam_turbine.json
+8e835b5350ed3fe674a792114b186e8fb3906a03 assets/eln/models/item/lp_steam_turbine_3d.json
 2c83c1e96fbb2b08023155305c817583659e25f8 assets/eln/models/item/machine_block.json
 41f73553e76eb0f8eaab20c1d0cb82503385c789 assets/eln/models/item/machine_booster.json
 11741f49b167f7d55d75148694f0adf6718fbb80 assets/eln/models/item/magenta_brush.json
@@ -787,6 +793,7 @@ a2f6b25ea172857c6a5851ca0009d2f8ba6f7dc2 assets/eln/models/item/pipe_pressure_va
 c6c4465c498507c618ab08509fc97458e71b1a89 assets/eln/models/item/pipe_temperature_sensor.json
 dfc7e3162421f7f4f1e6a850b22e03a280449386 assets/eln/models/item/pipe_throttle_valve.json
 e094407dc02261dd7493e9998d5a611ecb791c42 assets/eln/models/item/pipe_valve.json
+4cd65ebf22bb285edbccefaa9720344fc8b3e1d6 assets/eln/models/item/plant_steam_condenser.json
 4a9d386e1ae640f932b01052c84a1974236d246c assets/eln/models/item/player_filter.json
 fae3633068c6a0dddbd79198b06f9db6c89fe250 assets/eln/models/item/portable_battery.json
 53f8a69b50216adf11b139d9f568234f8994f0d6 assets/eln/models/item/portable_battery_pack.json

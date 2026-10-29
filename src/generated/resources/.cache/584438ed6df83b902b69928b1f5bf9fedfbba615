@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T14:25:49.140423224	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-29T14:48:29.480998818	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -186,6 +186,10 @@ faf9f6bfdae886c2f87f492fbc0e517943595eb5 data/eln/advancement/recipes/misc/low_v
 28e73e1e292dff45f7f769ee4de6945b14270513 data/eln/advancement/recipes/misc/low_voltage_relay.json
 4fa354f1b1fe390f469fe3ff6d3dca47dee62ef4 data/eln/advancement/recipes/misc/low_voltage_switch.json
 786377cab6bd0e3caab67b59d126e78859e98a4e data/eln/advancement/recipes/misc/lowpass_filter.json
+4b9b416e24744d3c7fdc6c6323c7619d435af010 data/eln/advancement/recipes/misc/lp_steam_turbine.json
+a01fe1411f1268ed72bebb19efec4a862ce51ff0 data/eln/advancement/recipes/misc/lp_steam_turbine_2.json
+ee79ec9d6859f3bb8df7d0eee6692fec11ecce01 data/eln/advancement/recipes/misc/lp_steam_turbine_3.json
+ab4a82c69f420dae28984c5d5a63affa0b65de68 data/eln/advancement/recipes/misc/lp_steam_turbine_4.json
 78963af925d293a3a9e1333e02a59d52b11f763d data/eln/advancement/recipes/misc/machine_block.json
 06f47239a3574d3c0cd2dc069583599180624ea4 data/eln/advancement/recipes/misc/machine_booster.json
 8906d98097cb2c61c6f6b604bd2d2ec70c0f04f1 data/eln/advancement/recipes/misc/magenta_brush.json
@@ -216,6 +220,7 @@ f040a0f74d9a8ed301c5e1180778e4413fd87668 data/eln/advancement/recipes/misc/overv
 33fede72ebcfffbf0ab2ef073240b9cb4538478c data/eln/advancement/recipes/misc/pal_chip.json
 b4965ce3977f71a9aa0d7f115ad9fc6106661373 data/eln/advancement/recipes/misc/pid_regulator.json
 c15d5c0cc610b6749034d53b6fe5c87c72a784c3 data/eln/advancement/recipes/misc/pink_brush.json
+c22c87bd08ed65c2308e22e1978b06ec035c7d0b data/eln/advancement/recipes/misc/plant_steam_condenser.json
 4a4cb32b42945ddd436f0ebf7fa6ecfff05bbea1 data/eln/advancement/recipes/misc/player_filter.json
 af15506bbf1df0708de0892e348079db76cd76b6 data/eln/advancement/recipes/misc/portable_battery.json
 01aae9be2bf2712ed6e6df58ee3b20966a16c101 data/eln/advancement/recipes/misc/portable_battery_pack.json
@@ -535,6 +540,10 @@ df3a3a83528481b086bbc7b267c9dc422fac4091 data/eln/recipe/low_voltage_cable_2.jso
 128526bc06c4453fcb50a70488fdb8dd56a471e3 data/eln/recipe/low_voltage_relay.json
 d0db5b9ff577cbbafc2b011202e53770643f4b43 data/eln/recipe/low_voltage_switch.json
 754c879b73a1199773b8434f47fd10b7cc682f89 data/eln/recipe/lowpass_filter.json
+487c4bdca6946c84ff692ef960f123100e990a6b data/eln/recipe/lp_steam_turbine.json
+abd836c18a265c25b32709be9e1819100baf28f0 data/eln/recipe/lp_steam_turbine_2.json
+513721a4735cd84f2580b2e07b800254ba8f488e data/eln/recipe/lp_steam_turbine_3.json
+e44eec5ce607faee65bb7c914419718b2dd4636a data/eln/recipe/lp_steam_turbine_4.json
 789b4cedd5840c52844b2ddc92a42e0ff82d40e1 data/eln/recipe/machine_block.json
 d5f805910e688c02cc8ec7887d09bdb0385185cb data/eln/recipe/machine_booster.json
 e5563e26e89b0f375d849f941cbd8e2827d35aaa data/eln/recipe/magenta_brush.json
@@ -565,6 +574,7 @@ bf528ceabda211c42878a565139d3114c1da1119 data/eln/recipe/oscillator_chip.json
 93b891c67b99090f4e687a2ab2eb61a71c09e438 data/eln/recipe/pal_chip.json
 c5b8082a0f4371b3a9d0d19015a5cb184cc23fcd data/eln/recipe/pid_regulator.json
 c31f1c59279d00c829341217db7ecf75091cf6fa data/eln/recipe/pink_brush.json
+6ea63de7579029a939062d12a7c7930d2b78a4fc data/eln/recipe/plant_steam_condenser.json
 31bea419e6ecfe9febfd542ffead3424dfd77c2b data/eln/recipe/player_filter.json
 e98466c835a24561de034c981fcb9142a1a9d70f data/eln/recipe/portable_battery.json
 7a25ce10192cf131d75cb441837cfe793efba228 data/eln/recipe/portable_battery_pack.json

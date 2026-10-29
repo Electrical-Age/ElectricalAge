@@ -109,6 +109,16 @@ class ShaftMotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor)
     /** How hard it drives now (0..1): what a pump against its side runs at. */
     fun driveShare() = if (desc.nominalP > 0) Math.min(1.0, shaftW / desc.nominalP) else 0.0
 
+    /** The speed (share of 800 rad/s, up to 1.2) a pump on its shaft end turns at: a plant condenser's condensate pump
+     *  and air ejector, against its side (Baughn 2026-10-29). */
+    fun pumpSpeed() = Math.max(0.0, Math.min(1.2, shaft.rads / nominalShaftRads))
+
+    /** A pump on its shaft end takes `watts` for `time` seconds off the shaft (the motor then draws to keep its speed). */
+    fun takeShaftPower(watts: Double, time: Double) {
+        val e = Math.min(shaft.energy, Math.max(0.0, watts) * time)
+        shaft.energy = shaft.energy - e
+    }
+
     inner class MotorProcess : IProcess {
         override fun process(time: Double) {
             // the energy the circuit gave last step, onto the shaft (under its torque limit; the rest is lost as heat)

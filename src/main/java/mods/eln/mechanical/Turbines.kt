@@ -75,24 +75,35 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
  * The shaft Steam Turbine (ShaftSteamTurbineElement): steam by EA pipe in on top and out of its back, work onto the
  * shaft (Baughn 2026-10-29). The 1.12 model until its own.
  */
-class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
+class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbineSpec) :
     SimpleShaftDescriptor(baseName, ShaftSteamTurbineElement::class, null) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Cowl"), obj.getPart("Stand"))
     override val rotating = arrayOf(obj.getPart("Shaft"), obj.getPart("Fan"))
     override val sound = "eln:steam_turbine"
 
+    fun spec() = spec
+
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
-        val p = ShaftSteamTurbineElement.NOMINAL_PA / 1e5
-        list.add("Steam in by pipe on top, out of its back: piped on (a heater, a condenser) or into the air.")
-        list.add(Utils.plotPower("Up to ", ShaftSteamTurbineElement.NOMINAL_P) + String.format(" onto the shaft from %.0f g/s of %.0f bar steam venting to air;",
-            ShaftSteamTurbineElement.nominalKgPerS() * 1000, p))
-        list.add("more with a vacuum behind it. Generators on the shaft take the power.")
+        val p = spec.nominalPa / 1e5
+        if (spec.wetBraking) {
+            list.add("The low-pressure stage: an HP Steam Turbine's exhaust in by pipe on top, out of its back")
+            list.add("into a Plant Steam Condenser: useless venting to air.")
+            list.add(Utils.plotPower("Up to ", spec.nominalP) + String.format(" onto the shaft from %.0f g/s of %.1f bar steam into a %.1f bar vacuum.",
+                spec.nominalKgPerS * 1000, p, spec.ratedExhaustPa / 1e5))
+            list.add("Wet steam brakes it and knocks; if it lasts at speed, it strips its blades.")
+        } else {
+            list.add("Steam in by pipe on top, out of its back: piped on (an LP turbine, a heater) or into the air.")
+            list.add(Utils.plotPower("Up to ", spec.nominalP) + String.format(" onto the shaft from %.0f g/s of %.0f bar steam venting to air;",
+                spec.nominalKgPerS * 1000, p))
+            list.add("more with a vacuum behind it. Generators on the shaft take the power.")
+            list.add("Water in the steam strips its blades.")
+        }
         list.add(Utils.plotRads("Automatic: governor full open to ", ShaftSteamTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
-        list.add("Its screen: throttle, or a regulator holding the inlet pressure; a signal on its front for external control.")
         list.add("Manual or external control turns the governor and the overspeed trip off: your own safeties then.")
-        list.add(String.format("Its casing bursts over %.0f bar. Water in the steam strips its blades.", ShaftSteamTurbineElement.BURST_PA / 1e5))
-        list.add("Might want a boiler with that.")   // (Baughn)
+        list.add("Its screen: throttle, or a regulator holding the inlet pressure; a signal on its front for external control.")
+        list.add(String.format("Its casing bursts over %.0f bar.", spec.burstPa / 1e5))
+        if (!spec.wetBraking) list.add("Might want a boiler with that.")   // (Baughn)
     }
 }
 
@@ -100,7 +111,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
 class SteamTurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc),
     mods.eln.oil.SteamValveControl.Rendered {
     override val cableRender = Eln.stdCableRenderSignal
-    val controls = mods.eln.oil.SteamValveControl.Render(this, ShaftSteamTurbineElement.TARGET_MAX_BAR)
+    val controls = mods.eln.oil.SteamValveControl.Render(this, (desc as SteamTurbineDescriptor).spec.targetMaxBar)
 
     override fun controls() = controls
 

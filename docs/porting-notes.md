@@ -61,6 +61,15 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   100/300 bar; vapour ports on top and high on three sides, liquid underneath and low; sight glass). 200V Inline Pump
   (line low on its flanks, head 25 bar x speed^2, 0.1 kg/s free-flowing, 500 W; gas in its line: it primes itself
   through a casing vent; water within 0.2 bar of boiling at its inlet: it cavitates and rattles). `PlumbingCases`.
+- Shaft redo, part 3 (Baughn 2026-10-29). LP Steam Turbine (transparent_node@274; ShaftSteamTurbineElement with
+  SteamTurbineSpec.LP: 9 kW from ~1.5 bar into ~0.1 bar, big bore, H 3 s): wet steam (water over 1 % of its inlet or
+  backed into its exhaust) brakes the shaft (up to half its rating) and knocks; over 10 % for 12 s at speed it strips
+  its blades (Turbine Blade Set); its drain throws 3 %/s. Plant Steam Condenser (transparent_node@5300): a
+  CondenserVessel (shared with the 50V/200V condensers' CondenserElement, unchanged in behaviour and NBT) fed at its
+  top, back or right face centre (an LP turbine's exhaust set straight against it), 60 L, shell 40 kW at 20 K plus
+  thermal cables; condensate pump and air ejector on a Shaft Motor against its side (no motor: no vacuum; air leaks
+  in at 2 mg/s at full vacuum); over half full its tubes drown (vacuum lost, LP power sags). Measured: HP + LP +
+  condenser +50 % work per kg over the HP venting to air, on 20 bar steam. `ShaftPlantCases`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

@@ -1745,6 +1745,12 @@
   "kind": "transparent_node",
   "name": "200v_shaft_motor"
  },
+ "eln:transparent_node@274": {
+  "descriptor": "SteamTurbineDescriptor",
+  "display": "LP Steam Turbine",
+  "kind": "transparent_node",
+  "name": "lp_steam_turbine"
+ },
  "eln:transparent_node@3073": {
   "descriptor": "SolarPanelDescriptor",
   "display": "Small Solar Panel",
@@ -2002,6 +2008,12 @@
   "display": "200V Inline Pump",
   "kind": "transparent_node",
   "name": "200v_inline_pump"
+ },
+ "eln:transparent_node@5300": {
+  "descriptor": "PlantCondenserDescriptor",
+  "display": "Plant Steam Condenser",
+  "kind": "transparent_node",
+  "name": "plant_steam_condenser"
  },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",

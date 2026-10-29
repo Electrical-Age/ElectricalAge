@@ -81,7 +81,8 @@ public class Wp11Content implements ElnContent {
             subId = 9;
             SteamTurbineDescriptor desc = new SteamTurbineDescriptor(
                 TR_NAME(Type.NONE, "Steam Turbine"),
-                obj.getObj("Turbine")
+                obj.getObj("Turbine"),
+                mods.eln.mechanical.SteamTurbineSpec.HP
             );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -126,6 +127,17 @@ public class Wp11Content implements ElnContent {
                 obj.getObj("Generator"),
                 meduimVoltageCableDescriptor,
                 MVU, 2000);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            // Baughn 2026-10-29: the low-pressure stage, between an HP turbine's exhaust and a plant condenser (1.12 model
+            // until its own)
+            subId = 18;
+            SteamTurbineDescriptor desc = new SteamTurbineDescriptor(
+                TR_NAME(Type.NONE, "LP Steam Turbine"),
+                obj.getObj("Turbine"),
+                mods.eln.mechanical.SteamTurbineSpec.LP
+            );
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {

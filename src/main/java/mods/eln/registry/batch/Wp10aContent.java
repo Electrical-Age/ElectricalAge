@@ -92,6 +92,9 @@ public class Wp10aContent implements ElnContent {
             0.003, 100e5, 300e5, "tankalloy"));
         transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "200V Inline Pump"),
             MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
+        // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)
+        transparentNodeItem.addDescriptor(52 + (id << 6), new mods.eln.oil.PlantCondenserDescriptor(TR_NAME(Type.NONE, "Plant Steam Condenser"),
+            0.06, 40000, 0.1, "condenser200v"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */

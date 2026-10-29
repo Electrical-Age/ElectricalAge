@@ -69,6 +69,8 @@ public class ElnModels implements DataProvider {
         if (name.equals("pipe_pressure_valve")) return itemTexture("pipe_control_valve", item);
         if (name.endsWith("_tank") && !name.contains("battery")) return itemTexture("small_passive_thermal_dissipator", item);   // (until their own icons)
         if (name.endsWith("inline_pump")) return itemTexture("electrical_motor", item);
+        if (name.equals("lp_steam_turbine")) return itemTexture("steam_turbine", item);
+        if (name.equals("plant_steam_condenser")) return itemTexture("200v_active_thermal_dissipator", item);
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();
             if (d instanceof GenericItemUsingDamageDescriptor g) return iconTexture(g.getIconName(), false);

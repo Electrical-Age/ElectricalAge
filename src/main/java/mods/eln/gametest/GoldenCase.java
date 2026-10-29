@@ -97,13 +97,14 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5440", "eln:transparent_node@5444",   // the electrical anvil, the capacitor bank (Baughn 2026-10-28)
         "eln:transparent_node@272", "eln:transparent_node@273", "eln:shared_item@4164",   // 8 kW generator, shaft motor, blades (Baughn 2026-10-29)
         "eln:transparent_node@5288", "eln:transparent_node@5292", "eln:transparent_node@5296",   // tanks, inline pump (Baughn 2026-10-29)
+        "eln:transparent_node@274", "eln:transparent_node@5300",   // LP turbine, plant condenser (Baughn 2026-10-29)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
         "50V Electric Heater", "200V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
         "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine",
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)
-        "Steam Turbine");   // (the shaft one's controls, as the 50V/200V's: Baughn 2026-10-29)
+        "Steam Turbine", "LP Steam Turbine");   // (the shaft ones' controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);
