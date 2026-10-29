@@ -188,9 +188,9 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     void drive() {
         double vy = getDeltaMovement().y, forward = 0;
         if (level().isClientSide() && mode() == Mode.RIDDEN && getControllingPassenger() instanceof Player p) {
-            setYRot(BikePhysics.turn(getYRot(), p.getYRot()));
             float in = p.zza > 0.01f ? 1 : p.zza < -0.01f ? -1 : 0;
             forward = physics.speed(in, powered());
+            setYRot(BikePhysics.turn(getYRot(), p.getYRot(), forward));   // (slower to turn the faster it goes: Baughn)
             if (isInWater()) forward *= 0.3;
             if (pendingJump > 0 && onGround()) {
                 vy = BikePhysics.jumpVelocity(pendingJump);

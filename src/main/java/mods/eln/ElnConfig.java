@@ -14,7 +14,7 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
-        BIKE_CRASH, BIKE_JUMP, BIKE_STEP;
+        BIKE_CRASH, BIKE_JUMP, BIKE_STEP, BIKE_TURN, BIKE_TURN_TOP;
     static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
     static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, POWER_CAP_LEAK;
@@ -70,6 +70,10 @@ public final class ElnConfig {
             .defineInRange("jumpHeight", 1.31, 0.0, 5.0);
         BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.6: slabs and stairs; 1 or more climbs full blocks).")
             .defineInRange("stepHeight", 0.6, 0.0, 2.0);
+        BIKE_TURN = b.comment("How fast it swings round to where the rider looks when slow, degrees per tick.")
+            .defineInRange("turnRate", 12.0, 0.5, 180.0);
+        BIKE_TURN_TOP = b.comment("...and at its powered top speed and above (Baughn: steering slows with speed); linear between.")
+            .defineInRange("turnRateAtTopSpeed", 5.0, 0.5, 180.0);
         b.pop();
         // the electrical anvil (Baughn 2026-10-28: an 800 V pulse, maxed out, so players build capacitor banks)
         b.push("anvil");
@@ -134,6 +138,8 @@ public final class ElnConfig {
         mods.eln.bike.BikePhysics.CRASH_SPEED = BIKE_CRASH.get() / 20;
         mods.eln.bike.BikePhysics.JUMP_VY = mods.eln.bike.BikePhysics.velocityForPeak(BIKE_JUMP.get());
         mods.eln.bike.BikePhysics.STEP_HEIGHT = (float) (double) BIKE_STEP.get();
+        mods.eln.bike.BikePhysics.TURN_PER_TICK = (float) (double) BIKE_TURN.get();
+        mods.eln.bike.BikePhysics.TURN_AT_TOP = (float) (double) BIKE_TURN_TOP.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.powerW = ANVIL_POWER.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerUnit = ANVIL_UNIT.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerName = ANVIL_NAME.get();

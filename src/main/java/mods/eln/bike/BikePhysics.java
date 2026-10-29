@@ -24,7 +24,9 @@ public final class BikePhysics {
     /** Upward speed of a full-charge jump: peaks a little over one block (BikePhysicsTest computes it). */
     public static volatile double JUMP_VY = 0.43;
     /** How fast the bike swings round to where the rider looks, degrees per tick. */
-    public static final float TURN_PER_TICK = 12;
+    public static volatile float TURN_PER_TICK = 12;
+    /** ...and at the powered top speed (Baughn: steering slows with speed); in between, linear in speed. */
+    public static volatile float TURN_AT_TOP = 5;
     /** The motor at full speed, W (a Portable Battery's 100 W discharge: ~7 min on one, ~20 on a pack). */
     public static volatile double MOTOR_WATTS = 100;
 
@@ -98,10 +100,21 @@ public final class BikePhysics {
         return (lo + hi) / 2;
     }
 
-    /** The heading after a tick of turning toward target (degrees), at most TURN_PER_TICK. */
+    /** The heading after a tick of turning toward target (degrees), at a standstill's rate. */
     public static float turn(float yaw, float target) {
-        float d = wrap(target - yaw);
-        return yaw + Math.max(-TURN_PER_TICK, Math.min(TURN_PER_TICK, d));
+        return turn(yaw, target, 0);
+    }
+
+    /** How fast it can turn at speed v (b/t), degrees per tick: TURN_PER_TICK standing, TURN_AT_TOP at top speed and above. */
+    public static float turnRate(double v) {
+        float f = (float) Math.min(1, Math.abs(v) / VMAX_POWERED);
+        return TURN_PER_TICK + (TURN_AT_TOP - TURN_PER_TICK) * f;
+    }
+
+    /** The heading after a tick of turning toward target at speed v (b/t). */
+    public static float turn(float yaw, float target, double v) {
+        float d = wrap(target - yaw), r = turnRate(v);
+        return yaw + Math.max(-r, Math.min(r, d));
     }
 
     static float wrap(float deg) {
