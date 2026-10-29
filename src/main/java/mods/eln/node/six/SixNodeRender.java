@@ -23,6 +23,9 @@ import org.jspecify.annotations.Nullable;
 public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRenderer<E, SixNodeRender.State> {
     public static class State extends BlockEntityRenderState {
         SixNodeElementRender[] renders = new SixNodeElementRender[SixNode.SLOTS];
+        /** A voxel block's glowing thermal cable boxes (Incandescence). */
+        java.util.List<float[]> glow = java.util.List.of();
+        int daylight;
     }
 
     @Override
@@ -30,9 +33,11 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         return new State();
     }
 
-    /** Only blocks with elements (voxel blocks of plain cables and pipes are drawn by their block model). */
+    /** Only blocks with elements or glowing cables (voxel blocks of plain cables and pipes are drawn by their block model). */
     @Override
     public boolean shouldRender(E be, Vec3 cameraPosition) {
+        if (be instanceof mods.eln.node.voxel.VoxelNodeEntity v && !v.clientGlow.isEmpty())
+            return BlockEntityRenderer.super.shouldRender(be, cameraPosition);
         for (SixNodeElementRender r : be.elementRenderList) if (r != null) return BlockEntityRenderer.super.shouldRender(be, cameraPosition);
         return false;
     }
@@ -53,6 +58,8 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                                    ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
         System.arraycopy(be.elementRenderList, 0, state.renders, 0, SixNode.SLOTS);
+        state.glow = be instanceof mods.eln.node.voxel.VoxelNodeEntity v ? v.clientGlow : java.util.List.of();
+        state.daylight = state.glow.isEmpty() ? 0 : mods.eln.misc.UtilsClient.hooks.skyLight(be.getLevel(), be.getBlockPos());
     }
 
     @Override
@@ -87,6 +94,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                     frame.soot = false;
                 }
             }
+            mods.eln.misc.Incandescence.drawCableGlow(state.glow, state.daylight);
         } catch (RuntimeException e) {
             ElnRenderErrors.report("six-node", e);
         } finally {

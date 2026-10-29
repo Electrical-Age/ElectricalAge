@@ -113,3 +113,40 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
   or wall from where it was placed: battery tops away from the viewer, slots in the same order.
 - The cubicles are grey: their faces map to the top-left 5 x 5 px of `model/batterychargera/batterychargera.png`,
   painted by `tools/textures/charger_cubicles.py`.
+
+## Hot things glow: Incandescence (Baughn 2026-10-28)
+
+`misc/Incandescence` is the one rule for every device that heats up on the outside: the Large Rheostat (its `main`
+part), the electric heater (its coils, a separate model part `element` since `tools/models/electricheater.py` splits
+them out), the power resistor (its core), six-node thermal cables and voxel thermal cables ("not truly realistic for
+the insulated thermal cables, but ... for charm"). The rheostat's drum is its own model part (`coil`, split out of
+`main`: faces with every corner within 0.30 of the axis) so its fins stay dark: glowing the whole `main` lit every fin face like a pane of coloured glass
+(AdventurAgent).
+
+- **Look:** nothing below the Draper point (525 C); colour from a smith's heat scale (dull red, blood red, cherry,
+  orange-red, orange, yellow-orange, yellow, white at 1300 C); brightness = sqrt of the black-body radiance above
+  525 C, 1 at 1100 C, up to 1.3. The power resistor burns out at 130 C, so it glows on its own warning scale
+  (`warningCelsius`: dark below 60% of its limit, 900 C's orange at the limit).
+- **Self-lit:** `drawGlow(celsius, part)` draws the part again over its normally lit self, full-bright and additive in
+  the heat colour; very hot parts get a second additive pass toward yellow-white. The 1.12 rheostat only tinted the
+  mesh by black-body colour (never brighter than the texture), from 281 C on; it now follows the physical scale.
+- **Halo:** `drawHalo(celsius, size)` is a camera-facing additive disc (`GL11.faceCamera`, the camera's rotation from
+  `UtilsClient.Hooks.cameraRotation`; as vanilla's conduit eye, the BER pose has no view rotation), bright in the
+  middle and black (adding nothing) at its rim: fake bloom. Daylight on the block (`Hooks.skyLight`) fades it to 15%
+  (Baughn: subtle by day).
+- **Voxel cables** are in the chunk mesh, so their glow is an overlay: the node publishes one glow step byte per part
+  after the parts' bytes (`VoxelNode.publishBeforeElements`, 25 K steps, outside the part hash: a glow change doesn't
+  re-mesh the chunk); `SixNodeRender` draws the outer surface of the block's hot cable boxes (`cableSurface`: no faces at the
+  joints with the next block or between a run's own pieces, coincident faces once, merged into rectangles; drawing
+  whole boxes doubled up there, a bright line at every joint), additive and untextured, 0.1 px proud, and one small
+  halo per block; it renders a voxel block with glowing cables even without elements.
+- **Block light (server):** the device's own node block emits it (`Node.setLightValue`, as a lamp on its own block):
+  `lightLevel` 1 at 525 C, 2 dull red (575), 8 orange (900), 14 at 1250, 15 at 1350. `Incandescence.Light` checks
+  every 10 ticks, goes up at once and down only 25 K below the step (`HYSTERESIS`), takes each change from a per-level,
+  per-tick budget of 16 (`BUDGET_PER_TICK`) so a long hot cable run can't flood the light engine, and always reports
+  its first check so a node's saved light can't outlive a cooled device. A voxel block lights to its hottest thermal
+  cable (`VoxelNode.recalculateLightValue`). Devices publish their temperature when the glow's 25 K step changes.
+- Tests: `IncandescenceTest` (levels, hysteresis, the first check, look, steps, the warning scale) and the GameTests
+  `hot_things_light_their_block` and `electric_heater_heats_a_thermal_cable` (the heater's back face feeds a floor
+  thermal cable, six-node and voxel). In a lab, `/elnlab heat <pos> <celsius>` holds a node's thermal loads at a
+  temperature (above a device's limit it burns, as it would).

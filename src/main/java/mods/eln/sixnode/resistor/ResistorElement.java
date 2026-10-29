@@ -79,10 +79,35 @@ public class ResistorElement extends SixNodeElement {
             .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
             .set(new Failure(this).electronics());
 
+        // it can't get hot enough to glow for real (130 C), so it glows on its own scale as it nears burnout, a
+        // warning (Baughn 2026-10-28: what heats up on the outside glows); publish when the look changes
+        slowProcessList.add(t -> {
+            double c = glowCelsius();
+            int step = mods.eln.misc.Incandescence.step(c);
+            if (step != glowStep) {
+                glowStep = step;
+                needPublish();
+            }
+            if (glow.update(sixNode.coordonate.world(), c)) sixNode.recalculateLightValue();
+        });
+
         resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
         if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
             slowProcessList.add(resistorProcess);
         }
+    }
+
+    final mods.eln.misc.Incandescence.Light glow = new mods.eln.misc.Incandescence.Light();
+    int glowStep;
+
+    /** Its glow temperature (C) on the warning scale of its own limit. */
+    double glowCelsius() {
+        return mods.eln.misc.Incandescence.warningCelsius(thermalLoad.Tc, descriptor.thermalWarmLimit);
+    }
+
+    @Override
+    public int getLightValue() {
+        return glow.level;
     }
 
     @Override
@@ -91,6 +116,7 @@ public class ResistorElement extends SixNodeElement {
         try {
             if (descriptor.isRheostat)
                 stream.writeFloat((float) control.getNormalized());
+            stream.writeFloat((float) glowCelsius());
         } catch (IOException e) {
             e.printStackTrace();
         }

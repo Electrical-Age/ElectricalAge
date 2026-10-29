@@ -99,6 +99,11 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         return true;
     }
 
+    /** The resistor's body (its core), drawn again glowing as it nears burnout (Incandescence). */
+    void drawCore() {
+        if (null != ResistorCore) ResistorCore.draw();
+    }
+
     @Override
     public void drawItem(boolean entity) {
         GL11.glTranslatef(0.0f, 0.0f, -0.2f);

@@ -2,7 +2,7 @@
 """Electric heater (50V / 200V): a resistor cabinet that pushes all its heat out of its back into a boiler or column.
 
 Drawn by ElectricHeaterRender -> ElectricHeaterDescriptor.draw(), which draws the parts main/dissipator/body that
-exist (this model has `main` only), after front.glRotateXnRef(). Connections (ElectricHeaterElement): electrical power
+exist (this model has `main` and `element`, the coils, which glow when hot), after front.glRotateXnRef(). Connections (ElectricHeaterElement): electrical power
 on the two side faces (z = 0 and z = 16 in the model, LRDU Down = at the floor), thermal on front.back() (XP, x = 16),
 nothing on the front.
 
@@ -33,7 +33,9 @@ TIERS = {
 }
 
 def heater(t):
+    """The cabinet (part main) and the coils (part element, drawn again glowing when hot: Incandescence)."""
     m = Model()
+    hot = Model()
     fx, bx = t["fx"], t["bx"]
     z0, z1 = t["z"]
     top = t["top"]
@@ -51,7 +53,7 @@ def heater(t):
     # heating elements: coil on a rod between ceramic end insulators
     ex = (fx + bx) / 2 + 0.25
     for y in t["el"]:
-        m.add(prism("z", ex, y, t["er"], zi0 + 0.75, zi1 - 0.75, "coil", n=6, caps=(False, False)))
+        hot.add(prism("z", ex, y, t["er"], zi0 + 0.75, zi1 - 0.75, "coil", n=6, caps=(False, False)))
         m.add(prism("z", ex, y, t["er"] + 0.25, zi0 + 0.05, zi0 + 0.75, "ceramic", n=6, caps=(False, True)))
         m.add(prism("z", ex, y, t["er"] + 0.25, zi1 - 0.75, zi1 - 0.05, "ceramic", n=6, caps=(True, False)))
     # grille: vertical bars and one cross bar in front of the elements
@@ -85,14 +87,15 @@ def heater(t):
     for y, z in t["bolts"]:
         zz = z - 0.25 if z < 8 else z + 0.25
         m.add(prism("x", y, zz, 0.3, bp - 0.3, bp, "brass", n=6, caps=(True, False)))
-    return m
+    return m, hot
 
 def main():
     res = sys.argv[1]
     for tier, t in TIERS.items():
         name = "electricheater" + tier
         d = out_dir(res, name)
-        counts = write_parts(d, name, [("main", heater(t))])
+        main, element = heater(t)
+        counts = write_parts(d, name, [("main", main), ("element", element)])
         atlas(os.path.join(d, "tex.png"), PAINT[tier])
         print(name, counts)
 

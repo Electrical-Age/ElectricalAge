@@ -28,8 +28,6 @@ import net.minecraft.world.item.ItemStack
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-// TODO: Make the whole thing brighter when it heats up, not just redder.
-
 class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPassiveDescriptor, val cable: ElectricalCableDescriptor, val series: SerieEE) :
     TransparentNodeDescriptor(name, LargeRheostatElement::class.java, null) {
 
@@ -46,10 +44,16 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
 
     fun draw(position: Float = 0f) {
         dissipator.draw()
+        drawCoil()
         GL11.glRotatef((1f - position) * 300f, 0f, 1f, 0f)
         dissipator.obj.getPart("wiper")?.draw()
     }
 
+
+    /** The resistive drum in the middle (its own model part, so only it glows: the fins stay dark). */
+    fun drawCoil() {
+        dissipator.obj.getPart("coil")?.draw()
+    }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
@@ -91,7 +95,13 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         slowProcessList.add(thermalWatchdog)
         thermalWatchdog.set(thermalLoad).setTMax(desc.dissipator.warmLimit)
             .set(Failure(this).machine())
+        // red-hot, it lights the room (Incandescence; Baughn 2026-10-28)
+        slowProcessList.add(IProcess {
+            if (glow.update(node.coordonate.world(), Incandescence.celsius(thermalLoad.Tc))) node.setLightValue(glow.level)
+        })
     }
+
+    val glow = Incandescence.Light()
 
     inner class ControlProcess() : IProcess {
         var lastC = -1000.0
@@ -192,8 +202,8 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
         return inventory
     }
 
-    val baseColor = BlackBodyColor(1f, 1f, 1f)
-    var color = BlackBodyTemperature(0f)
+    /** Its temperature (C), for the glow. */
+    var celsius = 0.0
     val positionAnimator = SlewLimiter(0.3f)
 
     init {
@@ -202,10 +212,11 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
 
     override fun draw() {
         front.glRotateZnRef()
-        // TODO: Get this thing *really* glowing.
-        // glColor doesn't let me exceed 1.0, the way I'd quite like to do.
-        GL11.glColor3f(color.red, color.green, color.blue)
         desc.draw(positionAnimator.position)
+        // 1.12 only tinted it toward the black-body colour, which can't be brighter than the texture: now it glows
+        // (Baughn: the colour change was there, the light wasn't)
+        Incandescence.drawGlow(celsius) { desc.drawCoil() }
+        Incandescence.drawHalo(celsius, 0.8f, tileEntity)
     }
 
     override fun refresh(deltaT: Float) {
@@ -215,11 +226,7 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
-        val temp = stream.readFloat() + 273
-        val c = BlackBodyTemperature(temp)
-        val p = BlackBodyPower(temp)
-        var bbc = c * (p / desc.dissipator.nominalP.toFloat())
-        color = (bbc + baseColor).normalize()
+        celsius = Incandescence.celsius(stream.readFloat().toDouble())
 
         if (positionAnimator.target == -1f) {
             positionAnimator.target = stream.readFloat()

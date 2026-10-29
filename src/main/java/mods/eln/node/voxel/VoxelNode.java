@@ -1506,8 +1506,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         markUsed();
     }
 
-    /** Client data: the part count, then each part's kind and length-prefixed bytes (an unknown kind is skipped); then
-     *  SixNode's elements. */
+    /** Client data: the part count, then each part's kind and length-prefixed bytes (an unknown kind is skipped), then a
+     *  glow step byte per part (Incandescence); then SixNode's elements. */
     @Override
     protected void publishBeforeElements(DataOutputStream stream) throws IOException {
         {
@@ -1523,7 +1523,22 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 stream.writeShort(b.size());
                 stream.write(b.toByteArray());
             }
+            // the thermal cables' glow, one step byte per part (Incandescence; not in the parts' bytes: no re-mesh)
+            stream.write(cables.glowSteps(parts));
         }
+    }
+
+    /** Each part's glow step as published (0: dark), for tests. */
+    public byte[] glowSteps() {
+        return cables.glowSteps(parts);
+    }
+
+    /** The block's light: its elements' and its hot thermal cables' (Incandescence). */
+    @Override
+    public void recalculateLightValue() {
+        int light = cables.glowLight();
+        for (mods.eln.node.six.SixNodeElement e : sideElementList) if (e != null) light = Math.max(light, e.getLightValue());
+        setLightValue(light);
     }
 
     /** For the probe (Jade): a headline, and with details the run's contents, ratings and fittings. */

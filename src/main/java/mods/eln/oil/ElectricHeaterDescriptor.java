@@ -31,10 +31,16 @@ public class ElectricHeaterDescriptor extends TransparentNodeDescriptor {
     }
 
     void draw() {
-        if (obj != null) for (String part : new String[]{"main", "dissipator", "body"}) {
+        if (obj != null) for (String part : new String[]{"main", "dissipator", "body", "element"}) {
             var p = obj.getPart(part);
             if (p != null) p.draw();
         }
+    }
+
+    /** The heating coils alone (part element), drawn again glowing when hot (Incandescence). */
+    void drawElement() {
+        var p = obj == null ? null : obj.getPart("element");
+        if (p != null) p.draw();
     }
 
     @Override

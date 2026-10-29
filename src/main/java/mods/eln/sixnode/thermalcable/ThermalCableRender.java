@@ -53,6 +53,9 @@ public class ThermalCableRender extends SixNodeElementRender {
 
         UtilsClient.bindTexture(cableDesciptor.render.cableTexture);
         glListCall();
+        // hot, it glows (Baughn 2026-10-28: "not truly realistic for the insulated thermal cables, but ... for charm")
+        mods.eln.misc.Incandescence.drawGlow(mods.eln.misc.Incandescence.celsius(temperature),
+            () -> CableRender.drawCable(cableDesciptor.render, connectedSide, CableRender.connectionType(this, side)));
 
         //GL11.glEnable(GL11.GL_LIGHTING);
         //GL11.glEnable(GL11.GL_TEXTURE_2D);

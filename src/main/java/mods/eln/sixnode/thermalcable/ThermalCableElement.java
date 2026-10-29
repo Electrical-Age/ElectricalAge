@@ -31,6 +31,13 @@ public class ThermalCableElement extends SixNodeElement {
     ThermalCableDescriptor descriptor;
 
     NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+    final mods.eln.misc.Incandescence.Light glow = new mods.eln.misc.Incandescence.Light();
+    int glowStep;
+
+    @Override
+    public int getLightValue() {
+        return glow.level;
+    }
 
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 
@@ -44,6 +51,16 @@ public class ThermalCableElement extends SixNodeElement {
         thermalLoadList.add(thermalLoad);
 
         slowProcessList.add(thermalWatchdog);
+        // hot, it glows and lights its block (Incandescence): publish when the glow's look changes
+        slowProcessList.add(t -> {
+            double c = mods.eln.misc.Incandescence.celsius(thermalLoad.Tc);
+            int step = mods.eln.misc.Incandescence.step(c);
+            if (step != glowStep) {
+                glowStep = step;
+                needPublish();
+            }
+            if (glow.update(sixNode.coordonate.world(), c)) sixNode.recalculateLightValue();
+        });
 
         thermalWatchdog
             .set(thermalLoad)

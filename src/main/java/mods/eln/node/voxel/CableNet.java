@@ -54,6 +54,9 @@ final class CableNet {
         final ElectricalLoad load;
         ThermalLoad thermal;
         final List<IProcess> slow = new ArrayList<>(), thermalSlow = new ArrayList<>();
+        /** A thermal cable's glow (Incandescence): its look in 25 K steps (published) and its block light. */
+        int glowStep;
+        final mods.eln.misc.Incandescence.Light glow = new mods.eln.misc.Incandescence.Light();
 
         Conductor(int tier, int face) {
             this.tier = tier;
@@ -130,6 +133,17 @@ final class CableNet {
             }
             thermal.C = Math.max(td.c() * s, Eln.simulator.getMinimalThermalC(thermal.Rs, thermal.Rp));
             thermal.Tc = parts.get(0).t;
+            // hot, it glows and lights its block (Baughn 2026-10-28: "for charm"); the client gets the look in 25 K
+            // steps, outside the parts' bytes, so a glow change doesn't re-mesh the chunk
+            slow.add(time -> {
+                double c = mods.eln.misc.Incandescence.celsius(thermal.Tc);
+                int st = mods.eln.misc.Incandescence.step(c);
+                if (st != glowStep) {
+                    glowStep = st;
+                    node.setNeedPublish(true);
+                }
+                if (glow.update(node.coordonate.world(), c)) node.recalculateLightValue();
+            });
             if (face < 0) return;
             ThermalLoadWatchDog tw = new ThermalLoadWatchDog();
             tw.set(thermal).setLimit(td.warmLimit(), td.coolLimit()).set(new Failure(this, node, node.coordonate, "cable " + td.name).cable());
@@ -295,6 +309,22 @@ final class CableNet {
     List<CablePart.Port> ports() {
         List<CablePart.Port> out = new ArrayList<>();
         for (Conductor k : live()) for (CablePart c : k.parts) out.addAll(c.cablePorts());
+        return out;
+    }
+
+    /** The brightest glow light of its thermal cables (0..15). */
+    int glowLight() {
+        int l = 0;
+        for (Conductor k : live()) if (k.td != null) l = Math.max(l, k.glow.level);
+        return l;
+    }
+
+    /** Each part's glow step (0: dark or not a thermal cable), in the node's part order (published to the client). */
+    byte[] glowSteps(List<VoxelPart> parts) {
+        java.util.Map<VoxelPart, Integer> step = new java.util.IdentityHashMap<>();
+        for (Conductor k : live()) if (k.td != null && k.glowStep > 0) for (CablePart c : k.parts) step.put(c, k.glowStep);
+        byte[] out = new byte[parts.size()];
+        for (int i = 0; i < out.length; i++) out[i] = (byte) Math.min(255, step.getOrDefault(parts.get(i), 0));
         return out;
     }
 

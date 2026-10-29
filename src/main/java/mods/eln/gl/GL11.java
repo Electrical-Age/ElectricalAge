@@ -165,6 +165,14 @@ public final class GL11 {
         f().texture(texture);
     }
 
+    /** EA's: keep the origin, face the camera (x right, y up on screen); false (nothing changed) without a client camera. */
+    public static boolean faceCamera() {
+        var q = mods.eln.misc.UtilsClient.hooks.cameraRotation();
+        if (q == null) return false;
+        f().faceCamera(new org.joml.Quaternionf(q));
+        return true;
+    }
+
     /** 1.12 lightmap override (OpenGlHelper.setLightmapTextureCoords to 240,240): draw full-bright or not. */
     public static void setFullBright(boolean on) {
         f().fullBright(on);
