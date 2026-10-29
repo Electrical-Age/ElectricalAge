@@ -13,12 +13,12 @@ import net.minecraft.world.entity.player.Player
 open class StraightJointDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     StraightJointElement::class, null) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
-    override val rotating = arrayOf(obj.getPart("Shaft"))
+    override val static = arrayOf(obj.getPart("main"))
+    override val rotating = arrayOf(obj.getPart("rotor"))
 }
 
 open class StraightJointElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
-    override val shaftMass = 0.5
+    override val shaftInertia = inertiaOf(0.02, 16000.0)
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? = null
 

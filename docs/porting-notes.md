@@ -44,6 +44,71 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
+  The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
+  air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar
+  venting to air (~39 g/s); automatic: 5 % droop governor (full open at 800 rad/s, shut at 840), trip over 880 (manual
+  or external control: neither; Baughn: whoever takes manual control duplicates the safeties), windage 2 % of
+  rated at rated speed (an unloaded turbine can't run away on the valve's leak); the 50V/200V turbines' controls and
+  screen (`SteamValveControl`); casing bursts over 60 bar; water strips its blades, repaired with a cheap Turbine
+  Blade Set. No fluid capability; an old turbine's tank is dropped on load. New: an 8 kW Generator (the 4 kW one is
+  drawn thinner) and a 200V Shaft Motor (spins a shaft to a signal's speed, 0-50 V: 0-800 rad/s, 2 kW, 85 %).
+  `shaft_steam_turbine_*`, `shaft_motor_spins_up_generator`.
+- Shaft redo, part 2: plumbing (Baughn 2026-10-29). Pipe Pressure Valve (a ValvePart mode, one way along its arrow;
+  relief holds the pressure before it, reducing the pressure after it; set point on its screen or a 0-50 V signal for
+  0-150 bar; done as a negative boost on its link, which the network solves within the step: no overshoot). Pipe Steam
+  Quality Sensor (PipeSensorPart QUALITY: % of the run's water that is liquid). Iron / Alloy Tank (3 L, 10/40 and
+  100/300 bar; vapour ports on top and high on three sides, liquid underneath and low; sight glass). 200V Inline Pump
+  (line low on its flanks, head 25 bar x speed^2, 0.1 kg/s free-flowing, 500 W; gas in its line: it primes itself
+  through a casing vent; water within 0.2 bar of boiling at its inlet: it cavitates and rattles). `PlumbingCases`.
+- Shaft redo, part 3 (Baughn 2026-10-29). LP Steam Turbine (transparent_node@274; ShaftSteamTurbineElement with
+  SteamTurbineSpec.LP: 9 kW from ~1.5 bar into ~0.1 bar, big bore, H 3 s): wet steam (water over 1 % of its inlet or
+  backed into its exhaust) brakes the shaft (up to half its rating) and knocks; over 10 % for 12 s at speed it strips
+  its blades (Turbine Blade Set); its drain throws 3 %/s. Plant Steam Condenser (transparent_node@5300): a
+  CondenserVessel (shared with the 50V/200V condensers' CondenserElement, unchanged in behaviour and NBT) fed at its
+  top, back or right face centre (an LP turbine's exhaust set straight against it), 60 L, shell 40 kW at 20 K plus
+  thermal cables; condensate pump and air ejector on a Shaft Motor against its side (no motor: no vacuum; air leaks
+  in at 2 mg/s at full vacuum); over half full its tubes drown (vacuum lost, LP power sags). Measured: HP + LP +
+  condenser +50 % work per kg over the HP venting to air, on 20 bar steam. `ShaftPlantCases`.
+- Round 4 (Baughn 2026-10-29): tanks hold 12 buckets a block, and tank blocks of a tier that fill a box (A x B x C)
+  are one vessel (TankGroup; any other shape stays separate one-block tanks); ports on the box's outer faces, drawing
+  at their height in the box; each block keeps its share by volume (written back before a change and before saving,
+  to float precision), so a broken block takes its share and saved state survives; the box draws as one tank from its
+  lowest corner (shell, sight glass and water scaled; no flanges). Plant condenser: cooling-water tubes in low on its
+  left, out low on its right, UA 4 kW/K. `tank_box_*`, `plant_condenser_cooling_water_full_hp`.
+- Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
+  taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
+  the Large Alloy Pipe (tier 2) drawn and taking 6, 16 x the alloy's inner area (Baughn): volume 16 x, conductance
+  32 x (d^2.5, turbulent; the network's linear form would give d^4), 40 / 120 bar. Fittings sized from the pipe's grid width;
+  ones saved before (their "at" arrays held 4 or 6, no "g" key) load at 2. LP turbine, HP exhaust, plant condenser
+  and tank ports take a large pipe (PipePart.LARGE_END_K). Kit: 8 alloy plates in a ring. `PipeSizeCases`,
+  `shaft_plant_large_crossover_full_flow` (42 g/s, HP 13.7 + LP 15.0 kW on one shaft, 33 m/s in the crossover).
+- Shaft redo, part 4 (Baughn 2026-10-29). Gas Turbine (same id, GasTurbineElement): fuel (FuelRegistry's gasoline,
+  gas and diesel lists, by energy per mB: e.g. gasoline 1.74 kJ/mB, diesel 2.64, natural gas 2.43) from a 16-bucket tank
+  by any pipe or capability; an open cycle, 28 % of the fuel's heat onto the shaft at rated speed, none under half speed
+  (it must be spun up: a Shaft Motor); 10 kW; H 1 s, fuel valve 0.3 s; governor/trip/windage as the steam turbines, a
+  signal on its front sets the valve by hand; the rest of the heat leaves as air at 500 C out of its back (a large
+  pipe's port) or vents. Counterflow Heat Exchanger (transparent_node@5304): blocks stack 2 x 2 across and up to 8 long along their
+  fronts into one exchanger (HeatExchangerGroup, as tank boxes: merge, split on break, shares saved per block), 50 W/K
+  a 2 x 2 slice (Baughn 2026-10-29), 8 L a side a block; a lone block or any other shape is a quarter slice (12.5 W/K).
+  Effectiveness-NTU for counterflow from last step's inflows (a boiling or condensing side, steam nearly all of its
+  pressure, takes any heat at saturation); ports on the two end faces, A at their centres, B up high: A in at the back
+  end, B in at the front. Separate jobs (economizer, steam raiser, reheat) are separate exchangers piped in series.
+  `GasPlantCases`.
+- Shaft redo, art pass (Baughn 2026-10-29). The HP/LP Steam Turbine, Gas Turbine, both Generators, Shaft Motor,
+  Joint, Joint Hub, Flywheel, Tachometer, Plant Steam Condenser and Heat Exchanger have their own models
+  (tools/models/README-shaft.md) instead of the 1.12 Turbine/Generator/GasTurbine/... ones: one shaft line for all, a
+  half coupling at each shaft face, rotor/valve/needle parts that move. Hitboxes: a model may carry NAME.hitbox beside its
+  OBJ; a descriptor that returns it from `modelHitbox()` (`ModelHitbox`) gets that outline and collision turned with
+  the block's front (read from the block entity), instead of its collision boxes (`shaft_hitbox_per_facing`).
+  Sounds: turbines play rotor tones, steam hiss or the new gas_turbine_roar, and an overspeed_whistle over 105 %; the
+  LP's wet-steam knock (steam_knock) and the inline pump's cavitation (pump_cavitation) replace the vanilla anvil and
+  grindstone. Jade's first line on turbines, the gas turbine and the plant condenser says why it isn't working.
+- Placement of the shaft and steam machines (AdventurAgent's client check, 2026-10-29): shaft parts are placed with
+  their shaft along the player's view (front to the player's left), not across it; turbines, the gas turbine, plant
+  condensers, tanks and heat exchangers turn on placement, together with such a device beside them, to the fronts whose
+  ports meet the most neighbouring ports (`FluidPlacement`; a turbine only front/back, keeping its shaft). Before, an LP
+  and a condenser placed side by side as a player would never coupled. `fluid_ports_meet_when_placed_by_a_player`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item
@@ -157,6 +222,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   face; pins that touch connect (docs/voxel-cables.md, devices off centre).
 
 ## Bugs fixed
+
+- Shafts stored mass^2 x 0.25 J per rad/s (linear in speed): a line's inertia grew with the square of its total mass,
+  and a joule bought as much speed at 10 rad/s as at 800. Now E = 1/2 I w^2, I summed over the blocks, each sized by
+  an inertia constant (Baughn 2026-10-29: realistic values now that boilers are slow); `ShaftNetwork.drive` limits a
+  machine's torque from rest. Only the speed is saved, so worlds keep their shaft speeds. `wp11 shaft network`.
 
 From 1.7.10/1.12 (carried in from the 1.12 branch, before the port): the WP16 sim audit (`AuditFixesTest`), fuse and
 breaker trip points, generator energy accounting, a truth table per PAL chip (every PAL shared one).

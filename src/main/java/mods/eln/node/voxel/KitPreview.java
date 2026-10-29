@@ -282,7 +282,7 @@ public final class KitPreview {
                                     int have, boolean toPort) {
         PipeRouter.Space sp = PipePlacer.space(view);
         if (join != null) sp = PipePlacer.spaceAround(sp, join, 6);
-        PipeRouter.Result r = PipeRouter.route(sp, PipePart.BORE[tier], start, wps, end, PREVIEW_BUDGET_MS);
+        PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], start, wps, end, PREVIEW_BUDGET_MS);
         List<int[]> bs = new ArrayList<>();
         boolean ok = r.error == null;
         String msg;

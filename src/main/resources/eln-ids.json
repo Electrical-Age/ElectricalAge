@@ -299,6 +299,12 @@
   "kind": "shared_item",
   "name": "copper_coil"
  },
+ "eln:shared_item@4164": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Turbine Blade Set",
+  "kind": "shared_item",
+  "name": "turbine_blade_set"
+ },
  "eln:shared_item@448": {
   "descriptor": "FerromagneticCoreDescriptor",
   "display": "Cheap Ferromagnetic Core",
@@ -1727,6 +1733,24 @@
   "kind": "transparent_node",
   "name": "tachometer"
  },
+ "eln:transparent_node@272": {
+  "descriptor": "GeneratorDescriptor",
+  "display": "8kW Generator",
+  "kind": "transparent_node",
+  "name": "8kw_generator"
+ },
+ "eln:transparent_node@273": {
+  "descriptor": "ShaftMotorDescriptor",
+  "display": "200V Shaft Motor",
+  "kind": "transparent_node",
+  "name": "200v_shaft_motor"
+ },
+ "eln:transparent_node@274": {
+  "descriptor": "SteamTurbineDescriptor",
+  "display": "LP Steam Turbine",
+  "kind": "transparent_node",
+  "name": "lp_steam_turbine"
+ },
  "eln:transparent_node@3073": {
   "descriptor": "SolarPanelDescriptor",
   "display": "Small Solar Panel",
@@ -1966,6 +1990,36 @@
   "display": "50V Compact Steam Turbine",
   "kind": "transparent_node",
   "name": "50v_compact_steam_turbine"
+ },
+ "eln:transparent_node@5288": {
+  "descriptor": "TankDescriptor",
+  "display": "Iron Tank",
+  "kind": "transparent_node",
+  "name": "iron_tank"
+ },
+ "eln:transparent_node@5292": {
+  "descriptor": "TankDescriptor",
+  "display": "Alloy Tank",
+  "kind": "transparent_node",
+  "name": "alloy_tank"
+ },
+ "eln:transparent_node@5296": {
+  "descriptor": "InlinePumpDescriptor",
+  "display": "200V Inline Pump",
+  "kind": "transparent_node",
+  "name": "200v_inline_pump"
+ },
+ "eln:transparent_node@5300": {
+  "descriptor": "PlantCondenserDescriptor",
+  "display": "Plant Steam Condenser",
+  "kind": "transparent_node",
+  "name": "plant_steam_condenser"
+ },
+ "eln:transparent_node@5304": {
+  "descriptor": "HeatExchangerDescriptor",
+  "display": "Counterflow Heat Exchanger",
+  "kind": "transparent_node",
+  "name": "counterflow_heat_exchanger"
  },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",

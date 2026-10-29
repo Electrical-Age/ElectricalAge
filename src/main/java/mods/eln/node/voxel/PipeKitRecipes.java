@@ -23,8 +23,10 @@ public final class PipeKitRecipes {
 
     /** The plate a tier's pipe is made of, and how many make one block (16 voxels) of it: 2 iron plates (the old
      *  recipe), 1 alloy plate (Baughn: 3 m per craft of 3 plates instead of 1). */
-    static final String[] PLATE = {"eln:iron_plate", "eln:alloy_plate"};
-    static final int[] PER_BLOCK = {2, 1};
+    static final String[] PLATE = {"eln:iron_plate", "eln:alloy_plate", "eln:alloy_plate"};
+    /** (The large alloy pipe: 8 alloy plates a block, made by its own shaped recipe; plates on their own make the alloy
+     *  pipe, plateTier finding it first.) */
+    static final int[] PER_BLOCK = {2, 1, 8};
 
     static net.minecraft.world.item.Item plate(int tier) {
         return net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(PLATE[tier]));
@@ -34,11 +36,13 @@ public final class PipeKitRecipes {
      *  2026-10-27: EA's own, and what a modpack adds; a lone kit gives back EA's). */
     public static int plateTier(ItemStack s) {
         if (s.isEmpty()) return -1;
-        for (int t = 0; t < PLATE.length; t++) if (s.is(mods.eln.misc.OreDictTags.highQualityPlates(METAL[t]))) return t;
+        for (int t = 0; t < PLATE_TIERS; t++) if (s.is(mods.eln.misc.OreDictTags.highQualityPlates(METAL[t]))) return t;
         return -1;
     }
 
-    static final String[] METAL = {"iron", "alloy"};
+    static final String[] METAL = {"iron", "alloy", "alloy"};
+    /** The tiers plates alone make (iron, alloy); the large alloy pipe has its own recipe. */
+    static final int PLATE_TIERS = 2;
 
     /**
      * Pipe kits from plates (Baughn: pipe kits didn't stack up or craft many at a time; cable kits had been fixed):
@@ -174,7 +178,7 @@ public final class PipeKitRecipes {
         List<net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>> out = new java.util.ArrayList<>();
         var info = new net.minecraft.world.item.crafting.Recipe.CommonInfo(false);
         var book = new net.minecraft.world.item.crafting.CraftingRecipe.CraftingBookInfo(net.minecraft.world.item.crafting.CraftingBookCategory.MISC, "eln_pipe_kit");
-        for (int t = 0; t < PLATE.length; t++) {
+        for (int t = 0; t < PLATE_TIERS; t++) {
             var ing = net.minecraft.world.item.crafting.Ingredient.of(plate(t));
             for (int n : new int[]{9}) {   // (the one-block recipe JEI lists itself, from display(): AdventurAgent saw it twice)
                 List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();

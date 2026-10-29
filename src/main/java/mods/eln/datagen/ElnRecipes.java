@@ -736,6 +736,84 @@ public final class ElnRecipes extends ElnRecipesBase {
             'A', firstExistingOre("blockAluminum", "blockIron"),
             'M', findItemStack("Advanced Machine Block")
         );
+        // Baughn 2026-10-29: the 8 kW generator (two 4 kW ones' worth, a bigger winding) and the small shaft motor
+        addRecipe(findItemStack("8kW Generator"),
+            "mmm",
+            "GaG",
+            " ME",
+            'm', findItemStack("Advanced Electrical Motor"),
+            'G', findItemStack("Generator"),
+            'M', findItemStack("Advanced Machine Block"),
+            'a', firstExistingOre("ingotAluminum", "ingotIron"),
+            'E', findItemStack("High Voltage Cable")
+        );
+        addRecipe(findItemStack("200V Shaft Motor"),
+            " m ",
+            "iMi",
+            " E ",
+            'm', findItemStack("Electrical Motor"),
+            'i', stack(Items.IRON_INGOT),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Medium Voltage Cable")
+        );
+        // the shaft redo's plumbing (Baughn 2026-10-29): tanks and the inline pump
+        addRecipe(findItemStack("Iron Tank"),
+            "iPi",
+            "i i",
+            "iPi",
+            'i', stack(Items.IRON_INGOT),
+            'P', stack(Items.GLASS_PANE)
+        );
+        addRecipe(findItemStack("Alloy Tank"),
+            "aPa",
+            "aTa",
+            "aPa",
+            'a', findItemStack("Alloy Ingot"),
+            'P', stack(Items.GLASS_PANE),
+            'T', findItemStack("Iron Tank")
+        );
+        addRecipe(findItemStack("200V Inline Pump"),
+            " m ",
+            "pMp",
+            " E ",
+            'm', findItemStack("Electrical Motor"),
+            'p', stack(Items.IRON_INGOT),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Medium Voltage Cable")
+        );
+        addRecipe(findItemStack("LP Steam Turbine"),
+            "aAa",
+            "ASA",
+            "aMa",
+            'a', firstExistingOre("ingotAluminum", "ingotIron"),
+            'A', firstExistingOre("blockAluminum", "blockIron"),
+            'S', findItemStack("Steam Turbine"),
+            'M', findItemStack("Advanced Machine Block")
+        );
+        addRecipe(findItemStack("Plant Steam Condenser"),
+            "cTc",
+            "cCc",
+            "cMc",
+            'c', findItemStack("Copper Thermal Cable"),
+            'T', findItemStack("Iron Tank"),
+            'C', findItemStack("Steam Condenser"),
+            'M', findItemStack("Advanced Machine Block")
+        );
+        addRecipe(findItemStack("Counterflow Heat Exchanger"),
+            "cIc",
+            "ccc",
+            "cIc",
+            'c', findItemStack("Copper Thermal Cable"),
+            'I', findItemStack("Iron Tank")
+        );
+        // cheap on purpose (Baughn 2026-10-29): what a water slug costs
+        addRecipe(findItemStack("Turbine Blade Set"),
+            "I I",
+            " S ",
+            "I I",
+            'I', stack(Items.IRON_INGOT),
+            'S', stack(Items.STICK)
+        );
         addRecipe(findItemStack("Gas Turbine"),
             "msH",
             "sSs",

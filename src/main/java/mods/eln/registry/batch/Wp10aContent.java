@@ -85,6 +85,19 @@ public class Wp10aContent implements ElnContent {
         // the bootstrap turbine (Baughn 2026-10-27): heat and water in, 50 V out, its control and condenser built in
         transparentNodeItem.addDescriptor(36 + (id << 6), new mods.eln.oil.CompactTurbineDescriptor(TR_NAME(Type.NONE, "50V Compact Steam Turbine"),
             LVU, 300, lowVoltageCableDescriptor, "compactturbine50v"));
+        // the shaft redo (Baughn 2026-10-29): tanks (steam drum, separator, hotwell) and an inline feed pump
+        transparentNodeItem.addDescriptor(40 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Iron Tank"),
+            mods.eln.oil.TankDescriptor.bucketsVolume(12), 10e5, 40e5, "tankiron"));   // (12 buckets a block: Baughn 2026-10-29)
+        transparentNodeItem.addDescriptor(44 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Alloy Tank"),
+            mods.eln.oil.TankDescriptor.bucketsVolume(12), 100e5, 300e5, "tankalloy"));
+        transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "200V Inline Pump"),
+            MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
+        // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)
+        transparentNodeItem.addDescriptor(52 + (id << 6), new mods.eln.oil.PlantCondenserDescriptor(TR_NAME(Type.NONE, "Plant Steam Condenser"),
+            0.06, 40000, 0.1, "plantcondenser"));
+        // the counterflow heat exchanger (economizer, reheater, steam raiser: Baughn 2026-10-29): 12.5 W/K a block, 50 a 2 x 2 slice; 8 L a side a block
+        transparentNodeItem.addDescriptor(56 + (id << 6), new mods.eln.oil.HeatExchangerDescriptor(TR_NAME(Type.NONE, "Counterflow Heat Exchanger"),
+            mods.eln.oil.HeatExchangerDescriptor.SLICE_UA / 4, 0.008, "heatexchanger"));
     }
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */

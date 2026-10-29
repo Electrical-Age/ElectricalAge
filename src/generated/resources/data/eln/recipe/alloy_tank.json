@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:glass_pane",
+    "T": "eln:iron_tank",
+    "a": "eln:alloy_ingot"
+  },
+  "pattern": [
+    "aPa",
+    "aTa",
+    "aPa"
+  ],
+  "result": {
+    "id": "eln:alloy_tank"
+  }
+}

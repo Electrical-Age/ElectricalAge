@@ -35,8 +35,8 @@ public class PipeSensorItem extends Item implements PipeTool {
 
     /** Its tooltip lines (client ItemTooltips). */
     public java.util.List<String> tooltip() {
-        return java.util.List.of(sensing == PipeSensorPart.PRESSURE ? "Reads a pipe's pressure (absolute)" : "Reads a pipe's temperature",
-            "0-50 V out on a signal cable laid into its block", "(click the sensor with a cable kit: it lays to the floor under it,",
-            "so the block needs a floor to lie on)", "Right-click it (empty hand) to step its full scale");
+        return java.util.List.of(sensing == PipeSensorPart.PRESSURE ? "Reads a pipe's pressure"
+                : sensing == PipeSensorPart.TEMPERATURE ? "Reads a pipe's temperature" : "Reads how wet a pipe's steam is",
+            "0-50 V out on a signal cable laid into its block", "Right-click it with an empty hand to step its full scale");
     }
 }

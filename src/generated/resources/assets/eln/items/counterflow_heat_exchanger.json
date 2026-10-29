@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "eln:item/counterflow_heat_exchanger"
+  }
+}

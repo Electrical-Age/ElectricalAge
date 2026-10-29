@@ -18,51 +18,21 @@ import java.io.DataOutputStream
 class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     JointHubElement::class, null) {
     override val obj = obj
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
-    override val rotating = emptyArray<Obj3D.Obj3DPart>()
-    val staticOnAllSides = arrayOf(obj.getPart("Cap"))
-    val rotatingOnAllSides = arrayOf(obj.getPart("Shaft"))
+    override val static = arrayOf(obj.getPart("main"))
+    override val rotating = arrayOf(obj.getPart("rotor"))
+    /** Its shaft across: couplings on its x faces, turning about x (tools/models/shaftparts.py). */
+    val rotatingX = obj.getPart("rotor_x")
+
     override fun draw(angle: Double) {
-        draw(angle, Direction.XP, DirectionSet());
+        super.draw(angle)
+        rotatingX?.draw(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 1f, 0f, 0f)
     }
-
-    fun draw(angle: Double, front: Direction, connectedSides: DirectionSet) {
-        static.forEach { it.draw() }
-
-        assert(rotatingOnAllSides.size > 0)
-        val bb = rotatingOnAllSides[0].boundingBox()
-        val centre = bb.centre()
-        val ox = centre.x
-        val oy = centre.y
-        val oz = centre.z
-        var direction = front;
-        for (i in 0..3) {
-            if (connectedSides.contains(direction)) {
-                val rotatingAngle = if (direction == Direction.XP || direction == Direction.ZN) angle else -angle
-                preserveMatrix {
-                    direction.glRotateXnRef()
-                    GL11.glTranslated(ox, oy, oz)
-                    GL11.glRotatef(((rotatingAngle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 1f, 0f, 0f)
-                    GL11.glTranslated(-ox, -oy, -oz)
-                    rotatingOnAllSides.forEach { it.draw() }
-                }
-            } else {
-                preserveMatrix {
-                    direction.glRotateXnRef()
-                    staticOnAllSides.forEach { it.draw() }
-                }
-            }
-
-            direction = direction.left();
-        }
-    }
-
 
     override fun getFrontFromPlace(side: Direction?, entityLiving: LivingEntity?): Direction? = Direction.XP
 }
 
 class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
-    override val shaftMass = 0.5
+    override val shaftInertia = inertiaOf(0.02, 16000.0)
     private var connectedSides = DirectionSet()
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? = null
@@ -114,13 +84,7 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
 
 class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender: CableRenderDescriptor? = null
-    val desc = desc as JointHubDescriptor
     val connectedSides = DirectionSet()
-
-    override fun draw() {
-        front.glRotateXnRef()
-        desc.draw(angle, front, connectedSides);
-    }
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)

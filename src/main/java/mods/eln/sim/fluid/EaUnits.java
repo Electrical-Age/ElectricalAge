@@ -51,6 +51,16 @@ public final class EaUnits {
         n.update();
     }
 
+    /** Take m kg of liquid water out of n (a bucket, or the fluid capability), with its enthalpy; returns what it took. */
+    public static double drainLiquid(FluidNode n, double m) {
+        m = Math.min(m, n.mLiquid());
+        if (m <= 0) return 0;
+        n.mWater -= m;
+        n.energy -= m * Water.hLiquid(n.T());
+        n.update();
+        return m;
+    }
+
     /** Put m kg of water in at temperature T (liquid) or of steam (vapour at T). */
     public static void addWater(FluidNode n, double m, double T, boolean vapour) {
         if (m <= 0) return;

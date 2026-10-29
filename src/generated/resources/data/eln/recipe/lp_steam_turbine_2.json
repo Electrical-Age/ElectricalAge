@@ -1,0 +1,44 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:tag_empty",
+      "tag": "c:ingots/aluminum"
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:storage_blocks/aluminum"
+      }
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/iron"
+      }
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:storage_blocks/aluminum"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "#c:storage_blocks/aluminum",
+    "M": "eln:advanced_machine_block",
+    "S": "eln:steam_turbine",
+    "a": "#c:ingots/iron"
+  },
+  "pattern": [
+    "aAa",
+    "ASA",
+    "aMa"
+  ],
+  "result": {
+    "id": "eln:lp_steam_turbine"
+  }
+}

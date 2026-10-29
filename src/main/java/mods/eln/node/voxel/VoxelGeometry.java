@@ -22,8 +22,9 @@ public final class VoxelGeometry {
     public record Quad(Identifier sprite, int argb, float[] xyz, float[] uv, int face) {
     }
 
+    /** Each pipe tier's sprite (PipePart.TIER_NAME order; the large alloy pipe is the alloy's metal, drawn wider). */
     public static final Identifier[] PIPE = {Identifier.fromNamespaceAndPath("eln", "block/pipe_iron"),
-        Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy")};
+        Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy"), Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy")};
     static final int SIDES = 12;
 
     /** The cable texture of a tier (the six-node cable's, copied onto the block atlas: textures/block/cable/). */
@@ -57,6 +58,31 @@ public final class VoxelGeometry {
                 float op = (float) (v.mode == ValvePart.ON_OFF ? (v.open ? 1 : 0) : v.opening());
                 b.color(0.8f - 0.5f * op, 0.2f + 0.55f * op, 0.15f + 0.15f * op);
                 double plane = c[stem] + s;
+                if (v.mode == ValvePart.PRESSURE) {
+                    // the pressure valve: a dome actuator (brass relieving, steel reducing) and a nub on the body's
+                    // downstream side showing its flow (Baughn 2026-10-29)
+                    double[] lo = new double[3], hi = new double[3];
+                    lo[stem] = plane;
+                    hi[stem] = plane + 1.5;
+                    lo[so[0]] = c[so[0]] - 2;
+                    hi[so[0]] = c[so[0]] + 2;
+                    lo[so[1]] = c[so[1]] - 2;
+                    hi[so[1]] = c[so[1]] + 2;
+                    if (v.pmode == ValvePart.RELIEF) b.color(0.75f, 0.6f, 0.25f);
+                    else b.color(0.6f, 0.62f, 0.68f);
+                    b.boxD(lo, hi);
+                    double[] nlo = new double[3], nhi = new double[3];
+                    double tip = c[v.axis] + v.flow * (h + 1);
+                    nlo[v.axis] = Math.min(c[v.axis] + v.flow * h, tip);
+                    nhi[v.axis] = Math.max(c[v.axis] + v.flow * h, tip);
+                    nlo[so[0] == v.axis ? so[1] : so[0]] = c[so[0] == v.axis ? so[1] : so[0]] - 0.75;
+                    nhi[so[0] == v.axis ? so[1] : so[0]] = c[so[0] == v.axis ? so[1] : so[0]] + 0.75;
+                    nlo[stem] = c[stem] + h - 1.5;
+                    nhi[stem] = c[stem] + h;
+                    b.color(0.85f, 0.85f, 0.2f);
+                    b.boxD(nlo, nhi);
+                    continue;
+                }
                 if (v.mode == ValvePart.CONTROL) {
                     // an actuator: a square box on the stem, coloured by the opening (its signal: a cable laid into the block)
                     double[] lo = new double[3], hi = new double[3];
@@ -105,7 +131,8 @@ public final class VoxelGeometry {
                 double lo = bx[ax], hi = bx[ax + 3];
                 boolean up = ps.outlet % 2 == 1;
                 if (ps.sensing == PipeSensorPart.PRESSURE) b.color(0.7f, 0.7f, 0.72f);
-                else b.color(0.8f, 0.5f, 0.3f);
+                else if (ps.sensing == PipeSensorPart.TEMPERATURE) b.color(0.8f, 0.5f, 0.3f);
+                else b.color(0.35f, 0.55f, 0.85f);   // (steam quality: blue)
                 b.tube(ax, c[o[0]], c[o[1]], 0.6, up ? lo : hi - 2, up ? lo + 2 : hi);
                 float f = (float) Math.max(0, Math.min(1, ps.shown));
                 b.color(0.2f + 0.7f * f, 0.75f - 0.55f * f, 0.15f);
@@ -135,7 +162,7 @@ public final class VoxelGeometry {
 
     /** A pipe: a round tube along each straight piece, a fitting ring at each bend, a flange where it meets a face. */
     static void pipe(Builder b, PipePart pipe) {
-        double r = pipe.bore() / 2.0;
+        double r = pipe.drawn() / 2.0;
         int[] p = pipe.points;
         int n = p.length / 3;
         for (int i = 1; i < n; i++) {

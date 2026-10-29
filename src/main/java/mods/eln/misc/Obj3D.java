@@ -407,7 +407,11 @@ public class Obj3D {
         return loadFile(filePath, false);
     }
 
+    /** The OBJ it was loaded from (under assets/eln/), for files beside it (a model's .hitbox). */
+    public String filePath;
+
     public boolean loadFile(final String filePath, boolean reload) {
+        this.filePath = filePath;
         Obj3DPart part = null;
         FaceGroup fg = null;
 

@@ -59,6 +59,58 @@ public final class MachineSounds {
         return List.of(hum, rotor, air);
     }
 
+    /** Loudness of the turbines' layers: the flow (steam hiss or gas roar), the rotor tones, the overspeed whistle. */
+    static final float FLOW_VOLUME = 0.35f, TURBINE_ROTOR_VOLUME = 0.1f, WHISTLE_VOLUME = 0.3f;
+
+    /**
+     * A turbine (shaft steam or gas turbine): its flow by flow (0..1: steam hiss, or a gas turbine's roar whose pitch
+     * also follows speed), rotor tones by speed, and over 105 % of its rated speed a whistle rising with the overspeed
+     * (Baughn 2026-10-29: hear a runaway coming). speed: shaft speed over rated.
+     */
+    public static List<LoopedSound> turbine(Coordonate at, DoubleSupplier speed, DoubleSupplier flow, boolean gas, float volume) {
+        LoopedSound flowing = new LoopedSound(gas ? "eln:gas_turbine_roar" : "eln:steam_hiss", at) {
+            @Override
+            public float getVolume() {
+                double f = clamp(flow.getAsDouble(), 0, 1);
+                return volume * FLOW_VOLUME * (float) (gas ? Math.sqrt(f) * clamp(speed.getAsDouble() * 1.5, 0, 1) : f);
+            }
+
+            @Override
+            public float getPitch() {
+                return gas ? clamp(0.6 + 0.5 * speed.getAsDouble(), 0.5, 2) : 1f;
+            }
+        };
+        LoopedSound rotor = new LoopedSound("eln:rotor_tone", at) {
+            @Override
+            public float getVolume() {
+                return volume * TURBINE_ROTOR_VOLUME * clamp((speed.getAsDouble() - 0.15) / 0.3, 0, 1);
+            }
+
+            @Override
+            public float getPitch() {
+                return clamp(ROTOR_PITCH * speed.getAsDouble(), 0.5, 2);
+            }
+        };
+        // (an alarm: not faded over the 16 blocks the machine's other layers are, so it's heard down the line)
+        LoopedSound whistle = new LoopedSound("eln:overspeed_whistle", at, LoopedSound.Attenuation.NONE) {
+            @Override
+            public float getVolume() {
+                return volume * whistle(speed.getAsDouble());
+            }
+
+            @Override
+            public float getPitch() {
+                return clamp(speed.getAsDouble(), 0.5, 2);
+            }
+        };
+        return List.of(flowing, rotor, whistle);
+    }
+
+    /** The overspeed whistle's loudness at a speed (share of rated): from 105 %, full at 110 % (the trip). */
+    public static float whistle(double speed) {
+        return WHISTLE_VOLUME * clamp((speed - 1.05) / 0.05, 0, 1);
+    }
+
     static float clamp(double v, double lo, double hi) {
         return (float) Math.max(lo, Math.min(hi, v));
     }

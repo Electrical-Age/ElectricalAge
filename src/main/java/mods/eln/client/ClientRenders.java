@@ -70,6 +70,10 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.oil.BoilerDescriptor.class, mods.eln.oil.BoilerRender::new);
         ElnRenders.transparent(mods.eln.oil.SteamGeneratorDescriptor.class, mods.eln.oil.SteamGeneratorRender::new);
         ElnRenders.transparent(mods.eln.oil.CompactTurbineDescriptor.class, mods.eln.oil.CompactTurbineRender::new);
+        ElnRenders.transparent(mods.eln.oil.TankDescriptor.class, mods.eln.oil.TankRender::new);
+        ElnRenders.transparent(mods.eln.oil.InlinePumpDescriptor.class, mods.eln.oil.InlinePumpRender::new);
+        ElnRenders.transparent(mods.eln.oil.PlantCondenserDescriptor.class, mods.eln.oil.PlantCondenserRender::new);
+        ElnRenders.transparent(mods.eln.oil.HeatExchangerDescriptor.class, mods.eln.oil.HeatExchangerRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.smelter.SmelterDescriptor.class, mods.eln.transparentnode.smelter.SmelterRender::new);
         ElnRenders.transparent(mods.eln.oil.SteamOvenDescriptor.class, mods.eln.oil.SteamOvenRender::new);
         ElnRenders.transparent(mods.eln.anvil.ElectricalAnvilDescriptor.class, mods.eln.anvil.ElectricalAnvilRender::new);
@@ -110,6 +114,8 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.mechanical.JointHubDescriptor.class, mods.eln.mechanical.JointHubRender::new);
         ElnRenders.transparent(mods.eln.mechanical.TachometerDescriptor.class, mods.eln.mechanical.TachometerRender::new);
         ElnRenders.transparent(mods.eln.mechanical.GeneratorDescriptor.class, mods.eln.mechanical.GeneratorRender::new);
-        ElnRenders.transparent(mods.eln.mechanical.TurbineDescriptor.class, mods.eln.mechanical.TurbineRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.GasTurbineDescriptor.class, mods.eln.mechanical.GasTurbineRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.SteamTurbineDescriptor.class, mods.eln.mechanical.SteamTurbineRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.ShaftMotorDescriptor.class, mods.eln.mechanical.ShaftMotorRender::new);
     }
 }

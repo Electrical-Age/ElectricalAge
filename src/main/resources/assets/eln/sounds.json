@@ -322,5 +322,41 @@
                 "stream": false
             }
         ]
+    },
+    "overspeed_whistle": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:overspeed_whistle",
+                "stream": false
+            }
+        ]
+    },
+    "gas_turbine_roar": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:gas_turbine_roar",
+                "stream": false
+            }
+        ]
+    },
+    "steam_knock": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:steam_knock",
+                "stream": false
+            }
+        ]
+    },
+    "pump_cavitation": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:pump_cavitation",
+                "stream": false
+            }
+        ]
     }
 }

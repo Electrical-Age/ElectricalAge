@@ -41,6 +41,14 @@ public class TransparentNodeEntity extends NodeBlockEntity {
     /** Client: the device's render (null = none, or not ported yet). */
     public TransparentNodeElementRender elementRender;
 
+    /** The device's front: server from its node, client from the last publish; null before either. */
+    public mods.eln.misc.Direction front() {
+        if (level != null && !level.isClientSide()) {
+            return getNode() instanceof TransparentNode n && n.element != null ? n.element.front : null;
+        }
+        return elementRender == null ? null : elementRender.front;
+    }
+
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
         super.serverPublishUnserialize(stream);

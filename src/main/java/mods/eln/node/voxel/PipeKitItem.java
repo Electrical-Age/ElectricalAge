@@ -33,7 +33,8 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
     /** A kit holding len voxels of a tier's pipe (empty if none). */
     public static ItemStack kit(int tier, int len) {
         if (len <= 0) return ItemStack.EMPTY;
-        ItemStack s = new ItemStack(tier == 0 ? ElnRegistry.PIPE_KIT_IRON.get() : ElnRegistry.PIPE_KIT_ALLOY.get());
+        ItemStack s = new ItemStack(tier == 0 ? ElnRegistry.PIPE_KIT_IRON.get() : tier == 1 ? ElnRegistry.PIPE_KIT_ALLOY.get()
+            : ElnRegistry.PIPE_KIT_LARGE_ALLOY.get());
         KitItem.setLength(s, len);
         return s;
     }

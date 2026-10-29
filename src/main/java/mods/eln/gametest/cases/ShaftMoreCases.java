@@ -6,7 +6,6 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
-import mods.eln.mechanical.TurbineElement;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -97,8 +96,8 @@ public final class ShaftMoreCases {
     }
 
     /**
-     * Gas turbine + flywheel with its 4 mB tank full of gasoline. At 800 rad/s (optimal) it burns fuel and speeds the
-     * shaft up; at 300 rad/s it is below its efficiency cutoff (0.5): no fuel used, speed unchanged.
+     * Gas turbine + flywheel with a bucket of gasoline in its tank. At 800 rad/s it burns fuel (keeping the flywheel
+     * near its speed); at 300 rad/s it is below its cutoff (400): no flame, no fuel used, it only slows (windage).
      */
     static final class GasTurbineCase implements TestCase {
         final double rads;
@@ -122,7 +121,7 @@ public final class ShaftMoreCases {
             Fluid[] fuels = FuelRegistry.INSTANCE.fluidListToFluids(FuelRegistry.INSTANCE.getGasolineList());
             if (fuels.length == 0) return;
             fluid = FuelRegistry.INSTANCE.fluidName(fuels[0]);
-            filled = ((TurbineElement) parts[0]).getTank().fill(new FluidStack(fuels[0], 4), true);
+            filled = ((mods.eln.mechanical.GasTurbineElement) parts[0]).tank.fill(new FluidStack(fuels[0], 1000), true);
         }
 
         public void measure(TestContext ctx) {
@@ -131,15 +130,15 @@ public final class ShaftMoreCases {
                 ctx.check(what + ": tank takes gasoline", false, "fluid " + fluid + ", filled " + filled + " mB");
                 return;
             }
-            FluidStack left = ((TurbineElement) parts[0]).getTank().drain(Integer.MAX_VALUE, false);
+            FluidStack left = ((mods.eln.mechanical.GasTurbineElement) parts[0]).tank.drain(Integer.MAX_VALUE, false);
             int mb = left == null ? 0 : left.getAmount();
             double now = shaft(parts[0]).getRads();
             if (burns) {
                 ctx.check(what + ": burns fuel", mb < filled, String.format("%s %d -> %d mB", fluid, filled, mb));
-                ctx.check(what + ": speeds the shaft up", now > rads, String.format("%.2f rad/s", now));
+                ctx.check(what + ": holds the shaft near its speed (over 790 rad/s)", now > 790, String.format("%.2f rad/s", now));
             } else {
                 ctx.check(what + ": below cutoff, no fuel used", mb == filled, String.format("%s %d -> %d mB", fluid, filled, mb));
-                ctx.check(what + ": speed unchanged", Math.abs(now - rads) < 1e-6, String.format("%.4f rad/s", now));
+                ctx.check(what + ": no power: it only slows (windage)", now <= rads, String.format("%.4f rad/s", now));
             }
         }
     }
