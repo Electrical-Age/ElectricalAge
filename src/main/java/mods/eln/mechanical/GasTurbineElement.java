@@ -91,7 +91,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             if (manual || rads < RATED_RADS) tripped = false;
             else if (rads > TRIP * RATED_RADS) tripped = true;
             double target = manual ? control.getNormalized() : tripped ? 0 : Math.max(0, Math.min(1, (RATED_RADS * (1 + DROOP) - rads) / (DROOP * RATED_RADS)));
-            gate += (target - gate) * Math.min(1, time / VALVE_TAU);
+            gate = tripped ? 0 : gate + (target - gate) * Math.min(1, time / VALVE_TAU);   // (a trip shuts the fuel at once)
             // the flame: only over CUTOFF of rated speed, and with fuel
             double fuelJ = 0;
             burning = r >= CUTOFF && gate > 0.002 && tank.getFluidAmount() > 0;

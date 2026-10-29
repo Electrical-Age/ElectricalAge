@@ -21,6 +21,7 @@ public final class ShaftArtCases {
         cases.add(new MotorSpinsUnloadedGenerators());
         cases.add(new SpeedKeptWhenPartsChange());
         cases.add(new TerminalsWhereDrawn());
+        cases.add(new TrippedSeals());
     }
 
     static final int HP = 9 + (4 << 6), GEN4 = 10 + (4 << 6), GAS = 11 + (4 << 6), JOINT = 12 + (4 << 6), HUB = 13 + (4 << 6),
@@ -345,6 +346,55 @@ public final class ShaftArtCases {
 
         public void measure(TestContext ctx) {
             ctx.check("shaft terminals: where they are drawn, on the faces that connect", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * A trip seals (AdventurAgent 2026-10-29: a tripped LP behind an HP on manual took 1.5 g/s through its governor
+     * valve's leak and kept the line at 916 rad/s): an HP and an LP on 20 bar steam, their shafts overdriven at 900
+     * rad/s (past the 880 trip, as a manual HP on the line would): tripped, they pass no steam and make no power.
+     */
+    static final class TrippedSeals extends PlumbingCases.Big {
+        final mods.eln.mechanical.ShaftSteamTurbineElement[] t = new mods.eln.mechanical.ShaftSteamTurbineElement[2];
+        final double[] kg0 = new double[2], w0 = new double[2], kg1 = new double[2], w1 = new double[2];
+        mods.eln.sim.IProcess drive;
+        int tick;
+
+        public String id() {
+            return "shaft_turbine_tripped_seals";
+        }
+
+        public int ticks() {
+            return 80;
+        }
+
+        public void build(TestContext ctx) {
+            t[0] = (mods.eln.mechanical.ShaftSteamTurbineElement) ShaftSteamCases.orient(ctx.placeTransparent(HP, ctx.at(2, 1, 2)));
+            t[1] = (mods.eln.mechanical.ShaftSteamTurbineElement) ShaftSteamCases.orient(ctx.placeTransparent(LP, ctx.at(2, 1, 6)));
+            mods.eln.Eln.simulator.addSlowProcess(drive = dt -> {
+                tick++;
+                for (int i = 0; i < 2; i++) {
+                    ShaftSteamCases.steam(t[i]);
+                    shaftOf(t[i]).setRads(900);
+                    if (tick == 20) {
+                        kg0[i] = t[i].totalKg;
+                        w0[i] = t[i].totalWork;
+                    }
+                    kg1[i] = t[i].totalKg;
+                    w1[i] = t[i].totalWork;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(drive);
+            for (int i = 0; i < 2; i++) {
+                String n = i == 0 ? "HP" : "LP";
+                ctx.line(String.format("%s overdriven at 900 rad/s on 20 bar: tripped %s, %.4f g steam, %.1f J of work over 3 s; inlet %.1f bar",
+                    n, t[i].tripped, (kg1[i] - kg0[i]) * 1000, w1[i] - w0[i], t[i].inlet.P() / 1e5));
+                ctx.check(n + " tripped: no steam through it, no power from it", t[i].tripped && kg1[i] - kg0[i] < 1e-7 && w1[i] - w0[i] < 1e-3,
+                    String.format("%.4f g, %.1f J", (kg1[i] - kg0[i]) * 1000, w1[i] - w0[i]));
+            }
         }
     }
 }

@@ -91,10 +91,11 @@ public final class MachineSounds {
                 return clamp(ROTOR_PITCH * speed.getAsDouble(), 0.5, 2);
             }
         };
-        LoopedSound whistle = new LoopedSound("eln:overspeed_whistle", at) {
+        // (an alarm: not faded over the 16 blocks the machine's other layers are, so it's heard down the line)
+        LoopedSound whistle = new LoopedSound("eln:overspeed_whistle", at, LoopedSound.Attenuation.NONE) {
             @Override
             public float getVolume() {
-                return volume * WHISTLE_VOLUME * clamp((speed.getAsDouble() - 1.05) / 0.05, 0, 1);
+                return volume * whistle(speed.getAsDouble());
             }
 
             @Override
@@ -103,6 +104,11 @@ public final class MachineSounds {
             }
         };
         return List.of(flowing, rotor, whistle);
+    }
+
+    /** The overspeed whistle's loudness at a speed (share of rated): from 105 %, full at 110 % (the trip). */
+    public static float whistle(double speed) {
+        return WHISTLE_VOLUME * clamp((speed - 1.05) / 0.05, 0, 1);
     }
 
     static float clamp(double v, double lo, double hi) {
