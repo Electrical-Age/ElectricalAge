@@ -22,8 +22,9 @@ public final class VoxelGeometry {
     public record Quad(Identifier sprite, int argb, float[] xyz, float[] uv, int face) {
     }
 
+    /** Each pipe tier's sprite (PipePart.TIER_NAME order; the large alloy pipe is the alloy's metal, drawn wider). */
     public static final Identifier[] PIPE = {Identifier.fromNamespaceAndPath("eln", "block/pipe_iron"),
-        Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy")};
+        Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy"), Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy")};
     static final int SIDES = 12;
 
     /** The cable texture of a tier (the six-node cable's, copied onto the block atlas: textures/block/cable/). */
