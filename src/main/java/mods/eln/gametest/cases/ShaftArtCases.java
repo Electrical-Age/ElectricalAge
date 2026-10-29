@@ -24,6 +24,8 @@ public final class ShaftArtCases {
         cases.add(new TrippedSeals());
         cases.add(new TankBoxReloads());
         cases.add(new TankBoxReformsLate());
+        cases.add(new InlinePumpAlongView());
+        cases.add(new TankBuckets());
     }
 
     static final int HP = 9 + (4 << 6), GEN4 = 10 + (4 << 6), GAS = 11 + (4 << 6), JOINT = 12 + (4 << 6), HUB = 13 + (4 << 6),
@@ -555,6 +557,120 @@ public final class ShaftArtCases {
                 else if (Math.abs(g.node.mWater - water) > 1e-3 * water) bad = String.format("water %.3f of %.3f kg", g.node.mWater, water);
             }
             ctx.check("lone tanks that fill a box become one box again, with their water", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * The 200V Inline Pump placed looking east (AdventurAgent 2026-10-29: its line came out across the view): its line runs
+     * east-west, in on the west (behind the player), out on the east; a pipe laid to its west face's low spot couples.
+     */
+    static final class InlinePumpAlongView extends PlumbingCases.Big {
+        mods.eln.oil.InlinePumpElement p;
+        String bad = "";
+
+        public String id() {
+            return "inline_pump_placed_along_the_view";
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            p = (mods.eln.oil.InlinePumpElement) placeLooking(ctx, PlumbingCases.PUMP, ctx.at(4, 1, 4), EAST);
+            int in = -1, out = -1;
+            for (var port : p.fluidPorts()) {
+                if (port.node() == p.inlet) in = port.face();
+                if (port.node() == p.outlet) out = port.face();
+            }
+            if (in != 4 || out != 5) bad += "in on face " + in + ", out on " + out + " (want west 4, east 5); ";
+            PipeCases.lay(ctx, ctx.at(3, 1, 4), 1, 0, 4, 8, 16, 4, 8);   // (to its west face's low spot)
+        }
+
+        public void measure(TestContext ctx) {
+            if (mods.eln.fluid.FluidWorld.edgesOf(p.inlet).isEmpty()) bad += "the pipe at its west doesn't reach its inlet; ";
+            ctx.check("inline pump placed looking east: its line east-west, in behind, out ahead; a pipe couples", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * Tanks take and give buckets of water (AdventurAgent 2026-10-29: a water bucket on an alloy tank did nothing): a water
+     * bucket on any block of a 3 x 1 x 2 alloy box puts 1000 mB in, an empty bucket takes 1000 mB out; the same on a lone
+     * iron tank; and a tank's water is its fluid capability.
+     */
+    static final class TankBuckets extends PlumbingCases.Big {
+        final List<BlockPos> box = new ArrayList<>();
+        BlockPos lone;
+        double box0, lone0;
+        mods.eln.sim.IProcess step;
+        int tick;
+        String bad = "";
+        double[] after = new double[4];
+
+        public String id() {
+            return "tank_takes_and_gives_buckets";
+        }
+
+        public int ticks() {
+            return 30;
+        }
+
+        static double liquidMb(mods.eln.oil.TankElement t) {
+            return t.vessel.mLiquid() / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+        }
+
+        static boolean bucket(TestContext ctx, mods.eln.oil.TankElement t, net.minecraft.world.item.Item item) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var held = player.getMainHandItem().copy();
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(item));
+            boolean used = mods.eln.fluid.FluidBuckets.use(player, t.getFluidHandler());
+            boolean filled = player.getMainHandItem().is(net.minecraft.world.item.Items.WATER_BUCKET);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+            return used && (item == net.minecraft.world.item.Items.BUCKET ? filled : true);
+        }
+
+        public void build(TestContext ctx) {
+            for (int x = 1; x <= 3; x++)
+                for (int z = 1; z <= 2; z++) {
+                    placeLooking(ctx, PlumbingCases.ALLOY_TANK, ctx.at(x, 1, z), EAST);
+                    box.add(ctx.at(x, 1, z));
+                }
+            lone = ctx.at(7, 1, 7);
+            placeLooking(ctx, PlumbingCases.IRON_TANK, lone, EAST);
+            var b = TankBoxReloads.at(ctx, box.get(4));
+            if (b.group == null) bad += "the alloy tanks aren't a box; ";
+            box0 = liquidMb(b);
+            lone0 = liquidMb(TankBoxReloads.at(ctx, lone));
+            mods.eln.Eln.simulator.addSlowProcess(step = dt -> {
+                tick++;
+                var bt = TankBoxReloads.at(ctx, box.get(4));
+                var lt = TankBoxReloads.at(ctx, lone);
+                if (tick == 2) {
+                    if (!bucket(ctx, bt, net.minecraft.world.item.Items.WATER_BUCKET)) bad += "box: water bucket not taken; ";
+                    if (!bucket(ctx, lt, net.minecraft.world.item.Items.WATER_BUCKET)) bad += "lone: water bucket not taken; ";
+                }
+                if (tick == 10) {
+                    after[0] = liquidMb(bt);
+                    after[1] = liquidMb(lt);
+                    if (!bucket(ctx, TankBoxReloads.at(ctx, box.get(0)), net.minecraft.world.item.Items.BUCKET)) bad += "box: an empty bucket got no water; ";
+                    if (!bucket(ctx, lt, net.minecraft.world.item.Items.BUCKET)) bad += "lone: an empty bucket got no water; ";
+                }
+                if (tick == 20) {
+                    after[2] = liquidMb(bt);
+                    after[3] = liquidMb(lt);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(step);
+            ctx.line(String.format("tank buckets: box %.0f -> %.0f -> %.0f mB; lone %.0f -> %.0f -> %.0f mB", box0, after[0], after[2], lone0, after[1], after[3]));
+            if (Math.abs(after[0] - box0 - 1000) > 5 || Math.abs(after[1] - lone0 - 1000) > 5) bad += "a water bucket didn't put 1000 mB in; ";
+            if (Math.abs(after[0] - after[2] - 1000) > 5 || Math.abs(after[1] - after[3] - 1000) > 5) bad += "an empty bucket didn't take 1000 mB out; ";
+            var t = TankBoxReloads.at(ctx, lone);
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, lone, null);
+            if (cap != t.water) bad += "the tank's water isn't its fluid capability (" + cap + "); ";
+            ctx.check("tanks take and give buckets of water, lone or in a box", bad.isEmpty(), bad);
         }
     }
 }

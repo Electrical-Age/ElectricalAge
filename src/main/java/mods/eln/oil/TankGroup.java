@@ -146,6 +146,7 @@ public final class TankGroup {
                 m.group = g;
                 m.vessel = g == null ? m.own : g.node;
                 m.makePorts();
+                m.showWater();
                 FluidWorld.changed(m);
                 m.needPublish();
             }

@@ -17,6 +17,16 @@ import java.util.List;
  * not after a preheater: Argon). Model: tools/models/inlinepump.py.
  */
 public class InlinePumpDescriptor extends TransparentNodeDescriptor {
+    /**
+     * Placed with its line along the player's view, water in behind and out ahead (AdventurAgent 2026-10-29: placed
+     * looking along a pipe run, its line came out across it): its front to the player's right (EA's left() of the view),
+     * so its left (the inlet) is behind them and its right (the outlet) ahead.
+     */
+    @Override
+    public mods.eln.misc.Direction getFrontFromPlace(mods.eln.misc.Direction side, net.minecraft.world.entity.LivingEntity entityLiving) {
+        return entityLiving == null ? mods.eln.misc.Direction.XN : mods.eln.misc.Utils.entityLivingHorizontalViewDirection(entityLiving).left();
+    }
+
     /** Shutoff head (Pa), the flow at no head (kg/s), electric power at full duty (W), efficiency, idle draw (W). */
     public static final double HEAD_PA = 25e5, RATED_KG_PER_S = 0.1, NOMINAL_P = 500, EFFICIENCY = 0.6, IDLE_W = 40;
     /** The margin over the water's vapour pressure it needs at its inlet (Pa), and the liquid share of the inlet. */
@@ -46,6 +56,7 @@ public class InlinePumpDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
+        list.add("Placed along your view: water in behind you, out ahead (the line through its foot, low on its flanks).");
         list.add(String.format("Water in on its left, out on its right: up to %.0f bar of head, %.0f mB/s free-flowing.",
             HEAD_PA / 1e5, RATED_KG_PER_S / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER));
         list.add(String.format("%.0f V on its front, up to %.0f W; a speed signal on its back (none: full speed).", nominalU, NOMINAL_P));

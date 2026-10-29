@@ -81,6 +81,49 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         return vessel == null ? 0 : Math.min(1, vessel.mLiquid() / Water.RHO_L / vessel.volume);
     }
 
+    /** Its water as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankWater). */
+    public final TankWater water = new TankWater();
+
+    @Override
+    public Object getFluidHandler() {
+        return water;
+    }
+
+    /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its water again. */
+    public void syncWater() {
+        if (vessel == null) return;
+        int d = water.change();
+        double kg = Math.abs(d) * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+        if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
+        else if (d < 0) {
+            double got = EaUnits.drainLiquid(vessel, kg);
+            if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
+        }
+        showWater();
+    }
+
+    void showWater() {
+        if (vessel == null) return;
+        // (to the nearest mB; cold, its vapour counts too: a bucket poured into a box comes back 999 mB, a little of it
+        // evaporated into the box's air, and an empty bucket wants a whole 1000)
+        water.show((int) Math.round(bucketable() / EaUnits.KG_PER_MB_WATER), (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER));
+    }
+
+    /** The water a bucket can take (kg): its liquid, and while it's under boiling its vapour (it would condense). */
+    double bucketable() {
+        return vessel.T() < Water.TB ? vessel.mWater : vessel.mLiquid();
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        syncWater();
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        showWater();
+    }
+
     @Override
     public Object fluidLevel() {
         return node.coordonate.dimention;
@@ -182,6 +225,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             List<TankElement> seeds = neighbours();
             seeds.add(this);
             TankGroup.regroup(seeds, null);
+            showWater();
         }
     }
 
