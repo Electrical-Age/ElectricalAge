@@ -56,10 +56,10 @@ public class InlinePumpDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Placed along your view: water in behind you, out ahead (the line through its foot, low on its flanks).");
+        list.add("Placed along your view: water in behind you, out ahead.");
         list.add(String.format("Water in on its left, out on its right: up to %.0f bar of head, %.0f mB/s free-flowing.",
             HEAD_PA / 1e5, RATED_KG_PER_S / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER));
-        list.add(String.format("%.0f V on its front, up to %.0f W; a speed signal on its back (none: full speed).", nominalU, NOMINAL_P));
+        list.add(String.format("%.0f V on its front, up to %.0f W; a speed signal on its back.", nominalU, NOMINAL_P));
         list.add("Fed steam, or water at its boiling point, it cavitates and moves next to nothing.");
     }
 }

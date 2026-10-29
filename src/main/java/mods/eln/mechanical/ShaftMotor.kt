@@ -43,11 +43,10 @@ class ShaftMotorDescriptor(
     }
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
-        list.add("Spins a shaft up: power in on its front (the terminal box: your left as you place it),")
-        list.add("  a speed signal on its back (the small plate)")
-        list.add("  (0-50 V: 0 to ${nominalShaftRads.toInt()} rad/s; no signal: ${nominalShaftRads.toInt()}).")
+        list.add("Spins a shaft up: power on its front, under its terminal box;")
+        list.add("a speed signal on its back sets its speed, full without one.")
         list.add(Utils.plotVolt("Nominal voltage: ", nominalU) + Utils.plotPower("  Power: ", nominalP))
-        list.add("Drives what sits against its side (a condenser's pumps).")
+        list.add("Drives a plant condenser's pumps beside it.")
     }
 }
 
@@ -176,8 +175,8 @@ class ShaftMotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor)
         info["Speed"] = Utils.plotRads("", shaft.rads)
         info["Drives to"] = Utils.plotRads("", targetRads())
         info["Power"] = Utils.plotPower("", drawnW)
-        // (AdventurAgent took the speed signal's small plate on its back for the power terminal: say which face is which)
-        info["Terminals"] = "200 V on its " + ShaftSteamTurbineElement.compass(front) + " face (the box), speed signal on its " +
+        // AdventurAgent took the speed signal's small plate on its back for the power terminal: say which face is which
+        info["Terminals"] = "200 V on its " + ShaftSteamTurbineElement.compass(front) + " face, speed signal on its " +
             ShaftSteamTurbineElement.compass(front.back())
         if (Eln.wailaEasyMode) info["Voltage"] = Utils.plotVolt("", load.u)
         return info

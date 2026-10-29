@@ -253,12 +253,12 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */
     public String status() {
         double rads = getShaft().getRads();
-        if (tripped) return I18N.tr("Tripped: overspeed (resets below rated speed)");
+        if (tripped) return I18N.tr("Tripped: overspeed");
         if (tank.getFluidAmount() <= 0) return I18N.tr("No fuel");
-        if (!burning && rads < CUTOFF * RATED_RADS) return String.format(I18N.tr("Needs a starter: spin it over %.0f rad/s (a Shaft Motor)"), CUTOFF * RATED_RADS);
+        if (!burning && rads < CUTOFF * RATED_RADS) return String.format(I18N.tr("Needs a starter: a Shaft Motor to spin it over %.0f rad/s"), CUTOFF * RATED_RADS);
         if (!burning) return I18N.tr("Fuel valve shut");
         if (manual()) return I18N.tr("Manual control: no governor or trip");
-        return exhaustPiped ? I18N.tr("Running") : I18N.tr("Running, venting its heat (pipe its exhaust to a heat exchanger)");
+        return exhaustPiped ? I18N.tr("Running") : I18N.tr("Running, its exhaust heat wasted");
     }
 
     @Override
@@ -273,7 +273,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         info.put(I18N.tr("Fuel"), tank.getFluidAmount() <= 0 ? I18N.tr("empty") : String.format("%d mB of %s, %s", tank.getFluidAmount(),
             FuelRegistry.INSTANCE.fluidName(tank.getFluid().getFluid()), Utils.plotPower("", fuelW)));
         info.put(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.0f °C, piped", exhaust == null ? 0 : exhaust.T() - Water.T0) : I18N.tr("to the air"));
-        info.put(I18N.tr("Fuel valve"), tripped ? I18N.tr("tripped (overspeed)") : String.format("%.0f%%%s", gate * 100, manual() ? I18N.tr(", by hand: no governor, no trip") : ""));
+        info.put(I18N.tr("Fuel valve"), tripped ? I18N.tr("tripped by overspeed") : String.format("%.0f%%%s", gate * 100, manual() ? I18N.tr(", by hand: no governor, no trip") : ""));
         return info;
     }
 }

@@ -54,8 +54,8 @@ public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Exhaust steam in on top, its back or its right (set an LP turbine's back against it); condensate out low on its front");
-        list.add("(to a feed pump); makeup water in high on its left, through a float valve.");
+        list.add("Exhaust steam in on top, its back or its right; set an LP turbine against it.");
+        list.add("Condensate out low on its front; makeup water in high on its left.");
         list.add("Its pump and air ejector run on a Shaft Motor against its side: no motor, no vacuum.");
         list.add(String.format("Rejects %.0f kW at a 20 K rise of its shell; more with thermal cables on its sides.", nominalHeat / 1000));
     }

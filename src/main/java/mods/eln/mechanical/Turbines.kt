@@ -38,7 +38,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbin
                 spec.nominalKgPerS * 1000, p, spec.ratedExhaustPa / 1e5))
             list.add("Wet steam brakes it and knocks; if it lasts at speed, it strips its blades.")
         } else {
-            list.add("Steam in by pipe on top, out of its back: piped on (an LP turbine, a heater) or into the air.")
+            list.add("Steam in by pipe on top, out of its back to an LP turbine, a heater or the air.")
             list.add(Utils.plotPower("Up to ", spec.nominalP) + String.format(" onto the shaft from %.0f g/s of %.0f bar steam venting to air;",
                 spec.nominalKgPerS * 1000, p))
             list.add("more with a vacuum behind it. Generators on the shaft take the power.")
@@ -103,10 +103,10 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add(Utils.plotPower("A fast peaker: up to ", GasTurbineElement.NOMINAL_P) + String.format(" onto the shaft at %.0f%% of its fuel's heat.",
             GasTurbineElement.ETA * 100))
-        list.add("Fuel (gasoline, natural gas, diesel, ...) by any pipe or fluid capability: no pressure needed.")
-        list.add(String.format("It can't start itself: spin it over %.0f rad/s (a Shaft Motor on its shaft), then it lights.",
+        list.add("Burns gasoline, natural gas or diesel, by any pipe or fluid capability.")
+        list.add(String.format("It can't start itself: a Shaft Motor spins it over %.0f rad/s, then it lights.",
             GasTurbineElement.CUTOFF * GasTurbineElement.RATED_RADS))
-        list.add(String.format("Hot exhaust (%.0f C) out of its back: pipe it to a heat exchanger, or it vents.", GasTurbineElement.EXHAUST_T - 273.15))
+        list.add(String.format("Its %.0f C exhaust leaves its back: pipe it to a heat exchanger, or it vents.", GasTurbineElement.EXHAUST_T - 273.15))
         list.add(Utils.plotRads("Automatic: governor full open to ", GasTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
         list.add("A signal on its front sets the fuel valve by hand: no governor, no trip: your safeties then.")
         list.add("Placed with its shaft along your view; it turns its exhaust toward an exchanger or pipe beside it.")

@@ -336,7 +336,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", h.tBin - Water.T0, h.tBout - Water.T0, b.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(b)));
         info.put(I18N.tr("Heat A to B"), Utils.plotPower("", h.qShown));
-        info.put(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("one block (a quarter slice): %.1f W/K"), ua())
+        info.put(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("one block, a quarter slice: %.1f W/K"), ua())
             : String.format(I18N.tr("2 x 2 x %d blocks: %.0f W/K"), group.length(), ua()));
         return info;
     }

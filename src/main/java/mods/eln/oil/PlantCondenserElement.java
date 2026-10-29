@@ -263,10 +263,10 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public String status() {
         var n = v.vessel;
         if (motor == null) return I18N.tr("No motor: no pump, no air ejector, no vacuum");
-        if (v.floodShare() > PlantCondenserDescriptor.FLOOD) return I18N.tr("Flooding: drain its condensate (a feed pump at its front)");
+        if (v.floodShare() > PlantCondenserDescriptor.FLOOD) return I18N.tr("Flooding: pump its condensate out");
         if (motorShare < 0.5) return I18N.tr("Motor slow: its pumps lag");
         if (n != null && n.P() > 0.3e5)
-            return tubesW < 1000 ? I18N.tr("Low vacuum: condenser hot (no cooling water through its tubes?)") : I18N.tr("Low vacuum: condenser hot (more cooling)");
+            return tubesW < 1000 ? I18N.tr("Low vacuum: no cooling water") : I18N.tr("Low vacuum: condenser hot");
         return I18N.tr("Holding vacuum");
     }
 
@@ -278,11 +278,11 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         if (n != null) {
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", n.P() / 1e5, EaUnits.contents(n)));
             info.put(I18N.tr("Temperature"), String.format("%.0f °C", n.T() - Water.T0));
-            info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)%s", v.floodShare() * 100, n.mLiquid() / EaUnits.KG_PER_MB_WATER,
+            info.put(I18N.tr("Fill"), String.format("%.0f%%, %.0f mB%s", v.floodShare() * 100, n.mLiquid() / EaUnits.KG_PER_MB_WATER,
                 v.floodShare() > PlantCondenserDescriptor.FLOOD ? I18N.tr(": FLOODING, its tubes drown") : ""));
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW) + I18N.tr(" by its shell, ") + Utils.plotPower("", tubesW) + I18N.tr(" to its cooling water"));
-        info.put(I18N.tr("Motor"), motor == null ? I18N.tr("none: no condensate pump, no air ejector (put a Shaft Motor against its side)")
+        info.put(I18N.tr("Motor"), motor == null ? I18N.tr("none: put a Shaft Motor against its side")
             : String.format("%.0f%% speed, pumping %.0f mB/s, %.0f W off its shaft", motorShare * 100, v.pumped, pumpW));
         return info;
     }

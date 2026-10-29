@@ -453,12 +453,12 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */
     public String status() {
         double rads = getShaft().getRads();
-        if (tripped) return I18N.tr("Tripped: overspeed (resets below rated speed)");
-        if (brakeW > 0) return I18N.tr("Braking: wet steam (dry it: a separator tank)");
+        if (tripped) return I18N.tr("Tripped: overspeed");
+        if (brakeW > 0) return I18N.tr("Braking: wet steam");
         if (spec.wetBraking && exhaustPiped && exhaustPa() > 3 * spec.ratedExhaustPa)
-            return String.format(I18N.tr("Low vacuum: %.2f bar behind it (condenser hot, flooded or without its motor?)"), exhaustPa() / 1e5);
+            return String.format(I18N.tr("Low vacuum: %.2f bar behind it"), exhaustPa() / 1e5);
         if (spec.wetBraking && !exhaustPiped)
-            return String.format(I18N.tr("Venting to air: an LP stage wants a condenser against its back (%s side)"), compass(exhaustSide()));
+            return String.format(I18N.tr("Venting to air: put a condenser at its %s side"), compass(exhaustSide()));
         if (inlet == null || steamKgPerS < 1e-4) return controls.limit <= 0.001 ? I18N.tr("Shut: its valve is closed") : I18N.tr("No steam at its inlet");
         if (controls.isManual()) return I18N.tr("Manual control: no governor or trip");
         if (rads > RATED_RADS) return I18N.tr("Governing: speed held, valve easing");
@@ -476,8 +476,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         info.put(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.2f bar, piped", exhaustPa() / 1e5) : I18N.tr("to the air"));
         if (inlet != null) info.put(I18N.tr("Work per kg"), String.format("%.0f kJ/kg", jPerKg() / 1000));
         if (wetShare() > 0.01) info.put(I18N.tr("Water in its way"), String.format("%.0f%%%s", wetShare() * 100,
-            brakeW > 0 ? String.format(", braking %.1f kW: dry the steam (a separator tank)", brakeW / 1000) : ""));
-        info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped (overspeed)") : String.format("%.0f%%", Math.min(gate, controls.limit) * 100));
+            brakeW > 0 ? String.format(", braking %.1f kW", brakeW / 1000) : ""));
+        info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped by overspeed") : String.format("%.0f%%", Math.min(gate, controls.limit) * 100));
         info.put(I18N.tr("Governor"), controls.isManual() ? I18N.tr("off: manual control, no overspeed trip") : I18N.tr("automatic, trips over 880 rad/s"));
         info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", controls.limit * 100)
             : controls.hasRegulator() ? String.format("holds %.1f bar at the inlet", controls.targetBar) : String.format("throttle %.0f%%", controls.throttle * 100));

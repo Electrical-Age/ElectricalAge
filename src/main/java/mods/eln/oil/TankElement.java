@@ -340,7 +340,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         Map<String, String> info = new HashMap<>();
         if (vessel == null) return info;
         info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
-        info.put(I18N.tr("Water"), String.format("%.0f mB (%.0f%% full)", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
+        info.put(I18N.tr("Water"), String.format("%.0f mB, %.0f%% full", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
         if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));

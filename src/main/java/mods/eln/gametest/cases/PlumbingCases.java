@@ -120,7 +120,8 @@ public final class PlumbingCases {
         InlinePumpElement p;
         IProcess watch;
         double bWater0, maxW;
-        boolean sawCavitate;
+        boolean sawCavitate, sawSteamBound;
+        String steamJade = "", airJade = "";
 
         PumpMovesWater(boolean boiling) {
             this.boiling = boiling;
@@ -156,6 +157,12 @@ public final class PlumbingCases {
             Eln.simulator.addSlowProcess(watch = dt -> {
                 sawCavitate |= boiling ? p.cavitating : p.cavitating && !p.gasBound;
                 maxW = Math.max(maxW, p.wantW);
+                // (Jade: gas at its inlet that is its own vapour reads cavitating, air reads priming: AdventurAgent)
+                if (p.gasBound && p.steamBound) {
+                    sawSteamBound = true;
+                    steamJade = p.getWaila().get("Speed");
+                }
+                if (p.gasBound && !p.steamBound) airJade = p.getWaila().get("Speed");
             });
         }
 
@@ -167,9 +174,12 @@ public final class PlumbingCases {
                 ctx.check("pump: cold water goes from A to B", moved > 0.05, String.format("%.3f kg", moved));
                 ctx.check("pump: it draws power doing it", maxW > 50, String.format("%.0f W", maxW));
                 ctx.check("pump: it primed itself (passed the line's air on) and then pumped water", p.totalKg > 0.05, String.format("%.3f kg", p.totalKg));
+                ctx.check("pump: Jade calls air at its inlet priming", airJade.contains("priming"), airJade);
             } else {
                 ctx.check("pump: water at its boiling point vapour-locks it (cavitating, or its line full of steam)", sawCavitate, "");
                 ctx.check("pump: and it moves next to nothing (under 0.05 kg)", moved < 0.05, String.format("%.3f kg", moved));
+                ctx.check("pump: Jade calls steam at its inlet cavitating, not priming", !sawSteamBound || steamJade.contains("CAVITATING") && !steamJade.contains("priming"),
+                    sawSteamBound + ": " + steamJade);
             }
         }
     }

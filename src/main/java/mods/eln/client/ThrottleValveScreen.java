@@ -135,8 +135,8 @@ public class ThrottleValveScreen extends Screen {
         super.extractRenderState(g, mouseX, mouseY, partial);
         g.centeredText(font, title, width / 2, height / 2 - 30, 0xFFFFFFFF);
         g.centeredText(font, Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY
-            ? "Opens over this pressure (absolute), wide open 10% above"
-            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Absolute; one way, along its arrow; a signal cable in its block sets it instead (0-50 V: 0-150 bar)"
+            ? "Opens over this; wide open at +10%"
+            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "One way, along its arrow"
             : "Shut at 0%, fully open at 100%"), width / 2, height / 2 + 16, 0xFFA0A0A0);
     }
 

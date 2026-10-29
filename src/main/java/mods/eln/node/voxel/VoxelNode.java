@@ -1645,7 +1645,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 default -> "Valve";
             }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut")
                 : v.mode == ValvePart.PRESSURE ? String.format("%s %.1f bar%s, %.0f%% open", v.pmode == ValvePart.RELIEF ? "holds before it at" : "holds after it at",
-                    v.setPoint() / 1e5, v.signalled() ? " (signal)" : "", v.opening() * 100)
+                    v.setPoint() / 1e5, v.signalled() ? " by signal" : "", v.opening() * 100)
                 : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",

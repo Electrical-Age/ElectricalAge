@@ -45,7 +45,7 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
     private List<FluidPort> ports = List.of();
     /** Speed now (0..1), cavitating, the water moved (kg/s, averaged) and the power wanted (W). */
     public double share;
-    public boolean cavitating, gasBound;
+    public boolean cavitating, gasBound, steamBound;
     public double kgPerS, wantW;
     double meterKg, meterTime;
     public double totalKg;
@@ -86,6 +86,7 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         // water too close to boiling: it cavitates, a vapour lock: it moves next to nothing
         boolean gas = share > 0.05 && gasBound(in);
         gasBound = gas;
+        steamBound = gas && in.pVapour() > 0.5 * in.P();   // (the gas is its own vapour: Jade calls it cavitation)
         cavitating = share > 0.05 && (gas || cavitates(in));
         pump.open = cavitating ? 0.05 * share : share;
         pump.boost = cavitating ? 0.02 * InlinePumpDescriptor.HEAD_PA * share * share : InlinePumpDescriptor.HEAD_PA * share * share;
@@ -256,8 +257,9 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound ? I18N.tr(", priming: gas in its line (it passes it on)")
-            : cavitating ? I18N.tr(", CAVITATING: its water is too close to boiling (cool it, or raise the pressure at its inlet)") : ""));
+        // (gas at its inlet that is its own vapour, steam or water at boiling, is cavitation; air is priming)
+        info.put(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound && !steamBound ? I18N.tr(", priming: air in its line")
+            : cavitating ? I18N.tr(", CAVITATING: its water is at boiling") : ""));
         info.put(I18N.tr("Head"), String.format("%.1f bar", pump == null ? 0 : pump.boost / 1e5));
         info.put(I18N.tr("Pumping"), String.format("%.0f mB/s", kgPerS / EaUnits.KG_PER_MB_WATER));
         info.put(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
