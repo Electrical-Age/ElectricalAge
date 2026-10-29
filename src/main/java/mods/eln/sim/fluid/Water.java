@@ -14,8 +14,8 @@ public final class Water {
     /** Specific gas constants (J/kg/K), heat capacities (J/kg/K). */
     public static final double R_V = 461.52, R_AIR = 287.05;
     public static final double CP_L = 4186, CP_V = 1900, CV_AIR = 718;
-    /** Liquid density (kg/m^3; at ~100 C) and the stiffness used when a node is full of liquid (Pa; softened). */
-    public static final double RHO_L = 958, K_LIQUID = 2e7;
+    /** Liquid density (kg/m^3; at ~100 C) and its bulk modulus once a node is full of liquid (Pa; ~2 GPa, 1 % at 200 bar). */
+    public static final double RHO_L = 958, K_LIQUID = 2e9;
     public static final double L_TB = 2.257e6;
     /** Dynamic viscosities (Pa s, ~100-200 C). */
     public static final double MU_L = 2.5e-4, MU_V = 1.3e-5, MU_AIR = 2.0e-5;

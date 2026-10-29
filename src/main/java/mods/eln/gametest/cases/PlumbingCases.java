@@ -36,6 +36,7 @@ public final class PlumbingCases {
         cases.add(new TankBoxSplits());
         cases.add(new HotWaterIntoShortPipe());
         cases.add(new ValveMeters());
+        cases.add(new LiquidStaysIncompressible());
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
@@ -458,6 +459,38 @@ public final class PlumbingCases {
             ctx.line(String.format("valve 2 %% open, water 6 bar -> 1 atm: %.1f g/s", flow * 1000));
             ctx.check("a throttle valve 2 % open meters water (10-60 g/s through an alloy seat at ~5 bar)", flow > 0.010 && flow < 0.060,
                 String.format("%.1f g/s", flow * 1000));
+        }
+    }
+
+    /**
+     * A physics bug: water was soft (bulk modulus 2e7 Pa): a liquid-full vessel took 1.4 x its volume at ~95 bar. At water's
+     * own ~2 GPa a full tank pushed by a 50 bar reservoir holds under 1 % more than it should.
+     */
+    static final class LiquidStaysIncompressible extends Big {
+        TankElement t;
+        mods.eln.sim.fluid.FluidDevice fx;
+
+        public String id() {
+            return "liquid_full_tank_incompressible";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(4, 1, 4);
+            t = tank(ctx, ALLOY_TANK, p, Direction.XN);
+            fill(t.vessel, 0.97 * t.vessel.volume * Water.RHO_L, Water.P_ATM, 293.15);
+            fx = vessels(t.fluidLevel(), new Object[]{p.above(), 0, reservoir(p.getY() + 1, 50e5)});   // (on its top port)
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.fluid.FluidWorld.remove(fx);
+            double full = t.vessel.mWater / (t.vessel.volume * Water.RHO_L);
+            ctx.line(String.format("liquid-full tank on a 50 bar reservoir: %.4f of its volume, %.1f bar", full, t.vessel.P() / 1e5));
+            ctx.check("liquid-full: under 1 % over its volume", full < 1.01, String.format("%.4f", full));
+            ctx.check("liquid-full: at about the reservoir's pressure (40-60 bar)", t.vessel.P() > 40e5 && t.vessel.P() < 60e5, String.format("%.1f bar", t.vessel.P() / 1e5));
         }
     }
 
