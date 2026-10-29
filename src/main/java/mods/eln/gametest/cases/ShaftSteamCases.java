@@ -146,7 +146,7 @@ public final class ShaftSteamCases {
                 if (tick > from) {
                     window += dt;
                     for (Resistor r : loads) elec += r.getP() * dt;
-                    drag += gens.length * 0.02 * 20 * Math.max(s.getRads(), 10) * dt;
+                    for (GeneratorElement g : gens) drag += g.getDesc().dragW(s.getRads()) * dt;
                     kg1 = t.totalKg;
                     work1 = t.totalWork;
                     ke1 = s.getEnergy();

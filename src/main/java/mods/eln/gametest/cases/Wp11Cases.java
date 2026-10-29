@@ -154,10 +154,9 @@ public final class Wp11Cases {
     /**
      * Generator + flywheel spun to 400 rad/s, generator electrically open: its source sets the open-circuit EMF
      * U = RtoU(rads) = 3200 V * rads / 800 rad/s (= 4 V per rad/s), seen unchanged on the input load (no current).
-     * Shaft drag (0.95 * 0.02 J * rads per tick, mass 105) slows it only slightly.
-     * WP16b thermal: sized for 4000 (1/0.95 - 1) + 0.02 * 20 * 800 * 0.05 = 226.5 W at 65 % of the 130 K warm limit
-     * (Rp = 130 / (226.5 / 0.65) = 0.3731 K/W); open circuit the only heat is the drag share, 0.02 * 20 * rads * 0.05
-     * = 0.02 * rads W (1.7.10 / WP16 heated with 1/20 of it).
+     * Its drag (1.5 % of its rating at 800 rad/s, as the speed squared) slows it only slightly.
+     * WP16b thermal: sized for 4000 (1/0.95 - 1) + 0.015 * 4000 * 0.05 = 213.5 W at 65 % of the 130 K warm limit
+     * (Rp = 130 / (213.5 / 0.65) = 0.3958 K/W); open circuit the only heat is the drag's share, 5 % of it.
      */
     static final class GeneratorCase implements TestCase {
         GeneratorElement gen;
@@ -183,9 +182,9 @@ public final class Wp11Cases {
             ctx.checkValue("wp11 generator open-circuit voltage [V] (3200 * rads / 800)", input.getU(), d.getRtoU().getValue(rads));
             ctx.checkValue("wp11 generator open-circuit voltage = 4 V per rad/s [V]", input.getU(), 4.0 * rads);
             mods.eln.sim.ThermalLoad th = field(gen, "thermal");
-            ctx.checkValue("wp11 generator thermal Rp [K/W] (130 / (226.5 W / 0.65))", th.Rp, 130 / (226.5 / 0.65));
+            ctx.checkValue("wp11 generator thermal Rp [K/W] (130 / (213.5 W / 0.65))", th.Rp, 130 / (d.nominalHeatPower() / 0.65));
             double heat = th.Pc + (th.Tc - th.Pc * 0.05 / th.C) / th.Rp; // heat in the last slow step, before the Rp leak
-            ctx.checkValue("wp11 generator open-circuit heat [W] (drag share 0.02 * rads)", heat, 0.02 * rads);
+            ctx.checkValue("wp11 generator open-circuit heat [W] (5 % of its drag)", heat, d.dragW(rads) * 0.05);
         }
     }
 

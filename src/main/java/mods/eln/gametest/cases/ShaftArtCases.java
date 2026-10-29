@@ -18,6 +18,9 @@ public final class ShaftArtCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new HitboxPerFacing());
         cases.add(new PortsMeetWhenPlaced());
+        cases.add(new MotorSpinsUnloadedGenerators());
+        cases.add(new SpeedKeptWhenPartsChange());
+        cases.add(new TerminalsWhereDrawn());
     }
 
     static final int HP = 9 + (4 << 6), GEN4 = 10 + (4 << 6), GAS = 11 + (4 << 6), JOINT = 12 + (4 << 6), HUB = 13 + (4 << 6),
@@ -92,11 +95,18 @@ public final class ShaftArtCases {
     /** Place by the item path as a player looking toward YAW (degrees: 0 south, 90 west, 180 north, 270 east). */
     static mods.eln.node.transparent.TransparentNodeElement placeLooking(TestContext ctx, int damage, BlockPos p, float yaw) {
         var d = mods.eln.Eln.transparentNodeItem.getDescriptor(damage);
+        // (the fake player is shared by every test: its view is put back, or other tests' placements turn with it)
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+        float y0 = player.getYRot(), x0 = player.getXRot();
         player.setYRot(yaw);
         player.setXRot(0);
-        var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, ctx.level(), p, Direction.YN);
-        return node == null ? null : node.element;
+        try {
+            var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, ctx.level(), p, Direction.YN);
+            return node == null ? null : node.element;
+        } finally {
+            player.setYRot(y0);
+            player.setXRot(x0);
+        }
     }
 
     static boolean piped(mods.eln.sim.fluid.FluidNode n) {
@@ -183,6 +193,158 @@ public final class ShaftArtCases {
         public void measure(TestContext ctx) {
             checks.forEach(Runnable::run);
             ctx.check("fluid ports meet when placed by a player (" + checks.size() + " checks)", bad.isEmpty(), String.join("; ", bad));
+        }
+    }
+
+    static mods.eln.mechanical.ShaftNetwork shaftOf(mods.eln.node.transparent.TransparentNodeElement e) {
+        return ((mods.eln.mechanical.ShaftElement) e).getShaft();
+    }
+
+    /** A 200V Shaft Motor at P (placed looking east: front north) fed 200 V on its front. */
+    static mods.eln.mechanical.ShaftMotorElement poweredMotor(TestContext ctx, BlockPos p) {
+        var m = (mods.eln.mechanical.ShaftMotorElement) placeLooking(ctx, MOTOR, p, EAST);
+        BlockPos cable = p.relative(m.front.toEnumFacing());
+        ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
+        var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, cable.relative(m.front.toEnumFacing()));
+        s.networkUnserialize(ctx.stream(out -> {
+            out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+            out.writeFloat(200f);
+        }));
+        return m;
+    }
+
+    /**
+     * AdventurAgent's client check (2026-10-29): a 200V Shaft Motor spinning a line with unloaded generators held it at
+     * 0.5 rad/s (the generators' drag took 4 W even at a standstill: an unbounded torque). Placed by the player's view: a
+     * motor and four unloaded 4 kW generators reach over 90 % of 800 rad/s within 30 s; with a flywheel (200 kJ at 800,
+     * two minutes of the motor's 2 kW) the line is well on its way, speeding up.
+     */
+    static final class MotorSpinsUnloadedGenerators extends PlumbingCases.Big {
+        mods.eln.node.transparent.TransparentNodeElement a, b;
+        IProcessHolder trace = new IProcessHolder();
+        double bAt20;
+
+        static final class IProcessHolder {
+            mods.eln.sim.IProcess p;
+            int tick;
+        }
+
+        public String id() {
+            return "shaft_motor_spins_unloaded_generators";
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            for (int line = 0; line < 2; line++) {
+                int z = line == 0 ? 2 : 7;
+                var m = poweredMotor(ctx, ctx.at(1, 1, z));
+                for (int x = 2; x <= 5; x++) placeLooking(ctx, GEN4, ctx.at(x, 1, z), EAST);
+                placeLooking(ctx, line == 0 ? TACHO : FLYWHEEL, ctx.at(6, 1, z), EAST);
+                if (line == 0) a = m;
+                else b = m;
+            }
+            mods.eln.Eln.simulator.addSlowProcess(trace.p = dt -> {
+                if (++trace.tick == 400) bAt20 = shaftOf(b).getRads();
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(trace.p);
+            double ra = shaftOf(a).getRads(), rb = shaftOf(b).getRads();
+            ctx.line(String.format("motor + 4 unloaded 4 kW generators: %.0f rad/s after 30 s; with a flywheel: %.0f at 20 s, %.0f at 30 s (inertia %.3f / %.3f kg m^2)",
+                ra, bAt20, rb, shaftOf(a).getInertia(), shaftOf(b).getInertia()));
+            ctx.check("motor + 4 unloaded generators: one shaft", shaftOf(a).getElements().size() == 6, String.valueOf(shaftOf(a).getElements().size()));
+            ctx.check("motor + 4 unloaded generators: over 90 % of 800 rad/s within 30 s", ra > 720, String.format("%.0f rad/s", ra));
+            ctx.check("with a flywheel too: under way and speeding up (over 250 rad/s at 30 s)", rb > 250 && rb > bAt20 + 20, String.format("%.0f -> %.0f rad/s", bAt20, rb));
+        }
+    }
+
+    /**
+     * Placing or breaking a shaft part keeps the line's speed (AdventurAgent: 800 -> 108 rad/s after a removal; a merge
+     * took the slower side's speed): a cut keeps it on both sides; a light part placed at rest joins at nearly the line's
+     * speed; a flywheel placed at rest takes its share of the angular momentum.
+     */
+    static final class SpeedKeptWhenPartsChange extends PlumbingCases.Big {
+        String bad = "";
+        String line = "";
+
+        public String id() {
+            return "shaft_speed_kept_when_parts_change";
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            int[] ids = {JOINT, GEN8, GEN4, JOINT, TACHO};
+            var parts = new mods.eln.node.transparent.TransparentNodeElement[ids.length];
+            for (int i = 0; i < ids.length; i++) parts[i] = placeLooking(ctx, ids[i], ctx.at(1 + i, 1, 4), EAST);
+            if (shaftOf(parts[0]).getElements().size() != 5) bad += "not one shaft; ";
+            shaftOf(parts[0]).setRads(800);
+            // a cut: the 4 kW generator in the middle goes
+            ctx.level().removeBlock(ctx.at(3, 1, 4), false);
+            double left = shaftOf(parts[0]).getRads(), right = shaftOf(parts[4]).getRads();
+            if (Math.abs(left - 800) > 1 || Math.abs(right - 800) > 1) bad += String.format("cut: %.0f / %.0f rad/s; ", left, right);
+            // a joint placed at rest on the right end: nearly the line's speed
+            var i0 = shaftOf(parts[4]).getInertia();
+            var j = placeLooking(ctx, JOINT, ctx.at(6, 1, 4), EAST);
+            double want = 800 * i0 / (i0 + ((mods.eln.mechanical.ShaftElement) j).getShaftInertia()), got = shaftOf(j).getRads();
+            if (Math.abs(got - want) > 1) bad += String.format("joint placed: %.0f rad/s (momentum: %.0f); ", got, want);
+            // a flywheel at rest on the left end: the momentum shared
+            var i1 = shaftOf(parts[0]).getInertia();
+            var f = placeLooking(ctx, FLYWHEEL, ctx.at(0, 1, 4), EAST);
+            double wantF = 800 * i1 / (i1 + ((mods.eln.mechanical.ShaftElement) f).getShaftInertia()), gotF = shaftOf(f).getRads();
+            if (Math.abs(gotF - wantF) > 1) bad += String.format("flywheel placed: %.0f rad/s (momentum: %.0f); ", gotF, wantF);
+            line = String.format("cut %.0f / %.0f; joint placed %.0f (of %.0f); flywheel placed %.0f (of %.0f)", left, right, got, want, gotF, wantF);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("shaft speed: " + line);
+            ctx.check("shaft speed kept when parts are cut, added, or a flywheel joins (momentum)", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * The motor's and generators' terminals are where they are drawn (AdventurAgent: a cable on the motor's other face
+     * found no connector): placed looking east, the motor takes power on its front (the terminal plate under its
+     * terminal box) and a signal on its back (the small plate); a generator power on its front and back; each face's
+     * plate is in its hitbox, the plates' faces the connecting ones.
+     */
+    static final class TerminalsWhereDrawn extends PlumbingCases.Big {
+        String bad = "";
+
+        public String id() {
+            return "shaft_terminals_where_drawn";
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            var m = placeLooking(ctx, MOTOR, ctx.at(2, 1, 2), EAST);
+            if (m.front != Direction.ZN) bad += "motor looking east faces " + m.front + "; ";
+            if (m.getConnectionMask(m.front, mods.eln.misc.LRDU.Down) != mods.eln.node.NodeBase.maskElectricalPower) bad += "motor: no power on its front; ";
+            if (m.getConnectionMask(m.front.back(), mods.eln.misc.LRDU.Down) != mods.eln.node.NodeBase.maskElectricalInputGate) bad += "motor: no signal on its back; ";
+            for (Direction d : new Direction[]{m.front.left(), m.front.right()})
+                if (m.getConnectionMask(d, mods.eln.misc.LRDU.Down) != 0) bad += "motor: a connection on its side " + d + "; ";
+            VoxelShape s = ctx.level().getBlockState(m.node.coordonate.pos()).getShape(ctx.level(), m.node.coordonate.pos());
+            if (!HitboxPerFacing.toward(s, m.front, 0.1) || !HitboxPerFacing.toward(s, m.front.back(), 0.1)) bad += "motor: its terminal plates aren't on its front and back; ";
+            for (int id : new int[]{GEN4, GEN8}) {
+                var g = placeLooking(ctx, id, ctx.at(id == GEN4 ? 5 : 8, 1, 2), EAST);
+                for (Direction d : new Direction[]{g.front, g.front.back()})
+                    if (g.getConnectionMask(d, mods.eln.misc.LRDU.Down) != mods.eln.node.NodeBase.maskElectricalPower) bad += "generator: no power on " + d + "; ";
+                VoxelShape gs = ctx.level().getBlockState(g.node.coordonate.pos()).getShape(ctx.level(), g.node.coordonate.pos());
+                if (!HitboxPerFacing.toward(gs, g.front, 0.1) || !HitboxPerFacing.toward(gs, g.front.back(), 0.1)) bad += "generator: its terminal plates aren't on its front and back; ";
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("shaft terminals: where they are drawn, on the faces that connect", bad.isEmpty(), bad);
         }
     }
 }

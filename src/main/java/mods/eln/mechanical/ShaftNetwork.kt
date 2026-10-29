@@ -84,9 +84,12 @@ class ShaftNetwork() : INBTTReady {
      * @param other The shaft network to merge into this one. Destroyed.
      */
     fun mergeShafts(other: ShaftNetwork) {
-        // TODO: Some kind of explosion-effect for severely mismatched speeds?
-        // For now, let's be nice.
-        rads = Math.min(rads, other.rads)
+        // angular momentum is kept (AdventurAgent's client check, 2026-10-29: it took the slower speed, so a part placed
+        // at rest against a line at 800 rad/s stopped the line dead): a light part joins at nearly the line's speed, a
+        // flywheel at rest drags it down as a clutch would
+        val i1 = inertia
+        val i2 = other.inertia
+        rads = (i1 * rads + i2 * other.rads) / (i1 + i2)
 
         assert(other != this)
         for (element in other.elements) {
