@@ -45,4 +45,31 @@ public class FireTest {
         run(o, 1.0, true, 60);
         assertTrue(o.level > 0.9, "oil: " + o.level);
     }
+
+    /**
+     * Baughn: a furnace at full throttle with no fuel coming climbed to 100% on embers (the bed's energy only decays
+     * towards zero), then flared to full power the moment fuel came back. The fire now can't outburn its bed.
+     */
+    @Test
+    void aFurnaceWithNoFuelComingBanksUntilItsOut() {
+        FurnaceProcess p = new FurnaceProcess(new ThermalLoad());
+        p.nominalCombustibleEnergy = 40000;
+        p.nominalPower = 3000;
+        p.setGain(1);
+        p.fire.level = 0.5;
+        p.combustibleEnergy = 20000;   // (a half-spent bed, nothing coming)
+        double maxLevelLate = 0;
+        for (double t = 0; t < 3600; t += DT) {
+            p.process(DT);
+            assertTrue(p.fire.level <= 0.5 + 1e-9, "it never climbs towards the setting: " + p.fire.level);
+            if (t > 1800) maxLevelLate = Math.max(maxLevelLate, p.fire.level);
+        }
+        assertEquals(0.0, p.fire.level, 0.0, "out once the bed is spent");
+        assertEquals(0.0, maxLevelLate, 0.0, "and stays out");
+        // fuel back: it relights and climbs slowly, no instant full power
+        p.combustibleEnergy = 40000;
+        for (double t = 0; t < 31; t += DT) p.process(DT);
+        p.combustibleEnergy = 40000;
+        assertTrue(p.getP() < 0.25 * p.nominalPower, "no flare: " + p.getP() + " W");
+    }
 }
