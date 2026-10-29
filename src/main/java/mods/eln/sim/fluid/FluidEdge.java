@@ -15,6 +15,13 @@ public final class FluidEdge {
     public double k;
     /** 0 closed .. 1 open (a valve). */
     public double open = 1;
+    /**
+     * A valve's flow area when fully open (m^2), or 0: a metering edge, by the orifice law m = CD x area x open x
+     * sqrt(2 rho dP) (both phases), rather than the lossless pipes' linear conductance (FluidNetwork.props).
+     */
+    public double area;
+    /** The orifice law's discharge coefficient, and the drop under which it turns linear (Pa: g stays finite). */
+    public static final double CD = 0.6, DP_LINEAR = 1000;
     /** A pump's head (Pa), pushing a -> b: added to the drive (a pump: its shutoff pressure above its sump). */
     public double boost;
     public Kind kind = Kind.PIPE;

@@ -368,7 +368,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (ends.size() != 2) continue;
             PipePart a = ends.get(0), b = ends.get(1);
             double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * 4;   // (a quarter block of pipe)
-            Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k);
+            // (a valve meters by the orifice law, its seat the smaller pipe's bore area: VOLUME_PER_BLOCK is m^3 a metre)
+            Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k).area(PipePart.VOLUME_PER_BLOCK[Math.min(a.tier, b.tier)]);
             l.open = v.opening();
             valveLinks.put(l, v);
         }

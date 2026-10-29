@@ -46,6 +46,14 @@ public interface FluidDevice {
             this.kind = kind;
             return this;
         }
+
+        /** A valve's flow area fully open (m^2): it then meters by the orifice law (FluidEdge.area). */
+        public double area;
+
+        public Link area(double area) {
+            this.area = area;
+            return this;
+        }
     }
 
     /** Nodes joined inside the device (pipes meeting at a junction): each group is one volume (lumped pipes). */

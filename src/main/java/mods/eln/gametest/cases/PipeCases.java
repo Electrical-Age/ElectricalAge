@@ -44,6 +44,7 @@ public final class PipeCases {
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
         cases.add(new KitLengthNotDamage());
+        cases.add(new ValveMeters());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -1324,6 +1325,64 @@ public final class PipeCases {
 
         public void measure(TestContext ctx) {
             ctx.check("kits: length in data, not damage; old kits read right", ok, result);
+        }
+    }
+
+    /**
+     * A physics bug (Baughn: fix when spotted): a throttle valve 2 % open passed water as 2 % of a lossless pipe, ~3 kg/s
+     * at 5 bar, so no feed could be metered. By the orifice law through an alloy seat it passes ~25 g/s.
+     */
+    static final class ValveMeters implements TestCase {
+        mods.eln.sim.fluid.FluidDevice fx;
+        mods.eln.sim.fluid.FluidNode sink;
+        double m0, flow;
+        mods.eln.sim.IProcess watch;
+        int tick;
+
+        public String id() {
+            return "valve_meters_water_by_orifice_law";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos pv = ctx.at(4, 1, 1);
+            lay(ctx, pv, 1, 0, 8, 8, 8, 8, 8, 16, 8, 8);
+            VoxelNode n = node(ctx, pv);
+            n.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
+            for (VoxelPart part : n.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) v.setting = 0.02;
+            // (a big free vessel of water under 6 bar of air, and an empty 10 m^3 one at 1 atm, behind test ports)
+            var src = new mods.eln.sim.fluid.FluidNode(1.0, pv.getY(), 1.0, false).fill(0.7 * mods.eln.sim.fluid.Water.RHO_L, 6e5, 293.15);
+            sink = new mods.eln.sim.fluid.FluidNode(10.0, pv.getY(), 1.0, false).fill(0, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+            double k = 2 * PipePart.K_PER_BLOCK[1] * 16;
+            List<mods.eln.sim.fluid.FluidDevice.FluidPort> ports = List.of(
+                new mods.eln.sim.fluid.FluidDevice.FluidPort(src, pv.west().asLong(), 5, 0.5, k),
+                new mods.eln.sim.fluid.FluidDevice.FluidPort(sink, pv.east().asLong(), 4, 0.5, k));
+            Object level = n.fluidLevel();
+            fx = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return level;
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return ports;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(fx);
+            mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
+                if (++tick == 100) m0 = sink.mWater;
+                if (tick > 100) flow = (sink.mWater - m0) / ((tick - 100) * dt);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(watch);
+            mods.eln.fluid.FluidWorld.remove(fx);
+            ctx.line(String.format("valve 2 %% open, water 6 bar -> 1 atm: %.1f g/s", flow * 1000));
+            ctx.check("a throttle valve 2 % open meters water (10-60 g/s through an alloy seat at ~5 bar)", flow > 0.010 && flow < 0.060,
+                String.format("%.1f g/s", flow * 1000));
         }
     }
 }
