@@ -105,6 +105,20 @@ public class Failure implements IDestructable {
         return this;
     }
 
+    /**
+     * A capacitor bank (Baughn 2026-10-28: at this size it should explode if overheated or over-voltaged): a capacitor
+     * whose failure, electrical or thermal, is an explosion scaled by the energy it holds (bankStrength).
+     * @param storedEnergy energy in J at the moment of failure
+     */
+    public Failure capacitorBank(DoubleSupplier storedEnergy) {
+        kind = Kind.CAPACITOR;
+        energy = storedEnergy;
+        explosive = true;
+        return this;
+    }
+
+    private boolean explosive;
+
     /** @param storedEnergy energy in J at the moment of failure; a big battery explodes. */
     public Failure battery(DoubleSupplier storedEnergy) {
         kind = Kind.BATTERY;
@@ -221,6 +235,14 @@ public class Failure implements IDestructable {
     /** Stored energy above which a failing battery explodes instead of only venting and burning (J). */
     public static final double BATTERY_EXPLOSION_ENERGY = 1e6;
 
+    /**
+     * A capacitor bank's explosion for the energy it held: 1 .. 3 (a creeper), sqrt(E / 40 kJ): a full bank at 800 V
+     * (115 kJ) is 1.7, one blown at 1300 V (300 kJ) 2.7.
+     */
+    public static float bankStrength(double energyJ) {
+        return (float) Math.max(1, Math.min(3, Math.sqrt(Math.max(0, energyJ) / 40000)));
+    }
+
     /** Explosion strength for a burst holding this much energy: 1 (small) .. 4 (TNT). */
     public static float explosionStrength(double energyJ) {
         return (float) Math.max(1, Math.min(4, Math.sqrt(Math.max(0, energyJ) / 15000)));
@@ -228,16 +250,17 @@ public class Failure implements IDestructable {
 
     private void apply(Level w, FailureCause cause, double value) {
         double e = energy != null ? energy.getAsDouble() : 0;
-        Outcome outcome = outcome(kind, cause, value, e);
-        if (outcome == Outcome.EXPLODE && !Eln.explosionEnable) outcome = Outcome.BURN_FIRE;
+        Outcome outcome = explosive ? Outcome.EXPLODE : outcome(kind, cause, value, e);
+        if (outcome == Outcome.EXPLODE && !Eln.explosionEnable) outcome = explosive ? Outcome.POP : Outcome.BURN_FIRE;
+        float strength = explosive ? bankStrength(e) : explosionStrength(e);
         BlockPos pos = new BlockPos(c.x, c.y, c.z);
 
         switch (outcome) {
             case EXPLODE:
                 if (node != null) {
-                    node.physicalSelfDestruction(explosionStrength(e));
+                    node.physicalSelfDestruction(strength);
                 } else {
-                    w.explode(null, c.x + .5, c.y + .5, c.z + .5, explosionStrength(e), Level.ExplosionInteraction.BLOCK);
+                    w.explode(null, c.x + .5, c.y + .5, c.z + .5, strength, Level.ExplosionInteraction.BLOCK);
                 }
                 return;
             case POP:

@@ -51,12 +51,24 @@ Baughn 2026-10-28: a workshop-sized store for the anvil's bursts. Six capacitor 
 `tools/models/capacitorbank.py`), one capacitor inside.
 - **Size:** one bank carries one 20 kJ burst from 800 V down to the anvil's 720 V: C >= 20000 / (0.5 (800^2 - 720^2))
   = 0.33 F; it has **0.36 F** (21.9 kJ between 800 and 720 V; 115 kJ at 800 V).
-- **Polar:** + on the left of its front (HV-tier band on the plate), - on the right (black band), low on the flanks.
-- **Rating:** 1000 V; it pops above 1.3 x that (`BipoleVoltageWatchdog`, as the Power Capacitor).
+- **Polar:** + on the left of its front, - on the right, low on the flanks: the terminal plates' bands and the cans'
+  studs are red (+) and blue (-) (Baughn); the cans' sleeve bands keep the HV tier colour.
+- **Rating:** 1000 V; above 1.3 x that (`BipoleVoltageWatchdog`, as the Power Capacitor) it **explodes** (Baughn
+  2026-10-28: "should probably explode if overheated or overvoltage'd ... realistic, at this size"):
+  `Failure.capacitorBank`, strength `bankStrength(E) = sqrt(E / 40 kJ)`, 1 .. 3 (a creeper at most): a full bank at 800 V
+  (115 kJ) is 1.7, one blown at 1300 V (300 kJ) 2.7. With explosions off (`Eln.explosionEnable`) it only pops.
+- **Heat:** an ESR of 0.1 ohm in series with the capacitor, and the leak, heat a thermal load (2000 J/K, 0.3 K/W to
+  ambient; Jade and the thermometer show it). Past 75 K over ambient (~95 C, an electrolytic's limit) it explodes the same
+  way. The anvil's bursts (~6 A) put ~4 W into the ESR, the leak ~128 W at 800 V (steady ~38 K over ambient): fine. A
+  stiff line's inrush puts most of the bank's energy into the ESR at once (~57 K per full charge or discharge): two of
+  those and it goes.
 - **Inrush:** none limited (Baughn 2026-10-28: "inrush current is supposed to be a problem; inductors are the solution.
   There are other solutions, like not using a stiff source"). An empty bank straight on a stiff 800 V source draws
-  hundreds of amps and burns its HV cable (GameTest `capacitor_bank_inrush`). Charge it through a resistor: 1 kohm
-  (Power Resistor, 60 Coal Dust) peaks at 0.8 A, RC 6 min. An inductor alone can't: with EA's largest, 100 H, an empty
+  hundreds of amps and burns its HV cable (GameTest `capacitor_bank_inrush`). Charge it through a resistance, and mind
+  the bank's own leak (~5 kohm): it makes a divider with the feed, so the bank parks at 800 x 5000 / (5000 + R). A
+  1 kohm feed parks it at ~667 V, under the anvil's 720 V stop: useless. Use a Large Rheostat at ~330 ohm from empty
+  (peak ~2.4 A; it parks at ~750 V, enough for the anvil's levelled-line start at 744 V), and turn it down to ~100 ohm
+  once the bank is past ~600 V (2 A at that point; it parks at ~784 V). An inductor alone can't: with EA's largest, 100 H, an empty
   0.36 F bank on 800 V rings with a peak of 800 sqrt(C/L) = 48 A and overshoots towards 1.6 kV, past its 1.3 kV limit;
   an inductor helps smooth a plant's draw once the bank is charged, in series with some resistance.
 - **Leakage:** a resistor across it, R = `leakTauS` / C (RC = 30 min): ~128 W at 800 V; the charge halves in ~10 min
@@ -101,5 +113,7 @@ refusals, plain copy, engraving), `anvil_800v_pulse` (5 kW on a stiff 800 V line
 1 s hold-off; a 20 kJ burst, then a 3 s rest), `anvil_welds_from_a_bank_on_a_weak_plant` (800 V behind 100 ohm, a bank at
 780 V: it welds),
 `capacitor_bank_inrush` (straight on 800 V its cable burns; behind 1 kohm it charges to 43 V in 20 s, nothing harmed),
-`capacitor_bank_holds_and_pops` (800 V kept; pops past 1300 V), `power_capacitor_leaks_like_the_bank`,
+`capacitor_bank_holds_and_pops` (800 V kept), `capacitor_bank_explodes_over_voltage` (1600 V: it explodes; strength by
+energy), `capacitor_bank_overheats_and_explodes` (a source right on its plate switched 800/0 V every 2 s: 105 K, boom),
+`anvil_welds_from_a_bank_on_a_weak_plant` also checks the bank stays under 15 K over ambient, `power_capacitor_leaks_like_the_bank`,
 `capacitor_bank_carries_an_anvil_burst` (a charged bank alone carries one 20 kJ burst, left at ~723 V).
