@@ -62,6 +62,9 @@ public class ElnModels implements DataProvider {
         if (name.endsWith("compact_steam_turbine")) return itemTexture("50v_turbine", item);   // (until its own icon)
         if (name.endsWith("v_steam_turbine")) return itemTexture(name.replace("_steam_turbine", "_turbine"), item);
         if (name.endsWith("steam_condenser")) return itemTexture("small_passive_thermal_dissipator", item);   // (until its own icon)
+        if (name.equals("8kw_generator")) return itemTexture("generator", item);   // (until their own icons)
+        if (name.endsWith("shaft_motor")) return itemTexture("electrical_motor", item);
+        if (name.equals("turbine_blade_set")) return itemTexture("iron_plate", item);
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();
             if (d instanceof GenericItemUsingDamageDescriptor g) return iconTexture(g.getIconName(), false);

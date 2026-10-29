@@ -38,8 +38,11 @@ class GeneratorDescriptor(
     nominalU: Float,
     powerOutPerDeltaU: Float,
     nominalP: Float,
-    thermalLoadInitializer: ThermalLoadInitializer) :
+    thermalLoadInitializer: ThermalLoadInitializer,
+    /** Drawn this much thinner (the 4 kW one is the small one: Baughn 2026-10-29). */
+    scaleX: Float) :
     SimpleShaftDescriptor(name, GeneratorElement::class, null) {
+    override val drawScaleX = scaleX
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
     val cable = cable

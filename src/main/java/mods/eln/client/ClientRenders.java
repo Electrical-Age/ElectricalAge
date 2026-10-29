@@ -111,5 +111,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.mechanical.TachometerDescriptor.class, mods.eln.mechanical.TachometerRender::new);
         ElnRenders.transparent(mods.eln.mechanical.GeneratorDescriptor.class, mods.eln.mechanical.GeneratorRender::new);
         ElnRenders.transparent(mods.eln.mechanical.TurbineDescriptor.class, mods.eln.mechanical.TurbineRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.SteamTurbineDescriptor.class, mods.eln.mechanical.SteamTurbineRender::new);
+        ElnRenders.transparent(mods.eln.mechanical.ShaftMotorDescriptor.class, mods.eln.mechanical.ShaftMotorRender::new);
     }
 }

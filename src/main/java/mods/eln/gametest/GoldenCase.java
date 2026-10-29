@@ -69,7 +69,10 @@ final class GoldenCase implements TestCase {
 
     /** Items recreated rather than ported (new class): the 1.12 fields still compared. */
     static final Map<String, java.util.Set<String>> RECREATED = Map.of(
-        "X-Ray Scanner", java.util.Set.of("energyStorage", "chargePower", "dischargePower")); // Baughn 2026-10-11
+        "X-Ray Scanner", java.util.Set.of("energyStorage", "chargePower", "dischargePower"), // Baughn 2026-10-11
+        // rebuilt on the steam network (Baughn 2026-10-29): steam by pipe, work by the expansion; no 1.12 number keeps
+        // its meaning (it took 7,200 mB/s of capability steam at a fixed 2.257 J/mB)
+        "Steam Turbine", java.util.Set.of());
 
     /** Fields changed on purpose (golden/README.md): name -> field -> why. */
     static final Map<String, Map<String, String>> CHANGED = Map.of(
@@ -92,12 +95,14 @@ final class GoldenCase implements TestCase {
         // the FE exporters: 1.12 simple-node blocks (eln:energy_converter_eln_to_other_*block), transparent nodes since 26.x
         "eln:transparent_node@5376", "eln:transparent_node@5380", "eln:transparent_node@5384",
         "eln:transparent_node@5440", "eln:transparent_node@5444",   // the electrical anvil, the capacitor bank (Baughn 2026-10-28)
+        "eln:transparent_node@272", "eln:transparent_node@273", "eln:shared_item@4164",   // 8 kW generator, shaft motor, blades (Baughn 2026-10-29)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
         "50V Electric Heater", "200V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
         "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine",
-        "Electrical Anvil");   // (their screen: Baughn 2026-10-26)
+        "Electrical Anvil",   // (their screen: Baughn 2026-10-26)
+        "Steam Turbine");   // (the shaft one's controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
         JsonObject g = golden.get(key);

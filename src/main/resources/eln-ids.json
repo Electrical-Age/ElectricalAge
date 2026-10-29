@@ -299,6 +299,12 @@
   "kind": "shared_item",
   "name": "copper_coil"
  },
+ "eln:shared_item@4164": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Turbine Blade Set",
+  "kind": "shared_item",
+  "name": "turbine_blade_set"
+ },
  "eln:shared_item@448": {
   "descriptor": "FerromagneticCoreDescriptor",
   "display": "Cheap Ferromagnetic Core",
@@ -1726,6 +1732,18 @@
   "display": "Tachometer",
   "kind": "transparent_node",
   "name": "tachometer"
+ },
+ "eln:transparent_node@272": {
+  "descriptor": "GeneratorDescriptor",
+  "display": "8kW Generator",
+  "kind": "transparent_node",
+  "name": "8kw_generator"
+ },
+ "eln:transparent_node@273": {
+  "descriptor": "ShaftMotorDescriptor",
+  "display": "200V Shaft Motor",
+  "kind": "transparent_node",
+  "name": "200v_shaft_motor"
  },
  "eln:transparent_node@3073": {
   "descriptor": "SolarPanelDescriptor",

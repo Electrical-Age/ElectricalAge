@@ -44,6 +44,15 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
   turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
+  The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
+  air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar
+  venting to air (~39 g/s); 5 % droop governor (full open at 800 rad/s, shut at 840), trip over 880, windage 2 % of
+  rated at rated speed (an unloaded turbine can't run away on the valve's leak); the 50V/200V turbines' controls and
+  screen (`SteamValveControl`); casing bursts over 60 bar; water strips its blades, repaired with a cheap Turbine
+  Blade Set. No fluid capability; an old turbine's tank is dropped on load. New: an 8 kW Generator (the 4 kW one is
+  drawn thinner) and a 200V Shaft Motor (spins a shaft to a signal's speed, 0-50 V: 0-800 rad/s, 2 kW, 85 %).
+  `shaft_steam_turbine_*`, `shaft_motor_spins_up_generator`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item
@@ -157,6 +166,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   face; pins that touch connect (docs/voxel-cables.md, devices off centre).
 
 ## Bugs fixed
+
+- Shafts stored mass^2 x 0.25 J per rad/s (linear in speed): a line's inertia grew with the square of its total mass,
+  and a joule bought as much speed at 10 rad/s as at 800. Now E = 1/2 I w^2, I summed over the blocks, each sized by
+  an inertia constant (Baughn 2026-10-29: realistic values now that boilers are slow); `ShaftNetwork.drive` limits a
+  machine's torque from rest. Only the speed is saved, so worlds keep their shaft speeds. `wp11 shaft network`.
 
 From 1.7.10/1.12 (carried in from the 1.12 branch, before the port): the WP16 sim audit (`AuditFixesTest`), fuse and
 breaker trip points, generator energy accounting, a truth table per PAL chip (every PAL shared one).

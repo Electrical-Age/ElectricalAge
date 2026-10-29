@@ -736,6 +736,34 @@ public final class ElnRecipes extends ElnRecipesBase {
             'A', firstExistingOre("blockAluminum", "blockIron"),
             'M', findItemStack("Advanced Machine Block")
         );
+        // Baughn 2026-10-29: the 8 kW generator (two 4 kW ones' worth, a bigger winding) and the small shaft motor
+        addRecipe(findItemStack("8kW Generator"),
+            "mmm",
+            "GaG",
+            " ME",
+            'm', findItemStack("Advanced Electrical Motor"),
+            'G', findItemStack("Generator"),
+            'M', findItemStack("Advanced Machine Block"),
+            'a', firstExistingOre("ingotAluminum", "ingotIron"),
+            'E', findItemStack("High Voltage Cable")
+        );
+        addRecipe(findItemStack("200V Shaft Motor"),
+            " m ",
+            "iMi",
+            " E ",
+            'm', findItemStack("Electrical Motor"),
+            'i', stack(Items.IRON_INGOT),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Medium Voltage Cable")
+        );
+        // cheap on purpose (Baughn 2026-10-29): what a water slug costs
+        addRecipe(findItemStack("Turbine Blade Set"),
+            "I I",
+            " S ",
+            "I I",
+            'I', stack(Items.IRON_INGOT),
+            'S', stack(Items.STICK)
+        );
         addRecipe(findItemStack("Gas Turbine"),
             "msH",
             "sSs",

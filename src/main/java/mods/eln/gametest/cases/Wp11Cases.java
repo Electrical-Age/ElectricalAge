@@ -190,22 +190,23 @@ public final class Wp11Cases {
         }
     }
 
-    /** Steam turbine with an empty tank: no fluid drained, no shaft energy (0 rad/s stays 0). */
+    /** Steam turbine with nothing piped in: no steam through, no work (0 rad/s stays 0); exhaust to the air. */
     static final class TurbineIdleCase implements TestCase {
-        TurbineElement turbine;
+        mods.eln.mechanical.ShaftSteamTurbineElement turbine;
 
         public String name() {
             return "wp11 steam turbine idle";
         }
 
         public void build(TestContext ctx) {
-            turbine = (TurbineElement) ctx.placeTransparent(STEAM_TURBINE, ctx.at(3, 1, 1));
+            turbine = (mods.eln.mechanical.ShaftSteamTurbineElement) ctx.placeTransparent(STEAM_TURBINE, ctx.at(3, 1, 1));
         }
 
         public void measure(TestContext ctx) {
             double rads = shaft(turbine).getRads();
-            ctx.check("wp11 steam turbine without steam: shaft stays at 0 rad/s, fluid rate 0",
-                rads == 0.0 && turbine.getFluidRate() == 0f, String.format("%.4f rad/s, %.3f mB/s", rads, turbine.getFluidRate()));
+            ctx.check("wp11 steam turbine without steam: shaft stays at 0 rad/s, no steam through",
+                rads == 0.0 && turbine.totalKg == 0, String.format("%.4f rad/s, %.6f kg", rads, turbine.totalKg));
+            ctx.check("wp11 steam turbine: no fluid capability (steam by EA pipe only)", turbine.getFluidHandler() == null, "");
         }
     }
 

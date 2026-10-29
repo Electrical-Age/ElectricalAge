@@ -13,6 +13,7 @@ import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.mechanical.FlywheelDescriptor;
 import mods.eln.mechanical.GasTurbineDescriptor;
 import mods.eln.mechanical.GeneratorDescriptor;
+import mods.eln.mechanical.ShaftMotorDescriptor;
 import mods.eln.mechanical.JointHubDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
 import mods.eln.mechanical.StraightJointDescriptor;
@@ -95,8 +96,36 @@ public class Wp11Content implements ElnContent {
                 nominalRads, nominalU,
                 nominalP / (nominalU / 25),
                 nominalP,
-                sixNodeThermalLoadInitializer.copy()
+                sixNodeThermalLoadInitializer.copy(),
+                0.75f   // (the small one: Baughn 2026-10-29)
             );
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            // Baughn 2026-10-29: an 8 kW generator beside the 4 kW one (four 4 kW per 16 kW turbine is intended)
+            subId = 16;
+            float nominalRads = 800, nominalU = 3200;
+            float nominalP = 8000;
+            GeneratorDescriptor desc = new GeneratorDescriptor(
+                TR_NAME(Type.NONE, "8kW Generator"),
+                obj.getObj("Generator"),
+                highVoltageCableDescriptor,
+                nominalRads, nominalU,
+                nominalP / (nominalU / 25),
+                nominalP,
+                sixNodeThermalLoadInitializer.copy(),
+                1f
+            );
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            // Baughn 2026-10-29: a small electric motor to spin shafts up and drive a condenser's pumps
+            subId = 17;
+            ShaftMotorDescriptor desc = new ShaftMotorDescriptor(
+                TR_NAME(Type.NONE, "200V Shaft Motor"),
+                obj.getObj("Generator"),
+                meduimVoltageCableDescriptor,
+                MVU, 2000);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {

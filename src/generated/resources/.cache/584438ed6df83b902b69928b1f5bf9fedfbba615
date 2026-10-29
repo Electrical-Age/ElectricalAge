@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T02:29:12.507035575	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-29T13:50:32.630460556	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -18,6 +18,7 @@ e59b7d9677bc37a760b28ff12f607b09abdd5407 data/eln/advancement/recipes/misc/200v_
 064e72657597a6c9f249d4fc7d94bea1258ed26f data/eln/advancement/recipes/misc/200v_oil_pump.json
 e6861ea161f2d01ee0029b3c8e782a9a1fddc54f data/eln/advancement/recipes/misc/200v_plate_machine.json
 747f4ba0a62f6feff6fd0d7ba03081e89112a86b data/eln/advancement/recipes/misc/200v_power_socket.json
+f3200f6d5cda5edc04414e9f5ed32c9310cb1540 data/eln/advancement/recipes/misc/200v_shaft_motor.json
 6ae07b6c2dd7a83cfbaf3d4cb0bbf8656fed4374 data/eln/advancement/recipes/misc/200v_steam_turbine.json
 650549264270bb5cfeace6d4170901f99ca50291 data/eln/advancement/recipes/misc/200v_submersible_pump.json
 0a5df19babf77af85a8355a565bc7ce232529590 data/eln/advancement/recipes/misc/200v_tar_sand_separator.json
@@ -59,6 +60,8 @@ e66dc6bbecb715722e880e211fe59913fadcbedb data/eln/advancement/recipes/misc/50v_s
 8e3b85897658969af3d6d89f1f79f22619b924ac data/eln/advancement/recipes/misc/50v_tungsten_heating_corp.json
 2422a0e9ea7ec844761ef4e22a9f49b614483724 data/eln/advancement/recipes/misc/800v_defence_turret.json
 80062b4f9d51ddc94f07ab57dcc4e3c6a3457591 data/eln/advancement/recipes/misc/800v_electrical_age_to_other_energy_exporter.json
+5efa0377fe291ce95e997e762d12ae33a202dd39 data/eln/advancement/recipes/misc/8kw_generator.json
+2129118260babb35c71c3abaa9e0cf9a0c2f3c90 data/eln/advancement/recipes/misc/8kw_generator_2.json
 79496b983ba9ed522455a9d984138a4452a98a45 data/eln/advancement/recipes/misc/advanced_chip.json
 77337270d3bcb51cd04bcfbbe92d2b91205082b0 data/eln/advancement/recipes/misc/advanced_electrical_motor.json
 3a619981495eb6f8bd59182f26cbc226b1dd4a70 data/eln/advancement/recipes/misc/advanced_energy_meter.json
@@ -296,6 +299,7 @@ d19389368c43bb77c6fbd3cb02485516845d6b1e data/eln/advancement/recipes/misc/therm
 ebd30793fac1b2c233ac5b6cdc2a993fbeb67027 data/eln/advancement/recipes/misc/tree_resin_collector.json
 f10a9eefb44cbdb04d4d1f0ca0507bbb07418460 data/eln/advancement/recipes/misc/tree_resin_collector_2.json
 36537e9727f2e9657a1580b66d45dac30567da2f data/eln/advancement/recipes/misc/tungsten_cable.json
+06f7d6a9098a138ce5181dc3148a749c93e4233e data/eln/advancement/recipes/misc/turbine_blade_set.json
 61ab3d5995c6865bb5ee2c140f3156fd26e60b8d data/eln/advancement/recipes/misc/utility_pole.json
 45da0cd5f829bf7dcb0e5bfecc984c9067178cc3 data/eln/advancement/recipes/misc/utility_pole_2.json
 036bce211a26d4b14a24a799461b4d1e26a834f4 data/eln/advancement/recipes/misc/utility_pole_3.json
@@ -360,6 +364,7 @@ b2bc41b4629f2c46260114fcfdff7291a52c17f2 data/eln/recipe/200v_macerator.json
 f52b8037748b5855a326b573fe52f465705d9bea data/eln/recipe/200v_oil_pump.json
 145d0d1fc7f4a0631ef21e5b2768de5439aa100c data/eln/recipe/200v_plate_machine.json
 5da761ff38e3067748db35412e9c9b552e533e6f data/eln/recipe/200v_power_socket.json
+9b6b94a50359d3391ded184685a8f07d44081dc2 data/eln/recipe/200v_shaft_motor.json
 3922ddff1257eb782d6c956bebb17d9fae806bed data/eln/recipe/200v_steam_turbine.json
 e25333ec84e2f843591d15dc724e02fd024fe100 data/eln/recipe/200v_submersible_pump.json
 8679563ab6e0e1e5d10c076891217a5ba2d08c9a data/eln/recipe/200v_tar_sand_separator.json
@@ -401,6 +406,8 @@ a2699653d83e94fba3176fed07eb9bc947098d52 data/eln/recipe/50v_submersible_pump.js
 26dd0e5b78d384e75a61dd3a288c91e7a056aed6 data/eln/recipe/50v_tungsten_heating_corp.json
 3c252398718236f524e1fa22cbb61b427356d014 data/eln/recipe/800v_defence_turret.json
 5503d8a4e479f03cd3c832b392fb5e93b78b7a44 data/eln/recipe/800v_electrical_age_to_other_energy_exporter.json
+b3b8ebbb856ae9ded0fbf671a186c8a3ce40f64b data/eln/recipe/8kw_generator.json
+4477cf450de2cf8492975fc1c1f3d14b2eacd62a data/eln/recipe/8kw_generator_2.json
 7ea06e3dd79c15911fb0a5e5b0dee923286aabfc data/eln/recipe/advanced_chip.json
 cc4e6d7b00eee3b561d0c68aaa1e8bf2a24be60f data/eln/recipe/advanced_electrical_motor.json
 ebc391934a2473c53d31289ac62a39b93aca573f data/eln/recipe/advanced_energy_meter.json
@@ -638,6 +645,7 @@ ad1c5258b30328edec6333acc45bcc1cba8d78e1 data/eln/recipe/thermal_insulation.json
 242851f63c4f602d3b0dc0b84582ae9e087dc1a1 data/eln/recipe/tree_resin_collector.json
 3755444f7d89f99a651710b209e8c730e6576173 data/eln/recipe/tree_resin_collector_2.json
 a704b9c15054e9a198a998bb306bf5ce8407501a data/eln/recipe/tungsten_cable.json
+a0578d3014c4046035c4bb4b86acfcd0233f31ac data/eln/recipe/turbine_blade_set.json
 651d22f75e6b8295b7992f229776b4292dffcc6b data/eln/recipe/utility_pole.json
 b204e479cbae894349308593acaaac469f4941ab data/eln/recipe/utility_pole_2.json
 fdb6dd720302e6dca9aafb6aa3bf07a3b7b35a8f data/eln/recipe/utility_pole_3.json

@@ -71,25 +71,43 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     }
 }
 
+/**
+ * The shaft Steam Turbine (ShaftSteamTurbineElement): steam by EA pipe in on top and out of its back, work onto the
+ * shaft (Baughn 2026-10-29). The 1.12 model until its own.
+ */
 class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
-    TurbineDescriptor(baseName, obj) {
+    SimpleShaftDescriptor(baseName, ShaftSteamTurbineElement::class, null) {
+    override val obj = obj
+    override val static = arrayOf(obj.getPart("Cowl"), obj.getPart("Stand"))
+    override val rotating = arrayOf(obj.getPart("Shaft"), obj.getPart("Fan"))
+    override val sound = "eln:steam_turbine"
+
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(stack, player, list, par4)
+        val p = ShaftSteamTurbineElement.NOMINAL_PA / 1e5
+        list.add("Steam in by pipe on top, out of its back: piped on (a heater, a condenser) or into the air.")
+        list.add(Utils.plotPower("Up to ", ShaftSteamTurbineElement.NOMINAL_P) + String.format(" onto the shaft from %.0f g/s of %.0f bar steam venting to air;",
+            ShaftSteamTurbineElement.nominalKgPerS() * 1000, p))
+        list.add("more with a vacuum behind it. Generators on the shaft take the power.")
+        list.add(Utils.plotRads("Governor: full open to ", ShaftSteamTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
+        list.add("Its screen: throttle, or a regulator holding the inlet pressure; a signal on its front for external control.")
+        list.add(String.format("Its casing bursts over %.0f bar. Water in the steam strips its blades.", ShaftSteamTurbineElement.BURST_PA / 1e5))
         list.add("Might want a boiler with that.")   // (Baughn)
     }
+}
 
-    // Steam turbines are for baseload.
-    override val inertia = 20f
-    // Computed to equal a single 36LP Railcraft boiler, or half of a 36HP.
-    override val fluidConsumption = 7200f
-    // Computed to equal what you'd get from Railcraft steam engines, plus a small
-    // bonus because you're using Electrical Age you crazy person you.
-    // This pretty much fills up a VHV line. The generator drag gives us a bit of leeway.
-    override val fluidDescription = "steam"
-    override val fluidTypes = FuelRegistry.steamList
-    // Steam turbines can, just barely, be started without power.
-    override val efficiencyCurve = 1.1f
-    override val sound = "eln:steam_turbine"
+/** Its render: the shaft, the steam's roar by flow, and the controls for the screen (SteamGeneratorScreen). */
+class SteamTurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc),
+    mods.eln.oil.SteamValveControl.Rendered {
+    override val cableRender = Eln.stdCableRenderSignal
+    val controls = mods.eln.oil.SteamValveControl.Render(this, ShaftSteamTurbineElement.TARGET_MAX_BAR)
+
+    override fun controls() = controls
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        volumeSetting.target = stream.readFloat()
+        controls.read(stream)
+    }
 }
 
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :

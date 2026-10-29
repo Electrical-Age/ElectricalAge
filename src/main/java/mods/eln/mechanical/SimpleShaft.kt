@@ -26,11 +26,22 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     // If you set this you should also set volumeSetting in render.
     // (Otherwise it'll stick to 100% volume.)
     internal open val sound: String? = null
+    /** The model drawn this much thinner across the shaft (a smaller machine on the same model until its own). */
+    open val drawScaleX = 1f
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
     open fun draw(angle: Double) {
+        if (drawScaleX != 1f) {
+            preserveMatrix {
+                GL11.glScalef(drawScaleX, 1f, 1f)
+                drawModel(angle)
+            }
+        } else drawModel(angle)
+    }
+
+    private fun drawModel(angle: Double) {
         for (part in static) {
             part.draw()
         }

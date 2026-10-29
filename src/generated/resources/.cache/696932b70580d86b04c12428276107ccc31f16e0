@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T02:29:12.502999946	eln-global/EA models
+// 26.3	2026-10-29T13:51:06.733166829	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -7,6 +7,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_magnetizer.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_oil_pump.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_plate_machine.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_shaft_motor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_steam_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_submersible_pump.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_tar_sand_separator.json
@@ -27,6 +28,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_tar_sand_separator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/50v_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/800v_defence_turret.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/8kw_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/auto_miner.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/boiler.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacitor_bank.json
@@ -105,6 +107,7 @@ ff4e488736f431dd00f01a6fdbeb1adec31cd4d2 assets/eln/items/200v_macerator.json
 f1d374d39ca6941880799bfdd8697b329d0588a5 assets/eln/items/200v_oil_pump.json
 ced06a526a5336739c0903382f3d59da76c4690e assets/eln/items/200v_plate_machine.json
 a77004a197dbdb9447a13768a82d3c5a0db92529 assets/eln/items/200v_power_socket.json
+99af07cefbcf131a0fab3b4a81f3a7fa7c0324ed assets/eln/items/200v_shaft_motor.json
 dddada0aa7170880474bc40a8a87c13aa7e4f6db assets/eln/items/200v_steam_turbine.json
 fdf123715e8d4ad85251d987f4abe69c1539e7a8 assets/eln/items/200v_submersible_pump.json
 c41bf999c4194d47e8f6208abe7ffa9007449505 assets/eln/items/200v_tar_sand_separator.json
@@ -138,6 +141,7 @@ d3f7ed94b2c39ca208659c9b74b19a8f69852e0c assets/eln/items/50v_tar_sand_separator
 5a4e111f8d5d642203067dd40d5df602b07a29b3 assets/eln/items/50v_tungsten_heating_corp.json
 9dc9ea2ce20f8d70da5568f96a0960921b137ecf assets/eln/items/50v_turbine.json
 1998f593a0942b5dbc02fb68c54a4dce6e4aa99e assets/eln/items/800v_defence_turret.json
+4f5b5b7ff1ba79dbf11d64241c7e60513a2be893 assets/eln/items/8kw_generator.json
 abd143b4b826f1e308beb65242dfe3da13fb1920 assets/eln/items/advanced_chip.json
 c4e228fc0a55e7e20a2be28757a7a9b278f15af3 assets/eln/items/advanced_electrical_motor.json
 166cdd600a982afbb966c7e731c062dce3219ddf assets/eln/items/advanced_energy_meter.json
@@ -404,6 +408,7 @@ b0e9ac661430266c12c61d5c58cde97253f1b494 assets/eln/items/tungsten_cable.json
 b3ade9333336fbfdb679453a73f6e1305814c944 assets/eln/items/tungsten_dust.json
 c1acaa29dfc25a42638aae34827c69cee46d93ba assets/eln/items/tungsten_ingot.json
 cc97206c950244d6a8d7e8f1f205d276c4aca492 assets/eln/items/tungsten_ore.json
+0c18495999fba11898ea8659f0b2731a4ea6124b assets/eln/items/turbine_blade_set.json
 4ad21ccf2fb5a8bbcc17b8c47d1cffaf3d8cbd95 assets/eln/items/tutorial_sign.json
 b41edace2ece4946cef42068eb21182f7d3ffebd assets/eln/items/universal_meter.json
 07284b5fa3ce85c54eb209577958dbfa4c37839b assets/eln/items/utility_pole.json
@@ -465,6 +470,8 @@ cae62c66181615a1907943a24def91c83223281e assets/eln/models/item/200v_plate_machi
 b64af5dd65553d5688568fe24cb828999ebc73bf assets/eln/models/item/200v_plate_machine_3d.json
 6516b7328cc2ba074ac47a10c91fa493bb1bb5d1 assets/eln/models/item/200v_power_socket.json
 0bd2284f374c4a09e3ed453dd50e2714a832ba30 assets/eln/models/item/200v_power_socket_3d.json
+67b03f71f081f768905f2a0e1f312a99f9f1d876 assets/eln/models/item/200v_shaft_motor.json
+dff0ff1b152ddd91c0d8cc2e1a8fe074713d6d98 assets/eln/models/item/200v_shaft_motor_3d.json
 fc29655922cf22b6572980e150c3aff7e4fb76e2 assets/eln/models/item/200v_steam_turbine.json
 99c543c0bc1feceb6850d6afecf303d9e8bf9beb assets/eln/models/item/200v_submersible_pump.json
 9f69a1ba01b352462d4310fd6905fe4882e971ee assets/eln/models/item/200v_submersible_pump_3d.json
@@ -516,6 +523,8 @@ a67e6dcb8020e78ad48a94d67e13e7f5ad1c5fc6 assets/eln/models/item/50v_turbine.json
 07a35785a90399a7b9ffe27c076743c2e362451d assets/eln/models/item/50v_turbine_3d.json
 4c3e9566025122dfdef3c0c397d33c7d7da4949b assets/eln/models/item/800v_defence_turret.json
 75fbd54de4f60b17c45ad244767a1439a5e692bf assets/eln/models/item/800v_defence_turret_3d.json
+7e12d610e77ff6c186997b27898f7799abc66524 assets/eln/models/item/8kw_generator.json
+857924bf36d7f7618323081b60791d5cd5090c6e assets/eln/models/item/8kw_generator_3d.json
 6123ef3f5ec626f1c23c8a736ced676d2f70da6f assets/eln/models/item/advanced_chip.json
 2d26ebbda988c734f20532a2df23ddada008508f assets/eln/models/item/advanced_electrical_motor.json
 af735f3de534b39a0ff0f69bec96cd3787b8de50 assets/eln/models/item/advanced_energy_meter.json
@@ -882,6 +891,7 @@ e57c38ce7f0e1b5542a7870870acacd8013d6e13 assets/eln/models/item/thermometer.json
 d78c66bf9bd68c27a17ed13f79eefaab08acf359 assets/eln/models/item/tungsten_cable.json
 1a9d8a62d2775ef16e2368f1c2c0efd4f9b32473 assets/eln/models/item/tungsten_dust.json
 7af01ae892df8b280f25babf45e8bb207fdc12f5 assets/eln/models/item/tungsten_ingot.json
+6ee852843c5ce8c9b8ee81b3593e09311b85c931 assets/eln/models/item/turbine_blade_set.json
 a764a7b9d92f6698f270716f881b366571b894e9 assets/eln/models/item/tutorial_sign.json
 4d3132768b1fcd6dbcd5998362460e4713afdb60 assets/eln/models/item/tutorial_sign_3d.json
 8405f6265c5670ed84bfc7645c6c88664af5f444 assets/eln/models/item/universal_meter.json
