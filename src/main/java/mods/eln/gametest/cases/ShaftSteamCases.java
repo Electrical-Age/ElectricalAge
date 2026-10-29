@@ -33,6 +33,7 @@ public final class ShaftSteamCases {
         cases.add(new DrivesGenerators(false));
         cases.add(new DrivesGenerators(true));
         cases.add(new ExhaustPipedOn());
+        cases.add(new BoilerPipeTurbine());
         cases.add(new GovernorLoadStep());
         cases.add(new MotorSpinsUp());
         cases.add(new OldSaveLoads());
@@ -238,6 +239,73 @@ public final class ShaftSteamCases {
                 String.format("%.2f bar", hp.exhaustPa() / 1e5));
             ctx.check("exhaust piped: both turbines do work", hp.totalWork > 0 && lp.totalWork > 0,
                 String.format("%.0f J and %.0f J", hp.totalWork, lp.totalWork));
+        }
+    }
+
+    /**
+     * Boiler -> alloy pipe -> Steam Turbine -> shaft -> 8 kW generator (Baughn: steam by pipe): a boiler fired with
+     * 30 kW runs the turbine, which carries a 2 kW load at speed while the boiler has water; the steam goes out of its
+     * back into the air.
+     */
+    static final class BoilerPipeTurbine implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        ShaftSteamTurbineElement t;
+        Resistor r;
+        IProcess fire;
+        double peakRads, peakW;
+
+        public String id() {
+            return "shaft_steam_turbine_boiler_pipe";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 1600;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos b = ctx.at(2, 1, 5);
+            boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), b);
+            boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            PipeCases.lay(ctx, b.above(), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);           // up out of the boiler, then east
+            PipeCases.lay(ctx, b.above().east(), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, b.above().east().east(), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);   // down into the turbine
+            TransparentNodeElement[] l = line(ctx, b.east().east(), GENERATOR_8KW);
+            t = (ShaftSteamTurbineElement) l[0];
+            r = load((GeneratorElement) l[1], 2000);
+            Eln.simulator.addSlowProcess(fire = dt -> {
+                boiler.thermal.moveEnergyTo(30000 * dt);
+                // (the boiler holds half a kilo of water: it runs dry in a minute or so; what it did while it had steam)
+                if (shaft(t).getRads() > peakRads) peakRads = shaft(t).getRads();
+                if (shaft(t).getRads() > 700) peakW = Math.max(peakW, t.shaftW);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(fire);
+            Eln.simulator.removeElectricalComponent(r);
+            ctx.line("boiler -> pipe -> shaft turbine: boiler " + boiler.getWaila() + "; turbine " + t.getWaila());
+            ctx.check("boiler pipe: the turbine runs off the piped steam", t.totalKg > 0 && peakRads > 700,
+                String.format("%.3f kg, peak %.0f rad/s", t.totalKg, peakRads));
+            ctx.check("boiler pipe: and carries the 2 kW load at speed (1.5-4 kW on the shaft, some spinning it up)", peakW > 1500 && peakW < 4000, String.format("%.0f W", peakW));
+            ctx.check("boiler pipe: its exhaust goes to the air", !t.exhaustPiped, "");
         }
     }
 
