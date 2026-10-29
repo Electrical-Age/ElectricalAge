@@ -25,11 +25,10 @@ def main_part():
     m.add(prism("x", C, C, 4.0, 5.0, 10.0, "paint", n=14))
     m.add(tube("x", C, C, 3.9, 4.3, 9.5, 10.0, "steel", n=14, inner=False))
     # the line, low (LINE_Y = 4 px: InlinePumpElement), into the volute's foot: pipe stubs to flanges on z = 0 and 16
-    m.add(prism("z", C, LY, 1.25, 0.9, 15.1, "steel", n=10, caps=(False, False)))
+    # (an alloy pipe's size: drawn 1.5 voxels, its flange 0.75 wider each way)
+    m.add(prism("z", C, LY, 0.75, 0.9, 15.1, "steel", n=8, caps=(False, False)))
     for z0, z1, caps in ((0.0, 1.0, (True, False)), (15.0, 16.0, (False, True))):
-        m.add(prism("z", C, LY, 2.0, z0, z1, "steel", n=12, caps=caps))
-    m.add(*bolt_ring("z", C, LY, 1.6, 1.0, 1.25, 4, rb=0.2))
-    m.add(*bolt_ring("z", C, LY, 1.6, 14.75, 15.0, 4, rb=0.2))
+        m.add(prism("z", C, LY, 1.5, z0, z1, "steel", n=10, caps=caps))
     # the motor behind, on a saddle
     m.add(box(11.5, 1.0, 5.5, 15.0, 5.5, 10.5, "castiron"))
     m.add(prism("x", C, C, 2.75, 11.0, 15.5, "steel", n=12))

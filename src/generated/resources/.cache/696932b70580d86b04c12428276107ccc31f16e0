@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T14:48:29.477441016	eln-global/EA models
+// 26.3	2026-10-29T15:29:05.47837335	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -329,6 +329,7 @@ fc7072eabfb82943749e3a2f64a672ea69f015d6 assets/eln/items/pink_brush.json
 eabbe6806f655e756f9e1a5051cd7d097dade7af assets/eln/items/pipe_control_valve.json
 c37d42d320e747a50897587a392f8eac6ad1a86d assets/eln/items/pipe_kit_alloy.json
 0e52b8c4201a35ab6ea10911cbff7726f1dc6d51 assets/eln/items/pipe_kit_iron.json
+1b05153f3cc7f11c032cb3b4caff730129e13330 assets/eln/items/pipe_kit_large_alloy.json
 0416c56ddb3ab4681b0662855c8b01190bc90ddf assets/eln/items/pipe_pressure_sensor.json
 a64d514e144be89135887a9026a32be41585646d assets/eln/items/pipe_pressure_valve.json
 387997f49d72c35f39eb1e691fc4c1c696cfc383 assets/eln/items/pipe_quality_sensor.json
@@ -786,6 +787,7 @@ ed17386abf1e7b55e0167a95e65e07395740cece assets/eln/models/item/pipe_adapter.jso
 a2f6b25ea172857c6a5851ca0009d2f8ba6f7dc2 assets/eln/models/item/pipe_control_valve.json
 2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_alloy.json
 cb6f096c14fa8c9e8b2459dee3fc41fed9f3a4f1 assets/eln/models/item/pipe_kit_iron.json
+2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_large_alloy.json
 409e691a2f03b52ed63b1fec945e97c715745cb0 assets/eln/models/item/pipe_pressure_sensor.json
 a2f6b25ea172857c6a5851ca0009d2f8ba6f7dc2 assets/eln/models/item/pipe_pressure_valve.json
 409e691a2f03b52ed63b1fec945e97c715745cb0 assets/eln/models/item/pipe_quality_sensor.json

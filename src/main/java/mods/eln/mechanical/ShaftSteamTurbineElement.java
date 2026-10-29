@@ -302,7 +302,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     void makePorts() {
         long pos = node.coordonate.pos().asLong();
         ports = List.of(new FluidPort(inlet, pos, 1, 1.0, spec.portK),   // the inlet on top
-            new FluidPort(exhaust, pos, exhaustSide().toEnumFacing().get3DDataValue(), 0.5, spec.portK));   // the exhaust behind
+            // the exhaust behind: made for a large alloy pipe (low-pressure steam, to an LP turbine or a condenser)
+            new FluidPort(exhaust, pos, exhaustSide().toEnumFacing().get3DDataValue(), 0.5, mods.eln.node.voxel.PipePart.LARGE_END_K));
     }
 
     @Override

@@ -136,6 +136,7 @@ public final class ValvePart extends VoxelPart {
     @Override
     public void write(CompoundTag t) {
         t.putIntArray("at", new int[]{x, y, z, axis, bore});
+        t.putBoolean("g", true);   // (grid widths: PipePart.GRID)
         t.putBoolean("open", open);
         if (mode != ON_OFF) t.putInt("mode", mode);
         if (mode == THROTTLE) t.putDouble("setting", setting);
@@ -149,7 +150,7 @@ public final class ValvePart extends VoxelPart {
 
     static ValvePart read(CompoundTag t) {
         int[] a = t.getIntArray("at").orElse(new int[]{8, 8, 8, 0, 4});
-        ValvePart v = new ValvePart(a[0], a[1], a[2], a[3], a[4], t.getIntOr("mode", ON_OFF));
+        ValvePart v = new ValvePart(a[0], a[1], a[2], a[3], t.getBooleanOr("g", false) ? a[4] : PipePart.oldBore(a[4]), t.getIntOr("mode", ON_OFF));
         v.open = t.getBooleanOr("open", true);
         v.setting = t.getDoubleOr("setting", 1);
         v.pmode = t.getIntOr("pmode", RELIEF);

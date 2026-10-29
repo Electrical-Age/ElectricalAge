@@ -39,6 +39,7 @@ public final class ShaftPlantCases {
         cases.add(new Flooding());
         cases.add(new DumpOnLoadRejection());
         cases.add(new FullPlantCoolingWater());
+        cases.add(new FullPlantLargeCrossover());
     }
 
     static final int LP_TURBINE = 18 + (4 << 6), CONDENSER = 52 + (82 << 6);
@@ -86,10 +87,14 @@ public final class ShaftPlantCases {
 
     /** Pipe out of a turbine's back (east of `at`), up, east one block, down into the top of the block east of that. */
     static void exhaustPipe(TestContext ctx, BlockPos turbine) {
+        exhaustPipe(ctx, turbine, 1);
+    }
+
+    static void exhaustPipe(TestContext ctx, BlockPos turbine, int tier) {
         BlockPos b = turbine.east();
-        PipeCases.lay(ctx, b, 1, 0, 8, 8, 8, 8, 8, 8, 16, 8);
-        PipeCases.lay(ctx, b.above(), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
-        PipeCases.lay(ctx, b.above().east(), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+        PipeCases.lay(ctx, b, tier, 0, 8, 8, 8, 8, 8, 8, 16, 8);
+        PipeCases.lay(ctx, b.above(), tier, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+        PipeCases.lay(ctx, b.above().east(), tier, 0, 8, 8, 8, 8, 8, 8, 0, 8);
     }
 
     /**
@@ -246,6 +251,84 @@ public final class ShaftPlantCases {
                 String.format("%.1f g/s, %.1f kW", steam * 1000, work / window / 1000));
             ctx.check("full HP: the cooling water takes most of the heat (over 50 kW; the shell the rest)", q > 50e3, String.format("%.1f kW", q / 1000));
             ctx.check("full HP: the vacuum holds (under 0.3 bar)", p < 0.3e5, String.format("%.2f bar", p / 1e5));
+        }
+    }
+
+    /**
+     * The full plant with a large alloy crossover (Baughn 2026-10-29: the alloy crossover throttled it to 15 g/s): HP
+     * and LP on one shaft with three loaded 8 kW generators, HP at full steam -> large pipe -> LP -> plant condenser face
+     * to face, cooling water through its tubes. Numbers logged.
+     */
+    static final class FullPlantLargeCrossover extends PlumbingCases.Big {
+        ShaftSteamTurbineElement hp, lp;
+        PlantCondenserElement c;
+        mods.eln.sim.fluid.FluidDevice loop;
+        Resistor[] loads;
+        IProcess feed;
+        int tick;
+        double kg0, wh0, wl0, q0, cool0, kg, wh, wl, q, cool, window, pSum, pxSum;
+
+        public String id() {
+            return "shaft_plant_large_crossover_full_flow";
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext ctx) {
+            // one shaft, as a real plant: LP (z 3), generator, HP (z 5), two generators (z 6, 7), all facing XN
+            BlockPos lpAt = ctx.at(2, 1, 3), hpAt = ctx.at(2, 1, 5), cp = ctx.at(3, 1, 3);
+            hp = (ShaftSteamTurbineElement) orient(ctx.placeTransparent(STEAM_TURBINE, hpAt));
+            var g1 = (GeneratorElement) orient(ctx.placeTransparent(GENERATOR_8KW, ctx.at(2, 1, 4)));
+            lp = (ShaftSteamTurbineElement) orient(ctx.placeTransparent(LP_TURBINE, lpAt));
+            var g2 = (GeneratorElement) orient(ctx.placeTransparent(GENERATOR_8KW, ctx.at(2, 1, 6)));
+            var g3 = (GeneratorElement) orient(ctx.placeTransparent(GENERATOR_8KW, ctx.at(2, 1, 7)));
+            loads = new Resistor[]{load(g1, 9000), load(g2, 9000), load(g3, 9000)};
+            // the large alloy crossover: out of the HP's back, up, north two blocks, west, down into the LP's top
+            PipeCases.lay(ctx, ctx.at(3, 1, 5), 2, 0, 8, 8, 8, 8, 8, 8, 16, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 5), 2, 8, 0, 8, 8, 8, 8, 8, 8, 0);
+            PipeCases.lay(ctx, ctx.at(3, 2, 4), 2, 8, 8, 16, 8, 8, 0);
+            PipeCases.lay(ctx, ctx.at(3, 2, 3), 2, 8, 8, 16, 8, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 2, 3), 2, 16, 8, 8, 8, 8, 8, 8, 0, 8);
+            c = condenser(ctx, cp, true, Direction.XP);
+            loop = coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);
+            Eln.simulator.addSlowProcess(feed = dt -> {
+                steam(hp);
+                if (++tick == 700) {
+                    kg0 = hp.totalKg;
+                    wh0 = hp.totalWork;
+                    wl0 = lp.totalWork;
+                    q0 = c.totalTubesJ;
+                    cool0 = c.totalCoolingKg;
+                }
+                if (tick > 700) {
+                    window += dt;
+                    kg = hp.totalKg - kg0;
+                    wh = hp.totalWork - wh0;
+                    wl = lp.totalWork - wl0;
+                    q = c.totalTubesJ - q0;
+                    cool = c.totalCoolingKg - cool0;
+                    pSum += c.v.vessel.P() * dt;
+                    pxSum += hp.exhaustPa() * dt;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(feed);
+            mods.eln.fluid.FluidWorld.remove(loop);
+            for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
+            double steam = kg / window;
+            ctx.line(String.format("full plant, large crossover: steam %.1f g/s; HP %.1f kW + LP %.1f kW (%.0f kJ/kg); crossover %.2f bar, condenser %.3f bar; "
+                    + "%.1f kW into %.2f kg/s of cooling water",
+                steam * 1000, wh / window / 1000, wl / window / 1000, (wh + wl) / Math.max(1e-9, kg) / 1000, pxSum / window / 1e5, pSum / window / 1e5,
+                q / window / 1000, cool / window));
+            ctx.line("full plant, large crossover: HP " + hp.getWaila() + "; LP " + lp.getWaila() + "; condenser " + c.getWaila());
+            ctx.check("large crossover: one shaft", hp.getShaft() == lp.getShaft(), "");
+            ctx.check("large crossover: the HP runs at about full steam (over 33 g/s)", steam > 0.033, String.format("%.1f g/s", steam * 1000));
+            ctx.check("large crossover: the LP does real work (over 5 kW)", wl / window > 5000, String.format("%.1f kW", wl / window / 1000));
+            ctx.check("large crossover: the condenser holds its vacuum (under 0.3 bar)", pSum / window < 0.3e5, String.format("%.2f bar", pSum / window / 1e5));
         }
     }
 

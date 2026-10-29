@@ -133,6 +133,9 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_kit_iron", p -> new mods.eln.node.voxel.PipeKitItem(0, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_ALLOY =
         ITEMS.registerItem("pipe_kit_alloy", p -> new mods.eln.node.voxel.PipeKitItem(1, p));
+    /** Baughn 2026-10-29: the large alloy pipe, 6 voxels wide, for low-pressure steam (an LP turbine's crossover). */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeKitItem> PIPE_KIT_LARGE_ALLOY =
+        ITEMS.registerItem("pipe_kit_large_alloy", p -> new mods.eln.node.voxel.PipeKitItem(2, p));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_VALVE =
         ITEMS.registerItem("pipe_valve", mods.eln.node.voxel.ValveItem::new);
     /** Baughn 2026-10-26: a valve opened by a signal (a turbine's throttle), and one set by hand on a slider. */
@@ -311,6 +314,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(tabIcon);
         ALL_ITEMS.add(PIPE_KIT_IRON);   // (pipes, 26.x)
         ALL_ITEMS.add(PIPE_KIT_ALLOY);
+        ALL_ITEMS.add(PIPE_KIT_LARGE_ALLOY);
         ALL_ITEMS.add(PIPE_VALVE);
         ALL_ITEMS.add(PIPE_CONTROL_VALVE);
         ALL_ITEMS.add(PIPE_THROTTLE_VALVE);

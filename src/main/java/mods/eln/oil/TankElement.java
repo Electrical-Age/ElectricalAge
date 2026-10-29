@@ -27,8 +27,8 @@ import java.util.Map;
  */
 public class TankElement extends TransparentNodeElement implements FluidDevice {
     final TankDescriptor desc;
-    /** Its ports' conductance (m^3): an alloy pipe's end. */
-    public static final double PORT_K = 2 * 3e-11 * 2.25 * 16;
+    /** Its ports' conductance (m^3): made for a large alloy pipe (they take any; the pipe's own end limits a smaller one). */
+    public static final double PORT_K = mods.eln.node.voxel.PipePart.LARGE_END_K;
     /** Heat it loses to the air (W/K): a bare steel vessel's. */
     static final double LOSS_W_PER_K = 1.0;
     /** The low (liquid) and high (vapour) side ports' heights (voxels, on the pipe lattice). */

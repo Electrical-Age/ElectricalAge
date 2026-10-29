@@ -99,6 +99,7 @@ public final class PipeSensorPart extends VoxelPart {
     @Override
     public void write(CompoundTag t) {
         t.putIntArray("at", new int[]{x, y, z, outlet, bore, sensing});
+        t.putBoolean("g", true);   // (grid widths: PipePart.GRID)
         t.putDouble("scale", scale);
         if (outProcess != null) outProcess.writeToNBT(t, "");
     }
@@ -106,7 +107,7 @@ public final class PipeSensorPart extends VoxelPart {
     static PipeSensorPart read(CompoundTag t) {
         int[] a = t.getIntArray("at").orElse(new int[]{8, 8, 8, 1, 4, PRESSURE});
         int sensing = a.length > 5 ? a[5] : PRESSURE;
-        var p = new PipeSensorPart(a[0], a[1], a[2], a[3], a[4], sensing, t.getDoubleOr("scale", defaultScale(sensing)));
+        var p = new PipeSensorPart(a[0], a[1], a[2], a[3], t.getBooleanOr("g", false) ? a[4] : PipePart.oldBore(a[4]), sensing, t.getDoubleOr("scale", defaultScale(sensing)));
         p.outProcess.readFromNBT(t, "");
         return p;
     }

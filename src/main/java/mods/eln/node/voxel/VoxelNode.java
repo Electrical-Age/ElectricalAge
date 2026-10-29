@@ -1082,7 +1082,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     int[] c = pipe.crackPoint();
                     var dir = net.minecraft.core.Direction.from3DDataValue(pipe.burstDir);
                     var origin = new net.minecraft.world.phys.Vec3(coordonate.x + c[0] / 16.0, coordonate.y + c[1] / 16.0, coordonate.z + c[2] / 16.0)
-                        .add(dir.getStepX() * pipe.bore() / 32.0, dir.getStepY() * pipe.bore() / 32.0, dir.getStepZ() * pipe.bore() / 32.0);
+                        .add(dir.getStepX() * pipe.drawn() / 32.0, dir.getStepY() * pipe.drawn() / 32.0, dir.getStepZ() * pipe.drawn() / 32.0);
                     SteamJet.tick(sl, origin, dir, e.getKey().edge, SteamJet.MAX_LENGTH);
                 } else if (e.getValue() instanceof SafetyValvePart sv && e.getKey().edge != null && e.getKey().open > 0) {
                     var dir = net.minecraft.core.Direction.from3DDataValue(sv.outlet);

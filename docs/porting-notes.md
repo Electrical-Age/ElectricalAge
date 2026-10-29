@@ -76,6 +76,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   to float precision), so a broken block takes its share and saved state survives; the box draws as one tank from its
   lowest corner (shell, sight glass and water scaled; no flanges). Plant condenser: cooling-water tubes in low on its
   left, out low on its right, UA 4 kW/K. `tank_box_*`, `plant_condenser_cooling_water_full_hp`.
+- Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
+  taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
+  the Large Alloy Pipe (tier 2) drawn and taking 6, inner diameter 16 x: volume 256 x, conductance 1024 x (d^2.5,
+  turbulent; the network's linear form would give d^4), 40 / 120 bar. Fittings sized from the pipe's grid width;
+  ones saved before (their "at" arrays held 4 or 6, no "g" key) load at 2. LP turbine, HP exhaust, plant condenser
+  and tank ports take a large pipe (PipePart.LARGE_END_K). Kit: 8 alloy plates in a ring. `PipeSizeCases`,
+  `shaft_plant_large_crossover_full_flow` (42 g/s, HP 13.7 + LP 15.1 kW on one shaft).
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

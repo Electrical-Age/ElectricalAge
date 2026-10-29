@@ -66,6 +66,7 @@ public class ElnModels implements DataProvider {
         if (name.endsWith("shaft_motor")) return itemTexture("electrical_motor", item);
         if (name.equals("turbine_blade_set")) return itemTexture("iron_plate", item);
         if (name.equals("pipe_quality_sensor")) return itemTexture("pipe_pressure_sensor", item);
+        if (name.equals("pipe_kit_large_alloy")) return itemTexture("pipe_kit_alloy", item);   // (until its own icon)
         if (name.equals("pipe_pressure_valve")) return itemTexture("pipe_control_valve", item);
         if (name.endsWith("_tank") && !name.contains("battery")) return itemTexture("small_passive_thermal_dissipator", item);   // (until their own icons)
         if (name.endsWith("inline_pump")) return itemTexture("electrical_motor", item);

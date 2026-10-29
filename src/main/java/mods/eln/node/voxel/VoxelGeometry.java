@@ -161,7 +161,7 @@ public final class VoxelGeometry {
 
     /** A pipe: a round tube along each straight piece, a fitting ring at each bend, a flange where it meets a face. */
     static void pipe(Builder b, PipePart pipe) {
-        double r = pipe.bore() / 2.0;
+        double r = pipe.drawn() / 2.0;
         int[] p = pipe.points;
         int n = p.length / 3;
         for (int i = 1; i < n; i++) {

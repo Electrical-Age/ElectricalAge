@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "P P",
+    "PPP"
+  ],
+  "key": {
+    "P": "eln:alloy_plate"
+  },
+  "result": {
+    "id": "eln:pipe_kit_large_alloy",
+    "components": {
+      "minecraft:custom_data": {
+        "kitLen": 16
+      }
+    }
+  }
+}

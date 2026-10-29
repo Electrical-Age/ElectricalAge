@@ -10,24 +10,45 @@ import java.util.List;
 
 /**
  * A pipe inside one block (notes/pipes/DESIGN.md sections 2, 5, 6a): an axis-aligned polyline through the block's
- * voxels (0..16 on each axis), its bore set by the tier (iron 4 voxels, alloy 6). Its contents are one fluid-core node
+ * voxels (0..16 on each axis); its tier sets what it takes on the voxel grid (GRID) and how wide it is drawn (DRAWN).
+ * Its contents are one fluid-core node
  * per block (lumping longer runs is later). An end on the block's boundary is a port: it meets the pipe or device on
  * the other side at the same spot; an end inside the block is capped (sealed).
  */
 public final class PipePart extends VoxelPart {
     public static final String KIND = "pipe";
-    /** Per tier: bore (voxels), volume per block of length (m^3), conductance per block (m^3). Tunables (6a, 6b). */
-    public static final int[] BORE = {4, 6};
-    public static final double[] VOLUME_PER_BLOCK = {0.00003, 0.00003 * 2.25};
+    /**
+     * Per tier (iron, alloy, large alloy): what it takes on the voxel grid (occupancy, hitbox, routing; even, so a box
+     * centred on a lattice point: iron would be 1, but a 1-voxel box can't sit centred on the centre lines, which lie on
+     * voxel corners), and the width it is drawn (Baughn 2026-10-29: iron and alloy at a quarter of their old 4 and 6;
+     * the large alloy pipe 6 voxels, the old alloy look). Volume per block of length (m^3), conductance per block (m^3).
+     */
+    public static final int[] GRID = {2, 2, 6};
+    public static final double[] DRAWN = {1.0, 1.5, 6.0};
+    /** Before 2026-10-29: the grid widths saved in fittings' "at" arrays (no "g" key): iron 4, alloy 6. */
+    static int oldBore(int saved) {
+        return saved >= 4 ? 2 : saved;
+    }
+
+    /**
+     * The large alloy pipe (Baughn 2026-10-29): inner diameter 16 x the alloy's, so 256 x its volume; its conductance
+     * 1024 x (d^2.5): the network's flow is linear in the pressure drop (rho k dP / mu, Poiseuille's form, which would
+     * give d^4 = 65536 x), but steam in a pipe this size is turbulent, where the flow at a given drop per length goes as
+     * about d^2.5. Ratings lower than the alloy's: a wide thin-walled low-pressure line.
+     */
+    public static final double LARGE_D = 16;
+    public static final double[] VOLUME_PER_BLOCK = {0.00003, 0.00003 * 2.25, 0.00003 * 2.25 * LARGE_D * LARGE_D};
     /** What saves before 2026-10-25 had (no "v" key): read scales their contents to the new volume. */
-    static final double[] OLD_VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25};
-    public static final double[] K_PER_BLOCK = {3e-11, 3e-11 * 2.25};
-    public static final String[] TIER_NAME = {"iron", "alloy"};
+    static final double[] OLD_VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25, 0.00015 * 2.25 * LARGE_D * LARGE_D};
+    public static final double[] K_PER_BLOCK = {3e-11, 3e-11 * 2.25, 3e-11 * 2.25 * Math.pow(LARGE_D, 2.5)};
+    public static final String[] TIER_NAME = {"iron", "alloy", "large alloy"};
+    /** A device port made to take a large alloy pipe (m^3): its end's conductance (LP turbine, condenser, tanks). */
+    public static final double LARGE_END_K = 2 * K_PER_BLOCK[2] * 16;
     /**
      * Ratings (DESIGN.md 6a): working and burst pressure (Pa), and the temperature (K) from which the rating falls,
      * linearly to half at SOFT_SPAN above it. Iron: 1850s-60s wrought iron; alloy: a Cr-Mo steam-line steel.
      */
-    public static final double[] WORKING_PA = {10e5, 100e5}, BURST_PA = {40e5, 300e5}, SOFT_K = {573.15, 873.15};
+    public static final double[] WORKING_PA = {10e5, 100e5, 40e5}, BURST_PA = {40e5, 300e5, 120e5}, SOFT_K = {573.15, 873.15, 873.15};
     static final double SOFT_SPAN = 100;
     /** A burst pipe vents through this (m^3): a crack, about a third of an open bore (a jet that lasts: Gemini). */
     static final double BURST_VENT_K = 1e-11;
@@ -52,8 +73,14 @@ public final class PipePart extends VoxelPart {
         return KIND;
     }
 
+    /** Its width on the voxel grid (GRID). */
     public int bore() {
-        return BORE[tier];
+        return GRID[tier];
+    }
+
+    /** The width it is drawn (DRAWN, voxels). */
+    public double drawn() {
+        return DRAWN[tier];
     }
 
     /** Length in voxels. */
@@ -186,7 +213,7 @@ public final class PipePart extends VoxelPart {
     }
 
     static PipePart read(CompoundTag t, int blockY) {
-        PipePart p = new PipePart(Math.max(0, Math.min(BORE.length - 1, t.getIntOr("tier", 0))), t.getIntArray("pts").orElse(new int[0]));
+        PipePart p = new PipePart(Math.max(0, Math.min(GRID.length - 1, t.getIntOr("tier", 0))), t.getIntArray("pts").orElse(new int[0]));
         p.burst = t.getBooleanOr("burst", false);
         p.burstDir = t.getIntOr("burstDir", -1);
         double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
@@ -218,7 +245,7 @@ public final class PipePart extends VoxelPart {
         int n = in.readByte();
         int[] pts = new int[3 * n];
         for (int i = 0; i < pts.length; i++) pts[i] = in.readByte();
-        PipePart p = new PipePart(Math.max(0, Math.min(BORE.length - 1, b & 0x7F)), pts);
+        PipePart p = new PipePart(Math.max(0, Math.min(GRID.length - 1, b & 0x7F)), pts);
         p.burst = (b & 0x80) != 0;
         return p;
     }

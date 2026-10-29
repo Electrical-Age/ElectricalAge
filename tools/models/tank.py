@@ -21,10 +21,11 @@ C = 8.0
 R = 5.5
 
 def flange_x0(y):
-    """An iron pipe's flange on the x = 0 face at height y, with a stub to the shell."""
-    return [prism("x", y, C, 2.0, 0.0, 1.0, "steel", n=12, caps=(True, False)),
-            prism("x", y, C, 1.25, 1.0, C - R + 0.5, "steel", n=10, caps=(False, False))] + \
-        bolt_ring("x", y, C, 1.6, 1.0, 1.25, 4, rb=0.2)
+    """A large alloy pipe's flange (its ports take one; smaller pipes meet it too) on the x = 0 face at height y, with a
+    stub to the shell: the pipe renderer's flange is its drawn radius (3) + 0.75."""
+    return [prism("x", y, C, 3.75, 0.0, 0.75, "steel", n=14, caps=(True, False)),
+            prism("x", y, C, 3.0, 0.75, C - R + 0.5, "steel", n=12, caps=(False, False))] + \
+        bolt_ring("x", y, C, 3.3, 0.75, 1.0, 6, rb=0.25)
 
 def shell_part(t):
     m = Model()
@@ -39,9 +40,9 @@ def shell_part(t):
 def ports_part(t):
     """The flanges: top port, and a low (liquid) and high (vapour) one on each face but the front (the sight glass)."""
     m = Model()
-    m.add(prism("y", C, C, 1.25, 14.5, 15.0, "steel", n=10, caps=(False, False)))
-    m.add(prism("y", C, C, 2.0, 15.0, 16.0, "steel", n=12))
-    m.add(*bolt_ring("y", C, C, 1.6, 14.75, 15.0, 4, rb=0.2))
+    m.add(prism("y", C, C, 3.0, 14.5, 15.25, "steel", n=12, caps=(False, False)))
+    m.add(prism("y", C, C, 3.75, 15.25, 16.0, "steel", n=14))
+    m.add(*bolt_ring("y", C, C, 3.3, 15.0, 15.25, 6, rb=0.25))
     for k in (1, 2, 3):
         for y in (4.0, 12.0):
             m.add(*turned(flange_x0(y), k))
