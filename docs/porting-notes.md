@@ -54,6 +54,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   Blade Set. No fluid capability; an old turbine's tank is dropped on load. New: an 8 kW Generator (the 4 kW one is
   drawn thinner) and a 200V Shaft Motor (spins a shaft to a signal's speed, 0-50 V: 0-800 rad/s, 2 kW, 85 %).
   `shaft_steam_turbine_*`, `shaft_motor_spins_up_generator`.
+- Shaft redo, part 2: plumbing (Baughn 2026-10-29). Pipe Pressure Valve (a ValvePart mode, one way along its arrow;
+  relief holds the pressure before it, reducing the pressure after it; set point on its screen or a 0-50 V signal for
+  0-150 bar; done as a negative boost on its link, which the network solves within the step: no overshoot). Pipe Steam
+  Quality Sensor (PipeSensorPart QUALITY: % of the run's water that is liquid). Iron / Alloy Tank (3 L, 10/40 and
+  100/300 bar; vapour ports on top and high on three sides, liquid underneath and low; sight glass). 200V Inline Pump
+  (line low on its flanks, head 25 bar x speed^2, 0.1 kg/s free-flowing, 500 W; gas in its line: it primes itself
+  through a casing vent; water within 0.2 bar of boiling at its inlet: it cavitates and rattles). `PlumbingCases`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

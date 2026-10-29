@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T13:50:32.630460556	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-29T14:25:49.140423224	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -11,6 +11,7 @@ e5d9e5f459a600a6558396e549f90654555124de data/eln/advancement/recipes/misc/200v_
 adeecf98acdb46f2b3deed72dde3336fe761659c data/eln/advancement/recipes/misc/200v_farming_lamp.json
 fbb4642e5d6af36744b70472e66e83a23584fdc6 data/eln/advancement/recipes/misc/200v_fuel_generator.json
 242c786e6996c20602f7489438500ca19b3dcbcd data/eln/advancement/recipes/misc/200v_incandescent_light_bulb.json
+b03f9d21efaa8f06d90f7e9546caac30357d9193 data/eln/advancement/recipes/misc/200v_inline_pump.json
 37efbb11471cfceb2fe4ab796ca865541ecb3134 data/eln/advancement/recipes/misc/200v_iron_heating_corp.json
 1e8551e401c65cffde1ceb96b614bca73e55cc78 data/eln/advancement/recipes/misc/200v_led_bulb.json
 e59b7d9677bc37a760b28ff12f607b09abdd5407 data/eln/advancement/recipes/misc/200v_macerator.json
@@ -68,6 +69,7 @@ e66dc6bbecb715722e880e211fe59913fadcbedb data/eln/advancement/recipes/misc/50v_s
 fa365aabe999e77b03e64373107eb501cad2b094 data/eln/advancement/recipes/misc/advanced_machine_block.json
 f70b299049c176c75a99881d9bb884024c4a16e1 data/eln/advancement/recipes/misc/allmeter.json
 44d9994058ce6f90ef2b7f32ea0381792d6ad2ec data/eln/advancement/recipes/misc/alloy_dust.json
+46a1bc5bf44016039d5a7b278377fac0d516c730 data/eln/advancement/recipes/misc/alloy_tank.json
 d5fb6b8e7356d15e8befa93dd2868cd5e615f99c data/eln/advancement/recipes/misc/amplifier.json
 680024760755705f28db20f9c14229ef76a77158 data/eln/advancement/recipes/misc/analog_vumeter.json
 8aa35baf293072557ea622599e4320ce44c2f2fd data/eln/advancement/recipes/misc/analog_vumeter_2.json
@@ -157,6 +159,7 @@ adff65b0e3b516752580628470a82e029fef2c0c data/eln/advancement/recipes/misc/high_
 66103a82763e2f5be503d9a4251d7ff65b7a29d8 data/eln/advancement/recipes/misc/improved_flashlight.json
 26baca3846cf3c09885134d3b1f92feb7bf65a5a data/eln/advancement/recipes/misc/industrial_data_logger.json
 23e7e1a3c03fa30b6de61225a6f5a79bb8c48b5e data/eln/advancement/recipes/misc/iron_cable.json
+caa773201e3270ec7194fa6ad69acb7e3b4f7c13 data/eln/advancement/recipes/misc/iron_tank.json
 74456d14bc1de3c51ca612ecc6e5b67ec8d20996 data/eln/advancement/recipes/misc/jk_flip_flop_chip.json
 898d97ed54ccf9a038e21587c74511817611f4ce data/eln/advancement/recipes/misc/joint.json
 ff770d82fed48e779e22e4fd14615d03adb00d06 data/eln/advancement/recipes/misc/joint_hub.json
@@ -357,6 +360,7 @@ b1c0ed4fee8f4b486843b128ef8582556320a2e5 data/eln/recipe/200v_emergency_lamp.jso
 6c7eb1ce8eca0953c08d46fedfae58e0b89a7e40 data/eln/recipe/200v_farming_lamp.json
 8f7f101379e18d86a9b0b75da7b813e9858902d0 data/eln/recipe/200v_fuel_generator.json
 a80b2a670a5c478fe2e30252015db1719388492f data/eln/recipe/200v_incandescent_light_bulb.json
+b1ea1a2ba0930a0675addf7cdc50b84e0e528e82 data/eln/recipe/200v_inline_pump.json
 bb52ea119c34f3e68042bb58e800a272744be9d6 data/eln/recipe/200v_iron_heating_corp.json
 053b8b4f4441dcbb53022b333c2cf6c0aa56e25e data/eln/recipe/200v_led_bulb.json
 b2bc41b4629f2c46260114fcfdff7291a52c17f2 data/eln/recipe/200v_macerator.json
@@ -414,6 +418,7 @@ ebc391934a2473c53d31289ac62a39b93aca573f data/eln/recipe/advanced_energy_meter.j
 a423457ff31535b559770376ebc14b04c271f5e8 data/eln/recipe/advanced_machine_block.json
 23dc3a28332b359aee832565c162e5f1e53db807 data/eln/recipe/allmeter.json
 3195eb3d865c65466172a7fbd6ac9ed00fbc5c40 data/eln/recipe/alloy_dust.json
+cbaccff23f3f97a836e6927f38b28d1ef2f967fe data/eln/recipe/alloy_tank.json
 df6fff4b10786a0a7c9cec342b128d16cceeb85d data/eln/recipe/amplifier.json
 ef281e1729ad0a2753e9bc34241a5dd3e55b2492 data/eln/recipe/analog_vumeter.json
 e174baf2191aceb8d51d7d0f30c0d4b2a17c0d9f data/eln/recipe/analog_vumeter_2.json
@@ -503,6 +508,7 @@ d7a54c89e137b00cf2d50b95480ddaf28591370f data/eln/recipe/high_voltage_switch.jso
 820d044aff444868e33966e505a7ee17af71055b data/eln/recipe/improved_flashlight.json
 4a6c0ad115aeb7f8a62cb0fab925aac8786d0226 data/eln/recipe/industrial_data_logger.json
 441236a83e9903671ee085ecd8705c19a822f2ac data/eln/recipe/iron_cable.json
+4b9f9ef5fa11f713b714c8dd328c65558f315235 data/eln/recipe/iron_tank.json
 06a223dc3fee3d2f1bc82751b232279336ff98fb data/eln/recipe/jk_flip_flop_chip.json
 e6776792e8a688b133e4ee88f8ec981d5c41d46e data/eln/recipe/joint.json
 01f5a5ba283195a3c2b59c8d98912eb14fa609dd data/eln/recipe/joint_hub.json

@@ -1,0 +1,182 @@
+package mods.eln.oil;
+
+import mods.eln.fluid.FluidWorld;
+import mods.eln.i18n.I18N;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.node.NodePeriodicPublishProcess;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.fluid.EaUnits;
+import mods.eln.sim.fluid.FluidDevice;
+import mods.eln.sim.fluid.FluidNode;
+import mods.eln.sim.fluid.Water;
+import net.minecraft.nbt.CompoundTag;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/** TankDescriptor: one fluid-core vessel and its ports; it bursts over its rating. */
+public class TankElement extends TransparentNodeElement implements FluidDevice {
+    final TankDescriptor desc;
+    /** Its ports' conductance (m^3): an alloy pipe's end. */
+    public static final double PORT_K = 2 * 3e-11 * 2.25 * 16;
+    /** Heat it loses to the air (W/K): a bare steel vessel's. */
+    static final double LOSS_W_PER_K = 1.0;
+    /** The low (liquid) and high (vapour) side ports' heights (voxels, on the pipe lattice). */
+    public static final int LOW = 4, HIGH = 12;
+    public FluidNode vessel;
+    private double[] loaded;
+    private List<FluidPort> ports = List.of();
+    /** The water's share of its volume, last published (the sight glass). */
+    float shownFill = -1;
+
+    public TankElement(TransparentNode node, TransparentNodeDescriptor d) {
+        super(node, d);
+        desc = (TankDescriptor) d;
+        slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
+        slowProcessList.add(time -> {
+            if (vessel == null) return;
+            if (vessel.P() > desc.burstPa)
+                new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
+                    .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
+            if (Math.abs(fill() - shownFill) > 0.02) needPublish();
+        });
+    }
+
+    /** The water's share of its volume. */
+    public double fill() {
+        return vessel == null ? 0 : Math.min(1, vessel.mLiquid() / Water.RHO_L / vessel.volume);
+    }
+
+    @Override
+    public Object fluidLevel() {
+        return node.coordonate.dimention;
+    }
+
+    @Override
+    public List<FluidPort> fluidPorts() {
+        return ports;
+    }
+
+    /** A side face's port spot at height y (voxels): the face's other axes in x, y, z order (FluidPort.at). */
+    static int sideSpot(int face, int y) {
+        return face <= 3 ? 8 * 17 + y : y * 17 + 8;   // (north/south: x then y; west/east: y then z)
+    }
+
+    void makePorts() {
+        long at = node.coordonate.pos().asLong();
+        List<FluidPort> out = new ArrayList<>();
+        out.add(new FluidPort(vessel, at, 1, 1.0, PORT_K));   // top: vapour
+        out.add(new FluidPort(vessel, at, 0, 0.0, PORT_K));   // bottom: liquid
+        for (Direction d : new Direction[]{front.left(), front.right(), front.back()}) {
+            int f = d.toEnumFacing().get3DDataValue();
+            out.add(new FluidPort(vessel, at, f, 0.0, PORT_K, sideSpot(f, LOW)));    // low: liquid
+            out.add(new FluidPort(vessel, at, f, 1.0, PORT_K, sideSpot(f, HIGH)));   // high: vapour
+        }
+        ports = out;
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        if (vessel != null) {
+            makePorts();
+            FluidWorld.add(this);
+        }
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        FluidWorld.remove(this);
+    }
+
+    @Override
+    public void initialize() {
+        vessel = new FluidNode(desc.volume, node.coordonate.y, 1.0, false);
+        vessel.lossWPerK = LOSS_W_PER_K;
+        if (loaded != null) {
+            vessel.mWater = loaded[0];
+            vessel.mAir = loaded[1];
+            vessel.energy = loaded[2];
+            vessel.update();
+        } else vessel.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        makePorts();
+        connect();
+    }
+
+    @Override
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        return null;
+    }
+
+    @Override
+    public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+        return null;
+    }
+
+    @Override
+    public int getConnectionMask(Direction side, LRDU lrdu) {
+        return 0;
+    }
+
+    @Override
+    public String multiMeterString(Direction side) {
+        return "";
+    }
+
+    @Override
+    public String thermoMeterString(Direction side) {
+        return vessel == null ? "" : mods.eln.misc.Utils.plotCelsius("T:", vessel.T() - Water.T0);
+    }
+
+    @Override
+    public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
+        return false;
+    }
+
+    @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            shownFill = (float) fill();
+            stream.writeFloat(shownFill);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void writeToNBT(CompoundTag nbt) {
+        super.writeToNBT(nbt);
+        if (vessel != null) {
+            nbt.putDouble("vesselW", vessel.mWater);
+            nbt.putDouble("vesselA", vessel.mAir);
+            nbt.putDouble("vesselU", vessel.energy);
+        }
+    }
+
+    @Override
+    public void readFromNBT(CompoundTag nbt) {
+        super.readFromNBT(nbt);
+        if (nbt.contains("vesselW"))
+            loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
+    }
+
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<>();
+        if (vessel == null) return info;
+        info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
+        info.put(I18N.tr("Water"), String.format("%.0f mB (%.0f%% full)", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
+        if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
+        if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
+        return info;
+    }
+}

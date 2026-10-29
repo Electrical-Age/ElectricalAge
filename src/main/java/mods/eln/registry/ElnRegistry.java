@@ -147,6 +147,11 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_pressure_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.PRESSURE));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeSensorItem> PIPE_TEMPERATURE_SENSOR =
         ITEMS.registerItem("pipe_temperature_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE));
+    /** Baughn 2026-10-29 (shaft redo): a run's wetness, and the pressure valve (relief / reducing). */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeSensorItem> PIPE_QUALITY_SENSOR =
+        ITEMS.registerItem("pipe_quality_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.QUALITY));
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_PRESSURE_VALVE =
+        ITEMS.registerItem("pipe_pressure_valve", p -> new mods.eln.node.voxel.ValveItem(p, mods.eln.node.voxel.ValvePart.PRESSURE));
     /** Baughn 2026-10-27: the battery belt (moved from Stasis Delvers, which keeps an alias for its old id). */
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.item.belt.BatteryBeltItem> BATTERY_BELT =
         ITEMS.registerItem("battery_belt", mods.eln.item.belt.BatteryBeltItem::new, p -> p.stacksTo(1));
@@ -313,6 +318,8 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
         ALL_ITEMS.add(PIPE_PRESSURE_SENSOR);
         ALL_ITEMS.add(PIPE_TEMPERATURE_SENSOR);
+        ALL_ITEMS.add(PIPE_QUALITY_SENSOR);
+        ALL_ITEMS.add(PIPE_PRESSURE_VALVE);
         ALL_ITEMS.add(BATTERY_BELT);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);

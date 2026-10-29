@@ -51,6 +51,7 @@ highvoltagebattery/highvoltagebattery.obj
 highvoltageswitch/highvoltageswitch.obj
 hub/hub.obj
 industrialpanel/industrialpanel.obj
+inlinepump200v/inlinepump200v.obj
 lampsupply/lampsupply.obj
 largerheostat/largerheostat.obj
 led/led.obj
@@ -108,6 +109,8 @@ stonefurnace/stonefurnace.obj
 streetlight/streetlight.obj
 submersiblepump200v/submersiblepump200v.obj
 submersiblepump50v/submersiblepump50v.obj
+tankalloy/tankalloy.obj
+tankiron/tankiron.obj
 tarsandseparator200v/tarsandseparator200v.obj
 tarsandseparator50v/tarsandseparator50v.obj
 temperaturesensor/temperaturesensor.obj

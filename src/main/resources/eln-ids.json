@@ -1985,6 +1985,24 @@
   "kind": "transparent_node",
   "name": "50v_compact_steam_turbine"
  },
+ "eln:transparent_node@5288": {
+  "descriptor": "TankDescriptor",
+  "display": "Iron Tank",
+  "kind": "transparent_node",
+  "name": "iron_tank"
+ },
+ "eln:transparent_node@5292": {
+  "descriptor": "TankDescriptor",
+  "display": "Alloy Tank",
+  "kind": "transparent_node",
+  "name": "alloy_tank"
+ },
+ "eln:transparent_node@5296": {
+  "descriptor": "InlinePumpDescriptor",
+  "display": "200V Inline Pump",
+  "kind": "transparent_node",
+  "name": "200v_inline_pump"
+ },
  "eln:transparent_node@5312": {
   "descriptor": "ColumnDescriptor",
   "display": "Fractionating Column Base",

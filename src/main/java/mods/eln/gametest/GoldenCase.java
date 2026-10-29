@@ -96,6 +96,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5376", "eln:transparent_node@5380", "eln:transparent_node@5384",
         "eln:transparent_node@5440", "eln:transparent_node@5444",   // the electrical anvil, the capacitor bank (Baughn 2026-10-28)
         "eln:transparent_node@272", "eln:transparent_node@273", "eln:shared_item@4164",   // 8 kW generator, shaft motor, blades (Baughn 2026-10-29)
+        "eln:transparent_node@5288", "eln:transparent_node@5292", "eln:transparent_node@5296",   // tanks, inline pump (Baughn 2026-10-29)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",

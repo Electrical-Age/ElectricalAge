@@ -756,6 +756,31 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Machine Block"),
             'E', findItemStack("Medium Voltage Cable")
         );
+        // the shaft redo's plumbing (Baughn 2026-10-29): tanks and the inline pump
+        addRecipe(findItemStack("Iron Tank"),
+            "iPi",
+            "i i",
+            "iPi",
+            'i', stack(Items.IRON_INGOT),
+            'P', stack(Items.GLASS_PANE)
+        );
+        addRecipe(findItemStack("Alloy Tank"),
+            "aPa",
+            "aTa",
+            "aPa",
+            'a', findItemStack("Alloy Ingot"),
+            'P', stack(Items.GLASS_PANE),
+            'T', findItemStack("Iron Tank")
+        );
+        addRecipe(findItemStack("200V Inline Pump"),
+            " m ",
+            "pMp",
+            " E ",
+            'm', findItemStack("Electrical Motor"),
+            'p', stack(Items.IRON_INGOT),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Medium Voltage Cable")
+        );
         // cheap on purpose (Baughn 2026-10-29): what a water slug costs
         addRecipe(findItemStack("Turbine Blade Set"),
             "I I",
