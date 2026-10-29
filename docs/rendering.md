@@ -120,7 +120,7 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 part), the electric heater (its coils, a separate model part `element` since `tools/models/electricheater.py` splits
 them out), the power resistor (its core), six-node thermal cables and voxel thermal cables ("not truly realistic for
 the insulated thermal cables, but ... for charm"). The rheostat's drum is its own model part (`coil`, split out of
-`main` by radius) so its fins stay dark: glowing the whole `main` lit every fin face like a pane of coloured glass
+`main`: faces with every corner within 0.30 of the axis) so its fins stay dark: glowing the whole `main` lit every fin face like a pane of coloured glass
 (AdventurAgent).
 
 - **Look:** nothing below the Draper point (525 C); colour from a smith's heat scale (dull red, blood red, cherry,
@@ -136,8 +136,10 @@ the insulated thermal cables, but ... for charm"). The rheostat's drum is its ow
   (Baughn: subtle by day).
 - **Voxel cables** are in the chunk mesh, so their glow is an overlay: the node publishes one glow step byte per part
   after the parts' bytes (`VoxelNode.publishBeforeElements`, 25 K steps, outside the part hash: a glow change doesn't
-  re-mesh the chunk); `SixNodeRender` draws additive untextured boxes 0.1 px proud of each hot cable and one small halo
-  per block, and renders a voxel block with glowing cables even without elements.
+  re-mesh the chunk); `SixNodeRender` draws the outer surface of the block's hot cable boxes (`cableSurface`: no faces at the
+  joints with the next block or between a run's own pieces, coincident faces once, merged into rectangles; drawing
+  whole boxes doubled up there, a bright line at every joint), additive and untextured, 0.1 px proud, and one small
+  halo per block; it renders a voxel block with glowing cables even without elements.
 - **Block light (server):** the device's own node block emits it (`Node.setLightValue`, as a lamp on its own block):
   `lightLevel` 1 at 525 C, 2 dull red (575), 8 orange (900), 14 at 1250, 15 at 1350. `Incandescence.Light` checks
   every 10 ticks, goes up at once and down only 25 K below the step (`HYSTERESIS`), takes each change from a per-level,

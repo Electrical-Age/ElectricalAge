@@ -62,4 +62,24 @@ public class IncandescenceTest {
         assertEquals(Incandescence.DRAPER_C, Incandescence.warningCelsius(0.6 * 130 + 1e-9, 130), 1e-3);
         assertEquals(900, Incandescence.warningCelsius(130, 130), 1e-9);
     }
+
+    @Test
+    void cableSurfaceHasNoJointsOrDoubles() {
+        // a straight run through the block along x (4 wide, 2 high on the floor): no faces at the block joints
+        var run = Incandescence.cableSurface(java.util.List.of(new float[]{900, 0, 0, 6, 16, 2, 10}));
+        for (float[] f : run) assertTrue(!(f[1] == 0), "no face across the run (x): " + java.util.Arrays.toString(f));
+        assertEquals(1, run.stream().filter(f -> f[1] == 1 && f[2] == 1).count());   // the top: one rectangle
+        // a run ending mid-block: one cap at x = 8
+        var end = Incandescence.cableSurface(java.util.List.of(new float[]{900, 0, 0, 6, 8, 2, 10}));
+        assertEquals(1, end.stream().filter(f -> f[1] == 0).count());
+        // a bend: two pieces overlapping at the corner; every face cell once, none inside the other piece
+        var bend = Incandescence.cableSurface(java.util.List.of(new float[]{900, 0, 0, 6, 10, 2, 10}, new float[]{900, 6, 0, 6, 10, 2, 16}));
+        java.util.Set<String> cells = new java.util.HashSet<>();
+        for (float[] f : bend)
+            for (int u = (int) f[4]; u < f[6]; u++)
+                for (int v = (int) f[5]; v < f[7]; v++)
+                    assertTrue(cells.add(f[1] + "," + f[2] + "," + f[3] + "," + u + "," + v), "doubled " + java.util.Arrays.toString(f));
+        assertTrue(bend.stream().noneMatch(f -> f[1] == 0 && f[2] == 0 && f[3] == 6 && f[5] < 10 && f[7] > 6),
+            "the second piece's face inside the first isn't drawn");
+    }
 }

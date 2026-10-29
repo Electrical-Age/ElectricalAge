@@ -173,7 +173,7 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         return clientHost;
     }
 
-    /** Client: the glowing boxes of hot thermal cables, each {celsius, x0, y0, z0, x1, y1, z1} in voxels (Incandescence). */
+    /** Client: the glowing surface strips of hot thermal cables (Incandescence.cableSurface). */
     public volatile List<float[]> clientGlow = List.of();
 
     /** Client: the parts as last published. */
@@ -236,7 +236,7 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
                 float c = (float) mods.eln.misc.Incandescence.stepCelsius(st);
                 for (int[] b : read[i].boxes()) glow.add(new float[]{c, b[0], b[1], b[2], b[3], b[4], b[5]});
             }
-            clientGlow = glow.isEmpty() ? List.of() : List.copyOf(glow);
+            clientGlow = glow.isEmpty() ? List.of() : List.copyOf(mods.eln.misc.Incandescence.cableSurface(glow));
             if (hash != partsHash || clientParts.size() != ps.size()) {
                 partsHash = hash;
                 partsChanged = true;

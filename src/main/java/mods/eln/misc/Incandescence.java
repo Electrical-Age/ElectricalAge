@@ -167,43 +167,106 @@ public final class Incandescence {
         GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
-    /** A box (block units) for a glow pass: six quads with their normals. */
-    public static void box(float x0, float y0, float z0, float x1, float y1, float z1) {
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glNormal3f(0, -1, 0);
-        GL11.glVertex3f(x0, y0, z0); GL11.glVertex3f(x1, y0, z0); GL11.glVertex3f(x1, y0, z1); GL11.glVertex3f(x0, y0, z1);
-        GL11.glNormal3f(0, 1, 0);
-        GL11.glVertex3f(x0, y1, z0); GL11.glVertex3f(x0, y1, z1); GL11.glVertex3f(x1, y1, z1); GL11.glVertex3f(x1, y1, z0);
-        GL11.glNormal3f(0, 0, -1);
-        GL11.glVertex3f(x0, y0, z0); GL11.glVertex3f(x0, y1, z0); GL11.glVertex3f(x1, y1, z0); GL11.glVertex3f(x1, y0, z0);
-        GL11.glNormal3f(0, 0, 1);
-        GL11.glVertex3f(x0, y0, z1); GL11.glVertex3f(x1, y0, z1); GL11.glVertex3f(x1, y1, z1); GL11.glVertex3f(x0, y1, z1);
-        GL11.glNormal3f(-1, 0, 0);
-        GL11.glVertex3f(x0, y0, z0); GL11.glVertex3f(x0, y0, z1); GL11.glVertex3f(x0, y1, z1); GL11.glVertex3f(x0, y1, z0);
-        GL11.glNormal3f(1, 0, 0);
-        GL11.glVertex3f(x1, y0, z0); GL11.glVertex3f(x1, y1, z0); GL11.glVertex3f(x1, y1, z1); GL11.glVertex3f(x1, y0, z1);
-        GL11.glEnd();
+    /**
+     * The outer surface of a voxel block's hot cable boxes, once per publish (VoxelNodeEntity): a face cell is kept only
+     * if the voxel just outside it isn't inside another box (the joints between a run's pieces, overlaps at bends) and
+     * not on the block's boundary (the joint with the next block); coincident faces count once; each face's cells are
+     * merged into rectangles. Additive boxes drawn whole doubled up there: bright lines at every joint and cap (AdventurAgent).
+     * In: {celsius, x0, y0, z0, x1, y1, z1} in voxels. Out: {celsius, axis, max side 0/1, plane, u0, v0, u1, v1}.
+     */
+    public static java.util.List<float[]> cableSurface(java.util.List<float[]> boxes) {
+        java.util.List<float[]> out = new java.util.ArrayList<>();
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        int n = boxes.size();
+        for (int i = 0; i < n; i++) {
+            float[] b = boxes.get(i);
+            int[] lo = {(int) b[1], (int) b[2], (int) b[3]}, hi = {(int) b[4], (int) b[5], (int) b[6]};
+            for (int a = 0; a < 3; a++) {
+                int u = (a + 1) % 3, v = (a + 2) % 3;
+                for (int side = 0; side < 2; side++) {
+                    int plane = side == 1 ? hi[a] : lo[a];
+                    if (plane <= 0 || plane >= 16) continue;   // (the joint with the next block, or the block's edge)
+                    boolean[][] cell = new boolean[16][16];
+                    boolean any = false;
+                    for (int cu = lo[u]; cu < hi[u]; cu++)
+                        for (int cv = lo[v]; cv < hi[v]; cv++) {
+                            double[] q = new double[3];
+                            q[a] = plane + (side == 1 ? 0.5 : -0.5);
+                            q[u] = cu + 0.5;
+                            q[v] = cv + 0.5;
+                            boolean hidden = false;
+                            for (int j = 0; j < n && !hidden; j++) {
+                                if (j == i) continue;
+                                float[] o = boxes.get(j);
+                                hidden = q[0] > o[1] && q[0] < o[4] && q[1] > o[2] && q[1] < o[5] && q[2] > o[3] && q[2] < o[6];
+                            }
+                            long key = ((((long) a * 2 + side) * 17 + plane) * 17 + cu) * 17 + cv;
+                            if (hidden || !seen.add(key)) continue;
+                            cell[cu][cv] = true;
+                            any = true;
+                        }
+                    if (!any) continue;
+                    // greedy rectangles: a row's run, grown over the following rows while they have the same run
+                    for (int cv = 0; cv < 16; cv++)
+                        for (int cu = 0; cu < 16; cu++) {
+                            if (!cell[cu][cv]) continue;
+                            int end = cu;
+                            while (end + 1 < 16 && cell[end + 1][cv]) end++;
+                            int top = cv;
+                            grow:
+                            while (top + 1 < 16) {
+                                for (int k = cu; k <= end; k++) if (!cell[k][top + 1]) break grow;
+                                top++;
+                            }
+                            for (int r = cv; r <= top; r++) for (int k = cu; k <= end; k++) cell[k][r] = false;
+                            out.add(new float[]{b[0], a, side, plane, cu, cv, end + 1, top + 1});
+                            cu = end;
+                        }
+                }
+            }
+        }
+        return out;
     }
 
     /**
-     * The glow of a voxel block's hot thermal cables (SixNodeRender, origin at the block's centre): each box a little
-     * proud of the cable, additive and untextured (the cable is in the chunk mesh), and one small halo per block.
+     * The glow of a voxel block's hot thermal cables (SixNodeRender, origin at the block's centre): the surface strips of
+     * {@link #cableSurface}, a hair proud of the cable, additive and untextured (the cable is in the chunk mesh), and
+     * one small halo per block at the hottest strip.
      */
-    public static void drawCableGlow(java.util.List<float[]> boxes, int daylight) {
-        if (boxes.isEmpty()) return;
+    public static void drawCableGlow(java.util.List<float[]> strips, int daylight) {
+        if (strips.isEmpty()) return;
         float hot = 0, cx = 0, cy = 0, cz = 0;
         GL11.glPushAttrib(0);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        for (float[] b : boxes) {
-            float e = 0.1f / 16;
-            float x0 = b[1] / 16 - 0.5f - e, y0 = b[2] / 16 - 0.5f - e, z0 = b[3] / 16 - 0.5f - e;
-            float x1 = b[4] / 16 - 0.5f + e, y1 = b[5] / 16 - 0.5f + e, z1 = b[6] / 16 - 0.5f + e;
-            drawGlow(b[0], () -> box(x0, y0, z0, x1, y1, z1));
-            if (b[0] > hot) {
-                hot = b[0];
-                cx = (x0 + x1) / 2;
-                cy = (y0 + y1) / 2;
-                cz = (z0 + z1) / 2;
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        for (float[] f : strips) {
+            int a = (int) f[1], u = (a + 1) % 3, v = (a + 2) % 3;
+            float plane = (f[3] + (f[2] == 1 ? 0.1f : -0.1f)) / 16 - 0.5f;
+            float u0 = f[4] / 16 - 0.5f, v0 = f[5] / 16 - 0.5f, u1 = f[6] / 16 - 0.5f, v1 = f[7] / 16 - 0.5f;
+            float[][] corners = {{u0, v0}, {u1, v0}, {u1, v1}, {u0, v1}};
+            float[] nrm = new float[3];
+            nrm[a] = f[2] == 1 ? 1 : -1;
+            drawGlow(f[0], () -> {
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glNormal3f(nrm[0], nrm[1], nrm[2]);
+                for (float[] c : corners) {
+                    float[] p = new float[3];
+                    p[a] = plane;
+                    p[u] = c[0];
+                    p[v] = c[1];
+                    GL11.glVertex3f(p[0], p[1], p[2]);
+                }
+                GL11.glEnd();
+            });
+            if (f[0] > hot) {
+                hot = f[0];
+                float[] p = new float[3];
+                p[a] = plane;
+                p[u] = (u0 + u1) / 2;
+                p[v] = (v0 + v1) / 2;
+                cx = p[0];
+                cy = p[1];
+                cz = p[2];
             }
         }
         GL11.glPopAttrib();
