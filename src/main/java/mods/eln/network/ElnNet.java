@@ -51,7 +51,9 @@ public final class ElnNet {
             (Data d, IPayloadContext ctx) -> serverHandler.accept(d.bytes(), (ServerPlayer) ctx.player()),
             (Data d, IPayloadContext ctx) -> clientHandler.accept(d.bytes()))
             .playToServer(mods.eln.bike.BikeCrash.TYPE, mods.eln.bike.BikeCrash.CODEC,
-                (mods.eln.bike.BikeCrash c, IPayloadContext ctx) -> mods.eln.bike.ElectricBike.onCrash((ServerPlayer) ctx.player(), c.entityId())));
+                (mods.eln.bike.BikeCrash c, IPayloadContext ctx) -> mods.eln.bike.ElectricBike.onCrash((ServerPlayer) ctx.player(), c.entityId()))
+            .playToServer(mods.eln.bike.BikeLamp.TYPE, mods.eln.bike.BikeLamp.CODEC,
+                (mods.eln.bike.BikeLamp l, IPayloadContext ctx) -> mods.eln.bike.ElectricBike.onLampToggle((ServerPlayer) ctx.player())));
     }
 
     public static void sendToPlayer(ServerPlayer player, ByteArrayOutputStream bos) {

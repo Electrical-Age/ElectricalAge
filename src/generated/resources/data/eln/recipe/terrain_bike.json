@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:electric_bike",
+    "M": "eln:advanced_machine_block",
+    "P": "#eln:high_quality_plates/alloy",
+    "R": "#c:rubbers",
+    "m": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "PmP",
+    "RBR",
+    " M "
+  ],
+  "result": {
+    "id": "eln:terrain_bike"
+  }
+}

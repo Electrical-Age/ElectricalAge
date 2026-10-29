@@ -2018,6 +2018,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
             'R', "itemRubber");
+        // the terrain bike (Baughn 2026-10-29: much dearer): an electric bike rebuilt round a 200 V motor in an advanced
+        // machine block, alloy plates for its frame, more rubber for its tyres
+        addRecipe(stack(mods.eln.registry.ElnRegistry.TERRAIN_BIKE.get()),
+            "PmP",
+            "RBR",
+            " M ",
+            'P', "plateAlloy",
+            'm', findItemStack("Advanced Electrical Motor"),
+            'R', "itemRubber",
+            'B', stack(mods.eln.registry.ElnRegistry.ELECTRIC_BIKE.get()),
+            'M', findItemStack("Advanced Machine Block"));
         // the turbines' condensers (Baughn 2026-10-26): a shell of copper tubes (the cooler) round a vessel, and a pump
         addRecipe(findItemStack("Small Steam Condenser", 1),
             "PCP",

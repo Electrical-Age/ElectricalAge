@@ -184,6 +184,14 @@ public final class ElnRegistry {
             .build(net.minecraft.resources.ResourceKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "electric_bike"))));
     public static final DeferredItem<mods.eln.bike.ElectricBikeItem> ELECTRIC_BIKE =
         registerListed("electric_bike", mods.eln.bike.ElectricBikeItem::new, p -> p.stacksTo(1));
+    /** The terrain bike (Baughn 2026-10-29): the same entity class, another type (BikeType.TERRAIN). */
+    public static final DeferredHolder<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.entity.EntityType<mods.eln.bike.ElectricBike>> TERRAIN_BIKE_ENTITY =
+        ENTITY_TYPES.register("terrain_bike", () -> net.minecraft.world.entity.EntityType.Builder
+            .<mods.eln.bike.ElectricBike>of(mods.eln.bike.ElectricBike::new, net.minecraft.world.entity.MobCategory.MISC)
+            .noLootTable().sized(0.8f, 1.0f).clientTrackingRange(10)
+            .build(net.minecraft.resources.ResourceKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, "terrain_bike"))));
+    public static final DeferredItem<mods.eln.bike.ElectricBikeItem> TERRAIN_BIKE =
+        registerListed("terrain_bike", p -> new mods.eln.bike.ElectricBikeItem(p, mods.eln.bike.BikeType.TERRAIN), p -> p.stacksTo(1));
 
     /** 1.12 dropped a vanilla spawn egg tagged eln:replicator; 26.x eggs are per entity type. */
     public static final DeferredItem<net.minecraft.world.item.SpawnEggItem> REPLICATOR_SPAWN_EGG =

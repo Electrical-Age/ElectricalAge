@@ -72,6 +72,15 @@ public class BikePhysicsTest {
     }
 
     @Test
+    void theTerrainBikeJumpsTwoAndAHalfAndStepsAWholeBlock() {
+        double peak = BikePhysics.jumpPeak(BikePhysics.jumpVelocity(1, BikeType.TERRAIN.jumpVy()));
+        assertTrue(peak > 2.3 && peak < 2.7, "peak " + peak);
+        assertEquals(1.0f, BikeType.TERRAIN.stepHeight(), 1e-6);
+        assertEquals(150, BikePhysics.motorWatts(BikePhysics.VMAX_POWERED, BikeType.TERRAIN.motorWatts()), 1e-9);
+        assertEquals(BikePhysics.STEP_HEIGHT, BikeType.ELECTRIC.stepHeight(), 1e-6);
+    }
+
+    @Test
     void steeringSlowsWithSpeed() {
         assertEquals(BikePhysics.TURN_PER_TICK, BikePhysics.turnRate(0), 1e-6);
         assertEquals(BikePhysics.TURN_AT_TOP, BikePhysics.turnRate(BikePhysics.VMAX_POWERED), 1e-6);

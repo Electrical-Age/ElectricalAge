@@ -1,4 +1,4 @@
-// 26.3	2026-10-28T20:30:15.068948417	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-29T02:29:12.507035575	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -287,6 +287,7 @@ ca2f8a0f26291613f84a226e9e99d0312ac72383 data/eln/advancement/recipes/misc/steam
 8c7779a14aa260ae9e6e6fd490c679ba77c96e9f data/eln/advancement/recipes/misc/suspended_lamp_socket.json
 cd249cd9cc2d5f0682bd91cba7bbc7732797f160 data/eln/advancement/recipes/misc/tachometer.json
 95fdaa08550153fb31f584f8fdcd9049735ac618 data/eln/advancement/recipes/misc/temperature_probe.json
+f0253581b66ab9981d592b8d55f9b07f10edd060 data/eln/advancement/recipes/misc/terrain_bike.json
 ee029a2dfa893a338f3cd2f42471b733e9d1d11b data/eln/advancement/recipes/misc/thermal_insulation.json
 9253dccd7f4ce64a9976935afcd7517c0272b991 data/eln/advancement/recipes/misc/thermal_probe.json
 9d3765bd3897d1b047fc5101220c3bb2eaa7c83f data/eln/advancement/recipes/misc/thermal_probe_chip.json
@@ -628,6 +629,7 @@ f4f9406ede6ea92137dd5caf98a20da982804e2e data/eln/recipe/street_light.json
 2dd44bbf82dca6fe077678b44dfae6276ea32cf7 data/eln/recipe/suspended_lamp_socket.json
 bc6f705dcd98d0320791535c98937a868e5c2998 data/eln/recipe/tachometer.json
 d3c9be2a659332bf91a00ce7d8970f72a6fbd853 data/eln/recipe/temperature_probe.json
+cc117cbb2a25ed6e3bfaafad358dcf90f9253c06 data/eln/recipe/terrain_bike.json
 ad1c5258b30328edec6333acc45bcc1cba8d78e1 data/eln/recipe/thermal_insulation.json
 25bac59779dd19b1f79d0fc284cb4c789d4ad34f data/eln/recipe/thermal_probe.json
 611bff93cd14943556a294d4ab261bbb895db3fc data/eln/recipe/thermal_probe_chip.json

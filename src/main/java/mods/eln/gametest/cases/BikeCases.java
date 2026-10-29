@@ -42,6 +42,8 @@ public final class BikeCases {
         cases.add(new DeepWater());
         cases.add(new Insides());
         cases.add(new Dye());
+        cases.add(new Lamp());
+        cases.add(new Terrain());
     }
 
     /**
@@ -361,11 +363,178 @@ public final class BikeCases {
     }
 
     static ElectricBike spawn(TestContext ctx, BlockPos p, float yaw) {
+        return spawn(ctx, p, yaw, mods.eln.bike.BikeType.ELECTRIC);
+    }
+
+    static ElectricBike spawn(TestContext ctx, BlockPos p, float yaw, mods.eln.bike.BikeType type) {
         ServerLevel w = ctx.level();
-        ElectricBike b = ElnRegistry.ELECTRIC_BIKE_ENTITY.get().create(w, EntitySpawnReason.TRIGGERED);
+        ElectricBike b = type.entityType().create(w, EntitySpawnReason.TRIGGERED);
         b.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, yaw, 0);
         w.addFreshEntity(b);
         return b;
+    }
+
+    /**
+     * The front lamp (Baughn 2026-10-29: like EA's flashlight): its rider switches it on, only with charge; it lights
+     * the air ahead with short-lived light blocks, draws its watts from the trunk battery even standing, and goes out
+     * when the battery is flat.
+     */
+    static final class Lamp implements TestCase {
+        public String id() {
+            return "bike_front_lamp";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        ElectricBike bike;
+
+        public void build(TestContext ctx) {
+            bike = spawn(ctx, ctx.at(4, 1, 0), 0);
+        }
+
+        public void measure(TestContext ctx) {
+            var p = rider(ctx, "lamp", bike);
+            try {
+                p.startRiding(bike);
+                bike.serverTick();
+                bike.toggleLamp();
+                ctx.check("no battery: the lamp won't come on", !bike.lampOn(), "");
+                bike.trunk.setItem(ElectricBike.BATTERY_SLOT, battery(1));
+                bike.serverTick();
+                bike.toggleLamp();
+                ctx.check("with charge, the rider's toggle turns it on", bike.lampOn(), "");
+                var bb = BatteryBeltItem.battery(bike.trunk.getItem(0));
+                double e0 = bb.getEnergy(bike.trunk.getItem(0));
+                for (int t = 0; t < 100; t++) bike.serverTick();   // 5 s, standing still
+                double used = e0 - bb.getEnergy(bike.trunk.getItem(0));
+                ctx.check("it draws its " + BikePhysics.LAMP_WATTS + " W standing still (5 s)", Math.abs(used - BikePhysics.LAMP_WATTS * 5) < 5, used + " J");
+                int lit = 0;
+                BlockPos at = bike.blockPosition();
+                for (BlockPos q : BlockPos.betweenClosed(at.offset(-2, -1, 1), at.offset(2, 2, 9)))
+                    if (ctx.level().getBlockState(q).is(ElnRegistry.LIGHT_BLOCK.get())) lit++;
+                ctx.check("the air ahead is lit", lit > 0, lit + " light blocks ahead");
+                bb.setEnergy(bike.trunk.getItem(0), 0);
+                bike.serverTick();
+                ctx.check("flat, it goes out", !bike.lampOn(), "");
+                bike.toggleLamp();
+                bike.toggleLamp();
+                ctx.check("flat, it stays out", !bike.lampOn(), "");
+                bb.setEnergy(bike.trunk.getItem(0), bb.getEnergyMax(bike.trunk.getItem(0)));
+                bike.serverTick();
+                bike.toggleLamp();
+                var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess());
+                bike.saveWithoutId(out);
+                ElectricBike copy = ElnRegistry.ELECTRIC_BIKE_ENTITY.get().create(ctx.level(), EntitySpawnReason.LOAD);
+                copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess(), out.buildResult()));
+                ctx.check("on, it stays on over a save", bike.lampOn() && copy.lampOn(), bike.lampOn() + " " + copy.lampOn());
+            } finally {
+                p.stopRiding();
+                bike.discard();
+            }
+        }
+    }
+
+    /**
+     * The terrain bike (Baughn 2026-10-29): rides up a whole block (a 2-block wall stops it), jumps 2.5, draws 150 W at
+     * full speed, keeps its own type and paint defaults over a save, and its recipe is an electric bike rebuilt.
+     */
+    static final class Terrain implements TestCase {
+        public String id() {
+            return "bike_terrain";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            ctx.level().setBlockAndUpdate(ctx.at(1, 1, 3), Blocks.STONE.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(4, 1, 3), Blocks.STONE.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(4, 2, 3), Blocks.STONE.defaultBlockState());
+        }
+
+        double ride(TestContext ctx, int x) {
+            BlockPos s = ctx.at(x, 1, 1);
+            ElectricBike b = spawn(ctx, s, 0, mods.eln.bike.BikeType.TERRAIN);
+            try {
+                for (int t = 0; t < 30; t++) {
+                    b.setOnGround(true);
+                    b.move(MoverType.SELF, new Vec3(0, 0, 0.2));
+                    b.move(MoverType.SELF, new Vec3(0, -0.1, 0));
+                }
+                return b.getZ() - s.getZ() - 0.5;
+            } finally {
+                b.discard();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            var T = mods.eln.bike.BikeType.TERRAIN;
+            double one = ride(ctx, 1), two = ride(ctx, 4);
+            ctx.check("the terrain bike rides up a whole block", one > 5.9, "went " + one);
+            ctx.check("a two-block wall stops it", two < 1.2, "went " + two);
+            double peak = BikePhysics.jumpPeak(BikePhysics.jumpVelocity(1, T.jumpVy()));
+            ctx.check("its full jump peaks at about 2.5 blocks", peak > 2.3 && peak < 2.7, "" + peak);
+            ctx.check("its motor draws 150 W at full speed, the same top speed", Math.abs(BikePhysics.motorWatts(BikePhysics.VMAX_POWERED, T.motorWatts()) - 150) < 1e-6, "");
+            ElectricBike b = spawn(ctx, ctx.at(7, 1, 1), 0, T);
+            try {
+                ctx.check("it is a terrain bike, with its own default colours, and drops its own item", b.bikeType() == T
+                    && mods.eln.bike.BikeColors.tint(T, 0, -1) != mods.eln.bike.BikeColors.tint(mods.eln.bike.BikeType.ELECTRIC, 0, -1)
+                    && b.asItem().is(ElnRegistry.TERRAIN_BIKE.get()), b.bikeType() + " " + b.asItem());
+                var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess());
+                b.save(out);
+                String id = out.buildResult().getStringOr("id", "");
+ctx.check("it saves as eln:terrain_bike (what it loads back as)", id.equals("eln:terrain_bike"), id);
+            } finally {
+                b.discard();
+            }
+            // the recipe: alloy plates, the 200 V (advanced) motor, rubber, an electric bike, an advanced machine block
+            ServerLevel w = ctx.level();
+            ItemStack plate = new ItemStack(mods.eln.Eln.itemsByName.get("Alloy Plate")), motor = new ItemStack(mods.eln.Eln.itemsByName.get("Advanced Electrical Motor")),
+                rubber = new ItemStack(mods.eln.Eln.itemsByName.get("Rubber")), block = new ItemStack(mods.eln.Eln.itemsByName.get("Advanced Machine Block"));
+            var grid = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, List.of(
+                plate, motor, plate.copy(),
+                rubber, new ItemStack(ElnRegistry.ELECTRIC_BIKE.get()), rubber.copy(),
+                ItemStack.EMPTY, block, ItemStack.EMPTY));
+            var found = w.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, grid, w);
+            ItemStack made = found.map(h -> h.value().assemble(grid)).orElse(ItemStack.EMPTY);
+            ctx.check("an electric bike rebuilt with a 200 V motor, alloy plates, rubber and an advanced machine block is a terrain bike",
+                made.is(ElnRegistry.TERRAIN_BIKE.get()), "" + made);
+        }
     }
 
     /** A rider: a plain mock player, as vanilla's GameTestHelper.makeMockPlayer (NeoForge's fake players can't ride). */

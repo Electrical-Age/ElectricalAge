@@ -20,8 +20,13 @@ public class BikeRenderer extends EntityRenderer<ElectricBike, BikeRenderState> 
     final BikeModel model;
 
     public BikeRenderer(EntityRendererProvider.Context ctx) {
+        this(ctx, false);
+    }
+
+    /** The electric bike's renderer, or the terrain bike's (its own, fatter model). */
+    public BikeRenderer(EntityRendererProvider.Context ctx, boolean terrain) {
         super(ctx);
-        model = new BikeModel(ctx.bakeLayer(BikeModel.LAYER));
+        model = new BikeModel(ctx.bakeLayer(terrain ? BikeModel.LAYER_TERRAIN : BikeModel.LAYER), terrain);
         shadowRadius = 0.45f;
     }
 
@@ -39,6 +44,8 @@ public class BikeRenderer extends EntityRenderer<ElectricBike, BikeRenderState> 
         s.crank = Mth.lerp(a, bike.crankO, bike.crank);
         s.mode = bike.mode();
         s.colors = bike.colors();
+        s.type = bike.bikeType();
+        s.lamp = bike.lampOn();
         s.hurtTime = bike.getHurtTime() - a;
         s.hurtDir = bike.getHurtDir();
         s.damageTime = Math.max(bike.getDamage() - a, 0);
@@ -59,8 +66,13 @@ public class BikeRenderer extends EntityRenderer<ElectricBike, BikeRenderState> 
         // one draw per dye group, each tinted with its paint (the dyeable parts are neutral grey in the texture)
         var type = model.renderType(TEXTURE);
         for (BikeModel.Group g : BikeModel.Group.values()) {
-            int tint = g == BikeModel.Group.BASE ? -1 : 0xFF000000 | mods.eln.bike.BikeColors.tint(g.ordinal() - 1, s.colors[g.ordinal() - 1]);
-            out.submitModel(model, s.forGroup(g), pose, type, s.lightCoords, OverlayTexture.NO_OVERLAY, tint, null, s.outlineColor);
+            int tint, light = s.lightCoords;
+            if (g == BikeModel.Group.BASE) tint = -1;
+            else if (g == BikeModel.Group.LAMP) {   // on: its face full bright; off: dimmed
+                tint = s.lamp ? -1 : 0xFF707070;
+                if (s.lamp) light = net.minecraft.util.LightCoordsUtil.FULL_BRIGHT;
+            } else tint = 0xFF000000 | mods.eln.bike.BikeColors.tint(s.type, g.ordinal() - 1, s.colors[g.ordinal() - 1]);
+            out.submitModel(model, s.forGroup(g), pose, type, light, OverlayTexture.NO_OVERLAY, tint, null, s.outlineColor);
         }
         pose.popPose();
         super.submit(s, pose, out, camera);
