@@ -131,6 +131,11 @@ public final class ElnClient {
         }
 
         @Override
+        public org.joml.Quaternionf cameraRotation() {
+            return Minecraft.getInstance().gameRenderer.mainCamera().rotation();
+        }
+
+        @Override
         public float playerYaw() {
             var p = Minecraft.getInstance().player;
             return p == null ? 0 : p.getYRot();

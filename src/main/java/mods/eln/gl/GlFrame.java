@@ -289,6 +289,13 @@ public final class GlFrame {
         stack[depth].rotate((float) Math.toRadians(angle), x / len, y / len, z / len);
     }
 
+    /** Keep the current origin but turn the axes to the camera's (a camera-facing sprite: Incandescence halos). */
+    void faceCamera(org.joml.Quaternionf camera) {
+        if (record(f -> f.faceCamera(camera))) return;
+        var t = stack[depth].getTranslation(new org.joml.Vector3f());
+        stack[depth].identity().translate(t).rotate(camera);
+    }
+
     void scale(float x, float y, float z) {
         if (record(f -> f.scale(x, y, z))) return;
         stack[depth].scale(x, y, z);
