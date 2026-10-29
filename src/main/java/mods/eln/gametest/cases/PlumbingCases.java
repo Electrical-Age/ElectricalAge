@@ -34,6 +34,7 @@ public final class PlumbingCases {
         cases.add(new QualitySensor());
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
+        cases.add(new HotWaterIntoShortPipe());
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
@@ -269,12 +270,12 @@ public final class PlumbingCases {
             PipeCases.lay(ctx, ctx.at(0, 3, 2), 1, 8, 16, 8, 8, 0, 8);
             PipeCases.lay(ctx, ctx.at(0, 2, 2), 1, 8, 16, 8, 8, 0, 8);
             PipeCases.lay(ctx, ctx.at(4, 1, 3), 1, 0, 4, 8, 16, 4, 8);
-            // half full of water at 2 bar, saturated (at 10 bar its water rammed the thin pipe to C past its burst: the
-            // network takes liquid from a big hot vessel into a small pipe faster than the pipe passes it on)
+            // half full of water at 10 bar, saturated
             var g = ts.get(0).group;
-            if (g != null) fill(g.node, 0.5 * g.node.volume * Water.RHO_L, 2e5, Water.tsat(2e5));
+            if (g != null) fill(g.node, 0.5 * g.node.volume * Water.RHO_L, 10e5, Water.tsat(10e5));
             cWater0 = c.vessel.mLiquid();
         }
+
 
 
         public void measure(TestContext ctx) {
@@ -323,6 +324,62 @@ public final class PlumbingCases {
             ctx.check("tank box split: 11 one-block tanks (not a box)", alone && ts.size() == 11, "");
             ctx.check("tank box split: they keep 11/12 of the water (by volume)", Math.abs(after - before * 11 / 12) < 0.02 * before,
                 String.format("%.3f of %.3f kg", after, before));
+        }
+    }
+
+    /**
+     * A physics bug (Baughn: fix when spotted): hot water at 10 bar from a big vessel through a one-block pipe into a
+     * small tank rammed the pipe full in a step and on to 1446 bar, past its burst (the tank's inflow limit cut what the
+     * pipe passed on after the pipe's own limit had been checked). Now the pipe never goes far past the pressures
+     * around it, nothing bursts, and the water gets through.
+     */
+    static final class HotWaterIntoShortPipe extends Big {
+        TankElement a, b;
+        mods.eln.node.voxel.PipePart pipe;
+        IProcess watch;
+        double maxP, mass0;
+        int tick;
+        String trace = "";
+
+        public String id() {
+            return "pipe_hot_water_short_pipe_no_overfill";
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            // the source: a 2 x 2 x 2 box of alloy tanks (x 1..2, z 1..2); the pipe from its east face's low port to a
+            // lone iron tank B (a small vessel whose own inflow limit cut what the pipe passed on)
+            for (int y = 1; y <= 2; y++)
+                for (int x = 1; x <= 2; x++)
+                    for (int z = 1; z <= 2; z++) {
+                        TankElement t = (TankElement) ctx.placeTransparent(ALLOY_TANK, ctx.at(x, y, z));
+                        if (x == 1 && y == 1 && z == 1) a = t;
+                    }
+            BlockPos pv = ctx.at(3, 1, 1), pb = ctx.at(4, 1, 1);
+            b = tank(ctx, IRON_TANK, pb, Direction.XP);   // (its back, -x, faces the pipe)
+            PipeCases.lay(ctx, pv, 1, 0, 4, 8, 16, 4, 8);   // (between their low, liquid ports)
+            VoxelNode n = PipeCases.node(ctx, pv);
+            for (var part : n.parts) if (part instanceof mods.eln.node.voxel.PipePart pp) pipe = pp;
+            fill(a.vessel, 0.6 * a.vessel.volume * Water.RHO_L, 10e5, Water.tsat(10e5));
+            mass0 = a.vessel.mWater + b.vessel.mWater + pipe.fluid.mWater;
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                var run = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
+                maxP = Math.max(maxP, run.P());
+                if (++tick <= 6) trace += String.format(" t%d pipe %.1f bar %.4f kg; A %.2f; B %.2f |", tick, run.P() / 1e5, run.mWater, a.vessel.P() / 1e5, b.vessel.P() / 1e5);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            double mass = a.vessel.mWater + b.vessel.mWater + mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid).mWater;
+            ctx.line("hot water into a short pipe:" + trace + " max " + String.format("%.1f bar", maxP / 1e5) + "; A " + a.getWaila() + "; B " + b.getWaila());
+            ctx.check("short pipe: never far past the 10 bar around it (under 20 bar)", maxP < 20e5, String.format("%.1f bar", maxP / 1e5));
+            ctx.check("short pipe: it doesn't burst", !pipe.burst, "");
+            ctx.check("short pipe: the water gets through to B", b.vessel.mLiquid() > 0.02, String.format("%.3f kg", b.vessel.mLiquid()));
+            ctx.check("short pipe: no water lost", Math.abs(mass - mass0) < 1e-3 * mass0, String.format("%.4f of %.4f kg", mass, mass0));
         }
     }
 
