@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "eln:pipe_valve",
+    "eln:signal_cable",
+    "minecraft:glass_pane"
+  ],
+  "result": {
+    "id": "eln:pipe_quality_sensor"
+  }
+}

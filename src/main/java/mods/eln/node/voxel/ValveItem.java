@@ -47,4 +47,12 @@ public class ValveItem extends Item implements PipeTool {
         if (player == null || !player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.SUCCESS;
     }
+
+    /** Its tooltip lines (client ItemTooltips), or null. */
+    public java.util.List<String> tooltip() {
+        if (mode != ValvePart.PRESSURE) return null;
+        return java.util.List.of("A pressure valve: one way, along its arrow (right-click it to set it up):",
+            "relief holds the pressure before it (a back-pressure or bypass valve),",
+            "reducing holds the pressure after it. A signal cable in its block sets it (0-50 V: 0-150 bar).");
+    }
 }

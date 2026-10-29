@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "eln:pipe_valve",
+    "minecraft:piston",
+    "eln:signal_cable"
+  ],
+  "result": {
+    "id": "eln:pipe_pressure_valve"
+  }
+}

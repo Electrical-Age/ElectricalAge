@@ -278,7 +278,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** The item a pipe sensor was fitted from. */
     static ItemStack sensorItem(PipeSensorPart s) {
         return new ItemStack(s.sensing == PipeSensorPart.PRESSURE ? mods.eln.registry.ElnRegistry.PIPE_PRESSURE_SENSOR.get()
-            : mods.eln.registry.ElnRegistry.PIPE_TEMPERATURE_SENSOR.get());
+            : s.sensing == PipeSensorPart.TEMPERATURE ? mods.eln.registry.ElnRegistry.PIPE_TEMPERATURE_SENSOR.get()
+            : mods.eln.registry.ElnRegistry.PIPE_QUALITY_SENSOR.get());
     }
 
     /** The item a valve was fitted from. */
@@ -286,6 +287,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return new ItemStack(switch (v.mode) {
             case ValvePart.CONTROL -> mods.eln.registry.ElnRegistry.PIPE_CONTROL_VALVE.get();
             case ValvePart.THROTTLE -> mods.eln.registry.ElnRegistry.PIPE_THROTTLE_VALVE.get();
+            case ValvePart.PRESSURE -> mods.eln.registry.ElnRegistry.PIPE_PRESSURE_VALVE.get();
             default -> mods.eln.registry.ElnRegistry.PIPE_VALVE.get();
         });
     }
@@ -367,8 +369,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     for (int[] e : pipe.innerEnds()) if (e[0] == v.x && e[1] == v.y && e[2] == v.z) ends.add(pipe);
             if (ends.size() != 2) continue;
             PipePart a = ends.get(0), b = ends.get(1);
-            double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * 4;   // (a quarter block of pipe)
+            // (a pressure valve passes one way, in its arrow's direction: a is the pipe before it)
+            if (v.mode == ValvePart.PRESSURE && side(a, v) == v.flow) {
+                PipePart t = a;
+                a = b;
+                b = t;
+            }
+            double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * (v.mode == ValvePart.PRESSURE ? 1 : 4);   // (a quarter block of pipe; a
+            // pressure valve's seat is narrower, a block's worth, so it can hold its set point without overshooting)
             Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k);
+            if (v.mode == ValvePart.PRESSURE) l.kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
             l.open = v.opening();
             valveLinks.put(l, v);
         }
@@ -376,6 +386,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     private java.util.Map<Link, ValvePart> valveLinks;
+
+    /** Which side of a valve, along its axis, a pipe ending at it lies on (+1 or -1). */
+    static int side(PipePart pipe, ValvePart v) {
+        int[] at = {v.x, v.y, v.z};
+        for (int i = 0; i + 2 < pipe.points.length; i += 3) {
+            int d = pipe.points[i + v.axis] - at[v.axis];
+            if (d != 0) return d > 0 ? 1 : -1;
+        }
+        return 1;
+    }
 
     /** The adapter on that face (for the fluid capability), or null. */
     public AdapterPart adapterOn(int face) {
@@ -557,7 +577,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (pipe.passes(lo[0], lo[1], lo[2]) && pipe.passes(hi[0], hi[1], hi[2])) axis = a;
         }
         if (axis < 0) return "the pipe turns there";
-        double scale = sensing == PipeSensorPart.PRESSURE ? PipeSensorPart.DEFAULT_BAR : PipeSensorPart.DEFAULT_C;
+        double scale = PipeSensorPart.defaultScale(sensing);
         for (int d : axis == 1 ? new int[]{2, 3, 4, 5} : new int[]{1, 2, 3, 4, 5, 0}) {
             var s = new PipeSensorPart(best[0], best[1], best[2], d, pipe.bore(), sensing, scale);
             int[] b = s.boxes().get(0);
@@ -635,6 +655,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     v.opening() * 100)));
                 return true;
             }
+            if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.PRESSURE && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                // its set point, mode and arrow (ThrottleValveScreen: the value carries mode and arrow, see pressureScreenValue)
+                openPartScreen(sp, i, SCREEN_PRESSURE, pressureScreenValue(v));
+                return true;
+            }
             if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && player instanceof net.minecraft.server.level.ServerPlayer sp) {
                 openPartScreen(sp, i, SCREEN_THROTTLE, v.setting);
                 return true;
@@ -648,7 +673,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public static final byte PART_PACKET = -2;
 
     /** The part screens (client ThrottleValveScreen): a throttle valve's opening, a safety valve's set pressure. */
-    public static final byte SCREEN_THROTTLE = 0, SCREEN_SAFETY = 1;
+    public static final byte SCREEN_THROTTLE = 0, SCREEN_SAFETY = 1, SCREEN_PRESSURE = 2;
+    /** The pressure valve's screen packets (PART_PACKET floats): a set point (bar, >= 0), or these to toggle its mode or
+     *  turn its arrow round. */
+    public static final float TOGGLE_PRESSURE_MODE = -1, FLIP_PRESSURE_ARROW = -2;
+
+    /** A pressure valve's state for its screen in one float: set point (bar) + 1000 if reducing + 2000 if its arrow
+     *  points to -axis. */
+    static double pressureScreenValue(ValvePart v) {
+        return v.setPa / 1e5 + (v.pmode == ValvePart.REDUCING ? 1000 : 0) + (v.flow < 0 ? 2000 : 0);
+    }
 
     /** Open a part's slider screen on the player's client (ClientPacketHandler, Eln.packetValveScreen): the part's
      *  index, the kind of screen and its value (0..1 open, or bar). */
@@ -680,6 +714,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 float f = stream.readFloat();
                 if (i >= 0 && i < parts.size() && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.THROTTLE && Float.isFinite(f)) {
                     v.setting = Math.max(0, Math.min(1, f));
+                    setNeedPublish(true);
+                }
+                if (i >= 0 && i < parts.size() && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.PRESSURE && Float.isFinite(f)) {
+                    if (f == TOGGLE_PRESSURE_MODE) v.pmode = v.pmode == ValvePart.RELIEF ? ValvePart.REDUCING : ValvePart.RELIEF;
+                    else if (f == FLIP_PRESSURE_ARROW) {
+                        v.flow = -v.flow;
+                        changed();   // (its link turns round)
+                    } else if (f >= 0) v.setPa = Math.max(ValvePart.MIN_BAR, Math.min(ValvePart.MAX_BAR, f)) * 1e5;
                     setNeedPublish(true);
                 }
                 if (i >= 0 && i < parts.size() && parts.get(i) instanceof SafetyValvePart sv && Float.isFinite(f)) {
@@ -970,6 +1012,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 ValvePart v = e.getValue();
                 double o = v.opening();
                 e.getKey().open = o;
+                if (v.mode == ValvePart.PRESSURE) {
+                    e.getKey().open = 1;
+                    // (before it: the most the pipe there can rise to this step, its neighbours' pressure: a reducing valve
+                    // on the pressure there at the step's start let a pipe just filled from a tank through by bars)
+                    var up = mods.eln.fluid.FluidWorld.nodeFor(e.getKey().a);
+                    double before = up.P();
+                    for (var edge : mods.eln.fluid.FluidWorld.edgesOf(up))
+                        if (edge != e.getKey().edge) before = Math.max(before, (edge.a == up ? edge.b : edge.a).P());
+                    e.getKey().boost = v.boost(before, mods.eln.fluid.FluidWorld.nodeFor(e.getKey().b).P());
+                    o = v.opening();
+                }
                 if (v.mode != ValvePart.ON_OFF && Math.abs(o - v.shown) > 0.02) {
                     v.shown = o;
                     setNeedPublish(true);   // (the drawing turns with it)
@@ -1587,8 +1640,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (p instanceof ValvePart v) out.put(switch (v.mode) {
                 case ValvePart.CONTROL -> "Control valve";
                 case ValvePart.THROTTLE -> "Throttle valve";
+                case ValvePart.PRESSURE -> "Pressure valve";
                 default -> "Valve";
-            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut") : String.format("%.0f%% open", v.opening() * 100));
+            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut")
+                : v.mode == ValvePart.PRESSURE ? String.format("%s %.1f bar%s, %.0f%% open", v.pmode == ValvePart.RELIEF ? "holds before it at" : "holds after it at",
+                    v.setPoint() / 1e5, v.signalled() ? " (signal)" : "", v.opening() * 100)
+                : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",
                 String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));

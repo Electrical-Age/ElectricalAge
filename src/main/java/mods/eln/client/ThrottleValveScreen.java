@@ -15,7 +15,9 @@ import java.io.IOException;
 
 /**
  * A pipe part's slider screen. A throttle valve's (Baughn 2026-10-26: a manual valve with a slider): how far open,
- * 0-100%. A safety valve's (Baughn 2026-10-27): its set pressure, SafetyValvePart.MIN_BAR..MAX_BAR on a log scale.
+ * 0-100%. A safety valve's (Baughn 2026-10-27): its set pressure, SafetyValvePart.MIN_BAR..MAX_BAR on a log scale. A
+ * pressure valve's (Baughn 2026-10-29): its set point (ValvePart.MIN_BAR..MAX_BAR, log), its mode (relief: holds the
+ * pressure before it; reducing: holds the pressure after it) and which way its arrow points.
  * Opened by the server (Eln.packetValveScreen); the slider sends each value back as the voxel node's part packet
  * (VoxelNode.PART_PACKET): 0..1 open, or bar.
  */
@@ -24,16 +26,37 @@ public class ThrottleValveScreen extends Screen {
     final int index, kind;
     /** The slider's position (0..1). */
     double setting;
+    /** A pressure valve's mode (reducing?) and arrow (towards -axis?), as the server sent them; flipped on the buttons. */
+    boolean reducing, backwards;
 
     ThrottleValveScreen(BlockPos pos, int index, int kind, double value) {
-        super(Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? "Safety Valve" : "Throttle Valve"));
+        super(Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? "Safety Valve"
+            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Pressure Valve" : "Throttle Valve"));
         this.pos = pos;
         this.index = index;
         this.kind = kind;
-        this.setting = kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toSlider(value) : value;
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) {
+            backwards = value >= 2000;
+            if (backwards) value -= 2000;
+            reducing = value >= 1000;
+            if (reducing) value -= 1000;
+            this.setting = toSliderP(value);
+        } else this.setting = kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toSlider(value) : value;
     }
 
     static final double LO = mods.eln.node.voxel.SafetyValvePart.MIN_BAR, HI = mods.eln.node.voxel.SafetyValvePart.MAX_BAR;
+
+    static final double PLO = mods.eln.node.voxel.ValvePart.MIN_BAR, PHI = mods.eln.node.voxel.ValvePart.MAX_BAR;
+
+    static double toSliderP(double bar) {
+        return Math.max(0, Math.min(1, Math.log(Math.max(PLO, bar) / PLO) / Math.log(PHI / PLO)));
+    }
+
+    /** A pressure valve's set point at a slider position: log scale, to 0.05 bar under 2, half a bar under 20, whole bars over. */
+    static double toBarP(double v) {
+        double b = PLO * Math.pow(PHI / PLO, v);
+        return b < 2 ? Math.round(b * 20) / 20.0 : b < 20 ? Math.round(b * 2) / 2.0 : Math.round(b);
+    }
 
     static double toSlider(double bar) {
         return Math.max(0, Math.min(1, Math.log(bar / LO) / Math.log(HI / LO)));
@@ -65,13 +88,29 @@ public class ThrottleValveScreen extends Screen {
             @Override
             protected void applyValue() {
                 setting = value;
-                send(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toBar(value) : value);
+                send(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toBar(value) : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? toBarP(value) : value);
             }
         });
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) {
+            addRenderableWidget(net.minecraft.client.gui.components.Button.builder(modeLabel(), b -> {
+                reducing = !reducing;
+                send(mods.eln.node.voxel.VoxelNode.TOGGLE_PRESSURE_MODE);
+                b.setMessage(modeLabel());
+            }).bounds(width / 2 - w / 2, height / 2 + 30, w, 20).build());
+            addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal("Turn its arrow round"), b -> {
+                backwards = !backwards;
+                send(mods.eln.node.voxel.VoxelNode.FLIP_PRESSURE_ARROW);
+            }).bounds(width / 2 - w / 2, height / 2 + 54, w, 20).build());
+        }
+    }
+
+    Component modeLabel() {
+        return Component.literal(reducing ? "Reducing: holds the pressure after it" : "Relief: holds the pressure before it");
     }
 
     Component label(double v) {
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) return Component.literal(String.format("Lifts at: %.1f bar", toBar(v)));
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) return Component.literal(String.format("Set point: %.2f bar", toBarP(v)));
         return Component.literal(String.format("Open: %.0f%%", v * 100));
     }
 
@@ -96,7 +135,9 @@ public class ThrottleValveScreen extends Screen {
         super.extractRenderState(g, mouseX, mouseY, partial);
         g.centeredText(font, title, width / 2, height / 2 - 30, 0xFFFFFFFF);
         g.centeredText(font, Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY
-            ? "Opens over this pressure (absolute), wide open 10% above" : "Shut at 0%, fully open at 100%"), width / 2, height / 2 + 16, 0xFFA0A0A0);
+            ? "Opens over this pressure (absolute), wide open 10% above"
+            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Absolute; one way, along its arrow; a signal cable in its block sets it instead (0-50 V: 0-150 bar)"
+            : "Shut at 0%, fully open at 100%"), width / 2, height / 2 + 16, 0xFFA0A0A0);
     }
 
     @Override
