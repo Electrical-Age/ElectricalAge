@@ -23,7 +23,11 @@ public final class RiderPose {
 
     /** The bottom bracket below and ahead of the hips; crank length to the pedal; the grips from the shoulders. */
     static final float BB_DOWN = 10.8f, BB_AHEAD = 2.5f, CRANK_LEN = 3.5f, LEG = 12;
-    static final float ARM_PITCH = -0.80f;
+    /**
+     * The upper body leans forward this much (radians) about the hips, and the hands go to the grips: 9.8 px below the
+     * player's top and 9.3 px ahead of its origin (BikeModel's grips; Baughn: the hands should be on the handles).
+     */
+    static final float LEAN = 0.35f, GRIP_Y = 9.82f, GRIP_Z = -9.32f, HAND = 9.3f;
 
     /** The render-state modifier (players, AvatarRenderer): one on an ElectricBike carries its crank angle. */
     public static void extract(net.minecraft.world.entity.Entity avatar, HumanoidRenderState state) {
@@ -41,8 +45,19 @@ public final class RiderPose {
         // the bike's left crank (model -x) is under the rider's right leg (also -x); the other is half a turn on
         leg(m.rightLeg, crank, -1.9f);
         leg(m.leftLeg, crank + Mth.PI, 1.9f);
+        // lean the body about the hips (its pivot is the neck: move the neck so the hips stay), the head with it
+        float c = Mth.cos(LEAN), sn = Mth.sin(LEAN), neckY = 12 * (1 - c), neckZ = -12 * sn;
+        m.body.xRot = LEAN;
+        m.body.y = neckY;
+        m.body.z = neckZ;
+        m.head.y = neckY;
+        m.head.z = neckZ;
+        // the shoulders ride on the body; each arm points at its grip
+        float shY = neckY + 2 * c, shZ = neckZ + 2 * sn;
         for (var arm : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm}) {
-            arm.xRot = ARM_PITCH;
+            arm.y = shY;
+            arm.z = shZ;
+            arm.xRot = (float) Math.atan2(GRIP_Z - shZ, GRIP_Y - shY);
             arm.yRot = 0;
             arm.zRot = arm == m.rightArm ? 0.08f : -0.08f;   // (out a little to the grips)
         }

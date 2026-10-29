@@ -23,4 +23,12 @@ public class RiderPoseTest {
             assertTrue(miss < 1.8, "crank " + i * 10 + " deg: the foot misses its pedal by " + miss + " px");
         }
     }
+
+    @Test
+    void theHandsReachTheGrips() {
+        float c = (float) Math.cos(RiderPose.LEAN), sn = (float) Math.sin(RiderPose.LEAN);
+        float shY = 12 * (1 - c) + 2 * c, shZ = -12 * sn + 2 * sn;
+        double reach = Math.hypot(RiderPose.GRIP_Y - shY, RiderPose.GRIP_Z - shZ);
+        assertTrue(Math.abs(reach - RiderPose.HAND) < 1.0, "shoulder to grip " + reach + " px, the hand is " + RiderPose.HAND + " px down the arm");
+    }
 }
