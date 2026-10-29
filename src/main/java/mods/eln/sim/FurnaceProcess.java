@@ -18,7 +18,9 @@ public class FurnaceProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        fire.step(gain, combustibleEnergy > 0, time);
+        // the fire can't burn harder than its bed has fuel for (Baughn: with nothing to burn it banks until it's out,
+        // rather than climbing to the setting on embers and flaring to full power when fuel comes back)
+        fire.step(Math.min(gain, fuelShare()), combustibleEnergy > 0, time);
         double energyConsumed = getP() * time;
         combustibleEnergy -= energyConsumed;
         load.PcTemp += energyConsumed / time;
@@ -37,6 +39,11 @@ public class FurnaceProcess implements IProcess {
 
     public double getGain() {
         return gain;
+    }
+
+    /** How full the fuel bed is (0..1). */
+    public double fuelShare() {
+        return nominalCombustibleEnergy <= 0 ? 0 : Math.max(0, Math.min(1, combustibleEnergy / nominalCombustibleEnergy));
     }
 
     public double getP() {
