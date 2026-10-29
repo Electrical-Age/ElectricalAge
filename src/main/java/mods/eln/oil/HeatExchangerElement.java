@@ -228,8 +228,8 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public void disconnectJob() {
         super.disconnectJob();
         FluidWorld.remove(this);
-        if (group != null) {
-            // (the stack without it: its share leaves with it, the rest re-form)
+        // (only a block that goes away splits the stack; one out of the simulation stays in it: as TankElement)
+        if (group != null && node.isDestructing()) {
             HeatExchangerGroup g = group;
             g.writeBack();
             List<HeatExchangerElement> rest = new java.util.ArrayList<>(g.members);

@@ -26,6 +26,7 @@ public final class ShaftArtCases {
         cases.add(new TankBoxReformsLate());
         cases.add(new InlinePumpAlongView());
         cases.add(new TankBuckets());
+        cases.add(new BoxSurvivesAFrozenReconnect());
     }
 
     static final int HP = 9 + (4 << 6), GEN4 = 10 + (4 << 6), GAS = 11 + (4 << 6), JOINT = 12 + (4 << 6), HUB = 13 + (4 << 6),
@@ -671,6 +672,96 @@ public final class ShaftArtCases {
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, lone, null);
             if (cap != t.water) bad += "the tank's water isn't its fluid capability (" + cap + "); ";
             ctx.check("tanks take and give buckets of water, lone or in a box", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * What lab anvil's boot did to a tank box (a late re-form logged on every boot): a block of a running box is
+     * reconnected (a neighbour's block changed as the chunk loaded) while Stasis keeps it out of the simulation (the
+     * veto: it only shows its connections). The box must stay one, the running rest with it, not fall apart into lone
+     * tanks; when the block runs again it is in the box. The same for a heat exchanger stack. The world-load path
+     * (frozen while loading, all thawed in a pass) and a whole box frozen and thawed are checked too.
+     */
+    static final class BoxSurvivesAFrozenReconnect extends PlumbingCases.Big {
+        String bad = "", out = "";
+
+        public String id() {
+            return "box_survives_a_frozen_reconnect";
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        static String tanks(TestContext ctx, List<BlockPos> at) {
+            var g = TankBoxReloads.at(ctx, at.get(0)).group;
+            int same = 0;
+            for (BlockPos p : at) if (g != null && TankBoxReloads.at(ctx, p).group == g) same++;
+            return same == at.size() && g.members.size() == at.size() ? "box" : "split (" + same + " of " + at.size() + " in one)";
+        }
+
+        static mods.eln.oil.HeatExchangerElement hx(TestContext ctx, BlockPos p) {
+            return (mods.eln.oil.HeatExchangerElement) ((mods.eln.node.transparent.TransparentNode) mods.eln.node.NodeManager.instance
+                .getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, ctx.level()))).element;
+        }
+
+        static String stack(TestContext ctx, List<BlockPos> at) {
+            var g = hx(ctx, at.get(0)).group;
+            int same = 0;
+            for (BlockPos p : at) if (g != null && hx(ctx, p).group == g) same++;
+            return same == at.size() && g.members.size() == at.size() ? "stack" : "split (" + same + " of " + at.size() + " in one)";
+        }
+
+        void expect(String what, String got, String want) {
+            out += what + ": " + got + "; ";
+            if (!got.equals(want)) bad += what + ": " + got + "; ";
+        }
+
+        public void build(TestContext ctx) {
+            List<BlockPos> tanks = new ArrayList<>(), hxs = new ArrayList<>();
+            for (int y = 1; y <= 2; y++)
+                for (int x = 1; x <= 2; x++)
+                    for (int z = 1; z <= 2; z++) {
+                        placeLooking(ctx, PlumbingCases.IRON_TANK, ctx.at(x, y, z), EAST);
+                        tanks.add(ctx.at(x, y, z));
+                    }
+            hxs.addAll(GasPlantCases.stack(ctx, ctx.at(5, 1, 5), 2).stream().map(h -> h.node.coordonate.pos()).toList());
+            BlockPos oneTank = tanks.get(5), oneHx = hxs.get(3);
+            try {
+                // one block reconnected while vetoed
+                mods.eln.node.NodeBase.simulationVeto = n -> n.coordonate.pos().equals(oneTank) || n.coordonate.pos().equals(oneHx);
+                TankBoxReloads.at(ctx, oneTank).reconnect();
+                hx(ctx, oneHx).reconnect();
+                expect("tank box, one block reconnected while frozen", tanks(ctx, tanks), "box");
+                expect("exchanger stack, one block reconnected while frozen", stack(ctx, hxs), "stack");
+                mods.eln.node.NodeBase.simulationVeto = null;
+                TankBoxReloads.at(ctx, oneTank).connect();
+                hx(ctx, oneHx).connect();
+                expect("tank box, that block running again", tanks(ctx, tanks), "box");
+                expect("exchanger stack, that block running again", stack(ctx, hxs), "stack");
+                // a world load with them frozen, then thawed in one pass
+                java.util.Set<Long> all = new java.util.HashSet<>();
+                for (BlockPos p : tanks) all.add(p.asLong());
+                for (BlockPos p : hxs) all.add(p.asLong());
+                mods.eln.node.NodeBase.simulationVeto = n -> all.contains(n.coordonate.pos().asLong());
+                List<BlockPos> both = new ArrayList<>(tanks);
+                both.addAll(hxs);
+                reloadAll(ctx, both);
+                mods.eln.node.NodeBase.simulationVeto = null;
+                for (var n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes()))
+                    if (all.contains(n.coordonate.pos().asLong()) && !n.isAdded()) n.connect();
+                expect("tank box, loaded frozen and thawed", tanks(ctx, tanks), "box");
+                expect("exchanger stack, loaded frozen and thawed", stack(ctx, hxs), "stack");
+            } catch (ReflectiveOperationException e) {
+                bad += e;
+            } finally {
+                mods.eln.node.NodeBase.simulationVeto = null;
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("frozen reconnects: " + out);
+            ctx.check("a box or stack stays one through a frozen block's reconnect and a frozen load", bad.isEmpty(), bad);
         }
     }
 }

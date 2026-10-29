@@ -233,8 +233,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public void disconnectJob() {
         super.disconnectJob();
         FluidWorld.remove(this);
-        if (group != null) {
-            // (the box without it: its share leaves with it, the rest re-form)
+        // Only a block that goes away splits the box (its share leaves with it, the rest re-form). One merely out of the
+        // simulation (frozen by Stasis, reconnected after a neighbour's block changed) stays in it: splitting there left
+        // the running rest as lone tanks whenever its reconnect was vetoed, on every boot of lab anvil (the late
+        // re-form below then caught it); it re-forms the box with its neighbours when it connects again.
+        if (group != null && node.isDestructing()) {
             TankGroup g = group;
             g.writeBack();
             List<TankElement> rest = new ArrayList<>(g.members);
