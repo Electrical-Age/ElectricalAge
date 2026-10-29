@@ -94,6 +94,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     @Override
     public Direction[] fronts() {
+        // (one of a box, or about to be: it stays as placed; turning would re-form the box under it)
+        if (group != null || !neighbours().isEmpty()) return new Direction[]{front};
         return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
     }
 

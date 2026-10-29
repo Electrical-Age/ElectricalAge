@@ -160,6 +160,8 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     @Override
     public Direction[] fronts() {
+        // (one of a stack, or about to be: it stays as placed; turning would re-form the stack under it)
+        if (group != null || !neighbours().isEmpty()) return new Direction[]{front};
         return new Direction[]{front, front.back()};
     }
 
