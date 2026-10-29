@@ -29,6 +29,8 @@ public final class CapacitorBankCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new Charge());
         cases.add(new Hold());
+        cases.add(new OverVoltage());
+        cases.add(new Hammered());
         cases.add(new Burst());
         cases.add(new PowerCapacitorLeak());
     }
@@ -153,9 +155,9 @@ public final class CapacitorBankCases {
         }
     }
 
-    /** A charged bank holds 0.5 C U^2 and leaks slowly; one charged past 1.3 x its rating pops. */
+    /** A charged bank holds 0.5 C U^2 and leaks slowly. */
     static final class Hold extends Room {
-        CapacitorBankElement held, over;
+        CapacitorBankElement held;
 
         public String id() {
             return "capacitor_bank_holds_and_pops";
@@ -170,12 +172,8 @@ public final class CapacitorBankCases {
             held = (CapacitorBankElement) ctx.placeTransparent(BANK, c);
             Direction f = held.front, r = f.right();
             ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(c, r));   // (a floating bank has no reference: grounded, it keeps its charge)
-            BlockPos b = c;
-            for (int i = 0; i < 3; i++) b = Wp10aCases.off(b, f);
-            over = (CapacitorBankElement) ctx.placeTransparent(BANK, b);
-            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(b, r));
             held.positiveLoad.setU(800);
-            over.positiveLoad.setU(1600);   // (300 V over: the watchdog's budget, 500 V s, goes in a few seconds)
+            held.cellLoad.setU(800);
         }
 
         public void measure(TestContext ctx) {
@@ -187,7 +185,83 @@ public final class CapacitorBankCases {
             double leak = 800 * 800 / (CapacitorBankDescriptor.leakTauS / CapacitorBankDescriptor.farads);
             ctx.check("capacitor bank: it leaks ~130 W at 800 V (a store for bursts, not for keeping)", leak > 100 && leak < 160,
                 String.format("%.0f W", leak));
-            ctx.check("capacitor bank: past 1.3 x its 1000 V rating it pops", over.isBurnt(), "");
+        }
+    }
+
+    /**
+     * Past 1.3 x its rating, or past its warm limit, a bank explodes by the energy it held (Baughn 2026-10-28):
+     * bankStrength 1 .. 3, sqrt(E / 40 kJ). One charged to 1600 V (460 kJ: strength 3) goes in a few seconds.
+     */
+    static final class OverVoltage extends Room {
+        BlockPos at;
+
+        public String id() {
+            return "capacitor_bank_explodes_over_voltage";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(4, 1, 3);
+            var b = (CapacitorBankElement) ctx.placeTransparent(BANK, at);
+            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(at, b.front.right()));
+            b.positiveLoad.setU(1600);   // (300 V over: the watchdog's budget, 500 V s, goes in a few seconds)
+            b.cellLoad.setU(1600);
+        }
+
+        public void measure(TestContext ctx) {
+            float s115 = mods.eln.sim.process.destruct.Failure.bankStrength(115e3), s300 = mods.eln.sim.process.destruct.Failure.bankStrength(300e3);
+            ctx.check("capacitor bank: explosion strength by stored energy (115 kJ 1.7, 300 kJ 2.7, at most a creeper's 3)",
+                Math.abs(s115 - 1.70) < 0.01 && Math.abs(s300 - 2.74) < 0.01 && mods.eln.sim.process.destruct.Failure.bankStrength(1e7) == 3f
+                    && mods.eln.sim.process.destruct.Failure.bankStrength(0) == 1f, s115 + " " + s300);
+            ctx.check("capacitor bank: charged to 1600 V (1.6 x its rating), it explodes", ctx.level().getBlockState(at).isAir(),
+                "" + ctx.level().getBlockState(at));
+        }
+    }
+
+    /**
+     * A stiff line hammering it: a source right on its + plate (no cable to burn first), switched 800 V / 0 V every 2 s.
+     * Each charge and discharge puts most of the bank's ~115 kJ through its 0.1 ohm ESR, ~57 K a time on 2000 J/K: past
+     * its warm limit (75 K over ambient) on the second, and it explodes.
+     */
+    static final class Hammered extends Room {
+        BlockPos at;
+        CapacitorBankElement bank;
+        SixNodeElement src;
+        mods.eln.sim.IProcess toggle;
+        double clock, maxT;
+
+        public String id() {
+            return "capacitor_bank_overheats_and_explodes";
+        }
+
+        public int ticks() {
+            return 300;   // 15 s
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(4, 1, 3);
+            bank = (CapacitorBankElement) ctx.placeTransparent(BANK, at);
+            src = source(ctx, Wp10aCases.off(at, bank.front.left()), 800);
+            ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(at, bank.front.right()));
+            mods.eln.Eln.simulator.addSlowProcess(toggle = t -> {
+                clock += t;
+                maxT = Math.max(maxT, bank.thermal.Tc);
+                double v = ((int) (clock / 2)) % 2 == 0 ? 800 : 0;
+                src.networkUnserialize(ctx.stream(out -> {
+                    out.writeByte(ElectricalSourceElement.setVoltageId);
+                    out.writeFloat((float) v);
+                }));
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(toggle);
+            ctx.line(String.format("capacitor bank hammered: hottest %.0f K over ambient", maxT));
+            ctx.check("capacitor bank: hammered by a stiff line it overheats (past 75 K over ambient) and explodes",
+                ctx.level().getBlockState(at).isAir() && maxT >= CapacitorBankElement.WARM, String.format("max %.0f K, %s", maxT, ctx.level().getBlockState(at)));
         }
     }
 
@@ -216,6 +290,7 @@ public final class CapacitorBankCases {
             AnvilCases.put(anvil, AnvilCases.pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
             // charged to 800 V, as a plant would leave it (the capacitor's history is its loads' voltages)
             bank.positiveLoad.setU(800);
+            bank.cellLoad.setU(800);
             bank.negativeLoad.setU(0);
         }
 

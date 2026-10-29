@@ -82,12 +82,14 @@ public final class AnvilCases {
             a = (ElectricalAnvilElement) ctx.placeTransparent(ANVIL, Wp10aCases.off(line, bank.front));
             put(a, pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
             bank.positiveLoad.setU(780);
+            bank.cellLoad.setU(780);
         }
 
         public void measure(TestContext ctx) {
             ctx.line("anvil weak plant: anvil " + a.getWaila() + String.format(" energy %.0f", a.energy) + "; bank " + bank.getWaila());
             ctx.check("anvil: a bank on a weak plant (100 ohm) gets it welding", a.energy > 10000 || tool(a).getDamageValue() < 1500,
                 String.format("%.0f J, damage %d", a.energy, tool(a).getDamageValue()));
+            ctx.check("anvil: ... and the bank stays cool (well under its 75 K limit)", bank.thermal.Tc < 15, String.format("%.1f K over ambient", bank.thermal.Tc));
         }
     }
 
