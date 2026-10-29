@@ -14,8 +14,10 @@ public class TankRender extends TransparentNodeElementRender {
     /** Whether it draws the tank (a lone tank, or a box's lowest corner), and the box's size. */
     boolean draws = true;
     int sx = 1, sy = 1, sz = 1;
-    /** In a box: its ports with a pipe on them (TankElement.coupled): a flange each. */
-    int coupled;
+    /** In a box: its ports with a pipe on them (TankElement.coupled): a flange each; and its place in the box. */
+    int coupled, ox, oy, oz;
+    /** The shell's radius (px; tools/models/tank.py R), its top (px), and its flanges' depth (px). */
+    static final float SHELL_R = 5.5f, SHELL_TOP = 15f, DISC = 0.75f;
 
     public TankRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -32,9 +34,29 @@ public class TankRender extends TransparentNodeElementRender {
                     mods.eln.gl.GL11.glPushMatrix();
                     mods.eln.misc.Direction.fromEnumFacing(net.minecraft.core.Direction.from3DDataValue(face)).glRotateXnRef();
                     desc.drawPart(hi == 0 ? "disc_low" : "disc_high");
+                    // a nozzle from behind the flange in to the shell, which a box scales away from its faces
+                    // (AdventurAgent 2026-10-29: on a 2 x 2 x 2 iron tank a pipe ended a third of a block short of it)
+                    float len = nozzle(face) - DISC;
+                    if (len > 0.05f) {
+                        mods.eln.gl.GL11.glTranslatef(-0.5f + DISC / 16f, 0, 0);
+                        mods.eln.gl.GL11.glScalef(len, 1, 1);
+                        mods.eln.gl.GL11.glTranslatef(0.5f, 0, 0);
+                        desc.drawPart(hi == 0 ? "nozzle_low" : "nozzle_high");
+                    }
                     mods.eln.gl.GL11.glPopMatrix();
                 }
-            if ((coupled & 1 << 12) != 0) desc.drawPart("disc_top");
+            if ((coupled & 1 << 12) != 0) {
+                desc.drawPart("disc_top");
+                float len = 16 * sy - SHELL_TOP * sy - DISC;   // (the box's top down to its shell's)
+                if (len > 0.05f) {
+                    mods.eln.gl.GL11.glPushMatrix();
+                    mods.eln.gl.GL11.glTranslatef(0, 0.5f - DISC / 16f, 0);
+                    mods.eln.gl.GL11.glScalef(1, len, 1);
+                    mods.eln.gl.GL11.glTranslatef(0, -0.5f, 0);
+                    desc.drawPart("nozzle_top");
+                    mods.eln.gl.GL11.glPopMatrix();
+                }
+            }
         }
         if (!draws) return;
         if (sx == 1 && sy == 1 && sz == 1) {
@@ -48,6 +70,21 @@ public class TankRender extends TransparentNodeElementRender {
         boolean alongX = front == mods.eln.misc.Direction.XN || front == mods.eln.misc.Direction.XP;
         mods.eln.gl.GL11.glScalef(alongX ? sx : sz, sy, alongX ? sz : sx);
         desc.drawBox(fill);
+    }
+
+    /**
+     * From this block's FACE (3D value, a side) in to the box's shell (px): the shell is the lone tank's scaled to the box,
+     * an upright cylinder of radius SHELL_R x the box's size across each axis, centred in it; the port is at the middle
+     * of this block's face.
+     */
+    float nozzle(int face) {
+        boolean alongX = face == 4 || face == 5;   // (west/east faces: the nozzle runs along x)
+        int o = alongX ? ox : oz, n = alongX ? sx : sz, oAcross = alongX ? oz : ox, nAcross = alongX ? sz : sx;
+        double across = (oAcross * 16 + 8) - nAcross * 8.0, half = SHELL_R * nAcross;
+        double reach = SHELL_R * n * Math.sqrt(Math.max(0, 1 - across * across / (half * half)));
+        boolean high = face == 3 || face == 5;   // (south/east: the face at the block's far side)
+        double faceAt = high ? (o + 1) * 16 : o * 16, shellAt = high ? n * 8.0 + reach : n * 8.0 - reach;
+        return (float) Math.max(0, Math.abs(shellAt - faceAt));
     }
 
     /** A box draws past its block: its whole size. */
@@ -67,6 +104,9 @@ public class TankRender extends TransparentNodeElementRender {
             sy = stream.readByte();
             sz = stream.readByte();
             coupled = stream.readShort();
+            ox = stream.readByte();
+            oy = stream.readByte();
+            oz = stream.readByte();
         } catch (IOException e) {
             e.printStackTrace();
         }

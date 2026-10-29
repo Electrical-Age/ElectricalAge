@@ -248,6 +248,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             stream.writeByte(group == null ? 1 : group.sy);
             stream.writeByte(group == null ? 1 : group.sz);
             stream.writeShort(group == null ? 0 : coupled);
+            // (its place in the box, for the nozzles from its flanges in to the box's shell)
+            var c = node.coordonate;
+            stream.writeByte(group == null ? 0 : c.x - group.x0);
+            stream.writeByte(group == null ? 0 : c.y - group.y0);
+            stream.writeByte(group == null ? 0 : c.z - group.z0);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }

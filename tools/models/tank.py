@@ -4,7 +4,8 @@ sight glass on its front. Ports (an iron pipe's flange): the top centre (vapour)
 (liquid, 4 px up) and a high one (vapour, 12 px up); the bottom port is a plain opening under the skid.
 
 Parts: `shell`, `ports` (the flanges), `glass` (the sight glass) and `level`: the water in it, 2..14 px, which
-TankRender scales to the fill. A box of tanks (TankGroup) is drawn as one: shell, glass and level scaled to the box.
+TankRender scales to the fill; for a merged box, `disc_*` (a flange where a pipe meets it) and `nozzle_*` (a stub of
+large pipe, 1 px long, which TankRender stretches from the flange in to the scaled shell). A box of tanks (TankGroup) is drawn as one: shell, glass and level scaled to the box.
 
 Design frame: mcmodel px (0..16, corner origin), front XN (x = 0).
 
@@ -62,6 +63,19 @@ def top_disc_part():
     m.add(*bolt_ring("y", C, C, 3.3, 15.0, 15.25, 6, rb=0.25))
     return m
 
+def nozzle_part(y, t):
+    """A box's nozzle on the x = 0 face at height y: a large pipe's bore, 1 px long from x = 0 (TankRender stretches it from
+    behind the flange disc in to the scaled shell: a merged box's shell sits well inside its faces)."""
+    m = Model()
+    m.add(prism("x", y, C, 3.0, 0.0, 1.0, t["shell"], n=12, caps=(False, False)))
+    return m
+
+def nozzle_top_part(t):
+    """The top port's nozzle, 1 px long down from y = 16 (stretched down to the shell's top)."""
+    m = Model()
+    m.add(prism("y", C, C, 3.0, 15.0, 16.0, t["shell"], n=12, caps=(False, False)))
+    return m
+
 def glass_part(t):
     """The sight glass on the front: brass frame, dark backing, 1.5..14.5 px."""
     m = Model()
@@ -81,7 +95,8 @@ def main():
         name = "tank" + tier
         d = out_dir(res, name)
         counts = write_parts(d, name, [("shell", shell_part(t)), ("ports", ports_part(t)), ("glass", glass_part(t)), ("level", level_part()),
-                                       ("disc_low", disc_part(4.0)), ("disc_high", disc_part(12.0)), ("disc_top", top_disc_part())])
+                                       ("disc_low", disc_part(4.0)), ("disc_high", disc_part(12.0)), ("disc_top", top_disc_part()),
+                                       ("nozzle_low", nozzle_part(4.0, t)), ("nozzle_high", nozzle_part(12.0, t)), ("nozzle_top", nozzle_top_part(t))])
         atlas(os.path.join(d, "tex.png"), t["paint"])
         print(name, counts)
 
