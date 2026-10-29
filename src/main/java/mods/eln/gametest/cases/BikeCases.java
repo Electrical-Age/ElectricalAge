@@ -41,6 +41,89 @@ public final class BikeCases {
         cases.add(new Charge());
         cases.add(new DeepWater());
         cases.add(new Insides());
+        cases.add(new Dye());
+    }
+
+    /**
+     * Paint (Baughn: dyeable per frame element): a dye on the part looked at paints that group, one dye used; the paint
+     * survives a save and being picked up and put down again.
+     */
+    static final class Dye implements TestCase {
+        public String id() {
+            return "bike_dye_per_part";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        ElectricBike bike;
+
+        public void build(TestContext ctx) {
+            bike = spawn(ctx, ctx.at(1, 1, 1), 0);
+        }
+
+        /** The player's eye at the bike + (dx, dy, dz), looking (yaw, pitch); right-click with dye. */
+        static void paint(net.minecraft.world.entity.player.Player p, ElectricBike b, double dx, double dy, double dz, float yaw, float pitch,
+                          net.minecraft.world.item.Item dye) {
+            p.snapTo(b.getX() + dx, b.getY() + dy - p.getEyeHeight(), b.getZ() + dz, yaw, pitch);
+            p.setYHeadRot(yaw);
+            if (!p.getMainHandItem().is(dye)) p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(dye, 2));
+            b.interact(p, InteractionHand.MAIN_HAND, Vec3.ZERO);
+        }
+
+        public void measure(TestContext ctx) {
+            var p = rider(ctx, "dye", bike);
+            ElectricBike placed = null;
+            try {
+                int red = net.minecraft.world.item.DyeColor.RED.getTextureDiffuseColor() & 0xFFFFFF;
+                paint(p, bike, 0, 0.7, 2.0, 180, 0, Items.DYE.red());   // from in front, at the fork
+                ctx.check("red dye on the fork paints the fork, nothing else, and uses one dye",
+                    bike.color(mods.eln.bike.BikeColors.FORK) == red && bike.color(mods.eln.bike.BikeColors.FRAME) == mods.eln.bike.BikeColors.DEFAULT
+                        && p.getMainHandItem().getCount() == 1, java.util.Arrays.toString(bike.colors()) + ", dye left " + p.getMainHandItem().getCount());
+                paint(p, bike, 0, 0.7, 2.0, 180, 0, Items.DYE.red());
+                ctx.check("the same colour again uses no dye", p.getMainHandItem().getCount() == 1, "" + p.getMainHandItem().getCount());
+                paint(p, bike, 0, 0.9, -2.0, 0, 0, Items.DYE.blue());   // from behind, at the trunk
+                paint(p, bike, 0, 2.5, -0.2, 0, 90, Items.DYE.white());   // from above, at the saddle
+                paint(p, bike, 2.0, 0.6, 0, 90, 0, Items.DYE.lime());   // from the side, at the frame
+                int[] want = {net.minecraft.world.item.DyeColor.LIME.getTextureDiffuseColor() & 0xFFFFFF, red,
+                    net.minecraft.world.item.DyeColor.BLUE.getTextureDiffuseColor() & 0xFFFFFF, net.minecraft.world.item.DyeColor.WHITE.getTextureDiffuseColor() & 0xFFFFFF};
+                ctx.check("each part takes its own dye: frame lime, fork red, trunk blue, saddle white",
+                    java.util.Arrays.equals(bike.colors(), want), java.util.Arrays.toString(bike.colors()));
+                // over a save
+                var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess());
+                bike.saveWithoutId(out);
+                ElectricBike copy = ElnRegistry.ELECTRIC_BIKE_ENTITY.get().create(ctx.level(), EntitySpawnReason.LOAD);
+                copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess(), out.buildResult()));
+                ctx.check("the paint survives a save", java.util.Arrays.equals(copy.colors(), want), java.util.Arrays.toString(copy.colors()));
+                // picked up (broken up) and put down again
+                bike.hurtServer(ctx.level(), ctx.level().damageSources().generic(), 100);
+                var drops = ctx.level().getEntitiesOfClass(ItemEntity.class, new AABB(bike.blockPosition()).inflate(3));
+                ItemStack item = drops.stream().map(ItemEntity::getItem).filter(s -> s.is(ElnRegistry.ELECTRIC_BIKE.get())).findFirst().orElse(ItemStack.EMPTY);
+                drops.forEach(net.minecraft.world.entity.Entity::discard);
+                ctx.check("the dropped bike item carries the paint", java.util.Arrays.equals(mods.eln.bike.BikeColors.of(item), want),
+                    java.util.Arrays.toString(mods.eln.bike.BikeColors.of(item)));
+                p.setItemInHand(InteractionHand.MAIN_HAND, item);
+                BlockPos floor = ctx.at(2, 0, 1);
+                java.util.Set<Integer> before = new java.util.HashSet<>();
+                ctx.level().getEntitiesOfClass(ElectricBike.class, new AABB(floor).inflate(4)).forEach(e -> before.add(e.getId()));
+                item.useOn(new net.minecraft.world.item.context.UseOnContext(p, InteractionHand.MAIN_HAND,
+                    new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(floor).add(0, 0.5, 0), net.minecraft.core.Direction.UP, floor, false)));
+                placed = ctx.level().getEntitiesOfClass(ElectricBike.class, new AABB(floor).inflate(4)).stream()
+                    .filter(e -> !before.contains(e.getId())).findFirst().orElse(null);
+                ctx.check("put down again, it has the same paint", placed != null && java.util.Arrays.equals(placed.colors(), want),
+                    placed == null ? "not placed" : java.util.Arrays.toString(placed.colors()));
+                ctx.check("a plain bike's item carries no paint data", !new ItemStack(ElnRegistry.ELECTRIC_BIKE.get()).has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)
+                    && java.util.Arrays.equals(mods.eln.bike.BikeColors.of(new ItemStack(ElnRegistry.ELECTRIC_BIKE.get())), new int[]{-1, -1, -1, -1}), "");
+            } finally {
+                bike.discard();
+                if (placed != null) placed.discard();
+            }
+        }
     }
 
     /** What a shulker box in trunk slot k holds (from the item itself). */

@@ -32,6 +32,7 @@ public class ElectricBikeItem extends Item {
         bike.snapTo(at.getX() + 0.5, y, at.getZ() + 0.5, yaw, 0);
         if (!level.noCollision(bike, bike.getBoundingBox())) return InteractionResult.FAIL;
         bike.setCustomName(ctx.getItemInHand().get(net.minecraft.core.component.DataComponents.CUSTOM_NAME));
+        bike.setColors(BikeColors.of(ctx.getItemInHand()));   // (its paint, from when it was picked up)
         level.addFreshEntity(bike);
         level.gameEvent(ctx.getPlayer(), net.minecraft.world.level.gameevent.GameEvent.ENTITY_PLACE, at);
         if (ctx.getPlayer() == null || !ctx.getPlayer().getAbilities().instabuild) ctx.getItemInHand().shrink(1);

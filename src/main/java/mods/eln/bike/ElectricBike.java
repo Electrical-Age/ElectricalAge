@@ -51,6 +51,11 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     static final EntityDataAccessor<Boolean> DATA_POWERED = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.BOOLEAN);
     /** The battery's charge for the rider's speedometer: 0..1, NO_BATTERY when the slot is empty (Baughn: show it needs one). */
     static final EntityDataAccessor<Float> DATA_CHARGE = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.FLOAT);
+    /** The paint, one per BikeColors group (BikeColors.DEFAULT: the group's default). */
+    @SuppressWarnings("unchecked")
+    static final EntityDataAccessor<Integer>[] DATA_COLOR = new EntityDataAccessor[]{
+        SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.INT), SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.INT),
+        SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.INT), SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.INT)};
     public static final float NO_BATTERY = -1;
 
     /** The trunk: slot 0 the battery, 1-3 anything (Baughn). */
@@ -103,6 +108,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         data.define(DATA_MODE, (byte) Mode.PARKED.ordinal());
         data.define(DATA_POWERED, false);
         data.define(DATA_CHARGE, NO_BATTERY);
+        for (var c : DATA_COLOR) data.define(c, BikeColors.DEFAULT);
     }
 
     public Mode mode() {
@@ -136,7 +142,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
 
     @Override
     public ItemStack getPickResult() {
-        return new ItemStack(getDropItem());
+        return asItem();
     }
 
     @Override
@@ -284,12 +290,71 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         if (player.level().getEntity(entityId) instanceof ElectricBike b && b.getControllingPassenger() == player) b.fall();
     }
 
+    // ---------------------------------------------------------------- paint
+
+    public int color(int group) {
+        return entityData.get(DATA_COLOR[group]);
+    }
+
+    public int[] colors() {
+        int[] c = new int[BikeColors.GROUPS];
+        for (int g = 0; g < c.length; g++) c[g] = color(g);
+        return c;
+    }
+
+    public void setColors(int[] c) {
+        for (int g = 0; g < BikeColors.GROUPS && g < c.length; g++) entityData.set(DATA_COLOR[g], c[g]);
+    }
+
+    /** The bike as an item: its paint goes with it. */
+    public ItemStack asItem() {
+        ItemStack s = new ItemStack(getDropItem());
+        BikeColors.put(s, colors());
+        return s;
+    }
+
+    /** Broken up: drop the item with its paint (VehicleEntity drops a plain one). */
+    @Override
+    public void destroy(ServerLevel level, Item dropItem) {
+        kill(level);
+        if (level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.ENTITY_DROPS)) {
+            ItemStack s = asItem();
+            s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, getCustomName());
+            spawnAtLocation(level, s);
+        }
+    }
+
+    /** Picks are generous so the fork and the trunk, outside the 0.8-wide box, can be clicked (dyed, ridden). */
+    @Override
+    public float getPickRadius() {
+        return 0.45f;
+    }
+
+    /** A dye on the part the player looks at: that group takes its colour (one dye, unless creative). */
+    InteractionResult dye(Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
+        net.minecraft.world.item.DyeColor dye = held.get(net.minecraft.core.component.DataComponents.DYE);
+        if (dye == null) return InteractionResult.PASS;
+        int g = BikeColors.pick(player.getEyePosition(), player.getViewVector(1), position(), getYRot());
+        if (g < 0) return InteractionResult.PASS;
+        int c = dye.getTextureDiffuseColor() & 0xFFFFFF;
+        if (color(g) == c) return InteractionResult.PASS;
+        if (!level().isClientSide()) {
+            entityData.set(DATA_COLOR[g], c);
+            if (!player.getAbilities().instabuild) held.shrink(1);
+            playSound(SoundEvents.DYE_USE, 1, 1);
+        }
+        return InteractionResult.SUCCESS;
+    }
+
     // ---------------------------------------------------------------- riding
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
         InteractionResult sup = super.interact(player, hand, location);
         if (sup != InteractionResult.PASS) return sup;
+        InteractionResult dyed = dye(player, hand);
+        if (dyed != InteractionResult.PASS) return dyed;
         if (mode() == Mode.FALLEN) {   // stand it back up
             if (!level().isClientSide()) {
                 setMode(Mode.PARKED);
@@ -438,11 +503,13 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     protected void addAdditionalSaveData(ValueOutput out) {
         out.putInt("mode", mode() == Mode.RIDDEN ? Mode.PARKED.ordinal() : mode().ordinal());
         net.minecraft.world.ContainerHelper.saveAllItems(out, trunk.getItems());
+        out.putIntArray("colors", colors());
     }
 
     @Override
     protected void readAdditionalSaveData(ValueInput in) {
         setMode(Mode.values()[Math.floorMod(in.getIntOr("mode", Mode.PARKED.ordinal()), Mode.values().length)]);
         net.minecraft.world.ContainerHelper.loadAllItems(in, trunk.getItems());
+        in.getIntArray("colors").ifPresent(this::setColors);
     }
 }

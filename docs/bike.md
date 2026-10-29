@@ -34,6 +34,8 @@ them into the statics of `BikePhysics` and `ElectricBike`; the defaults are the 
 | `crashSpeed` | 3 b/s | `CRASH_SPEED` (/20) |
 | `jumpHeight` | 1.31 blocks | `JUMP_VY` = `velocityForPeak(jumpHeight)` (0.43 b/t) |
 | `stepHeight` | 0.6 blocks | `STEP_HEIGHT` (1 or more climbs full blocks) |
+| `turnRate` | 12 °/tick | `TURN_PER_TICK`: the steering at a standstill |
+| `turnRateAtTopSpeed` | 5 °/tick | `TURN_AT_TOP`: at the powered top speed and above, linear in between (Baughn: steering slows with speed) |
 
 ## Recipe (Baughn 2026-10-28)
 
@@ -93,9 +95,22 @@ GameTest `bike_recipe` crafts it.
 - **Energy** (server): the speed it moved this tick (from the client's moves) gives the motor's draw, taken from the
   battery item.
 
+## Paint (Baughn 2026-10-29: dyeable, per frame element)
+
+- Four groups (`BikeColors`, `BikeModel.Group`): the frame (tubes and stays), the fork, the trunk (box and lid), the
+  saddle. Right-click a part with a vanilla dye: the group of the part the player looks at takes the dye's colour
+  (`DyeColor.getTextureDiffuseColor`), one dye used unless creative, none if it's that colour already.
+- Which part: the look ray against a box per group in the bike's frame (`BikeColors.pick`, nearest hit). The pick radius
+  is 0.45, so the fork and the trunk, outside the 0.8-wide box, can be clicked at all.
+- Synced (`DATA_COLOR`, one int per group; -1 = default), saved as `colors`, and on the item when broken up
+  (`CUSTOM_DATA` `eln_bike_colors`; a plain bike's item has none) and back on the bike when placed.
+- Drawing: the dyeable parts are neutral grey in the texture; `BikeRenderer` submits the model once per group, each with
+  its tint (the defaults reproduce the old blue frame, slate trunk, dark saddle).
+
 ## Client
 
-- `client/entity/BikeModel`: cube model, regions of one material each in `textures/entity/electric_bike.png` (drawn by
+- `client/entity/BikeModel`: cube model, regions of one material each, each sized for its largest box's UV layout
+  (2(d+w) x (d+h); the trunk's once overran into the battery's, an odd patch on its back: Baughn) in `textures/entity/electric_bike.png` (drawn by
   `tools/bike/texture.py`, which also draws the item icon): diamond frame in EA blue, battery on the down tube, hub
   motor in the back wheel, octagon-rim wheels with four spokes across that turn with the distance rolled
   (`ElectricBike.wheel`), saddle, bars with grips, a lamp, a rack with the trunk, a kickstand that folds up when ridden.
@@ -108,7 +123,9 @@ GameTest `bike_recipe` crafts it.
   `eln.client.mixins.json`, client, not required) calls `RiderPose.apply` after vanilla's `setupAnim`: each leg points from the
   hip at its pedal (the bike's left crank under the right leg), and with no knee in the player model the hip rises up
   to 4 px (or drops 1.5) so the foot meets the pedal within 2 px (`RiderPoseTest`); the arms reach forward to the
-  grips. `SEAT_Y` 0.87, `SEAT_Z` -0.22: the hips a pixel into the saddle, over it.
+  grips: the upper body leans 0.35 rad forward about the hips (body, head and shoulders move with it) and each arm points
+  at its grip (Baughn: hands on the handles; `RiderPoseTest`). `SEAT_Y` 0.87, `SEAT_Z` -0.22: the hips a pixel into the
+  saddle, over it.
 - `BikeSound`: EA's `rotor_tone`, quiet, pitch with speed, only while the motor runs; it takes a sound source only then
   (started when it runs, stopped after 2 s quiet).
 - `client/BikeHud` (GUI layer `eln:bike_speedometer`, above the hotbar; Baughn: tell players it needs a battery): while
