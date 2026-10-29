@@ -60,6 +60,8 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
     /** Multiblock devices (turbines, solar panels, poles) reach past their block: don't cull them by it. */
     @Override
     public AABB getRenderBoundingBox(TransparentNodeEntity be) {
+        var r = be.elementRender == null ? null : be.elementRender.renderBounds();
+        if (r != null) return r;
         return new AABB(be.getBlockPos()).inflate(3);
     }
 }

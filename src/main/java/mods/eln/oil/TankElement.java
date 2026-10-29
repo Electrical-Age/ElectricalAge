@@ -21,7 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** TankDescriptor: one fluid-core vessel and its ports; it bursts over its rating. */
+/**
+ * TankDescriptor: one fluid-core vessel and its ports; it bursts over its rating. Blocks of a tier filling a box are one
+ * vessel (TankGroup): `own` is this block's share, `vessel` the node in use (its own, or the box's).
+ */
 public class TankElement extends TransparentNodeElement implements FluidDevice {
     final TankDescriptor desc;
     /** Its ports' conductance (m^3): an alloy pipe's end. */
@@ -30,7 +33,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
     static final double LOSS_W_PER_K = 1.0;
     /** The low (liquid) and high (vapour) side ports' heights (voxels, on the pipe lattice). */
     public static final int LOW = 4, HIGH = 12;
-    public FluidNode vessel;
+    public FluidNode vessel, own;
+    /** The box it is part of, or null alone. */
+    public TankGroup group;
     private double[] loaded;
     private List<FluidPort> ports = List.of();
     /** The water's share of its volume, last published (the sight glass). */
@@ -65,21 +70,45 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
     }
 
     /** A side face's port spot at height y (voxels): the face's other axes in x, y, z order (FluidPort.at). */
-    static int sideSpot(int face, int y) {
+    public static int sideSpot(int face, int y) {
         return face <= 3 ? 8 * 17 + y : y * 17 + 8;   // (north/south: x then y; west/east: y then z)
     }
 
     void makePorts() {
         long at = node.coordonate.pos().asLong();
         List<FluidPort> out = new ArrayList<>();
-        out.add(new FluidPort(vessel, at, 1, 1.0, PORT_K));   // top: vapour
-        out.add(new FluidPort(vessel, at, 0, 0.0, PORT_K));   // bottom: liquid
-        for (Direction d : new Direction[]{front.left(), front.right(), front.back()}) {
-            int f = d.toEnumFacing().get3DDataValue();
-            out.add(new FluidPort(vessel, at, f, 0.0, PORT_K, sideSpot(f, LOW)));    // low: liquid
-            out.add(new FluidPort(vessel, at, f, 1.0, PORT_K, sideSpot(f, HIGH)));   // high: vapour
+        if (group == null) {
+            out.add(new FluidPort(vessel, at, 1, 1.0, PORT_K));   // top: vapour
+            out.add(new FluidPort(vessel, at, 0, 0.0, PORT_K));   // bottom: liquid
+            for (Direction d : new Direction[]{front.left(), front.right(), front.back()}) {
+                int f = d.toEnumFacing().get3DDataValue();
+                out.add(new FluidPort(vessel, at, f, 0.0, PORT_K, sideSpot(f, LOW)));    // low: liquid
+                out.add(new FluidPort(vessel, at, f, 1.0, PORT_K, sideSpot(f, HIGH)));   // high: vapour
+            }
+        } else {
+            // in a box: the ports on its outer faces, each drawing at its height in the whole vessel
+            var c = node.coordonate;
+            int j = c.y - group.y0, h = group.sy;
+            if (j == h - 1) out.add(new FluidPort(vessel, at, 1, 1.0, PORT_K));
+            if (j == 0) out.add(new FluidPort(vessel, at, 0, 0.0, PORT_K));
+            for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) {
+                if (TankGroup.neighbour(this, d, null) != null && group.members.contains(TankGroup.neighbour(this, d, null))) continue;
+                int f = d.toEnumFacing().get3DDataValue();
+                out.add(new FluidPort(vessel, at, f, (j * 16 + LOW) / (16.0 * h), PORT_K, sideSpot(f, LOW)));
+                out.add(new FluidPort(vessel, at, f, (j * 16 + HIGH) / (16.0 * h), PORT_K, sideSpot(f, HIGH)));
+            }
         }
         ports = out;
+    }
+
+    /** The tanks of its tier on its six sides (for regrouping). */
+    List<TankElement> neighbours() {
+        List<TankElement> out = new ArrayList<>();
+        for (Direction d : TankGroup.DIRS) {
+            TankElement o = TankGroup.neighbour(this, d, null);
+            if (o != null) out.add(o);
+        }
+        return out;
     }
 
     @Override
@@ -88,6 +117,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
         if (vessel != null) {
             makePorts();
             FluidWorld.add(this);
+            // (with its neighbours: a box may form)
+            List<TankElement> seeds = neighbours();
+            seeds.add(this);
+            TankGroup.regroup(seeds, null);
         }
     }
 
@@ -95,18 +128,29 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
     public void disconnectJob() {
         super.disconnectJob();
         FluidWorld.remove(this);
+        if (group != null) {
+            // (the box without it: its share leaves with it, the rest re-form)
+            TankGroup g = group;
+            g.writeBack();
+            List<TankElement> rest = new ArrayList<>(g.members);
+            rest.remove(this);
+            group = null;
+            vessel = own;
+            TankGroup.regroup(rest, this);
+        }
     }
 
     @Override
     public void initialize() {
-        vessel = new FluidNode(desc.volume, node.coordonate.y, 1.0, false);
-        vessel.lossWPerK = LOSS_W_PER_K;
+        own = new FluidNode(desc.volume, node.coordonate.y, 1.0, false);
+        own.lossWPerK = LOSS_W_PER_K;
         if (loaded != null) {
-            vessel.mWater = loaded[0];
-            vessel.mAir = loaded[1];
-            vessel.energy = loaded[2];
-            vessel.update();
-        } else vessel.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+            own.mWater = loaded[0];
+            own.mAir = loaded[1];
+            own.energy = loaded[2];
+            own.update();
+        } else own.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        vessel = own;
         makePorts();
         connect();
     }
@@ -147,6 +191,12 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
         try {
             shownFill = (float) fill();
             stream.writeFloat(shownFill);
+            // the box: whether it draws it (its lowest corner), and its size (a lone tank: 1 1 1)
+            boolean draws = group == null || group.master() == this;
+            stream.writeBoolean(draws);
+            stream.writeByte(group == null ? 1 : group.sx);
+            stream.writeByte(group == null ? 1 : group.sy);
+            stream.writeByte(group == null ? 1 : group.sz);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
@@ -155,10 +205,12 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        if (vessel != null) {
-            nbt.putDouble("vesselW", vessel.mWater);
-            nbt.putDouble("vesselA", vessel.mAir);
-            nbt.putDouble("vesselU", vessel.energy);
+        if (group != null) group.writeBack();   // (its share of the box)
+        if (own != null) {
+            // (to float precision: a box re-formed on load from these shares and written back differs in the last bits)
+            nbt.putDouble("vesselW", (float) own.mWater);
+            nbt.putDouble("vesselA", (float) own.mAir);
+            nbt.putDouble("vesselU", (float) own.energy);
         }
     }
 
@@ -175,6 +227,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
         if (vessel == null) return info;
         info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
         info.put(I18N.tr("Water"), String.format("%.0f mB (%.0f%% full)", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
+        info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
+            vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
         if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;

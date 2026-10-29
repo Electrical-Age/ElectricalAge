@@ -87,9 +87,9 @@ public class Wp10aContent implements ElnContent {
             LVU, 300, lowVoltageCableDescriptor, "compactturbine50v"));
         // the shaft redo (Baughn 2026-10-29): tanks (steam drum, separator, hotwell) and an inline feed pump
         transparentNodeItem.addDescriptor(40 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Iron Tank"),
-            0.003, 10e5, 40e5, "tankiron"));
+            mods.eln.oil.TankDescriptor.bucketsVolume(12), 10e5, 40e5, "tankiron"));   // (12 buckets a block: Baughn 2026-10-29)
         transparentNodeItem.addDescriptor(44 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Alloy Tank"),
-            0.003, 100e5, 300e5, "tankalloy"));
+            mods.eln.oil.TankDescriptor.bucketsVolume(12), 100e5, 300e5, "tankalloy"));
         transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "200V Inline Pump"),
             MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
         // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)

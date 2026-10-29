@@ -26,11 +26,33 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         this.obj = Eln.obj.getObj(model);
     }
 
+    /** Volume (m^3) of so many buckets of water (EA units). */
+    public static double bucketsVolume(double buckets) {
+        return buckets * 1000 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L;
+    }
+
     /** The vessel, and the water in its sight glass filled to `fill` (0..1). */
     void draw(float fill) {
         if (obj == null) return;
-        var m = obj.getPart("main");
-        if (m != null) m.draw();
+        for (String part : new String[]{"shell", "glass", "ports"}) {
+            var m = obj.getPart(part);
+            if (m != null) m.draw();
+        }
+        drawLevel(fill);
+    }
+
+    /** A box of tanks, scaled to it by the render: its shell and sight glass, not the ports (they'd stretch). */
+    void drawBox(float fill) {
+        if (obj == null) return;
+        for (String part : new String[]{"shell", "glass"}) {
+            var m = obj.getPart(part);
+            if (m != null) m.draw();
+        }
+        drawLevel(fill);
+    }
+
+    void drawLevel(float fill) {
+        if (obj == null) return;
         var l = obj.getPart("level");
         if (l == null || fill <= 0.005f) return;
         // (the glass runs 2..14 px: scale the water about its foot)

@@ -35,6 +35,17 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public double motorShare;
     /** Shaft power its pump and ejector take (W, last step) and the air that leaked in since loaded (kg). */
     public double pumpW, totalLeakKg;
+    /**
+     * The cooling-water tube bundle (Baughn 2026-10-29): water piped in low on its left and out low on its right
+     * passes through tubes in the vessel; heat goes from the vessel to it at TUBES_UA (W/K), as far as the two
+     * temperatures allow (half the way to even in a step at most). A full 16 kW HP turbine's steam (~39 g/s, ~90 kW)
+     * condenses with about a kilogram a second of cold water through it.
+     */
+    public static final double TUBES_UA = 4000, TUBES_VOLUME = 0.002;
+    public mods.eln.sim.fluid.FluidNode tubes;
+    private double[] loadedTubes;
+    /** Heat into the cooling water (W, last step) and since loaded (J), the water through it since loaded (kg). */
+    public double tubesW, totalTubesJ, totalCoolingKg;
 
     public PlantCondenserElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -88,11 +99,28 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
             totalLeakKg += air;
         }
         v.before(dt, cooling, motorShare, motorShare);
+        // the tube bundle: the vessel's heat into the cooling water (drowned tubes still work: they are in the water)
+        if (tubes != null) {
+            double tv = n.T(), tt = tubes.T(), q = TUBES_UA * (tv - tt);
+            double fromVessel = (n.energy - mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, n.volume, tt)) / dt;
+            double intoTubes = (mods.eln.sim.fluid.Flash.energyAt(tubes.mWater, tubes.mAir, tubes.volume, tv) - tubes.energy) / dt;
+            q = q >= 0 ? Math.max(0, Math.min(q, Math.min(0.5 * fromVessel, 0.5 * intoTubes))) : 0;
+            n.heat -= q;
+            tubes.heat += q;
+            tubesW = q;
+            totalTubesJ += q * dt;
+        }
     }
 
     @Override
     public void afterFluidStep(double dt) {
         double kg = v.after(dt);
+        // the cooling water through it: what flows into the tubes this step
+        if (tubes != null) {
+            var t = FluidWorld.nodeFor(tubes);
+            for (var e : FluidWorld.edgesOf(tubes))
+                if (e.b == t && e.flow > 0 || e.a == t && e.flow < 0) totalCoolingKg += Math.abs(e.flow) * dt;
+        }
         // the motor turns them: the pump's power for what it moved, the ejector's while it runs
         pumpW = kg / dt / Water.RHO_L * (CondenserDescriptor.PUMP_PA - Water.P_ATM) / PlantCondenserDescriptor.PUMP_EFFICIENCY
             + PlantCondenserDescriptor.EJECTOR_W * Math.min(1, motorShare);
@@ -109,7 +137,9 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
             new FluidPort(v.vessel, at, back, 1.0, EXHAUST_K),                  // exhaust in: back
             new FluidPort(v.vessel, at, right, 1.0, EXHAUST_K),                 // exhaust in: right
             new FluidPort(v.outlet, at, fr, 0.0, CondenserVessel.PORT_K, TankElement.sideSpot(fr, TankElement.LOW)),   // condensate out: front, low
-            new FluidPort(v.inlet, at, left, 1.0, CondenserVessel.PORT_K, TankElement.sideSpot(left, TankElement.HIGH)));   // makeup in: left, high
+            new FluidPort(v.inlet, at, left, 1.0, CondenserVessel.PORT_K, TankElement.sideSpot(left, TankElement.HIGH)),   // makeup in: left, high
+            new FluidPort(tubes, at, left, 0.0, CondenserVessel.PORT_K, TankElement.sideSpot(left, TankElement.LOW)),     // cooling water in: left, low
+            new FluidPort(tubes, at, right, 0.0, CondenserVessel.PORT_K, TankElement.sideSpot(right, TankElement.LOW)));  // cooling water out: right, low
     }
 
     @Override
@@ -132,6 +162,13 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public void initialize() {
         var c = node.coordonate;
         v.initialize(c.y, mods.eln.sim.Ambient.kelvin(c));
+        tubes = new mods.eln.sim.fluid.FluidNode(TUBES_VOLUME, c.y, 0.25, false);
+        if (loadedTubes != null) {
+            tubes.mWater = loadedTubes[0];
+            tubes.mAir = loadedTubes[1];
+            tubes.energy = loadedTubes[2];
+            tubes.update();
+        } else tubes.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(c));
         makePorts();
         connect();
     }
@@ -172,12 +209,14 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         v.write(nbt);
+        if (tubes != null) CondenserVessel.put(nbt, "tubes", tubes);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         v.read(nbt, false);
+        loadedTubes = CondenserVessel.get(nbt, "tubes");
     }
 
     @Override
@@ -190,7 +229,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
             info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)%s", v.floodShare() * 100, n.mLiquid() / EaUnits.KG_PER_MB_WATER,
                 v.floodShare() > PlantCondenserDescriptor.FLOOD ? I18N.tr(": FLOODING, its tubes drown") : ""));
         }
-        info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW));
+        info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW) + I18N.tr(" by its shell, ") + Utils.plotPower("", tubesW) + I18N.tr(" to its cooling water"));
         info.put(I18N.tr("Motor"), motor == null ? I18N.tr("none: no condensate pump, no air ejector (put a Shaft Motor against its side)")
             : String.format("%.0f%% speed, pumping %.0f mB/s, %.0f W off its shaft", motorShare * 100, v.pumped, pumpW));
         return info;

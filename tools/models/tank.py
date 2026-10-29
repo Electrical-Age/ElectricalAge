@@ -3,7 +3,8 @@
 sight glass on its front. Ports (an iron pipe's flange): the top centre (vapour), and on each side face a low one
 (liquid, 4 px up) and a high one (vapour, 12 px up); the bottom port is a plain opening under the skid.
 
-Parts: `main`, and `level`: the water in the sight glass, 2..14 px, which TankRender scales to the fill.
+Parts: `shell`, `ports` (the flanges), `glass` (the sight glass) and `level`: the water in it, 2..14 px, which
+TankRender scales to the fill. A box of tanks (TankGroup) is drawn as one: shell, glass and level scaled to the box.
 
 Design frame: mcmodel px (0..16, corner origin), front XN (x = 0).
 
@@ -25,7 +26,7 @@ def flange_x0(y):
             prism("x", y, C, 1.25, 1.0, C - R + 0.5, "steel", n=10, caps=(False, False))] + \
         bolt_ring("x", y, C, 1.6, 1.0, 1.25, 4, rb=0.2)
 
-def main_part(t):
+def shell_part(t):
     m = Model()
     m.add(box(1.5, 0, 1.5, 14.5, 1.0, 14.5, "darksteel", faces="nsewu"))
     m.add(prism("y", C, C, R, 1.0, 14.5, t["shell"], n=14, caps=(False, False)))
@@ -33,15 +34,22 @@ def main_part(t):
     m.add(prism("y", C, C, R - 0.5, 1.0, 1.5, t["shell"], n=14, caps=(True, False)))
     for y in (3.0, 8.0, 13.0):
         m.add(tube("y", C, C, R - 0.1, R + 0.4, y, y + 0.6, t["band"], n=14, inner=False))
-    # top port
+    return m
+
+def ports_part(t):
+    """The flanges: top port, and a low (liquid) and high (vapour) one on each face but the front (the sight glass)."""
+    m = Model()
     m.add(prism("y", C, C, 1.25, 14.5, 15.0, "steel", n=10, caps=(False, False)))
     m.add(prism("y", C, C, 2.0, 15.0, 16.0, "steel", n=12))
     m.add(*bolt_ring("y", C, C, 1.6, 14.75, 15.0, 4, rb=0.2))
-    # side ports: low (liquid) and high (vapour) on each face (the front's beside the sight glass, so not there)
     for k in (1, 2, 3):
         for y in (4.0, 12.0):
             m.add(*turned(flange_x0(y), k))
-    # the sight glass on the front: brass frame and glass, 2..14 px
+    return m
+
+def glass_part(t):
+    """The sight glass on the front: brass frame, dark backing, 1.5..14.5 px."""
+    m = Model()
     m.add(box(C - R - 0.75, 1.5, C - 1.25, C - R + 0.5, 14.5, C - 0.75, "brass"))
     m.add(box(C - R - 0.75, 1.5, C + 0.75, C - R + 0.5, 14.5, C + 1.25, "brass"))
     m.add(box(C - R - 0.6, 1.5, C - 0.75, C - R - 0.5, 14.5, C + 0.75, "darksteel", faces="w"))   # (behind the water)
@@ -57,7 +65,7 @@ def main():
     for tier, t in TIERS.items():
         name = "tank" + tier
         d = out_dir(res, name)
-        counts = write_parts(d, name, [("main", main_part(t)), ("level", level_part())])
+        counts = write_parts(d, name, [("shell", shell_part(t)), ("ports", ports_part(t)), ("glass", glass_part(t)), ("level", level_part())])
         atlas(os.path.join(d, "tex.png"), t["paint"])
         print(name, counts)
 

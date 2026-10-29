@@ -48,7 +48,8 @@ public final class SteamTurbineSpec {
     /**
      * LP: takes an HP turbine's exhaust at ~1.5 bar down to a condenser's ~0.1 bar: 9 kW from the same ~39 g/s (with
      * the HP's 16, about +55 % at the shaft; more against the HP venting to air at 1 atm, whose own work grows as its
-     * exhaust drops to 1.5 bar... less: see the GameTest's number). Big bore: low-pressure steam is thin.
+     * exhaust drops to 1.5 bar... less: see the GameTest's number). Big bore: low-pressure steam is thin. Its casing
+     * holds the HP's 20 bar rating (bursts over 25): its own governor shutting traps the HP's exhaust behind it.
      */
-    public static final SteamTurbineSpec LP = new SteamTurbineSpec(9000, 1.5e5, 0.1e5, 10e5, 0.75, 3.0, 8 * ALLOY_END_K, 0.8, 5, true);
+    public static final SteamTurbineSpec LP = new SteamTurbineSpec(9000, 1.5e5, 0.1e5, 25e5, 0.75, 3.0, 8 * ALLOY_END_K, 0.8, 5, true);
 }

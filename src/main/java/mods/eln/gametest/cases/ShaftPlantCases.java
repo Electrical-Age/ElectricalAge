@@ -38,6 +38,7 @@ public final class ShaftPlantCases {
         cases.add(new WetSteam(false));
         cases.add(new Flooding());
         cases.add(new DumpOnLoadRejection());
+        cases.add(new FullPlantCoolingWater());
     }
 
     static final int LP_TURBINE = 18 + (4 << 6), CONDENSER = 52 + (82 << 6);
@@ -156,6 +157,95 @@ public final class ShaftPlantCases {
             ctx.check("plant: the condenser holds a vacuum (under 0.3 bar)", c.v.vessel.P() < 0.3e5, String.format("%.2f bar", c.v.vessel.P() / 1e5));
             ctx.check("plant: HP + LP + condenser gets over +50 % more work per kg than the HP venting to air", perB > 1.5 * perA,
                 String.format("%.0f vs %.0f kJ/kg", perB / 1000, perA / 1000));
+        }
+    }
+
+    /** A source of cold water at `pa` (fixed: a lake behind a pump) and a drain at 1 atm, on two faces of a block. */
+    static mods.eln.sim.fluid.FluidDevice coolingLoop(PlantCondenserElement c, BlockPos inAt, int inFace, BlockPos outAt, int outFace, double pa) {
+        var lake = new mods.eln.sim.fluid.FluidNode(1.0, inAt.getY(), 1.0, true).fill(0.9 * Water.RHO_L, pa, 288.15);
+        var drain = new mods.eln.sim.fluid.FluidNode(1.0, outAt.getY(), 1.0, true).fill(0, Water.P_ATM, 288.15);
+        var level = c.fluidLevel();
+        var ports = List.of(
+            new mods.eln.sim.fluid.FluidDevice.FluidPort(lake, inAt.asLong(), inFace, 0.0, mods.eln.oil.CondenserVessel.PORT_K,
+                mods.eln.oil.TankElement.sideSpot(inFace, mods.eln.oil.TankElement.LOW)),
+            new mods.eln.sim.fluid.FluidDevice.FluidPort(drain, outAt.asLong(), outFace, 0.0, mods.eln.oil.CondenserVessel.PORT_K,
+                mods.eln.oil.TankElement.sideSpot(outFace, mods.eln.oil.TankElement.LOW)));
+        var d = new mods.eln.sim.fluid.FluidDevice() {
+            public Object fluidLevel() {
+                return level;
+            }
+
+            public List<FluidPort> fluidPorts() {
+                return ports;
+            }
+        };
+        mods.eln.fluid.FluidWorld.add(d);
+        return d;
+    }
+
+    /**
+     * Baughn 2026-10-29: can a full 16 kW HP (~39 g/s) be condensed? HP (throttle full) -> LP -> plant condenser with
+     * cooling water through its tubes from a 2 bar supply to a drain: the vacuum holds; the numbers are logged.
+     */
+    static final class FullPlantCoolingWater extends PlumbingCases.Big {
+        ShaftSteamTurbineElement hp;
+        PlantCondenserElement c;
+        mods.eln.sim.fluid.FluidDevice loop;
+        Resistor[] loads = new Resistor[2];
+        IProcess feed;
+        int tick;
+        double kg0, cool0, heat0, w0, kg, cool, heat, work, window, pSum;
+
+        public String id() {
+            return "plant_condenser_cooling_water_full_hp";
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext ctx) {
+            // (the HP's back straight against the condenser's back: no crossover pipe to throttle it)
+            BlockPos hpAt = ctx.at(3, 1, 5), cp = ctx.at(4, 1, 5);
+            TransparentNodeElement[] b = turbineLine(ctx, STEAM_TURBINE, hpAt, GENERATOR_8KW, GENERATOR_8KW);
+            hp = (ShaftSteamTurbineElement) b[0];
+            loads[0] = load((GeneratorElement) b[1], 9000);
+            loads[1] = load((GeneratorElement) b[2], 9000);
+            c = condenser(ctx, cp, true, Direction.XP);
+            // (front XP: its left is south, its right north)
+            loop = coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);
+            Eln.simulator.addSlowProcess(feed = dt -> {
+                steam(hp);
+                if (++tick == 700) {
+                    kg0 = hp.totalKg;
+                    cool0 = c.totalCoolingKg;
+                    heat0 = c.totalTubesJ;
+                    w0 = hp.totalWork;
+                }
+                if (tick > 700) {
+                    window += dt;
+                    kg = hp.totalKg - kg0;
+                    cool = c.totalCoolingKg - cool0;
+                    heat = c.totalTubesJ - heat0;
+                    work = hp.totalWork - w0;
+                    pSum += c.v.vessel.P() * dt;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(feed);
+            mods.eln.fluid.FluidWorld.remove(loop);
+            for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
+            double steam = kg / window, water = cool / window, q = heat / window, p = pSum / window;
+            ctx.line(String.format("full HP into the condenser: steam %.1f g/s, %.1f kW on the shaft (%.0f kJ/kg); condenser %.3f bar; "
+                + "%.1f kW into %.2f kg/s of cooling water (+%.1f K), shell %.1f kW",
+                steam * 1000, work / window / 1000, work / Math.max(1e-9, kg) / 1000, p / 1e5, q / 1000, water, q / Math.max(1e-9, water) / 4186, c.v.heatW / 1000));
+            ctx.line("full HP: condenser " + c.getWaila() + "; HP " + hp.getWaila());
+            ctx.check("full HP: it runs at about full steam (over 33 g/s, 16 kW on the shaft)", steam > 0.033 && work / window > 16e3,
+                String.format("%.1f g/s, %.1f kW", steam * 1000, work / window / 1000));
+            ctx.check("full HP: the cooling water takes most of the heat (over 50 kW; the shell the rest)", q > 50e3, String.format("%.1f kW", q / 1000));
+            ctx.check("full HP: the vacuum holds (under 0.3 bar)", p < 0.3e5, String.format("%.2f bar", p / 1e5));
         }
     }
 

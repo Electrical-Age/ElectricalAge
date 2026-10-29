@@ -70,6 +70,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   thermal cables; condensate pump and air ejector on a Shaft Motor against its side (no motor: no vacuum; air leaks
   in at 2 mg/s at full vacuum); over half full its tubes drown (vacuum lost, LP power sags). Measured: HP + LP +
   condenser +50 % work per kg over the HP venting to air, on 20 bar steam. `ShaftPlantCases`.
+- Round 4 (Baughn 2026-10-29): tanks hold 12 buckets a block, and tank blocks of a tier that fill a box (A x B x C)
+  are one vessel (TankGroup; any other shape stays separate one-block tanks); ports on the box's outer faces, drawing
+  at their height in the box; each block keeps its share by volume (written back before a change and before saving,
+  to float precision), so a broken block takes its share and saved state survives; the box draws as one tank from its
+  lowest corner (shell, sight glass and water scaled; no flanges). Plant condenser: cooling-water tubes in low on its
+  left, out low on its right, UA 4 kW/K. `tank_box_*`, `plant_condenser_cooling_water_full_hp`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item
