@@ -173,6 +173,9 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         return clientHost;
     }
 
+    /** Client: the glowing boxes of hot thermal cables, each {celsius, x0, y0, z0, x1, y1, z1} in voxels (Incandescence). */
+    public volatile List<float[]> clientGlow = List.of();
+
     /** Client: the parts as last published. */
     public volatile List<VoxelPart> clientParts = List.of();
 
@@ -213,14 +216,27 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
             int hash = n * 7919 + hostId + 31 * java.util.Arrays.hashCode(cv);
             clientHost = hostId == 0 ? null : net.minecraft.world.level.block.Block.stateById(hostId);
             List<VoxelPart> ps = new ArrayList<>(n);
+            VoxelPart[] read = new VoxelPart[n];
             for (int i = 0; i < n; i++) {
                 String kind = stream.readUTF();
                 byte[] b = new byte[stream.readShort()];
                 stream.readFully(b);
                 hash = hash * 31 + kind.hashCode() * 17 + java.util.Arrays.hashCode(b);
                 VoxelPart p = VoxelPart.deserialize(kind, new DataInputStream(new java.io.ByteArrayInputStream(b)));
+                read[i] = p;
                 if (p != null) ps.add(p);
             }
+            // the thermal cables' glow: a step per part (VoxelNode.publishBeforeElements), drawn by SixNodeRender
+            byte[] steps = new byte[n];
+            stream.readFully(steps);
+            List<float[]> glow = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                int st = steps[i] & 255;
+                if (st == 0 || read[i] == null) continue;
+                float c = (float) mods.eln.misc.Incandescence.stepCelsius(st);
+                for (int[] b : read[i].boxes()) glow.add(new float[]{c, b[0], b[1], b[2], b[3], b[4], b[5]});
+            }
+            clientGlow = glow.isEmpty() ? List.of() : List.copyOf(glow);
             if (hash != partsHash || clientParts.size() != ps.size()) {
                 partsHash = hash;
                 partsChanged = true;

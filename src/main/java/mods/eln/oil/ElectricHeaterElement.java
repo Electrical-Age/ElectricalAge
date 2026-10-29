@@ -39,6 +39,7 @@ public class ElectricHeaterElement extends TransparentNodeElement {
     final NbtElectricalLoad load = new NbtElectricalLoad("load");
     final Resistor resistor = new Resistor(load, null);
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
+    final mods.eln.misc.Incandescence.Light glow = new mods.eln.misc.Incandescence.Light();
     /** Baughn: with no regulator in its slot it heats at full power until something gives; a regulator holds a set point. */
     final RegulatorThermalLoadToElectricalResistor regulator = new RegulatorThermalLoadToElectricalResistor("regulator", thermal, resistor);
     final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
@@ -55,6 +56,10 @@ public class ElectricHeaterElement extends TransparentNodeElement {
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(new VoltageStateWatchDog().set(load).setUNominal(desc.nominalU).set(new Failure(this).machine()));
         slowProcessList.add(new ThermalLoadWatchDog().set(thermal).setTMax(800).set(new Failure(this).machine()));
+        // red-hot coils light the room (Incandescence; Baughn 2026-10-28)
+        slowProcessList.add(t -> {
+            if (glow.update(node.coordonate.world(), mods.eln.misc.Incandescence.celsius(thermal.Tc))) node.setLightValue(glow.level);
+        });
         thermalFastProcessList.add(regulator);
     }
 

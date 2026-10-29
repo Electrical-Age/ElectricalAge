@@ -18,6 +18,8 @@ public class ResistorRender extends SixNodeElementRender {
     private CableRenderType renderPreProcess;
 
     private float wiperPos = 0;
+    /** The glow's temperature (C, on the resistor's warning scale), from the server. */
+    private float glowCelsius;
 
     public ResistorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
@@ -29,6 +31,7 @@ public class ResistorRender extends SixNodeElementRender {
         super.publishUnserialize(stream);
         try {
             if (descriptor.isRheostat) wiperPos = stream.readFloat();
+            glowCelsius = stream.readFloat();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -39,6 +42,8 @@ public class ResistorRender extends SixNodeElementRender {
         GL11.glRotatef(90, 1, 0, 0);
         front.glRotateOnX();
         descriptor.draw(wiperPos);
+        // near its 130 C limit it glows dull red to orange, a warning (Incandescence.warningCelsius)
+        mods.eln.misc.Incandescence.drawGlow(glowCelsius, descriptor::drawCore);
     }
 
 }
