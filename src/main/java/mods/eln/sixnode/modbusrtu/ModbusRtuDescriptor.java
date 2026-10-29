@@ -100,4 +100,10 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
             }
         }
     }
+
+    /** Its door is drawn open in the model: not part of the box (Baughn 2026-10-29). */
+    @Override
+    protected java.util.Set<Obj3DPart> footprintIgnores() {
+        return door == null ? java.util.Set.of() : java.util.Set.of(door);
+    }
 }

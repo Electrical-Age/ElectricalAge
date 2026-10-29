@@ -35,6 +35,10 @@ them into the statics of `BikePhysics` and `ElectricBike`; the defaults are the 
 | `jumpHeight` | 1.31 blocks | `JUMP_VY` = `velocityForPeak(jumpHeight)` (0.43 b/t) |
 | `stepHeight` | 0.6 blocks | `STEP_HEIGHT` (1 or more climbs full blocks) |
 | `turnRate` | 12 °/tick | `TURN_PER_TICK`: the steering at a standstill |
+| `lampWatts` | 20 W | `LAMP_WATTS`: the front lamp's draw (both bikes) |
+| `terrainStepHeight` | 1.0 blocks | `BikeType.terrainStep` |
+| `terrainJumpHeight` | 2.5 blocks | `BikeType.terrainJumpVy` = `velocityForPeak` |
+| `terrainMotorWatts` | 150 W | `BikeType.terrainWatts` (same top speed) |
 | `turnRateAtTopSpeed` | 5 °/tick | `TURN_AT_TOP`: at the powered top speed and above, linear in between (Baughn: steering slows with speed) |
 
 ## Recipe (Baughn 2026-10-28)
@@ -95,6 +99,29 @@ GameTest `bike_recipe` crafts it.
 - **Energy** (server): the speed it moved this tick (from the client's moves) gives the motor's draw, taken from the
   battery item.
 
+## The terrain bike (Baughn 2026-10-29, Discord 1565187553659854970)
+
+- `eln:terrain_bike` (entity and item): the same `ElectricBike` class and `ElectricBikeItem`, told apart by
+  `BikeType` (from the entity type): step height 1.0 (a whole block rides; a 2-block wall stops it, and at speed throws
+  you), a 2.5-block jump, a 150 W motor at the same 9.5 b/s top speed; everything else is shared. Config: `terrain*`.
+- Its model (`BikeModel.LAYER_TERRAIN`, the same geometry, so the rider's pose and the dye targets hold): fat
+  knobbly tyres (wider, deeper, 16 knobs), a suspension fork (bare stanchions into fat lower legs, the dyeable part),
+  tubes 1.35x thicker. Default paint: orange frame, dark fork (dyeable per part like the bike). Tooltip "Still not a
+  motorcycle". Its own item icon (`tools/bike/texture.py`).
+- Recipe: `PmP` / `RBR` / ` M `: P alloy plate, m Advanced Electrical Motor (the 200 V motor), R rubber, B an electric
+  bike, M Advanced Machine Block.
+
+## The front lamp (Baughn 2026-10-29)
+
+- Riding, a right-click with an empty main hand switches it (client: `InputEvent.InteractionKeyMappingTriggered` sends
+  `BikeLamp`, `eln:bike_lamp`; the server takes it only from the bike's rider). On foot a right-click still mounts.
+- On only with charge; it draws `lampWatts` from the trunk battery, standing or riding, and goes out when the battery
+  is flat or taken out. Synced and saved (`lamp`).
+- While on, each server tick it lights the way as EA's flashlight does (`LampItem`): short-lived light blocks (level 14,
+  5 ticks) in the air along the bike's heading from the lamp, dipped 8 degrees, up to 12 blocks, every third half-block
+  step back from where the beam stops. Everyone sees the light. The lamp's face is drawn full bright when on and
+  dimmed when off (`BikeModel.Group.LAMP`). No beam cone is drawn (EA has none; Stasis draws the flashlight's).
+
 ## Paint (Baughn 2026-10-29: dyeable, per frame element)
 
 - Four groups (`BikeColors`, `BikeModel.Group`): the frame (tubes and stays), the fork, the trunk (box and lid), the
@@ -148,5 +175,6 @@ GameTest `bike_recipe` crafts it.
 
 `BikePhysicsTest` (rules), GameTests `gametest/cases/BikeCases`: trunk slots, save, break drops; kickstand, tip-over
 timing, rider off, stand up; half slab rides, full block stops; motor draw (~1 kJ in 10 s at full speed) and
-powered/pedalling; the recipe; container insides (shulker read/write lands in its CONTAINER, inert when taken out, stale edits void,
+powered/pedalling; the recipe; the lamp (no battery, toggle, 20 W standing, light ahead, flat goes out, saved);
+the terrain bike (a whole block rides, 2 stop it, jump 2.5, 150 W, type and item, saves as eln:terrain_bike, recipe); container insides (shulker read/write lands in its CONTAINER, inert when taken out, stale edits void,
 shift-click both ways conserves items, a bundle's weight limit); the synced charge (missing, flat, partial, half-percent threshold). Riding itself is client-side and needs a client to test.

@@ -20,6 +20,8 @@ import net.minecraft.util.Mth;
  */
 public class BikeModel extends EntityModel<BikeRenderState> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath("eln", "electric_bike"), "main");
+    /** The terrain bike (Baughn 2026-10-29): the same bike, fatter: knobbly tyres, a suspension fork, thicker tubes. */
+    public static final ModelLayerLocation LAYER_TERRAIN = new ModelLayerLocation(Identifier.fromNamespaceAndPath("eln", "terrain_bike"), "main");
 
     /** Wheel radius in pixels (ElectricBike.WHEEL_RADIUS in blocks), hub heights, and where things sit along z. */
     static final float R = BikeGeometry.R, HUB_Y = BikeGeometry.HUB_Y, FRONT_Z = BikeGeometry.FRONT_Z, REAR_Z = BikeGeometry.REAR_Z;
@@ -33,34 +35,48 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         BATTERY = {28, 23}, MOTOR = {46, 23}, BLACK = {28, 32};
 
     /** The dyeable groups (Baughn: dyeable per frame element), and what each holds; everything else is BASE. */
-    public enum Group { BASE, FRAME, FORK, TRUNK, SADDLE }
+    public enum Group {
+        BASE, FRAME, FORK, TRUNK, SADDLE,
+        /** The front lamp: drawn full bright when on (BikeRenderer). */
+        LAMP
+    }
 
     static final java.util.Map<String, Group> GROUPS = java.util.Map.ofEntries(
         java.util.Map.entry("head_tube", Group.FRAME), java.util.Map.entry("top_tube", Group.FRAME), java.util.Map.entry("down_tube", Group.FRAME),
         java.util.Map.entry("seat_tube", Group.FRAME), java.util.Map.entry("chain_stay_l", Group.FRAME), java.util.Map.entry("chain_stay_r", Group.FRAME),
         java.util.Map.entry("seat_stay_l", Group.FRAME), java.util.Map.entry("seat_stay_r", Group.FRAME),
         java.util.Map.entry("fork_l", Group.FORK), java.util.Map.entry("fork_r", Group.FORK),
-        java.util.Map.entry("trunk", Group.TRUNK), java.util.Map.entry("trunk_lid", Group.TRUNK), java.util.Map.entry("saddle", Group.SADDLE));
+        java.util.Map.entry("trunk", Group.TRUNK), java.util.Map.entry("trunk_lid", Group.TRUNK), java.util.Map.entry("saddle", Group.SADDLE),
+        java.util.Map.entry("lamp", Group.LAMP));
 
     private final ModelPart frontWheel, rearWheel, kickstand, crankL, crankR;
     /** Every top-level part with its group, for drawing one group at a time. */
     private final java.util.List<java.util.Map.Entry<ModelPart, Group>> parts = new java.util.ArrayList<>();
 
     public BikeModel(ModelPart root) {
+        this(root, false);
+    }
+
+    public BikeModel(ModelPart root, boolean terrain) {
         super(root);
         frontWheel = root.getChild("front_wheel");
         rearWheel = root.getChild("rear_wheel");
         kickstand = root.getChild("kickstand");
         crankL = root.getChild("crank_l");
         crankR = root.getChild("crank_r");
-        for (String name : PART_NAMES) parts.add(java.util.Map.entry(root.getChild(name), GROUPS.getOrDefault(name, Group.BASE)));
+        for (String name : terrain ? NAMES_TERRAIN : NAMES_BIKE) parts.add(java.util.Map.entry(root.getChild(name), GROUPS.getOrDefault(name, Group.BASE)));
     }
 
-    static final java.util.List<String> PART_NAMES = new java.util.ArrayList<>();
+    /** The top-level part names of each layer (createLayer fills the one it builds). */
+    static final java.util.List<String> NAMES_BIKE = new java.util.ArrayList<>(), NAMES_TERRAIN = new java.util.ArrayList<>();
+    static java.util.List<String> PART_NAMES = NAMES_BIKE;
+    /** While building the terrain layer: tubes thicker by this. */
+    static float thick = 1;
 
     /** A tube of thickness t from (y0, z0) to (y1, z1) at x, as a box along z turned about x. */
     static void tube(PartDefinition root, String name, int[] uv, float x, float y0, float z0, float y1, float z1, float t) {
         PART_NAMES.add(name);
+        if (uv == PAINT) t *= thick;
         float dy = y1 - y0, dz = z1 - z0, len = (float) Math.sqrt(dy * dy + dz * dz);
         float th = (float) Math.atan2(-dy, dz);
         root.addOrReplaceChild(name, CubeListBuilder.create().texOffs(uv[0], uv[1]).addBox(-t / 2, -t / 2, 0, t, t, len),
@@ -71,9 +87,15 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         PART_NAMES.add(name);
         PartDefinition w = root.addOrReplaceChild(name, CubeListBuilder.create(), PartPose.offset(0, HUB_Y, z));
         float seg = 2 * R * (float) Math.tan(Math.PI / 8) + 0.2f;
+        boolean fat = thick > 1;   // (the terrain bike's tyres: wider, deeper, with knobs on the tread)
+        float tw = fat ? 3.2f : 2, td = fat ? 2.2f : 1.5f;
         for (int i = 0; i < 8; i++)
-            w.addOrReplaceChild("rim" + i, CubeListBuilder.create().texOffs(TIRE[0], TIRE[1]).addBox(-1, -R, -seg / 2, 2, 1.5f, seg),
+            w.addOrReplaceChild("rim" + i, CubeListBuilder.create().texOffs(TIRE[0], TIRE[1]).addBox(-tw / 2, -R, -seg / 2, tw, td, seg),
                 PartPose.rotation(i * Mth.PI / 4, 0, 0));
+        if (fat)
+            for (int i = 0; i < 16; i++)
+                w.addOrReplaceChild("knob" + i, CubeListBuilder.create().texOffs(TIRE[0], TIRE[1]).addBox(i % 2 == 0 ? -1.5f : 0.2f, -R - 0.4f, -0.6f, 1.3f, 0.6f, 1.2f),
+                    PartPose.rotation(i * Mth.PI / 8, 0, 0));
         for (int i = 0; i < 4; i++)
             w.addOrReplaceChild("spoke" + i, CubeListBuilder.create().texOffs(METAL[0], METAL[1]).addBox(-0.25f, -R + 1, -0.25f, 0.5f, 2 * R - 2, 0.5f),
                 PartPose.rotation(i * Mth.PI / 4, 0, 0));
@@ -92,7 +114,17 @@ public class BikeModel extends EntityModel<BikeRenderState> {
     }
 
     public static LayerDefinition createLayer() {
+        return createLayer(false);
+    }
+
+    public static LayerDefinition createLayerTerrain() {
+        return createLayer(true);
+    }
+
+    static LayerDefinition createLayer(boolean terrain) {
+        PART_NAMES = terrain ? NAMES_TERRAIN : NAMES_BIKE;
         PART_NAMES.clear();
+        thick = terrain ? 1.35f : 1;
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         wheel(root, "front_wheel", FRONT_Z);
@@ -108,7 +140,14 @@ public class BikeModel extends EntityModel<BikeRenderState> {
             String s = x < 0 ? "_l" : "_r";
             tube(root, "chain_stay" + s, PAINT, x, BB_Y, BB_Z, HUB_Y, REAR_Z, 1f);
             tube(root, "seat_stay" + s, PAINT, x, SEAT_Y + 1.5f, SEAT_Z - 0.4f, HUB_Y, REAR_Z, 1f);
-            tube(root, "fork" + s, PAINT, x * 1.1f, HEAD_BOT, HEAD_Z - 1, HUB_Y, FRONT_Z, 1.1f);
+            if (!terrain) {
+                tube(root, "fork" + s, PAINT, x * 1.1f, HEAD_BOT, HEAD_Z - 1, HUB_Y, FRONT_Z, 1.1f);
+            } else {
+                // a suspension fork: bare stanchions into fat lower legs (the dyeable part)
+                float my = HEAD_BOT + 0.45f * (HUB_Y - HEAD_BOT), mz = HEAD_Z - 1 + 0.45f * (FRONT_Z - HEAD_Z + 1);
+                tube(root, "fork_upper" + s, METAL, x * 1.2f, HEAD_BOT, HEAD_Z - 1, my + 1, mz - 0.27f, 1.1f);
+                tube(root, "fork" + s, PAINT, x * 1.3f, my, mz, HUB_Y, FRONT_Z, 1.4f);
+            }
         }
         // the battery along the down tube, the bottom bracket and pedal cranks
         float dy = BB_Y - HEAD_BOT, dz = BB_Z - HEAD_Z, th = (float) Math.atan2(-dy, dz), len = (float) Math.sqrt(dy * dy + dz * dz);
@@ -150,6 +189,7 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         // the kickstand: pivots at the bottom bracket's back, down to the ground on the left; folds back along the stay
         part(root, "kickstand", CubeListBuilder.create().texOffs(BLACK[0], BLACK[1]).addBox(-0.5f, 0, -0.5f, 1, 6.2f, 1)
             .addBox(-1, 5.7f, -1, 2, 0.6f, 2), PartPose.offset(-1.5f, BB_Y, BB_Z + 2.5f));
+        thick = 1;
         return LayerDefinition.create(mesh, 64, 64);
     }
 

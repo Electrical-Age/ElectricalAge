@@ -51,6 +51,8 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     static final EntityDataAccessor<Boolean> DATA_POWERED = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.BOOLEAN);
     /** The battery's charge for the rider's speedometer: 0..1, NO_BATTERY when the slot is empty (Baughn: show it needs one). */
     static final EntityDataAccessor<Float> DATA_CHARGE = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.FLOAT);
+    /** The front lamp is on (Baughn 2026-10-29: it lights the way like EA's flashlight). */
+    static final EntityDataAccessor<Boolean> DATA_LAMP = SynchedEntityData.defineId(ElectricBike.class, EntityDataSerializers.BOOLEAN);
     /** The paint, one per BikeColors group (BikeColors.DEFAULT: the group's default). */
     @SuppressWarnings("unchecked")
     static final EntityDataAccessor<Integer>[] DATA_COLOR = new EntityDataAccessor[]{
@@ -97,8 +99,16 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
     public static java.util.function.Consumer<ElectricBike> clientCrash = b -> {
     };
 
+    /** Which bike this is (electric or terrain), from its entity type. */
+    public final BikeType bikeType;
+
+    public BikeType bikeType() {
+        return bikeType;
+    }
+
     public ElectricBike(EntityType<? extends ElectricBike> type, Level level) {
         super(type, level);
+        this.bikeType = BikeType.of(type);
         this.blocksBuilding = true;
     }
 
@@ -109,6 +119,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         data.define(DATA_POWERED, false);
         data.define(DATA_CHARGE, NO_BATTERY);
         for (var c : DATA_COLOR) data.define(c, BikeColors.DEFAULT);
+        data.define(DATA_LAMP, false);
     }
 
     public Mode mode() {
@@ -137,7 +148,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
 
     @Override
     protected Item getDropItem() {
-        return ElnRegistry.ELECTRIC_BIKE.get();
+        return bikeType.item();
     }
 
     @Override
@@ -147,7 +158,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
 
     @Override
     public float maxUpStep() {
-        return BikePhysics.STEP_HEIGHT;
+        return bikeType.stepHeight();
     }
 
     @Override
@@ -199,7 +210,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
             setYRot(BikePhysics.turn(getYRot(), p.getYRot(), forward));   // (slower to turn the faster it goes: Baughn)
             if (isInWater()) forward *= 0.3;
             if (pendingJump > 0 && onGround()) {
-                vy = BikePhysics.jumpVelocity(pendingJump);
+                vy = BikePhysics.jumpVelocity(pendingJump, bikeType.jumpVy());
                 jumpCooldown = 10;
                 playSound(SoundEvents.CHAIN_PLACE, 0.6f, 0.7f);
             }
@@ -259,6 +270,59 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
             stillTicks = 0;
         }
         drawPower();
+        if (lampOn()) lightTheWay();
+    }
+
+    // ---------------------------------------------------------------- the front lamp
+
+    public boolean lampOn() {
+        return entityData.get(DATA_LAMP);
+    }
+
+    /** The rider's toggle (BikeLamp, from a right-click with an empty hand while riding): on only with charge. */
+    public void toggleLamp() {
+        boolean on = !lampOn() && syncedCharge() > 0;
+        entityData.set(DATA_LAMP, on);
+        playSound(SoundEvents.LEVER_CLICK, 0.4f, on ? 1.4f : 1.1f);
+    }
+
+    /** BikeLamp from a client: only its rider can switch it. */
+    public static void onLampToggle(ServerPlayer player) {
+        if (player.getVehicle() instanceof ElectricBike b && b.getControllingPassenger() == player) b.toggleLamp();
+    }
+
+    /** How far the beam reaches (blocks), its light, and where the lamp sits on the bike (forward, up). */
+    static final double LAMP_RANGE = 12, LAMP_FORWARD = 0.55, LAMP_UP = 0.85;
+    static final int LAMP_LIGHT = 14;
+
+    /**
+     * Server, each tick the lamp is on: light blocks along the beam, as EA's flashlight places them (LampItem: short-lived
+     * light blocks in the air the beam crosses, every third step back from where it stops), from the lamp along the
+     * bike's heading, dipped a little.
+     */
+    void lightTheWay() {
+        float yr = getYRot() * Mth.DEG_TO_RAD;
+        double dip = Math.toRadians(8);
+        Vec3 dir = new Vec3(-Mth.sin(yr) * Math.cos(dip), -Math.sin(dip), Mth.cos(yr) * Math.cos(dip)).scale(0.5);
+        Vec3 p = position().add(-Mth.sin(yr) * LAMP_FORWARD, LAMP_UP, Mth.cos(yr) * LAMP_FORWARD);
+        int steps = 0;
+        for (int i = 0; i < LAMP_RANGE / 0.5; i++) {
+            Vec3 q = p.add(dir);
+            BlockPos b = BlockPos.containing(q);
+            if (!mods.eln.compat.WorldCompat.isAir(level(), b.getX(), b.getY(), b.getZ())) break;   // (a light block is air)
+            p = q;
+            steps++;
+        }
+        while (steps > 0) {
+            BlockPos at = BlockPos.containing(p);
+            int stride = 1;
+            if (mods.eln.compat.WorldCompat.isAir(level(), at.getX(), at.getY(), at.getZ())) {
+                mods.eln.sixnode.lampsocket.LightBlockEntity.addLight(level(), at.getX(), at.getY(), at.getZ(), LAMP_LIGHT, 5);
+                stride = 3;
+            }
+            p = p.subtract(dir.scale(stride));
+            steps -= stride;
+        }
     }
 
     /** The motor's draw from the trunk's battery (server), by the speed it went this tick; POWERED for both sides. */
@@ -266,12 +330,15 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         ItemStack s = trunk.getItem(BATTERY_SLOT);
         IItemEnergyBattery b = accepts(s) ? BatteryBeltItem.battery(s) : null;
         boolean has = b != null && b.getEnergy(s) > 1 && b.getDischagePower(s) > 0;
-        if (has && mode() == Mode.RIDDEN && serverSpeed > STOPPED) {
-            double joules = Math.min(BikePhysics.motorWatts(serverSpeed), b.getDischagePower(s)) / 20;
+        boolean moving = mode() == Mode.RIDDEN && serverSpeed > STOPPED;
+        if (has && (moving || lampOn())) {
+            double watts = (moving ? BikePhysics.motorWatts(serverSpeed, bikeType.motorWatts()) : 0) + (lampOn() ? BikePhysics.LAMP_WATTS : 0);
+            double joules = Math.min(watts, b.getDischagePower(s)) / 20;
             b.setEnergy(s, Math.max(0, b.getEnergy(s) - joules));
             has = b.getEnergy(s) > 1;
         }
         if (has != powered()) entityData.set(DATA_POWERED, has);
+        if (!has && lampOn()) entityData.set(DATA_LAMP, false);   // (flat, or no battery: the lamp goes out)
         syncCharge();
     }
 
@@ -504,6 +571,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         out.putInt("mode", mode() == Mode.RIDDEN ? Mode.PARKED.ordinal() : mode().ordinal());
         net.minecraft.world.ContainerHelper.saveAllItems(out, trunk.getItems());
         out.putIntArray("colors", colors());
+        out.putBoolean("lamp", lampOn());
     }
 
     @Override
@@ -511,5 +579,6 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         setMode(Mode.values()[Math.floorMod(in.getIntOr("mode", Mode.PARKED.ordinal()), Mode.values().length)]);
         net.minecraft.world.ContainerHelper.loadAllItems(in, trunk.getItems());
         in.getIntArray("colors").ifPresent(this::setColors);
+        entityData.set(DATA_LAMP, in.getBooleanOr("lamp", false));
     }
 }

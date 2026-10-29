@@ -14,7 +14,7 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
-        BIKE_CRASH, BIKE_JUMP, BIKE_STEP, BIKE_TURN, BIKE_TURN_TOP;
+        BIKE_CRASH, BIKE_JUMP, BIKE_STEP, BIKE_TURN, BIKE_TURN_TOP, BIKE_LAMP, TERRAIN_STEP, TERRAIN_JUMP, TERRAIN_MOTOR;
     static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
     static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, POWER_CAP_LEAK;
@@ -74,6 +74,14 @@ public final class ElnConfig {
             .defineInRange("turnRate", 12.0, 0.5, 180.0);
         BIKE_TURN_TOP = b.comment("...and at its powered top speed and above (Baughn: steering slows with speed); linear between.")
             .defineInRange("turnRateAtTopSpeed", 5.0, 0.5, 180.0);
+        BIKE_LAMP = b.comment("The front lamp's draw from the trunk battery, W (both bikes; a flashlight's is 20-50).")
+            .defineInRange("lampWatts", 20.0, 0.0, 1000.0);
+        TERRAIN_STEP = b.comment("The terrain bike: height it rides up without jumping, blocks (1: a whole block; 2-block walls stop it).")
+            .defineInRange("terrainStepHeight", 1.0, 0.0, 2.0);
+        TERRAIN_JUMP = b.comment("The terrain bike: height of a full-charge jump, blocks.")
+            .defineInRange("terrainJumpHeight", 2.5, 0.0, 6.0);
+        TERRAIN_MOTOR = b.comment("The terrain bike: its motor's draw at full speed, W (same top speed as the electric bike).")
+            .defineInRange("terrainMotorWatts", 150.0, 0.0, 10000.0);
         b.pop();
         // the electrical anvil (Baughn 2026-10-28: an 800 V pulse, maxed out, so players build capacitor banks)
         b.push("anvil");
@@ -140,6 +148,10 @@ public final class ElnConfig {
         mods.eln.bike.BikePhysics.STEP_HEIGHT = (float) (double) BIKE_STEP.get();
         mods.eln.bike.BikePhysics.TURN_PER_TICK = (float) (double) BIKE_TURN.get();
         mods.eln.bike.BikePhysics.TURN_AT_TOP = (float) (double) BIKE_TURN_TOP.get();
+        mods.eln.bike.BikePhysics.LAMP_WATTS = BIKE_LAMP.get();
+        mods.eln.bike.BikeType.terrainStep = (float) (double) TERRAIN_STEP.get();
+        mods.eln.bike.BikeType.terrainJumpVy = mods.eln.bike.BikePhysics.velocityForPeak(TERRAIN_JUMP.get());
+        mods.eln.bike.BikeType.terrainWatts = TERRAIN_MOTOR.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.powerW = ANVIL_POWER.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerUnit = ANVIL_UNIT.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerName = ANVIL_NAME.get();

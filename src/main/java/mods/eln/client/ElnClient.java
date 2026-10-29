@@ -58,6 +58,7 @@ public final class ElnClient {
             // every entity type needs a renderer: the client crashes on one without (thunderstorm replicators)
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
             e.registerEntityRenderer(ElnRegistry.ELECTRIC_BIKE_ENTITY.get(), mods.eln.client.entity.BikeRenderer::new);
+            e.registerEntityRenderer(ElnRegistry.TERRAIN_BIKE_ENTITY.get(), ctx -> new mods.eln.client.entity.BikeRenderer(ctx, true));
         });
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "device"),
@@ -77,6 +78,7 @@ public final class ElnClient {
             e -> {
                 e.registerLayerDefinition(mods.eln.client.entity.ReplicatorModel.LAYER, mods.eln.client.entity.ReplicatorModel::createLayer);
                 e.registerLayerDefinition(mods.eln.client.entity.BikeModel.LAYER, mods.eln.client.entity.BikeModel::createLayer);
+                e.registerLayerDefinition(mods.eln.client.entity.BikeModel.LAYER_TERRAIN, mods.eln.client.entity.BikeModel::createLayerTerrain);
             });
         // a bike rider's legs follow the pedals (RiderPose, HumanoidModelMixin)
         modBus.addListener(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent.class,
@@ -87,6 +89,16 @@ public final class ElnClient {
                     mods.eln.client.entity.RiderPose.extract(avatar, state);
                 }
             }));
+        // riding a bike, a right-click with an empty hand switches its front lamp (on foot it mounts, as before)
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered.class, e -> {
+            var mc = net.minecraft.client.Minecraft.getInstance();
+            if (e.isUseItem() && e.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND && mc.player != null
+                && mc.player.getVehicle() instanceof mods.eln.bike.ElectricBike && mc.player.getMainHandItem().isEmpty()) {
+                net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(mods.eln.bike.BikeLamp.INSTANCE);
+                e.setSwingHand(false);
+                e.setCanceled(true);
+            }
+        });
         mods.eln.bike.ElectricBike.clientSound = mods.eln.client.entity.BikeSound::tick;
         mods.eln.bike.ElectricBike.clientCrash = b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new mods.eln.bike.BikeCrash(b.getId()));
         if (mods.eln.handbook.Handbook.guideAvailable())

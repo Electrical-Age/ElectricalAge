@@ -19,13 +19,18 @@ public final class BikeColors {
     public static final int FRAME = 0, FORK = 1, TRUNK = 2, SADDLE = 3, GROUPS = 4;
     /** Not dyed: draw the group's default. */
     public static final int DEFAULT = -1;
-    /** The defaults as tints over the model's neutral (226 grey) texture: the colours it had before dyes. */
-    public static final int[] DEFAULTS = {0x3466BC, 0x3466BC, 0x4F5F6D, 0x3B2D26};
+    /** The electric bike's defaults, as tints over the model's neutral (226 grey) texture: its colours before dyes. */
+    public static final int[] DEFAULTS = BikeType.ELECTRIC.defaults;
     static final String KEY = "eln_bike_colors";
 
     /** The tint to draw group g with, given its stored colour. */
     public static int tint(int g, int stored) {
-        return stored == DEFAULT ? DEFAULTS[g] : stored;
+        return tint(BikeType.ELECTRIC, g, stored);
+    }
+
+    /** The tint for group g of a bike of this type (its own defaults: the terrain bike is orange with a dark fork). */
+    public static int tint(BikeType type, int g, int stored) {
+        return stored == DEFAULT ? type.defaultColor(g) : stored;
     }
 
     /** How far a dye reaches along the look ray (blocks): a player's entity interaction range and a little. */

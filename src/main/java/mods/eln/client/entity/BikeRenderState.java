@@ -11,6 +11,8 @@ public class BikeRenderState extends EntityRenderState {
     /** The paint (BikeColors, per group); and which group this copy draws (BikeRenderer draws one copy per group). */
     public int[] colors = new int[mods.eln.bike.BikeColors.GROUPS];
     public BikeModel.Group group = BikeModel.Group.BASE;
+    public mods.eln.bike.BikeType type = mods.eln.bike.BikeType.ELECTRIC;
+    public boolean lamp;
 
     /** A copy for drawing one group. */
     BikeRenderState forGroup(BikeModel.Group g) {
@@ -25,6 +27,8 @@ public class BikeRenderState extends EntityRenderState {
         c.mode = mode;
         c.colors = colors;
         c.group = g;
+        c.type = type;
+        c.lamp = lamp;
         c.lightCoords = lightCoords;
         c.outlineColor = outlineColor;
         return c;

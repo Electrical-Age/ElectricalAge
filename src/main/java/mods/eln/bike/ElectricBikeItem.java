@@ -14,10 +14,17 @@ import net.minecraft.world.item.context.UseOnContext;
 
 import java.util.function.Consumer;
 
-/** The electric bike as an item: used on a block, it stands there on its kickstand, facing the way you face. */
+/** A bike as an item (BikeType): used on a block, it stands there on its kickstand, facing the way you face. */
 public class ElectricBikeItem extends Item {
+    final BikeType type;
+
     public ElectricBikeItem(Item.Properties p) {
+        this(p, BikeType.ELECTRIC);
+    }
+
+    public ElectricBikeItem(Item.Properties p, BikeType type) {
         super(p);
+        this.type = type;
     }
 
     @Override
@@ -26,7 +33,7 @@ public class ElectricBikeItem extends Item {
         BlockPos pos = ctx.getClickedPos();
         double y = ctx.getClickedFace() == Direction.UP ? ctx.getClickLocation().y : pos.relative(ctx.getClickedFace()).getY();
         BlockPos at = ctx.getClickedFace() == Direction.UP ? pos : pos.relative(ctx.getClickedFace());
-        ElectricBike bike = mods.eln.registry.ElnRegistry.ELECTRIC_BIKE_ENTITY.get().create(level, EntitySpawnReason.SPAWN_ITEM_USE);
+        ElectricBike bike = type.entityType().create(level, EntitySpawnReason.SPAWN_ITEM_USE);
         if (bike == null) return InteractionResult.FAIL;
         float yaw = ctx.getPlayer() != null ? ctx.getPlayer().getYRot() : ctx.getHorizontalDirection().toYRot();
         bike.snapTo(at.getX() + 0.5, y, at.getZ() + 0.5, yaw, 0);
@@ -39,9 +46,9 @@ public class ElectricBikeItem extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    /** Baughn: "Not a motorcycle". */
+    /** Baughn: "Not a motorcycle" (the terrain bike: "Still not a motorcycle"). */
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> out, TooltipFlag flag) {
-        out.accept(Component.translatable("item.eln.electric_bike.tooltip").withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.translatable(type.tooltipKey()).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }
