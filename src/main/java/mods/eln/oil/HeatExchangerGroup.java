@@ -100,6 +100,33 @@ public final class HeatExchangerGroup {
         return null;
     }
 
+    /** Whether the exchangers connected to SEED make a stack (what regroup would make one exchanger of). */
+    static boolean wouldStack(HeatExchangerElement seed) {
+        Set<HeatExchangerElement> comp = new HashSet<>();
+        ArrayDeque<HeatExchangerElement> queue = new ArrayDeque<>();
+        queue.add(seed);
+        comp.add(seed);
+        int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
+        boolean sameAxis = true, ax = alongX(seed);
+        while (!queue.isEmpty()) {
+            HeatExchangerElement h = queue.poll();
+            var c = h.node.coordonate;
+            x0 = Math.min(x0, c.x);
+            y0 = Math.min(y0, c.y);
+            z0 = Math.min(z0, c.z);
+            x1 = Math.max(x1, c.x);
+            y1 = Math.max(y1, c.y);
+            z1 = Math.max(z1, c.z);
+            sameAxis &= alongX(h) == ax;
+            for (Direction d : DIRS) {
+                HeatExchangerElement o = neighbour(h, d, null);
+                if (o != null && comp.add(o)) queue.add(o);
+            }
+        }
+        int sx = x1 - x0 + 1, sy = y1 - y0 + 1, sz = z1 - z0 + 1;
+        return sameAxis && comp.size() == sx * sy * sz && sy == 2 && (ax ? sz : sx) == 2 && (ax ? sx : sz) <= MAX_LENGTH;
+    }
+
     /** Re-form the stacks of the exchangers connected to these (`excluded`: the block going away, or null). */
     public static void regroup(Collection<HeatExchangerElement> seeds, HeatExchangerElement excluded) {
         Set<HeatExchangerElement> done = new HashSet<>();

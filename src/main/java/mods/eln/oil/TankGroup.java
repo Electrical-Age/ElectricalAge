@@ -80,6 +80,30 @@ public final class TankGroup {
         return null;
     }
 
+    /** Whether the tanks connected to SEED fill a box of more than one (what regroup would make one vessel of). */
+    static boolean wouldBox(TankElement seed) {
+        Set<TankElement> comp = new HashSet<>();
+        ArrayDeque<TankElement> queue = new ArrayDeque<>();
+        queue.add(seed);
+        comp.add(seed);
+        int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
+        while (!queue.isEmpty()) {
+            TankElement t = queue.poll();
+            var c = t.node.coordonate;
+            x0 = Math.min(x0, c.x);
+            y0 = Math.min(y0, c.y);
+            z0 = Math.min(z0, c.z);
+            x1 = Math.max(x1, c.x);
+            y1 = Math.max(y1, c.y);
+            z1 = Math.max(z1, c.z);
+            for (Direction d : DIRS) {
+                TankElement o = neighbour(t, d, null);
+                if (o != null && comp.add(o)) queue.add(o);
+            }
+        }
+        return comp.size() > 1 && comp.size() == (x1 - x0 + 1) * (y1 - y0 + 1) * (z1 - z0 + 1);
+    }
+
     /**
      * Re-form the vessels of the tanks connected to these (a block placed, broken or unloaded: `excluded` is the one
      * going away, or null).

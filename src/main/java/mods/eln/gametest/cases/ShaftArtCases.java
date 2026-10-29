@@ -22,6 +22,8 @@ public final class ShaftArtCases {
         cases.add(new SpeedKeptWhenPartsChange());
         cases.add(new TerminalsWhereDrawn());
         cases.add(new TrippedSeals());
+        cases.add(new TankBoxReloads());
+        cases.add(new TankBoxReformsLate());
     }
 
     static final int HP = 9 + (4 << 6), GEN4 = 10 + (4 << 6), GAS = 11 + (4 << 6), JOINT = 12 + (4 << 6), HUB = 13 + (4 << 6),
@@ -395,6 +397,164 @@ public final class ShaftArtCases {
                 ctx.check(n + " tripped: no steam through it, no power from it", t[i].tripped && kg1[i] - kg0[i] < 1e-7 && w1[i] - w0[i] < 1e-3,
                     String.format("%.4f g, %.1f J", (kg1[i] - kg0[i]) * 1000, w1[i] - w0[i]));
             }
+        }
+    }
+
+    /**
+     * Unload these nodes and load them back as a world load does (NodeManager.loadFromNbt: each read, added and
+     * initialized in turn, then all booted), in the given order.
+     */
+    static void reloadAll(TestContext ctx, List<BlockPos> at) throws ReflectiveOperationException {
+        var w = ctx.level();
+        List<net.minecraft.nbt.CompoundTag> tags = new ArrayList<>();
+        List<Class<?>> classes = new ArrayList<>();
+        for (BlockPos p : at) {
+            var old = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, w));
+            var t = new net.minecraft.nbt.CompoundTag();
+            t.putString("tag", old.getNodeUuid());
+            old.writeToNBT(t);
+            tags.add(t);
+            classes.add(old.getClass());
+        }
+        for (BlockPos p : at) {
+            var old = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, w));
+            old.unload();
+            mods.eln.node.NodeManager.instance.removeNode(old);
+        }
+        List<mods.eln.node.NodeBase> fresh = new ArrayList<>();
+        for (int i = 0; i < tags.size(); i++) {
+            var n = (mods.eln.node.NodeBase) classes.get(i).getConstructor().newInstance();
+            n.readFromNBT(tags.get(i).copy());
+            mods.eln.node.NodeManager.instance.addNode(n);
+            n.initializeFromNBT();
+            fresh.add(n);
+        }
+        for (var n : fresh) n.globalBoot();
+        for (BlockPos p : at) if (w.getBlockEntity(p) instanceof mods.eln.node.NodeBlockEntity be) be.forgetNode();
+    }
+
+    /**
+     * AdventurAgent (2026-10-29): a 2 x 2 x 2 iron tank with pipes on its west and east faces came back from a server
+     * restart as eight one-block tanks. Built by a player's view, filled, piped; unloaded and loaded back (in placing order
+     * and the reverse), it is one box again with all its water.
+     */
+    static final class TankBoxReloads extends PlumbingCases.Big {
+        String bad = "", line = "";
+
+        public String id() {
+            return "tank_box_reforms_after_a_reload";
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        static mods.eln.oil.TankElement at(TestContext ctx, BlockPos p) {
+            return (mods.eln.oil.TankElement) ((mods.eln.node.transparent.TransparentNode) mods.eln.node.NodeManager.instance
+                .getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, ctx.level()))).element;
+        }
+
+        public void build(TestContext ctx) {
+            List<BlockPos> at = new ArrayList<>();
+            for (int y = 1; y <= 2; y++)
+                for (int x = 2; x <= 3; x++)
+                    for (int z = 2; z <= 3; z++) {
+                        placeLooking(ctx, PlumbingCases.IRON_TANK, ctx.at(x, y, z), EAST);
+                        at.add(ctx.at(x, y, z));
+                    }
+            var g = at(ctx, at.get(0)).group;
+            if (g == null || g.members.size() != 8) {
+                bad = "not a box when built";
+                return;
+            }
+            PlumbingCases.fill(g.node, 0.6 * g.node.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+            double water = g.node.mWater;
+            PipeCases.lay(ctx, ctx.at(1, 1, 2), 0, 0, 8, 8, 16, 8, 8);    // (an iron pipe to its west face's centre)
+            PipeCases.lay(ctx, ctx.at(4, 1, 2), 2, 0, 8, 8, 16, 8, 8);    // (a large pipe to its east face's centre)
+            for (int order = 0; order < 2; order++) {
+                List<BlockPos> o = new ArrayList<>(at);
+                o.add(ctx.at(1, 1, 2));   // (the pipes too, last; reversed: first)
+                o.add(ctx.at(4, 1, 2));
+                if (order == 1) java.util.Collections.reverse(o);
+                try {
+                    reloadAll(ctx, o);
+                } catch (ReflectiveOperationException e) {
+                    bad += e + "; ";
+                    return;
+                }
+                var g2 = at(ctx, at.get(0)).group;
+                boolean one = g2 != null && g2.members.size() == 8;
+                for (BlockPos p : at) one &= at(ctx, p).group == g2;
+                double w2 = one ? g2.node.mWater : 0;
+                line += String.format("%s order: %s, %.3f of %.3f kg; ", order == 0 ? "placing" : "reverse", one ? "one box" : "NOT a box", w2, water);
+                if (!one) bad += (order == 0 ? "placing" : "reverse") + " order: not one box; ";
+                else if (Math.abs(w2 - water) > 1e-3 * water) bad += String.format("water %.3f of %.3f kg; ", w2, water);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("tank box reload: " + line);
+            ctx.check("a tank box re-forms after a reload, with its water", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * Whatever leaves a full box of tanks as lone blocks (AdventurAgent's restart, not reproduced), the box re-forms within
+     * a couple of seconds, with all its water: a 2 x 2 x 2 box broken into lone tanks behind its back (shares written,
+     * groups dropped) is one box again.
+     */
+    static final class TankBoxReformsLate extends PlumbingCases.Big {
+        final List<BlockPos> at = new ArrayList<>();
+        double water;
+        String bad = "";
+
+        public String id() {
+            return "tank_box_reforms_late";
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext ctx) {
+            for (int y = 1; y <= 2; y++)
+                for (int x = 2; x <= 3; x++)
+                    for (int z = 2; z <= 3; z++) {
+                        placeLooking(ctx, PlumbingCases.IRON_TANK, ctx.at(x, y, z), EAST);
+                        at.add(ctx.at(x, y, z));
+                    }
+            var g = TankBoxReloads.at(ctx, at.get(0)).group;
+            if (g == null) {
+                bad = "not a box when built";
+                return;
+            }
+            PlumbingCases.fill(g.node, 0.5 * g.node.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+            water = g.node.mWater;
+            try {
+                var wb = mods.eln.oil.TankGroup.class.getDeclaredMethod("writeBack");
+                wb.setAccessible(true);
+                wb.invoke(g);
+            } catch (ReflectiveOperationException e) {
+                bad = e.toString();
+                return;
+            }
+            for (BlockPos p : at) {
+                var t = TankBoxReloads.at(ctx, p);
+                t.group = null;
+                t.vessel = t.own;
+                mods.eln.fluid.FluidWorld.changed(t);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            if (bad.isEmpty()) {
+                var g = TankBoxReloads.at(ctx, at.get(0)).group;
+                boolean one = g != null && g.members.size() == 8;
+                for (BlockPos p : at) one &= TankBoxReloads.at(ctx, p).group == g;
+                if (!one) bad = "still lone tanks after 3 s";
+                else if (Math.abs(g.node.mWater - water) > 1e-3 * water) bad = String.format("water %.3f of %.3f kg", g.node.mWater, water);
+            }
+            ctx.check("lone tanks that fill a box become one box again, with their water", bad.isEmpty(), bad);
         }
     }
 }

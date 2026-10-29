@@ -34,6 +34,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public FluidNode a, b, ownA, ownB;
     /** The stack it is part of, or null alone. */
     public HeatExchangerGroup group;
+    private int stackCheck;
     private double[] loadedA, loadedB;
     private List<FluidPort> ports = List.of();
     /** Heat A to B now (W), the inlet temperatures (K, last step's), and totals (J) since loaded. */
@@ -44,6 +45,15 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         super(node, d);
         desc = (HeatExchangerDescriptor) d;
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
+        // (a lone block whose neighbours stack with it re-forms the stack: as a tank box, TankElement)
+        slowProcessList.add(t -> {
+            if (a != null && group == null && ++stackCheck % 20 == 0 && !neighbours().isEmpty() && HeatExchangerGroup.wouldStack(this)) {
+                List<HeatExchangerElement> seeds = neighbours();
+                seeds.add(this);
+                HeatExchangerGroup.regroup(seeds, null);
+                if (group != null) mods.eln.Eln.LOG.info("Electrical Age: heat exchanger stack at {} re-formed late", node.coordonate);
+            }
+        });
     }
 
     /** What flows into n (kg/s) and the flow-weighted temperature it comes from (K), from the edges' last flows. */

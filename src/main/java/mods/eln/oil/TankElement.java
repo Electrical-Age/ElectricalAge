@@ -57,6 +57,15 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
                 new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
             if (Math.abs(fill() - shownFill) > 0.02) needPublish();
+            // a lone tank whose neighbours fill a box with it re-forms the box (AdventurAgent 2026-10-29: a 2 x 2 x 2 iron
+            // tank came back from a server restart as eight one-block tanks; not reproduced in a reload test: the log line
+            // says when this catches one)
+            if (group == null && ++boxCheck % 20 == 0 && !neighbours().isEmpty() && TankGroup.wouldBox(this)) {
+                List<TankElement> seeds = neighbours();
+                seeds.add(this);
+                TankGroup.regroup(seeds, null);
+                if (group != null) mods.eln.Eln.LOG.info("Electrical Age: tank box at {} re-formed late ({} tanks)", node.coordonate, group.members.size());
+            }
             int c = group == null ? 0 : coupledPorts();
             if (c != coupled) {
                 coupled = c;
@@ -64,6 +73,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             }
         });
     }
+
+    private int boxCheck;
 
     /** The water's share of its volume. */
     public double fill() {
