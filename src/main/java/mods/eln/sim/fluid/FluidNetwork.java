@@ -212,8 +212,11 @@ public final class FluidNetwork {
         // two-phase branch, while the step's real change may carry it onto the steep single-phase one (a short pipe of
         // saturated steam then pulled in twice its contents, overshot, and the flow reversed every other step)
         double s = 0;
-        for (double frac : new double[]{1e-4, 2e-2}) {
-            double d = Math.max(1e-7, frac * n.mass());
+        // (both ways: a node just short of liquid-full answers a gain stiffly and a loss softly, one just past it the
+        // other way round; with water's real bulk modulus the step overshot the knee between them every other step)
+        for (double frac : new double[]{1e-4, 2e-2, -1e-4, -2e-2}) {
+            double d = Math.max(1e-7, Math.abs(frac) * n.mass()) * Math.signum(frac);
+            if (n.mWater + (xl + xv) * d < 0 || n.mAir + xa * d < 0) continue;
             probe.solve(n.mWater + (xl + xv) * d, n.mAir + xa * d, n.energy + h * d, n.volume, n.T());
             s = Math.max(s, (probe.P - n.P()) / d);
         }

@@ -45,6 +45,7 @@ public final class PipeCases {
         cases.add(new PipeRoutePreview());
         cases.add(new KitLengthNotDamage());
         cases.add(new ValveMeters());
+        cases.add(new LiquidStaysIncompressible());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
@@ -1383,6 +1384,53 @@ public final class PipeCases {
             ctx.line(String.format("valve 2 %% open, water 6 bar -> 1 atm: %.1f g/s", flow * 1000));
             ctx.check("a throttle valve 2 % open meters water (10-60 g/s through an alloy seat at ~5 bar)", flow > 0.010 && flow < 0.060,
                 String.format("%.1f g/s", flow * 1000));
+        }
+    }
+
+    /**
+     * A physics bug: water was soft (bulk modulus 2e7 Pa): a liquid-full pipe took 1.4 x its volume at ~95 bar. At water's
+     * own ~2 GPa a full pipe pushed by a 50 bar reservoir holds under 1 % more than it should.
+     */
+    static final class LiquidStaysIncompressible implements TestCase {
+        mods.eln.sim.fluid.FluidDevice fx;
+        mods.eln.sim.fluid.FluidNode pipe;
+
+        public String id() {
+            return "liquid_full_pipe_incompressible";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(4, 1, 1);
+            lay(ctx, p, 1, 0, 8, 8, 16, 8, 8);   // (one alloy block, its east end shut)
+            VoxelNode n = node(ctx, p);
+            for (VoxelPart part : n.parts) if (part instanceof PipePart q) pipe = q.fluid;
+            pipe.fill(0.97 * pipe.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+            var src = new mods.eln.sim.fluid.FluidNode(1.0, p.getY(), 1.0, false).fill(0.7 * mods.eln.sim.fluid.Water.RHO_L, 50e5, 293.15);
+            List<mods.eln.sim.fluid.FluidDevice.FluidPort> ports = List.of(
+                new mods.eln.sim.fluid.FluidDevice.FluidPort(src, p.west().asLong(), 5, 0.5, 2 * PipePart.K_PER_BLOCK[1] * 16));
+            Object level = n.fluidLevel();
+            fx = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return level;
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return ports;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(fx);
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.fluid.FluidWorld.remove(fx);
+            double full = pipe.mWater / (pipe.volume * mods.eln.sim.fluid.Water.RHO_L);
+            ctx.line(String.format("liquid-full pipe on a 50 bar reservoir: %.4f of its volume, %.1f bar", full, pipe.P() / 1e5));
+            ctx.check("liquid-full: under 1 % over its volume", full < 1.01, String.format("%.4f", full));
+            ctx.check("liquid-full: at about the reservoir's pressure (40-60 bar)", pipe.P() > 40e5 && pipe.P() < 60e5, String.format("%.1f bar", pipe.P() / 1e5));
         }
     }
 }
