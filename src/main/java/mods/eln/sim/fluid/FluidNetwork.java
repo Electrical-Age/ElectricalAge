@@ -299,6 +299,11 @@ public final class FluidNetwork {
         // liquid steeply only once it is full; without this a step can overfill it far into its stiff range), and
         // its level may move at most half a port band per step either way (else a port near the level flips between
         // drawing gas and liquid every step, and the water sloshes back and forth for ever)
+        // (until nothing more is cut: cutting what a node takes in raises what is left in the node feeding it, which may
+        // already have been checked. One pass in node order let a short pipe between a big hot vessel and a full tank
+        // take the vessel's water in while the tank cut what the pipe passed on: 0.45 kg into 0.07 L, 1446 bar, a burst)
+        for (int pass = 0; pass < 50; pass++) {
+        boolean cut = false;
         for (FluidNode n : nodes) {
             if (n.fixed) continue;
             double inL = 0, outL = 0;
@@ -313,18 +318,22 @@ public final class FluidNetwork {
             double band = 0.5 * BAND * n.volume * Water.RHO_L / dt;
             double room = 0.5 * Math.max(0, n.state.vGas - Flash.GAS_MIN * n.volume) + 1e-4 * n.volume;
             double limIn = Math.min(room * Water.RHO_L / dt, band);
-            if (inL - outL > limIn) {
+            if (inL - outL > limIn * (1 + 1e-9) + 1e-12) {
                 double sc = (limIn + outL) / inL;
                 for (FluidEdge e : edges) {
                     if (out(e, n) >= 0) continue;
                     FluidNode o = other(e, n);
                     if (packet(o, port(e, o))[0] > 0) e.flow *= sc;
                 }
-            } else if (outL - inL > band) {
+                cut = true;
+            } else if (outL - inL > band * (1 + 1e-9) + 1e-12) {
                 double sc = (band + inL) / outL;
                 for (FluidEdge e : edges)
                     if (out(e, n) > 0 && packet(n, port(e, n))[0] > 0) e.flow *= sc;
+                cut = true;
             }
+        }
+        if (!cut) break;
         }
     }
 
