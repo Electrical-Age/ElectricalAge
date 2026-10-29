@@ -119,7 +119,7 @@ public final class PipePlacer {
 
     /** Route from a port to join a pipe at join (world voxels) and lay it (GameTests). Null if done, else why not. */
     public static String routeAndJoinForTests(Level level, int tier, PipeRouter.End start, long[] join) {
-        var r = PipeRouter.route(spaceAround(space(level), join, 6), PipePart.BORE[tier], start, List.of(),
+        var r = PipeRouter.route(spaceAround(space(level), join, 6), PipePart.GRID[tier], start, List.of(),
             new PipeRouter.End(join[0], join[1], join[2], -1));
         if (r.error != null) return r.error;
         return layJoined(level, tier, r.points, join, null);
@@ -190,7 +190,7 @@ public final class PipePlacer {
         // finish: at a port, or joining a pipe mid-run
         PipeRouter.End end = port != null ? port : new PipeRouter.End(join[0], join[1], join[2], -1);
         PipeRouter.Result r = join == null ? route(level, plan, end) : PipeRouter.route(spaceAround(space(level), join, 6),
-            PipePart.BORE[plan.tier], plan.start, plan.waypoints, end);
+            PipePart.GRID[plan.tier], plan.start, plan.waypoints, end);
         if (r.error != null) {
             player.sendOverlayMessage(Component.literal("No route: " + r.error));
             return true;
@@ -280,7 +280,7 @@ public final class PipePlacer {
             if (wps.isEmpty()) return new PipeRouter.Result(List.of(), null);
             last = wps.remove(wps.size() - 1);
         }
-        return PipeRouter.route(space(level), PipePart.BORE[plan.tier], plan.start, wps, last);
+        return PipeRouter.route(space(level), PipePart.GRID[plan.tier], plan.start, wps, last);
     }
 
     /** Lay the route: one pipe part per block piece; all or nothing. */

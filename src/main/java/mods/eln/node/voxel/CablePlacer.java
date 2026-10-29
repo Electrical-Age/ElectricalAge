@@ -191,7 +191,7 @@ public final class CablePlacer {
             int idx = v.partAt(hx, hy, hz);
             // a control valve: its signal comes from a signal cable laid into its block: the floor under it (Baughn
             // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
-            if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && cv.mode == ValvePart.CONTROL)
+            if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && (cv.mode == ValvePart.CONTROL || cv.mode == ValvePart.PRESSURE))
                 return new CableRouter.End(pos.getX() * 16L + cv.x, pos.getY() * 16L, pos.getZ() * 16L + cv.z, 0, -1);
             // a pipe sensor likewise (AdventurAgent: its dial and the pipe were "not a place for a cable")
             if (idx >= 0 && v.parts.get(idx) instanceof PipeSensorPart ps)

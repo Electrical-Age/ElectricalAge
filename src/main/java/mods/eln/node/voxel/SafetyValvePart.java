@@ -75,12 +75,13 @@ public final class SafetyValvePart extends VoxelPart {
     @Override
     public void write(CompoundTag t) {
         t.putIntArray("at", new int[]{x, y, z, outlet, bore});
+        t.putBoolean("g", true);   // (grid widths: PipePart.GRID)
         t.putDouble("set", setPa);
     }
 
     static SafetyValvePart read(CompoundTag t) {
         int[] a = t.getIntArray("at").orElse(new int[]{8, 8, 8, 1, 4});
-        return new SafetyValvePart(a[0], a[1], a[2], a[3], a[4], t.getDoubleOr("set", 10e5));
+        return new SafetyValvePart(a[0], a[1], a[2], a[3], t.getBooleanOr("g", false) ? a[4] : PipePart.oldBore(a[4]), t.getDoubleOr("set", 10e5));
     }
 
     @Override

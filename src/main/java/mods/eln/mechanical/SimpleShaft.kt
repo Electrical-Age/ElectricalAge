@@ -31,16 +31,20 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         voltageLevelColor = VoltageLevelColor.Neutral
     }
     open fun draw(angle: Double) {
+        drawModel(angle)
+    }
+
+    private fun drawModel(angle: Double) {
         for (part in static) {
             part.draw()
         }
         preserveMatrix {
             assert(rotating.size > 0)
-            val bb = rotating[0].boundingBox()
-            val centre = bb.centre()
-            val ox = centre.x
-            val oy = centre.y
-            val oz = centre.z
+            // (about the shaft line through the rotor's origin, from its NAME.txt: tools/models/README-shaft.md)
+            val r = rotating[0]
+            val ox = r.getFloat("originX").toDouble()
+            val oy = r.getFloat("originY").toDouble()
+            val oz = r.getFloat("originZ").toDouble()
             GL11.glTranslated(ox, oy, oz)
             GL11.glRotatef(((angle * 360).toDouble() / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)
@@ -49,6 +53,30 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             }
         }
     }
+
+    /** A valve's stem (part `valve`, if the model has one), lifted by up to 1.5 px with the valve's opening (0..1). */
+    val valve: Obj3D.Obj3DPart? get() = obj.getPart("valve")
+
+    fun drawValve(opening: Float) {
+        val v = valve ?: return
+        preserveMatrix {
+            GL11.glTranslatef(0f, Math.max(0f, Math.min(1f, opening)) * 1.5f / 16f, 0f)
+            v.draw()
+        }
+    }
+
+    /**
+     * Placed with its shaft along the player's view (AdventurAgent's client check, 2026-10-29: looking down a line to
+     * build it, every part came out across it, the turbines' exhausts into their neighbours): its front to the player's
+     * left (EA's right() of the view: a viewer facing a front sees right() on their right), its back to their right.
+     */
+    override fun getFrontFromPlace(side: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?): Direction? =
+        if (entityLiving == null) Direction.XN else Utils.entityLivingHorizontalViewDirection(entityLiving).right()
+
+    /** Its model's hitbox (NAME.hitbox, tools/models/README-shaft.md), turned with its front. */
+    private val hitbox by lazy { mods.eln.node.transparent.ModelHitbox.of(obj) }
+
+    override fun modelHitbox() = hitbox
 
     override fun hasItemDraw() = true
 
@@ -164,7 +192,8 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
 
 abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     TransparentNodeElement(node, desc_), ShaftElement {
-    override val shaftMass = 5.0
+    /** A plain shaft piece: 0.05 s of 16 kW at 800 rad/s (a machine sets its own). */
+    override val shaftInertia = inertiaOf(0.05, 16000.0)
     override var shaft = ShaftNetwork(this)
 
     init {

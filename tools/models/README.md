@@ -45,6 +45,9 @@ For transparent/six nodes drawn by their `Render` class. `Model.write_eln(outdir
   `usemtl` group may have its own texture (one GlFrame batch each), but the convention here is one atlas per model:
   16x16 cells, material -> (col, row), row 0 at the top of the image; `write_eln` insets UVs 0.3 texel from the cell
   borders. Lines are split on single spaces: no double or trailing spaces.
+- **Hitbox** (optional): `NAME.hitbox` beside the OBJ, one box a line (`x0 y0 z0 x1 y1 z1`, px, this frame); a
+  descriptor returning `ModelHitbox.of(obj)` from `modelHitbox()` gets it as outline and collision, turned with its
+  front. See README-shaft.md (the shaft machines all have one).
 - **Discovery**: `assets/eln/model/index.txt` lists every OBJ (the jar can't be scanned); regenerate it with
   `python3 script/gen_model_index.py`. Models are keyed by the OBJ **file name** without extension
   (`Eln.obj.getObj("steamturbine50v")`), so name the directory and the file the same.

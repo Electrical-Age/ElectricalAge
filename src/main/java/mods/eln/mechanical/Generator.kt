@@ -38,7 +38,8 @@ class GeneratorDescriptor(
     nominalU: Float,
     powerOutPerDeltaU: Float,
     nominalP: Float,
-    thermalLoadInitializer: ThermalLoadInitializer) :
+    thermalLoadInitializer: ThermalLoadInitializer,
+    ) :
     SimpleShaftDescriptor(name, GeneratorElement::class, null) {
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
@@ -64,23 +65,19 @@ class GeneratorDescriptor(
 
     /** Heat (W) at nominal power and speed: electrical loss + drag heat (+ ~0.3 W cable I^2 R, ignored). */
     fun nominalHeatPower() = nominalP.toDouble() * (1 / generationEfficiency - 1) +
-        defaultDrag * 20 * nominalRads * (1 - generationEfficiency)
+        DRAG_SHARE * nominalP * (1 - generationEfficiency)
+
+    /** Its windage and friction (W) at a speed (rad/s). */
+    fun dragW(rads: Double) = DRAG_SHARE * nominalP * (rads / nominalRads) * (rads / nominalRads)
+
+    companion object {
+        /** Windage and friction at its rated speed, as a share of its rating (a real machine's 1-2 %). */
+        const val DRAG_SHARE = 0.015
+    }
 
     override val obj = obj
-    override val static = arrayOf(
-        obj.getPart("Cowl"),
-        obj.getPart("Stand")
-    ).requireNoNulls()
-    override val rotating = arrayOf(obj.getPart("Shaft")).requireNoNulls()
-    val powerLights = arrayOf(
-        obj.getPart("LED_0"),
-        obj.getPart("LED_1"),
-        obj.getPart("LED_2"),
-        obj.getPart("LED_3"),
-        obj.getPart("LED_4"),
-        obj.getPart("LED_5"),
-        obj.getPart("LED_6")
-    ).requireNoNulls()
+    override val static = arrayOf(obj.getPart("main")).requireNoNulls()
+    override val rotating = arrayOf(obj.getPart("rotor")).requireNoNulls()
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
@@ -111,54 +108,6 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         load.step(deltaT)
     }
 
-    val ledColors: Array<Color> = arrayOf(
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black,
-        java.awt.Color.black
-    )
-    val ledColorBase: Array<HSLColor> = arrayOf(
-        GREEN,
-        GREEN,
-        GREEN,
-        GREEN,
-        YELLOW,
-        RED,
-        RED
-    )
-
-    fun calcPower(power: Double) {
-        if (power < 0) {
-            for (i in 1..6) {
-                ledColors[i] = Color.black
-            }
-            ledColors[0] = RED.adjustLuminanceClamped((-power / desc.nominalP * 4 * 100).toFloat(), 0f, 60f)
-        } else {
-            val slice = desc.nominalP / 5
-            var remainder = power
-            for (i in 0..6) {
-                ledColors[i] = ledColorBase[i].adjustLuminanceClamped((remainder / slice * 100).toFloat(), 0f, 65f)
-                remainder -= slice
-            }
-        }
-    }
-
-    override fun draw() {
-        draw {
-            ledColors.forEachIndexed { i, color ->
-                GL11.glColor3f(
-                    color.red / 255f,
-                    color.green / 255f,
-                    color.blue / 255f
-                )
-                desc.powerLights[i].draw()
-            }
-        }
-    }
-
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
         if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
         return null
@@ -167,7 +116,6 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         val power = stream.readDouble()
-        calcPower(power)
         load.target = Math.min(1.0, Math.abs(power / desc.nominalP)).toFloat()
     }
 }
@@ -176,6 +124,8 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     SimpleShaftElement(node, desc_) {
     val desc = desc_ as GeneratorDescriptor
+    /** H = 1.5 s of its nominal power at its nominal speed (Argon's sizing; Baughn 2026-10-29: realistic inertia). */
+    override val shaftInertia = inertiaOf(1.5, desc.nominalP.toDouble(), desc.nominalRads.toDouble())
 
     internal val inputLoad = NbtElectricalLoad("inputLoad")
     internal val positiveLoad = NbtElectricalLoad("positiveLoad")
@@ -253,10 +203,10 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
             // (1.7.10 moved a negative heat, i.e. motoring cooled the generator).
             val shaftE = if (E >= 0) E / eff else E * eff
             val lossE = if (E >= 0) shaftE - E else shaftE - electricalE
-            // The Math.max makes the shaft harder to spin up without an auxilliary power source.
-            // defaultDrag is J per tick (1/20 s) per rad/s; WP16b: scaled by the step length (1.7.10 applied it
-            // per electrical step, which is a tick only at the default electricalFrequency of 20 Hz).
-            val drag = defaultDrag * Math.max(shaft.rads, 10.0) * time * 20
+            // windage and friction: DRAG_SHARE of its rating at its rated speed, as the square of the speed (AdventurAgent's
+            // client check, 2026-10-29: 1.7.10's 0.4 W per rad/s with a 10 rad/s floor took 4 W even at a standstill, an
+            // unbounded torque under 1/2 I w^2: an unloaded generator on a motor-driven line held it at 0.5 rad/s)
+            val drag = desc.dragW(shaft.rads) * time
             shaft.energy -= shaftE + drag * eff
             // WP16b: energy (J) of this step. 1.7.10 passed these joules to movePowerTo (W), i.e. heated with
             // 1/20 of the loss; moveEnergyTo is right for a process at any rate (this one is electrical).
@@ -317,6 +267,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         var info = mutableMapOf<String, String>()
         info.put("Energy", Utils.plotEnergy("", shaft.energy))
         info.put("Speed", Utils.plotRads("", shaft.rads))
+        info.put("Terminals", "power on its " + ShaftSteamTurbineElement.compass(front) + " and " + ShaftSteamTurbineElement.compass(front.back()) + " faces")
         if (Eln.wailaEasyMode) {
             info.put("Voltage", Utils.plotVolt("", electricalPowerSource.getU()))
             info.put("Current", Utils.plotAmpere("", electricalPowerSource.getI()))

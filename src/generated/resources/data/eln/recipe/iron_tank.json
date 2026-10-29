@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:glass_pane",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "iPi",
+    "i i",
+    "iPi"
+  ],
+  "result": {
+    "id": "eln:iron_tank"
+  }
+}

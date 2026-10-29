@@ -84,7 +84,7 @@ public class ElnJadePlugin implements IWailaPlugin {
         if (pi < 0) return null;
         var part = v.parts.get(pi);
         if (part instanceof mods.eln.node.voxel.CablePart c) return mods.eln.node.voxel.CablePart.TIERS[c.tier].name();
-        if (part instanceof mods.eln.node.voxel.PipePart pp) return (pp.tier == 0 ? "Iron" : "Alloy") + " Pipe";
+        if (part instanceof mods.eln.node.voxel.PipePart pp) return (switch (pp.tier) { case 0 -> "Iron"; case 1 -> "Alloy"; default -> "Large Alloy"; }) + " Pipe";
         return null;
     }
 

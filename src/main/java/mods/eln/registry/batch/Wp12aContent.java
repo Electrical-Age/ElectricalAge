@@ -698,6 +698,16 @@ public class Wp12aContent implements ElnContent {
             descriptor = new GenericItemUsingDamageDescriptor(name);
             sharedItem.addElement(completId, descriptor);
         }
+        {
+            // Baughn 2026-10-29: water stripping a shaft Steam Turbine's blades is repaired with this, cheaply
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 4;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Turbine Blade Set");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+        }
     }
 
     public static void registerBrush(int id) {

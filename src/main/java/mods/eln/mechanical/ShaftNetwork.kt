@@ -13,6 +13,16 @@ import java.util.*
 val absoluteMaximumShaftSpeed = 1000.0
 // "Standard" drag, in J/t per rad.
 val defaultDrag = 0.02
+/** The speed shaft machines are rated at (rad/s): the generators' 800. */
+const val nominalShaftRads = 800.0
+/** A floor for a network's inertia (kg m^2), so an empty or tiny network has a defined speed. */
+const val minimumInertia = 1e-4
+
+/**
+ * Moment of inertia (kg m^2) from an inertia constant: h seconds of `power` (W) stored at `rads` (Baughn 2026-10-29:
+ * realistic values; a turbine-generator train is a few seconds, a flywheel tens).
+ */
+fun inertiaOf(h: Double, power: Double, rads: Double = nominalShaftRads) = 2 * h * power / (rads * rads)
 
 
 /**
@@ -26,26 +36,27 @@ class ShaftNetwork() : INBTTReady {
     }
 
     // Aggregate properties of the (current) shaft:
-    val shapeFactor = 0.5
-    val mass: Double
+    /** Moment of inertia (kg m^2): the sum of its blocks'. */
+    val inertia: Double
         get() {
             var sum = 0.0
             for (e in elements) {
-                sum += e.shaftMass
+                sum += e.shaftInertia
             }
-            return sum
+            return Math.max(sum, minimumInertia)
         }
     var rads = 0.0
     var radsLastPublished = rads
 
-    val joulePerRad: Double
-        get() = mass * mass * shapeFactor / 2
-
+    /**
+     * Kinetic energy, 1/2 I w^2 (Baughn 2026-10-29: fix the physics; 1.7.10 stored mass^2 x 0.25 J per rad/s, linear in
+     * speed, so a heavier line's inertia grew with the square of its mass and a joule bought as much speed at 10 rad/s as
+     * at 800). Setting it sets the speed; the speed is what's saved.
+     */
     var energy: Double
-        get() = joulePerRad * rads
+        get() = 0.5 * inertia * rads * rads
         set(value) {
-            rads = value / joulePerRad
-            if (rads < 0) rads = 0.0
+            rads = Math.sqrt(Math.max(0.0, 2 * value / inertia))
             if (radsLastPublished > rads * 1.05 || radsLastPublished < rads * 0.95) {
                 elements.forEach { it.needPublish() }
                 radsLastPublished = rads
@@ -53,14 +64,32 @@ class ShaftNetwork() : INBTTReady {
         }
 
     /**
+     * Drive the shaft with up to `power` (W) for `time` (s), but with no more than `maxTorque` (N m): a machine pushing
+     * from standstill accelerates the shaft at torque / inertia, not instantly (energy alone would give any joule at
+     * 0 rad/s a jump in speed). Returns the energy it took (J).
+     */
+    fun drive(power: Double, time: Double, maxTorque: Double): Double {
+        if (power <= 0 || time <= 0) return 0.0
+        val i = inertia
+        val wTorque = rads + maxTorque / i * time
+        val eTorque = 0.5 * i * wTorque * wTorque - energy
+        val e = Math.min(power * time, eTorque)
+        energy += e
+        return e
+    }
+
+    /**
      * Merge two shaft networks.
      *
      * @param other The shaft network to merge into this one. Destroyed.
      */
     fun mergeShafts(other: ShaftNetwork) {
-        // TODO: Some kind of explosion-effect for severely mismatched speeds?
-        // For now, let's be nice.
-        rads = Math.min(rads, other.rads)
+        // angular momentum is kept (AdventurAgent's client check, 2026-10-29: it took the slower speed, so a part placed
+        // at rest against a line at 800 rad/s stopped the line dead): a light part joins at nearly the line's speed, a
+        // flywheel at rest drags it down as a clutch would
+        val i1 = inertia
+        val i2 = other.inertia
+        rads = (i1 * rads + i2 * other.rads) / (i1 + i2)
 
         assert(other != this)
         for (element in other.elements) {
@@ -173,7 +202,8 @@ class ShaftNetwork() : INBTTReady {
 
 interface ShaftElement {
     var shaft: ShaftNetwork
-    val shaftMass: Double
+    /** Moment of inertia (kg m^2); see inertiaOf. */
+    val shaftInertia: Double
     val shaftConnectivity: Array<Direction>
     fun coordonate(): Coordonate
 

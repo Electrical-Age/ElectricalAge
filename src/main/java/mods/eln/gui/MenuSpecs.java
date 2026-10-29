@@ -164,7 +164,10 @@ public final class MenuSpecs {
         // the steam turbines (Baughn 2026-10-26): a regulator holds a target inlet pressure
         put(mods.eln.oil.SteamGeneratorDescriptor.class, d -> MenuSpec.of(
             descriptor(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, 8, 58, 1, IRegulatorDescriptor.class, MEDIUM, tr("Regulator slot"),
-                tr("(Holds a target inlet pressure)"))).publishing(0));
+                tr("Holds a target inlet pressure"))).publishing(0));
+        put(mods.eln.mechanical.SteamTurbineDescriptor.class, d -> MenuSpec.of(
+            descriptor(mods.eln.oil.SteamValveControl.REGULATOR_SLOT, 8, 58, 1, IRegulatorDescriptor.class, MEDIUM, tr("Regulator slot"),
+                tr("Holds a target inlet pressure"))).publishing(0));
         put(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId, 70, 58, 64,
                 s -> mods.eln.misc.Utils.getItemEnergie(s) > 0, MEDIUM, tr("Fuel slot")),

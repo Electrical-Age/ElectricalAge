@@ -30,6 +30,11 @@ public abstract class VoxelPart {
     public abstract void serialize(DataOutputStream out) throws IOException;
 
     /** Read a part saved by write (server), in the block at blockY; null for an unknown kind. */
+    /** A part from its saved tag, as a block at y 0 loads it (GameTests: fittings saved by older versions). */
+    public static VoxelPart load(CompoundTag t) {
+        return read(t, 0);
+    }
+
     static VoxelPart read(CompoundTag t, int blockY) {
         return switch (t.getStringOr("kind", "")) {
             case PipePart.KIND -> PipePart.read(t, blockY);

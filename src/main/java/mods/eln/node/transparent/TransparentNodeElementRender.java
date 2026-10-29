@@ -20,6 +20,11 @@ import java.io.IOException;
  * (see SixNodeElementRender). Looped sounds (R4) and GUI screens (P4b) are not here yet.
  */
 public abstract class TransparentNodeElementRender {
+    /** Where it draws, when that reaches past its block and the default (3 blocks round it) won't do; null: default. */
+    public net.minecraft.world.phys.AABB renderBounds() {
+        return null;
+    }
+
     public TransparentNodeEntity tileEntity;
     public Direction front;
     public boolean grounded;

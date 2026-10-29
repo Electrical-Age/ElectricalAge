@@ -1,0 +1,31 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:tag_empty",
+      "tag": "c:ingots/aluminum"
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/iron"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "E": "eln:high_voltage_cable",
+    "G": "eln:generator",
+    "M": "eln:advanced_machine_block",
+    "a": "#c:ingots/iron",
+    "m": "eln:advanced_electrical_motor"
+  },
+  "pattern": [
+    "mmm",
+    "GaG",
+    " ME"
+  ],
+  "result": {
+    "id": "eln:8kw_generator"
+  }
+}

@@ -10,7 +10,6 @@ import mods.eln.mechanical.GeneratorDescriptor;
 import mods.eln.mechanical.GeneratorElement;
 import mods.eln.mechanical.ShaftElement;
 import mods.eln.mechanical.ShaftNetwork;
-import mods.eln.mechanical.TurbineElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -126,8 +125,8 @@ public final class Wp11Cases {
     // ---- cases ----
 
     /**
-     * Joint + flywheel + joint on one axis merge into one ShaftNetwork: mass = 0.5 + 100 + 0.5 = 101, J/rad =
-     * m^2 * shapeFactor(0.5) / 2. Passive parts have no drag, so 100 rad/s set at build stays 100 rad/s.
+     * Joint + flywheel + joint on one axis merge into one ShaftNetwork: inertia = the sum of theirs, energy 1/2 I w^2
+     * (Baughn 2026-10-29; 1.7.10 stored mass^2 / 4 J per rad/s). Passive parts have no drag, so 100 rad/s set at build stays 100 rad/s.
      */
     static final class ShaftNetworkCase implements TestCase {
         TransparentNodeElement[] parts;
@@ -145,19 +144,19 @@ public final class Wp11Cases {
             ShaftNetwork s = shaft(parts[0]);
             boolean same = s == shaft(parts[1]) && s == shaft(parts[2]) && s.getElements().size() == 3;
             ctx.check("wp11 joint + flywheel + joint share one shaft network", same, s.getElements().size() + " element(s)");
-            ctx.checkValue("wp11 shaft mass [kg] (0.5 + 100 + 0.5)", s.getMass(), 101.0);
+            double i = mods.eln.mechanical.ShaftNetworkKt.inertiaOf(12.5, 16000.0, 800.0) + 2 * mods.eln.mechanical.ShaftNetworkKt.inertiaOf(0.02, 16000.0, 800.0);
+            ctx.checkValue("wp11 shaft inertia [kg m^2] (flywheel 12.5 s + two joints 0.02 s, of 16 kW at 800 rad/s)", s.getInertia(), i);
             ctx.checkValue("wp11 shaft speed [rad/s] (no drag in passive parts: 100 kept)", s.getRads(), 100.0);
-            ctx.checkValue("wp11 shaft energy [J] (m^2*0.5/2 * rads = 255025)", s.getEnergy(), 101.0 * 101.0 * 0.25 * 100.0);
+            ctx.checkValue("wp11 shaft energy [J] (1/2 I w^2)", s.getEnergy(), 0.5 * i * 100.0 * 100.0);
         }
     }
 
     /**
      * Generator + flywheel spun to 400 rad/s, generator electrically open: its source sets the open-circuit EMF
      * U = RtoU(rads) = 3200 V * rads / 800 rad/s (= 4 V per rad/s), seen unchanged on the input load (no current).
-     * Shaft drag (0.95 * 0.02 J * rads per tick, mass 105) slows it only slightly.
-     * WP16b thermal: sized for 4000 (1/0.95 - 1) + 0.02 * 20 * 800 * 0.05 = 226.5 W at 65 % of the 130 K warm limit
-     * (Rp = 130 / (226.5 / 0.65) = 0.3731 K/W); open circuit the only heat is the drag share, 0.02 * 20 * rads * 0.05
-     * = 0.02 * rads W (1.7.10 / WP16 heated with 1/20 of it).
+     * Its drag (1.5 % of its rating at 800 rad/s, as the speed squared) slows it only slightly.
+     * WP16b thermal: sized for 4000 (1/0.95 - 1) + 0.015 * 4000 * 0.05 = 213.5 W at 65 % of the 130 K warm limit
+     * (Rp = 130 / (213.5 / 0.65) = 0.3958 K/W); open circuit the only heat is the drag's share, 5 % of it.
      */
     static final class GeneratorCase implements TestCase {
         GeneratorElement gen;
@@ -178,32 +177,34 @@ public final class Wp11Cases {
             GeneratorDescriptor d = gen.getDesc();
             ElectricalLoad input = field(gen, "inputLoad");
             ctx.check("wp11 generator shaft slowed by drag only (400 > rads > 200)", rads < 400.0 && rads > 200.0, String.format("%.3f rad/s", rads));
-            ctx.checkValue("wp11 generator mass [kg] (5 + 100)", s.getMass(), 105.0);
+            ctx.checkValue("wp11 generator + flywheel inertia [kg m^2] (1.5 s of 4 kW + 12.5 s of 16 kW, at 800 rad/s)", s.getInertia(),
+                mods.eln.mechanical.ShaftNetworkKt.inertiaOf(1.5, 4000.0, 800.0) + mods.eln.mechanical.ShaftNetworkKt.inertiaOf(12.5, 16000.0, 800.0));
             ctx.checkValue("wp11 generator open-circuit voltage [V] (3200 * rads / 800)", input.getU(), d.getRtoU().getValue(rads));
             ctx.checkValue("wp11 generator open-circuit voltage = 4 V per rad/s [V]", input.getU(), 4.0 * rads);
             mods.eln.sim.ThermalLoad th = field(gen, "thermal");
-            ctx.checkValue("wp11 generator thermal Rp [K/W] (130 / (226.5 W / 0.65))", th.Rp, 130 / (226.5 / 0.65));
+            ctx.checkValue("wp11 generator thermal Rp [K/W] (130 / (213.5 W / 0.65))", th.Rp, 130 / (d.nominalHeatPower() / 0.65));
             double heat = th.Pc + (th.Tc - th.Pc * 0.05 / th.C) / th.Rp; // heat in the last slow step, before the Rp leak
-            ctx.checkValue("wp11 generator open-circuit heat [W] (drag share 0.02 * rads)", heat, 0.02 * rads);
+            ctx.checkValue("wp11 generator open-circuit heat [W] (5 % of its drag)", heat, d.dragW(rads) * 0.05);
         }
     }
 
-    /** Steam turbine with an empty tank: no fluid drained, no shaft energy (0 rad/s stays 0). */
+    /** Steam turbine with nothing piped in: no steam through, no work (0 rad/s stays 0); exhaust to the air. */
     static final class TurbineIdleCase implements TestCase {
-        TurbineElement turbine;
+        mods.eln.mechanical.ShaftSteamTurbineElement turbine;
 
         public String name() {
             return "wp11 steam turbine idle";
         }
 
         public void build(TestContext ctx) {
-            turbine = (TurbineElement) ctx.placeTransparent(STEAM_TURBINE, ctx.at(3, 1, 1));
+            turbine = (mods.eln.mechanical.ShaftSteamTurbineElement) ctx.placeTransparent(STEAM_TURBINE, ctx.at(3, 1, 1));
         }
 
         public void measure(TestContext ctx) {
             double rads = shaft(turbine).getRads();
-            ctx.check("wp11 steam turbine without steam: shaft stays at 0 rad/s, fluid rate 0",
-                rads == 0.0 && turbine.getFluidRate() == 0f, String.format("%.4f rad/s, %.3f mB/s", rads, turbine.getFluidRate()));
+            ctx.check("wp11 steam turbine without steam: shaft stays at 0 rad/s, no steam through",
+                rads == 0.0 && turbine.totalKg == 0, String.format("%.4f rad/s, %.6f kg", rads, turbine.totalKg));
+            ctx.check("wp11 steam turbine: no fluid capability (steam by EA pipe only)", turbine.getFluidHandler() == null, "");
         }
     }
 

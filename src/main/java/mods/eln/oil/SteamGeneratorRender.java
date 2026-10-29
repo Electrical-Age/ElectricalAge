@@ -10,7 +10,7 @@ import mods.eln.sound.MachineSounds;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class SteamGeneratorRender extends TransparentNodeElementRender {
+public class SteamGeneratorRender extends TransparentNodeElementRender implements SteamValveControl.Rendered {
     /** The rotor's turn rate at nominal speed (degrees per second): slow enough to follow, a hint rather than 3000 rpm
      *  (Baughn: subtle). */
     static final float DEG_PER_S = 360;
@@ -28,25 +28,19 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
     /** A condenser against its exhaust side: the duct into it, no vent stack (and no puffs). */
     boolean condenser;
     /** Its controls, for the screen (SteamGeneratorScreen). */
-    public boolean controlExternal, throttleNew, targetNew;
-    public float throttle = -1, targetBar = -1, limit, inletBar;
+    public final SteamValveControl.Render controls;
 
-    public void clientToggleControl() {
-        clientSendId(SteamGeneratorElement.TOGGLE_EXTERNAL);
+    @Override
+    public SteamValveControl.Render controls() {
+        return controls;
     }
 
-    public void clientSetThrottle(float v) {
-        clientSendFloat(SteamGeneratorElement.SET_THROTTLE, v);
-    }
-
-    public void clientSetTarget(float v) {
-        clientSendFloat(SteamGeneratorElement.SET_TARGET, v);
-    }
     float angle = (float) (Math.random() * 360);
 
     public SteamGeneratorRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
         desc = (SteamGeneratorDescriptor) d;
+        controls = new SteamValveControl.Render(this, SteamGeneratorElement.TARGET_MAX_BAR);
         PITCH = desc.nominalU > 100 ? 0.8f : 1f;
         // a generator's hum (by the steam it takes, as its output follows it), rotor tones and air (MachineSounds),
         // and the steam rushing through, muffled by a condenser
@@ -104,18 +98,7 @@ public class SteamGeneratorRender extends TransparentNodeElementRender {
             speed.setTarget(stream.readFloat());
             steam.setTarget(stream.readFloat());
             condenser = stream.readBoolean();
-            controlExternal = stream.readBoolean();
-            float t = stream.readFloat(), p = stream.readFloat();
-            if (t != throttle) {
-                throttle = t;
-                throttleNew = true;
-            }
-            if (p != targetBar) {
-                targetBar = p;
-                targetNew = true;
-            }
-            limit = stream.readFloat();
-            inletBar = stream.readFloat();
+            controls.read(stream);
         } catch (IOException e) {
             e.printStackTrace();
         }
