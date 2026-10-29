@@ -53,6 +53,14 @@ public class BikeColorsTest {
             assertEquals(BikeColors.TRUNK, look(yaw, TRUNK, 0, 0, -1), "trunk from behind" + y);
             assertEquals(BikeColors.SADDLE, look(yaw, SADDLE, 0, 1.8, -1), "saddle from behind, over the trunk" + y);
             assertEquals(BikeColors.SADDLE, look(yaw, SADDLE, 0, 1.2, 1), "saddle from in front, over the bars" + y);
+            // the saddle's back edge (as drawn: BikeGeometry), from the side and from above, is the saddle; a little
+            // further back is the trunk's front (AdventurAgent aimed 0.45 behind the middle: that is the trunk, 0.39-0.86)
+            double back = -BikeGeometry.saddle()[5] / 16 + 0.01;   // (-0.334)
+            for (int s2 : new int[]{1, -1})
+                assertEquals(BikeColors.SADDLE, look(yaw, new double[]{0, 1.0, back}, 2.08 * s2, 0, 0), "the saddle's back from the side" + y);
+            assertEquals(BikeColors.SADDLE, look(yaw, new double[]{0, 1.05, back}, 0, 1.11, 0), "the saddle's back from above" + y);
+            assertEquals(BikeColors.TRUNK, look(yaw, new double[]{0, 1.0, -0.45}, 2.08, 0, 0), "0.45 behind the middle, from the side, is the trunk" + y);
+            assertEquals(BikeColors.TRUNK, look(yaw, new double[]{0, 1.1, -0.45}, 0, 1.11, 0), "0.45 behind the middle, from above, is the trunk" + y);
             // looking past it: nothing
             assertEquals(-1, look(yaw, new double[]{1.5, 1.0, 0}, 0, 0, 1), "a ray past the bike's side, along it" + y);
         }

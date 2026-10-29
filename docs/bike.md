@@ -102,7 +102,9 @@ GameTest `bike_recipe` crafts it.
   (`DyeColor.getTextureDiffuseColor`), one dye used unless creative, none if it's that colour already.
 - Which part: the player's eye ray (server and client alike, up to 4.5 blocks), turned into the bike's frame, against
   boxes from the model's geometry (`BikeColors.BOXES`: saddle, trunk, fork, and the frame as three boxes), nearest hit
-  wins; never the entity's bounding box (AdventurAgent: side-on frame clicks missed, a saddle click painted the trunk).
+  wins. The boxes are computed from `bike/BikeGeometry`, the shapes `BikeModel` draws, plus 0.03 all round, with the
+  saddle's back and the trunk's front meeting halfway between them (0.334 and 0.39 behind the middle), so they can't
+  drift from the model; never the entity's bounding box (AdventurAgent: side-on frame clicks missed, a saddle click painted the trunk).
   With a dye in hand a click only paints: nothing hit (or the same colour) uses no dye and doesn't mount. The pick
   radius is 0.45, so the fork and the trunk, outside the 0.8-wide box, can be clicked at all. `BikeColorsTest` aims at
   every part from each side it can be seen from, at four headings.

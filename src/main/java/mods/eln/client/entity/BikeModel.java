@@ -9,6 +9,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
+import mods.eln.bike.BikeGeometry;
 import net.minecraft.util.Mth;
 
 /**
@@ -21,8 +22,9 @@ public class BikeModel extends EntityModel<BikeRenderState> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath("eln", "electric_bike"), "main");
 
     /** Wheel radius in pixels (ElectricBike.WHEEL_RADIUS in blocks), hub heights, and where things sit along z. */
-    static final float R = 5.5f, HUB_Y = 24 - R, FRONT_Z = -10, REAR_Z = 10;
-    static final float HEAD_Z = -7, HEAD_TOP = 8, HEAD_BOT = 11, BB_Y = 18.5f, BB_Z = 1, SEAT_Z = 3.5f, SEAT_Y = 9.5f;
+    static final float R = BikeGeometry.R, HUB_Y = BikeGeometry.HUB_Y, FRONT_Z = BikeGeometry.FRONT_Z, REAR_Z = BikeGeometry.REAR_Z;
+    static final float HEAD_Z = BikeGeometry.HEAD_Z, HEAD_TOP = BikeGeometry.HEAD_TOP, HEAD_BOT = BikeGeometry.HEAD_BOT, BB_Y = BikeGeometry.BB_Y,
+        BB_Z = BikeGeometry.BB_Z, SEAT_Z = BikeGeometry.SEAT_Z, SEAT_Y = BikeGeometry.SEAT_Y;
 
     // texture regions (u, v), one material each, each big enough for its largest box's UV layout (2(d+w) x (d+h)):
     // the trunk's 28 px overran a 24 px region into the battery's (Baughn: an oddity at the trunk's back). PAINT, TRUNK,
@@ -78,6 +80,11 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         w.addOrReplaceChild("hub", CubeListBuilder.create().texOffs(METAL[0], METAL[1]).addBox(-1.5f, -1, -1, 3, 2, 2), PartPose.ZERO);
     }
 
+    /** A cuboid given as {x0, y0, z0, x1, y1, z1} (BikeGeometry). */
+    static CubeListBuilder box(CubeListBuilder c, float[] b) {
+        return c.addBox(b[0], b[1], b[2], b[3] - b[0], b[4] - b[1], b[5] - b[2]);
+    }
+
     /** A top-level part, remembered by name for the dye groups. */
     static void part(PartDefinition root, String name, CubeListBuilder cubes, PartPose pose) {
         PART_NAMES.add(name);
@@ -115,8 +122,9 @@ public class BikeModel extends EntityModel<BikeRenderState> {
             .addBox(0.5f, 3, -1, 2, 1, 2), PartPose.offsetAndRotation(2.2f, BB_Y, BB_Z, 0.6f + Mth.PI, 0, 0));
         // seat post and saddle
         tube(root, "seat_post", METAL, 0, SEAT_Y + 0.6f, SEAT_Z - 0.6f, SEAT_Y - 1.4f, SEAT_Z - 0.2f, 1f);
-        part(root, "saddle", CubeListBuilder.create().texOffs(SADDLE[0], SADDLE[1]).addBox(-1.5f, -1, -3.5f, 3, 1.5f, 5)
-            .addBox(-2.5f, -0.95f, -0.5f, 5, 1.45f, 2.5f), PartPose.offset(0, SEAT_Y - 1.8f, SEAT_Z));   // (tops apart: they z-fought)
+        // (BikeGeometry's boxes, which the dyes aim at too)
+        part(root, "saddle", box(box(CubeListBuilder.create().texOffs(SADDLE[0], SADDLE[1]), BikeGeometry.SADDLE_BOXES[0]), BikeGeometry.SADDLE_BOXES[1]),
+            PartPose.offset(0, BikeGeometry.SADDLE_OY, BikeGeometry.SADDLE_OZ));
         // stem and handlebars, grips
         tube(root, "stem", METAL, 0, HEAD_TOP + 0.5f, HEAD_Z, HEAD_TOP - 2.5f, HEAD_Z + 0.6f, 1f);
         part(root, "bars", CubeListBuilder.create().texOffs(METAL[0], METAL[1]).addBox(-5, -0.5f, -0.5f, 10, 1, 1),
@@ -135,10 +143,10 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         tube(root, "rack_brace_r", METAL, 1.9f, rackY, REAR_Z - 3.2f, stayY, stayZ, 0.6f);
         tube(root, "rack_strut_l", METAL, -2.6f, HUB_Y - R - 1.8f, REAR_Z + 3.5f, HUB_Y, REAR_Z + 0.5f, 0.6f);
         tube(root, "rack_strut_r", METAL, 2.6f, HUB_Y - R - 1.8f, REAR_Z + 3.5f, HUB_Y, REAR_Z + 0.5f, 0.6f);
-        part(root, "trunk", CubeListBuilder.create().texOffs(TRUNK[0], TRUNK[1]).addBox(-3.5f, -4.5f, 0, 7, 4.5f, 7),
-            PartPose.offset(0, HUB_Y - R - 2.2f, REAR_Z - 3.5f));
-        part(root, "trunk_lid", CubeListBuilder.create().texOffs(LID[0], LID[1]).addBox(-3.8f, -1, -0.3f, 7.6f, 1, 7.6f),
-            PartPose.offset(0, HUB_Y - R - 6.7f, REAR_Z - 3.5f));
+        part(root, "trunk", box(CubeListBuilder.create().texOffs(TRUNK[0], TRUNK[1]), BikeGeometry.TRUNK_BOX),
+            PartPose.offset(0, BikeGeometry.RACK_Y, BikeGeometry.TRUNK_OZ));
+        part(root, "trunk_lid", box(CubeListBuilder.create().texOffs(LID[0], LID[1]), BikeGeometry.LID_BOX),
+            PartPose.offset(0, BikeGeometry.RACK_Y, BikeGeometry.TRUNK_OZ));
         // the kickstand: pivots at the bottom bracket's back, down to the ground on the left; folds back along the stay
         part(root, "kickstand", CubeListBuilder.create().texOffs(BLACK[0], BLACK[1]).addBox(-0.5f, 0, -0.5f, 1, 6.2f, 1)
             .addBox(-1, 5.7f, -1, 2, 0.6f, 2), PartPose.offset(-1.5f, BB_Y, BB_Z + 2.5f));

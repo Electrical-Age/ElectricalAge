@@ -55,21 +55,32 @@ public final class BikeColors {
         return best;
     }
 
+    /** Margin round each drawn part (blocks): a little generous, but the saddle and trunk meet halfway between them. */
+    static final double MARGIN = 0.03;
+
     /**
-     * {group, half-width, up from, up to, forward from, forward to}, in blocks, from BikeModel's geometry (model px:
-     * forward = -z / 16, up = (24 - y) / 16, side = x / 16), each a little generous but apart from its neighbours:
-     * the saddle (z 0-5.5, y 6.7-9.2, x +-2.5) with its post; the trunk and lid (z 6.2-13.8, y 5.3-10.8, x +-3.8);
-     * the fork (z -7 to -10, y 11-18.5, x +-1.3); the frame's tubes and stays (z -8 to 10, y 8-18.5), as three boxes:
-     * the head and top tube, the down and seat tubes, the stays.
+     * {group, half-width, up from, up to, forward from, forward to}, in blocks, from BikeGeometry (the boxes BikeModel
+     * draws), so they follow the model: forward = -z / 16, up = (24 - y) / 16, side = x / 16; the saddle (with its post),
+     * the trunk and lid, the fork, and the frame as three boxes.
      */
-    static final double[][] BOXES = {
-        {SADDLE, 0.20, 0.86, 1.13, -0.37, 0.03},
-        {TRUNK, 0.27, 0.78, 1.21, -0.89, -0.38},
-        {FORK, 0.14, 0.28, 0.80, 0.50, 0.70},
-        {FRAME, 0.10, 0.78, 1.02, -0.20, 0.52},   // head tube and top tube
-        {FRAME, 0.10, 0.30, 0.86, -0.20, 0.50},   // down tube, seat tube, bottom bracket
-        {FRAME, 0.12, 0.30, 0.86, -0.66, -0.20},  // chain and seat stays
-    };
+    static final double[][] BOXES = boxes();
+
+    static double[] fromModel(int group, float[] b, double margin) {
+        double half = Math.max(Math.abs(b[0]), Math.abs(b[3])) / 16 + margin;
+        return new double[]{group, half, (24 - b[4]) / 16 - margin, (24 - b[1]) / 16 + margin, -b[5] / 16 - margin, -b[2] / 16 + margin};
+    }
+
+    static double[][] boxes() {
+        double[] saddle = fromModel(SADDLE, BikeGeometry.saddle(), MARGIN), trunk = fromModel(TRUNK, BikeGeometry.trunk(), MARGIN);
+        // between them, the line halfway: the saddle's back and the trunk's front stop there
+        double mid = (-BikeGeometry.saddle()[5] / 16 + -BikeGeometry.trunk()[2] / 16) / 2;
+        saddle[4] = Math.max(saddle[4], mid);
+        trunk[5] = Math.min(trunk[5], mid);
+        saddle[2] -= 0.08;   // (and its post, below)
+        java.util.List<double[]> out = new java.util.ArrayList<>(java.util.List.of(saddle, trunk, fromModel(FORK, BikeGeometry.fork(), MARGIN)));
+        for (float[] f : BikeGeometry.frame()) out.add(fromModel(FRAME, f, MARGIN));
+        return out.toArray(new double[0][]);
+    }
 
     /** Slab test: the distance along r where the ray from o enters the box [lo, hi], or -1 if it misses. */
     static double hit(double[] o, double[] r, double[] lo, double[] hi) {
