@@ -149,13 +149,20 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             if (manual || rads < RATED_RADS) tripped = false;
             else if (rads > TRIP * RATED_RADS) tripped = true;
             double target = manual ? 1 : tripped ? 0 : Math.max(0, Math.min(1, (RATED_RADS * (1 + DROOP) - rads) / (DROOP * RATED_RADS)));
+            // the governor asks for a share of rated flow, so its valve opens less on an inlet over its rated pressure
+            // (else its gain grew with the pressure: an LP on ten times its rating overshot past 850 rad/s)
+            if (!manual) target /= Math.max(1, inlet.P() / spec.nominalPa);
             // a trip shuts its trip valve at once and seals: no leak (AdventurAgent 2026-10-29: a tripped LP behind an HP on
             // manual still took 1.5 g/s through the governor valve's leak and drove the line on at 916 rad/s)
             gate = tripped ? 0 : gate + (target - gate) * Math.min(1, time / GOV_TAU);
             double open = Math.min(gate, controls.limit());
             // steam through the nozzle (choked: by the inlet pressure), only what the inlet has above the exhaust
             double pEx = exhaustPa(), p = inlet.P();
-            double want = tripped ? 0 : (LEAK + (1 - LEAK) * open) * FLOW_MAX * spec.nominalKgPerS * p / spec.nominalPa * time;
+            // the governor-closed valve's leak is a share of rated flow that doesn't grow past rated inlet pressure, so at 0 %
+            // it stays well under the windage (AdventurAgent 2026-10-29: an LP fed 15 bar by a manual HP, ten times its
+            // rating, leaked 2 g/s through a shut governor, 0.6-0.8 kW, and crept from 830 rad/s to its trip)
+            double flow = FLOW_MAX * spec.nominalKgPerS * p / spec.nominalPa;
+            double want = tripped ? 0 : (LEAK * FLOW_MAX * spec.nominalKgPerS * Math.min(1, p / spec.nominalPa) + (1 - LEAK) * open * flow) * time;
             double mv = inlet.mVapour(), mg = mv + inlet.mAir;
             want = Math.min(want, p > pEx ? mv * (1 - pEx / p) : 0);
             double tIn = inlet.T(), air0 = inlet.mAir;

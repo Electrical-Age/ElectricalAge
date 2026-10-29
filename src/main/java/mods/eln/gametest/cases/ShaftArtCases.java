@@ -27,6 +27,7 @@ public final class ShaftArtCases {
         cases.add(new InlinePumpAlongView());
         cases.add(new TankBuckets());
         cases.add(new BoxSurvivesAFrozenReconnect());
+        cases.add(new GovernorHoldsOnOverpressure());
     }
 
     static final int HP = 9 + (4 << 6), GEN4 = 10 + (4 << 6), GAS = 11 + (4 << 6), JOINT = 12 + (4 << 6), HUB = 13 + (4 << 6),
@@ -762,6 +763,54 @@ public final class ShaftArtCases {
         public void measure(TestContext ctx) {
             ctx.line("frozen reconnects: " + out);
             ctx.check("a box or stack stays one through a frozen block's reconnect and a frozen load", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * A shut governor holds an unloaded line (AdventurAgent 2026-10-29: an LP fed 15 bar by a manual HP, ten times its
+     * rating, leaked 2 g/s through its governor at 0 % and crept to its trip, again and again): an LP on automatic with
+     * 15 bar at its inlet and an HP with 40 bar (twice its rating), each alone on its shaft from 830 rad/s for 20 s,
+     * hold it (the LP at or under 845 rad/s, the light lone HP 850) and settle at 840, never tripping.
+     */
+    static final class GovernorHoldsOnOverpressure extends PlumbingCases.Big {
+        final mods.eln.mechanical.ShaftSteamTurbineElement[] t = new mods.eln.mechanical.ShaftSteamTurbineElement[2];
+        final double[] feedPa = {40e5, 15e5}, max = new double[2];
+        final boolean[] trip = new boolean[2];
+        mods.eln.sim.IProcess feed;
+
+        public String id() {
+            return "shaft_governor_holds_on_overpressure";
+        }
+
+        public int ticks() {
+            return 400;
+        }
+
+        public void build(TestContext ctx) {
+            t[0] = (mods.eln.mechanical.ShaftSteamTurbineElement) ShaftSteamCases.orient(ctx.placeTransparent(HP, ctx.at(2, 1, 2)));
+            t[1] = (mods.eln.mechanical.ShaftSteamTurbineElement) ShaftSteamCases.orient(ctx.placeTransparent(LP, ctx.at(2, 1, 6)));
+            for (var e : t) shaftOf(e).setRads(830);
+            mods.eln.Eln.simulator.addSlowProcess(feed = dt -> {
+                for (int i = 0; i < 2; i++) {
+                    var in = t[i].inlet;
+                    if (in != null && in.P() < feedPa[i])
+                        mods.eln.sim.fluid.EaUnits.addWater(in, 0.01, mods.eln.sim.fluid.Water.tsat(feedPa[i]), true);
+                    max[i] = Math.max(max[i], shaftOf(t[i]).getRads());
+                    trip[i] |= t[i].tripped;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            for (int i = 0; i < 2; i++) {
+                String n = i == 0 ? "HP on 40 bar" : "LP on 15 bar";
+                ctx.line(String.format("%s, unloaded from 830 rad/s: max %.0f, now %.0f rad/s, tripped %s; %s", n, max[i], shaftOf(t[i]).getRads(), trip[i], t[i].getWaila()));
+                // (the HP alone is light, H 2.5 s with no generator: the governor's valve lag lets it past by a few rad/s)
+                double lim = i == 0 ? 850 : 845;
+                ctx.check(n + ": its governor holds the unloaded shaft (max " + (int) lim + " rad/s, then 842), no trip",
+                    max[i] <= lim && shaftOf(t[i]).getRads() <= 842 && !trip[i], String.format("max %.0f, now %.0f rad/s, tripped %s", max[i], shaftOf(t[i]).getRads(), trip[i]));
+            }
         }
     }
 }
