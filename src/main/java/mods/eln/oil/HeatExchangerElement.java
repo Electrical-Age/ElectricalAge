@@ -33,7 +33,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     private double[] loadedA, loadedB;
     private List<FluidPort> ports = List.of();
     /** Heat A to B now (W), the inlet temperatures (K, last step's), and totals (J) since loaded. */
-    public double q, tAin, tBin, totalJ;
+    public double q, tAin, tBin, tAout, tBout, totalJ;
     double meterQ, meterTime, qShown;
 
     public HeatExchangerElement(TransparentNode node, TransparentNodeDescriptor d) {
@@ -56,10 +56,12 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         return new double[]{m, m > 0 ? mT / m : n.T()};
     }
 
+    static final double BOILING = 1e7;
+
     /** A side's specific heat (J/kg K) for its heat capacity rate: very large while it holds water and steam together. */
     static double cp(FluidNode n) {
         double mw = n.mWater, ml = n.mLiquid(), mv = n.mVapour(), ma = n.mAir;
-        if (ml > 1e-6 && mv > 1e-6 && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return 1e7;   // (boiling or condensing)
+        if (ml > 1e-6 && mv > 1e-6 && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return BOILING;   // (boiling or condensing)
         double m = mw + ma;
         if (m <= 0) return 1005;
         return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
@@ -70,10 +72,14 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         if (a == null) return;
         var ia = inflow(a);
         var ib = inflow(b);
+        double cpA = cp(a), cpB = cp(b);
+        // (a side boiling or condensing meets the other at its saturation temperature, whatever its feed came in at: water
+        // fed at 20 C into a drum boiling at 170 mixes up to 170 there)
         tAin = ia[1];
         tBin = ib[1];
+        double inA = cpA >= BOILING ? a.T() : tAin, inB = cpB >= BOILING ? b.T() : tBin;
         double ua = desc.ua, heat;
-        double cA = ia[0] * cp(a), cB = ib[0] * cp(b);
+        double cA = ia[0] * cpA, cB = ib[0] * cpB;
         if (cA > 1e-6 && cB > 1e-6) {
             // counterflow effectiveness-NTU, from the two inlets
             double cMin = Math.min(cA, cB), cMax = Math.max(cA, cB), cr = cMin / cMax, ntu = ua / cMin, eps;
@@ -82,18 +88,25 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                 double x = Math.exp(-ntu * (1 - cr));
                 eps = (1 - x) / (1 - cr * x);
             }
-            heat = eps * cMin * (ia[1] - ib[1]);
+            heat = eps * cMin * (inA - inB);
         } else heat = ua * (a.T() - b.T());   // (a side still: the two volumes)
-        // at most half the way to even in a step, both ways
+        // at most (90 % of) the way to even in a step: the heat that brings both sides to one temperature, from each side's
+        // heat to reach the other's (1 / (1/fromA + 1/intoB): half the smaller for two like sides, nearly all of a thin
+        // gas's heat against boiling water; capped at half the smaller, 4 L of exhaust gave 8 kW of the 13 it could. It
+        // is taken before this step's inflow arrives, so its holding, not its through-flow, is the most it can give.)
         double ta = a.T(), tb = b.T();
-        double fromA = (a.energy - mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb)) / dt;
-        double intoB = (mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta) - b.energy) / dt;
-        if (heat > 0) heat = Math.max(0, Math.min(heat, 0.5 * Math.min(fromA, intoB)));
-        else {
+        if (heat > 0) {
+            double fromA = (a.energy - mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb)) / dt;
+            double intoB = (mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta) - b.energy) / dt;
+            heat = fromA <= 0 || intoB <= 0 ? 0 : Math.min(heat, 0.9 / (1 / fromA + 1 / intoB));
+        } else {
             double fromB = (b.energy - mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta)) / dt;
             double intoA = (mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb) - a.energy) / dt;
-            heat = Math.min(0, Math.max(heat, -0.5 * Math.min(fromB, intoA)));
+            heat = fromB <= 0 || intoA <= 0 ? 0 : Math.max(heat, -0.9 / (1 / fromB + 1 / intoA));
         }
+        // (what leaves each side: its inlet less the heat over its flow; the node's own temperature swings within a step)
+        tAout = cA > 1e-6 && cpA < BOILING ? tAin - heat / cA : a.T();
+        tBout = cB > 1e-6 && cpB < BOILING ? tBin + heat / cB : b.T();
         a.heat -= heat;
         b.heat += heat;
         q = heat;
@@ -209,9 +222,9 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
         if (a == null) return info;
-        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", tAin - Water.T0, a.T() - Water.T0, a.P() / 1e5,
+        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", tAin - Water.T0, tAout - Water.T0, a.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(a)));
-        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", tBin - Water.T0, b.T() - Water.T0, b.P() / 1e5,
+        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", tBin - Water.T0, tBout - Water.T0, b.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(b)));
         info.put(I18N.tr("Heat A to B"), Utils.plotPower("", qShown));
         return info;

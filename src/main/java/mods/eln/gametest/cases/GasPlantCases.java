@@ -208,7 +208,8 @@ public final class GasPlantCases {
         FluidDevice fx;
         IProcess watch;
         int tick;
-        double j0, window;
+        double j0, window, x0, e0, ea0;
+        FluidNode drainA;   // (side A's outlet)
 
         public String id() {
             return "heat_exchanger_economizer";
@@ -222,11 +223,11 @@ public final class GasPlantCases {
             l = new GasLine(ctx, true, 7000);
             BlockPos hp = ctx.at(3, 1, 5);
             h = hx(ctx, hp, Direction.ZP);
-            fx = fixtures(h.fluidLevel(), new Object[]{hp.east(), 4, air(hp.getY())}, new Object[]{hp.north(), 3, water(hp.getY(), 1.3e5, 293.15)},
+            fx = fixtures(h.fluidLevel(), new Object[]{hp.east(), 4, drainA = air(hp.getY())}, new Object[]{hp.north(), 3, water(hp.getY(), 1.3e5, 293.15)},
                 new Object[]{hp.south(), 2, air(hp.getY())});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
-                if (++tick == 500) j0 = h.totalJ;
+                if (++tick == 500) { j0 = h.totalJ; x0 = l.gt.totalExhaustJ; e0 = drainA.energy; ea0 = drainA.mAir; }
                 if (tick > 500) window += dt;
             });
         }
@@ -236,6 +237,13 @@ public final class GasPlantCases {
             Eln.simulator.removeElectricalComponent(l.load);
             mods.eln.fluid.FluidWorld.remove(fx);
             double kw = (h.totalJ - j0) / Math.max(1e-9, window) / 1000;
+            // (energy: the exhaust's heat over ambient goes into the water or out with the air; the air leaves no colder than the
+            // water: taking heat before a step's inflow, a looser cap once cooled it below ambient and made 21 kW of 19)
+            double ex = (l.gt.totalExhaustJ - x0) / window, left = ((drainA.energy - e0) - (drainA.mAir - ea0) * Water.hAir(293.15)) / window,
+                tOut = 293.15 + left / Math.max(1e-9, (drainA.mAir - ea0) / window * 1005);
+            ctx.line(String.format("economizer: exhaust %.1f kW = %.1f kW to the water + %.1f kW left in the air, which leaves at %.0f C", ex / 1000, kw, left / 1000, tOut - Water.T0));
+            ctx.check("economizer: heat is conserved (within 5 %)", Math.abs(kw * 1000 + left - ex) < 0.05 * ex, String.format("%.1f + %.1f vs %.1f kW", kw, left / 1000, ex / 1000));
+            ctx.check("economizer: the air leaves no colder than the water", tOut > h.b.T() - 2, String.format("%.0f vs %.0f C", tOut - Water.T0, h.b.T() - Water.T0));
             ctx.line(String.format("economizer: %.1f kW from the exhaust (gas turbine %.1f kW fuel, %.1f kW on the shaft); %s", kw, l.gt.fuelW / 1000, l.gt.shaftW / 1000, h.getWaila()));
             ctx.check("economizer: the exhaust heats the water (over 3 kW)", kw > 3, String.format("%.1f kW", kw));
             ctx.check("economizer: the water warms (B over 30 C)", h.b.T() > 303, String.format("%.0f C", h.b.T() - Water.T0));
@@ -275,11 +283,12 @@ public final class GasPlantCases {
 
     /**
      * A combined cycle (Argon's pinnacle): the gas turbine's exhaust raises steam in the heat exchanger's side B (a drum
-     * fed from an 18 bar reservoir), which drives an HP turbine. Numbers logged: fuel, both shafts, combined efficiency.
+     * fed from a 16 bar reservoir), which drives an HP turbine. Numbers logged: fuel, both shafts, combined efficiency.
      */
     static final class CombinedCycle extends PlumbingCases.Big {
-        /** The feed valve, an iron one ~1 % open on 16 bar against a drum near 12: a few g/s (the orifice law). */
-        static final double FEED_OPEN = 0.01;
+        /** The feed valve, an iron one ~0.6 % open on 16 bar against a drum near 15: ~2 g/s (the orifice law; the level is the
+         *  player's circuit to hold, Baughn: here it runs a little short of the ~4 g/s boiled over the window). */
+        static final double FEED_OPEN = 0.006;
         GasLine l;
         HeatExchangerElement h;
         ShaftSteamTurbineElement hp;
@@ -287,7 +296,8 @@ public final class GasPlantCases {
         FluidDevice fx;
         IProcess watch;
         int tick;
-        double f0, g0, s0, k0, j0, window;
+        double f0, g0, s0, k0, j0, w0, window;
+        FluidNode feed;
 
         public String id() {
             return "gas_plant_combined_cycle";
@@ -315,14 +325,14 @@ public final class GasPlantCases {
             // the pressure up, as a regulator on its screen would)
             hp.controls.throttle = 0.08;
             // side B: half full of water at 20 bar, saturated; fed from a 16 bar reservoir through an iron throttle valve
-            // about 1 % open (a feed that floods it fills the line and the turbine: the water must come no faster than it
+            // about 0.6 % open (a feed that floods it fills the line and the turbine: the water must come no faster than it
             // boils)
             h.b.fill(0.5 * h.b.volume * Water.RHO_L, 20e5, Water.tsat(20e5));
             PipeCases.lay(ctx, hxAt.north(), 0, 8, 8, 0, 8, 8, 8, 8, 8, 16);
             var feedNode = PipeCases.node(ctx, hxAt.north());
             feedNode.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
             for (var part : feedNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) v.setting = FEED_OPEN;
-            fx = fixtures(h.fluidLevel(), new Object[]{hxAt.east(), 4, air(hxAt.getY())}, new Object[]{hxAt.north().north(), 3, water(hxAt.getY(), 16e5, 293.15)});
+            fx = fixtures(h.fluidLevel(), new Object[]{hxAt.east(), 4, air(hxAt.getY())}, new Object[]{hxAt.north().north(), 3, feed = water(hxAt.getY(), 16e5, 293.15)});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
                 if (++tick == 1000) {
@@ -331,6 +341,7 @@ public final class GasPlantCases {
                     s0 = hp.totalWork;
                     k0 = hp.totalKg;
                     j0 = h.totalJ;
+                    w0 = feed.mWater;
                 }
                 if (tick > 1000) window += dt;
             });
@@ -347,6 +358,13 @@ public final class GasPlantCases {
                     + "HP %.1f kW; together %.1f kW = %.1f %% of the fuel (+%.0f %% over the gas turbine alone)",
                 fuel / 1000, gas / 1000, gas / fuel * 100, q / 1000, kg * 1000, h.b.P() / 1e5, st / 1000, (gas + st) / 1000, (gas + st) / fuel * 100, st / Math.max(1, gas) * 100));
             ctx.line("combined cycle: HX " + h.getWaila() + "; HP " + hp.getWaila());
+            ctx.line(String.format("combined cycle: feed %.2f g/s; drum B %.0f g of water", (w0 - feed.mWater) / window * 1000, h.b.mWater * 1000));
+            // (the exhaust's heat capacity rate: its heat over ambient spread over 500 K; at most it can give down to the drum)
+            double cEx = (fuel - gas) / (GasTurbineElement.EXHAUST_T - 293.15), most = cEx * (GasTurbineElement.EXHAUST_T - h.b.T());
+            ctx.line(String.format("combined cycle: exhaust %.1f W/K (%.1f g/s of air); out of the HX at %.0f C against the drum's %.0f C; %.1f of %.1f kW it could give",
+                cEx, cEx / 1.005, h.tAout - Water.T0, h.b.T() - Water.T0, q / 1000, most / 1000));
+            ctx.check("combined cycle: the exchanger takes most of what the exhaust can give down to the drum (over 85 %)", q > 0.85 * most,
+                String.format("%.1f of %.1f kW", q / 1000, most / 1000));
             ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 0.5 kW)", st > 500, String.format("%.1f kW", st / 1000));
             ctx.check("combined cycle: together they beat the gas turbine alone", gas + st > 1.05 * gas, "");
         }
