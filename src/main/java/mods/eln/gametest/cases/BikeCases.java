@@ -87,6 +87,11 @@ public final class BikeCases {
                         && p.getMainHandItem().getCount() == 1, java.util.Arrays.toString(bike.colors()) + ", dye left " + p.getMainHandItem().getCount());
                 paint(p, bike, 0, 0.7, 2.0, 180, 0, Items.DYE.red());
                 ctx.check("the same colour again uses no dye", p.getMainHandItem().getCount() == 1, "" + p.getMainHandItem().getCount());
+                // a dye aimed past the bike paints nothing, uses nothing, and doesn't put the player on it
+                p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DYE.blue(), 2));
+                paint(p, bike, 1.5, 0.9, 2.0, 180, 0, Items.DYE.blue());   // (along the bike, a block and a half to its side)
+                ctx.check("a dye aimed past it: no paint, no dye used, not mounted", bike.color(mods.eln.bike.BikeColors.TRUNK) == mods.eln.bike.BikeColors.DEFAULT
+                    && p.getMainHandItem().getCount() == 2 && p.getVehicle() == null, p.getMainHandItem().getCount() + " " + p.getVehicle());
                 paint(p, bike, 0, 0.9, -2.0, 0, 0, Items.DYE.blue());   // from behind, at the trunk
                 paint(p, bike, 0, 2.5, -0.2, 0, 90, Items.DYE.white());   // from above, at the saddle
                 paint(p, bike, 2.0, 0.6, 0, 90, 0, Items.DYE.lime());   // from the side, at the frame

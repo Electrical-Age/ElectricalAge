@@ -28,21 +28,26 @@ public final class BikeColors {
         return stored == DEFAULT ? DEFAULTS[g] : stored;
     }
 
+    /** How far a dye reaches along the look ray (blocks): a player's entity interaction range and a little. */
+    public static final double REACH = 4.5;
+
     /**
-     * Which group a look ray (eye, direction, in the world) meets first on a bike at pos facing yaw (degrees), or -1. The
-     * parts as boxes in the bike's frame: side (half-width), up, and along its heading (forward +), in blocks.
+     * Which group a look ray (eye, unit direction, in the world) meets first on a bike at pos facing yaw (degrees), or
+     * -1: the ray in the bike's frame (side, up, forward: yaw-rotated, so the boxes turn with the bike) against a box per
+     * part, nearest hit wins. Not the entity's bounding box: that is 0.8 square and says nothing about which part
+     * (AdventurAgent: side-on clicks on the frame missed, a saddle click painted the trunk).
      */
     public static int pick(Vec3 eye, Vec3 dir, Vec3 pos, float yaw) {
         float yr = yaw * Mth.DEG_TO_RAD;
-        double fx = -Mth.sin(yr), fz = Mth.cos(yr);
+        double fx = -Mth.sin(yr), fz = Mth.cos(yr);   // forward; side is (fz, -fx)
         Vec3 d = eye.subtract(pos);
-        double[] o = {d.x * fz - d.z * fx, d.y, d.x * fx + d.z * fz};   // side, up, forward
+        double[] o = {d.x * fz - d.z * fx, d.y, d.x * fx + d.z * fz};
         double[] r = {dir.x * fz - dir.z * fx, dir.y, dir.x * fx + dir.z * fz};
         int best = -1;
         double bestT = Double.MAX_VALUE;
         for (double[] b : BOXES) {
             double t = hit(o, r, new double[]{-b[1], b[2], b[4]}, new double[]{b[1], b[3], b[5]});
-            if (t >= 0 && t < bestT) {
+            if (t >= 0 && t <= REACH && t < bestT) {
                 bestT = t;
                 best = (int) b[0];
             }
@@ -50,12 +55,20 @@ public final class BikeColors {
         return best;
     }
 
-    /** {group, half-width, up from, up to, forward from, forward to} (BikeModel's parts, in blocks). */
+    /**
+     * {group, half-width, up from, up to, forward from, forward to}, in blocks, from BikeModel's geometry (model px:
+     * forward = -z / 16, up = (24 - y) / 16, side = x / 16), each a little generous but apart from its neighbours:
+     * the saddle (z 0-5.5, y 6.7-9.2, x +-2.5) with its post; the trunk and lid (z 6.2-13.8, y 5.3-10.8, x +-3.8);
+     * the fork (z -7 to -10, y 11-18.5, x +-1.3); the frame's tubes and stays (z -8 to 10, y 8-18.5), as three boxes:
+     * the head and top tube, the down and seat tubes, the stays.
+     */
     static final double[][] BOXES = {
-        {SADDLE, 0.18, 0.92, 1.12, -0.40, 0.04},
-        {TRUNK, 0.26, 0.62, 1.15, -0.88, -0.38},
-        {FORK, 0.12, 0.30, 1.05, 0.40, 0.70},
-        {FRAME, 0.10, 0.30, 1.00, -0.65, 0.48},
+        {SADDLE, 0.20, 0.86, 1.13, -0.37, 0.03},
+        {TRUNK, 0.27, 0.78, 1.21, -0.89, -0.38},
+        {FORK, 0.14, 0.28, 0.80, 0.50, 0.70},
+        {FRAME, 0.10, 0.78, 1.02, -0.20, 0.52},   // head tube and top tube
+        {FRAME, 0.10, 0.30, 0.86, -0.20, 0.50},   // down tube, seat tube, bottom bracket
+        {FRAME, 0.12, 0.30, 0.86, -0.66, -0.20},  // chain and seat stays
     };
 
     /** Slab test: the distance along r where the ray from o enters the box [lo, hi], or -1 if it misses. */

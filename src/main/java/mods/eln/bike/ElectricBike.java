@@ -335,10 +335,10 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         ItemStack held = player.getItemInHand(hand);
         net.minecraft.world.item.DyeColor dye = held.get(net.minecraft.core.component.DataComponents.DYE);
         if (dye == null) return InteractionResult.PASS;
+        // with a dye in hand a click only ever paints: no part hit, or that colour already, is nothing (no mounting)
         int g = BikeColors.pick(player.getEyePosition(), player.getViewVector(1), position(), getYRot());
-        if (g < 0) return InteractionResult.PASS;
         int c = dye.getTextureDiffuseColor() & 0xFFFFFF;
-        if (color(g) == c) return InteractionResult.PASS;
+        if (g < 0 || color(g) == c) return InteractionResult.FAIL;
         if (!level().isClientSide()) {
             entityData.set(DATA_COLOR[g], c);
             if (!player.getAbilities().instabuild) held.shrink(1);
@@ -354,7 +354,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         InteractionResult sup = super.interact(player, hand, location);
         if (sup != InteractionResult.PASS) return sup;
         InteractionResult dyed = dye(player, hand);
-        if (dyed != InteractionResult.PASS) return dyed;
+        if (dyed != InteractionResult.PASS) return dyed;   // (SUCCESS painted; FAIL: a dye in hand, nothing to paint)
         if (mode() == Mode.FALLEN) {   // stand it back up
             if (!level().isClientSide()) {
                 setMode(Mode.PARKED);

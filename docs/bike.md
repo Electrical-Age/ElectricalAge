@@ -100,8 +100,12 @@ GameTest `bike_recipe` crafts it.
 - Four groups (`BikeColors`, `BikeModel.Group`): the frame (tubes and stays), the fork, the trunk (box and lid), the
   saddle. Right-click a part with a vanilla dye: the group of the part the player looks at takes the dye's colour
   (`DyeColor.getTextureDiffuseColor`), one dye used unless creative, none if it's that colour already.
-- Which part: the look ray against a box per group in the bike's frame (`BikeColors.pick`, nearest hit). The pick radius
-  is 0.45, so the fork and the trunk, outside the 0.8-wide box, can be clicked at all.
+- Which part: the player's eye ray (server and client alike, up to 4.5 blocks), turned into the bike's frame, against
+  boxes from the model's geometry (`BikeColors.BOXES`: saddle, trunk, fork, and the frame as three boxes), nearest hit
+  wins; never the entity's bounding box (AdventurAgent: side-on frame clicks missed, a saddle click painted the trunk).
+  With a dye in hand a click only paints: nothing hit (or the same colour) uses no dye and doesn't mount. The pick
+  radius is 0.45, so the fork and the trunk, outside the 0.8-wide box, can be clicked at all. `BikeColorsTest` aims at
+  every part from each side it can be seen from, at four headings.
 - Synced (`DATA_COLOR`, one int per group; -1 = default), saved as `colors`, and on the item when broken up
   (`CUSTOM_DATA` `eln_bike_colors`; a plain bike's item has none) and back on the bike when placed.
 - Drawing: the dyeable parts are neutral grey in the texture; `BikeRenderer` submits the model once per group, each with
