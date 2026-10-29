@@ -81,7 +81,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   Dry it stops without failing. `compact_turbine_*`.
 - Pipe Control Valve (signal 0-50 V on its actuator's top) and Pipe Throttle Valve (slider screen), kinds of ValvePart
   (Baughn 2026-10-26). `pipe_throttle_and_control_valves`.
-- 50V/200V steam turbines take water damage: over 10% of the inlet liquid while the shaft turns above 20% speed burns them out (`FailureCause.WATER`, repairable; the repair drains the inlet). Baughn 2026-10-26; `oil_steam_turbine_floods`.
+- 50V/200V steam turbines take water damage: over 10% of the inlet liquid while the shaft turns above 20% speed burns them out (`FailureCause.WATER`, repairable; the repair drains the inlet). Baughn 2026-10-26; `oil_steam_turbine_floods`. A casing drain throws away 0.5% of the inlet volume a second in liquid water (Baughn 2026-10-29: condensate must get out, slugs stay fatal).
 - Cable slots removed: meters, electrical/voltage/thermal probes and lamp sockets have a built-in cable (LV, MV for the
   200V socket, copper thermal cable); Ground Cable has no GUI. Kept: transformer (turns), hub (side selection), breaker
   (trip rating); lamp supply and temperature probe slots are optional. Old cables stay in the hidden slot and drop on

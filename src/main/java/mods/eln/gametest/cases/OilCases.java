@@ -843,7 +843,7 @@ public final class OilCases {
     /**
      * Water in a turning turbine (Baughn: a significant quantity of water damages it): two loaded turbines at speed on
      * steam; at 300 ticks one gets 5% of its inlet as water, which it survives, the other 15%, which burns it out
-     * (FailureCause.WATER). A stopped turbine holds 15% unharmed.
+     * (FailureCause.WATER). A stopped turbine holds 15% unharmed. The casing drain lets water out slowly meanwhile.
      */
     static final class TurbineFloods implements TestCase {
         mods.eln.oil.SteamGeneratorElement wet, flooded, still;
@@ -901,6 +901,11 @@ public final class OilCases {
                 String.format("speed %.0f%%, water %.0f%%", wet.omega * 100, wetShare * 100));
             ctx.check("oil: 15% water in a turning turbine: water damage", flooded.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + flooded.getBurnt());
             ctx.check("oil: 15% water in a stopped turbine: no harm", !still.isBurnt(), "" + still.getBurnt());
+            // the casing drain (Baughn: water gets out slowly; 0.5% of the inlet a second): 10 s after, the wet one is dry and
+            // the stopped one is down by about 5 points
+            ctx.check("oil: the casing drain empties 5% in 10 s", wet.waterShare() < 0.005, String.format("%.2f%%", wet.waterShare() * 100));
+            ctx.check("oil: and lowers a stopped turbine's 15%", still.waterShare() < 0.12 && still.waterShare() > 0.08,
+                String.format("%.2f%%", still.waterShare() * 100));
             flooded.repair();
             ctx.check("oil: repaired, the flooded turbine is drained and works", !flooded.isBurnt() && flooded.waterShare() < 0.001,
                 String.format("burnt %s, water %.1f%%", flooded.getBurnt(), flooded.waterShare() * 100));
