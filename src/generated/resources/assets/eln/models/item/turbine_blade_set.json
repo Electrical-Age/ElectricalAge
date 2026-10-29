@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/iron_plate"
+    "layer0": "eln:item/turbine_blade_set"
   }
 }

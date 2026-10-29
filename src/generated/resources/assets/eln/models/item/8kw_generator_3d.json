@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:item/generator"
+    "particle": "eln:item/8kw_generator"
   }
 }

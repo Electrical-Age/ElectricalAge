@@ -62,17 +62,7 @@ public class ElnModels implements DataProvider {
         if (name.endsWith("compact_steam_turbine")) return itemTexture("50v_turbine", item);   // (until its own icon)
         if (name.endsWith("v_steam_turbine")) return itemTexture(name.replace("_steam_turbine", "_turbine"), item);
         if (name.endsWith("steam_condenser")) return itemTexture("small_passive_thermal_dissipator", item);   // (until its own icon)
-        if (name.equals("8kw_generator")) return itemTexture("generator", item);   // (until their own icons)
-        if (name.endsWith("shaft_motor")) return itemTexture("electrical_motor", item);
-        if (name.equals("turbine_blade_set")) return itemTexture("iron_plate", item);
-        if (name.equals("pipe_quality_sensor")) return itemTexture("pipe_pressure_sensor", item);
-        if (name.equals("pipe_kit_large_alloy")) return itemTexture("pipe_kit_alloy", item);   // (until its own icon)
-        if (name.equals("pipe_pressure_valve")) return itemTexture("pipe_control_valve", item);
         if (name.endsWith("_tank") && !name.contains("battery")) return itemTexture("small_passive_thermal_dissipator", item);   // (until their own icons)
-        if (name.endsWith("inline_pump")) return itemTexture("electrical_motor", item);
-        if (name.equals("lp_steam_turbine")) return itemTexture("steam_turbine", item);
-        if (name.equals("plant_steam_condenser")) return itemTexture("200v_active_thermal_dissipator", item);
-        if (name.equals("counterflow_heat_exchanger")) return itemTexture("small_active_thermal_dissipator", item);
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();
             if (d instanceof GenericItemUsingDamageDescriptor g) return iconTexture(g.getIconName(), false);

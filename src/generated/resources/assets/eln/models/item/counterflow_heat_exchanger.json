@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/small_active_thermal_dissipator"
+    "layer0": "eln:item/counterflow_heat_exchanger"
   }
 }

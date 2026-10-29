@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:item/electrical_motor"
+    "particle": "eln:item/200v_shaft_motor"
   }
 }

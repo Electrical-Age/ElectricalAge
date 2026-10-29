@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/pipe_pressure_sensor"
+    "layer0": "eln:item/pipe_quality_sensor"
   }
 }

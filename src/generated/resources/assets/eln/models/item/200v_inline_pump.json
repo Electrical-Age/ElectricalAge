@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/electrical_motor"
+    "layer0": "eln:item/200v_inline_pump"
   }
 }

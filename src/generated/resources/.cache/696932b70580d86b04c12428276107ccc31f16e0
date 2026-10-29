@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T15:58:41.986605667	eln-global/EA models
+// 26.3	2026-10-29T18:43:41.79466171	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -474,7 +474,7 @@ fe5ab82dcd039b36559e5543309ec6a110639916 assets/eln/models/item/200v_farming_lam
 141963314d33dfb844bb10230839ee5939beb9af assets/eln/models/item/200v_fuel_generator.json
 3453413052533eebcc9f464fb7238cbe7f04957f assets/eln/models/item/200v_fuel_generator_3d.json
 d1ceb40a95c54c0e474058ddc85c57c534b2270c assets/eln/models/item/200v_incandescent_light_bulb.json
-67b03f71f081f768905f2a0e1f312a99f9f1d876 assets/eln/models/item/200v_inline_pump.json
+401c29c75e7550169ca8cf98a9c1905d553ba362 assets/eln/models/item/200v_inline_pump.json
 5f4bcf4a055e02001202a709f0d8f072931207f8 assets/eln/models/item/200v_iron_heating_corp.json
 cfab526b2ac162870195ac86d6f8098fad218f2c assets/eln/models/item/200v_led_bulb.json
 c14fe1865781c82710e78b991a896e3e76d6e938 assets/eln/models/item/200v_macerator.json
@@ -486,8 +486,8 @@ cae62c66181615a1907943a24def91c83223281e assets/eln/models/item/200v_plate_machi
 b64af5dd65553d5688568fe24cb828999ebc73bf assets/eln/models/item/200v_plate_machine_3d.json
 6516b7328cc2ba074ac47a10c91fa493bb1bb5d1 assets/eln/models/item/200v_power_socket.json
 0bd2284f374c4a09e3ed453dd50e2714a832ba30 assets/eln/models/item/200v_power_socket_3d.json
-67b03f71f081f768905f2a0e1f312a99f9f1d876 assets/eln/models/item/200v_shaft_motor.json
-dff0ff1b152ddd91c0d8cc2e1a8fe074713d6d98 assets/eln/models/item/200v_shaft_motor_3d.json
+d95829f9ee146ef1e31743a848c67ce522f99c54 assets/eln/models/item/200v_shaft_motor.json
+dd48bbc231b59414a6c6d4530c8a2569dadac2e0 assets/eln/models/item/200v_shaft_motor_3d.json
 fc29655922cf22b6572980e150c3aff7e4fb76e2 assets/eln/models/item/200v_steam_turbine.json
 99c543c0bc1feceb6850d6afecf303d9e8bf9beb assets/eln/models/item/200v_submersible_pump.json
 9f69a1ba01b352462d4310fd6905fe4882e971ee assets/eln/models/item/200v_submersible_pump_3d.json
@@ -539,8 +539,8 @@ a67e6dcb8020e78ad48a94d67e13e7f5ad1c5fc6 assets/eln/models/item/50v_turbine.json
 07a35785a90399a7b9ffe27c076743c2e362451d assets/eln/models/item/50v_turbine_3d.json
 4c3e9566025122dfdef3c0c397d33c7d7da4949b assets/eln/models/item/800v_defence_turret.json
 75fbd54de4f60b17c45ad244767a1439a5e692bf assets/eln/models/item/800v_defence_turret_3d.json
-7e12d610e77ff6c186997b27898f7799abc66524 assets/eln/models/item/8kw_generator.json
-857924bf36d7f7618323081b60791d5cd5090c6e assets/eln/models/item/8kw_generator_3d.json
+10a32a4bc319f2527e93ed103eb4455ecf4de7c9 assets/eln/models/item/8kw_generator.json
+75e9fe18745976132a3f870e7354b46c8e568ff5 assets/eln/models/item/8kw_generator_3d.json
 6123ef3f5ec626f1c23c8a736ced676d2f70da6f assets/eln/models/item/advanced_chip.json
 2d26ebbda988c734f20532a2df23ddada008508f assets/eln/models/item/advanced_electrical_motor.json
 af735f3de534b39a0ff0f69bec96cd3787b8de50 assets/eln/models/item/advanced_energy_meter.json
@@ -550,7 +550,7 @@ e7302203eb2906a6f1805720b52f08e88f92495d assets/eln/models/item/advanced_machine
 5b9deed4c12ef976b6f71cfdfdcfd023c02804d5 assets/eln/models/item/alloy_dust.json
 f4c0ea441d39fa54a6fe791408e87931889a37cb assets/eln/models/item/alloy_ingot.json
 41c8d9c6ff804b8ca8397cfb3aed87e7a451bc5a assets/eln/models/item/alloy_plate.json
-4cd65ebf22bb285edbccefaa9720344fc8b3e1d6 assets/eln/models/item/alloy_tank.json
+fd323d20f1be3c4899d7e30d66c47b5941609713 assets/eln/models/item/alloy_tank.json
 787f4d35cfe11e2af6678238d90309b79282f56a assets/eln/models/item/amplifier.json
 3ea096a3d6bcf952b5362fc0cbe66eadeb380f29 assets/eln/models/item/amplifier_3d.json
 d7a070eecca4ab4eaba76d17551d7c0844df9737 assets/eln/models/item/analog_gauge.json
@@ -603,7 +603,7 @@ b358e230dd062a8df2c2e2f608f1fe8f16e7cfa5 assets/eln/models/item/copper_dust.json
 4417ef24ef1a588e9a886ecd4fcda40e28837755 assets/eln/models/item/copper_thermal_cable.json
 ab5f489ce7ccc43e91645bb66ee6ee1cab07742b assets/eln/models/item/cost_oriented_battery.json
 b2a10d604e646d4b250b589bc69d7b136e1e73a2 assets/eln/models/item/cost_oriented_battery_3d.json
-1870838a52b647683b6575ed51e8cec48e009c0c assets/eln/models/item/counterflow_heat_exchanger.json
+8e206260d9da65beedd27820e0ac9eaf460a4438 assets/eln/models/item/counterflow_heat_exchanger.json
 2d55f400a53da004175402102047ed397eebe632 assets/eln/models/item/current_oriented_battery.json
 d21f22ce19eafce8807be27945e6df9d787ba164 assets/eln/models/item/current_oriented_battery_3d.json
 2f3c76e5e017396bfe8efe4edd6a5a2bdf7893a8 assets/eln/models/item/cyan_brush.json
@@ -695,7 +695,7 @@ c77440ac82c6ecea9f0c1bcf51a96abee9bd2396 assets/eln/models/item/improved_flashli
 4a6030e469c1ee94608d5a180e4d50067fca17b6 assets/eln/models/item/iron_cable.json
 b5949fe001bb7915d5c219a56ec8a8aa59abd64a assets/eln/models/item/iron_dust.json
 6ee852843c5ce8c9b8ee81b3593e09311b85c931 assets/eln/models/item/iron_plate.json
-4cd65ebf22bb285edbccefaa9720344fc8b3e1d6 assets/eln/models/item/iron_tank.json
+dd1f8509979e613f461e441306a3dd80acfd43d3 assets/eln/models/item/iron_tank.json
 8c73426f3430842b5c382fd4e2b88340bfb87d28 assets/eln/models/item/item_creative_tab.json
 cbea44e4b7bd2d1574780c49e7921f3b9dcfa444 assets/eln/models/item/jk_flip_flop_chip.json
 36bcebe9fefb0162bccbdf26fb48897dbfe4f164 assets/eln/models/item/jk_flip_flop_chip_3d.json
@@ -737,8 +737,8 @@ e7c38f5c8aa4b9c35b4ca7ffe058e93894019cdc assets/eln/models/item/low_voltage_swit
 89169c1072a11c2362a1e4647fc89ba849e99f39 assets/eln/models/item/low_voltage_switch_3d.json
 0c08013b75d3497b5bf91f984c0c27e48365557a assets/eln/models/item/lowpass_filter.json
 859f74c91877d4d92821d60f68c24e7c02f08f54 assets/eln/models/item/lowpass_filter_3d.json
-1ad10bb23f5a1ed79129d5cedc9760acd3a70ab7 assets/eln/models/item/lp_steam_turbine.json
-8e835b5350ed3fe674a792114b186e8fb3906a03 assets/eln/models/item/lp_steam_turbine_3d.json
+2f21a11f396273fa0596d0ba4764c406f7eb7ed2 assets/eln/models/item/lp_steam_turbine.json
+002d8771a0ae533d3f050d48792ce5fe9807a99c assets/eln/models/item/lp_steam_turbine_3d.json
 2c83c1e96fbb2b08023155305c817583659e25f8 assets/eln/models/item/machine_block.json
 41f73553e76eb0f8eaab20c1d0cb82503385c789 assets/eln/models/item/machine_booster.json
 11741f49b167f7d55d75148694f0adf6718fbb80 assets/eln/models/item/magenta_brush.json
@@ -790,15 +790,15 @@ ed17386abf1e7b55e0167a95e65e07395740cece assets/eln/models/item/pipe_adapter.jso
 a2f6b25ea172857c6a5851ca0009d2f8ba6f7dc2 assets/eln/models/item/pipe_control_valve.json
 2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_alloy.json
 cb6f096c14fa8c9e8b2459dee3fc41fed9f3a4f1 assets/eln/models/item/pipe_kit_iron.json
-2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_large_alloy.json
+b4711b75336798da38c5c8241429c7c532716fc8 assets/eln/models/item/pipe_kit_large_alloy.json
 409e691a2f03b52ed63b1fec945e97c715745cb0 assets/eln/models/item/pipe_pressure_sensor.json
-a2f6b25ea172857c6a5851ca0009d2f8ba6f7dc2 assets/eln/models/item/pipe_pressure_valve.json
-409e691a2f03b52ed63b1fec945e97c715745cb0 assets/eln/models/item/pipe_quality_sensor.json
+728adc193abbaedf856be9ade16fbfdf6401b768 assets/eln/models/item/pipe_pressure_valve.json
+b5043a1265f9ba51a280e65fe4b5be36b577c75c assets/eln/models/item/pipe_quality_sensor.json
 4eca980c8e771e8c2a7a9ab24ef50903adf7b7ab assets/eln/models/item/pipe_safety_valve.json
 c6c4465c498507c618ab08509fc97458e71b1a89 assets/eln/models/item/pipe_temperature_sensor.json
 dfc7e3162421f7f4f1e6a850b22e03a280449386 assets/eln/models/item/pipe_throttle_valve.json
 e094407dc02261dd7493e9998d5a611ecb791c42 assets/eln/models/item/pipe_valve.json
-4cd65ebf22bb285edbccefaa9720344fc8b3e1d6 assets/eln/models/item/plant_steam_condenser.json
+aea553be1a7403d99f63a810998b9714ed6b7cbf assets/eln/models/item/plant_steam_condenser.json
 4a9d386e1ae640f932b01052c84a1974236d246c assets/eln/models/item/player_filter.json
 fae3633068c6a0dddbd79198b06f9db6c89fe250 assets/eln/models/item/portable_battery.json
 53f8a69b50216adf11b139d9f568234f8994f0d6 assets/eln/models/item/portable_battery_pack.json
@@ -916,7 +916,7 @@ e57c38ce7f0e1b5542a7870870acacd8013d6e13 assets/eln/models/item/thermometer.json
 d78c66bf9bd68c27a17ed13f79eefaab08acf359 assets/eln/models/item/tungsten_cable.json
 1a9d8a62d2775ef16e2368f1c2c0efd4f9b32473 assets/eln/models/item/tungsten_dust.json
 7af01ae892df8b280f25babf45e8bb207fdc12f5 assets/eln/models/item/tungsten_ingot.json
-6ee852843c5ce8c9b8ee81b3593e09311b85c931 assets/eln/models/item/turbine_blade_set.json
+8902322d354498fa83a7260d64e424d0662ebb77 assets/eln/models/item/turbine_blade_set.json
 a764a7b9d92f6698f270716f881b366571b894e9 assets/eln/models/item/tutorial_sign.json
 4d3132768b1fcd6dbcd5998362460e4713afdb60 assets/eln/models/item/tutorial_sign_3d.json
 8405f6265c5670ed84bfc7645c6c88664af5f444 assets/eln/models/item/universal_meter.json

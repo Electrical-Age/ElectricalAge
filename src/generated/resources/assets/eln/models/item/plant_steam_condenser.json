@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/small_passive_thermal_dissipator"
+    "layer0": "eln:item/plant_steam_condenser"
   }
 }
