@@ -37,6 +37,8 @@ public final class ShaftSteamCases {
         cases.add(new GovernorLoadStep());
         cases.add(new MotorSpinsUp());
         cases.add(new OldSaveLoads());
+        cases.add(new Overspeed(false));
+        cases.add(new Overspeed(true));
     }
 
     static final int GENERATOR_8KW = 16 + (4 << 6), MOTOR = 17 + (4 << 6);
@@ -433,6 +435,66 @@ public final class ShaftSteamCases {
             ctx.check("motor: no jump from rest (under 400 rad/s after 0.5 s: its torque limit)", at5s >= 0 && at5s < 400, String.format("%.0f", at5s));
             ctx.check("motor: brings it to about 800 rad/s (no signal: full speed)", w > 700 && w < 820, String.format("%.0f rad/s", w));
             ctx.check("motor: draws power to do it", m.getDrawnW() > 0, String.format("%.0f W", m.getDrawnW()));
+        }
+    }
+
+    /**
+     * Overspeed (Baughn 2026-10-29): an unloaded turbine on 20 bar steam. Automatic, the governor and the trip keep it
+     * under 880 rad/s; under manual control (throttle full open) neither protects it: it races past the trip to the
+     * shaft's burst speed and fails.
+     */
+    static final class Overspeed implements TestCase {
+        final boolean manual;
+        ShaftSteamTurbineElement t;
+        BlockPos at;
+        IProcess feed;
+        double max;
+        boolean burst, sawTrip;
+        int tick;
+
+        Overspeed(boolean manual) {
+            this.manual = manual;
+        }
+
+        public String id() {
+            return manual ? "shaft_steam_turbine_manual_overspeeds" : "shaft_steam_turbine_automatic_trips";
+        }
+
+        public int ticks() {
+            return 400;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(3, 1, 1);
+            t = (ShaftSteamTurbineElement) ctx.placeTransparent(STEAM_TURBINE, at);
+            t.controls.manual = manual;
+            Eln.simulator.addSlowProcess(feed = dt -> {
+                if (t.isBurnt() || mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(at, ctx.level())) == null) {
+                    burst = true;
+                    return;
+                }
+                steam(t);
+                if (++tick == 200) shaft(t).setRads(920);   // (as if a load fell off: over the trip)
+                sawTrip |= t.tripped;
+                if (tick < 200) max = Math.max(max, shaft(t).getRads());
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(feed);
+            String what = manual ? "manual control" : "automatic";
+            ctx.line(String.format("overspeed, %s: max %.0f rad/s, burst %s", what, max, burst));
+            if (manual) {
+                ctx.check("overspeed: under manual control nothing stops it: past the trip to the burst speed, and it fails",
+                    burst && max > 880, String.format("max %.0f rad/s, burst %s", max, burst));
+                ctx.check("overspeed: manual control never trips", !sawTrip, "");
+            } else {
+                ctx.check("overspeed: automatic, the governor holds it under 880 rad/s", !burst && max < 880 && max > 700,
+                    String.format("max %.0f rad/s", max));
+                // (unloaded, only windage slows it: it coasts down, the valve shut until it's under 800)
+                ctx.check("overspeed: automatic, pushed to 920 it trips and coasts down", sawTrip && t.tripped && !burst && shaft(t).getRads() < 915,
+                    String.format("tripped %s, now %.0f rad/s", sawTrip, shaft(t).getRads()));
+            }
         }
     }
 

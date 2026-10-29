@@ -22,7 +22,7 @@ import java.util.function.DoubleSupplier;
 public final class SteamValveControl {
     public static final int REGULATOR_SLOT = 0;
     public static final double TARGET_MIN_BAR = 1;
-    public static final byte TOGGLE_EXTERNAL = 1, SET_THROTTLE = 2, SET_TARGET = 3;
+    public static final byte TOGGLE_EXTERNAL = 1, SET_THROTTLE = 2, SET_TARGET = 3, TOGGLE_MANUAL = 4;
 
     final TransparentNodeElement element;
     public final TransparentNodeElementInventory inventory;
@@ -31,6 +31,12 @@ public final class SteamValveControl {
     final DoubleSupplier inletPa;
     public final double targetMaxBar;
     public boolean controlExternal;
+    /**
+     * Manual control (the shaft Steam Turbine; Baughn 2026-10-29): the throttle sets the valve itself, with no speed
+     * governor and no overspeed trip. External control is manual too. Whoever takes manual control duplicates the
+     * safeties.
+     */
+    public boolean manual;
     /** Internal throttle (0..1), target inlet pressure (bar), and the valve's limit now (0..1). */
     public double throttle = 1, targetBar, limit = 1;
     double regulated = 1;
@@ -53,6 +59,11 @@ public final class SteamValveControl {
         this.targetBar = defaultTargetBar;
         this.targetMaxBar = targetMaxBar;
         inventory = new TransparentNodeElementInventory(1, 1, element);
+    }
+
+    /** Under manual control (no governor, no trip): manual mode, or external control. */
+    public boolean isManual() {
+        return manual || controlExternal;
     }
 
     public boolean hasRegulator() {
@@ -78,6 +89,7 @@ public final class SteamValveControl {
     public boolean unserialize(byte type, DataInputStream stream) throws IOException {
         switch (type) {
             case TOGGLE_EXTERNAL -> controlExternal = !controlExternal;
+            case TOGGLE_MANUAL -> manual = !manual;
             case SET_THROTTLE -> throttle = Math.max(0, Math.min(1, stream.readFloat()));
             case SET_TARGET -> {
                 targetBar = Math.max(TARGET_MIN_BAR, Math.min(targetMaxBar, stream.readFloat()));
@@ -93,6 +105,7 @@ public final class SteamValveControl {
     /** For the screen: external, throttle, target, limit, inlet bar (Render.read reads them back). */
     public void serialize(DataOutputStream stream) throws IOException {
         stream.writeBoolean(controlExternal);
+        stream.writeBoolean(manual);
         stream.writeFloat((float) throttle);
         stream.writeFloat((float) targetBar);
         stream.writeFloat((float) limit);
@@ -101,6 +114,7 @@ public final class SteamValveControl {
 
     public void writeToNBT(CompoundTag nbt) {
         nbt.putBoolean("controlExternal", controlExternal);
+        nbt.putBoolean("manual", manual);
         nbt.putDouble("throttle", throttle);
         nbt.putDouble("targetBar", targetBar);
         pressure.writeToNBT(nbt, "pressure");
@@ -108,6 +122,7 @@ public final class SteamValveControl {
 
     public void readFromNBT(CompoundTag nbt, double defaultTargetBar) {
         controlExternal = nbt.getBooleanOr("controlExternal", false);
+        manual = nbt.getBooleanOr("manual", false);
         throttle = nbt.getDoubleOr("throttle", 1);
         targetBar = nbt.getDoubleOr("targetBar", defaultTargetBar);
         pressure.readFromNBT(nbt, "pressure");
@@ -120,7 +135,7 @@ public final class SteamValveControl {
 
     /** The client side of the controls (a turbine's render), for SteamGeneratorScreen. */
     public static class Render {
-        public boolean controlExternal, throttleNew, targetNew;
+        public boolean controlExternal, manual, throttleNew, targetNew;
         public float throttle = -1, targetBar = -1, limit, inletBar;
         public final float targetMaxBar;
         final mods.eln.node.transparent.TransparentNodeElementRender render;
@@ -132,6 +147,7 @@ public final class SteamValveControl {
 
         public void read(DataInputStream stream) throws IOException {
             controlExternal = stream.readBoolean();
+            manual = stream.readBoolean();
             float t = stream.readFloat(), p = stream.readFloat();
             if (t != throttle) {
                 throttle = t;
@@ -147,6 +163,10 @@ public final class SteamValveControl {
 
         public void clientToggleControl() {
             render.clientSendId(TOGGLE_EXTERNAL);
+        }
+
+        public void clientToggleManual() {
+            render.clientSendId(TOGGLE_MANUAL);
         }
 
         public void clientSetThrottle(float v) {

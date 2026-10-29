@@ -47,7 +47,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar
-  venting to air (~39 g/s); 5 % droop governor (full open at 800 rad/s, shut at 840), trip over 880, windage 2 % of
+  venting to air (~39 g/s); automatic: 5 % droop governor (full open at 800 rad/s, shut at 840), trip over 880 (manual
+  or external control: neither; Baughn: whoever takes manual control duplicates the safeties), windage 2 % of
   rated at rated speed (an unloaded turbine can't run away on the valve's leak); the 50V/200V turbines' controls and
   screen (`SteamValveControl`); casing bursts over 60 bar; water strips its blades, repaired with a cheap Turbine
   Blade Set. No fluid capability; an old turbine's tank is dropped on load. New: an 8 kW Generator (the 4 kW one is

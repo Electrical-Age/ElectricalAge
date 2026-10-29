@@ -88,8 +88,9 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
         list.add(Utils.plotPower("Up to ", ShaftSteamTurbineElement.NOMINAL_P) + String.format(" onto the shaft from %.0f g/s of %.0f bar steam venting to air;",
             ShaftSteamTurbineElement.nominalKgPerS() * 1000, p))
         list.add("more with a vacuum behind it. Generators on the shaft take the power.")
-        list.add(Utils.plotRads("Governor: full open to ", ShaftSteamTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
+        list.add(Utils.plotRads("Automatic: governor full open to ", ShaftSteamTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
         list.add("Its screen: throttle, or a regulator holding the inlet pressure; a signal on its front for external control.")
+        list.add("Manual or external control turns the governor and the overspeed trip off: your own safeties then.")
         list.add(String.format("Its casing bursts over %.0f bar. Water in the steam strips its blades.", ShaftSteamTurbineElement.BURST_PA / 1e5))
         list.add("Might want a boiler with that.")   // (Baughn)
     }

@@ -39,8 +39,9 @@ import java.util.Map;
  * Its governor is a 5 % droop: the valve is full open at 800 rad/s and shut at 840, so turbines on one shaft share
  * the load without fighting (Argon). The valve follows with a short lag; the controls (throttle, regulator holding an
  * inlet pressure, an external signal on its front) cap it, as on the 50V/200V turbines (SteamValveControl). Over
- * TRIP of its rated speed it trips (the valve shuts until the shaft is back under rated speed); a leak past the shut
- * valve remains, so a light shaft on very high pressure can still run away to the shaft's burst speed. Water in the
+ * TRIP of its rated speed it trips (the valve shuts until the shaft is back under rated speed). Under manual control (the
+ * throttle sets the valve, or an external signal does) there is no governor and no trip (Baughn 2026-10-29: whoever takes
+ * manual control duplicates the safeties): an overdriven shaft races to its burst speed. Water in the
  * inlet strips its blades (repaired with a Turbine Blade Set); over BURST_PA its casing bursts.
  */
 public class ShaftSteamTurbineElement extends SimpleShaftElement implements FluidDevice {
@@ -117,9 +118,11 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             if (inlet == null) return;
             double rads = getShaft().getRads();
             // governor: 5 % droop, a short valve lag; a trip shuts it over TRIP until back under rated speed
-            if (rads > TRIP * RATED_RADS) tripped = true;
-            else if (rads < RATED_RADS) tripped = false;
-            double target = tripped ? 0 : Math.max(0, Math.min(1, (RATED_RADS * (1 + DROOP) - rads) / (DROOP * RATED_RADS)));
+            // (manual control, Baughn 2026-10-29: the valve is the player's; no governor, no trip: their safeties)
+            boolean manual = controls.isManual();
+            if (manual || rads < RATED_RADS) tripped = false;
+            else if (rads > TRIP * RATED_RADS) tripped = true;
+            double target = manual ? 1 : tripped ? 0 : Math.max(0, Math.min(1, (RATED_RADS * (1 + DROOP) - rads) / (DROOP * RATED_RADS)));
             gate += (target - gate) * Math.min(1, time / GOV_TAU);
             double open = Math.min(gate, controls.limit());
             // steam through the nozzle (choked: by the inlet pressure), only what the inlet has above the exhaust
@@ -373,6 +376,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         if (inlet != null) info.put(I18N.tr("Work per kg"), String.format("%.0f kJ/kg", jPerKg() / 1000));
         if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));
         info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped (overspeed)") : String.format("%.0f%%", Math.min(gate, controls.limit) * 100));
+        info.put(I18N.tr("Governor"), controls.isManual() ? I18N.tr("off: manual control, no overspeed trip") : I18N.tr("automatic, trips over 880 rad/s"));
         info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", controls.limit * 100)
             : controls.hasRegulator() ? String.format("holds %.1f bar at the inlet", controls.targetBar) : String.format("throttle %.0f%%", controls.throttle * 100));
         return info;
