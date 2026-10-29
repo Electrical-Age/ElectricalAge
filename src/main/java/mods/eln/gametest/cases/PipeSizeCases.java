@@ -52,9 +52,9 @@ public final class PipeSizeCases {
                 ctx.check("pipe " + PipePart.TIER_NAME[t] + ": " + want[t] + " voxels on the grid, drawn " + drawn[t],
                     across(p) == want[t] && p.drawn() == drawn[t], across(p) + " / " + p.drawn());
             }
-            ctx.check("large alloy pipe: 256 x the alloy's volume, 1024 x its conductance",
-                Math.abs(PipePart.VOLUME_PER_BLOCK[2] / PipePart.VOLUME_PER_BLOCK[1] - 256) < 1e-6
-                    && Math.abs(PipePart.K_PER_BLOCK[2] / PipePart.K_PER_BLOCK[1] - 1024) < 1e-6, "");
+            ctx.check("large alloy pipe: 16 x the alloy's area and volume, 32 x its conductance (d^2.5)",
+                Math.abs(PipePart.VOLUME_PER_BLOCK[2] / PipePart.VOLUME_PER_BLOCK[1] - 16) < 1e-6
+                    && Math.abs(PipePart.K_PER_BLOCK[2] / PipePart.K_PER_BLOCK[1] - 32) < 1e-6, "");
         }
     }
 

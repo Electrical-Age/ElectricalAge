@@ -266,7 +266,8 @@ public final class ShaftPlantCases {
         Resistor[] loads;
         IProcess feed;
         int tick;
-        double kg0, wh0, wl0, q0, cool0, kg, wh, wl, q, cool, window, pSum, pxSum;
+        double kg0, wh0, wl0, q0, cool0, kg, wh, wl, q, cool, window, pSum, pxSum, plSum, rhoSum;
+        mods.eln.node.voxel.PipePart cross;
 
         public String id() {
             return "shaft_plant_large_crossover_full_flow";
@@ -291,6 +292,7 @@ public final class ShaftPlantCases {
             PipeCases.lay(ctx, ctx.at(3, 2, 4), 2, 8, 8, 16, 8, 8, 0);
             PipeCases.lay(ctx, ctx.at(3, 2, 3), 2, 8, 8, 16, 8, 8, 8, 0, 8, 8);
             PipeCases.lay(ctx, ctx.at(2, 2, 3), 2, 16, 8, 8, 8, 8, 8, 8, 0, 8);
+            for (var part : PipeCases.node(ctx, ctx.at(3, 2, 4)).parts) if (part instanceof mods.eln.node.voxel.PipePart pp) cross = pp;
             c = condenser(ctx, cp, true, Direction.XP);
             loop = coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);
             Eln.simulator.addSlowProcess(feed = dt -> {
@@ -311,6 +313,11 @@ public final class ShaftPlantCases {
                     cool = c.totalCoolingKg - cool0;
                     pSum += c.v.vessel.P() * dt;
                     pxSum += hp.exhaustPa() * dt;
+                    plSum += lp.inlet.P() * dt;
+                    // the crossover's steam: density in its first block, for the velocity (area = volume per metre)
+                    var run = mods.eln.fluid.FluidWorld.nodeFor(cross.fluid);
+                    double vg = run.volume - run.mLiquid() / mods.eln.sim.fluid.Water.RHO_L;
+                    if (vg > 0) rhoSum += (run.mVapour() + run.mAir) / vg * dt;
                 }
             });
         }
@@ -320,10 +327,11 @@ public final class ShaftPlantCases {
             mods.eln.fluid.FluidWorld.remove(loop);
             for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
             double steam = kg / window;
-            ctx.line(String.format("full plant, large crossover: steam %.1f g/s; HP %.1f kW + LP %.1f kW (%.0f kJ/kg); crossover %.2f bar, condenser %.3f bar; "
-                    + "%.1f kW into %.2f kg/s of cooling water",
-                steam * 1000, wh / window / 1000, wl / window / 1000, (wh + wl) / Math.max(1e-9, kg) / 1000, pxSum / window / 1e5, pSum / window / 1e5,
-                q / window / 1000, cool / window));
+            double rho = rhoSum / window, area = mods.eln.node.voxel.PipePart.VOLUME_PER_BLOCK[2];   // (m^2: m^3 per 1 m block)
+            ctx.line(String.format("full plant, large crossover: steam %.1f g/s; HP %.1f kW + LP %.1f kW (%.0f kJ/kg); crossover %.2f bar at the HP, %.2f at the LP; "
+                    + "steam %.2f kg/m^3 at %.1f m/s in a %.0f mm bore; condenser %.3f bar; %.1f kW into %.2f kg/s of cooling water",
+                steam * 1000, wh / window / 1000, wl / window / 1000, (wh + wl) / Math.max(1e-9, kg) / 1000, pxSum / window / 1e5, plSum / window / 1e5,
+                rho, steam / Math.max(1e-9, rho * area), Math.sqrt(4 * area / Math.PI) * 1000, pSum / window / 1e5, q / window / 1000, cool / window));
             ctx.line("full plant, large crossover: HP " + hp.getWaila() + "; LP " + lp.getWaila() + "; condenser " + c.getWaila());
             ctx.check("large crossover: one shaft", hp.getShaft() == lp.getShaft(), "");
             ctx.check("large crossover: the HP runs at about full steam (over 33 g/s)", steam > 0.033, String.format("%.1f g/s", steam * 1000));

@@ -31,12 +31,12 @@ public final class PipePart extends VoxelPart {
     }
 
     /**
-     * The large alloy pipe (Baughn 2026-10-29): inner diameter 16 x the alloy's, so 256 x its volume; its conductance
-     * 1024 x (d^2.5): the network's flow is linear in the pressure drop (rho k dP / mu, Poiseuille's form, which would
-     * give d^4 = 65536 x), but steam in a pipe this size is turbulent, where the flow at a given drop per length goes as
-     * about d^2.5. Ratings lower than the alloy's: a wide thin-walled low-pressure line.
+     * The large alloy pipe (Baughn 2026-10-29): 16 x the alloy's inner area (4 x its diameter), so 16 x its volume;
+     * its conductance 32 x (d^2.5): the network's flow is linear in the pressure drop (rho k dP / mu, Poiseuille's
+     * form, which would give d^4 = 256 x), but steam in a pipe this size is turbulent, where the flow at a given drop
+     * per length goes as about d^2.5. Ratings lower than the alloy's: a wide thin-walled low-pressure line.
      */
-    public static final double LARGE_D = 16;
+    public static final double LARGE_D = 4;
     public static final double[] VOLUME_PER_BLOCK = {0.00003, 0.00003 * 2.25, 0.00003 * 2.25 * LARGE_D * LARGE_D};
     /** What saves before 2026-10-25 had (no "v" key): read scales their contents to the new volume. */
     static final double[] OLD_VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25, 0.00015 * 2.25 * LARGE_D * LARGE_D};
