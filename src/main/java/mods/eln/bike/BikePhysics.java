@@ -29,6 +29,8 @@ public final class BikePhysics {
     public static volatile float TURN_AT_TOP = 5;
     /** The motor at full speed, W (a Portable Battery's 100 W discharge: ~7 min on one, ~20 on a pack). */
     public static volatile double MOTOR_WATTS = 100;
+    /** The front lamp's draw, W (Baughn 2026-10-29: like EA's flashlight). */
+    public static volatile double LAMP_WATTS = 20;
 
     private float[] inputs = new float[AVERAGE_TICKS];
     private int next;
@@ -75,7 +77,12 @@ public final class BikePhysics {
 
     /** Upward speed for a charged jump (scale 0..1 from the jump bar). */
     public static double jumpVelocity(float scale) {
-        return JUMP_VY * Math.max(0, Math.min(1, scale));
+        return jumpVelocity(scale, JUMP_VY);
+    }
+
+    /** Upward speed for a charged jump with a full-charge speed of vy. */
+    public static double jumpVelocity(float scale, double vy) {
+        return vy * Math.max(0, Math.min(1, scale));
     }
 
     /** The height a jump at vy reaches, falling as the bike does (move, then gravity and drag). */
@@ -126,8 +133,13 @@ public final class BikePhysics {
 
     /** The motor's draw at speed v (b/t): MOTOR_WATTS at full speed, falling with the square of speed. */
     public static double motorWatts(double v) {
+        return motorWatts(v, MOTOR_WATTS);
+    }
+
+    /** The draw at speed v of a motor of full the given watts at full speed. */
+    public static double motorWatts(double v, double full) {
         double f = Math.min(1, Math.abs(v) / VMAX_POWERED);
-        return MOTOR_WATTS * f * f;
+        return full * f * f;
     }
 
     /** Whether running into something at horizontal speed v (b/t) throws the rider off. */
