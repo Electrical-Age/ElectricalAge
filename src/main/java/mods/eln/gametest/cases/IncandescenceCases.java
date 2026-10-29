@@ -22,6 +22,79 @@ public final class IncandescenceCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new Lights());
+        cases.add(new HeaterFeedsCable());
+    }
+
+    /**
+     * The electric heater's copper back face feeds a thermal cable on the floor behind it (AdventurAgent's rig stayed
+     * cold): two rows, a six-node cable and one converted to voxel, each three blocks long from a heater held at 700 C.
+     * The near cable gets hot; that's what makes a thermal cable glow in game.
+     */
+    static final class HeaterFeedsCable implements TestCase {
+        final BlockPos[] near = new BlockPos[2], far = new BlockPos[2];
+        String err = "";
+
+        public String id() {
+            return "electric_heater_heats_a_thermal_cable";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext c) {
+            int cable = Ids.six("Copper Thermal Cable");
+            for (int row = 0; row < 2; row++) {
+                int z = 1 + 5 * row;
+                BlockPos hp = c.at(1, 1, z);
+                var h = (mods.eln.oil.ElectricHeaterElement) Wp10bCases.placeFacing(c, Ids.transparent("50V Electric Heater"), hp, mods.eln.misc.Direction.XN);
+                Lights.hold(h.thermal, 700);
+                for (int x = 2; x <= 4; x++) c.placeSix(cable, c.at(x, 1, z));
+                near[row] = c.at(2, 1, z);
+                far[row] = c.at(4, 1, z);
+                if (row == 1)
+                    for (int x = 2; x <= 4; x++) {
+                        var n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(c.at(x, 1, z), c.level()));
+                        if (n instanceof mods.eln.node.six.SixNode s6 && !(n instanceof mods.eln.node.voxel.VoxelNode)) {
+                            String why = mods.eln.node.voxel.CableConverter.convert(s6);
+                            if (why != null) err += x + ": " + why + "; ";
+                        }
+                    }
+            }
+        }
+
+        static double celsius(TestContext c, BlockPos p) {
+            var n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p, c.level()));
+            ThermalLoad t = n instanceof mods.eln.node.voxel.VoxelNode v ? v.cableThermal(0)
+                : n instanceof mods.eln.node.six.SixNode s6 ? s6.getElement(mods.eln.misc.Direction.YN).getThermalLoad(mods.eln.misc.LRDU.Left) : null;
+            return t == null ? Double.NaN : Incandescence.celsius(t.Tc);
+        }
+
+        public void measure(TestContext c) {
+            c.check("heater rig: converted", err.isEmpty(), err);
+            String[] what = {"six-node", "voxel"};
+            for (int row = 0; row < 2; row++) {
+                double a = celsius(c, near[row]), b = celsius(c, far[row]);
+                c.line(String.format("heater rig (%s): next to the heater %.0f C, third block %.0f C", what[row], a, b));
+                c.check("heater rig (" + what[row] + "): the cable behind the heater gets hot (> 300 C)", a > 300, String.format("%.0f C", a));
+            }
+        }
     }
 
     static final class Lights implements TestCase {

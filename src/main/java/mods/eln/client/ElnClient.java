@@ -131,6 +131,12 @@ public final class ElnClient {
         }
 
         @Override
+        public int skyLight(Level w, BlockPos p) {
+            if (w == null) return 0;
+            return Math.max(0, w.getBrightness(LightLayer.SKY, p) - w.getSkyDarken());
+        }
+
+        @Override
         public org.joml.Quaternionf cameraRotation() {
             return Minecraft.getInstance().gameRenderer.mainCamera().rotation();
         }

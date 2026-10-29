@@ -44,10 +44,16 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
 
     fun draw(position: Float = 0f) {
         dissipator.draw()
+        drawCoil()
         GL11.glRotatef((1f - position) * 300f, 0f, 1f, 0f)
         dissipator.obj.getPart("wiper")?.draw()
     }
 
+
+    /** The resistive drum in the middle (its own model part, so only it glows: the fins stay dark). */
+    fun drawCoil() {
+        dissipator.obj.getPart("coil")?.draw()
+    }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
@@ -209,8 +215,8 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
         desc.draw(positionAnimator.position)
         // 1.12 only tinted it toward the black-body colour, which can't be brighter than the texture: now it glows
         // (Baughn: the colour change was there, the light wasn't)
-        Incandescence.drawGlow(celsius) { desc.dissipator.obj.getPart("main")?.draw() }
-        Incandescence.drawHalo(celsius, 1.1f)
+        Incandescence.drawGlow(celsius) { desc.drawCoil() }
+        Incandescence.drawHalo(celsius, 0.8f, tileEntity)
     }
 
     override fun refresh(deltaT: Float) {

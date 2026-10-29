@@ -63,6 +63,11 @@ public final class UtilsClient {
         default void drawEntityItem(ItemEntity entityItem, double x, double y, double z, float roty, float scale) {
         }
 
+        /** The daylight on a block now (0..15: sky light less the night's darkening), so glows can fade in daylight. */
+        default int skyLight(Level w, BlockPos p) {
+            return 0;
+        }
+
         /** The camera's rotation (world space), for camera-facing sprites (Incandescence halos); null without a client. */
         default org.joml.Quaternionf cameraRotation() {
             return null;

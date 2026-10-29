@@ -27,7 +27,7 @@ public class ElectricHeaterRender extends TransparentNodeElementRender {
         mods.eln.misc.Incandescence.drawGlow(c, desc::drawElement);
         mods.eln.gl.GL11.glPushMatrix();
         mods.eln.gl.GL11.glTranslatef(-0.36f, -0.1f, 0f);
-        mods.eln.misc.Incandescence.drawHalo(c, 0.6f);
+        mods.eln.misc.Incandescence.drawHalo(c, 0.4f, tileEntity);
         mods.eln.gl.GL11.glPopMatrix();
     }
 

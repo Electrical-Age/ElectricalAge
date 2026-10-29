@@ -189,7 +189,7 @@ public final class Incandescence {
      * The glow of a voxel block's hot thermal cables (SixNodeRender, origin at the block's centre): each box a little
      * proud of the cable, additive and untextured (the cable is in the chunk mesh), and one small halo per block.
      */
-    public static void drawCableGlow(java.util.List<float[]> boxes) {
+    public static void drawCableGlow(java.util.List<float[]> boxes, int daylight) {
         if (boxes.isEmpty()) return;
         float hot = 0, cx = 0, cy = 0, cz = 0;
         GL11.glPushAttrib(0);
@@ -209,7 +209,7 @@ public final class Incandescence {
         GL11.glPopAttrib();
         GL11.glPushMatrix();
         GL11.glTranslatef(cx, cy, cz);
-        drawHalo(hot, 0.45f);
+        drawHalo(hot, 0.4f, daylight);
         GL11.glPopMatrix();
     }
 
@@ -219,11 +219,17 @@ public final class Incandescence {
      * A soft halo round the current origin, facing the camera: an additive disc bright in the middle, black (adds
      * nothing) at its rim. size = its radius (blocks) at full glow.
      */
-    public static void drawHalo(double celsius, float size) {
+    public static void drawHalo(double celsius, float size, net.minecraft.world.level.block.entity.BlockEntity be) {
+        drawHalo(celsius, size, be == null ? 0 : UtilsClient.hooks.skyLight(be.getLevel(), be.getBlockPos()));
+    }
+
+    /** As above, with the daylight (0..15) on the block: in full daylight a halo keeps 15% (Baughn: subtle by day). */
+    public static void drawHalo(double celsius, float size, int daylight) {
         float e = intensity(celsius);
         if (e <= 0) return;
         float[] c = color(celsius);
-        float r = size * (0.45f + 0.55f * Math.min(1.3f, e)), k = 0.35f * Math.min(1f, e);
+        float day = 1f - 0.85f * Math.max(0, Math.min(15, daylight)) / 15f;
+        float r = size * (0.45f + 0.55f * Math.min(1.3f, e)), k = 0.35f * Math.min(1f, e) * day;
         GL11.glPushMatrix();
         if (!GL11.faceCamera()) {
             GL11.glPopMatrix();

@@ -84,6 +84,10 @@ public final class LabCommands {
                         c.getSource().sendSuccess(() -> Component.literal("reconnected " + n.getClass().getSimpleName()), false);
                         return 1;
                     })))
+                .then(Commands.literal("heat").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .then(Commands.argument("celsius", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(-200, 3000))
+                        .executes(c -> heat(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"),
+                            com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(c, "celsius"))))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -225,6 +229,37 @@ public final class LabCommands {
         mods.eln.node.NodeOrphans.remove(node);
         src.sendSuccess(() -> Component.literal("removed " + what + " at " + pos.toShortString()), true);
         return 1;
+    }
+
+    /**
+     * /elnlab heat pos celsius: hold every thermal load of the node at pos at that temperature (a heat capacity nothing
+     * can move, until the node reloads). For testing hot things (Incandescence) without building a furnace for them.
+     */
+    static int heat(CommandSourceStack src, BlockPos pos, double celsius) {
+        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
+        java.util.List<mods.eln.sim.ThermalLoad> loads = new java.util.ArrayList<>();
+        if (node instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) loads.addAll(t.element.thermalLoadList);
+        if (node instanceof mods.eln.node.six.SixNode s6)
+            for (mods.eln.misc.Direction d : mods.eln.misc.Direction.values()) {
+                var e = s6.getElement(d);
+                if (e != null) loads.addAll(e.thermalLoadList);
+            }
+        if (node instanceof mods.eln.node.voxel.VoxelNode v)
+            for (int f = 0; f < 6; f++) {
+                var t = v.cableThermal(f);
+                if (t != null) loads.add(t);
+            }
+        if (loads.isEmpty()) {
+            src.sendFailure(Component.literal("no thermal load at " + pos.toShortString()));
+            return 0;
+        }
+        for (var t : loads) {
+            t.Tc = celsius - mods.eln.sim.PhysicalConstant.Tamb;
+            t.C = 1e15;
+        }
+        int n = loads.size();
+        src.sendSuccess(() -> Component.literal("holding " + n + " thermal load(s) at " + celsius + " C at " + pos.toShortString()), true);
+        return n;
     }
 
     static int inspect(CommandSourceStack src, BlockPos pos) {

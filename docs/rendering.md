@@ -119,7 +119,9 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 `misc/Incandescence` is the one rule for every device that heats up on the outside: the Large Rheostat (its `main`
 part), the electric heater (its coils, a separate model part `element` since `tools/models/electricheater.py` splits
 them out), the power resistor (its core), six-node thermal cables and voxel thermal cables ("not truly realistic for
-the insulated thermal cables, but ... for charm").
+the insulated thermal cables, but ... for charm"). The rheostat's drum is its own model part (`coil`, split out of
+`main` by radius) so its fins stay dark: glowing the whole `main` lit every fin face like a pane of coloured glass
+(AdventurAgent).
 
 - **Look:** nothing below the Draper point (525 C); colour from a smith's heat scale (dull red, blood red, cherry,
   orange-red, orange, yellow-orange, yellow, white at 1300 C); brightness = sqrt of the black-body radiance above
@@ -129,7 +131,9 @@ the insulated thermal cables, but ... for charm").
   the heat colour; very hot parts get a second additive pass toward yellow-white. The 1.12 rheostat only tinted the
   mesh by black-body colour (never brighter than the texture), from 281 C on; it now follows the physical scale.
 - **Halo:** `drawHalo(celsius, size)` is a camera-facing additive disc (`GL11.faceCamera`, the camera's rotation from
-  `UtilsClient.Hooks.cameraRotation`), bright in the middle and black (adding nothing) at its rim: fake bloom.
+  `UtilsClient.Hooks.cameraRotation`; as vanilla's conduit eye, the BER pose has no view rotation), bright in the
+  middle and black (adding nothing) at its rim: fake bloom. Daylight on the block (`Hooks.skyLight`) fades it to 15%
+  (Baughn: subtle by day).
 - **Voxel cables** are in the chunk mesh, so their glow is an overlay: the node publishes one glow step byte per part
   after the parts' bytes (`VoxelNode.publishBeforeElements`, 25 K steps, outside the part hash: a glow change doesn't
   re-mesh the chunk); `SixNodeRender` draws additive untextured boxes 0.1 px proud of each hot cable and one small halo
@@ -140,5 +144,7 @@ the insulated thermal cables, but ... for charm").
   per-tick budget of 16 (`BUDGET_PER_TICK`) so a long hot cable run can't flood the light engine, and always reports
   its first check so a node's saved light can't outlive a cooled device. A voxel block lights to its hottest thermal
   cable (`VoxelNode.recalculateLightValue`). Devices publish their temperature when the glow's 25 K step changes.
-- Tests: `IncandescenceTest` (levels, hysteresis, the first check, look, steps, the warning scale) and the GameTest
-  `hot_things_light_their_block`.
+- Tests: `IncandescenceTest` (levels, hysteresis, the first check, look, steps, the warning scale) and the GameTests
+  `hot_things_light_their_block` and `electric_heater_heats_a_thermal_cable` (the heater's back face feeds a floor
+  thermal cable, six-node and voxel). In a lab, `/elnlab heat <pos> <celsius>` holds a node's thermal loads at a
+  temperature (above a device's limit it burns, as it would).

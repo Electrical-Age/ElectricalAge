@@ -25,6 +25,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         SixNodeElementRender[] renders = new SixNodeElementRender[SixNode.SLOTS];
         /** A voxel block's glowing thermal cable boxes (Incandescence). */
         java.util.List<float[]> glow = java.util.List.of();
+        int daylight;
     }
 
     @Override
@@ -58,6 +59,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
         System.arraycopy(be.elementRenderList, 0, state.renders, 0, SixNode.SLOTS);
         state.glow = be instanceof mods.eln.node.voxel.VoxelNodeEntity v ? v.clientGlow : java.util.List.of();
+        state.daylight = state.glow.isEmpty() ? 0 : mods.eln.misc.UtilsClient.hooks.skyLight(be.getLevel(), be.getBlockPos());
     }
 
     @Override
@@ -92,7 +94,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                     frame.soot = false;
                 }
             }
-            mods.eln.misc.Incandescence.drawCableGlow(state.glow);
+            mods.eln.misc.Incandescence.drawCableGlow(state.glow, state.daylight);
         } catch (RuntimeException e) {
             ElnRenderErrors.report("six-node", e);
         } finally {
