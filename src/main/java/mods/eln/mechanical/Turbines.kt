@@ -48,6 +48,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbin
         list.add("Manual or external control turns the governor and the overspeed trip off: your own safeties then.")
         list.add("Its screen: throttle, or a regulator holding the inlet pressure; a signal on its front for external control.")
         list.add(String.format("Its casing bursts over %.0f bar.", spec.burstPa / 1e5))
+        list.add("Placed with its shaft along your view; it turns its exhaust toward a condenser or pipe beside it.")
         if (!spec.wetBraking) list.add("Might want a boiler with that.")   // (Baughn)
     }
 }
@@ -108,6 +109,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
         list.add(String.format("Hot exhaust (%.0f C) out of its back: pipe it to a heat exchanger, or it vents.", GasTurbineElement.EXHAUST_T - 273.15))
         list.add(Utils.plotRads("Automatic: governor full open to ", GasTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
         list.add("A signal on its front sets the fuel valve by hand: no governor, no trip: your safeties then.")
+        list.add("Placed with its shaft along your view; it turns its exhaust toward an exchanger or pipe beside it.")
     }
 }
 

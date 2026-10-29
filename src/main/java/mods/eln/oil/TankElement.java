@@ -25,7 +25,7 @@ import java.util.Map;
  * TankDescriptor: one fluid-core vessel and its ports; it bursts over its rating. Blocks of a tier filling a box are one
  * vessel (TankGroup): `own` is this block's share, `vessel` the node in use (its own, or the box's).
  */
-public class TankElement extends TransparentNodeElement implements FluidDevice {
+public class TankElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final TankDescriptor desc;
     /** Its ports' conductance (m^3): made for a large alloy pipe (they take any; the pipe's own end limits a smaller one). */
     public static final double PORT_K = mods.eln.node.voxel.PipePart.LARGE_END_K;
@@ -83,6 +83,23 @@ public class TankElement extends TransparentNodeElement implements FluidDevice {
     /** A side face's port spot at height y (voxels): the face's other axes in x, y, z order (FluidPort.at). */
     public static int sideSpot(int face, int y) {
         return face <= 3 ? 8 * 17 + y : y * 17 + 8;   // (north/south: x then y; west/east: y then z)
+    }
+
+    /** Placed: turned to meet its neighbours' ports (FluidPlacement): any way round: its sight glass (no ports) away from the pipes and devices beside it. */
+    @Override
+    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
+        super.initializeFromThat(front, entityLiving, itemStackNbt);
+        mods.eln.fluid.FluidPlacement.placed(this);
+    }
+
+    @Override
+    public Direction[] fronts() {
+        return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
+    }
+
+    @Override
+    public void remakePorts() {
+        makePorts();
     }
 
     void makePorts() {

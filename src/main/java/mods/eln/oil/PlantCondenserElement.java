@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /** PlantCondenserDescriptor: a CondenserVessel fed by pipe, its pump and ejector on a shaft motor beside it. */
-public class PlantCondenserElement extends TransparentNodeElement implements FluidDevice {
+public class PlantCondenserElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final PlantCondenserDescriptor desc;
     public final NbtThermalLoad shell = new NbtThermalLoad("shell");
     public final CondenserVessel v;
@@ -148,6 +148,23 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         pumpW = kg / dt / Water.RHO_L * (CondenserDescriptor.PUMP_PA - Water.P_ATM) / PlantCondenserDescriptor.PUMP_EFFICIENCY
             + PlantCondenserDescriptor.EJECTOR_W * Math.min(1, motorShare);
         if (motor != null && motorShare > 0) motor.takeShaftPower(pumpW, dt);
+    }
+
+    /** Placed: turned to meet its neighbours' ports (FluidPlacement): any way round: its exhaust inlets toward a turbine beside it, its cooling ports toward pipes. */
+    @Override
+    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
+        super.initializeFromThat(front, entityLiving, itemStackNbt);
+        mods.eln.fluid.FluidPlacement.placed(this);
+    }
+
+    @Override
+    public Direction[] fronts() {
+        return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
+    }
+
+    @Override
+    public void remakePorts() {
+        makePorts();
     }
 
     void makePorts() {

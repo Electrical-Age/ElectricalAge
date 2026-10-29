@@ -104,6 +104,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   Sounds: turbines play rotor tones, steam hiss or the new gas_turbine_roar, and an overspeed_whistle over 105 %; the
   LP's wet-steam knock (steam_knock) and the inline pump's cavitation (pump_cavitation) replace the vanilla anvil and
   grindstone. Jade's first line on turbines, the gas turbine and the plant condenser says why it isn't working.
+- Placement of the shaft and steam machines (AdventurAgent's client check, 2026-10-29): shaft parts are placed with
+  their shaft along the player's view (front to the player's left), not across it; turbines, the gas turbine, plant
+  condensers, tanks and heat exchangers turn on placement, together with such a device beside them, to the fronts whose
+  ports meet the most neighbouring ports (`FluidPlacement`; a turbine only front/back, keeping its shaft). Before, an LP
+  and a condenser placed side by side as a player would never coupled. `fluid_ports_meet_when_placed_by_a_player`.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

@@ -29,7 +29,7 @@ import java.util.Map;
  * (HeatExchangerGroup): `ownA`/`ownB` are this block's shares, `a`/`b` the sides in use (its own, or the stack's); the
  * stack's lowest corner steps it.
  */
-public class HeatExchangerElement extends TransparentNodeElement implements FluidDevice {
+public class HeatExchangerElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final HeatExchangerDescriptor desc;
     public FluidNode a, b, ownA, ownB;
     /** The stack it is part of, or null alone. */
@@ -149,6 +149,23 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     /** The exchanger it is part of (its stack's corner, or itself): it holds the readings. */
     HeatExchangerElement head() {
         return group == null ? this : group.master();
+    }
+
+    /** Placed: turned to meet its neighbours' ports (FluidPlacement): its own front or its back (a stack keeps its axis): its A and B ends toward what feeds them. */
+    @Override
+    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
+        super.initializeFromThat(front, entityLiving, itemStackNbt);
+        mods.eln.fluid.FluidPlacement.placed(this);
+    }
+
+    @Override
+    public Direction[] fronts() {
+        return new Direction[]{front, front.back()};
+    }
+
+    @Override
+    public void remakePorts() {
+        makePorts();
     }
 
     /**

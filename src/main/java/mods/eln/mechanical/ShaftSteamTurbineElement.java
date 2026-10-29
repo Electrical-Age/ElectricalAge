@@ -44,7 +44,7 @@ import java.util.Map;
  * manual control duplicates the safeties): an overdriven shaft races to its burst speed. Water in the
  * inlet strips its blades (repaired with a Turbine Blade Set); over BURST_PA its casing bursts.
  */
-public class ShaftSteamTurbineElement extends SimpleShaftElement implements FluidDevice {
+public class ShaftSteamTurbineElement extends SimpleShaftElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     /** Shaft power at its rating (W), the rating (saturated steam, venting to air), the casing's burst (Pa). */
     public static final double NOMINAL_P = SteamTurbineSpec.HP.nominalP, NOMINAL_PA = SteamTurbineSpec.HP.nominalPa, BURST_PA = SteamTurbineSpec.HP.burstPa;
     /** Work per kg out of the ideal (isentropic) expansion: a big multi-stage turbine does better than the 50V/200V. */
@@ -298,6 +298,23 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         return ports;
     }
 
+    /** Placed: turned to meet its neighbours' ports (FluidPlacement): its own front or its back (the shaft stays along the view): the exhaust toward a condenser or a pipe beside it. */
+    @Override
+    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
+        super.initializeFromThat(front, entityLiving, itemStackNbt);
+        mods.eln.fluid.FluidPlacement.placed(this);
+    }
+
+    @Override
+    public Direction[] fronts() {
+        return new Direction[]{front, front.back()};
+    }
+
+    @Override
+    public void remakePorts() {
+        makePorts();
+    }
+
     /** Its ports, from where it faces now (a turned turbine's exhaust moves with it). */
     void makePorts() {
         long pos = node.coordonate.pos().asLong();
@@ -319,6 +336,18 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     public void disconnectJob() {
         super.disconnectJob();
         FluidWorld.remove(this);
+    }
+
+    /** A side's compass name (Jade: which way its exhaust faces). */
+    static String compass(Direction d) {
+        return switch (d) {
+            case XN -> I18N.tr("west");
+            case XP -> I18N.tr("east");
+            case ZN -> I18N.tr("north");
+            case ZP -> I18N.tr("south");
+            case YN -> I18N.tr("bottom");
+            case YP -> I18N.tr("top");
+        };
     }
 
     /** The exhaust port's face: its back. */
@@ -426,7 +455,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         if (brakeW > 0) return I18N.tr("Braking: wet steam (dry it: a separator tank)");
         if (spec.wetBraking && exhaustPiped && exhaustPa() > 3 * spec.ratedExhaustPa)
             return String.format(I18N.tr("Low vacuum: %.2f bar behind it (condenser hot, flooded or without its motor?)"), exhaustPa() / 1e5);
-        if (spec.wetBraking && !exhaustPiped) return I18N.tr("Venting to air: an LP stage wants a condenser at its back");
+        if (spec.wetBraking && !exhaustPiped)
+            return String.format(I18N.tr("Venting to air: an LP stage wants a condenser against its back (%s side)"), compass(exhaustSide()));
         if (inlet == null || steamKgPerS < 1e-4) return controls.limit <= 0.001 ? I18N.tr("Shut: its valve is closed") : I18N.tr("No steam at its inlet");
         if (controls.isManual()) return I18N.tr("Manual control: no governor or trip");
         if (rads > RATED_RADS) return I18N.tr("Governing: speed held, valve easing");

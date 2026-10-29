@@ -36,7 +36,7 @@ import java.util.Map;
  * air. Governor, trip and windage as the steam turbines; a signal on its front sets the fuel valve by hand (no governor,
  * no trip).
  */
-public class GasTurbineElement extends SimpleShaftElement implements FluidDevice {
+public class GasTurbineElement extends SimpleShaftElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     /** Shaft power at full fuel and rated speed (W), the cycle's efficiency there, its exhaust's temperature (K). */
     public static final double NOMINAL_P = 10000, ETA = 0.28, EXHAUST_T = 773.15;
     public static final double RATED_RADS = ShaftNetworkKt.nominalShaftRads, CUTOFF = 0.5, DROOP = 0.05, VALVE_TAU = 0.3, TRIP = 1.1,
@@ -138,6 +138,23 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     @Override
     public List<FluidPort> fluidPorts() {
         return ports;
+    }
+
+    /** Placed: turned to meet its neighbours' ports (FluidPlacement): its own front or its back (the shaft stays along the view): the exhaust toward an exchanger or a pipe beside it. */
+    @Override
+    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
+        super.initializeFromThat(front, entityLiving, itemStackNbt);
+        mods.eln.fluid.FluidPlacement.placed(this);
+    }
+
+    @Override
+    public Direction[] fronts() {
+        return new Direction[]{front, front.back()};
+    }
+
+    @Override
+    public void remakePorts() {
+        makePorts();
     }
 
     void makePorts() {

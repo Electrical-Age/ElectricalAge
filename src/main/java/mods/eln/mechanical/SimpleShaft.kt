@@ -65,6 +65,14 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
     }
 
+    /**
+     * Placed with its shaft along the player's view (AdventurAgent's client check, 2026-10-29: looking down a line to
+     * build it, every part came out across it, the turbines' exhausts into their neighbours): its front to the player's
+     * left (EA's right() of the view: a viewer facing a front sees right() on their right), its back to their right.
+     */
+    override fun getFrontFromPlace(side: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?): Direction? =
+        if (entityLiving == null) Direction.XN else Utils.entityLivingHorizontalViewDirection(entityLiving).right()
+
     /** Its model's hitbox (NAME.hitbox, tools/models/README-shaft.md), turned with its front. */
     private val hitbox by lazy { mods.eln.node.transparent.ModelHitbox.of(obj) }
 
