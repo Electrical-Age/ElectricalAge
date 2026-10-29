@@ -95,6 +95,15 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   pressure, takes any heat at saturation); ports on the two end faces, A at their centres, B up high: A in at the back
   end, B in at the front. Separate jobs (economizer, steam raiser, reheat) are separate exchangers piped in series.
   `GasPlantCases`.
+- Shaft redo, art pass (Baughn 2026-10-29). The HP/LP Steam Turbine, Gas Turbine, both Generators, Shaft Motor,
+  Joint, Joint Hub, Flywheel, Tachometer, Plant Steam Condenser and Heat Exchanger have their own models
+  (tools/models/README-shaft.md) instead of the 1.12 Turbine/Generator/GasTurbine/... ones: one shaft line for all, a
+  half coupling at each shaft face, rotor/valve/needle parts that move. Hitboxes: a model may carry NAME.hitbox beside its
+  OBJ; a descriptor that returns it from `modelHitbox()` (`ModelHitbox`) gets that outline and collision turned with
+  the block's front (read from the block entity), instead of its collision boxes (`shaft_hitbox_per_facing`).
+  Sounds: turbines play rotor tones, steam hiss or the new gas_turbine_roar, and an overspeed_whistle over 105 %; the
+  LP's wet-steam knock (steam_knock) and the inline pump's cavitation (pump_cavitation) replace the vanilla anvil and
+  grindstone. Jade's first line on turbines, the gas turbine and the plant condenser says why it isn't working.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item
