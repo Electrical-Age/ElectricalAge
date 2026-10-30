@@ -343,6 +343,12 @@ on 1.7.10) onto 26.x.
   on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
   changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
+- Signal processor functions (Baughn 2026-10-30, board #45): `rs(set, reset)` and `rc(x, tau)` (1.12: `rs(reset, set)`,
+  `rc(tau, x)`). A processor saves `programVersion`; one saved without it has its program rewritten once on load
+  (`ProgramUpgrade`: the two arguments of every rs and rc call swap, so it does the same). Also fixed: `derivate`
+  reads 0 on its first step (1.12: x / dt, a spike); `ramp` holds at a period of 0 or below (1.12 ran backwards or to
+  NaN); `batteryCharge` stops at 1 (1.12 went past it between the full voltage and 1.5). Tests `ProgramUpgradeTest`,
+  GameTest `wp9c signal processor`.
 - Signal processor screen (Baughn 2026-10-30, board #45): a code editor (colours for A red, B blue, C green, names,
   functions, numbers, comments; a rule above the output line; problems underlined with their message on hover; undo,
   clipboard, scrolling) instead of the one-line field, a quick reference of the functions beside it (click to insert),

@@ -273,7 +273,7 @@ public final class Wp9cCases {
      */
     static final class MathCase implements TestCase {
         ElectricalMathElement withChips, without, program, migrated, constant;
-        String slotAfterLoad = "";
+        String slotAfterLoad = "", upgraded = "";
 
         public String name() {
             return "wp9c signal processor";
@@ -310,7 +310,11 @@ public final class Wp9cCases {
             migrated.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 8));
             net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
             migrated.writeToNBT(t);
+            // and its program from then, rs(reset, set), is rewritten to rs(set, reset), doing the same
+            t.putString("expression", "rs(0, A)");
+            t.remove("programVersion");
             migrated.readFromNBT(t);
+            upgraded = field(migrated, "expression");
             ItemStack s = migrated.getInventory().getItem(0);
             slotAfterLoad = s.getCount() + " " + (ElectricalMathElement.isChip(s) ? "cheap chips" : s.getItem().toString());
         }
@@ -332,6 +336,7 @@ public final class Wp9cCases {
             var f = constant.front;
             boolean all = constant.getConnectionMask(f.right()) != 0 && constant.getConnectionMask(f.inverse()) != 0 && constant.getConnectionMask(f.left()) != 0;
             ctx.check("wp9c signal processor: A, B and C connect whatever the program reads", all, "");
+            ctx.check("wp9c signal processor: an old program's rs(reset, set) loads as rs(set, reset)", upgraded.equals("rs(A, 0)"), upgraded);
             ctx.check("wp9c signal processor: 8 redstone load as 2 cheap chips", slotAfterLoad.equals("2 cheap chips"), slotAfterLoad);
             // daytime wraps each day (1.12 divided the total time: after day 1 it only grew)
             ctx.check("wp9c signal processor: daytime is the time of day", Math.abs(mods.eln.misc.Utils.dayFraction(36000) - 12000 / 23999.0) < 1e-9

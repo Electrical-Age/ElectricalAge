@@ -112,8 +112,8 @@ public class ProgramTest {
 
     @Test
     void theLatchStepsEvenInAnIfsBranchNotTaken() {
-        // rs(reset, set): set by B while the if shows 0; then the if shows the latch (it stepped while unread)
-        Program p = Program.compile("if(A, rs(0, B), 0)", inputs());
+        // rs(set, reset): set by B while the if shows 0; then the if shows the latch (it stepped while unread)
+        Program p = Program.compile("if(A, rs(B, 0), 0)", inputs());
         assertTrue(p.isValid(), p.error);
         a.v = 0;
         b.v = 1;

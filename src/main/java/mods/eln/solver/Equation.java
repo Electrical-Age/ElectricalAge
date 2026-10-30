@@ -597,6 +597,8 @@ public class Equation implements IValue, INBTTReady {
         @Override
         public void process(double time) {
             double p = periode.getValue();
+            // a period of 0, below or NaN holds the ramp (1.12 ran it backwards or to NaN, for good)
+            if (!(p > 0)) return;
             counter += time / p;
             if (counter >= 1.0) counter -= 1.0;
             if (counter >= 1.0) counter = 0;
@@ -690,8 +692,13 @@ public class Equation implements IValue, INBTTReady {
         }
     }
 
+    /**
+     * derivate(x): the change of x per second over the last step. Its first step has no previous value: it reads 0
+     * then (1.12 took the previous value as 0, a spike of x / dt when a program started).
+     */
     public static class Derivator implements IOperator, INBTTReady, IProcess {
         public double old = 0.0, value = 0.0;
+        boolean primed;
         public IValue probe;
 
         @Override
@@ -703,6 +710,7 @@ public class Equation implements IValue, INBTTReady {
         public void readFromNBT(CompoundTag nbt, String str) {
             old = nbt.getDoubleOr(str + "old", 0.0);
             value = nbt.getDoubleOr(str + "value", 0.0);
+            primed = nbt.contains(str + "old");
         }
 
         @Override
@@ -714,8 +722,9 @@ public class Equation implements IValue, INBTTReady {
         @Override
         public void process(double time) {
             double next = probe.getValue();
-            value = (next - old) / time;
+            value = primed ? (next - old) / time : 0;
             old = next;
+            primed = true;
         }
 
         @Override
@@ -811,8 +820,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void setOperator(IValue[] values) {
-            this.a = values[1];
-            this.b = values[0];
+            this.a = values[0];
+            this.b = values[1];
         }
 
         @Override
@@ -831,8 +840,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void setOperator(IValue[] values) {
-            this.a = values[1];
-            this.b = values[0];
+            this.a = values[0];
+            this.b = values[1];
         }
 
         @Override
@@ -842,9 +851,10 @@ public class Equation implements IValue, INBTTReady {
     }
 
     /**
-     * Set/reset latch, rs(reset, set): set above 0.6 sets it, reset above 0.6 clears it (reset wins). 26.x: it steps in
+     * Set/reset latch, rs(set, reset): set above 0.6 sets it, reset above 0.6 clears it (reset wins). 26.x: it steps in
      * process, once a tick, and getValue only reads it (it stepped whenever it was read: never inside an if's branch
-     * not taken, twice if read twice).
+     * not taken, twice if read twice). 1.12 took rs(reset, set); older programs are rewritten on load
+     * (ProgramUpgrade, Baughn 2026-10-30).
      */
     public static class Rs implements IOperator, INBTTReady, IProcess {
         public boolean state = false;
@@ -874,8 +884,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void setOperator(IValue[] values) {
-            this.set = values[1];
-            this.reset = values[0];
+            this.set = values[0];
+            this.reset = values[1];
         }
 
         @Override
@@ -884,6 +894,7 @@ public class Equation implements IValue, INBTTReady {
         }
     }
 
+    /** First-order lag, rc(x, tau): follows x with time constant tau seconds. 1.12 took rc(tau, x) (ProgramUpgrade). */
     public static class RC implements IOperator, INBTTReady, IProcess {
         public double state;
 
@@ -912,8 +923,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void setOperator(IValue[] values) {
-            this.input = values[1];
-            this.tao = values[0];
+            this.input = values[0];
+            this.tao = values[1];
         }
 
         @Override
@@ -984,7 +995,8 @@ public class Equation implements IValue, INBTTReady {
                 q += dq;
             }
 
-            return e / eMax;
+            // at most a full charge (1.12 went past 1 between the full voltage and 1.5)
+            return Math.min(1, e / eMax);
         }
     }
 

@@ -226,6 +226,7 @@ public class ElectricalMathElement extends SixNodeElement {
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putString("expression", expression);
+        nbt.putInt("programVersion", mods.eln.solver.ProgramUpgrade.VERSION);
         program.writeToNBT(nbt, "equation");
     }
 
@@ -238,7 +239,9 @@ public class ElectricalMathElement extends SixNodeElement {
             ItemStack chips = mods.eln.Eln.findItemStack("Cheap Chip", chipsFor(old.getCount()));
             inventory.setItem(ElectricalMathContainer.restoneSlotId, chips);
         }
-        expression = nbt.getStringOr("expression", "");
+        // a program saved by an older version is rewritten once to today's functions, doing the same (rs and rc
+        // took their arguments the other way round before 2026-10-30)
+        expression = mods.eln.solver.ProgramUpgrade.upgrade(nbt.getStringOr("expression", ""), nbt.getIntOr("programVersion", 0));
         preProcessEquation(expression);
         program.readFromNBT(nbt, "equation");
 

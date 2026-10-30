@@ -38,8 +38,8 @@ public final class FunctionReference {
         new Entry("Stateful", "pid(target, x, p, i, d)", "PID controller driving x to target.", "pid(0.5, A, 1, 0.1, 0)", "pid(0.5, A, 1, 0.1, 0)"),
         new Entry("Stateful", "pid(target, x, p, i, d, lo, hi)", "The same, its output held between lo and hi.", "pid(0.5, A, 1, 0.1, 0, 0, 1)",
             "pid(0.5, A, 1, 0.1, 0, 0, 1)"),
-        new Entry("Stateful", "rs(reset, set)", "Latch: set turns it on, reset off; reset wins.", "rs(B, A)", "rs(B, A)"),
-        new Entry("Stateful", "rc(tau, x)", "Smooths x, following it with time constant tau seconds.", "rc(2, A)", "rc(1, A)"),
+        new Entry("Stateful", "rs(set, reset)", "Latch: set turns it on, reset off; reset wins.", "rs(A, B)", "rs(A, B)"),
+        new Entry("Stateful", "rc(x, tau)", "Smooths x, following it with time constant tau seconds.", "rc(A, 2)", "rc(A, 1)"),
         new Entry("Stateful", "ramp(period)", "Climbs from 0 to 1 over period seconds, then again.", "ramp(10)", "ramp(10)"),
         new Entry("Utility", "if(c, a, b)", "a while c is on, else b.", "if(A > 0.5, B, C)", "if(A > 0.5, B, C)"),
         new Entry("Utility", "min(a, b)   max(a, b)", "The smaller or the larger.", "max(A, B)", "max(A, B)"),
@@ -48,6 +48,12 @@ public final class FunctionReference {
         new Entry("Utility", "daytime", "The time of day, 0 to 1.", "daytime > 0.5", "daytime"),
         new Entry("Utility", "name = expression", "Names a part, computed once and paid once; the last line is the output.", "x = A * 0.5", "x = "),
         new Entry("Utility", "# text", "A comment.", "# my notes", "# "));
+
+    /** The entries about a name: a function's (every form of it), or pi or daytime. */
+    public static List<Entry> forName(String name) {
+        java.util.regex.Pattern call = java.util.regex.Pattern.compile("(^|[^A-Za-z])" + java.util.regex.Pattern.quote(name) + "\\(");
+        return ENTRIES.stream().filter(e -> e.signature().equals(name) || call.matcher(e.signature()).find()).toList();
+    }
 
     /** The function names (for colouring). */
     public static Set<String> names() {
