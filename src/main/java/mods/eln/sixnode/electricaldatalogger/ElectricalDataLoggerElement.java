@@ -42,7 +42,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     public static final byte resetId = 1;
     public static final byte setSamplingPeriodeId = 2, setMaxValue = 3;
     public static final byte setUnitId = 4;
+    /** A client that can see the graph asks for it (LogWatchers), every second while it can. */
     public static final byte newClientId = 5;
+    final LogWatchers watchers = new LogWatchers();
     public static final byte printId = 6;
     public static final byte tooglePauseId = 7;
     public static final byte setMinValue = 8;
@@ -221,6 +223,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     store.clear();
                     break;
                 case newClientId:
+                    if (player != null && watchers.watch(player, player.level().getGameTime())) sendView(player);
                     break;
                 case printId:
                     printToDo = true;
@@ -231,7 +234,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     break;
             }
 
-            if (header == resetId || header == newClientId || header == setSamplingPeriodeId) sendView(header == newClientId ? player : null);
+            if (header == resetId || header == setSamplingPeriodeId) sendView(null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -242,7 +245,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         return true;
     }
 
-    /** The whole graph, to one player (who just started tracking the logger) or to all (null). */
+    /** The whole graph, to one player (who just started watching) or to every watcher (null). */
     public void sendView(ServerPlayer player) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
         DataOutputStream packet = new DataOutputStream(bos);
@@ -255,10 +258,15 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
             e.printStackTrace();
         }
         if (player != null) sendPacketToClient(bos, player);
-        else sendPacketToAllClient(bos);
+        else toWatchers(bos);
     }
 
-    /** A point just emitted, to every client tracking the logger: a few bytes at the sampling rate. */
+    void toWatchers(ByteArrayOutputStream bos) {
+        if (watchers.isEmpty() || !(sixNode.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        for (ServerPlayer p : watchers.players(level)) sendPacketToClient(bos, p);
+    }
+
+    /** A point just emitted, to the watchers: a few bytes at the sampling rate. */
     void sendPoint(float[][] point) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(32);
         DataOutputStream packet = new DataOutputStream(bos);
@@ -270,6 +278,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        sendPacketToAllClient(bos);
+        toWatchers(bos);
     }
 }

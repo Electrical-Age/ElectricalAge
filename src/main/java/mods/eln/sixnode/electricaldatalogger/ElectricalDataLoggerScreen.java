@@ -150,6 +150,7 @@ public class ElectricalDataLoggerScreen extends ElnScreen {
 
     @Override
     protected void update() {
+        render.watch();
         print.active = !deviceItem(ElectricalDataLoggerContainer.paperSlotId).isEmpty()
             && deviceItem(ElectricalDataLoggerContainer.printSlotId).isEmpty();
     }

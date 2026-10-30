@@ -30,7 +30,6 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
         time = System.currentTimeMillis();
-        clientSend(ElectricalDataLoggerElement.newClientId);
     }
 
     @Override
@@ -59,6 +58,21 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 		return descriptor.cableRender;
 	}
 	*/
+
+    /** Within this many blocks the graph can be read: the server sends it only to clients this near or with the screen open. */
+    public static final double WATCH_RANGE = 32;
+    final LogWatch watch = new LogWatch();
+
+    /** Keeps the graph coming (the screen calls it while open; refresh while the logger is near). */
+    public void watch() {
+        if (watch.due()) clientSend(ElectricalDataLoggerElement.newClientId);
+    }
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        if (mods.eln.misc.UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE) watch();
+    }
 
     @Override
     public void publishUnserialize(DataInputStream stream) {
