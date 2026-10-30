@@ -1,4 +1,0 @@
-o main
-f ventX 0.50000
-f ventY 0.18750
-f ventZ 0.00000

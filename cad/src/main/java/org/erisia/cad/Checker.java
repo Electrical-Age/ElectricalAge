@@ -37,7 +37,7 @@ public final class Checker {
         for (Solid s : m.solids)
             if (s.thickness() < EPS) out.add(new Issue("degenerate", s + " is " + fmt(s.thickness()) + " px thin"));
         List<Solid> convex = new ArrayList<>();
-        for (Solid s : m.solids) if (!s.ghost && (s instanceof Box || s instanceof Frustum)) convex.add(s);
+        for (Solid s : m.solids) if (!s.ghost && (s instanceof Box || s instanceof Frustum || s instanceof Mesh me && me.convex)) convex.add(s);
         out.addAll(faces(m.faces(), convex));
         out.addAll(relations(m));
         out.addAll(connectivity(m));
@@ -77,7 +77,9 @@ public final class Checker {
                     Geom.Hull hb = hulls.computeIfAbsent(b, k -> new Geom.Hull(faces.computeIfAbsent(k, Solid::faces)));
                     double[] sa = Geom.separationAxis(ha, hb);
                     if (sa[0] > EPS) continue;
-                    double s = Geom.joint(faces.get(a), faces.get(b), new double[]{sa[1], sa[2], sa[3]}, EPS, false);
+                    double[] axis = {sa[1], sa[2], sa[3]};
+                    // (both ways: a piece's part inside the other; an open or hollow piece holds nothing inside itself)
+                    double s = Math.max(Geom.joint(faces.get(a), faces.get(b), axis, EPS, false), Geom.joint(faces.get(b), faces.get(a), axis, EPS, false));
                     share[i][j] = share[j][i] = s;
                     if (s >= CONNECT_SHARE - 1e-9) union(comp, i, j);
                 }

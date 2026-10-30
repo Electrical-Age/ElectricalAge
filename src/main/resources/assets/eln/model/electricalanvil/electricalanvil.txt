@@ -1,7 +1,0 @@
-o main
-f toolX -0.21875
-f toolY 0.19063
-f toolZ 0.06250
-f sparkX -0.01875
-f sparkY 0.21875
-f sparkZ -0.20000

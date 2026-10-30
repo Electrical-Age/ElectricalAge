@@ -1,8 +1,0 @@
-o rot1
-f originX -0.140625
-f originY 0.09375
-f originZ 0.0
-o rot2
-f originX 0.140625
-f originY 0.09375
-f originZ 0.0

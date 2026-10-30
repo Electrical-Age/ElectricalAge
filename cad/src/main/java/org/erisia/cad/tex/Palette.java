@@ -25,7 +25,8 @@ public final class Palette {
 
     static final Map<String, Entry> ALL = new LinkedHashMap<>();
 
-    static void put(String name, int r, int g, int b, int noise, Shade shade) {
+    /** Add an entry (the shared palette's are below; a new material is added here, once, for every model). */
+    public static void put(String name, int r, int g, int b, int noise, Shade shade) {
         ALL.put(name, new Entry(name, r, g, b, noise, shade));
     }
 
@@ -65,6 +66,61 @@ public final class Palette {
         put("paint_blue", 52, 102, 176, 8, null);
         put("paint_orange", 226, 132, 44, 8, null);
         put("paint_boiler", 122, 44, 36, 8, null);
+        // the shaft machines' paints
+        put("paint_lp", 40, 84, 150, 8, null);
+        put("paint_gas", 150, 60, 40, 8, null);
+        put("paint_gen", 196, 150, 40, 8, null);
+        put("paint_plain", 90, 96, 104, 8, null);
+        put("paint_condenser", 60, 120, 130, 8, null);
+        put("paint_hx", 120, 110, 60, 8, null);
+        // the device models' own materials (ported from their scripts' atlases, board #44)
+        // (Tank)
+        put("paint_tankalloy", 150, 112, 52, 8, null);
+        // (CapacitorBank)
+        put("can", 64, 92, 150, 6, (x, y) -> all(x == 3 || x == 4 ? 24 : x == 12 || x == 13 ? -14 : 0));   // blue sleeve, a highlight
+        // (CapacitorBank)
+        put("cantop", 34, 36, 40, 4, (x, y) -> {
+            int d = (x - 8) * (x - 8) + (y - 8) * (y - 8);
+            return all(d >= 20 && d < 26 ? 30 : 0);   // a vent ring
+        });
+        // (CapacitorBank)
+        put("hvtier", 245, 204, 143, 8, null);   // the 800 V (HV) tier colour (as ElectricalAnvil's)
+        // (CapacitorBank)
+        put("blue", 40, 84, 200, 6, null);       // the - polarity
+        // (CapacitorBank)
+        put("label", 232, 228, 214, 4, (x, y) -> all((y == 6 || y == 9) && x >= 3 && x <= 12 ? -150 : 0));   // two printed lines
+        // (Column)
+        put("white", 226, 226, 220, 6, null);   // flare stack bands, dial face
+        // (Column)
+        put("sightglass", 210, 222, 226, 4, (x, y) -> y >= 3 ? new int[]{-60, -126, -202} : all(x % 5 == 0 ? -40 : 0));
+        // (Column)
+        put("lagging", 176, 180, 184, 5, (x, y) -> all(x == 0 || y == 15 ? -34 : x == 1 ? 12 : 0));
+        // (Column)
+        put("fire", 232, 96, 26, 22, (x, y) -> all((x * 5 + y * 3) % 7 == 0 ? 40 : 0));   // glow behind the porthole
+        // (ElectricalAnvil)
+        put("wood", 128, 92, 56, 6, (x, y) -> all(y % 4 == 0 ? -18 : (x * 3 + y) % 11 == 0 ? 10 : 0));   // planks
+        // (ElectricalAnvil)
+        put("plate", 112, 116, 120, 5, (x, y) -> all((x + 2 * y) % 13 == 0 ? 22 : (x * 7 + y * 3) % 17 == 0 ? -12 : 0));   // worn steel
+        // (ElectricalAnvil)
+        put("welder", 214, 150, 40, 7, null);   // workshop orange
+        // (ElectricalAnvil)
+        put("dials", 40, 42, 46, 3, (x, y) -> {
+            int a = (x - 4) * (x - 4) + (y - 5) * (y - 5), b = (x - 11) * (x - 11) + (y - 5) * (y - 5);
+            return all((a == 4 || a == 5 || b == 4 || b == 5 ? 150 : 0) + ((x == 4 && y == 4) || (x == 11 && y == 6) ? 180 : 0)
+                + (y == 11 && x >= 3 && x <= 12 ? 120 : 0));
+        });
+        // (ElectricalAnvil)
+        put("peg", 176, 140, 96, 5, (x, y) -> all(x % 4 == 2 && y % 4 == 2 ? -90 : 0));   // pegboard holes
+        // (ElectricalAnvil)
+        put("bulb", 255, 236, 170, 4, null);    // the lamp's bulb (the Python's "glow")
+        // (Smelter)
+        put("brick", 150, 72, 52, 10, (x, y) -> y % 4 == 3 || (x + ((y / 4) % 2 == 1 ? 4 : 0)) % 8 == 7 ? new int[]{-55, -55, -55} : null);
+        // (Smelter)
+        put("glow", 255, 255, 255, 0, null);
+        // (SteamOven)
+        put("darkglass", 70, 92, 104, 4, (x, y) -> x + y == 6 || x + y == 7 || x + y == 14 ? new int[]{70, 70, 70} : null);
+        // (SteamTurbine)
+        put("dialglass", 228, 230, 222, 4, (x, y) -> x == 8 && y < 9 ? new int[]{-120, -120, -120} : null);
         put("export", 150, 46, 40, 8, (x, y) -> all((x + y) % 8 < 2 ? -28 : 0));
     }
 

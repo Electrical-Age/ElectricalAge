@@ -1,4 +1,0 @@
-o rotor
-f originX 0.15625
-f originY 0.0
-f originZ 0.0

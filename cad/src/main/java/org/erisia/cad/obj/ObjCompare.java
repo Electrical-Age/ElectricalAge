@@ -25,6 +25,11 @@ public final class ObjCompare {
 
     /** The differences (empty: the same), at most max of them. */
     public static List<String> differences(List<Face> a, List<Face> b, Key key, int max) {
+        return differences(a, b, key, max, true);
+    }
+
+    /** ... comparing texture coordinates or not (a model moved to another atlas layout). */
+    public static List<String> differences(List<Face> a, List<Face> b, Key key, int max, boolean uvs) {
         List<String> out = new ArrayList<>();
         Map<String, double[]> area = new HashMap<>();
         for (Face f : a) area.computeIfAbsent(key.of(f), k -> new double[2])[0] += f.area();
@@ -32,12 +37,12 @@ public final class ObjCompare {
         for (var e : area.entrySet())
             if (Math.abs(e.getValue()[0] - e.getValue()[1]) > 1e-3 * Math.max(1, e.getValue()[0]))
                 out.add(e.getKey() + ": area " + e.getValue()[0] + " vs " + e.getValue()[1]);
-        covered(a, b, key, "first", out, max);
-        covered(b, a, key, "second", out, max);
+        covered(a, b, key, "first", out, max, uvs);
+        covered(b, a, key, "second", out, max, uvs);
         return out.size() > max ? out.subList(0, max) : out;
     }
 
-    static void covered(List<Face> from, List<Face> on, Key key, String which, List<String> out, int max) {
+    static void covered(List<Face> from, List<Face> on, Key key, String which, List<String> out, int max, boolean uvs) {
         for (Face f : from) {
             if (out.size() > max) return;
             double[] d = org.erisia.cad.Geom2.distinct(f);
@@ -50,7 +55,7 @@ public final class ObjCompare {
                 if (!key.of(f).equals(key.of(g)) || f.nx * g.nx + f.ny * g.ny + f.nz * g.nz < 1 - 1e-4) continue;
                 if (Math.abs(g.nx * c[0] + g.ny * c[1] + g.nz * c[2] - g.plane()) > 1e-3 || !org.erisia.cad.Geom2.inside(g, c)) continue;
                 double[] ua = org.erisia.cad.Geom2.uvAt(f, c), ub = org.erisia.cad.Geom2.uvAt(g, c);
-                if (ua != null && ub != null && !PlanarUv.ambiguous(f.nx, f.ny, f.nz) && (Math.abs(ua[0] - ub[0]) > 2e-3 || Math.abs(ua[1] - ub[1]) > 2e-3)) continue;
+                if (uvs && ua != null && ub != null && !PlanarUv.ambiguous(f.nx, f.ny, f.nz) && (Math.abs(ua[0] - ub[0]) > 2e-3 || Math.abs(ua[1] - ub[1]) > 2e-3)) continue;
                 hit = true;
                 break;
             }

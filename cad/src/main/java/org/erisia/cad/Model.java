@@ -15,6 +15,16 @@ public final class Model {
         return s;
     }
 
+    /** Add several (mcmodel's Model.add(*meshes)). */
+    public Model addAll(java.util.Collection<? extends Solid> ss) {
+        solids.addAll(ss);
+        return this;
+    }
+
+    public Model addAll(Solid... ss) {
+        return addAll(java.util.List.of(ss));
+    }
+
     public Part part(String name, Part parent, double ox, double oy, double oz, double rx, double ry, double rz) {
         Part p = new Part(name, parent, ox, oy, oz, rx, ry, rz);
         parts.add(p);
