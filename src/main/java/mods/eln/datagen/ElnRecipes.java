@@ -1620,6 +1620,10 @@ public final class ElnRecipes extends ElnRecipesBase {
             'G', stack(Blocks.GLASS_PANE),
             'I', stack(Items.IRON_INGOT));
 
+        // the headlamp (Baughn 2026-10-30): a small flashlight on a leather band
+        addShapelessRecipe(stack(mods.eln.registry.ElnRegistry.HEADLAMP.get()),
+            findItemStack("Small Flashlight"), stack(Items.LEATHER), stack(Items.LEATHER), stack(Items.STRING));
+
         addRecipe(findItemStack("Portable Electrical Mining Drill"),
             " T ",
             "IBI",

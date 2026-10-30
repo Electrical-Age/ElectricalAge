@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:small_flashlight",
+    "minecraft:leather",
+    "minecraft:leather",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "eln:headlamp"
+  }
+}

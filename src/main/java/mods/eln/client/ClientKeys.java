@@ -23,16 +23,32 @@ final class ClientKeys {
 
     static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(Eln.MODID, "keys"));
     static final KeyMapping WRENCH = new KeyMapping("key.eln.wrench", InputConstants.KEY_C, CATEGORY);
+    /** The headlamp on/off (Baughn 2026-10-30; K: free in the pack, L is advancements). */
+    static final KeyMapping HEADLAMP = new KeyMapping("key.eln.headlamp", InputConstants.KEY_K, CATEGORY);
     static boolean wrenchDown;
 
     static void register(RegisterKeyMappingsEvent e) {
         e.registerCategory(CATEGORY);
         e.register(WRENCH);
+        e.register(HEADLAMP);
+    }
+
+    static void send(int key, boolean down) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(bos);
+            out.writeByte(Eln.packetPlayerKey);
+            out.writeByte(key);
+            out.writeBoolean(down);
+            ElnNet.sendToServer(bos);
+        } catch (IOException ignored) {
+        }
     }
 
     static void tick(ClientTickEvent.Post e) {
         var mc = Minecraft.getInstance();
         if (mc.getConnection() == null) return;
+        while (HEADLAMP.consumeClick()) if (mc.gui.screen() == null) send(mods.eln.server.PlayerKeys.HEADLAMP, true);
         boolean clicked = false;
         while (WRENCH.consumeClick()) clicked = true;
         boolean down = WRENCH.isDown();

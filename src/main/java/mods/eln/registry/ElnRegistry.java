@@ -158,6 +158,10 @@ public final class ElnRegistry {
     /** Baughn 2026-10-27: the battery belt (moved from Stasis Delvers, which keeps an alias for its old id). */
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.item.belt.BatteryBeltItem> BATTERY_BELT =
         ITEMS.registerItem("battery_belt", mods.eln.item.belt.BatteryBeltItem::new, p -> p.stacksTo(1));
+    /** Baughn 2026-10-30: the headlamp, a flashlight on a band: the helmet slot (a leather cap's protection) or Curios' head slot. */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.item.headlamp.HeadlampItem> HEADLAMP =
+        ITEMS.registerItem("headlamp", mods.eln.item.headlamp.HeadlampItem::new,
+            p -> p.stacksTo(1).humanoidArmor(net.minecraft.world.item.equipment.ArmorMaterials.LEATHER, net.minecraft.world.item.equipment.ArmorType.HELMET));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.AdapterItem> PIPE_ADAPTER =
         ITEMS.registerItem("pipe_adapter", mods.eln.node.voxel.AdapterItem::new);
 
@@ -325,6 +329,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_QUALITY_SENSOR);
         ALL_ITEMS.add(PIPE_PRESSURE_VALVE);
         ALL_ITEMS.add(BATTERY_BELT);
+        ALL_ITEMS.add(HEADLAMP);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(HANDBOOK);

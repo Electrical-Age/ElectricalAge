@@ -32,6 +32,53 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
         @JvmField
         @Volatile
         var clientBeam: java.util.function.Predicate<Entity>? = null
+
+        /** Light blocks along the entity's look (two rows, from its eyes to the first solid block within range). */
+        @JvmStatic
+        fun placeBeam(world: Level, entity: Entity, light: Int, range0: Int) {
+            for (yOffset in 0..1) {
+                var x = entity.getX()
+                var y = entity.getY() + 1.62 - yOffset
+                var z = entity.getZ()
+
+                val v = entity.lookAngle.scale(0.25) // Vec3d is immutable in 1.12
+
+                val range = range0 + 1
+                var rCount = 0
+
+                for (idx in 0 until range) {
+                    x += v.x
+                    y += v.y
+                    z += v.z
+
+                    val fx = Mth.floor(x)
+                    val fy = Mth.floor(y)
+                    val fz = Mth.floor(z)
+                    if (!WorldCompat.isAir(world, fx, fy, fz)) {
+                        x -= v.x
+                        y -= v.y
+                        z -= v.z
+                        break
+                    }
+                    rCount++
+                }
+
+                while (rCount > 0) {
+                    var stride = 1
+                    val fx = Mth.floor(x)
+                    val fy = Mth.floor(y)
+                    val fz = Mth.floor(z)
+                    if (WorldCompat.isAir(world, fx, fy, fz)) {
+                        LightBlockEntity.addLight(world, fx, fy, fz, light, 5)
+                        stride = 3
+                    }
+                    x -= v.x * stride
+                    y -= v.y * stride
+                    z -= v.z * stride
+                    rCount -= stride
+                }
+            }
+        }
     }
 
     override fun onUpdate(stack: ItemStack, world: Level, entity: Entity, par4: Int, par5: Boolean) {
@@ -49,47 +96,6 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
             return
         }
 
-        for (yOffset in 0..1) {
-            var x = entity.getX()
-            var y = entity.getY() + 1.62 - yOffset
-            var z = entity.getZ()
-
-            val v = entity.lookAngle.scale(0.25) // Vec3d is immutable in 1.12
-
-            val range = getRange(stack) + 1
-            var rCount = 0
-
-            for (idx in 0 until range) {
-                x += v.x
-                y += v.y
-                z += v.z
-
-                val fx = Mth.floor(x)
-                val fy = Mth.floor(y)
-                val fz = Mth.floor(z)
-                if (!WorldCompat.isAir(world, fx, fy, fz)) {
-                    x -= v.x
-                    y -= v.y
-                    z -= v.z
-                    break
-                }
-                rCount++
-            }
-
-            while (rCount > 0) {
-                var stride = 1
-                val fx = Mth.floor(x)
-                val fy = Mth.floor(y)
-                val fz = Mth.floor(z)
-                if (WorldCompat.isAir(world, fx, fy, fz)) {
-                    LightBlockEntity.addLight(world, fx, fy, fz, light, 5)
-                    stride = 3
-                }
-                x -= v.x * stride
-                y -= v.y * stride
-                z -= v.z * stride
-                rCount -= stride
-            }
-        }
+        placeBeam(world, entity, light, getRange(stack))
     }
 }

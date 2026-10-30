@@ -1,4 +1,4 @@
-// 26.3	2026-10-30T00:46:47.59482572	eln-global/EA models
+// 26.3	2026-10-30T16:36:14.995581815	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -257,6 +257,7 @@ c5bec09b544a1b17e38e0199fc64d913404e29b6 assets/eln/items/gold_plate.json
 69b0f5a9932f8a27ea63cded262a9a9976c7c64c assets/eln/items/green_brush.json
 68db4992640bbf3df85227400237375dfe6c8c0a assets/eln/items/ground_cable.json
 6c06cb30635979c30b010d037a6c41d65432bd3d assets/eln/items/handbook.json
+969cbb494560f0f130da42a5c8f6c3126bc99754 assets/eln/items/headlamp.json
 50461a5034c917cad11b6e411503a3efed7e6b9c assets/eln/items/high_power_receiver_antenna.json
 2809d653915303c6821208594d7efdf6d8a7e1b0 assets/eln/items/high_power_transmitter_antenna.json
 a85c47bd1ce8e932ded9ef01dd78e0ccb9f5d970 assets/eln/items/high_voltage_cable.json
@@ -348,7 +349,7 @@ fe78eef8cbad6b2ea4f1ee7ca815c53bd607e714 assets/eln/items/portable_battery.json
 1bfcb215965ebc5f61f263bac4164cda5d21759b assets/eln/items/portable_capacitor.json
 793966133bc21aff691771f43c68dccce8b6f36d assets/eln/items/portable_capacitor_pack.json
 eee9074e972e34c6e9a424ecf51992071092e1f7 assets/eln/items/portable_electrical_axe.json
-7efd77dee0d76ac8cc9de62e728c3bc6a828ebba assets/eln/items/portable_electrical_mining_drill.json
+ca2b42fe30ea589232556a7d0298202dea727bce assets/eln/items/portable_electrical_mining_drill.json
 26c0d67215a411007813902db58045f0c342702a assets/eln/items/power_capacitor.json
 5164d1d89dd2960b7d9ab9e1649e805e71670fc6 assets/eln/items/power_capacitor_block.json
 bb572d18678811390e465d1b9223a2c06e17e29f assets/eln/items/power_inductor.json
@@ -809,6 +810,7 @@ fae3633068c6a0dddbd79198b06f9db6c89fe250 assets/eln/models/item/portable_battery
 12261070f6fe853e69cda102509be2a7a94c4b86 assets/eln/models/item/portable_capacitor_pack.json
 feac52c16140ecf0f832fe64097d546bf9f71aec assets/eln/models/item/portable_electrical_axe.json
 1228c4ca696da61c4cca8f6fa5ebd51f4d45d61c assets/eln/models/item/portable_electrical_mining_drill.json
+c584a778d4d7dd7e8ab18175e81630ed884060c3 assets/eln/models/item/portable_electrical_mining_drill_3d.json
 74b0da0027cbe5367578da6a2a4233b1d2826a82 assets/eln/models/item/power_capacitor.json
 622e11b0c9fdc05075f472f8df9d552bd403fdf5 assets/eln/models/item/power_capacitor_3d.json
 6b0364733f48d40275c73543a7ea8e1166c2f891 assets/eln/models/item/power_capacitor_block.json

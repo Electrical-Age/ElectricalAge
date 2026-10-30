@@ -1,4 +1,4 @@
-// 26.3	2026-10-30T00:46:47.598354496	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-10-30T16:36:14.998719599	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -151,6 +151,7 @@ a39938c4e0204b6626d2678f78657d83d72f3732 data/eln/advancement/recipes/misc/gas_t
 3206c8a83c23437655d503a29cdf6acb090766cf data/eln/advancement/recipes/misc/gray_brush.json
 a0d612bd4f26061b5e9c15aa0f3000b426037fd0 data/eln/advancement/recipes/misc/green_brush.json
 c14117c6913e1bb9562e34acda9dbe02383521d8 data/eln/advancement/recipes/misc/ground_cable.json
+fc128c4105f2c92ee05a3405c45a32a3d9656fb9 data/eln/advancement/recipes/misc/headlamp.json
 ca934f46f64dec6fbd4c555a9257f3af2dfa465f data/eln/advancement/recipes/misc/high_power_receiver_antenna.json
 3db2f7e8d0d048e8b8a35415ac6c3b8a3b9b4276 data/eln/advancement/recipes/misc/high_power_transmitter_antenna.json
 edc2bcc3b8068e76bf62b210f537e3fe57fa4ee4 data/eln/advancement/recipes/misc/high_voltage_cable.json
@@ -507,6 +508,7 @@ ac0567a3cf2f8b131a6719973f7964e08126dcf6 data/eln/recipe/fuel_heat_furnace.json
 6807bca5810c43c53a541f3192a05744bb3b73f2 data/eln/recipe/gray_brush.json
 1fd7392f8f3c4443adbf0499d84396c5da56090d data/eln/recipe/green_brush.json
 15ba4c1dcda12e30a0ba2f80409862bb6d81569f data/eln/recipe/ground_cable.json
+2a2690f54fe15a7783bdbfb8481c7334cbf4d7bf data/eln/recipe/headlamp.json
 947048bf74e986c940e07879841e888c3a75df68 data/eln/recipe/high_power_receiver_antenna.json
 72d99145ed8ef404b149ba6b07a7011236f1e36d data/eln/recipe/high_power_transmitter_antenna.json
 7b9640f35930954e8ec1cd07e6f911c5f2da5381 data/eln/recipe/high_voltage_cable.json

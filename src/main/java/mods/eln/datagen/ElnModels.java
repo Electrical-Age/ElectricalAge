@@ -140,6 +140,8 @@ public class ElnModels implements DataProvider {
             String model = "eln:item/" + name;
             if (item instanceof mods.eln.node.transparent.TransparentNodeItem ti && ti.descriptor instanceof mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor) {
                 model = converterModel(name);
+            } else if (name.equals("headlamp")) {
+                // (its model, models/item/headlamp, is the checked model library's: src/cadmodels Headlamp, built at compile time)
             } else if (name.equals("replicator_spawn_egg")) {
                 out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:item/generated", "textures",
                     obj("layer0", "minecraft:item/egg")), assets.resolve("models/item/" + name + ".json")));

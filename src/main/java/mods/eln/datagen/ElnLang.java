@@ -21,7 +21,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("e_coal_helmet", "E-Coal Helmet"), Map.entry("e_coal_chestplate", "E-Coal Chestplate"),
         Map.entry("e_coal_leggings", "E-Coal Leggings"), Map.entry("e_coal_boots", "E-Coal Boots"),
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
-        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_kit_large_alloy", "Large Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"), Map.entry("pipe_pressure_sensor", "Pipe Pressure Sensor"), Map.entry("pipe_temperature_sensor", "Pipe Temperature Sensor"), Map.entry("pipe_quality_sensor", "Pipe Steam Quality Sensor"), Map.entry("pipe_pressure_valve", "Pipe Pressure Valve"), Map.entry("battery_belt", "Battery Belt"), Map.entry("electric_bike", "Electric Bike"), Map.entry("terrain_bike", "Terrain Bike"),
+        Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_kit_large_alloy", "Large Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"), Map.entry("pipe_pressure_sensor", "Pipe Pressure Sensor"), Map.entry("pipe_temperature_sensor", "Pipe Temperature Sensor"), Map.entry("pipe_quality_sensor", "Pipe Steam Quality Sensor"), Map.entry("pipe_pressure_valve", "Pipe Pressure Valve"), Map.entry("battery_belt", "Battery Belt"), Map.entry("headlamp", "Headlamp"), Map.entry("electric_bike", "Electric Bike"), Map.entry("terrain_bike", "Terrain Bike"),
         Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
         Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("chisel", "Chisel"), Map.entry("handbook", "Electrical Engineer's Ledger"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("capacitor_cell", "Capacitor Cell"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
         Map.entry("item_creative_tab", "Electrical Age"));
@@ -38,6 +38,17 @@ public class ElnLang extends LanguageProvider {
         add("message.eln.electric_bike.no_battery", "No battery: pedalling only");
         add("message.eln.electric_bike.flat_battery", "The battery is flat: pedalling only");
         add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
+        add("key.eln.headlamp", "Headlamp on/off");
+        add("eln.headlamp.none", "No headlamp worn");
+        add("eln.headlamp.empty", "Headlamp is empty");
+        add("eln.headlamp.on", "Headlamp on");
+        add("eln.headlamp.off", "Headlamp off");
+        add("eln.headlamp.tip.wear", "Worn on the head: the helmet slot or the head slot");
+        add("eln.headlamp.tip.key", "%s switches it on and off");
+        add("eln.headlamp.tip.power", "Discharge power: %s W");
+        add("eln.headlamp.tip.energy", "Stored energy: %s J (%s%%)");
+        add("eln.headlamp.state.on", "State: on");
+        add("eln.headlamp.state.off", "State: off");
         add("item.eln.chisel.shape.cube", "cube");
         add("item.eln.chisel.shape.flat", "flat");
         add("item.eln.chisel.shape.tunnel", "tunnel");

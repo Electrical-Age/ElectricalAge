@@ -121,6 +121,8 @@ public final class Palette {
         put("darkglass", 70, 92, 104, 4, (x, y) -> x + y == 6 || x + y == 7 || x + y == 14 ? new int[]{70, 70, 70} : null);
         // (SteamTurbine)
         put("dialglass", 228, 230, 222, 4, (x, y) -> x == 8 && y < 9 ? new int[]{-120, -120, -120} : null);
+        // the headlamp's band (board #44)
+        put("leather", 122, 80, 48, 7, (x, y) -> all(y == 2 || y == 13 ? -24 : (x + 3 * y) % 9 == 0 ? 10 : 0));
         put("export", 150, 46, 40, 8, (x, y) -> all((x + y) % 8 < 2 ? -28 : 0));
     }
 

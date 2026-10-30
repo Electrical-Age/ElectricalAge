@@ -15,9 +15,15 @@ public final class PlayerKeys {
     }
 
     public static final int WRENCH = 1;
+    /** The headlamp key (Baughn 2026-10-30): a press switches the worn headlamp. */
+    public static final int HEADLAMP = 2;
     static final Set<UUID> WRENCH_DOWN = ConcurrentHashMap.newKeySet();
 
     public static void set(Player p, int key, boolean down) {
+        if (key == HEADLAMP) {
+            if (down) mods.eln.item.headlamp.HeadlampItem.toggle(p);
+            return;
+        }
         if (key != WRENCH) return;
         if (down) WRENCH_DOWN.add(p.getUUID());
         else WRENCH_DOWN.remove(p.getUUID());

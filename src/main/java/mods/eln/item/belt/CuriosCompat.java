@@ -19,6 +19,11 @@ public final class CuriosCompat {
         return LOADED ? Impl.belt(p) : ItemStack.EMPTY;
     }
 
+    /** The headlamp worn in Curios' head slot, or EMPTY. */
+    public static ItemStack headlamp(Player p) {
+        return LOADED ? Impl.headlamp(p) : ItemStack.EMPTY;
+    }
+
     public static void register(net.neoforged.bus.api.IEventBus modBus) {
         if (LOADED) modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> e.enqueueWork(Impl::register));
     }
@@ -37,6 +42,26 @@ public final class CuriosCompat {
                             .orElse(false);
                     }
                 });
+            // the headlamp in the head slot: lit while worn there; put on in the Curios screen (no equip on use: Curios
+            // 17.0.0-beta.3 leaks a transaction swapping into an occupied slot, and right-click would wear it as a helmet)
+            top.theillusivec4.curios.api.CuriosApi.registerCurio(mods.eln.registry.ElnRegistry.HEADLAMP.get(),
+                new top.theillusivec4.curios.api.type.capability.ICurioItem() {
+                    @Override
+                    public void curioTick(top.theillusivec4.curios.api.SlotContext ctx, ItemStack stack) {
+                        if (!ctx.entity().level().isClientSide()) mods.eln.item.headlamp.HeadlampItem.wornTick(stack, ctx.entity(), 0.05);
+                    }
+
+                    @Override
+                    public boolean canEquipFromUse(top.theillusivec4.curios.api.SlotContext ctx, ItemStack stack) {
+                        return false;
+                    }
+                });
+        }
+
+        static ItemStack headlamp(Player p) {
+            return top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(p)
+                .flatMap(h -> h.findFirstCurio(mods.eln.registry.ElnRegistry.HEADLAMP.get()))
+                .map(top.theillusivec4.curios.api.SlotResult::stack).orElse(ItemStack.EMPTY);
         }
 
         static ItemStack belt(Player p) {

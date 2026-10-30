@@ -94,14 +94,15 @@ public final class Catalog {
     }
 
     public static void writeBlock(Path res, BlockModel b) throws IOException {
-        Path dir = res.resolve("assets/eln/models/block");
+        String kind = b.item() ? "item" : "block";
+        Path dir = res.resolve("assets/eln/models/" + kind);
         Files.createDirectories(dir);
         ObjWriter.block(b.model(), dir, b.name());
         Set<String> mats = new TreeSet<>();
         for (Solid s : b.model().solids) mats.add(String.valueOf(s.material));
         StringBuilder tx = new StringBuilder();
         for (String m : mats) tx.append(",\n  \"").append(m).append("\": \"eln:blocks/").append(b.sprites()).append('/').append(m).append('"');
-        Files.writeString(dir.resolve(b.name() + ".json"), "{\n \"parent\": \"minecraft:block/block\",\n \"loader\": \"neoforge:obj\",\n \"model\": \"eln:models/block/"
+        Files.writeString(dir.resolve(b.name() + ".json"), "{\n \"parent\": \"minecraft:block/block\",\n \"loader\": \"neoforge:obj\",\n \"model\": \"eln:models/" + kind + "/"
             + b.name() + ".obj\",\n \"flip_v\": true,\n \"automatic_culling\": true,\n \"shade_quads\": true,\n \"textures\": {\n  \"particle\": \"eln:blocks/"
             + b.sprites() + "/" + b.particle() + "\"" + tx + "\n }\n}\n");
         Path tex = res.resolve("assets/eln/textures/blocks/" + b.sprites());
