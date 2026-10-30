@@ -9,6 +9,8 @@ public final class Part {
     public final String name;
     public final Part parent;
     public final double ox, oy, oz, rx, ry, rz;
+    /** It moves against its parent (a wheel, a crank): its solids hang together among themselves, not with the rest. */
+    public boolean moving;
 
     public Part(String name, Part parent, double ox, double oy, double oz, double rx, double ry, double rz) {
         this.name = name;
@@ -19,6 +21,17 @@ public final class Part {
         this.rx = rx;
         this.ry = ry;
         this.rz = rz;
+    }
+
+    public Part moving() {
+        moving = true;
+        return this;
+    }
+
+    /** The nearest moving part up from here (itself included), or null. */
+    public Part movingAncestor() {
+        for (Part p = this; p != null; p = p.parent) if (p.moving) return p;
+        return null;
     }
 
     /** Its frame in model space. */

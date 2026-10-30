@@ -40,7 +40,89 @@ public final class Checker {
         for (Solid s : m.solids) if (!s.ghost && (s instanceof Box || s instanceof Frustum)) convex.add(s);
         out.addAll(faces(m.faces(), convex));
         out.addAll(relations(m));
+        out.addAll(connectivity(m));
         return out;
+    }
+
+    /** The contact share two solids of a body must reach to count as joined. */
+    public static final double CONNECT_SHARE = 0.5;
+
+    /**
+     * Every drawn solid hangs together with its body (Solid.body; else its moving part, else the model): linked to the
+     * body's main piece (its biggest solid's) through contacts that each hold over CONNECT_SHARE of the narrower
+     * piece's outline, seen along the contact. Solids marked free are left out. Reports each solid that isn't linked,
+     * with its best link to the rest if it has a weak one.
+     */
+    public static List<Issue> connectivity(Model m) {
+        Map<Object, List<Solid>> bodies = new java.util.LinkedHashMap<>();
+        Object root = new Object();
+        for (Solid s : m.solids) {
+            if (s.ghost || s.free != null) continue;
+            Object key = s.body != null ? s.body : s.part != null && s.part.movingAncestor() != null ? s.part.movingAncestor() : root;
+            bodies.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+        }
+        List<Issue> out = new ArrayList<>();
+        Map<Solid, List<Face>> faces = new HashMap<>();
+        Map<Solid, Geom.Hull> hulls = new HashMap<>();
+        for (List<Solid> body : bodies.values()) {
+            int n = body.size();
+            if (n < 2) continue;
+            int[] comp = new int[n];
+            for (int i = 0; i < n; i++) comp[i] = i;
+            double[][] share = new double[n][n];
+            for (int i = 0; i < n; i++)
+                for (int j = i + 1; j < n; j++) {
+                    Solid a = body.get(i), b = body.get(j);
+                    Geom.Hull ha = hulls.computeIfAbsent(a, k -> new Geom.Hull(faces.computeIfAbsent(k, Solid::faces)));
+                    Geom.Hull hb = hulls.computeIfAbsent(b, k -> new Geom.Hull(faces.computeIfAbsent(k, Solid::faces)));
+                    double[] sa = Geom.separationAxis(ha, hb);
+                    if (sa[0] > EPS) continue;
+                    double s = Geom.joint(faces.get(a), faces.get(b), new double[]{sa[1], sa[2], sa[3]}, EPS, false);
+                    share[i][j] = share[j][i] = s;
+                    if (s >= CONNECT_SHARE - 1e-9) union(comp, i, j);
+                }
+            // the main piece: the component with the most bulk (its solids' bounding volumes), named by its biggest solid
+            Map<Integer, Double> bulk = new HashMap<>();
+            double[] vol = new double[n];
+            for (int i = 0; i < n; i++) {
+                double[] bb = bounds(faces.computeIfAbsent(body.get(i), Solid::faces));
+                vol[i] = (bb[3] - bb[0] + 0.01) * (bb[4] - bb[1] + 0.01) * (bb[5] - bb[2] + 0.01);
+                bulk.merge(find(comp, i), vol[i], Double::sum);
+            }
+            int main = 0;
+            for (int i = 0; i < n; i++)
+                if (bulk.get(find(comp, i)) > bulk.get(find(comp, main)) || find(comp, i) == find(comp, main) && vol[i] > vol[main]) main = i;
+            int mainRoot = find(comp, main);
+            for (int i = 0; i < n; i++) {
+                if (find(comp, i) == mainRoot) continue;
+                int best = -1;
+                for (int j = 0; j < n; j++) if (find(comp, j) != find(comp, i) && (best < 0 || share[i][j] > share[i][best])) best = j;
+                String why = best >= 0 && share[i][best] > 0 ? "its best link, to " + body.get(best) + ", holds " + Math.round(100 * share[i][best]) + " %"
+                    : "it touches nothing else of its body";
+                out.add(new Issue("connected", body.get(i) + " isn't joined to the main piece (" + body.get(main) + "): " + why));
+            }
+        }
+        return out;
+    }
+
+    static int find(int[] c, int i) {
+        while (c[i] != i) i = c[i] = c[c[i]];
+        return i;
+    }
+
+    static void union(int[] c, int i, int j) {
+        c[find(c, i)] = find(c, j);
+    }
+
+    static double[] bounds(List<Face> faces) {
+        double[] r = {Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
+        for (Face f : faces)
+            for (int i = 0; i < f.n; i++)
+                for (int k = 0; k < 3; k++) {
+                    r[k] = Math.min(r[k], f.xyz[3 * i + k]);
+                    r[k + 3] = Math.max(r[k + 3], f.xyz[3 * i + k]);
+                }
+        return r;
     }
 
     /** Degenerate faces and z-fights in a soup of faces (a model's, or another engine's output). */
@@ -142,11 +224,12 @@ public final class Checker {
                     else if (-sep > a.maxSink() + EPS)
                         out.add(new Issue("attach", a.a() + " is sunk " + fmt(-sep) + " px into " + a.b() + " (at most " + fmt(a.maxSink()) + ")"));
                     else {
-                        double[] c = Geom.contact(a.a().faces(), a.b().faces(), new double[]{sa[1], sa[2], sa[3]}, EPS);
-                        double share = c[1] > 0 ? c[0] / c[1] : 0;
+                        double[] axis = {sa[1], sa[2], sa[3]};
+                        double share = Geom.joint(a.a().faces(), a.b().faces(), axis, EPS, true);
+                        double[] c = Geom.contact(a.a().faces(), a.b().faces(), axis, EPS);
                         if (share < a.minShare() - 1e-9 || c[0] < a.minArea())
                             out.add(new Issue("attach", a.a() + " barely attached to " + a.b() + ": " + Math.round(100 * share) + " % contact ("
-                                + fmt(c[0]) + " of " + fmt(c[1]) + " px^2; needs " + Math.round(100 * a.minShare()) + " %"
+                                + fmt(c[0]) + " px^2 across the contact; needs " + Math.round(100 * a.minShare()) + " %"
                                 + (a.minArea() > 0 ? " and " + fmt(a.minArea()) + " px^2" : "") + ")"));
                     }
                 }

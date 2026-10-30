@@ -20,6 +20,11 @@ towergen) for geometry that is checked by tests.
     relation with an optional minimum area; Baughn: not just touching. Declare the narrower piece as a: a stem on a
     dial, a body under a wider cap), `disjoint`, `within` (e.g. a hitbox),
     `ratio` (a proportion);
+  - connected: every drawn solid hangs together with its body (`Solid.body`; else its nearest `Part.moving()` part, a
+    wheel or a crank; else the model), linked to the body's main piece (the component with the most bulk) through
+    joints that each hold at least 50 % of the narrower piece's outline, seen along the joint (a tube's end inside
+    another: its whole section). A solid meant to float says so with `free(reason)`. VoxelGeometry makes each part a
+    body of its own;
   - a decal that is meant to lie over a surface says so with `layer(n)` (n x 0.1 px out).
   `Checker.faces` also reads other engines' output (polygon soups), which is how the old geometry was surveyed.
 - **Textures**: `tex.Sheet` paints regions (base colour, seeded noise, vertical shade, patterns) and face-aware

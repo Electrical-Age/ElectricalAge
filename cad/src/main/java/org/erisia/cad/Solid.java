@@ -25,6 +25,14 @@ public abstract class Solid {
     public boolean cull;
     /** Not drawn: a hitbox or clearance volume, for relations only. */
     public boolean ghost;
+    /**
+     * The body it belongs to: solids of one body must hang together, each linked to the rest through contacts that
+     * hold over enough of the narrower piece (Checker.connectivity). Null: its part's (the nearest moving part up its
+     * parents), or the model's.
+     */
+    public Object body;
+    /** Why it may float free of its body (a glow plane, a decal, a part meant to hover), or null. */
+    public String free;
     /** Entity models: the texture region's corner (texOffs). */
     public int texU, texV;
 
@@ -77,6 +85,17 @@ public abstract class Solid {
 
     public Solid ghost() {
         ghost = true;
+        return this;
+    }
+
+    public Solid body(Object b) {
+        body = b;
+        return this;
+    }
+
+    /** It may float free of its body, for this reason. */
+    public Solid free(String why) {
+        free = why;
         return this;
     }
 

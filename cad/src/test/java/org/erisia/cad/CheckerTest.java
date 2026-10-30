@@ -150,4 +150,22 @@ public class CheckerTest {
         m.attach(small, base, 0, 0.5, 2);
         assertEquals(1, Checker.relations(m).size(), Checker.relations(m).toString());
     }
+
+    @Test
+    void everySolidHangsTogetherWithItsBody() {
+        Model m = new Model();
+        m.add(new Box(0, 0, 0, 10, 2, 10)).named("base");
+        m.add(new Box(2, 2, 2, 4, 6, 4)).named("post");                  // on the base: joined
+        m.add(new Box(1, 6, 1, 5, 7, 5)).named("top");                   // on the post's end: the post is held whole
+        m.add(new Box(9, 2, 9, 12, 4, 12)).named("corner");              // a corner over the base's: weak
+        m.add(new Box(20, 0, 0, 21, 1, 1)).named("away");                // touches nothing
+        m.add(new Box(20, 5, 0, 21, 6, 1)).named("glow").free("a glow plane in front of the lamp");
+        Part wheel = m.part("wheel", null, 30, 0, 0, 0, 0, 0).moving();
+        m.add(new Box(0, 0, 0, 2, 2, 2)).named("hub").in(wheel);        // a moving part: on its own
+        m.add(new Box(0, 2, 0, 2, 3, 2)).named("rim").in(wheel);
+        List<String> got = Checker.connectivity(m).stream().map(Checker.Issue::toString).toList();
+        assertEquals(2, got.size(), got.toString());
+        assertTrue(got.get(0).contains("corner") && got.get(0).contains("%"), got.toString());
+        assertTrue(got.get(1).contains("away") && got.get(1).contains("touches nothing"), got.toString());
+    }
 }

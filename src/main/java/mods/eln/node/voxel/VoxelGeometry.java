@@ -66,6 +66,16 @@ public final class VoxelGeometry {
         for (VoxelPart part : parts) if (part instanceof AdapterPart a) adapters[a.face] = true;
         List<int[]> cableBoxes = new ArrayList<>();
         for (VoxelPart part : parts) {
+            int first = m.solids.size();
+            draw(m, part, parts, lugs, adapters, cableBoxes);
+            // each part is a body of its own: its solids hang together (Checker.connectivity)
+            for (int i = first; i < m.solids.size(); i++) if (m.solids.get(i).body == null) m.solids.get(i).body = part;
+        }
+        return m;
+    }
+
+    static void draw(Model m, VoxelPart part, List<VoxelPart> parts, float[] lugs, boolean[] adapters, List<int[]> cableBoxes) {
+        {
             if (part instanceof ValvePart v) valve(m, v);
             else if (part instanceof SafetyValvePart sv) safetyValve(m, sv, parts);
             else if (part instanceof PipeSensorPart ps) sensor(m, ps, parts);
@@ -84,7 +94,6 @@ public final class VoxelGeometry {
                         if (port.face() >= 2 && lugs[port.face() - 2] > 0) lug(m, c, port, lugs[port.face() - 2]);
             }
         }
-        return m;
     }
 
     // --- the parts ---
@@ -351,7 +360,8 @@ public final class VoxelGeometry {
         int along = port.face() >= 4 ? 0 : 2, across = 2 - along;
         double edge = along == 0 ? port.x() : port.z(), in = edge == 0 ? 1 : -1, mid = across == 0 ? port.x() : port.z();
         double w2 = c.tierInfo().width() / 2.0, h = c.tierInfo().height();
-        lugBox(m, along, across, 0, H - 0.1, mid, w2 + 0.05, edge + in * 0.25, edge + in * (0.25 + h), cableSprite(c.tier)).named("lug riser")
+        // (its foot 0.1 px off the floor: on it, its underside lay in the cable box's and z-fought)
+        lugBox(m, along, across, 0.1, H - 0.1, mid, w2 + 0.05, edge + in * 0.25, edge + in * (0.25 + h), cableSprite(c.tier)).named("lug riser")
             .rgb(0.22f, 0.22f, 0.24f);
         int copper = rgb(0.77f, 0.43f, 0.27f);   // (dull copper: a lug you can touch isn't bare metal, Baughn)
         lugBox(m, along, across, H - 0.1, H + 0.6, mid, w2 + 0.15, edge + in * 0.15, edge + in * (0.35 + h), PIPE[0]).named("lug barrel").argb(copper);

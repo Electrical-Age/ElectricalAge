@@ -212,19 +212,21 @@ public final class Geom {
         return new double[]{best, axis[0], axis[1], axis[2]};
     }
 
-    /**
-     * How much of a is held by b, seen along the axis: {area of the outline of a's part inside b grown by eps, area of
-     * a's own outline}, both projected on the plane across the axis (px^2). a and b convex (their faces).
-     */
-    static double[] contact(List<Face> a, List<Face> b, double[] axis, double eps) {
+    /** a's faces as polygons (repeats dropped). */
+    static List<double[]> polys(List<Face> a) {
         List<double[]> polys = new ArrayList<>();
         for (Face f : a) {
             double[] d = distinct(f);
             if (d.length >= 9) polys.add(d);
         }
-        double[] own = outlineArea(polys, axis);
+        return polys;
+    }
+
+    /** The part of a inside b grown by eps, as polygons (b convex: its faces' planes; a ring's outer hull). */
+    static List<double[]> inside(List<Face> a, List<Face> b, double eps) {
+        List<double[]> polys = polys(a);
         for (Face g : b) {
-            if (g.nx == 0 && g.ny == 0 && g.nz == 0) continue;
+            if (g.nx == 0 && g.ny == 0 && g.nz == 0 || g.kind == Ring.INNER) continue;   // (a ring: its outer hull)
             double d = g.plane() + eps;
             List<double[]> next = new ArrayList<>();
             List<Double> cut = new ArrayList<>();
@@ -240,7 +242,39 @@ public final class Geom {
             polys = next;
             if (polys.isEmpty()) break;
         }
-        return new double[]{polys.isEmpty() ? 0 : outlineArea(polys, axis)[0], own[0]};
+        return polys;
+    }
+
+    /**
+     * How much of a is held by b, seen along the axis: {area of the outline of a's part inside b grown by eps, area of
+     * a's own outline}, both projected on the plane across the axis (px^2). a and b convex (their faces).
+     */
+    static double[] contact(List<Face> a, List<Face> b, double[] axis, double eps) {
+        List<double[]> in = inside(a, b, eps);
+        return new double[]{in.isEmpty() ? 0 : outlineArea(in, axis)[0], outlineArea(polys(a), axis)[0]};
+    }
+
+    /**
+     * The joint's cross-section share: the most, over the directions the two are seen along (the separating axis and
+     * each one's face normals), of the outline of where they meet over the outline of the one held (a), or of the
+     * smaller of the two when held is null. A tube's end inside another is held over its whole section seen along the
+     * tube; a box on a face, over its footprint seen down onto the face.
+     */
+    static double joint(List<Face> a, List<Face> b, double[] sepAxis, double eps, boolean aHeld) {
+        List<double[]> in = inside(a, b, eps);
+        if (in.isEmpty()) return 0;
+        List<double[]> axes = new ArrayList<>();
+        Hull.addDir(axes, sepAxis[0], sepAxis[1], sepAxis[2]);
+        for (List<Face> fs : List.of(a, b))
+            for (Face f : fs) if (f.nx != 0 || f.ny != 0 || f.nz != 0) Hull.addDir(axes, f.nx, f.ny, f.nz);
+        List<double[]> pa = polys(a), pb = aHeld ? null : polys(b);
+        double best = 0;
+        for (double[] ax : axes) {
+            double own = outlineArea(pa, ax)[0];
+            if (pb != null) own = Math.min(own, outlineArea(pb, ax)[0]);
+            if (own > 1e-9) best = Math.max(best, outlineArea(in, ax)[0] / own);
+        }
+        return Math.min(1, best);
     }
 
     /** The polygon's part on the side n.p <= d (points on the cut also go into cut). */
