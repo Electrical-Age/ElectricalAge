@@ -36,6 +36,12 @@ public final class Model {
         return this;
     }
 
+    /** ... held over at least minShare of a's outline along the contact, and minArea px^2. */
+    public Model attach(Solid a, Solid b, double maxSink, double minShare, double minArea) {
+        relations.add(new Relation.Attach(a, b, maxSink, minShare, minArea));
+        return this;
+    }
+
     public Model abut(Solid a, Solid b) {
         return attach(a, b, 0);
     }

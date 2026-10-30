@@ -70,7 +70,7 @@ public class CheckerTest {
         Solid floating = m.add(new Box(10, 9.5, 7, 12, 10, 9)).named("floating");
         Solid sunk = m.add(new Box(7.5, 8, 7.5, 8.5, 10, 8.5)).named("sunk");
         Solid hit = m.add(new Box(6, 8, 6, 10, 12, 10)).ghost();
-        m.abut(onTop, pipe);
+        m.attach(onTop, pipe, 0, 0, 0);   // (touching only: a box on a round pipe is held along a line)
         assertEquals(List.of(), Checker.relations(m));
         m.abut(floating, pipe);
         m.attach(sunk, pipe, 0.6);
@@ -113,5 +113,41 @@ public class CheckerTest {
         double[] b = one.bounds(x -> true);
         assertEquals(3.5, b[3], 0.2);
         assertEquals(4.3, b[4], 0.2);
+    }
+
+    static List<String> attach(Solid a, Solid b, double maxSink) {
+        Model m = new Model();
+        m.add(a);
+        m.add(b);
+        m.attach(a, b, maxSink);
+        return Checker.relations(m).stream().map(Checker.Issue::toString).toList();
+    }
+
+    @Test
+    void attachWantsACrossSectionNotATouch() {
+        Box base = new Box(0, 0, 0, 10, 2, 10);
+        // a box on a box's face: held all over
+        assertEquals(List.of(), attach(new Box(2, 2, 2, 6, 5, 6).named("on"), base, 0));
+        // a box hanging half over the edge: 50 %, just enough
+        assertEquals(List.of(), attach(new Box(8, 2, 2, 12, 5, 6).named("half"), base, 0));
+        // three quarters over the edge: 25 %
+        List<String> quarter = attach(new Box(9, 2, 2, 13, 5, 6).named("quarter"), base, 0);
+        assertEquals(1, quarter.size());
+        assertTrue(quarter.get(0).contains("barely attached") && quarter.get(0).contains("26 %"), quarter.toString());   // (b grown by EPS)
+        // touching at a corner only
+        List<String> corner = attach(new Box(10, 2, 10, 13, 5, 13).named("corner"), base, 0);
+        assertTrue(corner.size() == 1 && corner.get(0).contains("barely attached"), corner.toString());
+        // a cylinder lying on the box: a line of contact, a few percent
+        Frustum log = Frustum.cylinder(0, 3, 5, 1, 1, 9);   // along x, centre y 3 (radius 1 down to the top at 2), z 5
+        List<String> lying = attach(log, base, 0);
+        assertTrue(lying.size() == 1 && lying.get(0).contains("barely attached"), lying.toString());
+        // ... sunk to its axis it is held over its whole width
+        assertEquals(List.of(), attach(Frustum.cylinder(0, 2, 5, 1, 1, 9), base, 1));
+        // an absolute minimum area
+        Model m = new Model();
+        Solid small = m.add(new Box(2, 2, 2, 3, 3, 3));
+        m.add(base);
+        m.attach(small, base, 0, 0.5, 2);
+        assertEquals(1, Checker.relations(m).size(), Checker.relations(m).toString());
     }
 }

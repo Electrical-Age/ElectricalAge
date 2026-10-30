@@ -187,6 +187,11 @@ public final class Geom {
      * negative, they touch or interpenetrate by that much along the axis of least overlap.
      */
     static double separation(Hull a, Hull b) {
+        return separationAxis(a, b)[0];
+    }
+
+    /** The separation and the axis it is found along: {sep, x, y, z}. */
+    static double[] separationAxis(Hull a, Hull b) {
         List<double[]> axes = new ArrayList<>(a.normals);
         for (double[] n : b.normals) Hull.addDir(axes, n[0], n[1], n[2]);
         for (double[] e : a.edges)
@@ -195,10 +200,97 @@ public final class Geom {
                 if (l > 1e-6) Hull.addDir(axes, x / l, y / l, z / l);
             }
         double best = -Double.MAX_VALUE;
+        double[] axis = {0, 1, 0};
         for (double[] ax : axes) {
             double[] sa = a.span(ax), sb = b.span(ax);
-            best = Math.max(best, Math.max(sb[0] - sa[1], sa[0] - sb[1]));
+            double g = Math.max(sb[0] - sa[1], sa[0] - sb[1]);
+            if (g > best) {
+                best = g;
+                axis = ax;
+            }
         }
-        return best;
+        return new double[]{best, axis[0], axis[1], axis[2]};
+    }
+
+    /**
+     * How much of a is held by b, seen along the axis: {area of the outline of a's part inside b grown by eps, area of
+     * a's own outline}, both projected on the plane across the axis (px^2). a and b convex (their faces).
+     */
+    static double[] contact(List<Face> a, List<Face> b, double[] axis, double eps) {
+        List<double[]> polys = new ArrayList<>();
+        for (Face f : a) {
+            double[] d = distinct(f);
+            if (d.length >= 9) polys.add(d);
+        }
+        double[] own = outlineArea(polys, axis);
+        for (Face g : b) {
+            if (g.nx == 0 && g.ny == 0 && g.nz == 0) continue;
+            double d = g.plane() + eps;
+            List<double[]> next = new ArrayList<>();
+            List<Double> cut = new ArrayList<>();
+            for (double[] p : polys) {
+                double[] q = clipPlane(p, g.nx, g.ny, g.nz, d, cut);
+                if (q.length >= 9) next.add(q);
+            }
+            if (cut.size() >= 9) {   // the cap where the plane cut a: its points, in any order (only the outline is wanted)
+                double[] c = new double[cut.size()];
+                for (int i = 0; i < c.length; i++) c[i] = cut.get(i);
+                next.add(c);
+            }
+            polys = next;
+            if (polys.isEmpty()) break;
+        }
+        return new double[]{polys.isEmpty() ? 0 : outlineArea(polys, axis)[0], own[0]};
+    }
+
+    /** The polygon's part on the side n.p <= d (points on the cut also go into cut). */
+    static double[] clipPlane(double[] p, double nx, double ny, double nz, double d, List<Double> cut) {
+        int n = p.length / 3;
+        List<Double> out = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int j = (i + 1) % n;
+            double si = nx * p[3 * i] + ny * p[3 * i + 1] + nz * p[3 * i + 2] - d, sj = nx * p[3 * j] + ny * p[3 * j + 1] + nz * p[3 * j + 2] - d;
+            if (si <= 0) for (int k = 0; k < 3; k++) out.add(p[3 * i + k]);
+            if ((si <= 0) != (sj <= 0)) {
+                double t = si / (si - sj);
+                for (int k = 0; k < 3; k++) {
+                    double v = p[3 * i + k] + t * (p[3 * j + k] - p[3 * i + k]);
+                    out.add(v);
+                    cut.add(v);
+                }
+            }
+        }
+        double[] r = new double[out.size()];
+        for (int i = 0; i < r.length; i++) r[i] = out.get(i);
+        return r;
+    }
+
+    /** The area of the convex outline of all the points, projected along the axis: {area}. */
+    static double[] outlineArea(List<double[]> polys, double[] axis) {
+        double[][] b = basis(axis[0], axis[1], axis[2]);
+        List<double[]> pts = new ArrayList<>();
+        for (double[] p : polys)
+            for (int i = 0; i < p.length; i += 3)
+                pts.add(new double[]{p[i] * b[0][0] + p[i + 1] * b[0][1] + p[i + 2] * b[0][2], p[i] * b[1][0] + p[i + 1] * b[1][1] + p[i + 2] * b[1][2]});
+        if (pts.size() < 3) return new double[]{0};
+        // monotone chain hull
+        pts.sort((u, v) -> u[0] != v[0] ? Double.compare(u[0], v[0]) : Double.compare(u[1], v[1]));
+        double[][] h = new double[2 * pts.size()][];
+        int k = 0;
+        for (int pass = 0; pass < 2; pass++) {
+            int start = k;
+            for (int i = 0; i < pts.size(); i++) {
+                double[] q = pts.get(pass == 0 ? i : pts.size() - 1 - i);
+                while (k >= start + 2 && (h[k - 1][0] - h[k - 2][0]) * (q[1] - h[k - 2][1]) - (h[k - 1][1] - h[k - 2][1]) * (q[0] - h[k - 2][0]) <= 1e-12) k--;
+                h[k++] = q;
+            }
+            k--;
+        }
+        double area = 0;
+        for (int i = 0; i < k; i++) {
+            int j = (i + 1) % k;
+            area += h[i][0] * h[j][1] - h[j][0] * h[i][1];
+        }
+        return new double[]{Math.abs(area) / 2};
     }
 }

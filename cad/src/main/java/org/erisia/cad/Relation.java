@@ -4,9 +4,16 @@ package org.erisia.cad;
 public sealed interface Relation {
     /**
      * a touches b's surface (abut, maxSink 0) or sits sunk into it by at most maxSink px (a fitting's root inside its
-     * pipe): never floating clear of it, never buried deeper.
+     * pipe): never floating clear of it, never buried deeper; and it is held over enough of itself (Baughn 2026-10-30:
+     * not just touching, which lets a piece look barely attached): seen along the contact's direction, the part of a
+     * that meets b (within the checker's EPS) covers at least minShare of a's own outline there and minArea px^2.
      */
-    record Attach(Solid a, Solid b, double maxSink) implements Relation {
+    record Attach(Solid a, Solid b, double maxSink, double minShare, double minArea) implements Relation {
+        public static final double SHARE = 0.5;
+
+        public Attach(Solid a, Solid b, double maxSink) {
+            this(a, b, maxSink, SHARE, 0);
+        }
     }
 
     /** a and b don't clip each other (touching is allowed). */

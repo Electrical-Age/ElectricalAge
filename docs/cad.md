@@ -15,7 +15,10 @@ towergen) for geometry that is checked by tests.
   - z-fight: two faces of different solids facing the same way within 0.05 px of one plane, overlapping by area, that
     look different there (material, colour or texture coordinates). Opposite-facing faces are fine (back faces are
     culled); an overlap wholly inside another convex solid is hidden and not reported;
-  - declared relations: `attach`/`abut` (touching, or sunk at most so far), `disjoint`, `within` (e.g. a hitbox),
+  - declared relations: `attach`/`abut` (touching, or sunk at most so far, and held over enough of itself: seen along
+    the contact, the part of a inside b (grown by 0.05 px) covers at least 50 % of a's own outline, settable per
+    relation with an optional minimum area; Baughn: not just touching. Declare the narrower piece as a: a stem on a
+    dial, a body under a wider cap), `disjoint`, `within` (e.g. a hitbox),
     `ratio` (a proportion);
   - a decal that is meant to lie over a surface says so with `layer(n)` (n x 0.1 px out).
   `Checker.faces` also reads other engines' output (polygon soups), which is how the old geometry was surveyed.

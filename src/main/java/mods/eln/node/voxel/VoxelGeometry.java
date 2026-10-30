@@ -211,7 +211,7 @@ public final class VoxelGeometry {
         Solid cap = tube(m, ax, c[o[0]], c[o[1]], 2 * s, Math.min(top, end), Math.max(top, end), PIPE[0]).named("safety valve cap").rgb(0.75f, 0.15f, 0.12f);
         Solid pipe = pipeUnder(m, pipeAxis(parts, sv.x, sv.y, sv.z, ax), c, rp);
         Solid hit = box(m, sv.boxes().get(0), null).named("safety valve hitbox").ghost();
-        m.attach(body, pipe, rp).abut(cap, body).within(cap, hit).disjoint(cap, pipe)
+        m.attach(body, pipe, rp).abut(body, cap).within(cap, hit).disjoint(cap, pipe)
             .ratio("safety valve cap radius / pipe radius", 2 * s / rp, 0.5, 2).ratio("safety valve body radius / pipe radius", 1.4 * s / rp, 0.4, 1.5);
     }
 
@@ -234,7 +234,7 @@ public final class VoxelGeometry {
             .rgb(0.2f + 0.7f * f, 0.75f - 0.55f * f, 0.15f);
         Solid pipe = pipeUnder(m, pipeAxis(parts, ps.x, ps.y, ps.z, ax), c, rp);
         Solid hit = box(m, ps.boxes().get(0), null).named("sensor hitbox").ghost();
-        m.attach(stem, pipe, rp).abut(dial, stem).within(dial, hit).disjoint(dial, pipe)
+        m.attach(stem, pipe, rp).abut(stem, dial).within(dial, hit).disjoint(dial, pipe)
             .ratio("sensor dial radius / pipe radius", 2 * s / rp, 0.5, 2);
     }
 

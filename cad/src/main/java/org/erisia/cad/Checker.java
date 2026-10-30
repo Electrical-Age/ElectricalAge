@@ -136,10 +136,19 @@ public final class Checker {
         for (Relation r : m.relations) {
             switch (r) {
                 case Relation.Attach a -> {
-                    double sep = Geom.separation(hull.apply(a.a()), hull.apply(a.b()));
+                    double[] sa = Geom.separationAxis(hull.apply(a.a()), hull.apply(a.b()));
+                    double sep = sa[0];
                     if (sep > EPS) out.add(new Issue("attach", a.a() + " floats " + fmt(sep) + " px clear of " + a.b()));
                     else if (-sep > a.maxSink() + EPS)
                         out.add(new Issue("attach", a.a() + " is sunk " + fmt(-sep) + " px into " + a.b() + " (at most " + fmt(a.maxSink()) + ")"));
+                    else {
+                        double[] c = Geom.contact(a.a().faces(), a.b().faces(), new double[]{sa[1], sa[2], sa[3]}, EPS);
+                        double share = c[1] > 0 ? c[0] / c[1] : 0;
+                        if (share < a.minShare() - 1e-9 || c[0] < a.minArea())
+                            out.add(new Issue("attach", a.a() + " barely attached to " + a.b() + ": " + Math.round(100 * share) + " % contact ("
+                                + fmt(c[0]) + " of " + fmt(c[1]) + " px^2; needs " + Math.round(100 * a.minShare()) + " %"
+                                + (a.minArea() > 0 ? " and " + fmt(a.minArea()) + " px^2" : "") + ")"));
+                    }
                 }
                 case Relation.Disjoint d -> {
                     double sep = Geom.separation(hull.apply(d.a()), hull.apply(d.b()));
