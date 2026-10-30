@@ -36,7 +36,7 @@ public class BikeModel extends EntityModel<BikeRenderState> {
         java.util.Map.entry("head_tube", Group.FRAME), java.util.Map.entry("top_tube", Group.FRAME), java.util.Map.entry("down_tube", Group.FRAME),
         java.util.Map.entry("seat_tube", Group.FRAME), java.util.Map.entry("chain_stay_l", Group.FRAME), java.util.Map.entry("chain_stay_r", Group.FRAME),
         java.util.Map.entry("seat_stay_l", Group.FRAME), java.util.Map.entry("seat_stay_r", Group.FRAME),
-        java.util.Map.entry("fork_l", Group.FORK), java.util.Map.entry("fork_r", Group.FORK),
+        java.util.Map.entry("fork_crown", Group.FORK), java.util.Map.entry("fork_l", Group.FORK), java.util.Map.entry("fork_r", Group.FORK),
         java.util.Map.entry("trunk", Group.TRUNK), java.util.Map.entry("trunk_lid", Group.TRUNK), java.util.Map.entry("saddle", Group.SADDLE),
         java.util.Map.entry("lamp", Group.LAMP));
 

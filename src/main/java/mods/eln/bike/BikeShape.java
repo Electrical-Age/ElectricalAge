@@ -79,7 +79,7 @@ public final class BikeShape {
         }
 
         void wheel(String name, float z) {
-            Part w = part(name, null, 0, HUB, z, 0, 0, 0);
+            Part w = part(name, null, 0, HUB, z, 0, 0, 0).moving();
             float seg = 2 * R * (float) Math.tan(Math.PI / 8) + 0.2f;
             boolean fat = thick > 1;   // (the terrain bike's tyres: wider, deeper, with knobs on the tread)
             float tw = fat ? 3.2f : 2, td = fat ? 2.2f : 1.5f;
@@ -127,6 +127,10 @@ public final class BikeShape {
                 b.tube("fork" + s, PAINT, x * 1.3f, my, mz, HUB, FRONT_Z, 1.4f);
             }
         }
+        // the fork crown under the head tube, holding the blades' tops (Baughn 2026-10-30, the connectivity check: the
+        // blades met the head tube over 18 % of their section, beside it), just wider than the blades
+        float crown = terrain ? 2.05f : 1.95f;
+        b.cube(b.part("fork_crown", null, 0, HEAD_BOT, HEAD_Z - 1, 0, 0, 0), PAINT, -crown, -0.3f, -0.9f, 2 * crown, 1.5f, 1.8f);
         // the battery along the down tube, standing on its drawn surface (Baughn 2026-10-30: it floated over the bike's
         // tube and nearly met the terrain bike's fatter one), in the down tube's frame; the bottom bracket and cranks
         Box tube = (Box) down;
@@ -137,12 +141,13 @@ public final class BikeShape {
         battery.in(bp).tex(BATTERY[0], BATTERY[1]).material(BATTERY).named("battery").uv(UV);
         b.m.abut(battery, down).disjoint(battery, seat).disjoint(battery, b.m.solid("head_tube"));
         b.cube(b.part("bottom_bracket", null, 0, BB, BB_Z, 0, 0, 0), METAL, -2, -1, -1, 4, 2, 2);
-        Part cl = b.part("crank_l", null, -2.2f, BB, BB_Z, -0.6f, 0, 0);
+        Part cl = b.part("crank_l", null, -2.2f, BB, BB_Z, -0.6f, 0, 0).moving();
         b.cube(cl, BLACK, -0.5f, -0.5f, -0.5f, 1, 4, 1);
-        b.cube(cl, BLACK, -2.5f, 3, -1, 2, 1, 2);
-        Part cr = b.part("crank_r", null, 2.2f, BB, BB_Z, -(0.6f + PI), 0, 0);
+        // (the pedal runs through the crank's end, 0.1 px past it: it hung off the end's side, 28 % held)
+        b.cube(cl, BLACK, -2.5f, 3, -1, 3.1f, 1, 2);
+        Part cr = b.part("crank_r", null, 2.2f, BB, BB_Z, -(0.6f + PI), 0, 0).moving();
         b.cube(cr, BLACK, -0.5f, -0.5f, -0.5f, 1, 4, 1);
-        b.cube(cr, BLACK, 0.5f, 3, -1, 2, 1, 2);
+        b.cube(cr, BLACK, -0.6f, 3, -1, 3.1f, 1, 2);
         // seat post and saddle
         b.tube("seat_post", METAL, 0, SEAT - 0.6f, SEAT_Z - 0.6f, SEAT + 1.4f, SEAT_Z - 0.2f, 1f);
         // (BikeGeometry's boxes, which the dyes aim at too)
@@ -150,7 +155,8 @@ public final class BikeShape {
         b.cube(sp, SADDLE, BikeGeometry.SADDLE_BOXES[0]);
         b.cube(sp, SADDLE, BikeGeometry.SADDLE_BOXES[1]);
         // stem and handlebars, grips
-        b.tube("stem", METAL, 0, HEAD_TOP - 0.5f, HEAD_Z, HEAD_TOP + 2.5f, HEAD_Z + 0.6f, 1f);
+        // (the stem's top 0.3 px into the bars, hidden: it met them over 45 % of its section)
+        b.tube("stem", METAL, 0, HEAD_TOP - 0.5f, HEAD_Z, HEAD_TOP + 2.8f, HEAD_Z + 0.72f, 1f);
         b.cube(b.part("bars", null, 0, HEAD_TOP + 2.5f, HEAD_Z + 1.2f, 0, 0, 0), METAL, -5, -0.5f, -0.5f, 10, 1, 1);
         Part grips = b.part("grips", null, 0, HEAD_TOP + 2.5f, HEAD_Z + 1.2f, 0, 0, 0);
         b.cube(grips, BLACK, -7, -0.7f, -0.7f, 2.5f, 1.4f, 1.4f);
@@ -162,14 +168,15 @@ public final class BikeShape {
         // its front braced down to the seat stays (Baughn: the front lacked a support)
         float rackY = HUB + R + 1.6f, stayZ = SEAT_Z + 1.5f,
             stayY = SEAT - 1.5f - (stayZ - (SEAT_Z - 0.4f)) / (REAR_Z - (SEAT_Z - 0.4f)) * (SEAT - 1.5f - HUB);
-        b.tube("rack_brace_l", METAL, -1.9f, rackY, REAR_Z - 3.2f, stayY, stayZ, 0.6f);
-        b.tube("rack_brace_r", METAL, 1.9f, rackY, REAR_Z - 3.2f, stayY, stayZ, 0.6f);
+        // (at x 1.4, ending inside the stays: at 1.9 they only touched the stays' sides, 26 % held)
+        b.tube("rack_brace_l", METAL, -1.4f, rackY, REAR_Z - 3.2f, stayY, stayZ, 0.6f);
+        b.tube("rack_brace_r", METAL, 1.4f, rackY, REAR_Z - 3.2f, stayY, stayZ, 0.6f);
         b.tube("rack_strut_l", METAL, -2.6f, HUB + R + 1.8f, REAR_Z + 3.5f, HUB, REAR_Z + 0.5f, 0.6f);
         b.tube("rack_strut_r", METAL, 2.6f, HUB + R + 1.8f, REAR_Z + 3.5f, HUB, REAR_Z + 0.5f, 0.6f);
         b.cube(b.part("trunk", null, 0, up(BikeGeometry.RACK_Y), BikeGeometry.TRUNK_OZ, 0, 0, 0), TRUNK, BikeGeometry.TRUNK_BOX);
         b.cube(b.part("trunk_lid", null, 0, up(BikeGeometry.RACK_Y), BikeGeometry.TRUNK_OZ, 0, 0, 0), LID, BikeGeometry.LID_BOX);
         // the kickstand: pivots at the bottom bracket's back, down to the ground on the left; folds back along the stay
-        Part k = b.part("kickstand", null, -1.5f, BB, BB_Z + 2.5f, 0, 0, 0);
+        Part k = b.part("kickstand", null, -1.5f, BB, BB_Z + 2.5f, 0, 0, 0).moving();
         b.cube(k, BLACK, -0.5f, 0, -0.5f, 1, 6.2f, 1);
         b.cube(k, BLACK, -1, 5.7f, -1, 2, 0.6f, 2);
         return b.m;

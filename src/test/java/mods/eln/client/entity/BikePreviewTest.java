@@ -58,6 +58,10 @@ public class BikePreviewTest {
             // saddle from below and behind
             String b = terrain ? "terrain-bike" : "bike";
             double[] hub = {-3, 0, 3, 3, 13, 17}, saddle = {-4, 10, -2, 4, 20, 8};
+            double[] front = {-3, 7, -12, 3, 18, -3};
+            Raster.writeRow(Path.of(dir, b + "-fork-crown.png"), List.of(pic(old, before, og, type, -50, 15, front, true), pic(now, after, ng, type, -50, 15, front, false)));
+            double[] crank = {-6, 0, -4, 6, 10, 6};
+            Raster.writeRow(Path.of(dir, b + "-cranks.png"), List.of(pic(old, before, og, type, 60, 10, crank, true), pic(now, after, ng, type, 60, 10, crank, false)));
             Raster.writeRow(Path.of(dir, b + "-rear-hub.png"), List.of(pic(old, before, og, type, 75, 10, hub, true), pic(now, after, ng, type, 75, 10, hub, false)));
             Raster.writeRow(Path.of(dir, b + "-saddle.png"), List.of(pic(old, before, og, type, 150, -35, saddle, true), pic(now, after, ng, type, 150, -35, saddle, false),
                 pic(old, before, og, type, 60, 30, saddle, true), pic(now, after, ng, type, 60, 30, saddle, false)));

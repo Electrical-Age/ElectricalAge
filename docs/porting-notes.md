@@ -319,3 +319,9 @@ on 1.7.10) onto 26.x.
   - bikes: every other rim segment narrower (0.1 px a side; the terrain tyre's 0.2, clear of its knobs), the seat stays
     0.1 px further in than the chain stays, the top tube 1.3 px instead of 1.5, the saddle's rear box 0.1 px lower on
     top and higher underneath.
+
+- Bikes, joined up (board #44, Baughn 2026-10-30: every piece attached through a real cross-section, checked by
+  Checker.connectivity): a fork crown under the head tube holds the blades' tops (they met the head tube beside it,
+  18 % of their section); the pedals run through the cranks' ends (they hung off the side, 28 %); the stem's top goes
+  0.3 px into the bars (45 %, hidden); the rack braces sit at x 1.4 instead of 1.9, ending inside the seat stays (they
+  touched the stays' sides, 26 %). The voxel parts needed nothing.

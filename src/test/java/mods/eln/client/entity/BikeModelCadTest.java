@@ -67,8 +67,11 @@ public class BikeModelCadTest {
     }
 
     /** The parts fixed since LegacyBikeModel: the battery (on the tube), the rims (every other segment narrower), the
-     *  seat stays (further in), the top tube (thinner), the saddle (its rear box). */
-    static final List<String> FIXED = List.of("/battery", "/front_wheel/rim", "/rear_wheel/rim", "/seat_stay", "/top_tube", "/saddle");
+     *  seat stays (further in), the top tube (thinner), the saddle (its rear box); joined up (Checker.connectivity): the
+     *  fork crown (new), the pedals (through the cranks' ends), the stem (into the bars), the rack braces (into the
+     *  stays). */
+    static final List<String> FIXED = List.of("/battery", "/front_wheel/rim", "/rear_wheel/rim", "/seat_stay", "/top_tube", "/saddle",
+        "/fork_crown", "/crank_l", "/crank_r", "/stem", "/rack_brace");
 
     static List<String> keys(List<Face> faces) {
         List<String> out = new ArrayList<>();
