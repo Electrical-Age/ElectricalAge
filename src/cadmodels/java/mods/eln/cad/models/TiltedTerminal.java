@@ -40,10 +40,15 @@ public final class TiltedTerminal {
         m.add(obox(at(HN + 0.15, 0, 0), N, W, H, 0.15, SW + 0.4, SH + 0.4, "darksteel"));
         m.add(obox(at(HN + 0.35, 0, 0), N, W, H, 0.05, SW, SH, "screen"));
         // terminal strip on the back, the three inputs on it
-        m.add(box(9.0, 3.0, 13.5, 11.0, 13.0, 14.4, "darksteel"));
+        m.add(box(8.4, 3.0, 13.5, 11.0, 13.0, 14.4, "darksteel"));
         double[] ty = {12, 8, 4};
         String[] col = {"red", "blue", "paint_green"};
-        for (int i = 0; i < 3; i++) m.add(box(9.3, ty[i] - 0.8, 14.4, 10.7, ty[i] + 0.8, 16.0, col[i]));
+        for (int i = 0; i < 3; i++) {
+            // down on the face and out to the block's edge, over the cable's end (CableEnds)
+            Mesh t = box(8.0, ty[i] - 1.5, 14.05, 9.6, ty[i] + 1.5, 16.0, col[i], "udsne");   // (no face on the floor)
+            CableEnds.check("tiltedterminal", t, 2, true, 1, ty[i]);
+            m.add(t);
+        }
         return m;
     }
 

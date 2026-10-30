@@ -34,11 +34,13 @@ public final class FieldLogger {
         m.add(box(15.5, 10.5, 7.5, 16.5, 11.5, 8.5, "darksteel"));
         m.add(box(16.5, 4.2, 7.3, 17.1, 11.8, 8.7, "rubber"));
         // terminal strip on the back, the three inputs on it
-        m.add(box(9.0, 3.0, 12.5, 11.0, 13.0, 13.4, "darksteel"));
+        m.add(box(8.4, 3.0, 12.5, 11.0, 13.0, 13.4, "darksteel"));
         for (int i = 0; i < 3; i++) {
             double y = TERMINAL_Y[i];
-            // (out to the block's edge, where the cables end)
-            m.add(box(9.3, y - 0.8, 13.4, 10.7, y + 0.8, 16.0, TERMINAL[i]));
+            // down on the face and out to the block's edge, over the cable's end (CableEnds)
+            Mesh t = box(8.0, y - 1.5, 13.05, 9.6, y + 1.5, 16.0, TERMINAL[i], "udsne");   // (no face on the floor)
+            CableEnds.check("fieldlogger", t, 2, true, 1, y);
+            m.add(t);
         }
         return m;
     }
