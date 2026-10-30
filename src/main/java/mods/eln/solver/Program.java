@@ -59,6 +59,8 @@ public final class Program implements INBTTReady {
     /** The first problem, with its line (1-based; 0: the whole program), or null when it compiles. */
     public String error;
     public int errorLine;
+    /** The name the error is about (an unknown or clashing name), or null: the whole line. */
+    public String errorToken;
     int cost;
 
     private Program() {
@@ -123,9 +125,9 @@ public final class Program implements INBTTReady {
             Matcher m = DEFINITION.matcher(s);
             if (!m.matches()) return p.fail(line, "line " + line + ": a line before the last must be a definition, name = expression");
             String name = m.group(1), expr = m.group(2).trim();
-            if (RESERVED.contains(name)) return p.fail(line, "line " + line + ": " + name + " is a function's name");
+            if (RESERVED.contains(name)) return p.fail(line, "line " + line + ": " + name + " is a function's name").token(name);
             for (ISymbole k : known)
-                if (k.getName().equals(name)) return p.fail(line, "line " + line + ": " + name + " is already defined");
+                if (k.getName().equals(name)) return p.fail(line, "line " + line + ": " + name + " is already defined").token(name);
             Equation e = equation(expr, known);
             if (!e.isValid()) return p.invalid(line, expr, known);
             Component c = new Component(name, line, e);
@@ -142,6 +144,7 @@ public final class Program implements INBTTReady {
     }
 
     Program fail(int line, String message) {
+        errorToken = null;
         error = message;
         errorLine = line;
         components.clear();
@@ -152,7 +155,12 @@ public final class Program implements INBTTReady {
 
     Program invalid(int line, String expr, List<ISymbole> known) {
         String unknown = unknownName(expr, known);
-        return fail(line, "line " + line + ": " + (unknown != null ? unknown + " is not defined above" : "invalid expression"));
+        return fail(line, "line " + line + ": " + (unknown != null ? unknown + " is not defined above" : "invalid expression")).token(unknown);
+    }
+
+    Program token(String t) {
+        errorToken = t;
+        return this;
     }
 
     public boolean isValid() {
