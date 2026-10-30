@@ -20,8 +20,8 @@ public class RootSystem {
 
     //public HashMap<Component, IDestructor> componentDestructor = new HashMap<Component, IDestructor>();
 
-    public Set<Component> addComponents = new HashSet<Component>();
-    public HashSet<State> addStates = new HashSet<State>();
+    public Set<Component> addComponents = new java.util.LinkedHashSet<Component>();
+    public HashSet<State> addStates = new java.util.LinkedHashSet<State>();
 
     static final int maxSubSystemSize = 100;
 
@@ -114,7 +114,7 @@ public class RootSystem {
     }
 
     private void generateLine() {
-        Set<State> stateScope = new HashSet<State>();
+        Set<State> stateScope = new java.util.LinkedHashSet<State>();
         //HashSet<Resistor> resistorScope = new HashSet<Resistor>();
         for (State s : addStates) {
             if (isValidForLine(s)) {
@@ -269,8 +269,8 @@ public class RootSystem {
     }
 
     private void buildSubSystem(State root) {
-        Set<Component> componentSet = new HashSet<Component>();
-        Set<State> stateSet = new HashSet<State>();
+        Set<Component> componentSet = new java.util.LinkedHashSet<Component>();
+        Set<State> stateSet = new java.util.LinkedHashSet<State>();
 
         LinkedList<State> roots = new LinkedList<State>();
         roots.push(root);

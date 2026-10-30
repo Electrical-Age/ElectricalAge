@@ -78,6 +78,10 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
   become `InterSystemAbstraction` (half-R + `DelayInterSystem2` to ground on each side, coupled by Thevenin
   equivalents in `DelayInterSystem2.ThevnaCalculator`; Rth cached per `matrixVersion`, `-Deln.bench.noRthCache` off).
   A non-resistor left straddling two SubSystems is logged and left unsimulated (1.7.10 threw ClassCastException).
+  The coupling is iterative: a split network settles geometrically, most within 100 steps, a few in a thousand in
+  500 to 700 (`MnaPropertyTest.slowSettlersReachTheDcAnswer`). `RootSystem` walks its pending states and components
+  in insertion order (LinkedHashSet), so the split, and the simulation, is the same from run to run (it used
+  HashSets of identity-hashed objects: the split, and how fast it settled, varied with the JVM).
 - `MnaConst`: `highImpedance` 1e9, `ultraImpedance` 1e16, `noImpedance` 1e-9.
 
 ## Thermal network (`ThermalLoad`, `ThermalConnection`, `Simulator.thermalStep`)

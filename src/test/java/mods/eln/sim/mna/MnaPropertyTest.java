@@ -284,9 +284,28 @@ public class MnaPropertyTest {
     /**
      * Over 100 states: the network is split at ElectricalConnections into SubSystems coupled by
      * InterSystemAbstraction (half-resistors + Thevenin delay sources). In DC it must settle on the exact answer.
+     * <p>
+     * It settles geometrically, at a rate set by how the network is split: most settle within 100 steps, a few in a
+     * thousand need 500 to 700 (seeds below; 2026-10-30). The test used to judge it settled after a fixed 200 steps and
+     * failed on those, more or less often with the JVM: RootSystem walked HashSets of states and components, so the
+     * split changed from run to run (it walks them in insertion order now). It now steps until nothing moves (or 5000
+     * steps, a failure), then compares.
      */
     @Property(tries = 12)
     void interSystemAbstractionConvergesToTheDcAnswer(@ForAll @IntRange(min = 130, max = 200) int n, @ForAll long seed) {
+        settlesOnTheDcAnswer(n, seed);
+    }
+
+    /** The slow settlers found by scanning 6000 seeds, and the sample that failed in the 200-step test. */
+    @net.jqwik.api.Example
+    void slowSettlersReachTheDcAnswer() {
+        settlesOnTheDcAnswer(199, -15687);
+        long[][] slow = {{167, 959}, {131, 1120}, {186, 1689}, {142, 5282}, {180, 5351}, {157, 5517}};
+        for (long[] c : slow) assertTrue(settlesOnTheDcAnswer((int) c[0], c[1]) > 200, "seed " + c[1] + " is a slow one");
+    }
+
+    /** Builds the split network, steps until settled, checks the DC answer; returns the steps it took. */
+    int settlesOnTheDcAnswer(int n, long seed) {
         Random rnd = new Random(seed);
         RandomNet net = new RandomNet(n);
         for (int i = 1; i < n; i++) net.edges.add(new RandomNet.Edge(i, rnd.nextInt(i), 0)); // r: the loads' Rs
@@ -299,16 +318,25 @@ public class MnaPropertyTest {
         net.vs[rnd.nextInt(n)] = 100 + rnd.nextInt(400);
         for (int i = 0; i < n; i++) if (rnd.nextDouble() < 0.02) net.vs[i] = rnd.nextInt(400);
         Built b = new Built(net, 50, true, rnd, 0.1);
-        for (int i = 0; i < 200; i++) b.root.step();
-        assertTrue(b.root.getSubSystemCount() > 1, "expected a split network");
-        b.assertFinite("200 steps");
         double[] before = new double[n];
-        for (int i = 0; i < n; i++) before[i] = b.nodes[i].state;
-        b.root.step();
-        for (int i = 0; i < n; i++) assertEquals(before[i], b.nodes[i].state, 1e-6 * 500, "settled, node " + i);
+        int steps = 0;
+        double moved = Double.MAX_VALUE;
+        while (moved > 1e-6 && steps < 5000) {
+            b.root.step();
+            steps++;
+            moved = 0;
+            for (int i = 0; i < n; i++) {
+                moved = Math.max(moved, Math.abs(b.nodes[i].state - before[i]));
+                before[i] = b.nodes[i].state;
+            }
+        }
+        assertTrue(b.root.getSubSystemCount() > 1, "expected a split network");
+        b.assertFinite(steps + " steps");
+        assertTrue(moved <= 1e-6, "settled within 5000 steps (still moving " + moved + ")");
         double[] ref = net.solve(b.activeEdges());
         for (int i = 0; i < n; i++)
             assertEquals(ref[i], b.nodes[i].state, 1e-3 * 500, "node " + i + " in " + net);
+        return steps;
     }
 
     /** A Monopole conductance on a node acts as a resistor 1/g to ground, and stops acting once removed. */
