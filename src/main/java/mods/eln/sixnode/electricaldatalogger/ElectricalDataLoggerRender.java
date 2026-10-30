@@ -23,7 +23,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
     public boolean pause;
 
-    DataLogs log = new DataLogs(ElectricalDataLoggerElement.logsSizeMax);
+    DataLogs log = new DataLogs(1);
     boolean waitFistSync = true;
 
     public ElectricalDataLoggerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
@@ -64,11 +64,11 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     public void publishUnserialize(DataInputStream stream) {
         super.publishUnserialize(stream);
         try {
-            log.unitType = stream.readByte();
             pause = stream.readBoolean();
             log.samplingPeriod = stream.readFloat();
-            log.maxValue = stream.readFloat();
-            log.minValue = stream.readFloat();
+            int n = stream.readByte();
+            if (n != log.channelCount()) log = new DataLogs(n);
+            for (LogChannel c : log.channels) c.read(stream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,22 +77,32 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     @Override
     public void serverPacketUnserialize(DataInputStream stream) throws IOException {
         byte header = stream.readByte();
-
-        switch (header) {
-            case ElectricalDataLoggerElement.toClientLogsAdd:
-            case ElectricalDataLoggerElement.toClientLogsClear:
-                if (header == ElectricalDataLoggerElement.toClientLogsClear) {
-                    log.reset();
-                    waitFistSync = false;
-                }
-                int size = stream.available();
-                while (size != 0) {
-                    size--;
-                    log.write(stream.readByte());
-                }
-                //	Utils.println(log);
-                break;
+        if (header != ElectricalDataLoggerElement.toClientLogsAdd && header != ElectricalDataLoggerElement.toClientLogsClear) return;
+        int n = stream.readByte();
+        if (n != log.channelCount()) {
+            LogChannel[] keep = log.channels;
+            log = new DataLogs(n);
+            for (int c = 0; c < Math.min(n, keep.length); c++) log.channels[c] = keep[c];
         }
+        if (header == ElectricalDataLoggerElement.toClientLogsClear) {
+            log.readAll(stream);
+            waitFistSync = false;
+        } else log.add(DataLogs.readPoint(stream, n));
     }
 
+    /** A channel's scale or unit to the server: header, channel, value. */
+    public void sendChannel(byte id, int channel, float value) {
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
+            preparePacketForServer(o);
+            o.writeByte(id);
+            o.writeByte(channel);
+            if (id == ElectricalDataLoggerElement.setUnitId) o.writeByte((int) value);
+            else o.writeFloat(value);
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

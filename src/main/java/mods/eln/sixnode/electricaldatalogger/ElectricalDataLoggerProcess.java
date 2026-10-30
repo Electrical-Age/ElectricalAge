@@ -2,15 +2,10 @@ package mods.eln.sixnode.electricaldatalogger;
 
 
 
-import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Utils;
-import mods.eln.Eln;
 import mods.eln.sim.IProcess;
 import net.minecraft.world.item.ItemStack;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class ElectricalDataLoggerProcess implements IProcess {
 
@@ -20,50 +15,20 @@ public class ElectricalDataLoggerProcess implements IProcess {
         this.e = e;
     }
 
+    /** Records the input every step (a mean per tick) unless paused, sends each point as it is due, prints. */
     @Override
     public void process(double time) {
-        //Profiler p = new Profiler();
-        //p.add("A");
-        if (!e.pause) {
-            e.timeToNextSample -= time;
-            byte value = (byte) (e.inputGate.getNormalized() * 255.5 - 128);
-            e.sampleStack += value;
-            e.sampleStackNbr++;
-        }
-        //p.add("B");
+        if (!e.pause && e.store.record(new float[]{(float) e.inputGate.getNormalized()}, time)) e.sendPoint(e.store.emit());
         if (e.printToDo) {
             ItemStack paperStack = e.inventory.getItem(ElectricalDataLoggerContainer.paperSlotId);
             ItemStack printStack = e.inventory.getItem(ElectricalDataLoggerContainer.printSlotId);
             if (!Utils.isEmpty(paperStack) && Utils.isEmpty(printStack)) {
                 e.inventory.decrStackSize(ElectricalDataLoggerContainer.paperSlotId, 1);
                 ItemStack print = mods.eln.registry.batch.Wp9cContent.dataLogsPrintDescriptor.newItemStack(1);
-                mods.eln.registry.batch.Wp9cContent.dataLogsPrintDescriptor.initializeStack(print, e.logs);
+                mods.eln.registry.batch.Wp9cContent.dataLogsPrintDescriptor.initializeStack(print, e.view());
                 e.inventory.setItem(ElectricalDataLoggerContainer.printSlotId, print);
             }
             e.printToDo = false;
         }
-        //p.add("C");
-        if (e.timeToNextSample <= 0.0) {
-            e.timeToNextSample += e.logs.samplingPeriod;
-            byte value = (byte) (e.sampleStack / e.sampleStackNbr);
-            e.sampleStackReset();
-            e.logs.write(value);
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-            DataOutputStream packet = new DataOutputStream(bos);
-
-            e.preparePacketForClient(packet);
-
-            try {
-                packet.writeByte(e.toClientLogsAdd);
-                packet.write(value);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            //p.add("D");
-            e.sendPacketToAllClient(bos);
-        }
-        //p.stop();
-        //Utils.println(p);
     }
 }

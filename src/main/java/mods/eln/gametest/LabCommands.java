@@ -90,6 +90,13 @@ public final class LabCommands {
                     .then(Commands.argument("celsius", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(-200, 3000))
                         .executes(c -> heat(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"),
                             com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(c, "celsius"))))))
+                .then(Commands.literal("logwave").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .then(Commands.argument("minutes", IntegerArgumentType.integer(1, 1440))
+                        .executes(c -> logWave(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "minutes"))))))
+                .then(Commands.literal("logperiod").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .then(Commands.argument("seconds", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(0.05, 86400))
+                        .executes(c -> logPeriod(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"),
+                            com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(c, "seconds"))))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -261,6 +268,46 @@ public final class LabCommands {
         }
         int n = loads.size();
         src.sendSuccess(() -> Component.literal("holding " + n + " thermal load(s) at " + celsius + " C at " + pos.toShortString()), true);
+        return n;
+    }
+
+    /**
+     * Fills the data loggers at pos with a made-up history of the given length (a slow wave, a little ripple, a short
+     * spike every 7 minutes) for screenshots and manual tests of the graph.
+     */
+    static int logWave(CommandSourceStack src, BlockPos pos, int minutes) {
+        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
+        int n = 0;
+        if (node instanceof mods.eln.node.six.SixNode six)
+            for (var e : six.sideElementList)
+                if (e instanceof mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement l) {
+                    l.store.clear();
+                    long ticks = minutes * 1200L;
+                    for (long t = 0; t < ticks; t++) {
+                        double v = 0.5 + 0.3 * Math.sin(t / 24000.0 * Math.PI) + 0.05 * Math.sin(t / 7.0) + (t % 8400 < 4 ? 0.3 : 0);
+                        l.store.tick(new float[]{(float) v});
+                    }
+                    l.store.setPeriod(l.store.periodSeconds());
+                    l.sendView(null);
+                    n++;
+                }
+        int count = n;
+        src.sendSuccess(() -> Component.literal(count + " logger(s) filled with " + minutes + " min"), false);
+        return n;
+    }
+
+    /** Sets the sampling period of the data loggers at pos, as their screen's period field does. */
+    static int logPeriod(CommandSourceStack src, BlockPos pos, double seconds) {
+        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
+        int n = 0;
+        if (node instanceof mods.eln.node.six.SixNode six)
+            for (var e : six.sideElementList)
+                if (e instanceof mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement l) {
+                    l.store.setPeriod(seconds);
+                    l.needPublish();
+                    l.sendView(null);
+                    n++;
+                }
         return n;
     }
 

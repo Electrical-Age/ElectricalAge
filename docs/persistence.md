@@ -107,6 +107,12 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   element's load/component/process lists with prefix `""`. Keys are `<name><suffix>`: `NbtElectricalLoad`
   `<name>Uc`, `NbtThermalLoad` `<name>Tc`, `NbtResistor` `<name>R` (missing -> high impedance). Elements add
   their own keys after `super`.
+- Data logger (board #45): `store` {`ticks` long, `period` int (ticks a point), `emitted` long, `c<ch>t<tier>mean`
+  / `min` / `max`: the held buckets, oldest first, two bytes (a half-float) each; tier 0 has only `mean`}, and per
+  channel `ch<n>min`, `ch<n>max`, `ch<n>unit`. A logger saved before 2026-10-30 (`logslog` bytes, newest first,
+  `logssamplingPeriod`, `logsmaxValue`, `logsminValue`, `logsunitType`) is replayed into the store on load
+  (`ElectricalDataLoggerElement.migrate`). Prints: `samplingPeriod`, `channels`, `c<n>min/max/unit`, `c<n>points`
+  (mean, min, max halves per point, oldest first); old prints (`log` bytes) still draw (`DataLogs.fromNBT`).
 
 ## Ids that must never change
 

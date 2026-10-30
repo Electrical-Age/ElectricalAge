@@ -16,6 +16,7 @@ import mods.eln.sixnode.logicgate.LogicGateElement;
 import mods.eln.sixnode.SummingUnitElement;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorElement;
+import mods.eln.sixnode.electricaldatalogger.DataLogs;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerContainer;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement;
@@ -567,48 +568,101 @@ public final class Wp9cCases {
     }
 
     /**
-     * Signal Source 30 V -> Data Logger (input = back pin). Default sampling period 0.5 s: about 1 + t / 0.5 samples
-     * (+-1); a sample of a steady input is (byte) (U / SVU * 255.5 - 128) = 25 for 30 V (latest sample, once
-     * t >= 1 s). Paper in the paper slot + the GUI print packet -> one Data Logger Print in the print slot.
+     * Signal Source 30 V -> Data Logger A (input = back pin): it records a mean every tick, so after the test's 2 s it
+     * holds about 40 ticks and its newest 0.5 s point reads 30 V / SVU. Paper in the paper slot + the GUI print
+     * packet -> one Data Logger Print in the print slot. Logger B gets 600 ticks of history before the test; at the
+     * end its period goes 0.5 s -> 5 s -> 0.5 s by GUI packets and the 0.5 s view must come back unchanged, the 5 s
+     * view reading the same history coarser (board #45). Logger C loads a save from before 2026-10-30 (a byte log of 20
+     * samples at 1 s, one scale): it shows the same samples and scale.
      */
     static final class DataLoggerCase implements TestCase {
-        ElectricalDataLoggerElement logger;
+        ElectricalDataLoggerElement logger, history, migrated;
         long t0;
+        String migration = "";
+        static final int SEEDED = 600;
 
         public String name() {
             return "wp9c data logger";
         }
 
         public int width() {
-            return 3;
+            return 8;
+        }
+
+        static float seed(long t) {
+            return (float) (0.5 + 0.4 * Math.sin(t / 15.0));
+        }
+
+        ElectricalDataLoggerElement logger(TestContext ctx, int x, boolean input) {
+            if (input) signal(ctx, ctx.at(x - 1, 1, 1), 30);
+            ElectricalDataLoggerElement l = (ElectricalDataLoggerElement) ctx.placeSix(DATA_LOGGER, ctx.at(x, 1, 1));
+            orient(l, LRDU::inverse, Direction.XN);
+            return l;
         }
 
         public void build(TestContext ctx) {
-            signal(ctx, ctx.at(0, 1, 1), 30);
-            logger = (ElectricalDataLoggerElement) ctx.placeSix(DATA_LOGGER, ctx.at(1, 1, 1));
-            orient(logger, LRDU::inverse, Direction.XN);
+            logger = logger(ctx, 1, true);
             logger.getInventory().setItem(ElectricalDataLoggerContainer.paperSlotId, new ItemStack(Items.PAPER, 2));
             logger.getInventory().setChanged();
             logger.networkUnserialize(ctx.stream(o -> o.writeByte(ElectricalDataLoggerElement.printId)), player(ctx));
+            history = logger(ctx, 4, true);
+            for (int t = 0; t < SEEDED; t++) history.store.tick(new float[]{seed(t)});
+            migrated = logger(ctx, 6, false);
+            // a save from before 2026-10-30: newest sample first, (byte) (fraction * 255.5 - 128)
+            net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+            migrated.writeToNBT(tag);
+            tag.remove("store");
+            byte[] old = new byte[20];
+            for (int i = 0; i < 20; i++) old[i] = (byte) (i * 12 - 128);
+            tag.putByteArray("logslog", old);
+            tag.putFloat("logssamplingPeriod", 1f);
+            tag.putFloat("logsmaxValue", 50f);
+            tag.putFloat("logsminValue", 0f);
+            tag.putByte("logsunitType", (byte) 0);
+            migrated.readFromNBT(tag);
+            DataLogs v = migrated.view();
+            int ok = 0;
+            for (int i = 0; i < Math.min(20, v.size()); i++) if (Math.abs(v.mean(0, i) - DataLogs.oldSample(old[i])) < 2e-3) ok++;
+            migration = v.size() + " points, " + ok + " match, period " + v.samplingPeriod + " s, scale " + v.channels[0].min + ".."
+                + v.channels[0].max + " unit " + v.channels[0].unit;
             t0 = ctx.world().getGameTime();
+        }
+
+        float[][][] period(TestContext ctx, float p) {
+            history.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(ElectricalDataLoggerElement.setSamplingPeriodeId);
+                o.writeFloat(p);
+            }), player(ctx));
+            return history.store.view(DataLogs.POINTS);
         }
 
         public void measure(TestContext ctx) {
             double t = elapsed(ctx, t0);
-            int size = field(logger.logs, "size");
-            byte[] log = field(logger.logs, "log");
-            double expected = 1 + Math.floor(t / 0.5);
-            within(ctx, f("wp9c data logger sample count after %.2f s (1 + t / 0.5)", t), size, expected, 1.0);
-            if (t >= 1.0 && size > 0) {
-                int expectedSample = (byte) (30 / SVU * 255.5 - 128);
-                ctx.check("wp9c data logger latest sample (30 V -> 25)", log[0] == expectedSample, "sample " + log[0] + ", expected " + expectedSample);
-            }
+            within(ctx, f("wp9c data logger ticks recorded after %.2f s (t / 0.05)", t), logger.store.ticks(), t / 0.05, 3);
+            DataLogs v = logger.view();
+            ctx.checkValue("wp9c data logger newest point (30 V / SVU)", v.size() > 0 ? v.mean(0, 0) : -1, 30 / SVU);
             ItemStack paper = logger.getInventory().getItem(ElectricalDataLoggerContainer.paperSlotId);
             ItemStack print = logger.getInventory().getItem(ElectricalDataLoggerContainer.printSlotId);
             GenericItemUsingDamageDescriptor pd = print.isEmpty() ? null : Eln.sharedItem.getDescriptor(print);
             ctx.check("wp9c data logger print: one paper used, a Data Logger Print with the log",
                 paper.getCount() == 1 && pd instanceof DataLogsPrintDescriptor && mods.eln.generic.ItemNbt.has(print),
                 "paper " + paper.getCount() + ", print " + print + " (" + pd + ")");
+
+            float[][][] fine = period(ctx, 0.5f), coarse = period(ctx, 5f), back = period(ctx, 0.5f);
+            boolean same = fine.length == back.length;
+            for (int j = 0; same && j < fine.length; j++) same = java.util.Arrays.equals(fine[j][0], back[j][0]);
+            ctx.check("wp9c data logger: 0.5 s -> 5 s -> 0.5 s keeps the history", same && fine.length >= SEEDED / 10,
+                fine.length + " points before, " + back.length + " after, equal " + same);
+            // the oldest 5 s point covers seeded ticks only: its mean is theirs
+            long total = history.store.ticks();
+            int oldest = (int) (total / 100) - 1;
+            long a = total - (oldest + 1) * 100L;
+            double sum = 0;
+            for (long k = a; k < a + 100; k++) sum += seed(k);
+            within(ctx, "wp9c data logger: the 5 s view reads the same history (oldest point's mean)",
+                coarse.length > oldest && oldest >= 0 ? coarse[oldest][0][0] : -1, sum / 100, 2e-3);
+            ctx.check("wp9c data logger: a save from before 2026-10-30 keeps its samples and scale",
+                migration.equals("20 points, 20 match, period 1.0 s, scale 0.0..50.0 unit 0"), migration);
         }
     }
 

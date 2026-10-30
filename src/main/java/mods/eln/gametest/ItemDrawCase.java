@@ -48,7 +48,7 @@ final class ItemDrawCase implements TestCase {
         // item descriptors with a live look: the data-log print (empty log: the sheet alone)
         var print = mods.eln.registry.batch.Wp9cContent.dataLogsPrintDescriptor;
         var stack = print.newItemStack(1);
-        print.initializeStack(stack, new mods.eln.sixnode.electricaldatalogger.DataLogs(256));
+        print.initializeStack(stack, new mods.eln.sixnode.electricaldatalogger.DataLogs(1));
         PublishRenderCase.draw(ctx, "Data logger print (item, held)", () -> print.drawItem(stack, false));
     }
 }

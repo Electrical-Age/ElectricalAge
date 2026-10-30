@@ -334,6 +334,15 @@ on 1.7.10) onto 26.x.
   redstone loads with ceil(count / 4) chips. Programs are capped at 4096 characters and 40 lines; the server refuses
   bigger ones. `rs` now steps once a tick in its process (it stepped when read: never inside an if's branch not taken).
   Tests `ProgramTest`, GameTest `wp9c signal processor`.
+- Data logger history (Baughn 2026-10-30, board #45): the logger records the input's mean every tick, whatever its
+  period, into `LogStore`: the last 51 s tick by tick, then buckets of 0.2, 0.8, 3.2, 12.8 and 51.2 s keeping
+  minimum, maximum and mean (up to about 7 h), as half-floats of the signal (0..1). The period only chooses the view,
+  so changing it no longer wipes the log (0.5 s -> 5 s -> 0.5 s shows the same fine data); nor do scale and unit,
+  which are per channel now and only change the drawing. The graph shows each point's range as a band, so short
+  spikes survive a long period. 1.12 kept one byte per sample, shifted the whole array on every write and cleared
+  on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
+  changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
+  ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
 - Signal processor screen (Baughn 2026-10-30, board #45): a code editor (colours for A red, B blue, C green, names,
   functions, numbers, comments; a rule above the output line; problems underlined with their message on hover; undo,
   clipboard, scrolling) instead of the one-line field, a quick reference of the functions beside it (click to insert),

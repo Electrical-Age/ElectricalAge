@@ -27,19 +27,15 @@ import java.util.Map;
 
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
-    public static final int logsSizeMax = 256;
-
-    public int sampleStack, sampleStackNbr;
-
     NbtElectricalGateInput inputGate;
     ElectricalDataLoggerProcess slowProcess = new ElectricalDataLoggerProcess(this);
     public ElectricalDataLoggerDescriptor descriptor;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
-    public double timeToNextSample = 0;
-
-    public DataLogs logs = new DataLogs(logsSizeMax);
+    /** The history (board #45): one channel here, the input; shown per channel scale and unit. */
+    public final LogStore store = new LogStore(1);
+    public final LogChannel[] channels = {new LogChannel()};
 
     static final byte publishId = 1, dataId = 2;
 
@@ -66,7 +62,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
         electricalLoadList.add(inputGate);
         electricalProcessList.add(slowProcess);
-        sampleStackReset();
+        store.setPeriod(0.5);
     }
 
     public static boolean canBePlacedOnSide(Direction side, SixNodeDescriptor descriptor) {
@@ -88,23 +84,48 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
 
-        logs.readFromNBT(nbt, "logs");
         pause = nbt.getBooleanOr("pause", false);
-        timeToNextSample = nbt.getDoubleOr("timeToNextSample", 0.0);
-        sampleStack = nbt.getIntOr("sampleStack", 0);
-        sampleStackNbr = nbt.getIntOr("sampleStackNbr", 0);
+        if (nbt.contains("store")) {
+            store.readFromNBT(nbt.getCompoundOrEmpty("store"));
+            for (int c = 0; c < channels.length; c++) channels[c].readFromNBT(nbt, "ch" + c);
+        } else if (nbt.contains("logssamplingPeriod")) {
+            migrate(nbt);
+        }
+    }
+
+    /**
+     * A logger saved before 2026-10-30 kept a byte per sample (newest first) at its period and one scale: its samples
+     * are replayed into the store as recorded, and the scale becomes channel 0's.
+     */
+    void migrate(CompoundTag nbt) {
+        byte[] log = nbt.getByteArray("logslog").orElse(new byte[0]);
+        float period = nbt.getFloatOr("logssamplingPeriod", 0.5f);
+        channels[0] = new LogChannel(nbt.getFloatOr("logsminValue", 0f), nbt.getFloatOr("logsmaxValue", 100f), nbt.getByteOr("logsunitType", DataLogs.percentType));
+        float[][] samples = new float[log.length][];
+        for (int i = 0; i < log.length; i++) samples[i] = new float[]{DataLogs.oldSample(log[log.length - 1 - i])};
+        store.clear();
+        store.setPeriod(period > 0 ? period : 0.5);
+        store.replay(samples, store.period());
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putByte("front", (byte) (front.toInt() << 0));
-        nbt.putDouble("timeToNextSample", timeToNextSample);
         nbt.putBoolean("pause", pause);
+        CompoundTag s = new CompoundTag();
+        store.writeToNBT(s);
+        nbt.put("store", s);
+        for (int c = 0; c < channels.length; c++) channels[c].writeToNBT(nbt, "ch" + c);
+    }
 
-        logs.writeToNBT(nbt, "logs");
-        nbt.putInt("sampleStack", sampleStack);
-        nbt.putInt("sampleStackNbr", sampleStackNbr);
+    /** The graph as shown: the store's view at its period, with the channels' scales. */
+    public DataLogs view() {
+        DataLogs d = new DataLogs(channels.length);
+        d.samplingPeriod = store.periodSeconds();
+        for (int c = 0; c < channels.length; c++) d.channels[c] = new LogChannel(channels[c].min, channels[c].max, channels[c].unit);
+        d.set(store.view(DataLogs.POINTS));
+        return d;
     }
 
     @Override
@@ -145,11 +166,10 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            stream.writeByte(logs.unitType);
             stream.writeBoolean(pause);
-            stream.writeFloat((float) logs.samplingPeriod);
-            stream.writeFloat((float) logs.maxValue);
-            stream.writeFloat((float) logs.minValue);
+            stream.writeFloat(store.periodSeconds());
+            stream.writeByte(channels.length);
+            for (LogChannel c : channels) c.write(stream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -174,30 +194,31 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         byte header;
         try {
             switch (header = stream.readByte()) {
-                case setSamplingPeriodeId:
-                    logs.reset();
-                    sampleStackReset();
-                    logs.samplingPeriod = stream.readFloat();
-                    timeToNextSample = 0.1;
+                case setSamplingPeriodeId: {
+                    // the history stays: only the view changes (board #45)
+                    float p = stream.readFloat();
+                    if (Float.isFinite(p)) store.setPeriod(Math.max(LogStore.TICK, p));
                     needPublish();
                     break;
+                }
                 case setMaxValue:
-                    logs.maxValue = stream.readFloat();
-                    needPublish();
-                    break;
                 case setMinValue:
-                    logs.minValue = stream.readFloat();
+                case setUnitId: {
+                    // channel, value: a scale only changes how the history is shown
+                    int c = stream.readByte();
+                    if (c < 0 || c >= channels.length) break;
+                    if (header == setUnitId) channels[c].unit = stream.readByte();
+                    else {
+                        float v = stream.readFloat();
+                        if (!Float.isFinite(v)) break;
+                        if (header == setMaxValue) channels[c].max = v;
+                        else channels[c].min = v;
+                    }
                     needPublish();
                     break;
-                case setUnitId:
-                    //sampleStackReset();
-                    //logs.reset();
-                    logs.unitType = stream.readByte();
-                    needPublish();
-                    break;
+                }
                 case resetId:
-                    sampleStackReset();
-                    logs.reset();
+                    store.clear();
                     break;
                 case newClientId:
                     break;
@@ -210,22 +231,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     break;
             }
 
-            if (header == resetId || header == newClientId || header == setSamplingPeriodeId) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-                DataOutputStream packet = new DataOutputStream(bos);
-
-                preparePacketForClient(packet);
-
-                packet.writeByte(toClientLogsClear);
-                int size = logs.size();
-                for (int idx = size - 1; idx >= 0; idx--) {
-                    packet.writeByte(logs.read(idx));
-                }
-                if (header == newClientId)
-                    sendPacketToClient(bos, player);
-                else
-                    sendPacketToAllClient(bos);
-            }
+            if (header == resetId || header == newClientId || header == setSamplingPeriodeId) sendView(header == newClientId ? player : null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -236,8 +242,34 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         return true;
     }
 
-    public void sampleStackReset() {
-        sampleStack = 0;
-        sampleStackNbr = 0;
+    /** The whole graph, to one player (who just started tracking the logger) or to all (null). */
+    public void sendView(ServerPlayer player) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);
+        preparePacketForClient(packet);
+        try {
+            packet.writeByte(toClientLogsClear);
+            packet.writeByte(channels.length);
+            view().writeAll(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (player != null) sendPacketToClient(bos, player);
+        else sendPacketToAllClient(bos);
+    }
+
+    /** A point just emitted, to every client tracking the logger: a few bytes at the sampling rate. */
+    void sendPoint(float[][] point) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(32);
+        DataOutputStream packet = new DataOutputStream(bos);
+        preparePacketForClient(packet);
+        try {
+            packet.writeByte(toClientLogsAdd);
+            packet.writeByte(channels.length);
+            DataLogs.writePoint(packet, point, channels.length);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        sendPacketToAllClient(bos);
     }
 }
