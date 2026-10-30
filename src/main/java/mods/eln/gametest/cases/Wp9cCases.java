@@ -80,6 +80,7 @@ public final class Wp9cCases {
     static final int WIRELESS_TX = 8 + (92 << 6);
     static final int DATA_LOGGER = 0 + (93 << 6);
     static final int THREE_CHANNEL_LOGGER = 3 + (93 << 6);
+    static final int TILTED_TERMINAL = 4 + (93 << 6);
     static final int SIGNAL_TRIMMER = 0 + (95 << 6);
     static final int SIGNAL_SWITCH = 1 + (95 << 6);
     static final int SIGNAL_BUTTON = 8 + (95 << 6);
@@ -111,6 +112,7 @@ public final class Wp9cCases {
         cases.add(new WirelessCase());
         cases.add(new DataLoggerCase());
         cases.add(new ThreeChannelLoggerCase());
+        cases.add(new TiltedTerminalCase());
         cases.add(new EmergencyLampCase());
         cases.add(new ResinCollectorCase());
         cases.add(new MiscCase());
@@ -648,6 +650,39 @@ public final class Wp9cCases {
             for (int c = 0; c < 3; c++)
                 ctx.checkValue(f("wp9c three-channel logger: channel %c records its own cable's source (%.0f V) [signal]", (char) ('A' + c), volts[cabled[c]]),
                     v.size() > 0 ? v.mean(c, 0) : -1, volts[cabled[c]] / SVU);
+        }
+    }
+
+    /**
+     * The tilted terminal (Baughn 2026-10-30, board #45): placed on a floor and hung from a ceiling, both three-channel
+     * loggers; the one-channel Data Logger stays floor-only.
+     */
+    static final class TiltedTerminalCase implements TestCase {
+        ElectricalDataLoggerElement floor, ceiling;
+
+        public String name() {
+            return "wp9c tilted terminal logger";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            floor = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(1, 1, 1), Direction.YN);
+            ceiling = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(2, 2, 1), Direction.YP);
+        }
+
+        public void measure(TestContext ctx) {
+            var tilted = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor) Eln.sixNodeItem.getDescriptor(TILTED_TERMINAL);
+            var plain = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor) Eln.sixNodeItem.getDescriptor(DATA_LOGGER);
+            var pl = player(ctx);
+            ctx.check("wp9c tilted terminal: on a floor and a ceiling (a data logger only on a floor)",
+                tilted.canBePlacedOnSide(pl, Direction.YP) && tilted.canBePlacedOnSide(pl, Direction.YN) && !plain.canBePlacedOnSide(pl, Direction.YP),
+                "tilted " + tilted.canBePlacedOnSide(pl, Direction.YP) + "/" + tilted.canBePlacedOnSide(pl, Direction.YN) + ", plain " + plain.canBePlacedOnSide(pl, Direction.YP));
+            ctx.check("wp9c tilted terminal: three channels, three pins, both ways up",
+                floor.channels.length == 3 && ceiling.channels.length == 3 && floor.edgePins().size() == 3 && ceiling.edgePins().size() == 3
+                    && floor.store.ticks() > 0 && ceiling.store.ticks() > 0, floor.channels.length + " / " + ceiling.channels.length);
         }
     }
 

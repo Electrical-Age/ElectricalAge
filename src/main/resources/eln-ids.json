@@ -1103,6 +1103,12 @@
   "kind": "six_node",
   "name": "three_channel_data_logger"
  },
+ "eln:six_node@5956": {
+  "descriptor": "ElectricalDataLoggerDescriptor",
+  "display": "Tilted Terminal Logger",
+  "kind": "six_node",
+  "name": "tilted_terminal_logger"
+ },
  "eln:six_node@6016": {
   "descriptor": "ElectricalRelayDescriptor",
   "display": "Low Voltage Relay",

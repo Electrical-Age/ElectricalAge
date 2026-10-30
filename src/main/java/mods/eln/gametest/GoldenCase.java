@@ -86,7 +86,7 @@ final class GoldenCase implements TestCase {
 
     /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
-        "eln:six_node@5955",   // the three-channel data logger (Baughn 2026-10-30, board #45)
+        "eln:six_node@5955", "eln:six_node@5956",   // the three-channel data logger, the tilted terminal (Baughn 2026-10-30, board #45)
         "eln:transparent_node@5120", "eln:transparent_node@5124",   // 26.x oil: tar sand separators
         "eln:transparent_node@5184", "eln:transparent_node@5188",   // 26.x oil: pumps
         "eln:transparent_node@5192", "eln:transparent_node@5196",   // submersible pumps (Baughn 2026-10-25)
@@ -110,7 +110,7 @@ final class GoldenCase implements TestCase {
         "50V Electric Heater", "200V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
         "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine",
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)
-        "Three-Channel Data Logger",   // (Baughn 2026-10-30, board #45)
+        "Three-Channel Data Logger", "Tilted Terminal Logger",   // (Baughn 2026-10-30, board #45)
         "Steam Turbine", "LP Steam Turbine");   // (the shaft ones' controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {

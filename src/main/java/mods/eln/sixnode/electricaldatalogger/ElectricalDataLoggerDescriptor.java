@@ -25,6 +25,10 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     float sx, sy, sz;
     float tx, ty, tz;
     float rx, ry, rz, ra;
+    /** A second turn, applied after the first (0: none): the tilted terminal's leaning screen. */
+    float rx2, ry2, rz2, ra2;
+    /** The screen's size in the graph's units: hung from a ceiling, the graph turns half round within it. */
+    float flipW, flipH;
     float mx, my;
 
     float cr, cg, cb;
@@ -34,6 +38,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     public boolean onFloor;
     /** Inputs (board #45): 1, or 3 for the three-channel logger (its inputs on its back edge; three pins in a voxel block). */
     public int channels = 1;
+    /** Placed on a ceiling too, hanging (the tilted terminal). */
+    public boolean ceiling;
     public String textColor;
 
     public ElectricalDataLoggerDescriptor(String name, boolean onFloor, String objName, float cr, float cg, float cb, String textColor) {
@@ -58,6 +64,12 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
                 ry = main.getFloat("ry");
                 rz = main.getFloat("rz");
                 ra = main.getFloat("ra");
+                ra2 = main.getFloat("ra2");
+                flipW = main.getFloat("flipW");
+                flipH = main.getFloat("flipH");
+                rx2 = main.getFloat("rx2");
+                ry2 = main.getFloat("ry2");
+                rz2 = main.getFloat("rz2");
                 mx = main.getFloat("mx");
                 my = main.getFloat("my");
                 reflc = main.getFloat("reflc");
@@ -101,7 +113,12 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
             GL11.glTranslatef(tx, ty, tz);
             GL11.glRotatef(ra, rx, ry, rz);
+            if (ra2 != 0) GL11.glRotatef(ra2, rx2, ry2, rz2);
             GL11.glScalef(sx, sy, sz);
+            if (side == Direction.YP && flipW > 0) {
+                GL11.glTranslatef(flipW, flipH, 0);
+                GL11.glRotatef(180, 0, 0, 1);
+            }
             GL11.glColor4f(cr, cg, cb, 1);
             log.draw(mx, my, textColor, log.channelCount() > 1 ? DataLogs.INK : null);
 

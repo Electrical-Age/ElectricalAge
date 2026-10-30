@@ -112,6 +112,7 @@ public final class LabCommands {
                             }
                         return n;
                     }))))
+                .then(Commands.literal("tilted").executes(c -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("threelogger").executes(c -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
@@ -386,17 +387,41 @@ public final class LabCommands {
         return 1;
     }
 
+    /**
+     * Two tilted terminals for a look (screenshots): one hung from a ceiling block 3 above pos's floor, 2 north, and one
+     * on a table (a block) 2 east and 2 north; both facing south, toward pos, with 60 minutes of made-up history.
+     */
+    static int tilted(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        BlockPos hang = pos.offset(0, 2, -2), table = pos.offset(2, 0, -2);
+        level.setBlock(hang.above(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+        level.setBlock(table, net.minecraft.world.level.block.Blocks.OAK_PLANKS.defaultBlockState(), 3);
+        var a = host(level, player, 4 + (93 << 6), hang, mods.eln.misc.Direction.YP);
+        orient(a, l -> l, mods.eln.misc.Direction.ZP);
+        var b = host(level, player, 4 + (93 << 6), table.above(), mods.eln.misc.Direction.YN);
+        orient(b, l -> l, mods.eln.misc.Direction.ZP);
+        logWave(src, hang, 60);
+        logWave(src, table.above(), 60);
+        return 1;
+    }
+
     static mods.eln.node.six.SixNodeElement host(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player, int damage, BlockPos p) {
+        return host(level, player, damage, p, mods.eln.misc.Direction.YN);
+    }
+
+    static mods.eln.node.six.SixNodeElement host(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player, int damage, BlockPos p,
+                                                 mods.eln.misc.Direction side) {
         var d = mods.eln.Eln.sixNodeItem.getDescriptor(damage);
         mods.eln.node.voxel.VoxelNode v;
         if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) instanceof mods.eln.node.voxel.VoxelNode old) v = old;
         else {
             v = new mods.eln.node.voxel.VoxelNode();
-            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), mods.eln.misc.Direction.YN, player, d.newItemStack());
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), side, player, d.newItemStack());
             level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
         }
-        if (!v.createSubBlock(d.newItemStack(), mods.eln.misc.Direction.YN, player)) throw new IllegalStateException("can't host " + d.name + " at " + p);
-        return v.getElement(mods.eln.misc.Direction.YN);
+        if (!v.createSubBlock(d.newItemStack(), side, player)) throw new IllegalStateException("can't host " + d.name + " at " + p);
+        return v.getElement(side);
     }
 
     static void orient(mods.eln.node.six.SixNodeElement e, java.util.function.UnaryOperator<mods.eln.misc.LRDU> terminal, mods.eln.misc.Direction toward) {

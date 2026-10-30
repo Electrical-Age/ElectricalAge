@@ -1,4 +1,4 @@
-// 26.3	2026-10-30T20:29:26.525182328	eln-global/EA models
+// 26.3	2026-10-30T21:08:53.651752365	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -422,6 +422,7 @@ b292e3ad6284dc0949c5f85db800cd543536cb3a assets/eln/items/terrain_bike.json
 09bbdc39399a808476117185aa8521a2851a0aa2 assets/eln/items/thermistor.json
 b8d5ed94fef89e0ac4949348b1dad356ef9921c0 assets/eln/items/thermometer.json
 5c0e65979fb0d0feca2b5930ad05f95a13d0a82d assets/eln/items/three_channel_data_logger.json
+ea112d9ee667611f62f87e770e5e2fffb4921169 assets/eln/items/tilted_terminal_logger.json
 512c501158ff4f92a5a0355fc23ca1421c867b37 assets/eln/items/tree_resin.json
 c6446f5b914d4e16145d9c54a9d7bc2c574dd54a assets/eln/items/tree_resin_collector.json
 b0e9ac661430266c12c61d5c58cde97253f1b494 assets/eln/items/tungsten_cable.json
@@ -919,6 +920,8 @@ b0ba486bf09a61b33b9a09c1d5646c2fa2aa10b9 assets/eln/models/item/thermal_probe.js
 e57c38ce7f0e1b5542a7870870acacd8013d6e13 assets/eln/models/item/thermometer.json
 b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/three_channel_data_logger.json
 cd3e55862f2d7c2416a0084507021666f71c5096 assets/eln/models/item/three_channel_data_logger_3d.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/tilted_terminal_logger.json
+cd3e55862f2d7c2416a0084507021666f71c5096 assets/eln/models/item/tilted_terminal_logger_3d.json
 3c9727847682e4af5e194407102beb081a4e6264 assets/eln/models/item/tree_resin.json
 7a81ec2c0fa002e8fbff9b1d63d211a483fdda05 assets/eln/models/item/tree_resin_collector.json
 67759e44f7247676a819240699a03eff236bf533 assets/eln/models/item/tree_resin_collector_3d.json

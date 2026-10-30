@@ -79,7 +79,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     }
 
     public static boolean canBePlacedOnSide(Direction side, SixNodeDescriptor descriptor) {
-        if (((ElectricalDataLoggerDescriptor) descriptor).onFloor && side == Direction.YN) return true;
+        var d = (ElectricalDataLoggerDescriptor) descriptor;
+        if (d.onFloor && side == Direction.YN || d.ceiling && side == Direction.YP) return true;
         return false;
     }
 

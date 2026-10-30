@@ -343,6 +343,11 @@ on 1.7.10) onto 26.x.
   on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
   changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
+- Tilted Terminal Logger (Baughn 2026-10-30, board #45): a three-channel logger (same pins and screen code) whose
+  screen leans back 45 degrees (cad `TiltedTerminal`); placed on a floor or table it is a desk terminal, hung from a
+  ceiling (side YP; the model upside down, the graph turned half round so it reads) it faces a player about three
+  blocks below. Recipe: a Three-Channel Data Logger, a glass pane and an iron ingot (shapeless). GameTest
+  `wp9c tilted terminal logger`.
 - Three-Channel Data Logger (Baughn 2026-10-30, board #45): a data logger and two cheap chips (shapeless). Its own
   model (cad `FieldLogger`: a field logger with a front screen and a handle), three inputs A, B, C: in a voxel block
   three pins on its back edge at 4, 8 and 12 voxels (`edgePins`), coloured terminals; in a plain block the back, left

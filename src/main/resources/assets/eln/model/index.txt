@@ -129,6 +129,7 @@ tarsandseparator200v/tarsandseparator200v.obj
 tarsandseparator50v/tarsandseparator50v.obj
 temperaturesensor/temperaturesensor.obj
 thermalsensor/thermalsensor.obj
+tiltedterminal/tiltedterminal.obj
 transformator/corea/feromagneticcorea.obj
 transformator/transformator.obj
 transformator/transformatorcase.obj

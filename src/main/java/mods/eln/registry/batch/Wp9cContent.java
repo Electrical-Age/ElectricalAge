@@ -272,6 +272,22 @@ public class Wp9cContent implements ElnContent {
             desc.channels = 3;
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+
+        {
+            // a three-channel logger with its screen leaning back: on a desk, or hung from a ceiling, facing a player
+            // about three blocks below (Baughn 2026-10-30, board #45)
+            ElectricalDataLoggerDescriptor desc;
+            subId = 4;
+
+            name = TR_NAME(Type.NONE, "Tilted Terminal Logger");
+
+            desc = new ElectricalDataLoggerDescriptor(name, true,
+                "tiltedterminal", 0.9f, 0.9f, 0.9f, "\u00A7f");
+            desc.channels = 3;
+            desc.ceiling = true;
+            desc.setPlaceDirection(new mods.eln.misc.Direction[]{mods.eln.misc.Direction.YN, mods.eln.misc.Direction.YP});
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
     }
 
     public static void registerElectricalGateSource(int id) {

@@ -2471,6 +2471,10 @@ public final class ElnRecipes extends ElnRecipesBase {
         addShapelessRecipe(findItemStack("Three-Channel Data Logger", 1),
             findItemStack("Data Logger", 1), dictCheapChip, dictCheapChip);
 
+        // its screen on a bracket: a three-channel logger, a glass pane and an iron ingot
+        addShapelessRecipe(findItemStack("Tilted Terminal Logger", 1),
+            findItemStack("Three-Channel Data Logger", 1), stack(Blocks.GLASS_PANE), stack(Items.IRON_INGOT));
+
         addRecipe(findItemStack("Industrial Data Logger", 1),
             "RRR",
             "GGG",

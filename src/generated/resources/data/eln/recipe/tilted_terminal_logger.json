@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:three_channel_data_logger",
+    "minecraft:glass_pane",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "id": "eln:tilted_terminal_logger"
+  }
+}
