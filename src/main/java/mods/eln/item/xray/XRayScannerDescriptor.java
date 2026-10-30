@@ -111,7 +111,7 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
     @Override
     public void onUpdate(ItemStack stack, Level world, Entity entity, int slot, boolean held) {
         if (world.isClientSide()) return;
-        if (id(stack) == 0) mods.eln.generic.ItemNbt.edit(stack, n -> n.putLong("id", newId()));
+        if (id(stack) == 0) editNbt(stack, n -> n.putLong("id", newId()));   // a new stack gets its default tag here: 20 % charge
         State st = getState(stack);
         if (st != State.Boot && st != State.Stop) return;
         short c = getNbt(stack).getShortOr("c", (short) 0);
