@@ -18,36 +18,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * The bikes on the checked model library (board #44): both pass the checker (the battery stands on the down tube's
  * surface, clear of the seat tube, at either tube thickness), every box's texture net fits its region, and the layer
- * draws what it drew before (LegacyBikeModel) except the battery.
+ * draws what it drew before (LegacyBikeModel) except the parts fixed ({@link #FIXED}).
  */
 public class BikeModelCadTest {
-    /**
-     * Z-fights in geometry drawn as before, left as they were (they need Baughn's say on the look): the octagon rims'
-     * segments overlap at their joints, the stays meet side by side at the rear hub, the top and seat tubes at the
-     * seat cluster, and the saddle's two boxes share their underside (and their tops are only 0.05 px apart).
-     */
-    static final String[][] KNOWN = {{"rim", "rim"}, {"chain_stay", "seat_stay"}, {"top_tube", "seat_tube"}, {"saddle", "saddle"}};
-
-    static boolean known(Checker.Issue is) {
-        if (!is.rule().equals("z-fight")) return false;
-        String[] l = is.what().split("\n");
-        for (String[] k : KNOWN)
-            if (l.length == 2 && (l[0].contains("Box " + k[0]) && l[1].contains("Box " + k[1]) || l[0].contains("Box " + k[1]) && l[1].contains("Box " + k[0])))
-                return true;
-        return false;
-    }
-
     @Test
     void bothBikesPassTheChecker() {
         for (boolean terrain : new boolean[]{false, true}) {
             Model m = BikeShape.model(terrain);
             List<String> bad = new ArrayList<>();
-            int known = 0;
-            for (Checker.Issue is : Checker.check(m)) {
-                if (known(is)) known++;
-                else bad.add(is.toString());
-            }
-            System.out.println((terrain ? "terrain bike" : "bike") + ": " + m.solids.size() + " boxes, known z-fights left as drawn: " + known);
+            for (Checker.Issue is : Checker.check(m)) bad.add(is.toString());
             assertTrue(bad.isEmpty(), (terrain ? "terrain bike: " : "bike: ") + String.join("\n", bad));
         }
     }
@@ -87,10 +66,14 @@ public class BikeModelCadTest {
             }
     }
 
+    /** The parts fixed since LegacyBikeModel: the battery (on the tube), the rims (every other segment narrower), the
+     *  seat stays (further in), the top tube (thinner), the saddle (its rear box). */
+    static final List<String> FIXED = List.of("/battery", "/front_wheel/rim", "/rear_wheel/rim", "/seat_stay", "/top_tube", "/saddle");
+
     static List<String> keys(List<Face> faces) {
         List<String> out = new ArrayList<>();
         for (Face f : faces) {
-            if (f.solid.name.startsWith("/battery")) continue;
+            if (FIXED.stream().anyMatch(f.solid.name::startsWith)) continue;
             String[] c = new String[f.n];
             for (int i = 0; i < f.n; i++)
                 c[i] = String.format("(%.3f %.3f %.3f|%.4f %.4f)", f.xyz[3 * i], f.xyz[3 * i + 1], f.xyz[3 * i + 2], f.uv[2 * i], f.uv[2 * i + 1]).replace("-0.000", "0.000");
@@ -105,7 +88,7 @@ public class BikeModelCadTest {
     }
 
     @Test
-    void drawsAsBeforeExceptTheBattery() {
+    void drawsAsBeforeExceptTheFixedParts() {
         for (boolean terrain : new boolean[]{false, true}) {
             var was = keys(BikeFaces.of(LegacyBikeModel.createLayer(terrain).bakeRoot(), LegacyBikeModel.GROUPS));
             var now = keys(BikeFaces.of(BikeModel.createLayer(terrain).bakeRoot(), BikeModel.GROUPS));

@@ -83,8 +83,12 @@ public final class BikeShape {
             float seg = 2 * R * (float) Math.tan(Math.PI / 8) + 0.2f;
             boolean fat = thick > 1;   // (the terrain bike's tyres: wider, deeper, with knobs on the tread)
             float tw = fat ? 3.2f : 2, td = fat ? 2.2f : 1.5f;
-            for (int i = 0; i < 8; i++)
-                cube(part("rim" + i, w, 0, 0, 0, -(i * PI / 4), 0, 0), TIRE, -tw / 2, -R, -seg / 2, tw, td, seg);
+            // (every other segment narrower: the segments overlap at their joints, and their sides lay in one plane there
+            // and z-fought; on the terrain tyre 0.2 px a side, clear of its knobs' sides 0.1 px in, else 0.1)
+            for (int i = 0; i < 8; i++) {
+                float in = i % 2 == 0 ? 0 : fat ? 0.2f : 0.1f;
+                cube(part("rim" + i, w, 0, 0, 0, -(i * PI / 4), 0, 0), TIRE, -tw / 2 + in, -R, -seg / 2, tw - 2 * in, td, seg);
+            }
             if (fat)
                 for (int i = 0; i < 16; i++)
                     cube(part("knob" + i, w, 0, 0, 0, -(i * PI / 8), 0, 0), TIRE, i % 2 == 0 ? -1.5f : 0.2f, -R - 0.4f, -0.6f, 1.3f, 0.6f, 1.2f);
@@ -104,13 +108,16 @@ public final class BikeShape {
         b.cube(b.part("motor", b.m.part("rear_wheel"), 0, 0, 0, 0, 0, 0), MOTOR, -2, -2, -2, 4, 4, 4);
         // the frame: head tube, top tube, down tube, seat tube, chain and seat stays, fork
         b.tube("head_tube", PAINT, 0, HEAD_TOP, HEAD_Z, HEAD_BOT - 1, HEAD_Z - 1, 1.8f);
-        b.tube("top_tube", PAINT, 0, HEAD_TOP - 1, HEAD_Z, SEAT - 1.5f, SEAT_Z - 1, 1.5f);
+        // (the top tube 0.2 px thinner than the seat tube: at the seat cluster their sides lay in one plane and z-fought)
+        b.tube("top_tube", PAINT, 0, HEAD_TOP - 1, HEAD_Z, SEAT - 1.5f, SEAT_Z - 1, 1.3f);
         Solid down = b.tube("down_tube", PAINT, 0, HEAD_BOT, HEAD_Z - 0.5f, BB, BB_Z, 1.6f);
         Solid seat = b.tube("seat_tube", PAINT, 0, BB, BB_Z, SEAT - 0.5f, SEAT_Z - 0.6f, 1.5f);
         for (float x : new float[]{-1.2f, 1.2f}) {
             String s = x < 0 ? "_l" : "_r";
             b.tube("chain_stay" + s, PAINT, x, BB, BB_Z, HUB, REAR_Z, 1f);
-            b.tube("seat_stay" + s, PAINT, x, SEAT - 1.5f, SEAT_Z - 0.4f, HUB, REAR_Z, 1f);
+            // (the seat stays 0.1 px further in than the chain stays: at the rear hub their sides lay in one plane; in,
+            // not out, to stay clear of the hub motor's sides)
+            b.tube("seat_stay" + s, PAINT, x - Math.signum(x) * 0.1f, SEAT - 1.5f, SEAT_Z - 0.4f, HUB, REAR_Z, 1f);
             if (!terrain) {
                 b.tube("fork" + s, PAINT, x * 1.1f, HEAD_BOT, HEAD_Z - 1, HUB, FRONT_Z, 1.1f);
             } else {

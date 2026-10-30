@@ -13,9 +13,10 @@ public final class BikeGeometry {
     public static final float R = 5.5f, HUB_Y = 24 - R, FRONT_Z = -10, REAR_Z = 10;
     public static final float HEAD_Z = -7, HEAD_TOP = 8, HEAD_BOT = 11, BB_Y = 18.5f, BB_Z = 1, SEAT_Z = 3.5f, SEAT_Y = 9.5f;
 
-    /** The saddle: its part's origin, and its two boxes about it (the rear one a sliver lower: their tops z-fought). */
+    /** The saddle: its part's origin, and its two boxes about it (the rear one 0.1 px lower on top and higher underneath:
+     *  their tops, 0.05 apart, and their shared underside z-fought; the checker wants 0.05 or more). */
     public static final float SADDLE_OY = SEAT_Y - 1.8f, SADDLE_OZ = SEAT_Z;
-    public static final float[][] SADDLE_BOXES = {{-1.5f, -1, -3.5f, 1.5f, 0.5f, 1.5f}, {-2.5f, -0.95f, -0.5f, 2.5f, 0.5f, 2}};
+    public static final float[][] SADDLE_BOXES = {{-1.5f, -1, -3.5f, 1.5f, 0.5f, 1.5f}, {-2.5f, -0.9f, -0.5f, 2.5f, 0.4f, 2}};
     /** The rack's top, and the trunk on it: body and overhanging lid, about the trunk's origin. */
     public static final float RACK_Y = HUB_Y - R - 2.2f, TRUNK_OZ = REAR_Z - 3.5f;
     public static final float[] TRUNK_BOX = {-3.5f, -4.5f, 0, 3.5f, 0, 7}, LID_BOX = {-3.8f, -5.5f, -0.3f, 3.8f, -4.5f, 7.3f};
