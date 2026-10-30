@@ -20,6 +20,17 @@ object FuelRegistry {
     val dieselList = dieselFuels.keys.toTypedArray()
 
     /**
+     * Residual fuels: too heavy and tarry for an engine, but a burner fires them (Baughn 2026-10-30, oil lakes: burn the
+     * heavy cuts). The fuel heat furnace takes them; the gas turbine doesn't.
+     *
+     * The values represent the heating value (energy) for 1L of the fuel IRL.
+     */
+    private val heavyFuels = mapOf(
+        "residue" to 41700000.0     // a column's bottoms, as residual fuel oil (No. 6): ~41.7 MJ/l
+    )
+    val heavyList = heavyFuels.keys.toTypedArray()
+
+    /**
      * Gasoline-equivalents: Light oils, the type which can reasonably be burned by internal combustion engines or gas turbines.
      * The ones on this list are all pretty close to each other in energy content.
      *
@@ -67,7 +78,7 @@ object FuelRegistry {
     val steamList = steam.keys.toTypedArray()
 
     // All fuels together.
-    private val allFuels = dieselFuels + gasolineFuels + gasFuels + steam
+    private val allFuels = dieselFuels + gasolineFuels + gasFuels + steam + heavyFuels
 
     /**
      * 1.12 Forge fluid name: on 26.x the registry path of the (source) fluid, any namespace ("mymod:diesel" -> "diesel").
