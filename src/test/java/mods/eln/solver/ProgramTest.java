@@ -122,4 +122,20 @@ public class ProgramTest {
         b.v = 0;
         assertEquals(1, p.getValue(0.05), 0, "latched while its branch wasn't taken");
     }
+
+    @Test
+    void anInputMayHaveADefault() {
+        Program p = Program.compile("A = 0.25 * 2\nB = 1\nA + B", inputs(), java.util.Set.of("A", "B", "C"));
+        assertTrue(p.isValid(), p.error);
+        assertEquals(0.5, p.defaultOf("A"), 1e-12);
+        assertEquals(1, p.defaultOf("B"), 0);
+        assertTrue(Double.isNaN(p.defaultOf("C")));
+        assertEquals(0, p.getOperatorCount() - 1, "a default costs nothing; A + B one operator");
+        Program twice = Program.compile("A = 1\nA = 0\nA", inputs(), java.util.Set.of("A"));
+        assertEquals("line 2: A's default is already set", twice.error);
+        assertEquals("A", twice.errorToken);
+        assertTrue(Program.compile("A = B\nA", inputs(), java.util.Set.of("A")).error.contains("must be a number"));
+        // without defaults allowed, A is an input already
+        assertTrue(Program.compile("A = 1\nA", inputs()).error.contains("already defined"));
+    }
 }

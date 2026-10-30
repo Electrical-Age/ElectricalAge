@@ -85,8 +85,11 @@ public class ElectricalMathElement extends SixNodeElement {
             this.gate = gate;
         }
 
+        /** The input, or the program's default for it (`A = 0.5`) while no cable is connected (Baughn 2026-10-30). */
         @Override
         public double getValue() {
+            double d = program == null ? Double.NaN : program.defaultOf(name);
+            if (!Double.isNaN(d) && !connected(gate)) return d;
             return gate.getNormalized();
         }
 
@@ -112,6 +115,15 @@ public class ElectricalMathElement extends SixNodeElement {
         }
     }
 
+    /** Is a cable (an electrical connection to a neighbour) on this input? */
+    static boolean connected(NbtElectricalGateInput gate) {
+        for (var c : gate.getConnectedComponents()) if (c instanceof mods.eln.sim.ElectricalConnection) return true;
+        return false;
+    }
+
+    /** The inputs a program may give a default (`A = 0.5`). */
+    public static final java.util.Set<String> DEFAULTABLE = java.util.Set.of("A", "B", "C");
+
     /** Operators a cheap chip pays for (Baughn 2026-10-30; it was one redstone an operator). */
     public static final int OPERATORS_PER_CHIP = 4;
 
@@ -126,7 +138,7 @@ public class ElectricalMathElement extends SixNodeElement {
 
     void preProcessEquation(String expression) {
         this.expression = expression;
-        program = Program.compile(expression, symboleList);
+        program = Program.compile(expression, symboleList, DEFAULTABLE);
         // the inputs connect whether the program reads them or not (Baughn 2026-10-30), so cables can go in first
         for (int idx = 0; idx < 3; idx++) sideConnectionEnable[idx] = true;
         equationIsValid = program.isValid();

@@ -46,6 +46,7 @@ public final class FunctionReference {
         new Entry("Utility", "scale(x, in0, in1, out0, out1)", "Maps x from in0..in1 to out0..out1.", "scale(A, 0.2, 0.8, 0, 1)", "scale(A, 0, 1, 0, 1)"),
         new Entry("Utility", "batteryCharge(u)", "A battery's charge from its voltage signal.", "batteryCharge(A)", "batteryCharge(A)"),
         new Entry("Utility", "daytime", "The time of day, 0 to 1.", "daytime > 0.5", "daytime"),
+        new Entry("Utility", "A = 0.5", "An input's default: what A (or B, C) reads while no cable is on it, a weak pull up or down; a cable overrides it. In signal units (1 = 50 V), once per input; the logger graphs it.", "B = 0.2", "A = 0.5"),
         new Entry("Utility", "name = expression", "Names a part, computed once and paid once; the last line is the output.", "x = A * 0.5", "x = "),
         new Entry("Utility", "# text", "A comment.", "# my notes", "# "));
 

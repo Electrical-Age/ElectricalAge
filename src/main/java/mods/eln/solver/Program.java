@@ -55,6 +55,11 @@ public final class Program implements INBTTReady {
     }
 
     public final List<Component> components = new ArrayList<>();
+    /**
+     * Inputs given a value on a definition line, `A = 0.5` (Baughn 2026-10-30): what the input reads while no cable is
+     * connected to it, a weak pull up or down; a connected cable overrides it. A constant, set once per input, free.
+     */
+    public final java.util.Map<String, Double> defaults = new java.util.LinkedHashMap<>();
     Equation output;
     /** The first problem, with its line (1-based; 0: the whole program), or null when it compiles. */
     public String error;
@@ -113,6 +118,11 @@ public final class Program implements INBTTReady {
 
     /** Compile a program over the inputs (A, B, C, daytime...). Never null; check isValid and error. */
     public static Program compile(String source, List<ISymbole> inputs) {
+        return compile(source, inputs, Set.of());
+    }
+
+    /** The same, the inputs named in defaultable taking a default value from a definition line (`A = 0.5`). */
+    public static Program compile(String source, List<ISymbole> inputs, Set<String> defaultable) {
         Program p = new Program();
         String big = tooBig(source);
         if (big != null) return p.fail(0, "The program is " + big);
@@ -126,6 +136,13 @@ public final class Program implements INBTTReady {
             if (!m.matches()) return p.fail(line, "line " + line + ": a line before the last must be a definition, name = expression");
             String name = m.group(1), expr = m.group(2).trim();
             if (RESERVED.contains(name)) return p.fail(line, "line " + line + ": " + name + " is a function's name").token(name);
+            if (defaultable.contains(name)) {
+                if (p.defaults.containsKey(name)) return p.fail(line, "line " + line + ": " + name + "'s default is already set").token(name);
+                Equation e = equation(expr, List.of());
+                if (!e.isValid()) return p.fail(line, "line " + line + ": an input's default must be a number");
+                p.defaults.put(name, e.getValue(0));
+                continue;
+            }
             for (ISymbole k : known)
                 if (k.getName().equals(name)) return p.fail(line, "line " + line + ": " + name + " is already defined").token(name);
             Equation e = equation(expr, known);
@@ -148,6 +165,7 @@ public final class Program implements INBTTReady {
         error = message;
         errorLine = line;
         components.clear();
+        defaults.clear();
         output = null;
         cost = 0;
         return this;
@@ -200,6 +218,12 @@ public final class Program implements INBTTReady {
         if (!isValid()) return;
         output.readFromNBT(nbt, prefix);
         for (Component c : components) c.equation.readFromNBT(nbt, prefix + "." + c.name + ".");
+    }
+
+    /** The default of an input (`A = 0.5`), or NaN. */
+    public double defaultOf(String input) {
+        Double d = isValid() ? defaults.get(input) : null;
+        return d == null ? Double.NaN : d;
     }
 
     @Override

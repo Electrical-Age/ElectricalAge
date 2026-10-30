@@ -131,7 +131,15 @@ public final class SpLanguage implements LanguageAdapter {
                     return out;
                 }
                 case INPUT_A, INPUT_B, INPUT_C -> {
-                    return List.of("Input " + w, "The signal on that side, 0 to 1 for 0 to 50 V.");
+                    List<String> out = new ArrayList<>(List.of("Input " + w, "The signal on that side, 0 to 1 for 0 to 50 V."));
+                    for (Statement st : statements(text))
+                        if (st.definition()) {
+                            String def = text.split("\n", -1)[st.line()].substring(st.start(), st.end()).trim();
+                            Matcher m = DEFINITION.matcher(def);
+                            if (m.find() && m.group(1).equals(w))
+                                out.add("With no cable on it, it reads its default: " + def.substring(m.end()).trim() + ".");
+                        }
+                    return out;
                 }
                 case NAME, DEFINITION -> {
                     String[] lines = text.split("\n", -1);
@@ -152,7 +160,6 @@ public final class SpLanguage implements LanguageAdapter {
     }
 
     static Kind kind(String w, boolean defining, Set<String> names) {
-        if (defining) return Kind.DEFINITION;
         switch (w) {
             case "A":
                 return Kind.INPUT_A;
@@ -164,6 +171,7 @@ public final class SpLanguage implements LanguageAdapter {
                 return Kind.KEYWORD;
             default:
         }
+        if (defining) return Kind.DEFINITION;
         if (FunctionReference.names().contains(w)) return Kind.FUNCTION;
         if (names.contains(w)) return Kind.NAME;
         return Kind.TEXT;
@@ -186,7 +194,7 @@ public final class SpLanguage implements LanguageAdapter {
 
     /** The program compiled as the processor compiles it (no live inputs). */
     public static Program compile(String text) {
-        return Program.compile(text, symbols());
+        return Program.compile(text, symbols(), ElectricalMathElement.DEFAULTABLE);
     }
 
     @Override

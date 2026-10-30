@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalmath;
 
 import mods.eln.gui.code.LanguageAdapter.Kind;
 import mods.eln.gui.code.LanguageAdapter.Token;
+import mods.eln.gui.code.LanguageAdapter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -67,5 +68,14 @@ public class SpLanguageTest {
         assertTrue(SpLanguage.INSTANCE.hover(text, 0, 5).isEmpty()); // the = sign
         // a broken line above doesn't stop it
         assertEquals("rs(set, reset)", SpLanguage.INSTANCE.hover("smooth A, latch on B\n" + text, 2, 6).get(0));
+    }
+
+    @Test
+    void anInputsDefaultKeepsTheInputsColour() {
+        var t = SpLanguage.INSTANCE.tokenize("A = 0.5\nA * 2");
+        assertEquals(LanguageAdapter.Kind.INPUT_A, t.get(0).get(0).kind());
+        assertEquals(LanguageAdapter.Kind.INPUT_A, t.get(1).get(0).kind());
+        assertTrue(SpLanguage.INSTANCE.validate("A = 0.5\nA * 2").isEmpty());
+        assertTrue(SpLanguage.INSTANCE.hover("A = 0.5\nA * 2", 1, 0).get(2).contains("0.5"));
     }
 }

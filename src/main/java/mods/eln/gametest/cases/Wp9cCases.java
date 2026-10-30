@@ -269,10 +269,11 @@ public final class Wp9cCases {
      * Signal Processor, expression "A*0.5" (GUI packet), A (right pin) = 40 V -> normalized 0.8 -> 0.4 -> 20 V. A second
      * without chips in its slot outputs 0 V (Baughn 2026-10-30: ceil(operators / 4) cheap chips). A third runs a program
      * with named components, "half = A*0.5; half + half" -> 40 V, its parts paid for once. A fourth, saved with 8 redstone
-     * in its slot (before 2026-10-30), loads with 2 cheap chips. A fifth, "1", still offers all three inputs.
+     * in its slot (before 2026-10-30), loads with 2 cheap chips. A fifth, "1", still offers all three inputs. A sixth gives
+     * A and B defaults: A's cable overrides its default, B (no cable) reads its default.
      */
     static final class MathCase implements TestCase {
-        ElectricalMathElement withChips, without, program, migrated, constant;
+        ElectricalMathElement withChips, without, program, migrated, constant, defaults;
         String slotAfterLoad = "", upgraded = "";
 
         public String name() {
@@ -280,7 +281,7 @@ public final class Wp9cCases {
         }
 
         public int width() {
-            return 19;
+            return 23;
         }
 
         ElectricalMathElement math(TestContext ctx, int x, int chips, String expression) {
@@ -306,6 +307,8 @@ public final class Wp9cCases {
             program = math(ctx, 9, 1, "half = A*0.5; half + half");
             migrated = math(ctx, 13, 0, "A*0.5");
             constant = math(ctx, 17, 0, "1");
+            // A has a cable (40 V) and a default: the cable wins; B has none: its default is read (Baughn 2026-10-30)
+            defaults = math(ctx, 20, 1, "A = 0.1\nB = 0.3\nA * 0.5 + B");
             // as a processor saved before 2026-10-30 holds redstone: saved and loaded, it holds cheap chips
             migrated.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 8));
             net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
@@ -337,6 +340,7 @@ public final class Wp9cCases {
             boolean all = constant.getConnectionMask(f.right()) != 0 && constant.getConnectionMask(f.inverse()) != 0 && constant.getConnectionMask(f.left()) != 0;
             ctx.check("wp9c signal processor: A, B and C connect whatever the program reads", all, "");
             ctx.check("wp9c signal processor: an old program's rs(reset, set) loads as rs(set, reset)", upgraded.equals("rs(A, 0)"), upgraded);
+            ctx.checkValue("wp9c signal processor: defaults, A wired (0.8), B not (default 0.3): A * 0.5 + B [V]", out(defaults), 35);
             ctx.check("wp9c signal processor: 8 redstone load as 2 cheap chips", slotAfterLoad.equals("2 cheap chips"), slotAfterLoad);
             // daytime wraps each day (1.12 divided the total time: after day 1 it only grew)
             ctx.check("wp9c signal processor: daytime is the time of day", Math.abs(mods.eln.misc.Utils.dayFraction(36000) - 12000 / 23999.0) < 1e-9
