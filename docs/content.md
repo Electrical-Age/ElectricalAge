@@ -119,9 +119,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
 | `src/main/resources/resourcepacks/schematic_icons` | Built-in optional resource pack (schematic 32 px icons), added by `addPackFinders` in `client/ElnClient`. |
 | `tools/icons/` | Icon production, two sets: `vanilla/` (default 16 px) and `schematic/` (the pack). Rules: `tools/icons/CONTRACT.md`; generators `*/build.py`, per-icon scripts in `*/icons/`. |
 | `tools/bike/texture.py` | The bikes' item icons; the entity texture is painted by `BikeTexture` (`docs/bike.md`). |
-| `tools/models/electricalanvil.py` | The electrical anvil's desk model, atlas and item icon (`docs/anvil.md`). |
-| `tools/models/capacitorbank.py` | The capacitor bank's model, atlas, item icon and the Capacitor Cell icon (`docs/anvil.md`). |
-| `tools/models/` | Code-CAD device models (Python -> OBJ, `mcmodel.py`); see `tools/models/README.md`. |
+| `src/cadmodels/` | The device models (code-CAD in Java, generated at build time; `docs/cad.md`). The anvil's and capacitor bank's item icons, once drawn by their Python scripts, are committed PNGs. |
 | `script/gen_ids.py` | Wrote `eln-ids.json` (run once). |
 | `script/gen_model_index.py` | Writes `assets/eln/model/index.txt` for `misc/Obj3DFolder`; re-run after adding or removing OBJ models. |
 | `script/gen_ore_data.py` | Ore loot, features, pickaxe tag, biome modifier (stale, see above). |

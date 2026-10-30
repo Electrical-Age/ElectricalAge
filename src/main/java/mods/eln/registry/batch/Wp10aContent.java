@@ -49,10 +49,10 @@ public class Wp10aContent implements ElnContent {
         registerAnvil(85);
     }
 
-    /** The electrical anvil (Baughn 2026-10-28): a workshop desk on 800 V; model tools/models/electricalanvil.py. */
+    /** The electrical anvil (Baughn 2026-10-28): a workshop desk on 800 V; model mods.eln.cad.models.ElectricalAnvil. */
     public static void registerAnvil(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.anvil.ElectricalAnvilDescriptor(TR_NAME(Type.NONE, "Electrical Anvil"), "electricalanvil"));
-        // the capacitor bank (Baughn 2026-10-28): one carries one of the anvil's bursts; model tools/models/capacitorbank.py
+        // the capacitor bank (Baughn 2026-10-28): one carries one of the anvil's bursts; model mods.eln.cad.models.CapacitorBank
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor(TR_NAME(Type.NONE, "Capacitor Bank"), "capacitorbank"));
     }
 
@@ -75,9 +75,9 @@ public class Wp10aContent implements ElnContent {
             LVU, 1000, lowVoltageCableDescriptor, "steamturbine50v"));
         transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "200V Steam Turbine"),
             MVU, 4000, meduimVoltageCableDescriptor, "steamturbine200v"));
-        // the steam oven (Baughn 2026-10-23): food cooked with a pipe's steam; model tools/models/steamoven.py
+        // the steam oven (Baughn 2026-10-23): food cooked with a pipe's steam; model mods.eln.cad.models.SteamOven
         transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.SteamOvenDescriptor(TR_NAME(Type.NONE, "Steam Oven"), "steamoven"));
-        // the turbines' condensers (Baughn 2026-10-26: optional, beside the turbine, the models join); model tools/models/condenser.py
+        // the turbines' condensers (Baughn 2026-10-26: optional, beside the turbine, the models join); model mods.eln.cad.models.Condenser
         transparentNodeItem.addDescriptor(28 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Small Steam Condenser"),
             1000, 0.005, "condenser50v"));
         transparentNodeItem.addDescriptor(32 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Steam Condenser"),
@@ -100,7 +100,7 @@ public class Wp10aContent implements ElnContent {
             mods.eln.oil.HeatExchangerDescriptor.SLICE_UA / 4, 0.008, "heatexchanger"));
     }
 
-    /** 26.x oil: the pump (on well casing; oil lakes and water). Model: tools/models/oilpump.py. */
+    /** 26.x oil: the pump (on well casing; oil lakes and water). Model: mods.eln.cad.models.OilPump. */
     public static void registerOilPump(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "50V Oil Pump"),
             LVU, 1000, lowVoltageCableDescriptor, "oilpump50v"));
@@ -116,7 +116,7 @@ public class Wp10aContent implements ElnContent {
             MVU, 400, 4000, 15e5, meduimVoltageCableDescriptor, "submersiblepump200v"));
     }
 
-    /** 26.x oil: the tar sand separator (notes/oil; model tools/models/tarsandseparator.py, drawn as a macerator). */
+    /** 26.x oil: the tar sand separator (notes/oil; model mods.eln.cad.models.TarSandSeparator, drawn as a macerator). */
     public static void registerOilSeparator(int id) {
         {
             String name = TR_NAME(Type.NONE, "50V Tar Sand Separator");
@@ -222,7 +222,7 @@ public class Wp10aContent implements ElnContent {
     }
 
     /** 26.x (Baughn 2026-10-23): the smelter, heated through a thermal cable; it smelts at the electrical oven's rate for its
-     *  temperature (the same PfT table). Model: tools/models/smelter.py. */
+     *  temperature (the same PfT table). Model: mods.eln.cad.models.Smelter. */
     public static void registerSmelter(int id) {
         double[] PfTTable = {0, 20, 40, 80, 160, 240, 360, 540, 756, 1058.4, 1481.76};
         double[] lost = new double[PfTTable.length];

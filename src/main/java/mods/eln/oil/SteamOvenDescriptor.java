@@ -15,7 +15,7 @@ import static mods.eln.i18n.I18N.tr;
  * The steam oven (Baughn 2026-10-23): steam from a pipe on top, a 10 W fan on 50 V, and food in. All its heat is the
  * steam's: it cooks at up to twice the electrical oven's best food speed (the oven just under charring, PfT ~140 W:
  * here MAX_COOK_W), but only EFFICIENCY of the steam's heat reaches the food; the rest goes out of its vent. Model:
- * tools/models/steamoven.py.
+ * mods.eln.cad.models.SteamOven.
  */
 public class SteamOvenDescriptor extends TransparentNodeDescriptor {
     public static final double MAX_COOK_W = 280, EFFICIENCY = 0.25, FAN_W = 10, FAN_MIN = 0.7;

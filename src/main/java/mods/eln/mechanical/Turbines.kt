@@ -19,7 +19,7 @@ import java.io.DataOutputStream
 
 /**
  * The shaft Steam Turbine (ShaftSteamTurbineElement): steam by EA pipe in on top and out of its back, work onto the
- * shaft (Baughn 2026-10-29). Models: tools/models/shaftturbines.py (`main`, `rotor`, `valve`: the governor valve).
+ * shaft (Baughn 2026-10-29). Models: mods.eln.cad.models.ShaftTurbines (`main`, `rotor`, `valve`: the governor valve).
  */
 class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbineSpec) :
     SimpleShaftDescriptor(baseName, ShaftSteamTurbineElement::class, null) {
@@ -92,7 +92,7 @@ class SteamTurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDes
 
 /**
  * The Gas Turbine (GasTurbineElement; Baughn 2026-10-29, the shaft redo): a light, fast peaker. Model:
- * tools/models/shaftgas.py (`main`, `rotor`: its compressor behind the intake, `valve`: the fuel valve).
+ * mods.eln.cad.models.ShaftGas (`main`, `rotor`: its compressor behind the intake, `valve`: the fuel valve).
  */
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     SimpleShaftDescriptor(basename, GasTurbineElement::class, null) {

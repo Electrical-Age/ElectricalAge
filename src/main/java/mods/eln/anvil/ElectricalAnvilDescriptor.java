@@ -17,7 +17,7 @@ import static mods.eln.i18n.I18N.tr;
  * material for no XP, never raising the tool's anvil penalty and stepping an old one down; it engraves a new name for a
  * small pulse. While it works it draws its full rating off the 800 V line, more than a small plant gives: it waits for
  * the voltage to come up and pauses when it sags, so a capacitor bank (or an inductor) carries the pulses. Late-midgame
- * gear. Model: tools/models/electricalanvil.py.
+ * gear. Model: mods.eln.cad.models.ElectricalAnvil.
  */
 public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
     /** Its rating: 800 V at the HV cable's nominal power (config [anvil] power). */

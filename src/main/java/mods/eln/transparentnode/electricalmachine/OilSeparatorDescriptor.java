@@ -17,6 +17,6 @@ public class OilSeparatorDescriptor extends MaceratorDescriptor {
                                   ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {
         super(name, modelName, nominalU, nominalP, maximalU, thermal, cable, recipe);
         ElementClass = OilSeparatorElement.class;
-        cableTerminals = mods.eln.cable.CableTerminals.FLANKS;   // tools/models/tarsandseparator.py terminal plates
+        cableTerminals = mods.eln.cable.CableTerminals.FLANKS;   // mods.eln.cad.models.TarSandSeparator terminal plates
     }
 }

@@ -7,7 +7,7 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-/** The heat exchanger (tools/models/heatexchanger.py); a stack draws as one unit from its lowest corner. */
+/** The heat exchanger (mods.eln.cad.models.HeatExchanger); a stack draws as one unit from its lowest corner. */
 public class HeatExchangerRender extends TransparentNodeElementRender {
     final HeatExchangerDescriptor desc;
     /** Whether it draws (alone, or a stack's lowest corner), and the stack's size. */
@@ -31,7 +31,7 @@ public class HeatExchangerRender extends TransparentNodeElementRender {
         desc.drawPart("shell");
         mods.eln.gl.GL11.glPopMatrix();
         // the end flanges, unscaled, on every block of both end faces: the front end's on the front, the back end's
-        // turned to the back (tools/models/heatexchanger.py)
+        // turned to the back (mods.eln.cad.models.HeatExchanger)
         int len = alongX ? sx : sz, across = alongX ? sz : sx;
         boolean frontAtHigh = front == mods.eln.misc.Direction.XP || front == mods.eln.misc.Direction.ZP;
         for (int end = 0; end < 2; end++) {

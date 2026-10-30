@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * A device's hitbox from its model (Baughn 2026-10-29, the shaft art pass): NAME.hitbox beside NAME.obj, one box a line
- * (x0 y0 z0 x1 y1 z1, px, corner origin, front XN: tools/models/README-shaft.md), turned onto the block's front as the
+ * (x0 y0 z0 x1 y1 z1, px, corner origin, front XN: docs/models/shaft.md), turned onto the block's front as the
  * render turns the model (Direction.glRotateXnRef) and cached per front.
  */
 public final class ModelHitbox {

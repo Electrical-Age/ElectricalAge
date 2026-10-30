@@ -13,7 +13,7 @@ import java.util.List;
  * like the old heat turbine, which it replaces as early-game power (coal -> heat furnace -> boiler -> this). It gets
  * {@link #ETA} of what the steam gives expanding from its inlet to the exhaust (Baughn 2026-10-26: by the expansion,
  * Water.isentropicDrop), up to its nominal power, which it reaches on steam at {@link #NOMINAL_PA} venting to air; the
- * stock shaft Steam Turbine (7,200 mB/s) stays for big plants. Model: tools/models/steamturbine.py.
+ * stock shaft Steam Turbine (7,200 mB/s) stays for big plants. Model: mods.eln.cad.models.SteamTurbine.
  */
 public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
     /** Electric work per kg out of the ideal (isentropic) expansion: turbine and generator together. */

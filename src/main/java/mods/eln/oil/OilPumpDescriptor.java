@@ -35,7 +35,7 @@ public class OilPumpDescriptor extends TransparentNodeDescriptor {
         this.cable = cable;
         this.obj = Eln.obj.getObj(model);
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
-        cableTerminals = mods.eln.cable.CableTerminals.ALL_SIDES;   // tools/models/oilpump.py terminal plates
+        cableTerminals = mods.eln.cable.CableTerminals.ALL_SIDES;   // mods.eln.cad.models.OilPump terminal plates
     }
 
     /** Energy (J) to lift one mB by h blocks and push it out. */

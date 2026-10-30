@@ -1,7 +1,7 @@
 # The electrical anvil
 
 Baughn's design (2026-10-28): late-midgame gear, power-hungry, a workshop desk. It repairs tools without the vanilla
-anvil's ratchet. Code in `src/main/java/mods/eln/anvil/`; model `tools/models/electricalanvil.py`; tests
+anvil's ratchet. Code in `src/main/java/mods/eln/anvil/`; model `mods.eln.cad.models.ElectricalAnvil`; tests
 `gametest/cases/AnvilCases` and `AnvilRulesTest`.
 
 ## Baughn's decisions
@@ -48,7 +48,7 @@ new data component and would leak into other mods' views of the item.
 
 ## The capacitor bank (`transparentnode/capacitorbank`, `eln:transparent_node@5444`, `capacitor_bank`)
 Baughn 2026-10-28: a workshop-sized store for the anvil's bursts. Six capacitor cans in two layers of three (model
-`tools/models/capacitorbank.py`), one capacitor inside.
+`mods.eln.cad.models.CapacitorBank`), one capacitor inside.
 - **Size:** one bank carries one 20 kJ burst from 800 V down to the anvil's 720 V: C >= 20000 / (0.5 (800^2 - 720^2))
   = 0.33 F; it has **0.36 F** (21.9 kJ between 800 and 720 V; 115 kJ at 800 V).
 - **Polar:** + on the left of its front, - on the right, low on the flanks: the terminal plates' bands and the cans'

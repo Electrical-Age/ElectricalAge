@@ -4,7 +4,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 
-/** The plant condenser (tools/models/plantcondenser.py), its drive coupling toward the motor that drives it. */
+/** The plant condenser (mods.eln.cad.models.PlantCondenser), its drive coupling toward the motor that drives it. */
 public class PlantCondenserRender extends TransparentNodeElementRender {
     final PlantCondenserDescriptor desc;
 

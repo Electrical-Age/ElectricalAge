@@ -15,7 +15,7 @@ import java.util.List;
  * nearly twice the work per kg. Cooled to the local ambient by its own air cooler (sized for its turbine at full power),
  * plus whatever a thermal cable on a side takes. Its air ejector keeps air out; its condensate pump, driven by the
  * turbine's shaft, pushes the water out of its front flange (up to PUMP_PA) back to the boiler's feed. Water comes in
- * (makeup) by the flange on top. Model: tools/models/condenser.py.
+ * (makeup) by the flange on top. Model: mods.eln.cad.models.Condenser.
  */
 public class CondenserDescriptor extends TransparentNodeDescriptor {
     /** Heat (W) it rejects at its turbine's full power on a 10 bar inlet (0.1 bar, condensate at 46 C). */

@@ -117,7 +117,7 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 ## Hot things glow: Incandescence (Baughn 2026-10-28)
 
 `misc/Incandescence` is the one rule for every device that heats up on the outside: the Large Rheostat (its `main`
-part), the electric heater (its coils, a separate model part `element` since `tools/models/electricheater.py` splits
+part), the electric heater (its coils, a separate model part `element` since `mods.eln.cad.models.ElectricHeater` splits
 them out), the power resistor (its core), six-node thermal cables and voxel thermal cables ("not truly realistic for
 the insulated thermal cables, but ... for charm"). The rheostat's drum is its own model part (`coil`, split out of
 `main`: faces with every corner within 0.30 of the axis) so its fins stay dark: glowing the whole `main` lit every fin face like a pane of coloured glass

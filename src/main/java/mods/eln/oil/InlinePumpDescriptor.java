@@ -14,7 +14,7 @@ import java.util.List;
  * none: full speed). Head goes with the square of its speed (up to HEAD_PA at full), flow with its speed; the power it
  * draws with what it moves. It needs water at its inlet with some margin over boiling (NPSH_PA): fed vapour, or water
  * at its boiling point, it cavitates: it moves next to nothing and rattles (so it goes after the condenser or cooler,
- * not after a preheater: Argon). Model: tools/models/inlinepump.py.
+ * not after a preheater: Argon). Model: mods.eln.cad.models.InlinePump.
  */
 public class InlinePumpDescriptor extends TransparentNodeDescriptor {
     /**

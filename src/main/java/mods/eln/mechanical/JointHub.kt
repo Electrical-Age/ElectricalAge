@@ -20,7 +20,7 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
     override val obj = obj
     override val static = arrayOf(obj.getPart("main"))
     override val rotating = arrayOf(obj.getPart("rotor"))
-    /** Its shaft across: couplings on its x faces, turning about x (tools/models/shaftparts.py). */
+    /** Its shaft across: couplings on its x faces, turning about x (mods.eln.cad.models.ShaftParts). */
     val rotatingX = obj.getPart("rotor_x")
 
     override fun draw(angle: Double) {

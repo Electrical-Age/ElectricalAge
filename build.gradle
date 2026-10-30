@@ -26,6 +26,29 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 // The checked model library (cad/, board #44) is compiled into the mod, as Stasis does with towergen; :cad compiles
 // it alone, without Minecraft.
 sourceSets.main.java.srcDir 'cad/src/main/java'
+// The device models made with it (src/cadmodels: mods.eln.cad.models.Catalog) are generated at build time into
+// build/generated/cad (OBJ, MTL, atlases, origins, hitboxes, the converters' block models and sprites), not committed.
+// The task fails the build if a model breaks the checker; it is cached on the library's and the models' code.
+sourceSets {
+    cadmodels {
+        java { srcDir 'src/cadmodels/java' }
+    }
+}
+dependencies {
+    cadmodelsImplementation project(':cad')
+}
+def generateCadModels = tasks.register('generateCadModels', JavaExec) {
+    description = 'Writes the checked device models (mods.eln.cad.models.Catalog) into build/generated/cad'
+    classpath = sourceSets.cadmodels.runtimeClasspath
+    mainClass = 'mods.eln.cad.models.Catalog'
+    def out = layout.buildDirectory.dir('generated/cad')
+    args out.get().asFile.absolutePath
+    inputs.files(sourceSets.cadmodels.runtimeClasspath).withNormalizer(ClasspathNormalizer)
+    outputs.dir(out)
+    outputs.cacheIf { true }
+    doFirst { delete out }
+}
+sourceSets.main.resources.srcDir(generateCadModels)
 
 neoForge {
     version = project.neo_version
@@ -160,13 +183,4 @@ tasks.register('bikeTexture', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'mods.eln.bike.BikeTexture'
     args file('src/main/resources/assets/eln/textures/entity/electric_bike.png').absolutePath
-}
-
-// The static models made with the checked model library (mods.eln.cad.ModelCatalog), into the mod's resources;
-// ModelCatalogTest checks the committed files match.
-tasks.register('cadModels', JavaExec) {
-    description = 'Writes the ModelCatalog models (OBJ, MTL, atlases) into src/main/resources'
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'mods.eln.cad.ModelCatalog'
-    args file('src/main/resources').absolutePath
 }

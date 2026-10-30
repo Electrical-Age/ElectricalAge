@@ -1,8 +1,12 @@
 # Shaft machine models (the shaft redo's art pass)
 
+> Ported to Java (board #44): the model is a class in src/cadmodels/java/mods/eln/cad/models, generated at build time
+> (docs/cad.md); the Python script, its commands and its own atlas are gone (the shared palette replaces the atlas).
+
+
 Models for the shaft machines (Baughn 2026-10-29): HP and LP Steam Turbine, Gas Turbine, 4 kW and 8 kW Generator,
 Shaft Motor, Joint, Joint Hub, Flywheel, Tachometer, Plant Steam Condenser and the stacking Counterflow Heat Exchanger.
-Path 2 of README.md (EA Obj3D node OBJ), written with `shaftkit.py` on top of `oilkit.py` (its atlas and
+Path 2 of docs/cad.md (EA Obj3D node OBJ), written with `ShaftKit` on top of `OilKit` (its atlas and
 `write_parts`). House style: the steam turbine, boiler, condenser and tank models (skids, cast iron, bolted flanges,
 brass bolts, a paint band in the device's colour, gauges).
 
@@ -24,7 +28,7 @@ brass bolts, a paint band in the device's colour, gauges).
   the face, LOW = 4 px up, HIGH = 12 px up (centred across).
 - **Electric/signal floor terminals**: `oilkit.terminal_plate` (power: 3 studs) and `oilkit.signal_plate` (signal:
   one stud), on the x = 0 face; `oilkit.turned(..., 2)` puts one on the back. Keep the floor middle of those faces
-  clear (README.md "Cable terminals").
+  clear (docs/cad.md "Cable terminals").
 - **Hitbox**: `shaftkit.write_model(..., hitbox=[...])` writes NAME.hitbox: a few boxes (px, this frame, x0 y0 z0 x1 y1
   z1) that follow the model's bulk (3-8 boxes; include the shaft and couplings on the connecting faces). The game reads
   them for the block's outline and collision and turns them with the block's front.
@@ -47,5 +51,3 @@ brass bolts, a paint band in the device's colour, gauges).
 | plantcondenser | Plant Steam Condenser | exhaust in: large flanges top centre, back centre, right centre; condensate out: front LOW small; makeup in: left HIGH small; cooling water in: left LOW small, out: right LOW small; thermal pads; drive parts `drive_left` / `drive_front`: a half coupling at the shaft line on that face (the motor beside it drives the pumps) |
 | heatexchanger | Counterflow Heat Exchanger | parts `shell` (one block; the render scales it over a 2 x 2 x N stack) and `flange` on the x = 0 face: A large at CENTRE, B small at (y 12, z 8) 0.1 px proud of A's; the render draws `flange` on each end block of a stack |
 
-Script per family; run `nix-shell -p 'python3.withPackages(p:[p.pillow])' --run 'python3 tools/models/X.py src/main/resources'`,
-then `python3 script/gen_model_index.py`. Previews: `shaftkit.preview` into notes/ea/shaft/p5-previews/.

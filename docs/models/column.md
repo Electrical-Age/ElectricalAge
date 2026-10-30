@@ -1,5 +1,9 @@
 # EA fractionating column and flare stack models
 
+> Ported to Java (board #44): the model is a class in src/cadmodels/java/mods/eln/cad/models, generated at build time
+> (docs/cad.md); the Python script, its commands and its own atlas are gone (the shared palette replaces the atlas).
+
+
 What: models for the Fractionating Column Base, Column Segment and Flare Stack (`mods.eln.oil.Column*`, `FlareStack*`),
 replacing the placeholders. Model names (OBJ file = directory name): `columnbase`, `columnsegment`, `flarestack`; one
 part `main` each, one material `atlas`. The descriptors draw all parts, so `main` is enough.
@@ -30,14 +34,9 @@ flange; no coplanar overlap (the shared faces at the block boundary face opposit
 rung spacing and cage hoops repeat with period 2/8 px, so they continue across blocks.
 
 ## Files
-- `column.py RESOURCES` writes `assets/eln/model/{columnbase,columnsegment,flarestack}/` (`<name>.obj`, `.mtl`,
+- `Column` RESOURCES` writes `assets/eln/model/{columnbase,columnsegment,flarestack}/` (`<name>.obj`, `.mtl`,
   `tex.png`: 64x48 atlas of 12 procedural cells: steel, darksteel, castiron, copper, brass, paint (red), white, glass
   (gauge, amber level), lagging, soot, fire (porthole), rubber). Triangles: 1526 / 1456 / 1206.
-  Run: `nix-shell -p 'python3.withPackages(p:[p.pillow])' --run 'python3 tools/models/column.py src/main/resources'`,
-  then `python3 script/gen_model_index.py`.
-- `column.py --stack RESOURCES OUT`: composes base + 4 segments + a flare beside it (and a variant with segments turned
-  90 and 180 deg) and writes `tower_preview.png`, `tower_turned_preview.png` via `elncheck.preview`.
-- Check: `python3 tools/models/elncheck.py src/main/resources/assets/eln/model/{columnbase,columnsegment,flarestack}/*.obj --preview OUT`.
   Expected: `columnsegment` reports "nothing on the front (x-) face near the floor"; it sits on the base and has no
   cable connections, so that check (meant for floor-cable nodes) doesn't apply.
 

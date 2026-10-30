@@ -5,7 +5,7 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * 26.x: which faces of a device carry a floor-level terminal plate (tools/models/README.md, "Cable terminals"). A floor
+ * 26.x: which faces of a device carry a floor-level terminal plate (docs/cad.md, "Cable terminals"). A floor
  * cable (six-node electrical cable on YN) that connects to such a face draws a cable lug at its end: the cable turns up
  * against the face and a copper palm covers the plate's middle stud, {@link #CONDUCTOR_HEIGHT_PX} above the floor.
  * Cable-to-cable joints and devices without terminals are unchanged.

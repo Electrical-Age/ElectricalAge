@@ -12,7 +12,7 @@ import java.util.List;
  * liquid port underneath and on each side down low, so it serves as a steam drum (boiler steam in, dry steam off the
  * top, water back down), a separator (wet steam in, steam off the top, water off the bottom) or a hotwell (condensate
  * in, a pump drawing from the bottom). A sight glass on its front shows the water. Over its burst pressure it bursts.
- * Model: tools/models/tank.py.
+ * Model: mods.eln.cad.models.Tank.
  */
 public class TankDescriptor extends TransparentNodeDescriptor {
     final double volume, workingPa, burstPa;

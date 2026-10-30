@@ -20,7 +20,7 @@ import static mods.eln.i18n.I18N.tr;
  * The submersible pump (Baughn 2026-10-25): a small electric pump that stands in water (it must be waterlogged) and
  * pushes it up a pipe from the flange on its top, for a boiler's feed. Its nominal flow is a few times what a turbine of
  * its voltage turns into steam (NOMINAL_TURBINES), falling to nothing at shutoffPa against the pipe. Power on its
- * flanks; a signal on its front sets its speed (no cable there: full speed). Model: tools/models/submersiblepump.py.
+ * flanks; a signal on its front sets its speed (no cable there: full speed). Model: mods.eln.cad.models.SubmersiblePump.
  */
 public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
     /** Nominal flow, in turbines' worth of feedwater (a turbine of the same voltage at full power). */

@@ -1,7 +1,11 @@
 # EA compact steam turbine model (50V Compact Steam Turbine)
 
+> Ported to Java (board #44): the model is a class in src/cadmodels/java/mods/eln/cad/models, generated at build time
+> (docs/cad.md); the Python script, its commands and its own atlas are gone (the shared palette replaces the atlas).
+
+
 What: the model for the 50V Compact Steam Turbine, the early-game bootstrap generator (300 W, 50 V): one block with
-everything packaged on a skid, visibly smaller and simpler than the 50V Steam Turbine (`README-steamturbine.md`).
+everything packaged on a skid, visibly smaller and simpler than the 50V Steam Turbine (`steamturbine.md`).
 Written as `compactturbine50v`.
 
 Design (front = XN, x = 0; left seen from the front = z-, right = z+):
@@ -20,14 +24,11 @@ Design (front = XN, x = 0; left seen from the front = z-, right = z+):
   studs and a green tier stripe (`oilkit.terminal_plate`, as the steam turbines).
 
 ## Files
-- `compactturbine.py RESOURCES` writes `assets/eln/model/compactturbine50v/`: `compactturbine50v.obj` + `.mtl`
+- `CompactTurbine` RESOURCES` writes `assets/eln/model/compactturbine50v/`: `compactturbine50v.obj` + `.mtl`
   (parts `main`, `rotor`; one material `atlas`), `tex.png` (the shared oilkit atlas, paint = 50V green) and
   `compactturbine50v.txt`:
   `o rotor` / `f originY -0.15625` / `f originZ 0.03125`, `o main` / `f ventX 0.17188` / `f ventY 0.18750` / `f ventZ 0.37500`.
   1554 triangles (main 1462, rotor 92).
-  Run: `nix-shell -p 'python3.withPackages(p:[p.pillow])' --run 'python3 tools/models/compactturbine.py src/main/resources'`,
-  then `python3 script/gen_model_index.py`.
-- Check and preview: `python3 tools/models/elncheck.py src/main/resources/assets/eln/model/compactturbine50v/compactturbine50v.obj --preview OUT`.
 
 ## Not done
 - Java wiring (descriptor, render spinning `rotor`, steam puffs at the vent, `CableTerminals.FRONT_AND_BACK`).

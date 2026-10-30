@@ -97,7 +97,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `GasPlantCases`.
 - Shaft redo, art pass (Baughn 2026-10-29). The HP/LP Steam Turbine, Gas Turbine, both Generators, Shaft Motor,
   Joint, Joint Hub, Flywheel, Tachometer, Plant Steam Condenser and Heat Exchanger have their own models
-  (tools/models/README-shaft.md) instead of the 1.12 Turbine/Generator/GasTurbine/... ones: one shaft line for all, a
+  (docs/models/shaft.md) instead of the 1.12 Turbine/Generator/GasTurbine/... ones: one shaft line for all, a
   half coupling at each shaft face, rotor/valve/needle parts that move. Hitboxes: a model may carry NAME.hitbox beside its
   OBJ; a descriptor that returns it from `modelHitbox()` (`ModelHitbox`) gets that outline and collision turned with
   the block's front (read from the block entity), instead of its collision boxes (`shaft_hitbox_per_facing`).
@@ -196,12 +196,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 
 - New: the Smelter (`transparentnode/smelter`, Baughn 2026-10-23): heat from a thermal cable on its back, 20 W of
   50 V for its controls on a side; smelts at the electrical oven's rate for its temperature (same PfT table), drawing
-  that heat; hoppers: top/sides in, bottom out. Model `tools/models/smelter.py`. Test `wp10a_smelter`.
+  that heat; hoppers: top/sides in, bottom out. Model `mods.eln.cad.models.Smelter`. Test `wp10a_smelter`.
 
 - New: the Steam Oven (`oil/SteamOven*`, Baughn 2026-10-23): steam into a port on top (as the turbine's), a 10 W fan
   on 50 V; cooks food only, at up to 280 W (twice the electrical oven's best food speed), condensing 280 W / 25% of the
   steam's heat (~500 mB/s at full speed; the rest vents as a plume); hoppers: sides in, bottom out. Model
-  `tools/models/steamoven.py`. Test `steam_oven_cooks_with_steam`.
+  `mods.eln.cad.models.SteamOven`. Test `steam_oven_cooks_with_steam`.
 - Devices (transparent and six-node) can be placed against any full face, not only opaque cubes (Baughn): a top
   slab, the underside of a bottom slab or stair, a stair's back, glass (`TransparentSupportCases`).
 - Egg incubator: its windows are glass (the 1.7.10 texture left them fully transparent, so the model looked like a bare
@@ -215,7 +215,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Submersible pumps, 50V (100 W) and 200V (400 W) (Baughn 2026-10-25): placed in a water source (transparent-node
   blocks are waterloggable now, as six nodes were), they push the water they stand in up a pipe from the flange on
   top: 3.5 turbines' worth of feedwater (57 / 230 mB/s), falling to nothing at 3 bar against the pipe. Power on the
-  flanks, a signal on the front sets the speed (no cable there: full speed). Model `tools/models/submersiblepump.py`
+  flanks, a signal on the front sets the speed (no cable there: full speed). Model `mods.eln.cad.models.SubmersiblePump`
   (`submersible_pump_feeds_a_boiler`, `submersible_pump_water_and_signal`).
 
 - Logic and analog chips are drawn at 0.75 (a case 6 voxels across; Baughn) and, in voxel blocks, go anywhere on a

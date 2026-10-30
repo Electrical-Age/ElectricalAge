@@ -14,7 +14,7 @@ import java.util.List;
  * by bucket, by EA pipe on its top flange or by the fluid capability, 50 V out of the front and back. It turns
  * {@link #ETA} of the heat it takes into electricity (Baughn: 10%, so one stone heat furnace with all its combustion
  * chambers runs it at nearly full, ~270 W), against ~10% for a boiler and steam turbine venting and ~18% condensing; the cost of not
- * having to run a plant. Model: tools/models/compactturbine.py.
+ * having to run a plant. Model: mods.eln.cad.models.CompactTurbine.
  */
 public class CompactTurbineDescriptor extends TransparentNodeDescriptor {
     /** Electricity out of the heat taken. */

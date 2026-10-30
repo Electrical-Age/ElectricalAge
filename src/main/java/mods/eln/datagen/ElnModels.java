@@ -106,7 +106,7 @@ public class ElnModels implements DataProvider {
                 out.add(DataProvider.saveStable(cache, obj("parent", "minecraft:block/cube_all", "textures",
                     obj("all", "eln:" + (tex == null ? "blocks/ore" : tex))), assets.resolve("models/block/" + name + ".json")));
             } else if (b instanceof mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherBlock) {
-                // the synchronous-condenser models (AdventurAgent, tools/models/converter.py; OBJ in src/main/resources),
+                // the synchronous-condenser models (AdventurAgent, mods.eln.cad.models.Converter; OBJ in src/main/resources),
                 // turned so their EA face is the node's FRONT
                 JsonObject variants = new JsonObject();
                 for (int f = 0; f <= 6; f++) {

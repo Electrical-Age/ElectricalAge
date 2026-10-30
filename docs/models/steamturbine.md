@@ -1,5 +1,9 @@
 # EA small steam turbine models (50V / 200V Steam Turbine)
 
+> Ported to Java (board #44): the model is a class in src/cadmodels/java/mods/eln/cad/models, generated at build time
+> (docs/cad.md); the Python script, its commands and its own atlas are gone (the shared palette replaces the atlas).
+
+
 What: models for the 50V and 200V Steam Turbine (`mods.eln.oil.SteamGenerator*`), replacing the heat turbine placeholders
 (`turbineb`, `turbinebblue`). Registered in `Wp10aContent.registerSteam` as `steamturbine50v` / `steamturbine200v`.
 
@@ -19,12 +23,9 @@ Design: a compact turbine-generator set on a skid, shaft running front to back.
   15.75 px tall vs 14.5.
 
 ## Files
-- `steamturbine.py RESOURCES` writes `assets/eln/model/steamturbine{50v,200v}/` with `steamturbine*.obj` + `.mtl`
+- `SteamTurbine` RESOURCES` writes `assets/eln/model/steamturbine{50v,200v}/` with `steamturbine*.obj` + `.mtl`
   (part `main`, one material `atlas`) and `tex.png` (64x32 atlas of 8 procedural 16x16 cells: steel, darksteel,
   castiron, copper, brass, paint (tier colour), glass (gauge face), rubber). 1454 / 1614 triangles (main + rotor).
-  Run: `nix-shell -p 'python3.withPackages(p:[p.pillow])' --run 'python3 tools/models/steamturbine.py src/main/resources'`,
-  then `python3 script/gen_model_index.py`.
-- Check and preview: `python3 tools/models/elncheck.py src/main/resources/assets/eln/model/steamturbine*/steamturbine*.obj --preview OUT`.
 
 ## Not done
 - Inventory icon: datagen (`ElnModels`, the `v_steam_turbine` line) reuses the heat turbines' flat item textures. That's

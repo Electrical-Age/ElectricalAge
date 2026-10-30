@@ -16,7 +16,7 @@ public class TankRender extends TransparentNodeElementRender {
     int sx = 1, sy = 1, sz = 1;
     /** In a box: its ports with a pipe on them (TankElement.coupled): a flange each; and its place in the box. */
     int coupled, ox, oy, oz;
-    /** The shell's radius (px; tools/models/tank.py R), its top (px), and its flanges' depth (px). */
+    /** The shell's radius (px; mods.eln.cad.models.Tank R), its top (px), and its flanges' depth (px). */
     static final float SHELL_R = 5.5f, SHELL_TOP = 15f, DISC = 0.75f;
 
     public TankRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {

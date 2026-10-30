@@ -40,7 +40,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
         preserveMatrix {
             assert(rotating.size > 0)
-            // (about the shaft line through the rotor's origin, from its NAME.txt: tools/models/README-shaft.md)
+            // (about the shaft line through the rotor's origin, from its NAME.txt: docs/models/shaft.md)
             val r = rotating[0]
             val ox = r.getFloat("originX").toDouble()
             val oy = r.getFloat("originY").toDouble()
@@ -73,7 +73,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun getFrontFromPlace(side: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?): Direction? =
         if (entityLiving == null) Direction.XN else Utils.entityLivingHorizontalViewDirection(entityLiving).right()
 
-    /** Its model's hitbox (NAME.hitbox, tools/models/README-shaft.md), turned with its front. */
+    /** Its model's hitbox (NAME.hitbox, docs/models/shaft.md), turned with its front. */
     private val hitbox by lazy { mods.eln.node.transparent.ModelHitbox.of(obj) }
 
     override fun modelHitbox() = hitbox

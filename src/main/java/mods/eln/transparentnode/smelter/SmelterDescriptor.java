@@ -16,7 +16,7 @@ import static mods.eln.i18n.I18N.tr;
 /**
  * The smelter (Baughn 2026-10-23): a furnace heated through a thermal cable on its back, with a little 50 V for its
  * controls. It smelts as the electrical oven does at the same temperature (the oven's PfT), taking that heat from what the
- * cable brings; hoppers feed its top and empty its bottom. Model: tools/models/smelter.py.
+ * cable brings; hoppers feed its top and empty its bottom. Model: mods.eln.cad.models.Smelter.
  */
 public class SmelterDescriptor extends TransparentNodeDescriptor {
     public final IFunction PfT, thermalPlostfT;

@@ -14,7 +14,7 @@ import java.util.List;
  * up to 8 long, SLICE_UA per 2 x 2 slice (Baughn 2026-10-29: 50 W/K, 400 at the most); a lone block or any other shape
  * is a quarter slice per block. Ports on its two end faces: A at their centres, B up high (its top row gives a steam
  * raiser's steam). An economizer (gas exhaust to feedwater), a reheater between the HP and LP turbines, a steam raiser
- * for a combined cycle; separate jobs are separate exchangers piped in series. Model: tools/models/heatexchanger.py.
+ * for a combined cycle; separate jobs are separate exchangers piped in series. Model: mods.eln.cad.models.HeatExchanger.
  */
 public class HeatExchangerDescriptor extends TransparentNodeDescriptor {
     /** A 2 x 2 slice's UA (W/K; Baughn 2026-10-29). */

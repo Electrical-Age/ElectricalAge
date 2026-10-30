@@ -19,7 +19,7 @@ import static mods.eln.i18n.I18N.tr;
  * the anvil's 720 V: C >= 20 kJ / (0.5 (800^2 - 720^2)) = 0.33 F; it has 0.36 F. Rated 1000 V: it pops above 1.3 times
  * that, as the Power Capacitor does. It leaks (an RC time constant of half an hour), so it's no bulk store: lead-acid
  * batteries stay the way to keep energy (Baughn). Polar: + on the left of the front, - on the right (the model's
- * coloured plates). Model: tools/models/capacitorbank.py.
+ * coloured plates). Model: mods.eln.cad.models.CapacitorBank.
  */
 public class CapacitorBankDescriptor extends TransparentNodeDescriptor {
     /** Its capacitance (F), rating (V) and leakage time constant R C (s); config [capacitorBank]. */
