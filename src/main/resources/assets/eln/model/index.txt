@@ -79,7 +79,6 @@ passivethermaldissipatora/passivethermaldissipatora.obj
 plantcondenser/plantcondenser.obj
 platemachinea/platemachinea.obj
 platemachineb/platemachineb.obj
-plc/plc.obj
 powerelectricprimitives/powerelectricprimitives.obj
 powerpole/downlink.obj
 powerpole/transformer.obj
