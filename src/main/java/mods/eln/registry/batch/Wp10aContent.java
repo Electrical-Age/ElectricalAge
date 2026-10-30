@@ -106,6 +106,9 @@ public class Wp10aContent implements ElnContent {
             LVU, 1000, lowVoltageCableDescriptor, "oilpump50v"));
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "200V Oil Pump"),
             MVU, 4000, meduimVoltageCableDescriptor, "oilpump200v"));
+        // the steam injection wellhead (todo #138; Baughn 2026-10-30: enhanced recovery by steam, not water)
+        transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamInjectionDescriptor(TR_NAME(Type.NONE, "Steam Injection Wellhead"),
+            "oilpump50v"));
         // Baughn 2026-10-25: small waterlogged pumps for a boiler's feed, a few turbines' worth of water each
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "50V Submersible Pump"),
             LVU, 100, 1000, 6e5, lowVoltageCableDescriptor, "submersiblepump50v"));

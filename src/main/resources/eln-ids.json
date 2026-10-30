@@ -1931,6 +1931,12 @@
   "kind": "transparent_node",
   "name": "200v_submersible_pump"
  },
+ "eln:transparent_node@5200": {
+  "descriptor": "SteamInjectionDescriptor",
+  "display": "Steam Injection Wellhead",
+  "kind": "transparent_node",
+  "name": "steam_injection_wellhead"
+ },
  "eln:transparent_node@5248": {
   "descriptor": "ElectricHeaterDescriptor",
   "display": "50V Electric Heater",

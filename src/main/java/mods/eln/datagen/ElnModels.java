@@ -55,6 +55,7 @@ public class ElnModels implements DataProvider {
         // 26.x oil machines: the macerator's icons until their own exist
         if (name.endsWith("tar_sand_separator")) return itemTexture(name.replace("tar_sand_separator", "macerator"), item);
         if (name.endsWith("oil_pump")) return itemTexture(name.replace("oil_pump", "compressor"), item);
+        if (name.equals("steam_injection_wellhead")) return itemTexture("50v_oil_pump", item);   // (until its own icon)
         if (name.endsWith("electric_heater")) return itemTexture("large_rheostat", item);
         if (name.equals("boiler")) return itemTexture("electrical_furnace", item);
         if (name.startsWith("fractionating_column")) return itemTexture("fuel_heat_furnace", item);

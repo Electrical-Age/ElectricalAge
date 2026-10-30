@@ -283,3 +283,13 @@ on 1.7.10) onto 26.x.
   `capacitorBank.powerCapacitorLeakTauSeconds`, `GoldenCase.CHANGED`). With the compressor's four Dielectrics a sand (was
   one) a row of them would have been a cheap, non-wearing bulk store; batteries stay the only sensible one. Saved
   capacitors keep their charge and take the new leak on load. GameTest `power_capacitor_leaks_like_the_bank`.
+
+- Oil lakes (todo #138, Baughn 2026-10-30, after Argon's review): new lakes are `oilLakes.sizeMultiplier` (2) times as
+  big, all by depth (same footprint; the scale is saved in the lake's structure piece, 1 for older lakes). Below
+  `oilLakes.tailShare` (20 %) of its capacity an oil lake seeps instead of running dry: a pump gets `seepShare` (18 %) of
+  its nominal rate for ever and draws that share of its power; the lake stays at its tail level. Steam pushed down a
+  second well casing through the Steam Injection Wellhead (`eln:transparent_node@5200`, new; above the casing's head of
+  crude, ~0.08 bar a block) pays for crude at `steamKgPerBucket` (0.2 kg), and the lake's pumps run at full rate on it
+  (credit per lake in SavedData `eln:oil_recovery`, at most a pump tank's worth). Water lakes still run dry. Residue is a
+  fuel for the fuel heat furnace (~41.7 MJ/l); heavy oil already was. GameTests `oil_lake_seepage`, `oil_lake_steam`,
+  `oil_lake_weak_steam`, `oil_heavy_cuts_burn`, `oil_lake_sizes`.

@@ -39,8 +39,10 @@ public class OilPumpElement extends TransparentNodeElement {
     /** Source found at the last look: a lake id (> 0), water (-1) or nothing (0); depth in blocks. */
     int source;
     int depth;
-    double carry;
+    double carry, seepCarry;
     double rate;   // mB/s, for WAILA
+    /** Jade: the oil lake's state (OilRecovery.describe), or null. */
+    String lake;
     String status = "idle";
     int look;
 
@@ -73,50 +75,66 @@ public class OilPumpElement extends TransparentNodeElement {
                 status = source == 0 ? "no well casing down to oil or water" : "tank full";
                 return;
             }
-            resistor.setR(desc.resistorR);
+            // an oil lake in its seepage tail gives the pump only a trickle: it runs that slowly, drawing that share
+            OilRecovery rec = OilRecovery.oil(res) ? OilRecovery.get(level) : null;
+            boolean seeping = rec != null && rec.regime(res) == OilRecovery.Regime.SEEPAGE;
+            resistor.setR(seeping ? desc.resistorR / Math.max(0.01, OilRecovery.seepShare) : desc.resistorR);
             double e = resistor.getP() * time;
             double mb = e / OilPumpDescriptor.energyPerMb(water, depth) + carry;
             int whole = (int) Math.min(Math.floor(mb), tank.getCapacity() - tank.getFluidAmount());
             carry = mb - Math.floor(mb);
             long got = 0;
+            if (rec != null) {
+                // (seepage: never more than its share of this pump's nominal rate; at most 2 s of it banked)
+                double seepRate = OilRecovery.seepShare * desc.nominalP / OilPumpDescriptor.energyPerMb(false, depth);
+                seepCarry = Math.min(seepCarry + seepRate * time, Math.max(1, 2 * seepRate));
+            }
             if (whole > 0) {
                 if (source < 0) got = whole;
-                else {
+                else if (rec != null) {
+                    long[] t = rec.take(level, res, whole, (long) Math.floor(seepCarry));
+                    got = t[0];
+                    seepCarry -= t[2];
+                } else {
                     if (res != null) got = mods.eln.reservoir.Reservoirs.take(level, res, whole, false);
                     if (got == 0) status = "the lake is empty";
                 }
                 if (got > 0) tank.fill(new FluidStack(water ? Fluids.WATER : Oil.CRUDE.get(), (int) got), true);
             }
             rate = 0.9 * rate + 0.1 * (got / Math.max(time, 1e-6));
-            if (got > 0) status = source < 0 ? "pumping water" : water ? "pumping water from lake #" + source : "pumping crude from lake #" + source;
+            if (got > 0) status = source < 0 ? "pumping water" : water ? "pumping water from lake #" + source : "pumping crude";
+            lake = rec != null ? OilRecovery.describe(level, res) : null;
         }
     }
 
     /** Follow the well casing down: a lake cell or water below its end (or beside its bottom block)? */
     void findSource(ServerLevel level) {
-        BlockPos p = node.coordonate.pos().below();
+        int[] w = well(level, node.coordonate.pos());
+        source = w[0];
+        depth = w[1];
+    }
+
+    /**
+     * The well under a device at `top`: {source, depth}: following the casing down from the block under it, a lake's id
+     * (> 0) or water (-1) under its end or beside its bottom block, else 0; depth in blocks of casing.
+     */
+    static int[] well(ServerLevel level, BlockPos top) {
+        BlockPos p = top.below();
         int d = 0;
         while (level.getBlockState(p).is(OilWorldgen.WELL_CASING.get()) && d < 400) {
             p = p.below();
             d++;
         }
-        source = 0;
-        depth = d;
-        if (d == 0) return;
+        if (d == 0) return new int[]{0, 0};
         // the block under the casing, or around its bottom piece
         BlockPos bottom = p.above();
         for (BlockPos q : new BlockPos[]{p, bottom.north(), bottom.south(), bottom.east(), bottom.west()}) {
             mods.eln.reservoir.Reservoir r = mods.eln.reservoir.ReservoirData.get(level).at(level, q);
-            if (r != null) {
-                source = r.id();
-                return;
-            }
+            if (r != null) return new int[]{r.id(), d};
             var fs = level.getFluidState(q);
-            if (fs.is(Fluids.WATER) && fs.isSource()) {
-                source = -1;
-                return;
-            }
+            if (fs.is(Fluids.WATER) && fs.isSource()) return new int[]{-1, d};
         }
+        return new int[]{0, d};
     }
 
     @Override
@@ -180,6 +198,7 @@ public class OilPumpElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
         info.put(I18N.tr("Status"), status);
+        if (lake != null) info.put(I18N.tr("Lake"), lake);
         info.put(I18N.tr("Flow"), String.format("%.1f mB/s", rate));
         info.put(I18N.tr("Tank"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
         info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));

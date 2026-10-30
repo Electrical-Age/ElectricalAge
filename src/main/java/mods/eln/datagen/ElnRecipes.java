@@ -1987,6 +1987,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'P', stack(Blocks.PISTON),
             'W', stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get()),
             'I', stack(Items.IRON_INGOT));
+        // the steam injection wellhead (todo #138): an alloy pipe in, a valve, well casing down
+        addRecipe(findItemStack("Steam Injection Wellhead", 1),
+            " p ",
+            "IvI",
+            "IWI",
+            'p', stack(mods.eln.registry.ElnRegistry.PIPE_KIT_ALLOY.get()),
+            'v', stack(mods.eln.registry.ElnRegistry.PIPE_VALVE.get()),
+            'W', stack(mods.eln.oil.OilWorldgen.WELL_CASING_ITEM.get()),
+            'I', "ingotAlloy");
         // the submersible pumps (Baughn 2026-10-25): a motor in a can, an intake screen, a pipe out of the top
         addRecipe(findItemStack("50V Submersible Pump", 1),
             " p ",

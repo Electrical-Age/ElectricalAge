@@ -1,4 +1,4 @@
-// 26.3	2026-10-29T18:43:41.79466171	eln-global/EA models
+// 26.3	2026-10-30T00:46:47.59482572	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -72,6 +72,7 @@ f0ed42296ed8f581741e53ea14400c53a04c1ba2 assets/eln/blockstates/light_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/plant_steam_condenser.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/power_capacitor_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/power_inductor_block.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/reservoir_water.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/single_use_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/six_node.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_active_thermal_dissipator.json
@@ -81,6 +82,7 @@ f0ed42296ed8f581741e53ea14400c53a04c1ba2 assets/eln/blockstates/light_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/small_steam_condenser.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/smelter.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_condenser.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_injection_wellhead.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_oven.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/stone_heat_furnace.json
@@ -404,6 +406,7 @@ f8750fe216f0ad07571216fdd59b94264a744d04 assets/eln/items/smelter.json
 c45e46494ad77465a8c06bb56e58edf1d6a747db assets/eln/items/solar_tracker.json
 e0ac63120912b77188f74155e43fa17b38d38223 assets/eln/items/standard_alarm.json
 487ad37c75d2b054b20b14f748f86561f444052e assets/eln/items/steam_condenser.json
+9419d74e29c682a6d664170f063dd973a0898acd assets/eln/items/steam_injection_wellhead.json
 0a5420dad554eca037ba807beb9837751b42e535 assets/eln/items/steam_oven.json
 f5be8cbae972b0a222f2b97523926ae36187a761 assets/eln/items/steam_turbine.json
 7673b321165d9e22db59d2bf13173c3dfa78066e assets/eln/items/stone_heat_furnace.json
@@ -890,6 +893,7 @@ ab4ccf32ae822a3b82f3f003b145d622fcf8a8a0 assets/eln/models/item/smelter_3d.json
 32399a008ed75e65341ade5b864871dc9bf680f2 assets/eln/models/item/standard_alarm.json
 a125e471bfb6effc571f726e1993643a16652ef6 assets/eln/models/item/standard_alarm_3d.json
 4cd65ebf22bb285edbccefaa9720344fc8b3e1d6 assets/eln/models/item/steam_condenser.json
+6cc62f4c36b3248f592ce3d191775049b2c53c54 assets/eln/models/item/steam_injection_wellhead.json
 4a30621bce4da77ce01185947ca76d8110bdce49 assets/eln/models/item/steam_oven.json
 5e84f459a170388d992107a67a11427a8505a577 assets/eln/models/item/steam_oven_3d.json
 1ad10bb23f5a1ed79129d5cedc9760acd3a70ab7 assets/eln/models/item/steam_turbine.json

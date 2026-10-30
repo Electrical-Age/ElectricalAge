@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:ingots/alloy",
+    "W": "eln:well_casing",
+    "p": "eln:pipe_kit_alloy",
+    "v": "eln:pipe_valve"
+  },
+  "pattern": [
+    " p ",
+    "IvI",
+    "IWI"
+  ],
+  "result": {
+    "id": "eln:steam_injection_wellhead"
+  }
+}
