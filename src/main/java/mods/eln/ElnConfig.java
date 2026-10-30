@@ -116,7 +116,7 @@ public final class ElnConfig {
         LAKE_SIZE = b.comment("Generated oil lakes hold this many times the old volume, by going deeper (their footprint is the same).",
                 "New lakes only: a lake keeps the multiplier it was generated with.").defineInRange("sizeMultiplier", 2.0, 0.25, 5.0);
         TAIL_SHARE = b.comment("Below this share of its capacity an oil lake seeps instead of running dry.").defineInRange("tailShare", 0.2, 0.0, 1.0);
-        SEEP_SHARE = b.comment("A pump on a seeping lake gets this share of its nominal rate, for ever.").defineInRange("seepShare", 0.18, 0.0, 1.0);
+        SEEP_SHARE = b.comment("A seeping lake yields this share of one 200 V pump's nominal rate, for ever, shared by all the pumps on it.").defineInRange("seepShare", 0.18, 0.0, 1.0);
         STEAM_PER_BUCKET = b.comment("Steam (kg) injected down a well that brings up a bucket of crude from a seeping lake at the pumps' full rate.")
             .defineInRange("steamKgPerBucket", 0.2, 0.001, 100.0);
         b.pop();
