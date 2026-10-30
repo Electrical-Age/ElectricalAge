@@ -63,6 +63,9 @@ public final class LogGraph {
             if (!compact) right += widths[i] + 4;
         }
         int gx = x + left, gw = w - left - right;
+        // the data first, the axes' labels over it
+        g.fill(gx, gy + gh, gx + gw, gy + gh + 1, AXIS);
+        for (int c = 0; c < log.channelCount(); c++) series(g, gx, gy, gw, gh, log, c, colour.applyAsInt(c), 0, 1);
         for (int i = 0; i < axes.size(); i++) {
             LogChannel s = axes.get(i).scale();
             int textColour = axes.size() == 1 ? TEXT : colour.applyAsInt(axes.get(i).channels().get(0));
@@ -78,8 +81,6 @@ public final class LogGraph {
                 g.text(f, labels[i][t], tx, Math.max(gy - 4, Math.min(gy + gh - 4, ly)), textColour, false);
             }
         }
-        g.fill(gx, gy + gh, gx + gw, gy + gh + 1, AXIS);
-        for (int c = 0; c < log.channelCount(); c++) series(g, gx, gy, gw, gh, log, c, colour.applyAsInt(c), 0, 1);
     }
 
     /** Channel c's band and line over (gx, gy, gw, gh), signal lo..hi mapped to the bottom..top. */
@@ -155,7 +156,9 @@ public final class LogGraph {
             series(g, gx, ly + 1, gw, lh - 1, log, c, colour.applyAsInt(c), 0, 1);
             LogChannel ch = log.channels[c];
             String name = ch.name.isEmpty() ? "" : ch.name + " ";
-            g.text(f, name + label(ch.max, ch), gx + 1, ly + 1, colour.applyAsInt(c), false);
+            String text = name + label(ch.max, ch);
+            g.fill(gx, ly, gx + f.width(text) + 2, ly + 9, 0xB0181C1A);   // over the data, on a dark backing
+            g.text(f, text, gx + 1, ly + 1, colour.applyAsInt(c), false);
         }
     }
 

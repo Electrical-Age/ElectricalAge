@@ -296,7 +296,8 @@ public final class LabCommands {
                     st.clear();
                     long ticks = minutes * 1200L;
                     for (long t = 0; t < ticks; t++) {
-                        float a = (float) (0.5 + 0.3 * Math.sin(t / 2400.0 * Math.PI)), b = (t / 1800) % 2 == 0 ? 0.8f : 0.1f, c = (t % 3000) / 3000f;
+                        float a = (float) (0.5 + 0.3 * Math.sin(t / 24000.0 * Math.PI) + 0.03 * Math.sin(t / 9.0)), b = (t / 12000) % 2 == 0 ? 0.8f : 0.1f,
+                            c = (t % 18000) / 18000f;
                         st.tick(new float[]{a, b, c, b > 0.5 ? a : 0});
                     }
                     st.setPeriod(st.periodSeconds());

@@ -19,7 +19,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     ElectricalMathDescriptor descriptor;
     Coordonate coord;
-    PhysicalInterpolator interpolator;
 
 
     String expression;
@@ -53,7 +52,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
     public ElectricalMathRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalMathDescriptor) descriptor;
-        interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
         coord = new Coordonate(tileEntity);
         ledOn[0] = true;
         ledOn[4] = true;
@@ -87,11 +85,12 @@ public class ElectricalMathRender extends SixNodeElementRender {
         if (UtilsClient.distanceFromClientPlayer(tileEntity) < 15) {
             GL11.glColor3f(0, 0, 0);
             UtilsClient.drawConnectionPinSixNode(front, pinDistances, 1.8f, 1.35f);
+            // A red (right), B blue (back), C green (left), as in the editor (Baughn 2026-10-30)
             GL11.glColor3f(1, 0, 0);
             UtilsClient.drawConnectionPinSixNode(front.right(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(0, 1, 0);
+            GL11.glColor3f(0, 0.3f, 1);
             UtilsClient.drawConnectionPinSixNode(front.inverse(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(0, 0, 1);
+            GL11.glColor3f(0, 1, 0);
             UtilsClient.drawConnectionPinSixNode(front.left(), pinDistances, 1.8f, 1.35f);
             GL11.glColor3f(1, 1, 1);
         }
@@ -100,7 +99,8 @@ public class ElectricalMathRender extends SixNodeElementRender {
             front.left().glRotateOnX();
         }
 
-        descriptor.draw(interpolator.get(), ledOn);
+        // the tiny logger screen only near enough to read (its data comes only then too)
+        descriptor.draw(ledOn, UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE ? log : null);
     }
 
     @Override
@@ -118,12 +118,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
             ledTime = 0;
         }
 
-        if (!Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(0)))
-            interpolator.setTarget(0f);
-        else
-            interpolator.setTarget(1f);
-
-        interpolator.step(deltaT);
     }
 
     @Override

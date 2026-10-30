@@ -168,7 +168,7 @@ public class Wp9cContent implements ElnContent {
             name = TR_NAME(Type.NONE, "Signal Processor");
 
             desc = new ElectricalMathDescriptor(name,
-                obj.getObj("PLC"));
+                obj.getObj("signalprocessor"));
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 

@@ -118,6 +118,7 @@ public final class Palette {
         // (Smelter)
         put("glow", 255, 255, 255, 0, null);
         // (SteamOven)
+        put("screen", 18, 26, 22, 2, null);     // an instrument's dark screen (the signal processor's logger)
         put("darkglass", 70, 92, 104, 4, (x, y) -> x + y == 6 || x + y == 7 || x + y == 14 ? new int[]{70, 70, 70} : null);
         // (SteamTurbine)
         put("dialglass", 228, 230, 222, 4, (x, y) -> x == 8 && y < 9 ? new int[]{-120, -120, -120} : null);

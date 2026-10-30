@@ -104,6 +104,7 @@ shaftmotor/shaftmotor.obj
 shaftsteamhp/shaftsteamhp.obj
 shaftsteamlp/shaftsteamlp.obj
 shafttacho/shafttacho.obj
+signalprocessor/signalprocessor.obj
 signalsource/signalsource.obj
 signalsourcepot/signalsourcepot.obj
 simplelamp/simplelamp.obj

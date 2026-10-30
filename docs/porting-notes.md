@@ -343,6 +343,15 @@ on 1.7.10) onto 26.x.
   on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
   changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
+- Signal processor logger and defaults (Baughn 2026-10-30, board #45): a program may give an input a default,
+  `A = 0.5` on a definition line (a constant, once per input, free), read while no cable is connected to it. The
+  processor carries a four-channel logger (A, B, C as the program reads them, and the output) in its screen's left
+  pane, with lines, stacked-area and lane modes, and draws the A/B/C/out graph on a tiny screen on its new model
+  (cad `SignalProcessor`, no door). Loggers send their graph only to watchers: a client asks while it can see it
+  (screen open, or within 32 blocks for the data logger, 6 for the processor's tiny screen) and repeats every second;
+  the whole graph when watching starts or the period changes, then one point (6 bytes a channel) as each is due.
+  Units are free text (10 characters, sanitized); older saves and prints keep theirs as a symbol. GameTests
+  `wp9c signal processor`, `wp9c data logger`.
 - Signal processor functions (Baughn 2026-10-30, board #45): `rs(set, reset)` and `rc(x, tau)` (1.12: `rs(reset, set)`,
   `rc(tau, x)`). A processor saves `programVersion`; one saved without it has its program rewritten once on load
   (`ProgramUpgrade`: the two arguments of every rs and rc call swap, so it does the same). Also fixed: `derivate`
