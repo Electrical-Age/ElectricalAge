@@ -44,6 +44,9 @@ public final class LabCommands {
             Commands.literal("elnlab").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("gallery").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> gallery(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
+                .then(Commands.literal("voxelgallery").executes(c -> voxelGallery(c.getSource(), BlockPos.containing(c.getSource().getPosition()).below()))
+                    .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .executes(c -> voxelGallery(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("burn").then(Commands.argument("r", IntegerArgumentType.integer(1, 64))
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
                         .executes(c -> burn(c.getSource(), IntegerArgumentType.getInteger(c, "r"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
@@ -501,5 +504,25 @@ public final class LabCommands {
         src.sendSuccess(() -> Component.literal("gallery: " + fp + "/" + devices.size() + " placed, " + rows.size()
             + " rows, cameras in eln-gallery-26.json"), true);
         return placed;
+    }
+
+    /**
+     * The voxel part gallery (board #44, for a client's look at the checked-model fixes): on a smooth stone pad at pos
+     * (its corner, the pad at pos's level; by default the block under the caller), the legend to chat and to eln-voxelgallery.txt.
+     */
+    static int voxelGallery(CommandSourceStack src, BlockPos origin) {
+        WorldTestContext ctx = new WorldTestContext(src.getLevel(), origin);
+        var r = mods.eln.gametest.cases.VoxelGallery.place(ctx);
+        StringBuilder b = new StringBuilder("Voxel gallery at " + origin.toShortString() + " (offsets x y z from it; the pad at y +0)\n");
+        for (String l : r.legend()) b.append(l).append("\n");
+        for (String e : r.errors()) b.append("FAILED ").append(e).append("\n");
+        try {
+            java.nio.file.Files.writeString(java.nio.file.Path.of("eln-voxelgallery.txt"), b.toString());
+        } catch (IOException e) {
+            src.sendFailure(Component.literal("legend not written: " + e));
+        }
+        for (String l : b.toString().split("\n")) src.sendSuccess(() -> Component.literal(l), false);
+        src.sendSuccess(() -> Component.literal("voxelgallery: " + r.legend().size() + " blocks, " + r.errors().size() + " failed; legend in eln-voxelgallery.txt"), true);
+        return r.legend().size() - r.errors().size();
     }
 }

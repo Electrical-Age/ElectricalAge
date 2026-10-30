@@ -45,6 +45,7 @@ public final class PipeCases {
         cases.add(new PipeRoutePreview());
         cases.add(new KitLengthNotDamage());
         cases.add(new LiquidStaysIncompressible());
+        cases.add(new VoxelGallery());
     }
 
     static VoxelNode node(TestContext ctx, BlockPos p) {
