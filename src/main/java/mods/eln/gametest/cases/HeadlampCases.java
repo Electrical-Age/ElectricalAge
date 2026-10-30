@@ -20,6 +20,7 @@ public final class HeadlampCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new Worn());
         cases.add(new DrillModel());
+        cases.add(new LightsKey());
     }
 
     /**
@@ -95,6 +96,61 @@ public final class HeadlampCases {
             ctx.check("drill: the model loads with parts main and bit", obj != null && obj.getPart("main") != null && obj.getPart("bit") != null, "" + obj);
             var d = mods.eln.Eln.sharedItemStackOne.getDescriptor(Wp12Cases.MINING_DRILL);
             ctx.check("drill: drawn as its model", d instanceof mods.eln.item.electricalitem.ElectricalPickaxe pick && pick.hasItemDraw(), "" + d);
+        }
+    }
+
+    /**
+     * The lights key steps every light the player has (Baughn 2026-10-30): a headlamp and a flashlight in each hand step
+     * together on one press, each through its own cycle (headlamp off/on, flashlight off/on/boosted); a flashlight alone
+     * in the offhand steps too.
+     */
+    static final class LightsKey implements TestCase {
+        static final int SMALL_FLASHLIGHT = 0 + (121 << 6);
+        String result = "";
+        boolean ok, offhandAlone;
+
+        public String id() {
+            return "lights_key_steps_every_light";
+        }
+
+        static ItemStack flashlight() {
+            var d = (mods.eln.item.electricalitem.ElectricalLampItem) mods.eln.Eln.sharedItemStackOne.getDescriptor(SMALL_FLASHLIGHT);
+            ItemStack s = d.newItemStack();
+            d.setEnergy(s, 5000);
+            return s;
+        }
+
+        static int light(ItemStack s) {
+            return ((mods.eln.item.electricalitem.LampItem) mods.eln.misc.Utils.getItemObject(s)).beamLight(s);
+        }
+
+        public void build(TestContext ctx) {
+            Player p = FakePlayerFactory.get(ctx.level(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("e1a0b2c3-0000-4000-8000-000000000148"), "eln_lights"));
+            ItemStack head = new ItemStack(ElnRegistry.HEADLAMP.get());
+            ((HeadlampItem) head.getItem()).setEnergy(head, 1000);
+            p.setItemSlot(EquipmentSlot.HEAD, head);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, flashlight());
+            p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, flashlight());
+            mods.eln.server.PlayerKeys.set(p, mods.eln.server.PlayerKeys.HEADLAMP, true);
+            boolean first = HeadlampItem.isOn(p.getItemBySlot(EquipmentSlot.HEAD)) && light(p.getMainHandItem()) == 10 && light(p.getOffhandItem()) == 10;
+            mods.eln.server.PlayerKeys.set(p, mods.eln.server.PlayerKeys.HEADLAMP, true);
+            boolean second = !HeadlampItem.isOn(p.getItemBySlot(EquipmentSlot.HEAD)) && light(p.getMainHandItem()) == 12 && light(p.getOffhandItem()) == 12;
+            mods.eln.server.PlayerKeys.set(p, mods.eln.server.PlayerKeys.HEADLAMP, true);
+            boolean third = HeadlampItem.isOn(p.getItemBySlot(EquipmentSlot.HEAD)) && light(p.getMainHandItem()) == 0 && light(p.getOffhandItem()) == 0;
+            ok = first && second && third;
+            result = first + " " + second + " " + third;
+            // a flashlight alone in the offhand
+            p.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, flashlight());
+            mods.eln.server.PlayerKeys.set(p, mods.eln.server.PlayerKeys.HEADLAMP, true);
+            offhandAlone = light(p.getOffhandItem()) == 10;
+            p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("lights key: headlamp and both flashlights step together, each its own cycle", ok, "presses 1, 2, 3: " + result);
+            ctx.check("lights key: a flashlight alone in the offhand steps", offhandAlone, "");
         }
     }
 }

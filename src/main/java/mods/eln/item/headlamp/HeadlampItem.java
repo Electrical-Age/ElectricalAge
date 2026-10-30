@@ -80,20 +80,29 @@ public class HeadlampItem extends Item implements IItemEnergyBattery {
         return mods.eln.item.belt.CuriosCompat.headlamp(p);
     }
 
-    /** The headlamp key (server): switch the worn headlamp, and say so. */
-    public static void toggle(Player p) {
-        ItemStack s = worn(p);
-        if (s.isEmpty()) {
-            p.sendOverlayMessage(Component.translatable("eln.headlamp.none"));
-            return;
-        }
+    /** Step a headlamp (off, on, off; an empty one stays off); returns the new state's word, as the flashlight's. */
+    public static String step(ItemStack s) {
         boolean on = !isOn(s);
-        if (on && ((HeadlampItem) s.getItem()).getEnergy(s) <= 0) {
-            p.sendOverlayMessage(Component.translatable("eln.headlamp.empty"));
-            return;
-        }
+        if (on && ((HeadlampItem) s.getItem()).getEnergy(s) <= 0) return "is empty";
         setOn(s, on);
-        p.sendOverlayMessage(Component.translatable(on ? "eln.headlamp.on" : "eln.headlamp.off"));
+        return on ? "ON" : "OFF";
+    }
+
+    /**
+     * The lights key (server; Baughn 2026-10-30: it works the flashlight in either hand too, and steps every light the
+     * player has): the worn headlamp and an EA flashlight in the main hand and in the offhand each step through their own
+     * cycle, as their right-click does, and one message lists the new states.
+     */
+    public static void toggle(Player p) {
+        java.util.List<String> said = new java.util.ArrayList<>();
+        ItemStack head = worn(p);
+        if (!head.isEmpty()) said.add("Headlamp " + step(head));
+        for (var hand : net.minecraft.world.InteractionHand.values()) {
+            ItemStack s = p.getItemInHand(hand);
+            if (mods.eln.misc.Utils.getItemObject(s) instanceof mods.eln.item.electricalitem.ElectricalLampItem lamp)
+                said.add("Flashlight" + (hand == net.minecraft.world.InteractionHand.OFF_HAND ? " (off hand) " : " ") + lamp.step(s));
+        }
+        p.sendOverlayMessage(said.isEmpty() ? Component.translatable("eln.headlamp.none") : Component.literal(String.join(", ", said)));
     }
 
     @Override

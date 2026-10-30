@@ -23,7 +23,7 @@ final class ClientKeys {
 
     static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(Eln.MODID, "keys"));
     static final KeyMapping WRENCH = new KeyMapping("key.eln.wrench", InputConstants.KEY_C, CATEGORY);
-    /** The headlamp on/off (Baughn 2026-10-30; K: free in the pack, L is advancements). */
+    /** Lights on/off: the worn headlamp and the flashlights in hand (Baughn 2026-10-30; K: free in the pack, L is advancements). */
     static final KeyMapping HEADLAMP = new KeyMapping("key.eln.headlamp", InputConstants.KEY_K, CATEGORY);
     static boolean wrenchDown;
 

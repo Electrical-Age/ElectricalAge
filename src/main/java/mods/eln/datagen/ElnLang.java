@@ -38,11 +38,8 @@ public class ElnLang extends LanguageProvider {
         add("message.eln.electric_bike.no_battery", "No battery: pedalling only");
         add("message.eln.electric_bike.flat_battery", "The battery is flat: pedalling only");
         add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
-        add("key.eln.headlamp", "Headlamp on/off");
-        add("eln.headlamp.none", "No headlamp worn");
-        add("eln.headlamp.empty", "Headlamp is empty");
-        add("eln.headlamp.on", "Headlamp on");
-        add("eln.headlamp.off", "Headlamp off");
+        add("key.eln.headlamp", "Lights on/off (headlamp, flashlights in hand)");
+        add("eln.headlamp.none", "No headlamp worn, no flashlight in hand");
         add("eln.headlamp.tip.wear", "Worn on the head: the helmet slot or the head slot");
         add("eln.headlamp.tip.key", "%s switches it on and off");
         add("eln.headlamp.tip.power", "Discharge power: %s W");

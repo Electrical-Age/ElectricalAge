@@ -15,7 +15,7 @@ public final class PlayerKeys {
     }
 
     public static final int WRENCH = 1;
-    /** The headlamp key (Baughn 2026-10-30): a press switches the worn headlamp. */
+    /** The lights key (Baughn 2026-10-30): a press steps the worn headlamp and the flashlights in hand. */
     public static final int HEADLAMP = 2;
     static final Set<UUID> WRENCH_DOWN = ConcurrentHashMap.newKeySet();
 

@@ -70,26 +70,27 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
     }
 
     override fun onItemRightClick(s: ItemStack, w: Level, p: Player): ItemStack {
-        if (!w.isClientSide()) {
-            var lightState = getLightState(s) + 1
-            if (lightState > 2) lightState = 0
-            // an empty flashlight doesn't switch on (it did, and said ON; AGE 378dfa5e)
-            if (lightState != 0 && getEnergy(s) <= 0) {
-                Utils.sendMessage(p as ServerPlayer, "Flashlight is empty")
-                setLightState(s, 0)
-                return s
-            }
-            //((Player) entity).sendMessage("Flashlight !!!");
-            when (lightState) {
-                0 -> Utils.sendMessage(p as ServerPlayer, "Flashlight OFF")
-                1 -> Utils.sendMessage(p as ServerPlayer, "Flashlight ON")
-                2 -> Utils.sendMessage(p as ServerPlayer, "Flashlight BOOSTED")
-                else -> {
-                }
-            }
-            setLightState(s, lightState)
-        }
+        if (!w.isClientSide()) Utils.sendMessage(p as ServerPlayer, "Flashlight " + step(s))
         return s
+    }
+
+    /**
+     * Step to the next state (off, on, boosted, off), as a right-click does; returns the new state's word (OFF, ON,
+     * BOOSTED, or "is empty": an empty flashlight doesn't switch on; it did, and said ON, AGE 378dfa5e). Server.
+     */
+    fun step(s: ItemStack): String {
+        var lightState = getLightState(s) + 1
+        if (lightState > 2) lightState = 0
+        if (lightState != 0 && getEnergy(s) <= 0) {
+            setLightState(s, 0)
+            return "is empty"
+        }
+        setLightState(s, lightState)
+        return when (lightState) {
+            1 -> "ON"
+            2 -> "BOOSTED"
+            else -> "OFF"
+        }
     }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
