@@ -671,7 +671,7 @@ public final class Wp9cCases {
             within(ctx, "wp9c data logger: the 5 s view reads the same history (oldest point's mean)",
                 coarse.length > oldest && oldest >= 0 ? coarse[oldest][0][0] : -1, sum / 100, 2e-3);
             ctx.check("wp9c data logger: a save from before 2026-10-30 keeps its samples and scale",
-                migration.equals("20 points, 20 match, period 1.0 s, scale 0.0..50.0 unit 0"), migration);
+                migration.equals("20 points, 20 match, period 1.0 s, scale 0.0..50.0 unit V"), migration);
         }
     }
 

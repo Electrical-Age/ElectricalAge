@@ -90,7 +90,22 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         } else log.add(DataLogs.readPoint(stream, n));
     }
 
-    /** A channel's scale or unit to the server: header, channel, value. */
+    /** A channel's unit to the server: header, channel, text. */
+    public void sendUnit(int channel, String unit) {
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
+            preparePacketForServer(o);
+            o.writeByte(ElectricalDataLoggerElement.setUnitId);
+            o.writeByte(channel);
+            o.writeUTF(LogChannel.sanitize(unit));
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** A channel's scale to the server: header, channel, value. */
     public void sendChannel(byte id, int channel, float value) {
         try {
             java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
@@ -98,8 +113,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
             preparePacketForServer(o);
             o.writeByte(id);
             o.writeByte(channel);
-            if (id == ElectricalDataLoggerElement.setUnitId) o.writeByte((int) value);
-            else o.writeFloat(value);
+            o.writeFloat(value);
             sendPacketToServer(bos);
         } catch (IOException e) {
             e.printStackTrace();

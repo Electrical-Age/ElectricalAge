@@ -100,7 +100,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     void migrate(CompoundTag nbt) {
         byte[] log = nbt.getByteArray("logslog").orElse(new byte[0]);
         float period = nbt.getFloatOr("logssamplingPeriod", 0.5f);
-        channels[0] = new LogChannel(nbt.getFloatOr("logsminValue", 0f), nbt.getFloatOr("logsmaxValue", 100f), nbt.getByteOr("logsunitType", DataLogs.percentType));
+        channels[0] = new LogChannel(nbt.getFloatOr("logsminValue", 0f), nbt.getFloatOr("logsmaxValue", 100f), LogChannel.oldUnit(nbt.getByteOr("logsunitType", DataLogs.percentType)));
         float[][] samples = new float[log.length][];
         for (int i = 0; i < log.length; i++) samples[i] = new float[]{DataLogs.oldSample(log[log.length - 1 - i])};
         store.clear();
@@ -207,7 +207,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     // channel, value: a scale only changes how the history is shown
                     int c = stream.readByte();
                     if (c < 0 || c >= channels.length) break;
-                    if (header == setUnitId) channels[c].unit = stream.readByte();
+                    if (header == setUnitId) channels[c].unit = LogChannel.sanitize(stream.readUTF());
                     else {
                         float v = stream.readFloat();
                         if (!Float.isFinite(v)) break;

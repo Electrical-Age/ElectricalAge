@@ -69,14 +69,15 @@
    "fill": true
   },
   {
-   "button": "unit",
-   "sample": [
-    "Unit: Voltage [V]",
-    "Unit: Current [A]",
-    "Unit: Power [W]",
-    "Unit: Temp. [*C]",
-    "Unit: Percent [-]%",
-    "Unit: Energy [J]"
+   "row": [
+    {
+     "text": "unitl",
+     "sample": "Unit"
+    },
+    {
+     "field": "unit",
+     "chars": 10
+    }
    ],
    "fill": true
   },

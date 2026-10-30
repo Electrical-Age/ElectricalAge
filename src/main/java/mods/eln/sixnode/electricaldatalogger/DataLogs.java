@@ -147,7 +147,7 @@ public class DataLogs {
         if (nbt.contains("log")) {
             DataLogs d = new DataLogs(1);
             d.samplingPeriod = nbt.getFloatOr("samplingPeriod", 0.5f);
-            d.channels[0] = new LogChannel(nbt.getFloatOr("minValue", 0f), nbt.getFloatOr("maxValue", 0f), nbt.getByteOr("unitType", (byte) 0));
+            d.channels[0] = new LogChannel(nbt.getFloatOr("minValue", 0f), nbt.getFloatOr("maxValue", 0f), LogChannel.oldUnit(nbt.getByteOr("unitType", (byte) 0)));
             byte[] log = nbt.getByteArray("log").orElse(new byte[0]);
             for (int j = Math.min(log.length, POINTS) - 1; j >= 0; j--) {
                 float v = oldSample(log[j]);
@@ -246,20 +246,20 @@ public class DataLogs {
     }
 
     /** The value factor (0..1) of the way from min to max, in the unit. */
-    public static String getYstring(float factor, float maxValue, float minValue, byte unitType) {
-        return format(factor * (maxValue - minValue) + minValue, unitType);
+    public static String getYstring(float factor, float maxValue, float minValue, String unit) {
+        return format(factor * (maxValue - minValue) + minValue, unit);
     }
 
-    public static String format(double v, byte unitType) {
-        return switch (unitType) {
-            case celsiusType -> Utils.plotCelsius("", v - PhysicalConstant.Tamb);
-            case voltageType -> Utils.plotVolt("", v);
-            case currentType -> Utils.plotAmpere("", v);
-            case powerType -> Utils.plotPower("", v);
-            case percentType -> Utils.plotPercent("", v * 0.01);
-            case energyType -> Utils.plotEnergy("", v);
-            default -> "";
-        };
+    /** Units that take SI prefixes (k, m, ...); others are written as plain numbers. */
+    static final java.util.Set<String> SI = java.util.Set.of("V", "A", "W", "J", "Wh", "Hz", "N", "Pa", "F", "H", "s", "\u03A9", "ohm", "g");
+
+    /** A value in a unit: three significant digits, an SI prefix for SI units. */
+    public static String format(double v, String unit) {
+        if (SI.contains(unit)) return Utils.plotValue(v, unit);
+        double a = Math.abs(v);
+        String n = a == 0 ? "0" : a >= 1e5 || a < 1e-3 ? String.format(java.util.Locale.ROOT, "%.2e", v)
+            : new java.math.BigDecimal(v).round(new java.math.MathContext(3)).stripTrailingZeros().toPlainString();
+        return unit.isEmpty() ? n : unit.equals("%") || unit.startsWith("\u00B0") ? n + unit : n + " " + unit;
     }
 
     public List<LogChannel> channelList() {

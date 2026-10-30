@@ -24,9 +24,6 @@ public class ElectricalDataLoggerScreen extends ElnScreen {
         this.render = (ElectricalDataLoggerRender) render;
     }
 
-    // DataLogs unit order: voltage, current, power, celsius, percent, energy (do not translate, as 1.12)
-    static final String[] UNITS = {"Voltage [V]", "Current [A]", "Power [W]", "Temp. [*C]", "Percent [-]%", "Energy [J]"};
-
     /** Channel colours after the first (which takes the logger's ink): blue, green, white (board #45). */
     static final int[] CHANNEL_COLOURS = {0, 0xFF5A9CFF, 0xFF5AD85A, 0xFFE8E8E8};
     static final int GRID = 0xFF3A3A3A, AXIS_TEXT = 0xFFA0A0A0;
@@ -146,11 +143,8 @@ public class ElectricalDataLoggerScreen extends ElnScreen {
             float p = EaField.parse(v);
             if (!Float.isNaN(p)) render.sendChannel(ElectricalDataLoggerElement.setMinValue, 0, p);
         }, tr("Y-axis min"), tr("what a zero signal reads as"));
-        button("unit", () -> {
-                byte u = render.log.channels[0].unit;
-                return tr("Unit: %1$", u >= 0 && u < 6 ? tr(UNITS[u]) : "?");
-            },
-            () -> render.sendChannel(ElectricalDataLoggerElement.setUnitId, 0, (render.log.channels[0].unit + 1) % 6), tr("Click to change"));
+        text("unitl", () -> tr("Unit"));
+        field("unit", () -> render.log.channels[0].unit, v -> render.sendUnit(0, v), tr("Unit"), tr("any text, up to 10 characters"));
         update();
     }
 
