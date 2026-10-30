@@ -285,7 +285,8 @@ public class Wp9cContent implements ElnContent {
                 "tiltedterminal", 0.9f, 0.9f, 0.9f, "\u00A7f");
             desc.channels = 3;
             desc.ceiling = true;
-            desc.setPlaceDirection(new mods.eln.misc.Direction[]{mods.eln.misc.Direction.YN, mods.eln.misc.Direction.YP});
+            // on a table, a ceiling or (high) a wall (Baughn 2026-10-30)
+            desc.setPlaceDirection(mods.eln.misc.Direction.values());
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }

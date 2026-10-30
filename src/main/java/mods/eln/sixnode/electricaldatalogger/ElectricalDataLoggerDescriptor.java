@@ -38,7 +38,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     public boolean onFloor;
     /** Inputs (board #45): 1, or 3 for the three-channel logger (its inputs on its back edge; three pins in a voxel block). */
     public int channels = 1;
-    /** Placed on a ceiling too, hanging (the tilted terminal). */
+    /** Placed on a ceiling (hanging) or a wall too (the tilted terminal): its screen leans down toward a player below. */
     public boolean ceiling;
     public String textColor;
 
@@ -165,6 +165,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
     @Override
     public LRDU getFrontFromPlace(Direction side, Player player) {
+        // on a wall, its front (where the screen looks) down: it leans out and down toward a player below
+        if (ceiling && side.isNotY()) return side.getLRDUGoingTo(Direction.YN);
         LRDU front = super.getFrontFromPlace(side, player);
         if (onFloor) {
             return front.inverse();
