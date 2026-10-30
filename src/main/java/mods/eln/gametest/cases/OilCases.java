@@ -1657,7 +1657,11 @@ public final class OilCases {
         }
     }
 
-    /** Generated lakes (LakeShape): mostly 5-20k buckets (design: a tower-fortnight or a few), every one a real lake. */
+    /**
+     * Generated lakes (LakeShape): mostly 5-20k buckets at the old depth (design: a tower-fortnight or a few), every one
+     * a real lake; at the default sizeMultiplier 2 (todo #138, Baughn 2026-10-30) twice that, by depth alone (same
+     * footprint).
+     */
     static final class LakeSizes extends Base {
         public String id() {
             return "oil_lake_sizes";
@@ -1668,15 +1672,21 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             var rnd = new java.util.Random(12345);
-            int inRange = 0, n = 12;
-            StringBuilder sb = new StringBuilder(), outcrops = new StringBuilder();
+            int inRange = 0, n = 12, twice = 0;
+            StringBuilder sb = new StringBuilder(), outcrops = new StringBuilder(), sizes2 = new StringBuilder();
             for (int i = 0; i < n; i++) {
                 int r0 = 28 + rnd.nextInt(29);
                 float aspect = 0.7f + 0.6f * rnd.nextFloat();
-                var shape = new mods.eln.oil.LakeShape(i, 0, 0, 0, Math.round(r0 * aspect), Math.round(r0 / aspect), rnd.nextInt());
-                int[][] cols = shape.columns();
-                long cells = 0;
+                int seed = rnd.nextInt();
+                var shape = new mods.eln.oil.LakeShape(i, 0, 0, 0, Math.round(r0 * aspect), Math.round(r0 / aspect), seed, 1f);
+                var deeper = new mods.eln.oil.LakeShape(i, 0, 0, 0, Math.round(r0 * aspect), Math.round(r0 / aspect), seed, 2f);
+                int[][] cols = shape.columns(), cols2 = deeper.columns();
+                long cells = 0, cells2 = 0;
                 for (int k = 0; k < cols[1].length; k++) cells += Integer.bitCount(cols[1][k]);
+                for (int k = 0; k < cols2[1].length; k++) cells2 += Integer.bitCount(cols2[1][k]);
+                sizes2.append(cells2).append(' ');
+                double ratio = cells2 / (double) Math.max(1, cells);
+                if (ratio > 1.8 && ratio < 2.2 && deeper.sizeX() == shape.sizeX() && deeper.sizeZ() == shape.sizeZ()) twice++;
                 int out = 0, tarCols = 0, area = 0;
                 for (int x = shape.minX(); x < shape.minX() + shape.sizeX(); x++)
                     for (int z = shape.minZ(); z < shape.minZ() + shape.sizeZ(); z++) {
@@ -1694,6 +1704,8 @@ public final class OilCases {
             ctx.line("oil: lake sizes (buckets): " + sb);
             ctx.line("oil: tar sand outcrop / buried columns per lake: " + outcrops);
             ctx.check("oil: most lakes hold 4-25k buckets", inRange >= n * 2 / 3, inRange + " of " + n + ": " + sb);
+            ctx.line("oil: lake sizes at sizeMultiplier 2 (buckets): " + sizes2);
+            ctx.check("oil: at sizeMultiplier 2 every lake holds 1.8-2.2 times as much, on the same footprint", twice == n, twice + " of " + n);
             // a lake below y 0 (negative heights): full means the surface at its top
             var deep = mods.eln.oil.OilReservoirs.create(ctx.level(), null, 0, 0, 2, 1, new int[]{-21, -22}, new int[]{0b111, 0b1111}, Long.MAX_VALUE);
             ctx.check("oil: below y 0, a full lake's surface is its top (y -18)", deep.surface() == -18 * 8, "" + deep.surface());

@@ -34,7 +34,7 @@ public class OilLakePiece extends StructurePiece {
     public OilLakePiece(CompoundTag tag) {
         super(OilWorldgen.LAKE_PIECE.get(), tag);
         this.shape = new LakeShape(tag.getLongOr("key", 0), tag.getIntOr("cx", 0), tag.getIntOr("cz", 0), tag.getIntOr("base_y", 0),
-            tag.getIntOr("rx", 32), tag.getIntOr("rz", 32), tag.getIntOr("seed", 0));
+            tag.getIntOr("rx", 32), tag.getIntOr("rz", 32), tag.getIntOr("seed", 0), tag.getFloatOr("depth_scale", 1f));   // (1: a lake from before)
         this.surface = tag.getIntOr("surface", 64);
     }
 
@@ -47,6 +47,7 @@ public class OilLakePiece extends StructurePiece {
         tag.putInt("rx", shape.rx());
         tag.putInt("rz", shape.rz());
         tag.putInt("seed", shape.seed());
+        tag.putFloat("depth_scale", shape.depthScale());
         tag.putInt("surface", surface);
     }
 
@@ -65,7 +66,7 @@ public class OilLakePiece extends StructurePiece {
                 if (kind == LakeShape.Kind.OUTSIDE) {
                     // just outside the cavern: no water or lava flowing in at its height
                     if (shape.dist(x, z) < 1.3f)
-                        for (int y = base - 8; y <= base + 9; y++) {
+                        for (int y = base - Math.max(8, LakeShape.maxDepth(shape.depthScale()) + 2); y <= base + 9; y++) {
                             p.set(x, y, z);
                             if (!level.getBlockState(p).getFluidState().isEmpty()) level.setBlock(p, stone, 2);
                         }

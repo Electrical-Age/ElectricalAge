@@ -18,6 +18,7 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
     static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, POWER_CAP_LEAK;
+    static final ModConfigSpec.DoubleValue LAKE_SIZE;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -110,6 +111,11 @@ public final class ElnConfig {
                 "Dielectrics a sand a row of them was a cheap bulk store (Baughn 2026-10-28: batteries stay the only sensible one).")
             .defineInRange("powerCapacitorLeakTauSeconds", 1800.0, 1.0, 1e9);
         b.pop();
+        // oil lakes (todo #138; Baughn 2026-10-30, after Argon's a3)
+        b.push("oilLakes");
+        LAKE_SIZE = b.comment("Generated oil lakes hold this many times the old volume, by going deeper (their footprint is the same).",
+                "New lakes only: a lake keeps the multiplier it was generated with.").defineInRange("sizeMultiplier", 2.0, 0.25, 5.0);
+        b.pop();
         b.push("probe");
         PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
                 "Also 1.12's wailaEasyMode: more detail on some machines.")
@@ -164,6 +170,7 @@ public final class ElnConfig {
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.ratedVolts = BANK_VOLTS.get();
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.leakTauS = BANK_LEAK.get();
         powerCapacitorLeakTauS = POWER_CAP_LEAK.get();
+        mods.eln.oil.OilLakeStructure.sizeMultiplier = LAKE_SIZE.get();
         if (mods.eln.Eln.sixNodeItem != null)   // (config can load before the devices register; they take it from the field)
             for (Object d : mods.eln.Eln.sixNodeItem.all().values())
                 if (d instanceof mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor p) p.dischargeTao = powerCapacitorLeakTauS;

@@ -6,9 +6,14 @@ package mods.eln.oil;
  * <p>
  * An ellipse with a noise-warped shore, oil to baseY (the full surface), deeper towards the middle with a noisy floor;
  * islands (dry, a block above the oil) and pillars (rock to the ceiling); a beach ring of dry floor around the oil;
- * a cavern ceiling 3-8 blocks above the oil.
+ * a cavern ceiling 3-8 blocks above the oil. depthScale deepens the oil (todo #138, Baughn 2026-10-30: lakes twice as
+ * big, mostly by depth; config oilLakes.sizeMultiplier), its footprint the same; a lake keeps the scale it was
+ * generated with (saved in its piece; 1 for lakes from before).
  */
-public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int seed) {
+public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int seed, float depthScale) {
+    /** The most oil cells a column holds (the record keeps a column's cells as bits of an int). */
+    public static final int MAX_DEPTH = 31;
+
     /** What a column is. */
     public enum Kind { OUTSIDE, BEACH, ISLAND, PILLAR, OIL }
 
@@ -53,7 +58,12 @@ public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int
     public int depth(int x, int z) {
         float d = dist(x, z);
         float centre = Math.max(0, 1 - d);
-        return Math.round(0.6f + 5.5f * centre * (0.55f + 0.45f * noise(x / 9f, z / 9f, seed ^ 0xDE9)));
+        return Math.min(MAX_DEPTH, Math.round(depthScale * (0.6f + 5.5f * centre * (0.55f + 0.45f * noise(x / 9f, z / 9f, seed ^ 0xDE9)))));
+    }
+
+    /** The deepest any column can be at this scale (blocks). */
+    public static int maxDepth(float depthScale) {
+        return Math.min(MAX_DEPTH, (int) Math.ceil(depthScale * 6.1f));
     }
 
     /** The cavern ceiling: the first solid block above the oil/beach. */
@@ -90,7 +100,7 @@ public record LakeShape(long key, int cx, int cz, int baseY, int rx, int rz, int
                     floor[idx] = Integer.MIN_VALUE;
                     continue;
                 }
-                int d = Math.min(31, depth(x, z));
+                int d = depth(x, z);
                 floor[idx] = baseY - d;
                 mask[idx] = (1 << d) - 1;
             }
