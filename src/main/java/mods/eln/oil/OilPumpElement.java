@@ -39,7 +39,7 @@ public class OilPumpElement extends TransparentNodeElement {
     /** Source found at the last look: a lake id (> 0), water (-1) or nothing (0); depth in blocks. */
     int source;
     int depth;
-    double carry, seepCarry;
+    double carry;
     double rate;   // mB/s, for WAILA
     /** Jade: the oil lake's state (OilRecovery.describe), or null. */
     String lake;
@@ -75,26 +75,20 @@ public class OilPumpElement extends TransparentNodeElement {
                 status = source == 0 ? "no well casing down to oil or water" : "tank full";
                 return;
             }
-            // an oil lake in its seepage tail gives the pump only a trickle: it runs that slowly, drawing that share
+            // an oil lake in its seepage tail gives its pumps only a trickle between them: a pump runs slowly, drawing a share
             OilRecovery rec = OilRecovery.oil(res) ? OilRecovery.get(level) : null;
             boolean seeping = rec != null && rec.regime(res) == OilRecovery.Regime.SEEPAGE;
-            resistor.setR(seeping ? desc.resistorR / Math.max(0.01, OilRecovery.seepShare) : desc.resistorR);
+            double seepW = OilRecovery.seepRate() * OilPumpDescriptor.energyPerMb(false, depth);
+            resistor.setR(seeping && seepW < desc.nominalP ? desc.resistorR * desc.nominalP / Math.max(1, seepW) : desc.resistorR);
             double e = resistor.getP() * time;
             double mb = e / OilPumpDescriptor.energyPerMb(water, depth) + carry;
             int whole = (int) Math.min(Math.floor(mb), tank.getCapacity() - tank.getFluidAmount());
             carry = mb - Math.floor(mb);
             long got = 0;
-            if (rec != null) {
-                // (seepage: never more than its share of this pump's nominal rate; at most 2 s of it banked)
-                double seepRate = OilRecovery.seepShare * desc.nominalP / OilPumpDescriptor.energyPerMb(false, depth);
-                seepCarry = Math.min(seepCarry + seepRate * time, Math.max(1, 2 * seepRate));
-            }
             if (whole > 0) {
                 if (source < 0) got = whole;
                 else if (rec != null) {
-                    long[] t = rec.take(level, res, whole, (long) Math.floor(seepCarry));
-                    got = t[0];
-                    seepCarry -= t[2];
+                    got = rec.take(level, res, whole)[0];
                 } else {
                     if (res != null) got = mods.eln.reservoir.Reservoirs.take(level, res, whole, false);
                     if (got == 0) status = "the lake is empty";

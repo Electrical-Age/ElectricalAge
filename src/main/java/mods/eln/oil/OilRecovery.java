@@ -15,8 +15,8 @@ import java.util.Map;
  * How an oil lake gives up its last oil (todo #138; Baughn 2026-10-30, after Argon's a3):
  * <ul>
  * <li>primary: down to TAIL_SHARE of its capacity, a pump takes oil from the lake at its full rate;</li>
- * <li>seepage: below that the lake never runs dry: a pump gets SEEP_SHARE of its own nominal rate, from fractures, and
- * the lake stays at its tail level;</li>
+ * <li>seepage: below that the lake never runs dry: it seeps SEEP_SHARE of a 200V oil pump's nominal rate, from fractures,
+ * one budget for the lake that all its pumps share (Baughn 2026-10-30), and stays at its tail level;</li>
  * <li>boosted: steam pumped down a second well (SteamInjectionElement) pays for oil at STEAM_KG_PER_BUCKET, and while
  * that lasts the lake's pumps run at their full rate again.</li>
  * </ul>
@@ -33,6 +33,22 @@ public final class OilRecovery extends SavedData {
     public enum Regime { PRIMARY, SEEPAGE, BOOSTED }
 
     final Map<String, Double> boost;
+    /** Seepage not taken yet (mB) per lake, and the game time it was last topped up (not saved: at most 2 s of it). */
+    final Map<Integer, double[]> seep = new HashMap<>();
+
+    /** A lake's seepage (mB/s): SEEP_SHARE of a 200V oil pump's nominal rate, from 40 blocks down (its tooltip's). */
+    public static double seepRate() {
+        return seepShare * 4000 / OilPumpDescriptor.energyPerMb(false, 40);
+    }
+
+    /** The seepage the lake has for its pumps now (mB): topped up by the game time since, at most 2 s of it. */
+    double seepage(ServerLevel level, Reservoir r) {
+        double[] s = seep.computeIfAbsent(r.id(), k -> new double[]{0, level.getGameTime()});
+        long now = level.getGameTime();
+        s[0] = Math.min(s[0] + seepRate() * (now - s[1]) / 20.0, Math.max(1, 2 * seepRate()));
+        s[1] = now;
+        return s[0];
+    }
 
     OilRecovery(Map<String, Double> boost) {
         this.boost = new HashMap<>(boost);
@@ -79,22 +95,24 @@ public final class OilRecovery extends SavedData {
     }
 
     /**
-     * A pump takes up to `want` mB: from the lake down to its tail, then what steam has paid for, then up to `seep` mB
-     * of seepage (its share of the pump's nominal rate this step). Returns {mB taken, regime ordinal, seepage taken}.
+     * A pump takes up to `want` mB: from the lake down to its tail, then what steam has paid for, then the lake's seepage
+     * (shared by all its pumps). Returns {mB taken, regime ordinal}.
      */
-    public long[] take(ServerLevel level, Reservoir r, long want, long seep) {
+    public long[] take(ServerLevel level, Reservoir r, long want) {
         long got = Reservoirs.take(level, r, Math.min(want, Math.max(0, r.amount() - tail(r))), false);
-        if (got >= want) return new long[]{got, Regime.PRIMARY.ordinal(), 0};
+        if (got >= want) return new long[]{got, Regime.PRIMARY.ordinal()};
         long rest = want - got;
         double b = boost(r);
         if (b >= 1) {
             long fromBoost = (long) Math.min(rest, Math.floor(b));
             boost.put(Integer.toString(r.id()), b - fromBoost);
             setDirty();
-            return new long[]{got + fromBoost, Regime.BOOSTED.ordinal(), 0};
+            return new long[]{got + fromBoost, Regime.BOOSTED.ordinal()};
         }
-        long s = Math.min(rest, seep);
-        return new long[]{got + s, (got > 0 ? Regime.PRIMARY : Regime.SEEPAGE).ordinal(), s};
+        double[] sp = seep.computeIfAbsent(r.id(), k -> new double[]{0, level.getGameTime()});
+        long s = (long) Math.min(rest, Math.floor(seepage(level, r)));
+        sp[0] -= s;
+        return new long[]{got + s, (got > 0 ? Regime.PRIMARY : Regime.SEEPAGE).ordinal()};
     }
 
     /** For Jade: the lake's state in a few words. */
@@ -103,7 +121,7 @@ public final class OilRecovery extends SavedData {
         int pct = (int) Math.round(100.0 * r.amount() / cap);
         return switch (get(level).regime(r)) {
             case PRIMARY -> String.format("lake #%d, %d%% full", r.id(), pct);
-            case SEEPAGE -> String.format("lake #%d seeping: %.0f%% of a pump's rate", r.id(), seepShare * 100);
+            case SEEPAGE -> String.format("lake #%d seeping %.1f mB/s", r.id(), seepRate());
             case BOOSTED -> String.format("lake #%d boosted by steam: %.1f buckets paid", r.id(), get(level).boost(r) / 1000);
         };
     }
