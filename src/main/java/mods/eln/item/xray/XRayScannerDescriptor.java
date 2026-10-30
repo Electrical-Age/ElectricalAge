@@ -132,7 +132,11 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
         }
         switch (getState(s)) {
             case Idle -> {
-                if (getEnergy(s) > dischargePower) setState(s, State.Boot, BOOT_TIME);
+                if (getEnergy(s) > dischargePower) editNbt(s, n -> {
+                    n.putByte("s", (byte) State.Boot.ordinal());
+                    n.putShort("c", BOOT_TIME);
+                    n.putInt("boots", n.getIntOr("boots", 0) + 1);   // a new look for the boot bar each time
+                });
             }
             case Run -> setState(s, State.Stop, STOP_TIME);
             default -> {
@@ -235,6 +239,7 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
         UtilsClient.enableBlend();
         GL11.glColor4f(1f, 1f, 1f, 0.6f);
         if (st == State.Boot && textInit != null) textInit.draw();
+        if (st == State.Boot) drawBootBar(bootFill(stack));
         if (st == State.Run && textRun != null) {
             if (pic == null) textRun.draw();
             int bat = (int) Math.min(textBat.length - 1, getEnergy(stack) / energyStorage * textBat.length + 0.5);
@@ -243,6 +248,39 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
         UtilsClient.disableBlend();
         UtilsClient.enableLight();
         UtilsClient.glDefaultColor();
+    }
+
+    /** The boot progress bar's fill (0..1): see XRayBoot. */
+    public double bootFill(ItemStack stack) {
+        CompoundTag n = getNbt(stack);
+        double t = XRayBoot.time(n.getShortOr("c", BOOT_TIME), BOOT_TIME);
+        return XRayBoot.fill(t, id(stack) * 31 + n.getIntOr("boots", 0));
+    }
+
+    /** The boot progress bar on the screen, above the boot text (screen top is x 0.9051, the text row x 0.625..0.656). */
+    static void drawBootBar(double fill) {
+        float xa = 0.735f, xb = 0.700f, za = -0.21875f, zb = 0.21875f, y = 0.1652f, m = 0.006f;
+        float zf = (float) (za + m + (zb - za - 2 * m) * Math.max(0, Math.min(1, fill)));
+        UtilsClient.disableTexture();
+        UtilsClient.disableCulling();
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glNormal3f(0, 1, 0);
+        GL11.glColor4f(0.15f, 0.15f, 0.15f, 0.8f);   // the empty bar
+        GL11.glVertex3f(xa, y, za);
+        GL11.glVertex3f(xa, y, zb);
+        GL11.glVertex3f(xb, y, zb);
+        GL11.glVertex3f(xb, y, za);
+        if (fill > 0) {
+            GL11.glColor4f(0.95f, 0.55f, 0.1f, 1f);   // the boot LED's orange
+            GL11.glVertex3f(xa - m, y + 0.0004f, za + m);
+            GL11.glVertex3f(xa - m, y + 0.0004f, zf);
+            GL11.glVertex3f(xb + m, y + 0.0004f, zf);
+            GL11.glVertex3f(xb + m, y + 0.0004f, za + m);
+        }
+        GL11.glEnd();
+        UtilsClient.enableCulling();
+        UtilsClient.enableTexture();
+        GL11.glColor4f(1f, 1f, 1f, 0.6f);
     }
 
     /** The picture on the model's screen (the plane y = 0.163, x 0.5955..0.9051 top to bottom, z -0.2475..0.2483). */
