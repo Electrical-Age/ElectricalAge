@@ -80,6 +80,8 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         try {
             pause = stream.readBoolean();
             log = Logger.readPublish(stream, log);
+            if (log.channelCount() > 1)
+                for (int c = 0; c < log.channelCount(); c++) log.channels[c].name = String.valueOf((char) ('A' + c));
         } catch (IOException e) {
             e.printStackTrace();
         }

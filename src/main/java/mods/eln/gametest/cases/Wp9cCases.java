@@ -79,6 +79,7 @@ public final class Wp9cCases {
     static final int WIRELESS_RX = 0 + (92 << 6);
     static final int WIRELESS_TX = 8 + (92 << 6);
     static final int DATA_LOGGER = 0 + (93 << 6);
+    static final int THREE_CHANNEL_LOGGER = 3 + (93 << 6);
     static final int SIGNAL_TRIMMER = 0 + (95 << 6);
     static final int SIGNAL_SWITCH = 1 + (95 << 6);
     static final int SIGNAL_BUTTON = 8 + (95 << 6);
@@ -109,6 +110,7 @@ public final class Wp9cCases {
         cases.add(new EnergyMeterCase());
         cases.add(new WirelessCase());
         cases.add(new DataLoggerCase());
+        cases.add(new ThreeChannelLoggerCase());
         cases.add(new EmergencyLampCase());
         cases.add(new ResinCollectorCase());
         cases.add(new MiscCase());
@@ -578,6 +580,74 @@ public final class Wp9cCases {
                 "connection " + connection + ", channels " + tx.channel + " / " + rx.channel);
             ctx.checkValue("wp9c wireless transmitter value (35 V / SVU)", tx.getValue(), 35 / SVU);
             ctx.checkValue("wp9c wireless receiver output [V] (= tx value * SVU)", out(rx), tx.getValue() * SVU);
+        }
+    }
+
+    /**
+     * The three-channel data logger (Baughn 2026-10-30, board #45) on the floor of a voxel block, its back edge west: its
+     * three inputs are pins on that edge at z 4, 8 and 12. Three floor cables in the block west of it meet them, each
+     * from its own Signal Source (10, 25, 40 V) in a block round it: one through to the block further west, two turning
+     * north and south. Each channel must record its own source's signal.
+     */
+    static final class ThreeChannelLoggerCase implements TestCase {
+        ElectricalDataLoggerElement logger;
+        final double[] volts = {10, 25, 40};
+        /** Which source (by volts index) each channel's pin is cabled to. */
+        final int[] cabled = new int[3];
+        String why = "";
+
+        public String name() {
+            return "wp9c three-channel data logger";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public void build(TestContext ctx) {
+            logger = (ElectricalDataLoggerElement) CableCases.host(ctx, THREE_CHANNEL_LOGGER, ctx.at(5, 1, 1), Direction.YN);
+            orient(logger, LRDU::inverse, Direction.XN);
+            // where each channel's pin is along the back (west) edge, as VoxelNode.ends places edge pins
+            var pins = logger.edgePins();
+            int along = logger.side.applyLRDU(logger.front.inverse().left()).toEnumFacing().get3DDataValue();
+            for (int c = 0; c < 3; c++) {
+                int z = 8 + (along % 2 == 0 ? -pins.get(c).offset() : pins.get(c).offset());
+                cabled[c] = z == 4 ? 0 : z == 8 ? 1 : 2;
+            }
+            // the sources: for z 4 one in the block north-west (its south edge), for z 8 two blocks west (its east edge),
+            // for z 12 south-west (its north edge)
+            var s = new mods.eln.sixnode.electricalsource.ElectricalSourceElement[3];
+            s[0] = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) CableCases.host(ctx, Wp9aCases.SIGNAL_SOURCE, ctx.at(4, 1, 0), Direction.YN);
+            Wp9aCases.orient(s[0], l -> l, Direction.ZP);
+            s[1] = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) CableCases.host(ctx, Wp9aCases.SIGNAL_SOURCE, ctx.at(3, 1, 1), Direction.YN);
+            Wp9aCases.orient(s[1], l -> l, Direction.XP);
+            s[2] = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) CableCases.host(ctx, Wp9aCases.SIGNAL_SOURCE, ctx.at(4, 1, 2), Direction.YN);
+            Wp9aCases.orient(s[2], l -> l, Direction.ZN);
+            for (int i = 0; i < 3; i++) {
+                float u = (float) volts[i];
+                s[i].networkUnserialize(ctx.stream(o -> {
+                    o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                    o.writeFloat(u);
+                }));
+            }
+            int down = CableCases.DOWN;
+            try {
+                CableCases.voxel(ctx, ctx.at(4, 1, 1),
+                    List.of(new mods.eln.node.voxel.CablePart(0, down, new int[]{16, 0, 4, 8, 0, 4, 8, 0, 0})),
+                    List.of(new mods.eln.node.voxel.CablePart(0, down, new int[]{16, 0, 8, 0, 0, 8})),
+                    List.of(new mods.eln.node.voxel.CablePart(0, down, new int[]{16, 0, 12, 8, 0, 12, 8, 0, 16})));
+            } catch (RuntimeException e) {
+                why = String.valueOf(e.getMessage());
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("wp9c three-channel logger: the three cables laid", why.isEmpty(), why);
+            ctx.check("wp9c three-channel logger: three inputs on its back edge", logger.edgePins().size() == 3, logger.edgePins().size() + " pins");
+            var v = logger.view();
+            for (int c = 0; c < 3; c++)
+                ctx.checkValue(f("wp9c three-channel logger: channel %c records its own cable's source (%.0f V) [signal]", (char) ('A' + c), volts[cabled[c]]),
+                    v.size() > 0 ? v.mean(c, 0) : -1, volts[cabled[c]] / SVU);
         }
     }
 

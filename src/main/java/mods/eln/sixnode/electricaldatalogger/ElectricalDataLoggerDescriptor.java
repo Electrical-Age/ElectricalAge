@@ -32,6 +32,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     float reflc;
 
     public boolean onFloor;
+    /** Inputs (board #45): 1, or 3 for the three-channel logger (its inputs on its back edge; three pins in a voxel block). */
+    public int channels = 1;
     public String textColor;
 
     public ElectricalDataLoggerDescriptor(String name, boolean onFloor, String objName, float cr, float cg, float cb, String textColor) {
@@ -77,14 +79,16 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         //GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         //Glass (reflections)
-        UtilsClient.enableBlend();
-        obj.bindTexture("Reflection.png");
-        float rotYaw = UtilsClient.clientPlayerYaw() / 360.f;
-        float rotPitch = UtilsClient.clientPlayerPitch() / 180.f;
-        float pos = (((float) UtilsClient.clientPlayerX()) - ((float) (objPosMX * 2)) + ((float) UtilsClient.clientPlayerZ()) - ((float) (objPosMZ * 2))) / 24.f;
-        GL11.glColor4f(1, 1, 1, reflc);
-        reflection.draw(rotYaw + pos, rotPitch * 0.857f);
-        UtilsClient.disableBlend();
+        if (reflection != null) {
+            UtilsClient.enableBlend();
+            obj.bindTexture("Reflection.png");
+            float rotYaw = UtilsClient.clientPlayerYaw() / 360.f;
+            float rotPitch = UtilsClient.clientPlayerPitch() / 180.f;
+            float pos = (((float) UtilsClient.clientPlayerX()) - ((float) (objPosMX * 2)) + ((float) UtilsClient.clientPlayerZ()) - ((float) (objPosMZ * 2))) / 24.f;
+            GL11.glColor4f(1, 1, 1, reflc);
+            reflection.draw(rotYaw + pos, rotPitch * 0.857f);
+            UtilsClient.disableBlend();
+        }
 
         //Plot
         if (log != null) {
@@ -99,7 +103,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
             GL11.glRotatef(ra, rx, ry, rz);
             GL11.glScalef(sx, sy, sz);
             GL11.glColor4f(cr, cg, cb, 1);
-            log.draw(mx, my, textColor);
+            log.draw(mx, my, textColor, log.channelCount() > 1 ? DataLogs.INK : null);
 
             UtilsClient.glDefaultColor();
 
@@ -138,6 +142,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Measures the voltage of an\nelectrical signal and plots\nthe data in real time.").split("\n"));
+        if (channels > 1) list.add(tr("%1$ inputs on its back: A, B and C.", channels));
         list.add(tr("It can store up to 256 points."));
     }
 

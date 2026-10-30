@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:data_logger",
+    "#c:circuits/basic",
+    "#c:circuits/basic"
+  ],
+  "result": {
+    "id": "eln:three_channel_data_logger"
+  }
+}

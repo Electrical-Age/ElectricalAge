@@ -36,6 +36,7 @@ electricheater50v/electricheater50v.obj
 eletored/eletored.obj
 emergencyexitlighting/emergencyexitlighting.obj
 energymeter/energymeter.obj
+fieldlogger/fieldlogger.obj
 firedetector/firedetector.obj
 flarestack/flarestack.obj
 flatlamp/flatlamp.obj

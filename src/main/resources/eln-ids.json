@@ -1097,6 +1097,12 @@
   "kind": "six_node",
   "name": "industrial_data_logger"
  },
+ "eln:six_node@5955": {
+  "descriptor": "ElectricalDataLoggerDescriptor",
+  "display": "Three-Channel Data Logger",
+  "kind": "six_node",
+  "name": "three_channel_data_logger"
+ },
  "eln:six_node@6016": {
   "descriptor": "ElectricalRelayDescriptor",
   "display": "Low Voltage Relay",

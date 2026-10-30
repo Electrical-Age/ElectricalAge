@@ -259,6 +259,19 @@ public class Wp9cContent implements ElnContent {
                 "IndustrialPanel", 0.25f, 0.5f, 1f, "\u00A7f");
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+
+        {
+            // three inputs, a data logger and two cheap chips (Baughn 2026-10-30, board #45)
+            ElectricalDataLoggerDescriptor desc;
+            subId = 3;
+
+            name = TR_NAME(Type.NONE, "Three-Channel Data Logger");
+
+            desc = new ElectricalDataLoggerDescriptor(name, true,
+                "fieldlogger", 0.9f, 0.9f, 0.9f, "\u00A7f");
+            desc.channels = 3;
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
     }
 
     public static void registerElectricalGateSource(int id) {

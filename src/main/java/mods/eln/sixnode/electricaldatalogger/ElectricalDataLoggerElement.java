@@ -28,15 +28,17 @@ import java.util.Map;
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
     NbtElectricalGateInput inputGate;
+    /** The inputs, channel by channel (inputGate first; the three-channel logger has two more). */
+    final NbtElectricalGateInput[] inputs;
     ElectricalDataLoggerProcess slowProcess = new ElectricalDataLoggerProcess(this);
     public ElectricalDataLoggerDescriptor descriptor;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
-    /** The history (board #45): one channel here, the input; shown per channel scale and unit. */
-    public final Logger logger = new Logger(this, -1, new LogChannel());
-    public final LogStore store = logger.store;
-    public final LogChannel[] channels = logger.channels;
+    /** The history (board #45): a channel per input; shown per channel scale and unit. */
+    public final Logger logger;
+    public final LogStore store;
+    public final LogChannel[] channels;
 
     static final byte publishId = 1, dataId = 2;
 
@@ -60,9 +62,19 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
         this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
 
-        inputGate = new NbtElectricalGateInput("inputGate");
-
-        electricalLoadList.add(inputGate);
+        int n = Math.max(1, this.descriptor.channels);
+        inputs = new NbtElectricalGateInput[n];
+        LogChannel[] ch = new LogChannel[n];
+        for (int c = 0; c < n; c++) {
+            inputs[c] = new NbtElectricalGateInput(c == 0 ? "inputGate" : "inputGate" + c);
+            electricalLoadList.add(inputs[c]);
+            ch[c] = new LogChannel();
+            if (n > 1) ch[c].name = String.valueOf((char) ('A' + c));
+        }
+        inputGate = inputs[0];
+        logger = new Logger(this, -1, ch);
+        store = logger.store;
+        channels = logger.channels;
         electricalProcessList.add(slowProcess);
     }
 
@@ -121,10 +133,35 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         return logger.view();
     }
 
+    /**
+     * Where the inputs are: the first on the back edge. The three-channel logger's others: in a voxel block, beside the
+     * first on the same edge (edgePins, Baughn 2026-10-30: three pins on its lower side); in a plain block, on its left
+     * and right edges (a six-node edge has one connection).
+     */
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
         if (front.inverse() == lrdu) return inputGate;
+        if (inputs.length > 1 && !inVoxelBlock()) {
+            if (lrdu == front.left()) return inputs[1];
+            if (lrdu == front.right() && inputs.length > 2) return inputs[2];
+        }
         return null;
+    }
+
+    boolean inVoxelBlock() {
+        return sixNode instanceof mods.eln.node.voxel.VoxelNode;
+    }
+
+    /** The places of the three inputs along the back edge (voxels from its middle, toward front.inverse().left()). */
+    public static final int[] PIN_OFFSETS = {4, 0, -4};
+
+    @Override
+    public java.util.List<EdgePin> edgePins() {
+        if (inputs.length == 1) return java.util.List.of();
+        java.util.List<EdgePin> out = new java.util.ArrayList<>();
+        for (int c = 0; c < inputs.length; c++)
+            out.add(new EdgePin(front.inverse(), PIN_OFFSETS[c % PIN_OFFSETS.length], NodeBase.maskElectricalInputGate, inputs[c]));
+        return out;
     }
 
     @Override
@@ -134,19 +171,28 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
-        return 0;
+        return getElectricalLoad(lrdu) != null ? NodeBase.maskElectricalInputGate : 0;
     }
 
     @Override
     public String multiMeterString() {
-        return inputGate.plot("In: ");
+        if (inputs.length == 1) return inputGate.plot("In: ");
+        StringBuilder b = new StringBuilder();
+        for (int c = 0; c < inputs.length; c++) b.append(inputs[c].plot((char) ('A' + c) + ": "));
+        return b.toString();
     }
 
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Input"), Utils.plotVolt("", inputGate.getU()));
+        if (inputs.length == 1) info.put(I18N.tr("Input"), Utils.plotVolt("", inputGate.getU()));
+        else {
+            // (A red, B blue, C green)
+            String[] col = {"\u00A7c", "\u00A79", "\u00A7a"};
+            StringBuilder b = new StringBuilder();
+            for (int c = 0; c < inputs.length; c++) b.append(Utils.plotVolt(col[c % 3], inputs[c].getU()));
+            info.put(I18N.tr("Inputs"), b.toString());
+        }
         return info;
     }
 

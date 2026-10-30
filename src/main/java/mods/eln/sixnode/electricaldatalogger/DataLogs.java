@@ -195,12 +195,21 @@ public class DataLogs {
      * The graph in [0, margeX] x [0, margeY], y down, in the current colour: each channel's range over a period as a
      * thin band, its mean as a line; the first axis's top, middle and bottom on the right; the time span below.
      */
+    /** Channel colours where a graph shows several (A red, B blue, C green, out white, as the editor). */
+    public static final float[][] INK = {{1f, 0.35f, 0.35f}, {0.35f, 0.6f, 1f}, {0.35f, 0.85f, 0.35f}, {0.95f, 0.95f, 0.95f}};
+
     void draw(float margeX, float margeY, String textHeader) {
+        draw(margeX, margeY, textHeader, null);
+    }
+
+    /** As draw, each channel in its colour from ink (null: all in the current colour). */
+    void draw(float margeX, float margeY, String textHeader, float[][] ink) {
         GL11.glLineWidth(1f);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         if (size >= 2) {
             float dx = margeX / (size - 1);
             for (int c = 0; c < channels.length; c++) {
+                if (ink != null) GL11.glColor3f(ink[c % ink.length][0], ink[c % ink.length][1], ink[c % ink.length][2]);
                 GL11.glBegin(GL11.GL_QUAD_STRIP);
                 for (int age = 0; age < size; age++) {
                     float lo = min(c, age), hi = max(c, age);
@@ -218,6 +227,7 @@ public class DataLogs {
                 GL11.glEnd();
             }
         }
+        if (ink != null) GL11.glColor3f(0.8f, 0.8f, 0.8f);   // the frame and labels
         float temp = 0.01f;
         GL11.glBegin(GL11.GL_QUAD_STRIP);
         GL11.glVertex2f(margeX + temp, 0f);

@@ -2467,6 +2467,10 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', dictAdvancedChip,
             'G', stack(Blocks.GLASS_PANE));
 
+        // three inputs: a data logger and two cheap chips (Baughn 2026-10-30, board #45)
+        addShapelessRecipe(findItemStack("Three-Channel Data Logger", 1),
+            findItemStack("Data Logger", 1), dictCheapChip, dictCheapChip);
+
         addRecipe(findItemStack("Industrial Data Logger", 1),
             "RRR",
             "GGG",

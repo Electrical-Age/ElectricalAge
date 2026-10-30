@@ -97,6 +97,22 @@ public final class LabCommands {
                     .then(Commands.argument("seconds", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(0.05, 86400))
                         .executes(c -> logPeriod(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"),
                             com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(c, "seconds"))))))
+                .then(Commands.literal("logmode").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .then(Commands.argument("mode", IntegerArgumentType.integer(0, 2)).executes(c -> {
+                        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(BlockPosArgument.getLoadedBlockPos(c, "pos"), c.getSource().getLevel()));
+                        int n = 0;
+                        if (node instanceof mods.eln.node.six.SixNode six)
+                            for (var el : six.sideElementList) {
+                                var lg = el instanceof mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement l ? l.logger
+                                    : el instanceof mods.eln.sixnode.electricalmath.ElectricalMathElement m ? m.logger : null;
+                                if (lg == null) continue;
+                                lg.mode = (byte) IntegerArgumentType.getInteger(c, "mode");
+                                el.needPublish();
+                                n++;
+                            }
+                        return n;
+                    }))))
+                .then(Commands.literal("threelogger").executes(c -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -285,7 +301,10 @@ public final class LabCommands {
                     long ticks = minutes * 1200L;
                     for (long t = 0; t < ticks; t++) {
                         double v = 0.5 + 0.3 * Math.sin(t / 24000.0 * Math.PI) + 0.05 * Math.sin(t / 7.0) + (t % 8400 < 4 ? 0.3 : 0);
-                        l.store.tick(new float[]{(float) v});
+                        // (more channels: a square wave, a ramp)
+                        float[] vs = new float[l.store.channels()];
+                        for (int c = 0; c < vs.length; c++) vs[c] = (float) (c == 0 ? v : c == 1 ? ((t / 12000) % 2 == 0 ? 0.7 : 0.2) : (t % 18000) / 18000.0);
+                        l.store.tick(vs);
                     }
                     l.store.setPeriod(l.store.periodSeconds());
                     l.sendView(null);
@@ -327,6 +346,67 @@ public final class LabCommands {
                     n++;
                 }
         return n;
+    }
+
+    /**
+     * The three-channel logger's test layout at pos (as GameTest wp9c three-channel data logger): the logger in the
+     * block east of pos, its back west; three floor cables in pos from its pins to three Signal Sources (10, 25, 40 V)
+     * north, west and south of pos. For screenshots and trying it.
+     */
+    static int threeLogger(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        var logger = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement) host(level, player, 3 + (93 << 6), pos.east());
+        orient(logger, mods.eln.misc.LRDU::inverse, mods.eln.misc.Direction.XN);
+        int[][] at = {{0, 0, -1}, {-1, 0, 0}, {0, 0, 1}};
+        mods.eln.misc.Direction[] toward = {mods.eln.misc.Direction.ZP, mods.eln.misc.Direction.XP, mods.eln.misc.Direction.ZN};
+        float[] volts = {10, 25, 40};
+        for (int i = 0; i < 3; i++) {
+            var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 1 + (3 << 6), pos.offset(at[i][0], at[i][1], at[i][2]));
+            orient(s, l -> l, toward[i]);
+            float u = volts[i];
+            try {
+                var bos = new java.io.ByteArrayOutputStream();
+                var o = new java.io.DataOutputStream(bos);
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(u);
+                s.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())));
+            } catch (java.io.IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        for (int[] pts : new int[][]{{16, 0, 4, 8, 0, 4, 8, 0, 0}, {16, 0, 8, 0, 0, 8}, {16, 0, 12, 8, 0, 12, 8, 0, 16}}) {
+            String err = mods.eln.node.voxel.PipeKitItem.place(level, pos, new mods.eln.node.voxel.CablePart(0, 0, pts), null);
+            if (err != null) {
+                src.sendFailure(Component.literal("cable: " + err));
+                return 0;
+            }
+        }
+        src.sendSuccess(() -> Component.literal("three-channel logger laid"), false);
+        return 1;
+    }
+
+    static mods.eln.node.six.SixNodeElement host(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player, int damage, BlockPos p) {
+        var d = mods.eln.Eln.sixNodeItem.getDescriptor(damage);
+        mods.eln.node.voxel.VoxelNode v;
+        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) instanceof mods.eln.node.voxel.VoxelNode old) v = old;
+        else {
+            v = new mods.eln.node.voxel.VoxelNode();
+            v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), mods.eln.misc.Direction.YN, player, d.newItemStack());
+            level.setBlock(p, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().defaultBlockState(), 3);
+        }
+        if (!v.createSubBlock(d.newItemStack(), mods.eln.misc.Direction.YN, player)) throw new IllegalStateException("can't host " + d.name + " at " + p);
+        return v.getElement(mods.eln.misc.Direction.YN);
+    }
+
+    static void orient(mods.eln.node.six.SixNodeElement e, java.util.function.UnaryOperator<mods.eln.misc.LRDU> terminal, mods.eln.misc.Direction toward) {
+        for (var f : mods.eln.misc.LRDU.values())
+            if (e.side.applyLRDU(terminal.apply(f)) == toward) {
+                e.front = f;
+                e.sixNode.reconnect();
+                e.sixNode.setNeedPublish(true);
+                return;
+            }
     }
 
     static int inspect(CommandSourceStack src, BlockPos pos) {

@@ -343,6 +343,11 @@ on 1.7.10) onto 26.x.
   on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
   changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
+- Three-Channel Data Logger (Baughn 2026-10-30, board #45): a data logger and two cheap chips (shapeless). Its own
+  model (cad `FieldLogger`: a field logger with a front screen and a handle), three inputs A, B, C: in a voxel block
+  three pins on its back edge at 4, 8 and 12 voxels (`edgePins`), coloured terminals; in a plain block the back, left
+  and right edges. Its screen has the graph modes and per-channel scale and unit tabs. GameTest
+  `wp9c three-channel data logger` (three cables, three sources, each channel its own).
 - Signal processor logger and defaults (Baughn 2026-10-30, board #45): a program may give an input a default,
   `A = 0.5` on a definition line (a constant, once per input, free), read while no cable is connected to it. The
   processor carries a four-channel logger (A, B, C as the program reads them, and the output) in its screen's left

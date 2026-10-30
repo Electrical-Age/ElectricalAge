@@ -82,6 +82,35 @@
    "fill": true
   },
   {
+   "row": [
+    {
+     "button": "mode",
+     "sample": [
+      "Graph: Lines",
+      "Graph: Stacked",
+      "Graph: Lanes"
+     ]
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "tab0",
+     "sample": "A"
+    },
+    {
+     "button": "tab1",
+     "sample": "B"
+    },
+    {
+     "button": "tab2",
+     "sample": "C"
+    }
+   ],
+   "fill": true
+  },
+  {
    "text": "inventory",
    "sample": "Inventory"
   },
