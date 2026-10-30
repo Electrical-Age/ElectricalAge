@@ -33,4 +33,10 @@ public class ElnSlot extends Slot {
     public int getMaxStackSize() {
         return spec.limit();
     }
+
+    /** ... and the device's own cap for that item (Container.getMaxStackSize(ItemStack): the signal processor's advanced chips). */
+    @Override
+    public int getMaxStackSize(ItemStack stack) {
+        return Math.min(super.getMaxStackSize(stack), container.getMaxStackSize(stack));
+    }
 }

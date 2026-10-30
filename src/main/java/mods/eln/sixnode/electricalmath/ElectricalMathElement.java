@@ -55,7 +55,17 @@ public class ElectricalMathElement extends SixNodeElement {
     int chipsRequired;
     boolean chipsReady = false;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    /**
+     * The chip slot: up to 64 cheap chips, or up to 8 advanced chips (the same 64 cheap chips' worth; Baughn
+     * 2026-10-30: cap advanced chips at 8).
+     */
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this) {
+        @Override
+        public int getMaxStackSize(ItemStack stack) {
+            return chipWorth(stack) == ADVANCED_CHIP_WORTH ? Math.min(MAX_ADVANCED_CHIPS, super.getMaxStackSize(stack)) : super.getMaxStackSize(stack);
+        }
+    };
+    public static final int MAX_ADVANCED_CHIPS = 8;
 
     static final byte setExpressionId = 1;
     /** Packets for the logger (Logger's ids follow), both ways. */

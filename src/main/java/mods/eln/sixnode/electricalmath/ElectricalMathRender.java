@@ -78,25 +78,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
     public void draw() {
         super.draw();
 
-        float[] pinDistances = null;
-        if (side.isY()) {
-            pinDistances = front.rotate4PinDistances(descriptor.pinDistance);
-        } else {
-            pinDistances = descriptor.pinDistance;
-        }
-
-        if (UtilsClient.distanceFromClientPlayer(tileEntity) < 15) {
-            GL11.glColor3f(0, 0, 0);
-            UtilsClient.drawConnectionPinSixNode(front, pinDistances, 1.8f, 1.35f);
-            // A red (right), B blue (back), C green (left), as in the editor (Baughn 2026-10-30)
-            GL11.glColor3f(1, 0, 0);
-            UtilsClient.drawConnectionPinSixNode(front.right(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(0, 0.3f, 1);
-            UtilsClient.drawConnectionPinSixNode(front.inverse(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(0, 1, 0);
-            UtilsClient.drawConnectionPinSixNode(front.left(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(1, 1, 1);
-        }
+        // (no coloured pin stubs: the model's brass terminals meet the cables; Baughn 2026-10-30)
 
         if (side.isY()) {
             front.left().glRotateOnX();

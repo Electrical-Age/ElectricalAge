@@ -345,8 +345,9 @@ on 1.7.10) onto 26.x.
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
 - Signal processor model (Baughn 2026-10-30, board #45: "DIN rails in a cupboard with arithmetic modules"): an open
   cupboard with three DIN rails; a module appears per cheap chip's worth inserted, up to 3 x 6, each face a little
-  different, the logger's screen across the top. The slot takes Advanced Chips too, worth 8 cheap chips each (slot limit
-  64 either way). Its terminals reach the block's edge over the cable's end and are left out of its box.
+  different, the logger's screen across the top. The slot takes 64 cheap chips, or Advanced Chips worth 8 cheap chips
+  each, up to 8 (the same 64 cheap chips' worth; `ElnSlot` asks the container for a per-item cap). No coloured pin
+  stubs: the brass terminals meet the cables. Its terminals reach the block's edge over the cable's end and are left out of its box.
 - Terminals meet the cables (Baughn: "zoom in on the connectors: a gap"): the loggers' and the processor's terminals
   sit on the face and reach the block's edge, covering a signal cable's 1 x 1 px end either way round; the model build
   checks it (`CableEnds`).

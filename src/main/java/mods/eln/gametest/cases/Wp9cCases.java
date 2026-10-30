@@ -114,6 +114,7 @@ public final class Wp9cCases {
         cases.add(new ThreeChannelLoggerCase());
         cases.add(new TiltedTerminalCase());
         cases.add(new ChipsCase());
+        cases.add(new IncognitoLoadCase());
         cases.add(new EmergencyLampCase());
         cases.add(new ResinCollectorCase());
         cases.add(new MiscCase());
@@ -738,6 +739,54 @@ public final class Wp9cCases {
             ctx.check("wp9c signal processor chips: 9 operators need 3; none not ready, 6 cheap ready, 3 advanced (24) ready",
                 need == 3 && !r0 && r1 && r2, "need " + need + ", ready " + r0 + " " + r1 + " " + r2);
             ctx.check("wp9c signal processor chips: modules 0, 6 and 18 (24 capped)", m0 == 0 && m1 == 6 && m2 == 18, m0 + " " + m1 + " " + m2);
+        }
+    }
+
+    /**
+     * The two signal processors on Incognito (2026-10-30), loaded from saves as they are there: no programVersion,
+     * redstone in the slot (32 and 30). Each keeps its program, gets 8 cheap chips, and is ready. And the chip slot's caps:
+     * 64 cheap chips, 8 advanced chips.
+     */
+    static final class IncognitoLoadCase implements TestCase {
+        final String[] programs = {"batteryCharge(((B * 400) + ((C - 0.5) * 100 * 0.55)) / 200)", "(C<0.0528*2)|(A<C)"};
+        final int[] redstone = {32, 30};
+        final String[] got = new String[2];
+        String caps = "";
+
+        public String name() {
+            return "wp9c signal processor incognito saves";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            for (int i = 0; i < 2; i++) {
+                ElectricalMathElement m = (ElectricalMathElement) ctx.placeSix(SIGNAL_PROCESSOR, ctx.at(1 + 2 * i, 1, 1));
+                m.getInventory().setItem(0, new ItemStack(Items.REDSTONE, redstone[i]));
+                net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+                m.writeToNBT(t);
+                t.putString("expression", programs[i]);
+                t.remove("programVersion");
+                t.remove("store");
+                m.readFromNBT(t);
+                ItemStack s = m.getInventory().getItem(0);
+                String expr = field(m, "expression");
+                int need = field(m, "chipsRequired");
+                boolean ready = field(m, "chipsReady");
+                got[i] = (expr.equals(programs[i]) ? "kept" : "rewritten to " + expr) + ", " + s.getCount() + " " + (ElectricalMathElement.isChip(s) ? "chips" : s.getItem())
+                    + ", needs " + need + ", ready " + ready;
+                if (i == 0)
+                    caps = m.getInventory().getMaxStackSize(Eln.findItemStack("Cheap Chip", 1)) + " cheap, "
+                        + m.getInventory().getMaxStackSize(Eln.findItemStack("Advanced Chip", 1)) + " advanced";
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("wp9c incognito battery gauge: kept, 32 redstone -> 8 chips, needs 4, ready", got[0].equals("kept, 8 chips, needs 4, ready true"), got[0]);
+            ctx.check("wp9c incognito comparator: kept, 30 redstone -> 8 chips, needs 1, ready", got[1].equals("kept, 8 chips, needs 1, ready true"), got[1]);
+            ctx.check("wp9c signal processor slot: 64 cheap chips or 8 advanced", caps.equals("64 cheap, 8 advanced"), caps);
         }
     }
 
