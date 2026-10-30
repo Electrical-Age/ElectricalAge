@@ -126,14 +126,16 @@ public class GenericItemUsingDamageDescriptor {
     public void onUpdate(ItemStack stack, Level world, Entity entity, int par4, boolean par5) {
     }
 
-    /** The stack's EA tag, created from getDefaultNBT() when missing (1.12 semantics: the stack gets the tag). */
+    /**
+     * A copy of the stack's EA tag, or getDefaultNBT() when it has none. Reading never writes the stack: 1.12 stored the
+     * default here, but the client reads stacks to draw them (item bar, name, tooltip), and a tag added there only made
+     * the client's copy differ from the server's. A battery picked from the crafting result then got a cursor fix-up
+     * from the server that arrived after it was put away: a ghost battery on the cursor (Baughn).
+     */
     protected CompoundTag getNbt(ItemStack stack) {
         CompoundTag nbt = ItemNbt.get(stack);
-        if (nbt == null) {
-            nbt = getDefaultNBT();
-            ItemNbt.set(stack, nbt);
-        }
-        return nbt;
+        if (nbt == null) nbt = getDefaultNBT();
+        return nbt == null ? new CompoundTag() : nbt;
     }
 
     /** Change the stack's EA tag (created from getDefaultNBT() when missing) and store it back (see ItemNbt.edit). */

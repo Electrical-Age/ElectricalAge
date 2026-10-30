@@ -82,10 +82,10 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
     }
 
     public double getLifeInTag(ItemStack stack) {
-        if (!mods.eln.generic.ItemNbt.has(stack))
-            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
-        if (mods.eln.generic.ItemNbt.get(stack).contains("life"))
-            return mods.eln.generic.ItemNbt.get(stack).getDoubleOr("life", 0.0);
+        // read only: the client reads it for the tooltip (see GenericItemUsingDamageDescriptor.getNbt)
+        CompoundTag t = mods.eln.generic.ItemNbt.get(stack);
+        if (t != null && t.contains("life"))
+            return t.getDoubleOr("life", 0.0);
         return Utils.rand(0.75, 1.50);
     }
 

@@ -215,15 +215,17 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     }
 
     double getChargeInTag(ItemStack stack) {
-        if (!mods.eln.generic.ItemNbt.has(stack))
-            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
-        return mods.eln.generic.ItemNbt.get(stack).getDoubleOr("charge", 0.0);
+        return tag(stack).getDoubleOr("charge", 0.0);
     }
 
     double getLifeInTag(ItemStack stack) {
-        if (!mods.eln.generic.ItemNbt.has(stack))
-            mods.eln.generic.ItemNbt.set(stack, getDefaultNBT());
-        return mods.eln.generic.ItemNbt.get(stack).getDoubleOr("life", 0.0);
+        return tag(stack).getDoubleOr("life", 0.0);
+    }
+
+    /** The stack's tag, or the default one; read only (the client reads it for the name: see GenericItemUsingDamageDescriptor.getNbt). */
+    CompoundTag tag(ItemStack stack) {
+        CompoundTag t = mods.eln.generic.ItemNbt.get(stack);
+        return t != null ? t : getDefaultNBT();
     }
 
     public double getEnergy(double charge, double life) {
