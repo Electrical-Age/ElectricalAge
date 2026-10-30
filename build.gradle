@@ -161,3 +161,12 @@ tasks.register('bikeTexture', JavaExec) {
     mainClass = 'mods.eln.bike.BikeTexture'
     args file('src/main/resources/assets/eln/textures/entity/electric_bike.png').absolutePath
 }
+
+// The static models made with the checked model library (mods.eln.cad.ModelCatalog), into the mod's resources;
+// ModelCatalogTest checks the committed files match.
+tasks.register('cadModels', JavaExec) {
+    description = 'Writes the ModelCatalog models (OBJ, MTL, atlases) into src/main/resources'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'mods.eln.cad.ModelCatalog'
+    args file('src/main/resources').absolutePath
+}

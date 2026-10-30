@@ -1,5 +1,9 @@
 # Device models with code-CAD (tools/models)
 
+New and changed models go to the checked model library instead (docs/cad.md: `mods.eln.cad.ModelCatalog`,
+`./gradlew cadModels`), which checks them for z-fights, thin parts and loose pieces; its OBJ writers follow the
+conventions below. The scripts here stay until their model is next changed.
+
 Models are Python scripts that build geometry from primitives and write OBJ files. No Blender, the output is reproducible,
 and each tier is a parameter set. Examples: `converter.py` (README-converter.md), `steamturbine.py` (README-steamturbine.md).
 Run everything with `nix-shell -p 'python3.withPackages(p:[p.pillow])' --run 'python3 ...'` from the repo root.

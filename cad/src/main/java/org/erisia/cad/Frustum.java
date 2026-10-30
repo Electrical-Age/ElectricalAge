@@ -11,6 +11,8 @@ public final class Frustum extends Solid {
     public final int axis, sides;
     public final double c1, c2, r0, r1, a0, a1, phase;
     public boolean cap0 = true, cap1 = true;
+    /** Caps as one polygon each (an OBJ target fans it), instead of one triangle per side from the centre. */
+    public boolean capPolygon;
 
     public Frustum(int axis, double c1, double c2, double r0, double r1, double a0, double a1, int sides, double phase) {
         this.axis = axis;
@@ -33,6 +35,32 @@ public final class Frustum extends Solid {
         cap0 = !at0;
         cap1 = !at1;
         return this;
+    }
+
+    /** A whole ring as one face, wound along n (in its own frame), then placed. */
+    void polygon(FaceSink sink, Frame place, double[][] ring, boolean unused, double[] n, int kind, int vid0) {
+        int S = ring.length;
+        double[] p = new double[3 * S];
+        int[] vid = new int[S];
+        for (int i = 0; i < S; i++) {
+            System.arraycopy(ring[i], 0, p, 3 * i, 3);
+            vid[i] = vid0 + i;
+        }
+        Face local = new Face(this, p, vid, kind, 0);
+        if (local.nx * n[0] + local.ny * n[1] + local.nz * n[2] < 0) {
+            double[] q = new double[3 * S];
+            int[] w = new int[S];
+            for (int i = 0; i < S; i++) {
+                System.arraycopy(p, 3 * (S - 1 - i), q, 3 * i, 3);
+                w[i] = vid[S - 1 - i];
+            }
+            p = q;
+            vid = w;
+        }
+        if (place != null) for (int i = 0; i < S; i++) place.apply(p, 3 * i);
+        Face face = new Face(this, p, vid, kind, 0);
+        if (uv != null) face.uv = uv.map(face);
+        sink.accept(face);
     }
 
     /** The two axes across it, in order. */
@@ -84,6 +112,11 @@ public final class Frustum extends Solid {
         double[] n0 = new double[3], n1 = new double[3];
         n0[axis] = -1;
         n1[axis] = 1;
+        if (capPolygon) {
+            if (cap0 && r0 + g > 0) polygon(sink, f, ring0, true, n0, CAP0, 0);
+            if (cap1 && r1 + g > 0) polygon(sink, f, ring1, false, n1, CAP1, S);
+            return;
+        }
         for (int k = 0; k < S; k++) {
             int k1 = (k + 1) % S;
             if (cap0) quad(sink, f, cc0, cc0, ring0[k1], ring0[k], n0[0], n0[1], n0[2], CAP0, k, 2 * S, 2 * S, k1, k);
