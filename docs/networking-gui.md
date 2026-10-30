@@ -101,13 +101,19 @@ Rules:
 - `src/main/java/mods/eln/client/gui/ElnScreen.java`: base screen. Builders by layout id (`button`, `field`, `slider`,
   ...) throw if the layout lacks the id. `containerTick` -> refreshers -> `update()` (read live values from the render).
   `EaField` commits on Enter or focus loss; `EaSlider` sends on release or a key press, and follows the device while idle.
+- Code editor (board #45): `client/gui/CodeEditor.java`, a widget over `gui/code/CodeBuffer` (pure Java: lines,
+  cursor, selection, undo/redo; tested by `CodeBufferTest`) with a `gui/code/LanguageAdapter` (tokens to colour,
+  diagnostics to mark, rules to draw). Text is drawn in fixed 6 px cells, each glyph of the game font centred in its
+  cell, so it is monospaced and scales with the GUI. The signal processor's adapter is `sixnode/electricalmath/SpLanguage`;
+  its screen (`ElectricalMathScreen`, laid out by hand, no JSON) adds the reference pane `client/gui/ReferencePane`
+  fed by `FunctionReference`.
 - Device screens live next to their devices (e.g. `sixnode/hub/HubScreen.java`, `oil/ElectricHeaterScreen.java`); the
   Kotlin devices' screens are in `KotlinDeviceScreens.kt`.
 
 Layout engine: `src/main/java/mods/eln/gui/layout/Layout.java` (pure Java, no client classes). Rows and columns of
 self-sizing leaves (`slot`, `text`, `button`, `slider`, `field`, `gauge`, `progress`, `inventory`, `canvas`, `space`),
 so nothing is placed by hand. The grammar is in its Javadoc. It returns `Result` with `problems()` (overlaps etc.).
-JSON: `src/main/resources/assets/eln/gui/*.json` (49 files). `client/gui/ElnLayouts` reads them fresh from the resource
+JSON: `src/main/resources/assets/eln/gui/*.json` (53 files). `client/gui/ElnLayouts` reads them fresh from the resource
 manager every time a screen opens (resource packs can override them) and measures with the client font. Slot leaves
 are named by slot index. A slot wider than 18 gets the big skin.
 

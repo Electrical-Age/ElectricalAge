@@ -24,7 +24,6 @@ final class ClientScreens {
         layout("sixnode.electricalrelay.ElectricalRelayDescriptor", "electrical_relay");
         layout("sixnode.electricalgatesource.ElectricalGateSourceDescriptor", "gate_source");
         layout("sixnode.electricaltimeout.ElectricalTimeoutDescriptor", "electrical_timeout");
-        layout("sixnode.electricalmath.ElectricalMathDescriptor", "electrical_math");
         layout("sixnode.electricalbreaker.ElectricalBreakerDescriptor", "electrical_breaker");
         layout("sixnode.batterycharger.BatteryChargerDescriptor", "battery_charger");
         layout("sixnode.powersocket.PowerSocketDescriptor", "power_socket");

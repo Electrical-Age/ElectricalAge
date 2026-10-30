@@ -268,10 +268,10 @@ public final class Wp9cCases {
      * Signal Processor, expression "A*0.5" (GUI packet), A (right pin) = 40 V -> normalized 0.8 -> 0.4 -> 20 V. A second
      * without chips in its slot outputs 0 V (Baughn 2026-10-30: ceil(operators / 4) cheap chips). A third runs a program
      * with named components, "half = A*0.5; half + half" -> 40 V, its parts paid for once. A fourth, saved with 8 redstone
-     * in its slot (before 2026-10-30), loads with 2 cheap chips.
+     * in its slot (before 2026-10-30), loads with 2 cheap chips. A fifth, "1", still offers all three inputs.
      */
     static final class MathCase implements TestCase {
-        ElectricalMathElement withChips, without, program, migrated;
+        ElectricalMathElement withChips, without, program, migrated, constant;
         String slotAfterLoad = "";
 
         public String name() {
@@ -279,7 +279,7 @@ public final class Wp9cCases {
         }
 
         public int width() {
-            return 16;
+            return 19;
         }
 
         ElectricalMathElement math(TestContext ctx, int x, int chips, String expression) {
@@ -304,6 +304,7 @@ public final class Wp9cCases {
             without = math(ctx, 5, 0, "A*0.5");
             program = math(ctx, 9, 1, "half = A*0.5; half + half");
             migrated = math(ctx, 13, 0, "A*0.5");
+            constant = math(ctx, 17, 0, "1");
             // as a processor saved before 2026-10-30 holds redstone: saved and loaded, it holds cheap chips
             migrated.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 8));
             net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
@@ -326,6 +327,10 @@ public final class Wp9cCases {
             int preq = field(program, "chipsRequired");
             ctx.check("wp9c signal processor: a program with a named part, one chip (2 operators)", pvalid && preq == 1, "valid " + pvalid + ", " + preq + " chips");
             ctx.checkValue("wp9c signal processor program output [V] (half = 0.4; half + half = 0.8 * SVU)", out(program), 40);
+            // the inputs connect though "1" reads none of them (Baughn 2026-10-30)
+            var f = constant.front;
+            boolean all = constant.getConnectionMask(f.right()) != 0 && constant.getConnectionMask(f.inverse()) != 0 && constant.getConnectionMask(f.left()) != 0;
+            ctx.check("wp9c signal processor: A, B and C connect whatever the program reads", all, "");
             ctx.check("wp9c signal processor: 8 redstone load as 2 cheap chips", slotAfterLoad.equals("2 cheap chips"), slotAfterLoad);
             // daytime wraps each day (1.12 divided the total time: after day 1 it only grew)
             ctx.check("wp9c signal processor: daytime is the time of day", Math.abs(mods.eln.misc.Utils.dayFraction(36000) - 12000 / 23999.0) < 1e-9

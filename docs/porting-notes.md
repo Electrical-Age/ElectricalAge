@@ -334,3 +334,8 @@ on 1.7.10) onto 26.x.
   redstone loads with ceil(count / 4) chips. Programs are capped at 4096 characters and 40 lines; the server refuses
   bigger ones. `rs` now steps once a tick in its process (it stepped when read: never inside an if's branch not taken).
   Tests `ProgramTest`, GameTest `wp9c signal processor`.
+- Signal processor screen (Baughn 2026-10-30, board #45): a code editor (colours for A red, B blue, C green, names,
+  functions, numbers, comments; a rule above the output line; problems underlined with their message on hover; undo,
+  clipboard, scrolling) instead of the one-line field, a quick reference of the functions beside it (click to insert),
+  and the chips needed or the first problem shown as you type; Apply sends the program. Inputs A, B and C always
+  connect, whether or not the program reads them (1.12 offered only the ones it read). GameTest `wp9c signal processor`.

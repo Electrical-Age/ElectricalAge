@@ -127,9 +127,8 @@ public class ElectricalMathElement extends SixNodeElement {
     void preProcessEquation(String expression) {
         this.expression = expression;
         program = Program.compile(expression, symboleList);
-        for (int idx = 0; idx < 3; idx++) {
-            sideConnectionEnable[idx] = program.uses(symboleList.get(idx));
-        }
+        // the inputs connect whether the program reads them or not (Baughn 2026-10-30), so cables can go in first
+        for (int idx = 0; idx < 3; idx++) sideConnectionEnable[idx] = true;
         equationIsValid = program.isValid();
         error = program.error == null || expression.isEmpty() ? "" : program.error;
         chipsRequired = equationIsValid ? chipsFor(program.getOperatorCount()) : 0;

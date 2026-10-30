@@ -73,8 +73,9 @@ public final class MenuSpecs {
             descriptor(mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorContainer.filterId, 184 / 2 - 12, 8, 1,
                 EntitySensorFilterDescriptor.class, MEDIUM, tr("Entity filter slot"))).panel(176, 114, 8, 32));
         put(mods.eln.sixnode.electricalmath.ElectricalMathDescriptor.class, d -> MenuSpec.of(
-            filter(mods.eln.sixnode.electricalmath.ElectricalMathContainer.restoneSlotId, 125 + 27 + 44 / 2, 25, 64,
-                mods.eln.sixnode.electricalmath.ElectricalMathElement::isChip, MEDIUM, tr("Cheap chip slot"))).panel(220, 128, 30, 46));
+            // (the editor screen, board #45: ElectricalMathScreen's sizes)
+            filter(mods.eln.sixnode.electricalmath.ElectricalMathContainer.restoneSlotId, 41, 140, 64,
+                mods.eln.sixnode.electricalmath.ElectricalMathElement::isChip, MEDIUM, tr("Cheap chip slot"))).panel(466, 266, 132, 188));
         put(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, d -> MenuSpec.of()
             .panel(176, d.voltageOnly ? 121 : 166, 8, d.voltageOnly ? 39 : 84));
         put(mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor.class, d -> MenuSpec.of(
