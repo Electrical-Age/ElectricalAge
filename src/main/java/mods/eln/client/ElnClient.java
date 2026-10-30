@@ -111,6 +111,7 @@ public final class ElnClient {
         ClientScreens.registerAll();
         mods.eln.gui.ElnNodeMenu.clientLayout = mods.eln.client.gui.ElnLayouts::apply;
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent.class, ClientKeys::register);
+        modBus.addListener(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent.class, DrillSpin::registerExtensions);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, ClientKeys::tick);
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent.class,
             e -> {

@@ -28,11 +28,11 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
 
     override fun itemDrawParent() = "eln:item/device_obj"
 
-    /** Drawn with its bit turned by the client's spin (it digs while the attack key holds it to a block). */
+    /** Drawn with its bit turned by its holder's spin (DrillSpin: digging turns it). */
     override fun drawItem(stack: ItemStack, entity: Boolean) {
         val o = obj ?: return
         o.getPart("main")?.draw()
-        o.getPart("bit")?.draw(if (entity) 0f else spinAngle, 1f, 0f, 0f)
+        o.getPart("bit")?.draw(if (entity) 0f else spinAngles[stack] ?: 0f, 1f, 0f, 0f)
     }
 
     /** Energy enough to dig a block at full strength. */
@@ -93,6 +93,6 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
     }
 }
 
-/** Client: the held drill's bit angle (degrees), set each frame by DrillSpin. */
+/** Client: each held drill's bit angle (degrees), by the stack in its player's hand, set each frame by DrillSpin. */
 @JvmField
-var spinAngle = 0f
+val spinAngles = java.util.IdentityHashMap<ItemStack, Float>()
