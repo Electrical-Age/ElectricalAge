@@ -290,6 +290,18 @@ public final class LabCommands {
                     l.store.setPeriod(l.store.periodSeconds());
                     l.sendView(null);
                     n++;
+                } else if (e instanceof mods.eln.sixnode.electricalmath.ElectricalMathElement m) {
+                    // a signal processor's A, B, C and out: a slow wave, a square, a ramp, and A while B is on
+                    var st = m.logger.store;
+                    st.clear();
+                    long ticks = minutes * 1200L;
+                    for (long t = 0; t < ticks; t++) {
+                        float a = (float) (0.5 + 0.3 * Math.sin(t / 2400.0 * Math.PI)), b = (t / 1800) % 2 == 0 ? 0.8f : 0.1f, c = (t % 3000) / 3000f;
+                        st.tick(new float[]{a, b, c, b > 0.5 ? a : 0});
+                    }
+                    st.setPeriod(st.periodSeconds());
+                    m.logger.sendView(null);
+                    n++;
                 }
         int count = n;
         src.sendSuccess(() -> Component.literal(count + " logger(s) filled with " + minutes + " min"), false);
@@ -306,6 +318,11 @@ public final class LabCommands {
                     l.store.setPeriod(seconds);
                     l.needPublish();
                     l.sendView(null);
+                    n++;
+                } else if (e instanceof mods.eln.sixnode.electricalmath.ElectricalMathElement m) {
+                    m.logger.store.setPeriod(seconds);
+                    m.needPublish();
+                    m.logger.sendView(null);
                     n++;
                 }
         return n;

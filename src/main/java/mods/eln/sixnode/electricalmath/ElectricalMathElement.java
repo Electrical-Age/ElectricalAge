@@ -58,6 +58,21 @@ public class ElectricalMathElement extends SixNodeElement {
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     static final byte setExpressionId = 1;
+    /** Packets for the logger (Logger's ids follow), both ways. */
+    public static final byte LOG_HEADER = 20;
+
+    /**
+     * The logger it carries (Baughn 2026-10-30, board #45): A, B and C as the program reads them (defaults included)
+     * and the output, all as signals (0..1), shown 0 to 50 V unless set otherwise.
+     */
+    public final mods.eln.sixnode.electricaldatalogger.Logger logger = new mods.eln.sixnode.electricaldatalogger.Logger(this, LOG_HEADER,
+        channel("A"), channel("B"), channel("C"), channel("out"));
+
+    public static mods.eln.sixnode.electricaldatalogger.LogChannel channel(String name) {
+        var c = new mods.eln.sixnode.electricaldatalogger.LogChannel(0, 50, "V");
+        c.name = name;
+        return c;
+    }
 
     public ElectricalMathElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
@@ -108,10 +123,15 @@ public class ElectricalMathElement extends SixNodeElement {
 
         @Override
         public void process(double time) {
+            double out = e.chipsReady ? e.program.getValue(time) : 0;
             if (e.chipsReady)
-                e.gateOutputProcess.setOutputNormalizedSafe(e.program.getValue(time));
+                e.gateOutputProcess.setOutputNormalizedSafe(out);
             else
                 e.gateOutputProcess.setOutputNormalized(0.0);
+            float[] v = new float[4];
+            for (int i = 0; i < 3; i++) v[i] = (float) e.symboleList.get(i).getValue();
+            v[3] = (float) (Double.isFinite(out) ? out : 0);
+            e.logger.record(v, time);
         }
     }
 
@@ -240,6 +260,7 @@ public class ElectricalMathElement extends SixNodeElement {
         nbt.putString("expression", expression);
         nbt.putInt("programVersion", mods.eln.solver.ProgramUpgrade.VERSION);
         program.writeToNBT(nbt, "equation");
+        logger.writeToNBT(nbt);
     }
 
     @Override
@@ -256,6 +277,7 @@ public class ElectricalMathElement extends SixNodeElement {
         expression = mods.eln.solver.ProgramUpgrade.upgrade(nbt.getStringOr("expression", ""), nbt.getIntOr("programVersion", 0));
         preProcessEquation(expression);
         program.readFromNBT(nbt, "equation");
+        logger.readFromNBT(nbt);
 
         firstBoot = false;
     }
@@ -268,6 +290,7 @@ public class ElectricalMathElement extends SixNodeElement {
             stream.writeInt(chipsRequired);
             stream.writeBoolean(equationIsValid);
             stream.writeUTF(error);
+            logger.publish(stream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -277,7 +300,12 @@ public class ElectricalMathElement extends SixNodeElement {
     public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream, player);
         try {
-            switch (stream.readByte()) {
+            byte header = stream.readByte();
+            if (header == LOG_HEADER) {
+                logger.handle(stream.readByte(), stream, player);
+                return;
+            }
+            switch (header) {
                 case setExpressionId:
                     String source = stream.readUTF();
                     if (Program.tooBig(source) != null) break;   // (the screen caps it too; a bigger one is refused here)

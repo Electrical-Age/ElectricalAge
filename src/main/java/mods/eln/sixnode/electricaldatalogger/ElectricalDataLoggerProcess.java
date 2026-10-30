@@ -18,7 +18,7 @@ public class ElectricalDataLoggerProcess implements IProcess {
     /** Records the input every step (a mean per tick) unless paused, sends each point as it is due, prints. */
     @Override
     public void process(double time) {
-        if (!e.pause && e.store.record(new float[]{(float) e.inputGate.getNormalized()}, time)) e.sendPoint(e.store.emit());
+        if (!e.pause) e.logger.record(new float[]{(float) e.inputGate.getNormalized()}, time);
         if (e.printToDo) {
             ItemStack paperStack = e.inventory.getItem(ElectricalDataLoggerContainer.paperSlotId);
             ItemStack printStack = e.inventory.getItem(ElectricalDataLoggerContainer.printSlotId);

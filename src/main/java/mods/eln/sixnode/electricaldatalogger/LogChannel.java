@@ -8,6 +8,8 @@ import net.minecraft.nbt.CompoundTag;
  */
 public final class LogChannel {
     public float min = 0, max = 100;
+    /** What the device calls the channel (A, B, C, out), for legends; set by the device, not saved. */
+    public String name = "";
     public String unit = "%";
     /** A unit's longest. */
     public static final int UNIT_CHARS = 10;

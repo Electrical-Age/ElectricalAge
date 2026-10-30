@@ -29,6 +29,24 @@ public class ElectricalMathRender extends SixNodeElementRender {
     /** Why it doesn't compile, or "". */
     public String error = "";
 
+    /** The logger's graph (A, B, C, out), kept while watched: the screen is open or the processor within WATCH_RANGE. */
+    public mods.eln.sixnode.electricaldatalogger.DataLogs log = named(new mods.eln.sixnode.electricaldatalogger.DataLogs(4));
+    public final mods.eln.sixnode.electricaldatalogger.LogClient logClient = new mods.eln.sixnode.electricaldatalogger.LogClient(this,
+        ElectricalMathElement.LOG_HEADER);
+    /** The tiny screen on top can be read from this near (blocks); further, nothing of the logger is sent. */
+    public static final double WATCH_RANGE = 6;
+
+    static mods.eln.sixnode.electricaldatalogger.DataLogs named(mods.eln.sixnode.electricaldatalogger.DataLogs d) {
+        String[] names = {"A", "B", "C", "out"};
+        for (int c = 0; c < Math.min(4, d.channelCount()); c++) d.channels[c].name = names[c];
+        return d;
+    }
+
+    @Override
+    public void serverPacketUnserialize(DataInputStream stream) throws IOException {
+        if (stream.readByte() == ElectricalMathElement.LOG_HEADER) log = named(mods.eln.sixnode.electricaldatalogger.Logger.receive(stream, log));
+    }
+
     float ledTime = 0f;
     boolean[] ledOn = new boolean[8];
 
@@ -49,6 +67,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             chipsRequired = stream.readInt();
             equationIsValid = stream.readBoolean();
             error = stream.readUTF();
+            log = named(mods.eln.sixnode.electricaldatalogger.Logger.readPublish(stream, log));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,6 +105,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
+        if (UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE) logClient.watch();
         ledTime += deltaT;
 
         if (ledTime > 0.4) {

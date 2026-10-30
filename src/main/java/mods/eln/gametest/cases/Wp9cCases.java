@@ -341,6 +341,11 @@ public final class Wp9cCases {
             ctx.check("wp9c signal processor: A, B and C connect whatever the program reads", all, "");
             ctx.check("wp9c signal processor: an old program's rs(reset, set) loads as rs(set, reset)", upgraded.equals("rs(A, 0)"), upgraded);
             ctx.checkValue("wp9c signal processor: defaults, A wired (0.8), B not (default 0.3): A * 0.5 + B [V]", out(defaults), 35);
+            // its logger graphs what the program read: A from the cable, B its default, and the output
+            var lv = defaults.logger.view();
+            ctx.check("wp9c signal processor: the logger graphs A 0.8, B's default 0.3, out 0.7",
+                lv.size() > 0 && Math.abs(lv.mean(0, 0) - 0.8) < 2e-3 && Math.abs(lv.mean(1, 0) - 0.3) < 2e-3 && Math.abs(lv.mean(3, 0) - 0.7) < 2e-3,
+                lv.size() > 0 ? lv.mean(0, 0) + " " + lv.mean(1, 0) + " " + lv.mean(3, 0) : "no points");
             ctx.check("wp9c signal processor: 8 redstone load as 2 cheap chips", slotAfterLoad.equals("2 cheap chips"), slotAfterLoad);
             // daytime wraps each day (1.12 divided the total time: after day 1 it only grew)
             ctx.check("wp9c signal processor: daytime is the time of day", Math.abs(mods.eln.misc.Utils.dayFraction(36000) - 12000 / 23999.0) < 1e-9

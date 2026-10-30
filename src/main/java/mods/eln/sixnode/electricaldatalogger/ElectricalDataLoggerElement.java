@@ -34,8 +34,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
     /** The history (board #45): one channel here, the input; shown per channel scale and unit. */
-    public final LogStore store = new LogStore(1);
-    public final LogChannel[] channels = {new LogChannel()};
+    public final Logger logger = new Logger(this, -1, new LogChannel());
+    public final LogStore store = logger.store;
+    public final LogChannel[] channels = logger.channels;
 
     static final byte publishId = 1, dataId = 2;
 
@@ -44,7 +45,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     public static final byte setUnitId = 4;
     /** A client that can see the graph asks for it (LogWatchers), every second while it can. */
     public static final byte newClientId = 5;
-    final LogWatchers watchers = new LogWatchers();
     public static final byte printId = 6;
     public static final byte tooglePauseId = 7;
     public static final byte setMinValue = 8;
@@ -64,7 +64,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
         electricalLoadList.add(inputGate);
         electricalProcessList.add(slowProcess);
-        store.setPeriod(0.5);
     }
 
     public static boolean canBePlacedOnSide(Direction side, SixNodeDescriptor descriptor) {
@@ -87,10 +86,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         front = LRDU.fromInt((value >> 0) & 0x3);
 
         pause = nbt.getBooleanOr("pause", false);
-        if (nbt.contains("store")) {
-            store.readFromNBT(nbt.getCompoundOrEmpty("store"));
-            for (int c = 0; c < channels.length; c++) channels[c].readFromNBT(nbt, "ch" + c);
-        } else if (nbt.contains("logssamplingPeriod")) {
+        if (!logger.readFromNBT(nbt) && nbt.contains("logssamplingPeriod")) {
             migrate(nbt);
         }
     }
@@ -102,7 +98,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     void migrate(CompoundTag nbt) {
         byte[] log = nbt.getByteArray("logslog").orElse(new byte[0]);
         float period = nbt.getFloatOr("logssamplingPeriod", 0.5f);
-        channels[0] = new LogChannel(nbt.getFloatOr("logsminValue", 0f), nbt.getFloatOr("logsmaxValue", 100f), LogChannel.oldUnit(nbt.getByteOr("logsunitType", DataLogs.percentType)));
+        channels[0].min = nbt.getFloatOr("logsminValue", 0f);
+        channels[0].max = nbt.getFloatOr("logsmaxValue", 100f);
+        channels[0].unit = LogChannel.oldUnit(nbt.getByteOr("logsunitType", DataLogs.percentType));
         float[][] samples = new float[log.length][];
         for (int i = 0; i < log.length; i++) samples[i] = new float[]{DataLogs.oldSample(log[log.length - 1 - i])};
         store.clear();
@@ -115,19 +113,12 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         super.writeToNBT(nbt);
         nbt.putByte("front", (byte) (front.toInt() << 0));
         nbt.putBoolean("pause", pause);
-        CompoundTag s = new CompoundTag();
-        store.writeToNBT(s);
-        nbt.put("store", s);
-        for (int c = 0; c < channels.length; c++) channels[c].writeToNBT(nbt, "ch" + c);
+        logger.writeToNBT(nbt);
     }
 
     /** The graph as shown: the store's view at its period, with the channels' scales. */
     public DataLogs view() {
-        DataLogs d = new DataLogs(channels.length);
-        d.samplingPeriod = store.periodSeconds();
-        for (int c = 0; c < channels.length; c++) d.channels[c] = new LogChannel(channels[c].min, channels[c].max, channels[c].unit);
-        d.set(store.view(DataLogs.POINTS));
-        return d;
+        return logger.view();
     }
 
     @Override
@@ -169,9 +160,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeBoolean(pause);
-            stream.writeFloat(store.periodSeconds());
-            stream.writeByte(channels.length);
-            for (LogChannel c : channels) c.write(stream);
+            logger.publish(stream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -193,38 +182,10 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     @Override
     public void networkUnserialize(DataInputStream stream, ServerPlayer player) {
         super.networkUnserialize(stream);
-        byte header;
         try {
-            switch (header = stream.readByte()) {
-                case setSamplingPeriodeId: {
-                    // the history stays: only the view changes (board #45)
-                    float p = stream.readFloat();
-                    if (Float.isFinite(p)) store.setPeriod(Math.max(LogStore.TICK, p));
-                    needPublish();
-                    break;
-                }
-                case setMaxValue:
-                case setMinValue:
-                case setUnitId: {
-                    // channel, value: a scale only changes how the history is shown
-                    int c = stream.readByte();
-                    if (c < 0 || c >= channels.length) break;
-                    if (header == setUnitId) channels[c].unit = LogChannel.sanitize(stream.readUTF());
-                    else {
-                        float v = stream.readFloat();
-                        if (!Float.isFinite(v)) break;
-                        if (header == setMaxValue) channels[c].max = v;
-                        else channels[c].min = v;
-                    }
-                    needPublish();
-                    break;
-                }
-                case resetId:
-                    store.clear();
-                    break;
-                case newClientId:
-                    if (player != null && watchers.watch(player, player.level().getGameTime())) sendView(player);
-                    break;
+            byte header = stream.readByte();
+            if (logger.handle(header, stream, player)) return;
+            switch (header) {
                 case printId:
                     printToDo = true;
                     break;
@@ -233,8 +194,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     needPublish();
                     break;
             }
-
-            if (header == resetId || header == setSamplingPeriodeId) sendView(null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -247,37 +206,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     /** The whole graph, to one player (who just started watching) or to every watcher (null). */
     public void sendView(ServerPlayer player) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream packet = new DataOutputStream(bos);
-        preparePacketForClient(packet);
-        try {
-            packet.writeByte(toClientLogsClear);
-            packet.writeByte(channels.length);
-            view().writeAll(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (player != null) sendPacketToClient(bos, player);
-        else toWatchers(bos);
-    }
-
-    void toWatchers(ByteArrayOutputStream bos) {
-        if (watchers.isEmpty() || !(sixNode.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)) return;
-        for (ServerPlayer p : watchers.players(level)) sendPacketToClient(bos, p);
-    }
-
-    /** A point just emitted, to the watchers: a few bytes at the sampling rate. */
-    void sendPoint(float[][] point) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(32);
-        DataOutputStream packet = new DataOutputStream(bos);
-        preparePacketForClient(packet);
-        try {
-            packet.writeByte(toClientLogsAdd);
-            packet.writeByte(channels.length);
-            DataLogs.writePoint(packet, point, channels.length);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        toWatchers(bos);
+        logger.sendView(player);
     }
 }

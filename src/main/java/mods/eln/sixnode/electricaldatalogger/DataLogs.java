@@ -22,6 +22,8 @@ public class DataLogs {
     public static final byte voltageType = 0, currentType = 1, powerType = 2, celsiusType = 3, percentType = 4, energyType = 5;
 
     public float samplingPeriod = 0.5f;
+    /** Logger.LINES, STACKED or LANES. */
+    public byte mode;
     public LogChannel[] channels;
     /** [channel][slot] -> mean, min, max; NaN where nothing was recorded. head is the newest point's slot. */
     final float[][] mean, min, max;
@@ -33,6 +35,15 @@ public class DataLogs {
         mean = new float[channels][POINTS];
         min = new float[channels][POINTS];
         max = new float[channels][POINTS];
+    }
+
+    /** The same graph settings for n channels (the points start empty). */
+    public DataLogs resized(int n) {
+        DataLogs d = new DataLogs(n);
+        d.samplingPeriod = samplingPeriod;
+        d.mode = mode;
+        for (int c = 0; c < Math.min(n, channels.length); c++) d.channels[c] = channels[c];
+        return d;
     }
 
     public int channelCount() {
