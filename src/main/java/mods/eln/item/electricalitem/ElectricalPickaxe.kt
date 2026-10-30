@@ -10,12 +10,33 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 
+/**
+ * The Portable Electrical Mining Drill. Client: the bit spins up while it digs (the attack key held on a block, with
+ * charge) and runs down after (DrillSpin), with a whirring grind.
+ */
 class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
                         energyStorage: Double, energyPerBlock: Double, chargePower: Double) : ElectricalTool(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower) {
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Opens holes. Right-click to open smaller holes."))
     }
+
+    /** The model (board #44: the hand drill, made with the model library): parts main and bit (it turns about x). */
+    var obj: mods.eln.misc.Obj3D? = null
+
+    override fun hasItemDraw() = obj?.getPart("main") != null
+
+    override fun itemDrawParent() = "eln:item/device_obj"
+
+    /** Drawn with its bit turned by the client's spin (it digs while the attack key holds it to a block). */
+    override fun drawItem(stack: ItemStack, entity: Boolean) {
+        val o = obj ?: return
+        o.getPart("main")?.draw()
+        o.getPart("bit")?.draw(if (entity) 0f else spinAngle, 1f, 0f, 0f)
+    }
+
+    /** Energy enough to dig a block at full strength. */
+    fun canDig(stack: ItemStack) = getEnergy(stack) >= getEnergyPerBlock()
 
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
@@ -71,3 +92,7 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
         return ok
     }
 }
+
+/** Client: the held drill's bit angle (degrees), set each frame by DrillSpin. */
+@JvmField
+var spinAngle = 0f

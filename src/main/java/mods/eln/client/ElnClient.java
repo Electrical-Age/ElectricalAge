@@ -122,6 +122,9 @@ public final class ElnClient {
         XRayScan.install();
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent.class, ItemTooltips::onTooltip);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, e -> XRayScan.tick());
+        // the hand drill's bit spin and sound
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, e -> DrillSpin.tick());
+        NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, e -> DrillSpin.frame(e.getPartialTick().getGameTimeDeltaPartialTick(true)));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent.class,
             e -> mods.eln.client.render.ElnPipelines.ALL.forEach(e::registerPipeline));
         // the optional schematic icon set (Options -> Resource Packs): overrides textures/item/<id>.png

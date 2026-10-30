@@ -72,6 +72,7 @@ public class Wp12bContent implements ElnContent {
                 120000, 200, 2400// double energyStorage,double
                 // energyPerBlock,double chargePower
             );
+            desc.setObj(mods.eln.Eln.obj.getObj("handdrill"));   // (board #44: the hand drill model, src/cadmodels HandDrill)
             sharedItemStackOne.addElement(subId + (id << 6), desc);
         }
 

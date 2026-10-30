@@ -42,6 +42,8 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
         }
     }
 
+    fun getEnergyPerBlock() = energyPerBlock
+
     fun getStrength(stack: ItemStack): Float {
         return if (getEnergy(stack) >= energyPerBlock) strengthOn else strengthOff
     }

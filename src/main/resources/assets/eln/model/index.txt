@@ -45,6 +45,7 @@ fuelgenerator200v/fuelgenerator200v.obj
 fuelgenerator50v/fuelgenerator50v.obj
 fuelheater/fuelheater.obj
 groundcable/groundcable.obj
+handdrill/handdrill.obj
 heatexchanger/heatexchanger.obj
 highcapacitybattery/highcapacitybattery.obj
 highcurrentbattery/highcurrentbattery.obj

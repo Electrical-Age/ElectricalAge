@@ -332,6 +332,15 @@
             }
         ]
     },
+    "drill": {
+        "category": "player",
+        "sounds": [
+            {
+                "name": "eln:drill",
+                "stream": false
+            }
+        ]
+    },
     "gas_turbine_roar": {
         "category": "block",
         "sounds": [
