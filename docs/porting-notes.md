@@ -294,3 +294,10 @@ on 1.7.10) onto 26.x.
   (credit per lake in SavedData `eln:oil_recovery`, at most a pump tank's worth). Water lakes still run dry. Residue is a
   fuel for the fuel heat furnace (~41.7 MJ/l); heavy oil already was. GameTests `oil_lake_seepage`, `oil_lake_steam`,
   `oil_lake_weak_steam`, `oil_heavy_cuts_burn`, `oil_lake_sizes`.
+
+- Safety valve and pipe sensor (board #44, Baughn 2026-10-30): drawn to the pipe they sit on as drawn (iron 1 px,
+  alloy 1.5 px), not the old 4-voxel pipe: they stand on it from its axis (they floated half a voxel above the thin
+  pipes), half the old size on iron, a little more on alloy, the old size on the large alloy pipe. The cap and the dial
+  are stacked on the body and stem; the safety valve's cap used to end in the body's top plane and z-fought. Hitboxes
+  are unchanged. VoxelGeometry is built on the checked model library (docs/cad.md); everything else draws exactly as
+  before (VoxelGeometryCadTest).
