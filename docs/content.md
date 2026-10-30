@@ -118,7 +118,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
 |---|---|
 | `src/main/resources/resourcepacks/schematic_icons` | Built-in optional resource pack (schematic 32 px icons), added by `addPackFinders` in `client/ElnClient`. |
 | `tools/icons/` | Icon production, two sets: `vanilla/` (default 16 px) and `schematic/` (the pack). Rules: `tools/icons/CONTRACT.md`; generators `*/build.py`, per-icon scripts in `*/icons/`. |
-| `tools/bike/texture.py` | The electric bike's entity texture and item icon (`docs/bike.md`). |
+| `tools/bike/texture.py` | The bikes' item icons; the entity texture is painted by `BikeTexture` (`docs/bike.md`). |
 | `tools/models/electricalanvil.py` | The electrical anvil's desk model, atlas and item icon (`docs/anvil.md`). |
 | `tools/models/capacitorbank.py` | The capacitor bank's model, atlas, item icon and the Capacitor Cell icon (`docs/anvil.md`). |
 | `tools/models/` | Code-CAD device models (Python -> OBJ, `mcmodel.py`); see `tools/models/README.md`. |

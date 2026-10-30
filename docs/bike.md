@@ -142,9 +142,11 @@ GameTest `bike_recipe` crafts it.
 
 ## Client
 
-- `client/entity/BikeModel`: cube model, regions of one material each, each sized for its largest box's UV layout
-  (2(d+w) x (d+h); the trunk's once overran into the battery's, an odd patch on its back: Baughn) in `textures/entity/electric_bike.png` (drawn by
-  `tools/bike/texture.py`, which also draws the item icon): diamond frame in EA blue, battery on the down tube, hub
+- `bike/BikeShape` (the solids, on the checked model library: docs/cad.md) and `client/entity/BikeModel` (vanilla
+  cubes from them): regions of one material each, each sized for its largest box's UV layout (2(d+w) x (d+h); the
+  trunk's once overran into the battery's, an odd patch on its back: Baughn; BikeModelCadTest now checks every net) in
+  `textures/entity/electric_bike.png` (painted by `bike/BikeTexture`, `./gradlew bikeTexture`; `tools/bike/texture.py`
+  draws the item icons): diamond frame in EA blue, battery on the down tube, hub
   motor in the back wheel, octagon-rim wheels with four spokes across that turn with the distance rolled
   (`ElectricBike.wheel`), saddle, bars with grips, a lamp, a rack with the trunk, a kickstand that folds up when ridden.
 - `BikeRenderer`: parked it leans 8° onto the kickstand; fallen it lies on its side; hit, it rocks like a boat.

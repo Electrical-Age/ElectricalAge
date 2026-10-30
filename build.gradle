@@ -154,3 +154,10 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ['-Xmaxerrs', '10000']
 }
 
+// The bike's entity texture, painted from BikeShape (board #44); BikeTextureTest checks the committed PNG matches.
+tasks.register('bikeTexture', JavaExec) {
+    description = 'Paints textures/entity/electric_bike.png from BikeShape'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'mods.eln.bike.BikeTexture'
+    args file('src/main/resources/assets/eln/textures/entity/electric_bike.png').absolutePath
+}

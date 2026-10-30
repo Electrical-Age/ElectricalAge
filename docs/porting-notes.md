@@ -301,3 +301,12 @@ on 1.7.10) onto 26.x.
   are stacked on the body and stem; the safety valve's cap used to end in the body's top plane and z-fought. Hitboxes
   are unchanged. VoxelGeometry is built on the checked model library (docs/cad.md); everything else draws exactly as
   before (VoxelGeometryCadTest).
+
+- Bikes (board #44, Baughn 2026-10-30): the battery stands on the down tube's drawn surface on both bikes (it floated
+  0.3 px over the bike's tube and nearly met the terrain bike's fatter one); it stays in the BASE group, so the frame
+  dye doesn't tint its stripe. Its green stripe is now one row of texels round its sides and ends, the same row on
+  every side face, so it meets at the edges (the old one was painted across the region without regard to the box's
+  unwrap, half on the top). Vanilla 26.x doesn't truncate fractional box sizes in the unwrap (`ModelPart.Cube` takes
+  them as floats; only the texture corner is an int), but a fractional face edge falls inside a texel, which then shows
+  on both faces. The bike is built from BikeShape's solids (docs/cad.md) and draws exactly as before otherwise
+  (BikeModelCadTest); the texture is painted by BikeTexture (`./gradlew bikeTexture`), its noise reseeded.
