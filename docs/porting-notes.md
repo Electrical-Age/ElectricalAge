@@ -310,3 +310,12 @@ on 1.7.10) onto 26.x.
   them as floats; only the texture corner is an int), but a fractional face edge falls inside a texel, which then shows
   on both faces. The bike is built from BikeShape's solids (docs/cad.md) and draws exactly as before otherwise
   (BikeModelCadTest); the texture is painted by BikeTexture (`./gradlew bikeTexture`), its noise reseeded.
+
+- Z-fights the checker found (board #44, Baughn 2026-10-30), fixed with the least change to the look:
+  - cable bends, tees and crosses: a cable box is cut back where an earlier one in the block covers its whole
+    cross-section, so their tops no longer overlap (the texture is unchanged: it's mapped by position);
+  - a pipe ending under a pipe adapter draws no flange or end cap of its own there (they lay in the adapter's face);
+  - two bends of a large pipe close together: the later fitting ring is turned half a side (12-sided, 15°);
+  - bikes: every other rim segment narrower (0.1 px a side; the terrain tyre's 0.2, clear of its knobs), the seat stays
+    0.1 px further in than the chain stays, the top tube 1.3 px instead of 1.5, the saddle's rear box 0.1 px lower on
+    top and higher underneath.

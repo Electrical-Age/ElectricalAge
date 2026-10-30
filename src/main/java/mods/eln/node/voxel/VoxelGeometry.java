@@ -60,6 +60,11 @@ public final class VoxelGeometry {
     /** The block's solids (and their relations, for the tests). */
     public static Model model(List<VoxelPart> parts, float[] lugs) {
         Model m = new Model();
+        // the faces an adapter's flange covers: a pipe ending there draws no flange or cap of its own (they lay in the
+        // flange's face and z-fought with it)
+        boolean[] adapters = new boolean[6];
+        for (VoxelPart part : parts) if (part instanceof AdapterPart a) adapters[a.face] = true;
+        List<int[]> cableBoxes = new ArrayList<>();
         for (VoxelPart part : parts) {
             if (part instanceof ValvePart v) valve(m, v);
             else if (part instanceof SafetyValvePart sv) safetyValve(m, sv, parts);
@@ -69,11 +74,11 @@ public final class VoxelGeometry {
             else if (part instanceof PipePart pipe) {
                 // (burst: scorched)
                 int argb = pipe.burst ? rgb(0.55f, 0.35f, 0.25f) : 0xFFFFFFFF;
-                pipe(m, pipe, PIPE[pipe.tier], argb);
+                pipe(m, pipe, PIPE[pipe.tier], argb, adapters);
             } else if (part instanceof CablePart c) {
                 // (black insulation, Baughn; burnt: scorched brown)
                 int argb = c.burnt != null ? rgb(0.35f, 0.22f, 0.14f) : rgb(0.22f, 0.22f, 0.24f);
-                cable(m, c, argb);
+                cable(m, c, argb, cableBoxes);
                 if (lugs != null && c.face == 0 && !c.isKnuckle())
                     for (CablePart.Port port : c.cablePorts())
                         if (port.face() >= 2 && lugs[port.face() - 2] > 0) lug(m, c, port, lugs[port.face() - 2]);
@@ -234,7 +239,7 @@ public final class VoxelGeometry {
     }
 
     /** A pipe: a round tube along each straight piece, a fitting ring at each bend, a flange where it meets a face. */
-    static void pipe(Model m, PipePart pipe, Identifier sprite, int argb) {
+    static void pipe(Model m, PipePart pipe, Identifier sprite, int argb, boolean[] adapters) {
         double r = pipe.drawn() / 2.0;
         int[] p = pipe.points;
         int n = p.length / 3;
@@ -243,18 +248,28 @@ public final class VoxelGeometry {
         // run into the bend a little so the tubes meet without a gap
         for (Frustum piece : Sweep.along(pts, r, 0.7)) {
             m.add(piece).named("pipe").material(sprite).argb(argb).uv(TUBE_UV).culled();
+            int f0 = piece.axis == 1 ? 0 : piece.axis == 2 ? 2 : 4;
+            piece.open(piece.a0 == 0 && adapters[f0], piece.a1 == 16 && adapters[f0 + 1]);
         }
+        List<double[]> fittings = new ArrayList<>();
         for (int i = 1; i < n - 1; i++) {
             int[] c = {p[3 * i], p[3 * i + 1], p[3 * i + 2]};
             int axis = p[3 * i - 3] != c[0] ? 0 : p[3 * i - 2] != c[1] ? 1 : 2;
             int[] o = others(axis);
-            tube(m, axis, c[o[0]], c[o[1]], r + 0.35, c[axis] - r - 0.3, c[axis] + r + 0.3, sprite).named("pipe fitting").argb(argb);
+            // two bends close together (a large pipe's, 6 voxels apart): their rings' sides lay in one plane and
+            // z-fought, so the later ring is turned half a side (no side of it faces the earlier one's)
+            double[] bb = {c[0] - r - 0.35, c[1] - r - 0.35, c[2] - r - 0.35, c[0] + r + 0.35, c[1] + r + 0.35, c[2] + r + 0.35};
+            boolean near = false;
+            for (double[] f : fittings) near |= bb[0] < f[3] && f[0] < bb[3] && bb[1] < f[4] && f[1] < bb[4] && bb[2] < f[5] && f[2] < bb[5];
+            m.add(new Frustum(axis, c[o[0]], c[o[1]], r + 0.35, r + 0.35, c[axis] - r - 0.3, c[axis] + r + 0.3, SIDES, near ? 0 : 0.5))
+                .named("pipe fitting").material(sprite).argb(argb).uv(TUBE_UV).culled();
+            fittings.add(bb);
         }
         for (int end = 0; end < 2; end++) {
             int i = end == 0 ? 0 : n - 1;
             int x = p[3 * i], y = p[3 * i + 1], z = p[3 * i + 2];
             int face = PipePart.faceOf(x, y, z);
-            if (face < 0) continue;
+            if (face < 0 || adapters[face]) continue;
             int axis = face <= 1 ? 1 : face <= 3 ? 2 : 0;
             int[] c = {x, y, z};
             int[] o = others(axis);
@@ -267,7 +282,7 @@ public final class VoxelGeometry {
      * A cable: its boxes, textured as six-node cables are (CableRender): the strip of the texture's left half centred
      * on u = 1/4, across the cable on top and running down its sides, v along it.
      */
-    static void cable(Model m, CablePart c, int argb) {
+    static void cable(Model m, CablePart c, int argb, List<int[]> drawn) {
         List<int[]> boxes = c.boxes();
         int[] p = c.points;
         for (int i = 0; i < boxes.size(); i++) {
@@ -280,7 +295,9 @@ public final class VoxelGeometry {
                 along = p[k] != p[k - 3] ? 0 : p[k + 1] != p[k - 2] ? 1 : 2;
                 n = CablePart.normalAxis(c.face);
             }
-            int[] bx = boxes.get(i);
+            int[] bx = trim(boxes.get(i).clone(), along, drawn);
+            if (bx == null) continue;
+            drawn.add(bx);
             int w = 3 - along - n;
             double cw = (bx[w] + bx[w + 3]) / 2.0, half = (bx[w + 3] - bx[w]) / 2.0;
             boolean knuckle = c.isKnuckle();
@@ -303,6 +320,26 @@ public final class VoxelGeometry {
             };
             box(m, bx, cableSprite(c.tier)).named("cable box " + i).argb(argb).uv(uv);
         }
+    }
+
+    /**
+     * A cable box cut back along its length where an earlier cable box in the block covers its whole cross-section
+     * there (a bend's corner, a branch's root): their tops overlapped, each with its own strip of texture, and z-fought.
+     * Null if nothing is left.
+     */
+    static int[] trim(int[] b, int along, List<int[]> drawn) {
+        for (int[] d : drawn) {
+            boolean overlap = true, covers = true;
+            for (int a = 0; a < 3; a++) {
+                overlap &= b[a] < d[a + 3] && d[a] < b[a + 3];
+                if (a != along) covers &= d[a] <= b[a] && d[a + 3] >= b[a + 3];
+            }
+            if (!overlap || !covers) continue;
+            if (d[along] <= b[along]) b[along] = Math.max(b[along], d[along + 3]);
+            else if (d[along + 3] >= b[along + 3]) b[along + 3] = Math.min(b[along + 3], d[along]);
+            if (b[along + 3] <= b[along]) return null;
+        }
+        return b;
     }
 
     /**

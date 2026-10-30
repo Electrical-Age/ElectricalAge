@@ -53,6 +53,17 @@ public final class Checker {
      * hidden and not reported.
      */
     public static List<Issue> faces(List<Face> faces, List<Solid> occluders) {
+        return scan(faces, occluders, null);
+    }
+
+    /** The pairs of faces that z-fight (for pictures that mark them). */
+    public static List<Face[]> fights(List<Face> faces) {
+        List<Face[]> pairs = new ArrayList<>();
+        scan(faces, List.of(), pairs);
+        return pairs;
+    }
+
+    static List<Issue> scan(List<Face> faces, List<Solid> occluders, List<Face[]> pairs) {
         Map<Solid, List<Face>> occ = new HashMap<>();
         List<Issue> out = new ArrayList<>();
         Map<Long, List<Face>> byNormal = new HashMap<>();
@@ -77,6 +88,7 @@ public final class Checker {
                     if (poly == null || area[0] <= AREA) continue;
                     if (looksSame(a, b, poly) || hidden(poly, a.solid, b.solid, occluders, occ)) continue;
                     out.add(new Issue("z-fight", fmt(area[0]) + " px^2 of " + a + "\n    and " + b));
+                    if (pairs != null) pairs.add(new Face[]{a, b});
                 }
             }
         }
