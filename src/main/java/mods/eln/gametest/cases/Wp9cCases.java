@@ -113,6 +113,7 @@ public final class Wp9cCases {
         cases.add(new DataLoggerCase());
         cases.add(new ThreeChannelLoggerCase());
         cases.add(new TiltedTerminalCase());
+        cases.add(new ChipsCase());
         cases.add(new EmergencyLampCase());
         cases.add(new ResinCollectorCase());
         cases.add(new MiscCase());
@@ -658,7 +659,7 @@ public final class Wp9cCases {
      * loggers; the one-channel Data Logger stays floor-only.
      */
     static final class TiltedTerminalCase implements TestCase {
-        ElectricalDataLoggerElement floor, ceiling;
+        ElectricalDataLoggerElement floor, ceiling, wall;
 
         public String name() {
             return "wp9c tilted terminal logger";
@@ -670,19 +671,73 @@ public final class Wp9cCases {
 
         public void build(TestContext ctx) {
             floor = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(1, 1, 1), Direction.YN);
+            // (with the blocks they hang from: a neighbour's change makes a device check what holds it)
+            ctx.level().setBlock(ctx.at(2, 3, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            ctx.level().setBlock(ctx.at(3, 2, 0), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
             ceiling = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(2, 2, 1), Direction.YP);
+            wall = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(3, 2, 1), Direction.ZN);
         }
 
         public void measure(TestContext ctx) {
             var tilted = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor) Eln.sixNodeItem.getDescriptor(TILTED_TERMINAL);
             var plain = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor) Eln.sixNodeItem.getDescriptor(DATA_LOGGER);
             var pl = player(ctx);
-            ctx.check("wp9c tilted terminal: on a floor and a ceiling (a data logger only on a floor)",
-                tilted.canBePlacedOnSide(pl, Direction.YP) && tilted.canBePlacedOnSide(pl, Direction.YN) && !plain.canBePlacedOnSide(pl, Direction.YP),
+            // on a wall it faces down (its screen leans out and down toward a player below)
+            var front = tilted.getFrontFromPlace(Direction.ZN, pl);
+            ctx.check("wp9c tilted terminal: on a wall, its front is down", Direction.ZN.applyLRDU(front) == Direction.YN, String.valueOf(Direction.ZN.applyLRDU(front)));
+            ctx.check("wp9c tilted terminal: on a floor, a ceiling and a wall (a data logger only on a floor)",
+                tilted.canBePlacedOnSide(pl, Direction.YP) && tilted.canBePlacedOnSide(pl, Direction.YN) && tilted.canBePlacedOnSide(pl, Direction.ZN)
+                    && !plain.canBePlacedOnSide(pl, Direction.YP) && wall != null,
                 "tilted " + tilted.canBePlacedOnSide(pl, Direction.YP) + "/" + tilted.canBePlacedOnSide(pl, Direction.YN) + ", plain " + plain.canBePlacedOnSide(pl, Direction.YP));
             ctx.check("wp9c tilted terminal: three channels, three pins, both ways up",
                 floor.channels.length == 3 && ceiling.channels.length == 3 && floor.edgePins().size() == 3 && ceiling.edgePins().size() == 3
-                    && floor.store.ticks() > 0 && ceiling.store.ticks() > 0, floor.channels.length + " / " + ceiling.channels.length);
+                    && floor.store.ticks() > 0 && ceiling.store.ticks() > 0, floor.channels.length + " / " + ceiling.channels.length + ", pins "
+                    + floor.edgePins().size() + " / " + ceiling.edgePins().size() + ", ticks " + floor.store.ticks() + " / " + ceiling.store.ticks());
+        }
+    }
+
+    /**
+     * The signal processor's chips (Baughn 2026-10-30): an advanced chip pays for 8 cheap chips' worth; the modules on
+     * its rails follow the chips inserted, one per cheap chip's worth, up to 18. A program of 9 operators (3 chips): with
+     * none, with 6 cheap chips, with 3 advanced chips (24, shown as 18).
+     */
+    static final class ChipsCase implements TestCase {
+        ElectricalMathElement none, cheap, advanced;
+
+        public String name() {
+            return "wp9c signal processor chips";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        ElectricalMathElement sp(TestContext ctx, int x, String chip, int n) {
+            ElectricalMathElement m = (ElectricalMathElement) ctx.placeSix(SIGNAL_PROCESSOR, ctx.at(x, 1, 1));
+            m.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(1);   // ElectricalMathElement.setExpressionId
+                o.writeUTF("A*0.5 + A*0.5 + A*0.5 + A*0.5 + A*0.5");
+            }), player(ctx));
+            if (n > 0) {
+                m.getInventory().setItem(0, mods.eln.Eln.findItemStack(chip, n));
+                m.getInventory().setChanged();
+            }
+            return m;
+        }
+
+        public void build(TestContext ctx) {
+            none = sp(ctx, 1, null, 0);
+            cheap = sp(ctx, 3, "Cheap Chip", 6);
+            advanced = sp(ctx, 5, "Advanced Chip", 3);
+        }
+
+        public void measure(TestContext ctx) {
+            int need = field(none, "chipsRequired");
+            boolean r0 = field(none, "chipsReady"), r1 = field(cheap, "chipsReady"), r2 = field(advanced, "chipsReady");
+            int m0 = field(none, "modules"), m1 = field(cheap, "modules"), m2 = field(advanced, "modules");
+            ctx.check("wp9c signal processor chips: 9 operators need 3; none not ready, 6 cheap ready, 3 advanced (24) ready",
+                need == 3 && !r0 && r1 && r2, "need " + need + ", ready " + r0 + " " + r1 + " " + r2);
+            ctx.check("wp9c signal processor chips: modules 0, 6 and 18 (24 capped)", m0 == 0 && m1 == 6 && m2 == 18, m0 + " " + m1 + " " + m2);
         }
     }
 

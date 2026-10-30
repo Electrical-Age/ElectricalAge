@@ -151,10 +151,27 @@ public class ElectricalMathElement extends SixNodeElement {
         return (operators + OPERATORS_PER_CHIP - 1) / OPERATORS_PER_CHIP;
     }
 
-    /** Is this the cheap chip, the processor slot's only item? */
+    /** Is this a chip the processor's slot takes: a cheap chip, or an advanced chip (worth 8, Baughn 2026-10-30)? */
     public static boolean isChip(ItemStack s) {
-        return !Utils.isEmpty(s) && Utils.getItemObject(s) instanceof mods.eln.generic.GenericItemUsingDamageDescriptor d && "Cheap Chip".equals(d.name);
+        return chipWorth(s) > 0;
     }
+
+    /** An advanced chip pays for as many operators as this many cheap chips. */
+    public static final int ADVANCED_CHIP_WORTH = 8;
+
+    /** One chip of this stack in cheap chips: 1, ADVANCED_CHIP_WORTH, or 0 (not a chip). */
+    public static int chipWorth(ItemStack s) {
+        if (Utils.isEmpty(s) || !(Utils.getItemObject(s) instanceof mods.eln.generic.GenericItemUsingDamageDescriptor d)) return 0;
+        return "Cheap Chip".equals(d.name) ? 1 : "Advanced Chip".equals(d.name) ? ADVANCED_CHIP_WORTH : 0;
+    }
+
+    /** The slot's chips in cheap chips. */
+    public static int chipValue(ItemStack s) {
+        return Utils.isEmpty(s) ? 0 : chipWorth(s) * s.getCount();
+    }
+
+    /** Modules shown on the rails: one per cheap chip's worth, up to 3 x 6. */
+    int modules;
 
     void preProcessEquation(String expression) {
         this.expression = expression;
@@ -239,8 +256,9 @@ public class ElectricalMathElement extends SixNodeElement {
 
     void checkChips() {
         ItemStack stack = inventory.getItem(ElectricalMathContainer.restoneSlotId);
-        int chips = isChip(stack) ? stack.getCount() : 0;
+        int chips = chipValue(stack);
         chipsReady = chipsRequired <= chips;
+        modules = Math.min(ElectricalMathDescriptor.MODULES, chips);
         needPublish();
     }
 
@@ -297,6 +315,7 @@ public class ElectricalMathElement extends SixNodeElement {
             stream.writeInt(chipsRequired);
             stream.writeBoolean(equationIsValid);
             stream.writeUTF(error);
+            stream.writeByte(modules);
             logger.publish(stream);
         } catch (IOException e) {
             e.printStackTrace();

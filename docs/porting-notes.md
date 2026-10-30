@@ -343,10 +343,17 @@ on 1.7.10) onto 26.x.
   on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
   changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
+- Signal processor model (Baughn 2026-10-30, board #45: "DIN rails in a cupboard with arithmetic modules"): an open
+  cupboard with three DIN rails; a module appears per cheap chip's worth inserted, up to 3 x 6, each face a little
+  different, the logger's screen across the top. The slot takes Advanced Chips too, worth 8 cheap chips each (slot limit
+  64 either way). Its terminals reach the block's edge over the cable's end and are left out of its box.
+- Terminals meet the cables (Baughn: "zoom in on the connectors: a gap"): the loggers' and the processor's terminals
+  sit on the face and reach the block's edge, covering a signal cable's 1 x 1 px end either way round; the model build
+  checks it (`CableEnds`).
 - Tilted Terminal Logger (Baughn 2026-10-30, board #45): a three-channel logger (same pins and screen code) whose
-  screen leans back 45 degrees (cad `TiltedTerminal`); placed on a floor or table it is a desk terminal, hung from a
-  ceiling (side YP; the model upside down, the graph turned half round so it reads) it faces a player about three
-  blocks below. Recipe: a Three-Channel Data Logger, a glass pane and an iron ingot (shapeless). GameTest
+  screen leans back 45 degrees (cad `TiltedTerminal`); placed on a floor or table it is a desk terminal, high on a
+  wall (its front down) it leans out and down, hung from a ceiling (side YP; the model upside down, the graph turned
+  half round so it reads) it faces a player about three blocks below. Recipe: a Three-Channel Data Logger, a glass pane and an iron ingot (shapeless). GameTest
   `wp9c tilted terminal logger`.
 - Three-Channel Data Logger (Baughn 2026-10-30, board #45): a data logger and two cheap chips (shapeless). Its own
   model (cad `FieldLogger`: a field logger with a front screen and a handle), three inputs A, B, C: in a voxel block

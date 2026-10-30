@@ -75,7 +75,7 @@ public final class MenuSpecs {
         put(mods.eln.sixnode.electricalmath.ElectricalMathDescriptor.class, d -> MenuSpec.of(
             // (the editor screen, board #45: ElectricalMathScreen's sizes)
             filter(mods.eln.sixnode.electricalmath.ElectricalMathContainer.restoneSlotId, 41, 202, 64,
-                mods.eln.sixnode.electricalmath.ElectricalMathElement::isChip, MEDIUM, tr("Cheap chip slot"))).panel(466, 266, 132, 188));
+                mods.eln.sixnode.electricalmath.ElectricalMathElement::isChip, MEDIUM, tr("Chip slot: cheap chips, or advanced chips (8 cheap chips each)"))).panel(466, 266, 132, 188));
         put(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, d -> MenuSpec.of()
             .panel(176, d.voltageOnly ? 121 : 166, 8, d.voltageOnly ? 39 : 84));
         put(mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor.class, d -> MenuSpec.of(

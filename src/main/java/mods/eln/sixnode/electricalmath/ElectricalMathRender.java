@@ -24,6 +24,8 @@ public class ElectricalMathRender extends SixNodeElementRender {
     String expression;
 
     public int chipsRequired;
+    /** Modules on the rails (the chips inserted, in cheap chips, up to 18). */
+    int modules;
     public boolean equationIsValid;
     /** Why it doesn't compile, or "". */
     public String error = "";
@@ -65,6 +67,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             chipsRequired = stream.readInt();
             equationIsValid = stream.readBoolean();
             error = stream.readUTF();
+            modules = stream.readByte();
             log = named(mods.eln.sixnode.electricaldatalogger.Logger.readPublish(stream, log));
         } catch (IOException e) {
             e.printStackTrace();
@@ -100,7 +103,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
         }
 
         // the tiny logger screen only near enough to read (its data comes only then too)
-        descriptor.draw(ledOn, UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE ? log : null);
+        descriptor.draw(ledOn, UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE ? log : null, modules);
     }
 
     @Override

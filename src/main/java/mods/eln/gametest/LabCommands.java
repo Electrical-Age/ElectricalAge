@@ -112,6 +112,7 @@ public final class LabCommands {
                             }
                         return n;
                     }))))
+                .then(Commands.literal("spmodules").executes(c -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("tilted").executes(c -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("threelogger").executes(c -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
@@ -387,20 +388,42 @@ public final class LabCommands {
         return 1;
     }
 
+    /** Three signal processors on the floor 2 north of pos, 2 apart: no chips, 6 cheap chips, 3 advanced chips (18 modules). */
+    static int spModules(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        String[] chip = {null, "Cheap Chip", "Advanced Chip"};
+        int[] n = {0, 6, 3};
+        for (int i = 0; i < 3; i++) {
+            var e = (mods.eln.sixnode.electricalmath.ElectricalMathElement) host(level, player, 4 + (109 << 6), pos.offset(-2 + 2 * i, 0, -2));
+            if (n[i] > 0) {
+                e.getInventory().setItem(0, mods.eln.Eln.findItemStack(chip[i], n[i]));
+                e.getInventory().setChanged();
+            }
+            logWave(src, pos.offset(-2 + 2 * i, 0, -2), 30);
+        }
+        return 1;
+    }
+
     /**
      * Two tilted terminals for a look (screenshots): one hung from a ceiling block 3 above pos's floor, 2 north, and one
-     * on a table (a block) 2 east and 2 north; both facing south, toward pos, with 60 minutes of made-up history.
+     * on a table (a block) 2 east and 2 north, one high on a wall 2 west and 3 north (its screen leaning down); facing
+     * south, toward pos, with 60 minutes of made-up history.
      */
     static int tilted(CommandSourceStack src, BlockPos pos) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
-        BlockPos hang = pos.offset(0, 2, -2), table = pos.offset(2, 0, -2);
+        BlockPos hang = pos.offset(0, 2, -2), table = pos.offset(2, 0, -2), wall = pos.offset(-2, 2, -2);
         level.setBlock(hang.above(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
         level.setBlock(table, net.minecraft.world.level.block.Blocks.OAK_PLANKS.defaultBlockState(), 3);
         var a = host(level, player, 4 + (93 << 6), hang, mods.eln.misc.Direction.YP);
         orient(a, l -> l, mods.eln.misc.Direction.ZP);
         var b = host(level, player, 4 + (93 << 6), table.above(), mods.eln.misc.Direction.YN);
         orient(b, l -> l, mods.eln.misc.Direction.ZP);
+        level.setBlock(wall.north(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+        var w = host(level, player, 4 + (93 << 6), wall, mods.eln.misc.Direction.ZN);
+        orient(w, l -> l, mods.eln.misc.Direction.YN);
+        logWave(src, wall, 60);
         logWave(src, hang, 60);
         logWave(src, table.above(), 60);
         return 1;

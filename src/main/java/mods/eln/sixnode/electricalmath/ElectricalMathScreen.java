@@ -94,7 +94,7 @@ public class ElectricalMathScreen extends ElnScreen {
 
     int chips() {
         var stack = menu.deviceInventory.getItem(ElectricalMathContainer.restoneSlotId);
-        return ElectricalMathElement.isChip(stack) ? stack.getCount() : 0;
+        return ElectricalMathElement.chipValue(stack);
     }
 
     /** The status under the editor: the first problem, or the chips needed. */

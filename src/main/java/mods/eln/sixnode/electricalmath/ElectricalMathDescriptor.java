@@ -25,8 +25,11 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     public float[] pinDistance;
 
     Obj3D obj;
-    Obj3DPart main;
+    Obj3DPart main, terminals;
     Obj3DPart led[] = new Obj3DPart[8];
+    /** The modules on the DIN rails, one per cheap chip's worth inserted (Baughn 2026-10-30), up to MODULES. */
+    public static final int MODULES = 18;
+    Obj3DPart module[] = new Obj3DPart[MODULES];
     /** The logger's screen on top (block units, x up from the face): where the graph is drawn. */
     float screenX, screenY0, screenY1, screenZ0, screenZ1;
 
@@ -37,6 +40,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
+            terminals = obj.getPart("terminals");
             if (main != null) {
                 screenX = main.getFloat("screenX");
                 screenY0 = main.getFloat("screenY0");
@@ -47,6 +51,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
             for (int idx = 0; idx < 8; idx++) {
                 led[idx] = obj.getPart("led" + idx);
             }
+            for (int idx = 0; idx < MODULES; idx++) module[idx] = obj.getPart("m" + idx);
 
             pinDistance = Utils.getSixNodePinDistance(main);
         }
@@ -59,9 +64,11 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());
     }
-    /** The model, its lamps, and the logger's graph on its screen (log null: none, as for the item). */
-    void draw(boolean ledOn[], mods.eln.sixnode.electricaldatalogger.DataLogs log) {
+    /** The model with modules on its rails, its lamps, and the logger's graph on its screen (log null: none, as for the item). */
+    void draw(boolean ledOn[], mods.eln.sixnode.electricaldatalogger.DataLogs log, int modules) {
         if (main != null) main.draw();
+        if (terminals != null) terminals.draw();
+        for (int idx = 0; idx < Math.min(modules, MODULES); idx++) if (module[idx] != null) module[idx].draw();
         for (int idx = 0; idx < 8; idx++) {
             if (led[idx] == null) continue;
             if (ledOn[idx]) {
@@ -125,7 +132,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     public void drawItem(boolean entity) {
         GL11.glTranslatef(-0.3f, -0.1f, 0f);
         GL11.glRotatef(90, 1, 0, 0);
-        draw(ledDefault, null);
+        draw(ledDefault, null, 6);
 
     }
 
@@ -137,4 +144,10 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 
     // 26.x port: top() removed (client rendering; redone in P3)
     // 26.x port: bottom() removed (client rendering; redone in P3)
+
+    /** Its terminals reach the block's edge (to meet the cables): not part of its box. */
+    @Override
+    protected java.util.Set<Obj3DPart> footprintIgnores() {
+        return terminals == null ? java.util.Set.of() : java.util.Set.of(terminals);
+    }
 }

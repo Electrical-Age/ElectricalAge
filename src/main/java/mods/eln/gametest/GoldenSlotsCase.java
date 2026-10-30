@@ -248,9 +248,9 @@ final class GoldenSlotsCase implements TestCase {
                     want = got;
                 }
                 // (Baughn 2026-10-30: a signal processor's operators are paid in cheap chips, 4 operators a chip; it took redstone)
-                if ("Signal Processor".equals(name) && i == 0 && want.equals(Set.of("minecraft:redstone@0")) && got.size() == 1
-                    && mods.eln.sixnode.electricalmath.ElectricalMathElement.isChip(new ItemStack(probes.get(got.iterator().next())))) {
-                    known.add(name + " slot 0 takes cheap chips, not redstone (Baughn 2026-10-30)");
+                if ("Signal Processor".equals(name) && i == 0 && want.equals(Set.of("minecraft:redstone@0")) && !got.isEmpty()
+                    && got.stream().allMatch(k -> mods.eln.sixnode.electricalmath.ElectricalMathElement.isChip(new ItemStack(probes.get(k))))) {
+                    known.add(name + " slot 0 takes cheap and advanced chips, not redstone (Baughn 2026-10-30)");
                     want = got;
                 }
                 int wantLimit = g.get("limit").getAsInt();
