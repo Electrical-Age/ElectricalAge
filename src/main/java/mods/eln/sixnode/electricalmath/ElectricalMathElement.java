@@ -272,9 +272,16 @@ public class ElectricalMathElement extends SixNodeElement {
             ItemStack chips = mods.eln.Eln.findItemStack("Cheap Chip", chipsFor(old.getCount()));
             inventory.setItem(ElectricalMathContainer.restoneSlotId, chips);
         }
-        // a program saved by an older version is rewritten once to today's functions, doing the same (rs and rc
-        // took their arguments the other way round before 2026-10-30)
-        expression = mods.eln.solver.ProgramUpgrade.upgrade(nbt.getStringOr("expression", ""), nbt.getIntOr("programVersion", 0));
+        // a program saved by an older version is rewritten once to today's language, doing the same (rs and rc took
+        // their arguments the other way round, = ^ ! were on/off comparisons, the operators' order was 1.12's), and its
+        // functions' saved state renumbered to the order they stand in the text
+        int version = nbt.getIntOr("programVersion", 0);
+        var up = mods.eln.solver.ProgramUpgrade.upgradeAll(nbt.getStringOr("expression", ""), version);
+        expression = up.program();
+        if (version < mods.eln.solver.ProgramUpgrade.VERSION) {
+            nbt = nbt.copy();
+            mods.eln.solver.ProgramUpgrade.remapState(nbt, "equation", up.remaps());
+        }
         preProcessEquation(expression);
         program.readFromNBT(nbt, "equation");
         logger.readFromNBT(nbt);

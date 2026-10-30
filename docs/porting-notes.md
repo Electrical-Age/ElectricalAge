@@ -357,6 +357,17 @@ on 1.7.10) onto 26.x.
   the whole graph when watching starts or the period changes, then one point (6 bytes a channel) as each is due.
   Units are free text (10 characters, sanitized); older saves and prints keep theirs as a symbol. GameTests
   `wp9c signal processor`, `wp9c data logger`.
+- Signal processor operators (Baughn 2026-10-30, board #45): `^` is power (right to left), `==` and `!=` compare
+  values within 0.01, `>=` `<=` are new, `&` `|` `!` are on/off at 0.5, in the usual order (^, * /, + -, comparisons,
+  !, &, |). 1.12: `=` and `^` compared as on/off, `!a` was 1 - a, and = ^ & | shared one level read left to right.
+  `rs` switches at 0.5 (1.12: 0.6; old programs are not rewritten for it: the difference only shows for inputs between
+  0.5 and 0.6). The 7-argument `pid` holds its integral within lo..hi (1.12: always 0..1, a bug). Programs saved at
+  `programVersion` 1 or older are rewritten once on load to do the same (`ProgramUpgrade`: `a = b` to
+  `(a > 0.5) == (b > 0.5)`, `a ^ b` to `!=` likewise, `!a` to `1 - a`, brackets where the order differs; a statement
+  that reads the same keeps its text). A rewritten line may cost more chips (the added comparisons). Stateful
+  functions' saved state is numbered in text order now (1.12: the order its reducer made them) and renumbered on load.
+  The compiler is a recursive descent parser (`Equation.Parser`); 1.12's reducer stays only to tell that old order.
+  Tests `ProgramUpgradeTest` (old programs read the same after the rewrite, over many inputs), `ProgramTest`.
 - Signal processor functions (Baughn 2026-10-30, board #45): `rs(set, reset)` and `rc(x, tau)` (1.12: `rs(reset, set)`,
   `rc(tau, x)`). A processor saves `programVersion`; one saved without it has its program rewritten once on load
   (`ProgramUpgrade`: the two arguments of every rs and rc call swap, so it does the same). Also fixed: `derivate`

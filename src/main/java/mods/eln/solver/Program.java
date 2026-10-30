@@ -25,7 +25,7 @@ public final class Program implements INBTTReady {
     public static final int MAX_CHARS = 4096, MAX_LINES = 40;
     /** Iterations each line's parser may take (Equation.iterationLimit). */
     static final int ITERATIONS = 100;
-    static final Pattern DEFINITION = Pattern.compile("^([A-Za-z_][A-Za-z0-9_]*)\\s*=(.*)$", Pattern.DOTALL);
+    static final Pattern DEFINITION = Pattern.compile("^([A-Za-z_][A-Za-z0-9_]*)\\s*=(?!=)(.*)$", Pattern.DOTALL);
     /** Names a component may not take: the functions and the constants. */
     static final Set<String> RESERVED = new HashSet<>(List.of("pi", "PI", "min", "max", "sin", "cos", "asin", "acos", "abs", "ramp", "integrate",
         "derivate", "pow", "pid", "batteryCharge", "rs", "rc", "if", "scale"));

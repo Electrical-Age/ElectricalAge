@@ -42,10 +42,10 @@ public class ProgramTest {
         assertTrue(p.isValid(), p.error);
         a.v = 0.8;
         assertEquals(0.4, p.getValue(0.05), 1e-12);
-        // = is still "equals" in the output line
-        Program eq = Program.compile("A=B", inputs());
+        // an old = in the output line is rewritten on load (ProgramUpgrade); today a single = there is no expression
+        assertFalse(Program.compile("A=B", inputs()).isValid());
+        Program eq = Program.compile(ProgramUpgrade.upgrade("A=B", 1), inputs());
         assertTrue(eq.isValid(), eq.error);
-        assertEquals(1, eq.getOperatorCount());
     }
 
     @Test

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Equation implements IValue, INBTTReady {
 
@@ -123,7 +124,14 @@ public class Equation implements IValue, INBTTReady {
         this.symbolList.addAll(symbolList);
     }
 
-    public void preProcess(String exp) {
+    /**
+     * The 1.12 reducer (before 2026-10-30), kept only to tell in which order it made an old program's stateful
+     * functions: their saved state is numbered in that order (ProgramUpgrade re-numbers it). Records, for each stateful
+     * function it makes, "name#k" (the k-th call of that name in the text).
+     */
+    void preProcessLegacy(String exp, List<String> statefulOrder) {
+        java.util.IdentityHashMap<String, String> tags = new java.util.IdentityHashMap<>();
+        java.util.Map<String, Integer> seen = new HashMap<>();
         int idx;
         exp = exp.replace(" ", "");
 
@@ -150,6 +158,11 @@ public class Equation implements IValue, INBTTReady {
             list.add(stack);
             stringList.add(stack);
         }
+        for (Object o : list)
+            if (o instanceof String t && FUNCTIONS.containsKey(t)) {
+                int k = seen.merge(t, 1, Integer::sum) - 1;
+                tags.put(t, t + "#" + k);
+            }
 
         int depthMax = getDepthMax(list);
         int depth;
@@ -208,8 +221,10 @@ public class Equation implements IValue, INBTTReady {
                             if ((operator = mapper.newOperator(str, depthDelta, list, idx)) != null) {
                                 if (operator instanceof IProcess)
                                     processList.add((IProcess) operator);
-                                if (operator instanceof INBTTReady)
+                                if (operator instanceof INBTTReady) {
                                     nbtList.add((INBTTReady) operator);
+                                    if (tags.containsKey(str)) statefulOrder.add(tags.get(str));
+                                }
                                 operatorCount += operator.getRedstoneCost();
                                 resetPriority = true;
                                 break;
@@ -237,6 +252,257 @@ public class Equation implements IValue, INBTTReady {
                 root = (IValue) list.get(0);
             } else
                 root = null;
+        }
+    }
+
+    /** The order 1.12's reducer made an expression's stateful functions in ("name#k", the k-th call of the name). */
+    public static List<String> legacyStatefulOrder(String exp) {
+        Equation e = new Equation();
+        e.operatorList.putAll(staticOperatorList);
+        e.separatorList = staticSeparatorList;
+        e.setIterationLimit(100);
+        // every other name as a symbol (the program's inputs and components; only the order matters here)
+        for (String t : tokenize(exp))
+            if (Character.isLetter(t.charAt(0)) && !FUNCTIONS.containsKey(t) && !t.equals("pi") && !t.equals("PI"))
+                e.symbolList.add(new ISymbole() {
+                    public double getValue() {
+                        return 0;
+                    }
+
+                    public String getName() {
+                        return t;
+                    }
+                });
+        List<String> out = new ArrayList<>();
+        e.preProcessLegacy(exp, out);
+        return out;
+    }
+
+    /** The functions: name -> argument count -> class. */
+    static final java.util.Map<String, java.util.Map<Integer, Class<? extends IOperator>>> FUNCTIONS = new HashMap<>();
+
+    static void fn(String name, int args, Class<? extends IOperator> c) {
+        FUNCTIONS.computeIfAbsent(name, k -> new HashMap<>()).put(args, c);
+    }
+
+    static {
+        fn("min", 2, Min.class);
+        fn("max", 2, Max.class);
+        fn("sin", 1, Sin.class);
+        fn("cos", 1, Cos.class);
+        fn("asin", 1, Asin.class);
+        fn("acos", 1, Acos.class);
+        fn("abs", 1, Abs.class);
+        fn("ramp", 1, Ramp.class);
+        fn("integrate", 2, Integrator.class);
+        fn("integrate", 3, IntegratorMinMax.class);
+        fn("derivate", 1, Derivator.class);
+        fn("pow", 2, Pow.class);
+        fn("pid", 5, Pid.class);
+        fn("pid", 7, PidMinMax.class);
+        fn("batteryCharge", 1, BatteryCharge.class);
+        fn("rs", 2, Rs.class);
+        fn("rc", 2, RC.class);
+        fn("if", 3, If.class);
+        fn("scale", 5, Scale.class);
+    }
+
+    /** Is name a function that keeps state (numbered in its saved state)? */
+    public static boolean stateful(String name) {
+        var forms = FUNCTIONS.get(name);
+        if (forms == null) return false;
+        for (var c : forms.values()) if (INBTTReady.class.isAssignableFrom(c)) return true;
+        return false;
+    }
+
+    /**
+     * Compile an expression (Baughn 2026-10-30, board #45): the usual order, ^ (power, right to left) before unary -,
+     * before * /, before + -, before the comparisons (> < >= <= == !=), before !, before &, before |; brackets and
+     * function calls. Stateful functions are numbered in the order they appear in the text (their saved state).
+     */
+    public void preProcess(String exp) {
+        stringList.clear();
+        root = null;
+        List<String> tokens = tokenize(exp);
+        if (tokens == null || tokens.size() > 2000) return;
+        for (String t : tokens) if (!OPERATOR_TOKENS.contains(t) && !t.equals("(") && !t.equals(")") && !t.equals(",")) stringList.add(t);
+        Parser p = new Parser(tokens);
+        try {
+            IValue v = p.or();
+            if (p.i != tokens.size()) return;
+            for (INBTTReady n : p.slots) if (n == null) return;
+            nbtList.addAll(p.slots);
+            root = v;
+        } catch (IllegalArgumentException e) {
+            root = null;
+        }
+    }
+
+    static final java.util.Set<String> OPERATOR_TOKENS = java.util.Set.of("+", "-", "*", "/", "^", "&", "|", "!", ">", "<", ">=", "<=", "==", "!=", "=");
+
+    /** Words (names, numbers) and operators; two-character operators kept whole. Null if a character is unknown. */
+    static List<String> tokenize(String exp) {
+        List<String> out = new ArrayList<>();
+        StringBuilder word = new StringBuilder();
+        for (int i = 0; i < exp.length(); i++) {
+            char c = exp.charAt(i);
+            boolean sep = "+-*&|/^,()<>=!".indexOf(c) >= 0;
+            if (!sep && !Character.isWhitespace(c)) {
+                word.append(c);
+                continue;
+            }
+            if (word.length() > 0) {
+                out.add(word.toString());
+                word.setLength(0);
+            }
+            if (!sep) continue;
+            if (i + 1 < exp.length() && exp.charAt(i + 1) == '=' && "<>=!".indexOf(c) >= 0) {
+                out.add(c + "=");
+                i++;
+            } else out.add(String.valueOf(c));
+        }
+        if (word.length() > 0) out.add(word.toString());
+        return out;
+    }
+
+    /** Recursive descent over the tokens; throws IllegalArgumentException where the text isn't an expression. */
+    final class Parser {
+        final List<String> t;
+        int i, depth;
+        final ArrayList<INBTTReady> slots = new ArrayList<>();
+
+        Parser(List<String> t) {
+            this.t = t;
+        }
+
+        String peek() {
+            return i < t.size() ? t.get(i) : "";
+        }
+
+        boolean take(String s) {
+            if (!peek().equals(s)) return false;
+            i++;
+            return true;
+        }
+
+        IValue op(IOperator o, IValue... args) {
+            o.setOperator(args);
+            operatorCount += o.getRedstoneCost();
+            if (o instanceof IProcess pr) processList.add(pr);
+            return o;
+        }
+
+        IValue or() {
+            if (++depth > 100) throw new IllegalArgumentException("too deep");
+            IValue a = and();
+            while (take("|")) a = op(new Or(), a, and());
+            depth--;
+            return a;
+        }
+
+        IValue and() {
+            IValue a = not();
+            while (take("&")) a = op(new And(), a, not());
+            return a;
+        }
+
+        IValue not() {
+            if (take("!")) return op(new Not(), not());
+            return cmp();
+        }
+
+        IValue cmp() {
+            IValue a = add();
+            while (true) {
+                if (take(">")) a = op(new Bigger(), a, add());
+                else if (take("<")) a = op(new Smaller(), a, add());
+                else if (take(">=")) a = op(new BiggerOrEqual(), a, add());
+                else if (take("<=")) a = op(new SmallerOrEqual(), a, add());
+                else if (take("==")) a = op(new Equal(), a, add());
+                else if (take("!=")) a = op(new NotEqual(), a, add());
+                else return a;
+            }
+        }
+
+        IValue add() {
+            IValue a = mul();
+            while (true) {
+                if (take("+")) a = op(new Add(), a, mul());
+                else if (take("-")) a = op(new Sub(), a, mul());
+                else return a;
+            }
+        }
+
+        IValue mul() {
+            IValue a = unary();
+            while (true) {
+                if (take("*")) a = op(new Mul(), a, unary());
+                else if (take("/")) a = op(new Div(), a, unary());
+                else return a;
+            }
+        }
+
+        IValue unary() {
+            if (take("-")) return op(new Inv(), unary());
+            return pow();
+        }
+
+        IValue pow() {
+            IValue a = primary();
+            if (take("^")) return op(new Pow(), a, unary());
+            return a;
+        }
+
+        IValue primary() {
+            String s = peek();
+            if (s.isEmpty()) throw new IllegalArgumentException("end");
+            if (take("(")) {
+                IValue v = or();
+                if (!take(")")) throw new IllegalArgumentException(")");
+                return v;
+            }
+            if (OPERATOR_TOKENS.contains(s) || s.equals(")") || s.equals(",")) throw new IllegalArgumentException(s);
+            i++;
+            var forms = FUNCTIONS.get(s);
+            if (forms != null && peek().equals("(")) {
+                // a stateful call takes its number before its arguments: numbered as the calls stand in the text
+                int slot = -1;
+                if (stateful(s)) {
+                    slot = slots.size();
+                    slots.add(null);
+                }
+                take("(");
+                List<IValue> args = new ArrayList<>();
+                if (!peek().equals(")")) {
+                    args.add(or());
+                    while (take(",")) args.add(or());
+                }
+                if (!take(")")) throw new IllegalArgumentException(")");
+                Class<? extends IOperator> c = forms.get(args.size());
+                if (c == null) throw new IllegalArgumentException(s + " takes " + forms.keySet() + " arguments");
+                IOperator o;
+                try {
+                    o = c.getDeclaredConstructor().newInstance();
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalArgumentException(e);
+                }
+                IValue v = op(o, args.toArray(new IValue[0]));
+                if (o instanceof INBTTReady n) {
+                    if (slot < 0) {
+                        slot = slots.size();
+                        slots.add(null);
+                    }
+                    slots.set(slot, n);
+                }
+                return v;
+            }
+            for (ISymbole sym : symbolList) if (sym.getName().equals(s)) return sym;
+            if (s.equals("pi") || s.equals("PI")) return new Constant(Math.PI);
+            try {
+                return new Constant(Double.parseDouble(s));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(s);
+            }
         }
     }
 
@@ -294,6 +560,57 @@ public class Equation implements IValue, INBTTReady {
         @Override
         public double getValue() {
             return (a.getValue() > 0.5) != (b.getValue() > 0.5) ? 1.0 : 0.0;
+        }
+
+        @Override
+        public int getRedstoneCost() {
+            return 1;
+        }
+    }
+
+    /** a == b: equal within 0.01 (Baughn 2026-10-30: signals are rarely exactly equal). */
+    public static class Equal extends OperatorAB {
+        public static final double TOLERANCE = 0.01;
+
+        @Override
+        public double getValue() {
+            return Math.abs(a.getValue() - b.getValue()) <= TOLERANCE ? 1.0 : 0.0;
+        }
+
+        @Override
+        public int getRedstoneCost() {
+            return 1;
+        }
+    }
+
+    public static class NotEqual extends OperatorAB {
+        @Override
+        public double getValue() {
+            return Math.abs(a.getValue() - b.getValue()) > Equal.TOLERANCE ? 1.0 : 0.0;
+        }
+
+        @Override
+        public int getRedstoneCost() {
+            return 1;
+        }
+    }
+
+    public static class BiggerOrEqual extends OperatorAB {
+        @Override
+        public double getValue() {
+            return a.getValue() >= b.getValue() ? 1.0 : 0.0;
+        }
+
+        @Override
+        public int getRedstoneCost() {
+            return 1;
+        }
+    }
+
+    public static class SmallerOrEqual extends OperatorAB {
+        @Override
+        public double getValue() {
+            return a.getValue() <= b.getValue() ? 1.0 : 0.0;
         }
 
         @Override
@@ -418,12 +735,13 @@ public class Equation implements IValue, INBTTReady {
         }
     }
 
+    /** !a: on (1) while a is off (0.5 or below), else 0 (Baughn 2026-10-30; 1.12 gave 1 - a). */
     public static class Not implements IOperator {
         IValue a;
 
         @Override
         public double getValue() {
-            return 1.0 - a.getValue();
+            return a.getValue() > 0.5 ? 0.0 : 1.0;
         }
 
         @Override
@@ -769,9 +1087,18 @@ public class Equation implements IValue, INBTTReady {
             iStack += error * time * i.getValue();
             dValue = (error - oldError) / time;
 
-            if (iStack > 1) iStack = 1;
-            if (iStack < 0) iStack = 0;
+            if (iStack > hi()) iStack = hi();
+            if (iStack < lo()) iStack = lo();
             oldError = error;
+        }
+
+        /** The integral's bounds: 0..1, or the 7-argument form's lo..hi (Baughn 2026-10-30; 1.12 held it in 0..1 always). */
+        double lo() {
+            return 0;
+        }
+
+        double hi() {
+            return 1;
         }
 
         @Override
@@ -791,6 +1118,16 @@ public class Equation implements IValue, INBTTReady {
 
     public static class PidMinMax extends Pid {
         public IValue min, max;
+
+        @Override
+        double lo() {
+            return Math.min(min.getValue(), max.getValue());
+        }
+
+        @Override
+        double hi() {
+            return Math.max(min.getValue(), max.getValue());
+        }
 
         @Override
         public double getValue() {
@@ -851,7 +1188,7 @@ public class Equation implements IValue, INBTTReady {
     }
 
     /**
-     * Set/reset latch, rs(set, reset): set above 0.6 sets it, reset above 0.6 clears it (reset wins). 26.x: it steps in
+     * Set/reset latch, rs(set, reset): set on (above 0.5) sets it, reset on clears it (reset wins; 1.12 switched at 0.6). 26.x: it steps in
      * process, once a tick, and getValue only reads it (it stepped whenever it was read: never inside an if's branch
      * not taken, twice if read twice). 1.12 took rs(reset, set); older programs are rewritten on load
      * (ProgramUpgrade, Baughn 2026-10-30).
@@ -863,8 +1200,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void process(double time) {
-            if (set.getValue() > 0.6) state = true;
-            if (reset.getValue() > 0.6) state = false;
+            if (set.getValue() > 0.5) state = true;
+            if (reset.getValue() > 0.5) state = false;
         }
 
         @Override

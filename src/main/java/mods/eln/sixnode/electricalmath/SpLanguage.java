@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public final class SpLanguage implements LanguageAdapter {
     public static final SpLanguage INSTANCE = new SpLanguage();
     static final Pattern IDENT = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*"), NUMBER = Pattern.compile("[0-9]*\\.?[0-9]+"),
-        DEFINITION = Pattern.compile("^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=");
+        DEFINITION = Pattern.compile("^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=(?!=)");
     static final String OPERATORS = "+-*&|/^,()<>=!;";
     /** The processor's own symbols, by name (for checking a program on the client). */
     static final List<String> SYMBOLS = List.of("A", "B", "C", "daytime");
