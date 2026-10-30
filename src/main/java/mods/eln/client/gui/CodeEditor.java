@@ -101,7 +101,7 @@ public class CodeEditor extends AbstractWidget {
         return (width - gutter() - 2 * PAD) / CELL;
     }
 
-    int textX() {
+    public int textX() {
         return getX() + gutter() + PAD;
     }
 
@@ -191,16 +191,50 @@ public class CodeEditor extends AbstractWidget {
         }
         if (isHovered()) g.requestCursor(com.mojang.blaze3d.platform.cursor.CursorTypes.IBEAM);
         g.disableScissor();
-        // a problem's message on hover (its underline or its line number)
-        if (isMouseOver(mouseX, mouseY)) {
+        // on hover: a problem's message (its underline or its line number), else what the language says of the word
+        if (isMouseOver(mouseX, mouseY) && mouseY >= ty) {
             int l = scrollLine + (mouseY - ty) / LINE;
+            int c = mouseX < tx ? -1 : (mouseX - tx) / CELL + scrollCol;
+            boolean shown = false;
             for (var p : problems)
-                if (p.line() == l) {
-                    int c = (mouseX - tx) / CELL + scrollCol;
-                    if (mouseX < x0 + gw || c >= p.start() && c <= Math.max(p.end(), p.start() + 1))
-                        g.setTooltipForNextFrame(Component.literal(p.message()), mouseX, mouseY);
+                if (p.line() == l && (mouseX < x0 + gw || c >= p.start() && c <= Math.max(p.end(), p.start() + 1))) {
+                    g.setTooltipForNextFrame(Component.literal(p.message()), mouseX, mouseY);
+                    shown = true;
                 }
+            if (!shown && c >= 0 && l < buffer.lineCount()) {
+                List<String> info = hover(l, c);
+                if (!info.isEmpty()) g.setTooltipForNextFrame(font, tooltip(font, info), mouseX, mouseY);
+            }
         }
+    }
+
+    String hoverText;
+    int hoverLine = -1, hoverCol = -1;
+    List<String> hoverInfo = List.of();
+
+    /** The language's word on (line, col), kept while neither the text nor the place changes. */
+    List<String> hover(int line, int col) {
+        String text = buffer.text();
+        if (line != hoverLine || col != hoverCol || !text.equals(hoverText)) {
+            hoverText = text;
+            hoverLine = line;
+            hoverCol = col;
+            hoverInfo = language.hover(text, line, col);
+        }
+        return hoverInfo;
+    }
+
+    /** Hover lines as a tooltip: headings (the first, and any after an example) gold, examples grey, wrapped. */
+    static List<net.minecraft.util.FormattedCharSequence> tooltip(Font font, List<String> info) {
+        List<net.minecraft.util.FormattedCharSequence> out = new java.util.ArrayList<>();
+        boolean heading = true;
+        for (String s : info) {
+            boolean example = s.startsWith("e.g. ");
+            var style = net.minecraft.network.chat.Style.EMPTY.withColor(heading ? 0xF0C860 : example ? 0xA0A0A0 : 0xFFFFFF);
+            out.addAll(font.split(Component.literal(s).withStyle(style), 200));
+            heading = example;
+        }
+        return out;
     }
 
     // ---- input

@@ -117,7 +117,7 @@ public final class Program implements INBTTReady {
         String big = tooBig(source);
         if (big != null) return p.fail(0, "The program is " + big);
         List<Object[]> st = statements(source);
-        if (st.isEmpty()) return p.fail(0, "Equation required!");
+        if (st.isEmpty()) return p.fail(0, "Program required");
         List<ISymbole> known = new ArrayList<>(inputs);
         for (int i = 0; i < st.size() - 1; i++) {
             String s = (String) st.get(i)[0];

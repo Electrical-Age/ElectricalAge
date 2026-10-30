@@ -54,4 +54,18 @@ public class SpLanguageTest {
         assertTrue(d.get(0).message().contains("y is not defined above"), d.get(0).message());
         assertTrue(SpLanguage.INSTANCE.validate("x = A\nx * 2").isEmpty());
     }
+
+    @Test
+    void hoverExplainsFunctionsInputsAndNamedParts() {
+        String text = "avg = rc(A, 2)\non = rs(B > 0.5, C)\nif(on, avg, 0)";
+        var h = SpLanguage.INSTANCE.hover(text, 1, 6); // rs
+        assertEquals("rs(set, reset)", h.get(0));
+        assertTrue(h.get(2).startsWith("e.g. "));
+        assertEquals("Input B", SpLanguage.INSTANCE.hover(text, 1, 8).get(0));
+        assertEquals(List.of("avg", "avg = rc(A, 2)"), SpLanguage.INSTANCE.hover(text, 2, 8));
+        assertEquals(6, SpLanguage.INSTANCE.hover("pid(1, A, 1, 0, 0)", 0, 1).size()); // both forms
+        assertTrue(SpLanguage.INSTANCE.hover(text, 0, 5).isEmpty()); // the = sign
+        // a broken line above doesn't stop it
+        assertEquals("rs(set, reset)", SpLanguage.INSTANCE.hover("smooth A, latch on B\n" + text, 2, 6).get(0));
+    }
 }

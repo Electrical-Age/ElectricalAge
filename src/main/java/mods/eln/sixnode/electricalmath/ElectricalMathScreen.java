@@ -23,6 +23,8 @@ public class ElectricalMathScreen extends ElnScreen {
     static final int LEFT_X = 6, LEFT_W = 90, EDIT_X = 100, EDIT_W = 226, EDIT_Y = 16, EDIT_H = 148, REF_X = 332, REF_W = 128;
     final ElectricalMathRender render;
     CodeEditor editor;
+    /** The guide's open categories, kept over a re-layout (all closed when the screen opens). */
+    final java.util.Set<String> openCategories = new java.util.HashSet<>();
     Program draft;
 
     public ElectricalMathScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
@@ -36,14 +38,10 @@ public class ElectricalMathScreen extends ElnScreen {
         String text = editor != null ? editor.buffer.text() : render.expression == null ? "" : render.expression;
         editor = addRenderableWidget(new CodeEditor(leftPos + EDIT_X, topPos + EDIT_Y, EDIT_W, EDIT_H, text, Program.MAX_CHARS, SpLanguage.INSTANCE,
             t -> draft = SpLanguage.compile(t)));
-        addRenderableWidget(new ReferencePane(leftPos + REF_X, topPos + EDIT_Y, REF_W, HEIGHT - EDIT_Y - 6, s -> editor.insert(s)));
+        addRenderableWidget(new ReferencePane(leftPos + REF_X, topPos + EDIT_Y, REF_W, HEIGHT - EDIT_Y - 6, openCategories, s -> editor.insert(s)));
         button(LEFT_X, 162, LEFT_W, () -> tr("Apply"), () -> render.clientSetString(ElectricalMathElement.setExpressionId, editor.buffer.text()),
             tr("Sends the program to the processor"));
         setInitialFocus(editor);
-    }
-
-    boolean applied() {
-        return editor.buffer.text().equals(render.expression == null ? "" : render.expression);
     }
 
     int chips() {
@@ -51,21 +49,20 @@ public class ElectricalMathScreen extends ElnScreen {
         return ElectricalMathElement.isChip(stack) ? stack.getCount() : 0;
     }
 
-    /** The status under the editor: the first problem, or the chips needed; and whether it is applied. */
+    /** The status under the editor: the first problem, or the chips needed. */
     String status() {
         String t = editor.buffer.text();
-        if (t.isBlank()) return tr("Equation required!");
+        if (t.isBlank()) return tr("Program required");
         if (!editor.problems().isEmpty()) return editor.problems().get(0).message();
         if (draft == null || !draft.isValid()) return tr("Invalid equation!");
         int need = ElectricalMathElement.chipsFor(draft.getOperatorCount());
-        return tr("%1$ Cheap Chip(s) required", need) + (applied() ? "" : ", " + tr("not applied yet"));
+        return tr("%1$ Cheap Chip(s) required", need);
     }
 
     int statusColor() {
         String t = editor.buffer.text();
         if (t.isBlank()) return LABEL;
         if (!editor.problems().isEmpty() || draft == null || !draft.isValid()) return 0xFFC02020;
-        if (!applied()) return 0xFF806010;
         return chips() >= ElectricalMathElement.chipsFor(draft.getOperatorCount()) ? 0xFF108F00 : 0xFFC02020;
     }
 
@@ -84,10 +81,10 @@ public class ElectricalMathScreen extends ElnScreen {
             g.text(font, names[i], x + 12 + i * 18, y + 76, 0xFFE8E8E8, false);
         }
         g.text(font, tr("Logger"), x + 6, y + 90, 0xFFDADADA, false);
-        g.text(font, tr("Cheap chips"), leftPos + LEFT_X, topPos + CHIP_Y - 11, LABEL, false);
+        g.text(font, tr("Chips"), leftPos + CHIP_X - 4 - font.width(tr("Chips")), topPos + CHIP_Y + 5, LABEL, false);
         String s = status();
         var lines = font.split(Component.literal(s), EDIT_W);
-        g.text(font, lines.isEmpty() ? Component.empty().getVisualOrderText() : lines.get(0), leftPos + EDIT_X, topPos + EDIT_Y + EDIT_H + 3, statusColor(), false);
+        g.text(font, lines.isEmpty() ? Component.empty().getVisualOrderText() : lines.get(0), editor.textX(), topPos + EDIT_Y + EDIT_H + 3, statusColor(), false);
         if (lines.size() > 1 && mouseY >= topPos + EDIT_Y + EDIT_H + 2 && mouseY < topPos + EDIT_Y + EDIT_H + 12 && mouseX >= leftPos + EDIT_X
             && mouseX < leftPos + EDIT_X + EDIT_W)
             g.setTooltipForNextFrame(Component.literal(s), mouseX, mouseY);

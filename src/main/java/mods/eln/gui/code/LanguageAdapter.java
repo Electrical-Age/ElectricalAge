@@ -28,6 +28,14 @@ public interface LanguageAdapter {
     /** What is wrong with the text (empty: nothing). */
     List<Diagnostic> validate(String text);
 
+    /**
+     * What to show when the pointer rests on (line, col): lines of a tooltip, the first a heading, or empty for
+     * nothing (the signal processor: a function's reference entry, an input, a named part's definition).
+     */
+    default List<String> hover(String text, int line, int col) {
+        return List.of();
+    }
+
     /** Lines (0-based) to draw a rule above (the signal processor: its output line). */
     default Set<Integer> rulesAbove(String text) {
         return Set.of();

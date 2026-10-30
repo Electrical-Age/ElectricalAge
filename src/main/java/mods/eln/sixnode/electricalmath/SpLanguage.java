@@ -112,6 +112,45 @@ public final class SpLanguage implements LanguageAdapter {
         return false;
     }
 
+    @Override
+    public List<String> hover(String text, int line, int col) {
+        List<List<Token>> tokens = tokenize(text);
+        if (line < 0 || line >= tokens.size()) return List.of();
+        String s = text.split("\n", -1)[line];
+        for (Token t : tokens.get(line)) {
+            if (col < t.start() || col >= t.end()) continue;
+            String w = s.substring(t.start(), t.end());
+            switch (t.kind()) {
+                case FUNCTION, KEYWORD -> {
+                    List<String> out = new ArrayList<>();
+                    for (var e : FunctionReference.forName(w.equals("PI") ? "pi" : w)) {
+                        out.add(e.signature());
+                        out.add(e.meaning());
+                        out.add("e.g. " + e.example());
+                    }
+                    return out;
+                }
+                case INPUT_A, INPUT_B, INPUT_C -> {
+                    return List.of("Input " + w, "The signal on that side, 0 to 1 for 0 to 50 V.");
+                }
+                case NAME, DEFINITION -> {
+                    String[] lines = text.split("\n", -1);
+                    for (Statement st : statements(text))
+                        if (st.definition()) {
+                            String def = lines[st.line()].substring(st.start(), st.end()).trim();
+                            Matcher m = DEFINITION.matcher(def);
+                            if (m.find() && m.group(1).equals(w)) return List.of(w, def);
+                        }
+                    return List.of();
+                }
+                default -> {
+                    return List.of();
+                }
+            }
+        }
+        return List.of();
+    }
+
     static Kind kind(String w, boolean defining, Set<String> names) {
         if (defining) return Kind.DEFINITION;
         switch (w) {
