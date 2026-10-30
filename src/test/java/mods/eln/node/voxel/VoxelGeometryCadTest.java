@@ -91,4 +91,17 @@ public class VoxelGeometryCadTest {
             assertEquals(8, body[1], 1e-9, "the body stands on the pipe (from its axis)");
         }
     }
+
+    @Test
+    void closeBendsShareOneSleeve() {
+        // the large pipe's S (bends 4 voxels apart): one sleeve along the piece between the bends, not two rings crossed
+        // at right angles (each one's end poked out through the other's side: AdventurAgent 2026-10-30)
+        var m = VoxelGeometry.model(List.of(new PipePart(2, new int[]{0, 8, 8, 6, 8, 8, 6, 12, 8, 16, 12, 8})), null);
+        assertEquals(1, m.solids.stream().filter(x -> "pipe fitting".equals(x.name)).count());
+        double[] b = m.bounds(x -> "pipe fitting".equals(x.name));
+        assertTrue(b[1] < 8 - 3 && b[4] > 12 + 3, "it covers both bends: y " + b[1] + ".." + b[4]);
+        // bends far apart keep a ring each
+        var far = VoxelGeometry.model(List.of(new PipePart(0, new int[]{0, 8, 8, 6, 8, 8, 6, 12, 8, 16, 12, 8})), null);
+        assertEquals(2, far.solids.stream().filter(x -> "pipe fitting".equals(x.name)).count());
+    }
 }

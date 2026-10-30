@@ -260,20 +260,34 @@ public final class VoxelGeometry {
             int f0 = piece.axis == 1 ? 0 : piece.axis == 2 ? 2 : 4;
             piece.open(piece.a0 == 0 && adapters[f0], piece.a1 == 16 && adapters[f0 + 1]);
         }
-        List<double[]> fittings = new ArrayList<>();
+        // a fitting ring at each bend: {axis, c1, c2, from, to} (along the incoming piece, round the corner). Two bends
+        // close together (a large pipe's S or U, a few voxels apart) share one sleeve along the piece between them: two
+        // rings there crossed at right angles, and each one's end poked out through the other's side (AdventurAgent
+        // 2026-10-30: a wedge on the S's knuckle; earlier their sides z-fought)
+        List<double[]> rings = new ArrayList<>();
+        int last = -1;
         for (int i = 1; i < n - 1; i++) {
             int[] c = {p[3 * i], p[3 * i + 1], p[3 * i + 2]};
             int axis = p[3 * i - 3] != c[0] ? 0 : p[3 * i - 2] != c[1] ? 1 : 2;
             int[] o = others(axis);
-            // two bends close together (a large pipe's, 6 voxels apart): their rings' sides lay in one plane and
-            // z-fought, so the later ring is turned half a side (no side of it faces the earlier one's)
-            double[] bb = {c[0] - r - 0.35, c[1] - r - 0.35, c[2] - r - 0.35, c[0] + r + 0.35, c[1] + r + 0.35, c[2] + r + 0.35};
-            boolean near = false;
-            for (double[] f : fittings) near |= bb[0] < f[3] && f[0] < bb[3] && bb[1] < f[4] && f[1] < bb[4] && bb[2] < f[5] && f[2] < bb[5];
-            m.add(new Frustum(axis, c[o[0]], c[o[1]], r + 0.35, r + 0.35, c[axis] - r - 0.3, c[axis] + r + 0.3, SIDES, near ? 0 : 0.5))
-                .named("pipe fitting").material(sprite).argb(argb).uv(TUBE_UV).culled();
-            fittings.add(bb);
+            double[] ring = {axis, c[o[0]], c[o[1]], c[axis] - r - 0.3, c[axis] + r + 0.3};
+            if (last == i - 1 && !rings.isEmpty()) {
+                // the previous bend is this piece's start: near enough that the rings would meet?
+                double[] prev = rings.get(rings.size() - 1);
+                int[] q = {p[3 * i - 3], p[3 * i - 2], p[3 * i - 1]};
+                double gap = Math.abs(c[axis] - q[axis]);
+                if (gap < 2 * (r + 0.35)) {
+                    rings.set(rings.size() - 1, new double[]{axis, c[o[0]], c[o[1]], Math.min(c[axis], q[axis]) - r - 0.3, Math.max(c[axis], q[axis]) + r + 0.3});
+                    last = -1;   // (merged: a third bend starts afresh)
+                    continue;
+                }
+            }
+            rings.add(ring);
+            last = i;
         }
+        for (double[] g : rings)
+            m.add(new Frustum((int) g[0], g[1], g[2], r + 0.35, r + 0.35, g[3], g[4], SIDES, 0.5))
+                .named("pipe fitting").material(sprite).argb(argb).uv(TUBE_UV).culled();
         for (int end = 0; end < 2; end++) {
             int i = end == 0 ? 0 : n - 1;
             int x = p[3 * i], y = p[3 * i + 1], z = p[3 * i + 2];
