@@ -841,16 +841,24 @@ public class Equation implements IValue, INBTTReady {
         }
     }
 
-    public static class Rs implements IOperator, INBTTReady {
+    /**
+     * Set/reset latch, rs(reset, set): set above 0.6 sets it, reset above 0.6 clears it (reset wins). 26.x: it steps in
+     * process, once a tick, and getValue only reads it (it stepped whenever it was read: never inside an if's branch
+     * not taken, twice if read twice).
+     */
+    public static class Rs implements IOperator, INBTTReady, IProcess {
         public boolean state = false;
 
         public IValue set, reset;
 
         @Override
-        public double getValue() {
-
+        public void process(double time) {
             if (set.getValue() > 0.6) state = true;
             if (reset.getValue() > 0.6) state = false;
+        }
+
+        @Override
+        public double getValue() {
             return state ? 1.0 : 0.0;
         }
 
