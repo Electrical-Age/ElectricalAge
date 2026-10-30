@@ -50,7 +50,10 @@ transparent neighbour).
 - Voxel-to-legacy: EA's (side, edge) rule; `VoxelNode.legacy(side, lrdu)` picks the conductor that a six-node cable on
   that face would be. No outer-corner wraps through air: an outer corner is a knuckle in the corner block.
 - A straight block = 2 x Rs (`ElectricalConnection` adds both ends' Rs), as six-node cables.
-- Hosted elements' edges are `End`s too (`VoxelNode.ends()`), linked to cables at the same point.
+- Hosted elements' edges are `End`s too (`VoxelNode.ends()`), linked to cables at the same point. An element may put
+  several terminals on one edge (`SixNodeElement.edgePins()`: the three-channel data logger's inputs, board #45):
+  each is an `End` of its own, offset voxels from the edge's middle toward `side.applyLRDU(lrdu.left())`, and that edge
+  then has no middle point. In a plain six-node block such an element falls back to one connection an edge.
 
 ## Devices off centre (chips)
 

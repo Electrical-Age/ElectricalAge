@@ -1154,13 +1154,25 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (e == null) continue;
             Direction fs = Direction.fromInt(f);
             int af = fs.toEnumFacing().get3DDataValue();
+            var edgePins = e.edgePins();
             for (LRDU l : LRDU.values()) {
                 int dv = fs.applyLRDU(l).toEnumFacing().get3DDataValue();
                 int[] c = {8, 8, 8};
                 c[CablePart.normalAxis(af)] = CablePart.plane(af);
                 c[CablePart.normalAxis(dv)] = dv % 2 == 0 ? 0 : 16;
                 boolean burnt = e.isBurnt();
-                out.add(new End(c[0], c[1], c[2], dv, e.getConnectionMask(l), burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l), f, l));
+                boolean pinned = false;
+                // several terminals on this edge: each its own point along it (SixNodeElement.edgePins)
+                for (var p : edgePins) {
+                    if (p.lrdu() != l) continue;
+                    pinned = true;
+                    int along = fs.applyLRDU(l.left()).toEnumFacing().get3DDataValue();
+                    int[] q = c.clone();
+                    q[CablePart.normalAxis(along)] = 8 + (along % 2 == 0 ? -p.offset() : p.offset());
+                    out.add(new End(q[0], q[1], q[2], dv, p.mask(), burnt ? null : p.load(), null, f, l));
+                }
+                if (!pinned)
+                    out.add(new End(c[0], c[1], c[2], dv, e.getConnectionMask(l), burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l), f, l));
             }
         }
         return out;

@@ -439,4 +439,17 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         if (info != null) wailaList.put("Info", info);   // (Baughn: Jade showed "null" for a resin collector)
         return wailaList;
     }
+
+    /**
+     * Several terminals on one edge (board #45: the three-channel data logger's inputs): in a voxel block, each is a
+     * connection point of its own on that edge, offset voxels from the edge's middle toward the world side
+     * side.applyLRDU(lrdu.left()); an edge with any of these has no middle point. Empty: one point an edge, as usual.
+     */
+    public java.util.List<EdgePin> edgePins() {
+        return java.util.List.of();
+    }
+
+    /** A terminal on an edge (edgePins): the edge, where along it, the mask and the load it connects. */
+    public record EdgePin(mods.eln.misc.LRDU lrdu, int offset, int mask, mods.eln.sim.ElectricalLoad load) {
+    }
 }
