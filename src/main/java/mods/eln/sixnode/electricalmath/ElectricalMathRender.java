@@ -24,8 +24,10 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     String expression;
 
-    public int redstoneRequired;
+    public int chipsRequired;
     public boolean equationIsValid;
+    /** Why it doesn't compile, or "". */
+    public String error = "";
 
     float ledTime = 0f;
     boolean[] ledOn = new boolean[8];
@@ -44,8 +46,9 @@ public class ElectricalMathRender extends SixNodeElementRender {
         super.publishUnserialize(stream);
         try {
             expression = stream.readUTF();
-            redstoneRequired = stream.readInt();
+            chipsRequired = stream.readInt();
             equationIsValid = stream.readBoolean();
+            error = stream.readUTF();
         } catch (IOException e) {
             e.printStackTrace();
         }

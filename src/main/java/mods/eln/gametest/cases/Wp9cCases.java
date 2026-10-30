@@ -265,30 +265,33 @@ public final class Wp9cCases {
     }
 
     /**
-     * Signal Processor, expression "A*0.5" (GUI packet), A (right pin) = 40 V -> normalized 0.8 -> 0.4 -> 20 V.
-     * A second one without redstone in its slot outputs 0 V (redstone = operator count is required).
+     * Signal Processor, expression "A*0.5" (GUI packet), A (right pin) = 40 V -> normalized 0.8 -> 0.4 -> 20 V. A second
+     * without chips in its slot outputs 0 V (Baughn 2026-10-30: ceil(operators / 4) cheap chips). A third runs a program
+     * with named components, "half = A*0.5; half + half" -> 40 V, its parts paid for once. A fourth, saved with 8 redstone
+     * in its slot (before 2026-10-30), loads with 2 cheap chips.
      */
     static final class MathCase implements TestCase {
-        ElectricalMathElement withRedstone, without;
+        ElectricalMathElement withChips, without, program, migrated;
+        String slotAfterLoad = "";
 
         public String name() {
             return "wp9c signal processor";
         }
 
         public int width() {
-            return 8;
+            return 16;
         }
 
-        ElectricalMathElement math(TestContext ctx, int x, int redstone) {
+        ElectricalMathElement math(TestContext ctx, int x, int chips, String expression) {
             BlockPos p = ctx.at(x, 1, 1);
             ElectricalMathElement m = (ElectricalMathElement) ctx.placeSix(SIGNAL_PROCESSOR, p);
             orient(m, l -> l, Direction.XP);
             m.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(1); // ElectricalMathElement.setExpressionId
-                o.writeUTF("A*0.5");
+                o.writeUTF(expression);
             }), player(ctx));
-            if (redstone > 0) {
-                m.getInventory().setItem(0, new ItemStack(Items.REDSTONE, redstone));
+            if (chips > 0) {
+                m.getInventory().setItem(0, mods.eln.Eln.findItemStack("Cheap Chip", chips));
                 m.getInventory().setChanged();
             }
             signal(ctx, beside(m, p, m.front.right()), 40);
@@ -297,19 +300,33 @@ public final class Wp9cCases {
         }
 
         public void build(TestContext ctx) {
-            withRedstone = math(ctx, 1, 8);
-            without = math(ctx, 5, 0);
+            withChips = math(ctx, 1, 1, "A*0.5");
+            without = math(ctx, 5, 0, "A*0.5");
+            program = math(ctx, 9, 1, "half = A*0.5; half + half");
+            migrated = math(ctx, 13, 0, "A*0.5");
+            // as a processor saved before 2026-10-30 holds redstone: saved and loaded, it holds cheap chips
+            migrated.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 8));
+            net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+            migrated.writeToNBT(t);
+            migrated.readFromNBT(t);
+            ItemStack s = migrated.getInventory().getItem(0);
+            slotAfterLoad = s.getCount() + " " + (ElectricalMathElement.isChip(s) ? "cheap chips" : s.getItem().toString());
         }
 
         public void measure(TestContext ctx) {
-            boolean valid = field(withRedstone, "equationIsValid");
-            int required = field(withRedstone, "redstoneRequired");
-            boolean ready = field(withRedstone, "redstoneReady");
-            ctx.check("wp9c signal processor: A*0.5 valid, redstone ready", valid && ready && required >= 1 && required <= 8,
-                "valid " + valid + ", requires " + required + " redstone, ready " + ready);
-            ctx.checkValue("wp9c signal processor output [V] (A = 40 V -> 0.8 * 0.5 * SVU)", out(withRedstone), 20);
-            boolean ready2 = field(without, "redstoneReady");
-            within(ctx, "wp9c signal processor without redstone: not ready, output 0 V", ready2 ? 999 : out(without), 0, 0.01);
+            boolean valid = field(withChips, "equationIsValid");
+            int required = field(withChips, "chipsRequired");
+            boolean ready = field(withChips, "chipsReady");
+            ctx.check("wp9c signal processor: A*0.5 valid, a chip ready", valid && ready && required == 1,
+                "valid " + valid + ", requires " + required + " chips, ready " + ready);
+            ctx.checkValue("wp9c signal processor output [V] (A = 40 V -> 0.8 * 0.5 * SVU)", out(withChips), 20);
+            boolean ready2 = field(without, "chipsReady");
+            within(ctx, "wp9c signal processor without chips: not ready, output 0 V", ready2 ? 999 : out(without), 0, 0.01);
+            boolean pvalid = field(program, "equationIsValid");
+            int preq = field(program, "chipsRequired");
+            ctx.check("wp9c signal processor: a program with a named part, one chip (2 operators)", pvalid && preq == 1, "valid " + pvalid + ", " + preq + " chips");
+            ctx.checkValue("wp9c signal processor program output [V] (half = 0.4; half + half = 0.8 * SVU)", out(program), 40);
+            ctx.check("wp9c signal processor: 8 redstone load as 2 cheap chips", slotAfterLoad.equals("2 cheap chips"), slotAfterLoad);
             // daytime wraps each day (1.12 divided the total time: after day 1 it only grew)
             ctx.check("wp9c signal processor: daytime is the time of day", Math.abs(mods.eln.misc.Utils.dayFraction(36000) - 12000 / 23999.0) < 1e-9
                 && mods.eln.misc.Utils.dayFraction(23999) == 1 && mods.eln.misc.Utils.dayFraction(48000) == 0, "");

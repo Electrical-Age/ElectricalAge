@@ -247,6 +247,12 @@ final class GoldenSlotsCase implements TestCase {
                     known.add(name + " slot " + i + " narrowed: takes " + got.size() + " of 1.12's " + want.size() + " probes");
                     want = got;
                 }
+                // (Baughn 2026-10-30: a signal processor's operators are paid in cheap chips, 4 operators a chip; it took redstone)
+                if ("Signal Processor".equals(name) && i == 0 && want.equals(Set.of("minecraft:redstone@0")) && got.size() == 1
+                    && mods.eln.sixnode.electricalmath.ElectricalMathElement.isChip(new ItemStack(probes.get(got.iterator().next())))) {
+                    known.add(name + " slot 0 takes cheap chips, not redstone (Baughn 2026-10-30)");
+                    want = got;
+                }
                 int wantLimit = g.get("limit").getAsInt();
                 // (Baughn 2026-10-26: 4 combustion chambers, was 2, with steam turbines by the expansion)
                 if ("Stone Heat Furnace".equals(name) && i == 2 && wantLimit == 2 && limit == 4) {

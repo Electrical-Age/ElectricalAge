@@ -15,7 +15,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import mods.eln.solver.Equation;
+import mods.eln.solver.Program;
 import mods.eln.solver.ISymbole;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,11 +46,14 @@ public class ElectricalMathElement extends SixNodeElement {
 
     boolean sideConnectionEnable[] = new boolean[3];
     String expression = "";
-    Equation equation;
+    Program program;
     boolean equationIsValid;
+    /** Why the program doesn't compile (for the screen), or "". */
+    String error = "";
 
-    int redstoneRequired;
-    boolean redstoneReady = false;
+    /** Cheap chips the program needs (Baughn 2026-10-30: ceil(N / 4) for N operators), and whether the slot has them. */
+    int chipsRequired;
+    boolean chipsReady = false;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
@@ -102,31 +105,35 @@ public class ElectricalMathElement extends SixNodeElement {
 
         @Override
         public void process(double time) {
-            if (e.redstoneReady)
-                e.gateOutputProcess.setOutputNormalizedSafe(e.equation.getValue(time));
+            if (e.chipsReady)
+                e.gateOutputProcess.setOutputNormalizedSafe(e.program.getValue(time));
             else
                 e.gateOutputProcess.setOutputNormalized(0.0);
         }
     }
 
+    /** Operators a cheap chip pays for (Baughn 2026-10-30; it was one redstone an operator). */
+    public static final int OPERATORS_PER_CHIP = 4;
+
+    public static int chipsFor(int operators) {
+        return (operators + OPERATORS_PER_CHIP - 1) / OPERATORS_PER_CHIP;
+    }
+
+    /** Is this the cheap chip, the processor slot's only item? */
+    public static boolean isChip(ItemStack s) {
+        return !Utils.isEmpty(s) && Utils.getItemObject(s) instanceof mods.eln.generic.GenericItemUsingDamageDescriptor d && "Cheap Chip".equals(d.name);
+    }
+
     void preProcessEquation(String expression) {
         this.expression = expression;
-        equation = new Equation(); //expression, symboleList, 100);
-        equation.setUpDefaultOperatorAndMapper();
-        equation.setIterationLimit(100);
-        equation.addSymbol(symboleList);
-        equation.preProcess(expression);
-
+        program = Program.compile(expression, symboleList);
         for (int idx = 0; idx < 3; idx++) {
-            sideConnectionEnable[idx] = equation.isSymboleUsed(symboleList.get(idx));
+            sideConnectionEnable[idx] = program.uses(symboleList.get(idx));
         }
-        this.expression = expression;
-
-        redstoneRequired = 0;
-        if (equationIsValid = equation.isValid()) {
-            redstoneRequired = equation.getOperatorCount();
-        }
-        checkRedstone();
+        equationIsValid = program.isValid();
+        error = program.error == null || expression.isEmpty() ? "" : program.error;
+        chipsRequired = equationIsValid ? chipsFor(program.getOperatorCount()) : 0;
+        checkChips();
     }
 
     public class DayTime implements ISymbole {
@@ -174,10 +181,11 @@ public class ElectricalMathElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Equation"), expression);
+        // (A red, B blue, C green: Baughn 2026-10-30)
         info.put(I18N.tr("Input voltages"),
             Utils.plotVolt("\u00A7c", gateInput[0].getU()) +
-                Utils.plotVolt("\u00A7a", gateInput[1].getU()) +
-                Utils.plotVolt("\u00A79", gateInput[2].getU()));
+                Utils.plotVolt("\u00A79", gateInput[1].getU()) +
+                Utils.plotVolt("\u00A7a", gateInput[2].getU()));
         info.put(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
         return info;
     }
@@ -195,16 +203,13 @@ public class ElectricalMathElement extends SixNodeElement {
     @Override
     protected void inventoryChanged() {
         super.inventoryChanged();
-        checkRedstone();
+        checkChips();
     }
 
-    void checkRedstone() {
-        int redstoneInStack = 0;
-
+    void checkChips() {
         ItemStack stack = inventory.getItem(ElectricalMathContainer.restoneSlotId);
-        if (!Utils.isEmpty(stack)) redstoneInStack = stack.getCount();
-
-        redstoneReady = redstoneRequired <= redstoneInStack;
+        int chips = isChip(stack) ? stack.getCount() : 0;
+        chipsReady = chipsRequired <= chips;
         needPublish();
     }
 
@@ -222,15 +227,21 @@ public class ElectricalMathElement extends SixNodeElement {
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putString("expression", expression);
-        equation.writeToNBT(nbt, "equation");
+        program.writeToNBT(nbt, "equation");
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        // a processor from before 2026-10-30 holds redstone (one an operator): it becomes cheap chips, ceil(count / 4)
+        ItemStack old = inventory.getItem(ElectricalMathContainer.restoneSlotId);
+        if (!Utils.isEmpty(old) && old.is(net.minecraft.world.item.Items.REDSTONE)) {
+            ItemStack chips = mods.eln.Eln.findItemStack("Cheap Chip", chipsFor(old.getCount()));
+            inventory.setItem(ElectricalMathContainer.restoneSlotId, chips);
+        }
         expression = nbt.getStringOr("expression", "");
         preProcessEquation(expression);
-        equation.readFromNBT(nbt, "equation");
+        program.readFromNBT(nbt, "equation");
 
         firstBoot = false;
     }
@@ -240,8 +251,9 @@ public class ElectricalMathElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeUTF(expression);
-            stream.writeInt(redstoneRequired);
+            stream.writeInt(chipsRequired);
             stream.writeBoolean(equationIsValid);
+            stream.writeUTF(error);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -253,7 +265,9 @@ public class ElectricalMathElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setExpressionId:
-                    preProcessEquation(stream.readUTF());
+                    String source = stream.readUTF();
+                    if (Program.tooBig(source) != null) break;   // (the screen caps it too; a bigger one is refused here)
+                    preProcessEquation(source);
                     reconnect();
                     break;
             }

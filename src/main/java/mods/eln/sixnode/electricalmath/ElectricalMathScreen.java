@@ -23,24 +23,25 @@ public class ElectricalMathScreen extends ElnScreen {
     protected void init() {
         super.init();
         field("expression", () -> render.expression, v -> render.clientSetString(ElectricalMathElement.setExpressionId, v),
-            tr("Output voltage formula"), tr("Inputs are") + " A B C");
+            tr("Output voltage formula"), tr("Inputs are") + " A B C", tr("Name parts with name = expression; separate them with ;"))
+            .setMaxLength(mods.eln.solver.Program.MAX_CHARS);
         text("status", this::status, this::statusColor);
     }
 
-    int redstone() {
+    int chips() {
         var stack = menu.deviceInventory.getItem(ElectricalMathContainer.restoneSlotId);
-        return stack.isEmpty() ? 0 : stack.getCount();
+        return ElectricalMathElement.isChip(stack) ? stack.getCount() : 0;
     }
 
     String status() {
         if (render.expression == null || render.expression.isEmpty()) return tr("Equation required!");
-        if (render.equationIsValid) return tr("%1$ Redstone(s) required", render.redstoneRequired);
-        return tr("Invalid equation!");
+        if (render.equationIsValid) return tr("%1$ Cheap Chip(s) required", render.chipsRequired);
+        return render.error == null || render.error.isEmpty() ? tr("Invalid equation!") : render.error;
     }
 
     int statusColor() {
         if (render.expression == null || render.expression.isEmpty()) return LABEL;
-        if (render.equationIsValid) return redstone() >= render.redstoneRequired ? 0xFF108F00 : 0xFFC02020;
+        if (render.equationIsValid) return chips() >= render.chipsRequired ? 0xFF108F00 : 0xFFC02020;
         return 0xFFC02020;
     }
 }

@@ -325,3 +325,12 @@ on 1.7.10) onto 26.x.
   18 % of their section); the pedals run through the cranks' ends (they hung off the side, 28 %); the stem's top goes
   0.3 px into the bars (45 %, hidden); the rack braces sit at x 1.4 instead of 1.9, ending inside the seat stays (they
   touched the stays' sides, 26 %). The voxel parts needed nothing.
+
+- Signal processor programs (Baughn 2026-10-30, board #45): the expression may be a program, `name = expression`
+  lines (or ;-separated statements) and a last line with the output; an old single expression is still the output line
+  (= in it is still "equals"). Components are computed once a tick in order, definition before use; a stateful function
+  in one keeps one state, saved under the component's name (the output's keeps the old "equation" keys). Cost: each
+  line's operators once, paid in cheap chips, ceil(N / 4); the slot takes cheap chips only, and a processor saved with
+  redstone loads with ceil(count / 4) chips. Programs are capped at 4096 characters and 40 lines; the server refuses
+  bigger ones. `rs` now steps once a tick in its process (it stepped when read: never inside an if's branch not taken).
+  Tests `ProgramTest`, GameTest `wp9c signal processor`.
