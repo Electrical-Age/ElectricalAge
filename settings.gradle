@@ -8,3 +8,5 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 rootProject.name = 'eln'
+// the checked model library (cad/, pure Java; its sources are compiled into the mod)
+include 'cad'

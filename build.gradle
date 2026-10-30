@@ -23,6 +23,9 @@ repositories {
 
 // datagen output (P5) is part of the mod's resources
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+// The checked model library (cad/, board #44) is compiled into the mod, as Stasis does with towergen; :cad compiles
+// it alone, without Minecraft.
+sourceSets.main.java.srcDir 'cad/src/main/java'
 
 neoForge {
     version = project.neo_version
@@ -109,6 +112,11 @@ test {
     // jqwik keeps failing seeds (replayed first on the next run) under build/, not in the tests' working directory
     systemProperty 'jqwik.database', file('build/jqwik-database').absolutePath
     if (project.hasProperty('fluidCases')) systemProperty 'fluid.cases', project.property('fluidCases')
+    // the checked model library's reports and before/after previews (board #44): -PcadReport=PREFIX -PcadPreviews=DIR
+    if (project.hasProperty('cadReport')) systemProperty 'cad.report', project.property('cadReport')
+    if (project.hasProperty('cadDetail')) systemProperty 'cad.detail', project.property('cadDetail')
+    if (project.hasProperty('cadPreviews')) systemProperty 'cad.previews', project.property('cadPreviews')
+    systemProperty 'eln.resources', file('src/main/resources').absolutePath
     // LayoutTest checks every shipped screen layout (assets/eln/gui)
     systemProperty 'eln.guiDir', file('src/main/resources/assets/eln/gui').absolutePath
 }
@@ -145,3 +153,4 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += ['-Xmaxerrs', '10000']
 }
+

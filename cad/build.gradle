@@ -1,0 +1,26 @@
+// The checked model library (board #44): solids authored in px, Y up; emitters per target; a checker that fails tests on
+// zero-thickness solids, z-fighting faces and broken declared relations. Pure Java, no Minecraft: the mod compiles its
+// sources in (root build.gradle), as Stasis does with towergen, and this project compiling alone proves it stays so.
+plugins {
+    id 'java-library'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+}
