@@ -33,12 +33,14 @@ public final class SpLanguage implements LanguageAdapter {
         List<Statement> out = new ArrayList<>();
         String[] lines = text.split("\n", -1);
         for (int l = 0; l < lines.length; l++) {
-            String s = lines[l];
+            // # starts a comment anywhere on a line
+            int hash = lines[l].indexOf('#');
+            String s = hash < 0 ? lines[l] : lines[l].substring(0, hash);
             int start = 0;
             for (int i = 0; i <= s.length(); i++)
                 if (i == s.length() || s.charAt(i) == ';') {
                     String part = s.substring(start, i).trim();
-                    if (!part.isEmpty() && !part.startsWith("#")) out.add(new Statement(l, start, i, DEFINITION.matcher(s.substring(start, i)).find()));
+                    if (!part.isEmpty()) out.add(new Statement(l, start, i, DEFINITION.matcher(s.substring(start, i)).find()));
                     start = i + 1;
                 }
         }

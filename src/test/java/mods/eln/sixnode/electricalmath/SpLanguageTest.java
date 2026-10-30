@@ -78,4 +78,16 @@ public class SpLanguageTest {
         assertTrue(SpLanguage.INSTANCE.validate("A = 0.5\nA * 2").isEmpty());
         assertTrue(SpLanguage.INSTANCE.hover("A = 0.5\nA * 2", 1, 0).get(2).contains("0.5"));
     }
+
+    @Test
+    void aCommentMayFollowCode() {
+        String text = "sum = A + B\nhalf = sum / 2  # mean\nhalf";
+        assertTrue(SpLanguage.INSTANCE.validate(text).isEmpty(), SpLanguage.INSTANCE.validate(text).toString());
+        var line = SpLanguage.INSTANCE.tokenize(text).get(1);
+        assertEquals(LanguageAdapter.Kind.COMMENT, line.get(line.size() - 1).kind());
+        assertEquals(LanguageAdapter.Kind.DEFINITION, line.get(0).kind());
+        assertTrue(SpLanguage.INSTANCE.hover(text, 1, 18).isEmpty());   // in the comment
+        assertEquals(List.of("half", "half = sum / 2"), SpLanguage.INSTANCE.hover(text, 2, 1));
+        assertEquals(java.util.Set.of(2), SpLanguage.INSTANCE.rulesAbove(text));
+    }
 }

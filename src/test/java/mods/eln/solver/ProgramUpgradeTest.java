@@ -143,6 +143,7 @@ class ProgramUpgradeTest {
         assertEquals("A>0.3 &  B<0.7", ProgramUpgrade.upgrade("A>0.3 &  B<0.7", 1));
         assertEquals("x = A*2\n# note\nx + 1", ProgramUpgrade.upgrade("x = A*2\n# note\nx + 1", 1));
         assertEquals("x = (A > 0.5) == (B > 0.5)\nx", ProgramUpgrade.upgrade("x = A = B\nx", 1));
+        assertEquals("x = A * 2  # twice\nx", ProgramUpgrade.upgrade("x = A * 2  # twice\nx", 1));
     }
 
     @Test

@@ -75,12 +75,16 @@ public final class Program implements INBTTReady {
     static List<Object[]> statements(String source) {
         List<Object[]> out = new ArrayList<>();
         String[] lines = source.split("\n", -1);
-        for (int i = 0; i < lines.length; i++)
-            for (String part : lines[i].split(";", -1)) {
+        for (int i = 0; i < lines.length; i++) {
+            // # starts a comment anywhere on a line (there are no strings)
+            int hash = lines[i].indexOf('#');
+            String code = hash < 0 ? lines[i] : lines[i].substring(0, hash);
+            for (String part : code.split(";", -1)) {
                 String s = part.trim();
-                if (s.isEmpty() || s.startsWith("#")) continue;
+                if (s.isEmpty()) continue;
                 out.add(new Object[]{s, i + 1});
             }
+        }
         return out;
     }
 

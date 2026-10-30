@@ -138,4 +138,17 @@ public class ProgramTest {
         // without defaults allowed, A is an input already
         assertTrue(Program.compile("A = 1\nA", inputs()).error.contains("already defined"));
     }
+
+    @Test
+    void aCommentMayFollowCode() {
+        // AdventurAgent 2026-10-30: "half = sum / 2  # mean" was read as code
+        Program p = Program.compile("sum = A + B  # both\nhalf = sum / 2  # mean\nhalf # the output; # and more", inputs());
+        assertTrue(p.isValid(), p.error);
+        a.v = 0.6;
+        b.v = 0.2;
+        assertEquals(0.4, p.getValue(0.05), 1e-12);
+        assertEquals(2, p.getOperatorCount());
+        // ; before a comment still separates; after it, it is comment
+        assertTrue(Program.compile("x = A; x * 2 # x; y", inputs()).isValid());
+    }
 }
