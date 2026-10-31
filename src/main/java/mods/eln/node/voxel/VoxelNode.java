@@ -798,7 +798,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         probe.oy = oy;
         probe.oz = oz;
         probe.front = front;
-        return placeError(probe);
+        try {
+            return placeError(probe);
+        } finally {
+            probe.unload();   // (undo what its constructor joined: a Wireless Signal Repeater joins the wireless spots)
+        }
     }
 
     /** Why the device off centre in e's slot can't be turned to front (its body and pins move: a lopsided model), or null. */
