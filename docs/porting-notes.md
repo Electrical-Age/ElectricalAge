@@ -107,7 +107,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Placement of the shaft and steam machines (Baughn 2026-10-31, replacing the 2026-10-29 rule): shaft parts and the
   steam and fluid machines are placed facing the player (a shaft part's shaft runs across the view), and placing one
   never turns its neighbours. The wrench key with a click turns a shaft part, turbine, gas turbine, plant condenser, lone
-  tank or lone heat exchanger a quarter turn; its shaft re-couples keeping its speed, its ports follow
+  tank, lone heat exchanger, 50V/200V steam turbine or steam condenser a quarter turn; its shaft re-couples keeping its speed, its ports follow
   (`TransparentNodeElement.wrenchTurn`, `FluidPlacement.turn`). Tanks and exchangers in a box or stack don't turn. Before,
   placing turned the device and its neighbours to meet the most ports, and nothing turned them back.
   `machines_face_the_player_and_the_wrench_turns_them`.

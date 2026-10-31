@@ -31,7 +31,7 @@ import java.util.Map;
  * through a float valve: open below MAKEUP_OPEN of its volume as water, shut by MAKEUP_SHUT (Baughn's makeup pump
  * filled one to the flood line).
  */
-public class CondenserElement extends TransparentNodeElement implements FluidDevice {
+public class CondenserElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final CondenserDescriptor desc;
     public final NbtThermalLoad shell = new NbtThermalLoad("shell");
     /** The vessel, its pump, ejector and makeup (shared with the plant condenser). */
@@ -157,10 +157,28 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         vessel = v.vessel;
         outlet = v.outlet;
         inlet = v.inlet;
-        long at = c.pos().asLong();
+        remakePorts();
+        connect();
+    }
+
+    @Override
+    public Direction[] fronts() {
+        return mods.eln.fluid.FluidPlacement.horizontal();
+    }
+
+    @Override
+    public void remakePorts() {
+        long at = node.coordonate.pos().asLong();
         ports = List.of(new FluidPort(outlet, at, front.toEnumFacing().get3DDataValue(), 0.0, PORT_K),   // condensate out, front
             new FluidPort(inlet, at, 1, 1.0, PORT_K));                                                      // makeup in, top (float valve)
-        connect();
+    }
+
+    /** The wrench turns it (AdventurAgent 2026-10-31: placed facing the player, nothing could turn it to a turbine). */
+    @Override
+    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
+        if (!mods.eln.fluid.FluidPlacement.turn(this)) return false;
+        findTurbine();
+        return true;
     }
 
     @Override

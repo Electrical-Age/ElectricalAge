@@ -216,6 +216,17 @@ public final class ShaftArtCases {
             expect("a generator turned a quarter leaves the line", () -> parted);
             expect("and keeps its speed (" + kept + " rad/s)", () -> Math.abs(kept - 300) < 1e-6);
             expect("turned back across, it rejoins the line", () -> rejoined);
+            // a steam turbine (50V/200V) and a steam condenser south of it: the turbine turned until its exhaust side
+            // (right of its front) faces the condenser, which finds it; the condenser turns too (AdventurAgent 2026-10-31)
+            var st = (mods.eln.oil.SteamGeneratorElement) placeLooking(ctx, 12 + (82 << 6), ctx.at(6, 1, 5), NORTH);
+            var sc = (mods.eln.oil.CondenserElement) placeLooking(ctx, 32 + (82 << 6), ctx.at(6, 1, 6), EAST);
+            for (int i = 0; i < 3 && st.front.right() != Direction.ZP; i++) st.wrenchTurn(null);
+            boolean faces = st.front.right() == Direction.ZP;
+            Direction s0 = sc.front;
+            boolean scTurned = sc.wrenchTurn(null) && sc.front == s0.right();
+            expect("a steam turbine turns its exhaust side to a condenser", () -> faces);
+            expect("a steam condenser turns a quarter turn", () -> scTurned);
+            expect("the condenser finds the turned turbine", () -> sc.turbine == st);
         }
 
         public void measure(TestContext ctx) {

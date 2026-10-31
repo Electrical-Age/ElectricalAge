@@ -189,6 +189,18 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         super.initializeFromThat(front, entityLiving, itemStackNbt);
     }
 
+    /**
+     * The wrench turns it a quarter turn (Baughn 2026-10-31), so its exhaust side can face a condenser beside it; its
+     * terminals follow its front, and the condenser finds it again within a second.
+     */
+    @Override
+    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
+        front = front.right();
+        reconnect();
+        needPublish();
+        return true;
+    }
+
     /** "Under Pressure" (data/eln/advancement/guide/low_pressure.json) to its placer, if online. */
     void awardLowPressure() {
         if (!(node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl)) return;
