@@ -508,7 +508,7 @@ public final class LabCommands {
             }
     }
 
-    static int inspect(CommandSourceStack src, BlockPos pos) {
+    public static int inspect(CommandSourceStack src, BlockPos pos) {
         var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
         List<String> out = new ArrayList<>();
         if (node == null) out.add("no EA node at " + pos);
@@ -529,7 +529,11 @@ public final class LabCommands {
             }
             out.add("  links: " + links);
             if (node instanceof mods.eln.node.voxel.VoxelNode v) {
-                out.add("- " + v.getWaila(true));
+                try {
+                    out.add("- " + v.getWaila(true));
+                } catch (RuntimeException e) {
+                    out.add("- (waila: " + e + ")");
+                }
                 for (var p : v.parts) {
                     var t = new net.minecraft.nbt.CompoundTag();
                     p.write(t);
@@ -539,7 +543,17 @@ public final class LabCommands {
             if (node instanceof mods.eln.node.six.SixNode six)
                 for (var el : six.sideElementList) {
                     if (el == null) continue;
-                    out.add("- " + el.side + ": " + el.getClass().getSimpleName() + " " + new TreeMap<>(el.getWaila()));
+                    // (some devices have no Waila: a Hub, a repeater)
+                    String place = el.slot >= 6 ? " slot " + el.slot + " at " + el.ox + "," + el.oy + "," + el.oz + ", front " + el.front
+                        + ", pins " + (node instanceof mods.eln.node.voxel.VoxelNode v ? pinsOf(v, el) : "-") : "";
+                    String waila;
+                    try {
+                        var w = el.getWaila();
+                        waila = w == null ? "{}" : new TreeMap<>(w).toString();
+                    } catch (RuntimeException e) {
+                        waila = "(waila: " + e + ")";
+                    }
+                    out.add("- " + el.side + ": " + el.getClass().getSimpleName() + place + " " + waila);
                     try {
                         if (el instanceof mods.eln.sixnode.lampsocket.LampSocketElement l) {
                             Object p = field(l, "lampProcess");
@@ -570,6 +584,17 @@ public final class LabCommands {
             src.sendSuccess(() -> Component.literal(line), false);
         }
         return out.size();
+    }
+
+    /** The pins of an off-centre device: edge (world direction), tip, kind mask, linked or not. */
+    static String pinsOf(mods.eln.node.voxel.VoxelNode v, mods.eln.node.six.SixNodeElement e) {
+        List<String> out = new ArrayList<>();
+        for (int[] t : v.pinTips(e.slot)) {
+            var l = mods.eln.misc.LRDU.fromInt(t[0]);
+            out.add(e.side.applyLRDU(l) + "@" + t[1] + "," + t[2] + "," + t[3] + " mask " + Integer.toHexString(e.getConnectionMask(l))
+                + (e.slotMask.get(l) ? " linked" : " open"));
+        }
+        return out.toString();
     }
 
     public static Object field(Object o, String name) {

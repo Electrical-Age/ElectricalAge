@@ -1214,6 +1214,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         cables.addToSimulation();
         connectElementsToCables();
         connectPins();
+        pinsChanged();
         connectValves();
         connectSensors();
         cablesBuilt = !cables.conductors.isEmpty();
@@ -1347,6 +1348,36 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 sideElementList[q.slot].slotMask.set(q.lrdu, true);
                 link(p.load, q.load, p.thermal, q.thermal);
             }
+        }
+    }
+
+    /** Each off-centre device's pins as last published (slot * 4 + edge bits), to see them change. */
+    private long publishedPins = -1;
+
+    /**
+     * Pins that come and go after placement (a Hub's with the cables in its slots, a Temperature Probe's back pin with
+     * its slot): the clients get them (AdventurAgent: a Hub given cables showed no pins), and a pin that now lands on
+     * something is reported in the log. Its links follow its kind in connectPins either way.
+     */
+    private void pinsChanged() {
+        long sig = 0;
+        for (int i = 6; i < SLOTS; i++) {
+            var e = sideElementList[i];
+            if (e == null) continue;
+            int m = 0;
+            for (LRDU l : LRDU.values()) if (e.getConnectionMask(l) != 0) m |= 1 << l.toInt();
+            sig = sig * 31 + i * 16L + m;
+        }
+        if (sig == publishedPins) return;
+        boolean first = publishedPins == -1;
+        publishedPins = sig;
+        setNeedPublish(true);
+        if (first) return;
+        for (int i = 6; i < SLOTS; i++) {
+            var e = sideElementList[i];
+            if (e == null) continue;
+            String err = turnError(e, e.front);
+            if (err != null) Eln.LOG.info("Electrical Age: {} at {} has pins in the way now: {}", e.sixNodeElementDescriptor.name, coordonate, err);
         }
     }
 

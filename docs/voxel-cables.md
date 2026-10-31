@@ -99,6 +99,11 @@ transparent neighbour).
   (one pin of its kind touching its side: a tap); then at the click as before, else the refusal says what to do. Where
   the cable leaves a choice the player's facing is tried first, then turned clockwise. The preview shows the same plan.
   Breaking a device in line leaves the gap; the two ends stay where they were.
+- A cable kit ends at the nearest pin of its own kind (`CablePlacer.deviceEnd` with the kit's tier; a face-slot device's
+  edges likewise): a Copper Thermal Cable kit at a Thermal Probe's side pins, a signal kit at its front. The pin boxes are
+  coloured by their cable: copper for thermal, pale for signal, dark grey for power.
+- Pins that change after placement (a Hub's with its slots, a Temperature Probe's back pin) are published when they
+  change (`VoxelNode.pinsChanged`), and one that now lands on something is logged; links follow the kind as always.
 - `placeErrorAt` builds a stand-in element to read its pins and unloads it after (a Wireless Signal Repeater joins the
   wireless spots as it is made; left there, its empty spot crashed the receivers' process).
 - Holding such a device shows it see-through where a click would put it (`DevicePreview`, client

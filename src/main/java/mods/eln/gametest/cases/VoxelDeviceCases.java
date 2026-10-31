@@ -35,6 +35,7 @@ public final class VoxelDeviceCases {
         cases.add(new PowerDevicesCase());
         cases.add(new InlineCase());
         cases.add(new TapCase());
+        cases.add(new SlotPinsCase());
     }
 
     static int id(String name) {
@@ -827,5 +828,124 @@ public final class VoxelDeviceCases {
             c.check("tap: a power socket above a wall cable gets its pin onto it", socket != null && linked(socket, Direction.YN), socketErr
                 + (socket == null ? "" : ", mask " + socket.slotMask.mask));
         }
+    }
+
+    /**
+     * Pins that follow a device's slots (AdventurAgent: a Hub given two LV cables in its GUI showed no pins, and
+     * `/elnlab inspect` on its block failed): a Hub off centre gets a pin for each slot filled and loses it when emptied,
+     * and its block is published each time so clients draw them; a Temperature Probe given a thermal cable likewise.
+     * `/elnlab inspect` works on a block with each converted device off centre. A Copper Thermal Cable kit aimed at a
+     * Thermal Probe's signal pin ends at its nearest thermal pin, a signal kit at the signal pin.
+     */
+    static final class SlotPinsCase implements TestCase {
+        String hub = "", temp = "", inspect = "", kit = "";
+        boolean hubOk, tempOk, inspectOk = true, kitOk;
+
+        public String name() {
+            return "pins that follow a device's slots";
+        }
+
+        public int width() {
+            return 24;
+        }
+
+        public int height() {
+            return 8;
+        }
+
+        public int depth() {
+            return 24;
+        }
+
+        static boolean published(VoxelNode v, Runnable change) {
+            v.setNeedPublish(false);
+            change.run();
+            return v.getNeedPublish();
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 24; x++) for (int z = 0; z < 8; z++) c.floor(c.at(x, 0, z));
+            BlockPos ph = c.at(1, 1, 1);
+            var vh = block(c, ph);
+            var h = put(c, vh, "Hub", Direction.YN, 0, 0, 2, Direction.ZN);
+            var inv = h.getInventory();
+            int bare = vh.pinTips(h.slot).size();
+            boolean p1 = published(vh, () -> {
+                inv.setItem(mods.eln.sixnode.hub.HubContainer.cableSlotId + 0, Wp9aCases.lvCable());
+                inv.setItem(mods.eln.sixnode.hub.HubContainer.cableSlotId + 3, Wp9aCases.lvCable());
+                inv.setChanged();
+            });
+            int two = vh.pinTips(h.slot).size();
+            boolean p2 = published(vh, () -> {
+                inv.setItem(mods.eln.sixnode.hub.HubContainer.cableSlotId + 3, net.minecraft.world.item.ItemStack.EMPTY);
+                inv.setChanged();
+            });
+            int one = vh.pinTips(h.slot).size();
+            hub = fmt("pins bare %d, slots 0 and 3 %d (published %s), slot 3 emptied %d (published %s)", bare, two, p1, one, p2);
+            hubOk = bare == 0 && two == 2 && p1 && one == 1 && p2;
+            // a temperature probe: its back pin's kind changes; the block is published
+            BlockPos pt = c.at(3, 1, 1);
+            var vt = block(c, pt);
+            var t = put(c, vt, "Temperature Probe", Direction.YN, 2, 0, 0, Direction.ZN);
+            boolean p3 = published(vt, () -> {
+                t.getInventory().setItem(mods.eln.sixnode.thermalsensor.ThermalSensorContainer.cableSlotId,
+                    mods.eln.Eln.sixNodeItem.getDescriptor(Wp9bCases.THERMAL_CABLE).newItemStack());
+                t.getInventory().setChanged();
+            });
+            var back = t.side.getLRDUGoingTo(Direction.ZP);
+            temp = fmt("published %s, back pin mask %x", p3, t.getConnectionMask(back));
+            tempOk = p3 && t.getConnectionMask(back) == NodeBaseMasks.THERMAL;
+            // /elnlab inspect on a block with each converted floor device off centre
+            var src = c.level().getServer().createCommandSourceStack().withSuppressedOutput();
+            int i = 0;
+            for (String n : GeometryCase.FLOOR_DEVICES) {
+                BlockPos p = c.at(i % 10 * 2, 1, 3 + i / 10 * 2);
+                i++;
+                var v = block(c, p);
+                try {
+                    put(c, v, n, Direction.YN, 2, 0, 0, Direction.ZN);
+                    int lines = mods.eln.gametest.LabCommands.inspect(src, p);
+                    if (lines < 3) {
+                        inspectOk = false;
+                        inspect += n + ": " + lines + " lines; ";
+                    }
+                } catch (RuntimeException e) {
+                    inspectOk = false;
+                    inspect += n + ": " + e + "; ";
+                }
+            }
+            try {
+                mods.eln.gametest.LabCommands.inspect(src, ph);
+            } catch (RuntimeException e) {
+                inspectOk = false;
+                inspect += "hub: " + e;
+            }
+            // a thermal probe, front south (its signal pin there): kits aimed at that pin
+            BlockPos pp = c.at(5, 1, 1);
+            var vp = block(c, pp);
+            var probe = put(c, vp, "Thermal Probe", Direction.YN, 0, 0, -2, Direction.ZP);
+            int[] sig = tip(vp, probe, Direction.ZP), west = tip(vp, probe, Direction.XN), east = tip(vp, probe, Direction.XP);
+            var hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(pp).add((sig[0] + 0.5) / 16.0, 0.5 / 16, (sig[2] - 1.5) / 16.0);
+            var th = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), pp, net.minecraft.core.Direction.UP, hit, false, new long[1][], THERMAL);
+            var sg = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), pp, net.minecraft.core.Direction.UP, hit, false, new long[1][], SIGNAL);
+            long bx = pp.getX() * 16L, bz = pp.getZ() * 16L;
+            kit = fmt("signal pin %s, thermal pins %s %s; thermal kit ends at %s, signal kit at %s", java.util.Arrays.toString(sig),
+                java.util.Arrays.toString(west), java.util.Arrays.toString(east), th == null ? "-" : (th.x() - bx) + "," + (th.z() - bz),
+                sg == null ? "-" : (sg.x() - bx) + "," + (sg.z() - bz));
+            kitOk = th != null && sg != null && th.z() - bz == west[2] && (th.x() - bx == west[0] || th.x() - bx == east[0])
+                && sg.x() - bx == sig[0] && sg.z() - bz == sig[2];
+        }
+
+        public void measure(TestContext c) {
+            c.check("slot pins: a Hub's pins follow its slots, and clients are told", hubOk, hub);
+            c.check("slot pins: a Temperature Probe's back pin turns thermal with a thermal cable in its slot, and clients are told", tempOk, temp);
+            c.check("slot pins: /elnlab inspect works on every converted device off centre and a Hub", inspectOk, inspect);
+            c.check("slot pins: a thermal kit ends at a thermal probe's thermal pin, a signal kit at its signal pin", kitOk, kit);
+        }
+    }
+
+    /** Masks the checks compare with. */
+    static final class NodeBaseMasks {
+        static final int THERMAL = mods.eln.node.NodeBase.maskThermal;
     }
 }
