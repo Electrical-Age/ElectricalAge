@@ -99,6 +99,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         front = LRDU.fromInt((value >> 0) & 0x3);
 
         pause = nbt.getBooleanOr("pause", false);
+        pinTurn = Math.floorMod(nbt.getByteOr("pinTurn", (byte) 0), 4);
         if (!logger.readFromNBT(nbt) && nbt.contains("logssamplingPeriod")) {
             migrate(nbt);
         }
@@ -126,6 +127,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         super.writeToNBT(nbt);
         nbt.putByte("front", (byte) (front.toInt() << 0));
         nbt.putBoolean("pause", pause);
+        if (pinTurn != 0) nbt.putByte("pinTurn", (byte) pinTurn);
         logger.writeToNBT(nbt);
     }
 
@@ -141,12 +143,39 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
      */
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (front.inverse() == lrdu) return inputGate;
+        if (pinEdge() == lrdu) return inputGate;
         if (inputs.length > 1 && !inVoxelBlock()) {
-            if (lrdu == front.left()) return inputs[1];
-            if (lrdu == front.right() && inputs.length > 2) return inputs[2];
+            if (lrdu == turn(front.left())) return inputs[1];
+            if (lrdu == turn(front.right()) && inputs.length > 2) return inputs[2];
         }
         return null;
+    }
+
+    /**
+     * The inputs' edge, in quarter turns from the back (front.inverse()). The tilted terminal turns it with shift and the
+     * wrench key (C) on a right-click, as C alone turns the logger (Baughn 2026-10-31); its terminal strip follows.
+     */
+    int pinTurn;
+
+    LRDU turn(LRDU l) {
+        for (int i = 0; i < pinTurn; i++) l = l.getNextClockwise();
+        return l;
+    }
+
+    /** The edge the first input (and, in a voxel block, all three) is on. */
+    public LRDU pinEdge() {
+        return turn(front.inverse());
+    }
+
+    @Override
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (descriptor.ceiling && entityPlayer.isShiftKeyDown() && Utils.isPlayerUsingWrench(entityPlayer)) {
+            pinTurn = (pinTurn + 1) % 4;
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
     }
 
     boolean inVoxelBlock() {
@@ -161,7 +190,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         if (inputs.length == 1) return java.util.List.of();
         java.util.List<EdgePin> out = new java.util.ArrayList<>();
         for (int c = 0; c < inputs.length; c++)
-            out.add(new EdgePin(front.inverse(), PIN_OFFSETS[c % PIN_OFFSETS.length], NodeBase.maskElectricalInputGate, inputs[c]));
+            out.add(new EdgePin(pinEdge(), PIN_OFFSETS[c % PIN_OFFSETS.length], NodeBase.maskElectricalInputGate, inputs[c]));
         return out;
     }
 
@@ -208,6 +237,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         try {
             stream.writeBoolean(pause);
             logger.publish(stream);
+            stream.writeByte(pinTurn);
         } catch (IOException e) {
             e.printStackTrace();
         }

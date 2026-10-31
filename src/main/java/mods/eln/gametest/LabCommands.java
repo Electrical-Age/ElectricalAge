@@ -112,6 +112,7 @@ public final class LabCommands {
                             }
                         return n;
                     }))))
+                .then(Commands.literal("loggerdemo").executes(c -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("spmodules").executes(c -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("tilted").executes(c -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("threelogger").executes(c -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
@@ -385,6 +386,28 @@ public final class LabCommands {
             }
         }
         src.sendSuccess(() -> Component.literal("three-channel logger laid"), false);
+        return 1;
+    }
+
+    /**
+     * Every logger for a look (screenshots): the three processors (spmodules) 2 north, the tilted terminals 8 east, the
+     * three-channel logger with its cables 8 west, a data logger 5 south-west, and a processor on a west wall 4 south
+     * with a floor cable turning up the wall to it (a knuckle in the corner, under its terminal).
+     */
+    static int loggerDemo(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        spModules(src, pos);
+        tilted(src, pos.east(8));
+        threeLogger(src, pos.west(8));
+        orient(host(level, player, 0 + (93 << 6), pos.offset(-5, 0, 5)), l -> l, mods.eln.misc.Direction.ZP);
+        logWave(src, pos.offset(-5, 0, 5), 30);
+        BlockPos sp = pos.south(4);
+        level.setBlock(sp.west(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+        host(level, player, 4 + (109 << 6), sp, mods.eln.misc.Direction.XN);
+        mods.eln.node.voxel.PipeKitItem.place(level, sp, new mods.eln.node.voxel.CablePart(0, 0, new int[]{16, 0, 8, 1, 0, 8}), null);
+        mods.eln.node.voxel.PipeKitItem.place(level, sp, mods.eln.node.voxel.CablePart.knuckle(0, 0, 0, 8), null);
+        logWave(src, sp, 30);
         return 1;
     }
 

@@ -22,6 +22,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
     Obj3D obj;
     Obj3DPart main, led, reflection;
+    /** The tilted terminal's terminal strip, drawn on whichever edge its inputs are (shift-C turns them). */
+    Obj3DPart terminals;
     float sx, sy, sz;
     float tx, ty, tz;
     float rx, ry, rz, ra;
@@ -74,6 +76,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
                 my = main.getFloat("my");
                 reflc = main.getFloat("reflc");
                 led = obj.getPart("led");
+                terminals = obj.getPart("terminals");
             }
         }
 
@@ -84,7 +87,24 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
     void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
-        if (onFloor || side.isY()) front.glRotateOnX();
+        draw(log, side, front, front.inverse(), objPosMX, objPosMZ, null);
+    }
+
+    /**
+     * The model, its terminals on the inputs' edge (pinEdge; the strip is modelled on the back, front.inverse()), and the
+     * graph: graph, a texture (LogTexture) in the world, else the 1.12 lines (item, prints).
+     */
+    void draw(DataLogs log, Direction side, LRDU front, LRDU pinEdge, int objPosMX, int objPosMZ, net.minecraft.resources.Identifier graph) {
+        boolean turned = onFloor || side.isY();
+        if (terminals != null) {
+            // drawn as if the logger faced away from its inputs' edge: the strip lands on that edge
+            GL11.glPushMatrix();
+            if (turned) pinEdge.inverse().glRotateOnX();
+            if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
+            terminals.draw();
+            GL11.glPopMatrix();
+        }
+        if (turned) front.glRotateOnX();
         if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
         //GL11.glDisable(GL11.GL_TEXTURE_2D);
         if (main != null) main.draw();
@@ -120,7 +140,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
                 GL11.glRotatef(180, 0, 0, 1);
             }
             GL11.glColor4f(cr, cg, cb, 1);
-            log.draw(mx, my, textColor, log.channelCount() > 1 ? DataLogs.INK : null);
+            log.draw(mx, my, textColor, log.channelCount() > 1 ? DataLogs.INK : null, graph);
 
             UtilsClient.glDefaultColor();
 

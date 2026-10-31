@@ -685,6 +685,18 @@ public final class Wp9cCases {
             var pl = player(ctx);
             // on a wall it faces down (its screen leans out and down toward a player below)
             var front = tilted.getFrontFromPlace(Direction.ZN, pl);
+            // shift + the wrench key (C) on a right-click moves its inputs to the next edge (Baughn 2026-10-31)
+            var front0 = floor.front;
+            pl.setShiftKeyDown(true);
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, true);
+            boolean turned = floor.onBlockActivated(pl, floor.side, 0.5f, 0.5f, 0.5f);
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, false);
+            pl.setShiftKeyDown(false);
+            var edge = floor.edgePins().get(0).lrdu();
+            ctx.check("wp9c tilted terminal: shift-C moves its inputs to the next edge, the screen stays",
+                turned && floor.front == front0 && edge == front0.inverse().getNextClockwise() && floor.pinEdge() == edge
+                    && floor.getConnectionMask(edge) != 0 && floor.getConnectionMask(front0.inverse()) == 0,
+                "turned " + turned + ", front " + front0 + " -> " + floor.front + ", inputs on " + edge);
             ctx.check("wp9c tilted terminal: on a wall, its front is down", Direction.ZN.applyLRDU(front) == Direction.YN, String.valueOf(Direction.ZN.applyLRDU(front)));
             ctx.check("wp9c tilted terminal: on a floor, a ceiling and a wall (a data logger only on a floor)",
                 tilted.canBePlacedOnSide(pl, Direction.YP) && tilted.canBePlacedOnSide(pl, Direction.YN) && tilted.canBePlacedOnSide(pl, Direction.ZN)

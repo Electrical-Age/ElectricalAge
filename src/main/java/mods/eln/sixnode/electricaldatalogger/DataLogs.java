@@ -28,6 +28,8 @@ public class DataLogs {
     /** [channel][slot] -> mean, min, max; NaN where nothing was recorded. head is the newest point's slot. */
     final float[][] mean, min, max;
     int head = -1, size;
+    /** Counts changes (points, a reset, the scales): an in-world texture repaints when it moves (LogTexture). */
+    public int version;
 
     public DataLogs(int channels) {
         this.channels = new LogChannel[channels];
@@ -51,6 +53,7 @@ public class DataLogs {
     }
 
     public void reset() {
+        version++;
         head = -1;
         size = 0;
     }
@@ -61,6 +64,7 @@ public class DataLogs {
 
     /** A new newest point: [channel] -> {mean, min, max} or null. */
     public void add(float[][] point) {
+        version++;
         head = (head + 1) % POINTS;
         size = Math.min(POINTS, size + 1);
         for (int c = 0; c < channels.length; c++) {
@@ -204,7 +208,36 @@ public class DataLogs {
 
     /** As draw, each channel in its colour from ink (null: all in the current colour). */
     void draw(float margeX, float margeY, String textHeader, float[][] ink) {
+        draw(margeX, margeY, textHeader, ink, null);
+    }
+
+    /**
+     * As draw; with a texture (LogTexture, in the world), the graph is that texture over [0, margeX] x [0, margeY],
+     * full bright, and only the labels are drawn here (prints keep the lines).
+     */
+    void draw(float margeX, float margeY, String textHeader, float[][] ink, net.minecraft.resources.Identifier texture) {
         GL11.glLineWidth(1f);
+        if (texture != null) {
+            GL11.bindTexture(texture);
+            GL11.setFullBright(true);
+            UtilsClient.disableCulling();
+            GL11.glColor4f(1, 1, 1, 1);
+            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glTexCoord2f(0, 0);
+            GL11.glVertex2f(0, 0);
+            GL11.glTexCoord2f(0, 1);
+            GL11.glVertex2f(0, margeY);
+            GL11.glTexCoord2f(1, 1);
+            GL11.glVertex2f(margeX, margeY);
+            GL11.glTexCoord2f(1, 0);
+            GL11.glVertex2f(margeX, 0);
+            GL11.glEnd();
+            UtilsClient.enableCulling();
+            GL11.setFullBright(false);
+            GL11.glColor3f(0.8f, 0.8f, 0.8f);
+            labels(margeX, margeY, textHeader);
+            return;
+        }
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         if (size >= 2) {
             float dx = margeX / (size - 1);
@@ -249,7 +282,12 @@ public class DataLogs {
             GL11.glEnd();
         }
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+        labels(margeX, margeY, textHeader);
+    }
 
+    /** The first scale's top, middle and bottom on the right; the time span below. */
+    void labels(float margeX, float margeY, String textHeader) {
+        LogChannel ch = channels[0];
         GL11.glPushMatrix();
         float scale = 0.01f;
         GL11.glScalef(scale, scale, 1f);

@@ -66,6 +66,11 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     }
     /** The model with modules on its rails, its lamps, and the logger's graph on its screen (log null: none, as for the item). */
     void draw(boolean ledOn[], mods.eln.sixnode.electricaldatalogger.DataLogs log, int modules) {
+        draw(ledOn, log, modules, null);
+    }
+
+    /** ... graph: the logger's graph as a texture (LogTexture), or null: none. */
+    void draw(boolean ledOn[], mods.eln.sixnode.electricaldatalogger.DataLogs log, int modules, net.minecraft.resources.Identifier graph) {
         if (main != null) main.draw();
         if (terminals != null) terminals.draw();
         for (int idx = 0; idx < Math.min(modules, MODULES); idx++) if (module[idx] != null) module[idx].draw();
@@ -83,37 +88,41 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
             }
         }
         GL11.glColor3f(1f, 1f, 1f);
-        if (log != null && log.size() >= 2 && screenY1 > screenY0) drawGraph(log);
+        if (graph != null && screenY1 > screenY0) drawGraph(graph);
     }
 
     /** Channel colours on the tiny screen: A red, B blue, C green, out white (as in the editor). */
     static final float[][] INK = {{1f, 0.35f, 0.35f}, {0.35f, 0.6f, 1f}, {0.35f, 0.85f, 0.35f}, {0.95f, 0.95f, 0.95f}};
 
+    /** The screen's aspect (width along z over height along y), for its texture. */
+    float screenAspect() {
+        return (screenZ1 - screenZ0) / Math.max(1e-3f, screenY1 - screenY0);
+    }
+
     /**
-     * Each channel's mean as a thin strip across the screen, time along z (newest at z1), the signal along y (0..1 of
-     * the screen's height, clipped), 0.1 px above the glass. It shows the shape, not numbers: the screen is a few pixels.
+     * The logger's graph (a texture, newest on the right as one faces the screen) on the screen, 0.1 px over the glass,
+     * full bright.
      */
-    void drawGraph(mods.eln.sixnode.electricaldatalogger.DataLogs log) {
-        float x = screenX + 0.1f / 16, h = screenY1 - screenY0, w = screenZ1 - screenZ0, t = 0.12f / 16;
-        int n = log.size();
-        UtilsClient.disableTexture();
-        UtilsClient.disableLight();
+    void drawGraph(net.minecraft.resources.Identifier graph) {
+        float x = screenX + 0.1f / 16;
+        GL11.bindTexture(graph);
+        GL11.setFullBright(true);
         UtilsClient.disableCulling();
-        for (int c = 0; c < log.channelCount() && c < INK.length; c++) {
-            GL11.glColor3f(INK[c][0], INK[c][1], INK[c][2]);
-            GL11.glBegin(GL11.GL_QUAD_STRIP);
-            for (int age = 0; age < n; age++) {
-                float m = log.mean(c, age);
-                if (Float.isNaN(m)) continue;
-                float z = screenZ1 - w * age / (n - 1), y = screenY0 + h * Math.max(0, Math.min(1, m));
-                GL11.glVertex3f(x, y - t, z);
-                GL11.glVertex3f(x, y + t, z);
-            }
-            GL11.glEnd();
-        }
+        GL11.glColor4f(1, 1, 1, 1);
+        // (texture top at y0, its right, the newest points, at z1: the graph reads upright, newest on the right, seen
+        // from the processor's front; checked in the dev client 2026-10-31)
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glTexCoord2f(0, 0);
+        GL11.glVertex3f(x, screenY0, screenZ0);
+        GL11.glTexCoord2f(1, 0);
+        GL11.glVertex3f(x, screenY0, screenZ1);
+        GL11.glTexCoord2f(1, 1);
+        GL11.glVertex3f(x, screenY1, screenZ1);
+        GL11.glTexCoord2f(0, 1);
+        GL11.glVertex3f(x, screenY1, screenZ0);
+        GL11.glEnd();
         UtilsClient.enableCulling();
-        UtilsClient.enableLight();
-        UtilsClient.enableTexture();
+        GL11.setFullBright(false);
         GL11.glColor3f(1f, 1f, 1f);
     }
 

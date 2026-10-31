@@ -50,7 +50,13 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
                 drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
             }
         }
-        descriptor.draw(log, side, front, this.tileEntity.getBlockPos().getX(), this.tileEntity.getBlockPos().getZ());
+        // the graph as a texture, painted when a point comes (LogTexture)
+        net.minecraft.resources.Identifier graph = null;
+        if (descriptor.mx > 0 && descriptor.my > 0) {
+            if (texture == null && !noTexture) noTexture = (texture = LogTexture.of(descriptor.mx / descriptor.my)) == null;
+            if (texture != null) graph = texture.update(log, this::ink);
+        }
+        descriptor.draw(log, side, front, pinEdge(), this.tileEntity.getBlockPos().getX(), this.tileEntity.getBlockPos().getZ(), graph);
     }
 	/*
     @Override
@@ -62,6 +68,29 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     /** Within this many blocks the graph can be read: the server sends it only to clients this near or with the screen open. */
     public static final double WATCH_RANGE = 32;
     public final LogClient logClient = new LogClient(this, -1);
+    LogTexture texture;
+    boolean noTexture;
+    /** The inputs' edge: quarter turns from the back (the tilted terminal: shift-C). */
+    int pinTurn;
+
+    LRDU pinEdge() {
+        LRDU l = front.inverse();
+        for (int i = 0; i < pinTurn; i++) l = l.getNextClockwise();
+        return l;
+    }
+
+    /** Channel c's ink on the in-world graph: the logger's colour, or A red, B blue, C green. */
+    int ink(int c) {
+        float[] k = log.channelCount() > 1 ? DataLogs.INK[c % DataLogs.INK.length] : new float[]{descriptor.cr, descriptor.cg, descriptor.cb};
+        return 0xFF000000 | Math.round(k[0] * 255) << 16 | Math.round(k[1] * 255) << 8 | Math.round(k[2] * 255);
+    }
+
+    @Override
+    public void destructor() {
+        super.destructor();
+        if (texture != null) texture.close();
+        texture = null;
+    }
 
     /** Keeps the graph coming (the screen calls it while open; refresh while the logger is near). */
     public void watch() {
@@ -80,6 +109,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         try {
             pause = stream.readBoolean();
             log = Logger.readPublish(stream, log);
+            pinTurn = stream.readByte();
             if (log.channelCount() > 1)
                 for (int c = 0; c < log.channelCount(); c++) log.channels[c].name = String.valueOf((char) ('A' + c));
         } catch (IOException e) {

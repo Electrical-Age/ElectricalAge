@@ -48,6 +48,16 @@ public class ElectricalMathRender extends SixNodeElementRender {
         if (stream.readByte() == ElectricalMathElement.LOG_HEADER) log = named(mods.eln.sixnode.electricaldatalogger.Logger.receive(stream, log));
     }
 
+    mods.eln.sixnode.electricaldatalogger.LogTexture texture;
+    boolean noTexture;
+
+    @Override
+    public void destructor() {
+        super.destructor();
+        if (texture != null) texture.close();
+        texture = null;
+    }
+
     float ledTime = 0f;
     boolean[] ledOn = new boolean[8];
 
@@ -85,7 +95,15 @@ public class ElectricalMathRender extends SixNodeElementRender {
         }
 
         // the tiny logger screen only near enough to read (its data comes only then too)
-        descriptor.draw(ledOn, UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE ? log : null, modules);
+        net.minecraft.resources.Identifier graph = null;
+        if (UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE && log.size() >= 2) {
+            if (texture == null && !noTexture) noTexture = (texture = mods.eln.sixnode.electricaldatalogger.LogTexture.of(descriptor.screenAspect())) == null;
+            if (texture != null) graph = texture.update(log, c -> {
+                float[] k = ElectricalMathDescriptor.INK[c % ElectricalMathDescriptor.INK.length];
+                return 0xFF000000 | Math.round(k[0] * 255) << 16 | Math.round(k[1] * 255) << 8 | Math.round(k[2] * 255);
+            });
+        }
+        descriptor.draw(ledOn, log, modules, graph);
     }
 
     @Override

@@ -182,6 +182,7 @@ public final class Logger {
         if (n != log.channelCount()) log = log.resized(n);
         log.samplingPeriod = period;
         log.mode = mode;
+        log.version++;
         for (LogChannel c : log.channels) c.read(in);
         return log;
     }
