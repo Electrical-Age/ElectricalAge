@@ -111,6 +111,15 @@ public abstract class NodeBlock extends Block implements EntityBlock {
         return activate(level, pos, player, hit);
     }
 
+    /** Middle-click (the server picks, 26.x): the device, cable or pipe under the crosshair, as its item (#161). */
+    @Override
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, boolean includeData, Player player) {
+        NodeBlockEntity e = tileAt(level, pos, NodeBlockEntity.class);
+        if (e == null || player == null || !(e.getNode() instanceof Node n)) return ItemStack.EMPTY;
+        var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
+        return n.pickItem(pick instanceof BlockHitResult bh && bh.getBlockPos().equals(pos) ? bh : null, level);
+    }
+
     protected InteractionResult activate(Level level, BlockPos pos, Player player, BlockHitResult hit) {
         NodeBlockEntity e = tileAt(level, pos, NodeBlockEntity.class);
         if (e == null) return InteractionResult.PASS;

@@ -95,6 +95,17 @@ public class GhostBlock extends Block {
         return InteractionResult.SUCCESS;
     }
 
+    /** Middle-click on a machine's ghost: the machine (#161). */
+    @Override
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, boolean includeData,
+                                      net.minecraft.world.entity.player.Player player) {
+        if (!(level instanceof Level world) || world.isClientSide()) return ItemStack.EMPTY;
+        GhostElement g = getElement(world, pos);
+        if (g == null) return ItemStack.EMPTY;
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(g.getObservatorCoordonate());
+        return n instanceof mods.eln.node.Node node ? node.pickItem(null, level) : ItemStack.EMPTY;
+    }
+
     GhostElement getElement(Level world, BlockPos pos) {
         return Eln.ghostManager.getGhost(new Coordonate(pos, world));
     }

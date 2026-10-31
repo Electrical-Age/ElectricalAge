@@ -65,6 +65,16 @@ public class SixNode extends Node {
         return keptSides[side] != null;
     }
 
+    /** Middle-click: the element under the crosshair (else the first), as its item. */
+    @Override
+    public net.minecraft.world.item.ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
+        int mask = 0;
+        for (Direction d : Direction.values()) if (getElement(d) != null) mask |= 1 << d.getInt();
+        Direction side = hit == null ? null : SixNodeBlock.sideAt(mask, coordonate.pos(), hit);
+        for (int i = 0; side == null && i < 6; i++) if ((mask & (1 << i)) != 0) side = Direction.fromInt(i);
+        return side == null ? net.minecraft.world.item.ItemStack.EMPTY : getElement(side).getDropItemStack();
+    }
+
     public SixNodeElement getElement(Direction side) {
         return sideElementList[side.getInt()];
     }

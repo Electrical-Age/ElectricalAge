@@ -97,8 +97,12 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
 
     /** The element whose plate holds the hit point, or null. */
     public static @Nullable Direction sideAt(SixNodeEntity e, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
+        return sideAt(e.getSideMask(), pos, hit);
+    }
+
+    /** The same, from a mask of the faces that hold an element (bit = Direction.getInt()). */
+    public static @Nullable Direction sideAt(int mask, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
         double x = hit.getLocation().x - pos.getX(), y = hit.getLocation().y - pos.getY(), z = hit.getLocation().z - pos.getZ();
-        int mask = e.getSideMask();
         Direction side = null;
         Direction facing = Direction.fromIntMinecraftSide(hit.getDirection().getOpposite().get3DDataValue());
         if ((mask & (1 << facing.getInt())) != 0 && PLATES[facing.getInt()].bounds().inflate(0.002).contains(x, y, z)) side = facing;

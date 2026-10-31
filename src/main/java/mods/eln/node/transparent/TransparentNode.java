@@ -24,6 +24,12 @@ import java.lang.reflect.InvocationTargetException;
 public class TransparentNode extends Node {
 
     public TransparentNodeElement element;
+
+    /** Middle-click: the machine, as its item (#161). */
+    @Override
+    public net.minecraft.world.item.ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
+        return element == null ? net.minecraft.world.item.ItemStack.EMPTY : element.getDropItemStack();
+    }
     public int elementId;
     public ServerPlayer removedByPlayer;
 

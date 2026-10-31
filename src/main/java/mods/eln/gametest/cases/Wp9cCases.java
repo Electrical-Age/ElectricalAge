@@ -114,6 +114,7 @@ public final class Wp9cCases {
         cases.add(new ThreeChannelLoggerCase());
         cases.add(new TiltedTerminalCase());
         cases.add(new DemoProcessorCase());
+        cases.add(new PickBlockCase());
         cases.add(new ChipsCase());
         cases.add(new IncognitoLoadCase());
         cases.add(new EmergencyLampCase());
@@ -653,6 +654,41 @@ public final class Wp9cCases {
             for (int c = 0; c < 3; c++)
                 ctx.checkValue(f("wp9c three-channel logger: channel %c records its own cable's source (%.0f V) [signal]", (char) ('A' + c), volts[cabled[c]]),
                     v.size() > 0 ? v.mean(c, 0) : -1, volts[cabled[c]] / SVU);
+        }
+    }
+
+    /**
+     * Middle-click (pick block, #161): a device in a six-node block, one hosted in a voxel block, a voxel cable and a
+     * machine (a transparent node) each give their own item, as the server picks it.
+     */
+    static final class PickBlockCase implements TestCase {
+        String six = "", hosted = "", cable = "", machine = "";
+
+        public String name() {
+            return "pick block";
+        }
+
+        String pick(TestContext ctx, BlockPos p) {
+            var st = ctx.level().getBlockState(p);
+            return st.getCloneItemStack(p, ctx.level(), false, player(ctx)).getHoverName().getString();
+        }
+
+        public void build(TestContext ctx) {
+            var pl = player(ctx);
+            ctx.placeSix(SIGNAL_PROCESSOR, ctx.at(1, 1, 1));
+            mods.eln.gametest.LabCommands.host(ctx.level(), pl, SIGNAL_PROCESSOR, ctx.at(3, 1, 1), Direction.YN);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), ctx.at(5, 1, 1), new mods.eln.node.voxel.CablePart(0, 0, new int[]{16, 0, 8, 1, 0, 8}), null);
+            ctx.placeTransparent(0 + (64 << 6), ctx.at(6, 1, 1));
+        }
+
+        public void measure(TestContext ctx) {
+            String sp = Eln.sixNodeItem.getDescriptor(SIGNAL_PROCESSOR).newItemStack().getHoverName().getString();
+            String kit = mods.eln.node.voxel.CableKitItem.kit(0, 16).getHoverName().getString();
+            String dis = Eln.transparentNodeItem.getDescriptor(0 + (64 << 6)).newItemStack().getHoverName().getString();
+            ctx.check("pick block: a device in a six-node block", pick(ctx, ctx.at(1, 1, 1)).equals(sp), pick(ctx, ctx.at(1, 1, 1)));
+            ctx.check("pick block: a device in a voxel block", pick(ctx, ctx.at(3, 1, 1)).equals(sp), pick(ctx, ctx.at(3, 1, 1)));
+            ctx.check("pick block: a voxel cable gives a one-block kit of its tier", pick(ctx, ctx.at(5, 1, 1)).equals(kit), pick(ctx, ctx.at(5, 1, 1)) + " (want " + kit + ")");
+            ctx.check("pick block: a machine", pick(ctx, ctx.at(6, 1, 1)).equals(dis), pick(ctx, ctx.at(6, 1, 1)) + " (want " + dis + ")");
         }
     }
 

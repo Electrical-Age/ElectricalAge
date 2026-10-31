@@ -14,6 +14,11 @@ public abstract class Node extends NodeBase {
 
     private int lastLight = 0;
 
+    /** Middle-click (pick block): the item for what the player points at (hit: in this block, or null). */
+    public net.minecraft.world.item.ItemStack pickItem(@org.jetbrains.annotations.Nullable net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
+        return net.minecraft.world.item.ItemStack.EMPTY;
+    }
+
     public void setLightValue(int light) {
         if (light > 15) light = 15;
         if (light < 0) light = 0;

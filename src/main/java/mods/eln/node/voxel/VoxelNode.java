@@ -265,14 +265,41 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (index < 0 || index >= parts.size()) return parts.isEmpty();
         VoxelPart p = parts.remove(index);
         markUsed();
-        if (drop && p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
-        if (drop && p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
-        if (drop && p instanceof ValvePart v) dropItem(valveItem(v));
-        if (drop && p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
-        if (drop && p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
-        if (drop && p instanceof PipeSensorPart s) dropItem(sensorItem(s));
+        if (drop && !partItem(p).isEmpty()) dropItem(partItem(p));
         changed();
         return isEmptyNode();
+    }
+
+    /** The item a part was made from (what it drops), or empty: a burst pipe, a burnt cable. */
+    static ItemStack partItem(VoxelPart p) {
+        if (p instanceof PipePart pipe) return pipe.burst ? ItemStack.EMPTY : PipeKitItem.kit(pipe.tier, pipe.length());
+        if (p instanceof CablePart c) return c.burnt != null ? ItemStack.EMPTY : CableKitItem.kit(c.tier, c.dropLength());
+        if (p instanceof ValvePart v) return valveItem(v);
+        if (p instanceof AdapterPart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
+        if (p instanceof SafetyValvePart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get());
+        if (p instanceof PipeSensorPart s) return sensorItem(s);
+        return ItemStack.EMPTY;
+    }
+
+    /** Middle-click: the device, cable, pipe or fitting under the crosshair, else the imitated block. */
+    @Override
+    public ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
+        if (hit != null) {
+            var l = hit.getLocation();
+            Aimed a = aimed(l.x - coordonate.x, l.y - coordonate.y, l.z - coordonate.z);
+            if (a.element() >= 0 && getElement(a.element()) != null) return getElement(a.element()).getDropItemStack();
+            if (a.part() >= 0 && !pickPart(parts.get(a.part())).isEmpty()) return pickPart(parts.get(a.part()));
+        }
+        if (host != null) return host.getCloneItemStack(level, coordonate.pos(), false);
+        for (VoxelPart p : parts) if (!pickPart(p).isEmpty()) return pickPart(p);
+        return super.pickItem(hit, level);
+    }
+
+    /** A part's item for a middle-click: a cable or pipe as a one-block kit of its tier (burnt or burst too). */
+    static ItemStack pickPart(VoxelPart p) {
+        if (p instanceof PipePart pipe) return PipeKitItem.kit(pipe.tier, 16);
+        if (p instanceof CablePart c) return CableKitItem.kit(c.tier, 16);
+        return partItem(p);
     }
 
     /** The item a pipe sensor was fitted from. */
@@ -1482,14 +1509,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     @Override
     public void onBreakBlock() {
-        for (VoxelPart p : parts) {
-            if (p instanceof PipePart pipe && !pipe.burst) dropItem(PipeKitItem.kit(pipe.tier, pipe.length()));
-            if (p instanceof CablePart c && c.burnt == null) dropItem(CableKitItem.kit(c.tier, c.dropLength()));
-            if (p instanceof ValvePart v) dropItem(valveItem(v));
-            if (p instanceof AdapterPart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get()));
-            if (p instanceof SafetyValvePart) dropItem(new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get()));
-            if (p instanceof PipeSensorPart s) dropItem(sensorItem(s));
-        }
+        for (VoxelPart p : parts) if (!partItem(p).isEmpty()) dropItem(partItem(p));
         parts.clear();
         super.onBreakBlock();
         invalidateCapabilities();
