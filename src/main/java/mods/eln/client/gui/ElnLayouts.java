@@ -73,18 +73,20 @@ public final class ElnLayouts {
         Layout.Result r = layout(descriptor);
         if (r == null) return spec;
         List<SlotSpec> slots = new ArrayList<>();
-        for (SlotSpec s : spec.slots()) {
-            Layout.Rect rect = r.get("slot", String.valueOf(s.index()));
-            if (rect == null) {
-                slots.add(s);
-                continue;
-            }
-            int inset = rect.w() > 18 ? 5 : 1;
-            slots.add(new SlotSpec(s.kind(), s.index(), rect.x() + inset, rect.y() + inset, s.limit(), s.filter(),
-                rect.w() > 18 ? SlotSpec.BIG : s.skin(), s.comment()));
-        }
+        for (SlotSpec s : spec.slots()) slots.add(place(r, String.valueOf(s.index()), s));
+        List<SlotSpec> wear = new ArrayList<>();
+        for (SlotSpec s : spec.wear()) wear.add(place(r, "wear" + s.index(), s));
         Layout.Rect inv = r.get("inventory", "");
         return new MenuSpec(slots, spec.playerInventory(), spec.refreshRateDivider(),
-            inv != null ? inv.x() + 1 : spec.inventoryX(), inv != null ? inv.y() + 1 : spec.inventoryY(), r.width(), r.height());
+            inv != null ? inv.x() + 1 : spec.inventoryX(), inv != null ? inv.y() + 1 : spec.inventoryY(), r.width(), r.height(), wear);
+    }
+
+    /** The slot at the layout's slot of that id, or as it was if the layout has none. */
+    static SlotSpec place(Layout.Result r, String id, SlotSpec s) {
+        Layout.Rect rect = r.get("slot", id);
+        if (rect == null) return s;
+        int inset = rect.w() > 18 ? 5 : 1;
+        return new SlotSpec(s.kind(), s.index(), rect.x() + inset, rect.y() + inset, s.limit(), s.filter(),
+            rect.w() > 18 ? SlotSpec.BIG : s.skin(), s.comment());
     }
 }

@@ -114,7 +114,7 @@ public final class MenuSpecs {
             battery(2, 26 - 18 + 0, 6 + 18),
             battery(3, 26 - 18 + 18, 6 + 18),
             descriptor(mods.eln.sixnode.batterycharger.BatteryChargerContainer.boosterSlotId, 80 - 18, 6 + 18 / 2, 5,
-                MachineBoosterDescriptor.class, MEDIUM, tr("Booster slot"))).panel(176, 126, 8, 44));
+                MachineBoosterDescriptor.class, MEDIUM, tr("Booster slot"))).panel(176, 126, 8, 44).wearing(4, 98, 6));
         put(mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor.class, d -> d.batteryPowered ? MenuSpec.of(
             descriptor(0, 184 / 2 - 12, 8, 1, BatteryItem.class, MEDIUM, tr("Portable battery slot"))) : MenuSpec.SCREEN_ONLY);
 

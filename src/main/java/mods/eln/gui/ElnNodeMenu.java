@@ -18,6 +18,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * The menu of every EA device GUI (P4; 1.12: the device's Container from GuiHandler, or none). Device slots from the
  * descriptor's {@link MenuSpec}, then the player inventory (27 + 9) as 1.12 BasicContainer. GUI controls keep using EA
@@ -38,8 +40,15 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     private final @Nullable NodeBase node;
     public final int deviceSlots;
 
+    /** Server: the worn slots shown are the player's own (keys from {@link #wearables}). */
     public ElnNodeMenu(int containerId, Inventory playerInventory, Container deviceInventory, MenuSpec spec, @Nullable NodeBase node,
                        BlockPos pos, int slot, byte kind, int descriptorId) {
+        this(containerId, playerInventory, deviceInventory, spec, node, pos, slot, kind, descriptorId,
+            spec.wear().isEmpty() ? List.of() : wearables.keys(playerInventory.player, spec.wear().size()));
+    }
+
+    public ElnNodeMenu(int containerId, Inventory playerInventory, Container deviceInventory, MenuSpec spec, @Nullable NodeBase node,
+                       BlockPos pos, int slot, byte kind, int descriptorId, List<String> wearKeys) {
         super(ElnRegistry.NODE_MENU.get(), containerId);
         this.pos = pos;
         this.slot = slot;
@@ -56,6 +65,48 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
                 for (int j = 0; j < 9; j++) addSlot(new Slot(playerInventory, j + i * 9 + 9, x0 + j * 18, y0 + i * 18));
             for (int i = 0; i < 9; i++) addSlot(new Slot(playerInventory, i, x0 + i * 18, y0 + 58));
         }
+        inventoryEnd = slots.size();
+        this.wearKeys = List.copyOf(wearKeys.subList(0, Math.min(wearKeys.size(), spec.wear().size())));
+        for (int i = 0; i < this.wearKeys.size(); i++) {
+            SlotSpec at = spec.wear().get(i);
+            addSlot(wearables.slot(playerInventory.player, this.wearKeys.get(i), at.x(), at.y()));
+        }
+    }
+
+    /** The end of the player inventory's slots: the worn slots follow, up to slots.size(). */
+    public final int inventoryEnd;
+    /** The worn accessory slots shown ("identifier#index"), in slot order; the open data carries them to the client. */
+    public final List<String> wearKeys;
+
+    /**
+     * The player's worn accessory slots a menu can show: Curios' (CuriosCompat), none without it. A static hook so
+     * GameTests can stand in for Curios, which their runtime lacks.
+     */
+    public interface Wearables {
+        /** Keys ("identifier#index") of the slots to show, at most max. */
+        List<String> keys(Player player, int max);
+
+        /** The slot of that key at (x, y); an inert {@link NoSlot} if the player has no such slot (yet). */
+        Slot slot(Player player, String key, int x, int y);
+    }
+
+    public static Wearables wearables = mods.eln.item.belt.CuriosCompat.WEARABLES;
+
+    /** A worn slot the client doesn't have: holds nothing, takes nothing (keeps both sides' slot lists the same length). */
+    public static final class NoSlot extends Slot {
+        public NoSlot(int x, int y) {
+            super(new SimpleContainer(1), 0, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return false;
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            return false;
+        }
     }
 
     /**
@@ -70,9 +121,12 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         int slot = buf.readByte();
         byte kind = buf.readByte();
         int id = buf.readInt();
+        int n = buf.readVarInt();
+        List<String> wear = new java.util.ArrayList<>();
+        for (int i = 0; i < n; i++) wear.add(buf.readUtf(256));
         MenuSpec spec = clientLayout.apply(NodeMenus.spec(kind, id), NodeMenus.descriptor(kind, id));
         return new ElnNodeMenu(containerId, playerInventory, new SimpleContainer(Math.max(1, spec.inventorySize())), spec, null,
-            pos, slot, kind, id);
+            pos, slot, kind, id, wear);
     }
 
     public void writeOpenData(RegistryFriendlyByteBuf buf) {
@@ -80,6 +134,8 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         buf.writeByte(slot);
         buf.writeByte(kind);
         buf.writeInt(descriptorId);
+        buf.writeVarInt(wearKeys.size());
+        for (String k : wearKeys) buf.writeUtf(k, 256);
     }
 
     @Override
@@ -104,30 +160,37 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     }
 
     /**
-     * Shift-click: device slot -> player inventory (from the end), player slot -> the device slots, else between the
-     * main inventory and the hotbar (1.12 BasicContainer.transferStackInSlot). Returns EMPTY unless something moved:
-     * 26.x repeats the click while the result is non-empty.
+     * Shift-click: device slot -> a worn slot, else the player inventory (from the end); worn slot -> the device slots,
+     * else the inventory; player slot -> the device slots, then the worn slots, else between the main inventory and the
+     * hotbar (1.12 BasicContainer.transferStackInSlot). So a worn battery belt goes into the charger and, charged, back
+     * on. Returns EMPTY unless something moved: 26.x repeats the click while the result is non-empty.
      */
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
-        if (!slot.hasItem()) return ItemStack.EMPTY;
+        if (!slot.hasItem() || !slot.mayPickup(player)) return ItemStack.EMPTY;
         ItemStack stack = slot.getItem();
         ItemStack before = stack.copy();
         int total = slots.size();
         boolean moved;
         if (index < deviceSlots) {
-            moved = moveItemStackTo(stack, deviceSlots, total, true);
+            moved = inventoryEnd < total && moveItemStackTo(stack, inventoryEnd, total, false);
+            if (!moved) moved = inventoryEnd > deviceSlots && moveItemStackTo(stack, deviceSlots, inventoryEnd, true);
+        } else if (index >= inventoryEnd) {
+            moved = deviceSlots > 0 && moveItemStackTo(stack, 0, deviceSlots, false);
+            if (!moved) moved = inventoryEnd > deviceSlots && moveItemStackTo(stack, deviceSlots, inventoryEnd, false);
         } else {
             moved = deviceSlots > 0 && moveItemStackTo(stack, 0, deviceSlots, false);
+            if (!moved && inventoryEnd < total) moved = moveItemStackTo(stack, inventoryEnd, total, false);
             if (!moved && spec.playerInventory()) {
-                if (index < deviceSlots + 27) moved = moveItemStackTo(stack, deviceSlots + 27, total, false);
+                if (index < deviceSlots + 27) moved = moveItemStackTo(stack, deviceSlots + 27, inventoryEnd, false);
                 else moved = moveItemStackTo(stack, deviceSlots, deviceSlots + 27, false);
             }
         }
         if (!moved) return ItemStack.EMPTY;
+        // set, not setChanged: a worn slot's getItem is a copy (NeoForge's StackCopySlot)
         if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
-        else slot.setChanged();
+        else slot.set(stack);
         return before;
     }
 }

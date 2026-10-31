@@ -24,6 +24,28 @@ public final class CuriosCompat {
         return LOADED ? Impl.headlamp(p) : ItemStack.EMPTY;
     }
 
+    /** Curios is loaded (client code checks this before touching Curios classes). */
+    public static boolean loaded() {
+        return LOADED;
+    }
+
+    /** The Curios slot types the battery charger shows, in order: the battery belt's and the headlamp's. */
+    static final String[] WORN_TYPES = {"belt", "head"};
+
+    /** The player's Curios belt and head slots, for device menus (ElnNodeMenu; none without Curios). */
+    public static final mods.eln.gui.ElnNodeMenu.Wearables WEARABLES = new mods.eln.gui.ElnNodeMenu.Wearables() {
+        @Override
+        public java.util.List<String> keys(Player player, int max) {
+            return LOADED ? Impl.keys(player, max) : java.util.List.of();
+        }
+
+        @Override
+        public net.minecraft.world.inventory.Slot slot(Player player, String key, int x, int y) {
+            net.minecraft.world.inventory.Slot s = LOADED ? Impl.slot(player, key, x, y) : null;
+            return s != null ? s : new mods.eln.gui.ElnNodeMenu.NoSlot(x, y);
+        }
+    };
+
     public static void register(net.neoforged.bus.api.IEventBus modBus) {
         if (LOADED) modBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, e -> e.enqueueWork(Impl::register));
     }
@@ -56,6 +78,39 @@ public final class CuriosCompat {
                         return false;
                     }
                 });
+        }
+
+        static java.util.List<String> keys(Player p, int max) {
+            java.util.List<String> out = new java.util.ArrayList<>();
+            var h = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(p).orElse(null);
+            if (h == null) return out;
+            for (String type : WORN_TYPES) {
+                var sh = h.getStacksHandler(type).orElse(null);
+                if (sh == null || !sh.isVisible()) continue;
+                for (int i = 0; i < sh.getSlots() && out.size() < max; i++) out.add(type + "#" + i);
+            }
+            return out;
+        }
+
+        /**
+         * Curios' own slot class (as its screen builds them): Curios' handler checks what may go in (the slot type, canEquip,
+         * CurioCanEquipEvent) and come out (canUnequip, CurioCanUnequipEvent, binding curses); the slot adds the type's icon,
+         * its tooltip and the equip sound. Null if the player has no such slot.
+         */
+        static net.minecraft.world.inventory.Slot slot(Player p, String key, int x, int y) {
+            int hash = key.lastIndexOf('#');
+            if (hash <= 0) return null;
+            String id = key.substring(0, hash);
+            int index;
+            try {
+                index = Integer.parseInt(key.substring(hash + 1));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+            var sh = top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(p).flatMap(h -> h.getStacksHandler(id)).orElse(null);
+            if (sh == null || index < 0 || index >= sh.getStacks().getSlots()) return null;
+            return new top.theillusivec4.curios.common.inventory.CurioSlot(p, sh.getStacks(), index, id, x, y, sh.getRenders(),
+                sh.getActiveStates(), sh.canToggleRendering(), false);
         }
 
         static ItemStack headlamp(Player p) {

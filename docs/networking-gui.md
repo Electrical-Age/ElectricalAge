@@ -74,7 +74,7 @@ within 16 blocks (`MAX_DISTANCE_SQ`, 26.x hardening) -> `NodeBase.networkUnseria
 
 | Class | Side | Role |
 |---|---|---|
-| `src/main/java/mods/eln/gui/ElnNodeMenu.java` | both | The one menu type (`ElnRegistry.NODE_MENU`). Device slots from a `MenuSpec`, then player inventory 27 + 9. Open data: pos, slot (six-node: the element's slot, 0..5 = centred on that face; transparent: the side), kind (`SIX`/`TRANSPARENT`), descriptor id. Client copy: `node == null`, device inventory is a stand-in `SimpleContainer` synced by vanilla slot sync. |
+| `src/main/java/mods/eln/gui/ElnNodeMenu.java` | both | The one menu type (`ElnRegistry.NODE_MENU`). Device slots from a `MenuSpec`, then player inventory 27 + 9. Open data: pos, slot (six-node: the element's slot, 0..5 = centred on that face; transparent: the side), kind (`SIX`/`TRANSPARENT`), descriptor id, the worn slots' keys. Client copy: `node == null`, device inventory is a stand-in `SimpleContainer` synced by vanilla slot sync. |
 | `src/main/java/mods/eln/node/NodeMenus.java` | server (`open`, `menu`), both (`spec`, `descriptor`) | `NodeBase.onBlockActivated` -> `hasGui(side)` -> `NodeMenus.open`. Pads a too-small element inventory with a `SimpleContainer`. `openedHook` for GameTests. |
 | `src/main/java/mods/eln/gui/MenuSpecs.java` | both | Descriptor class -> `MenuSpec` (walks superclasses); no entry = `MenuSpec.SCREEN_ONLY`. The 1.12 container constructors as data. |
 | `src/main/java/mods/eln/gui/MenuSpec.java`, `SlotSpec.java`, `ElnSlot.java` | both | Slots, player-inventory position, panel size, `refreshRateDivider` (-1: no periodic publish). `SlotSpec` kinds: `any`, `descriptor`, `six`, `filter`, `battery`, `lamp`, `regulator`. `ElnSlot` = `mayPlace` from the filter, `getMaxStackSize` = spec limit. |
@@ -82,9 +82,15 @@ within 16 blocks (`MAX_DISTANCE_SQ`, 26.x hardening) -> `NodeBase.networkUnseria
 
 Rules:
 - `stillValid`: the node is not destructing, is still the node at `pos`, and the player is within 8 blocks.
-- Shift-click (`ElnNodeMenu.quickMoveStack`): device slot -> player inventory (from the end); player slot -> device
-  slots (first accepting), else main inventory <-> hotbar. Returns `EMPTY` unless something moved, because 26.x
-  repeats the move while the result is non-empty. Not covered by any test.
+- Shift-click (`ElnNodeMenu.quickMoveStack`): device slot -> a worn slot, else player inventory (from the end); worn
+  slot -> device slots, else player inventory; player slot -> device slots (first accepting), then worn slots, else
+  main inventory <-> hotbar. Returns `EMPTY` unless something moved, because 26.x repeats the move while the result
+  is non-empty. Covered for the charger's worn slots by `charger_worn_slots`.
+- Worn slots (`MenuSpec.wearing`, only the battery charger; Baughn, todo #177): after the player inventory, the
+  player's Curios `belt` and `head` slots (`CuriosCompat.WEARABLES`: Curios' own `CurioSlot`, so Curios' rules on
+  what goes in and out apply), at most `wear().size()`. The server picks them; their keys (`belt#0`) ride at the end
+  of the open data, so the client builds the same number of slots (`ElnNodeMenu.NoSlot` for a key it lacks). Layout
+  ids `wear0`.. place them. `ElnNodeMenu.wearables` is a hook so the GameTest can stand in for Curios.
 - Server authoritative: the client menu has no node. Slot contents use vanilla menu sync; every other GUI value goes
   out as an EA packet and comes back in the next publish. Screens never change device state locally.
 

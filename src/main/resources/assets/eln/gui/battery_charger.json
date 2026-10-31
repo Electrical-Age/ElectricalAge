@@ -37,6 +37,33 @@
      "slot": "4"
     },
     {
+     "column": [
+      {
+       "row": [
+        {
+         "slot": "wear0"
+        },
+        {
+         "slot": "wear1"
+        }
+       ],
+       "gap": 0
+      },
+      {
+       "row": [
+        {
+         "slot": "wear2"
+        },
+        {
+         "slot": "wear3"
+        }
+       ],
+       "gap": 0
+      }
+     ],
+     "gap": 0
+    },
+    {
      "space": 0,
      "fill": true
     },
