@@ -5,67 +5,40 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.fluid.FluidDevice;
 
 /**
- * A device just placed turns to meet its neighbours' ports (AdventurAgent's client check, 2026-10-29: an LP turbine and
- * a plant condenser placed side by side never coupled: facing from the player's view put the LP's exhaust and the
- * condenser's inlets on other faces, and nothing in the world says which way a port faces). Of the fronts it may take
- * (a turbine: its own or its back, so its shaft stays along the view), it takes the one whose ports meet the most ports
- * of the devices and pipes already beside it; its own front when none does better. Then the devices beside it that may
- * turn get the same chance (a condenser placed first, its inlets away from where the LP then came), never losing a
- * coupling they had.
+ * Fluid devices that the wrench turns (Baughn 2026-10-31). They used to turn themselves and their neighbours on placement
+ * to meet the most ports (AdventurAgent, 2026-10-29: an LP turbine and a plant condenser placed side by side never
+ * coupled), but that turned machines the player had set, and nothing turned them back. Now a device stays as placed,
+ * facing the player, and the wrench key with a click gives it a quarter turn; its ports follow.
  */
 public final class FluidPlacement {
     private FluidPlacement() {
     }
 
-    /** A device that turns to meet its neighbours' ports: the fronts it may take, and its ports remade from its front. */
+    /** A device the wrench turns: the fronts it may take, and its ports remade from its front. */
     public interface Turnable {
         Direction[] fronts();
 
         void remakePorts();
     }
 
-    /**
-     * Placed: E and each turnable device beside it take, together, the pair of fronts whose ports meet the most (a pair:
-     * a condenser placed first with its inlets away from where an LP comes, the LP's exhaust away from it, meet only
-     * when both turn), keeping what they had on a tie; then E alone against the rest (pipes, fixed devices).
-     */
-    public static void placed(TransparentNodeElement e) {
-        if (!(e instanceof Turnable te) || !(e instanceof FluidDevice de)) return;
-        for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP, Direction.YN, Direction.YP})
-            if (e.node.getNeighbor(d) instanceof mods.eln.node.transparent.TransparentNode n && n.element != e
-                && n.element instanceof Turnable tn && n.element instanceof FluidDevice dn) {
-                TransparentNodeElement ne = n.element;
-                Direction e0 = e.front, n0 = ne.front, eBest = e0, nBest = n0;
-                int most = coupled(e, de) + coupled(ne, dn);
-                for (Direction ef : te.fronts())
-                    for (Direction nf : tn.fronts()) {
-                        e.front = ef;
-                        ne.front = nf;
-                        te.remakePorts();
-                        tn.remakePorts();
-                        int c = coupled(e, de) + coupled(ne, dn);
-                        if (c > most) {
-                            most = c;
-                            eBest = ef;
-                            nBest = nf;
-                        }
-                    }
-                settle(e, te, e0, eBest);
-                settle(ne, tn, n0, nBest);
-            }
-        // alone against what can't turn
-        Direction placed = e.front, best = placed;
-        int most = coupled(e, de);
-        for (Direction c : te.fronts()) {
-            e.front = c;
-            te.remakePorts();
-            int n = coupled(e, de);
-            if (n > most) {
-                most = n;
-                best = c;
+    /** The four horizontal fronts: a lone device may take any. */
+    public static Direction[] horizontal() {
+        return new Direction[]{Direction.XN, Direction.ZN, Direction.XP, Direction.ZP};
+    }
+
+    /** A quarter turn to the next front it may take (going round by right()); false when it may take no other. */
+    public static boolean turn(TransparentNodeElement e) {
+        if (!(e instanceof Turnable t)) return false;
+        var allowed = java.util.List.of(t.fronts());
+        Direction f = e.front;
+        for (int i = 0; i < 3; i++) {
+            f = f.right();
+            if (allowed.contains(f)) {
+                settle(e, t, e.front, f);
+                return true;
             }
         }
-        settle(e, te, placed, best);
+        return false;
     }
 
     static void settle(TransparentNodeElement e, Turnable t, Direction was, Direction to) {

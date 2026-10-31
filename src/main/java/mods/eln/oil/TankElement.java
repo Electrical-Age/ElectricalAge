@@ -139,11 +139,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         return face <= 3 ? 8 * 17 + y : y * 17 + 8;   // (north/south: x then y; west/east: y then z)
     }
 
-    /** Placed: turned to meet its neighbours' ports (FluidPlacement): any way round: its sight glass (no ports) away from the pipes and devices beside it. */
+    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
     @Override
     public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
         super.initializeFromThat(front, entityLiving, itemStackNbt);
-        mods.eln.fluid.FluidPlacement.placed(this);
+        remakePorts();
     }
 
     @Override
@@ -151,6 +151,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         // (one of a box, or about to be: it stays as placed; turning would re-form the box under it)
         if (group != null || !neighbours().isEmpty()) return new Direction[]{front};
         return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
+    }
+
+    @Override
+    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
+        return mods.eln.fluid.FluidPlacement.turn(this);
     }
 
     @Override

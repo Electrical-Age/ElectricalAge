@@ -66,12 +66,11 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     }
 
     /**
-     * Placed with its shaft along the player's view (AdventurAgent's client check, 2026-10-29: looking down a line to
-     * build it, every part came out across it, the turbines' exhausts into their neighbours): its front to the player's
-     * left (EA's right() of the view: a viewer facing a front sees right() on their right), its back to their right.
+     * Placed with its front toward the player, so its shaft runs across their view (Baughn 2026-10-31: the front had
+     * followed the shaft, along the view, and placing turned neighbours; the wrench now turns a part instead).
      */
     override fun getFrontFromPlace(side: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?): Direction? =
-        if (entityLiving == null) Direction.XN else Utils.entityLivingHorizontalViewDirection(entityLiving).right()
+        if (entityLiving == null) Direction.XN else Utils.entityLivingHorizontalViewDirection(entityLiving).inverse
 
     /** Its model's hitbox (NAME.hitbox, docs/models/shaft.md), turned with its front. */
     private val hitbox by lazy { mods.eln.node.transparent.ModelHitbox.of(obj) }
@@ -212,6 +211,22 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
     override fun onBreakElement() {
         super.onBreakElement()
         shaft.disconnectShaft(this)
+    }
+
+    /**
+     * The wrench key and a click: a quarter turn (Baughn 2026-10-31). It leaves its shaft and joins whatever its turned
+     * ends meet, keeping its speed; a fluid machine's ports follow its front.
+     */
+    override fun wrenchTurn(player: net.minecraft.world.entity.player.Player?): Boolean {
+        val rads = shaft.rads
+        shaft.disconnectShaft(this)
+        shaft.rads = rads
+        front = front.right()
+        (this as? mods.eln.fluid.FluidPlacement.Turnable)?.remakePorts()
+        reconnect()
+        shaft.connectShaft(this)
+        needPublish()
+        return true
     }
 
     override fun networkSerialize(stream: DataOutputStream) {

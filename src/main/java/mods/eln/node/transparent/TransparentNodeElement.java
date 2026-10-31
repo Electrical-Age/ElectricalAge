@@ -352,6 +352,14 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     public abstract boolean onBlockActivated(Player entityPlayer, Direction side,
                                              float vx, float vy, float vz);
 
+    /**
+     * The wrench key and a click turn the device a quarter turn, where it may turn (Baughn 2026-10-31: placing a
+     * machine had turned its neighbours, and nothing turned them back). True when it turned; most devices don't.
+     */
+    public boolean wrenchTurn(Player player) {
+        return false;
+    }
+
 
     public void readFromNBT(CompoundTag nbt) {
         Container inv = getInventory();

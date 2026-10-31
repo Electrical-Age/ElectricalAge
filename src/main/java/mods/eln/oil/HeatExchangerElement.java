@@ -161,18 +161,23 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         return group == null ? this : group.master();
     }
 
-    /** Placed: turned to meet its neighbours' ports (FluidPlacement): its own front or its back (a stack keeps its axis): its A and B ends toward what feeds them. */
+    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
     @Override
     public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
         super.initializeFromThat(front, entityLiving, itemStackNbt);
-        mods.eln.fluid.FluidPlacement.placed(this);
+        remakePorts();
     }
 
     @Override
     public Direction[] fronts() {
         // (one of a stack, or about to be: it stays as placed; turning would re-form the stack under it)
         if (group != null || !neighbours().isEmpty()) return new Direction[]{front};
-        return new Direction[]{front, front.back()};
+        return mods.eln.fluid.FluidPlacement.horizontal();
+    }
+
+    @Override
+    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
+        return mods.eln.fluid.FluidPlacement.turn(this);
     }
 
     @Override

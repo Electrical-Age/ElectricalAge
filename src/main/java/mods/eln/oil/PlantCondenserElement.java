@@ -150,16 +150,21 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         if (motor != null && motorShare > 0) motor.takeShaftPower(pumpW, dt);
     }
 
-    /** Placed: turned to meet its neighbours' ports (FluidPlacement): any way round: its exhaust inlets toward a turbine beside it, its cooling ports toward pipes. */
+    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
     @Override
     public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
         super.initializeFromThat(front, entityLiving, itemStackNbt);
-        mods.eln.fluid.FluidPlacement.placed(this);
+        remakePorts();
     }
 
     @Override
     public Direction[] fronts() {
         return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
+    }
+
+    @Override
+    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
+        return mods.eln.fluid.FluidPlacement.turn(this);
     }
 
     @Override

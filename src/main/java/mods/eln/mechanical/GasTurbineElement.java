@@ -140,16 +140,16 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         return ports;
     }
 
-    /** Placed: turned to meet its neighbours' ports (FluidPlacement): its own front or its back (the shaft stays along the view): the exhaust toward an exchanger or a pipe beside it. */
+    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
     @Override
     public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
         super.initializeFromThat(front, entityLiving, itemStackNbt);
-        mods.eln.fluid.FluidPlacement.placed(this);
+        remakePorts();
     }
 
     @Override
     public Direction[] fronts() {
-        return new Direction[]{front, front.back()};
+        return mods.eln.fluid.FluidPlacement.horizontal();
     }
 
     @Override

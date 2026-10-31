@@ -123,19 +123,19 @@ public final class ShaftArtCases {
     static final float EAST = 270, WEST = 90, NORTH = 180, SOUTH = 0;
 
     /**
-     * AdventurAgent's client check (2026-10-29): an LP turbine and a plant condenser placed side by side by a player never
-     * coupled. Placed by the item path with the player's view (no front set by the test): a shaft part's shaft runs
-     * along the view; a turbine, gas turbine, tank, heat exchanger or plant condenser turns to meet the ports already
-     * beside it. LP then condenser (the condenser in each of 4 facings) and condenser then LP; an HP's and a gas
-     * turbine's exhaust and a large pipe, both orders; a tank and a pipe on its low spot; a heat exchanger and a pipe
-     * at its end; a plant condenser between two cooling-water pipes.
+     * Baughn (2026-10-31): placing a machine turned the ones beside it, the wrench couldn't turn them back, and a machine's
+     * front followed its shaft instead of facing the player. Placed by the item path with the player's view: a machine
+     * faces the player and its neighbours keep their fronts; the wrench key and a click turn it a quarter turn, its
+     * ports and shaft following. An LP and a plant condenser beside it (the condenser in each of 4 facings) couple after
+     * wrench turns (AdventurAgent 2026-10-29: they hadn't coupled at all); a tank and an exchanger turned to a pipe; two
+     * generators in a line part and rejoin as one turns, keeping their speed.
      */
     static final class PortsMeetWhenPlaced extends PlumbingCases.Big {
         final List<String> bad = new ArrayList<>();
         final List<Runnable> checks = new ArrayList<>();
 
         public String id() {
-            return "fluid_ports_meet_when_placed_by_a_player";
+            return "machines_face_the_player_and_the_wrench_turns_them";
         }
 
         public int ticks() {
@@ -148,58 +148,79 @@ public final class ShaftArtCases {
             });
         }
 
+        static boolean meets(mods.eln.node.transparent.TransparentNodeElement e) {
+            return mods.eln.fluid.FluidPlacement.coupled(e, (mods.eln.sim.fluid.FluidDevice) e) > 0;
+        }
+
+        /** Wrench turns of E (at most 3) until it meets a port; how many it took, or -1. */
+        static int turnUntilMet(mods.eln.node.transparent.TransparentNodeElement e) {
+            for (int i = 0; i < 4; i++) {
+                if (meets(e)) return i;
+                if (i < 3) e.wrenchTurn(null);
+            }
+            return -1;
+        }
+
         public void build(TestContext ctx) {
-            // LP looking east (shaft east-west, exhaust south), then a condenser south of it, in each facing
             for (int k = 0; k < 4; k++) {
                 BlockPos a = ctx.at(1 + 2 * k, 1, 0);
                 var lp = (mods.eln.mechanical.ShaftSteamTurbineElement) placeLooking(ctx, LP, a, EAST);
-                boolean along = lp.front == Direction.ZN || lp.front == Direction.ZP;
-                expect("LP looking east: its shaft runs east-west (front " + lp.front + ")", () -> along);
+                Direction f0 = lp.front;
+                if (k == 0) expect("LP looking east faces the player (front XN, was " + f0 + ")", () -> f0 == Direction.XN);
                 float yaw = 90 * k;
-                placeLooking(ctx, PLANT_CONDENSER, a.south(), yaw);
-                expect("LP then condenser (placed looking " + yaw + "): coupled", () -> piped(lp.exhaust));
+                var c = placeLooking(ctx, PLANT_CONDENSER, a.south(), yaw);
+                boolean kept = lp.front == f0;
+                expect("condenser placed beside an LP (looking " + yaw + "): the LP kept its front", () -> kept);
+                // the LP's exhaust toward the condenser, then the condenser's inlets toward it
+                boolean met = false;
+                for (int i = 0; i < 4 && !met; i++) {
+                    if (turnUntilMet(c) >= 0 && meets(lp)) met = true;
+                    else lp.wrenchTurn(null);
+                }
+                boolean m = met;
+                expect("LP and condenser (looking " + yaw + "): wrench turns couple them", () -> m && piped(lp.exhaust));
             }
-            // a condenser first, then the LP north of it looking west (its back would face north: it turns)
-            for (int k = 0; k < 4; k++) {
-                BlockPos a = ctx.at(1 + 2 * k, 1, 3);
-                placeLooking(ctx, PLANT_CONDENSER, a.south(), 90 * k);
-                var lp = (mods.eln.mechanical.ShaftSteamTurbineElement) placeLooking(ctx, LP, a, WEST);
-                int kk = k;
-                expect("condenser (placed looking " + 90 * kk + ") then LP: coupled", () -> piped(lp.exhaust));
-            }
-            // an HP and a gas turbine, then a large pipe at the back; a large pipe, then the turbine (it turns)
-            int[] turbines = {HP, GAS};
-            for (int t = 0; t < 2; t++) {
-                BlockPos a = ctx.at(1 + 4 * t, 1, 6), b = ctx.at(3 + 4 * t, 1, 6);
-                var e1 = placeLooking(ctx, turbines[t], a, EAST);
-                PipeCases.lay(ctx, a.relative(e1.front.back().toEnumFacing()), 2, 8, 8, 0, 8, 8, 16);
-                PipeCases.lay(ctx, b.south(), 2, 8, 8, 0, 8, 8, 16);
-                var e2 = placeLooking(ctx, turbines[t], b, WEST);
-                String n = t == 0 ? "HP" : "gas turbine";
-                mods.eln.sim.fluid.FluidNode x1 = e1 instanceof mods.eln.mechanical.ShaftSteamTurbineElement s1 ? s1.exhaust : ((mods.eln.mechanical.GasTurbineElement) e1).exhaust;
-                mods.eln.sim.fluid.FluidNode x2 = e2 instanceof mods.eln.mechanical.ShaftSteamTurbineElement s2 ? s2.exhaust : ((mods.eln.mechanical.GasTurbineElement) e2).exhaust;
-                expect(n + " then a large pipe at its back: coupled", () -> piped(x1));
-                expect("a large pipe, then the " + n + " (turned to it): coupled", () -> piped(x2));
-            }
-            // a tank looking at a pipe on its east (its front, the sight glass, would face it: it turns)
+            // the whole path once: a player holding the wrench key clicks a lone tank; it turns instead of opening
             PipeCases.lay(ctx, ctx.at(1, 1, 9), 1, 0, 4, 8, 16, 4, 8);
             var tank = (mods.eln.oil.TankElement) placeLooking(ctx, PlumbingCases.ALLOY_TANK, ctx.at(0, 1, 9), WEST);
-            expect("a pipe, then a tank looking at it: coupled", () -> piped(tank.vessel));
-            // a heat exchanger looking east (its ends east and west), a pipe at its east end's centre
-            var hx = (mods.eln.oil.HeatExchangerElement) placeLooking(ctx, GasPlantCases.HX, ctx.at(4, 1, 9), EAST);
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            Direction t0 = tank.front;
+            mods.eln.server.PlayerKeys.set(player, mods.eln.server.PlayerKeys.WRENCH, true);
+            boolean clicked;
+            try {
+                clicked = tank.node.onBlockActivated(player, Direction.YP, 0.5f, 1f, 0.5f);
+            } finally {
+                mods.eln.server.PlayerKeys.set(player, mods.eln.server.PlayerKeys.WRENCH, false);
+            }
+            Direction t1 = tank.front;
+            boolean c1 = clicked;
+            expect("wrench key + click on a tank: a quarter turn (" + t0 + " to " + t1 + ")", () -> c1 && t1 == t0.right());
+            int tt = turnUntilMet(tank);
+            expect("a tank turned to a pipe beside it: coupled", () -> tt >= 0 && piped(tank.vessel));
+            var hx = (mods.eln.oil.HeatExchangerElement) placeLooking(ctx, GasPlantCases.HX, ctx.at(4, 1, 9), NORTH);
             PipeCases.lay(ctx, ctx.at(5, 1, 9), 2, 0, 8, 8, 16, 8, 8);
-            expect("a heat exchanger, then a large pipe at its end: coupled", () -> piped(hx.a));
-            // a plant condenser between two pipes on its low spots (north and south): its cooling ports take both
-            PipeCases.lay(ctx, ctx.at(8, 1, 7), 1, 8, 4, 0, 8, 4, 16);
-            PipeCases.lay(ctx, ctx.at(8, 1, 9), 1, 8, 4, 0, 8, 4, 16);
-            var c = (mods.eln.oil.PlantCondenserElement) placeLooking(ctx, PLANT_CONDENSER, ctx.at(8, 1, 8), NORTH);
-            expect("two pipes, then a plant condenser between them: both on its cooling-water ports",
-                () -> mods.eln.fluid.FluidWorld.edgesOf(c.tubes).size() >= 2);
+            int ht = turnUntilMet(hx);
+            expect("a heat exchanger turned to a large pipe at its end: coupled", () -> ht >= 0 && piped(hx.a));
+            // two generators in a line (looking north: shaft east-west), spinning; one turned leaves the line, turned back
+            // rejoins it
+            var g1 = placeLooking(ctx, GEN4, ctx.at(1, 1, 5), NORTH);
+            var g2 = placeLooking(ctx, GEN4, ctx.at(2, 1, 5), NORTH);
+            boolean joined = shaftOf(g1) == shaftOf(g2);
+            shaftOf(g1).setRads(300);
+            g2.wrenchTurn(null);
+            boolean parted = shaftOf(g1) != shaftOf(g2);
+            double kept = shaftOf(g2).getRads();
+            g2.wrenchTurn(null);
+            boolean rejoined = shaftOf(g1) == shaftOf(g2);
+            expect("generators looking north share a shaft", () -> joined);
+            expect("a generator turned a quarter leaves the line", () -> parted);
+            expect("and keeps its speed (" + kept + " rad/s)", () -> Math.abs(kept - 300) < 1e-6);
+            expect("turned back across, it rejoins the line", () -> rejoined);
         }
 
         public void measure(TestContext ctx) {
             checks.forEach(Runnable::run);
-            ctx.check("fluid ports meet when placed by a player (" + checks.size() + " checks)", bad.isEmpty(), String.join("; ", bad));
+            ctx.check("machines face the player and the wrench turns them (" + checks.size() + " checks)", bad.isEmpty(), String.join("; ", bad));
         }
     }
 
@@ -207,9 +228,9 @@ public final class ShaftArtCases {
         return ((mods.eln.mechanical.ShaftElement) e).getShaft();
     }
 
-    /** A 200V Shaft Motor at P (placed looking east: front north) fed 200 V on its front. */
+    /** A 200V Shaft Motor at P (placed looking south: front north) fed 200 V on its front. */
     static mods.eln.mechanical.ShaftMotorElement poweredMotor(TestContext ctx, BlockPos p) {
-        var m = (mods.eln.mechanical.ShaftMotorElement) placeLooking(ctx, MOTOR, p, EAST);
+        var m = (mods.eln.mechanical.ShaftMotorElement) placeLooking(ctx, MOTOR, p, SOUTH);
         BlockPos cable = p.relative(m.front.toEnumFacing());
         ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
         var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, cable.relative(m.front.toEnumFacing()));
@@ -248,8 +269,8 @@ public final class ShaftArtCases {
             for (int line = 0; line < 2; line++) {
                 int z = line == 0 ? 2 : 7;
                 var m = poweredMotor(ctx, ctx.at(1, 1, z));
-                for (int x = 2; x <= 5; x++) placeLooking(ctx, GEN4, ctx.at(x, 1, z), EAST);
-                placeLooking(ctx, line == 0 ? TACHO : FLYWHEEL, ctx.at(6, 1, z), EAST);
+                for (int x = 2; x <= 5; x++) placeLooking(ctx, GEN4, ctx.at(x, 1, z), SOUTH);
+                placeLooking(ctx, line == 0 ? TACHO : FLYWHEEL, ctx.at(6, 1, z), SOUTH);
                 if (line == 0) a = m;
                 else b = m;
             }
@@ -289,7 +310,7 @@ public final class ShaftArtCases {
         public void build(TestContext ctx) {
             int[] ids = {JOINT, GEN8, GEN4, JOINT, TACHO};
             var parts = new mods.eln.node.transparent.TransparentNodeElement[ids.length];
-            for (int i = 0; i < ids.length; i++) parts[i] = placeLooking(ctx, ids[i], ctx.at(1 + i, 1, 4), EAST);
+            for (int i = 0; i < ids.length; i++) parts[i] = placeLooking(ctx, ids[i], ctx.at(1 + i, 1, 4), SOUTH);
             if (shaftOf(parts[0]).getElements().size() != 5) bad += "not one shaft; ";
             shaftOf(parts[0]).setRads(800);
             // a cut: the 4 kW generator in the middle goes
@@ -298,12 +319,12 @@ public final class ShaftArtCases {
             if (Math.abs(left - 800) > 1 || Math.abs(right - 800) > 1) bad += String.format("cut: %.0f / %.0f rad/s; ", left, right);
             // a joint placed at rest on the right end: nearly the line's speed
             var i0 = shaftOf(parts[4]).getInertia();
-            var j = placeLooking(ctx, JOINT, ctx.at(6, 1, 4), EAST);
+            var j = placeLooking(ctx, JOINT, ctx.at(6, 1, 4), SOUTH);
             double want = 800 * i0 / (i0 + ((mods.eln.mechanical.ShaftElement) j).getShaftInertia()), got = shaftOf(j).getRads();
             if (Math.abs(got - want) > 1) bad += String.format("joint placed: %.0f rad/s (momentum: %.0f); ", got, want);
             // a flywheel at rest on the left end: the momentum shared
             var i1 = shaftOf(parts[0]).getInertia();
-            var f = placeLooking(ctx, FLYWHEEL, ctx.at(0, 1, 4), EAST);
+            var f = placeLooking(ctx, FLYWHEEL, ctx.at(0, 1, 4), SOUTH);
             double wantF = 800 * i1 / (i1 + ((mods.eln.mechanical.ShaftElement) f).getShaftInertia()), gotF = shaftOf(f).getRads();
             if (Math.abs(gotF - wantF) > 1) bad += String.format("flywheel placed: %.0f rad/s (momentum: %.0f); ", gotF, wantF);
             line = String.format("cut %.0f / %.0f; joint placed %.0f (of %.0f); flywheel placed %.0f (of %.0f)", left, right, got, want, gotF, wantF);
@@ -317,7 +338,7 @@ public final class ShaftArtCases {
 
     /**
      * The motor's and generators' terminals are where they are drawn (AdventurAgent: a cable on the motor's other face
-     * found no connector): placed looking east, the motor takes power on its front (the terminal plate under its
+     * found no connector): placed looking south, the motor takes power on its front (the terminal plate under its
      * terminal box) and a signal on its back (the small plate); a generator power on its front and back; each face's
      * plate is in its hitbox, the plates' faces the connecting ones.
      */
@@ -333,8 +354,8 @@ public final class ShaftArtCases {
         }
 
         public void build(TestContext ctx) {
-            var m = placeLooking(ctx, MOTOR, ctx.at(2, 1, 2), EAST);
-            if (m.front != Direction.ZN) bad += "motor looking east faces " + m.front + "; ";
+            var m = placeLooking(ctx, MOTOR, ctx.at(2, 1, 2), SOUTH);
+            if (m.front != Direction.ZN) bad += "motor looking south faces " + m.front + "; ";
             if (m.getConnectionMask(m.front, mods.eln.misc.LRDU.Down) != mods.eln.node.NodeBase.maskElectricalPower) bad += "motor: no power on its front; ";
             if (m.getConnectionMask(m.front.back(), mods.eln.misc.LRDU.Down) != mods.eln.node.NodeBase.maskElectricalInputGate) bad += "motor: no signal on its back; ";
             for (Direction d : new Direction[]{m.front.left(), m.front.right()})
@@ -342,7 +363,7 @@ public final class ShaftArtCases {
             VoxelShape s = ctx.level().getBlockState(m.node.coordonate.pos()).getShape(ctx.level(), m.node.coordonate.pos());
             if (!HitboxPerFacing.toward(s, m.front, 0.1) || !HitboxPerFacing.toward(s, m.front.back(), 0.1)) bad += "motor: its terminal plates aren't on its front and back; ";
             for (int id : new int[]{GEN4, GEN8}) {
-                var g = placeLooking(ctx, id, ctx.at(id == GEN4 ? 5 : 8, 1, 2), EAST);
+                var g = placeLooking(ctx, id, ctx.at(id == GEN4 ? 5 : 8, 1, 2), SOUTH);
                 for (Direction d : new Direction[]{g.front, g.front.back()})
                     if (g.getConnectionMask(d, mods.eln.misc.LRDU.Down) != mods.eln.node.NodeBase.maskElectricalPower) bad += "generator: no power on " + d + "; ";
                 VoxelShape gs = ctx.level().getBlockState(g.node.coordonate.pos()).getShape(ctx.level(), g.node.coordonate.pos());
