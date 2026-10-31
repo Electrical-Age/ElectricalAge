@@ -85,7 +85,9 @@ transparent neighbour).
   sockets and the anemometer, walls only).
 - Placed anywhere (Baughn): chips, the small sensors and sources of a0d38750, and the relays (drawn and measured at half
   scale), the four probes, the wireless receiver, transmitter and repeater, the Electrical Timer, the LED vuMeter, the
-  Signal Switch with LED, the power sockets, the Ground Cable, the Hub and the anemometer. Not: the redstone converters
+  Signal Switch with LED, the power sockets, the Ground Cable, the Hub and the anemometer; the Energy Meter and Advanced Energy Meter (in line on a power run: its sign follows
+  which way it faces), the Weak 50V, 50V and 200V Battery Chargers (four power pins, one load) and the Nuclear and
+  Standard Alarms. Not: the redstone converters
   (Baughn), the analog vuMeter and the power switches (they take the face). A thermal probe's pins join Copper Thermal
   Cable (thermal loads both ways); a Temperature Probe's back pin and a Hub's pins change with their slots after
   placement: the links follow the new kind (a mismatched cable simply isn't joined), but the placement rules are not
@@ -96,14 +98,15 @@ transparent neighbour).
   between the pin tips and the cut-out length comes back to the player as a kit of its tier, a converted piece's `paid`
   shared by length, so cable is neither made nor lost; a cut end on the block's side keeps 2 voxels, since a pin there
   would face the next block); on a free cable end inside the block (one pin of its kind on the end; tried first for a click within 5 voxels of
-  an end, so every aim there gives the same place; if the device doesn't fit beyond the end, the end is drawn back 2
+  an end or anywhere in the block past it, so every aim there gives the same place; if the device doesn't fit beyond the end, the end is drawn back 2
   voxels at a time and the cable comes back as a kit); beside the cable
   (one pin of its kind touching its side: a tap); then at the click as before, else the refusal says what to do. Where
   the cable leaves a choice the player's facing is tried first, then turned clockwise. The preview shows the same plan.
   Breaking a device in line leaves the gap; the two ends stay where they were. A click on a cable places on the face
   the cable lies on (`VoxelNode.placeFace`), not on the side of the block the click hit. Every refusal of
   `SixNodeItem.placeAt` says why on the action bar, and a use key held down (the client repeats it every 4 ticks) does
-  nothing on the block just placed in for 6 ticks, so no "No room" follows a placement.
+  nothing on the block just placed in while the repeats go on (each one within 6 ticks of the last), so no "No room"
+  follows a placement.
 - A cable kit ends at the nearest pin of its own kind (`CablePlacer.deviceEnd` with the kit's tier; a face-slot device's
   edges likewise): a Copper Thermal Cable kit at a Thermal Probe's side pins, a signal kit at its front. The pin boxes are
   coloured by their cable: copper for thermal, pale for signal, dark grey for power.

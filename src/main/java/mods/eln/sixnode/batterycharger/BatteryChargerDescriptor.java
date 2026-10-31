@@ -128,4 +128,29 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
+
+    /** Placed anywhere on a face of a voxel block, at its drawn size (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        mods.eln.misc.LRDU turn = modelTurn(side, front);
+        if (turn != null) turn.glRotateOnX();
+        draw(new boolean[4], new boolean[4], false, false);
+    }
+
+    @Override
+    public mods.eln.misc.LRDU modelTurn(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        // (as BatteryChargerRender: on a ceiling half a turn further)
+        if (!side.isY()) return null;
+        return side == mods.eln.misc.Direction.YP ? front.right().inverse() : front.right();
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return boundsOf(main);
+    }
 }

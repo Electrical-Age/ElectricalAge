@@ -37,6 +37,7 @@ public final class VoxelDeviceCases {
         cases.add(new TapCase());
         cases.add(new SlotPinsCase());
         cases.add(new FreeEndCase());
+        cases.add(new MetersChargersAlarmsCase());
     }
 
     static int id(String name) {
@@ -139,7 +140,8 @@ public final class VoxelDeviceCases {
         static final String[] FLOOR_DEVICES = {"Low Voltage Relay", "Medium Voltage Relay", "High Voltage Relay", "Very High Voltage Relay",
             "Signal Relay", "Electrical Probe", "Voltage Probe", "Thermal Probe", "Temperature Probe", "Wireless Signal Receiver",
             "Wireless Signal Transmitter", "Wireless Signal Repeater", "Electrical Timer", "LED vuMeter", "Signal Switch with LED",
-            "Ground Cable", "Hub"};
+            "Ground Cable", "Hub", "Energy Meter", "Advanced Energy Meter", "Weak 50V Battery Charger", "50V Battery Charger",
+            "200V Battery Charger", "Nuclear Alarm", "Standard Alarm"};
         static final String[] WALL_DEVICES = {"50V Power Socket", "200V Power Socket", "Electrical Anemometer Sensor"};
         String all = "", middle = "", lopsided = "", relays = "", stayed = "";
         boolean anywhereOk, middleOk, lopsidedOk, relaysOk, stayedOk;
@@ -1014,6 +1016,109 @@ public final class VoxelDeviceCases {
             c.check("free end: each aim puts the Voltage Probe's LV pin on the end, the cable kept", ok, detail);
             c.check("free end: the same place for every aim", where.stream().distinct().count() == 1, where.toString());
             c.check("free end: a click on the cable's end goes on the floor it lies on", face.equals("YN"), face);
+        }
+    }
+
+    /**
+     * Batch 2 (Baughn, #178): the energy meters, battery chargers and alarms as voxel devices. An Energy Meter put in line
+     * on a 50 V run counts the current to a resistor; an Advanced Energy Meter off centre between cables does too; a 50V
+     * Battery Charger put on a run (in line) and a Weak 50V and a 200V one off centre are fed through their pins; the two
+     * alarms off centre see a Signal Source on their pin.
+     */
+    static final class MetersChargersAlarmsCase implements TestCase {
+        SixNodeElement meter, adv, c50, cWeak, c200, nuclear, standard;
+        mods.eln.sixnode.resistor.ResistorElement rMeter, rAdv;
+        String placed = "";
+
+        public String name() {
+            return "energy meters, battery chargers and alarms as voxel devices";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        static void close(TestContext c, SixNodeElement m) {
+            m.networkUnserialize(c.stream(o -> o.writeByte(mods.eln.sixnode.energymeter.EnergyMeterElement.clientToggleStateId)));
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 10; x++) for (int z = 0; z < 10; z++) c.floor(c.at(x, 0, z));
+            // an Energy Meter clicked onto a run: in line
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            BlockPos pm = c.at(1, 1, 1);
+            var vm = block(c, pm);
+            CableCases.voxel(c, pm, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            placed += "meter: " + vm.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c)) + "; ";
+            meter = TapCase.placed(vm);
+            if (meter != null) close(c, meter);
+            rMeter = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
+            // an Advanced Energy Meter off centre, its pins west and east
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 4), 50);
+            BlockPos pa = c.at(1, 1, 4);
+            var va = block(c, pa);
+            adv = put(c, va, "Advanced Energy Meter", Direction.YN, 0, 0, 2, Direction.XN);
+            cableOut(c, va, pa, adv, Direction.XN, LV, FLOOR);
+            cableOut(c, va, pa, adv, Direction.XP, LV, FLOOR);
+            close(c, adv);
+            rAdv = resistor(c, c.at(2, 1, 4), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 4));
+            // a 200V charger off centre, fed from the west
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 7), 200);
+            BlockPos p2 = c.at(1, 1, 7);
+            var v2 = block(c, p2);
+            c200 = put(c, v2, "200V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
+            cableOut(c, v2, p2, c200, Direction.XN, mods.eln.node.voxel.CablePart.tierOf("Medium Voltage Cable"), FLOOR);
+            // a 50V charger clicked onto a 50 V run
+            source(c, Wp9aCases.SOURCE, c.at(4, 1, 1), 50);
+            BlockPos p5 = c.at(5, 1, 1);
+            var v5 = block(c, p5);
+            CableCases.voxel(c, p5, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            placed += "charger: " + v5.placeAnywhere(desc("50V Battery Charger").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            c50 = TapCase.placed(v5);
+            // a weak one off centre, fed from the east
+            BlockPos pw = c.at(5, 1, 4);
+            var vw = block(c, pw);
+            cWeak = put(c, vw, "Weak 50V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
+            cableOut(c, vw, pw, cWeak, Direction.XP, LV, FLOOR);
+            source(c, Wp9aCases.SOURCE, c.at(6, 1, 4), 50);
+            // the alarms, their pin north on SVU
+            BlockPos pn = c.at(5, 1, 8);
+            var vn = block(c, pn);
+            nuclear = put(c, vn, "Nuclear Alarm", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vn, pn, nuclear, Direction.ZN, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(5, 1, 7), mods.eln.Eln.SVU);
+            BlockPos ps = c.at(8, 1, 8);
+            var vs = block(c, ps);
+            standard = put(c, vs, "Standard Alarm", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vs, ps, standard, Direction.ZN, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 7), mods.eln.Eln.SVU);
+        }
+
+        public void measure(TestContext c) {
+            c.check("batch 2: an Energy Meter and a 50V charger clicked onto runs go in line", meter != null && c50 != null
+                && linked(meter, Direction.XN) && linked(meter, Direction.XP) && linked(c50, Direction.XN) && linked(c50, Direction.XP), placed);
+            Wp9cCases.within(c, "batch 2: the Energy Meter in line passes 50 V's current to the resistor [A]", Wp9aCases.current(rMeter),
+                50 / rMeter.nominalRs, 0.05 * 50 / rMeter.nominalRs);
+            double counted = meter == null ? 0 : (double) mods.eln.gametest.LabCommands.field(meter, "energyStack");
+            // (its sign follows which way it faces the current: placed by the player's facing, a wrench turns it round)
+            c.check("batch 2: and counts its energy", Math.abs(counted) > 10, fmt("%.2f J", counted));
+            Wp9cCases.within(c, "batch 2: an Advanced Energy Meter off centre passes it too [A]", Wp9aCases.current(rAdv),
+                50 / rAdv.nominalRs, 0.05 * 50 / rAdv.nominalRs);
+            Wp9cCases.within(c, "batch 2: a 200V charger off centre fed through its west pin [V]", u(c200, Direction.XN), 200, 2);
+            Wp9cCases.within(c, "batch 2: a 50V charger in line on the run [V]", c50 == null ? 0 : u(c50, Direction.XN), 50, 1);
+            Wp9cCases.within(c, "batch 2: a weak 50V charger fed through its east pin [V]", u(cWeak, Direction.XP), 50, 1);
+            Wp9cCases.within(c, "batch 2: the Nuclear Alarm sees SVU on its pin [V]", u(nuclear, Direction.ZN), mods.eln.Eln.SVU, 0.1);
+            Wp9cCases.within(c, "batch 2: the Standard Alarm sees SVU on its pin [V]", u(standard, Direction.ZN), mods.eln.Eln.SVU, 0.1);
         }
     }
 }

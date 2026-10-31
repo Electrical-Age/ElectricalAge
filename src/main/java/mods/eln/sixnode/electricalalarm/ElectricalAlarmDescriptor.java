@@ -105,4 +105,27 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
+
+    /** Placed anywhere on a face of a voxel block, at its drawn size (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        mods.eln.misc.LRDU turn = modelTurn(side, front);
+        if (turn != null) turn.glRotateOnX();
+        draw(false, 0f);
+    }
+
+    @Override
+    public mods.eln.misc.LRDU modelTurn(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        return side.isY() ? front.right() : null;
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return boundsOf(main, rot);
+    }
 }

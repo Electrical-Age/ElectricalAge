@@ -200,4 +200,27 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
         }
         // UtilsClient.enableCulling();
     }
+
+    /** Placed anywhere on a face of a voxel block, at its drawn size (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        mods.eln.misc.LRDU turn = modelTurn(side, front);
+        if (turn != null) turn.glRotateOnX();
+        draw(0, 0, 1, 0, false);
+    }
+
+    @Override
+    public mods.eln.misc.LRDU modelTurn(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        return side.isY() ? front.left() : null;
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return boundsOf(base, powerDisk);
+    }
 }
