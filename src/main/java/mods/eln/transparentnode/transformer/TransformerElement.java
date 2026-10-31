@@ -83,7 +83,11 @@ public class TransformerElement extends TransparentNodeElement {
         super.connectJob();
     }
 
-    /** Both windings and the core are in (Baughn 2026-10-27: with any of the three slots empty it connects to nothing). */
+    /**
+     * Both windings and the core are in (Baughn 2026-10-27: with any of the three slots empty no power flows). Cables
+     * still attach to its terminals (Baughn, #164: so a voxel cable can be laid to an unconfigured one); only the
+     * electrical link waits for it to be complete.
+     */
     boolean complete() {
         return !Utils.isEmpty(inventory.getItem(TransformerContainer.primaryCableSlotId))
             && !Utils.isEmpty(inventory.getItem(TransformerContainer.secondaryCableSlotId))
@@ -105,7 +109,7 @@ public class TransformerElement extends TransparentNodeElement {
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        if (lrdu == LRDU.Down && complete()) {
+        if (lrdu == LRDU.Down) {
             if (side == front.left()) return NodeBase.maskElectricalPower;
             if (side == front.right()) return NodeBase.maskElectricalPower;
             if (side == front && !grounded) return NodeBase.maskElectricalPower;

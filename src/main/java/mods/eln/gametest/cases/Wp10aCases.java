@@ -792,9 +792,9 @@ public final class Wp10aCases {
     }
 
     /**
-     * Baughn 2026-10-27: a DC-DC converter with any of its three slots empty connects to nothing. Fed on its primary,
-     * windings in but no core: no connection on any side, its secondary cable dead; the core put in, it connects and
-     * transforms.
+     * Baughn 2026-10-27: a DC-DC converter with any of its three slots empty passes no power. Fed on its primary,
+     * windings in but no core: cables attach to its terminals (#164) but no electrical link on any side, its secondary
+     * cable dead; the core put in, it links and transforms.
      */
     static final class TransformerIncompleteCase implements TestCase {
         TransformerElement tr;
@@ -822,11 +822,11 @@ public final class Wp10aCases {
         }
 
         public void measure(TestContext ctx) {
-            noCoreMasks = true;
+            noCoreMasks = tr.getConnectionMask(tr.front.left(), mods.eln.misc.LRDU.Down) != 0 && tr.getConnectionMask(tr.front.right(), mods.eln.misc.LRDU.Down) != 0;
             for (mods.eln.misc.Direction d : mods.eln.misc.Direction.values())
-                if (tr.getConnectionMask(d, mods.eln.misc.LRDU.Down) != 0 || tr.getElectricalLoad(d, mods.eln.misc.LRDU.Down) != null) noCoreMasks = false;
+                if (tr.getElectricalLoad(d, mods.eln.misc.LRDU.Down) != null) noCoreMasks = false;
             deadU = loadU(secondary);
-            ctx.check("wp10a transformer without a core connects on no side", noCoreMasks, "");
+            ctx.check("wp10a transformer without a core: cables attach to its windings, no electrical link", noCoreMasks, "");
             ctx.check("wp10a transformer without a core: its secondary cable is dead", Math.abs(deadU) < 0.5, String.format("%.2f V", deadU));
             ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
             if (c.isEmpty()) return;
