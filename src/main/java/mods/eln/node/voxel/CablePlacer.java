@@ -179,6 +179,11 @@ public final class CablePlacer {
     /** A click as a routing end: on a device, its face's nearest edge; on a cable, a point of it; else a point on the
      *  face clicked. join (out) gets the junction point for a cable. */
     static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join) {
+        return endAt(level, pos, face, hit, start, join, -1);
+    }
+
+    /** The same for a kit of that tier (-1: any): a device off centre ends at its nearest pin of the kit's kind. */
+    static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join, int tier) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
         if (n instanceof VoxelNode v) {
@@ -187,7 +192,7 @@ public final class CablePlacer {
             // (its port)
             int el = v.elementAt(hx, hy, hz, 0);
             if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
-            if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start);
+            if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start, tier);
             int idx = v.partAt(hx, hy, hz);
             // a control valve: its signal comes from a signal cable laid into its block: the floor under it (Baughn
             // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
@@ -251,7 +256,7 @@ public final class CablePlacer {
             p[w] = base[w] + 8;   // (the middle of the edge: the connector's centre, where a terminal plate's lug sits, Baughn)
             return new CableRouter.End(p[0], p[1], p[2], edge, start ? f : CableRouter.reverse(f));
         }
-        CableRouter.End snapped = snapToPort(level, pos, face, hx, hy, hz, start, join);
+        CableRouter.End snapped = snapToPort(level, pos, face, hx, hy, hz, start, join, tier);
         if (snapped != null) return snapped;
         return surface(pos, face, hx, hy, hz);
     }
@@ -259,12 +264,20 @@ public final class CablePlacer {
     /** The end at the hosted device in slot el (0..5: centred on that face) of v: the edge of its face nearest the block-local
      *  point h that has a connector; null if it has none. */
     static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start) {
+        return deviceEnd(v, pos, el, h, start, -1);
+    }
+
+    /** The same for a kit of that tier (-1: any). */
+    static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start, int tier) {
         if (el >= 6) {   // (a device placed off centre: its pins, the one nearest the click)
             var e = v.getElement(el);
             if (e == null) return null;
             VoxelNode.Pin best = null;
             double bd = Double.MAX_VALUE;
             for (VoxelNode.Pin p : VoxelNode.pins(e)) {
+                // a pin of the kit's kind (AdventurAgent: a thermal kit ended at a thermal probe's signal pin)
+                if (tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(p.mask(), DevicePlacer.tierMask(tier)))
+                    continue;
                 double d = sq(p.tip()[0] - h[0] * 16) + sq(p.tip()[1] - h[1] * 16) + sq(p.tip()[2] - h[2] * 16);
                 if (d < bd) {
                     bd = d;
@@ -284,7 +297,8 @@ public final class CablePlacer {
         for (int g = 0; g < 6; g++) {
             if (CableRouter.axis(g) == fa) continue;
             var out = mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g));
-            if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
+            int m = v.getSideConnectionMask(out, out.getLRDUGoingTo(side));
+            if (m == 0 || tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(m, DevicePlacer.tierMask(tier))) continue;
             double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
             if (d < bd) {
                 bd = d;
@@ -306,7 +320,7 @@ public final class CablePlacer {
      * connected and wasn't; Baughn: a cable must never look connected without being so). The machine is a transparent
      * node, or a six-node device on the same surface (hosted in a VoxelNode). Null if there's no such machine.
      */
-    static CableRouter.End snapToPort(Level level, BlockPos pos, Direction face, double hx, double hy, double hz, boolean start, long[][] join) {
+    static CableRouter.End snapToPort(Level level, BlockPos pos, Direction face, double hx, double hy, double hz, boolean start, long[][] join, int tier) {
         BlockPos cb = pos.relative(face);
         double[] h = {hx, hy, hz};
         CableRouter.End best = null;
@@ -328,13 +342,13 @@ public final class CablePlacer {
                 if (v.getSideConnectionMask(out, out.getLRDUGoingTo(side)) == 0) continue;
                 Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.47, -d.getStepY() * 0.47, -d.getStepZ() * 0.47)
                     .add(-face.getStepX() * 0.47, -face.getStepY() * 0.47, -face.getStepZ() * 0.47);
-                e = deviceEnd(v, nb, side.getInt(), new double[]{hit.x - nb.getX(), hit.y - nb.getY(), hit.z - nb.getZ()}, start);
+                e = deviceEnd(v, nb, side.getInt(), new double[]{hit.x - nb.getX(), hit.y - nb.getY(), hit.z - nb.getZ()}, start, tier);
                 if (e == null || e.dir() < 0) continue;
             } else {
                 // the machine's face toward the cable, low on the edge the cable lies along
                 Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.5, -d.getStepY() * 0.5, -d.getStepZ() * 0.5)
                     .add(-face.getStepX() * 0.45, -face.getStepY() * 0.45, -face.getStepZ() * 0.45);
-                e = endAt(level, nb, d.getOpposite(), hit, start, join);
+                e = endAt(level, nb, d.getOpposite(), hit, start, join, tier);
                 if (e == null) continue;   // (no connector on that edge)
             }
             best = e;
@@ -357,6 +371,10 @@ public final class CablePlacer {
 
     public static CableRouter.End endAtForTests(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join) {
         return endAt(level, pos, face, hit, start, join);
+    }
+
+    public static CableRouter.End endAtForTests(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join, int tier) {
+        return endAt(level, pos, face, hit, start, join, tier);
     }
 
     /** A lattice coordinate inside the block (not on its edge). */
@@ -391,7 +409,7 @@ public final class CablePlacer {
             return true;
         }
         long[][] join = new long[1][];
-        CableRouter.End at = endAt(level, pos, face, hit, plan == null, join);
+        CableRouter.End at = endAt(level, pos, face, hit, plan == null, join, tier);
         if (at == null) {
             player.sendOverlayMessage(Component.literal(noEnd(level, pos)));
             return true;

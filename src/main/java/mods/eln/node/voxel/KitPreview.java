@@ -68,7 +68,7 @@ public final class KitPreview {
             return;
         }
         long[][] join = new long[1][];
-        CableRouter.End at = CablePlacer.endAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation(), plan == null, join);
+        CableRouter.End at = CablePlacer.endAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation(), plan == null, join, kit.tier);
         // a machine's port: snapped to it and in its own colour (Baughn: it wasn't obvious that cables connect to machines)
         boolean device = at != null && CablePlacer.isDevice(level, bh.getBlockPos(), bh.getLocation());
         if (at == null) {
