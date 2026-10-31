@@ -51,8 +51,11 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         if (ctx.getPlayer() != null) {
             Placed last = LAST_PLACED.get(ctx.getPlayer().getUUID());
             long now = world.getGameTime();
-            if (last != null && now - last.tick() <= REPEAT_TICKS && (last.pos().equals(ctx.getClickedPos()) || last.pos().equals(ctx.getClickedPos().relative(ctx.getClickedFace()))))
+            if (last != null && now - last.tick() <= REPEAT_TICKS && (last.pos().equals(ctx.getClickedPos()) || last.pos().equals(ctx.getClickedPos().relative(ctx.getClickedFace())))) {
+                // (still held: the window moves on with each repeat, AdventurAgent saw "No room" after a long hold)
+                LAST_PLACED.put(ctx.getPlayer().getUUID(), new Placed(last.pos(), now));
                 return InteractionResult.FAIL;
+            }
         }
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Direction direction = Direction.fromIntMinecraftSide(ctx.getClickedFace().get3DDataValue()).getInverse();

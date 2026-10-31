@@ -952,7 +952,7 @@ public final class VoxelDeviceCases {
 
     /**
      * AdventurAgent's free end: an LV run from a block's west edge to voxel 8 along x, at z 8 on the floor. A Voltage
-     * Probe aimed at five spots just past the end goes the same place each time, its LV pin on the end: the probe doesn't
+     * Probe aimed at seven spots past the end, out to the cell's edges, goes the same place each time, its LV pin on the end: the probe doesn't
      * fit beyond voxel 8 (10 voxels tip to tip), so the end is drawn back and the cable taken off comes back. A click on
      * the end of the cable puts a device on the floor the cable lies on, not on the open side clicked.
      */
@@ -978,7 +978,8 @@ public final class VoxelDeviceCases {
         }
 
         public void build(TestContext c) {
-            double[][] aims = {{9.5, 8}, {10.5, 8}, {11, 7.5}, {10, 9.5}, {12, 8.5}};
+            // (the last two at the cell's edges, AdventurAgent: there the probe went beside the end)
+            double[][] aims = {{9.5, 8}, {10.5, 8}, {11, 7.5}, {10, 9.5}, {12, 8.5}, {13, 1.2}, {15.5, 14.8}};
             for (int i = 0; i < aims.length; i++) {
                 BlockPos p = c.at(1 + i % 4 * 2, 1, 1 + i / 4 * 3);
                 c.floor(p.below());

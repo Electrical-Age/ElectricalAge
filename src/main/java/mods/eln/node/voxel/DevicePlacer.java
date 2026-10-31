@@ -233,7 +233,8 @@ public final class DevicePlacer {
      *  leaves toward + there, the end's last straight run (voxels), and its distance from the click. */
     record End(int part, int e, int f, int axis, boolean out, int run, double dist) {}
 
-    /** The free ends of working cables on the face inside the block within 5 voxels of the click, nearest first. */
+    /** The free ends of working cables on the face inside the block within 5 voxels of the click, or with the click
+     *  anywhere in the block past them, nearest first. */
     static List<End> endsNear(VoxelNode v, Direction face, double[] h) {
         int f3 = face.toEnumFacing().get3DDataValue();
         double[] q = {h[0] * 16, h[1] * 16, h[2] * 16};
@@ -248,8 +249,12 @@ public final class DevicePlacer {
                 if (a < 0 || p[e + a] == 0 || p[e + a] == 16) continue;   // (an end on the block's side opens there)
                 if (joined(v, i, p[e], p[e + 1], p[e + 2])) continue;   // (another cable meets it there)
                 double dist = Math.sqrt(sq(q[0] - p[e]) + sq(q[1] - p[e + 1]) + sq(q[2] - p[e + 2]));
-                if (dist > 5) continue;
-                out.add(new End(i, e, f, a, p[e + a] > p[f + a], Math.abs(p[e + a] - p[f + a]), dist));
+                boolean out_ = p[e + a] > p[f + a];
+                // near the end, or anywhere in the cell past it (AdventurAgent: aimed past an end at the cell's edge,
+                // the probe went beside the end)
+                double past = out_ ? q[a] - p[e + a] : p[e + a] - q[a];
+                if (dist > 5 && !(past > 0)) continue;
+                out.add(new End(i, e, f, a, out_, Math.abs(p[e + a] - p[f + a]), dist));
             }
         }
         out.sort(java.util.Comparator.comparingDouble(End::dist));
