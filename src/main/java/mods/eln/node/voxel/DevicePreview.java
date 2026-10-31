@@ -44,8 +44,8 @@ public final class DevicePreview {
                 if (level.getBlockEntity(pos) instanceof VoxelNodeEntity ve && ve.getNode() instanceof VoxelNode v)
                     side = v.placeFace(face, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
             }
-            int[] o = VoxelNode.snap(item.descriptor, side, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
             var front = item.descriptor.getFrontFromPlace(side, p);
+            int[] o = VoxelNode.snap(item.descriptor, side, front, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
             var st = level.getBlockState(pos);
             String err = null;
             boolean show = true;
@@ -55,6 +55,7 @@ public final class DevicePreview {
                     err = slot < 0 ? "full" : v.placeErrorAt(p.getMainHandItem(), slot, side, o[0], o[1], o[2], front);
                 } else show = false;
             } else if (!st.isAir() && !st.canBeReplaced()) show = false;
+            if (show && err == null && !item.descriptor.allowedOnSide(side)) err = "side";
             if (show && err == null && !SixNodeBlock.get().getIfOtherBlockIsSolid(level, pos, side)) err = "no support";
             if (show) {
                 key = pos.toShortString() + side + o[0] + "," + o[1] + "," + o[2] + front + item.descriptor.parentItemDamage + (err == null);

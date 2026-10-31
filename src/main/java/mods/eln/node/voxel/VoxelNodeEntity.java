@@ -133,8 +133,8 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         if (f < 6) return List.of(d == null ? VoxelNode.plate(f) : d.footprintBox(f));
         if (d == null || er == null) return List.of();
         List<int[]> out = new ArrayList<>();
-        out.add(VoxelNode.bodyBox(d, er.side.getInt(), er.ox, er.oy, er.oz));
-        out.addAll(VoxelNode.pinBoxes(d, er.side, er.ox, er.oy, er.oz, l -> (er.pinMask & (1 << l.toInt())) != 0));
+        out.add(VoxelNode.bodyBox(d, er.side, er.front, er.ox, er.oy, er.oz));
+        out.addAll(VoxelNode.pinBoxes(d, er.side, er.front, er.ox, er.oy, er.oz, l -> (er.pinMask & (1 << l.toInt())) != 0));
         return out;
     }
 
@@ -143,7 +143,8 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         int h = java.util.Arrays.hashCode(elementRenderIdList);
         for (int i = 6; i < elementRenderList.length; i++) {
             var er = elementRenderList[i];
-            if (er != null) h = h * 31 + er.side.getInt() * 4096 + (er.ox & 15) * 256 + (er.oy & 15) * 16 + (er.oz & 15);
+            if (er != null) h = (h * 31 + er.side.getInt() * 4096 + (er.ox & 15) * 256 + (er.oy & 15) * 16 + (er.oz & 15)) * 31
+                + (er.front == null ? 0 : er.front.toInt() + 1) * 16 + er.pinMask;   // (a turned or reconnected device: its body and pins move)
         }
         return h;
     }

@@ -121,8 +121,15 @@ public abstract class SixNodeElementRender {
         }
 
         if (slot >= 6 && !sixNodeDescriptor.drawsOwnPins()) {   // (off centre: a pin past its body on every connecting edge)
-            float from = sixNodeDescriptor.bodyHalf() / 16f;
-            for (LRDU l : LRDU.values()) if ((pinMask & (1 << l.toInt())) != 0) drawPinBox(l, from, from + 1 / 16f, 1.8f / 16, 1 / 16f);
+            // from the model's edge (a lopsided model: SixNodeDescriptor.bodyBounds) to one voxel past its body
+            int[] ext = sixNodeDescriptor.bodyExtents(side, front);
+            float[] reach = sixNodeDescriptor.modelReach(side, front);
+            for (LRDU l : LRDU.values())
+                if ((pinMask & (1 << l.toInt())) != 0) {
+                    float to = (ext[l.toInt()] + 1) / 16f;
+                    float from = reach == null ? to - 1 / 16f : Math.min(reach[l.toInt()] / 16f, to - 1 / 16f);
+                    drawPinBox(l, from, to, 1.8f / 16, 1 / 16f);
+                }
         }
 
         GL11.glColor3f(1f, 1f, 1f);

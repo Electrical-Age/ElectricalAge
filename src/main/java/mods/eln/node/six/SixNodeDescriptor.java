@@ -130,6 +130,86 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return footprint()[0];
     }
 
+    /**
+     * Its model across the face, unturned: {yMin, yMax, zMin, zMax} in px from the centre, after modelScale (the element
+     * frame: Down/Up along y, Left/Right along z). Null (the default): a square of bodyHalf each way. A device placed
+     * anywhere whose model is not a square round its centre gives it, so its body and pins follow the model (Baughn: the
+     * probes and relays work as voxel devices at their drawn size).
+     */
+    protected float[] bodyBounds() {
+        return null;
+    }
+
+    /** The turn its render gives its model on side at front: the LRDU it passes to glRotateOnX, null if none. */
+    public LRDU modelTurn(Direction side, LRDU front) {
+        return front;
+    }
+
+    private float[] bounds;
+    private boolean boundsDone;
+
+    /** How far the model reaches toward each edge (index LRDU.toInt()), px, turned as drawn; null without bodyBounds. */
+    public float[] modelReach(Direction side, LRDU front) {
+        if (!boundsDone) {
+            bounds = bodyBounds();
+            boundsDone = true;
+        }
+        if (bounds == null) return null;
+        LRDU turn = modelTurn(side, front);
+        float y0 = Float.MAX_VALUE, y1 = -Float.MAX_VALUE, z0 = Float.MAX_VALUE, z1 = -Float.MAX_VALUE;
+        for (float y : new float[]{bounds[0], bounds[1]})
+            for (float z : new float[]{bounds[2], bounds[3]}) {
+                double[] v = {0, y, z};
+                if (turn != null) turn.rotateOnXnLeft(v);   // (as glRotateOnX turns it)
+                y0 = Math.min(y0, (float) v[1]);
+                y1 = Math.max(y1, (float) v[1]);
+                z0 = Math.min(z0, (float) v[2]);
+                z1 = Math.max(z1, (float) v[2]);
+            }
+        float[] r = new float[4];
+        r[LRDU.Left.toInt()] = -z0;
+        r[LRDU.Right.toInt()] = z1;
+        r[LRDU.Down.toInt()] = -y0;
+        r[LRDU.Up.toInt()] = y1;
+        return r;
+    }
+
+    /**
+     * Its body's reach toward each edge (index LRDU.toInt()), whole voxels: the model's reach rounded up to an odd number,
+     * so with its centre on an even voxel each pin's tip is on an even voxel too (the routers' 2-voxel lattice: a cable
+     * kit can end there). Without bodyBounds: bodyHalf each way.
+     */
+    public int[] bodyExtents(Direction side, LRDU front) {
+        float[] r = modelReach(side, front);
+        int[] e = new int[4];
+        for (int i = 0; i < 4; i++) {
+            if (r == null) {
+                e[i] = bodyHalf();
+                continue;
+            }
+            int n = Math.max(1, (int) Math.ceil(r[i] - 0.01));
+            e[i] = n % 2 == 0 ? n + 1 : n;
+        }
+        return e;
+    }
+
+    /** {yMin, yMax, zMin, zMax} of these model parts, px, at modelScale (for bodyBounds); null if none. */
+    protected float[] boundsOf(Obj3D.Obj3DPart... parts) {
+        BoundingBox b = null;
+        for (var p : parts) if (p != null) b = b == null ? p.boundingBox() : b.merge(p.boundingBox());
+        if (b == null) return null;
+        float s = 16 * modelScale;
+        return new float[]{(float) b.min.y * s, (float) b.max.y * s, (float) b.min.z * s, (float) b.max.z * s};
+    }
+
+    /** May it go on side, by its own rule (canBePlacedOnSide, which tells the player), without telling anyone? For a
+     *  device placed anywhere, whose preview asks every tick. */
+    public boolean allowedOnSide(Direction side) {
+        if (placeDirection == null) return true;
+        for (Direction d : placeDirection) if (d == side) return true;
+        return false;
+    }
+
     /** Client: its model in the frame SixNodeRender sets up for an element (on its face, centred), turned to front; for
      *  the placement preview of a device placed anywhere. */
     public void drawPlaced(Direction side, LRDU front) {

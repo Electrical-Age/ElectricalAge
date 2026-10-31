@@ -85,6 +85,14 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     protected boolean onBlockActivatedRotate(Player entityPlayer) {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            // off centre in a voxel block: only where its body and pins, turned, still fit
+            if (slot >= 6 && sixNode instanceof mods.eln.node.voxel.VoxelNode v) {
+                String err = v.turnError(this, front.getNextClockwise());
+                if (err != null) {
+                    if (entityPlayer != null) entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(err));
+                    return true;
+                }
+            }
             front = front.getNextClockwise();
             sixNode.reconnect();
             sixNode.setNeedPublish(true);
