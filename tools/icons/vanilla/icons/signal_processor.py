@@ -1,55 +1,43 @@
-"""signal_processor - the PLC box (sixnode, model plc/plc.obj), 16 px, NOT a chip.
+"""signal_processor - the DIN-rail cupboard (sixnode, cad SignalProcessor, 2026-10-30), 16 px, NOT a chip.
 
-Model: ``main`` is a white wall-mounted cabinet, 10 wide x 13 tall seen from the front (taller
-than wide), with a full-size hinged ``door`` on the left (hinge at z = 0.3125, i.e. the left
-edge seen from the front) and eight ``led*`` parts on two inner module rails.
-ElectricalMathDescriptor.drawItem renders the item with the door ~63 deg open
-(``draw(0.7f, ledDefault)``) and ledDefault lit: LEDs with idx&3 == 0 red, the others green,
-off ones dark grey.  That open look is the identifying feature, so it is drawn here:
+Model: an open grey cupboard fixed to a face, three DIN rails across it carrying up to eighteen
+arithmetic modules (one per cheap chip's worth inserted; the item draws six), the logger's small
+dark screen across the top with status lamps beside it, and a brass terminal on each edge.  Drawn
+front-on as the family's sixnode boxes (depth 2):
 
- * cabinet: front 9 x 12 + sixnode depth 2 (cols 4..14, rows 1..14), white;
- * opening: CAV interior with an inner left jamb and top, two CABLE module rails, LEDs from
-   ledDefault (top row R . G . -> R off G; bottom R G G . -> R G G; the 4th LED is dropped);
- * door: open on the hinge (left) side, a white panel with the grey handle.  It is drawn as a
-   foreshortened trapezoid on purpose: the strict cabinet-oblique version (a parallelogram
-   running down-left) was tried and read as a skewed grey slab at GUI 2.
-
-White: families.chips.WHITE_PLASTIC (the IRON steps with the face mapping shifted one step up:
-front IRON[4] = the texture's ~#e0e0e0, top IRON[5], side IRON[3], outline IRON[2]/IRON[1]),
-frozen there and reported as a kit request.  No new colours.
-
-The opening keeps a 1 px white rim on all four sides (row 4, col 5, col 12, row 13), as in
-the model's front view; its inner left jamb is WHITE_PLASTIC[1]
-(STYLE §3: inner left jambs use the body ramp[1]); the inner top stays CAV[2] (shadow).
+ * cupboard: front cols 2..13, rows 2..13, STEEL, the open interior CAV;
+ * top: the screen (CAV[0]) with a green trace and two lamps (red, green) at its right;
+ * three rails (CABLE), the upper two carrying modules in the model's colours (white, the
+   yellow-orange paint, dark), a red lamp or a brass screw on some faces; the lowest rail empty,
+   as the item shows six modules;
+ * brass terminals at the middle of the left and right edges (the top and bottom ones hide
+   behind the box's own top and the bottom row).
 """
-from kit import (Canvas, box, outline_region, STEEL, CABLE, CAV, MARK_RED, MARK_GREEN)
-from families.chips import WHITE_PLASTIC
-
-#: door panel columns 1..3 -> (first row, last row); the hinge edge (col 3) is full height
-DOOR = ((5, 12), (4, 13), (3, 14))
+from kit import Canvas, box, STEEL, CABLE, CAV, MARK_RED, MARK_GREEN, GOLD, WHITE, line
 
 
 def draw():
     cv = Canvas(16)
-    W = WHITE_PLASTIC
-    box(cv, 4, 3, 9, 12, 2, W, bevel=False)          # cabinet: front cols 4..12, rows 3..14
-
-    # the opening, with a white rim all round (row 4, col 5, col 12, row 13)
-    cv.rect(6, 5, 6, 8, CAV[1])                        # cols 6..11, rows 5..12
-    cv.vline(6, 5, 12, W[1])                           # inner left jamb (body ramp[1])
-    cv.hline(7, 11, 5, CAV[2])                         # inner top (shadow under the lintel)
-    for y in (6, 10):                                  # two module rails
-        cv.hline(7, 11, y, CABLE[3])
-        cv.hline(7, 11, y + 1, CABLE[1])
-    for x, c in ((7, MARK_RED), (9, CAV[3]), (11, MARK_GREEN)):        # LEDs, top rail
-        cv.set(x, 6, c)
-    for x, c in ((7, MARK_RED), (9, MARK_GREEN), (11, MARK_GREEN)):    # LEDs, bottom rail
-        cv.set(x, 10, c)
-
-    # the open door on the hinge side
-    door = {(x, y) for x, (a, b) in zip(range(1, 4), DOOR) for y in range(a, b + 1)}
-    for p in door:
-        cv.set(*p, W[3])
-    outline_region(cv, door, W[0], W[1])
-    cv.set(2, 9, STEEL[2])                             # handle
+    box(cv, 2, 3, 11, 11, 2, STEEL, bevel=False)      # cupboard: front cols 2..12, rows 3..13
+    cv.rect(3, 4, 9, 9, CAV[1])                        # the open interior, cols 3..11, rows 4..12
+    cv.hline(3, 11, 4, CAV[2])
+    # the screen across the top, its trace, two lamps beside it
+    cv.rect(3, 5, 6, 2, CAV[0])
+    line(cv, (3, 6), (5, 5), MARK_GREEN)
+    line(cv, (5, 5), (8, 6), MARK_GREEN)
+    cv.set(10, 5, MARK_RED)
+    cv.set(11, 5, MARK_GREEN)
+    # rails and modules
+    body = [WHITE, GOLD[3], CAV[3], WHITE, GOLD[3], CAV[3]]
+    for r, y in enumerate((8, 11)):
+        cv.hline(3, 11, y, CABLE[2])
+        for k in range(3):
+            x = 3 + 3 * k
+            c = body[r * 3 + k]
+            cv.rect(x, y - 1, 2, 2, c)
+            cv.set(x + 1, y - 1, MARK_RED if (r + k) % 2 == 0 else GOLD[2])
+    cv.hline(3, 11, 12, CABLE[2])                      # the third rail, empty
+    # brass terminals on the left and right edges
+    cv.rect(1, 7, 1, 3, GOLD[2])
+    cv.rect(13, 7, 1, 3, GOLD[2])
     return cv

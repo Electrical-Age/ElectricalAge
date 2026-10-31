@@ -4954,7 +4954,7 @@
   "vanilla_size": 16,
   "schematic_scope": true,
   "tier_cue": null,
-  "model": "plc/plc.obj",
+  "model": "signalprocessor/signalprocessor.obj",
   "parts": [
    "main",
    "door",
@@ -4968,7 +4968,7 @@
    "led7"
   ],
   "model_texture_notes": "",
-  "appearance": "A white wall-mounted box with a hinged white door that swings open, with eight small LEDs inside; seen closed it is a white panel with a door seam and a small grey handle.",
+  "appearance": "An open grey cupboard with three DIN rails of arithmetic modules (one per cheap chip, up to 18), a small logger screen across the top, brass terminals on its edges.",
   "function": "Computes a user-entered math expression from up to 3 signal inputs and outputs a signal (ElectricalMathDescriptor); schematic: a function block (f(x) / CPU box) with 3 inputs and 1 output.",
   "current_texture": "eln:blocks/signalprocessor",
   "shares_texture_with": [],

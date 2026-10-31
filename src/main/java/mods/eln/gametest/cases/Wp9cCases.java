@@ -693,6 +693,17 @@ public final class Wp9cCases {
             mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, false);
             pl.setShiftKeyDown(false);
             var edge = floor.edgePins().get(0).lrdu();
+            // and round: never onto the edge the screen faces
+            java.util.Set<LRDU> seen = new java.util.HashSet<>();
+            pl.setShiftKeyDown(true);
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, true);
+            for (int k = 0; k < 6; k++) {
+                floor.onBlockActivated(pl, floor.side, 0.5f, 0.5f, 0.5f);
+                seen.add(floor.pinEdge());
+            }
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, false);
+            pl.setShiftKeyDown(false);
+            ctx.check("wp9c tilted terminal: shift-C cycles three edges, never the screen's", seen.size() == 3 && !seen.contains(floor.front), seen.toString());
             ctx.check("wp9c tilted terminal: shift-C moves its inputs to the next edge, the screen stays",
                 turned && floor.front == front0 && edge == front0.inverse().getNextClockwise() && floor.pinEdge() == edge
                     && floor.getConnectionMask(edge) != 0 && floor.getConnectionMask(front0.inverse()) == 0,

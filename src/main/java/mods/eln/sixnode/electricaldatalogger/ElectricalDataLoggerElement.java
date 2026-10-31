@@ -170,7 +170,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (descriptor.ceiling && entityPlayer.isShiftKeyDown() && Utils.isPlayerUsingWrench(entityPlayer)) {
-            pinTurn = (pinTurn + 1) % 4;
+            // the next edge, skipping the one the screen faces (Baughn 2026-10-31)
+            do pinTurn = (pinTurn + 1) % 4; while (pinEdge() == front);
             sixNode.reconnect();
             sixNode.setNeedPublish(true);
             return true;
