@@ -109,6 +109,7 @@ public final class ElnClient {
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent.class, mods.eln.client.render.VoxelOutline::onExtract);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent.class, mods.eln.client.render.DevicePreviewRender::onExtract);
         ClientScreens.registerAll();
+        mods.eln.client.render.WornCurios.register(modBus);
         mods.eln.gui.ElnNodeMenu.clientLayout = mods.eln.client.gui.ElnLayouts::apply;
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent.class, ClientKeys::register);
         modBus.addListener(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent.class, DrillSpin::registerExtensions);

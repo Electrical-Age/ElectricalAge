@@ -52,6 +52,10 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - Display poses: `src/main/resources/assets/eln/models/item/device_six.json`, `device_transparent.json`, `device_obj.json` (X-ray scanner via `itemDrawParent()`), as the base of per-item `<name>_3d` models.
 - `client/render/ElnItemRenderer.java` (`SpecialModelRenderer`, registered as `eln:device`): opens a GlFrame and calls `GenericItemBlockUsingDamageDescriptor.drawItem(entity)` or `GenericItemUsingDamageDescriptor.drawItem(stack, entity)` when `hasItemDraw()`.
 - `client/render/LitProperty.java`: condition `eln:lit` (flashlight on/off icon).
+- `client/render/WornCurios.java` (Curios loaded only): `ICurioRenderer`s draw the worn accessories on players (Baughn,
+  todo #166). Battery belt: a band 3 px tall round the waist, 1.2 px off the body (over a chestplate), its faces cut from
+  the item icon. Headlamp: its item model on the forehead at 1.15x, following the head. In the helmet slot the headlamp
+  is leather armour and draws as a leather cap. Curios' per-slot render toggle hides them.
 - Optional built-in resource pack `resourcepacks/schematic_icons` (schematic item icons), added in `ElnClient`.
 
 ## Burnt devices
