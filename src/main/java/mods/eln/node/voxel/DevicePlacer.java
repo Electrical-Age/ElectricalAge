@@ -28,9 +28,9 @@ public final class DevicePlacer {
     private DevicePlacer() {
     }
 
-    /** A cable cut for a device in line: the piece at index replaced by a and b (either may be null), `returned` voxels
-     *  of cable back to the player. */
-    public record Cut(int index, CablePart a, CablePart b, int returned) {}
+    /** A cable cut for a device in line (inline) or drawn back from an end: the piece at index replaced by a and b
+     *  (either may be null), `returned` voxels of cable back to the player. */
+    public record Cut(int index, CablePart a, CablePart b, int returned, boolean inline) {}
 
     /** Where it goes: offset, front, a cut (null if none), or why not (err, the rest unset). */
     public record Plan(int ox, int oy, int oz, LRDU front, Cut cut, String err) {
@@ -226,7 +226,7 @@ public final class DevicePlacer {
                 x.u = c.u;
                 x.t = c.t;
             }
-        return new Cut(seg.part, pa, pb, returned);
+        return new Cut(seg.part, pa, pb, returned, true);
     }
 
     /** A free end of a cable on the face: the piece's index, the end's point index, the axis and whether the cable
@@ -317,7 +317,7 @@ public final class DevicePlacer {
             t.paid = c.paid * t.length() / c.length();
             returned = c.paid - t.paid;
         }
-        return new Cut(end.part(), t, null, returned);
+        return new Cut(end.part(), t, null, returned, false);
     }
 
     /** One pin of the cable's kind touching the side of the cable, on the click's side first. */

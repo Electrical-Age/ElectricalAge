@@ -38,6 +38,7 @@ public final class VoxelDeviceCases {
         cases.add(new SlotPinsCase());
         cases.add(new FreeEndCase());
         cases.add(new MetersChargersAlarmsCase());
+        cases.add(new InLineChainCase());
     }
 
     static int id(String name) {
@@ -1058,8 +1059,7 @@ public final class VoxelDeviceCases {
             var vm = block(c, pm);
             CableCases.voxel(c, pm, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
             placed += "meter: " + vm.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c)) + "; ";
-            meter = TapCase.placed(vm);
-            if (meter != null) close(c, meter);
+            meter = TapCase.placed(vm);   // (in line: it starts closed)
             rMeter = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
             c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
             // an Advanced Energy Meter off centre, its pins west and east
@@ -1119,6 +1119,79 @@ public final class VoxelDeviceCases {
             Wp9cCases.within(c, "batch 2: a weak 50V charger fed through its east pin [V]", u(cWeak, Direction.XP), 50, 1);
             Wp9cCases.within(c, "batch 2: the Nuclear Alarm sees SVU on its pin [V]", u(nuclear, Direction.ZN), mods.eln.Eln.SVU, 0.1);
             Wp9cCases.within(c, "batch 2: the Standard Alarm sees SVU on its pin [V]", u(standard, Direction.ZN), mods.eln.Eln.SVU, 0.1);
+        }
+    }
+
+    /**
+     * AdventurAgent's run, placed as a player does (the item's use on the cable, voxel cables on): a 50 V source, then a
+     * floor LV run through five voxel blocks with an Energy Meter, an Advanced Energy Meter and a 50V Battery Charger put
+     * in line in the first, third and fifth, then a resistor and ground. The meters start closed when put in line (they
+     * opened the run: 25 mV past the first), so the resistor carries the current, both meters count it and the charger
+     * has power.
+     */
+    static final class InLineChainCase implements TestCase {
+        final SixNodeElement[] dev = new SixNodeElement[3];
+        mods.eln.sixnode.resistor.ResistorElement r;
+        String placed = "";
+
+        public String name() {
+            return "a run with meters and a charger put in line by a player";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 10; x++) c.floor(c.at(x, 0, 1));
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            for (int x = 1; x <= 5; x++) {
+                block(c, c.at(x, 1, 1));
+                CableCases.voxel(c, c.at(x, 1, 1), List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            }
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            mods.eln.node.voxel.CableConverter.convertOnLoad = true;
+            var player = player(c);
+            try {
+                String[] names = {"Energy Meter", "Advanced Energy Meter", "50V Battery Charger"};
+                for (int i = 0; i < 3; i++) {
+                    BlockPos p = c.at(1 + 2 * i, 1, 1);
+                    var d = desc(names[i]);
+                    var stack = d.newItemStack();
+                    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+                    var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(0.55, 1 / 16.0, 0.5),
+                        net.minecraft.core.Direction.UP, p, false);
+                    var res = d.parentItem.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+                    var v = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+                    dev[i] = TapCase.placed(v);
+                    placed += names[i] + ": " + res + "; ";
+                }
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+            }
+            r = resistor(c, c.at(6, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(7, 1, 1));
+        }
+
+        public void measure(TestContext c) {
+            c.check("chain: the three were put in line by the item's use", dev[0] != null && dev[1] != null && dev[2] != null, placed);
+            if (dev[0] == null || dev[1] == null || dev[2] == null) return;
+            Wp9cCases.within(c, "chain: the resistor past them carries the source's current [A]", Wp9aCases.current(r), 50 / r.nominalRs, 0.05 * 50 / r.nominalRs);
+            double e1 = (double) mods.eln.gametest.LabCommands.field(dev[0], "energyStack"), e2 = (double) mods.eln.gametest.LabCommands.field(dev[1], "energyStack");
+            c.check("chain: both meters closed and counting", ((mods.eln.sixnode.energymeter.EnergyMeterElement) dev[0]).shunt.getState()
+                && ((mods.eln.sixnode.energymeter.EnergyMeterElement) dev[1]).shunt.getState() && Math.abs(e1) > 10 && Math.abs(e2) > 10, fmt("%.1f J, %.1f J", e1, e2));
+            Wp9cCases.within(c, "chain: the charger has power on its pins [V]", u(dev[2], Direction.XN), 50, 1);
+            String w = String.valueOf(dev[2].getWaila());
+            c.check("chain: the charger doesn't say it has no power in", !w.contains("none: run a cable"), w);
         }
     }
 }

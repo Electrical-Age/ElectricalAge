@@ -948,6 +948,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (cut != null) DevicePlacer.unapply(this, cut, old);
             return "Can't place that";
         }
+        if (cut != null && cut.inline()) d.placedInLine(getElement(slot));   // (an energy meter starts closed)
         if (cut != null) {
             changed();   // (the cable's conductors and links rebuilt round the device)
             // the cut-out cable back to the player: cable is neither made nor lost

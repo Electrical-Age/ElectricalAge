@@ -223,4 +223,13 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
     protected float[] bodyBounds() {
         return boundsOf(base, powerDisk);
     }
+
+    /**
+     * Put in line on a cable, it starts closed: the cable carried current a moment ago (AdventurAgent: a meter put into
+     * a working run opened it, like 1.12's switch starting off). Placed any other way it starts open, as in 1.12.
+     */
+    @Override
+    public void placedInLine(mods.eln.node.six.SixNodeElement e) {
+        if (e instanceof EnergyMeterElement m) m.setSwitchState(true);
+    }
 }

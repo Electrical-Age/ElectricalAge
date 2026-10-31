@@ -215,6 +215,10 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public void drawPlaced(Direction side, LRDU front) {
     }
 
+    /** Just put in line on a cable that carried current (VoxelNode.placeAnywhere): e is the new element. */
+    public void placedInLine(SixNodeElement e) {
+    }
+
     /** Does its model have pins (chips)? Else a device placed off centre gets small pin boxes drawn for it. */
     public boolean drawsOwnPins() {
         return false;
