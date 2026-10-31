@@ -48,16 +48,16 @@ public final class SignalProcessor {
         List<Mesh> m = new ArrayList<>();
         // a terminal on each edge, from the walls out to the block's edge
         Mesh t;
-        t = box(8.0, 0.0, 6.5, 9.6, 1.3, 9.5, "brass", "udsne");
+        t = box(8.0, -CableEnds.PAST, 6.5, 9.6, 1.3, 9.5, "brass", "udsne");
         CableEnds.check("signalprocessor", t, 1, false, 2, 8);
         m.add(t);
-        t = box(8.0, 14.7, 6.5, 9.6, 16.0, 9.5, "brass", "udsne");
+        t = box(8.0, 14.7, 6.5, 9.6, 16.0 + CableEnds.PAST, 9.5, "brass", "udsne");
         CableEnds.check("signalprocessor", t, 1, true, 2, 8);
         m.add(t);
-        t = box(8.0, 6.5, 0.0, 9.6, 9.5, 1.3, "brass", "udsne");
+        t = box(8.0, 6.5, -CableEnds.PAST, 9.6, 9.5, 1.3, "brass", "udsne");
         CableEnds.check("signalprocessor", t, 2, false, 1, 8);
         m.add(t);
-        t = box(8.0, 6.5, 14.7, 9.6, 9.5, 16.0, "brass", "udsne");
+        t = box(8.0, 6.5, 14.7, 9.6, 9.5, 16.0 + CableEnds.PAST, "brass", "udsne");
         CableEnds.check("signalprocessor", t, 2, true, 1, 8);
         m.add(t);
         // (checked as part of the cupboard they hang from: drawn apart only to stay out of the device's box)

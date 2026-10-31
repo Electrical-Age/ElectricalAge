@@ -39,16 +39,26 @@ public final class TiltedTerminal {
         m.add(obox(C, N, W, H, HN, HW, HH, "paint"));
         m.add(obox(at(HN + 0.15, 0, 0), N, W, H, 0.15, SW + 0.4, SH + 0.4, "darksteel"));
         m.add(obox(at(HN + 0.35, 0, 0), N, W, H, 0.05, SW, SH, "screen"));
+        return m;
+    }
+
+    /**
+     * The terminal strip on the back with the three inputs, a part of its own: drawn on whichever edge the inputs are
+     * (shift-C), checked as part of the body it stands against.
+     */
+    static List<Mesh> terminals() {
+        List<Mesh> m = new ArrayList<>();
         // terminal strip on the back, the three inputs on it
         m.add(box(8.4, 3.0, 13.5, 11.0, 13.0, 14.4, "darksteel"));
         double[] ty = {12, 8, 4};
         String[] col = {"red", "blue", "paint_green"};
         for (int i = 0; i < 3; i++) {
             // down on the face and out to the block's edge, over the cable's end (CableEnds)
-            Mesh t = box(8.0, ty[i] - 1.5, 14.05, 9.6, ty[i] + 1.5, 16.0, col[i], "udsne");   // (no face on the floor)
+            Mesh t = box(8.0, ty[i] - 1.5, 14.05, 9.6, ty[i] + 1.5, 16.0 + CableEnds.PAST, col[i], "udsne");   // (no face on the floor)
             CableEnds.check("tiltedterminal", t, 2, true, 1, ty[i]);
             m.add(t);
         }
+        for (Mesh x : m) x.body = "main";
         return m;
     }
 
@@ -63,6 +73,7 @@ public final class TiltedTerminal {
     public static List<NodeModel> models() {
         NodeModel n = new NodeModel("tiltedterminal", "paint_plain");
         n.part("main", main());
+        n.part("terminals", terminals());
         n.part("led", led());
         // the graph: drawn y down in mx by my, scaled by s, turned (ra2 about z, then ra about y) so its x runs across
         // the screen (+y), its y down the screen (-h), its face out of it (n); its top-left corner 0.1 px over the glass

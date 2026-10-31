@@ -38,7 +38,7 @@ public final class FieldLogger {
         for (int i = 0; i < 3; i++) {
             double y = TERMINAL_Y[i];
             // down on the face and out to the block's edge, over the cable's end (CableEnds)
-            Mesh t = box(8.0, y - 1.5, 13.05, 9.6, y + 1.5, 16.0, TERMINAL[i], "udsne");   // (no face on the floor)
+            Mesh t = box(8.0, y - 1.5, 13.05, 9.6, y + 1.5, 16.0 + CableEnds.PAST, TERMINAL[i], "udsne");   // (no face on the floor)
             CableEnds.check("fieldlogger", t, 2, true, 1, y);
             m.add(t);
         }

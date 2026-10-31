@@ -343,6 +343,14 @@ on 1.7.10) onto 26.x.
   on a period change. Clients get the 256 points of the view when they start tracking a logger or the period
   changes, then one point (6 bytes a channel) as each is due. Old saves and prints are converted (only the last
   ~7 h of an old log fit). Tests `LogStoreTest`, `LogAxesTest`, GameTest `wp9c data logger`.
+- Loggers in the world (Baughn 2026-10-31): the graph on a logger's screen (data loggers, the tilted terminal, the
+  processor's tiny screen) is a small texture painted when a point comes (`LogTexture`, 128 px wide), drawn like the
+  screen's graph: newest on the right, a faint band for each point's range, a 1 px line for its mean (the 1.12 strips
+  were thick and z-fought with themselves). The tilted terminal's inputs move to the next edge with shift + the wrench
+  key (C) on a right-click (C alone turns the logger), saved as `pinTurn`; its terminal strip is drawn there. The
+  processor's Apply is Save, red while the text differs from what the processor holds; the channel buttons are
+  labelled Edit. Terminals reach 0.1 px past the block's edge so a cable knuckle in the corner (a floor cable turning
+  up a wall to a wall-mounted device) lies inside them; `CableEnds` checks it when the models are made.
 - Signal processor model (Baughn 2026-10-30, board #45: "DIN rails in a cupboard with arithmetic modules"): an open
   cupboard with three DIN rails; a module appears per cheap chip's worth inserted, up to 3 x 6, each face a little
   different, the logger's screen across the top. The slot takes 64 cheap chips, or Advanced Chips worth 8 cheap chips
