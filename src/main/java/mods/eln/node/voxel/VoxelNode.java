@@ -795,6 +795,43 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
     }
 
+    /**
+     * The front a wrench click turns the device off centre in e's slot to: the next one clockwise; but if pins of it are
+     * joined to cables (in line, or on a cable's end), the next one clockwise at which pins of the same kinds are at
+     * all those places (an energy meter in line: straight round, reversing it; AdventurAgent: a quarter turn cut the
+     * run). Null, and why in err[0], if there is none or it would not fit.
+     */
+    public LRDU wrenchTurn(mods.eln.node.six.SixNodeElement e, String[] err) {
+        List<int[]> held = new ArrayList<>();   // (tip x, y, z, mask of each joined pin)
+        for (Pin p : pins(e)) if (e.slotMask.get(p.lrdu())) held.add(new int[]{p.tip()[0], p.tip()[1], p.tip()[2], p.mask()});
+        LRDU was = e.front, f = was;
+        String why = null;
+        for (int k = 0; k < 3; k++) {
+            f = f.getNextClockwise();
+            boolean keeps = true;
+            if (!held.isEmpty()) {
+                e.front = f;
+                try {
+                    List<Pin> now = pins(e);
+                    for (int[] h : held) {
+                        boolean found = false;
+                        for (Pin p : now)
+                            if (p.tip()[0] == h[0] && p.tip()[1] == h[1] && p.tip()[2] == h[2] && compareConnectionMask(p.mask(), h[3])) found = true;
+                        keeps &= found;
+                    }
+                } finally {
+                    e.front = was;
+                }
+            }
+            if (!keeps) continue;
+            why = turnError(e, f);
+            if (why == null) return f;
+            if (held.isEmpty()) break;   // (not joined: the quarter turn or nothing, as before)
+        }
+        err[0] = why != null ? why : "It can't turn here without taking its pins off the cables";
+        return null;
+    }
+
     /** Why the device off centre in e's slot can't be turned to front (its body and pins move: a lopsided model), or null. */
     public String turnError(mods.eln.node.six.SixNodeElement e, LRDU front) {
         if (e.slot < 6 || sideElementList[e.slot] != e) return null;

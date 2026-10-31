@@ -81,7 +81,8 @@ transparent neighbour).
   (`bodyExtents`: with the centre on an even voxel, each pin's tip is on an even voxel, where the kit can end), and the
   grey pin boxes are drawn from the model's edge. Without bounds the body is a square of `bodyHalf`. Since the body and
   pins follow the front, a wrench turn of a device off centre is refused where the turned device would not fit
-  (`VoxelNode.turnError`). Placing anywhere and its preview honour a device's allowed sides (`allowedOnSide`: the power
+  (`VoxelNode.turnError`); a device whose pins are joined to cables turns to the next front at which pins of the same
+  kinds sit where those are, so a two-pin device in line turns straight round, or not at all (`VoxelNode.wrenchTurn`). Placing anywhere and its preview honour a device's allowed sides (`allowedOnSide`: the power
   sockets and the anemometer, walls only).
 - Placed anywhere (Baughn): chips, the small sensors and sources of a0d38750, and the relays (drawn and measured at half
   scale), the four probes, the wireless receiver, transmitter and repeater, the Electrical Timer, the LED vuMeter, the

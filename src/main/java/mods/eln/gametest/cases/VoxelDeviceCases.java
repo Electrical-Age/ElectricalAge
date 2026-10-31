@@ -39,6 +39,7 @@ public final class VoxelDeviceCases {
         cases.add(new FreeEndCase());
         cases.add(new MetersChargersAlarmsCase());
         cases.add(new InLineChainCase());
+        cases.add(new WrenchInLineCase());
     }
 
     static int id(String name) {
@@ -1192,6 +1193,88 @@ public final class VoxelDeviceCases {
             Wp9cCases.within(c, "chain: the charger has power on its pins [V]", u(dev[2], Direction.XN), 50, 1);
             String w = String.valueOf(dev[2].getWaila());
             c.check("chain: the charger doesn't say it has no power in", !w.contains("none: run a cable"), w);
+        }
+    }
+
+    /**
+     * The wrench on a device in line (AdventurAgent: a quarter turn took an Energy Meter's pins off the run and cut it):
+     * two Energy Meters put in line on one 50 V run, the second wrenched once. It turns straight round, its pins stay on
+     * the run's ends, the run stays live and it counts with the opposite sign to the first. An off-centre meter not on a
+     * cable turns a quarter as before.
+     */
+    static final class WrenchInLineCase implements TestCase {
+        SixNodeElement first, turned, free;
+        mods.eln.sixnode.resistor.ResistorElement r;
+        String turn = "", freeTurn = "";
+
+        public String name() {
+            return "a wrench reverses a device in line";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        static void wrench(TestContext c, SixNodeElement e) {
+            var pl = player(c);
+            pl.setShiftKeyDown(true);
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, true);
+            try {
+                e.onBlockActivated(pl, e.side, 0.5f, 0.5f, 0.5f);
+            } finally {
+                mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, false);
+                pl.setShiftKeyDown(false);
+            }
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 10; x++) for (int z = 0; z < 5; z++) c.floor(c.at(x, 0, z));
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            for (int x = 1; x <= 2; x++) {
+                block(c, c.at(x, 1, 1));
+                CableCases.voxel(c, c.at(x, 1, 1), List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            }
+            SixNodeElement[] m = new SixNodeElement[2];
+            for (int i = 0; i < 2; i++) {
+                var v = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(1 + i, 1, 1), c.level()));
+                v.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+                m[i] = TapCase.placed(v);
+            }
+            first = m[0];
+            turned = m[1];
+            r = resistor(c, c.at(3, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(4, 1, 1));
+            if (turned != null) {
+                var before = turned.front;
+                wrench(c, turned);
+                turn = before + " -> " + turned.front;
+            }
+            // an off-centre meter on its own: a quarter turn
+            var vf = block(c, c.at(1, 1, 3));
+            free = put(c, vf, "Energy Meter", Direction.YN, 0, 0, 0, Direction.ZN);
+            var b = free.front;
+            wrench(c, free);
+            freeTurn = b + " -> " + free.front;
+        }
+
+        public void measure(TestContext c) {
+            c.check("wrench in line: the meter turns straight round", turned != null && turn.endsWith("-> " + turned.front)
+                && turn.startsWith(turned.front.inverse() + " "), turn);
+            if (first == null || turned == null) return;
+            c.check("wrench in line: its pins stay on the run", linked(turned, Direction.XN) && linked(turned, Direction.XP), "mask " + turned.slotMask.mask);
+            Wp9cCases.within(c, "wrench in line: the run stays live [A]", Wp9aCases.current(r), 50 / r.nominalRs, 0.05 * 50 / r.nominalRs);
+            double e1 = (double) mods.eln.gametest.LabCommands.field(first, "energyStack"), e2 = (double) mods.eln.gametest.LabCommands.field(turned, "energyStack");
+            c.check("wrench in line: it counts with the other sign", e1 * e2 < 0 && Math.abs(e2) > 10, fmt("%.1f J, %.1f J", e1, e2));
+            String[] f = freeTurn.split(" -> ");
+            c.check("wrench: a quarter turn, clockwise", f.length == 2 && LRDU.valueOf(f[0]).getNextClockwise() == LRDU.valueOf(f[1]), freeTurn);
         }
     }
 }
