@@ -57,6 +57,16 @@ public final class DevicePlacer {
         int[] o = VoxelNode.snap(d, face, front0, h[0], h[1], h[2]);
         Seg seg = nearest(v, face, h);
         boolean onCable = seg != null && seg.dist <= seg.c.tierInfo().width() / 2.0 + 1;
+        // just past a cable's free end: a pin on that end, wherever exactly the click is (AdventurAgent: a Voltage Probe
+        // aimed past an LV run's end was refused four times, then placed apart from it)
+        if (!endsNear(v, face, h).isEmpty()) {
+            int[][] m = new int[4][];
+            List<LRDU> fs = new ArrayList<>();
+            for (LRDU f = front0; fs.size() < 4; f = f.getNextClockwise()) fs.add(f);
+            for (int i = 0; i < 4; i++) m[i] = masks(v, stack, slot, face, fs.get(i));
+            Plan p = atEnd(v, d, stack, slot, face, h, fs, m);
+            if (p != null) return p;
+        }
         if (!onCable) {
             String err = v.placeErrorAt(stack, slot, face, o[0], o[1], o[2], front0);
             if (err == null) return new Plan(o[0], o[1], o[2], front0, null, null);
@@ -219,35 +229,90 @@ public final class DevicePlacer {
         return new Cut(seg.part, pa, pb, returned);
     }
 
-    /** One pin of the cable's kind on a free end of a cable on the face, near the click. */
-    static Plan atEnd(VoxelNode v, SixNodeDescriptor d, ItemStack stack, int slot, Direction face, double[] h,
-                      List<LRDU> fronts, int[][] masks) {
-        int f3 = face.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(f3);
+    /** A free end of a cable on the face: the piece's index, the end's point index, the axis and whether the cable
+     *  leaves toward + there, the end's last straight run (voxels), and its distance from the click. */
+    record End(int part, int e, int f, int axis, boolean out, int run, double dist) {}
+
+    /** The free ends of working cables on the face inside the block within 5 voxels of the click, nearest first. */
+    static List<End> endsNear(VoxelNode v, Direction face, double[] h) {
+        int f3 = face.toEnumFacing().get3DDataValue();
         double[] q = {h[0] * 16, h[1] * 16, h[2] * 16};
-        for (VoxelPart part : v.parts) {
-            if (!(part instanceof CablePart c) || c.isKnuckle() || c.face != f3 || c.burnt != null) continue;
+        List<End> out = new ArrayList<>();
+        for (int i = 0; i < v.parts.size(); i++) {
+            if (!(v.parts.get(i) instanceof CablePart c) || c.isKnuckle() || c.face != f3 || c.burnt != null) continue;
             int[] p = c.points;
             for (int end = 0; end < 2; end++) {
                 int e = end == 0 ? 0 : p.length - 3, f = end == 0 ? 3 : p.length - 6;
                 int a = -1;
                 for (int x = 0; x < 3; x++) if (p[e + x] != p[f + x]) a = x;
                 if (a < 0 || p[e + a] == 0 || p[e + a] == 16) continue;   // (an end on the block's side opens there)
-                if (Math.abs(q[0] - p[e]) + Math.abs(q[1] - p[e + 1]) + Math.abs(q[2] - p[e + 2]) > 5) continue;
-                boolean out = p[e + a] > p[f + a];   // (the cable leaves toward +a at this end)
-                LRDU back = edge(face, a, !out);   // (a pin pointing back at the cable)
-                int b = 3 - n - a;
-                for (int i = 0; i < 4; i++) {
-                    if (!NodeBase.compareConnectionMask(masks[i][back.toInt()], cableMask(c)) || masks[i][back.toInt()] == 0) continue;
-                    LRDU front = fronts.get(i);
-                    int ext = d.bodyExtents(face, front)[back.toInt()];
-                    int[] o = new int[3];
-                    o[a] = p[e + a] + (out ? ext + 1 : -ext - 1) - 8;
-                    o[b] = p[e + b] - 8;
-                    if (tryAt(v, stack, slot, face, o, front, null) == null) return new Plan(o[0], o[1], o[2], front, null, null);
-                }
+                if (joined(v, i, p[e], p[e + 1], p[e + 2])) continue;   // (another cable meets it there)
+                double dist = Math.sqrt(sq(q[0] - p[e]) + sq(q[1] - p[e + 1]) + sq(q[2] - p[e + 2]));
+                if (dist > 5) continue;
+                out.add(new End(i, e, f, a, p[e + a] > p[f + a], Math.abs(p[e + a] - p[f + a]), dist));
             }
         }
+        out.sort(java.util.Comparator.comparingDouble(End::dist));
+        return out;
+    }
+
+    static double sq(double x) {
+        return x * x;
+    }
+
+    /** Does another cable piece pass the point (an end that is a joint, not free)? */
+    static boolean joined(VoxelNode v, int part, int x, int y, int z) {
+        for (int i = 0; i < v.parts.size(); i++)
+            if (i != part && v.parts.get(i) instanceof CablePart o && o.passes(x, y, z)) return true;
+        return false;
+    }
+
+    /**
+     * One pin of the cable's kind on a free end near the click. If the device doesn't fit beyond the end (a Voltage
+     * Probe past an end in the middle of a block), the end is drawn back 2 voxels at a time, at most to 2 voxels of its
+     * last run, and the cable taken off comes back as a kit, as an in-line cut.
+     */
+    static Plan atEnd(VoxelNode v, SixNodeDescriptor d, ItemStack stack, int slot, Direction face, double[] h,
+                      List<LRDU> fronts, int[][] masks) {
+        int n = CablePart.normalAxis(face.toEnumFacing().get3DDataValue());
+        for (End end : endsNear(v, face, h)) {
+            CablePart c = (CablePart) v.parts.get(end.part());
+            int[] p = c.points;
+            int a = end.axis(), b = 3 - n - a, e = end.e();
+            LRDU back = edge(face, a, !end.out());   // (a pin pointing back at the cable)
+            for (int r = 0; r <= end.run() - 2; r += 2)
+                for (int i = 0; i < 4; i++) {
+                    int m = masks[i][back.toInt()];
+                    if (m == 0 || !NodeBase.compareConnectionMask(m, cableMask(c))) continue;
+                    LRDU front = fronts.get(i);
+                    int ext = d.bodyExtents(face, front)[back.toInt()];
+                    int tip = p[e + a] + (end.out() ? -r : r);
+                    int[] o = new int[3];
+                    o[a] = tip + (end.out() ? ext + 1 : -ext - 1) - 8;
+                    o[b] = p[e + b] - 8;
+                    Cut cut = r == 0 ? null : trim(end, c, tip);
+                    if (r > 0 && cut == null) continue;
+                    if (tryAt(v, stack, slot, face, o, front, cut) == null) return new Plan(o[0], o[1], o[2], front, cut, null);
+                }
+        }
         return null;
+    }
+
+    /** The cable with that end drawn back to tip along its axis; the length taken off comes back. */
+    static Cut trim(End end, CablePart c, int tip) {
+        int[] q = c.points.clone();
+        q[end.e() + end.axis()] = tip;
+        CablePart t = new CablePart(c.tier, c.face, q);
+        if (!t.valid()) return null;
+        t.u = c.u;
+        t.t = c.t;
+        int returned;
+        if (c.paid < 0) returned = c.length() - t.length();
+        else {
+            t.paid = c.paid * t.length() / c.length();
+            returned = c.paid - t.paid;
+        }
+        return new Cut(end.part(), t, null, returned);
     }
 
     /** One pin of the cable's kind touching the side of the cable, on the click's side first. */

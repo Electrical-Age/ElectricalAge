@@ -36,6 +36,7 @@ public final class VoxelDeviceCases {
         cases.add(new InlineCase());
         cases.add(new TapCase());
         cases.add(new SlotPinsCase());
+        cases.add(new FreeEndCase());
     }
 
     static int id(String name) {
@@ -947,5 +948,71 @@ public final class VoxelDeviceCases {
     /** Masks the checks compare with. */
     static final class NodeBaseMasks {
         static final int THERMAL = mods.eln.node.NodeBase.maskThermal;
+    }
+
+    /**
+     * AdventurAgent's free end: an LV run from a block's west edge to voxel 8 along x, at z 8 on the floor. A Voltage
+     * Probe aimed at five spots just past the end goes the same place each time, its LV pin on the end: the probe doesn't
+     * fit beyond voxel 8 (10 voxels tip to tip), so the end is drawn back and the cable taken off comes back. A click on
+     * the end of the cable puts a device on the floor the cable lies on, not on the open side clicked.
+     */
+    static final class FreeEndCase implements TestCase {
+        final List<String> where = new ArrayList<>();
+        String detail = "", face = "";
+        boolean ok = true;
+
+        public String name() {
+            return "a device aimed past a cable's free end";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            double[][] aims = {{9.5, 8}, {10.5, 8}, {11, 7.5}, {10, 9.5}, {12, 8.5}};
+            for (int i = 0; i < aims.length; i++) {
+                BlockPos p = c.at(1 + i % 4 * 2, 1, 1 + i / 4 * 3);
+                c.floor(p.below());
+                var v = block(c, p);
+                CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 8, 0, 8})));
+                var stack = desc("Voltage Probe").newItemStack();
+                double[] h = {aims[i][0] / 16, 0.5 / 16, aims[i][1] / 16};
+                var plan = mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, h, player(c));
+                String err = v.placeAnywhere(stack, Direction.YN, h[0], h[1], h[2], player(c));
+                var e = TapCase.placed(v);
+                int back = plan.cut() == null ? 0 : plan.cut().returned();
+                String at = e == null ? "-" : e.ox + "," + e.oy + "," + e.oz + " " + e.front;
+                where.add(at);
+                Direction west = Direction.XN;
+                int[] t = e == null ? null : tip(v, e, west);
+                Object[] k = t == null ? null : v.cableAt(t[0] - 1, t[1], t[2]);
+                boolean one = err == null && e != null && t != null && k != null && cableLength(v) + back == 8
+                    && e.getConnectionMask(e.side.getLRDUGoingTo(west)) != 0;
+                detail += fmt("aim %.1f,%.1f: %s, at %s, pin west %s, cable %d + back %d; ", aims[i][0], aims[i][1], err, at,
+                    t == null ? "-" : java.util.Arrays.toString(t), cableLength(v), back);
+                ok &= one;
+            }
+            // a click on the cable's east end (its open side) is a place on the floor
+            BlockPos q = c.at(7, 1, 4);
+            c.floor(q.below());
+            var w = block(c, q);
+            CableCases.voxel(c, q, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 8, 0, 8})));
+            face = String.valueOf(w.placeFace(net.minecraft.core.Direction.EAST, 8.0 / 16, 0.5 / 16, 8.2 / 16));
+        }
+
+        public void measure(TestContext c) {
+            c.check("free end: each aim puts the Voltage Probe's LV pin on the end, the cable kept", ok, detail);
+            c.check("free end: the same place for every aim", where.stream().distinct().count() == 1, where.toString());
+            c.check("free end: a click on the cable's end goes on the floor it lies on", face.equals("YN"), face);
+        }
     }
 }
