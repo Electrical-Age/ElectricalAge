@@ -94,6 +94,21 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     /** Channel colours on the tiny screen: A red, B blue, C green, out white (as in the editor). */
     static final float[][] INK = {{1f, 0.35f, 0.35f}, {0.35f, 0.6f, 1f}, {0.35f, 0.85f, 0.35f}, {0.95f, 0.95f, 0.95f}};
 
+    /**
+     * Which way the tiny screen reads, from the matrix that takes the model to the world: {is z1 the viewer's right,
+     * is y1 the top}. The screen faces along the model's +x. On a wall its top is up; on a floor or ceiling, the model's
+     * -y (as on the floor, checked in the dev client). The right is then up x normal, so the graph is never mirrored
+     * and the newest points are on the right, seen from in front of the screen, on any face, any turn.
+     */
+    static boolean[] screenOrientation(org.joml.Matrix4f m) {
+        org.joml.Vector3f n = m.transformDirection(new org.joml.Vector3f(1, 0, 0)).normalize(),
+            y = m.transformDirection(new org.joml.Vector3f(0, 1, 0)).normalize(), z = m.transformDirection(new org.joml.Vector3f(0, 0, 1)).normalize();
+        org.joml.Vector3f up = Math.abs(n.y) < 0.7f ? new org.joml.Vector3f(0, 1, 0) : new org.joml.Vector3f(y).negate();
+        up.sub(new org.joml.Vector3f(n).mul(up.dot(n))).normalize();   // (in the screen's plane)
+        org.joml.Vector3f right = new org.joml.Vector3f(up).cross(n);
+        return new boolean[]{z.dot(right) > 0, y.dot(up) > 0};
+    }
+
     /** The screen's aspect (width along z over height along y), for its texture. */
     float screenAspect() {
         return (screenZ1 - screenZ0) / Math.max(1e-3f, screenY1 - screenY0);
@@ -109,17 +124,20 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
         GL11.setFullBright(true);
         UtilsClient.disableCulling();
         GL11.glColor4f(1, 1, 1, 1);
-        // (texture top at y0, its right, the newest points, at z1: the graph reads upright, newest on the right, seen
-        // from the processor's front; checked in the dev client 2026-10-31)
+        // which ends of the screen are the viewer's right and top depends on the face it is on and its turn: worked out
+        // from where the screen's axes point in the world (AdventurAgent 2026-10-31: on a wall the newest were on the left)
+        boolean[] o = screenOrientation(GL11.currentMatrix());
+        float zl = o[0] ? screenZ0 : screenZ1, zr = o[0] ? screenZ1 : screenZ0;
+        float yt = o[1] ? screenY1 : screenY0, yb = o[1] ? screenY0 : screenY1;
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glTexCoord2f(0, 0);
-        GL11.glVertex3f(x, screenY0, screenZ0);
+        GL11.glVertex3f(x, yt, zl);
         GL11.glTexCoord2f(1, 0);
-        GL11.glVertex3f(x, screenY0, screenZ1);
+        GL11.glVertex3f(x, yt, zr);
         GL11.glTexCoord2f(1, 1);
-        GL11.glVertex3f(x, screenY1, screenZ1);
+        GL11.glVertex3f(x, yb, zr);
         GL11.glTexCoord2f(0, 1);
-        GL11.glVertex3f(x, screenY1, screenZ0);
+        GL11.glVertex3f(x, yb, zl);
         GL11.glEnd();
         UtilsClient.enableCulling();
         GL11.setFullBright(false);

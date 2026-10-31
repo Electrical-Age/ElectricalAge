@@ -162,6 +162,11 @@ public final class GlFrame {
         for (int i = 0; i < stack.length; i++) stack[i] = new Matrix4f();
     }
 
+    /** A copy of the current matrix (model to the frame's base space: world-aligned for a block's draw). */
+    public Matrix4f currentMatrix() {
+        return new Matrix4f(stack[depth]);
+    }
+
     void reset(Matrix4f pose, Matrix3f normal) {
         depth = 0;
         if (pose != null) stack[0].set(pose);

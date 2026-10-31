@@ -160,6 +160,11 @@ public final class GL11 {
         f().popAttrib();
     }
 
+    /** EA's: a copy of the current matrix (for a device to tell which way its parts face in the world). */
+    public static org.joml.Matrix4f currentMatrix() {
+        return f().currentMatrix();
+    }
+
     /** EA's texture binding (1.12 UtilsClient.bindTexture). */
     public static void bindTexture(Identifier texture) {
         f().texture(texture);
