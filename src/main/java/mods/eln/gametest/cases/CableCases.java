@@ -1243,13 +1243,27 @@ public final class CableCases {
                     doorsOk &= f[1] <= 8 && f[0] < 8;
                 }
             this.doors = doors.toString();
+            // the relays draw their model at half size: so is their footprint (Baughn: it was twice the drawn size)
+            StringBuilder relays = new StringBuilder();
+            relaysOk = true;
+            for (var d : mods.eln.Eln.sixNodeItem.all().values())
+                if (d instanceof mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor) {
+                    int[] f = d.footprint();
+                    relays.append(d.name).append('=').append(f[0]).append(',').append(f[1]).append("; ");
+                    relaysOk &= f[0] == 4 && f[1] >= 4 && f[1] <= 7;
+                }
+            this.relays = relays.toString();
         }
+
+        boolean relaysOk;
+        String relays;
 
         boolean doorsOk;
         String doors;
 
         public void measure(TestContext c) {
             c.check("footprint: devices with doors are boxed closed, emergency lamps without their glow (at most half a block high, narrower than the face)", doorsOk && !doors.isEmpty(), doors);
+            c.check("footprint: the relays at their drawn half size (8 voxels across, 4 to 7 high)", relaysOk && !relays.isEmpty(), relays);
             c.check("footprint: a floor trimmer is clicked on its 6 x 6 model only", floorOk, floor);
             c.check("footprint: its outline is the model's box", outlineOk, outline);
             c.check("footprint: a wall trimmer likewise", wallOk, wall);

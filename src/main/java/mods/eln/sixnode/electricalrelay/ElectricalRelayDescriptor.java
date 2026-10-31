@@ -37,6 +37,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
         super(name, ElectricalRelayElement.class, null);
         this.cable = cable;
         this.obj = obj;
+        modelScale = 0.5f;   // (draw scales the model by half: its footprint, click box and outline follow)
 
         if (obj != null) {
             main = obj.getPart("main");
