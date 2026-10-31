@@ -238,7 +238,8 @@ public class ElectricalMathElement extends SixNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Equation"), expression);
+        // the output's expression only (Baughn 2026-10-31: the whole program filled the tooltip)
+        info.put(I18N.tr("Output"), Program.outputLine(expression));
         // (A red, B blue, C green: Baughn 2026-10-30)
         info.put(I18N.tr("Input voltages"),
             Utils.plotVolt("\u00A7c", gateInput[0].getU()) +

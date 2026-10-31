@@ -88,6 +88,12 @@ public final class Program implements INBTTReady {
         return out;
     }
 
+    /** The output line's expression (the last statement), as written; "" if none. */
+    public static String outputLine(String source) {
+        List<Object[]> st = statements(source == null ? "" : source);
+        return st.isEmpty() ? "" : (String) st.get(st.size() - 1)[0];
+    }
+
     /** Is the source too long to take (server-side check of what a client sends)? */
     public static String tooBig(String source) {
         if (source.length() > MAX_CHARS) return "longer than " + MAX_CHARS + " characters";
