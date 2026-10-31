@@ -97,6 +97,12 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         logClient.watch();
     }
 
+    /** The loggers with terminals at the block's edge (three inputs) draw no cable stubs through themselves. */
+    @Override
+    public boolean drawCableAuto() {
+        return descriptor.channels <= 1;
+    }
+
     @Override
     public void refresh(float deltaT) {
         super.refresh(deltaT);

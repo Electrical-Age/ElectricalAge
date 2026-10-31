@@ -106,6 +106,12 @@ public class ElectricalMathRender extends SixNodeElementRender {
         descriptor.draw(ledOn, log, modules, graph);
     }
 
+    /** No cable stubs across the block: the cupboard's terminals reach its edge and meet the cables there (Baughn 2026-10-31). */
+    @Override
+    public boolean drawCableAuto() {
+        return false;
+    }
+
     @Override
     public void refresh(float deltaT) {
         if (UtilsClient.distanceFromClientPlayer(tileEntity) < WATCH_RANGE) logClient.watch();
