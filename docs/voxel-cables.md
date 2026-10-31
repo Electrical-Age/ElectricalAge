@@ -75,6 +75,23 @@ transparent neighbour).
   keep their usual clearance (`CableRouter.CLEARANCE`).
 - A pin at the block's edge reaches the next voxel block (`connectPinsAcross`): a cable there taking its contact voxel,
   or a pin there tip to tip (a NodeConnection, dropped when either block disconnects).
+- A device whose model is not a square round its centre gives its model's bounds across the face
+  (`SixNodeDescriptor.bodyBounds`, px at `modelScale`) and the turn its render gives the model (`modelTurn`, as its
+  `drawPlaced`); its body then reaches toward each edge as far as the turned model, rounded up to an odd number of voxels
+  (`bodyExtents`: with the centre on an even voxel, each pin's tip is on an even voxel, where the kit can end), and the
+  grey pin boxes are drawn from the model's edge. Without bounds the body is a square of `bodyHalf`. Since the body and
+  pins follow the front, a wrench turn of a device off centre is refused where the turned device would not fit
+  (`VoxelNode.turnError`). Placing anywhere and its preview honour a device's allowed sides (`allowedOnSide`: the power
+  sockets and the anemometer, walls only).
+- Placed anywhere (Baughn): chips, the small sensors and sources of a0d38750, and the relays (drawn and measured at half
+  scale), the four probes, the wireless receiver, transmitter and repeater, the Electrical Timer, the LED vuMeter, the
+  Signal Switch with LED, the power sockets, the Ground Cable, the Hub and the anemometer. Not: the redstone converters
+  (Baughn), the analog vuMeter and the power switches (they take the face). A thermal probe's pins join Copper Thermal
+  Cable (thermal loads both ways); a Temperature Probe's back pin and a Hub's pins change with their slots after
+  placement: the links follow the new kind (a mismatched cable simply isn't joined), but the placement rules are not
+  checked again.
+- `placeErrorAt` builds a stand-in element to read its pins and unloads it after (a Wireless Signal Repeater joins the
+  wireless spots as it is made; left there, its empty spot crashed the receivers' process).
 - Holding such a device shows it see-through where a click would put it (`DevicePreview`, client
   `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A click on a device in a voxel block places on
   that device's face (`placeFace`).
@@ -170,6 +187,10 @@ device terminal plates) applies to six-node floor cables only, not voxel cables.
   "chisel a cable hole through a wall", "chisel brush shapes" (flat 16 + 16 voxels, tunnel 256 and put back 64, sneak
   + right-click puts back and keeps the brush, the brush packet: held chisel only, invalid ignored), "fence joins an imitated fence", "a short cable piece beside a resistor stays cool", "converted wall device round two corners"
   (every order), "converted cable under water", lamp round two corners (six-node / converted / reverted).
+- `gametest/cases/VoxelDeviceCases.java`: the devices placed anywhere since a0d38750: sizes and pins of each (logged), a
+  click in the middle of a free face still uses the face's slot, lopsided bodies turn with the front; relays switch a
+  resistor's current, probes read through their pins, a thermal probe reads a hot Copper Thermal Cable, temperature probes
+  by their slot, wireless link, timer, LED vuMeter and switch, ground and hub currents, sockets and anemometer walls only.
 - `gametest/cases/PipeCases.java`: `pipe_boiler_to_turbine`, `pipe_two_in_one_block`, `pipe_routed_over_a_wall`,
   `pipe_join_mid_run`, `pipe_kit_crafting`, `pipe_burst_vents`, `pipe_valve`, `pipe_adapter_capability`,
   `pipe_valve_by_player`, `pipe_kit_pickup_merges`.
