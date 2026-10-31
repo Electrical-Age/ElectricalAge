@@ -155,7 +155,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
             boundsDone = true;
         }
         if (bounds == null) return null;
-        LRDU turn = modelTurn(side, front);
+        LRDU turn = front == null ? null : modelTurn(side, front);   // (a client render before its first publish)
         float y0 = Float.MAX_VALUE, y1 = -Float.MAX_VALUE, z0 = Float.MAX_VALUE, z1 = -Float.MAX_VALUE;
         for (float y : new float[]{bounds[0], bounds[1]})
             for (float z : new float[]{bounds[2], bounds[3]}) {
