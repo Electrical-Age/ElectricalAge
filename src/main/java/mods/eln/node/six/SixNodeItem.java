@@ -46,6 +46,14 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             if (ctx.getPlayer() != null) ctx.getPlayer().sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cables are laid with a cable kit (craft one from these)"));
             return InteractionResult.FAIL;
         }
+        // holding the use key repeats the click every few ticks: a repeat on the block just placed in places nothing and
+        // says nothing (AdventurAgent: "No room" showed after a relay was placed)
+        if (ctx.getPlayer() != null) {
+            Placed last = LAST_PLACED.get(ctx.getPlayer().getUUID());
+            long now = world.getGameTime();
+            if (last != null && now - last.tick() <= REPEAT_TICKS && (last.pos().equals(ctx.getClickedPos()) || last.pos().equals(ctx.getClickedPos().relative(ctx.getClickedFace()))))
+                return InteractionResult.FAIL;
+        }
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Direction direction = Direction.fromIntMinecraftSide(ctx.getClickedFace().get3DDataValue()).getInverse();
         // clicking a voxel block (its cables or pipes): the device goes into that block, on the face behind the click
@@ -58,8 +66,16 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction,
             new double[]{h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ()});
         if (ok && ctx.getPlayer() != null && !ctx.getPlayer().isCreative()) ctx.getItemInHand().shrink(1);
+        if (ok && ctx.getPlayer() != null) LAST_PLACED.put(ctx.getPlayer().getUUID(), new Placed(pos, world.getGameTime()));
         return ok ? InteractionResult.SUCCESS : InteractionResult.FAIL;
     }
+
+    /** A device a player just placed: where, when (game ticks). */
+    record Placed(BlockPos pos, long tick) {}
+
+    static final java.util.Map<java.util.UUID, Placed> LAST_PLACED = new java.util.concurrent.ConcurrentHashMap<>();
+    /** The client repeats a held use key every 4 ticks. */
+    static final int REPEAT_TICKS = 6;
 
     /** 1.12 placeBlockAt: place this device at pos on its face `direction` (pointing at the supporting block). */
     public boolean placeAt(ItemStack stack, Player player, Level world, BlockPos pos, Direction direction) {
@@ -80,7 +96,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
                 if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(error));
                 return false;
             }
-            if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
+            if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return refuse(player, NO_SUPPORT);
             GhostGroup ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up);
             if (ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
@@ -107,9 +123,9 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         } else if (old.getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock) {
             // a voxel block: on a free face whose plate is clear of its cables and pipes
             if (!(world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve) || !(ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v))
-                return false;
+                return refuse(player, "That block isn't ready yet: try again");
             if (anywhere) {
-                if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
+                if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return refuse(player, NO_SUPPORT);
                 String err = v.placeAnywhere(stack, direction, at[0], at[1], at[2], player);
                 if (err != null && player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(err));
                 return err == null;
@@ -119,7 +135,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
                 if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No room for it on that face"));
                 return false;
             }
-            if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
+            if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return refuse(player, NO_SUPPORT);
             String error = descriptor.checkCanPlace(new Coordonate(pos, world), direction, LRDU.Up);
             if (error != null) {
                 if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(error));
@@ -136,14 +152,23 @@ public class SixNodeItem extends Item implements IDescriptorItem {
                     return false;
                 }
                 world.removeBlock(pos, false);
-                return false;
+                return refuse(player, "That block had nothing in it and is gone: try again");
             }
             if (!sixNode.getSideEnable(direction) && block.getIfOtherBlockIsSolid(world, pos, direction)) {
                 sixNode.createSubBlock(stack, direction, player);
                 return true;
             }
             if (sixNode.isSideKept(direction.getInt())) return sixNode.createSubBlock(stack, direction, player);   // (refuses, and says why)
+            return refuse(player, sixNode.getSideEnable(direction) ? "That face already holds a device" : NO_SUPPORT);
         }
+        return refuse(player, "Something is in the way there");
+    }
+
+    static final String NO_SUPPORT = "Nothing solid behind that face to put it on";
+
+    /** Every refusal says why, on the action bar (AdventurAgent: a click that did nothing and said nothing). */
+    static boolean refuse(Player player, String why) {
+        if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(why));
         return false;
     }
 }

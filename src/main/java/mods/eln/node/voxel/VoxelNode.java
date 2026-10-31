@@ -972,6 +972,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public Direction placeFace(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
         int el = elementAt(hx, hy, hz, 0);
         if (el >= 0) return sideElementList[el].side;
+        // on a cable: the face it lies on (AdventurAgent: a click on the end of a floor cable aimed at the open side
+        // and did nothing)
+        int part = partAt(hx, hy, hz);
+        if (part >= 0 && parts.get(part) instanceof CablePart c && !c.isKnuckle())
+            return Direction.fromIntMinecraftSide(c.face);
         return Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
     }
 
