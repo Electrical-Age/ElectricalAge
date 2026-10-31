@@ -238,4 +238,16 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
             return box.keyPressed(event) || box.canConsumeInput();
         return super.keyPressed(event);
     }
+
+    /**
+     * The wheel: a slot's own use first (bundles), else the widget under the pointer (Baughn 2026-10-31: the processor's
+     * guide didn't scroll; AbstractContainerScreen hands the wheel only to slots, never to its widgets).
+     */
+    @Override
+    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        if (super.mouseScrolled(x, y, scrollX, scrollY)) return true;
+        for (var child : children())
+            if (child.isMouseOver(x, y) && child.mouseScrolled(x, y, scrollX, scrollY)) return true;
+        return false;
+    }
 }
