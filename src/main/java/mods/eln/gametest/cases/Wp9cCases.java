@@ -660,7 +660,8 @@ public final class Wp9cCases {
      * loggers; the one-channel Data Logger stays floor-only.
      */
     static final class TiltedTerminalCase implements TestCase {
-        ElectricalDataLoggerElement floor, ceiling, wall;
+        ElectricalDataLoggerElement floor, ceiling, wall, used;
+        String byUse = "", published = "";
 
         public String name() {
             return "wp9c tilted terminal logger";
@@ -677,6 +678,26 @@ public final class Wp9cCases {
             ctx.level().setBlock(ctx.at(3, 2, 0), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
             ceiling = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(2, 2, 1), Direction.YP);
             wall = (ElectricalDataLoggerElement) CableCases.host(ctx, TILTED_TERMINAL, ctx.at(3, 2, 1), Direction.ZN);
+            // shift-C the way a player does it: the wrench key's state on the server (the client's key packet), sneaking,
+            // an empty hand, a right-click on the block (the block's use, as the server runs it)
+            used = (ElectricalDataLoggerElement) ctx.placeSix(TILTED_TERMINAL, ctx.at(1, 1, 2));
+            var pl = player(ctx);
+            BlockPos at = ctx.at(1, 1, 2);
+            var before = used.pinEdge();
+            pl.setShiftKeyDown(true);
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, true);
+            used.sixNode.setNeedPublish(false);
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(at).add(0.5, 0.15, 0.5),
+                net.minecraft.core.Direction.UP, at, false);
+            var result = ctx.level().getBlockState(at).useWithoutItem(ctx.level(), pl, hit);
+            mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, false);
+            pl.setShiftKeyDown(false);
+            byUse = result + ", " + before + " -> " + used.pinEdge() + ", publish " + used.sixNode.getNeedPublish();
+            // what the clients get: the publish ends with the inputs' turn
+            var bos = new java.io.ByteArrayOutputStream();
+            used.networkSerialize(new java.io.DataOutputStream(bos));
+            byte[] b = bos.toByteArray();
+            published = b.length > 0 ? String.valueOf(b[b.length - 1]) : "none";
         }
 
         public void measure(TestContext ctx) {
@@ -685,6 +706,8 @@ public final class Wp9cCases {
             var pl = player(ctx);
             // on a wall it faces down (its screen leans out and down toward a player below)
             var front = tilted.getFrontFromPlace(Direction.ZN, pl);
+            ctx.check("wp9c tilted terminal: shift-C through the block's use moves the inputs, and publishes the turn",
+                byUse.endsWith("publish true") && !byUse.contains(" -> " + used.front.inverse() + ",") && published.equals("1"), byUse + ", published turn " + published);
             // shift + the wrench key (C) on a right-click moves its inputs to the next edge (Baughn 2026-10-31)
             var front0 = floor.front;
             pl.setShiftKeyDown(true);

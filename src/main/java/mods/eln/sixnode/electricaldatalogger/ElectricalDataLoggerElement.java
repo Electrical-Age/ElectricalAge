@@ -169,14 +169,21 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (descriptor.ceiling && entityPlayer.isShiftKeyDown() && Utils.isPlayerUsingWrench(entityPlayer)) {
-            // the next edge, skipping the one the screen faces (Baughn 2026-10-31)
-            do pinTurn = (pinTurn + 1) % 4; while (pinEdge() == front);
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        }
+        if (descriptor.ceiling && entityPlayer.isShiftKeyDown() && Utils.isPlayerUsingWrench(entityPlayer)) return turnInputs();
         return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
+    }
+
+    /**
+     * The tilted terminal's inputs to the next edge, skipping the one the screen faces (Baughn 2026-10-31): reconnected,
+     * saved, published (the clients draw the strip there). False for a logger that can't.
+     */
+    public boolean turnInputs() {
+        if (!descriptor.ceiling) return false;
+        do pinTurn = (pinTurn + 1) % 4; while (pinEdge() == front);
+        sixNode.reconnect();
+        sixNode.setNeedPublish(true);
+        needPublish();
+        return true;
     }
 
     boolean inVoxelBlock() {

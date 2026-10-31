@@ -112,6 +112,20 @@ public final class LabCommands {
                             }
                         return n;
                     }))))
+                .then(Commands.literal("tiltedinputs").then(Commands.argument("pos", BlockPosArgument.blockPos()).executes(c -> {
+                    // as shift + the wrench key (C) on a right-click: the tilted terminal's inputs to the next edge
+                    var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(BlockPosArgument.getLoadedBlockPos(c, "pos"), c.getSource().getLevel()));
+                    int n = 0;
+                    if (node instanceof mods.eln.node.six.SixNode six)
+                        for (var el : six.sideElementList)
+                            if (el instanceof mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement l && l.turnInputs()) {
+                                n++;
+                                String edge = String.valueOf(l.pinEdge());
+                                c.getSource().sendSuccess(() -> Component.literal("inputs now on the " + edge + " edge"), false);
+                            }
+                    if (n == 0) c.getSource().sendFailure(Component.literal("no tilted terminal logger there"));
+                    return n;
+                })))
                 .then(Commands.literal("loggerdemo").executes(c -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("spmodules").executes(c -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
                 .then(Commands.literal("tilted").executes(c -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))

@@ -58,16 +58,22 @@ final class ClientKeys {
             mc.gui.setScreen(ChiselRadial.create(mc.player.getMainHandItem(), WRENCH, down));
             return;
         }
+        syncWrench(down);
+    }
+
+    static void syncWrench(boolean down) {
         if (down == wrenchDown) return;
         wrenchDown = down;
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DataOutputStream out = new DataOutputStream(bos);
-            out.writeByte(Eln.packetPlayerKey);
-            out.writeByte(mods.eln.server.PlayerKeys.WRENCH);
-            out.writeBoolean(down);
-            ElnNet.sendToServer(bos);
-        } catch (IOException ignored) {
-        }
+        send(mods.eln.server.PlayerKeys.WRENCH, down);
+    }
+
+    /**
+     * Before a click reaches the server: the tick sends the key's state only after the clicks of that tick, so C pressed
+     * in the same tick as the right-click arrived after it (the click then opened the screen instead of turning).
+     */
+    static void beforeClick(net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered e) {
+        var mc = Minecraft.getInstance();
+        if (mc.getConnection() == null || mc.player == null || mc.player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ChiselItem) return;
+        syncWrench(WRENCH.isDown());
     }
 }
