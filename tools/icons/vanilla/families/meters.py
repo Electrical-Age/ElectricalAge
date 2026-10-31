@@ -26,7 +26,7 @@ Shared visual system
 * Seven-segment glyphs (``seg_text``): 3 x 5 digits (a 1 is one column), used by the digital
   watch.
 """
-from kit import (Canvas, box, depth, line, STEEL, CAV, WHITE, MARK_RED, MARK_GREEN,
+from kit import (Canvas, box, depth, line, STEEL, CAV, WHITE, MARK_RED, MARK_GREEN, MARK_BLUE,
                  WHITE_PLASTIC)
 
 WALL_DEPTH = 2
@@ -290,4 +290,49 @@ def modern_data_logger():
     housing(cv, 1, 5, 11, 10, STEEL)                     # screen: front cols 1..11, rows 5..14
     screen(cv, 3, 6, 8, 7, trace=[(3, 11), (4, 11), (4, 10), (5, 10), (6, 10), (6, 9), (7, 9),
                                   (7, 8), (8, 8), (9, 8), (9, 7), (10, 7)], ink=MARK_GREEN)
+    return cv
+
+
+#: the field logger's teal paint (cad palette "paint_condenser", 60 120 130)
+TEAL = None
+
+
+def _teal():
+    from kit.palette import _r
+    return _r('#1c3238', '#2d5258', '#3c7882', '#5a9aa3', '#8cc2c8')
+
+
+def three_channel_data_logger():
+    """fieldlogger (cad FieldLogger: Three-Channel Data Logger): a small teal field logger standing
+    on the floor, a carrying handle on top, the dark screen on its front with three traces in the
+    channels' colours (A red, B blue, C green, as the in-world graph and the terminals)."""
+    from kit import line as _line
+    cv = Canvas(16)
+    housing(cv, 1, 5, 12, 10, _teal())                  # case: front cols 1..12, rows 5..14
+    for x in (4, 9):                                    # handle posts on the top face
+        cv.set(x + 1, 3, CAV[1])
+    cv.hline(5, 10, 2, CAV[0])                          # the grip
+    screen(cv, 3, 7, 8, 6)                              # screen cols 3..10, rows 7..12
+    _line(cv, (3, 9), (6, 8), MARK_RED)
+    _line(cv, (6, 8), (10, 9), MARK_RED)
+    _line(cv, (3, 11), (6, 11), MARK_BLUE)
+    _line(cv, (7, 10), (10, 10), MARK_BLUE)
+    _line(cv, (3, 12), (10, 11), MARK_GREEN)
+    return cv
+
+
+def tilted_terminal_logger():
+    """tiltedterminal (cad TiltedTerminal: Tilted Terminal Logger): a low grey body on a plinth and
+    the head leaning back above it, its screen up and toward the viewer with three traces (A red,
+    B blue, C green)."""
+    from kit import line as _line
+    cv = Canvas(16)
+    housing(cv, 2, 11, 10, 4, STEEL)                    # body: front cols 2..11, rows 11..14
+    box(cv, 2, 4, 10, 7, 3, STEEL, bevel=False)         # head, leaning back (deeper box above)
+    screen(cv, 3, 5, 8, 5)                              # screen cols 3..10, rows 5..9
+    _line(cv, (3, 7), (6, 6), MARK_RED)
+    _line(cv, (6, 6), (10, 7), MARK_RED)
+    _line(cv, (3, 8), (10, 8), MARK_BLUE)
+    _line(cv, (3, 9), (7, 9), MARK_GREEN)
+    _line(cv, (7, 9), (10, 8), MARK_GREEN)
     return cv

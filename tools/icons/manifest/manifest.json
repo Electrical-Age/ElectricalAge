@@ -6629,5 +6629,49 @@
   "shares_texture_with": [],
   "notes": "One of 16 dye brushes that differ only in roller colour.",
   "redraw": true
+ },
+ {
+  "item_id": "three_channel_data_logger",
+  "display_name": "Three-Channel Data Logger",
+  "family": "meter_display",
+  "placeable": true,
+  "node_kind": "six_node",
+  "tier": "signal",
+  "vanilla_size": 16,
+  "schematic_scope": false,
+  "tier_cue": null,
+  "model": "fieldlogger/fieldlogger.obj",
+  "parts": [
+   "main"
+  ],
+  "model_texture_notes": "",
+  "appearance": "Small teal field logger on the floor with a handle, a front screen with three coloured traces, three coloured terminals on its back.",
+  "function": "Logs and plots a signal value over time; schematic: oscilloscope/recorder box with a trace.",
+  "current_texture": null,
+  "shares_texture_with": [],
+  "notes": "26.x (board #45); cad model.",
+  "redraw": true
+ },
+ {
+  "item_id": "tilted_terminal_logger",
+  "display_name": "Tilted Terminal Logger",
+  "family": "meter_display",
+  "placeable": true,
+  "node_kind": "six_node",
+  "tier": "signal",
+  "vanilla_size": 16,
+  "schematic_scope": false,
+  "tier_cue": null,
+  "model": "tiltedterminal/tiltedterminal.obj",
+  "parts": [
+   "main"
+  ],
+  "model_texture_notes": "",
+  "appearance": "Low grey terminal with its screen head leaning back 45 degrees; on a desk, a wall or hung from a ceiling.",
+  "function": "Logs and plots a signal value over time; schematic: oscilloscope/recorder box with a trace.",
+  "current_texture": null,
+  "shares_texture_with": [],
+  "notes": "26.x (board #45); cad model.",
+  "redraw": true
  }
 ]

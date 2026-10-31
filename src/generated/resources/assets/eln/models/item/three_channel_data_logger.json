@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:items/missing"
+    "layer0": "eln:item/three_channel_data_logger"
   }
 }

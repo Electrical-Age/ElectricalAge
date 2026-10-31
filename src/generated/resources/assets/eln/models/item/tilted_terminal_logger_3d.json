@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_six",
   "textures": {
-    "particle": "eln:items/missing"
+    "particle": "eln:item/tilted_terminal_logger"
   }
 }

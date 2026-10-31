@@ -1,4 +1,4 @@
-// 26.3	2026-10-30T21:08:53.651752365	eln-global/EA models
+// 26.3	2026-10-31T01:09:47.130642028	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -918,10 +918,10 @@ b0ba486bf09a61b33b9a09c1d5646c2fa2aa10b9 assets/eln/models/item/thermal_probe.js
 0cb1547cfd2c7178f5d4443ceff2c42d98924c33 assets/eln/models/item/thermistor.json
 10160d3b1a7e4a3d17900326b18cbd2ef76b2214 assets/eln/models/item/thermistor_3d.json
 e57c38ce7f0e1b5542a7870870acacd8013d6e13 assets/eln/models/item/thermometer.json
-b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/three_channel_data_logger.json
-cd3e55862f2d7c2416a0084507021666f71c5096 assets/eln/models/item/three_channel_data_logger_3d.json
-b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/tilted_terminal_logger.json
-cd3e55862f2d7c2416a0084507021666f71c5096 assets/eln/models/item/tilted_terminal_logger_3d.json
+9f868e2e0b413c816d5c8df371295061842b04ad assets/eln/models/item/three_channel_data_logger.json
+fc53ccebc9e988515bcef733e0b42d25b4c65918 assets/eln/models/item/three_channel_data_logger_3d.json
+8fa15563ce0c45f7f203ff519fd24c3e16bf84ce assets/eln/models/item/tilted_terminal_logger.json
+7fb3d335cc313927a277499bde37c9c8d6ec147d assets/eln/models/item/tilted_terminal_logger_3d.json
 3c9727847682e4af5e194407102beb081a4e6264 assets/eln/models/item/tree_resin.json
 7a81ec2c0fa002e8fbff9b1d63d211a483fdda05 assets/eln/models/item/tree_resin_collector.json
 67759e44f7247676a819240699a03eff236bf533 assets/eln/models/item/tree_resin_collector_3d.json
