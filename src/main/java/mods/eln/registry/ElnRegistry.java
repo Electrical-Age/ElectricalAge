@@ -103,6 +103,8 @@ public final class ElnRegistry {
         RECIPE_SERIALIZERS.register("cable_kit_from_coils", () -> mods.eln.node.voxel.CableKitRecipes.FromCoils.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.CableKitRecipes.ToCoil>> CABLE_KIT_TO_COIL =
         RECIPE_SERIALIZERS.register("cable_kit_to_coil", () -> mods.eln.node.voxel.CableKitRecipes.ToCoil.SERIALIZER);
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.item.electricalitem.BatteryPackRecipe>> BATTERY_PACK =
+        RECIPE_SERIALIZERS.register("portable_battery_pack", () -> mods.eln.item.electricalitem.BatteryPackRecipe.SERIALIZER);
     /** Cable kits, one per CablePart tier: signal, low, medium, high, very high voltage. */
     public static final java.util.List<net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.CableKitItem>> CABLE_KITS = java.util.List.of(
         ITEMS.registerItem("cable_kit_signal", p -> new mods.eln.node.voxel.CableKitItem(0, p)),

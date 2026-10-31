@@ -1597,9 +1597,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "IPI",
             'P', "ingotLead",
             'I', stack(Items.IRON_INGOT));
-        addShapelessRecipe(
-            findItemStack("Portable Battery Pack"),
-            findItemStack("Portable Battery"), findItemStack("Portable Battery"), findItemStack("Portable Battery"));
+        // (the Portable Battery Pack: BatteryPackRecipe, which keeps the batteries' charge; its JSON is in main resources)
     }
 
     public static void recipeElectricalTool() {

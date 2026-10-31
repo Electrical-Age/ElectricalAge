@@ -248,12 +248,21 @@ final class GoldenRecipesCase implements TestCase {
             for (RecipeHolder<?> h : mine) {
                 Recipe<?> r = h.value();
                 ItemStack res;
+                boolean custom = false;
                 if (shaped && r instanceof ShapedRecipe sr) res = sr.assemble(CraftingInput.EMPTY);
                 else if (!shaped && r instanceof ShapelessRecipe sl) res = sl.assemble(CraftingInput.EMPTY);
-                else continue;
+                else if (!shaped && r instanceof net.minecraft.world.item.crafting.CustomRecipe cr) {
+                    // (a custom recipe in a 1.12 shapeless one's place, e.g. the battery pack that keeps its batteries'
+                    // charge: the 1.12 grid, first choice per slot, must make the same item)
+                    List<ItemStack> grid = new ArrayList<>();
+                    for (Slot sl : slots) if (!sl.empty()) grid.add(new ItemStack(sl.items().get(0)));
+                    var in = CraftingInput.of(grid.size(), 1, grid);
+                    res = cr.matches(in, ctx.level()) ? cr.assemble(in) : ItemStack.EMPTY;
+                    custom = true;
+                } else continue;
                 if (res.getItem() != out || res.getCount() != count) continue;
-                boolean ok = shaped ? matchShaped((ShapedRecipe) r, g.get("width").getAsInt(), g.get("height").getAsInt(), slots)
-                    : matchShapeless((ShapelessRecipe) r, slots);
+                boolean ok = custom || (shaped ? matchShaped((ShapedRecipe) r, g.get("width").getAsInt(), g.get("height").getAsInt(), slots)
+                    : matchShapeless((ShapelessRecipe) r, slots));
                 if (ok) {
                     hit = h;
                     if (!used.contains(h.id().identifier())) break; // prefer a recipe not matched yet

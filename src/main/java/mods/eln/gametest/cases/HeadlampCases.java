@@ -21,6 +21,7 @@ public final class HeadlampCases {
         cases.add(new Worn());
         cases.add(new DrillModel());
         cases.add(new LightsKey());
+        cases.add(new BatteryPack());
     }
 
     /**
@@ -167,6 +168,45 @@ public final class HeadlampCases {
         public void measure(TestContext ctx) {
             ctx.check("lights key: headlamp and both flashlights step together, each its own cycle", ok, "presses 1, 2, 3: " + result);
             ctx.check("lights key: a flashlight alone in the offhand steps", offhandAlone, "");
+        }
+    }
+
+    /**
+     * Three portable batteries make a pack that keeps their charge (Baughn 2026-10-31: three full ones made an empty pack);
+     * anything else in the grid, or two batteries, doesn't match; the recipe is the one the server finds for the grid.
+     */
+    static final class BatteryPack implements TestCase {
+        public String id() {
+            return "battery_pack_keeps_charge";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var r = mods.eln.item.electricalitem.BatteryPackRecipe.INSTANCE;
+            ItemStack b = mods.eln.Eln.findItemStack("Portable Battery");
+            var d = (mods.eln.item.electricalitem.BatteryItem) mods.eln.generic.GenericItemUsingDamageDescriptor.getDescriptor(b);
+            List<ItemStack> bats = new java.util.ArrayList<>();
+            for (double e : new double[]{40000, 40000, 10000}) {
+                ItemStack s = b.copy();
+                d.setEnergy(s, e);
+                bats.add(s);
+            }
+            var in = net.minecraft.world.item.crafting.CraftingInput.of(3, 1, bats);
+            ItemStack pack = r.assemble(in);
+            var pd = pack.isEmpty() ? null : (mods.eln.item.electricalitem.BatteryItem) mods.eln.generic.GenericItemUsingDamageDescriptor.getDescriptor(pack);
+            ctx.check("battery pack: three batteries make a pack", r.matches(in, ctx.level()) && pd != null
+                && pack.getItem() == mods.eln.Eln.findItemStack("Portable Battery Pack").getItem(), pack.toString());
+            ctx.check("battery pack: it holds their 90 kJ", pd != null && Math.abs(pd.getEnergy(pack) - 90000) < 1e-6,
+                pd == null ? "" : pd.getEnergy(pack) + " J");
+            ctx.check("battery pack: two batteries don't match",
+                !r.matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, bats.subList(0, 2)), ctx.level()), "");
+            ctx.check("battery pack: a stray item doesn't match", !r.matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 2,
+                List.of(bats.get(0), bats.get(1), bats.get(2), new ItemStack(net.minecraft.world.item.Items.IRON_INGOT))), ctx.level()), "");
+            var found = ctx.level().recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, in, ctx.level());
+            ctx.check("battery pack: the server's recipe for the grid is this one", found.isPresent()
+                && found.get().value() instanceof mods.eln.item.electricalitem.BatteryPackRecipe, found.map(h -> h.id().toString()).orElse("none"));
         }
     }
 }

@@ -253,6 +253,10 @@ In the port:
 - Right-clicking an item into a device slot (battery charger) made a new stack and copied only its energy: an X-ray
   scanner lost its filters and a used lamp came back new (lamp sockets use the same path). The stack goes in as it is (`XRayCase`).
 
+- Three portable batteries made an empty Portable Battery Pack (1.12's plain shapeless recipe; Baughn 2026-10-31).
+  `BatteryPackRecipe` sums their charge into the pack; `golden_recipes` accepts a custom recipe in a shapeless one's
+  place when the 1.12 grid makes the same item. Test: `battery_pack_keeps_charge`.
+
 - Two devices on adjacent faces of one block shared heat only on some corners: `SixNode.tryConnectTwoInternalElement`
   paired the wrong thermal loads (1.12). Test: `six_node_inner_corner_a_temperature_probe_reads_a_wall_cable_s_heat`.
 
