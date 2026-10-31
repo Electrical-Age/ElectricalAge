@@ -30,6 +30,9 @@ import java.util.Map;
  * holds a few pieces).
  */
 final class CableNet {
+    /** The simulator's slow thermal step, s (Simulator.tick: electrical cables' thermal loads). */
+    static final double SLOW_STEP = 0.05;
+
     /** A knuckle's resistance, as a share of its tier's per-element Rs (a corner adds almost nothing). */
     static final double KNUCKLE_SHARE = 1e-3;
 
@@ -102,6 +105,15 @@ final class CableNet {
                 thermal.C = Math.max(d.thermalC * s, Eln.simulator.getMinimalThermalC(d.thermalRs * s, d.thermalRp / s));
                 thermal.Rp = d.thermalRp / s;
                 thermal.Rs = d.thermalRs * s;
+                // the slow thermal step is explicit: a piece whose C Rs is under one step swings and grows once it is
+                // joined to a stiff thermal load (a relay's 2-voxel pin cable to a resistor beside it overheated in half
+                // a second); a short piece keeps C Rs at one step, both raised alike (a quarter block: 0.45 of a block's)
+                double cr = thermal.C * thermal.Rs;
+                if (cr < SLOW_STEP) {
+                    double k = Math.sqrt(SLOW_STEP / cr);
+                    thermal.C *= k;
+                    thermal.Rs *= k;
+                }
                 thermal.setAsSlow();
                 thermal.Tc = t;
                 thermalSlow.add(new ElectricalLoadHeatThermalLoad(load, thermal));

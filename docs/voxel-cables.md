@@ -44,6 +44,10 @@ transparent neighbour).
 - Each conductor: one `ElectricalLoad` with `setCanBeSimplifiedByLine(true)` (so runs collapse into MNA `Line`s,
   `sim/mna/component/Line.java`), scaled by `share()` = length/16 clamped to [0.25, 1]; knuckles use
   `KNUCKLE_SHARE` = 1e-3 and get no thermal load or watchdogs. Thermal tier: thermal load only (`load == null`).
+- An electrical conductor's thermal load keeps C Rs at least the slow thermal step (`CableNet.SLOW_STEP`, 0.05 s; both
+  raised alike): scaled by `share()`, C Rs falls with its square, and below one step the explicit update swings and grows
+  once the piece is joined to a stiff thermal load (a relay's 2-voxel pin cable beside a Power Resistor burnt in half a
+  second). Pieces of half a block and more are unchanged.
 - Conductors touching inside a block (inner corner, tier change) are joined by `ElectricalConnection`/`ThermalConnection`
   if their masks match (`NodeBase.compareConnectionMask`).
 - Voxel-to-voxel: ends meet only at the exact same point across the face (`Port.mirrored()`), one `NodeConnection` each.
@@ -164,7 +168,7 @@ device terminal plates) applies to six-node floor cables only, not voxel cables.
   burns), "routed cable over a wall", "cable kits", "six-node device hosted in a voxel block", "break a device in a
   mixed voxel block", "thermal cable converted", "cable through a fence and under a slab", "cable up a staircase",
   "chisel a cable hole through a wall", "chisel brush shapes" (flat 16 + 16 voxels, tunnel 256 and put back 64, sneak
-  + right-click puts back and keeps the brush, the brush packet: held chisel only, invalid ignored), "fence joins an imitated fence", "converted wall device round two corners"
+  + right-click puts back and keeps the brush, the brush packet: held chisel only, invalid ignored), "fence joins an imitated fence", "a short cable piece beside a resistor stays cool", "converted wall device round two corners"
   (every order), "converted cable under water", lamp round two corners (six-node / converted / reverted).
 - `gametest/cases/PipeCases.java`: `pipe_boiler_to_turbine`, `pipe_two_in_one_block`, `pipe_routed_over_a_wall`,
   `pipe_join_mid_run`, `pipe_kit_crafting`, `pipe_burst_vents`, `pipe_valve`, `pipe_adapter_capability`,

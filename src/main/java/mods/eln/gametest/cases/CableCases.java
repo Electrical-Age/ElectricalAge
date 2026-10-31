@@ -50,6 +50,7 @@ public final class CableCases {
         cases.add(new SmallDevicesAnywhereCase());
         cases.add(new BreakMixedCase());
         cases.add(new ThermalCase());
+        cases.add(new ShortPieceCase());
         cases.add(new MimicCase());
         cases.add(new StairsCase());
         cases.add(new ChiselCase());
@@ -1463,6 +1464,59 @@ public final class CableCases {
             c.line(String.format("thermal: far end %.3f C (six-node), %.3f C (converted)", a, b));
             c.check("thermal: heat crosses the corners alike (2%)", a > 1 && Math.abs(a - b) <= 0.02 * a, String.format("%.3f vs %.3f", a, b));
             for (var h : hot) mods.eln.Eln.simulator.removeThermalLoad(h);
+        }
+    }
+
+    /**
+     * A short cable piece stays thermally stable beside a stiff thermal load: an Electrical Source at 50 V off centre in a
+     * voxel block, a 2-voxel LV cable from its east pin to the block's edge, a Power Resistor, then ground. The piece's
+     * thermal load is joined to the resistor's; its C Rs (a sixteenth of a block's) made the slow explicit step swing and
+     * grow, and it burnt in half a second (a relay's pin cable beside a resistor, Baughn's voxel devices).
+     */
+    static final class ShortPieceCase implements TestCase {
+        ResistorElement r;
+        mods.eln.node.voxel.VoxelNode v;
+        String err = "";
+
+        public String name() {
+            return "a short cable piece beside a resistor stays cool";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var yn = mods.eln.misc.Direction.YN;
+            v = ChipsPackedCase.block(c, c.at(1, 1, 1));
+            var d = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9aCases.SOURCE);
+            if (!v.createSubBlockAt(d.newItemStack(), 6, yn, 2, 0, 0, player)) {
+                err = "source not placed";
+                return;
+            }
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) v.getElement(6);
+            src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(50f);
+            }));
+            int[] east = null;
+            for (int[] t : v.pinTips(6)) if (yn.applyLRDU(mods.eln.misc.LRDU.fromInt(t[0])) == mods.eln.misc.Direction.XP) east = t;
+            if (east == null || 16 - east[1] > 4) {
+                err = "east pin " + java.util.Arrays.toString(east);
+                return;
+            }
+            voxel(c, c.at(1, 1, 1), List.of(new CablePart(LV, DOWN, new int[]{east[1], 0, east[3], 16, 0, east[3]})));
+            r = Wp9aCases.resistor(c, Wp9aCases.POWER_RESISTOR, 2, 1, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
+        }
+
+        public void measure(TestContext c) {
+            c.check("short piece: built", err.isEmpty(), err);
+            var states = v.cableStates();
+            double t = states.isEmpty() ? Double.NaN : states.get(0)[2];
+            c.check("short piece: not burnt, barely warm", states.size() == 1 && Math.abs(t) < 1, states.size() + " live, " + t + " C");
+            Wp9cCases.within(c, "short piece: the circuit carries 50 V / 100 ohm [A]", r == null ? 0 : Wp9aCases.current(r), 0.5, 0.01);
         }
     }
 

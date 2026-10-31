@@ -1494,6 +1494,25 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return null;
     }
 
+    /** The working cable conductor with a piece taking voxel (x, y, z): its electrical load (index 0) and thermal load
+     *  (index 1), either null; null if none (tests). */
+    public Object[] cableAt(int x, int y, int z) {
+        int[] v = {x, y, z, x + 1, y + 1, z + 1};
+        for (CableNet.Conductor k : cables.live())
+            for (CablePart c : k.parts)
+                for (int[] b : c.boxes()) if (overlaps(b, v)) return new Object[]{k.load, k.thermal};
+        return null;
+    }
+
+    /** The pins of the device off centre in a slot: {LRDU int, tip x, y, z} each (tests). */
+    public List<int[]> pinTips(int slot) {
+        var e = sideElementList[slot];
+        List<int[]> out = new ArrayList<>();
+        if (slot < 6 || e == null) return out;
+        for (Pin p : pins(e)) out.add(new int[]{p.lrdu().toInt(), p.tip()[0], p.tip()[1], p.tip()[2]});
+        return out;
+    }
+
     /** Each working cable conductor's voltage, current and temperature (C above ambient; NaN without one): tests. */
     public List<double[]> cableStates() {
         List<double[]> out = new ArrayList<>();
