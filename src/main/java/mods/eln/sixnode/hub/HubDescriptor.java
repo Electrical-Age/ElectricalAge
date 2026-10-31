@@ -83,4 +83,25 @@ public class HubDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return LRDU.Up;
     }
+
+    /** Small: placed anywhere on a face of a voxel block, at its drawn size (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        draw(new boolean[6]);
+    }
+
+    @Override
+    public mods.eln.misc.LRDU modelTurn(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        return null;
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return boundsOf(main);
+    }
 }

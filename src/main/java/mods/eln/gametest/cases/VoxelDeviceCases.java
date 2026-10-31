@@ -31,6 +31,8 @@ public final class VoxelDeviceCases {
         cases.add(new RelaysCase());
         cases.add(new ProbesCase());
         cases.add(new ThermalProbesCase());
+        cases.add(new SignalDevicesCase());
+        cases.add(new PowerDevicesCase());
     }
 
     static int id(String name) {
@@ -131,8 +133,10 @@ public final class VoxelDeviceCases {
      */
     static final class GeometryCase implements TestCase {
         static final String[] FLOOR_DEVICES = {"Low Voltage Relay", "Medium Voltage Relay", "High Voltage Relay", "Very High Voltage Relay",
-            "Signal Relay", "Electrical Probe", "Voltage Probe", "Thermal Probe", "Temperature Probe"};
-        static final String[] WALL_DEVICES = {};
+            "Signal Relay", "Electrical Probe", "Voltage Probe", "Thermal Probe", "Temperature Probe", "Wireless Signal Receiver",
+            "Wireless Signal Transmitter", "Wireless Signal Repeater", "Electrical Timer", "LED vuMeter", "Signal Switch with LED",
+            "Ground Cable", "Hub"};
+        static final String[] WALL_DEVICES = {"50V Power Socket", "200V Power Socket", "Electrical Anemometer Sensor"};
         String all = "", middle = "", lopsided = "", relays = "", stayed = "";
         boolean anywhereOk, middleOk, lopsidedOk, relaysOk, stayedOk;
 
@@ -160,10 +164,10 @@ public final class VoxelDeviceCases {
             anywhereOk = middleOk = true;
             for (String n : FLOOR_DEVICES) anywhereOk &= desc(n).placeAnywhere();
             for (String n : WALL_DEVICES) anywhereOk &= desc(n).placeAnywhere();
-            // the ones that stay as they are: the redstone converters (Baughn)
+            // the ones that stay as they are: the analog vuMeter, the power switches, the redstone converters (Baughn)
             StringBuilder st = new StringBuilder();
             stayedOk = true;
-            for (String n : new String[]{"Redstone-to-Voltage Converter"}) {
+            for (String n : new String[]{"Analog vuMeter", "Low Voltage Switch", "Redstone-to-Voltage Converter"}) {
                 var d = mods.eln.Eln.sixNodeItem.all().values().stream().filter(x -> x.name.equals(n)).findFirst().orElse(null);
                 st.append(n).append('=').append(d == null ? "missing" : d.placeAnywhere()).append("; ");
                 stayedOk &= d != null && !d.placeAnywhere();
@@ -226,7 +230,7 @@ public final class VoxelDeviceCases {
 
         public void measure(TestContext c) {
             c.line(all);
-            c.check("voxel devices: each converted device goes anywhere; the redstone converters don't", anywhereOk && stayedOk, stayed);
+            c.check("voxel devices: each converted device goes anywhere; the analog vuMeter, power switches and redstone converters don't", anywhereOk && stayedOk, stayed);
             c.check("voxel devices: a click in the middle of a free face puts each in the face's own slot (as before)", middleOk, middle);
             c.check("voxel devices: a lopsided model's body follows it, turned with its front", lopsidedOk, lopsided);
             c.check("voxel devices: a relay's body is its half-size model (contacts along, gate across)", relaysOk, relays);
@@ -470,6 +474,186 @@ public final class VoxelDeviceCases {
                 !linked(slotOnLv, Direction.ZP) && Math.abs(b) < 1, fmt("linked %s, %.2f C", linked(slotOnLv, Direction.ZP), b));
             c.check("temperature probe: a thermal cable in its slot, on a hot thermal cable: reads it", linked(slotOnThermal, Direction.ZP) && d > 0.8 * HOT, fmt("%.2f C", d));
             for (var h : bodies) mods.eln.Eln.simulator.removeThermalLoad(h);
+        }
+    }
+
+    /**
+     * Signal devices off centre: a Wireless Signal Transmitter fed 35 V on its pin and a Receiver whose pin's cable carries
+     * it; a Repeater; an Electrical Timer whose input pin is held high (its output pin's cable high); a LED vuMeter and a
+     * Signal Switch with LED (closed) on a Signal Source.
+     */
+    static final class SignalDevicesCase implements TestCase {
+        SixNodeElement tx, rx, rep, timer, vu, sw;
+        VoxelNode vRx, vTimer;
+
+        public String name() {
+            return "signal devices as voxel devices";
+        }
+
+        public int width() {
+            return 24;
+        }
+
+        public int height() {
+            return 8;
+        }
+
+        public int depth() {
+            return 24;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 14; x++) for (int z = 0; z < 4; z++) c.floor(c.at(x, 0, z));
+            String channel = "eln voxel " + System.nanoTime();
+            // transmitter: its input pin north, a 35 V signal source beyond
+            BlockPos pt = c.at(1, 1, 2);
+            var vt = block(c, pt);
+            tx = put(c, vt, "Wireless Signal Transmitter", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vt, pt, tx, Direction.ZN, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), 35);
+            tx.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.setChannelId);
+                o.writeUTF(channel);
+            }));
+            BlockPos pr = c.at(4, 1, 2);
+            vRx = block(c, pr);
+            rx = put(c, vRx, "Wireless Signal Receiver", Direction.YN, -2, 0, 0, Direction.ZN);
+            cableOut(c, vRx, pr, rx, Direction.ZN, SIGNAL, FLOOR);
+            rx.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxElement.setChannelId);
+                o.writeUTF(channel);
+            }));
+            BlockPos pp = c.at(6, 1, 2);
+            var vp = block(c, pp);
+            rep = put(c, vp, "Wireless Signal Repeater", Direction.YN, 0, 0, -2, Direction.XP);
+            cableOut(c, vp, pp, rep, Direction.XP, SIGNAL, FLOOR);
+            // timer: input north on SVU, output south
+            BlockPos pm = c.at(8, 1, 2);
+            vTimer = block(c, pm);
+            timer = put(c, vTimer, "Electrical Timer", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vTimer, pm, timer, Direction.ZN, SIGNAL, FLOOR);
+            cableOut(c, vTimer, pm, timer, Direction.ZP, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 1), mods.eln.Eln.SVU);
+            // LED vuMeter, its input north on 30 V
+            BlockPos pv = c.at(10, 1, 2);
+            var vv = block(c, pv);
+            vu = put(c, vv, "LED vuMeter", Direction.YN, -2, 0, 0, Direction.ZN);
+            cableOut(c, vv, pv, vu, Direction.ZN, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(10, 1, 1), 30);
+            // LED switch, closed: north on SVU, its south contact follows
+            BlockPos ps = c.at(12, 1, 2);
+            var vs = block(c, ps);
+            sw = put(c, vs, "Signal Switch with LED", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vs, ps, sw, Direction.ZN, SIGNAL, FLOOR);
+            cableOut(c, vs, ps, sw, Direction.ZP, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(12, 1, 1), mods.eln.Eln.SVU);
+            ((mods.eln.sixnode.electricalswitch.ElectricalSwitchElement) sw).setSwitchState(true);
+        }
+
+        public void measure(TestContext c) {
+            c.check("wireless: transmitter's and receiver's pins linked, repeater placed with its pin linked", linked(tx, Direction.ZN) && linked(rx, Direction.ZN)
+                && linked(rep, Direction.XP), tx.slotMask.mask + " " + rx.slotMask.mask + " " + rep.slotMask.mask);
+            Wp9cCases.within(c, "wireless: 35 V on the transmitter's pin, out of the receiver's pin [V]", u(rx, Direction.ZN), 35, 0.1);
+            Wp9cCases.within(c, "wireless: the receiver's pin's cable [V]", ProbesCase.cableU(vRx, tip(vRx, rx, Direction.ZN), Direction.ZN), 35, 0.1);
+            c.check("timer: both pins linked", linked(timer, Direction.ZN) && linked(timer, Direction.ZP), "mask " + timer.slotMask.mask);
+            Wp9cCases.within(c, "timer: input pin held high: its output pin's cable high [V]",
+                ProbesCase.cableU(vTimer, tip(vTimer, timer, Direction.ZP), Direction.ZP), mods.eln.Eln.SVU, 0.1);
+            Wp9cCases.within(c, "LED vuMeter: 30 V on its pin [V]", u(vu, Direction.ZN), 30, 0.1);
+            c.check("LED switch: both pins linked; closed, its south contact at the source's SVU", linked(sw, Direction.ZN) && linked(sw, Direction.ZP)
+                && Math.abs(u(sw, Direction.ZP) - mods.eln.Eln.SVU) < 0.2, fmt("mask %d, %.2f V", sw.slotMask.mask, u(sw, Direction.ZP)));
+        }
+    }
+
+    /**
+     * Power devices off centre: a Ground Cable whose west pin's cable runs to a Power Resistor from a 50 V source (the
+     * current flows); a Hub with no cables in its slots has no pins, and with LV cables in its west and east slots joins a
+     * 50 V source to a resistor; power sockets go on walls only, off centre there their pin (down) meets a cable on the
+     * wall to a source below; an Anemometer likewise on a wall.
+     */
+    static final class PowerDevicesCase implements TestCase {
+        SixNodeElement ground, hub, socket, wind;
+        mods.eln.sixnode.resistor.ResistorElement rGround, rHub;
+        String floorSocket = "", floorWind = "", hubBare = "";
+
+        public String name() {
+            return "power devices as voxel devices";
+        }
+
+        public int width() {
+            return 24;
+        }
+
+        public int height() {
+            return 8;
+        }
+
+        public int depth() {
+            return 24;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 12; x++) for (int z = 0; z < 5; z++) c.floor(c.at(x, 0, z));
+            // ground: source 50 V, resistor, then the ground's west pin
+            BlockPos pg = c.at(3, 1, 1);
+            var vg = block(c, pg);
+            ground = put(c, vg, "Ground Cable", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vg, pg, ground, Direction.XN, LV, FLOOR);
+            rGround = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
+            source(c, Wp9aCases.SOURCE, c.at(1, 1, 1), 50);
+            // hub: placed bare (no pins), then LV cables in its west and east slots
+            BlockPos ph = c.at(6, 1, 1);
+            var vh = block(c, ph);
+            hub = put(c, vh, "Hub", Direction.YN, 0, 0, 2, Direction.ZN);
+            hubBare = "pins bare: " + vh.pinTips(hub.slot).size();
+            for (Direction d : new Direction[]{Direction.XN, Direction.XP})
+                hub.getInventory().setItem(mods.eln.sixnode.hub.HubContainer.cableSlotId + hub.side.getLRDUGoingTo(d).toInt(), Wp9aCases.lvCable());
+            hub.getInventory().setChanged();
+            cableOut(c, vh, ph, hub, Direction.XN, LV, FLOOR);
+            cableOut(c, vh, ph, hub, Direction.XP, LV, FLOOR);
+            source(c, Wp9aCases.SOURCE, c.at(5, 1, 1), 50);
+            rHub = resistor(c, c.at(7, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(8, 1, 1));
+            // sockets and the anemometer: refused on the floor
+            var vf = block(c, c.at(10, 1, 1));
+            floorSocket = String.valueOf(vf.placeAnywhere(desc("50V Power Socket").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
+            floorWind = String.valueOf(vf.placeAnywhere(desc("Electrical Anemometer Sensor").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
+            // a socket on a north wall (y 2), its pin down; a source on the wall of the block below
+            for (int y = 1; y <= 2; y++) c.floor(c.at(1, y, 3));
+            var below = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(Wp9aCases.SOURCE, c.at(1, 1, 4), Direction.ZN);
+            below.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(50f);
+            }));
+            BlockPos ps = c.at(1, 2, 4);
+            var vs = block(c, ps);
+            socket = put(c, vs, "50V Power Socket", Direction.ZN, 2, 0, 0, Direction.YN);
+            cableOut(c, vs, ps, socket, Direction.YN, LV, NORTH_WALL);
+            // an anemometer on a north wall, its pin wherever its front puts it
+            c.floor(c.at(4, 2, 3));
+            BlockPos pw = c.at(4, 2, 4);
+            var vw = block(c, pw);
+            var d = desc("Electrical Anemometer Sensor");
+            LRDU f = d.getFrontFromPlace(Direction.ZN, player(c));
+            int slot = vw.freeSlot();
+            String err = vw.placeErrorAt(d.newItemStack(), slot, Direction.ZN, 2, -2, 0, f);
+            if (err == null && vw.createSubBlockAt(d.newItemStack(), slot, Direction.ZN, 2, -2, 0, player(c))) {
+                wind = vw.getElement(slot);
+                for (int[] t : vw.pinTips(slot)) cableOut(c, vw, pw, wind, Direction.ZN.applyLRDU(LRDU.fromInt(t[0])), SIGNAL, NORTH_WALL);
+            } else floorWind += "; wall: " + err;
+        }
+
+        public void measure(TestContext c) {
+            c.check("ground: its pin linked; the resistor carries 50 V's current to it", linked(ground, Direction.XN)
+                && Math.abs(Wp9aCases.current(rGround) - 50 / rGround.nominalRs) < 0.05 * 50 / rGround.nominalRs,
+                fmt("mask %d, %.3f A", ground.slotMask.mask, Wp9aCases.current(rGround)));
+            c.check("hub: no pins with empty slots; with LV cables in two slots, two pins that join source and resistor",
+                hubBare.equals("pins bare: 0") && linked(hub, Direction.XN) && linked(hub, Direction.XP)
+                    && Math.abs(Wp9aCases.current(rHub) - 50 / rHub.nominalRs) < 0.05 * 50 / rHub.nominalRs,
+                fmt("%s, mask %d, %.3f A", hubBare, hub.slotMask.mask, Wp9aCases.current(rHub)));
+            c.check("sockets and anemometer: not on a floor", floorSocket.startsWith("It can't go on that side") && floorWind.startsWith("It can't go on that side"),
+                floorSocket + " / " + floorWind);
+            c.check("socket: off centre on a wall, its pin down on a cable", socket != null && linked(socket, Direction.YN), socket == null ? "-" : "mask " + socket.slotMask.mask);
+            c.check("anemometer: off centre on a wall, its pin on a cable", wind != null && wind.slotMask.mask != 0, wind == null ? floorWind : "mask " + wind.slotMask.mask);
         }
     }
 }

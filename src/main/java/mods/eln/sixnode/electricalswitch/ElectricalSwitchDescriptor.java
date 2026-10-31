@@ -204,4 +204,21 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
             return super.getFrontFromPlace(side, player).inverse();
         }
     }
+
+    /** Small: placed anywhere on a face of a voxel block, at its drawn size (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return signalSwitch && objType == ObjType.Button;   // (the Signal Switch with LED; the power switches take the face)
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        front.glRotateOnX();
+        draw(0f, 0f, null);
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return boundsOf(main, lever);
+    }
 }
