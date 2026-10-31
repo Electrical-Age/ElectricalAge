@@ -33,6 +33,42 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
         @Volatile
         var clientBeam: java.util.function.Predicate<Entity>? = null
 
+        /**
+         * The beam an entity casts (the one light for every EA lamp, Baughn 2026-10-31): the brightest lit flashlight in
+         * either hand or the worn headlamp, else 0. For the client's beam drawing (Stasis Delvers' FlashlightPost).
+         */
+        @JvmStatic
+        fun beamLight(entity: Entity): Int {
+            var best = 0
+            if (entity is net.minecraft.world.entity.LivingEntity)
+                for (s in listOf(entity.mainHandItem, entity.offhandItem)) {
+                    val lamp = mods.eln.misc.Utils.getItemObject(s)
+                    if (lamp is LampItem) best = maxOf(best, lamp.beamLight(s))
+                }
+            if (entity is Player) {
+                val head = mods.eln.item.headlamp.HeadlampItem.worn(entity)
+                if (head.item is mods.eln.item.headlamp.HeadlampItem) best = maxOf(best, (head.item as mods.eln.item.headlamp.HeadlampItem).light(head))
+            }
+            return best
+        }
+
+        /**
+         * The server's half of a lamp's light (hand-held or worn): one light block at the eyes when a client draws the
+         * beam (clientBeam), else the 1.12 trail of light blocks along the look.
+         */
+        @JvmStatic
+        fun light(world: Level, entity: Entity, light: Int, range: Int) {
+            val beam = clientBeam
+            if (beam != null && beam.test(entity)) {
+                val fx = Mth.floor(entity.getX())
+                val fy = Mth.floor(entity.getY() + 1.62)
+                val fz = Mth.floor(entity.getZ())
+                if (WorldCompat.isAir(world, fx, fy, fz)) LightBlockEntity.addLight(world, fx, fy, fz, light, 5)
+                return
+            }
+            placeBeam(world, entity, light, range)
+        }
+
         /** Light blocks along the entity's look (two rows, from its eyes to the first solid block within range). */
         @JvmStatic
         fun placeBeam(world: Level, entity: Entity, light: Int, range0: Int) {
@@ -86,16 +122,6 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
         if (getLightState(stack) == 0) return
         val light = getLight(stack)
         if (light == 0) return
-
-        val beam = clientBeam
-        if (beam != null && beam.test(entity)) {
-            val fx = Mth.floor(entity.getX())
-            val fy = Mth.floor(entity.getY() + 1.62)
-            val fz = Mth.floor(entity.getZ())
-            if (WorldCompat.isAir(world, fx, fy, fz)) LightBlockEntity.addLight(world, fx, fy, fz, light, 5)
-            return
-        }
-
-        placeBeam(world, entity, light, getRange(stack))
+        light(world, entity, light, getRange(stack))
     }
 }

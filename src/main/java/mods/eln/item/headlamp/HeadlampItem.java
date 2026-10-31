@@ -63,9 +63,10 @@ public class HeadlampItem extends Item implements IItemEnergyBattery {
             return;
         }
         lamp.setEnergy(s, e);
-        // (always the trail of light along the look: no client draws a beam for a worn lamp, so LampItem.clientBeam,
-        // which hands the beam to Stasis Delvers' drawing for lamps in hand, doesn't apply)
-        LampItem.placeBeam(level, wearer, LIGHT, RANGE);
+        // the flashlight's light exactly (Baughn 2026-10-31: one beam for hand-held and worn lamps): with a client
+        // drawing beams (LampItem.clientBeam, Stasis Delvers, which asks LampItem.beamLight) a light at the eyes, else
+        // the trail along the look
+        LampItem.light(level, wearer, LIGHT, RANGE);
     }
 
     @Override

@@ -125,6 +125,10 @@ public class ItemEnergyInventoryProcess implements IProcess {
                 }
             }
 
+            // a headlamp worn in Curios' head slot charges from carried batteries as one in the helmet slot does
+            ItemStack lamp = mods.eln.item.headlamp.HeadlampItem.worn(player);
+            if (!lamp.isEmpty() && lamp != player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD)
+                && lamp.getItem() instanceof IItemEnergyBattery lb) list.add(new Element(lamp, lb));
             // the worn battery belt (Baughn 2026-10-27): its batteries power the player's tools as carried ones do
             ItemStack belt = mods.eln.item.belt.BatteryBeltItem.worn(player);
             if (!belt.isEmpty() && belt.getItem() instanceof IItemEnergyBattery bb) list.add(new Element(belt, bb));
