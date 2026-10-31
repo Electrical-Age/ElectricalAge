@@ -33,6 +33,8 @@ public final class VoxelDeviceCases {
         cases.add(new ThermalProbesCase());
         cases.add(new SignalDevicesCase());
         cases.add(new PowerDevicesCase());
+        cases.add(new InlineCase());
+        cases.add(new TapCase());
     }
 
     static int id(String name) {
@@ -669,6 +671,161 @@ public final class VoxelDeviceCases {
             c.check("anemometer: clicked on an open floor, refused without leaving an empty block", openFloorOk, openFloor);
             c.check("socket: off centre on a wall, its pin down on a cable", socket != null && linked(socket, Direction.YN), socket == null ? "-" : "mask " + socket.slotMask.mask);
             c.check("anemometer: off centre on a wall, its pin on a cable", wind != null && wind.slotMask.mask != 0, wind == null ? floorWind : "mask " + wind.slotMask.mask);
+        }
+    }
+
+    static int cableLength(VoxelNode v) {
+        int n = 0;
+        for (var part : v.parts) if (part instanceof CablePart cp) n += cp.dropLength();
+        return n;
+    }
+
+    /**
+     * Devices placed onto a cable already laid (AdventurAgent: with a cable across the floor every place and facing was
+     * refused). A straight LV run from a 50 V source to a resistor and ground; a click on the run puts the device in
+     * line, turned so its contacts lie along the run, the cable cut where it goes and given back. An LV relay with its
+     * gate on 50 V passes the current, one with its gate at 0 V doesn't, an Electrical Probe in line reads 50 V. The cut
+     * keeps the cable: what is left plus what came back is the run's 16 voxels.
+     */
+    static final class InlineCase implements TestCase {
+        SixNodeElement on, off, probe;
+        mods.eln.sixnode.resistor.ResistorElement rOn, rOff, rProbe;
+        VoxelNode vProbe;
+        String accounts = "";
+        boolean accountsOk = true;
+
+        public String name() {
+            return "devices placed in line on a cable";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        SixNodeElement row(TestContext c, String name, int z, Double gate) {
+            for (int x = 0; x < 5; x++) for (int dz = -1; dz <= 1; dz++) c.floor(c.at(x, 0, z + dz));
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, z), 50);
+            BlockPos p = c.at(1, 1, z);
+            var v = block(c, p);
+            CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            var stack = desc(name).newItemStack();
+            double[] h = {0.55, 0, 0.5};
+            var plan = mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, h, player(c));
+            String err = v.placeAnywhere(stack, Direction.YN, h[0], h[1], h[2], player(c));
+            SixNodeElement e = null;
+            for (int i = 6; i < mods.eln.node.six.SixNode.SLOTS; i++) if (v.getElement(i) != null) e = v.getElement(i);
+            int left = cableLength(v), back = plan.cut() == null ? -1 : plan.cut().returned();
+            accounts += fmt("%s: %s, cut %s, left %d + back %d; ", name, err, plan.cut() != null, left, back);
+            accountsOk &= err == null && e != null && plan.cut() != null && left + back == 16 && back > 0;
+            if (e == null) return null;
+            Direction front = e.side.applyLRDU(e.front);
+            cableOut(c, v, p, e, front, SIGNAL, FLOOR);
+            if (gate != null) {
+                BlockPos g = front == Direction.ZN ? c.at(1, 1, z - 1) : c.at(1, 1, z + 1);
+                source(c, Wp9aCases.SIGNAL_SOURCE, g, gate);
+            }
+            if (name.equals("Electrical Probe")) vProbe = v;
+            return e;
+        }
+
+        public void build(TestContext c) {
+            on = row(c, "Low Voltage Relay", 1, mods.eln.Eln.SVU);
+            rOn = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
+            off = row(c, "Low Voltage Relay", 4, 0.0);
+            rOff = resistor(c, c.at(2, 1, 4), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 4));
+            probe = row(c, "Electrical Probe", 7, null);
+            rProbe = resistor(c, c.at(2, 1, 7), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 7));
+        }
+
+        public void measure(TestContext c) {
+            c.check("in line: each placed on the run, the cable cut and its cut-out length given back (kept: 16 voxels)", accountsOk, accounts);
+            if (on == null || off == null || probe == null) return;
+            c.check("in line: a relay's contacts lie along the run, both linked", linked(on, Direction.XN) && linked(on, Direction.XP)
+                && linked(off, Direction.XN) && linked(off, Direction.XP), on.slotMask.mask + " " + off.slotMask.mask);
+            double i = Wp9aCases.current(rOn);
+            Wp9cCases.within(c, "in line: gate on 50 V, the relay passes the source's current to the resistor [A]", i, 50 / rOn.nominalRs, 0.05 * 50 / rOn.nominalRs);
+            Wp9cCases.within(c, "in line: gate at 0 V, none [A]", Wp9aCases.current(rOff), 0, 1e-3);
+            Wp9cCases.within(c, "in line: the run's current flows through an Electrical Probe too [A]", Wp9aCases.current(rProbe), 50 / rProbe.nominalRs,
+                0.05 * 50 / rProbe.nominalRs);
+            Direction f = probe.side.applyLRDU(probe.front);
+            Wp9cCases.within(c, "in line: the probe reads 50 V on its signal pin's cable [V]",
+                ProbesCase.cableU(vProbe, tip(vProbe, probe, f), f), mods.eln.Eln.SVU, 0.1);
+        }
+    }
+
+    /**
+     * A device with one pin of the cable's kind, aimed beside a cable, taps it: a Voltage Probe clicked just beside a
+     * 50 V LV run reads it; a power socket clicked above a cable on a wall gets its pin onto it (AdventurAgent: always
+     * "Too close"). A device with no pin of the cable's kind, clicked on it, is refused with what to do instead.
+     */
+    static final class TapCase implements TestCase {
+        SixNodeElement volt, socket;
+        String voltErr = "", rxErr = "", socketErr = "";
+
+        public String name() {
+            return "devices tapping a cable beside them";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        static SixNodeElement placed(VoxelNode v) {
+            for (int i = 6; i < mods.eln.node.six.SixNode.SLOTS; i++) if (v.getElement(i) != null) return v.getElement(i);
+            return null;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 4; x++) for (int z = 0; z < 9; z++) c.floor(c.at(x, 0, z));
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            BlockPos p = c.at(1, 1, 1);
+            var v = block(c, p);
+            // (the run a quarter of the way across: a Voltage Probe is 10 voxels tip to tip, more than half a block)
+            CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 4, 16, 0, 4})));
+            voltErr = String.valueOf(v.placeAnywhere(desc("Voltage Probe").newItemStack(), Direction.YN, 0.5, 0, 0.35, player(c)));
+            volt = placed(v);
+            BlockPos q = c.at(1, 1, 4);
+            var w = block(c, q);
+            CableCases.voxel(c, q, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            rxErr = String.valueOf(w.placeAnywhere(desc("Wireless Signal Receiver").newItemStack(), Direction.YN, 0.6, 0, 0.5, player(c)));
+            // a wall to the north at y 2, an LV cable across it at y 4
+            c.floor(c.at(1, 2, 6));
+            BlockPos s = c.at(1, 2, 7);
+            var u = block(c, s);
+            CableCases.voxel(c, s, List.of(new CablePart(LV, NORTH_WALL, new int[]{0, 4, 0, 16, 4, 0})));
+            socketErr = String.valueOf(u.placeAnywhere(desc("50V Power Socket").newItemStack(), Direction.ZN, 0.5, 0.45, 0, player(c)));
+            socket = placed(u);
+        }
+
+        public void measure(TestContext c) {
+            c.check("tap: a Voltage Probe clicked beside the run is placed with its cable pin on it", volt != null && voltErr.equals("null"), voltErr);
+            if (volt != null) {
+                Direction f = volt.side.applyLRDU(volt.front);
+                Wp9cCases.within(c, "tap: it reads the run's 50 V [V]", u(volt, f), mods.eln.Eln.SVU, 0.1);
+            }
+            c.check("tap: a receiver (no pin of the cable's kind) clicked on the run is refused, told what to do",
+                rxErr.contains("place the device first"), rxErr);
+            c.check("tap: a power socket above a wall cable gets its pin onto it", socket != null && linked(socket, Direction.YN), socketErr
+                + (socket == null ? "" : ", mask " + socket.slotMask.mask));
         }
     }
 }

@@ -52,7 +52,17 @@ public final class DevicePreview {
             if (st.getBlock() instanceof VoxelNodeBlock) {
                 if (level.getBlockEntity(pos) instanceof VoxelNodeEntity ve && ve.getNode() instanceof VoxelNode v) {
                     int slot = v.freeSlot();
-                    err = slot < 0 ? "full" : v.placeErrorAt(p.getMainHandItem(), slot, side, o[0], o[1], o[2], front);
+                    if (slot < 0) err = "full";
+                    else if (!item.descriptor.allowedOnSide(side)) err = "side";
+                    else if (!(o[0] == 0 && o[1] == 0 && o[2] == 0 && v.sideElementList[side.getInt()] == null && v.canPlaceElement(side.getInt()))) {
+                        // where the click would put it: in line on a cable, at its end, beside it, or at the click
+                        var plan = DevicePlacer.plan(v, p.getMainHandItem(), slot, side, new double[]{h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ()}, p);
+                        err = plan.err();
+                        if (err == null) {
+                            o = new int[]{plan.ox(), plan.oy(), plan.oz()};
+                            front = plan.front();
+                        }
+                    }
                 } else show = false;
             } else if (!st.isAir() && !st.canBeReplaced()) show = false;
             if (show && err == null && !item.descriptor.allowedOnSide(side)) err = "side";

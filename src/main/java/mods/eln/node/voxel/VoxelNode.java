@@ -786,18 +786,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public String placeErrorAt(ItemStack stack, int slot, Direction face, int ox, int oy, int oz, LRDU front) {
         var d = Eln.sixNodeItem.getDescriptor(stack);
         if (!d.allowedOnSide(face)) return "It can't go on that side";   // (the power sockets: walls only)
-        mods.eln.node.six.SixNodeElement probe;
-        try {
-            probe = (mods.eln.node.six.SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
-                mods.eln.node.six.SixNodeDescriptor.class).newInstance(this, face, d);
-        } catch (ReflectiveOperationException | RuntimeException ex) {
-            return "Can't place that";
-        }
-        probe.slot = slot;
-        probe.ox = ox;
-        probe.oy = oy;
-        probe.oz = oz;
-        probe.front = front;
+        var probe = standIn(stack, slot, face, ox, oy, oz, front);
+        if (probe == null) return "Can't place that";
         try {
             return placeError(probe);
         } finally {
@@ -819,6 +809,30 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             sideElementList[e.slot] = e;
             markUsed();
         }
+    }
+
+    /** An element of this stack's kind at that place and front, not added (to read its pins); the caller unloads it,
+     *  which undoes what its constructor joined. Null if it can't be made. */
+    mods.eln.node.six.SixNodeElement standIn(ItemStack stack, int slot, Direction face, int ox, int oy, int oz, LRDU front) {
+        var d = Eln.sixNodeItem.getDescriptor(stack);
+        mods.eln.node.six.SixNodeElement probe;
+        try {
+            probe = (mods.eln.node.six.SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
+                mods.eln.node.six.SixNodeDescriptor.class).newInstance(this, face, d);
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            return null;
+        }
+        probe.slot = slot;
+        probe.ox = ox;
+        probe.oy = oy;
+        probe.oz = oz;
+        probe.front = front;
+        return probe;
+    }
+
+    /** The used voxels again after DevicePlacer changed the parts for a check. */
+    void markUsedForPlacer() {
+        markUsed();
     }
 
     /** A free slot past the faces, or -1. */
@@ -917,9 +931,38 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // next block, a machine beside it, by EA's edge rule: a trimmer beside a furnace)
         if (o[0] == 0 && o[1] == 0 && o[2] == 0 && sideElementList[face.getInt()] == null && canPlaceElement(face.getInt()))
             return createSubBlock(stack, face, player) ? null : "Can't place that";
-        String err = placeErrorAt(stack, slot, face, o[0], o[1], o[2], front);
-        if (err != null) return err;
-        return createSubBlockAt(stack, slot, face, o[0], o[1], o[2], player) ? null : "Can't place that";
+        // where it goes, in line on a cable, on a cable's end or beside one (DevicePlacer)
+        var plan = DevicePlacer.plan(this, stack, slot, face, new double[]{hx, hy, hz}, player);
+        if (plan.err() != null) return plan.err();
+        var cut = plan.cut();
+        CablePart old = cut == null ? null : (CablePart) parts.get(cut.index());
+        if (cut != null) DevicePlacer.apply(this, cut);
+        placingFront = plan.front();
+        boolean ok;
+        try {
+            ok = createSubBlockAt(stack, slot, face, plan.ox(), plan.oy(), plan.oz(), player);
+        } finally {
+            placingFront = null;
+        }
+        if (!ok) {
+            if (cut != null) DevicePlacer.unapply(this, cut, old);
+            return "Can't place that";
+        }
+        if (cut != null) {
+            changed();   // (the cable's conductors and links rebuilt round the device)
+            // the cut-out cable back to the player: cable is neither made nor lost
+            ItemStack back = CableKitItem.kit(old.tier, cut.returned());
+            if (!back.isEmpty() && player != null && !player.isCreative() && !player.getInventory().add(back)) dropItem(back);
+        }
+        return null;
+    }
+
+    /** The front of the device being placed by placeAnywhere (its plan), else null: the player's facing. */
+    private LRDU placingFront;
+
+    @Override
+    protected LRDU frontFor(mods.eln.node.six.SixNodeDescriptor d, Direction side, Player player) {
+        return placingFront != null ? placingFront : super.frontFor(d, side, player);
     }
 
     /**

@@ -117,6 +117,11 @@ public class SixNode extends Node {
 
     /** A device into a slot: on face direction, its centre (ox, oy, oz) world voxels from the face's centre (0 for the
      *  six face slots). */
+    /** The front a device placed on side gets: the player's facing, by the descriptor. */
+    protected LRDU frontFor(SixNodeDescriptor d, Direction side, Player player) {
+        return d.getFrontFromPlace(side, player);
+    }
+
     public boolean createSubBlockAt(ItemStack itemStack, int slot, Direction direction, int ox, int oy, int oz, Player player) {
         if (slot < 0 || slot >= SLOTS || slot < 6 && slot != direction.getInt()) return false;
         if (keptSides[slot] != null) {
@@ -135,7 +140,7 @@ public class SixNode extends Node {
             sideElementList[slot] = e;
 
             disconnect();
-            e.front = descriptor.getFrontFromPlace(direction, player);
+            e.front = frontFor(descriptor, direction, player);
             e.initialize();
             sideElementIdList[slot] = descriptor.parentItemDamage;
 

@@ -90,6 +90,15 @@ transparent neighbour).
   Cable (thermal loads both ways); a Temperature Probe's back pin and a Hub's pins change with their slots after
   placement: the links follow the new kind (a mismatched cable simply isn't joined), but the placement rules are not
   checked again.
+- Placed where cables already run (`DevicePlacer`, AdventurAgent: with a cable across the floor every place was
+  refused). A click on a cable, or a click refused within 6 voxels of one, tries in order: in line (two opposite pins
+  with the same mask, of the cable's kind: the device sits on the cable, turned so they lie along it; the cable is cut
+  between the pin tips and the cut-out length comes back to the player as a kit of its tier, a converted piece's `paid`
+  shared by length, so cable is neither made nor lost; a cut end on the block's side keeps 2 voxels, since a pin there
+  would face the next block); on a free cable end inside the block (one pin of its kind on the end); beside the cable
+  (one pin of its kind touching its side: a tap); then at the click as before, else the refusal says what to do. Where
+  the cable leaves a choice the player's facing is tried first, then turned clockwise. The preview shows the same plan.
+  Breaking a device in line leaves the gap; the two ends stay where they were.
 - `placeErrorAt` builds a stand-in element to read its pins and unloads it after (a Wireless Signal Repeater joins the
   wireless spots as it is made; left there, its empty spot crashed the receivers' process).
 - Holding such a device shows it see-through where a click would put it (`DevicePreview`, client
@@ -190,7 +199,8 @@ device terminal plates) applies to six-node floor cables only, not voxel cables.
 - `gametest/cases/VoxelDeviceCases.java`: the devices placed anywhere since a0d38750: sizes and pins of each (logged), a
   click in the middle of a free face still uses the face's slot, lopsided bodies turn with the front; relays switch a
   resistor's current, probes read through their pins, a thermal probe reads a hot Copper Thermal Cable, temperature probes
-  by their slot, wireless link, timer, LED vuMeter and switch, ground and hub currents, sockets and anemometer walls only.
+  by their slot, wireless link, timer, LED vuMeter and switch, ground and hub currents, sockets and anemometer walls only;
+  devices put in line on an LV run (relays switch, a probe reads, the cable kept) and tapping a cable beside them.
 - `gametest/cases/PipeCases.java`: `pipe_boiler_to_turbine`, `pipe_two_in_one_block`, `pipe_routed_over_a_wall`,
   `pipe_join_mid_run`, `pipe_kit_crafting`, `pipe_burst_vents`, `pipe_valve`, `pipe_adapter_capability`,
   `pipe_valve_by_player`, `pipe_kit_pickup_merges`.
