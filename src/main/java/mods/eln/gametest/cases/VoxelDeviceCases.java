@@ -29,6 +29,8 @@ public final class VoxelDeviceCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new GeometryCase());
         cases.add(new RelaysCase());
+        cases.add(new ProbesCase());
+        cases.add(new ThermalProbesCase());
     }
 
     static int id(String name) {
@@ -124,14 +126,15 @@ public final class VoxelDeviceCases {
     /**
      * Every device converted here: placed anywhere, a click in the middle of a free face still puts it in the face's own
      * slot (the old placement, ports at the face's edges); its body follows its drawn model (logged: the body box and reach
-     * of each, centred, front north); the relays at their half size, their contacts along their length.
+     * of each, centred, front north); lopsided models keep their pins at the model's edges (a Voltage Probe's signal
+     * pin 6 voxels from its centre on the long side, its cable pin 4 on the short side); the relays at their half size.
      */
     static final class GeometryCase implements TestCase {
         static final String[] FLOOR_DEVICES = {"Low Voltage Relay", "Medium Voltage Relay", "High Voltage Relay", "Very High Voltage Relay",
-            "Signal Relay"};
+            "Signal Relay", "Electrical Probe", "Voltage Probe", "Thermal Probe", "Temperature Probe"};
         static final String[] WALL_DEVICES = {};
-        String all = "", middle = "", relays = "", stayed = "";
-        boolean anywhereOk, middleOk, relaysOk, stayedOk;
+        String all = "", middle = "", lopsided = "", relays = "", stayed = "";
+        boolean anywhereOk, middleOk, lopsidedOk, relaysOk, stayedOk;
 
         public String name() {
             return "small devices as voxel devices: size and pins";
@@ -194,6 +197,18 @@ public final class VoxelDeviceCases {
             for (String n : FLOOR_DEVICES) log.append(' ').append(n).append(describe(desc(n), yn, toward(yn, zn))).append(';');
             for (String n : WALL_DEVICES) log.append(' ').append(n).append(describe(desc(n), zn, desc(n).getFrontFromPlace(zn, player(c)))).append(';');
             all = log.toString();
+            // a Voltage Probe, front north: its signal pin on the model's long side (5 px: tip 6 voxels out), its cable
+            // pin on the short side (3 px: tip 4 voxels out); its body 4 voxels across the other way (2 px each side)
+            var vp = desc("Voltage Probe");
+            int[] e = vp.bodyExtents(yn, toward(yn, zn));
+            lopsided = fmt("Voltage Probe reach north %d, south %d, west %d, east %d", e[toward(yn, zn).toInt()], e[toward(yn, Direction.ZP).toInt()],
+                e[toward(yn, Direction.XN).toInt()], e[toward(yn, Direction.XP).toInt()]);
+            lopsidedOk = e[toward(yn, zn).toInt()] == 5 && e[toward(yn, Direction.ZP).toInt()] == 3 && e[toward(yn, Direction.XN).toInt()] == 3
+                && e[toward(yn, Direction.XP).toInt()] == 3;
+            // turned east, the long side goes east
+            int[] t = vp.bodyExtents(yn, toward(yn, Direction.XP));
+            lopsided += fmt("; turned east: east %d, west %d", t[toward(yn, Direction.XP).toInt()], t[toward(yn, Direction.XN).toInt()]);
+            lopsidedOk &= t[toward(yn, Direction.XP).toInt()] == 5 && t[toward(yn, Direction.XN).toInt()] == 3;
             // the relays: 8 voxels long (their contacts along it), 5 wide (their gate across), at half scale
             var r = desc("Low Voltage Relay");
             int[] re = r.bodyExtents(yn, toward(yn, zn));
@@ -213,6 +228,7 @@ public final class VoxelDeviceCases {
             c.line(all);
             c.check("voxel devices: each converted device goes anywhere; the redstone converters don't", anywhereOk && stayedOk, stayed);
             c.check("voxel devices: a click in the middle of a free face puts each in the face's own slot (as before)", middleOk, middle);
+            c.check("voxel devices: a lopsided model's body follows it, turned with its front", lopsidedOk, lopsided);
             c.check("voxel devices: a relay's body is its half-size model (contacts along, gate across)", relaysOk, relays);
         }
     }
@@ -283,6 +299,177 @@ public final class VoxelDeviceCases {
                 fmt("%s, %.4f A", off.getSwitchState(), Wp9aCases.current(rOff)));
             c.check("relay: a Signal Relay closes on signal cables", sig.getSwitchState() && Math.abs(u(sig, Direction.XP) - mods.eln.Eln.SVU) < 0.2,
                 fmt("%s, far contact %.2f V", sig.getSwitchState(), u(sig, Direction.XP)));
+        }
+    }
+
+    /**
+     * Probes off centre, signal pin north. An Electrical Probe between a 50 V source (west) and a Power Resistor (east) to
+     * ground: its signal pin's cable at 50 V's share of SVU. A Voltage Probe whose cable pin (south) is on a 30 V source.
+     */
+    static final class ProbesCase implements TestCase {
+        SixNodeElement probe, volt;
+        VoxelNode vProbe, vVolt;
+        BlockPos pProbe, pVolt;
+
+        public String name() {
+            return "probes as voxel devices";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 5; x++) for (int z = 0; z < 7; z++) c.floor(c.at(x, 0, z));
+            pProbe = c.at(1, 1, 1);
+            vProbe = block(c, pProbe);
+            probe = put(c, vProbe, "Electrical Probe", Direction.YN, 0, 0, 2, Direction.ZN);
+            cableOut(c, vProbe, pProbe, probe, Direction.XN, LV, FLOOR);
+            cableOut(c, vProbe, pProbe, probe, Direction.XP, LV, FLOOR);
+            cableOut(c, vProbe, pProbe, probe, Direction.ZN, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            resistor(c, c.at(2, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
+            pVolt = c.at(1, 1, 4);
+            vVolt = block(c, pVolt);
+            volt = put(c, vVolt, "Voltage Probe", Direction.YN, 2, 0, 0, Direction.ZN);
+            cableOut(c, vVolt, pVolt, volt, Direction.ZP, LV, FLOOR);
+            cableOut(c, vVolt, pVolt, volt, Direction.ZN, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SOURCE, c.at(1, 1, 5), 30);
+        }
+
+        static double cableU(VoxelNode v, int[] t, Direction dir) {
+            int[] q = t.clone();
+            int a = dir == Direction.XN || dir == Direction.XP ? 0 : 2;
+            q[a] += dir == Direction.XP || dir == Direction.ZP ? 0 : -1;
+            Object[] k = v.cableAt(q[0], q[1], q[2]);
+            return k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
+        }
+
+        public void measure(TestContext c) {
+            int[] s = tip(vProbe, probe, Direction.ZN), w = tip(vProbe, probe, Direction.XN);
+            // its model: 8 px across its contacts, 4 px toward its signal side and 2 px behind (centre z 10)
+            c.check("probe: pins at its model's edges (signal at z 4, contacts at x 2 and 14)", s != null && w != null && s[2] == 4 && w[0] == 2,
+                java.util.Arrays.toString(s) + " " + java.util.Arrays.toString(w));
+            c.check("probe: its three pins linked", linked(probe, Direction.XN) && linked(probe, Direction.XP) && linked(probe, Direction.ZN), "mask " + probe.slotMask.mask);
+            double a = u(probe, Direction.XN), out = u(probe, Direction.ZN);
+            Wp9cCases.within(c, fmt("probe: the signal on its pin's cable is %.2f V / 50 V of SVU [V]", a), cableU(vProbe, s, Direction.ZN), a / 50 * mods.eln.Eln.SVU, 0.05);
+            c.check("probe: it sees the source through its pin (> 45 V)", a > 45, fmt("%.2f V, out %.2f V", a, out));
+            int[] f = tip(vVolt, volt, Direction.ZN), b = tip(vVolt, volt, Direction.ZP);
+            c.check("voltage probe: its signal pin 6 voxels out on the long side, its cable pin 4 on the short (centre 10,8)",
+                f != null && b != null && f[2] == 2 && b[2] == 12 && f[0] == 10, java.util.Arrays.toString(f) + " " + java.util.Arrays.toString(b));
+            Wp9cCases.within(c, "voltage probe: 30 V on its cable pin -> 0.6 SVU on its signal pin's cable [V]", cableU(vVolt, f, Direction.ZN), 0.6 * mods.eln.Eln.SVU, 0.05);
+        }
+    }
+
+    /**
+     * The thermal pins (none had used them): a Thermal Probe off centre, its two thermal pins on Copper Thermal Cables,
+     * the west one held at 30 C above ambient: the probe reads it, and its signal pin carries it. A Temperature Probe on
+     * a hot LV cable (its back pin electrical, the cable's thermal load) reads it; one with a thermal cable in its slot
+     * (its back pin now thermal) on the same kind of hot LV cable doesn't join it, and doesn't break; one with a thermal
+     * cable in its slot on a hot thermal cable reads that.
+     */
+    static final class ThermalProbesCase implements TestCase {
+        static final double HOT = 30;
+        SixNodeElement thermal, onLv, slotOnLv, slotOnThermal;
+        VoxelNode vThermal;
+        final List<mods.eln.sim.ThermalLoad> bodies = new ArrayList<>();
+        String err = "";
+
+        public String name() {
+            return "thermal and temperature probes as voxel devices";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        /** A body held at HOT, joined to the cable taking voxel q of v (slow: an electrical cable's thermal load). */
+        void heat(VoxelNode v, int[] q, boolean slow) {
+            Object[] k = v.cableAt(q[0], q[1], q[2]);
+            if (k == null || k[1] == null) {
+                err += "no thermal load at " + java.util.Arrays.toString(q) + "; ";
+                return;
+            }
+            var body = new mods.eln.sim.ThermalLoad(HOT, 1e9, 1e-3, 1e9);
+            if (slow) body.setAsSlow();
+            else body.setAsFast();
+            mods.eln.Eln.simulator.addThermalLoad(body);
+            mods.eln.Eln.simulator.addThermalConnection(new mods.eln.sim.ThermalConnection(body, (mods.eln.sim.ThermalLoad) k[1]));
+            bodies.add(body);
+        }
+
+        static int[] outside(int[] t, Direction dir) {
+            int[] q = t.clone();
+            int a = dir == Direction.XN || dir == Direction.XP ? 0 : 2;
+            q[a] += dir == Direction.XP || dir == Direction.ZP ? 0 : -1;
+            return q;
+        }
+
+        SixNodeElement temperature(TestContext c, int x, boolean thermalSlot, int tier) {
+            BlockPos p = c.at(x, 1, 1);
+            var v = block(c, p);
+            var e = put(c, v, "Temperature Probe", Direction.YN, 2, 0, 0, Direction.ZN);
+            if (thermalSlot) {
+                ((mods.eln.sixnode.thermalsensor.ThermalSensorElement) e).getInventory()
+                    .setItem(mods.eln.sixnode.thermalsensor.ThermalSensorContainer.cableSlotId, mods.eln.Eln.sixNodeItem.getDescriptor(Wp9bCases.THERMAL_CABLE).newItemStack());
+                ((mods.eln.sixnode.thermalsensor.ThermalSensorElement) e).getInventory().setChanged();
+            }
+            cableOut(c, v, p, e, Direction.ZP, tier, FLOOR);
+            heat(v, outside(tip(v, e, Direction.ZP), Direction.ZP), tier != THERMAL);
+            return e;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 8; x++) c.floor(c.at(x, 0, 1));
+            BlockPos p = c.at(1, 1, 1);
+            vThermal = block(c, p);
+            thermal = put(c, vThermal, "Thermal Probe", Direction.YN, 0, 0, 2, Direction.ZN);
+            cableOut(c, vThermal, p, thermal, Direction.XN, THERMAL, FLOOR);
+            cableOut(c, vThermal, p, thermal, Direction.XP, THERMAL, FLOOR);
+            cableOut(c, vThermal, p, thermal, Direction.ZN, SIGNAL, FLOOR);
+            heat(vThermal, outside(tip(vThermal, thermal, Direction.XN), Direction.XN), false);
+            onLv = temperature(c, 3, false, LV);
+            slotOnLv = temperature(c, 5, true, LV);
+            slotOnThermal = temperature(c, 7, true, THERMAL);
+        }
+
+        static double t(SixNodeElement e, Direction dir) {
+            var l = e.getThermalLoad(e.side.getLRDUGoingTo(dir));
+            return l == null ? Double.NaN : l.Tc;
+        }
+
+        public void measure(TestContext c) {
+            c.check("thermal probe: heated", err.isEmpty(), err);
+            c.check("thermal probe: both thermal pins and its signal pin linked", linked(thermal, Direction.XN) && linked(thermal, Direction.XP)
+                && linked(thermal, Direction.ZN), "mask " + thermal.slotMask.mask);
+            double tc = t(thermal, Direction.XN);
+            c.check(fmt("thermal probe: reads the hot thermal cable (%.0f C above ambient) through its pin", HOT), tc > 0.8 * HOT && tc <= HOT + 1e-6, fmt("%.2f C", tc));
+            Wp9cCases.within(c, "thermal probe: its signal pin at T / 50 C of SVU (its default 0..50 C range) [V]", u(thermal, Direction.ZN),
+                tc / 50 * mods.eln.Eln.SVU, 0.05);
+            double a = t(onLv, Direction.ZP), b = t(slotOnLv, Direction.ZP), d = t(slotOnThermal, Direction.ZP);
+            c.check("temperature probe: on a hot LV cable, reads it through its back pin", linked(onLv, Direction.ZP) && a > 0.8 * HOT && a <= HOT + 1e-6,
+                fmt("linked %s, %.2f C, mask %d", linked(onLv, Direction.ZP), a, onLv.slotMask.mask));
+            c.check("temperature probe: a thermal cable in its slot, on an LV cable: its thermal pin doesn't join the LV cable",
+                !linked(slotOnLv, Direction.ZP) && Math.abs(b) < 1, fmt("linked %s, %.2f C", linked(slotOnLv, Direction.ZP), b));
+            c.check("temperature probe: a thermal cable in its slot, on a hot thermal cable: reads it", linked(slotOnThermal, Direction.ZP) && d > 0.8 * HOT, fmt("%.2f C", d));
+            for (var h : bodies) mods.eln.Eln.simulator.removeThermalLoad(h);
         }
     }
 }

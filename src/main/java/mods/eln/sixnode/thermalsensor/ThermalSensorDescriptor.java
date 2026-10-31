@@ -66,4 +66,21 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
+
+    /** Small: placed anywhere on a face of a voxel block, at its drawn size (Baughn). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        front.glRotateOnX();
+        draw(temperatureOnly);
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return boundsOf(main, adapter);
+    }
 }
