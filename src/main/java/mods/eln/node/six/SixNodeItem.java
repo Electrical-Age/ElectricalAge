@@ -87,8 +87,12 @@ public class SixNodeItem extends Item implements IDescriptorItem {
                 var v = new mods.eln.node.voxel.VoxelNode();
                 v.onBlockPlacedBy(new Coordonate(pos, world), direction, player, stack);
                 if (anywhere) {
-                    String err = v.placeAnywhere(stack, direction, at[0], at[1], at[2], player);   // (an empty block: it fits)
-                    if (err != null) mods.eln.Eln.LOG.warn("Electrical Age: placing {} at {} in a new block: {}", descriptor.name, pos, err);
+                    // an empty block: it fits, unless the device may not go on that side (the anemometer on a floor)
+                    String err = v.placeAnywhere(stack, direction, at[0], at[1], at[2], player);
+                    if (err != null) {
+                        if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(err));
+                        return false;
+                    }
                 } else v.createSubBlock(stack, direction, player);
                 world.setBlock(pos, mods.eln.registry.ElnRegistry.VOXEL_NODE_BLOCK.get().stateFor(world, pos), 3);
                 return true;

@@ -573,7 +573,8 @@ public final class VoxelDeviceCases {
     static final class PowerDevicesCase implements TestCase {
         SixNodeElement ground, hub, socket, wind;
         mods.eln.sixnode.resistor.ResistorElement rGround, rHub;
-        String floorSocket = "", floorWind = "", hubBare = "";
+        String floorSocket = "", floorWind = "", hubBare = "", openFloor = "";
+        boolean openFloorOk;
 
         public String name() {
             return "power devices as voxel devices";
@@ -617,6 +618,19 @@ public final class VoxelDeviceCases {
             var vf = block(c, c.at(10, 1, 1));
             floorSocket = String.valueOf(vf.placeAnywhere(desc("50V Power Socket").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
             floorWind = String.valueOf(vf.placeAnywhere(desc("Electrical Anemometer Sensor").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
+            // a click on the floor in the open, as a player with voxel cables on: refused, no empty block left, item kept
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            mods.eln.node.voxel.CableConverter.convertOnLoad = true;
+            try {
+                var wd = desc("Electrical Anemometer Sensor");
+                BlockPos air = c.at(12, 1, 1);
+                boolean placed = ((mods.eln.node.six.SixNodeItem) wd.parentItem).placeAt(wd.newItemStack(), player(c), c.level(), air, Direction.YN,
+                    new double[]{0.3, 0, 0.5});
+                openFloor = "placed " + placed + ", block " + c.level().getBlockState(air).getBlock().getName().getString();
+                openFloorOk = !placed && c.level().getBlockState(air).isAir();
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+            }
             // a socket on a north wall (y 2), its pin down; a source on the wall of the block below
             for (int y = 1; y <= 2; y++) c.floor(c.at(1, y, 3));
             var below = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(Wp9aCases.SOURCE, c.at(1, 1, 4), Direction.ZN);
@@ -652,6 +666,7 @@ public final class VoxelDeviceCases {
                 fmt("%s, mask %d, %.3f A", hubBare, hub.slotMask.mask, Wp9aCases.current(rHub)));
             c.check("sockets and anemometer: not on a floor", floorSocket.startsWith("It can't go on that side") && floorWind.startsWith("It can't go on that side"),
                 floorSocket + " / " + floorWind);
+            c.check("anemometer: clicked on an open floor, refused without leaving an empty block", openFloorOk, openFloor);
             c.check("socket: off centre on a wall, its pin down on a cable", socket != null && linked(socket, Direction.YN), socket == null ? "-" : "mask " + socket.slotMask.mask);
             c.check("anemometer: off centre on a wall, its pin on a cable", wind != null && wind.slotMask.mask != 0, wind == null ? floorWind : "mask " + wind.slotMask.mask);
         }
