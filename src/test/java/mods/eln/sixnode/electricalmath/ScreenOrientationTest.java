@@ -53,6 +53,40 @@ class ScreenOrientationTest {
             }
     }
 
+    static Vector3f vec(Direction d) {
+        int[] v = new int[3];
+        d.applyTo(v, 1);
+        return new Vector3f(v[0], v[1], v[2]);
+    }
+
+    /**
+     * On a floor or ceiling, as seen by a player standing at the device's front (where its lamps and labels read from:
+     * the player who placed it, looking the way they looked then): the screen's right is their right, its top away from
+     * them on a floor and toward them on a ceiling, newest on the right (AdventurAgent 2026-10-31: on a floor it was
+     * turned 180°). The front is placed as SixNodeDescriptor.getFrontFromPlace does it; all four fronts.
+     */
+    @Test
+    void onAFloorOrCeilingTheProcessorsScreenReadsFromItsFront() {
+        StringBuilder bad = new StringBuilder();
+        for (Direction side : new Direction[]{Direction.YN, Direction.YP})
+            for (Direction looking : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) {
+                LRDU front = side.getLRDUGoingTo(looking);
+                if (side == Direction.YP) front = front.inverse();
+                Matrix4f m = device(side, front.left()::glRotateOnX);
+                boolean[] o = ElectricalMathDescriptor.screenOrientation(m);
+                Vector3f right = dir(m, 0, 0, o[0] ? 1 : -1), up = dir(m, 0, o[1] ? 1 : -1, 0), normal = dir(m, 1, 0, 0);
+                Vector3f away = vec(looking), viewersRight = new Vector3f(away).cross(0, 1, 0);
+                Vector3f wantUp = side == Direction.YN ? away : new Vector3f(away).negate();
+                // the lamps (model +z of the screen) sit to its left
+                Vector3f lamps = dir(m, 0, 0, 1);
+                if (right.dot(viewersRight) < 0.99f || up.dot(wantUp) < 0.99f || lamps.dot(viewersRight) > -0.99f
+                    || new Vector3f(right).cross(up).dot(normal) < 0.99f)
+                    bad.append(side).append(" front ").append(front).append(", looking ").append(looking).append(": right ")
+                        .append(right).append(" up ").append(up).append('\n');
+            }
+        assertTrue(bad.isEmpty(), bad.toString());
+    }
+
     @Test
     void theLoggersFramesAreNeverMirrored() {
         // a logger's graph is drawn in its model's frame; a turn (no mirror) keeps it reading as on the floor

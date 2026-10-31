@@ -97,13 +97,14 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     /**
      * Which way the tiny screen reads, from the matrix that takes the model to the world: {is z1 the viewer's right,
      * is y1 the top}. The screen faces along the model's +x. On a wall its top is up; on a floor or ceiling, the model's
-     * -y (as on the floor, checked in the dev client). The right is then up x normal, so the graph is never mirrored
-     * and the newest points are on the right, seen from in front of the screen, on any face, any turn.
+     * +y, the cupboard's top, so it reads the same way as the labels and lamps: for the player who placed it, top away
+     * on a floor and toward them on a ceiling (AdventurAgent 2026-10-31: -y had it turned 180° on a floor). The right is
+     * then up x normal, so the graph is never mirrored and the newest points are on the right, on any face, any turn.
      */
     static boolean[] screenOrientation(org.joml.Matrix4f m) {
         org.joml.Vector3f n = m.transformDirection(new org.joml.Vector3f(1, 0, 0)).normalize(),
             y = m.transformDirection(new org.joml.Vector3f(0, 1, 0)).normalize(), z = m.transformDirection(new org.joml.Vector3f(0, 0, 1)).normalize();
-        org.joml.Vector3f up = Math.abs(n.y) < 0.7f ? new org.joml.Vector3f(0, 1, 0) : new org.joml.Vector3f(y).negate();
+        org.joml.Vector3f up = Math.abs(n.y) < 0.7f ? new org.joml.Vector3f(0, 1, 0) : new org.joml.Vector3f(y);
         up.sub(new org.joml.Vector3f(n).mul(up.dot(n))).normalize();   // (in the screen's plane)
         org.joml.Vector3f right = new org.joml.Vector3f(up).cross(n);
         return new boolean[]{z.dot(right) > 0, y.dot(up) > 0};

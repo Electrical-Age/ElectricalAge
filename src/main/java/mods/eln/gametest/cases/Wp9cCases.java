@@ -113,6 +113,7 @@ public final class Wp9cCases {
         cases.add(new DataLoggerCase());
         cases.add(new ThreeChannelLoggerCase());
         cases.add(new TiltedTerminalCase());
+        cases.add(new DemoProcessorCase());
         cases.add(new ChipsCase());
         cases.add(new IncognitoLoadCase());
         cases.add(new EmergencyLampCase());
@@ -652,6 +653,53 @@ public final class Wp9cCases {
             for (int c = 0; c < 3; c++)
                 ctx.checkValue(f("wp9c three-channel logger: channel %c records its own cable's source (%.0f V) [signal]", (char) ('A' + c), volts[cabled[c]]),
                     v.size() > 0 ? v.mean(c, 0) : -1, volts[cabled[c]] / SVU);
+        }
+    }
+
+    /**
+     * The logger demo's wall processor (AdventurAgent 2026-10-31: 0 V for "0.9" where a lone one gave 45 V): built as
+     * /elnlab loggerdemo builds it, on a wall in a voxel block with a cable along its floor and a knuckle, beside a lone
+     * one on a wall; both run "0.9". And the demo builds again where it stood (it threw: the face was taken).
+     */
+    static final class DemoProcessorCase implements TestCase {
+        SixNodeElement demo, lone, again;
+        String rebuilt = "";
+
+        public String name() {
+            return "wp9c demo wall processor";
+        }
+
+        ElectricalMathElement program(TestContext ctx, SixNodeElement e) {
+            var m = (ElectricalMathElement) e;
+            m.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(1); // ElectricalMathElement.setExpressionId
+                o.writeUTF("0.9");
+            }), player(ctx));
+            return m;
+        }
+
+        public void build(TestContext ctx) {
+            var pl = player(ctx);
+            BlockPos sp = ctx.at(2, 1, 1), alone = ctx.at(5, 1, 1);
+            ctx.level().setBlock(sp.west(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+            ctx.level().setBlock(alone.west(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+            demo = program(ctx, mods.eln.gametest.LabCommands.host(ctx.level(), pl, SIGNAL_PROCESSOR, sp, Direction.XN));
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), sp, new mods.eln.node.voxel.CablePart(0, 0, new int[]{16, 0, 8, 1, 0, 8}), null);
+            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), sp, mods.eln.node.voxel.CablePart.knuckle(0, 0, 0, 8), null);
+            lone = program(ctx, mods.eln.gametest.LabCommands.host(ctx.level(), pl, SIGNAL_PROCESSOR, alone, Direction.XN));
+            try {
+                again = mods.eln.gametest.LabCommands.host(ctx.level(), pl, SIGNAL_PROCESSOR, ctx.at(5, 1, 2), Direction.YN);
+                again = mods.eln.gametest.LabCommands.host(ctx.level(), pl, SIGNAL_PROCESSOR, ctx.at(5, 1, 2), Direction.YN);
+                rebuilt = again != null && !again.sixNode.isDestructing() && again.sixNode.getElement(Direction.YN) == again ? "ok" : "not there";
+            } catch (RuntimeException e) {
+                rebuilt = e.toString();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.checkValue("wp9c demo wall processor: the lone one on a wall, \"0.9\" [V]", out(lone), 45);
+            ctx.checkValue("wp9c demo wall processor: the demo's, with its cable, \"0.9\" [V]", out(demo), 45);
+            ctx.check("wp9c demo wall processor: a device hosted again where one stood replaces it", rebuilt.equals("ok"), rebuilt);
         }
     }
 

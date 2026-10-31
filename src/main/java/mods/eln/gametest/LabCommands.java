@@ -126,10 +126,10 @@ public final class LabCommands {
                     if (n == 0) c.getSource().sendFailure(Component.literal("no tilted terminal logger there"));
                     return n;
                 })))
-                .then(Commands.literal("loggerdemo").executes(c -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
-                .then(Commands.literal("spmodules").executes(c -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
-                .then(Commands.literal("tilted").executes(c -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
-                .then(Commands.literal("threelogger").executes(c -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition()))))
+                .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("tilted").executes(c -> demo(c.getSource(), () -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("threelogger").executes(c -> demo(c.getSource(), () -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -408,6 +408,16 @@ public final class LabCommands {
      * three-channel logger with its cables 8 west, a data logger 5 south-west, and a processor on a west wall 4 south
      * with a floor cable turning up the wall to it (a knuckle in the corner, under its terminal).
      */
+    /** A demo build: what stopped it, said plainly (a block in the way), rather than "an unexpected error". */
+    static int demo(CommandSourceStack src, java.util.function.IntSupplier build) {
+        try {
+            return build.getAsInt();
+        } catch (RuntimeException e) {
+            src.sendFailure(Component.literal("demo not built: " + e.getMessage() + " (clear the area, or stand elsewhere)"));
+            return 0;
+        }
+    }
+
     static int loggerDemo(CommandSourceStack src, BlockPos pos) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
@@ -470,11 +480,15 @@ public final class LabCommands {
         return host(level, player, damage, p, mods.eln.misc.Direction.YN);
     }
 
-    static mods.eln.node.six.SixNodeElement host(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player, int damage, BlockPos p,
+    /** A device on side of p, in a voxel block (p's, if it has one): one already on that side (a demo built again) is replaced. */
+    public static mods.eln.node.six.SixNodeElement host(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player, int damage, BlockPos p,
                                                  mods.eln.misc.Direction side) {
         var d = mods.eln.Eln.sixNodeItem.getDescriptor(damage);
+        var at = new mods.eln.misc.Coordonate(p, level);
+        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(at) instanceof mods.eln.node.voxel.VoxelNode old && old.getElement(side) != null)
+            old.deleteSubBlock(null, side);
         mods.eln.node.voxel.VoxelNode v;
-        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) instanceof mods.eln.node.voxel.VoxelNode old) v = old;
+        if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(at) instanceof mods.eln.node.voxel.VoxelNode old && !old.isDestructing()) v = old;
         else {
             v = new mods.eln.node.voxel.VoxelNode();
             v.onBlockPlacedBy(new mods.eln.misc.Coordonate(p, level), side, player, d.newItemStack());
