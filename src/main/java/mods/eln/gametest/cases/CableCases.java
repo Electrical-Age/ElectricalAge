@@ -1578,7 +1578,7 @@ public final class CableCases {
      * material back, and a block carved and put back whole is plain stone again.
      */
     static final class ChiselCase implements TestCase {
-        String err, wall, back, whole;
+        String err, wall, back, whole, refused;
 
         public String name() {
             return "chisel a cable hole through a wall";
@@ -1632,6 +1632,11 @@ public final class CableCases {
             mods.eln.node.voxel.ChiselItem.carve(player, level, w2.west(), new net.minecraft.world.phys.Vec3(w2.getX(), w2.getY() + 0.5, w2.getZ() + 0.5),
                 net.minecraft.core.Direction.EAST, 2, false);
             whole = "carved " + carvedNow + ", after putting back: " + level.getBlockState(w2).getBlock().getName().getString();
+            // a block it can't carve: it says why (#163)
+            BlockPos chest = c.at(6, 1, 1);
+            level.setBlock(chest, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState(), 3);
+            refused = String.valueOf(mods.eln.node.voxel.ChiselItem.carve(player, level, chest,
+                new net.minecraft.world.phys.Vec3(chest.getX(), chest.getY() + 0.5, chest.getZ() + 0.5), net.minecraft.core.Direction.WEST, 2, true));
         }
 
         public void measure(TestContext c) {
@@ -1639,6 +1644,7 @@ public final class CableCases {
             c.check("chisel: the wall block is carved stone holding cable", wall.startsWith("Stone, carved 512, parts "), wall);
             c.check("chisel: right-click puts material back", !back.startsWith(back.substring(back.indexOf("-> ") + 3) + " "), back);
             c.check("chisel: carved and put back whole: stone again", whole.equals("carved true, after putting back: Stone"), whole);
+            c.check("chisel: on a chest it says why not", refused.startsWith("can't carve Chest: "), refused);
         }
     }
 

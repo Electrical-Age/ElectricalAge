@@ -102,8 +102,8 @@ public class ChiselItem extends Item implements PipeTool {
     public InteractionResult useOn(UseOnContext ctx) {
         if (ctx.getLevel().isClientSide()) return InteractionResult.SUCCESS;
         if (ctx.getPlayer() instanceof ServerPlayer sp && strokeReady(sp, (ServerLevel) ctx.getLevel()))
-            carve(sp, (ServerLevel) ctx.getLevel(), ctx.getClickedPos(), ctx.getClickLocation(), ctx.getClickedFace(), size(ctx.getItemInHand()),
-                shape(ctx.getItemInHand()), false);
+            tell(sp, carve(sp, (ServerLevel) ctx.getLevel(), ctx.getClickedPos(), ctx.getClickLocation(), ctx.getClickedFace(), size(ctx.getItemInHand()),
+                shape(ctx.getItemInHand()), false));
         return InteractionResult.SUCCESS;
     }
 
@@ -116,7 +116,12 @@ public class ChiselItem extends Item implements PipeTool {
         if (!(e.getEntity() instanceof ServerPlayer sp) || !(e.getLevel() instanceof ServerLevel sl)) return;
         var pick = sp.pick(sp.blockInteractionRange(), 1f, false);
         if (!(pick instanceof BlockHitResult bh) || !bh.getBlockPos().equals(e.getPos()) || !strokeReady(sp, sl)) return;
-        carve(sp, sl, e.getPos(), bh.getLocation(), bh.getDirection(), size(s), shape(s), true);
+        tell(sp, carve(sp, sl, e.getPos(), bh.getLocation(), bh.getDirection(), size(s), shape(s), true));
+    }
+
+    /** Why a stroke did nothing, on the action bar (#163: a chisel on a block it can't work was silent). */
+    static void tell(ServerPlayer sp, String why) {
+        if (why != null) sp.sendOverlayMessage(net.minecraft.network.chat.Component.literal(why));
     }
 
     /** carve with a cube brush. */
@@ -153,7 +158,8 @@ public class ChiselItem extends Item implements PipeTool {
         BlockState st = level.getBlockState(at);
         VoxelNode node = st.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(at) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n ? n : null;
         if (node == null) {
-            if (!remove || !Mimic.carvable(st)) return "can't carve that";
+            if (!remove) return st.isAir() ? "nothing carved here to put back" : "put back only into a carved block";
+            if (!Mimic.carvable(st)) return Mimic.whyNotCarvable(st);
             // a plain block becomes a voxel block imitating it
             node = new VoxelNode();
             node.onBlockPlacedBy(new Coordonate(at, level), mods.eln.misc.Direction.YN, player, ItemStack.EMPTY);
@@ -161,7 +167,7 @@ public class ChiselItem extends Item implements PipeTool {
             node.carved = new BitSet(4096);
             level.setBlock(at, VoxelNodeBlock.forHost(st), 3);
         }
-        if (node.host == null) return "nothing to carve here";
+        if (node.host == null) return remove ? "nothing to carve here: no block around these parts" : "nothing carved here to put back";
         if (node.carved == null) node.carved = new BitSet(4096);
         BitSet all = Mimic.voxels(Mimic.boxes(node.host, level, at));
         BitSet region = Mimic.voxels(java.util.List.of(brush));

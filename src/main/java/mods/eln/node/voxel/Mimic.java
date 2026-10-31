@@ -34,6 +34,15 @@ public final class Mimic {
         return c == net.minecraft.world.level.block.Block.class || c == net.minecraft.world.level.block.RotatedPillarBlock.class;
     }
 
+    /** Why the chisel can't carve this block (for the player), or null if it can. */
+    public static String whyNotCarvable(BlockState s) {
+        if (carvable(s)) return null;
+        if (s.isAir()) return "nothing to carve there";
+        String name = s.getBlock().getName().getString();
+        if (s.hasBlockEntity()) return "can't carve " + name + ": it holds or does something (only plain blocks)";
+        return "can't carve " + name + ": only plain blocks (stone, planks, bricks, logs), stairs, slabs, fences, walls, bars and carpets";
+    }
+
     /** The voxels of boxes (0..16) as a set (VoxelNode.voxel indexing). */
     public static java.util.BitSet voxels(List<int[]> boxes) {
         java.util.BitSet s = new java.util.BitSet(4096);
