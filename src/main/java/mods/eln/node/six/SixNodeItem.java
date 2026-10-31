@@ -75,7 +75,9 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             Coordonate coord = new Coordonate(pos, world);
             String error;
             if ((error = descriptor.checkCanPlace(coord, direction, LRDU.Up)) != null) {
-                if (player != null) Utils.sendMessage(player, error);
+                // on the action bar, where the voxel blocks' refusals show (AdventurAgent: a socket clicked on a floor
+                // seemed to do nothing)
+                if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(error));
                 return false;
             }
             if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
@@ -120,7 +122,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return false;
             String error = descriptor.checkCanPlace(new Coordonate(pos, world), direction, LRDU.Up);
             if (error != null) {
-                if (player != null) Utils.sendMessage(player, error);
+                if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(error));
                 return false;
             }
             return v.createSubBlock(stack, direction, player);
