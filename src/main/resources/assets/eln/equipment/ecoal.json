@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "eln:ecoal"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "eln:ecoal"
+      }
+    ]
+  }
+}

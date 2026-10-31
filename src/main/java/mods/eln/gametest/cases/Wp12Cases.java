@@ -304,6 +304,10 @@ public final class Wp12Cases {
                 ctx.checkValue("e-coal armour: pig health after 10 damage (10 - 7)", healthAfter, 3.0);
                 ctx.checkValue("e-coal armour: energy left [J] (4000 - 3 * 500)", e, 2500.0);
                 ctx.check("e-coal armour: no armour points", pig.getArmorValue() == 0, "armor " + pig.getArmorValue());
+                // AdventurAgent: worn E-Coal drew nothing; its equipment asset and layer textures were missing
+                ctx.check("e-coal armour: its equipment asset and layer textures ship", Wp12Cases.class.getResource("/assets/eln/equipment/ecoal.json") != null
+                    && Wp12Cases.class.getResource("/assets/eln/textures/entity/equipment/humanoid/ecoal.png") != null
+                    && Wp12Cases.class.getResource("/assets/eln/textures/entity/equipment/humanoid_leggings/ecoal.png") != null, "");
             } finally {
                 pig.discard();
             }
