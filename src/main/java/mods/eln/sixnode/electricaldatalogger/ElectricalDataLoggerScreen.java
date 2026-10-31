@@ -74,11 +74,12 @@ public class ElectricalDataLoggerScreen extends ElnScreen {
         }, tr("Y-axis min"), tr("what a zero signal reads as"));
         text("unitl", () -> tr("Unit"));
         field("unit", () -> channel().unit, v -> render.logClient.unit(selected, v), tr("Unit"), tr("any text, up to 10 characters"));
+        text("editl", () -> render.descriptor.channels > 1 ? tr("Edit") : "");
         button("mode", () -> tr("Graph: %1$", tr(LogGraph.MODE_NAMES.get(Math.floorMod(render.log.mode, 3)))),
             () -> render.logClient.mode((render.log.mode + 1) % 3), tr("Lines, stacked areas, or a lane each"));
         for (int i = 0; i < TABS.length; i++) {
             int c = i;
-            var b = button("tab" + i, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Show this channel's scale and unit"));
+            var b = button("tab" + i, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Edit this channel's scale and unit"));
             b.visible = render.descriptor.channels > c && render.descriptor.channels > 1;
         }
         update();

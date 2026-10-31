@@ -43,8 +43,10 @@ public class ElectricalMathScreen extends ElnScreen {
             t -> draft = SpLanguage.compile(t)));
         addRenderableWidget(new ReferencePane(leftPos + REF_X, topPos + EDIT_Y, REF_W, HEIGHT - EDIT_Y - 6, openCategories, s -> editor.insert(s)));
         logControls();
-        button(LEFT_X, 224, LEFT_W, () -> tr("Apply"), () -> render.clientSetString(ElectricalMathElement.setExpressionId, editor.buffer.text()),
-            tr("Sends the program to the processor"));
+        // Save (Baughn 2026-10-31: was Apply), red while the text differs from what the processor holds
+        button(LEFT_X, 224, LEFT_W, () -> (saved() ? "" : "\u00A7c") + tr("Save"),
+            () -> render.clientSetString(ElectricalMathElement.setExpressionId, editor.buffer.text()),
+            tr("Saves the program to the processor"), tr("red: changed, not saved yet"));
         setInitialFocus(editor);
     }
 
@@ -59,7 +61,8 @@ public class ElectricalMathScreen extends ElnScreen {
         }, tr("Sampling period"), tr("in seconds, at least 0.05; changing it keeps the history"));
         for (int i = 0; i < 4; i++) {
             int c = i;
-            button(LEFT_X + i * 23, 155, 21, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Show this channel's scale and unit"));
+            // (Baughn 2026-10-31: they pick the channel the fields below edit, not what the graph shows)
+            button(LEFT_X + 22 + i * 15, 155, c == 3 ? 22 : 14, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Edit this channel's scale and unit below"));
         }
         field(LEFT_X, 177, 28, () -> num(channel().min), v -> {
             float p = mods.eln.client.gui.EaField.parse(v);
@@ -92,6 +95,11 @@ public class ElectricalMathScreen extends ElnScreen {
         render.logClient.watch();
     }
 
+    /** Does the editor hold what the processor has? */
+    boolean saved() {
+        return editor == null || editor.buffer.text().equals(render.expression == null ? "" : render.expression);
+    }
+
     int chips() {
         var stack = menu.deviceInventory.getItem(ElectricalMathContainer.restoneSlotId);
         return ElectricalMathElement.chipValue(stack);
@@ -122,6 +130,7 @@ public class ElectricalMathScreen extends ElnScreen {
         g.fill(x + 1, y + 1, x + LEFT_W - 1, y + 91, 0xFF6A6F7A);
         mods.eln.sixnode.electricaldatalogger.LogGraph.draw(g, font, x + 3, y + 3, LEFT_W - 6, 86, render.log, ElectricalMathScreen::colour, true);
         g.text(font, tr("Period"), x, topPos + 139, LABEL, false);
+        g.text(font, tr("Edit"), x, topPos + 161, LABEL, false);
         g.text(font, tr("Chips"), leftPos + CHIP_X - 4 - font.width(tr("Chips")), topPos + CHIP_Y + 5, LABEL, false);
         String s = status();
         var lines = font.split(Component.literal(s), EDIT_W);
