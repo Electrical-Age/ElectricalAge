@@ -159,16 +159,22 @@ public abstract class SixNodeElementRender {
         GL11.glColor3f(0.62f, 0.38f, 0.80f);
     }
 
+    /** A bus pin's width and height: wider and taller than the bus cable (3 x 1 voxels), so the cable's end goes into it. */
+    public static final float BUS_PIN_W = 3.4f / 16, BUS_PIN_H = 1.6f / 16;
+    /** Where a bus pin ends: just past the block's edge, over the end of a bus cable there (as the models' terminals). */
+    public static final float BUS_PIN_TO = 8.1f / 16;
+
     /** A bus pin in the current frame: on the face toward edge l, offset voxels along it toward l.left() (as VoxelNode
-     *  places edge pins; element frame: Left/Right along z, Down/Up along y), from `from` to `to` off the centre. */
-    protected static void drawBusPin(LRDU l, int offset, float from, float to) {
+     *  places edge pins; element frame: Left/Right along z, Down/Up along y), from `from` off the centre (inside the
+     *  body, so it comes out of it) to just past the block's edge. */
+    protected static void drawBusPin(LRDU l, int offset, float from) {
         LRDU a = l.left();
         float s = (a == LRDU.Left || a == LRDU.Down ? -1 : 1) * offset / 16f;
         GL11.glPushMatrix();
         if (a == LRDU.Left || a == LRDU.Right) GL11.glTranslatef(0, 0, s);
         else GL11.glTranslatef(0, s, 0);
         busColour();
-        drawPinBox(l, from, to, 2.8f / 16, 1 / 16f);
+        drawPinBox(l, from, BUS_PIN_TO, BUS_PIN_W, BUS_PIN_H);
         GL11.glPopMatrix();
         GL11.glColor3f(1f, 1f, 1f);
     }

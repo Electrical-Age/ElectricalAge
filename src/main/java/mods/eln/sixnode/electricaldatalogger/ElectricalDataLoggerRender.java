@@ -69,7 +69,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     public void draw() {
         super.draw();
         // the bus pin, in a voxel block (a plain block has no bus cable to meet)
-        if (front != null && inVoxelBlock()) drawBusPin(ElectricalDataLoggerElement.busEdge(pinEdge(), front), 0, 5 / 16f, 8 / 16f);
+        if (front != null && inVoxelBlock()) drawBusPin(ElectricalDataLoggerElement.busEdge(pinEdge(), front), 0, 4 / 16f);
         if (!descriptor.onFloor) {
             if (side.isY()) {
                 GL11.glPushMatrix();

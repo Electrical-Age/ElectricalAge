@@ -47,10 +47,7 @@ public class BusModuleRender extends SixNodeElementRender {
         // the pins, from the box's side (5 px out) to the block's edge, where the cables meet them
         float from = 5 / 16f, to = 8 / 16f;
         boolean voxel = inVoxelBlock();
-        if (voxel) {   // (a plain block has no bus cable to meet)
-            pinColour(front);
-            drawPinBox(front, from, to, 2.8f / 16, 1 / 16f);
-        }
+        if (voxel) drawBusPin(front, 0, from);   // (a plain block has no bus cable to meet)
         for (int i = 0; i < BusModuleElement.TERMINALS; i++) {
             int o = BusModuleElement.PIN_OFFSETS[i % 3];
             if (!voxel && o != 0) continue;   // (a plain block's edge has one connection: the middle terminal's)
