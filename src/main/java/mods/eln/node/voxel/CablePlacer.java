@@ -201,9 +201,16 @@ public final class CablePlacer {
             // a pipe sensor likewise (AdventurAgent: its dial and the pipe were "not a place for a cable")
             if (idx >= 0 && v.parts.get(idx) instanceof PipeSensorPart ps)
                 return new CableRouter.End(pos.getX() * 16L + ps.x, pos.getY() * 16L, pos.getZ() * 16L + ps.z, 0, -1);
-            if (idx >= 0 && v.parts.get(idx) instanceof CablePart c && !c.isKnuckle()) {
+            if (idx >= 0 && v.parts.get(idx) instanceof CablePart clicked && !clicked.isKnuckle()) {
+                // a branch of a cable of the kit's own tier: the clicked one, or the nearest such in the block
+                // (AdventurAgent: a bus kit started on a signal cable crossing the cell began a separate bus, "Laid")
+                List<CablePart> cands = new ArrayList<>();
+                if (tier < 0 || clicked.tier == tier) cands.add(clicked);
+                else for (VoxelPart vp : v.parts) if (vp instanceof CablePart o && !o.isKnuckle() && o.tier == tier) cands.add(o);
                 long[] best = null;
+                int bestFace = -1;
                 double bd = Double.MAX_VALUE;
+                for (CablePart c : cands)
                 for (int a = 0; a <= 16; a += 2)
                     for (int b = 0; b <= 16; b += 2) {
                         int[] q = new int[3];
@@ -217,11 +224,12 @@ public final class CablePlacer {
                         if (d < bd) {
                             bd = d;
                             best = new long[]{pos.getX() * 16L + q[0], pos.getY() * 16L + q[1], pos.getZ() * 16L + q[2]};
+                            bestFace = c.face;
                         }
                     }
                 if (best == null) return null;
                 join[0] = best;
-                return new CableRouter.End(best[0], best[1], best[2], c.face, -1);
+                return new CableRouter.End(best[0], best[1], best[2], bestFace, -1);
             }
             if (v.host != null) return surface(pos, face, hx, hy, hz);   // (the imitated stair's surface)
             return null;
