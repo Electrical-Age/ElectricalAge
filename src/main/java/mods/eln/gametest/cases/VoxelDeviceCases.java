@@ -41,6 +41,8 @@ public final class VoxelDeviceCases {
         cases.add(new InLineChainCase());
         cases.add(new WrenchInLineCase());
         cases.add(new PassivesInLineCase());
+        cases.add(new DiodeRigCase());
+        cases.add(new RheostatThermistorCase());
     }
 
     static int id(String name) {
@@ -1371,6 +1373,221 @@ public final class VoxelDeviceCases {
             c.check("passives: one without a fuse blocks it", i("no fuse") < 1e-3, fmt("%.4f A", i("no fuse")));
             var rh = dev.get("rheostat");
             c.check("passives: a rheostat in line has its signal pin too", rh.getConnectionMask(rh.front) != 0 && placed.contains("rheostat: null pins 3"), placed);
+        }
+    }
+
+    /**
+     * AdventurAgent's diode rig, every part put in line on one floor LV run through the item's use, as a player does: a
+     * 50 V Electrical Source, a diode, a Power Resistor with 46 coal dust (68 ohm), a Ground Cable, in successive blocks.
+     * A 10A and a 25A Diode, each as placed and wrenched round: of each pair one passes 50 V / 68 ohm and one blocks. A
+     * Signal Diode likewise between a Signal Source at SVU and one at 0 V: one conducts, one blocks. (Into a signal
+     * input alone a blocking diode still lets it float up to the source: an input draws next to nothing.) (With the resistor's coal dust
+     * slot empty it is 0.01 ohm: the diode then shorts the source, the symptoms AdventurAgent saw.)
+     */
+    static final class DiodeRigCase implements TestCase {
+        final List<SixNodeElement[]> rows = new ArrayList<>();
+
+        public String name() {
+            return "a diode rig put in line by a player";
+        }
+
+        public int width() {
+            return 24;
+        }
+
+        public int height() {
+            return 8;
+        }
+
+        public int depth() {
+            return 24;
+        }
+
+        static SixNodeElement use(TestContext c, String name, BlockPos p) {
+            var player = player(c);
+            var d = desc(name);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, d.newItemStack());
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(0.55, 1 / 16.0, 0.5),
+                net.minecraft.core.Direction.UP, p, false);
+            d.parentItem.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+            var v = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+            return v == null ? null : TapCase.placed(v);
+        }
+
+        /** A run through 7 blocks at z and these devices put on it in blocks 1, 2, 3, ... (null: none). */
+        static SixNodeElement[] run(TestContext c, int z, int tier, String... devices) {
+            for (int x = 0; x < 7; x++) {
+                c.floor(c.at(x, 0, z));
+                block(c, c.at(x, 1, z));
+                CableCases.voxel(c, c.at(x, 1, z), List.of(new CablePart(tier, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            }
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            mods.eln.node.voxel.CableConverter.convertOnLoad = true;
+            SixNodeElement[] e = new SixNodeElement[devices.length];
+            try {
+                for (int i = 0; i < devices.length; i++) e[i] = use(c, devices[i], c.at(1 + i, 1, z));
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+            }
+            return e;
+        }
+
+        static void volts(TestContext c, SixNodeElement src, double u) {
+            if (src != null) src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat((float) u);
+            }));
+        }
+
+        void row(TestContext c, int z, String diode, boolean flip) {
+            var e = run(c, z, LV, "Electrical Source", diode, "Power Resistor", "Ground Cable");
+            volts(c, e[0], 50);
+            if (e[2] != null) {
+                e[2].getInventory().setItem(0, Wp9aCases.coal(46));   // (68 ohm)
+                e[2].getInventory().setChanged();
+            }
+            if (flip && e[1] != null) WrenchInLineCase.wrench(c, e[1]);
+            rows.add(e);
+        }
+
+        void signalRow(TestContext c, int z, boolean flip) {
+            var e = run(c, z, SIGNAL, "Signal Source", "Signal Diode", "Signal Source");
+            volts(c, e[0], mods.eln.Eln.SVU);
+            volts(c, e[2], 0);
+            if (flip && e[1] != null) WrenchInLineCase.wrench(c, e[1]);
+            rows.add(e);
+        }
+
+        public void build(TestContext c) {
+            row(c, 1, "10A Diode", false);
+            row(c, 4, "10A Diode", true);
+            row(c, 7, "25A Diode", false);
+            row(c, 10, "25A Diode", true);
+            signalRow(c, 13, false);
+            signalRow(c, 16, true);
+        }
+
+        /** The current through a row's resistor. */
+        static double through(SixNodeElement r) {
+            return Math.abs(u(r, Direction.XN) - u(r, Direction.XP)) / ((mods.eln.sixnode.resistor.ResistorElement) r).nominalRs;
+        }
+
+        public void measure(TestContext c) {
+            for (int pair = 0; pair < 2; pair++) {
+                var a = rows.get(2 * pair);
+                var b = rows.get(2 * pair + 1);
+                String name = pair == 0 ? "10A" : "25A";
+                boolean all = java.util.Arrays.stream(a).allMatch(java.util.Objects::nonNull) && java.util.Arrays.stream(b).allMatch(java.util.Objects::nonNull);
+                c.check("diode rig: the " + name + " rows were put in line", all, java.util.Arrays.toString(a) + java.util.Arrays.toString(b));
+                if (!all) continue;
+                double ia = through(a[2]), ib = through(b[2]);
+                c.check(fmt("diode rig: %s Diode as placed and wrenched: one passes 50 V / 68 ohm, one blocks", name),
+                    Math.abs(Math.max(ia, ib) - 50 / 68.0) < 0.03 && Math.min(ia, ib) < 1e-3, fmt("%.4f A, %.4f A", ia, ib));
+            }
+            var s1 = rows.get(4);
+            var s2 = rows.get(5);
+            boolean all = java.util.Arrays.stream(s1).allMatch(java.util.Objects::nonNull) && java.util.Arrays.stream(s2).allMatch(java.util.Objects::nonNull);
+            c.check("diode rig: the Signal Diode rows were put in line", all, java.util.Arrays.toString(s1) + java.util.Arrays.toString(s2));
+            if (!all) return;
+            var d1 = (mods.eln.sixnode.diode.DiodeElement) s1[1];
+            var d2 = (mods.eln.sixnode.diode.DiodeElement) s2[1];
+            double i1 = Math.abs(d1.anodeLoad.getCurrent()), i2 = Math.abs(d2.anodeLoad.getCurrent());
+            c.check("diode rig: Signal Diode as placed and wrenched between SVU and 0 V: one conducts and one blocks",
+                d1.resistorSwitch.getState() != d2.resistorSwitch.getState() && Math.max(i1, i2) > 1e-3 && Math.min(i1, i2) < 1e-6,
+                fmt("conducting %s / %s, %.4f A / %.6f A", d1.resistorSwitch.getState(), d2.resistorSwitch.getState(), i1, i2));
+        }
+    }
+
+    /**
+     * A Rheostat in line on a 50 V run before 100 ohm to ground, its core 68 ohm, its signal pin's cable to a Signal
+     * Source: at 0 V it is nearly shorted, at SVU it is 68 ohm. A Thermistor in line, its body held 30 C warm, is 30 %
+     * lower (its -1 %/C).
+     */
+    static final class RheostatThermistorCase implements TestCase {
+        SixNodeElement low, high, therm;
+        mods.eln.sixnode.resistor.ResistorElement rLow, rHigh, rTherm;
+        mods.eln.sim.ThermalLoad body;
+
+        public String name() {
+            return "a rheostat's signal and a thermistor's heat in line";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        SixNodeElement row(TestContext c, String name, int z) {
+            for (int x = 0; x < 5; x++) for (int dz = -1; dz <= 1; dz++) c.floor(c.at(x, 0, z + dz));
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, z), 50);
+            BlockPos p = c.at(1, 1, z);
+            var v = block(c, p);
+            CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            v.placeAnywhere(desc(name).newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            var e = TapCase.placed(v);
+            if (e != null) {
+                e.getInventory().setItem(0, Wp9aCases.coal(46));
+                e.getInventory().setChanged();
+            }
+            return e;
+        }
+
+        void gate(TestContext c, SixNodeElement e, int z, double u) {
+            if (e == null) return;
+            Direction f = e.side.applyLRDU(e.front);
+            var v = (VoxelNode) e.sixNode;
+            cableOut(c, v, c.at(1, 1, z), e, f, SIGNAL, FLOOR);
+            source(c, Wp9aCases.SIGNAL_SOURCE, f == Direction.ZN ? c.at(1, 1, z - 1) : c.at(1, 1, z + 1), u);
+        }
+
+        public void build(TestContext c) {
+            low = row(c, "Rheostat", 1);
+            gate(c, low, 1, 0);
+            rLow = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
+            high = row(c, "Rheostat", 4);
+            gate(c, high, 4, mods.eln.Eln.SVU);
+            rHigh = resistor(c, c.at(2, 1, 4), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 4));
+            therm = row(c, "Thermistor", 7);
+            rTherm = resistor(c, c.at(2, 1, 7), Direction.XN, 48);
+            c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 7));
+            if (therm != null) {
+                body = new mods.eln.sim.ThermalLoad(30, 1e9, 1e-3, 1e9);
+                body.setAsSlow();
+                mods.eln.Eln.simulator.addThermalLoad(body);
+                mods.eln.Eln.simulator.addThermalConnection(new mods.eln.sim.ThermalConnection(body,
+                    (mods.eln.sim.ThermalLoad) mods.eln.gametest.LabCommands.field(therm, "thermalLoad")));
+            }
+        }
+
+        static double r(SixNodeElement e) {
+            return ((mods.eln.sim.mna.component.Resistor) mods.eln.gametest.LabCommands.field(e, "r")).getR();
+        }
+
+        public void measure(TestContext c) {
+            c.check("rheostat, thermistor: placed in line", low != null && high != null && therm != null, "");
+            if (low == null || high == null || therm == null) return;
+            double rl = r(low), rh = r(high), rt = r(therm);
+            c.check("rheostat: its signal pin's cable linked", linked(low, low.side.applyLRDU(low.front)) && linked(high, high.side.applyLRDU(high.front)),
+                low.slotMask.mask + " " + high.slotMask.mask);
+            c.check(fmt("rheostat: 0 V on its signal: nearly shorted (%.2f ohm); SVU: its 68 ohm (%.1f)", rl, rh), rl < 1 && Math.abs(rh - 68) < 1,
+                fmt("%.2f / %.2f ohm", rl, rh));
+            Wp9cCases.within(c, "rheostat at SVU: 50 V over it and 100 ohm [A]", Math.abs(Wp9aCases.current(rHigh)), 50 / (100 + rh), 0.02 * 50 / (100 + rh));
+            Wp9cCases.within(c, "rheostat at 0 V: 50 V over 100 ohm [A]", Math.abs(Wp9aCases.current(rLow)), 50 / (100 + rl), 0.02 * 50 / (100 + rl));
+            double tc = ((mods.eln.sim.ThermalLoad) mods.eln.gametest.LabCommands.field(therm, "thermalLoad")).Tc;
+            c.check(fmt("thermistor: warmed to %.1f C, its 68 ohm falls 1 %%/C", tc), tc > 20 && Math.abs(rt - 68 * (1 - 0.01 * tc)) < 1,
+                fmt("%.2f ohm", rt));
+            Wp9cCases.within(c, "thermistor: 50 V over it and 100 ohm [A]", Math.abs(Wp9aCases.current(rTherm)), 50 / (100 + rt), 0.02 * 50 / (100 + rt));
+            if (body != null) mods.eln.Eln.simulator.removeThermalLoad(body);
         }
     }
 }
