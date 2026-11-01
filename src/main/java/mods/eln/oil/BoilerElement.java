@@ -56,26 +56,13 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     private final List<Vent> vents = new java.util.ArrayList<>();
     public double steamRate;   // mB/s that left the vessel as steam, for WAILA
     /**
-     * The level signal on the front face, under the gauge glass: the gauge glass's reading (fill(), 0..1 of the signal
-     * range). Baughn 2026-11-01: analog, so a boiler can in principle be run on little water, with the real downsides
-     * (heatingShare). A logic input reads it high above half, as the old level switch did; liquidAtProbe still
-     * keeps that switch's reading, with its deadband, for Jade.
+     * The phase signal (Baughn: read the boiler's state as one reads a cable's temperature): a level switch with its
+     * probe at half height (half the water tank, fill()), high while it is in liquid, low in gas; on the front face, under the gauge glass (Baughn).
+     * PROBE_BAND either way is its deadband, so a feed pump run off it doesn't chatter.
      */
     public final NbtElectricalGateOutput phaseOut = new NbtElectricalGateOutput("phaseOut");
     public final NbtElectricalGateOutputProcess phaseOutProcess = new NbtElectricalGateOutputProcess("phaseOutProcess", phaseOut);
     public static final double PROBE = 0.5, PROBE_BAND = 0.03;
-    /**
-     * The heating surface: covered while the water stands above WET_FILL of the gauge glass; below that it uncovers in
-     * proportion, and an uncovered surface passes only DRY_SHARE as much heat into steam as into water. Run low, the
-     * shell keeps the heat it can't pass on and runs hot, and boiled dry it burns out (the watchdog below).
-     */
-    public static final double WET_FILL = 0.25, DRY_SHARE = 0.05;
-
-    /** The share of the heating surface under water, as heat passes (DRY_SHARE..1). */
-    public double heatingShare() {
-        double w = Math.max(0, Math.min(1, fill() / WET_FILL));
-        return DRY_SHARE + (1 - DRY_SHARE) * w;
-    }
     public boolean liquidAtProbe;
     double meterSteam, meterTime;
     /** Heat going into water at its boiling point (W, averaged over a second like steamRate): how hard it boils, for
@@ -93,7 +80,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             if (vessel == null) return;
             double level = fill();
             if (liquidAtProbe ? level < PROBE - PROBE_BAND : level > PROBE + PROBE_BAND) liquidAtProbe = !liquidAtProbe;
-            phaseOutProcess.setOutputNormalized(Math.max(0, Math.min(1, level)));
+            phaseOutProcess.state(liquidAtProbe);
         });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         // dry and very hot: it fails (no explosion this round)
@@ -144,7 +131,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         syncTanks();
         // the shell heats the water (EA thermal temperatures are relative to the ambient, Tref)
         double shellK = thermal.Tc + mods.eln.sim.PhysicalConstant.Tref;
-        double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W * heatingShare();
+        double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W;
         // (at most half the way to the shell's temperature in a step, as the condenser: a boiler boiled dry holds only
         // a little air and vapour, next to no heat capacity, and the explicit step overshot it to 1300 C and on into its
         // pipes, with the pressure swinging 0.5-3.6 bar: AdventurAgent)
@@ -345,9 +332,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Steam to give"), EaUnits.steamGrams(tanks.steam()));
         info.put(I18N.tr("Steam made"), EaUnits.steamGrams(steamRate) + "/s");
         // (Baughn: "At half height: liquid" didn't say what it meant)
-        info.put(I18N.tr("Front signal"), I18N.tr("%1$% of the gauge glass", Math.round(100 * Math.max(0, Math.min(1, fill())))));
-        double wet = heatingShare();
-        if (wet < 0.999) info.put(I18N.tr("Heating surface"), I18N.tr("%1$% under water: the shell runs hot", Math.round(100 * (wet - DRY_SHARE) / (1 - DRY_SHARE))));
+        info.put(I18N.tr("Front signal"), liquidAtProbe ? I18N.tr("high: water above half") : I18N.tr("low: water below half"));
         return info;
     }
 }
