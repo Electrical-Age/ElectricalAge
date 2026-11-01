@@ -84,6 +84,23 @@
   {
    "row": [
     {
+     "field": "bus",
+     "chars": 16
+    },
+    {
+     "text": "busl",
+     "sample": [
+      "Bus channel",
+      "Bus full",
+      "Not a channel name"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
      "button": "mode",
      "sample": [
       "Graph: Lines",

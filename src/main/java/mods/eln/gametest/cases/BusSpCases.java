@@ -22,9 +22,10 @@ import static mods.eln.gametest.cases.BusModuleCases.DOWN;
 import static mods.eln.gametest.cases.BusModuleCases.SIGNAL;
 
 /**
- * The signal processor on the field bus (mods.eln.bus): a processor reads a channel a Bus I/O Module puts on the bus
- * and writes another a module drives a wire from, its output wire still working beside its bus pin; a program ending
- * with a bus definition; a 65th channel refused; its program kept over a save and load.
+ * The signal processor and the data logger on the field bus (mods.eln.bus): a processor reads a channel a Bus I/O
+ * Module puts on the bus and writes another a module drives a wire from, its output wire still working beside its bus
+ * pin; a program ending with a bus definition; a 65th channel refused; a logger channel recording a bus channel; both
+ * devices' settings kept over a save and load.
  */
 public final class BusSpCases {
     private BusSpCases() {
@@ -35,6 +36,7 @@ public final class BusSpCases {
         cases.add(new EndsWithBus());
         cases.add(new Refused());
         cases.add(new SpSaved());
+        cases.add(new LoggerOnBus());
     }
 
     /** A signal processor in a voxel block at p, its output toward dir, with this program and chips. */
@@ -246,6 +248,77 @@ public final class BusSpCases {
             var bus = fresh.port.bus();
             c.check("bus sp saved: back on a bus with its channels", bus != null && bus.names().containsAll(claims),
                 bus == null ? "no bus" : bus.names().toString());
+        }
+    }
+
+    /**
+     * A Three-Channel Data Logger (front north, in a voxel block) whose channel B records bus channel "lvl": module A's
+     * in terminal puts a 20 V Signal Source on it, through bus cable to the logger's bus pin (x 4; the rest east or west
+     * of it, as busEdge says). B records 0.4, A and C their open wires; saved and loaded, B still takes "lvl", claimed again.
+     */
+    static final class LoggerOnBus implements TestCase {
+        mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement logger;
+        BusModuleElement a;
+        String why = "";
+        int lx;
+
+        public String id() {
+            return "bus_logger_channel";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public void build(TestContext c) {
+            try {
+                // which way its bus pin faces decides the side the rest goes
+                logger = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement) CableCases.host(c, Wp9cCases.THREE_CHANNEL_LOGGER, c.at(4, 1, 1),
+                    Direction.YN);
+                Wp9aCases.orient(logger, l -> l, Direction.ZN);
+                Direction d = logger.side.applyLRDU(logger.busEdge());
+                if (d != Direction.XP && d != Direction.XN) throw new IllegalStateException("bus pin toward " + d);
+                int s = d == Direction.XP ? 1 : -1;
+                lx = 4;
+                BusModuleCases.across(c, c.at(lx + s, 1, 1), BUS);
+                a = BusModuleCases.module(c, c.at(lx + 2 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP);
+                BusModuleCases.across(c, c.at(lx + 3 * s, 1, 1), SIGNAL);
+                BusModuleCases.source(c, c.at(lx + 4 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP, 20);
+                a.setName(BACK_MIDDLE, "lvl");
+                if (logger.setBus(1, "LVL ") != null) throw new IllegalStateException(logger.busMessage());
+            } catch (RuntimeException e) {
+                why = String.valueOf(e);
+            }
+        }
+
+        public void measure(TestContext c) {
+            c.check("bus logger: built", why.isEmpty(), why);
+            if (!why.isEmpty()) return;
+            c.check("bus logger: on module A's bus", logger.port.bus() != null && logger.port.bus() == a.port.bus(), logger.port.bus() + " " + a.port.bus());
+            c.check("bus logger: the name is folded to lower case and claimed", "lvl".equals(logger.busName(1)) && logger.port.claims().equals(Set.of("lvl")),
+                logger.busName(1) + " " + logger.port.claims());
+            c.check("bus logger: its bus edge has no wire", logger.getElectricalLoad(logger.busEdge()) == null, "");
+            var v = logger.view();
+            c.check("bus logger: channel B records the bus channel, 0.4; A and C their open wires",
+                v.size() > 0 && Math.abs(v.mean(1, 0) - 0.4) < 2e-3 && Math.abs(v.mean(0, 0)) < 2e-3 && Math.abs(v.mean(2, 0)) < 2e-3,
+                v.size() > 0 ? v.mean(0, 0) + " " + v.mean(1, 0) + " " + v.mean(2, 0) : "no points");
+            String bad = logger.setBus(0, "no spaces!");
+            c.check("bus logger: a bad name is refused", bad != null && logger.busName(0).isEmpty() && !bad.contains("("), String.valueOf(bad));
+            logger.setBus(0, "");
+            Reload r;
+            try {
+                r = Reload.node(c.level(), c.at(lx, 1, 1));
+            } catch (ReflectiveOperationException e) {
+                c.check("bus logger: reloads", false, e.toString());
+                return;
+            }
+            var fresh = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement) ((SixNode) r.fresh).sideElementList[Direction.YN.getInt()];
+            c.check("bus logger: its channels' bus names come back", "lvl".equals(fresh.busName(1)) && fresh.busName(0).isEmpty() && fresh.busName(2).isEmpty(),
+                fresh.busName(0) + "/" + fresh.busName(1) + "/" + fresh.busName(2));
+            c.check("bus logger: claimed again on load", fresh.port.claims().equals(Set.of("lvl")), fresh.port.claims().toString());
+            BusNet.refresh();
+            c.check("bus logger: back on the bus", fresh.port.bus() != null && fresh.port.bus().names().contains("lvl"),
+                fresh.port.bus() == null ? "no bus" : fresh.port.bus().names().toString());
         }
     }
 }

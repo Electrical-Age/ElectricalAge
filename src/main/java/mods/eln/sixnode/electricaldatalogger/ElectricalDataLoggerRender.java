@@ -34,12 +34,44 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return ElnDeviceRegistry.signalCableDescriptor.render;
+        return busPin(lrdu) ? null : ElnDeviceRegistry.signalCableDescriptor.render;
+    }
+
+    /** Per channel, the bus channel it records, or "" (its wire). */
+    String[] busNames = {""};
+    /** Why the last bus name set was refused, or "". */
+    String busMessage = "";
+
+    boolean inVoxelBlock() {
+        return tileEntity instanceof mods.eln.node.voxel.VoxelNodeEntity;
+    }
+
+    /** The bus pin, in a voxel block (ElectricalDataLoggerElement.busEdge). */
+    @Override
+    protected boolean busPin(LRDU l) {
+        return front != null && inVoxelBlock() && l == ElectricalDataLoggerElement.busEdge(pinEdge(), front);
+    }
+
+    /** Client: ask the server to have channel c record this bus channel ("": its wire). */
+    void sendBus(int c, String name) {
+        try {
+            var bos = new java.io.ByteArrayOutputStream();
+            var stream = new java.io.DataOutputStream(bos);
+            preparePacketForServer(stream);
+            stream.writeByte(ElectricalDataLoggerElement.setBusId);
+            stream.writeByte(c);
+            stream.writeUTF(name);
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void draw() {
         super.draw();
+        // the bus pin, in a voxel block (a plain block has no bus cable to meet)
+        if (front != null && inVoxelBlock()) drawBusPin(ElectricalDataLoggerElement.busEdge(pinEdge(), front), 0, 5 / 16f, 8 / 16f);
         if (!descriptor.onFloor) {
             if (side.isY()) {
                 GL11.glPushMatrix();
@@ -115,6 +147,10 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         try {
             pause = stream.readBoolean();
             log = Logger.readPublish(stream, log);
+            String[] b = new String[Math.max(1, descriptor.channels)];
+            for (int c = 0; c < b.length; c++) b[c] = stream.readUTF();
+            busNames = b;
+            busMessage = stream.readUTF();
             pinTurn = stream.readByte();
             if (log.channelCount() > 1)
                 for (int c = 0; c < log.channelCount(); c++) log.channels[c].name = String.valueOf((char) ('A' + c));

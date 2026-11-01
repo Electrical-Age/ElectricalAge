@@ -399,6 +399,11 @@ on 1.7.10) onto 26.x.
   a tick (a slow process, after the circuit), only while the processor has its chips; a non-finite value writes 0.
   The editor colours `bus.` names, accepts them as the processor does, and lists them in the reference's "Field bus"
   category. Old programs are unchanged. Tests `ProgramTest`, `SpLanguageTest`, GameTests `bus_sp_*`.
+- Data loggers on the field bus: in a voxel block every data logger (one or three channels, the tilted terminal)
+  has a bus pin in the middle of a free edge, the first clockwise from its inputs' edge that isn't its front
+  (`busEdge`; it follows the tilted terminal's turn). A channel may record a bus channel instead of its wire: a
+  "Bus channel" field under the unit, for the selected channel (empty: the wire, as before). Names are lower-cased;
+  a bad name or a 65th channel on its bus is refused in the screen. NBT `bus<n>`. GameTest `bus_logger_channel`.
 - Signal processor logger and defaults (Baughn 2026-10-30, board #45): a program may give an input a default,
   `A = 0.5` on a definition line (a constant, once per input, free), read while no cable is connected to it. The
   processor carries a four-channel logger (A, B, C as the program reads them, and the output) in its screen's left

@@ -25,6 +25,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The data loggers: a channel per input wire. In a voxel block a logger also has a field bus pin (busEdge), and each
+ * channel may record a bus channel, set by name in its screen, instead of its wire.
+ */
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
     NbtElectricalGateInput inputGate;
@@ -50,6 +54,15 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     public static final byte printId = 6;
     public static final byte tooglePauseId = 7;
     public static final byte setMinValue = 8;
+    /** A channel's bus channel name (channel byte, name), from the screen. (Logger's packets take 1 to 9.) */
+    public static final byte setBusId = 10;
+
+    /** Its bus pin, the same for the element's life (VoxelNode links it to the bus cable it touches). */
+    public final mods.eln.bus.BusPort port = new mods.eln.bus.BusPort();
+    /** Per channel: the bus channel it records, or "": its wire. */
+    final String[] busNames;
+    /** Why the last bus name set was refused, or "": shown in its screen. */
+    String busMessage = "";
 
     public static final byte toClientLogsClear = 1;
     public static final byte toClientLogsAdd = 2;
@@ -72,6 +85,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
             if (n > 1) ch[c].name = String.valueOf((char) ('A' + c));
         }
         inputGate = inputs[0];
+        busNames = new String[n];
+        java.util.Arrays.fill(busNames, "");
         logger = new Logger(this, -1, ch);
         store = logger.store;
         channels = logger.channels;
@@ -103,6 +118,11 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         if (!logger.readFromNBT(nbt) && nbt.contains("logssamplingPeriod")) {
             migrate(nbt);
         }
+        for (int c = 0; c < busNames.length; c++) {
+            String b = nbt.getStringOr("bus" + c, "");
+            busNames[c] = mods.eln.bus.Bus.validName(b) ? b : "";
+        }
+        port.claim(busUsed(busNames));
     }
 
     /**
@@ -129,6 +149,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         nbt.putBoolean("pause", pause);
         if (pinTurn != 0) nbt.putByte("pinTurn", (byte) pinTurn);
         logger.writeToNBT(nbt);
+        for (int c = 0; c < busNames.length; c++) if (!busNames[c].isEmpty()) nbt.putString("bus" + c, busNames[c]);
     }
 
     /** The graph as shown: the store's view at its period, with the channels' scales. */
@@ -209,7 +230,73 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
+        if (inVoxelBlock() && lrdu == busEdge()) return NodeBase.maskRs485;
         return getElectricalLoad(lrdu) != null ? NodeBase.maskElectricalInputGate : 0;
+    }
+
+    /** The bus pin's edge, alone in its middle: the first edge clockwise from the inputs' that isn't the front (the
+     *  edge the screen faces). Only in a voxel block, whose free edges these are. */
+    public LRDU busEdge() {
+        return busEdge(pinEdge(), front);
+    }
+
+    public static LRDU busEdge(LRDU pinEdge, LRDU front) {
+        LRDU l = pinEdge;
+        for (int i = 0; i < 3; i++) {
+            l = l.getNextClockwise();
+            if (l != front) return l;
+        }
+        return l;
+    }
+
+    @Override
+    public mods.eln.bus.BusPort busPort(LRDU lrdu) {
+        return inVoxelBlock() && lrdu == busEdge() ? port : null;
+    }
+
+    /** Channel c's bus channel, or "": it records its wire. */
+    public String busName(int c) {
+        return c >= 0 && c < busNames.length ? busNames[c] : "";
+    }
+
+    /** Why the last bus name set was refused, or "". */
+    public String busMessage() {
+        return busMessage;
+    }
+
+    static java.util.Set<String> busUsed(String[] names) {
+        java.util.Set<String> s = new java.util.LinkedHashSet<>();
+        for (String x : names) if (!x.isEmpty()) s.add(x);
+        return s;
+    }
+
+    /**
+     * Channel c records this bus channel (trimmed, lower-cased; empty: its wire again). Null if taken, else why it was
+     * refused (a name the bus can't have, or a 65th channel on its bus), which the screen shows.
+     */
+    public String setBus(int c, String raw) {
+        if (c < 0 || c >= busNames.length) return I18N.tr("No such channel");
+        String n = raw == null ? "" : raw.trim().toLowerCase(java.util.Locale.ROOT);
+        String why = null;
+        if (!n.isEmpty() && !mods.eln.bus.Bus.validName(n)) why = I18N.tr("Not a channel name");
+        else {
+            String[] next = busNames.clone();
+            next[c] = n;
+            var want = busUsed(next);
+            if (!mods.eln.bus.BusNet.room(port, want)) why = I18N.tr("Bus full");
+            else {
+                busNames[c] = n;
+                port.claim(want);
+            }
+        }
+        busMessage = why == null ? "" : why;
+        needPublish();
+        return why;
+    }
+
+    /** Channel c's level now, 0..1: its bus channel's, or its wire's. */
+    double level(int c) {
+        return busNames[c].isEmpty() ? inputs[c].getNormalized() : port.read(busNames[c]);
     }
 
     @Override
@@ -231,6 +318,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
             for (int c = 0; c < inputs.length; c++) b.append(Utils.plotVolt(col[c % 3], inputs[c].getU()));
             info.put(I18N.tr("Inputs"), b.toString());
         }
+        for (int c = 0; c < busNames.length; c++)
+            if (!busNames[c].isEmpty())
+                info.put(I18N.tr("Bus") + (busNames.length > 1 ? " " + (char) ('A' + c) : ""), busNames[c] + " " + Utils.plotVolt("", port.read(busNames[c]) * mods.eln.Eln.SVU));
         return info;
     }
 
@@ -245,7 +335,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         try {
             stream.writeBoolean(pause);
             logger.publish(stream);
-            stream.writeByte(pinTurn);
+            for (String b : busNames) stream.writeUTF(b);
+            stream.writeUTF(busMessage);
+            stream.writeByte(pinTurn);   // (last: tests read it there)
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -278,6 +370,11 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     pause = !pause;
                     needPublish();
                     break;
+                case setBusId: {
+                    int c = stream.readByte();
+                    setBus(c, stream.readUTF());
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

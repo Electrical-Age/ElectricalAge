@@ -117,6 +117,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   saved: the writers put them back one tick after load.
 - Signal processor: no new keys for the bus; its channels are in `expression`, claimed again on load. A
   `bus.<name> = ...` line's stateful functions are saved under `equation.bus.<name>.`, as other components'.
+- Data logger: per channel n `bus<n>`, the bus channel it records (absent: its wire), claimed again on load.
 
 ## Ids that must never change
 
