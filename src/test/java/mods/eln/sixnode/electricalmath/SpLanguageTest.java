@@ -90,4 +90,26 @@ public class SpLanguageTest {
         assertEquals(List.of("half", "half = sum / 2"), SpLanguage.INSTANCE.hover(text, 2, 1));
         assertEquals(java.util.Set.of(2), SpLanguage.INSTANCE.rulesAbove(text));
     }
+
+    @Test
+    void busChannels() {
+        String text = "low = bus.tank_level < 0.3\nbus.3way = low & A\nbus.pump = rs(low, B)";
+        var t = SpLanguage.INSTANCE.tokenize(text);
+        assertEquals(Kind.BUS, at(t, 0, 6), "a read, one token with its dot");
+        assertEquals(Kind.BUS, at(t, 0, 19));
+        assertEquals(Kind.OPERATOR, at(t, 0, 21));
+        assertEquals(Kind.BUS, at(t, 1, 0), "a write, a name starting with a digit");
+        assertEquals(Kind.NAME, at(t, 1, 11));
+        assertEquals(Kind.BUS, at(t, 2, 0));
+        // the editor accepts what the processor does: no "not defined above", and no output line, so no rule
+        assertTrue(SpLanguage.INSTANCE.validate(text).isEmpty(), SpLanguage.INSTANCE.validate(text).toString());
+        assertEquals(Set.of(), SpLanguage.INSTANCE.rulesAbove(text));
+        assertEquals(Set.of(2), SpLanguage.INSTANCE.rulesAbove("bus.a = A\nx = bus.a\nx"));
+        assertEquals("Bus channel tank_level", SpLanguage.INSTANCE.hover(text, 0, 8).get(0));
+        assertTrue(SpLanguage.INSTANCE.hover(text, 2, 6).get(2).contains("rs(low, B)"), "where it is written");
+        var bad = SpLanguage.INSTANCE.validate("bus.Tank + 1");
+        assertEquals(1, bad.size());
+        assertEquals(0, bad.get(0).start());
+        assertEquals(8, bad.get(0).end());
+    }
 }

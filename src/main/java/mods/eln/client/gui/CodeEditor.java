@@ -48,6 +48,7 @@ public class CodeEditor extends AbstractWidget {
         COLOURS.put(LanguageAdapter.Kind.INPUT_C, 0xFF5AD85A);
         COLOURS.put(LanguageAdapter.Kind.KEYWORD, 0xFFF0A050);
         COLOURS.put(LanguageAdapter.Kind.ERROR, ERROR);
+        COLOURS.put(LanguageAdapter.Kind.BUS, 0xFF5CD6D0);
     }
 
     public final CodeBuffer buffer;

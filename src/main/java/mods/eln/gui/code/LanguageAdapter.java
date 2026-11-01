@@ -11,7 +11,9 @@ import java.util.Set;
 public interface LanguageAdapter {
     /** Kinds of token, each drawn in its colour by the editor. */
     enum Kind {
-        TEXT, COMMENT, NUMBER, OPERATOR, FUNCTION, NAME, DEFINITION, INPUT_A, INPUT_B, INPUT_C, KEYWORD, ERROR
+        TEXT, COMMENT, NUMBER, OPERATOR, FUNCTION, NAME, DEFINITION, INPUT_A, INPUT_B, INPUT_C, KEYWORD, ERROR,
+        /** A field bus channel (the signal processor's bus.name). */
+        BUS
     }
 
     /** A token: columns start (inclusive) to end (exclusive) of its line. */

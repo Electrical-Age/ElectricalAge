@@ -13,13 +13,14 @@ import java.util.regex.Pattern;
 
 /**
  * The signal processor's language for the code editor (board #45): inputs A red, B blue, C green; functions, named
- * components (their definitions marked), numbers, operators, # comments; a rule above the output line. Problems come
+ * components (their definitions marked), field bus channels (bus.name), numbers, operators, # comments; a rule above
+ * the output line (none when the program ends with a bus definition). Problems come
  * from compiling the program (Program) as the processor will.
  */
 public final class SpLanguage implements LanguageAdapter {
     public static final SpLanguage INSTANCE = new SpLanguage();
-    static final Pattern IDENT = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*"), NUMBER = Pattern.compile("[0-9]*\\.?[0-9]+"),
-        DEFINITION = Pattern.compile("^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=(?!=)");
+    static final Pattern IDENT = Pattern.compile("bus\\.[A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*"), NUMBER = Pattern.compile("[0-9]*\\.?[0-9]+"),
+        DEFINITION = Pattern.compile("^\\s*(bus\\.[A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*)\\s*=(?!=)");
     static final String OPERATORS = "+-*&|/^,()<>=!;";
     /** The processor's own symbols, by name (for checking a program on the client). */
     static final List<String> SYMBOLS = List.of("A", "B", "C", "daytime");
@@ -28,7 +29,8 @@ public final class SpLanguage implements LanguageAdapter {
     record Statement(int line, int start, int end, boolean definition) {
     }
 
-    /** The statements of the text, by ; and line, blank and # lines left out; all but the last that define are definitions. */
+    /** The statements of the text, by ; and line, blank and # lines left out; all but the last that define are
+     *  definitions, and the last if it writes a bus channel (Program: only those are definitions there). */
     static List<Statement> statements(String text) {
         List<Statement> out = new ArrayList<>();
         String[] lines = text.split("\n", -1);
@@ -46,7 +48,8 @@ public final class SpLanguage implements LanguageAdapter {
         }
         if (!out.isEmpty()) {
             Statement last = out.remove(out.size() - 1);
-            out.add(new Statement(last.line(), last.start(), last.end(), false));
+            Matcher m = DEFINITION.matcher(lines[last.line()].substring(last.start(), last.end()));
+            out.add(new Statement(last.line(), last.start(), last.end(), m.find() && m.group(1).startsWith(Program.BUS)));
         }
         return out;
     }
@@ -143,6 +146,18 @@ public final class SpLanguage implements LanguageAdapter {
                         }
                     return out;
                 }
+                case BUS -> {
+                    List<String> out = new ArrayList<>(List.of("Bus channel " + w.substring(Program.BUS.length()),
+                        "A field bus channel, 0 to 1 for 0 to 50 V. Read, it is the bus's level as the tick began; a line bus.name = ... writes it."));
+                    String[] lines = text.split("\n", -1);
+                    for (Statement st : statements(text))
+                        if (st.definition()) {
+                            String def = lines[st.line()].substring(st.start(), st.end()).trim();
+                            Matcher m = DEFINITION.matcher(def);
+                            if (m.find() && m.group(1).equals(w)) out.add("Written here: " + def);
+                        }
+                    return out;
+                }
                 case NAME, DEFINITION -> {
                     String[] lines = text.split("\n", -1);
                     for (Statement st : statements(text))
@@ -173,6 +188,7 @@ public final class SpLanguage implements LanguageAdapter {
                 return Kind.KEYWORD;
             default:
         }
+        if (w.startsWith(Program.BUS)) return Kind.BUS;
         if (defining) return Kind.DEFINITION;
         if (FunctionReference.names().contains(w)) return Kind.FUNCTION;
         if (names.contains(w)) return Kind.NAME;
@@ -221,7 +237,7 @@ public final class SpLanguage implements LanguageAdapter {
     @Override
     public Set<Integer> rulesAbove(String text) {
         List<Statement> st = statements(text);
-        if (st.size() < 2) return Set.of();
+        if (st.size() < 2 || st.get(st.size() - 1).definition()) return Set.of();
         return Set.of(st.get(st.size() - 1).line());
     }
 }
