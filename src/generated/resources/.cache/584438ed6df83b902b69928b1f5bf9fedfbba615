@@ -1,4 +1,4 @@
-// 26.3	2026-10-30T21:08:53.655088726	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-01T18:35:26.615375579	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -135,6 +135,7 @@ a278a8ffc954fedd4f7dc050c32d8aba50d42142 data/eln/advancement/recipes/misc/elect
 c95c5929d0b1534b30262ea3827c5f15d75bb044 data/eln/advancement/recipes/misc/energy_meter.json
 e09f2b8bf38f6e72748fec44315b25bcf864bccc data/eln/advancement/recipes/misc/experimental_transporter.json
 e6626b81782dcf21944212f0e22b7ebca4a2ce5b data/eln/advancement/recipes/misc/fast_electrical_drill.json
+7cc5812c49b47ab69555098d564e91a30828e9d7 data/eln/advancement/recipes/misc/field_bus_cable.json
 a7ff3268fc3ae3ad11defa593f5a837359306cab data/eln/advancement/recipes/misc/flare_stack.json
 154a4ef09cc9ac5d53ce9cf792a69f016610ce11 data/eln/advancement/recipes/misc/flat_lamp_socket.json
 2e185699c3874a3467dccd5da7b635d3eb802814 data/eln/advancement/recipes/misc/fluorescent_lamp_socket.json
@@ -493,6 +494,7 @@ c611bc5041d2328ae1ef25e0e0db2858897e737d data/eln/recipe/electrical_probe_chip.j
 fcad7ac7974a4a1f34a82d16fc8438ba71b5b019 data/eln/recipe/energy_meter.json
 c2715733a822da5ec8a2af7742a673d2fdd1699e data/eln/recipe/experimental_transporter.json
 578f4c90700882a789008dc7d51958f37b2cd362 data/eln/recipe/fast_electrical_drill.json
+c69701fc0715e23ae06919546a43dbd77b2991b2 data/eln/recipe/field_bus_cable.json
 cb117cca2d60183ceb605b7c516744be0b07ec15 data/eln/recipe/flare_stack.json
 566930bc1d495eba2162396b25dc0a79d0919023 data/eln/recipe/flat_lamp_socket.json
 dcac5b388078066d6313cefb6951a595b5afe2dd data/eln/recipe/fluorescent_lamp_socket.json

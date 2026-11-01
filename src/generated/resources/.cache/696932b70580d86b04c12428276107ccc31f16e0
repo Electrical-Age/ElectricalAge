@@ -1,4 +1,4 @@
-// 26.3	2026-10-31T01:09:47.130642028	eln-global/EA models
+// 26.3	2026-11-01T18:35:26.611838453	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -177,6 +177,7 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 455bb8c075ef804a67f6c3def780a8e7e147209f assets/eln/items/blue_brush.json
 11d8e05d7d4c49afc10498780c82c071c42ab4fa assets/eln/items/boiler.json
 4e6ec02f2a448b5dc61acd4cb001db2bf89175ab assets/eln/items/brown_brush.json
+1786006f63a9cf200ed3022efa13a5e450652fa1 assets/eln/items/cable_kit_bus.json
 8b28d204138e8b3a19be00bec948932a9e853819 assets/eln/items/cable_kit_hv.json
 5e9c5666a93b581fa46fc9a7d72f0018e5a23bae assets/eln/items/cable_kit_lv.json
 8357193eeda22f7d16d16e19a17856cbb097699b assets/eln/items/cable_kit_mv.json
@@ -242,6 +243,7 @@ ca36c6f6ee1a11e8922ed285329e5e23fe4f3776 assets/eln/items/energy_converter_eln_t
 de5c1b2d84fa3c31b87212d69064619a2111728b assets/eln/items/experimental_transporter.json
 33ba2ebe0b92001716aeee68db4dcacaf11f90f7 assets/eln/items/fast_electrical_drill.json
 d579fd2af476ff519ec84e7e704251ce31b104ab assets/eln/items/ferrite_ingot.json
+f231450e1ec972989bf51336e77fc68029b7f993 assets/eln/items/field_bus_cable.json
 ddc607965cfb890c82537469702f0e1b834bcfe4 assets/eln/items/flare_stack.json
 2a95d3003f54ea1bc6db84d8c4c2ec039bc769c1 assets/eln/items/flat_lamp_socket.json
 eaeabb81f8f3ce34a04ca742e056c6aa8c581081 assets/eln/items/fluorescent_lamp_socket.json
@@ -579,6 +581,7 @@ a156b4526875a4a67867cba5f6306a8bfde04fb7 assets/eln/models/item/blown_lead_fuse.
 0b32ee436dbf7cfb34aef91f60ec27be6269e26e assets/eln/models/item/blue_brush.json
 09c70a74e51db7dd1d394f0fd622870dbe16f1a8 assets/eln/models/item/boiler.json
 3692a38ccb89b9e11066bb03b638e63ed63d39c3 assets/eln/models/item/brown_brush.json
+00a907d2286048d055c501dd50e7f55581fbceb7 assets/eln/models/item/cable_kit_bus.json
 cac6a0113223ca972d0fb558559968f3bedfb59a assets/eln/models/item/cable_kit_hv.json
 0ebb4e07b328e5edfdb89eddd9f667839b2fe653 assets/eln/models/item/cable_kit_lv.json
 f9992078b5ec44355c3a62df7588c097c1cc330c assets/eln/models/item/cable_kit_mv.json
@@ -663,6 +666,7 @@ e6afb16e4b0ce8dc4b31b2a6c51aae12c13d5bee assets/eln/models/item/energy_meter_3d.
 2aba789b8d07ec50f87c52a0817d9fb2a66b473c assets/eln/models/item/experimental_transporter_3d.json
 37a1c402bfab093031ed4dd591bd46c078560c92 assets/eln/models/item/fast_electrical_drill.json
 501c2a5d165ccbd6a0f21052851864ca2a57e5dd assets/eln/models/item/ferrite_ingot.json
+716169343d99761dcaf4103e0bfbf7bd523dc4dd assets/eln/models/item/field_bus_cable.json
 256b9deac7b3597fbaca6cd86bcd1bf83db5ac5e assets/eln/models/item/flare_stack.json
 93d8fcdda08d24ff11c965e098b40cecee5c53c3 assets/eln/models/item/flat_lamp_socket.json
 feb389f761dc6ea894ab26bc00ddd80bc82b5c33 assets/eln/models/item/flat_lamp_socket_3d.json
