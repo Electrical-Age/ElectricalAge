@@ -84,15 +84,21 @@
   {
    "row": [
     {
-     "field": "bus",
-     "chars": 16
+     "canvas": "busswatch",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "bus",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ]
     },
     {
      "text": "busl",
      "sample": [
-      "Bus channel",
-      "Bus full",
-      "Not a channel name"
+      "Bus channel"
      ]
     }
    ],

@@ -1,74 +1,59 @@
 package mods.eln.bus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 /**
- * A field bus: the ports one connected run of bus cable reaches, and its named channels. Values are 0..1 (a signal's
- * share of its 50 V). Double-buffered: what devices write in a simulator tick is read in the next one, so the order
- * devices run in doesn't matter; several writers on one channel: the highest wins (a wired OR). Nothing here is in the
- * circuit solver.
+ * A field bus: the ports one connected run of bus cable reaches, and its 16 channels (BusChannel). Values are 0..1 (a
+ * signal's share of its 50 V). Double-buffered: what devices write in a simulator tick is read in the next one, so the
+ * order devices run in doesn't matter; several writers on one channel: the highest wins (a wired OR). Nothing here is
+ * in the circuit solver.
  */
 public final class Bus {
-    /** Most channel names on one bus (Baughn: 64 is plenty). Checked when a player sets a name (BusNet.room). */
-    public static final int MAX_CHANNELS = 64;
-    /** A channel name: 1-16 of a-z, 0-9 and _. */
-    static final Pattern NAME = Pattern.compile("[a-z0-9_]{1,16}");
+    final java.util.List<BusPort> ports = new java.util.ArrayList<>();
+    /** The channels some port uses, a bit each (Jade's list). */
+    int used;
+    double[] cur = new double[BusChannel.COUNT], next = new double[BusChannel.COUNT];
+    int[] writers = new int[BusChannel.COUNT], nextWriters = new int[BusChannel.COUNT];
 
-    public static boolean validName(String n) {
-        return n != null && NAME.matcher(n).matches();
+    double read(int c) {
+        return BusChannel.valid(c) ? cur[c] : 0;
     }
 
-    final List<BusPort> ports = new ArrayList<>();
-    final Set<String> names = new LinkedHashSet<>();
-    Map<String, Double> cur = new HashMap<>(), next = new HashMap<>();
-    Map<String, Integer> writers = new HashMap<>(), nextWriters = new HashMap<>();
-
-    double read(String name) {
-        Double v = cur.get(name);
-        return v == null ? 0 : v;
+    void write(int c, double v) {
+        if (!BusChannel.valid(c)) return;
+        next[c] = Math.max(next[c], Math.max(0, Math.min(1, v)));
+        nextWriters[c]++;
     }
 
-    void write(String name, double v) {
-        if (!names.contains(name)) return;
-        double c = Math.max(0, Math.min(1, v));
-        next.merge(name, c, Math::max);
-        nextWriters.merge(name, 1, Integer::sum);
-    }
-
-    /** The claimed names again (a port's claims changed). */
+    /** The used channels again (a port's claims changed). */
     void reclaim() {
-        names.clear();
-        for (BusPort p : ports) names.addAll(p.claims);
+        used = 0;
+        for (BusPort p : ports) used |= p.claims;
     }
 
     /** Next tick's values become this tick's. */
     void swap() {
+        double[] d = cur;
         cur = next;
-        next = new HashMap<>();
+        next = d;
+        java.util.Arrays.fill(next, 0);
+        int[] w = writers;
         writers = nextWriters;
-        nextWriters = new HashMap<>();
+        nextWriters = w;
+        java.util.Arrays.fill(nextWriters, 0);
     }
 
-    /** Its channel names, in the order ports claimed them. */
-    public Set<String> names() {
-        return java.util.Collections.unmodifiableSet(names);
+    /** Is a channel in use: some port claims it, or something wrote it last tick? */
+    public boolean inUse(int c) {
+        return BusChannel.valid(c) && ((used >> c & 1) != 0 || writers[c] > 0);
     }
 
     /** A channel's level now (0..1). */
-    public double value(String name) {
-        return read(name);
+    public double value(int c) {
+        return read(c);
     }
 
     /** How many writes a channel had last tick (two or more: a clash to show). */
-    public int writers(String name) {
-        Integer n = writers.get(name);
-        return n == null ? 0 : n;
+    public int writers(int c) {
+        return BusChannel.valid(c) ? writers[c] : 0;
     }
 
     public int portCount() {

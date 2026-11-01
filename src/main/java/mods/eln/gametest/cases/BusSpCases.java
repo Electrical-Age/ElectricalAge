@@ -14,18 +14,25 @@ import mods.eln.sixnode.electricalmath.ElectricalMathElement;
 import net.minecraft.core.BlockPos;
 
 import java.util.List;
-import java.util.Set;
 
 import static mods.eln.gametest.cases.BusModuleCases.BACK_MIDDLE;
 import static mods.eln.gametest.cases.BusModuleCases.BUS;
 import static mods.eln.gametest.cases.BusModuleCases.DOWN;
 import static mods.eln.gametest.cases.BusModuleCases.SIGNAL;
+import static mods.eln.gametest.cases.BusModuleCases.CYAN;
+import static mods.eln.gametest.cases.BusModuleCases.LIGHT_BLUE;
+import static mods.eln.gametest.cases.BusModuleCases.LIME;
+import static mods.eln.gametest.cases.BusModuleCases.ORANGE;
+import static mods.eln.gametest.cases.BusModuleCases.RED;
+import static mods.eln.gametest.cases.BusModuleCases.UNUSED;
+import static mods.eln.gametest.cases.BusModuleCases.WHITE;
+import static mods.eln.gametest.cases.BusModuleCases.YELLOW;
 
 /**
  * The signal processor and the data logger on the field bus (mods.eln.bus): a processor reads a channel a Bus I/O
  * Module puts on the bus and writes another a module drives a wire from, its output wire still working beside its bus
- * pin; a program ending with a bus definition; a 65th channel refused; a logger channel recording a bus channel; both
- * devices' settings kept over a save and load.
+ * pin; a program ending with a bus definition; only the 16 dye names are channels; a logger channel recording a bus
+ * channel; both devices' settings kept over a save and load.
  */
 public final class BusSpCases {
     private BusSpCases() {
@@ -34,7 +41,7 @@ public final class BusSpCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new ReadWrite());
         cases.add(new EndsWithBus());
-        cases.add(new Refused());
+        cases.add(new BadChannel());
         cases.add(new SpSaved());
         cases.add(new LoggerOnBus());
     }
@@ -80,9 +87,9 @@ public final class BusSpCases {
     }
 
     /**
-     * A Signal Source at 30 V (x 0) into module A's in terminal "level" (x 2); bus cable (x 3) on to module B (z 0),
-     * whose out terminal takes "half", and to the processor (x 4, output west), whose bus pin is off its output's middle:
-     * the cable bends to meet it. Program: bus.half = bus.level / 2, output bus.level, on a signal cable in x 3 that
+     * A Signal Source at 30 V (x 0) into module A's in terminal on 4 yellow (x 2); bus cable (x 3) on to module B (z 0),
+     * whose out terminal takes 1 orange, and to the processor (x 4, output west), whose bus pin is off its output's middle:
+     * the cable bends to meet it. Program: bus.orange = bus.yellow / 2, output bus.yellow, on a signal cable in x 3 that
      * meets the output terminal.
      */
     static final class ReadWrite implements TestCase {
@@ -101,14 +108,14 @@ public final class BusSpCases {
                 BusModuleCases.across(c, c.at(1, 1, 1), SIGNAL);
                 a = BusModuleCases.module(c, c.at(2, 1, 1), Direction.XP);
                 b = BusModuleCases.module(c, c.at(3, 1, 0), Direction.ZP);
-                sp = processor(c, c.at(4, 1, 1), Direction.XN, "bus.half = bus.level / 2\nbus.level", 1);
+                sp = processor(c, c.at(4, 1, 1), Direction.XN, "bus.orange = bus.yellow / 2\nbus.yellow", 1);
                 pz = busAlong(sp);
                 CableCases.voxel(c, c.at(3, 1, 1),
                     List.of(new CablePart(BUS, DOWN, new int[]{0, 0, 8, 8, 0, 8, 8, 0, 0}),
                         new CablePart(BUS, DOWN, new int[]{8, 0, 8, 8, 0, pz, 16, 0, pz})),
                     List.of(new CablePart(SIGNAL, DOWN, new int[]{16, 0, 8, 12, 0, 8})));
-                a.setName(BACK_MIDDLE, "level");
-                b.setName(BACK_MIDDLE, "half");
+                a.setChannel(BACK_MIDDLE, YELLOW);
+                b.setChannel(BACK_MIDDLE, ORANGE);
                 b.setOut(BACK_MIDDLE, true);
             } catch (RuntimeException e) {
                 why = String.valueOf(e);
@@ -122,18 +129,18 @@ public final class BusSpCases {
             c.check("bus sp: the program compiles", valid(sp), error(sp));
             c.check("bus sp: on the modules' bus", sp.port.bus() != null && sp.port.bus() == a.port.bus() && a.port.bus() == b.port.bus(),
                 sp.port.bus() + " " + a.port.bus() + " " + b.port.bus());
-            c.check("bus sp: claims what the program reads and writes", sp.port.claims().equals(Set.of("half", "level")), sp.port.claims().toString());
-            Wp9cCases.within(c, "bus sp: reads the channel module A puts on [0..1]", sp.port.read("level"), 0.6, 0.01);
-            Wp9cCases.within(c, "bus sp: writes half of it [0..1]", sp.port.read("half"), 0.3, 0.01);
-            c.check("bus sp: one writer on its channel", sp.port.bus() != null && sp.port.bus().writers("half") == 1,
-                sp.port.bus() == null ? "no bus" : "" + sp.port.bus().writers("half"));
+            c.check("bus sp: claims what the program reads and writes", sp.port.claims() == (1 << ORANGE | 1 << YELLOW), "" + sp.port.claims());
+            Wp9cCases.within(c, "bus sp: reads the channel module A puts on [0..1]", sp.port.read(YELLOW), 0.6, 0.01);
+            Wp9cCases.within(c, "bus sp: writes half of it [0..1]", sp.port.read(ORANGE), 0.3, 0.01);
+            c.check("bus sp: one writer on its channel", sp.port.bus() != null && sp.port.bus().writers(ORANGE) == 1,
+                sp.port.bus() == null ? "no bus" : "" + sp.port.bus().writers(ORANGE));
             Wp9cCases.within(c, "bus sp: module B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 15, 0.5);
             Object[] k = ((VoxelNode) BusCases.node(c, 3, 1, 1)).cableAt(14, 0, 8);
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
             Wp9cCases.within(c, "bus sp: its output wire beside the bus pin still gives the output [V]", u, 30, 0.5);
             c.check("bus sp: its output edge has no circuit link to the bus", sp.edgePins().get(1).load() == null, "");
             var w = sp.getWaila();
-            c.check("bus sp: Jade shows its bus channels", "2".equals(w.get("Bus channels")), w.toString());
+            c.check("bus sp: Jade shows its bus channels by number and name", "1 orange, 4 yellow".equals(w.get("Bus channels")), w.toString());
         }
     }
 
@@ -153,10 +160,10 @@ public final class BusSpCases {
 
         public void build(TestContext c) {
             try {
-                sp = processor(c, c.at(1, 1, 1), Direction.XP, "x = 0.4\nbus.const = x", 0);
+                sp = processor(c, c.at(1, 1, 1), Direction.XP, "x = 0.4\nbus.lime = x", 0);
                 b = BusModuleCases.module(c, c.at(3, 1, 1), Direction.XN);
                 bentTo(c, c.at(2, 1, 1), busAlong(sp));
-                b.setName(BACK_MIDDLE, "const");
+                b.setChannel(BACK_MIDDLE, LIME);
                 b.setOut(BACK_MIDDLE, true);
             } catch (RuntimeException e) {
                 why = String.valueOf(e);
@@ -167,22 +174,21 @@ public final class BusSpCases {
             c.check("bus sp ends: built", why.isEmpty(), why);
             if (!why.isEmpty()) return;
             c.check("bus sp ends: a program ending with a bus definition compiles", valid(sp), error(sp));
-            Wp9cCases.within(c, "bus sp ends: the channel has 0.4 [0..1]", sp.port.read("const"), 0.4, 1e-6);
+            Wp9cCases.within(c, "bus sp ends: the channel has 0.4 [0..1]", sp.port.read(LIME), 0.4, 1e-6);
             Wp9cCases.within(c, "bus sp ends: the module's out terminal gives 20 V [V]", b.volts(BACK_MIDDLE), 20, 0.5);
             Wp9cCases.within(c, "bus sp ends: no output expression, 0 V on the output [V]", Wp9cCases.out(sp), 0, 0.01);
         }
     }
 
     /**
-     * On a bus with 64 channels (a bare port claims them), a program using one of them compiles, one adding a 65th is
-     * refused with its message shown as a compile error, and claims nothing; a plain program claims nothing either.
-     * Broken, the processor's port leaves the bus.
+     * Only the 16 dye names are channels: bus.teal is a compile error that names them, and claims nothing; the dye names
+     * compile and are claimed; a plain program claims nothing. Broken, the processor's port leaves the bus.
      */
-    static final class Refused implements TestCase {
+    static final class BadChannel implements TestCase {
         ElectricalMathElement sp;
 
         public String id() {
-            return "bus_sp_refused";
+            return "bus_sp_bad_channel";
         }
 
         public void build(TestContext c) {
@@ -190,34 +196,30 @@ public final class BusSpCases {
         }
 
         public void measure(TestContext c) {
-            BusPort full = new BusPort();
-            List<String> many = new java.util.ArrayList<>();
-            for (int i = 0; i < 64; i++) many.add("c" + i);
-            full.claim(many);
-            BusNet.link(full, sp.port);
+            BusPort other = new BusPort();
+            BusNet.link(other, sp.port);
             BusNet.refresh();
-            c.check("bus sp refused: on the full bus", sp.port.bus() != null && sp.port.bus().names().size() == 64,
-                sp.port.bus() == null ? "no bus" : "" + sp.port.bus().names().size());
-            program(c, sp, "bus.c5 = bus.c6 > 0.5");
-            c.check("bus sp refused: channels the bus has are fine", valid(sp) && sp.port.claims().equals(Set.of("c5", "c6")),
+            program(c, sp, "bus.red = bus.white > 0.5");
+            c.check("bus sp channels: dye names are channels", valid(sp) && sp.port.claims() == (1 << RED | 1 << WHITE),
                 error(sp) + " " + sp.port.claims());
-            program(c, sp, "bus.c5 = bus.extra > 0.5");
+            program(c, sp, "bus.red = bus.teal > 0.5");
             String e = error(sp);
-            c.check("bus sp refused: a 65th channel", !valid(sp) && e.startsWith("Bus full"), e);
-            c.check("bus sp refused: no parenthesis in the message", !e.contains("("), e);
-            c.check("bus sp refused: a refused program claims nothing", sp.port.claims().isEmpty(), sp.port.claims().toString());
+            c.check("bus sp channels: bus.teal is no channel", !valid(sp) && e.contains("bus.teal is not a bus channel"), e);
+            c.check("bus sp channels: the error names the 16", e.contains("white") && e.contains("light_blue") && e.contains("black"), e);
+            c.check("bus sp channels: no parenthesis in the message", !e.contains("("), e);
+            c.check("bus sp channels: a program that fails claims nothing", sp.port.claims() == 0, "" + sp.port.claims());
             program(c, sp, "A * 2");
-            c.check("bus sp refused: a program without the bus is fine", valid(sp) && error(sp).isEmpty() && sp.port.claims().isEmpty(), error(sp));
+            c.check("bus sp channels: a program without the bus is fine", valid(sp) && error(sp).isEmpty() && sp.port.claims() == 0, error(sp));
             sp.sixNode.deleteSlot(null, sp.slot);
             BusNet.refresh();
-            c.check("bus sp refused: broken, its port is off the bus", sp.port.bus() == null && full.bus() == null, sp.port.bus() + " " + full.bus());
+            c.check("bus sp channels: broken, its port is off the bus", sp.port.bus() == null && other.bus() == null, sp.port.bus() + " " + other.bus());
         }
     }
 
     /** A processor with a bus program, saved and loaded: the same program, valid, its names claimed and on its bus again. */
     static final class SpSaved implements TestCase {
         ElectricalMathElement sp;
-        static final String PROGRAM = "# bus\nlow = bus.tank_level < 0.3\nbus.pump = rs(low, bus.tank_level > 0.9)\nbus.pump";
+        static final String PROGRAM = "# bus\nlow = bus.cyan < 0.3\nbus.red = rs(low, bus.cyan > 0.9)\nbus.red";
 
         public String id() {
             return "bus_sp_saved";
@@ -230,8 +232,8 @@ public final class BusSpCases {
 
         public void measure(TestContext c) {
             c.check("bus sp saved: compiles", valid(sp), error(sp));
-            Set<String> claims = Set.copyOf(sp.port.claims());
-            c.check("bus sp saved: claims its channels", claims.equals(Set.of("tank_level", "pump")), claims.toString());
+            int claims = sp.port.claims();
+            c.check("bus sp saved: claims its channels", claims == (1 << CYAN | 1 << RED), "" + claims);
             c.check("bus sp saved: on a bus", sp.port.bus() != null, "no bus");
             Reload r;
             try {
@@ -243,18 +245,17 @@ public final class BusSpCases {
             var fresh = (ElectricalMathElement) ((SixNode) r.fresh).sideElementList[Direction.YN.getInt()];
             String expr = Batch1Cases.field(fresh, "expression");
             c.check("bus sp saved: the program comes back", PROGRAM.equals(expr) && valid(fresh), expr + " / " + error(fresh));
-            c.check("bus sp saved: claimed again on load", Set.copyOf(fresh.port.claims()).equals(claims), fresh.port.claims().toString());
+            c.check("bus sp saved: claimed again on load", fresh.port.claims() == claims, "" + fresh.port.claims());
             BusNet.refresh();
             var bus = fresh.port.bus();
-            c.check("bus sp saved: back on a bus with its channels", bus != null && bus.names().containsAll(claims),
-                bus == null ? "no bus" : bus.names().toString());
+            c.check("bus sp saved: back on a bus with its channels in use", bus != null && bus.inUse(CYAN) && bus.inUse(RED), "" + bus);
         }
     }
 
     /**
-     * A Three-Channel Data Logger (front north, in a voxel block) whose channel B records bus channel "lvl": module A's
+     * A Three-Channel Data Logger (front north, in a voxel block) whose channel B records bus channel 3 light_blue: module A's
      * in terminal puts a 20 V Signal Source on it, through bus cable to the logger's bus pin (x 4; the rest east or west
-     * of it, as busEdge says). B records 0.4, A and C their open wires; saved and loaded, B still takes "lvl", claimed again.
+     * of it, as busEdge says). B records 0.4, A and C their open wires; saved and loaded, B still takes it, claimed again.
      */
     static final class LoggerOnBus implements TestCase {
         mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement logger;
@@ -284,8 +285,13 @@ public final class BusSpCases {
                 a = BusModuleCases.module(c, c.at(lx + 2 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP);
                 BusModuleCases.across(c, c.at(lx + 3 * s, 1, 1), SIGNAL);
                 BusModuleCases.source(c, c.at(lx + 4 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP, 20);
-                a.setName(BACK_MIDDLE, "lvl");
-                if (logger.setBus(1, "LVL ") != null) throw new IllegalStateException(logger.busMessage());
+                a.setChannel(BACK_MIDDLE, LIGHT_BLUE);
+                // as its screen sends it
+                logger.networkUnserialize(c.stream(o -> {
+                    o.writeByte(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement.setBusId);
+                    o.writeByte(1);
+                    o.writeByte(LIGHT_BLUE);
+                }), Wp9cCases.player(c));
             } catch (RuntimeException e) {
                 why = String.valueOf(e);
             }
@@ -295,16 +301,17 @@ public final class BusSpCases {
             c.check("bus logger: built", why.isEmpty(), why);
             if (!why.isEmpty()) return;
             c.check("bus logger: on module A's bus", logger.port.bus() != null && logger.port.bus() == a.port.bus(), logger.port.bus() + " " + a.port.bus());
-            c.check("bus logger: the name is folded to lower case and claimed", "lvl".equals(logger.busName(1)) && logger.port.claims().equals(Set.of("lvl")),
-                logger.busName(1) + " " + logger.port.claims());
+            c.check("bus logger: channel B takes 3 light_blue, claimed", logger.busChannel(1) == LIGHT_BLUE && logger.port.claims() == 1 << LIGHT_BLUE,
+                logger.busChannel(1) + " " + logger.port.claims());
             c.check("bus logger: its bus edge has no wire", logger.getElectricalLoad(logger.busEdge()) == null, "");
             var v = logger.view();
             c.check("bus logger: channel B records the bus channel, 0.4; A and C their open wires",
                 v.size() > 0 && Math.abs(v.mean(1, 0) - 0.4) < 2e-3 && Math.abs(v.mean(0, 0)) < 2e-3 && Math.abs(v.mean(2, 0)) < 2e-3,
                 v.size() > 0 ? v.mean(0, 0) + " " + v.mean(1, 0) + " " + v.mean(2, 0) : "no points");
-            String bad = logger.setBus(0, "no spaces!");
-            c.check("bus logger: a bad name is refused", bad != null && logger.busName(0).isEmpty() && !bad.contains("("), String.valueOf(bad));
-            logger.setBus(0, "");
+            var w = logger.getWaila();
+            c.check("bus logger: Jade shows B's channel by number and name", w.getOrDefault("Bus B", "").startsWith("3 light_blue"), w.toString());
+            logger.setBus(0, 16);
+            c.check("bus logger: 16 is no channel, A records its wire", logger.busChannel(0) == UNUSED, "" + logger.busChannel(0));
             Reload r;
             try {
                 r = Reload.node(c.level(), c.at(lx, 1, 1));
@@ -313,12 +320,12 @@ public final class BusSpCases {
                 return;
             }
             var fresh = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement) ((SixNode) r.fresh).sideElementList[Direction.YN.getInt()];
-            c.check("bus logger: its channels' bus names come back", "lvl".equals(fresh.busName(1)) && fresh.busName(0).isEmpty() && fresh.busName(2).isEmpty(),
-                fresh.busName(0) + "/" + fresh.busName(1) + "/" + fresh.busName(2));
-            c.check("bus logger: claimed again on load", fresh.port.claims().equals(Set.of("lvl")), fresh.port.claims().toString());
+            c.check("bus logger: its channels' bus channels come back",
+                fresh.busChannel(1) == LIGHT_BLUE && fresh.busChannel(0) == UNUSED && fresh.busChannel(2) == UNUSED,
+                fresh.busChannel(0) + "/" + fresh.busChannel(1) + "/" + fresh.busChannel(2));
+            c.check("bus logger: claimed again on load", fresh.port.claims() == 1 << LIGHT_BLUE, "" + fresh.port.claims());
             BusNet.refresh();
-            c.check("bus logger: back on the bus", fresh.port.bus() != null && fresh.port.bus().names().contains("lvl"),
-                fresh.port.bus() == null ? "no bus" : fresh.port.bus().names().toString());
+            c.check("bus logger: back on the bus", fresh.port.bus() != null && fresh.port.bus().inUse(LIGHT_BLUE), "" + fresh.port.bus());
         }
     }
 }

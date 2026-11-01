@@ -2,7 +2,7 @@ package mods.eln.sixnode.busmodule;
 
 import mods.eln.Eln;
 import mods.eln.bus.Bus;
-import mods.eln.bus.BusNet;
+import mods.eln.bus.BusChannel;
 import mods.eln.bus.BusPort;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -23,17 +23,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static mods.eln.i18n.I18N.tr;
 
 /**
  * The Bus I/O Module: the bridge between a field bus (mods.eln.bus) and EA's signal wires. Its front edge is the bus
- * terminal; its left, back and right edges hold three signal terminals each, 9 in all (Baughn). Each terminal has a
- * channel name (empty: unused) and a direction: in, the wire's level goes onto the bus every tick; out, the bus drives
- * the wire like a signal source. In a voxel block the three terminals of an edge are pins 4 voxels apart (edgePins);
+ * terminal; its left, back and right edges hold three signal terminals each, 9 in all (Baughn). Each terminal is
+ * tuned to one of the bus's 16 colour channels (BusChannel), or unused, from its screen or with an EA brush, and has a
+ * direction: in, the wire's level goes onto the bus every tick; out, the bus drives the wire like a signal source. In a voxel block the three terminals of an edge are pins 4 voxels apart (edgePins);
  * in a plain six-node block an edge has one connection, the middle terminal's, and there is no bus cable to join.
  */
 public class BusModuleElement extends SixNodeElement {
@@ -45,15 +43,15 @@ public class BusModuleElement extends SixNodeElement {
     /** A terminal's wire: an input while the driver is high impedance, else an output. */
     final NbtElectricalGateOutput[] gates = new NbtElectricalGateOutput[TERMINALS];
     final NbtElectricalGateOutputProcess[] drivers = new NbtElectricalGateOutputProcess[TERMINALS];
-    final String[] names = new String[TERMINALS];
+    /** Each terminal's channel, or BusChannel.UNUSED. */
+    final int[] channels = new int[TERMINALS];
     final boolean[] out = new boolean[TERMINALS];
     /** Its bus pin, the same for the element's life (VoxelNode links it to the bus cable it touches). */
     public final BusPort port = new BusPort();
-    /** Why the last name set was refused, or "": shown in its screen. */
-    String message = "";
     boolean activity;
 
-    public static final byte setNameId = 1, setOutId = 2;
+    /** Screen packets: a terminal's channel (terminal byte, channel byte; anything not a channel: unused), its direction. */
+    public static final byte setChannelId = 1, setOutId = 2;
 
     public BusModuleElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
@@ -62,7 +60,7 @@ public class BusModuleElement extends SixNodeElement {
             drivers[i] = new NbtElectricalGateOutputProcess("t" + i + "drive", gates[i]);
             electricalLoadList.add(gates[i]);
             electricalComponentList.add(drivers[i]);
-            names[i] = "";
+            channels[i] = BusChannel.UNUSED;
             drivers[i].setHighImpedance(true);
         }
         // once a simulator tick, after the circuit: the electrical processes run several times a tick, and every
@@ -127,13 +125,9 @@ public class BusModuleElement extends SixNodeElement {
         return lrdu == busEdge() ? port : null;
     }
 
-    /** Why the last name set was refused, or "". */
-    public String message() {
-        return message;
-    }
-
-    public String name(int i) {
-        return names[i];
+    /** Terminal i's channel, or BusChannel.UNUSED. */
+    public int channel(int i) {
+        return channels[i];
     }
 
     public boolean isOut(int i) {
@@ -145,34 +139,19 @@ public class BusModuleElement extends SixNodeElement {
         return gates[i].getU();
     }
 
-    Set<String> used(String[] n) {
-        Set<String> s = new LinkedHashSet<>();
-        for (String x : n) if (!x.isEmpty()) s.add(x);
-        return s;
+    /** The channels its terminals use, bit c for channel c. */
+    int used() {
+        int m = 0;
+        for (int c : channels) if (BusChannel.valid(c)) m |= 1 << c;
+        return m;
     }
 
-    /**
-     * Terminal i's channel name, from the player: trimmed and lower-cased; empty frees it. Null if taken, else why it
-     * was refused (a name the bus can't have, or a 65th channel on its bus), which the screen shows.
-     */
-    public String setName(int i, String raw) {
-        if (i < 0 || i >= TERMINALS) return tr("No such terminal");
-        String n = raw == null ? "" : raw.trim().toLowerCase(java.util.Locale.ROOT);
-        String why = null;
-        if (!n.isEmpty() && !Bus.validName(n)) why = tr("Names are 1 to 16 of a-z, 0-9 and _");
-        else {
-            String[] next = names.clone();
-            next[i] = n;
-            Set<String> want = used(next);
-            if (!BusNet.room(port, want)) why = tr("Bus full: it has %1$ channels already", Bus.MAX_CHANNELS);
-            else {
-                names[i] = n;
-                port.claim(want);
-            }
-        }
-        message = why == null ? "" : why;
+    /** Terminal i's channel: 0..15, anything else unused. */
+    public void setChannel(int i, int c) {
+        if (i < 0 || i >= TERMINALS) return;
+        channels[i] = BusChannel.orUnused(c);
+        port.claim(used());
         needPublish();
-        return why;
     }
 
     /** Terminal i's direction: out drives its wire from the bus, in puts its wire on the bus. */
@@ -189,10 +168,10 @@ public class BusModuleElement extends SixNodeElement {
         public void process(double time) {
             boolean any = false;
             for (int i = 0; i < TERMINALS; i++) {
-                String n = names[i];
-                if (n.isEmpty()) continue;
-                if (out[i]) drivers[i].setOutputNormalized(port.read(n));
-                else port.write(n, gates[i].getU() / Eln.SVU);
+                int c = channels[i];
+                if (c == BusChannel.UNUSED) continue;
+                if (out[i]) drivers[i].setOutputNormalized(port.read(c));
+                else port.write(c, gates[i].getU() / Eln.SVU);
                 any |= gates[i].getU() > 0.5;
             }
             if (any != activity) {
@@ -202,30 +181,24 @@ public class BusModuleElement extends SixNodeElement {
         }
     }
 
-    /** 0: on no bus, 1: on one, 2: on one past its 64 channels (a merge of two buses; nothing is dropped). */
-    int busState() {
-        Bus b = port.bus();
-        if (b == null) return 0;
-        return b.names().size() > Bus.MAX_CHANNELS ? 2 : 1;
-    }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         for (int i = 0; i < TERMINALS; i++) {
-            String n = nbt.getStringOr("t" + i + "name", "");
-            names[i] = Bus.validName(n) ? n : "";
+            // (absent, or no channel: unused)
+            channels[i] = BusChannel.orUnused(nbt.getByteOr("t" + i + "bus", (byte) BusChannel.UNUSED));
             out[i] = nbt.getBooleanOr("t" + i + "out", false);
             drivers[i].setHighImpedance(!out[i]);
         }
-        port.claim(used(names));
+        port.claim(used());
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         for (int i = 0; i < TERMINALS; i++) {
-            if (!names[i].isEmpty()) nbt.putString("t" + i + "name", names[i]);
+            if (channels[i] != BusChannel.UNUSED) nbt.putByte("t" + i + "bus", (byte) channels[i]);
             if (out[i]) nbt.putBoolean("t" + i + "out", true);
         }
     }
@@ -235,12 +208,11 @@ public class BusModuleElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             for (int i = 0; i < TERMINALS; i++) {
-                stream.writeUTF(names[i]);
+                stream.writeByte(channels[i]);
                 stream.writeBoolean(out[i]);
             }
-            stream.writeByte(busState());
+            stream.writeBoolean(port.bus() != null);
             stream.writeBoolean(activity);
-            stream.writeUTF(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -251,9 +223,9 @@ public class BusModuleElement extends SixNodeElement {
         super.networkUnserialize(stream);
         try {
             switch (stream.readByte()) {
-                case setNameId -> {
+                case setChannelId -> {
                     int i = stream.readByte();
-                    setName(i, stream.readUTF());
+                    setChannel(i, stream.readByte());
                 }
                 case setOutId -> {
                     int i = stream.readByte();
@@ -280,12 +252,12 @@ public class BusModuleElement extends SixNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new LinkedHashMap<>();
         Bus b = port.bus();
-        if (b == null) info.put(I18N.tr("Bus"), I18N.tr("no bus"));
-        else info.put(I18N.tr("Bus"), (b.names().size() == 1 ? I18N.tr("1 channel") : I18N.tr("%1$ channels", b.names().size()))
-            + (b.names().size() > Bus.MAX_CHANNELS ? ", " + I18N.tr("bus full") : ""));
+        info.put(I18N.tr("Bus"), b == null ? I18N.tr("no bus") : I18N.tr("on a bus"));
+        // terminals by their number, 1 to 9; channels by number and name, 0 to 15
         for (int i = 0; i < TERMINALS; i++) {
-            if (names[i].isEmpty()) continue;
-            info.put((i + 1) + " " + names[i], (out[i] ? I18N.tr("out") : I18N.tr("in")) + " " + Utils.plotVolt("", gates[i].getU()));
+            if (channels[i] == BusChannel.UNUSED) continue;
+            info.put(I18N.tr("Terminal %1$", i + 1), BusChannel.label(channels[i]) + ", " + (out[i] ? I18N.tr("out") : I18N.tr("in")) + " "
+                + Utils.plotVolt("", gates[i].getU()));
         }
         return info;
     }
@@ -294,7 +266,8 @@ public class BusModuleElement extends SixNodeElement {
     public String multiMeterString() {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < TERMINALS; i++)
-            if (!names[i].isEmpty()) s.append(i + 1).append(' ').append(names[i]).append(' ').append(Utils.plotVolt("", gates[i].getU()));
+            if (channels[i] != BusChannel.UNUSED)
+                s.append(s.isEmpty() ? "" : "  ").append(i + 1).append(": ").append(BusChannel.label(channels[i])).append(' ').append(Utils.plotVolt("", gates[i].getU()));
         return s.toString();
     }
 

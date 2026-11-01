@@ -51,10 +51,17 @@ public final class FunctionReference {
         new Entry("Utility", "A = 0.5", "An input's default: what A (or B, C) reads while no cable is on it, a weak pull up or down; a cable overrides it. In signal units (1 = 50 V), once per input; the logger graphs it.", "B = 0.2", "A = 0.5"),
         new Entry("Utility", "name = expression", "Names a part, computed once and paid once; the last line is the output.", "x = A * 0.5", "x = "),
         new Entry("Utility", "# text", "A comment.", "# my notes", "# "),
-        new Entry("Field bus", "bus.name", "Reads a channel of the field bus on its pin beside the output: 0 to 1 for 0 to 50 V, as the tick began. Names are 1 to 16 of a-z, 0-9 and _.",
-            "bus.tank_level < 0.3", "bus."),
-        new Entry("Field bus", "bus.name = expression", "Writes a channel, once a tick; with several writers the highest wins. It may be the last line: then the output wire gives 0 V.",
-            "bus.pump = rs(A, B)", "bus.name = "));
+        new Entry("Field bus", "bus.colour", "Reads a channel of the field bus on its pin beside the output: 0 to 1 for 0 to 50 V, as the tick began. "
+            + "The 16 channels are the dye colours, numbered 0 to 15: " + numbered() + ".", "bus.light_blue < 0.3", "bus."),
+        new Entry("Field bus", "bus.colour = expression", "Writes a channel, once a tick; with several writers the highest wins. It may be the last line: then the output wire gives 0 V.",
+            "bus.red = rs(A, B)", "bus.red = "));
+
+    /** The bus channels, "0 white, 1 orange, ...". */
+    static String numbered() {
+        StringBuilder b = new StringBuilder();
+        for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) b.append(c == 0 ? "" : ", ").append(mods.eln.bus.BusChannel.label(c));
+        return b.toString();
+    }
 
     /** The entries about a name: a function's (every form of it), or pi or daytime. */
     public static List<Entry> forName(String name) {

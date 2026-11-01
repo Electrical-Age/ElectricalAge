@@ -1,16 +1,13 @@
 package mods.eln.bus;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 /**
  * One member of a field bus: a bus cable conductor or a device's bus pin. Ports are joined by links (BusNet.link) when
- * their nodes connect, and the ports a link reaches form one Bus. A device's port also claims the channel names it uses,
- * so a channel exists while some device on the bus claims it (Baughn: named channels, 64 a bus).
+ * their nodes connect, and the ports a link reaches form one Bus. A device's port also claims the channels it uses, a
+ * bit each, so Jade can list a bus's channels in use; every channel is carried whether claimed or not.
  */
 public final class BusPort {
-    final Set<BusPort> links = new LinkedHashSet<>();
-    final Set<String> claims = new LinkedHashSet<>();
+    final java.util.Set<BusPort> links = new java.util.LinkedHashSet<>();
+    int claims;
     Bus bus;
 
     /** The bus this port is on now, or null: it has no links, or the net hasn't been rebuilt since it was joined. */
@@ -18,25 +15,24 @@ public final class BusPort {
         return bus;
     }
 
-    /** The names this port claims. */
-    public Set<String> claims() {
-        return java.util.Collections.unmodifiableSet(claims);
+    /** The channels this port claims, bit c for channel c. */
+    public int claims() {
+        return claims;
     }
 
-    /** Claim exactly these names (a device's settings changed or loaded); the bus's channel list follows. */
-    public void claim(java.util.Collection<String> names) {
-        claims.clear();
-        for (String n : names) if (Bus.validName(n)) claims.add(n);
+    /** Claim exactly these channels (bit c for channel c; a device's settings changed or loaded). */
+    public void claim(int mask) {
+        claims = mask & ((1 << BusChannel.COUNT) - 1);
         if (bus != null) bus.reclaim();
     }
 
-    /** The level of a channel, 0..1 (0: no such channel, or nobody wrote it last tick). */
-    public double read(String name) {
-        return bus == null ? 0 : bus.read(name);
+    /** The level of a channel, 0..1 (0: no bus, no such channel, or nobody wrote it last tick). */
+    public double read(int c) {
+        return bus == null ? 0 : bus.read(c);
     }
 
     /** Write a channel for the next tick (the highest of this tick's writes wins). */
-    public void write(String name, double v) {
-        if (bus != null) bus.write(name, v);
+    public void write(int c, double v) {
+        if (bus != null) bus.write(c, v);
     }
 }

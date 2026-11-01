@@ -378,32 +378,44 @@ on 1.7.10) onto 26.x.
   three pins on its back edge at 4, 8 and 12 voxels (`edgePins`), coloured terminals; in a plain block the back, left
   and right edges. Its screen has the graph modes and per-channel scale and unit tabs. GameTest
   `wp9c three-channel data logger` (three cables, three sources, each channel its own).
+- Field bus channels (Baughn 2026-11-01, after named channels with a cap of 64 were built): a bus has exactly 16
+  channels, one per Minecraft dye colour, numbered as Minecraft numbers its dyes, 0 white .. 15 black, and named as it
+  names them (`BusChannel`, held to `DyeColor` by `BusChannelTest`). No names, no cap, no "bus full": every channel is
+  always carried, and a device's claims only mark channels in use for Jade. EA's brushes and wire colours number the
+  dyes the other way round (1.12's dye damage, 0 black .. 15 white), so a brush's colour b is channel 15 - b
+  (`BusChannel.fromBrush`). Wherever a channel's colour shows, its number and name go with it (Baughn: the colours
+  aren't colourblind-safe): screens show a swatch beside a button labelled `3 light_blue`, Jade on a bus cable lists
+  the channels in use as `3 light_blue  12.5V` with writer clashes, Jade on a module lists `Terminal 5: 3 light_blue,
+  in 30V`. The pins themselves carry no number tag yet. Tests `BusNetTest`, `BusNetPropertyTest`, `BusChannelTest`,
+  GameTest `bus_cable_across_blocks`.
 - Bus I/O Module (the field bus, `mods.eln.bus`; Baughn: 9 terminals), id `1 + (117 << 6)` beside the Modbus RTU,
   whose model it wears without the door (a proper model later). On a face, its front edge takes Field Bus Cable; its
   left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels
-  apart (`edgePins`). Each terminal: a channel name (empty: unused) and in (its wire's level onto the bus every tick)
-  or out (the bus drives its wire, a gate output). Its screen sets them; names are lower-cased, and a bad name or a
-  65th channel on its bus is refused there. In a plain six-node block there is no bus cable, and each signal edge
-  connects only its middle terminal (2, 5, 8). NBT `t<n>name`, `t<n>out`. Recipe: a signal processor's with Field
+  apart (`edgePins`). Each terminal: unused or a colour channel, and in (its wire's level onto the bus every tick)
+  or out (the bus drives its wire, a gate output). In its screen a button per terminal steps through unused, 0 white
+  .. 15 black (shift-click steps back). In a plain six-node block there is no bus cable, and each signal edge
+  connects only its middle terminal (2, 5, 8). NBT `t<n>bus`, `t<n>out`. Recipe: a signal processor's with Field
   Bus Cable on top. GameTests `bus_module_*`.
 - Signal processor on the field bus (Baughn: the bus is to make signal logic denser). In a voxel block's face slot its
   output edge has two terminals: the output in the middle (as before) and a bus pin 4 voxels toward `front.left()`
   (`edgePins`, `BUS_OFFSET`); a plain six-node block, or an off-centre slot, has no bus pin. Programs read a channel
-  as `bus.<name>` anywhere a name may stand (`pump = bus.tank_level < 0.3`) and write one with a definition line
-  `bus.<name> = expression` (`bus.feed = rs(A, B)`). A read is always the bus's level as the tick began, also for a
-  channel the program writes, so `bus.n = bus.n + 0.1` is a counter with a tick's delay, not a cycle. The last line
+  as `bus.<dye name>` anywhere a name may stand (`pump = bus.light_blue < 0.3`) and write one with a definition line
+  `bus.<dye name> = expression` (`bus.red = rs(A, B)`); the 16 names are Minecraft's (`white`, `orange`, `magenta`,
+  `light_blue`, `yellow`, `lime`, `pink`, `gray`, `light_gray`, `cyan`, `purple`, `blue`, `brown`, `green`, `red`,
+  `black`). A read is always the bus's level as the tick began, also for a
+  channel the program writes, so `bus.lime = bus.lime + 0.1` is a counter with a tick's delay, not a cycle. The last line
   may be a bus definition (only a bus definition is a definition there): the program then has no output expression
-  and the output wire gives 0 V. Names follow the bus's rule; a bad name or a channel written twice is a compile
-  error, and a program whose channels would pass its bus's 64 is refused when saved ("Bus full", shown under the
-  editor; it then claims nothing and its wire gives 0 V). The names read and written are claimed; writes go out once
+  and the output wire gives 0 V. Any other `bus.x` is a compile error that lists the 16 names, and so is a channel
+  written twice. The channels read and written are claimed; writes go out once
   a tick (a slow process, after the circuit), only while the processor has its chips; a non-finite value writes 0.
-  The editor colours `bus.` names, accepts them as the processor does, and lists them in the reference's "Field bus"
-  category. Old programs are unchanged. Tests `ProgramTest`, `SpLanguageTest`, GameTests `bus_sp_*`.
+  The editor colours `bus.` names, accepts them as the processor does, says a channel's number and name on hover,
+  and lists the 16 in the reference's "Field bus" category. Old programs are unchanged. Tests `ProgramTest`, `SpLanguageTest`, GameTests `bus_sp_*`.
 - Data loggers on the field bus: in a voxel block every data logger (one or three channels, the tilted terminal)
   has a bus pin in the middle of a free edge, the first clockwise from its inputs' edge that isn't its front
   (`busEdge`; it follows the tilted terminal's turn). A channel may record a bus channel instead of its wire: a
-  "Bus channel" field under the unit, for the selected channel (empty: the wire, as before). Names are lower-cased;
-  a bad name or a 65th channel on its bus is refused in the screen. NBT `bus<n>`. GameTest `bus_logger_channel`.
+  "Bus channel" picker under the unit, for the selected channel, a swatch and a button that steps through unused
+  (the wire, as before) and the 16 colours. A plain block has no bus pin: the picker is hidden there and every
+  channel records its wire. NBT `busc<n>`. GameTest `bus_logger_channel`.
 - Signal processor logger and defaults (Baughn 2026-10-30, board #45): a program may give an input a default,
   `A = 0.5` on a definition line (a constant, once per input, free), read while no cable is connected to it. The
   processor carries a four-channel logger (A, B, C as the program reads them, and the output) in its screen's left

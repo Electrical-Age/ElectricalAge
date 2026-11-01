@@ -93,6 +93,28 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
         drawers.add(() -> painter.accept(drawing, abs));
     }
 
+    /**
+     * A field bus channel picker: a swatch (canvas swatchId) and a button (buttonId) labelled with the channel's number
+     * and name, or Unused, that steps through unused, 0 white .. 15 black; shift-click steps back. Baughn: the colours
+     * aren't colourblind-safe, so the label always says which.
+     */
+    protected net.minecraft.client.gui.components.Button busChannel(String swatchId, String buttonId, java.util.function.IntSupplier get,
+                                                                    java.util.function.IntConsumer set, String... tooltip) {
+        canvas(swatchId, (g, q) -> {
+            int c = get.getAsInt();
+            g.fill(q.x(), q.y(), q.x() + q.w(), q.y() + q.h(), 0xFF373737);
+            if (mods.eln.bus.BusChannel.valid(c))
+                g.fill(q.x() + 1, q.y() + 1, q.x() + q.w() - 1, q.y() + q.h() - 1, 0xFF000000 | mods.eln.bus.BusChannel.rgb(c));
+            else g.fill(q.x() + 1, q.y() + 1, q.x() + q.w() - 1, q.y() + q.h() - 1, 0xFFC6C6C6);
+        });
+        String[] tips = java.util.Arrays.copyOf(tooltip, tooltip.length + 1);
+        tips[tooltip.length] = mods.eln.i18n.I18N.tr("Click for the next colour, shift-click for the one before.");
+        return button(buttonId, () -> {
+            int c = get.getAsInt();
+            return mods.eln.bus.BusChannel.valid(c) ? mods.eln.bus.BusChannel.label(c) : mods.eln.i18n.I18N.tr("Unused");
+        }, () -> set.accept(mods.eln.bus.BusChannel.cycle(get.getAsInt(), net.minecraft.client.Minecraft.getInstance().hasShiftDown())), tips);
+    }
+
     /** A live text line at its layout place. */
     protected void text(String id, java.util.function.Supplier<String> s) {
         text(id, s, () -> LABEL);

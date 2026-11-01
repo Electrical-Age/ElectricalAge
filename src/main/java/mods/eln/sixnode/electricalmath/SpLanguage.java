@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * The signal processor's language for the code editor (board #45): inputs A red, B blue, C green; functions, named
- * components (their definitions marked), field bus channels (bus.name), numbers, operators, # comments; a rule above
+ * components (their definitions marked), field bus channels (bus.red: a dye name), numbers, operators, # comments; a rule above
  * the output line (none when the program ends with a bus definition). Problems come
  * from compiling the program (Program) as the processor will.
  */
@@ -147,8 +147,11 @@ public final class SpLanguage implements LanguageAdapter {
                     return out;
                 }
                 case BUS -> {
-                    List<String> out = new ArrayList<>(List.of("Bus channel " + w.substring(Program.BUS.length()),
-                        "A field bus channel, 0 to 1 for 0 to 50 V. Read, it is the bus's level as the tick began; a line bus.name = ... writes it."));
+                    int ch = mods.eln.bus.BusChannel.byName(w.substring(Program.BUS.length()));
+                    if (ch == mods.eln.bus.BusChannel.UNUSED)
+                        return List.of("Not a bus channel", "The 16 channels are the dye colours: " + mods.eln.bus.BusChannel.choices());
+                    List<String> out = new ArrayList<>(List.of("Bus channel " + mods.eln.bus.BusChannel.label(ch),
+                        "A field bus channel, 0 to 1 for 0 to 50 V. Read, it is the bus's level as the tick began; a line bus." + w.substring(Program.BUS.length()) + " = ... writes it."));
                     String[] lines = text.split("\n", -1);
                     for (Statement st : statements(text))
                         if (st.definition()) {
@@ -188,7 +191,7 @@ public final class SpLanguage implements LanguageAdapter {
                 return Kind.KEYWORD;
             default:
         }
-        if (w.startsWith(Program.BUS)) return Kind.BUS;
+        if (w.startsWith(Program.BUS)) return Kind.BUS;   // (one that is no channel: the check marks it)
         if (defining) return Kind.DEFINITION;
         if (FunctionReference.names().contains(w)) return Kind.FUNCTION;
         if (names.contains(w)) return Kind.NAME;

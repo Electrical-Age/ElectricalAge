@@ -82,31 +82,20 @@ public final class BusNet {
             }
             for (BusPort p : nb.ports) p.bus = nb;
             nb.reclaim();
-            // seeded from the old buses: the highest per name, now and pending
-            for (Bus o : old) {
-                o.cur.forEach((k, v) -> nb.cur.merge(k, v, Math::max));
-                o.next.forEach((k, v) -> nb.next.merge(k, v, Math::max));
-                o.writers.forEach((k, v) -> nb.writers.merge(k, v, Integer::sum));
-                o.nextWriters.forEach((k, v) -> nb.nextWriters.merge(k, v, Integer::sum));
-            }
+            // seeded from the old buses: the highest per channel, now and pending
+            for (Bus o : old)
+                for (int c = 0; c < BusChannel.COUNT; c++) {
+                    nb.cur[c] = Math.max(nb.cur[c], o.cur[c]);
+                    nb.next[c] = Math.max(nb.next[c], o.next[c]);
+                    nb.writers[c] += o.writers[c];
+                    nb.nextWriters[c] += o.nextWriters[c];
+                }
             made.add(nb);
         }
         // ports no bus reaches now (no links left) leave their old bus
         for (Bus o : BUSES) for (BusPort p : o.ports) if (!seen.contains(p)) p.bus = null;
         BUSES.clear();
         BUSES.addAll(made);
-    }
-
-    /** Can a port on this bus claim these names without passing the bus's limit? A port on no bus: always. */
-    public static boolean room(BusPort port, Collection<String> names) {
-        Bus b = port.bus;
-        if (b == null) return true;
-        // the port's own old claims leave; another port's claim of the same name costs nothing
-        Set<String> others = new HashSet<>();
-        for (BusPort p : b.ports) if (p != port) others.addAll(p.claims);
-        Set<String> after = new HashSet<>(others);
-        after.addAll(names);
-        return after.size() <= Bus.MAX_CHANNELS;
     }
 
     /** World start and stop: forget everything (the GameTest server and lab clones load several worlds in one JVM). */

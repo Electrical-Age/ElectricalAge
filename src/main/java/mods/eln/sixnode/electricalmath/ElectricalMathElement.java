@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * The signal processor: a program (Program) over inputs A, B and C computes its output. In a voxel block it also has a
  * field bus pin on its output edge, BUS_OFFSET voxels from the output terminal toward front.left(): its program reads
- * and writes the bus's channels as bus.name (Program), claiming the names it uses.
+ * and writes the bus's 16 colour channels as bus.red, bus.light_blue (Program), claiming the channels it uses.
  */
 public class ElectricalMathElement extends SixNodeElement {
 
@@ -207,10 +207,7 @@ public class ElectricalMathElement extends SixNodeElement {
     void preProcessEquation(String expression) {
         this.expression = expression;
         program = Program.compile(expression, symboleList, DEFAULTABLE, port::read);
-        // its channels must fit on its bus as it is now (on load it is on none yet: a merge past 64 keeps every name)
-        if (program.isValid() && !mods.eln.bus.BusNet.room(port, program.busNames()))
-            program.refuse(I18N.tr("Bus full: it has %1$ channels already", mods.eln.bus.Bus.MAX_CHANNELS));
-        port.claim(program.busNames());
+        port.claim(program.busChannels());
         // the inputs connect whether the program reads them or not (Baughn 2026-10-30), so cables can go in first
         for (int idx = 0; idx < 3; idx++) sideConnectionEnable[idx] = true;
         equationIsValid = program.isValid();
@@ -289,9 +286,12 @@ public class ElectricalMathElement extends SixNodeElement {
                 Utils.plotVolt("\u00A79", gateInput[1].getU()) +
                 Utils.plotVolt("\u00A7a", gateInput[2].getU()));
         info.put(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
-        if (!port.claims().isEmpty()) {
-            // the channels its program uses; whether its pin is on a bus
-            info.put(I18N.tr("Bus channels"), port.claims().size() + (port.bus() == null ? ", " + I18N.tr("no bus") : ""));
+        if (port.claims() != 0) {
+            // the channels its program uses, by number and name; whether its pin is on a bus
+            StringBuilder b = new StringBuilder();
+            for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++)
+                if ((port.claims() >> c & 1) != 0) b.append(b.isEmpty() ? "" : ", ").append(mods.eln.bus.BusChannel.label(c));
+            info.put(I18N.tr("Bus channels"), b + (port.bus() == null ? ", " + I18N.tr("no bus") : ""));
         }
         return info;
     }

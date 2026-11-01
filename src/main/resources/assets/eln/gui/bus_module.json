@@ -11,8 +11,16 @@
      "sample": "9"
     },
     {
-     "field": "n0",
-     "chars": 17,
+     "canvas": "s0",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c0",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -32,8 +40,16 @@
      "sample": "9"
     },
     {
-     "field": "n1",
-     "chars": 17,
+     "canvas": "s1",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c1",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -53,8 +69,16 @@
      "sample": "9"
     },
     {
-     "field": "n2",
-     "chars": 17,
+     "canvas": "s2",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c2",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -74,8 +98,16 @@
      "sample": "9"
     },
     {
-     "field": "n3",
-     "chars": 17,
+     "canvas": "s3",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c3",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -95,8 +127,16 @@
      "sample": "9"
     },
     {
-     "field": "n4",
-     "chars": 17,
+     "canvas": "s4",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c4",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -116,8 +156,16 @@
      "sample": "9"
     },
     {
-     "field": "n5",
-     "chars": 17,
+     "canvas": "s5",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c5",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -137,8 +185,16 @@
      "sample": "9"
     },
     {
-     "field": "n6",
-     "chars": 17,
+     "canvas": "s6",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c6",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -158,8 +214,16 @@
      "sample": "9"
     },
     {
-     "field": "n7",
-     "chars": 17,
+     "canvas": "s7",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c7",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -179,8 +243,16 @@
      "sample": "9"
     },
     {
-     "field": "n8",
-     "chars": 17,
+     "canvas": "s8",
+     "width": 12,
+     "height": 12
+    },
+    {
+     "button": "c8",
+     "sample": [
+      "Unused",
+      "10 light_gray"
+     ],
      "fill": true
     },
     {
@@ -196,7 +268,8 @@
   {
    "text": "status",
    "sample": [
-    "Names are 1 to 16 of a-z, 0-9 and _"
+    "No bus",
+    "On a bus"
    ]
   }
  ],

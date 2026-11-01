@@ -19,11 +19,12 @@ import java.util.regex.Pattern;
  * Each component is computed once a tick, in order, before the output; a later line can use the names above it (never a
  * name below: no cycles).
  * <p>
- * Field bus channels (mods.eln.bus) are written {@code bus.<name>}: read anywhere a name may stand, as the bus had them
+ * Field bus channels (mods.eln.bus.BusChannel) are written {@code bus.<dye name>}, {@code bus.red}, {@code bus.light_blue}:
+ * the 16 Minecraft dye names, nothing else (Baughn: colour-tuned channels). They are read anywhere a name may stand, as the bus had them
  * at the start of the tick (a channel this program writes too reads the bus, so {@code bus.n = bus.n + 0.1} is a loop
  * with a tick's delay); written by a definition line {@code bus.<name> = expression}, which may also be the last line,
  * leaving the processor no output expression (its wire then gives 0 V). The names read and written are what the
- * processor claims on its bus (busNames). A stateful function (integrate, derivate, pid, rs, rc, ramp) in a component keeps one state,
+ * processor claims on its bus (busChannels). A stateful function (integrate, derivate, pid, rs, rc, ramp) in a component keeps one state,
  * however many lines read the component, saved under the component's name so editing one line leaves the others' state
  * alone. Cost: each line's operators once (Baughn: a named component used several times is paid for once).
  */
@@ -44,14 +45,14 @@ public final class Program implements INBTTReady {
         public final int line;
         final Equation equation;
         double value;
-        /** The bus channel it writes (a {@code bus.<name> =} line, read by no later line), or null. */
-        public final String channel;
+        /** The bus channel it writes (a {@code bus.<name> =} line, read by no later line), or BusChannel.UNUSED. */
+        public final int channel;
 
         Component(String name, int line, Equation equation) {
             this.name = name;
             this.line = line;
             this.equation = equation;
-            this.channel = name.startsWith(BUS) ? name.substring(BUS.length()) : null;
+            this.channel = name.startsWith(BUS) ? mods.eln.bus.BusChannel.byName(name.substring(BUS.length())) : mods.eln.bus.BusChannel.UNUSED;
         }
 
         @Override
@@ -72,8 +73,8 @@ public final class Program implements INBTTReady {
      */
     public final java.util.Map<String, Double> defaults = new java.util.LinkedHashMap<>();
     Equation output;
-    /** The bus channels read and written, in the order the text names them first. */
-    final java.util.LinkedHashSet<String> busNames = new java.util.LinkedHashSet<>();
+    /** The bus channels read and written, bit c for channel c. */
+    int busChannels;
     /** The lines that write a bus channel, in order. */
     final List<Component> busWrites = new ArrayList<>();
     /** The first problem, with its line (1-based; 0: the whole program), or null when it compiles. */
@@ -154,11 +155,11 @@ public final class Program implements INBTTReady {
     /** A bus channel read: the bus's level of it, 0..1 (0 with no bus). */
     static final class BusRead implements ISymbole {
         final String name;
-        final String channel;
-        final java.util.function.ToDoubleFunction<String> bus;
+        final int channel;
+        final java.util.function.IntToDoubleFunction bus;
 
-        BusRead(String channel, java.util.function.ToDoubleFunction<String> bus) {
-            this.name = BUS + channel;
+        BusRead(int channel, java.util.function.IntToDoubleFunction bus) {
+            this.name = BUS + mods.eln.bus.BusChannel.name(channel);
             this.channel = channel;
             this.bus = bus;
         }
@@ -176,16 +177,16 @@ public final class Program implements INBTTReady {
 
     /**
      * Each {@code bus.<name>} the expression reads, as a symbol in known (once a name); null, or the first word that
-     * isn't a channel name, which the line's error is about.
+     * isn't a channel, which the line's error is about.
      */
-    String busReads(String expression, List<ISymbole> known, java.util.function.ToDoubleFunction<String> bus) {
+    String busReads(String expression, List<ISymbole> known, java.util.function.IntToDoubleFunction bus) {
         List<String> tokens = Equation.tokenize(expression);
         if (tokens == null) return null;
         for (String t : tokens) {
             if (!t.startsWith(BUS)) continue;
-            String channel = t.substring(BUS.length());
-            if (!mods.eln.bus.Bus.validName(channel)) return t;
-            busNames.add(channel);
+            int channel = mods.eln.bus.BusChannel.byName(t.substring(BUS.length()));
+            if (channel == mods.eln.bus.BusChannel.UNUSED) return t;
+            busChannels |= 1 << channel;
             boolean have = false;
             for (ISymbole k : known) have |= k.getName().equals(t);
             if (!have) known.add(new BusRead(channel, bus));
@@ -194,14 +195,15 @@ public final class Program implements INBTTReady {
     }
 
     Program badChannel(int line, String word) {
-        return fail(line, "line " + line + ": " + word + " is not a bus channel: its name is 1 to 16 of a-z, 0-9 and _").token(word);
+        return fail(line, "line " + line + ": " + word + " is not a bus channel; a channel is a dye colour: "
+            + mods.eln.bus.BusChannel.choices()).token(word);
     }
 
     /**
      * The same, reading bus channels through bus (null: they read 0, as on the client, which has no bus). A program's
-     * {@code bus.<name>} channels are its busNames.
+     * {@code bus.<name>} channels are its busChannels.
      */
-    public static Program compile(String source, List<ISymbole> inputs, Set<String> defaultable, java.util.function.ToDoubleFunction<String> bus) {
+    public static Program compile(String source, List<ISymbole> inputs, Set<String> defaultable, java.util.function.IntToDoubleFunction bus) {
         Program p = new Program();
         String big = tooBig(source);
         if (big != null) return p.fail(0, "The program is " + big);
@@ -255,9 +257,9 @@ public final class Program implements INBTTReady {
 
     /** A {@code bus.<name> = expression} line: a component writing that channel, read by no line (bus.name reads the
      *  bus). Null if it fails (this program then has the error). */
-    Component busDefinition(String name, String expr, int line, List<ISymbole> known, java.util.function.ToDoubleFunction<String> bus) {
-        String channel = name.substring(BUS.length());
-        if (!mods.eln.bus.Bus.validName(channel)) {
+    Component busDefinition(String name, String expr, int line, List<ISymbole> known, java.util.function.IntToDoubleFunction bus) {
+        int channel = mods.eln.bus.BusChannel.byName(name.substring(BUS.length()));
+        if (channel == mods.eln.bus.BusChannel.UNUSED) {
             badChannel(line, name);
             return null;
         }
@@ -276,17 +278,12 @@ public final class Program implements INBTTReady {
             invalid(line, expr, known);
             return null;
         }
-        busNames.add(channel);
+        busChannels |= 1 << channel;
         Component c = new Component(name, line, e);
         components.add(c);
         busWrites.add(c);
         cost += e.getOperatorCount();
         return c;
-    }
-
-    /** Refuse it whole with this message (the processor's bus has no room for its channels): it no longer compiles. */
-    public Program refuse(String message) {
-        return fail(0, message);
     }
 
     Program fail(int line, String message) {
@@ -295,7 +292,7 @@ public final class Program implements INBTTReady {
         errorLine = line;
         components.clear();
         defaults.clear();
-        busNames.clear();
+        busChannels = 0;
         busWrites.clear();
         output = null;
         cost = 0;
@@ -322,15 +319,20 @@ public final class Program implements INBTTReady {
         return isValid() && output != null;
     }
 
-    /** The bus channels it reads or writes (what the processor claims), in the order the text names them. */
-    public Set<String> busNames() {
-        return isValid() ? java.util.Collections.unmodifiableSet(busNames) : Set.of();
+    /** The bus channels it reads or writes (what the processor claims), bit c for channel c; 0 if it doesn't compile. */
+    public int busChannels() {
+        return isValid() ? busChannels : 0;
+    }
+
+    /** Where a program's bus writes go (BusPort::write). */
+    public interface BusWriter {
+        void write(int channel, double value);
     }
 
     /** Its bus writes, each channel and the value its line had last: once a tick, after getValue. Non-finite: 0. */
-    public void writeBus(java.util.function.ObjDoubleConsumer<String> bus) {
+    public void writeBus(BusWriter bus) {
         if (!isValid()) return;
-        for (Component c : busWrites) bus.accept(c.channel, Double.isFinite(c.value) ? c.value : 0);
+        for (Component c : busWrites) bus.write(c.channel, Double.isFinite(c.value) ? c.value : 0);
     }
 
     /** Operators in all lines, each line once. */

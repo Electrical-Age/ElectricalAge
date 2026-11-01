@@ -111,8 +111,6 @@ public class ElectricalMathScreen extends ElnScreen {
         if (t.isBlank()) return tr("Program required");
         if (!editor.problems().isEmpty()) return editor.problems().get(0).message();
         if (draft == null || !draft.isValid()) return tr("Invalid equation!");
-        // what only the processor can tell: its bus has no room for the program's channels
-        if (saved() && render.error != null && !render.error.isEmpty()) return render.error;
         int need = ElectricalMathElement.chipsFor(draft.getOperatorCount());
         return tr("%1$ Cheap Chip(s) required", need);
     }
@@ -121,7 +119,6 @@ public class ElectricalMathScreen extends ElnScreen {
         String t = editor.buffer.text();
         if (t.isBlank()) return LABEL;
         if (!editor.problems().isEmpty() || draft == null || !draft.isValid()) return 0xFFC02020;
-        if (saved() && render.error != null && !render.error.isEmpty()) return 0xFFC02020;
         return chips() >= ElectricalMathElement.chipsFor(draft.getOperatorCount()) ? 0xFF108F00 : 0xFFC02020;
     }
 

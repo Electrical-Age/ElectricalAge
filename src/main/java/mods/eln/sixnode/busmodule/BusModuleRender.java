@@ -15,17 +15,16 @@ import java.io.IOException;
 /** The Bus I/O Module on the client: its model, a violet bus pin and its nine signal pins, and what its screen shows. */
 public class BusModuleRender extends SixNodeElementRender {
     final BusModuleDescriptor descriptor;
-    final String[] names = new String[BusModuleElement.TERMINALS];
+    /** Each terminal's channel, or BusChannel.UNUSED. */
+    final int[] channels = new int[BusModuleElement.TERMINALS];
     final boolean[] out = new boolean[BusModuleElement.TERMINALS];
-    /** BusModuleElement.busState: 0 no bus, 1 on a bus, 2 on a bus past its 64 channels. */
-    int busState;
+    boolean onBus;
     boolean activity;
-    String message = "";
 
     public BusModuleRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (BusModuleDescriptor) descriptor;
-        java.util.Arrays.fill(names, "");
+        java.util.Arrays.fill(channels, mods.eln.bus.BusChannel.UNUSED);
     }
 
     boolean inVoxelBlock() {
@@ -68,7 +67,7 @@ public class BusModuleRender extends SixNodeElementRender {
         }
         GL11.glColor3f(1f, 1f, 1f);
         front.glRotateOnX();
-        descriptor.draw(busState != 0, activity, busState == 2 || !message.isEmpty());
+        descriptor.draw(onBus, activity, false);
     }
 
     @Override
@@ -87,15 +86,15 @@ public class BusModuleRender extends SixNodeElementRender {
         return !inVoxelBlock();
     }
 
-    /** Client: ask the server to set terminal i's channel name. */
-    void sendName(int i, String name) {
+    /** Client: ask the server to tune terminal i to channel c (BusChannel.UNUSED: unused). */
+    void sendChannel(int i, int c) {
         try {
             var bos = new java.io.ByteArrayOutputStream();
             var stream = new java.io.DataOutputStream(bos);
             preparePacketForServer(stream);
-            stream.writeByte(BusModuleElement.setNameId);
+            stream.writeByte(BusModuleElement.setChannelId);
             stream.writeByte(i);
-            stream.writeUTF(name);
+            stream.writeByte(c);
             sendPacketToServer(bos);
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,12 +121,11 @@ public class BusModuleRender extends SixNodeElementRender {
         super.publishUnserialize(stream);
         try {
             for (int i = 0; i < BusModuleElement.TERMINALS; i++) {
-                names[i] = stream.readUTF();
+                channels[i] = mods.eln.bus.BusChannel.orUnused(stream.readByte());
                 out[i] = stream.readBoolean();
             }
-            busState = stream.readByte();
+            onBus = stream.readBoolean();
             activity = stream.readBoolean();
-            message = stream.readUTF();
         } catch (IOException e) {
             e.printStackTrace();
         }

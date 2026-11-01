@@ -1850,21 +1850,20 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     out.put(key, k.name() + ", BURNT");
                     continue;
                 }
-                if (k.port != null) {   // the field bus: its channels (details: all of them)
+                if (k.port != null) {   // the field bus: its channels in use, by number and name (Baughn: colourblind)
                     var b = k.port.bus();
                     if (b == null) {
                         out.put(key, k.name() + ": no devices");
                         continue;
                     }
-                    out.put(key, k.name() + ": " + b.names().size() + " channels, " + b.portCount() + " ports");
-                    int shown = 0;
-                    for (String c : b.names()) {
-                        if (!details && shown++ >= 8) {
-                            out.put("...", (b.names().size() - 8) + " more");
-                            break;
-                        }
+                    int used = 0;
+                    for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) if (b.inUse(c)) used++;
+                    out.put(key, k.name() + ": " + used + (used == 1 ? " channel in use, " : " channels in use, ") + b.portCount() + " ports");
+                    for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) {
+                        if (!b.inUse(c)) continue;
                         int w = b.writers(c);
-                        out.put("  " + c, mods.eln.misc.Utils.plotVolt("", b.value(c) * mods.eln.Eln.SVU) + (w > 1 ? " from " + w + " writers" : w == 0 ? " unwritten" : ""));
+                        out.put("  " + mods.eln.bus.BusChannel.label(c), mods.eln.misc.Utils.plotVolt("", b.value(c) * mods.eln.Eln.SVU)
+                            + (w > 1 ? " from " + w + " writers" : w == 0 ? " unwritten" : ""));
                     }
                     continue;
                 }

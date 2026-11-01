@@ -1,5 +1,6 @@
 package mods.eln.gametest.cases;
 
+import mods.eln.bus.BusNet;
 import mods.eln.bus.BusPort;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
@@ -10,7 +11,7 @@ import java.util.List;
 
 /**
  * The field bus (mods.eln.bus): Field Bus Cable laid across voxel blocks makes one bus, with no circuit links; a run
- * not touching it is another; breaking the middle splits it. Jade lists a bus cable's channels.
+ * not touching it is another; breaking the middle splits it. Jade lists a bus cable's channels in use by number and name.
  */
 public final class BusCases {
     private BusCases() {
@@ -56,12 +57,21 @@ public final class BusCases {
                 a.nodeConnectionList.size() + " " + b.nodeConnectionList.size());
             var w = b.getWaila(true);
             c.check("bus: Jade names the cable", w.values().stream().anyMatch(s -> s.startsWith("Field Bus Cable")), w.toString());
+            // a device's port on it claiming 3 light_blue: Jade lists that channel, by number and name, and no other
+            BusPort dev = new BusPort();
+            dev.claim(1 << 3);
+            BusNet.link(dev, b.busPorts().get(0));
+            BusNet.refresh();
+            w = b.getWaila(true);
+            c.check("bus: Jade lists a channel in use by number and name", w.containsKey("  3 light_blue") && w.get("  3 light_blue").contains("V"), w.toString());
+            c.check("bus: and only the channels in use", w.keySet().stream().filter(k -> k.startsWith("  ")).count() == 1, w.toString());
+            BusNet.detach(List.of(dev));
             // the middle block gone: the ends are apart
             b.disconnect();
-            mods.eln.bus.BusNet.refresh();
+            BusNet.refresh();
             c.check("bus: the middle gone, the ends are apart", bus(a) == null || bus(a) != bus(d), bus(a) + " " + bus(d));
             b.connect();
-            mods.eln.bus.BusNet.refresh();
+            BusNet.refresh();
             c.check("bus: back again, one bus", bus(a) != null && bus(a) == bus(d), bus(a) + " " + bus(d));
         }
     }

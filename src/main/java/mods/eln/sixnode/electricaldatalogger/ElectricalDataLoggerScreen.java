@@ -74,16 +74,20 @@ public class ElectricalDataLoggerScreen extends ElnScreen {
         }, tr("Y-axis min"), tr("what a zero signal reads as"));
         text("unitl", () -> tr("Unit"));
         field("unit", () -> channel().unit, v -> render.logClient.unit(selected, v), tr("Unit"), tr("any text, up to 10 characters"));
-        field("bus", () -> render.busNames[Math.min(selected, render.busNames.length - 1)], v -> render.sendBus(Math.min(selected, render.busNames.length - 1), v),
-            tr("The field bus channel this channel records instead of its wire: a-z, 0-9 and _, up to 16. Empty: its wire."),
-            tr("The bus meets the logger's violet pin in a voxel block."));
-        text("busl", () -> !render.busMessage.isEmpty() ? render.busMessage : tr("Bus channel"), () -> render.busMessage.isEmpty() ? LABEL : 0xFFA02020);
+        // the bus channel this channel records, only in a voxel block: a plain block has no bus pin
+        if (render.inVoxelBlock()) {
+            busChannel("busswatch", "bus", () -> render.busChannels[Math.min(selected, render.busChannels.length - 1)],
+                b -> render.sendBus(Math.min(selected, render.busChannels.length - 1), b),
+                tr("The field bus channel this channel records instead of its wire. Unused: its wire."),
+                tr("The bus meets the logger's violet pin."));
+            text("busl", () -> tr("Bus channel"));
+        }
         text("editl", () -> render.descriptor.channels > 1 ? tr("Edit") : "");
         button("mode", () -> tr("Graph: %1$", tr(LogGraph.MODE_NAMES.get(Math.floorMod(render.log.mode, 3)))),
             () -> render.logClient.mode((render.log.mode + 1) % 3), tr("Lines, stacked areas, or a lane each"));
         for (int i = 0; i < TABS.length; i++) {
             int c = i;
-            var b = button("tab" + i, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Edit this channel's scale, unit and bus channel"));
+            var b = button("tab" + i, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, render.inVoxelBlock() ? tr("Edit this channel's scale, unit and bus channel") : tr("Edit this channel's scale and unit"));
             b.visible = render.descriptor.channels > c && render.descriptor.channels > 1;
         }
         update();

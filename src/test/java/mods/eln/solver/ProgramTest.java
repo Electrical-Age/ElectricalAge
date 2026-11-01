@@ -152,95 +152,110 @@ public class ProgramTest {
         assertTrue(Program.compile("x = A; x * 2 # x; y", inputs()).isValid());
     }
 
-    /** A bus with fixed channel levels, and what a program wrote to it. */
+    /** A bus with fixed channel yellows, and what a program wrote to it. */
     final java.util.Map<String, Double> bus = new java.util.HashMap<>(), written = new java.util.LinkedHashMap<>();
 
     Program onBus(String source) {
-        return Program.compile(source, inputs(), java.util.Set.of("A", "B", "C"), n -> bus.getOrDefault(n, 0.0));
+        return Program.compile(source, inputs(), java.util.Set.of("A", "B", "C"), c -> bus.getOrDefault(mods.eln.bus.BusChannel.name(c), 0.0));
+    }
+
+    void wrote(int c, double v) {
+        written.put(mods.eln.bus.BusChannel.name(c), v);
+    }
+
+    static int mask(String... names) {
+        int m = 0;
+        for (String n : names) m |= 1 << mods.eln.bus.BusChannel.byName(n);
+        return m;
     }
 
     @Test
     void busChannelsAreReadAnywhereANameMayStand() {
-        bus.put("tank_level", 0.2);
-        bus.put("3way", 0.5);
-        Program p = onBus("low = bus.tank_level < 0.3\nlow * bus.3way + bus.unset");
+        bus.put("cyan", 0.2);
+        bus.put("blue", 0.5);
+        Program p = onBus("low = bus.cyan < 0.3\nlow * bus.blue + bus.black");
         assertTrue(p.isValid(), p.error);
         assertTrue(p.hasOutput());
         assertEquals(0.5, p.getValue(0.05), 1e-12);
-        assertEquals(java.util.List.of("tank_level", "3way", "unset"), java.util.List.copyOf(p.busNames()), "in the order they are named");
+        assertEquals(mask("cyan", "blue", "black"), p.busChannels());
         assertEquals(3, p.getOperatorCount(), "a bus read costs nothing");
         // without a bus (the editor's check), the same program compiles; its channels read 0
-        Program client = Program.compile("low = bus.tank_level < 0.3\nlow * bus.3way + bus.unset", inputs());
+        Program client = Program.compile("low = bus.cyan < 0.3\nlow * bus.blue + bus.black", inputs());
         assertTrue(client.isValid(), client.error);
         assertEquals(0, client.getValue(0.05), 0);
     }
 
     @Test
     void aBusDefinitionWritesItsChannel() {
-        bus.put("level", 0.8);
-        Program p = onBus("bus.half = bus.level / 2\nbus.feed = A > 0.5\nA");
+        bus.put("yellow", 0.8);
+        Program p = onBus("bus.orange = bus.yellow / 2\nbus.red = A > 0.5\nA");
         assertTrue(p.isValid(), p.error);
         a.v = 0.9;
         assertEquals(0.9, p.getValue(0.05), 1e-12);
-        p.writeBus(written::put);
-        assertEquals(java.util.Map.of("half", 0.4, "feed", 1.0), written);
-        assertEquals(java.util.Set.of("half", "level", "feed"), p.busNames());
+        p.writeBus(this::wrote);
+        assertEquals(java.util.Map.of("orange", 0.4, "red", 1.0), written);
+        assertEquals(mask("orange", "yellow", "red"), p.busChannels());
         assertEquals(2, p.getOperatorCount(), "a write's operators are paid for");
     }
 
     @Test
     void aProgramMayEndWithABusDefinition() {
-        Program p = onBus("x = A * 2\nbus.out = x");
+        Program p = onBus("x = A * 2\nbus.green = x");
         assertTrue(p.isValid(), p.error);
         assertFalse(p.hasOutput());
         a.v = 0.3;
         assertEquals(0, p.getValue(0.05), 0, "no output expression: the wire gives 0");
-        p.writeBus(written::put);
-        assertEquals(0.6, written.get("out"), 1e-12);
+        p.writeBus(this::wrote);
+        assertEquals(0.6, written.get("green"), 1e-12);
         // only a bus definition is a definition on the last line
         assertFalse(onBus("x = A").isValid());
-        assertTrue(onBus("bus.only = 1").isValid());
+        assertTrue(onBus("bus.white = 1").isValid());
     }
 
     @Test
     void readingAChannelThisProgramWritesReadsTheBus() {
-        // bus.n is the bus's level as the tick began: a counter with a tick's delay, no cycle
-        bus.put("n", 0.25);
-        Program p = onBus("bus.n = bus.n + 0.1\nbus.n");
+        // bus.lime is the bus's level as the tick began: a counter with a tick's delay, no cycle
+        bus.put("lime", 0.25);
+        Program p = onBus("bus.lime = bus.lime + 0.1\nbus.lime");
         assertTrue(p.isValid(), p.error);
         assertEquals(0.25, p.getValue(0.05), 1e-12);
-        p.writeBus(written::put);
-        assertEquals(0.35, written.get("n"), 1e-12);
+        p.writeBus(this::wrote);
+        assertEquals(0.35, written.get("lime"), 1e-12);
     }
 
     @Test
-    void badBusNamesAreRefused() {
-        Program caps = onBus("bus.Tank * 2");
-        assertFalse(caps.isValid());
-        assertEquals("bus.Tank", caps.errorToken);
-        assertTrue(caps.error.contains("is not a bus channel"), caps.error);
-        assertFalse(onBus("bus.this_name_is_too_long = 1").isValid(), "17 characters");
+    void onlyTheSixteenDyeNamesAreChannels() {
+        Program teal = onBus("bus.teal * 2");
+        assertFalse(teal.isValid());
+        assertEquals("bus.teal", teal.errorToken);
+        assertTrue(teal.error.contains("is not a bus channel"), teal.error);
+        for (String n : new String[]{"white", "light_blue", "light_gray", "black"}) assertTrue(teal.error.contains(n), "it names the choices: " + teal.error);
+        assertFalse(teal.error.contains("("), "no parenthesis: " + teal.error);
+        assertFalse(onBus("bus.Red * 2").isValid(), "as Minecraft writes them, lower case");
+        assertFalse(onBus("bus.silver = 1").isValid(), "Minecraft's name is light_gray");
+        assertFalse(onBus("bus.3 = 1").isValid(), "not by number");
         assertFalse(onBus("bus. = 1").isValid());
-        Program twice = onBus("bus.x = A\nbus.x = B\n0");
-        assertEquals("line 2: bus.x is already written above", twice.error);
-        assertTrue(twice.busNames().isEmpty(), "a program that fails claims nothing");
+        for (int c = 0; c < 16; c++) assertTrue(onBus("bus." + mods.eln.bus.BusChannel.name(c) + " = 1").isValid(), "channel " + c);
+        Program twice = onBus("bus.red = A\nbus.red = B\n0");
+        assertEquals("line 2: bus.red is already written above", twice.error);
+        assertEquals(0, twice.busChannels(), "a program that fails claims nothing");
         assertTrue(onBus("x.y + 1").error.contains("x.y is not defined above"), "other dotted names are unknown");
     }
 
     @Test
     void aBusWritesStateIsSavedUnderItsName() {
-        Program p = onBus("bus.i = integrate(1, 0)\nbus.i");
+        Program p = onBus("bus.pink = integrate(1, 0)\nbus.pink");
         for (int t = 0; t < 20; t++) p.getValue(0.05);
         CompoundTag nbt = new CompoundTag();
         p.writeToNBT(nbt, "equation");
-        Program q = onBus("x = A\nbus.i = integrate(1, 0)\nx");
+        Program q = onBus("x = A\nbus.pink = integrate(1, 0)\nx");
         q.readFromNBT(nbt, "equation");
         q.getValue(0);
         p.getValue(0);
         java.util.Map<String, Double> w = new java.util.HashMap<>();
-        q.writeBus(w::put);
-        p.writeBus(written::put);
-        assertEquals(written.get("i"), w.get("i"), 1e-9);
-        assertEquals(1.0, w.get("i"), 1e-9);
+        q.writeBus((c, v) -> w.put(mods.eln.bus.BusChannel.name(c), v));
+        p.writeBus(this::wrote);
+        assertEquals(written.get("pink"), w.get("pink"), 1e-9);
+        assertEquals(1.0, w.get("pink"), 1e-9);
     }
 }

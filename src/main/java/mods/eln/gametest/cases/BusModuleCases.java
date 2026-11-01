@@ -14,12 +14,11 @@ import mods.eln.sixnode.busmodule.BusModuleElement;
 import net.minecraft.core.BlockPos;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * The Bus I/O Module (mods.eln.bus): two modules on one bus carry a signal from a wire to a wire; two writers on one
- * channel, the higher wins; its nine terminals' names and directions survive a save and load and are claimed again;
- * a bad name and a 65th channel are refused.
+ * channel, the higher wins; its nine terminals' channels and directions survive a save and load and are claimed again;
+ * its screen's packet tunes a terminal, and a value that is no channel leaves it unused.
  */
 public final class BusModuleCases {
     private BusModuleCases() {
@@ -29,13 +28,16 @@ public final class BusModuleCases {
         cases.add(new Across());
         cases.add(new HighestWins());
         cases.add(new Saved());
-        cases.add(new Refused());
+        cases.add(new Tuned());
     }
 
     static final int MODULE = 1 + (117 << 6);
     static final int SIGNAL = CablePart.tierOf("Signal Cable"), BUS = CablePart.BUS, DOWN = 0, WEST = 4, EAST = 5;
     /** The terminal at the middle of the back edge (offset 0): it meets a cable along the block's centre line. */
     static final int BACK_MIDDLE = 4;
+    /** Bus channels by their dye names (BusChannel). */
+    static final int WHITE = 0, ORANGE = 1, LIGHT_BLUE = 3, YELLOW = 4, LIME = 5, CYAN = 9, BLUE = 11, RED = 14, BLACK = 15,
+        UNUSED = mods.eln.bus.BusChannel.UNUSED;
 
     /** A module on the floor of a voxel block at p, its bus edge toward dir. */
     static BusModuleElement module(TestContext c, BlockPos p, Direction dir) {
@@ -90,8 +92,8 @@ public final class BusModuleCases {
                 across(c, c.at(4, 1, 1), BUS);
                 b = module(c, c.at(5, 1, 1), Direction.XN);
                 across(c, c.at(6, 1, 1), SIGNAL);
-                a.setName(BACK_MIDDLE, "level");
-                b.setName(BACK_MIDDLE, "level");
+                a.setChannel(BACK_MIDDLE, LIGHT_BLUE);
+                b.setChannel(BACK_MIDDLE, LIGHT_BLUE);
                 b.setOut(BACK_MIDDLE, true);
             } catch (RuntimeException e) {
                 why = String.valueOf(e.getMessage());
@@ -106,13 +108,15 @@ public final class BusModuleCases {
             c.check("bus module: both on one bus", a.port.bus() != null && a.port.bus() == b.port.bus(), a.port.bus() + " " + b.port.bus());
             c.check("bus module: its bus edge has no circuit link", a.getElectricalLoad(a.busEdge()) == null, "");
             Wp9cCases.within(c, "bus module: A's in terminal sees the source [V]", a.volts(BACK_MIDDLE), 30, 0.5);
-            Wp9cCases.within(c, "bus module: the channel carries it [0..1]", a.port.read("level"), 0.6, 0.01);
+            Wp9cCases.within(c, "bus module: the channel carries it [0..1]", a.port.read(LIGHT_BLUE), 0.6, 0.01);
             Wp9cCases.within(c, "bus module: B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 30, 0.5);
             Object[] k = ((VoxelNode) BusCases.node(c, 6, 1, 1)).cableAt(8, 0, 8);
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
             Wp9cCases.within(c, "bus module: the signal wire past B reads it [V]", u, 30, 0.5);
             var w = a.getWaila();
-            c.check("bus module: Jade shows the terminal, its direction and volts", w.containsKey("5 level") && w.get("5 level").startsWith("in"), w.toString());
+            c.check("bus module: Jade shows the terminal, its channel's number and name, direction and volts",
+                w.containsKey("Terminal 5") && w.get("Terminal 5").startsWith("3 light_blue, in"), w.toString());
+            c.check("bus module: Jade has no line for an unused terminal", !w.containsKey("Terminal 1"), w.toString());
             c.check("bus module: Jade shows the bus", w.containsKey("Bus") && !w.get("Bus").equals("no bus"), w.toString());
         }
     }
@@ -135,10 +139,10 @@ public final class BusModuleCases {
                 b = module(c, c.at(4, 1, 1), Direction.XN);
                 across(c, c.at(5, 1, 1), SIGNAL);
                 source(c, c.at(6, 1, 1), Direction.XN, 40);
-                a.setName(BACK_MIDDLE, "mix");
-                b.setName(BACK_MIDDLE, "mix");
+                a.setChannel(BACK_MIDDLE, RED);
+                b.setChannel(BACK_MIDDLE, RED);
                 // A also reads it back on a free terminal
-                a.setName(0, "mix");
+                a.setChannel(0, RED);
                 a.setOut(0, true);
             } catch (RuntimeException e) {
                 why = String.valueOf(e.getMessage());
@@ -151,17 +155,17 @@ public final class BusModuleCases {
             var bus = a.port.bus();
             c.check("bus module highest: one bus", bus != null && bus == b.port.bus(), bus + " " + b.port.bus());
             if (bus == null) return;
-            Wp9cCases.within(c, "bus module highest: the channel has the higher, 40 V [0..1]", bus.value("mix"), 0.8, 0.01);
-            c.check("bus module highest: two writers", bus.writers("mix") == 2, "" + bus.writers("mix"));
+            Wp9cCases.within(c, "bus module highest: the channel has the higher, 40 V [0..1]", bus.value(RED), 0.8, 0.01);
+            c.check("bus module highest: two writers", bus.writers(RED) == 2, "" + bus.writers(RED));
             Wp9cCases.within(c, "bus module highest: an out terminal on it gives 40 V [V]", a.volts(0), 40, 0.5);
             Wp9cCases.within(c, "bus module highest: the 10 V wire stays at 10 V [V]", a.volts(BACK_MIDDLE), 10, 0.5);
         }
     }
 
-    /** A module with all nine terminals set, saved and loaded: the same names and directions, claimed on its bus again. */
+    /** A module with all nine terminals set, saved and loaded: the same channels and directions, claimed on its bus again. */
     static final class Saved implements TestCase {
         BusModuleElement m;
-        static final String[] NAMES = {"a0", "", "pump_on", "level", "x", "", "valve_3", "a0", "z"};
+        static final int[] CHANNELS = {WHITE, UNUSED, LIME, LIGHT_BLUE, BLACK, UNUSED, CYAN, WHITE, RED};
 
         public String id() {
             return "bus_module_saved";
@@ -171,21 +175,22 @@ public final class BusModuleCases {
             m = module(c, c.at(2, 1, 1), Direction.XP);
             across(c, c.at(3, 1, 1), BUS);
             for (int i = 0; i < 9; i++) {
-                m.setName(i, NAMES[i]);
+                m.setChannel(i, CHANNELS[i]);
                 m.setOut(i, i % 2 == 1);
             }
         }
 
         static String settings(BusModuleElement e) {
             StringBuilder s = new StringBuilder();
-            for (int i = 0; i < 9; i++) s.append(e.name(i)).append(e.isOut(i) ? ">" : "<").append(' ');
+            for (int i = 0; i < 9; i++) s.append(e.channel(i)).append(e.isOut(i) ? ">" : "<").append(' ');
             return s.toString();
         }
 
         public void measure(TestContext c) {
             String before = settings(m);
-            Set<String> claims = Set.copyOf(m.port.claims());
-            c.check("bus module saved: its names claimed", claims.equals(Set.of("a0", "pump_on", "level", "x", "valve_3", "z")), claims.toString());
+            int claims = m.port.claims();
+            int want = 1 << WHITE | 1 << LIME | 1 << LIGHT_BLUE | 1 << BLACK | 1 << CYAN | 1 << RED;
+            c.check("bus module saved: its channels claimed", claims == want, Integer.toBinaryString(claims));
             Reload r;
             try {
                 r = Reload.node(c.level(), c.at(2, 1, 1));
@@ -194,56 +199,62 @@ public final class BusModuleCases {
                 return;
             }
             var fresh = (BusModuleElement) ((SixNode) r.fresh).sideElementList[Direction.YN.getInt()];
-            c.check("bus module saved: names and directions come back", settings(fresh).equals(before), before + " -> " + settings(fresh));
-            c.check("bus module saved: claimed again on load", Set.copyOf(fresh.port.claims()).equals(claims), fresh.port.claims().toString());
+            c.check("bus module saved: channels and directions come back", settings(fresh).equals(before), before + " -> " + settings(fresh));
+            c.check("bus module saved: claimed again on load", fresh.port.claims() == claims, Integer.toBinaryString(fresh.port.claims()));
             BusNet.refresh();
             var bus = fresh.port.bus();
-            c.check("bus module saved: back on its bus with its channels", bus != null && bus.names().containsAll(claims),
-                bus == null ? "no bus" : bus.names().toString());
+            boolean all = bus != null;
+            for (int ch = 0; ch < 16 && all; ch++) all = bus.inUse(ch) == ((claims >> ch & 1) != 0);
+            c.check("bus module saved: back on its bus, its channels in use", all, bus == null ? "no bus" : "");
         }
     }
 
     /**
-     * Names refused: one the bus can't have, and a 65th channel (a bare port on the bus claims 64); a capitalised one is
-     * folded to lower case; a name already on the bus costs nothing. Broken, the module's names leave the bus.
+     * Its screen's packet tunes a terminal to a channel; a value that is no channel, too high or negative, leaves it
+     * unused; a terminal past the ninth is ignored. Broken, the module's port leaves the bus.
      */
-    static final class Refused implements TestCase {
+    static final class Tuned implements TestCase {
         BusModuleElement m;
 
         public String id() {
-            return "bus_module_refused";
+            return "bus_module_tuned";
         }
 
         public void build(TestContext c) {
             m = module(c, c.at(2, 1, 1), Direction.XP);
         }
 
+        /** What the screen sends for terminal i, channel ch. */
+        void send(TestContext c, int i, int ch) {
+            m.networkUnserialize(c.stream(o -> {
+                o.writeByte(BusModuleElement.setChannelId);
+                o.writeByte(i);
+                o.writeByte(ch);
+            }));
+        }
+
         public void measure(TestContext c) {
-            String bad = m.setName(0, "no spaces!");
-            c.check("bus module refused: a bad name", bad != null && m.name(0).isEmpty() && !m.message().isEmpty(), bad + " / " + m.name(0));
-            String up = m.setName(2, "Tank_Level");
-            c.check("bus module refused: capitals are folded", up == null && m.name(2).equals("tank_level"), up + " / " + m.name(2));
-            m.setName(2, "");
-            // a bare port with 64 channels, on the module's bus
-            BusPort full = new BusPort();
-            List<String> many = new java.util.ArrayList<>();
-            for (int i = 0; i < 64; i++) many.add("c" + i);
-            full.claim(many);
-            BusNet.link(full, m.port);
+            BusPort other = new BusPort();
+            BusNet.link(other, m.port);
             BusNet.refresh();
-            c.check("bus module refused: on the full bus", m.port.bus() != null && m.port.bus().names().size() == 64,
-                m.port.bus() == null ? "no bus" : "" + m.port.bus().names().size());
-            String fine = m.setName(0, "c5");
-            c.check("bus module refused: a name the bus has is fine", fine == null && m.name(0).equals("c5"), String.valueOf(fine));
-            String more = m.setName(1, "extra");
-            c.check("bus module refused: a 65th channel", more != null && m.name(1).isEmpty() && m.message().equals(more), more + " / " + m.name(1));
-            c.check("bus module refused: no parenthesis in the messages", !bad.contains("(") && !more.contains("("), bad + " / " + more);
-            c.check("bus module refused: Jade has no line for a refused name", !m.getWaila().containsKey("2 extra"), m.getWaila().toString());
+            send(c, 2, BLUE);
+            c.check("bus module tuned: the screen tunes terminal 3 to 11 blue", m.channel(2) == BLUE && m.port.claims() == 1 << BLUE,
+                m.channel(2) + " " + m.port.claims());
+            c.check("bus module tuned: its bus has the channel in use", m.port.bus() != null && m.port.bus().inUse(BLUE), "" + m.port.bus());
+            c.check("bus module tuned: Jade says it by number and name", m.getWaila().getOrDefault("Terminal 3", "").startsWith("11 blue, in"), m.getWaila().toString());
+            send(c, 2, 16);
+            c.check("bus module tuned: 16 is no channel, unused", m.channel(2) == UNUSED && m.port.claims() == 0, "" + m.channel(2));
+            send(c, 4, ORANGE);
+            send(c, 4, -3);
+            c.check("bus module tuned: a negative value, unused", m.channel(4) == UNUSED, "" + m.channel(4));
+            send(c, 9, RED);
+            boolean none = true;
+            for (int i = 0; i < 9; i++) none &= m.channel(i) == UNUSED;
+            c.check("bus module tuned: no tenth terminal", none, "");
             // broken: its port leaves the bus
             m.sixNode.deleteSlot(null, m.slot);
             BusNet.refresh();
-            c.check("bus module refused: broken, its port is off the bus", m.port.bus() == null && full.bus() == null,
-                m.port.bus() + " " + full.bus());
+            c.check("bus module tuned: broken, its port is off the bus", m.port.bus() == null && other.bus() == null, m.port.bus() + " " + other.bus());
         }
     }
 }

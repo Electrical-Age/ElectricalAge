@@ -37,10 +37,8 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         return busPin(lrdu) ? null : ElnDeviceRegistry.signalCableDescriptor.render;
     }
 
-    /** Per channel, the bus channel it records, or "" (its wire). */
-    String[] busNames = {""};
-    /** Why the last bus name set was refused, or "". */
-    String busMessage = "";
+    /** Per channel, the bus channel it records, or BusChannel.UNUSED: its wire. */
+    int[] busChannels = {mods.eln.bus.BusChannel.UNUSED};
 
     boolean inVoxelBlock() {
         return tileEntity instanceof mods.eln.node.voxel.VoxelNodeEntity;
@@ -52,15 +50,15 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         return front != null && inVoxelBlock() && l == ElectricalDataLoggerElement.busEdge(pinEdge(), front);
     }
 
-    /** Client: ask the server to have channel c record this bus channel ("": its wire). */
-    void sendBus(int c, String name) {
+    /** Client: ask the server to have channel c record bus channel b (BusChannel.UNUSED: its wire). */
+    void sendBus(int c, int b) {
         try {
             var bos = new java.io.ByteArrayOutputStream();
             var stream = new java.io.DataOutputStream(bos);
             preparePacketForServer(stream);
             stream.writeByte(ElectricalDataLoggerElement.setBusId);
             stream.writeByte(c);
-            stream.writeUTF(name);
+            stream.writeByte(b);
             sendPacketToServer(bos);
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,10 +145,9 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         try {
             pause = stream.readBoolean();
             log = Logger.readPublish(stream, log);
-            String[] b = new String[Math.max(1, descriptor.channels)];
-            for (int c = 0; c < b.length; c++) b[c] = stream.readUTF();
-            busNames = b;
-            busMessage = stream.readUTF();
+            int[] b = new int[Math.max(1, descriptor.channels)];
+            for (int c = 0; c < b.length; c++) b[c] = mods.eln.bus.BusChannel.orUnused(stream.readByte());
+            busChannels = b;
             pinTurn = stream.readByte();
             if (log.channelCount() > 1)
                 for (int c = 0; c < log.channelCount(); c++) log.channels[c].name = String.valueOf((char) ('A' + c));

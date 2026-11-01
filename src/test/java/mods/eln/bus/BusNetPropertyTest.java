@@ -28,7 +28,7 @@ class BusNetPropertyTest {
             List<Set<Integer>> adj = new ArrayList<>();
             for (int i = 0; i < n; i++) {
                 BusPort p = new BusPort();
-                p.claim(List.of("x"));
+                p.claim(1 << 5);
                 ports.add(p);
                 adj.add(new HashSet<>());
             }
@@ -65,11 +65,11 @@ class BusNetPropertyTest {
                 // one port writes; next tick exactly its bus reads it
                 int w = r.nextInt(n);
                 double v = 0.1 + 0.8 * r.nextDouble();
-                ports.get(w).write("x", v);
+                ports.get(w).write(5, v);
                 BusNet.tick();
                 for (int i = 0; i < n; i++) {
                     boolean reach = !adj.get(w).isEmpty() && !adj.get(i).isEmpty() && comp[i] == comp[w];
-                    assertEquals(reach ? v : 0, ports.get(i).read("x"), 1e-9, "port " + i + " after port " + w + " wrote (step " + step + ")");
+                    assertEquals(reach ? v : 0, ports.get(i).read(5), 1e-9, "port " + i + " after port " + w + " wrote (step " + step + ")");
                 }
             }
         } finally {
