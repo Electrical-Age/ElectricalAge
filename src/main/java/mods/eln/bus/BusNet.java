@@ -34,21 +34,21 @@ public final class BusNet {
         }
     }
 
-    /** Drop every link of these ports (their node is disconnecting); they leave their buses at the next rebuild. */
+    /**
+     * Drop every link of these ports (their node is disconnecting). They keep their bus until the next rebuild, which
+     * a reconnect usually rejoins them to: the rebuilt bus starts from it, so a node reconnecting (a part placed in its
+     * block) never shows running logic a 0. A port the rebuild doesn't reach leaves its bus then.
+     */
     public static void detach(Collection<BusPort> ports) {
         for (BusPort p : ports) {
             if (p == null) continue;
             for (BusPort o : p.links) {
                 o.links.remove(p);
-                if (o.links.isEmpty()) {
-                    ALL.remove(o);
-                    o.bus = null;
-                }
+                if (o.links.isEmpty()) ALL.remove(o);
             }
-            if (!p.links.isEmpty()) dirty = true;
+            if (!p.links.isEmpty() || p.bus != null) dirty = true;
             p.links.clear();
             ALL.remove(p);
-            p.bus = null;
         }
     }
 
@@ -56,6 +56,12 @@ public final class BusNet {
     public static void tick() {
         if (dirty) rebuild();
         for (Bus b : BUSES) b.swap();
+    }
+
+    /** Find the buses again now if links changed, without swapping (tests: a swap mid-tick would drop every bus's
+     *  pending writes, the other tests' too). */
+    public static void refresh() {
+        if (dirty) rebuild();
     }
 
     static void rebuild() {
@@ -85,6 +91,8 @@ public final class BusNet {
             }
             made.add(nb);
         }
+        // ports no bus reaches now (no links left) leave their old bus
+        for (Bus o : BUSES) for (BusPort p : o.ports) if (!seen.contains(p)) p.bus = null;
         BUSES.clear();
         BUSES.addAll(made);
     }

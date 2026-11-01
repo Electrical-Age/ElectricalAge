@@ -72,6 +72,24 @@ class BusNetTest {
     }
 
     @Test
+    void aNodeReconnectingKeepsValues() {
+        BusPort a = port("x"), cable = new BusPort(), b = port("x");
+        BusNet.link(a, cable);
+        BusNet.link(cable, b);
+        BusNet.tick();
+        a.write("x", 0.6);
+        BusNet.tick();
+        // the whole bus is one block that reconnects: every port detached, a new cable port, links again
+        BusNet.detach(List.of(a, cable, b));
+        BusPort cable2 = new BusPort();
+        BusNet.link(a, cable2);
+        BusNet.link(cable2, b);
+        a.write("x", 0.6);
+        BusNet.tick();
+        assertEquals(0.6, b.read("x"), 1e-9, "no dip to 0 when a block reconnects");
+    }
+
+    @Test
     void detachSplitsTheBus() {
         BusPort a = port("x"), mid = new BusPort(), b = port("x");
         BusNet.link(a, mid);

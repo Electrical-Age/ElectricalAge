@@ -58,10 +58,10 @@ public final class BusCases {
             c.check("bus: Jade names the cable", w.values().stream().anyMatch(s -> s.startsWith("Field Bus Cable")), w.toString());
             // the middle block gone: the ends are apart
             b.disconnect();
-            mods.eln.bus.BusNet.tick();
+            mods.eln.bus.BusNet.refresh();
             c.check("bus: the middle gone, the ends are apart", bus(a) == null || bus(a) != bus(d), bus(a) + " " + bus(d));
             b.connect();
-            mods.eln.bus.BusNet.tick();
+            mods.eln.bus.BusNet.refresh();
             c.check("bus: back again, one bus", bus(a) != null && bus(a) == bus(d), bus(a) + " " + bus(d));
         }
     }

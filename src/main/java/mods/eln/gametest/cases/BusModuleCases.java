@@ -196,7 +196,7 @@ public final class BusModuleCases {
             var fresh = (BusModuleElement) ((SixNode) r.fresh).sideElementList[Direction.YN.getInt()];
             c.check("bus module saved: names and directions come back", settings(fresh).equals(before), before + " -> " + settings(fresh));
             c.check("bus module saved: claimed again on load", Set.copyOf(fresh.port.claims()).equals(claims), fresh.port.claims().toString());
-            BusNet.tick();
+            BusNet.refresh();
             var bus = fresh.port.bus();
             c.check("bus module saved: back on its bus with its channels", bus != null && bus.names().containsAll(claims),
                 bus == null ? "no bus" : bus.names().toString());
@@ -230,7 +230,7 @@ public final class BusModuleCases {
             for (int i = 0; i < 64; i++) many.add("c" + i);
             full.claim(many);
             BusNet.link(full, m.port);
-            BusNet.tick();
+            BusNet.refresh();
             c.check("bus module refused: on the full bus", m.port.bus() != null && m.port.bus().names().size() == 64,
                 m.port.bus() == null ? "no bus" : "" + m.port.bus().names().size());
             String fine = m.setName(0, "c5");
@@ -241,7 +241,7 @@ public final class BusModuleCases {
             c.check("bus module refused: Jade has no line for a refused name", !m.getWaila().containsKey("2 extra"), m.getWaila().toString());
             // broken: its port leaves the bus
             m.sixNode.deleteSlot(null, m.slot);
-            BusNet.tick();
+            BusNet.refresh();
             c.check("bus module refused: broken, its port is off the bus", m.port.bus() == null && full.bus() == null,
                 m.port.bus() + " " + full.bus());
         }
