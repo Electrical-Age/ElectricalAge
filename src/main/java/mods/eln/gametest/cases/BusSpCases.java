@@ -139,6 +139,15 @@ public final class BusSpCases {
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
             Wp9cCases.within(c, "bus sp: its output wire beside the bus pin still gives the output [V]", u, 30, 0.5);
             c.check("bus sp: its output edge has no circuit link to the bus", sp.edgePins().get(1).load() == null, "");
+            // a bus kit aimed at the bus pin ends there, a signal kit at the output beside it (AdventurAgent: a bus kit
+            // found no place on the processor)
+            BlockPos at = c.at(4, 1, 1);
+            var node = (VoxelNode) BusCases.node(c, 4, 1, 1);
+            var busEnd = mods.eln.node.voxel.CablePlacer.deviceEnd(node, at, sp.side.getInt(), new double[]{0.05, 0, pz / 16.0}, false, BUS);
+            c.check("bus sp: a bus kit ends at the bus pin", busEnd != null && busEnd.x() == at.getX() * 16L && busEnd.z() == at.getZ() * 16L + pz,
+                String.valueOf(busEnd));
+            var sigEnd = mods.eln.node.voxel.CablePlacer.deviceEnd(node, at, sp.side.getInt(), new double[]{0.05, 0, pz / 16.0}, false, SIGNAL);
+            c.check("bus sp: a signal kit there ends at the output", sigEnd != null && sigEnd.z() == at.getZ() * 16L + 8, String.valueOf(sigEnd));
             var w = sp.getWaila();
             c.check("bus sp: Jade shows its bus channels by number and name", "1 orange, 4 yellow".equals(w.get("Bus channels")), w.toString());
         }

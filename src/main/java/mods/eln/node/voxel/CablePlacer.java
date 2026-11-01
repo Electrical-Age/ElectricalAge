@@ -268,7 +268,7 @@ public final class CablePlacer {
     }
 
     /** The same for a kit of that tier (-1: any). */
-    static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start, int tier) {
+    public static CableRouter.End deviceEnd(VoxelNode v, BlockPos pos, int el, double[] h, boolean start, int tier) {
         if (el >= 6) {   // (a device placed off centre: its pins, the one nearest the click)
             var e = v.getElement(el);
             if (e == null) return null;
@@ -292,6 +292,43 @@ public final class CablePlacer {
         var side = mods.eln.misc.Direction.fromInt(el);
         int f = side.toEnumFacing().get3DDataValue();
         int fa = CableRouter.axis(f);
+        // an element with several terminals on an edge (edgePins: the three-channel logger, the Bus I/O Module, the
+        // signal processor's bus pin): each is its own point along the edge, as VoxelNode.ends() puts them; the one of
+        // the kit's kind nearest the click (AdventurAgent: a bus kit couldn't reach the processor's bus pin)
+        var host = v.getElement(el);
+        if (host != null && !host.edgePins().isEmpty()) {
+            long[] best = null;
+            int bestOut = -1;
+            double bd = Double.MAX_VALUE;
+            for (var lrdu : mods.eln.misc.LRDU.values()) {
+                int dv = side.applyLRDU(lrdu).toEnumFacing().get3DDataValue();
+                int[] c = {8, 8, 8};
+                c[fa] = CablePart.plane(f);
+                c[CableRouter.axis(dv)] = dv % 2 == 0 ? 0 : 16;
+                List<int[]> points = new java.util.ArrayList<>();   // {x, y, z, mask}
+                boolean pinned = false;
+                for (var pin : host.edgePins()) {
+                    if (pin.lrdu() != lrdu) continue;
+                    pinned = true;
+                    int along = side.applyLRDU(lrdu.left()).toEnumFacing().get3DDataValue();
+                    int[] q = c.clone();
+                    q[CableRouter.axis(along)] = 8 + (along % 2 == 0 ? -pin.offset() : pin.offset());
+                    points.add(new int[]{q[0], q[1], q[2], pin.mask()});
+                }
+                if (!pinned) points.add(new int[]{c[0], c[1], c[2], host.getConnectionMask(lrdu)});
+                for (int[] q : points) {
+                    if (q[3] == 0 || tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(q[3], DevicePlacer.tierMask(tier))) continue;
+                    double d = sq(q[0] - h[0] * 16) + sq(q[1] - h[1] * 16) + sq(q[2] - h[2] * 16);
+                    if (d < bd) {
+                        bd = d;
+                        best = new long[]{pos.getX() * 16L + q[0], pos.getY() * 16L + q[1], pos.getZ() * 16L + q[2]};
+                        bestOut = dv;
+                    }
+                }
+            }
+            if (best == null) return null;
+            return new CableRouter.End(best[0], best[1], best[2], f, start ? bestOut : CableRouter.reverse(bestOut));
+        }
         int edge = -1;
         double bd = Double.MAX_VALUE;
         for (int g = 0; g < 6; g++) {
