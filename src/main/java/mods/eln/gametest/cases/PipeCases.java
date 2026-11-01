@@ -119,18 +119,19 @@ public final class PipeCases {
     }
 
     /**
-     * The phase signal on the boiler's front, under its gauges (Baughn: liquid or gas): high with water above half the gauge glass, low
-     * below it; a signal can connect on the front, heat only on the other faces.
+     * The level signal on the boiler's front, under its gauges (Baughn 2026-11-01: analog): the gauge glass's reading as
+     * a share of the signal range, so 3/4 full reads 3/4 and a quarter a quarter; a signal can connect on the front,
+     * heat only on the other faces. Its heating surface uncovers below WET_FILL: an eighth full passes about half the heat.
      */
     static final class BoilerPhase implements TestCase {
-        mods.eln.oil.BoilerElement full, low;
+        mods.eln.oil.BoilerElement full, low, lower;
 
         public String id() {
             return "boiler_phase_signal";
         }
 
         public int width() {
-            return 5;
+            return 7;
         }
 
         public int ticks() {
@@ -143,13 +144,19 @@ public final class PipeCases {
             low = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 3, 1);
             full.fromTanks(6000, 0);
             low.fromTanks(2000, 0);
+            lower = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 5, 1);
+            lower.fromTanks(1000, 0);
         }
 
         public void measure(TestContext ctx) {
             double uFull = full.phaseOut.getU(), uLow = low.phaseOut.getU();
             var front = full.front;
-            ctx.check("phase: high with water at half height", uFull > 0.9 * mods.eln.Eln.SVU, String.format("%.2f V", uFull));
-            ctx.check("phase: low without", uLow < 0.1 * mods.eln.Eln.SVU, String.format("%.2f V", uLow));
+            ctx.check("level: 3/4 full reads 3/4 of the signal range", Math.abs(uFull - 0.75 * mods.eln.Eln.SVU) < 0.02 * mods.eln.Eln.SVU, String.format("%.2f V", uFull));
+            ctx.check("level: 1/4 full reads 1/4", Math.abs(uLow - 0.25 * mods.eln.Eln.SVU) < 0.02 * mods.eln.Eln.SVU, String.format("%.2f V", uLow));
+            ctx.check("level: a logic input still reads high above half, low below", uFull > 0.5 * mods.eln.Eln.SVU && uLow < 0.5 * mods.eln.Eln.SVU, "");
+            ctx.check("heating surface: covered at a quarter and up, half uncovered at an eighth", full.heatingShare() > 0.995 && low.heatingShare() > 0.995
+                && Math.abs(lower.heatingShare() - (mods.eln.oil.BoilerElement.DRY_SHARE + 0.5 * (1 - mods.eln.oil.BoilerElement.DRY_SHARE))) < 0.02,
+                String.format("%.3f / %.3f / %.3f", full.heatingShare(), low.heatingShare(), lower.heatingShare()));
             ctx.check("phase: the front takes a signal, not heat; the back takes heat", full.getConnectionMask(front, mods.eln.misc.LRDU.Down) == mods.eln.node.NodeBase.maskElectricalOutputGate
                 && full.getThermalLoad(front, mods.eln.misc.LRDU.Down) == null
                 && full.getConnectionMask(front.back(), mods.eln.misc.LRDU.Down) == mods.eln.node.NodeBase.maskThermal, "");
