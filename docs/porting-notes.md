@@ -386,6 +386,19 @@ on 1.7.10) onto 26.x.
   65th channel on its bus is refused there. In a plain six-node block there is no bus cable, and each signal edge
   connects only its middle terminal (2, 5, 8). NBT `t<n>name`, `t<n>out`. Recipe: a signal processor's with Field
   Bus Cable on top. GameTests `bus_module_*`.
+- Signal processor on the field bus (Baughn: the bus is to make signal logic denser). In a voxel block's face slot its
+  output edge has two terminals: the output in the middle (as before) and a bus pin 4 voxels toward `front.left()`
+  (`edgePins`, `BUS_OFFSET`); a plain six-node block, or an off-centre slot, has no bus pin. Programs read a channel
+  as `bus.<name>` anywhere a name may stand (`pump = bus.tank_level < 0.3`) and write one with a definition line
+  `bus.<name> = expression` (`bus.feed = rs(A, B)`). A read is always the bus's level as the tick began, also for a
+  channel the program writes, so `bus.n = bus.n + 0.1` is a counter with a tick's delay, not a cycle. The last line
+  may be a bus definition (only a bus definition is a definition there): the program then has no output expression
+  and the output wire gives 0 V. Names follow the bus's rule; a bad name or a channel written twice is a compile
+  error, and a program whose channels would pass its bus's 64 is refused when saved ("Bus full", shown under the
+  editor; it then claims nothing and its wire gives 0 V). The names read and written are claimed; writes go out once
+  a tick (a slow process, after the circuit), only while the processor has its chips; a non-finite value writes 0.
+  The editor colours `bus.` names, accepts them as the processor does, and lists them in the reference's "Field bus"
+  category. Old programs are unchanged. Tests `ProgramTest`, `SpLanguageTest`, GameTests `bus_sp_*`.
 - Signal processor logger and defaults (Baughn 2026-10-30, board #45): a program may give an input a default,
   `A = 0.5` on a definition line (a constant, once per input, free), read while no cable is connected to it. The
   processor carries a four-channel logger (A, B, C as the program reads them, and the output) in its screen's left

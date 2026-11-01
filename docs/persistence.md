@@ -115,6 +115,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   (mean, min, max halves per point, oldest first); old prints (`log` bytes) still draw (`DataLogs.fromNBT`).
 - Bus I/O Module: per terminal n (0-8) `t<n>name` (absent: unused) and `t<n>out` (absent: in). Bus values are not
   saved: the writers put them back one tick after load.
+- Signal processor: no new keys for the bus; its channels are in `expression`, claimed again on load. A
+  `bus.<name> = ...` line's stateful functions are saved under `equation.bus.<name>.`, as other components'.
 
 ## Ids that must never change
 

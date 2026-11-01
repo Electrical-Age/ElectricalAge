@@ -88,7 +88,10 @@ public class ElectricalMathRender extends SixNodeElementRender {
     public void draw() {
         super.draw();
 
-        // (no coloured pin stubs: the model's brass terminals meet the cables; Baughn 2026-10-30)
+        // (no coloured pin stubs: the model's brass terminals meet the cables; Baughn 2026-10-30), but the bus pin beside
+        // the output, in a voxel block (a plain block has no bus cable to meet)
+        if (front != null && tileEntity instanceof mods.eln.node.voxel.VoxelNodeEntity)
+            drawBusPin(front, ElectricalMathElement.BUS_OFFSET, 5 / 16f, 8 / 16f);
 
         if (side.isY()) {
             front.left().glRotateOnX();

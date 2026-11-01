@@ -31,6 +31,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The signal processor: a program (Program) over inputs A, B and C computes its output. In a voxel block it also has a
+ * field bus pin on its output edge, BUS_OFFSET voxels from the output terminal toward front.left(): its program reads
+ * and writes the bus's channels as bus.name (Program), claiming the names it uses.
+ */
 public class ElectricalMathElement extends SixNodeElement {
 
     NbtElectricalGateOutput gateOutput = new NbtElectricalGateOutput("gateOutput");
@@ -41,6 +46,11 @@ public class ElectricalMathElement extends SixNodeElement {
     ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 
     ElectricalMathElectricalProcess electricalProcess = new ElectricalMathElectricalProcess(this);
+
+    /** Its bus pin, the same for the element's life (VoxelNode links it to the bus cable it touches). */
+    public final mods.eln.bus.BusPort port = new mods.eln.bus.BusPort();
+    /** Where the bus pin is on the output edge: voxels from the output terminal (the edge's middle) toward front.left(). */
+    public static final int BUS_OFFSET = 4;
 
     boolean firstBoot = true;
 
@@ -94,6 +104,9 @@ public class ElectricalMathElement extends SixNodeElement {
         electricalComponentList.add(gateOutputProcess);
 
         electricalProcessList.add(electricalProcess);
+        // once a simulator tick, after the circuit: the electrical processes run several times a tick, and every bus
+        // write counts as a writer
+        slowProcessList.add(new BusWrite());
 
         symboleList.add(new GateInputSymbol("A", gateInput[0]));
         symboleList.add(new GateInputSymbol("B", gateInput[1]));
@@ -145,6 +158,14 @@ public class ElectricalMathElement extends SixNodeElement {
         }
     }
 
+    /** The program's bus writes, each as its line computed it last (a processor without its chips writes nothing). */
+    class BusWrite implements IProcess {
+        @Override
+        public void process(double time) {
+            if (chipsReady && program != null) program.writeBus(port::write);
+        }
+    }
+
     /** Is a cable (an electrical connection to a neighbour) on this input? */
     static boolean connected(NbtElectricalGateInput gate) {
         for (var c : gate.getConnectedComponents()) if (c instanceof mods.eln.sim.ElectricalConnection) return true;
@@ -185,7 +206,11 @@ public class ElectricalMathElement extends SixNodeElement {
 
     void preProcessEquation(String expression) {
         this.expression = expression;
-        program = Program.compile(expression, symboleList, DEFAULTABLE);
+        program = Program.compile(expression, symboleList, DEFAULTABLE, port::read);
+        // its channels must fit on its bus as it is now (on load it is on none yet: a merge past 64 keeps every name)
+        if (program.isValid() && !mods.eln.bus.BusNet.room(port, program.busNames()))
+            program.refuse(I18N.tr("Bus full: it has %1$ channels already", mods.eln.bus.Bus.MAX_CHANNELS));
+        port.claim(program.busNames());
         // the inputs connect whether the program reads them or not (Baughn 2026-10-30), so cables can go in first
         for (int idx = 0; idx < 3; idx++) sideConnectionEnable[idx] = true;
         equationIsValid = program.isValid();
@@ -205,6 +230,24 @@ public class ElectricalMathElement extends SixNodeElement {
         public String getName() {
             return "daytime";
         }
+    }
+
+    boolean inVoxelBlock() {
+        return sixNode instanceof mods.eln.node.voxel.VoxelNode;
+    }
+
+    /** In a voxel block, its output edge has two terminals: the output in the middle, the bus pin beside it. */
+    @Override
+    public java.util.List<EdgePin> edgePins() {
+        if (!inVoxelBlock()) return java.util.List.of();
+        return java.util.List.of(new EdgePin(front, 0, Node.maskElectricalOutputGate, gateOutput),
+            new EdgePin(front, BUS_OFFSET, mods.eln.node.NodeBase.maskRs485, null));
+    }
+
+    /** The bus pin's port, toward the output edge, in a voxel block's face slot (an off-centre processor has none). */
+    @Override
+    public mods.eln.bus.BusPort busPort(LRDU lrdu) {
+        return lrdu == front && slot < 6 && inVoxelBlock() ? port : null;
     }
 
     @Override
@@ -246,6 +289,10 @@ public class ElectricalMathElement extends SixNodeElement {
                 Utils.plotVolt("\u00A79", gateInput[1].getU()) +
                 Utils.plotVolt("\u00A7a", gateInput[2].getU()));
         info.put(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
+        if (!port.claims().isEmpty()) {
+            // the channels its program uses; whether its pin is on a bus
+            info.put(I18N.tr("Bus channels"), port.claims().size() + (port.bus() == null ? ", " + I18N.tr("no bus") : ""));
+        }
         return info;
     }
 

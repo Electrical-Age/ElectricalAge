@@ -150,8 +150,27 @@ public abstract class SixNodeElementRender {
 
     /** The colour of the pin toward l: violet for a bus pin, as the bus cable is drawn; else by the cable it takes. */
     protected void pinColour(LRDU l) {
-        if (busPin(l)) GL11.glColor3f(0.42f, 0.24f, 0.55f);
+        if (busPin(l)) busColour();
         else pinColour(getCableRender(l));
+    }
+
+    /** The bus cable's violet, for a bus pin. */
+    protected static void busColour() {
+        GL11.glColor3f(0.42f, 0.24f, 0.55f);
+    }
+
+    /** A bus pin in the current frame: on the face toward edge l, offset voxels along it toward l.left() (as VoxelNode
+     *  places edge pins; element frame: Left/Right along z, Down/Up along y), from `from` to `to` off the centre. */
+    protected static void drawBusPin(LRDU l, int offset, float from, float to) {
+        LRDU a = l.left();
+        float s = (a == LRDU.Left || a == LRDU.Down ? -1 : 1) * offset / 16f;
+        GL11.glPushMatrix();
+        if (a == LRDU.Left || a == LRDU.Right) GL11.glTranslatef(0, 0, s);
+        else GL11.glTranslatef(0, s, 0);
+        busColour();
+        drawPinBox(l, from, to, 2.8f / 16, 1 / 16f);
+        GL11.glPopMatrix();
+        GL11.glColor3f(1f, 1f, 1f);
     }
 
     /** A pin's colour by the cable it takes (AdventurAgent couldn't tell a thermal probe's pins apart): copper for

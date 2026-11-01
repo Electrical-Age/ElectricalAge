@@ -284,6 +284,11 @@ public final class Program implements INBTTReady {
         return c;
     }
 
+    /** Refuse it whole with this message (the processor's bus has no room for its channels): it no longer compiles. */
+    public Program refuse(String message) {
+        return fail(0, message);
+    }
+
     Program fail(int line, String message) {
         errorToken = null;
         error = message;
