@@ -296,7 +296,8 @@ public final class ShaftSteamCases {
                 boiler.thermal.moveEnergyTo(30000 * dt);
                 // (the boiler holds half a kilo of water: it runs dry in a minute or so; what it did while it had steam)
                 if (shaft(t).getRads() > peakRads) peakRads = shaft(t).getRads();
-                if (shaft(t).getRads() > 700) peakW = Math.max(peakW, t.shaftW);
+                // (650: below a quarter full its heating surface uncovers and it boils less, BoilerElement.heatingShare)
+                if (shaft(t).getRads() > 650) peakW = Math.max(peakW, t.shaftW);
             });
         }
 
@@ -304,7 +305,7 @@ public final class ShaftSteamCases {
             Eln.simulator.removeSlowProcess(fire);
             Eln.simulator.removeElectricalComponent(r);
             ctx.line("boiler -> pipe -> shaft turbine: boiler " + boiler.getWaila() + "; turbine " + t.getWaila());
-            ctx.check("boiler pipe: the turbine runs off the piped steam", t.totalKg > 0 && peakRads > 700,
+            ctx.check("boiler pipe: the turbine runs off the piped steam", t.totalKg > 0 && peakRads > 650,
                 String.format("%.3f kg, peak %.0f rad/s", t.totalKg, peakRads));
             ctx.check("boiler pipe: and carries the 2 kW load at speed (1.5-4 kW on the shaft, some spinning it up)", peakW > 1500 && peakW < 4000, String.format("%.0f W", peakW));
             ctx.check("boiler pipe: its exhaust goes to the air", !t.exhaustPiped, "");
