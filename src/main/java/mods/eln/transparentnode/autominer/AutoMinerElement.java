@@ -207,7 +207,10 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
+        Map<String, String> info = new java.util.LinkedHashMap<String, String>();
+        // where to connect: its ports are two of its ghost blocks, which Jade can't name (Baughn: a hint)
+        info.put(I18N.tr("Power"), I18N.tr("at the two lower corner blocks on its console side, from their side faces, now %1$",
+            Utils.plotVolt("", inPowerLoad.getU()).trim()));
         info.put(I18N.tr("Silk touch"), slowProcess.silkTouch ? I18N.tr("Yes") : I18N.tr("No"));
         info.put(I18N.tr("Depth"), Utils.plotValue(slowProcess.pipeLength, "m "));
         return info;

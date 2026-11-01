@@ -63,6 +63,16 @@ public final class MinerCableCases {
             var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(p), Direction.NORTH, p, false);
             InteractionResult r = c.level().getBlockState(p).useItemOn(kit, c.level(), player, InteractionHand.MAIN_HAND, hit);
             c.check("autominer: the ghost port passes a kit's click on to the kit", r == InteractionResult.PASS, String.valueOf(r));
+            mods.eln.node.transparent.TransparentNode miner = null;
+            for (int x = 0; x < 9; x++) for (int y = 1; y < 7; y++) for (int z = 0; z < 7; z++)
+                if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level()))
+                    instanceof mods.eln.node.transparent.TransparentNode t) miner = t;
+            if (miner == null) {
+                c.check("autominer: found", false, "");
+                return;
+            }
+            var w = miner.element.getWaila();
+            c.check("autominer: Jade says where its power goes, first", w.keySet().iterator().next().equals("Power") && w.get("Power").contains("corner"), w.toString());
         }
     }
 }
