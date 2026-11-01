@@ -156,7 +156,7 @@ public abstract class SixNodeElementRender {
 
     /** The bus cable's violet, for a bus pin. */
     protected static void busColour() {
-        GL11.glColor3f(0.42f, 0.24f, 0.55f);
+        GL11.glColor3f(0.62f, 0.38f, 0.80f);
     }
 
     /** A bus pin in the current frame: on the face toward edge l, offset voxels along it toward l.left() (as VoxelNode

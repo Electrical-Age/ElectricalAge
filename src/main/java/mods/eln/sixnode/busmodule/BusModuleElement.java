@@ -158,7 +158,7 @@ public class BusModuleElement extends SixNodeElement {
      * The terminal nearest a click on the module (block-local 0..1, the face's normal ignored): each terminal's point is
      * at its pin's root, 5 voxels from the module's centre toward its edge and PIN_OFFSETS along it toward
      * edge.left(), as VoxelNode places edge pins. In a plain block only the middle terminals (2, 5, 8) count, as only
-     * they connect there.
+     * they connect there. BUS_PIN: the bus pin is nearest (AdventurAgent: a brush there tuned terminal 1).
      */
     public int terminalAt(float vx, float vy, float vz) {
         double[] centre = {(8 + ox) / 16.0, (8 + oy) / 16.0, (8 + oz) / 16.0}, hit = {vx, vy, vz};
@@ -182,8 +182,22 @@ public class BusModuleElement extends SixNodeElement {
                 best = i;
             }
         }
+        if (inVoxelBlock()) {
+            var e = side.applyLRDU(front).toEnumFacing();
+            int[] es = {e.getStepX(), e.getStepY(), e.getStepZ()};
+            double d = 0;
+            for (int k = 0; k < 3; k++) {
+                if (k == normal.getAxis().ordinal()) continue;
+                double p = centre[k] + es[k] * 5 / 16.0;
+                d += (p - hit[k]) * (p - hit[k]);
+            }
+            if (d < bestD) best = BUS_PIN;
+        }
         return best;
     }
+
+    /** terminalAt: the click was nearest the bus pin. */
+    public static final int BUS_PIN = -2;
 
     /**
      * An EA brush tunes the terminal nearest the click to its colour, using paint only if that changes it, and says the
@@ -195,6 +209,7 @@ public class BusModuleElement extends SixNodeElement {
         if (!(mods.eln.item.BrushDescriptor.getDescriptor(stack) instanceof mods.eln.item.BrushDescriptor brush))
             return super.onBlockActivated(player, side, vx, vy, vz);
         int i = terminalAt(vx, vy, vz);
+        if (i == BUS_PIN) Utils.sendMessage(player, tr("That is the bus pin: brush a terminal to tune it"));
         if (i < 0) return true;
         int c = BusChannel.fromBrush(brush.getColor(stack));
         if (c != channels[i] && brush.use(stack, player)) setChannel(i, c);

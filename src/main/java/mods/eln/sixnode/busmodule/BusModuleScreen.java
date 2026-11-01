@@ -25,7 +25,7 @@ public class BusModuleScreen extends ElnScreen {
         super.init();
         for (int t = 0; t < BusModuleElement.TERMINALS; t++) {
             final int i = t;
-            text("l" + i, () -> String.valueOf(i + 1));
+            text("l" + i, () -> "T" + (i + 1));   // (AdventurAgent: "1" beside channel "14" read as one number)
             busChannel("s" + i, "c" + i, () -> render.channels[i], c -> render.sendChannel(i, c),
                 tr("The bus channel of terminal %1$. A brush used on the module tunes the terminal nearest the click.", i + 1));
             button("d" + i, () -> render.out[i] ? tr("Out") : tr("In"), () -> render.sendOut(i, !render.out[i]),
