@@ -105,14 +105,17 @@ public final class ElnRegistry {
         RECIPE_SERIALIZERS.register("cable_kit_to_coil", () -> mods.eln.node.voxel.CableKitRecipes.ToCoil.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.item.electricalitem.BatteryPackRecipe>> BATTERY_PACK =
         RECIPE_SERIALIZERS.register("portable_battery_pack", () -> mods.eln.item.electricalitem.BatteryPackRecipe.SERIALIZER);
-    /** Cable kits, one per CablePart tier: signal, low, medium, high, very high voltage. */
+    /** Field Bus Cable (mods.eln.bus): the coil its kits are made from; no six-node cable of its own. */
+    public static final DeferredItem<Item> FIELD_BUS_CABLE = ITEMS.registerSimpleItem("field_bus_cable");
+    /** Cable kits, one per CablePart tier: signal, low, medium, high, very high voltage, thermal, field bus. */
     public static final java.util.List<net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.CableKitItem>> CABLE_KITS = java.util.List.of(
         ITEMS.registerItem("cable_kit_signal", p -> new mods.eln.node.voxel.CableKitItem(0, p)),
         ITEMS.registerItem("cable_kit_lv", p -> new mods.eln.node.voxel.CableKitItem(1, p)),
         ITEMS.registerItem("cable_kit_mv", p -> new mods.eln.node.voxel.CableKitItem(2, p)),
         ITEMS.registerItem("cable_kit_hv", p -> new mods.eln.node.voxel.CableKitItem(3, p)),
         ITEMS.registerItem("cable_kit_vhv", p -> new mods.eln.node.voxel.CableKitItem(4, p)),
-        ITEMS.registerItem("cable_kit_thermal", p -> new mods.eln.node.voxel.CableKitItem(5, p)));
+        ITEMS.registerItem("cable_kit_thermal", p -> new mods.eln.node.voxel.CableKitItem(5, p)),
+        ITEMS.registerItem("cable_kit_bus", p -> new mods.eln.node.voxel.CableKitItem(6, p)));
     /** Raw lead and tungsten: what their ores drop, like raw iron (Baughn 2026-10-19: they dropped the ore block, as in
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
@@ -335,6 +338,7 @@ public final class ElnRegistry {
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(HANDBOOK);
+        ALL_ITEMS.add(FIELD_BUS_CABLE);
         ALL_ITEMS.add(RAW_LEAD);
         ALL_ITEMS.add(RAW_TUNGSTEN);
         ALL_ITEMS.add(CHARCOAL_NUGGET);

@@ -41,6 +41,8 @@ final class CableNet {
     final Map<CablePart, Conductor> of = new IdentityHashMap<>();
     final List<ElectricalConnection> internalE = new ArrayList<>();
     final List<ThermalConnection> internalT = new ArrayList<>();
+    /** Bus conductors touching inside the block (linked in addToSimulation, never in the circuit). */
+    final List<mods.eln.bus.BusPort[]> internalB = new ArrayList<>();
 
     CableNet(VoxelNode node) {
         this.node = node;
@@ -66,15 +68,21 @@ final class CableNet {
             this.face = face;
             this.d = CablePart.TIERS[tier].descriptor();
             this.td = CablePart.TIERS[tier].thermalDescriptor();
-            this.load = td != null ? null : new ElectricalLoad();
+            this.bus = CablePart.TIERS[tier].bus();
+            this.port = bus ? new mods.eln.bus.BusPort() : null;
+            this.load = td != null || bus ? null : new ElectricalLoad();
         }
 
+        /** A field bus conductor: no load of any kind; its bus is found by mods.eln.bus.BusNet through its port. */
+        final boolean bus;
+        final mods.eln.bus.BusPort port;
+
         boolean valid() {
-            return d != null || td != null;
+            return d != null || td != null || bus;
         }
 
         String name() {
-            return d != null ? d.name : td.name;
+            return d != null ? d.name : td != null ? td.name : CablePart.TIERS[tier].name();
         }
 
         double share() {
@@ -85,6 +93,7 @@ final class CableNet {
         }
 
         void make() {
+            if (bus) return;
             double s = share();
             if (td != null) {
                 makeThermal(s);
@@ -167,7 +176,7 @@ final class CableNet {
         final List<IProcess> watchdogs = new ArrayList<>();
 
         int mask() {
-            return d != null ? d.getNodeMask() : NodeBase.maskThermalWire;
+            return CablePart.TIERS[tier].mask();
         }
 
         boolean isBurntNow() {
@@ -224,6 +233,7 @@ final class CableNet {
         of.clear();
         internalE.clear();
         internalT.clear();
+        internalB.clear();
         List<CablePart> cables = new ArrayList<>();
         for (VoxelPart p : node.parts) if (p instanceof CablePart c) cables.add(c);
         // union by tier, face and touching (knuckles alone)
@@ -254,6 +264,7 @@ final class CableNet {
                 if (!NodeBase.compareConnectionMask(a.mask(), b.mask()) || !touch(a, b)) continue;
                 if (a.load != null && b.load != null) internalE.add(new ElectricalConnection(a.load, b.load));
                 if (a.thermal != null && b.thermal != null) internalT.add(new ThermalConnection(a.thermal, b.thermal));
+                if (a.port != null && b.port != null) internalB.add(new mods.eln.bus.BusPort[]{a.port, b.port});
             }
     }
 
@@ -285,6 +296,14 @@ final class CableNet {
         }
         for (ElectricalConnection c : internalE) Eln.simulator.addElectricalComponent(c);
         for (ThermalConnection c : internalT) Eln.simulator.addThermalConnection(c);
+        for (mods.eln.bus.BusPort[] l : internalB) mods.eln.bus.BusNet.link(l[0], l[1]);
+    }
+
+    /** The bus ports of its conductors (detached when the node disconnects). */
+    List<mods.eln.bus.BusPort> busPorts() {
+        List<mods.eln.bus.BusPort> out = new ArrayList<>();
+        for (Conductor k : conductors) if (k.port != null) out.add(k.port);
+        return out;
     }
 
     void removeFromSimulation() {

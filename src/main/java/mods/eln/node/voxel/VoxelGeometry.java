@@ -87,7 +87,8 @@ public final class VoxelGeometry {
                 pipe(m, pipe, PIPE[pipe.tier], argb, adapters);
             } else if (part instanceof CablePart c) {
                 // (black insulation, Baughn; burnt: scorched brown)
-                int argb = c.burnt != null ? rgb(0.35f, 0.22f, 0.14f) : rgb(0.22f, 0.22f, 0.24f);
+                // (the field bus: violet, as real Profibus cable is)
+                int argb = c.burnt != null ? rgb(0.35f, 0.22f, 0.14f) : c.tierInfo().bus() ? rgb(0.42f, 0.24f, 0.55f) : rgb(0.22f, 0.22f, 0.24f);
                 cable(m, c, argb, cableBoxes);
                 if (lugs != null && c.face == 0 && !c.isKnuckle())
                     for (CablePart.Port port : c.cablePorts())

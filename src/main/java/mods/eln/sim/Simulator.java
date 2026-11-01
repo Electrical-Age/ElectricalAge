@@ -386,6 +386,9 @@ public class Simulator /* ,IPacketHandler */ {
         long startTime = System.nanoTime();
         long e0 = electricalNsStack, tf0 = thermalFastNsStack, ts0 = thermalSlowNsStack;
 
+        // field buses first: last tick's writes become this tick's values (inline: init() and stop() clear the lists)
+        mods.eln.bus.BusNet.tick();
+
         for (Object o : slowPreProcessList.toArray()) {
             IProcess process = (IProcess) o;
             process.process(1.0 / 20);

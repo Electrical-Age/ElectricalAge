@@ -12,7 +12,8 @@
               "eln:medium_voltage_cable",
               "eln:high_voltage_cable",
               "eln:very_high_voltage_cable",
-              "eln:copper_thermal_cable"
+              "eln:copper_thermal_cable",
+              "eln:field_bus_cable"
             ]
           }
         ]
@@ -38,7 +39,8 @@
       "eln:cable_kit_from_coils_mv",
       "eln:cable_kit_from_coils_hv",
       "eln:cable_kit_from_coils_vhv",
-      "eln:cable_kit_from_coils_thermal"
+      "eln:cable_kit_from_coils_thermal",
+      "eln:cable_kit_from_coils_bus"
     ]
   }
 }

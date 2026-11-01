@@ -777,7 +777,7 @@ public final class CableCases {
             var mv = rm.byKey(mvKey).map(h -> h.value()).orElse(null);
             var adv = c.level().getServer().getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "recipes/misc/cable_kit_from_coils"));
             c.check("cable kit: in the recipe book, one recipe per tier each way, unlocked by cable",
-                learnable == 12 && adv != null, learnable + " learnable, advancement " + (adv != null));
+                learnable == 2 * CablePart.TIERS.length && adv != null, learnable + " learnable, advancement " + (adv != null));
             var mvIngs = mv == null ? List.<net.minecraft.world.item.crafting.Ingredient>of() : mv.placementInfo().ingredients();
             var mvIn = net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(mods.eln.node.voxel.CableKitRecipes.coil(LV + 1)));
             c.check("cable kit: the MV recipe places MV cable only and takes no LV", mv instanceof mods.eln.node.voxel.CableKitRecipes.FromCoils

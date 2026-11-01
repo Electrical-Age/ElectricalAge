@@ -105,10 +105,9 @@ public final class DevicePlacer {
         return tierMask(c.tier);
     }
 
-    /** The connection mask of a cable tier (CablePart.TIERS index): its six-node cable's, or a thermal wire's. */
+    /** The connection mask of a cable tier (CablePart.TIERS index). */
     static int tierMask(int tier) {
-        var cd = CablePart.TIERS[tier].descriptor();
-        return cd != null ? cd.getNodeMask() : NodeBase.maskThermalWire;
+        return CablePart.TIERS[tier].mask();
     }
 
     /** The edge of face pointing along axis a, toward + (pos) or -. */

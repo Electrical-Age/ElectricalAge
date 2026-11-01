@@ -12,7 +12,8 @@
               "eln:cable_kit_mv",
               "eln:cable_kit_hv",
               "eln:cable_kit_vhv",
-              "eln:cable_kit_thermal"
+              "eln:cable_kit_thermal",
+              "eln:field_bus_cable"
             ]
           }
         ]
@@ -38,7 +39,8 @@
       "eln:cable_kit_to_coil_mv",
       "eln:cable_kit_to_coil_hv",
       "eln:cable_kit_to_coil_vhv",
-      "eln:cable_kit_to_coil_thermal"
+      "eln:cable_kit_to_coil_thermal",
+      "eln:cable_kit_to_coil_bus"
     ]
   }
 }

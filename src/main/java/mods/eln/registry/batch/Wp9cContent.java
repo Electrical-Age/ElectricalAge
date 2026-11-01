@@ -73,12 +73,14 @@ public class Wp9cContent implements ElnContent {
     @Override
     public void serverAboutToStart() {
         WirelessSignalTxElement.channelMap.clear();
+        mods.eln.bus.BusNet.clear();
     }
 
     @Override
     public void serverStopped() {
         IWirelessSignalSpot.spots.clear();
         WirelessSignalTxElement.channelMap.clear();
+        mods.eln.bus.BusNet.clear();
         TutorialSignElement.resetBalise();
     }
     @Override

@@ -26,6 +26,7 @@ public final class CableKitRecipes {
     /** The cable tier of a coil (an old six-node cable item), or -1. */
     public static int coilTier(ItemStack s) {
         if (s.isEmpty()) return -1;
+        if (s.is(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get())) return CablePart.BUS;
         var d = GenericItemBlockUsingDamageDescriptor.getDescriptor(s);
         if (d instanceof ElectricalCableDescriptor c) return CablePart.tierOf(c.name);
         if (d instanceof mods.eln.sixnode.thermalcable.ThermalCableDescriptor t) return CablePart.tierOf(t.name);
@@ -34,6 +35,7 @@ public final class CableKitRecipes {
 
     /** A coil of a tier. */
     public static ItemStack coil(int tier) {
+        if (tier == CablePart.BUS) return new ItemStack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get());
         var d = CablePart.TIERS[tier].sixDescriptor();
         return d == null ? ItemStack.EMPTY : d.newItemStack();
     }

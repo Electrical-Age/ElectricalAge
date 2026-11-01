@@ -459,6 +459,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return java.util.List.of();
     }
 
+    /** The field bus port toward an edge whose mask is NodeBase.maskRs485 (or an edge pin with that mask), or null. In
+     *  a voxel block it joins the bus cable it touches (mods.eln.bus); keep the same port for the element's life. */
+    public mods.eln.bus.BusPort busPort(mods.eln.misc.LRDU lrdu) {
+        return null;
+    }
+
     /** A terminal on an edge (edgePins): the edge, where along it, the mask and the load it connects. */
     public record EdgePin(mods.eln.misc.LRDU lrdu, int offset, int mask, mods.eln.sim.ElectricalLoad load) {
     }

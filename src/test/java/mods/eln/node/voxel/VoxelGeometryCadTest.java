@@ -45,11 +45,12 @@ public class VoxelGeometryCadTest {
     /**
      * The blocks whose drawing was fixed: the safety valve and sensor (resized), adapters (no pipe flange or cap under
      * the adapter's), cable bends and branches (boxes trimmed where they overlapped), the large pipe's S (its second
-     * fitting ring a layer out).
+     * fitting ring a layer out). The Field Bus Cable is new since, drawn violet.
      */
     static boolean changed(VoxelCases.Case c) {
         return c.parts().stream().anyMatch(p -> p instanceof SafetyValvePart || p instanceof PipeSensorPart || p instanceof AdapterPart)
-            || c.name().startsWith("cable") && c.name().matches(".* (bend|tee|cross) on .*") || c.name().startsWith("large alloy S ");
+            || c.name().startsWith("cable") && c.name().matches(".* (bend|tee|cross) on .*") || c.name().startsWith("large alloy S ")
+            || c.name().contains("Field Bus");
     }
 
     @Test

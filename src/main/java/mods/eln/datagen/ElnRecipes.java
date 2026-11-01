@@ -1848,6 +1848,10 @@ public final class ElnRecipes extends ElnRecipesBase {
         addSmelting(in.getItem(), 0,
             findItemStack("Tungsten Ingot"));
         // raw lead and tungsten (their ores' drops, as raw iron), smelted and blasted
+        // Field Bus Cable: signal cable in violet jackets, gold on the contacts (mods.eln.bus)
+        addShapelessRecipe(stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get(), 4),
+            findItemStack("Signal Cable"), findItemStack("Signal Cable"), findItemStack("Signal Cable"), findItemStack("Signal Cable"),
+            stack(net.minecraft.world.item.Items.DYE.purple()), stack(net.minecraft.world.item.Items.GOLD_NUGGET));
         addSmelting(mods.eln.registry.ElnRegistry.RAW_LEAD.get(), 0, findItemStack("ingotLead"));
         addSmelting(mods.eln.registry.ElnRegistry.RAW_TUNGSTEN.get(), 0, findItemStack("Tungsten Ingot"));
         addBlasting(mods.eln.registry.ElnRegistry.RAW_LEAD.get(), findItemStack("ingotLead"), 0.7f);

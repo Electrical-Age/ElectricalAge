@@ -22,9 +22,21 @@ public final class CablePart extends VoxelPart {
     public static final String KIND = "cable";
 
     /** The tiers: six-node cable descriptor name, cross-section width and height (voxels). Signal 1x1 (Baughn). */
-    public record Tier(String name, int width, int height, boolean thermal) {
+    public record Tier(String name, int width, int height, Kind kind) {
+        /** What a tier carries: current (an electrical load), heat (a thermal load), or a field bus's channels. */
+        public enum Kind {ELECTRICAL, THERMAL, BUS}
+
         Tier(String name, int width, int height) {
-            this(name, width, height, false);
+            this(name, width, height, Kind.ELECTRICAL);
+        }
+
+        public boolean thermal() {
+            return kind == Kind.THERMAL;
+        }
+
+        /** The field bus cable: no load of any kind, only its bus (mods.eln.bus). */
+        public boolean bus() {
+            return kind == Kind.BUS;
         }
 
         /** An electrical tier's descriptor (null for the thermal cable). */
@@ -43,6 +55,14 @@ public final class CablePart extends VoxelPart {
             return null;
         }
 
+        /** The connection mask its pieces and the pins they take share: the six-node cable's, a thermal wire's, or the
+         *  bus's (NodeBase.maskRs485, which nothing else uses). */
+        public int mask() {
+            if (kind == Kind.BUS) return mods.eln.node.NodeBase.maskRs485;
+            var d = descriptor();
+            return d != null ? d.getNodeMask() : mods.eln.node.NodeBase.maskThermalWire;
+        }
+
         public mods.eln.cable.CableRenderDescriptor render() {
             var d = sixDescriptor();
             if (d instanceof ElectricalCableDescriptor e) return e.render;
@@ -57,8 +77,12 @@ public final class CablePart extends VoxelPart {
         new Tier("Medium Voltage Cable", 3, 1),
         new Tier("High Voltage Cable", 4, 2),
         new Tier("Very High Voltage Cable", 4, 2),
-        new Tier("Copper Thermal Cable", 4, 4, true),
+        new Tier("Copper Thermal Cable", 4, 4, Tier.Kind.THERMAL),
+        new Tier("Field Bus Cable", 3, 1, Tier.Kind.BUS),
     };
+
+    /** The field bus cable's tier. */
+    public static final int BUS = 6;
 
     public static int tierOf(String name) {
         for (int i = 0; i < TIERS.length; i++) if (TIERS[i].name.equals(name)) return i;
