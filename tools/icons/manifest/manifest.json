@@ -3872,6 +3872,32 @@
   "redraw": true
  },
  {
+  "item_id": "bus_io_module",
+  "display_name": "Bus I/O Module",
+  "family": "signal_io",
+  "placeable": true,
+  "node_kind": "six_node",
+  "tier": "signal",
+  "vanilla_size": 16,
+  "schematic_scope": true,
+  "tier_cue": null,
+  "model": "rtu/rtu.obj",
+  "parts": [
+   "main",
+   "led-power",
+   "led-activity",
+   "led-error",
+   "display"
+  ],
+  "model_texture_notes": "Drawn without the RTU's door: the window, display and LEDs show.",
+  "appearance": "The Modbus RTU's light grey box without its door, a violet bus pin on its front edge and three pale signal pins on each other edge.",
+  "function": "Bridges a field bus and signal wires: 9 terminals, each a named channel in or out.",
+  "current_texture": null,
+  "shares_texture_with": [],
+  "notes": "26.x (the field bus); reuses the RTU model.",
+  "redraw": true
+ },
+ {
   "item_id": "modern_data_logger",
   "display_name": "Modern Data Logger",
   "family": "meter_display",

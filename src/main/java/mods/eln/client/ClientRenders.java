@@ -14,6 +14,7 @@ public final class ClientRenders {
         // generated from the 1.12 descriptors' RenderClass (eln/port: super(name, XElement.class, XRender.class))
         ElnRenders.six(mods.eln.signalinductor.SignalInductorDescriptor.class, mods.eln.signalinductor.SignalInductorRender::new);
         ElnRenders.six(mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.class, mods.eln.sixnode.TreeResinCollector.TreeResinCollectorRender::new);
+        ElnRenders.six(mods.eln.sixnode.busmodule.BusModuleDescriptor.class, mods.eln.sixnode.busmodule.BusModuleRender::new);
         ElnRenders.six(mods.eln.sixnode.batterycharger.BatteryChargerDescriptor.class, mods.eln.sixnode.batterycharger.BatteryChargerRender::new);
         ElnRenders.six(mods.eln.sixnode.diode.DiodeDescriptor.class, mods.eln.sixnode.diode.DiodeRender::new);
         ElnRenders.six(mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor.class, mods.eln.sixnode.electricalalarm.ElectricalAlarmRender::new);

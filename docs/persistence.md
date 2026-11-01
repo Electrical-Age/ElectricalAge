@@ -113,6 +113,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   `logssamplingPeriod`, `logsmaxValue`, `logsminValue`, `logsunitType`) is replayed into the store on load
   (`ElectricalDataLoggerElement.migrate`). Prints: `samplingPeriod`, `channels`, `c<n>min/max/unit`, `c<n>points`
   (mean, min, max halves per point, oldest first); old prints (`log` bytes) still draw (`DataLogs.fromNBT`).
+- Bus I/O Module: per terminal n (0-8) `t<n>name` (absent: unused) and `t<n>out` (absent: in). Bus values are not
+  saved: the writers put them back one tick after load.
 
 ## Ids that must never change
 

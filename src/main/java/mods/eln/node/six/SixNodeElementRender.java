@@ -137,15 +137,26 @@ public abstract class SixNodeElementRender {
             if ((pinMask & (1 << l.toInt())) != 0) {
                 float to = (ext[l.toInt()] + 1) / 16f;
                 float from = reach == null ? to - 1 / 16f : Math.min(reach[l.toInt()] / 16f, to - 1 / 16f);
-                pinColour(getCableRender(l));
+                pinColour(l);
                 drawPinBox(l, from, to, 1.8f / 16, 1 / 16f);
             }
         GL11.glColor3f(1f, 1f, 1f);
     }
 
+    /** Is the pin toward l a field bus pin (mods.eln.bus)? It takes no six-node cable, so getCableRender can't say. */
+    protected boolean busPin(LRDU l) {
+        return false;
+    }
+
+    /** The colour of the pin toward l: violet for a bus pin, as the bus cable is drawn; else by the cable it takes. */
+    protected void pinColour(LRDU l) {
+        if (busPin(l)) GL11.glColor3f(0.42f, 0.24f, 0.55f);
+        else pinColour(getCableRender(l));
+    }
+
     /** A pin's colour by the cable it takes (AdventurAgent couldn't tell a thermal probe's pins apart): copper for
      *  thermal cable, pale for signal cable, dark grey for the power cables. */
-    static void pinColour(CableRenderDescriptor r) {
+    protected static void pinColour(CableRenderDescriptor r) {
         if (r != null && r == mods.eln.registry.ElnDeviceRegistry.copperThermalCableDescriptor.render) GL11.glColor3f(0.85f, 0.48f, 0.22f);
         else if (r != null && r == mods.eln.registry.ElnDeviceRegistry.signalCableDescriptor.render) GL11.glColor3f(0.9f, 0.9f, 0.86f);
         else GL11.glColor3f(0.35f, 0.35f, 0.38f);
@@ -153,7 +164,7 @@ public abstract class SixNodeElementRender {
 
     /** A small box (in the current colour) on the face toward edge l, from `from` to `to` off the centre (element frame: x off the face,
      *  Left/Right along z, Down/Up along y), w wide and h high. */
-    static void drawPinBox(LRDU l, float from, float to, float w, float h) {
+    protected static void drawPinBox(LRDU l, float from, float to, float w, float h) {
         float s = l == LRDU.Left || l == LRDU.Down ? -1 : 1;
         float a0 = s * from, a1 = s * to, b0 = -w / 2, b1 = w / 2;
         boolean alongZ = l == LRDU.Left || l == LRDU.Right;

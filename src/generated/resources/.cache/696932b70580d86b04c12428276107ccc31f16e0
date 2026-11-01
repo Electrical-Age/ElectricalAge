@@ -1,4 +1,4 @@
-// 26.3	2026-11-01T18:35:26.611838453	eln-global/EA models
+// 26.3	2026-11-01T19:08:50.041648537	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -177,6 +177,7 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 455bb8c075ef804a67f6c3def780a8e7e147209f assets/eln/items/blue_brush.json
 11d8e05d7d4c49afc10498780c82c071c42ab4fa assets/eln/items/boiler.json
 4e6ec02f2a448b5dc61acd4cb001db2bf89175ab assets/eln/items/brown_brush.json
+1590ef9c11774d7b50f1bdd1b9e3c57b16951db8 assets/eln/items/bus_io_module.json
 1786006f63a9cf200ed3022efa13a5e450652fa1 assets/eln/items/cable_kit_bus.json
 8b28d204138e8b3a19be00bec948932a9e853819 assets/eln/items/cable_kit_hv.json
 5e9c5666a93b581fa46fc9a7d72f0018e5a23bae assets/eln/items/cable_kit_lv.json
@@ -581,6 +582,8 @@ a156b4526875a4a67867cba5f6306a8bfde04fb7 assets/eln/models/item/blown_lead_fuse.
 0b32ee436dbf7cfb34aef91f60ec27be6269e26e assets/eln/models/item/blue_brush.json
 09c70a74e51db7dd1d394f0fd622870dbe16f1a8 assets/eln/models/item/boiler.json
 3692a38ccb89b9e11066bb03b638e63ed63d39c3 assets/eln/models/item/brown_brush.json
+6a6bc5f4771d1508f439772f0bb5221a95b9f699 assets/eln/models/item/bus_io_module.json
+2455775bc80773a47711382cd52ea8514840bac1 assets/eln/models/item/bus_io_module_3d.json
 00a907d2286048d055c501dd50e7f55581fbceb7 assets/eln/models/item/cable_kit_bus.json
 cac6a0113223ca972d0fb558559968f3bedfb59a assets/eln/models/item/cable_kit_hv.json
 0ebb4e07b328e5edfdb89eddd9f667839b2fe653 assets/eln/models/item/cable_kit_lv.json
