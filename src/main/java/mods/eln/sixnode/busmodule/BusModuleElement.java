@@ -154,6 +154,54 @@ public class BusModuleElement extends SixNodeElement {
         needPublish();
     }
 
+    /**
+     * The terminal nearest a click on the module (block-local 0..1, the face's normal ignored): each terminal's point is
+     * at its pin's root, 5 voxels from the module's centre toward its edge and PIN_OFFSETS along it toward
+     * edge.left(), as VoxelNode places edge pins. In a plain block only the middle terminals (2, 5, 8) count, as only
+     * they connect there.
+     */
+    public int terminalAt(float vx, float vy, float vz) {
+        double[] centre = {(8 + ox) / 16.0, (8 + oy) / 16.0, (8 + oz) / 16.0}, hit = {vx, vy, vz};
+        net.minecraft.core.Direction normal = side.toEnumFacing();
+        int best = -1;
+        double bestD = Double.MAX_VALUE;
+        for (int i = 0; i < TERMINALS; i++) {
+            int o = PIN_OFFSETS[i % 3];
+            if (!inVoxelBlock() && o != 0) continue;
+            var e = side.applyLRDU(edgeOf(i)).toEnumFacing();
+            var a = side.applyLRDU(edgeOf(i).left()).toEnumFacing();
+            int[] es = {e.getStepX(), e.getStepY(), e.getStepZ()}, as = {a.getStepX(), a.getStepY(), a.getStepZ()};
+            double d = 0;
+            for (int k = 0; k < 3; k++) {
+                if (k == normal.getAxis().ordinal()) continue;
+                double p = centre[k] + es[k] * 5 / 16.0 + as[k] * o / 16.0;
+                d += (p - hit[k]) * (p - hit[k]);
+            }
+            if (d < bestD) {
+                bestD = d;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * An EA brush tunes the terminal nearest the click to its colour, using paint only if that changes it, and says the
+     * terminal's channel by number and name; anything else in hand: as other devices.
+     */
+    @Override
+    public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
+        net.minecraft.world.item.ItemStack stack = player.getMainHandItem();
+        if (!(mods.eln.item.BrushDescriptor.getDescriptor(stack) instanceof mods.eln.item.BrushDescriptor brush))
+            return super.onBlockActivated(player, side, vx, vy, vz);
+        int i = terminalAt(vx, vy, vz);
+        if (i < 0) return true;
+        int c = BusChannel.fromBrush(brush.getColor(stack));
+        if (c != channels[i] && brush.use(stack, player)) setChannel(i, c);
+        Utils.sendMessage(player, tr("Terminal %1$: %2$", i + 1, channels[i] == BusChannel.UNUSED ? tr("unused") : BusChannel.label(channels[i])));
+        return true;
+    }
+
     /** Terminal i's direction: out drives its wire from the bus, in puts its wire on the bus. */
     public void setOut(int i, boolean o) {
         if (i < 0 || i >= TERMINALS) return;

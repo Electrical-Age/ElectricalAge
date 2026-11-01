@@ -18,7 +18,8 @@ import java.util.List;
 /**
  * The Bus I/O Module (mods.eln.bus): two modules on one bus carry a signal from a wire to a wire; two writers on one
  * channel, the higher wins; its nine terminals' channels and directions survive a save and load and are claimed again;
- * its screen's packet tunes a terminal, and a value that is no channel leaves it unused.
+ * its screen's packet tunes a terminal, and a value that is no channel leaves it unused; a brush tunes the terminal
+ * nearest the click.
  */
 public final class BusModuleCases {
     private BusModuleCases() {
@@ -29,6 +30,7 @@ public final class BusModuleCases {
         cases.add(new HighestWins());
         cases.add(new Saved());
         cases.add(new Tuned());
+        cases.add(new Brushed());
     }
 
     static final int MODULE = 1 + (117 << 6);
@@ -255,6 +257,62 @@ public final class BusModuleCases {
             m.sixNode.deleteSlot(null, m.slot);
             BusNet.refresh();
             c.check("bus module tuned: broken, its port is off the bus", m.port.bus() == null && other.bus() == null, m.port.bus() + " " + other.bus());
+        }
+    }
+
+    /**
+     * EA brushes clicked on a module (floor, bus edge east) tune the terminal nearest the click: a Red Brush near the
+     * back edge's middle tunes terminal 5 to 14 red (EA's brushes number the dyes the other way round), a Light Blue
+     * Brush where terminal 4 meets its cable tunes it to 3 light_blue. Paint is used only for a change; a dry brush
+     * tunes nothing; a brush click opens no screen.
+     */
+    static final class Brushed implements TestCase {
+        BusModuleElement m;
+
+        public String id() {
+            return "bus_module_brushed";
+        }
+
+        public void build(TestContext c) {
+            m = module(c, c.at(2, 1, 1), Direction.XP);
+        }
+
+        static int life(net.minecraft.world.item.ItemStack s) {
+            var t = mods.eln.generic.ItemNbt.get(s);
+            return t == null ? -1 : t.getIntOr("life", -1);
+        }
+
+        public void measure(TestContext c) {
+            // its own fake player: the shared one's hand is other tests' too
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.get(c.level(),
+                new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes("eln_bus_brush".getBytes()), "eln_bus_brush"));
+            var hand = net.minecraft.world.InteractionHand.MAIN_HAND;
+            try {
+                var red = mods.eln.Eln.findItemStack("Red Brush", 1);
+                player.setItemInHand(hand, red);
+                // the back edge is west (x 0); its middle terminal's pin root is 5 voxels west of the centre
+                boolean used = m.onBlockActivated(player, m.side, 0.15f, 0.05f, 0.5f);
+                c.check("bus module brushed: a click with a brush is taken", used, "");
+                c.check("bus module brushed: a Red Brush tunes terminal 5 to 14 red", m.channel(BACK_MIDDLE) == RED, "" + m.channel(BACK_MIDDLE));
+                int after = life(player.getMainHandItem());
+                m.onBlockActivated(player, m.side, 0.15f, 0.05f, 0.5f);
+                c.check("bus module brushed: the same colour again uses no paint", life(player.getMainHandItem()) == after, after + " -> " + life(player.getMainHandItem()));
+                // terminal 4: where it meets a cable on the west edge (along), a little in from the edge
+                int z = along(m, 3);
+                player.setItemInHand(hand, mods.eln.Eln.findItemStack("Light Blue Brush", 1));
+                m.onBlockActivated(player, m.side, 0.12f, 0.05f, z / 16f);
+                c.check("bus module brushed: a Light Blue Brush at terminal 4 tunes it to 3 light_blue", m.channel(3) == LIGHT_BLUE && m.channel(BACK_MIDDLE) == RED,
+                    m.channel(3) + " " + m.channel(BACK_MIDDLE) + " at z " + z);
+                c.check("bus module brushed: claimed", m.port.claims() == (1 << RED | 1 << LIGHT_BLUE), "" + m.port.claims());
+                // a dry brush tunes nothing
+                var dry = mods.eln.Eln.findItemStack("Black Brush", 1);
+                ((mods.eln.item.BrushDescriptor) mods.eln.item.BrushDescriptor.getDescriptor(dry)).setLife(dry, 0);
+                player.setItemInHand(hand, dry);
+                m.onBlockActivated(player, m.side, 0.15f, 0.05f, 0.5f);
+                c.check("bus module brushed: a dry brush tunes nothing", m.channel(BACK_MIDDLE) == RED, "" + m.channel(BACK_MIDDLE));
+            } finally {
+                player.setItemInHand(hand, net.minecraft.world.item.ItemStack.EMPTY);
+            }
         }
     }
 }

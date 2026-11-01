@@ -393,8 +393,10 @@ on 1.7.10) onto 26.x.
   left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels
   apart (`edgePins`). Each terminal: unused or a colour channel, and in (its wire's level onto the bus every tick)
   or out (the bus drives its wire, a gate output). In its screen a button per terminal steps through unused, 0 white
-  .. 15 black (shift-click steps back). In a plain six-node block there is no bus cable, and each signal edge
-  connects only its middle terminal (2, 5, 8). NBT `t<n>bus`, `t<n>out`. Recipe: a signal processor's with Field
+  .. 15 black (shift-click steps back). An EA brush used on the module tunes the terminal nearest the click (each
+  terminal's point is its pin's root, `terminalAt`) to the brush's colour, using paint only for a change, and says
+  the terminal's channel by number and name. In a plain six-node block there is no bus cable, and each signal edge
+  connects only its middle terminal (2, 5, 8), and only those are tuned by a brush. NBT `t<n>bus`, `t<n>out`. Recipe: a signal processor's with Field
   Bus Cable on top. GameTests `bus_module_*`.
 - Signal processor on the field bus (Baughn: the bus is to make signal logic denser). In a voxel block's face slot its
   output edge has two terminals: the output in the middle (as before) and a bus pin 4 voxels toward `front.left()`

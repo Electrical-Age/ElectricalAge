@@ -27,7 +27,7 @@ public class BusModuleScreen extends ElnScreen {
             final int i = t;
             text("l" + i, () -> String.valueOf(i + 1));
             busChannel("s" + i, "c" + i, () -> render.channels[i], c -> render.sendChannel(i, c),
-                tr("The bus channel of terminal %1$.", i + 1));
+                tr("The bus channel of terminal %1$. A brush used on the module tunes the terminal nearest the click.", i + 1));
             button("d" + i, () -> render.out[i] ? tr("Out") : tr("In"), () -> render.sendOut(i, !render.out[i]),
                 tr("In: the wire's level goes onto the bus."), tr("Out: the bus drives the wire."));
         }
