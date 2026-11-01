@@ -21,8 +21,10 @@ public class PowerInductorSixRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
+        drawPins();   // (off centre)
         front.left().glRotateOnX();
-        descriptor.draw();
+        if (slot >= 6) descriptor.drawShort();
+        else descriptor.draw();
     }
 
 }

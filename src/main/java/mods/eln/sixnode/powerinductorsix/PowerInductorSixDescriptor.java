@@ -106,4 +106,34 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
+
+    /** Small: placed anywhere on a face of a voxel block, in line on a cable, its leads shortened (Baughn, batch 3). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(Direction side, LRDU front) {
+        LRDU turn = modelTurn(side, front);
+        if (turn != null) turn.glRotateOnX();
+        drawShort();
+    }
+
+    @Override
+    public LRDU modelTurn(Direction side, LRDU front) {
+        return front.left();
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return inlineBounds(2, new Obj3DPart[]{InductorCore}, Base, InductorCore, InductorBaseExtention);
+    }
+
+    /** Off centre: the core, its base and leads shortened to its pins. */
+    void drawShort() {
+        drawStretched(2, SHORT_LEADS, Base, InductorCables);
+        if (null != InductorBaseExtention) InductorBaseExtention.draw();
+        if (null != InductorCore) InductorCore.draw();
+    }
 }

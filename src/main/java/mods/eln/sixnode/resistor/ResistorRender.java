@@ -39,9 +39,11 @@ public class ResistorRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
+        drawPins();   // (off centre)
         GL11.glRotatef(90, 1, 0, 0);
         front.glRotateOnX();
-        descriptor.draw(wiperPos);
+        if (slot >= 6) descriptor.drawShort(wiperPos);
+        else descriptor.draw(wiperPos);
         // near its 130 C limit it glows dull red to orange, a warning (Incandescence.warningCelsius)
         mods.eln.misc.Incandescence.drawGlow(glowCelsius, descriptor::drawCore);
     }

@@ -40,6 +40,7 @@ public final class VoxelDeviceCases {
         cases.add(new MetersChargersAlarmsCase());
         cases.add(new InLineChainCase());
         cases.add(new WrenchInLineCase());
+        cases.add(new PassivesInLineCase());
     }
 
     static int id(String name) {
@@ -143,7 +144,8 @@ public final class VoxelDeviceCases {
             "Signal Relay", "Electrical Probe", "Voltage Probe", "Thermal Probe", "Temperature Probe", "Wireless Signal Receiver",
             "Wireless Signal Transmitter", "Wireless Signal Repeater", "Electrical Timer", "LED vuMeter", "Signal Switch with LED",
             "Ground Cable", "Hub", "Energy Meter", "Advanced Energy Meter", "Weak 50V Battery Charger", "50V Battery Charger",
-            "200V Battery Charger", "Nuclear Alarm", "Standard Alarm"};
+            "200V Battery Charger", "Nuclear Alarm", "Standard Alarm", "10A Diode", "25A Diode", "Signal Diode", "Power Capacitor",
+            "Power Inductor", "Power Resistor", "Rheostat", "Thermistor", "Electrical Fuse Holder"};
         static final String[] WALL_DEVICES = {"50V Power Socket", "200V Power Socket", "Electrical Anemometer Sensor"};
         String all = "", middle = "", lopsided = "", relays = "", stayed = "";
         boolean anywhereOk, middleOk, lopsidedOk, relaysOk, stayedOk;
@@ -1275,6 +1277,100 @@ public final class VoxelDeviceCases {
             c.check("wrench in line: it counts with the other sign", e1 * e2 < 0 && Math.abs(e2) > 10, fmt("%.1f J, %.1f J", e1, e2));
             String[] f = freeTurn.split(" -> ");
             c.check("wrench: a quarter turn, clockwise", f.length == 2 && LRDU.valueOf(f[0]).getNextClockwise() == LRDU.valueOf(f[1]), freeTurn);
+        }
+    }
+
+    /**
+     * Batch 3 (Baughn: "Inline parts: Yes, let's"): the in-line passives clicked onto a 50 V LV run, each in its own
+     * block between the source and a 100 ohm resistor to ground. A Power Resistor and a Thermistor add their resistance;
+     * of two 10A Diodes, the second wrenched round, one conducts and the other blocks; a Power Capacitor blocks the
+     * steady current; a Power Inductor with copper and a core passes it; a fuse holder with an LV fuse passes it, one
+     * without blocks; a Rheostat goes in line with its signal pin free.
+     */
+    static final class PassivesInLineCase implements TestCase {
+        final java.util.Map<String, SixNodeElement> dev = new java.util.LinkedHashMap<>();
+        final java.util.Map<String, mods.eln.sixnode.resistor.ResistorElement> load = new java.util.HashMap<>();
+        String placed = "";
+
+        public String name() {
+            return "in-line passives put on a cable";
+        }
+
+        public int width() {
+            return 24;
+        }
+
+        public int height() {
+            return 8;
+        }
+
+        public int depth() {
+            return 24;
+        }
+
+        SixNodeElement row(TestContext c, String key, String name, int i) {
+            int x0 = i / 5 * 6, z = 1 + i % 5 * 3;
+            for (int x = x0; x < x0 + 5; x++) c.floor(c.at(x, 0, z));
+            source(c, Wp9aCases.SOURCE, c.at(x0, 1, z), 50);
+            BlockPos p = c.at(x0 + 1, 1, z);
+            var v = block(c, p);
+            CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            String err = v.placeAnywhere(desc(name).newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            var e = TapCase.placed(v);
+            placed += key + ": " + err + (e == null ? "" : " pins " + v.pinTips(e.slot).size()) + "; ";
+            load.put(key, resistor(c, c.at(x0 + 2, 1, z), Direction.XN, 48));
+            c.placeSix(Wp9aCases.GROUND, c.at(x0 + 3, 1, z));
+            if (e != null) dev.put(key, e);
+            return e;
+        }
+
+        static void core(SixNodeElement e, int n) {
+            e.getInventory().setItem(0, Wp9aCases.coal(n));
+            e.getInventory().setChanged();
+        }
+
+        public void build(TestContext c) {
+            var r = row(c, "resistor", "Power Resistor", 0);
+            if (r != null) core(r, 36);
+            var t = row(c, "thermistor", "Thermistor", 1);
+            if (t != null) core(t, 36);
+            row(c, "diode a", "10A Diode", 2);
+            var b = row(c, "diode b", "10A Diode", 3);
+            if (b != null) WrenchInLineCase.wrench(c, b);
+            row(c, "capacitor", "Power Capacitor", 4);
+            var l = row(c, "inductor", "Power Inductor", 5);
+            if (l != null) {
+                l.getInventory().setItem(0, Wp10aCases.shared(Wp10aCases.COPPER_CABLE, mods.eln.item.CopperCableDescriptor.class, 1));
+                l.getInventory().setItem(1, Wp10aCases.shared(Wp10aCases.CORE_OPTIMAL, mods.eln.item.FerromagneticCoreDescriptor.class, 1));
+                l.getInventory().setChanged();
+            }
+            var f = row(c, "fuse", "Electrical Fuse Holder", 6);
+            if (f != null) Wp9aCases.use(c, f, mods.eln.Eln.sharedItem.getDescriptor(Wp9aCases.FUSE_LV).newItemStack());
+            row(c, "no fuse", "Electrical Fuse Holder", 7);
+            row(c, "rheostat", "Rheostat", 8);
+        }
+
+        double i(String k) {
+            return Math.abs(Wp9aCases.current(load.get(k)));
+        }
+
+        public void measure(TestContext c) {
+            c.check("passives: each put in line, both contacts on the run", dev.size() == 9 && dev.values().stream().allMatch(e ->
+                e.slotMask.get(e.side.getLRDUGoingTo(Direction.XN)) && e.slotMask.get(e.side.getLRDUGoingTo(Direction.XP))), placed);
+            if (dev.size() != 9) return;
+            for (String k : new String[]{"resistor", "thermistor"}) {
+                double rd = ((mods.eln.sixnode.resistor.ResistorElement) dev.get(k)).nominalRs, rl = load.get(k).nominalRs;
+                Wp9cCases.within(c, fmt("passives: a %s of %.1f ohm in line: 50 V over it and 100 ohm [A]", k, rd), i(k), 50 / (rl + rd), 0.03 * 50 / (rl + rd));
+            }
+            double a = i("diode a"), b = i("diode b");
+            c.check("passives: of two diodes, one turned round, one conducts and one blocks",
+                Math.max(a, b) > 0.45 && Math.min(a, b) < 1e-3, fmt("%.4f A, %.4f A", a, b));
+            c.check("passives: a capacitor in line blocks the steady current", i("capacitor") < 0.05, fmt("%.4f A", i("capacitor")));
+            Wp9cCases.within(c, "passives: an inductor with copper and a core passes it [A]", i("inductor"), 0.5, 0.03);
+            Wp9cCases.within(c, "passives: a fuse holder with an LV fuse passes it [A]", i("fuse"), 0.5, 0.03);
+            c.check("passives: one without a fuse blocks it", i("no fuse") < 1e-3, fmt("%.4f A", i("no fuse")));
+            var rh = dev.get("rheostat");
+            c.check("passives: a rheostat in line has its signal pin too", rh.getConnectionMask(rh.front) != 0 && placed.contains("rheostat: null pins 3"), placed);
         }
     }
 }

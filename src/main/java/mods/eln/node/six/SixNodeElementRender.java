@@ -120,21 +120,27 @@ public abstract class SixNodeElementRender {
             }
         }
 
-        if (slot >= 6 && !sixNodeDescriptor.drawsOwnPins()) {   // (off centre: a pin past its body on every connecting edge)
-            // from the model's edge (a lopsided model: SixNodeDescriptor.bodyBounds) to one voxel past its body
-            int[] ext = sixNodeDescriptor.bodyExtents(side, front);
-            float[] reach = sixNodeDescriptor.modelReach(side, front);
-            for (LRDU l : LRDU.values())
-                if ((pinMask & (1 << l.toInt())) != 0) {
-                    float to = (ext[l.toInt()] + 1) / 16f;
-                    float from = reach == null ? to - 1 / 16f : Math.min(reach[l.toInt()] / 16f, to - 1 / 16f);
-                    pinColour(getCableRender(l));
-                    drawPinBox(l, from, to, 1.8f / 16, 1 / 16f);
-                }
-        }
+        if (slot >= 6) drawPins();
 
         GL11.glColor3f(1f, 1f, 1f);
         // Minecraft.getMinecraft().profiler.endSection();
+    }
+
+    /** Off centre: a pin past its body on every connecting edge, in the element frame (before the render's own turn).
+     *  draw() does it; a render that doesn't call super.draw() calls this (the in-line parts). */
+    protected void drawPins() {
+        if (slot < 6 || sixNodeDescriptor.drawsOwnPins()) return;
+        // from the model's edge (a lopsided model: SixNodeDescriptor.bodyBounds) to one voxel past its body
+        int[] ext = sixNodeDescriptor.bodyExtents(side, front);
+        float[] reach = sixNodeDescriptor.modelReach(side, front);
+        for (LRDU l : LRDU.values())
+            if ((pinMask & (1 << l.toInt())) != 0) {
+                float to = (ext[l.toInt()] + 1) / 16f;
+                float from = reach == null ? to - 1 / 16f : Math.min(reach[l.toInt()] / 16f, to - 1 / 16f);
+                pinColour(getCableRender(l));
+                drawPinBox(l, from, to, 1.8f / 16, 1 / 16f);
+            }
+        GL11.glColor3f(1f, 1f, 1f);
     }
 
     /** A pin's colour by the cable it takes (AdventurAgent couldn't tell a thermal probe's pins apart): copper for

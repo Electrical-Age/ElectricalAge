@@ -202,6 +202,32 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return new float[]{(float) b.min.y * s, (float) b.max.y * s, (float) b.min.z * s, (float) b.max.z * s};
     }
 
+    /**
+     * An in-line part placed off centre (Baughn, batch 3: diodes, capacitor, inductor, resistors, fuse holder): its model's
+     * leads run edge to edge for the face slot; off centre they are drawn shortened to reach just its pins, 6 px from its
+     * centre, a stretch of 6/8 along the leads.
+     */
+    protected static final float SHORT_LEADS = 6f / 8f;
+
+    /** Bounds for bodyBounds of an in-line part: across its leads from all its parts, along them (model axis leadAxis:
+     *  1 y, 2 z) from its core only. */
+    protected float[] inlineBounds(int leadAxis, Obj3D.Obj3DPart[] core, Obj3D.Obj3DPart... all) {
+        float[] b = boundsOf(all), c = boundsOf(core);
+        if (b == null || c == null) return null;
+        int i = leadAxis == 1 ? 0 : 2;
+        b[i] = c[i];
+        b[i + 1] = c[i + 1];
+        return b;
+    }
+
+    /** Client: these parts drawn stretched by k along model axis `axis` (1 y, 2 z) about the centre: shortened leads. */
+    protected static void drawStretched(int axis, float k, Obj3D.Obj3DPart... parts) {
+        mods.eln.gl.GL11.glPushMatrix();
+        mods.eln.gl.GL11.glScalef(1f, axis == 1 ? k : 1f, axis == 2 ? k : 1f);
+        for (var p : parts) if (p != null) p.draw();
+        mods.eln.gl.GL11.glPopMatrix();
+    }
+
     /** May it go on side, by its own rule (canBePlacedOnSide, which tells the player), without telling anyone? For a
      *  device placed anywhere, whose preview asks every tick. */
     public boolean allowedOnSide(Direction side) {

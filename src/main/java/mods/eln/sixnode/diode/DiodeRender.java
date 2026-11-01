@@ -24,8 +24,10 @@ public class DiodeRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
+        drawPins();   // (off centre)
         front.glRotateOnX();
-        descriptor.draw();
+        if (slot >= 6) descriptor.drawShort();
+        else descriptor.draw();
     }
 
     @Override

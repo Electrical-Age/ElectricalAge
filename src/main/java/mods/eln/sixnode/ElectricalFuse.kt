@@ -56,8 +56,27 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
     }
 
 
-    fun draw(installedFuse: ElectricalFuseDescriptor?) {
-        case?.draw()
+    /** Small: placed anywhere on a face of a voxel block, in line on a cable, its holder shortened (Baughn, batch 3). */
+    override fun placeAnywhere() = true
+
+    override fun modelTurn(side: mods.eln.misc.Direction, front: mods.eln.misc.LRDU): mods.eln.misc.LRDU = front.right()
+
+    /** Across: the holder; along it (y): 4 px each way, the holder drawn shortened to its pins (SHORT_LEADS). */
+    override fun bodyBounds(): FloatArray? = boundsOf(case)?.also {
+        it[0] = -4f
+        it[1] = 4f
+    }
+
+    override fun drawPlaced(side: mods.eln.misc.Direction, front: mods.eln.misc.LRDU) {
+        modelTurn(side, front).glRotateOnX()
+        draw(null, true)
+    }
+
+    fun draw(installedFuse: ElectricalFuseDescriptor?) = draw(installedFuse, false)
+
+    /** short: off centre, the holder shortened to its pins (the fuse in it as it is). */
+    fun draw(installedFuse: ElectricalFuseDescriptor?, short: Boolean) {
+        if (short) drawStretched(1, SHORT_LEADS, case) else case?.draw()
         if (installedFuse != null) {
             mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.voltageLevelColorOf(installedFuse.cableDescriptor).setGLColor()
             fuseType?.draw()
@@ -235,8 +254,9 @@ class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, des
     private var installedFuse: ElectricalFuseDescriptor? = null
 
     override fun draw() {
+        drawPins()   // (off centre)
         front.right().glRotateOnX()
-        descriptor.draw(installedFuse)
+        descriptor.draw(installedFuse, slot >= 6)
     }
 
     override fun publishUnserialize(stream: DataInputStream?) {

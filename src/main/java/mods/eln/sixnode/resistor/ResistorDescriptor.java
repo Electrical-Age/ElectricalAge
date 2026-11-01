@@ -117,4 +117,40 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     public LRDU getFrontFromPlace(Direction side, Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
+
+    /** Small: placed anywhere on a face of a voxel block, in line on a cable, its leads shortened (Baughn, batch 3). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(Direction side, LRDU front) {
+        LRDU turn = modelTurn(side, front);
+        if (turn != null) turn.glRotateOnX();
+        drawShort(0.5f);
+    }
+
+    @Override
+    public LRDU modelTurn(Direction side, LRDU front) {
+        return front.getNextClockwise();   // (its render turns it a quarter more)
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return inlineBounds(2, new Obj3D.Obj3DPart[]{ResistorCore}, Base, ResistorCore, ResistorBaseExtension);
+    }
+
+    /** Off centre: the core, its base and leads shortened to its pins; a rheostat's track and wiper. */
+    void drawShort(float wiperPos) {
+        drawStretched(2, SHORT_LEADS, Base, Cables);
+        if (null != ResistorBaseExtension) ResistorBaseExtension.draw();
+        if (null != ResistorCore) ResistorCore.draw();
+        if (isRheostat) {
+            final float wiperSpread = 0.238f;
+            ResistorTrack.draw();
+            GL11.glTranslatef(0, 0, (wiperPos - 0.5f) * wiperSpread * 2);
+            ResistorWiper.draw();
+        }
+    }
 }

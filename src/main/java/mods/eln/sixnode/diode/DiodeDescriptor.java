@@ -118,4 +118,28 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         if (diodeCables != null) diodeCables.draw();
         if (diodeCore != null) diodeCore.draw();
     }
+
+    /** Small: placed anywhere on a face of a voxel block, in line on a cable, its leads shortened (Baughn, batch 3). */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
+        mods.eln.misc.LRDU turn = modelTurn(side, front);
+        if (turn != null) turn.glRotateOnX();
+        drawShort();
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        return inlineBounds(2, new Obj3DPart[]{diodeCore}, base, diodeCore);
+    }
+
+    /** Off centre: the core, its base and leads shortened to its pins. */
+    void drawShort() {
+        drawStretched(2, SHORT_LEADS, base, diodeCables);
+        if (diodeCore != null) diodeCore.draw();
+    }
 }

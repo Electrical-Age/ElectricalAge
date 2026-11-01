@@ -88,7 +88,12 @@ transparent neighbour).
   scale), the four probes, the wireless receiver, transmitter and repeater, the Electrical Timer, the LED vuMeter, the
   Signal Switch with LED, the power sockets, the Ground Cable, the Hub and the anemometer; the Energy Meter and Advanced Energy Meter (in line on a power run: its sign follows
   which way it faces), the Weak 50V, 50V and 200V Battery Chargers (four power pins, one load) and the Nuclear and
-  Standard Alarms. Not: the redstone converters
+  Standard Alarms; the in-line passives (Baughn, batch 3: the 10A, 25A and Signal Diodes, Power Capacitor, Power
+  Inductor, Power Resistor, Rheostat, Thermistor and Electrical Fuse Holder). Their models run their base and leads edge
+  to edge for the face slot, which is kept as it was; off centre the same model is drawn with the base and leads
+  stretched by `SixNodeDescriptor.SHORT_LEADS` (6/8) along them so they end at the pins, 6 voxels from the centre, and
+  the body is the core (`inlineBounds`). Their renders don't call `super.draw()`, so they call `drawPins()` themselves.
+  Not: the redstone converters
   (Baughn), the analog vuMeter and the power switches (they take the face). A thermal probe's pins join Copper Thermal
   Cable (thermal loads both ways); a Temperature Probe's back pin and a Hub's pins change with their slots after
   placement: the links follow the new kind (a mismatched cable simply isn't joined), but the placement rules are not
