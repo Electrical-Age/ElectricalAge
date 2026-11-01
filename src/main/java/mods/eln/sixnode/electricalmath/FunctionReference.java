@@ -19,7 +19,7 @@ public final class FunctionReference {
 
     public static final List<String> CATEGORIES = List.of("Arithmetic", "Comparison and logic", "Trigonometry", "Stateful", "Utility", "Field bus");
 
-    public static final List<Entry> ENTRIES = List.of(
+    public static final List<Entry> ENTRIES = withChannels(List.of(
         new Entry("Arithmetic", "a + b   a - b", "Adds or subtracts.", "A + 0.2", " + "),
         new Entry("Arithmetic", "a * b   a / b", "Multiplies or divides.", "A * 0.5", " * "),
         new Entry("Arithmetic", "-a", "Negates.", "1 - A", "-"),
@@ -52,15 +52,18 @@ public final class FunctionReference {
         new Entry("Utility", "name = expression", "Names a part, computed once and paid once; the last line is the output.", "x = A * 0.5", "x = "),
         new Entry("Utility", "# text", "A comment.", "# my notes", "# "),
         new Entry("Field bus", "bus.colour", "Reads a channel of the field bus on its pin beside the output: 0 to 1 for 0 to 50 V, as the tick began. "
-            + "The 16 channels are the dye colours, numbered 0 to 15: " + numbered() + ".", "bus.light_blue < 0.3", "bus."),
+            + "The 16 channels are the dye colours, numbered 0 to 15, each listed below.", "bus.light_blue < 0.3", "bus."),
         new Entry("Field bus", "bus.colour = expression", "Writes a channel, once a tick; with several writers the highest wins. It may be the last line: then the output wire gives 0 V.",
-            "bus.red = rs(A, B)", "bus.red = "));
+            "bus.red = rs(A, B)", "bus.red = ")));
 
-    /** The bus channels, "0 white, 1 orange, ...". */
-    static String numbered() {
-        StringBuilder b = new StringBuilder();
-        for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) b.append(c == 0 ? "" : ", ").append(mods.eln.bus.BusChannel.label(c));
-        return b.toString();
+    /** The entries, then one per bus channel, so the 16 read as a list (Baughn: not one paragraph). */
+    static List<Entry> withChannels(List<Entry> base) {
+        List<Entry> all = new java.util.ArrayList<>(base);
+        for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) {
+            String n = "bus." + mods.eln.bus.BusChannel.name(c);
+            all.add(new Entry("Field bus", n, "Channel " + c + ", " + mods.eln.bus.BusChannel.name(c).replace('_', ' ') + ".", n, n));
+        }
+        return List.copyOf(all);
     }
 
     /** The entries about a name: a function's (every form of it), or pi or daytime. */

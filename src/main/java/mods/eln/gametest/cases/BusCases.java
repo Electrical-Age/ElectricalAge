@@ -57,7 +57,7 @@ public final class BusCases {
             c.check("bus: no circuit links between bus cables", a.nodeConnectionList.isEmpty() && b.nodeConnectionList.isEmpty(),
                 a.nodeConnectionList.size() + " " + b.nodeConnectionList.size());
             var w = b.getWaila(true);
-            c.check("bus: Jade names the cable", w.values().stream().anyMatch(s -> s.startsWith("Field Bus Cable")), w.toString());
+            c.check("bus: Jade shows the bus", w.containsKey("Bus") && w.values().stream().noneMatch(s -> s.startsWith("Field Bus Cable")), w.toString());
             // a device's port on it claiming 3 light_blue: Jade lists that channel, by number and name, and no other
             BusPort dev = new BusPort();
             dev.claim(1 << 3);

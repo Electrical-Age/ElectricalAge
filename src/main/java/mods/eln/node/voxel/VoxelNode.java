@@ -1853,12 +1853,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 if (k.port != null) {   // the field bus: its channels in use, by number and name (Baughn: colourblind)
                     var b = k.port.bus();
                     if (b == null) {
-                        out.put(key, k.name() + ": no devices");
+                        out.put("Bus", "no devices");   // (Jade's title already says Field Bus Cable, Baughn)
                         continue;
                     }
                     int used = 0;
                     for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) if (b.inUse(c)) used++;
-                    out.put(key, k.name() + ": " + used + (used == 1 ? " channel in use, " : " channels in use, ") + b.portCount() + " ports");
+                    out.put("Bus", used + (used == 1 ? " channel in use, " : " channels in use, ") + b.portCount() + " ports");
                     for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) {
                         if (!b.inUse(c)) continue;
                         int w = b.writers(c);
