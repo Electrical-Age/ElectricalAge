@@ -131,6 +131,32 @@ public final class ReservoirCases {
             sweep(ctx, r);
             ctx.check("water: the dam gone, the cell is water again", r.capacity() == cap && level.getBlockState(d).is(Blocks.WATER),
                 r.capacity() + ", " + level.getBlockState(d));
+
+            // a sealed pocket: walled in and cleared, it stays dry (a dam) through the lake falling and rising; a hole
+            // in the wall lets the lake back in
+            BlockPos pk = ctx.at(4, 2, 1);
+            BlockPos[] walls = {pk.north(), pk.south(), pk.east(), pk.west(), pk.above(), pk.below()};
+            for (BlockPos w : walls) level.setBlock(w, Blocks.COBBLESTONE.defaultBlockState(), 3);
+            level.setBlock(pk, Blocks.COBBLESTONE.defaultBlockState(), 3);
+            sweep(ctx, r);
+            level.setBlock(pk, Blocks.AIR.defaultBlockState(), 3);
+            sweep(ctx, r);
+            sweep(ctx, r);
+            ctx.check("water: a sealed pocket cleared stays dry", level.getBlockState(pk).isAir(), level.getBlockState(pk).toString());
+            ctx.check("water: the dry pocket is out of the area", r.capacity() == cap - 7000, r.capacity() + " vs " + cap);
+            Reservoirs.setAmount(level, r, 500);
+            sweep(ctx, r);
+            Reservoirs.setAmount(level, r, r.capacity());
+            sweep(ctx, r);
+            ctx.check("water: the lake fell and rose, the pocket is still dry", level.getBlockState(pk).isAir(), level.getBlockState(pk).toString());
+            level.setBlock(walls[0], Blocks.AIR.defaultBlockState(), 3);
+            sweep(ctx, r);
+            sweep(ctx, r);
+            ctx.check("water: a hole in the wall, the pocket fills", level.getBlockState(pk).is(Blocks.WATER)
+                && level.getBlockState(walls[0]).is(Blocks.WATER), level.getBlockState(pk) + ", " + level.getBlockState(walls[0]));
+            for (BlockPos w : walls) level.setBlock(w, Blocks.AIR.defaultBlockState(), 3);
+            sweep(ctx, r);
+            ctx.check("water: the walls gone, the full area again", r.capacity() == cap, r.capacity() + " vs " + cap);
             ReservoirData.get(level).remove(r);
         }
     }

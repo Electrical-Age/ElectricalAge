@@ -27,7 +27,8 @@ import java.util.function.BiFunction;
  * surface moves, its loaded chunks are queued and swept a few per tick; a chunk that loads is swept too, and loaded
  * chunks every 10 s. The first sweep of a chunk asks the basin for its cells and corrects the area table by the
  * difference from the estimate. A cell holding something else is a dam: it leaves the area (the amount stays) and
- * fills again when the block goes (Baughn: for oil too).
+ * fills again when the block goes (Baughn: for oil too), if water (or oil) is beside it. A cell cleared out of a sealed
+ * pocket stays dry and counts as a dam too, until the lake gets in.
  * <p>
  * Nothing here imports the rest of EA: kinds and basins are registered (oil: mods.eln.oil.Oil; water: this package,
  * ReservoirWater; Watershed's lakes: its own basin), so the package can become a small library later (Baughn).
@@ -227,6 +228,22 @@ public final class Reservoirs {
         return c;
     }
 
+    /** Does a neighbour of p hold the reservoir's fluid (a full or partial cell, flowing, waterlogged)? Neighbours in
+     *  chunks that aren't loaded count as dry. */
+    static boolean wet(ServerLevel level, LevelChunk chunk, BlockPos p, ReservoirKind kind) {
+        var fluid = kind.cell(8).getFluidState().getType();
+        BlockPos.MutableBlockPos n = new BlockPos.MutableBlockPos();
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+            n.setWithOffset(p, d);
+            LevelChunk nc = (n.getX() >> 4) == chunk.getPos().x() && (n.getZ() >> 4) == chunk.getPos().z() ? chunk
+                : level.getChunkSource().getChunkNow(n.getX() >> 4, n.getZ() >> 4);
+            if (nc == null) continue;
+            var f = nc.getBlockState(n).getFluidState();
+            if (!f.isEmpty() && fluid.isSame(f.getType())) return true;
+        }
+        return false;
+    }
+
     /** Bring one chunk of a reservoir in line with its record (public for tests). */
     public static void sweep(ServerLevel level, Reservoir r, int cx, int cz) {
         LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
@@ -263,6 +280,19 @@ public final class Reservoirs {
                     // water above where this chunk's surface was: poured in (a bucket), it joins the record
                     r.amount = Math.min(r.capacity(), r.amount + 1000);
                     reshape = true;
+                }
+                if (!kind.ours(cur) && kind.fillable(cur)) {
+                    // cleared inside the lake: refills only from water beside it, so a sealed pocket stays dry and
+                    // counts as a dam until a hole lets the lake in (a player could not clear a cofferdam)
+                    boolean wasWet = c.shown != Integer.MIN_VALUE && y * 8 < c.shown && lvl > 0;
+                    if ((dam || wasWet) && !wet(level, chunk, p, kind)) {
+                        if (!dam) {
+                            c.dams.add(key);
+                            r.addArea(y, -1);
+                            reshape = true;
+                        }
+                        continue;
+                    }
                 }
                 if (kind.ours(cur) || kind.fillable(cur)) {
                     want = lvl == 0 ? (kind.ours(cur) ? air : cur) : kind.matches(cur, lvl) ? cur : kind.cell(lvl);
