@@ -378,6 +378,14 @@ on 1.7.10) onto 26.x.
   three pins on its back edge at 4, 8 and 12 voxels (`edgePins`), coloured terminals; in a plain block the back, left
   and right edges. Its screen has the graph modes and per-channel scale and unit tabs. GameTest
   `wp9c three-channel data logger` (three cables, three sources, each channel its own).
+- Bus I/O Module (the field bus, `mods.eln.bus`; Baughn: 9 terminals), id `1 + (117 << 6)` beside the Modbus RTU,
+  whose model it wears without the door (a proper model later). On a face, its front edge takes Field Bus Cable; its
+  left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels
+  apart (`edgePins`). Each terminal: a channel name (empty: unused) and in (its wire's level onto the bus every tick)
+  or out (the bus drives its wire, a gate output). Its screen sets them; names are lower-cased, and a bad name or a
+  65th channel on its bus is refused there. In a plain six-node block there is no bus cable, and each signal edge
+  connects only its middle terminal (2, 5, 8). NBT `t<n>name`, `t<n>out`. Recipe: a signal processor's with Field
+  Bus Cable on top. GameTests `bus_module_*`.
 - Signal processor logger and defaults (Baughn 2026-10-30, board #45): a program may give an input a default,
   `A = 0.5` on a definition line (a constant, once per input, free), read while no cable is connected to it. The
   processor carries a four-channel logger (A, B, C as the program reads them, and the output) in its screen's left

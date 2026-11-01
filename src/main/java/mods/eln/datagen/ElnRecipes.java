@@ -2259,6 +2259,16 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', stack(Items.IRON_INGOT),
             'c', findItemStack("Signal Cable"),
             'C', dictCheapChip);
+
+        // the field bus's bridge to signal wires: a signal processor's parts, the bus cable on top
+        addRecipe(findItemStack("Bus I/O Module", 1),
+            "IbI",
+            "cCc",
+            "IcI",
+            'I', stack(Items.IRON_INGOT),
+            'b', stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()),
+            'c', findItemStack("Signal Cable"),
+            'C', dictCheapChip);
     }
 
     public static void recipeElectricalRedstone() {

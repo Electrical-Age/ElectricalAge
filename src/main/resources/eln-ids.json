@@ -1415,6 +1415,12 @@
   "kind": "six_node",
   "name": "modbus_rtu"
  },
+ "eln:six_node@7489": {
+  "descriptor": "BusModuleDescriptor",
+  "display": "Bus I/O Module",
+  "kind": "six_node",
+  "name": "bus_io_module"
+ },
  "eln:six_node@7492": {
   "descriptor": "ElectricalWatchDescriptor",
   "display": "Analog watch",

@@ -63,7 +63,7 @@ public class Wp9cContent implements ElnContent {
         registerElectricalManagerEnergyMeter(98);
         registerElectricalGate(109);
         registerTreeResinCollector(116);
-        registerSixNodeMisc(117); // modbus rtu, tutorial sign
+        registerSixNodeMisc(117); // modbus rtu, bus i/o module, tutorial sign
         registerLogicalGates(118);
         registerAnalogChips(124);
         registerWirelessAnalyser(14); // shared item
@@ -109,6 +109,12 @@ public class Wp9cContent implements ElnContent {
             } else {
                 sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
             }
+        }
+        {
+            // the field bus's bridge to signal wires (mods.eln.bus): beside the Modbus RTU, whose model it wears
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Bus I/O Module");
+            sixNodeItem.addDescriptor(subId + (id << 6), new mods.eln.sixnode.busmodule.BusModuleDescriptor(name, obj.getObj("RTU")));
         }
         {
             subId = 8;

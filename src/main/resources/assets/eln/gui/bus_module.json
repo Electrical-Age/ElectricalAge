@@ -1,0 +1,204 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Bus I/O Module"
+  },
+  {
+   "row": [
+    {
+     "text": "l0",
+     "sample": "9"
+    },
+    {
+     "field": "n0",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d0",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l1",
+     "sample": "9"
+    },
+    {
+     "field": "n1",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d1",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l2",
+     "sample": "9"
+    },
+    {
+     "field": "n2",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d2",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l3",
+     "sample": "9"
+    },
+    {
+     "field": "n3",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d3",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l4",
+     "sample": "9"
+    },
+    {
+     "field": "n4",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d4",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l5",
+     "sample": "9"
+    },
+    {
+     "field": "n5",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d5",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l6",
+     "sample": "9"
+    },
+    {
+     "field": "n6",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d6",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l7",
+     "sample": "9"
+    },
+    {
+     "field": "n7",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d7",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "l8",
+     "sample": "9"
+    },
+    {
+     "field": "n8",
+     "chars": 17,
+     "fill": true
+    },
+    {
+     "button": "d8",
+     "sample": [
+      "In",
+      "Out"
+     ]
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "status",
+   "sample": [
+    "Names are 1 to 16 of a-z, 0-9 and _"
+   ]
+  }
+ ],
+ "gap": 2
+}
