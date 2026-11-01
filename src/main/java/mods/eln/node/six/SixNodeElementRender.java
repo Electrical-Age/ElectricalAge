@@ -184,23 +184,10 @@ public abstract class SixNodeElementRender {
     /** A small box (in the current colour) on the face toward edge l, from `from` to `to` off the centre (element frame: x off the face,
      *  Left/Right along z, Down/Up along y), w wide and h high. */
     protected static void drawPinBox(LRDU l, float from, float to, float w, float h) {
-        float s = l == LRDU.Left || l == LRDU.Down ? -1 : 1;
-        float a0 = s * from, a1 = s * to, b0 = -w / 2, b1 = w / 2;
-        boolean alongZ = l == LRDU.Left || l == LRDU.Right;
         UtilsClient.disableTexture();
         GL11.glBegin(GL11.GL_QUADS);
-        float[][] faces = {
-            {h, a0, b0, h, a1, b0, h, a1, b1, h, a0, b1},     // top
-            {0, a1, b0, 0, a1, b1, h, a1, b1, h, a1, b0},     // end
-            {0, a0, b0, 0, a1, b0, h, a1, b0, h, a0, b0},     // sides
-            {0, a0, b1, h, a0, b1, h, a1, b1, 0, a1, b1},
-        };
-        for (float[] f : faces)
-            for (int i = 0; i < 12; i += 3) {
-                float x = f[i], a = f[i + 1], b = f[i + 2];
-                if (alongZ) GL11.glVertex3f(x, b, a);
-                else GL11.glVertex3f(x, a, b);
-            }
+        for (float[] q : PinBox.quads(l, from, to, w, h))
+            for (int i = 0; i < 12; i += 3) GL11.glVertex3f(q[i], q[i + 1], q[i + 2]);
         GL11.glEnd();
         UtilsClient.enableTexture();
         GL11.glColor3f(1f, 1f, 1f);
