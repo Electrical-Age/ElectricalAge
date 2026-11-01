@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:circuits/basic",
+    "I": "minecraft:iron_ingot",
+    "b": "eln:field_bus_cable",
+    "c": "eln:signal_cable"
+  },
+  "pattern": [
+    "IbI",
+    "cCc",
+    "IcI"
+  ],
+  "result": {
+    "id": "eln:bus_io_module"
+  }
+}
