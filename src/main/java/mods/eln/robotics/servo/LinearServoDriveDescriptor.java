@@ -27,7 +27,7 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
      * The motor: 2 m/s at 200 V (slower on a sagging line, stalled below 30 %), 1 m/s^2, 40 W idle, 80 % efficient. A
      * counterweight balances the car and COUNTERWEIGHT_KG of load, so an empty car going down lifts that much.
      */
-    public static Drive drive = new Drive(Eln.MVU, 2.0, 1.0, 40, 0.8);
+    public static Drive drive = new Drive(Eln.MVU, 2.0, 1.0, 40, 0.8, 120);
     public static double counterweightKg = 40, playerKg = 80, itemKg = 2;
     public static final double G = 9.81;
     /** Its motor's heat: capacity (J/K), to ambient (K/W); it faults this hot (K over ambient) and resumes at RESUME_K. */
@@ -45,7 +45,7 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
 
     /** Top speed (m/tick) at this line voltage. */
     public static double vmaxPerTick(double volts) {
-        return drive.vmaxAt(volts) / 20;
+        return drive.vmaxAt(volts / drive.nominalVolts()) / 20;
     }
 
     /** Acceleration (m/tick^2). */
