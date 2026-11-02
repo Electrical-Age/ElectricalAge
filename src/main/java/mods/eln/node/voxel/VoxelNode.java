@@ -1267,7 +1267,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 connectVoxel(dir, v);
                 connectPinsAcross(dir, v);
             }
-            else for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
+            else {
+                for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
+                // a bus port on the face toward a bus cable here (a machine at another mod's block): a bus link
+                if (other instanceof mods.eln.bus.BusPeer peer && peer.busPortOn(dir.getInverse()) instanceof mods.eln.bus.BusPort bp)
+                    for (LRDU lrdu : LRDU.values()) mods.eln.bus.BusNet.link(bp, busPortAt(dir, lrdu));
+            }
         }
         // only blocks with pipes in the fluid world (it steps every device every tick)
         if (hasFluid()) FluidWorld.add(this);
@@ -1636,6 +1641,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
             }
         return null;
+    }
+
+    /** The bus port of the cable taking EA's (side, edge) connection toward a non-voxel neighbour (see legacy), or null. */
+    public mods.eln.bus.BusPort busPortAt(Direction side, LRDU lrdu) {
+        CableNet.Conductor k = legacy(side, lrdu);
+        return k == null ? null : k.port;
     }
 
     /** The working cable conductor with a piece taking voxel (x, y, z): its electrical load (index 0) and thermal load
