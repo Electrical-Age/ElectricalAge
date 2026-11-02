@@ -1,4 +1,4 @@
-// 26.3	2026-11-01T19:08:50.044999156	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-02T13:57:50.780666188	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -182,6 +182,7 @@ ceb55f6818049de87939b9447a5099d891e290dc data/eln/advancement/recipes/misc/led_v
 7892ac2f3ce55ef0000c8f396755f43c4378249e data/eln/advancement/recipes/misc/life_oriented_battery.json
 a0361b0c4e69b76ec0464c62f3c3b1a6b9254794 data/eln/advancement/recipes/misc/light_blue_brush.json
 00587e800a6e444b5b4aefe9264c067dfd2535ea data/eln/advancement/recipes/misc/lime_brush.json
+5256056842f243d34ddc68c2c239bf9ab8c71849 data/eln/advancement/recipes/misc/linear_servo_drive.json
 d824a825729f0f7b48fa42e68f2d9070b4bc9a84 data/eln/advancement/recipes/misc/long_suspended_lamp_socket.json
 d82e19fb36ddaee5cd8a7f910027a98e9f222af8 data/eln/advancement/recipes/misc/low_power_receiver_antenna.json
 231dc3ce3878d48f3430a11200946b0669218e6d data/eln/advancement/recipes/misc/low_power_transmitter_antenna.json
@@ -243,6 +244,7 @@ c3b894f60c00346800570928b4de8ca5e9c8114d data/eln/advancement/recipes/misc/sampl
 b24b6bafabb4fecdf57c23a1499fe7ee2dadba82 data/eln/advancement/recipes/misc/scanner.json
 967dfd8caa482125fd9e966799de55343c3b1b79 data/eln/advancement/recipes/misc/schmitt_trigger_chip.json
 fad549b494b884027c37c9ce86bef8d20daf92ee data/eln/advancement/recipes/misc/sconce_lamp_socket.json
+a7bd55a2be3ea7ef6c5c5ccb93c08352fa382893 data/eln/advancement/recipes/misc/servo_rail.json
 07608aa3e11b0b7b91641411b86252318206a2a5 data/eln/advancement/recipes/misc/signal_antenna.json
 83de940301722992ea77f1b5b1ade32d270fb500 data/eln/advancement/recipes/misc/signal_button.json
 ab4847f73790968a91aa4f849fd84b789956ac48 data/eln/advancement/recipes/misc/signal_cable.json
@@ -290,6 +292,7 @@ c59077f0aed77894b4afd0b67547f7ff68c33066 data/eln/advancement/recipes/misc/small
 fe7580a5cab94e3b2a53fc81c07fc52050eb51e3 data/eln/advancement/recipes/misc/smelting_tungsten_ore.json
 d745c0a06786c255ec7cf4ebac2a0bd8da10121b data/eln/advancement/recipes/misc/solar_tracker.json
 91ecd892a2a111989dbc8ae5cd7292830389e96f data/eln/advancement/recipes/misc/standard_alarm.json
+7c358b8ef58c8aea06e478be26bcb184379c2bbf data/eln/advancement/recipes/misc/station_marker.json
 35aadf92ce0cd908191a2b23fa5db29821d21129 data/eln/advancement/recipes/misc/steam_condenser.json
 febda46518aac7a1a3b44f912d4bf97add471642 data/eln/advancement/recipes/misc/steam_injection_wellhead.json
 3b3894bb499e10bccea06d0524264277edaa9371 data/eln/advancement/recipes/misc/steam_oven.json
@@ -542,6 +545,7 @@ dae1f3a6acbfed0befa3b5fe34d4db8acb0a8562 data/eln/recipe/led_vumeter_3.json
 851888ea7c7223580d616996e7af8a5b19925ca3 data/eln/recipe/life_oriented_battery.json
 d244c7c13b4520a563baaa80b30f6e5a80880eaf data/eln/recipe/light_blue_brush.json
 d8e2611aa1042a6f6a9521826a9917d1befdf6cd data/eln/recipe/lime_brush.json
+006fd7432a76b927e35a43fc435f64a99e393e10 data/eln/recipe/linear_servo_drive.json
 2869c21114ed9e2d7b4e8fe691769b0686c409a0 data/eln/recipe/long_suspended_lamp_socket.json
 9639e37b19847e92307c0ab6544578d6cd5554a1 data/eln/recipe/low_power_receiver_antenna.json
 67dac147f3cb70f6dc532742617cf55ac06316bb data/eln/recipe/low_power_transmitter_antenna.json
@@ -603,6 +607,7 @@ adad48cd9d9f462c2e3a5dcf4cf01bdfc515cb0e data/eln/recipe/sample_and_hold.json
 7e1409acba56e3791f862ac41f87c67789397242 data/eln/recipe/scanner.json
 2f85d1235efcb5debc796eb156537d8cab3ba3a8 data/eln/recipe/schmitt_trigger_chip.json
 5ef7603dd6104268396da90edac572c5080fc2ea data/eln/recipe/sconce_lamp_socket.json
+98dcb368c7b90a2ceb4ad241cebeb35540bac44f data/eln/recipe/servo_rail.json
 8a4e0436293a872c87ff3fa260b4825d3811b626 data/eln/recipe/signal_antenna.json
 0d1d0b73320ae6877437909abf163135c8ee41a2 data/eln/recipe/signal_button.json
 75b59dcfe9f86c321f54d8828bd75916795d974e data/eln/recipe/signal_cable.json
@@ -650,6 +655,7 @@ f8d98570968cecc459a14f0cd820a44af3560cf9 data/eln/recipe/smelting_tungsten_dust.
 7021b95b0c11d5bc733cc073169c93ec0ff815c5 data/eln/recipe/smelting_tungsten_ore.json
 5bfee752b7a7f8c89009a59ae6e95f13ce11aacc data/eln/recipe/solar_tracker.json
 4ab93d287ce3eeee14c2bf3bb7c860f4ebacbd27 data/eln/recipe/standard_alarm.json
+b96dfa97ab86ea0acc7d0ad7c689198953de00ef data/eln/recipe/station_marker.json
 c4a92d71ecc73f59ecdd4e92dba9ace4eaf4260b data/eln/recipe/steam_condenser.json
 de6b0d86f1b6a83a630f6f99c80a28f8adcf17e5 data/eln/recipe/steam_injection_wellhead.json
 ad38d8978faeb5e64094fb9e2d5f61f950b2a9c1 data/eln/recipe/steam_oven.json

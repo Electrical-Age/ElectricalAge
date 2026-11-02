@@ -133,6 +133,14 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - FE exporter since the Machine API: `energyBuffer`, `inPowerFactor`, and the machine keys; `loadUc` and
   `powerInResistorR` (its resistor, now the machine) are no longer read. Both its older saves load
   (`wp11_legacy_exporter_save`, `wp11_exporter_old_save`).
+- Linear Servo Drive (`robotics/servo/LinearServoDriveElement`): `clock` (long, the drive's own tick count; segments
+  start on it, and it stops while its chunks are unloaded), the current segment `segStart` (long), `segFrom`, `segV0`,
+  `segTo`, `segVmax`, `segAccel` (blocks and ticks), `target`, `fault` (byte: 0 none, 1 obstructed, 2 overheat, 3 no
+  rail), `proportional`, `carMost`/`carLeast` (the car's UUID); sim parts `powerUc`, `setpointUc`, `enableUc`,
+  `inPositionUc`, `faultOutUc`, `thermalTc`, and the outputs' `inPositionProcess*`/`faultProcess*`. The elevator car
+  entity is not saved (`noSave`, `shouldBeSaved` false): the drive finds it by UUID within a session, else spawns it
+  again where its segment says. A stopped car's floor ghost (GhostBlock tFloor, UUID 0x5E7A, observer the drive) is an
+  ordinary saved ghost, so a player logging in on a car mid-shaft stands on it before the car is back.
 
 ## Ids that must never change
 
@@ -143,6 +151,9 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - The 1.12 damage id is the device id: `eid` / `EID<n>` in node NBT and in client packets
   (`node/DescriptorRegistry.getDescriptor(int legacyDamage)`). Renumbering a device orphans every saved copy.
 - Descriptor keys of 1.12 (`EnergyConverterElnToOther*`) are only read by `ExporterSaveUpgrade`; keep them.
+- 26.x additions follow the same rule: e.g. `eln:transparent_node@5504` (`linear_servo_drive`, group 86), the blocks
+  `eln:servo_rail`, `eln:station_marker` and the entity `eln:elevator_car` (`robotics/Robotics`; not yet in a release,
+  so they may still change before shipping).
 - Block-entity alias: `eln:energy_converter_eln_to_other_entity` -> `eln:transparent_node` (`ElnRegistry`), for
   chunks saved while the exporter had its own BE type.
 

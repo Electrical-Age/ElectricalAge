@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "mods.eln.robotics.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "FloatingKickMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
