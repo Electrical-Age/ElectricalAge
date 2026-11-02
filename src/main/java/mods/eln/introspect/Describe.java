@@ -78,6 +78,7 @@ public final class Describe {
         Report r = new Report(Report.Half.SERVER);
         r.id().text(Keys.KIND, "eln:" + Describe.snake(node.getClass().getSimpleName()));
         r.id().text(Keys.NODE, "other");
+        r.id().bool(Keys.SERVER_ONLY, true);
         r.id().ref(Keys.POS, node.coordonate.x + "," + node.coordonate.y + "," + node.coordonate.z);
         r.id().bool("in_simulation", node.isAdded());
         r.id().text(Keys.ELEMENT, node.getClass().getSimpleName());
@@ -141,6 +142,7 @@ public final class Describe {
         var p = v.parts.get(i);
         r.id().text(Keys.KIND, p.kind());
         r.id().text(Keys.NODE, "voxel_part");
+        r.id().bool(Keys.SERVER_ONLY, true);
         r.id().ref(Keys.POS, v.coordonate.x + "," + v.coordonate.y + "," + v.coordonate.z);
         r.id().integer("index", i);
         r.id().text(Keys.ELEMENT, p.getClass().getSimpleName());

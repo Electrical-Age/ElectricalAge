@@ -11,6 +11,8 @@ public final class Keys {
 
     // id
     public static final String KIND = "kind", NODE = "node", POS = "pos", FACE = "face", SLOT = "slot", ELEMENT = "element";
+    /** True on a report no client has a half of (a port node, a voxel part): nothing to compare. */
+    public static final String SERVER_ONLY = "server_only";
 
     // spec
     public static final String NOMINAL_VOLTAGE = "nominal_voltage", RATED_POWER = "rated_power", IDLE_POWER = "idle_power",

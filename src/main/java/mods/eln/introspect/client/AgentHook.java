@@ -49,12 +49,13 @@ public final class AgentHook {
 
     /**
      * Pairs the server's reports with this client's (by node and slot) and lists their sync differences:
-     * {"pairs":[{"id":..., "diff":[{key,server,client,why}]}], "unpaired":[ids]}.
+     * {"pairs":[{"id":..., "diff":[{key,server,client,why}]}], "unpaired":[ids], "server_only":[ids]} (server_only: reports
+     * marked so, which no client has).
      */
     public static String compare(String serverJson, String clientJson) {
         JsonArray s = reports(serverJson), c = reports(clientJson);
         JsonObject out = new JsonObject();
-        JsonArray pairs = new JsonArray(), unpaired = new JsonArray();
+        JsonArray pairs = new JsonArray(), unpaired = new JsonArray(), alone = new JsonArray();
         boolean[] used = new boolean[c.size()];
         for (JsonElement se : s) {
             JsonObject so = se.getAsJsonObject();
@@ -62,7 +63,9 @@ public final class AgentHook {
             for (int i = 0; i < c.size() && match < 0; i++)
                 if (!used[i] && key(so).equals(key(c.get(i).getAsJsonObject()))) match = i;
             if (match < 0) {
-                unpaired.add(so.get("id"));
+                JsonObject id = so.getAsJsonObject("id");
+                boolean serverOnly = id != null && id.get("server_only") instanceof JsonObject b && b.get("bool").getAsBoolean();
+                (serverOnly ? alone : unpaired).add(so.get("id"));
                 continue;
             }
             used[match] = true;
@@ -83,6 +86,7 @@ public final class AgentHook {
         for (int i = 0; i < c.size(); i++) if (!used[i]) unpaired.add(c.get(i).getAsJsonObject().get("id"));
         out.add("pairs", pairs);
         out.add("unpaired", unpaired);
+        out.add("server_only", alone);
         return out.toString();
     }
 
