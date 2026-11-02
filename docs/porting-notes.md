@@ -270,6 +270,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   (it restarted on every load). Jade's "Power consumption" is the power drawn (it showed the power times the
   boosters' efficiency). Their terminal's series resistance is the LV cable's for every voltage: a 200 V machine's is
   0.025 instead of the MV cable's 0.1 ohm, at its 10 A 0.75 V less drop (under 1% more power).
+  On a line weaker than the machine (its resistance above the machine's), they now draw the line's maximum power at
+  about half its volts instead of their resistor's power far below that: the API's slow consumers plan on the line
+  they learn, so they never pull it down past its maximum power (found with the Linear Servo Drive).
 
 ## Bugs fixed
 

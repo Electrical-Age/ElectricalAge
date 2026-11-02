@@ -28,7 +28,8 @@ import java.util.function.Consumer;
  * the demand smoothed over two ticks (fast attack: a rise counts at once, a fall halves first) plus a refill of at
  * most a quarter of a tick's rated work (held back a second when the line can't keep up), but never more than the buffer's
  * room, and none without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle
- * watts only. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
+ * watts only. A Brownout.SLOW consumer on a soft line plans against the line as it is (see LINE_MODEL_SAG): never
+ * past the line's maximum power, so it can't pull its own line down to its rated resistance. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
  * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times (for a producer too).
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
@@ -69,6 +70,17 @@ public final class MachineCore implements MachineView {
      */
     public static final double REFILL_KEPT_UP = 0.95;
     public static final int REFILL_HOLDOFF_TICKS = 20;
+    /**
+     * Brownout.SLOW consumers learn their line's Thevenin resistance from two steps whose current differs by more
+     * than LINE_LEARN_SHARE (the rest of the circuit unchanged in between: R = -dU/dI, and none if that isn't
+     * positive). Planning on the last volts alone (R = U^2 / P) assumes a stiff line: asked for more than a weak line
+     * can carry, it lowers its resistance past the line's maximum power and the line collapses to its rated
+     * resistance. When the learnt line would sag over LINE_MODEL_SAG at the planned power, the plan is capped at the
+     * line's maximum power E^2 / 4R and its resistance solved on the line's stiff side; below that the old rule
+     * stands. Brownout.STOP machines keep the old rule: a source that can't carry their demand stops them (Baughn: the
+     * starved-supply behaviour is the spec's choice).
+     */
+    public static final double LINE_LEARN_SHARE = 0.02, LINE_MODEL_SAG = 0.01;
     /** A producer's open-circuit voltage, share of nominal. */
     public static final double DROOP_OPEN_RATIO = 1.05;
     /**
@@ -99,6 +111,7 @@ public final class MachineCore implements MachineView {
 
     // consumer
     private double demand, failedTry, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
+    private double lineOhms, lineVolts, prevVolts = Double.NaN, prevAmps = Double.NaN;
     private int keptUpTicks = REFILL_HOLDOFF_TICKS, shortSteps;
     // producer
     private boolean sourceOn;
@@ -225,6 +238,7 @@ public final class MachineCore implements MachineView {
             double work = joules - idle;
             shortSteps = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? 0 : shortSteps + 1;
             keptUpTicks = shortSteps >= 2 ? 0 : Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS);
+            if (spec.brownout() == mods.eln.api.Brownout.SLOW) learnLine(a, amps);
             double stored = Math.max(0, Math.min(work, capacity - buffer));
             buffer += stored;
             joulesLost += joules - stored;
@@ -265,11 +279,42 @@ public final class MachineCore implements MachineView {
         previousDemand = Math.min(ratedJoulesPerTick, demand + failedTry);
         demand = 0;
         failedTry = 0;
+        double p = idle + work;
+        lineVolts = Math.abs(volts) + amps * lineOhms;
+        if (p > 0 && lineOhms > 0 && p * lineOhms > LINE_MODEL_SAG * lineVolts * lineVolts) {
+            // a soft line: no more than its maximum power, the resistance that draws p on its stiff side
+            double e = lineVolts, r = lineOhms;
+            p = Math.min(p, e * e / (4 * r));
+            double ohms = Math.max((e * e - 2 * p * r + e * Math.sqrt(Math.max(0, e * e - 4 * p * r))) / (2 * p),
+                uNom * uNom / spec.ratedWatts());
+            p = e * e * ohms / ((ohms + r) * (ohms + r));
+            idle = Math.min(idle, p);
+            work = p - idle;
+            loadOhms = ohms;
+        } else loadOhms = p > 0 ? volts * volts / p : Double.POSITIVE_INFINITY;
         idleCommand = idle;
         workCommand = work;
-        double p = idle + work;
-        loadOhms = p > 0 ? volts * volts / p : Double.POSITIVE_INFINITY;
         return p;
+    }
+
+    /** The line's resistance as last learnt (see LINE_LEARN_SHARE), from a step at u volts drawing i amps. */
+    private void learnLine(double u, double i) {
+        double di = i - prevAmps;
+        if (Double.isFinite(prevVolts) && Math.abs(di) > LINE_LEARN_SHARE * Math.max(i, prevAmps)) {
+            double r = (prevVolts - u) / di;
+            lineOhms = r > 0 && Double.isFinite(r) ? r : 0;
+        }
+        prevVolts = u;
+        prevAmps = i;
+    }
+
+    /**
+     * The most the learnt line can deliver, E^2 / 4R, W, while the plan uses it (a Brownout.SLOW consumer on a soft
+     * line); infinite otherwise.
+     */
+    public double lineWattsLimit() {
+        boolean soft = spec.brownout() == mods.eln.api.Brownout.SLOW && !producer && lineOhms > 0;
+        return soft ? lineVolts * lineVolts / (4 * lineOhms) : Double.POSITIVE_INFINITY;
     }
 
     /** Consumer: the resistance that draws beforeStep()'s watts at the last line volts, ohm; infinite for none. */

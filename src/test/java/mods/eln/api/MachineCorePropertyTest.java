@@ -270,7 +270,7 @@ public class MachineCorePropertyTest {
             else {
                 assertTrue(pB >= pA, "the bigger ask planned less: " + pB + " < " + pA);
                 double cap = spec.ratedWatts() * Math.pow(u / spec.nominalVolts(), 2);
-                if (running && pA < Math.min(cap, spec.ratedWatts()) * (1 - 1e-9))
+                if (running && pA < Math.min(Math.min(cap, spec.ratedWatts()), a.lineWattsLimit()) * (1 - 1e-9))
                     assertTrue(pB > pA, "the bigger ask planned no more: " + pB + " = " + pA);
             }
         }

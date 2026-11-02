@@ -143,7 +143,8 @@ public class BenchTest {
     /**
      * A dynamo given 40 J a tick (800 W) feeding a mill that asks 50 J a tick (1000 W, plus 20 W idle): with
      * Brownout.STOP (the default) the line falls under the floor and the mill stops and restarts; with
-     * Brownout.SLOW it settles on what the dynamo gives and takes all of it.
+     * Brownout.SLOW it settles on what the dynamo gives and takes all of it (holding the line at 160 V: it draws no
+     * more than the line can give).
      */
     @Test
     void starvedProducerStopOrSlow() {
@@ -160,7 +161,8 @@ public class BenchTest {
                 assertTrue(states.contains("UNDERVOLTAGE") && states.contains("RUNNING"), "stops and restarts: " + states);
             } else {
                 assertTrue(states.stream().allMatch("RUNNING"::equals), "keeps running: " + states);
-                assertTrue(b.volts() < 150, "on a sagging line: " + b.volts());
+                // below nominal, but not pulled down to its rated resistance: it plans on the line it learnt
+                assertTrue(b.volts() < 180, "on a sagging line: " + b.volts());
                 // the dynamo's energy reaches the owner, less the idle watts and the droop loss (about 7% at this current)
                 double most = (800 - 20) * 0.05 * 100;
                 assertTrue(late <= most && late > 0.9 * most, "taken in the last 100 ticks: " + late + " of " + most);
@@ -168,6 +170,29 @@ public class BenchTest {
             assertTrue(dynamo.joulesOut() <= dynamo.joulesIn() + 1e-6);
             assertTrue(mill.joulesIn() <= dynamo.joulesOut());
         }
+    }
+
+    /**
+     * A Brownout.SLOW consumer asking more than its line can carry (a 47 ohm line: at most 213 W at 100 V) learns the
+     * line and draws its maximum power, on the stiff side; planning on the sagged volts alone, it would pull the line
+     * down to its own rated resistance (13 ohm: 44 V, 145 W).
+     */
+    @Test
+    void slowConsumerStopsAtTheLinesMaximumPower() {
+        Bench b = ElnTestKit.bench().supply(200, 0.01).line(47);
+        Taker t = new Taker(50); // 1000 W
+        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(3000).idleWatts(40).onBrownout(Brownout.SLOW).build())
+            .owner(t::tick);
+        b.ticks(40);
+        double lowest = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < 100; i++) {
+            b.tick();
+            lowest = Math.min(lowest, m.volts());
+        }
+        double most = 200 * 200 / (4 * 47.01);
+        assertTrue(lowest > 0.45 * 200, "the line held near half its volts: lowest " + lowest + "\n" + b.trace());
+        assertEquals(most, m.watts(), 0.03 * most, "it draws the line's maximum power");
+        assertEquals(MachineState.RUNNING, m.state());
     }
 
     /** Two producers in parallel (a singular matrix if they were ideal sources) share a load bigger than either's rating. */
