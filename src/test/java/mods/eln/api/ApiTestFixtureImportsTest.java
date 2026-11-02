@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The hosted-machine fixture (mods.eln.apitest) is written as another mod would be: no EA type but mods.eln.api's
- * (not api.impl, not the testkit), in imports or anywhere in its text.
+ * (not api.impl, .spi, .element or the testkit), in imports or anywhere in its text. The build also compiles it against
+ * the eln-api jar alone (compileApiConsumer).
  */
 public class ApiTestFixtureImportsTest {
     static final Pattern EA = Pattern.compile("mods\\.eln\\.[A-Za-z_][A-Za-z0-9_.]*");
@@ -40,7 +41,8 @@ public class ApiTestFixtureImportsTest {
                 while (m.find()) {
                     String ref = m.group();
                     boolean ok = ref.equals("mods.eln.api") || ref.startsWith("mods.eln.apitest.")
-                        || ref.startsWith("mods.eln.api.") && !ref.startsWith("mods.eln.api.impl") && !ref.startsWith("mods.eln.api.testkit");
+                        || ref.startsWith("mods.eln.api.") && !ref.startsWith("mods.eln.api.impl") && !ref.startsWith("mods.eln.api.testkit")
+                        && !ref.startsWith("mods.eln.api.spi") && !ref.startsWith("mods.eln.api.element");
                     if (!ok) bad.add(f.getFileName() + ":" + n + " " + ref);
                 }
             }

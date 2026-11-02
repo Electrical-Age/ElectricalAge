@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.148'
     id 'org.jetbrains.kotlin.jvm' version '2.4.21'
+    id 'maven-publish'
 }
 
 version = mod_version
@@ -26,6 +27,20 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 // The checked model library (cad/, board #44) is compiled into the mod, as Stasis does with towergen; :cad compiles
 // it alone, without Minecraft.
 sourceSets.main.java.srcDir 'cad/src/main/java'
+// The API for other mods (docs/api.md) is compiled on its own, against Minecraft and NeoForge alone, so it can't name
+// EA's internals: mods.eln.api, .lowlevel and .spi in src/api, the testkit in src/apiTestkit (on the API alone). Both
+// are part of the mod (its jar, runs and tests) and are packaged as eln-api and eln-api-testkit jars for other mods to
+// compile against (see "The eln-api jars" below).
+sourceSets {
+    api
+    apiTestkit {
+        compileClasspath += api.output
+    }
+}
+dependencies {
+    implementation sourceSets.api.output
+    implementation sourceSets.apiTestkit.output
+}
 // The device models made with it (src/cadmodels: mods.eln.cad.models.Catalog) are generated at build time into
 // build/generated/cad (OBJ, MTL, atlases, origins, hitboxes, the converters' block models and sprites), not committed.
 // The task fails the build if a model breaks the checker; it is cached on the library's and the models' code.
@@ -91,8 +106,13 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            sourceSet(sourceSets.api)
+            sourceSet(sourceSets.apiTestkit)
         }
     }
+
+    addModdingDependenciesTo(sourceSets.api)
+    addModdingDependenciesTo(sourceSets.apiTestkit)
 
     // The game on the unit-test classpath (the sim's NBT uses CompoundTag); JUnit 5 platform, JUnit 4 tests via vintage
     unitTest {
@@ -185,4 +205,125 @@ tasks.register('bikeTexture', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'mods.eln.bike.BikeTexture'
     args file('src/main/resources/assets/eln/textures/entity/electric_bike.png').absolutePath
+}
+
+// ---- The eln-api jars: the API for other mods, to compile against (compileOnly; EA's own jar is the implementation)
+// build/libs/eln-api-<version>.jar (mods.eln.api, .lowlevel, .spi) and eln-api-testkit-<version>.jar (mods.eln.api.testkit,
+// for tests), each with its sources and javadoc jars; publishApiPublicationsToBuildRepoRepository puts them in
+// build/repo as mods.eln:eln-api and mods.eln:eln-api-testkit. Their manifests carry ElnApi.API_VERSION.
+def apiVersionMatch = file('src/api/java/mods/eln/api/ElnApi.java').text =~ /String API_VERSION = "(\d+\.\d+\.\d+)";/
+if (!apiVersionMatch.find()) throw new GradleException('ElnApi.java has no API_VERSION = "major.minor.patch"')
+def apiVersion = apiVersionMatch.group(1)
+apiVersionMatch = null
+
+tasks.named('jar') {
+    from sourceSets.api.output
+    from sourceSets.apiTestkit.output
+}
+
+def apiJars = [api: 'eln-api', apiTestkit: 'eln-api-testkit'].collectEntries { setName, artifact ->
+    def set = sourceSets[setName]
+    def javadoc = tasks.register("${setName}Javadoc", Javadoc) {
+        description = "The ${artifact} javadoc"
+        source = set.allJava
+        classpath = set.compileClasspath
+        destinationDir = layout.buildDirectory.dir("docs/${artifact}").get().asFile
+        title = "Electrical Age API ${apiVersion}" + (setName == 'api' ? '' : ': testkit')
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+    def manifestAttributes = [
+        'Specification-Title'   : artifact,
+        'Specification-Vendor'  : 'Electrical Age',
+        'Specification-Version' : apiVersion,
+        'Implementation-Title'  : artifact,
+        'Implementation-Version': project.version,
+        'Eln-Api-Version'       : apiVersion,
+        'Minecraft-Version'     : minecraft_version,
+    ]
+    def jars = [
+        jar    : tasks.register("${setName}Jar", Jar) {
+            description = "build/libs/${artifact}-<version>.jar: the API classes alone, to compile against"
+            archiveBaseName = artifact
+            from set.output
+            manifest.attributes(manifestAttributes)
+        },
+        sources: tasks.register("${setName}SourcesJar", Jar) {
+            archiveBaseName = artifact
+            archiveClassifier = 'sources'
+            from set.allSource
+            manifest.attributes(manifestAttributes)
+        },
+        javadoc: tasks.register("${setName}JavadocJar", Jar) {
+            archiveBaseName = artifact
+            archiveClassifier = 'javadoc'
+            from javadoc
+            manifest.attributes(manifestAttributes)
+        },
+    ]
+    tasks.named('assemble') { dependsOn jars.values() }
+    [(setName): jars]
+}
+
+// The leak check: another mod's code compiled against the eln-api jars and Minecraft/NeoForge alone, none of EA's
+// other classes (no source path either): the docs' samples (but HeaterElement, EA's own element) and the hidden API
+// test machine, then the samples' JUnit tests against the testkit jar too. A public API signature that named an EA
+// internal would not compile here (nor in the api source set itself); ApiJarTest checks the jars' classes and manifests.
+configurations {
+    apiConsumerJunit
+}
+dependencies {
+    apiConsumerJunit platform('org.junit:junit-bom:5.13.4')
+    apiConsumerJunit 'org.junit.jupiter:junit-jupiter-api'
+}
+def compileApiConsumer = tasks.register('compileApiConsumer', JavaCompile) {
+    description = 'Compiles the API samples as another mod would: against the eln-api jar and Minecraft/NeoForge only'
+    javaCompiler = javaToolchains.compilerFor(java.toolchain)
+    source = fileTree('src/test/java/mods/eln/api/docs') { include '*.java'; exclude '*Test.java', 'HeaterElement.java' } +
+        fileTree('src/main/java/mods/eln/apitest') { include '*.java' }
+    classpath = sourceSets.api.compileClasspath + files(apiJars.api.jar)
+    destinationDirectory = layout.buildDirectory.dir('apiConsumer/main')
+    options.encoding = 'UTF-8'
+}
+def compileApiConsumerTest = tasks.register('compileApiConsumerTest', JavaCompile) {
+    description = "Compiles the API samples' tests as another mod would: against the eln-api and eln-api-testkit jars"
+    javaCompiler = javaToolchains.compilerFor(java.toolchain)
+    source = fileTree('src/test/java/mods/eln/api/docs') { include '*Test.java'; exclude 'ApiDocSamplesTest.java' }
+    classpath = sourceSets.api.compileClasspath + files(apiJars.api.jar, apiJars.apiTestkit.jar) +
+        files(compileApiConsumer) + configurations.apiConsumerJunit
+    destinationDirectory = layout.buildDirectory.dir('apiConsumer/test')
+    options.encoding = 'UTF-8'
+}
+tasks.named('check') { dependsOn compileApiConsumer, compileApiConsumerTest }
+tasks.named('test') {
+    dependsOn apiJars.api.jar, apiJars.apiTestkit.jar
+    systemProperty 'eln.apiJar', apiJars.api.jar.get().archiveFile.get().asFile.absolutePath
+    systemProperty 'eln.apiTestkitJar', apiJars.apiTestkit.jar.get().archiveFile.get().asFile.absolutePath
+}
+
+publishing {
+    publications {
+        [api: 'eln-api', apiTestkit: 'eln-api-testkit'].each { setName, artifactName ->
+            create(setName, MavenPublication) {
+                groupId = project.group
+                artifactId = artifactName
+                version = project.version
+                artifact apiJars[setName].jar
+                artifact apiJars[setName].sources
+                artifact apiJars[setName].javadoc
+                if (setName == 'apiTestkit') pom.withXml {
+                    def dep = asNode().appendNode('dependencies').appendNode('dependency')
+                    dep.appendNode('groupId', project.group)
+                    dep.appendNode('artifactId', 'eln-api')
+                    dep.appendNode('version', project.version)
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'buildRepo'
+            url = layout.buildDirectory.dir('repo')
+        }
+    }
 }

@@ -20,8 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * docs/api.md can't rot: every java code block in it names a region of a compiled source in this package (a fence
  * "```java src/test/java/mods/eln/api/docs/Mill.java#spec" and, in the file, the lines between "// doc:begin spec" and
  * "// doc:end spec"), and must equal that region (its common indentation removed). Every region here is shown in the
- * page, and the samples use only the public API (but HeaterElement, the EA-element sample, which names EA's types).
- * Code blocks of other languages are refused: every sample on the page is compiled.
+ * page, and the samples use only what the eln-api jars hold: mods.eln.api and .lowlevel, the testkit in the tests
+ * (*Test.java); not mods.eln.api.impl, .spi or .element (but HeaterElement, the EA-element sample, which names EA's
+ * types). The build also compiles them against the jars alone (compileApiConsumer). Code blocks of other languages are
+ * refused: every sample on the page is compiled.
  */
 public class ApiDocSamplesTest {
     static final Pattern FENCE = Pattern.compile("^```java(?:\\s+(\\S+)#(\\S+))?\\s*$");
@@ -113,6 +115,7 @@ public class ApiDocSamplesTest {
             for (Path f : s.filter(p -> p.toString().endsWith(".java")).toList()) {
                 String n0 = f.getFileName().toString();
                 if (n0.equals("HeaterElement.java") || n0.equals("ApiDocSamplesTest.java")) continue; // (EA's own element; this test)
+                boolean test = n0.endsWith("Test.java");
                 int n = 0;
                 for (String line : Files.readAllLines(f)) {
                     n++;
@@ -120,7 +123,9 @@ public class ApiDocSamplesTest {
                     Matcher m = EA.matcher(line);
                     while (m.find()) {
                         String ref = m.group();
-                        boolean ok = ref.equals("mods.eln.api") || ref.startsWith("mods.eln.api.") && !ref.startsWith("mods.eln.api.impl");
+                        boolean ok = ref.equals("mods.eln.api") || ref.startsWith("mods.eln.api.")
+                            && !ref.startsWith("mods.eln.api.impl") && !ref.startsWith("mods.eln.api.spi")
+                            && !ref.startsWith("mods.eln.api.element") && (test || !ref.startsWith("mods.eln.api.testkit"));
                         if (!ok) bad.add(f.getFileName() + ":" + n + " " + ref);
                     }
                 }
