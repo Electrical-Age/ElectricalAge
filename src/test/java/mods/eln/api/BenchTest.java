@@ -201,6 +201,18 @@ public class BenchTest {
         assertEquals(MachineState.RUNNING, m.state());
     }
 
+    /** The bench sets the ambient its machines' heat models start at and cool to. */
+    @Test
+    void benchAmbient() {
+        Bench b = ElnTestKit.bench().supply(200, 0.01).ambientCelsius(35);
+        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(80).build());
+        b.ticks(5);
+        assertEquals(35, m.celsius(), 1e-9);
+        b.ambientCelsius(0);
+        b.ticks(2000);
+        assertEquals(0, m.celsius(), 0.1);
+    }
+
     /** Two producers in parallel (a singular matrix if they were ideal sources) share a load bigger than either's rating. */
     @Test
     void parallelProducersShare() {

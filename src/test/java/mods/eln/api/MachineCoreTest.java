@@ -190,6 +190,29 @@ public class MachineCoreTest {
         assertEquals(10, d.celsius() - 20, 0.01);
     }
 
+    /** The reset band is the spec's, and the model cools to the ambient it is given (a desert's, say). */
+    @Test
+    void overheatResetsAtItsBandAndCoolsToItsAmbient() {
+        MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
+            .overheatCelsius(80).overheatResetKelvin(30).build();
+        MachineCore c = new MachineCore(spec);
+        c.setAmbientCelsius(40);
+        assertEquals(40, c.celsius(), 1e-12, "it starts at its ambient");
+        for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
+        while (c.state() == MachineState.RUNNING) {
+            c.heatJoules(100);
+            c.afterStep(200, 0);
+        }
+        double coolest = Double.POSITIVE_INFINITY;
+        while (c.state() == MachineState.OVERHEAT_TRIPPED) {
+            c.afterStep(200, 0);
+            coolest = Math.min(coolest, c.celsius());
+        }
+        assertTrue(coolest < 60 && coolest > 55, "reset 20 K under the trip (30 K band, but halfway to the 40 C ambient is nearer): " + coolest);
+        for (int i = 0; i < 400000; i++) c.afterStep(200, 0);
+        assertEquals(40, c.celsius(), 0.01, "cooled to its ambient");
+    }
+
     /** Brownout.SLOW: a 200 V machine on a 100 V line runs, on a quarter of its rated power. */
     @Test
     void slowRunsOnWhatArrives() {

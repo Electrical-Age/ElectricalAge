@@ -57,6 +57,7 @@ public final class ElementHost implements ElementMachine {
         applySaved();
         planStep();
     };
+    private double ambient = Double.NaN;
     private MachineCore.Saved saved;
 
     /**
@@ -116,7 +117,13 @@ public final class ElementHost implements ElementMachine {
         return afterStep;
     }
 
+    /** Follows the element's ambient (it is set as the element joins the simulation), then takes back a loaded state. */
     private void applySaved() {
+        double a = site.ambientCelsius();
+        if (a != ambient && Double.isFinite(a)) {
+            ambient = a;
+            core.setAmbientCelsius(a);
+        }
         if (saved == null) return;
         if (core.ticks() == 0) core.restore(saved);
         saved = null;

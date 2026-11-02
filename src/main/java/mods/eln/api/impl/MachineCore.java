@@ -357,7 +357,10 @@ public final class MachineCore implements MachineView {
         return e;
     }
 
-    /** Sets the temperature the heat model cools to (the world's, at the machine), degrees C. */
+    /**
+     * Sets the temperature the heat model cools to (the world's, at the machine), degrees C; before the first step
+     * the machine starts at it too.
+     */
     public void setAmbientCelsius(double c) {
         if (!Double.isFinite(c)) throw new IllegalArgumentException("ambient must be finite, got " + c);
         ambientCelsius = c;
@@ -524,7 +527,7 @@ public final class MachineCore implements MachineView {
             boolean clear = switch (state) {
                 case OVERVOLTAGE_TRIPPED -> r < OVERVOLTAGE_RESET_RATIO;
                 // 10 K under the trip point, or halfway down to ambient if that is nearer (a hot place still resets)
-                default -> celsius < thermal.overheatCelsius() - Math.min(MachineSpec.OVERHEAT_RESET_KELVIN,
+                default -> celsius < thermal.overheatCelsius() - Math.min(thermal.overheatResetKelvin(),
                     (thermal.overheatCelsius() - ambientCelsius) / 2);
             };
             tripTimer = clear ? tripTimer + 1 : 0;

@@ -30,6 +30,9 @@ public interface ElementSite {
     /** The series resistance of the power terminal, ohm (what a cable's node has). */
     double powerRs();
 
+    /** The ambient where the element stands, degrees C (EA's Ambient; known once the element is in the simulation). */
+    double ambientCelsius();
+
     /** The series resistance of a signal gate, ohm. */
     double signalRs();
 }

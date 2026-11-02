@@ -23,7 +23,7 @@ import java.util.function.Consumer;
  */
 public final class BenchMachine implements Machine {
     private final Bench bench;
-    private final MachineCore core;
+    final MachineCore core;
     final MnaMachine mna;
     private Consumer<Machine> owner = m -> {
     };

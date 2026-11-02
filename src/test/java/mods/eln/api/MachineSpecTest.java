@@ -111,7 +111,14 @@ public class MachineSpecTest {
     void thermal() {
         MachineSpec s = MachineSpec.consumer(Tier.V200).ratedWatts(100)
             .heatCapacityJPerK(1000).heatLossWPerK(2).overheatCelsius(80).build();
-        assertEquals(new MachineSpec.Thermal(1000, 2, 80), s.thermal().orElseThrow());
+        assertEquals(new MachineSpec.Thermal(1000, 2, 80, MachineSpec.OVERHEAT_RESET_KELVIN), s.thermal().orElseThrow());
+        assertEquals(30, MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatCelsius(80)
+            .overheatResetKelvin(30).build().thermal().orElseThrow().overheatResetKelvin());
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatCelsius(80)
+            .overheatResetKelvin(0), "overheatResetKelvin must be positive and finite, got 0.0");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatCelsius(45)
+            .overheatResetKelvin(30), "overheatCelsius must be above 50.0 C");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).overheatResetKelvin(5), "overheatResetKelvin is part of the heat model");
         MachineSpec.Builder ok = MachineSpec.consumer(Tier.V200).ratedWatts(100);
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(0).heatLossWPerK(2).overheatCelsius(80),
             "heatCapacityJPerK must be positive and finite, got 0.0");

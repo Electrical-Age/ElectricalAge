@@ -76,10 +76,25 @@ public final class Bench {
         return this;
     }
 
+    /**
+     * The ambient the machines' heat models cool to, degrees C (default MachineSpec.AMBIENT_CELSIUS), for those there
+     * and those added later; a machine not yet stepped starts at it.
+     */
+    public Bench ambientCelsius(double celsius) {
+        checkThread();
+        if (!Double.isFinite(celsius)) throw new IllegalArgumentException("ambient must be finite, got " + celsius);
+        ambientCelsius = celsius;
+        for (BenchMachine m : machines) m.core.setAmbientCelsius(celsius);
+        return this;
+    }
+
+    private double ambientCelsius = MachineSpec.AMBIENT_CELSIUS;
+
     /** Connects a machine to the bus. */
     public BenchMachine add(MachineSpec spec) {
         checkThread();
         MachineCore core = new MachineCore(spec);
+        core.setAmbientCelsius(ambientCelsius);
         MnaMachine mna = new MnaMachine(core, bus);
         mna.addTo(sim);
         mna.applyBeforeStep();

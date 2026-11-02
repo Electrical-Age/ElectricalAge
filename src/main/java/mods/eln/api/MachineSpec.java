@@ -34,16 +34,21 @@ public final class MachineSpec {
     }
 
     /**
-     * A first-order heat model: heat capacity (J/K), loss to ambient (W/K) and the temperature that trips the
-     * machine (degrees C). The time constant is heatCapacityJPerK / heatLossWPerK seconds. Heat in: a consumer's
-     * idle watts and the delivered energy its buffer couldn't hold, a producer's droop loss, and Machine.heatJoules.
+     * A first-order heat model: heat capacity (J/K), loss to ambient (W/K), the temperature that trips the machine
+     * (degrees C) and how far under it (K) a trip resets. The time constant is heatCapacityJPerK / heatLossWPerK
+     * seconds. Heat in: a consumer's idle watts and the delivered energy its buffer couldn't hold, a producer's droop
+     * loss, and Machine.heatJoules. It starts at and cools to the ambient where the machine stands (EA's Ambient, by
+     * biome and depth, for an element; the bench's setting on a Bench).
      */
-    public record Thermal(double heatCapacityJPerK, double heatLossWPerK, double overheatCelsius) {
+    public record Thermal(double heatCapacityJPerK, double heatLossWPerK, double overheatCelsius, double overheatResetKelvin) {
     }
 
-    /** The ambient temperature the heat model starts at and cools to, degrees C. */
+    /** The nominal ambient, degrees C: a heat model's limits are checked against it; machines use the world's. */
     public static final double AMBIENT_CELSIUS = 20;
-    /** An overheat trip resets only this far (K) below its trip point (or halfway to ambient, if that is nearer). */
+    /**
+     * By default an overheat trip resets only this far (K) below its trip point (or halfway to ambient, if that is
+     * nearer: a hot place still resets); see Builder.overheatResetKelvin.
+     */
     public static final double OVERHEAT_RESET_KELVIN = 10;
     /** The shortest trip cooldown build() accepts, s: shorter lets a trip chatter. */
     public static final double MIN_TRIP_COOLDOWN_SECONDS = 0.5;
@@ -69,7 +74,7 @@ public final class MachineSpec {
         brownout = b.brownout;
         tripCooldownSeconds = b.tripCooldownSeconds;
         burnsOnOvervoltage = b.burnsOnOvervoltage;
-        thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatCelsius) : null;
+        thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatCelsius, b.overheatResetKelvin) : null;
         this.powerFaces = Collections.unmodifiableSet(EnumSet.copyOf(powerFaces));
         signalsIn = List.copyOf(b.signalsIn);
         signalsOut = List.copyOf(b.signalsOut);
@@ -169,7 +174,8 @@ public final class MachineSpec {
         private final double nominalVolts;
         private double ratedWatts, idleWatts = 0, minVoltageRatio = 0.75, tripCooldownSeconds = 3;
         private double heatCapacityJPerK = Double.NaN, heatLossWPerK = Double.NaN, overheatCelsius = Double.NaN;
-        private boolean ratedSet, idleSet, minSet, heatSet, burnsOnOvervoltage;
+        private double overheatResetKelvin = OVERHEAT_RESET_KELVIN;
+        private boolean ratedSet, idleSet, minSet, heatSet, resetSet, burnsOnOvervoltage;
         private Brownout brownout = Brownout.STOP;
         private boolean brownoutSet;
         private Set<RelativeFace> power;
@@ -240,10 +246,23 @@ public final class MachineSpec {
             return this;
         }
 
-        /** The temperature that trips OVERHEAT_TRIPPED, degrees C, above 30 (see heatCapacityJPerK). */
+        /**
+         * The temperature that trips OVERHEAT_TRIPPED, degrees C, above the nominal ambient plus the reset band (30 by
+         * default; see heatCapacityJPerK).
+         */
         public Builder overheatCelsius(double celsius) {
             overheatCelsius = celsius;
             heatSet = true;
+            return this;
+        }
+
+        /**
+         * How far (K, positive) under overheatCelsius an overheat trip resets, after its cooldown; default
+         * OVERHEAT_RESET_KELVIN (10). Part of the heat model: needs heatCapacityJPerK and the rest.
+         */
+        public Builder overheatResetKelvin(double kelvin) {
+            overheatResetKelvin = kelvin;
+            resetSet = true;
             return this;
         }
 
@@ -324,11 +343,14 @@ public final class MachineSpec {
                     errors.add("heatCapacityJPerK must be positive and finite" + got(heatCapacityJPerK));
                 if (!(Double.isFinite(heatLossWPerK) && heatLossWPerK > 0))
                     errors.add("heatLossWPerK must be positive and finite" + got(heatLossWPerK));
-                if (!(Double.isFinite(overheatCelsius) && overheatCelsius > AMBIENT_CELSIUS + OVERHEAT_RESET_KELVIN))
-                    errors.add("overheatCelsius must be above " + (AMBIENT_CELSIUS + OVERHEAT_RESET_KELVIN)
-                        + " C (ambient " + AMBIENT_CELSIUS + " C plus the " + OVERHEAT_RESET_KELVIN
+                if (!(Double.isFinite(overheatResetKelvin) && overheatResetKelvin > 0))
+                    errors.add("overheatResetKelvin must be positive and finite, got " + overheatResetKelvin);
+                else if (!(Double.isFinite(overheatCelsius) && overheatCelsius > AMBIENT_CELSIUS + overheatResetKelvin))
+                    errors.add("overheatCelsius must be above " + (AMBIENT_CELSIUS + overheatResetKelvin)
+                        + " C (ambient " + AMBIENT_CELSIUS + " C plus the " + overheatResetKelvin
                         + " K reset band)" + got(overheatCelsius));
-            }
+            } else if (resetSet) errors.add("overheatResetKelvin is part of the heat model: set heatCapacityJPerK, "
+                + "heatLossWPerK and overheatCelsius too");
 
             // signal names, then one role per face (or per cable position on it)
             Set<String> names = new HashSet<>();

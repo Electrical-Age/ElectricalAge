@@ -79,6 +79,11 @@ public final class Machines {
             }
 
             @Override
+            public double ambientCelsius() {
+                return element.ambient + mods.eln.sim.PhysicalConstant.Tamb;   // (stamped from Ambient as it joins the simulation)
+            }
+
+            @Override
             public double signalRs() {
                 return ElnDeviceRegistry.signalCableDescriptor.electricalRs;
             }

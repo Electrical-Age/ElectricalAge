@@ -80,6 +80,12 @@ public class ElementHostTest {
             return 0.1;
         }
 
+        double ambient = 20;
+
+        public double ambientCelsius() {
+            return ambient;
+        }
+
         void joinTo(Simulator sim) {
             for (State l : loads) sim.addElectricalLoad(l);
             sim.addAllElectricalComponent(components);
@@ -278,6 +284,16 @@ public class ElementHostTest {
         CompoundTag d = new CompoundTag();
         INBT.write(f, d);
         assertEquals(a, d);
+    }
+
+    /** The heat model cools to the element's ambient (EA's Ambient where it stands), taken up at the first tick. */
+    @Test
+    void heatFollowsTheElementsAmbient() {
+        Element e = new Element();
+        e.ambient = -10;   // snowy peaks
+        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build());
+        e.slowPre.get(0).process(0.05);
+        assertEquals(-10, m.celsius(), 1e-12);
     }
 
     /** The element's failure path burns it; while the element is burnt the core stays so, and it comes back unburnt. */
