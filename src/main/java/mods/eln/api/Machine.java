@@ -15,8 +15,9 @@ public interface Machine extends MachineView {
     /**
      * Takes exactly joules from the buffer and returns true, or takes nothing and returns false (not RUNNING, or
      * not enough yet). Use it for steps that need all their energy, like a recipe. The ask sizes next tick's load
-     * either way, capped at ratedJoulesPerTick() (a bigger ask is logged once). Asking more than the buffer can
-     * ever hold (2 x ratedJoulesPerTick()) throws IllegalArgumentException, since it could never succeed.
+     * either way, capped at ratedJoulesPerTick() (a bigger step is fine, it just waits longer); retrying a failed
+     * step in the same tick is not more demand. Asking more than the buffer can ever hold
+     * (2 x ratedJoulesPerTick()) throws IllegalArgumentException, since it could never succeed.
      */
     boolean tryTakeJoules(double joules);
 
