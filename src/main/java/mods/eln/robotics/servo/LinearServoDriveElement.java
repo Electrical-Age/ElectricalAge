@@ -161,7 +161,9 @@ public class LinearServoDriveElement extends TransparentNodeElement {
             BlockPos r = p.relative(ax, i);
             for (var d : net.minecraft.core.Direction.values()) {
                 if (d.getAxis() == ax.getAxis() || d == carSide()) continue;
-                var s = level.getBlockState(r.relative(d));
+                BlockPos m = r.relative(d);
+                if (!level.isLoaded(m)) return;   // (a marker's chunk not there: keep the stations as they were)
+                var s = level.getBlockState(m);
                 if (s.getBlock() instanceof StationMarkerBlock && s.getValue(StationMarkerBlock.FACING) == d) marks.add(i);
             }
         }
