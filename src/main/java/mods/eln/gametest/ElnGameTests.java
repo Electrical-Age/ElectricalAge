@@ -166,7 +166,7 @@ public final class ElnGameTests {
     }
 
     /**
-     * Save/load round trip of every node in the test's bounds, in the state the case left it (1.12 selftest
+     * Save/load round trip of every saved node (mustBeSaved) in the test's bounds, in the state the case left it (1.12 selftest
      * persistence pass): only live sim state (voltages, switch-resistor states) may differ.
      */
     static void persistence(GameTestHelper helper, GameTestContext ctx) {
@@ -175,6 +175,7 @@ public final class ElnGameTests {
         for (mods.eln.node.NodeBase n : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
             if (n.isDestructing() || n.coordonate.dimention != mods.eln.misc.Dimensions.id(helper.getLevel())) continue;
             if (!bounds.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) continue;
+            if (!n.mustBeSaved()) continue;   // (ghost and hosted-machine nodes: never in a save, nothing to round-trip)
             total++;
             try {
                 Reload r = Reload.node(helper.getLevel(), n.coordonate.pos());
