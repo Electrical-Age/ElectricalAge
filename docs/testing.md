@@ -44,6 +44,10 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `gui/LayoutTest` | Layout engine; every `assets/eln/gui/*.json` has no overlaps and nothing outside its panel. |
 | `item/xray/XRayRayMarchTest` | X-ray ray march. |
 | `gametest/StructureFileTest` | The generated floor `.nbt` parses (3x3 stone floor). |
+| `robotics/motion/SegmentPropertyTest` (jqwik), `DriveTest` | Servo segments are continuous, within limits, arrive; retargets are seamless. Top speed follows the line, the draw. |
+| `robotics/motion/StationsTest` | Stations from markers or spread evenly; setpoint bands and share; the panel's next stop; block-aligned stops. |
+| `robotics/servo/RidersTest` | Who stands on a car (players a round trip late on the server); the client's carry of its own player (the pure core of `CarCarry`). |
+| `robotics/servo/SegmentPayloadTest` | The segment payload's codec round trip; the client's segment matches the server's. |
 
 ## GameTest harness (`src/main/java/mods/eln/gametest`, server)
 
@@ -89,7 +93,9 @@ wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Case
 `WorldSensorCases`, `ShaftMoreCases`, `LampSupplyCases`, `LampLightCases`, `CableSlotCases` (devices work with an empty
 inventory), `SixNodeBreakCases` (one face per break, kept-only voxel block, orphan block), `BurnChainCases` (one failure per network), `CableCases` (voxel vs six-node cables,
 currents agree to 0.1%), `PipeCases`, `OilCases`, `TurretCases`, `OreDropCases`, `ItemCapabilityCases` (hoppers/pipes),
-`TooltipCases`, `PortHelperCases` (fuel, smelting, `eln:light`, waterlogged six-node block).
+`TooltipCases`, `PortHelperCases` (fuel, smelting, `eln:light`, waterlogged six-node block), `ServoCases` (the elevator:
+to a station and in position, slower on a sagging line, stopped by an obstruction, reloaded mid-move, floor ghost, a mob
+carried; structure `floor_11x10x5`).
 
 ### Golden data (`golden/1.12/*.json`, see `golden/README.md`)
 

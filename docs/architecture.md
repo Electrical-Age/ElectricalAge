@@ -41,6 +41,7 @@ Tick data flow: `ServerTickEvent.Pre` -> `Simulator.tick()` (see simulation.md) 
 | `server`, `compat` | saves, tick listener, player keys; NeoForge shims (`WorldCompat`...) and `compat/jade` |
 | `misc`, `fsm`, `solver`, `i18n`, `wiki` | utilities (Coordonate, Direction, LRDU, Obj3D, Utils), state machines, signal-math expression parser, `I18N.tr`, wiki data |
 | `datagen` | lang, tags, recipes, item models -> `src/generated/resources` (committed) |
+| `robotics` | the servo layer, kept apart (own registers in `Robotics`, an `ElnContent` in `Eln.CONTENT`) so it can become a subproject: `motion` (pure: `Segment`, `Drive`, `Stations`), `servo` (Linear Servo Drive node, `ServoRailBlock`, `StationMarkerBlock`, `ElevatorCar` + `ElevatorPanel` part, `Riders`, `SegmentPayload`), `client` (car renderer, `CarCarry`), `mixin` (floating kick) |
 | `gametest` | in-game tests and `/elnlab` lab commands (see testing.md) |
 
 Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to the Java ones under `src/main/java`

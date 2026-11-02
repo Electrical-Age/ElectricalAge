@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "p": "#eln:high_quality_plates/iron"
+  },
+  "pattern": [
+    "IpI",
+    "IpI",
+    "IpI"
+  ],
+  "result": {
+    "count": 8,
+    "id": "eln:servo_rail"
+  }
+}

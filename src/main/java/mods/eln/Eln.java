@@ -112,7 +112,8 @@ public class Eln {
         new mods.eln.registry.batch.Wp12bContent(),
         new mods.eln.registry.batch.Wp12cContent(),
         new mods.eln.registry.batch.Wp12dContent(),
-        new mods.eln.registry.batch.Wp12eContent());
+        new mods.eln.registry.batch.Wp12eContent(),
+        new mods.eln.robotics.Robotics());   // (26.x: the servo layer, Baughn 2026-11-02)
 
     // EA packet ids (first byte of an ElnNet.Data payload), as in 1.12
     public static final byte packetPlayerKey = 14;
@@ -315,6 +316,7 @@ public class Eln {
         mods.eln.registry.ElnDeviceRegistry.registerBatch1();
         for (ElnContent c : CONTENT) c.preInit();
         mods.eln.registry.ElnRegistry.register(modBus);
+        mods.eln.robotics.Robotics.register(modBus);
         mods.eln.item.belt.CuriosCompat.register(modBus);
         mods.eln.oil.Oil.register(modBus);
         mods.eln.sound.ElnSounds.register(modBus);

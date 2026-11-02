@@ -26,6 +26,7 @@ public final class ElnClient {
         mods.eln.sound.SoundCommand.clientPlayer = mods.eln.sound.SoundClient::play;
         UtilsClient.hooks = new ClientHooks();
         ClientRenders.registerAll();
+        mods.eln.robotics.client.RoboticsClient.register(modBus);
         // oil: crude (still/flowing) and lake oil, opaque (AdventurAgent: tinted water textures let the lake bed show through)
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent.class, e -> {
             var tint = net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFFFFFFFF);

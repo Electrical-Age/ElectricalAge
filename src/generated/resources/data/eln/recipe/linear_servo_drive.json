@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:machine_block",
+    "S": "eln:signal_cable",
+    "V": "eln:medium_voltage_cable",
+    "m": "eln:electrical_motor",
+    "p": "#eln:high_quality_plates/iron"
+  },
+  "pattern": [
+    "pmp",
+    "SBS",
+    "pVp"
+  ],
+  "result": {
+    "id": "eln:linear_servo_drive"
+  }
+}

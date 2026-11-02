@@ -24,6 +24,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_kit_large_alloy", "Large Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"), Map.entry("pipe_pressure_sensor", "Pipe Pressure Sensor"), Map.entry("pipe_temperature_sensor", "Pipe Temperature Sensor"), Map.entry("pipe_quality_sensor", "Pipe Steam Quality Sensor"), Map.entry("pipe_pressure_valve", "Pipe Pressure Valve"), Map.entry("battery_belt", "Battery Belt"), Map.entry("headlamp", "Headlamp"), Map.entry("electric_bike", "Electric Bike"), Map.entry("terrain_bike", "Terrain Bike"),
         Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
         Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("cable_kit_bus", "Field Bus Cable Kit"), Map.entry("field_bus_cable", "Field Bus Cable"), Map.entry("chisel", "Chisel"), Map.entry("handbook", "Electrical Engineer's Ledger"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("capacitor_cell", "Capacitor Cell"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
+        Map.entry("servo_rail", "Servo Rail"), Map.entry("station_marker", "Station Marker"),
         Map.entry("item_creative_tab", "Electrical Age"));
 
     public ElnLang(PackOutput output) {
@@ -113,12 +114,15 @@ public class ElnLang extends LanguageProvider {
             if (name == null && item instanceof IDescriptorItem d && d.getEaDescriptor() != null) name = descriptorName(d.getEaDescriptor());
             if (name == null) throw new IllegalStateException("ElnLang: no English name for eln:" + path);
             add(item, name);
-            if (item instanceof BlockItem b && BuiltInRegistries.BLOCK.getKey(b.getBlock()).getNamespace().equals(Eln.MODID))
+            // (a plain BlockItem's name is its block's: one key for both)
+            if (item instanceof BlockItem b && BuiltInRegistries.BLOCK.getKey(b.getBlock()).getNamespace().equals(Eln.MODID)
+                && !b.getBlock().getDescriptionId().equals(item.getDescriptionId()))
                 add(b.getBlock(), name);
         }
         add(ElnRegistry.REPLICATOR.get(), "Replicator");
         add(ElnRegistry.ELECTRIC_BIKE_ENTITY.get(), "Electric Bike");
         add(ElnRegistry.TERRAIN_BIKE_ENTITY.get(), "Terrain Bike");
+        add(mods.eln.robotics.Robotics.ELEVATOR_CAR.get(), "Elevator Car");
         add(ElnRegistry.SIX_NODE_BLOCK.get(), "Electrical Age Device");
         add(ElnRegistry.VOXEL_NODE_BLOCK.get(), "Pipes and Cables");
         add(ElnRegistry.VOXEL_NODE_WOODEN_FENCE.get(), "Pipes and Cables");

@@ -167,6 +167,37 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   GuideME optional). Book + 4 copper cables; every player gets one once, when a slot is free (persisted NBT
   `eln_handbook_given`). EA ships a stub start page; a content mod adds pages under `guides/eln/handbook/` in its own
   namespace and calls `Handbook.setStartPage` (`mods/eln/handbook`, `HandbookCases`).
+- New in 26.x: the servo layer (`mods/eln/robotics`; Baughn 2026-11-02: the servo layer first, 200 V only, players ride
+  the carriage now: "an elevator would be the earliest truly useful output"). The first device is an elevator:
+  - A Linear Servo Drive (`eln:transparent_node@5504`) with a Servo Rail mast on its top, 2 to 32 blocks, moves an
+    elevator car (an entity, a 1x1 floor plate with a frame) up and down on the drive's front side. The car's floor
+    stops level with the drive's foot at the bottom and with the top rail block at the top.
+  - Stops: Station Markers fixed to the mast's side (or the drive's), one per floor, each a stop at its own height;
+    clicking one calls the car. With no markers, up to eight stops spread evenly. Riding, the car's panel sends it a
+    station up (top half) or down (bottom half). Every planned stop is on a whole block.
+  - Connections: 200 V on the back. Seen from the car's side, the left flank takes the setpoint on a floor cable and
+    gives in-position on a ceiling cable; the right flank takes enable on a floor cable (unconnected counts as enabled)
+    and gives the fault signal on a ceiling cable. Two signals a flank because the front is the shaft. A connected
+    setpoint overrides the markers and the panel (its eight bands pick stations; an empty hand on the drive switches it
+    to a share of the travel, to the nearest block).
+  - Motion: 2 m/s at 200 V, 1 m/s^2, slower on a lower line voltage (none below 60 V); a sag mid-move retargets the move
+    to the lower top speed. Draw: 40 W idle plus the lifting work over 80 % (a counterweight balances the car and 40 kg;
+    players count 80 kg, other creatures by size). The losses heat the motor: past 80 K over ambient it faults and holds
+    until it is back under 50 K. It never burns.
+  - Safety: before each step the car and its riders are swept to the next position; a block or a creature that isn't
+    riding stops it dead (fault; it clears on the next call or an enable toggle). Disabled, it stops at the next whole
+    block it can; a dead line brakes it where it can.
+  - Sync (design: Argon's review): the drive owns the motion (a Segment on its own saved clock, which stops while its
+    chunks are unloaded) and places the car on the server; clients get the segment (`SegmentPayload`) and run it on a
+    local clock, carrying their own player after its tick. The car has no vanilla position sync and is not saved. On
+    the server it is solid to mobs and items, which it carries, but not to players, whose positions there are a round
+    trip late. A stopped car has a floor ghost under its plate (a player logging in on it stands on that). A mixin
+    keeps a rider from the floating kick when allow-flight is off.
+  - Departures from the design: the panel is a part entity (the car's collider is only its plate, so the plate can't
+    also be the panel's hitbox); joiners get the segment in the car's pairing bundle rather than in startSeenByPlayer
+    (which runs after the spawn bundle); on the server, riders' sweep is clipped to the car's column (a rider's
+    overhang meets the landing, it doesn't fault the car) and a player up to 1 m off the top (a round trip late) still counts as a rider.
+  - Tests: `ServoCases`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
 
 ## Behaviour changes vs 1.12
 
@@ -273,6 +304,9 @@ In the port:
 - Config: the rest of the 1.12 balancing values.
 - Chunk baking of static device geometry (voxel nodes are already baked into the chunk mesh); only if playtests need it.
 - In-game wiki guide (`wiki/Data.java` only collects descriptor groups), ore regeneration.
+- Servo layer: horizontal rails (the car and its payload carry an axis; the drive only scans up), larger platforms, bus
+  I/O on the drive, the drive's own screen. Other players and mobs riding a car are drawn by vanilla's interpolation,
+  so they may trail the car by a tick or two; only the local player is carried in step with it.
 
 ## Open questions
 

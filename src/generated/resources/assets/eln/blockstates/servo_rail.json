@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "eln:block/servo_rail",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "eln:block/servo_rail",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "eln:block/servo_rail",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "eln:block/servo_rail",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "eln:block/servo_rail"
+    },
+    "facing=west": {
+      "model": "eln:block/servo_rail",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
