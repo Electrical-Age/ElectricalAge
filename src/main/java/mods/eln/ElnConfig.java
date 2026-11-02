@@ -12,6 +12,7 @@ public final class ElnConfig {
     static final ModConfigSpec.IntValue AUTOMINER_RANGE;
     static final ModConfigSpec.BooleanValue PROBE_DETAILS;
     static final ModConfigSpec.BooleanValue CONVERT_CABLES;
+    static final ModConfigSpec.BooleanValue INTROSPECT_REMOTE;
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
@@ -128,6 +129,11 @@ public final class ElnConfig {
                 "Also 1.12's wailaEasyMode: more detail on some machines.")
             .define("details", false);
         b.pop();
+        b.push("introspect");
+        INTROSPECT_REMOTE = b.comment("Answer an op's client asking for device reports (eln:describe), for test tools on lab servers.",
+                "/eln describe works for ops either way.")
+            .define("remote", false);
+        b.pop();
         SPEC = b.build();
     }
 
@@ -141,6 +147,7 @@ public final class ElnConfig {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
         heatFurnaceFuelFactor = HEAT_FURNACE_FUEL.get();
         Eln.wailaEasyMode = PROBE_DETAILS.get();
+        mods.eln.introspect.Introspect.remote = INTROSPECT_REMOTE.get();
         mods.eln.node.voxel.CableConverter.convertOnLoad = CONVERT_CABLES.get();
         mods.eln.sim.Fire.COAL.lag = COAL_LAG.get();
         mods.eln.sim.Fire.COAL.kindle = COAL_KINDLE.get();

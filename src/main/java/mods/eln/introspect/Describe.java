@@ -41,28 +41,48 @@ public final class Describe {
     private Describe() {
     }
 
-    /** Everything EA has at pos: a transparent device, each six-node element (by face or slot), each voxel part. A ghost
-     *  block answers with its device, marked {@code via_ghost}. Empty: nothing of EA's there. */
+    /** Everything EA has at pos: a transparent device, each six-node element (by face or slot), each voxel part, or
+     *  another kind of node. A ghost block answers with its device too, marked {@code via_ghost}. Empty: nothing of
+     *  EA's there. */
     public static List<Report> at(ServerLevel level, BlockPos pos) {
         List<Report> out = new ArrayList<>();
         Coordonate at = new Coordonate(pos, level);
         NodeBase node = NodeManager.instance == null ? null : NodeManager.instance.getNodeFromCoordonate(at);
-        String viaGhost = null;
-        if (node == null && Eln.ghostManager != null) {
-            var ghost = Eln.ghostManager.getGhost(at);
-            if (ghost != null && ghost.getObservatorCoordonate() != null) {
-                node = NodeManager.instance.getNodeFromCoordonate(ghost.getObservatorCoordonate());
-                viaGhost = pos.getX() + "," + pos.getY() + "," + pos.getZ();
+        if (node != null) node(node, out);
+        // a ghost block (a multiblock's filler, which may host a node of its own, e.g. a power port) answers with its device too
+        var ghost = Eln.ghostManager == null ? null : Eln.ghostManager.getGhost(at);
+        if (ghost != null && ghost.getObservatorCoordonate() != null && NodeManager.instance != null) {
+            NodeBase device = NodeManager.instance.getNodeFromCoordonate(ghost.getObservatorCoordonate());
+            if (device != null && device != node) {
+                List<Report> via = new ArrayList<>();
+                node(device, via);
+                for (Report r : via) r.id().ref("via_ghost", pos.getX() + "," + pos.getY() + "," + pos.getZ());
+                out.addAll(via);
             }
         }
-        if (node == null) return out;
+        return out;
+    }
+
+    private static void node(NodeBase node, List<Report> out) {
+        int before = out.size();
         if (node instanceof TransparentNode tn && tn.element != null) out.add(transparent(tn.element, node));
         if (node instanceof SixNode six)
             for (SixNodeElement e : six.sideElementList) if (e != null) out.add(six(e, node));
         if (node instanceof VoxelNode v)
             for (int i = 0; i < v.parts.size(); i++) out.add(part(v, i));
-        if (viaGhost != null) for (Report r : out) r.id().ref("via_ghost", viaGhost);
-        return out;
+        if (out.size() == before) out.add(other(node));
+    }
+
+    /** A node of another kind (e.g. a machine's power port node): what it is and where; it may describe itself. */
+    static Report other(NodeBase node) {
+        Report r = new Report(Report.Half.SERVER);
+        r.id().text(Keys.KIND, "eln:" + Describe.snake(node.getClass().getSimpleName()));
+        r.id().text(Keys.NODE, "other");
+        r.id().ref(Keys.POS, node.coordonate.x + "," + node.coordonate.y + "," + node.coordonate.z);
+        r.id().bool("in_simulation", node.isAdded());
+        r.id().text(Keys.ELEMENT, node.getClass().getSimpleName());
+        if (node instanceof Describable d) own(r, d);
+        return r;
     }
 
     public static Report entity(Entity e) {
@@ -83,11 +103,12 @@ public final class Describe {
         r.id().text(Keys.ELEMENT, e.getClass().getSimpleName());
         guard(r, () -> {
             loads(r, e.electricalLoadList, e.thermalLoadList);
-            Map<Object, String> names = loadNames(e.electricalLoadList, e.thermalLoadList);
+            Ports p = new Ports(loadNames(e.electricalLoadList, e.thermalLoadList));
             for (mods.eln.misc.Direction d : mods.eln.misc.Direction.values())
                 for (LRDU l : LRDU.values())
-                    port(r, names, d.name().toLowerCase(Locale.ROOT) + "_" + l.name().toLowerCase(Locale.ROOT),
+                    p.add(d.name().toLowerCase(Locale.ROOT) + "_" + l.name().toLowerCase(Locale.ROOT),
                         e.getConnectionMask(d, l), e.getElectricalLoad(d, l), e.getThermalLoad(d, l));
+            p.to(r);
         });
         guard(r, () -> legacy(r, e.getWaila()));
         if (e.transparentNodeDescriptor instanceof DescribableSpec s) guard(r, () -> s.describeSpec(r.spec()));
@@ -104,9 +125,10 @@ public final class Describe {
         r.id().text(Keys.ELEMENT, e.getClass().getSimpleName());
         guard(r, () -> {
             loads(r, e.electricalLoadList, e.thermalLoadList);
-            Map<Object, String> names = loadNames(e.electricalLoadList, e.thermalLoadList);
+            Ports p = new Ports(loadNames(e.electricalLoadList, e.thermalLoadList));
             for (LRDU l : LRDU.values())
-                port(r, names, l.name().toLowerCase(Locale.ROOT), e.getConnectionMask(l), e.getElectricalLoad(l), e.getThermalLoad(l));
+                p.add(l.name().toLowerCase(Locale.ROOT), e.getConnectionMask(l), e.getElectricalLoad(l), e.getThermalLoad(l));
+            p.to(r);
         });
         guard(r, () -> legacy(r, e.getWaila()));
         if (e.sixNodeElementDescriptor instanceof DescribableSpec s) guard(r, () -> s.describeSpec(r.spec()));
@@ -203,17 +225,44 @@ public final class Describe {
         return Keys.valid(k) ? k : "";
     }
 
-    /** A port where the element answers with a load or a mask on that side. Connection state isn't known here (null). */
-    private static void port(Report r, Map<Object, String> names, String side, int mask, ElectricalLoad el, ThermalLoad th) {
-        if (mask == 0 && el == null && th == null) return;
-        Port.Kind kind = (mask & NodeBase.maskThermal) != 0 && el == null ? Port.Kind.THERMAL
-            : (mask & (NodeBase.maskElectricalGate | NodeBase.maskSignal)) != 0 ? Port.Kind.SIGNAL
-            : (mask & NodeBase.maskElectricalPower) != 0 ? Port.Kind.POWER
-            : th != null && el == null ? Port.Kind.THERMAL : Port.Kind.POWER;
-        Num value = el != null ? Report.value(el.getU(), Unit.V) : th != null ? Report.value(th.getT() + PhysicalConstant.Tamb, Unit.C) : null;
-        String load = el != null ? names.get(el) : th != null ? names.get(th) : null;
-        String name = (load != null ? load : kind.name().toLowerCase(Locale.ROOT)) + "_" + side;
-        r.port(name, kind, side, null, value);
+    /**
+     * The default ports: one per load an element connects on some side (its connection mask there isn't 0), named by
+     * the load, with the sides it connects on ("xp_left zn_up"). Connection state isn't known here (null).
+     */
+    private static final class Ports {
+        final Map<Object, String> names;
+        final Map<Object, Port.Kind> kinds = new java.util.LinkedHashMap<>();
+        final Map<Object, List<String>> sides = new IdentityHashMap<>();
+        final Map<Object, Num> values = new IdentityHashMap<>();
+
+        Ports(Map<Object, String> names) {
+            this.names = names;
+        }
+
+        void add(String side, int mask, ElectricalLoad el, ThermalLoad th) {
+            if (mask == 0) return;
+            Object load = el != null ? el : th;
+            if (load == null) return;
+            Port.Kind kind = el == null ? Port.Kind.THERMAL
+                : (mask & (NodeBase.maskElectricalGate | NodeBase.maskSignal)) != 0 && (mask & NodeBase.maskElectricalPower) == 0 ? Port.Kind.SIGNAL
+                : Port.Kind.POWER;
+            if (!kinds.containsKey(load)) {
+                kinds.put(load, kind);
+                sides.put(load, new ArrayList<>());
+                values.put(load, el != null ? Report.value(el.getU(), Unit.V) : Report.value(th.getT() + PhysicalConstant.Tamb, Unit.C));
+            }
+            sides.get(load).add(side);
+        }
+
+        void to(Report r) {
+            int n = 0;
+            for (var e : kinds.entrySet()) {
+                String name = names.get(e.getKey());
+                if (name == null) name = e.getValue().name().toLowerCase(Locale.ROOT) + "_" + n;
+                n++;
+                r.port(name, e.getValue(), String.join(" ", sides.get(e.getKey())), null, values.get(e.getKey()));
+            }
+        }
     }
 
     /** The Jade lines, as "label: value" texts in order (legacy.lines). */
