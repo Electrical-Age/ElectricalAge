@@ -159,10 +159,13 @@ public final class MachineCore implements MachineView {
     public record Saved(double bufferJoules, double celsius, MachineState state, int tripTicks, TripCause lastTrip) {
     }
 
-    /** The machine's lasting state: its buffer, temperature, a trip in progress and the last trip. */
+    /**
+     * The machine's lasting state: its buffer, temperature, a trip in progress and the last trip. A burn is not kept
+     * as a trip (the host keeps that the machine burnt; repaired, it starts UNPOWERED as repair() leaves it).
+     */
     public Saved snapshot() {
-        return new Saved(buffer, celsius, state.tripped() ? state : MachineState.UNPOWERED,
-            state.tripped() ? tripTimer : 0, lastTrip);
+        boolean trip = state.tripped() && !burnt;
+        return new Saved(buffer, celsius, trip ? state : MachineState.UNPOWERED, trip ? tripTimer : 0, lastTrip);
     }
 
     /**

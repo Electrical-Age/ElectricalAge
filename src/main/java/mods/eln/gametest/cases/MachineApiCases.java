@@ -285,7 +285,7 @@ public final class MachineApiCases {
     static final class BurnCase implements TestCase {
         ElectricalMachineElement m;
         ElectricalSourceElement src;
-        boolean burnt;
+        boolean burnt, burntAfterLoad;
 
         public String name() {
             return "machine api burns and is repaired";
@@ -307,6 +307,13 @@ public final class MachineApiCases {
             m.getInventory().setChanged();
             ctx.after(40, () -> {
                 burnt = m.isBurnt();
+                try {   // saved and loaded while burnt: still burnt, and a repair is all it needs
+                    Reload.node(ctx.level(), ctx.at(2, 1, 1));
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+                m = element(ctx, ctx.at(2, 1, 1));
+                burntAfterLoad = m.isBurnt();
                 src.networkUnserialize(ctx.stream(out -> {
                     out.writeByte(ElectricalSourceElement.setVoltageId);
                     out.writeFloat(50f);
@@ -317,6 +324,7 @@ public final class MachineApiCases {
 
         public void measure(TestContext ctx) {
             ctx.check("80 V on a 50 V machine burns it", burnt, "");
+            ctx.check("burnt, it loads burnt", burntAfterLoad, "");
             ctx.check("the burn was an overvoltage", m.machine.lastTrip().map(t -> t.burns() && t.state() == MachineState.OVERVOLTAGE_TRIPPED).orElse(false),
                 "" + m.machine.lastTrip());
             ctx.check("repaired, it runs again", !m.isBurnt() && m.machine.state() == MachineState.RUNNING

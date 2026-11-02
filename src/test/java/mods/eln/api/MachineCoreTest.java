@@ -377,6 +377,7 @@ public class MachineCoreTest {
         double[] ohms = {Double.POSITIVE_INFINITY};
         step(c, 70, ohms);
         assertTrue(c.burnt());
+        assertEquals(MachineState.UNPOWERED, c.snapshot().state(), "a burn is the host's to keep, not a trip to wait out");
         c.repair();
         assertFalse(c.burnt());
         powerUp(c, 50, ohms);
