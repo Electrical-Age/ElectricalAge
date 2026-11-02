@@ -20,7 +20,7 @@ import static mods.eln.i18n.I18N.tr;
  * the car's side (front.left()), the left flank has the setpoint (in) and in-position (out), the right flank enable (in)
  * and fault (out). Model: mods.eln.cad.models.ServoParts.
  */
-public class LinearServoDriveDescriptor extends TransparentNodeDescriptor {
+public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implements mods.eln.introspect.DescribableSpec {
     /** Rail length it drives, in blocks (the car's travel). */
     public static final int MIN_TRAVEL = 2, MAX_TRAVEL = 32;
     /**
@@ -86,5 +86,17 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Moves an elevator car along a Servo Rail\nset on its top, %1$ to %2$ blocks long.\nThe car rides on its front side.\n200V power on the back.\nSeen from the car's side, left flank:\nsetpoint in on a floor cable,\nin position out on a ceiling cable.\nRight flank: enable in on a floor cable,\nfault out on a ceiling cable.",
             MIN_TRAVEL, MAX_TRAVEL).split("\n"));
+    }
+
+    @Override
+    public void describeSpec(mods.eln.introspect.Section spec) {
+        spec.num(mods.eln.introspect.Keys.NOMINAL_VOLTAGE, drive.nominalVolts(), mods.eln.introspect.Unit.V);
+        spec.num(mods.eln.introspect.Keys.MAX_SPEED, drive.vmaxNominal(), mods.eln.introspect.Unit.M_PER_S);
+        spec.num(mods.eln.introspect.Keys.ACCELERATION, drive.accel(), mods.eln.introspect.Unit.M_PER_S2);
+        spec.num(mods.eln.introspect.Keys.IDLE_POWER, drive.idleWatts(), mods.eln.introspect.Unit.W);
+        spec.num(mods.eln.introspect.Keys.EFFICIENCY, drive.efficiency(), mods.eln.introspect.Unit.RATIO);
+        spec.integer(mods.eln.introspect.Keys.TRAVEL_MIN, MIN_TRAVEL);
+        spec.integer(mods.eln.introspect.Keys.TRAVEL_MAX, MAX_TRAVEL);
+        spec.num("counterweight", counterweightKg, mods.eln.introspect.Unit.KG);
     }
 }

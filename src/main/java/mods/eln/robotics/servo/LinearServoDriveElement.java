@@ -62,7 +62,7 @@ import java.util.UUID;
  * (Drive), the losses heating the motor; too hot, it faults and holds until it cools (it doesn't burn). Its top speed
  * follows the line voltage, so a weak supply makes a slower car, and a move under way slows when the line sags.
  */
-public class LinearServoDriveElement extends TransparentNodeElement {
+public class LinearServoDriveElement extends TransparentNodeElement implements mods.eln.introspect.Describable {
     /** What it shows (publish, lamp, Jade). */
     public static final byte IDLE = 0, IN_POSITION = 1, MOVING = 2, FAULT = 3;
     /** Why it stopped. OBSTRUCTED holds until the next command; the others clear themselves. */
@@ -591,5 +591,31 @@ public class LinearServoDriveElement extends TransparentNodeElement {
             default -> LinearServoDriveDescriptor.vmaxPerTick(power.getU()) <= 0 ? I18N.tr("No power")
                 : !enabled() ? I18N.tr("Disabled") : movingAt(clock) ? I18N.tr("Moving") : I18N.tr("In position");
         };
+    }
+
+    /** Statuses and faults by name, in their byte order (introspect). */
+    static final java.util.List<String> STATUS_NAMES = java.util.List.of("idle", "in_position", "moving", "fault"),
+        FAULT_NAMES = java.util.List.of("none", "obstructed", "overheat", "no_rail");
+
+    @Override
+    public void describe(mods.eln.introspect.Report r) {
+        var st = r.state();
+        st.choice(mods.eln.introspect.Keys.STATUS, STATUS_NAMES.get(status()), STATUS_NAMES);
+        st.num(mods.eln.introspect.Keys.POSITION, posAt(clock), mods.eln.introspect.Unit.M).range(0, Math.max(0, travel));
+        st.num(mods.eln.introspect.Keys.TARGET, target, mods.eln.introspect.Unit.M);
+        st.num(mods.eln.introspect.Keys.SPEED, speed, mods.eln.introspect.Unit.M_PER_S);
+        st.num(mods.eln.introspect.Keys.POWER, drawW, mods.eln.introspect.Unit.W);
+        st.num(mods.eln.introspect.Keys.LOAD, loadKg, mods.eln.introspect.Unit.KG);
+        st.integer("travel", travel);
+        List<mods.eln.introspect.Value> at = new ArrayList<>();
+        for (int s : stations) at.add(new mods.eln.introspect.Value.Int(s));
+        st.list("stations", at);
+        st.choice("setpoint_mode", proportional ? "proportional" : "station", java.util.List.of("station", "proportional"));
+        st.bool(mods.eln.introspect.Keys.ENABLED, enabled());
+        st.num("clock", clock, mods.eln.introspect.Unit.TICK);
+        if (carId != null) st.ref("car", carId.toString());
+        // the render shows the status lamp from the published byte: both halves must agree on it
+        r.sync().choice(mods.eln.introspect.Keys.STATUS, STATUS_NAMES.get(status()), STATUS_NAMES);
+        if (fault != NO_FAULT) r.fault(FAULT_NAMES.get(fault), stateText());
     }
 }

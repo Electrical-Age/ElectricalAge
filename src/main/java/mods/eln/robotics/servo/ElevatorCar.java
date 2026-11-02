@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  * each client places it by its own clock from the last SegmentPayload and carries its own player (client.CarCarry).
  * Vanilla's position sync is off both ways: no update interval, and the client swallows any position packet.
  */
-public class ElevatorCar extends Entity {
+public class ElevatorCar extends Entity implements mods.eln.introspect.Describable, mods.eln.introspect.ClientDescribable {
     /** The plate's thickness (m): a floor ghost's (GhostBlock.tFloor). */
     public static final double THICK = 1 / 16.0;
     /** Client: the cars in the client's level (the carry ticks them). */
@@ -248,5 +248,47 @@ public class ElevatorCar extends Entity {
     public void onRemovedFromLevel() {
         super.onRemovedFromLevel();
         CLIENT.remove(this);
+    }
+
+    // ---- introspect: the server's segment and clock against each client's
+
+    /** How many ticks a client may be behind the server when the two halves are read (a round trip and a tick). */
+    static final int SYNC_LAG_TICKS = 6;
+
+    @Override
+    public void describe(mods.eln.introspect.Report r) {
+        if (head != null) r.state().ref("head", head.getX() + "," + head.getY() + "," + head.getZ());
+        motion(r, serverNow - (segment == null ? 0 : segment.startTick()));
+    }
+
+    @Override
+    public void describeClient(mods.eln.introspect.Report r) {
+        motion(r, clientT);
+        if (segment != null && origin != null) {
+            // where the entity really stands against where its segment says (the carry and interpolation must not drift)
+            Vec3 d = position().subtract(origin);
+            double along = d.x * axis.getStepX() + d.y * axis.getStepY() + d.z * axis.getStepZ();
+            r.client().num("entity_offset", along - segment.position(clientT), mods.eln.introspect.Unit.M);
+        }
+    }
+
+    /**
+     * Sync keys of both halves, from a segment and the ticks into it: the segment itself (exact: both come from one
+     * payload), the ticks into it, and position and velocity, which may differ by SYNC_LAG_TICKS of motion.
+     */
+    private void motion(mods.eln.introspect.Report r, long dt) {
+        var sync = r.sync();
+        sync.bool("has_segment", segment != null && origin != null);
+        if (segment == null || origin == null) return;
+        double accel = segment.accel(), vmax = Math.abs(segment.vmax());
+        sync.choice("axis", axis);
+        sync.num(mods.eln.introspect.Keys.SEGMENT_START, segment.startTick(), mods.eln.introspect.Unit.TICK).tol(0);
+        var seg = sync.section("segment");
+        seg.num("from", segment.from(), mods.eln.introspect.Unit.M).tol(1e-9);
+        seg.num("to", segment.to(), mods.eln.introspect.Unit.M).tol(1e-9);
+        seg.num("vmax", segment.vmax() * 20, mods.eln.introspect.Unit.M_PER_S).tol(1e-9);
+        sync.num(mods.eln.introspect.Keys.ELAPSED, dt, mods.eln.introspect.Unit.TICK).tol(SYNC_LAG_TICKS);
+        sync.num(mods.eln.introspect.Keys.POSITION, segment.position(dt), mods.eln.introspect.Unit.M).tol(0.05 + vmax * SYNC_LAG_TICKS);
+        sync.num(mods.eln.introspect.Keys.VELOCITY, segment.velocity(dt) * 20, mods.eln.introspect.Unit.M_PER_S).tol(0.05 + accel * 20 * SYNC_LAG_TICKS);
     }
 }

@@ -8,7 +8,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 /** The Linear Servo Drive (LinearServoDriveDescriptor): the motor, its drum, and the status lamp. */
-public class LinearServoDriveRender extends TransparentNodeElementRender {
+public class LinearServoDriveRender extends TransparentNodeElementRender implements mods.eln.introspect.ClientDescribable {
     final LinearServoDriveDescriptor desc;
     public byte status;
 
@@ -31,5 +31,11 @@ public class LinearServoDriveRender extends TransparentNodeElementRender {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void describeClient(mods.eln.introspect.Report r) {
+        var names = LinearServoDriveElement.STATUS_NAMES;
+        r.sync().choice(mods.eln.introspect.Keys.STATUS, status >= 0 && status < names.size() ? names.get(status) : names.get(0), names);
     }
 }
