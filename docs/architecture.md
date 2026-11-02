@@ -42,6 +42,7 @@ Tick data flow: `ServerTickEvent.Pre` -> `Simulator.tick()` (see simulation.md) 
 | `misc`, `fsm`, `solver`, `i18n`, `wiki` | utilities (Coordonate, Direction, LRDU, Obj3D, Utils), state machines, signal-math expression parser, `I18N.tr`, wiki data |
 | `datagen` | lang, tags, recipes, item models -> `src/generated/resources` (committed) |
 | `gametest` | in-game tests and `/elnlab` lab commands (see testing.md) |
+| `api` | the machine API for other mods and new devices: `MachineSpec` (built and checked), `Tier`, `RelativeFace`, `MachineState`, `TripCause`, `Machine`/`MachineView`/`MachineBus`; no internal types in its signatures |
 
 Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to the Java ones under `src/main/java`
 (e.g. `node/published.kt`, `node/INodeElement.kt`, `mechanical/*.kt`, `sixnode/AnalogChips.kt`, `sound/LoopedSound.kt`).

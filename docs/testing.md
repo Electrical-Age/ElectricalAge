@@ -33,6 +33,7 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `sim/AuditFixesTest` | Regression tests for the 1.7.10 sim bugs fixed in the WP16 audit. |
 | `sim/FireTest` | A fire's burn level lags its setting. |
 | `sim/fluid/FluidCoreTest`, `FluidPropertyTest` | Water/steam/air properties, flash, turbine calibration; random networks conserve mass/energy, no NaN, settle. Not jqwik: own seeds, printed in the failure message. |
+| `api/MachineSpecTest` | `MachineSpec` defaults (power on every face not given a signal or the bus) and every `build()` message. |
 | `node/NodeSaveLoadTest` | Unloadable node tags (also a `LinkageError`) are kept by `NodeManager` as orphans and written back unchanged; dropped by position; a node whose save throws keeps its last good tag. |
 | `node/six/SixNodeLoadTest` | A six-node face that cannot load is kept and its side stays taken; load connects once; bad client packets ignored. |
 | `server/ElnWorldSavesTest` | Bad save files set aside, unreadable ones left and saving blocked, a whole `.tmp` preferred to the `.bak`. |
