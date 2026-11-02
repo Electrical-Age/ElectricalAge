@@ -156,6 +156,7 @@ public class LowLevelBenchTest {
         PortLink link = c.connect(a, PortRef.of(net.minecraft.core.BlockPos.ZERO, net.minecraft.core.Direction.UP, PortKind.POWER));
         b.attach(c);
         assertThrows(IllegalStateException.class, () -> b.attach(c), "once per circuit");
+        assertThrows(IllegalStateException.class, () -> c.hostAt(null), "a circuit on a bench can't be hosted too");
         b.ticks(2);
         assertEquals(PortStatus.NOT_HOSTED, link.status(), "a bench has no world");
         List<PortStatus> seen = new ArrayList<>();

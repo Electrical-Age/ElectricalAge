@@ -76,7 +76,7 @@ public final class LowLevelCases {
         boolean hostedAt0, hostedAt15, backAt15, frontAt15, backAt22, retiredAt30, attachedAt30;
         double volts15, amps15, amps22;
         NodeBase nodeAt15, nodeAt30;
-        Throwable twice, onMachine;
+        Throwable twice, onMachine, benched;
 
         public String id() {
             return "api_lowlevel_hosted";
@@ -91,6 +91,11 @@ public final class LowLevelCases {
                 Circuit.create("second").hostAt(be);
             } catch (Throwable x) {
                 twice = x;
+            }
+            try {
+                mods.eln.api.testkit.ElnTestKit.bench().attach(circuit);
+            } catch (Throwable x) {
+                benched = x;
             }
             c.level().setBlock(c.at(5, 1, 1), ApiTestMachines.BLOCK.get().defaultBlockState(), 3);
             try {
@@ -131,6 +136,7 @@ public final class LowLevelCases {
             c.check("broken: the circuit retires and leaves the simulation, the node goes", retiredAt30 && !attachedAt30 && nodeAt30 == null,
                 retiredAt30 + " / " + attachedAt30 + " / " + nodeAt30);
             c.check("rules: a block entity hosts one circuit", twice instanceof IllegalStateException, String.valueOf(twice));
+            c.check("rules: a hosted circuit can't go on a bench too", benched instanceof IllegalStateException, String.valueOf(benched));
             c.check("rules: a machine's block entity can't host a circuit", onMachine instanceof IllegalStateException
                 && onMachine.getMessage().contains("machine"), String.valueOf(onMachine));
         }

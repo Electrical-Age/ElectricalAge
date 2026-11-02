@@ -104,11 +104,13 @@ public final class Bench {
 
     /**
      * Attaches a low-level circuit (mods.eln.api.lowlevel) to the bench's simulator: its parts step with the machines,
-     * and its watchdogs check after each step. Port links have no world here: they read NOT_HOSTED. Once per circuit.
+     * and its watchdogs check after each step. Port links have no world here: they read NOT_HOSTED. Once per circuit,
+     * and not one hosted at a block entity (IllegalStateException).
      */
     public Bench attach(Circuit circuit) {
         checkThread();
         CircuitImpl c = impl(circuit);
+        if (c.hosting()) throw new IllegalStateException(circuit.name() + " is hosted at a block entity; a bench takes a circuit of its own");
         c.attach(new CircuitImpl.Site() {
             @Override
             public Simulator simulator() {

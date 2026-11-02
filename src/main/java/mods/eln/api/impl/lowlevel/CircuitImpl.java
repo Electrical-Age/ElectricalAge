@@ -213,9 +213,9 @@ public final class CircuitImpl implements Circuit {
     public HostedNode hostAt(BlockEntity be, FaceConnection... faces) {
         check();
         checkOpen();
+        if (hosting || site != null) throw new IllegalStateException(this + " is already hosted (or on a bench)");
         Objects.requireNonNull(be, "be");
         Objects.requireNonNull(faces, "faces");
-        if (hosting || site != null) throw new IllegalStateException(this + " is already hosted (or on a bench)");
         for (FaceConnection f : faces) own(Objects.requireNonNull(f, "face connection").load());
         CircuitNode n = CircuitHosts.INSTANCE.host(be, this, faces);
         hosting = true;
@@ -225,6 +225,11 @@ public final class CircuitImpl implements Circuit {
     @Override
     public boolean attached() {
         return site != null;
+    }
+
+    /** Hosted at a block entity (queued or placed): only its node may attach it. */
+    public boolean hosting() {
+        return hosting;
     }
 
     // ---- joining a simulator

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * "```java src/test/java/mods/eln/api/docs/Mill.java#spec" and, in the file, the lines between "// doc:begin spec" and
  * "// doc:end spec"), and must equal that region (its common indentation removed). Every region here is shown in the
  * page, and the samples use only the public API (but HeaterElement, the EA-element sample, which names EA's types).
+ * Code blocks of other languages are refused: every sample on the page is compiled.
  */
 public class ApiDocSamplesTest {
     static final Pattern FENCE = Pattern.compile("^```java(?:\\s+(\\S+)#(\\S+))?\\s*$");
@@ -72,7 +73,10 @@ public class ApiDocSamplesTest {
         int blocks = 0;
         for (int i = 0; i < doc.size(); i++) {
             Matcher f = FENCE.matcher(doc.get(i));
-            if (!f.matches()) continue;
+            if (!f.matches()) {
+                if (doc.get(i).startsWith("```")) problems.add("api.md:" + (i + 1) + ": a code block that isn't a java sample: " + doc.get(i));
+                continue;
+            }
             int start = i + 1;
             List<String> body = new ArrayList<>();
             for (i = start; i < doc.size() && !doc.get(i).startsWith("```"); i++) body.add(doc.get(i).stripTrailing());

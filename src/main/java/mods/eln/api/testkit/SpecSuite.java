@@ -351,8 +351,9 @@ final class SpecSuite {
             int runs = 0;
             for (int i = 20; i < 200; i++) if (run.states.get(i) == MachineState.RUNNING && run.states.get(i - 1) != MachineState.RUNNING) runs++;
             int allowed = 180 / MachineCore.UNDERVOLTAGE_RECOVERY_TICKS + 1;
-            check("weak line, STOP", run, runs <= allowed, "half the rated power available: %d restarts in 9 s (at most %d: no chatter); ends %s",
-                runs, allowed, run.m.state());
+            check("weak line, STOP", run, runs <= allowed, "half the rated power available: it stops and restarts, %d restarts in 9 s "
+                    + "(at most %d: each after the %d-tick recovery hold, never tick by tick); Brownout.STOP doesn't run on a line that "
+                    + "can't carry it; ends %s", runs, allowed, MachineCore.UNDERVOLTAGE_RECOVERY_TICKS, run.m.state());
         }
     }
 
