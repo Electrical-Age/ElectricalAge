@@ -35,7 +35,7 @@ class DriveTest {
     @Test
     void starvedFromRestItWaits() {
         Segment s = new Segment(0, 0, 0, 6, 0.1, 0.0025);
-        Segment n = lift.afterPaying(s, 0, 1000, 0);
+        Segment n = lift.afterPaying(s, 0, 1000, 0, 0);
         assertNotSame(s, n);
         assertEquals(1, n.startTick());
         assertEquals(0, n.from());
@@ -44,11 +44,22 @@ class DriveTest {
         assertEquals(0.1, n.vmax(), "it goes on with its limits once paid");
     }
 
+    /** Cut on an empty buffer, its new top speed is what the supply keeps delivering, not the tick's crumbs. */
+    @Test
+    void cutToWhatTheSupplyKeepsPaying() {
+        Segment s = new Segment(0, 0, 0.05, 6, 0.05, 0.0025);   // cruising at 1 m/s
+        double perTick = 1000 * 0.025 / 0.8;   // the line pays for half of it
+        Segment n = lift.afterPaying(s, 10, 1000, 1e-6, perTick);
+        assertEquals(1e-6 * 0.8 / 1000, n.v0(), 1e-15, "this tick: the crumbs");
+        assertEquals(0.025, n.vmax(), 1e-12, "then: what the line keeps paying for");
+    }
+
     /** Paid in full, the segment is unchanged; short, the new one starts where the paid step ends, no faster than paid. */
     @Property(tries = 1000)
     void neverFurtherThanPaid(@ForAll @DoubleRange(min = -10, max = 10) double to, @ForAll @DoubleRange(min = -0.2, max = 0.2) double v0,
                               @ForAll @DoubleRange(min = 0.005, max = 0.15) @net.jqwik.api.constraints.Scale(4) double vmax, @ForAll @IntRange(min = 0, max = 300) int at,
-                              @ForAll @DoubleRange(min = -3000, max = 3000) double force, @ForAll @DoubleRange(min = 0, max = 1.2) double share) {
+                              @ForAll @DoubleRange(min = -3000, max = 3000) double force, @ForAll @DoubleRange(min = 0, max = 1.2) double share,
+                              @ForAll @DoubleRange(min = 0, max = 1.5) double sustainShare) {
         Segment s = new Segment(0, 0, v0, to, vmax, 0.0025);
         double p = s.position(at), dx = s.position(at + 1) - p;
         double need = lift.joules(dx, force), got = need * share;
@@ -56,7 +67,7 @@ class DriveTest {
         assertTrue(Math.abs(paid) <= Math.abs(dx) + 1e-15 && paid * dx >= 0, "within the planned step, same way: " + paid + " of " + dx);
         assertTrue(lift.joules(paid, force) <= got * (1 + 1e-9) + 1e-12, "paid for: " + lift.joules(paid, force) + " > " + got);
         if (force * dx <= 0) assertEquals(dx, paid, "lowering (or holding) costs nothing");
-        Segment n = lift.afterPaying(s, at, force, got);
+        Segment n = lift.afterPaying(s, at, force, got, need * sustainShare);
         if (share >= 1 || need == 0) {
             assertSame(s, n, "paid in full: no new segment");
             return;
@@ -65,7 +76,11 @@ class DriveTest {
         assertEquals(p + paid, n.position(0), 1e-12, "continuous: it starts where the paid step ends");
         assertEquals(paid, n.velocity(0), 1e-12, "at the speed paid for");
         assertEquals(s.to(), n.to(), "toward the same target");
-        if (paid != 0) assertTrue(n.vmax() <= Math.abs(paid) + 1e-15, "its new top speed is no more than paid");
+        double sustained = Math.abs(lift.paidMetres(dx, force, need * sustainShare));
+        if (paid != 0 || sustained != 0) {
+            assertTrue(n.vmax() <= Math.max(Math.abs(paid), sustained) + 1e-15, "its new top speed is no more than the supply pays for");
+            assertTrue(n.vmax() <= s.vmax() + 1e-15, "nor its old one");
+        } else assertEquals(s.vmax(), n.vmax(), "paid nothing: it waits with its limits");
         SegmentPropertyTest.checkProfile(n, "after a shortfall");
     }
 }

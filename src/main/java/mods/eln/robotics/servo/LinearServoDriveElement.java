@@ -1,30 +1,25 @@
 package mods.eln.robotics.servo;
 
 import mods.eln.Eln;
+import mods.eln.api.ElementMachine;
+import mods.eln.api.MachineState;
+import mods.eln.api.Machines;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
-import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.robotics.Robotics;
 import mods.eln.robotics.motion.Drive;
 import mods.eln.robotics.motion.Segment;
 import mods.eln.robotics.motion.Stations;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.nbt.NbtElectricalGateInput;
-import mods.eln.sim.nbt.NbtElectricalGateOutput;
-import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -58,26 +53,23 @@ import java.util.UUID;
  * before the car entity is back. Motion counts in the drive's own clock (saved), which stops while its chunks are
  * unloaded, so a move resumes where it was.
  * <p>
- * Electrics: a resistor on the 200 V line drawing idle losses plus the lifting power over the motor's efficiency
- * (Drive), the losses heating the motor; too hot, it faults and holds until it cools (it doesn't burn). Its top speed
- * follows the line voltage, so a weak supply makes a slower car, and a move under way slows when the line sags.
+ * Electrics: a machine on the Machine API (LinearServoDriveDescriptor.spec: a 200 V consumer, idle losses as its idle
+ * draw, a heat model). Each tick it asks for the lifting work of its step over the motor's efficiency and moves only as
+ * far as what it got pays for (Drive.afterPaying), so a starved supply makes a slower car; its top speed also follows
+ * the line voltage, and a move under way is retargeted when the line sags or recovers. Below the stall share, too hot
+ * or overvolted it holds (the last two are faults; it never burns).
  */
 public class LinearServoDriveElement extends TransparentNodeElement implements mods.eln.introspect.Describable {
     /** What it shows (publish, lamp, Jade). */
     public static final byte IDLE = 0, IN_POSITION = 1, MOVING = 2, FAULT = 3;
     /** Why it stopped. OBSTRUCTED holds until the next command; the others clear themselves. */
-    public static final byte NO_FAULT = 0, OBSTRUCTED = 1, OVERHEAT = 2, NO_RAIL = 3;
+    public static final byte NO_FAULT = 0, OBSTRUCTED = 1, OVERHEAT = 2, NO_RAIL = 3, OVERVOLTAGE = 4;
     /** Its floor ghost's id (the descriptor has no ghost group: getGhostGroupUuid is -1). */
     static final int FLOOR_GHOST = 0x5E7A;
 
     final LinearServoDriveDescriptor desc;
-    public final NbtElectricalLoad power = new NbtElectricalLoad("power");
-    final Resistor motor = new Resistor(power, null);
-    public final NbtElectricalGateInput setpoint = new NbtElectricalGateInput("setpoint"), enable = new NbtElectricalGateInput("enable");
-    public final NbtElectricalGateOutput inPosition = new NbtElectricalGateOutput("inPosition"), faultOut = new NbtElectricalGateOutput("faultOut");
-    final NbtElectricalGateOutputProcess inPositionProcess = new NbtElectricalGateOutputProcess("inPositionProcess", inPosition),
-        faultProcess = new NbtElectricalGateOutputProcess("faultProcess", faultOut);
-    public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
+    /** Its power, heat and signals; their parts are in this element's lists. */
+    public final ElementMachine machine;
 
     // saved
     /** The drive's clock (ticks it has run with its chunks loaded); segments start on it. */
@@ -100,24 +92,19 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     double wired = Double.NaN;
     boolean wasEnabled = true;
     int sinceRetarget;
+    /** Stalled at the stall share (Drive.STALL_SHARE), and the ticks the line has been back over the resume share. */
+    public boolean stalled;
+    int resumeTicks;
     /** A floor ghost of ours may stand (true after a load: unknown). */
     boolean ghostUp = true;
-    /** Load on the car (kg), power drawn (W), speed (m/s, + along the axis) this tick. */
-    public double loadKg, drawW, speed;
+    /** Load on the car (kg), the force it holds along the axis (N), speed (m/s, + along the axis) this tick. */
+    public double loadKg, forceN, speed;
     byte status = IDLE;
 
     public LinearServoDriveElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (LinearServoDriveDescriptor) d;
-        electricalLoadList.add(power);
-        electricalComponentList.add(motor);
-        electricalLoadList.add(setpoint);
-        electricalLoadList.add(enable);
-        electricalLoadList.add(inPosition);
-        electricalLoadList.add(faultOut);
-        electricalComponentList.add(inPositionProcess);
-        electricalComponentList.add(faultProcess);
-        thermalLoadList.add(thermal);
+        machine = Machines.forElement(this, LinearServoDriveDescriptor.spec());
         slowProcessList.add(this::step);
     }
 
@@ -183,7 +170,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     /** The setpoint wire rules while connected (Baughn: wires override the buttons). */
     boolean wiredUp() {
-        return !setpoint.getConnectedComponents().isEmpty();
+        return machine.signalConnected(LinearServoDriveDescriptor.SETPOINT);
     }
 
     /** Go to stop t (a new command also clears an obstruction). */
@@ -222,9 +209,9 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         p.sendOverlayMessage(Component.literal(text));
     }
 
-    /** True when its enable input is high, or not connected. */
+    /** True when its enable input is high (over 0.6, a gate's high), or not connected (it defaults to 1). */
     boolean enabled() {
-        return enable.getConnectedComponents().isEmpty() || enable.stateHigh();
+        return machine.signal(LinearServoDriveDescriptor.ENABLE) > 0.6;
     }
 
     // ---- the tick
@@ -233,28 +220,38 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         if (!(world() instanceof ServerLevel level)) return;
         BlockPos hp = node.coordonate.pos();
         BlockPos col = hp.relative(carSide());
-        if (!level.isLoaded(hp) || !level.isLoaded(col)) {
-            setDraw(0, 0);   // (unloaded: the clock stops, the car with it)
-            return;
-        }
+        if (!level.isLoaded(hp) || !level.isLoaded(col)) return;   // (unloaded: the clock stops, the car with it; it asks for nothing)
         long t0 = clock;
         clock++;
         if (travel < 0 || clock % 20 == 0) scan(level);
-        double u = power.getU(), vlim = LinearServoDriveDescriptor.vmaxPerTick(u), a = LinearServoDriveDescriptor.accelPerTick();
+        Drive drive = LinearServoDriveDescriptor.drive;
+        double ratio = machine.voltageRatio();
+        if (machine.state() == MachineState.RUNNING) {
+            if (ratio < Drive.STALL_SHARE) {
+                stalled = true;
+                resumeTicks = 0;
+            } else if (stalled) {
+                resumeTicks = ratio >= Drive.RESUME_SHARE ? resumeTicks + 1 : 0;
+                if (resumeTicks >= Drive.RESUME_TICKS) stalled = false;
+            }
+        }
+        double vlim = stalled ? 0 : drive.vmaxAt(ratio) / 20, a = LinearServoDriveDescriptor.accelPerTick();
         double p = posAt(t0), v = seg.velocity(t0 - seg.startTick());
         boolean moving = movingAt(t0);
 
-        // faults that come and go by themselves
-        double heat = thermal.Tc - thermal.ambient;
-        if (fault == OVERHEAT && heat < LinearServoDriveDescriptor.RESUME_K) fault = NO_FAULT;
-        if (heat > LinearServoDriveDescriptor.WARM_K && fault != OBSTRUCTED) fault = OVERHEAT;
+        // faults that come and go by themselves: the machine's trips, the rail
+        MachineState ms = machine.state();
+        byte trip = ms == MachineState.OVERHEAT_TRIPPED ? OVERHEAT : ms == MachineState.OVERVOLTAGE_TRIPPED ? OVERVOLTAGE : NO_FAULT;
+        if ((fault == OVERHEAT || fault == OVERVOLTAGE) && fault != trip) fault = NO_FAULT;
+        if (trip != NO_FAULT && fault != OBSTRUCTED) fault = trip;
         boolean railOk = travel >= LinearServoDriveDescriptor.MIN_TRAVEL && p <= travel + 1e-9;
         if (!railOk && fault != OBSTRUCTED) fault = NO_RAIL;
         else if (railOk && fault == NO_RAIL) fault = NO_FAULT;
 
         // commands from the wires
         if (wiredUp() && travel >= 0) {
-            double want = proportional ? Stations.proportional(setpoint.getNormalized(), travel) : Stations.band(setpoint.getNormalized(), stations);
+            double in = machine.signal(LinearServoDriveDescriptor.SETPOINT);
+            double want = proportional ? Stations.proportional(in, travel) : Stations.band(in, stations);
             if (want != wired) {
                 wired = want;
                 command(want);
@@ -265,7 +262,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         wasEnabled = en;
         if (railOk) target = Math.max(0, Math.min(travel, target));
 
-        // the motion
+        // the motion: the voltage's speed limit (the energy's comes with the step below)
         Segment next = seg;
         if (fault != NO_FAULT) {
             if (moving) next = Segment.rest(t0, p);   // (stop dead)
@@ -281,23 +278,39 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             }
         } else if (seg.to() != target) {
             next = seg.retarget(t0, target, vlim, a);
-        } else if (moving && Math.abs(vlim - seg.vmax()) > LinearServoDriveDescriptor.RETARGET_SHARE * seg.vmax()
-            && sinceRetarget >= LinearServoDriveDescriptor.RETARGET_TICKS) {
-            next = seg.retarget(t0, target, vlim, a);   // (the line sagged or recovered: the new top speed)
+        } else if (moving && sinceRetarget >= LinearServoDriveDescriptor.RETARGET_TICKS) {
+            double share = LinearServoDriveDescriptor.RETARGET_SHARE;
+            // up only when it costs nothing (lowering) or energy is piling up: else the energy's limit holds it back
+            boolean free = forceN * (target - p) <= 0;
+            boolean spare = machine.bufferJoules() >= LinearServoDriveDescriptor.SPARE_TICKS * machine.ratedJoulesPerTick();
+            if (vlim < (1 - share) * seg.vmax() || vlim > (1 + share) * seg.vmax() && (free || spare))
+                next = seg.retarget(t0, target, vlim, a);   // (the line sagged or recovered: the new top speed)
         }
         boolean changed = next != seg;
         seg = next;
-        sinceRetarget = changed ? 0 : sinceRetarget + 1;
         double p1 = posAt(clock);
 
-        // the car: sweep, place, carry
+        // who rides, and what the step costs: it goes only as far as the energy it got pays for
         ElevatorCar c = travel >= LinearServoDriveDescriptor.MIN_TRAVEL || car != null ? car(level) : null;
+        List<Entity> riders = List.of();
         loadKg = 0;
         if (c != null) {
-            AABB box0 = c.boxAt(p);
-            double tol = Riders.tolerance(p1 - p);
-            List<Entity> riders = riders(level, c, box0, tol);
+            riders = riders(level, c, c.boxAt(p), Riders.tolerance(p1 - p));
             for (Entity e : riders) loadKg += massOf(e);
+        }
+        forceN = Drive.G * (loadKg - LinearServoDriveDescriptor.counterweightKg) * axis().getStepY();
+        double need = drive.joules(p1 - p, forceN);
+        double got = need > 0 ? machine.takeJoules(Math.min(need, machine.ratedJoulesPerTick())) : 0;
+        double sustain = Math.max(0, machine.watts() - drive.idleWatts()) / 20;   // (J a tick)
+        Segment paid = drive.afterPaying(seg, t0, forceN, got, sustain);
+        if (paid != seg) {
+            seg = paid;
+            changed = true;
+            p1 = posAt(clock);
+        }
+
+        // the car: sweep, place, carry
+        if (c != null) {
             if (p1 != p) {
                 removeGhost();
                 if (blocked(level, c, riders, p, p1)) {
@@ -321,25 +334,19 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             if (changed) c.broadcast();
             if (!movingAt(clock) && Math.abs(p1 - Math.rint(p1)) < 1e-6) floorGhost(level, c, p1);
         }
-
-        // power and heat
-        double vm = (p1 - p) * 20;
-        speed = vm;
-        var ax = axis();
-        double force = LinearServoDriveDescriptor.G * (loadKg - LinearServoDriveDescriptor.counterweightKg) * ax.getStepY();
-        setDraw(vm, force);
-        double pin = u * u / motor.getR();
-        double mech = Math.max(0, force * vm);
-        thermal.moveEnergyTo(Math.max(0, pin - Math.min(mech, pin * LinearServoDriveDescriptor.drive.efficiency())) * dt);
+        sinceRetarget = changed ? 0 : sinceRetarget + 1;
+        speed = (p1 - p) * 20;
+        // the motor's losses heat it: what it got less the work done (all of it, when the step was blocked)
+        if (got > 0) machine.heatJoules(Math.max(0, got - Math.max(0, forceN * (p1 - p))));
 
         // outputs and the lamp
         boolean stopped = !movingAt(clock);
         boolean there = stopped && fault == NO_FAULT && Math.abs(p1 - target) < 1e-6 && railOk;
-        inPositionProcess.state(there);
-        faultProcess.state(fault != NO_FAULT);
-        byte s = status();
-        if (s != status) {
-            status = s;
+        machine.setSignal(LinearServoDriveDescriptor.IN_POSITION, there ? 1 : 0);
+        machine.setSignal(LinearServoDriveDescriptor.FAULT, fault != NO_FAULT ? 1 : 0);
+        byte st = status();
+        if (st != status) {
+            status = st;
             needPublish();
         }
     }
@@ -349,13 +356,6 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         if (fault != NO_FAULT) return FAULT;
         if (movingAt(clock)) return MOVING;
         return Math.abs(posAt(clock) - target) < 1e-6 ? IN_POSITION : IDLE;
-    }
-
-    /** Draw at speed vm (m/s) against force f (N): the resistor's value. */
-    void setDraw(double vm, double f) {
-        Drive d = LinearServoDriveDescriptor.drive;
-        drawW = d.watts(vm, f);
-        motor.setR(Drive.resistance(d.nominalVolts(), drawW));
     }
 
     /** The car, found again by UUID or spawned at its place; null if its chunk isn't there. */
@@ -464,9 +464,6 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     @Override
     public void initialize() {
-        ElnDeviceRegistry.meduimVoltageCableDescriptor.applyTo(power);
-        thermal.set(1, LinearServoDriveDescriptor.HEAT_RP, LinearServoDriveDescriptor.HEAT_C);
-        setDraw(0, 0);
         Eln.ghostManager.addObserver(this);
         status = status();
         connect();
@@ -493,12 +490,10 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return true;
     }
 
+    /** Power on the back; the signals at their flanks' floor and ceiling cables (LinearServoDriveDescriptor.spec). */
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        if (side == front.back()) return lrdu == LRDU.Down ? power : null;
-        if (side == front.left()) return lrdu == LRDU.Down ? setpoint : lrdu == LRDU.Up ? inPosition : null;
-        if (side == front.right()) return lrdu == LRDU.Down ? enable : lrdu == LRDU.Up ? faultOut : null;
-        return null;
+        return machine.electricalLoad(side, lrdu);
     }
 
     @Override
@@ -508,22 +503,22 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        if (side == front.back()) return lrdu == LRDU.Down ? NodeBase.maskElectricalPower : 0;
-        if (side == front.left() || side == front.right())
-            return lrdu == LRDU.Down ? NodeBase.maskElectricalInputGate : lrdu == LRDU.Up ? NodeBase.maskElectricalOutputGate : 0;
-        return 0;
+        return machine.connectionMask(side, lrdu);
     }
 
+    /** A flank: its input (the floor cable); elsewhere the supply. */
     @Override
     public String multiMeterString(Direction side) {
-        if (side == front.left()) return Utils.plotSignal(setpoint.getU(), setpoint.getCurrent());
-        if (side == front.right()) return Utils.plotSignal(enable.getU(), enable.getCurrent());
-        return Utils.plotUIP(power.getU(), power.getI());
+        if (side == front.left() || side == front.right()) {
+            ElectricalLoad in = machine.electricalLoad(side, LRDU.Down);
+            return Utils.plotSignal(in.getU(), in.getCurrent());
+        }
+        return Utils.plotUIP(machine.volts(), machine.amps());
     }
 
     @Override
     public String thermoMeterString(Direction side) {
-        return Utils.plotCelsius("T: ", thermal.Tc);
+        return Utils.plotCelsius("T: ", machine.celsius());
     }
 
     @Override
@@ -569,13 +564,14 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     }
 
     @Override
+    /** The machine's lines (volts, power drawn), then the drive's; its State line covers the machine's. */
     public Map<String, String> getWaila() {
         Map<String, String> info = new LinkedHashMap<>();
+        machine.addWaila(info);
         double p = posAt(clock);
         info.put(I18N.tr("Position"), String.format("%.1f m", p));
         info.put(I18N.tr("Target"), String.format("%.0f m", target));
         info.put(I18N.tr("Speed"), String.format("%.2f m/s", Math.abs(speed)));
-        info.put(I18N.tr("Power"), Utils.plotPower("", drawW));
         info.put(I18N.tr("Setpoint"), proportional ? I18N.tr("share of the travel") : I18N.tr("station"));
         info.put(I18N.tr("State"), stateText());
         return info;
@@ -586,16 +582,18 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return switch (fault) {
             case OBSTRUCTED -> I18N.tr("Fault: something is in the way");
             case OVERHEAT -> I18N.tr("Fault: the motor is too hot");
+            case OVERVOLTAGE -> I18N.tr("Fault: the line voltage is too high");
             case NO_RAIL -> travel < LinearServoDriveDescriptor.MIN_TRAVEL ? I18N.tr("Fault: needs a rail of %1$ to %2$ blocks on top",
                 LinearServoDriveDescriptor.MIN_TRAVEL, LinearServoDriveDescriptor.MAX_TRAVEL) : I18N.tr("Fault: the rail is broken");
-            default -> LinearServoDriveDescriptor.vmaxPerTick(power.getU()) <= 0 ? I18N.tr("No power")
+            default -> stalled && machine.state() == MachineState.RUNNING ? I18N.tr("The line is too weak")
+                : machine.state() != MachineState.RUNNING ? I18N.tr("No power")
                 : !enabled() ? I18N.tr("Disabled") : movingAt(clock) ? I18N.tr("Moving") : I18N.tr("In position");
         };
     }
 
     /** Statuses and faults by name, in their byte order (introspect). */
     static final java.util.List<String> STATUS_NAMES = java.util.List.of("idle", "in_position", "moving", "fault"),
-        FAULT_NAMES = java.util.List.of("none", "obstructed", "overheat", "no_rail");
+        FAULT_NAMES = java.util.List.of("none", "obstructed", "overheat", "no_rail", "overvoltage");
 
     @Override
     public void describe(mods.eln.introspect.Report r) {
@@ -604,7 +602,11 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         st.num(mods.eln.introspect.Keys.POSITION, posAt(clock), mods.eln.introspect.Unit.M).range(0, Math.max(0, travel));
         st.num(mods.eln.introspect.Keys.TARGET, target, mods.eln.introspect.Unit.M);
         st.num(mods.eln.introspect.Keys.SPEED, speed, mods.eln.introspect.Unit.M_PER_S);
-        st.num(mods.eln.introspect.Keys.POWER, drawW, mods.eln.introspect.Unit.W);
+        st.num(mods.eln.introspect.Keys.POWER, machine.watts(), mods.eln.introspect.Unit.W);
+        st.num(mods.eln.introspect.Keys.VOLTAGE, machine.volts(), mods.eln.introspect.Unit.V);
+        st.num(mods.eln.introspect.Keys.BUFFER_ENERGY, machine.bufferJoules(), mods.eln.introspect.Unit.J);
+        st.num(mods.eln.introspect.Keys.TEMPERATURE, machine.celsius(), mods.eln.introspect.Unit.C);
+        st.choice("machine_state", machine.state());
         st.num(mods.eln.introspect.Keys.LOAD, loadKg, mods.eln.introspect.Unit.KG);
         st.integer("travel", travel);
         List<mods.eln.introspect.Value> at = new ArrayList<>();

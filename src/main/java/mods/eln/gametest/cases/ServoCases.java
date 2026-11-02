@@ -1,5 +1,8 @@
 package mods.eln.gametest.cases;
 
+import mods.eln.api.MachineState;
+import mods.eln.api.impl.ElementHost;
+import mods.eln.api.impl.MachineCore;
 import mods.eln.gametest.Reload;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
@@ -8,6 +11,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.robotics.Robotics;
 import mods.eln.robotics.servo.ElevatorCar;
+import mods.eln.robotics.servo.LinearServoDriveDescriptor;
 import mods.eln.robotics.servo.LinearServoDriveElement;
 import mods.eln.robotics.servo.StationMarkerBlock;
 import mods.eln.sim.IProcess;
@@ -39,6 +43,8 @@ public final class ServoCases {
         cases.add(new SaveMidMove());
         cases.add(new GhostFloor());
         cases.add(new CarriesAMob());
+        cases.add(new Starved());
+        cases.add(new EnergyBooks());
     }
 
     static final int TRAVEL = 6;
@@ -79,6 +85,22 @@ public final class ServoCases {
         /** The drive now (a reload swaps the element). */
         LinearServoDriveElement drive(TestContext ctx) {
             return LinearServoDriveElement.at(ctx.level(), head);
+        }
+
+        /** The volts on the in-position output (the left flank's ceiling cable) and the fault output (the right one's). */
+        double inPositionVolts(TestContext ctx) {
+            var d = drive(ctx);
+            return d.machine.electricalLoad(d.front.left(), LRDU.Up).getU();
+        }
+
+        double faultVolts(TestContext ctx) {
+            var d = drive(ctx);
+            return d.machine.electricalLoad(d.front.right(), LRDU.Up).getU();
+        }
+
+        /** The drive's machine core (its energy books). */
+        MachineCore core(TestContext ctx) {
+            return ((ElementHost) drive(ctx).machine).core();
         }
 
         BlockPos marker(int m) {
@@ -168,15 +190,16 @@ public final class ServoCases {
             ctx.check("servo: one car, standing at the called station", s.cars(ctx).size() == 1 && Math.abs(s.carFloor(ctx) - 3) < 1e-6,
                 s.cars(ctx).size() + " cars, floor " + s.carFloor(ctx));
             ctx.check("servo: in position (status and output)", d.status() == LinearServoDriveElement.IN_POSITION
-                && d.inPosition.getU() > 40 && d.faultOut.getU() < 10, d.status() + " " + d.inPosition.getU() + " V");
+                && s.inPositionVolts(ctx) > 40 && s.faultVolts(ctx) < 10, d.status() + " " + s.inPositionVolts(ctx) + " V");
             ctx.check("servo: a floor ghost under the stopped car", d.ghostAt(3), "");
         }
     }
 
     /**
      * A weak line (a 33 ohm resistor in series) against a stiff one: going down empty, the car lifts its counterweight
-     * (~1 kW at 2 m/s); the weak line sags as it speeds up, and the move is retargeted to the lower top speed (~1.3 m/s)
-     * mid-way.
+     * (~1 kW at 2 m/s); the weak line sags as it speeds up, and the move is retargeted to the lower top speed mid-way.
+     * The line gives at most ~300 W (at 100 V), so after a burst on the machine's buffer the car goes ~0.55 m/s (the
+     * drive before the Machine API went ~1.3 m/s here, on energy it never drew) and takes ~12 s.
      */
     static final class Sag extends Room {
         Shaft stiff, weak;
@@ -189,7 +212,7 @@ public final class ServoCases {
         }
 
         public int ticks() {
-            return 320;
+            return 440;
         }
 
         public void build(TestContext ctx) {
@@ -253,7 +276,7 @@ public final class ServoCases {
                 if (tick == 10) s.call(ctx, 6);
                 if (tick == 120) {
                     var d = s.drive(ctx);
-                    faulted = d.fault == LinearServoDriveElement.OBSTRUCTED && d.faultOut.getU() > 40 && d.status() == LinearServoDriveElement.FAULT;
+                    faulted = d.fault == LinearServoDriveElement.OBSTRUCTED && s.faultVolts(ctx) > 40 && d.status() == LinearServoDriveElement.FAULT;
                     heldAt = s.carFloor(ctx);
                     ctx.level().removeBlock(stone, false);
                     s.call(ctx, 6);
@@ -271,19 +294,22 @@ public final class ServoCases {
         }
     }
 
-    /** Saved and loaded mid-move, the drive takes up its motion where it was and adopts its car (no second one). */
+    /**
+     * Saved and loaded mid-move, the drive takes up its motion where it was and adopts its car (no second one); its
+     * machine comes back with its buffer and runs on.
+     */
     static final class SaveMidMove extends Room {
         Shaft s;
-        double before = Double.NaN, after = Double.NaN;
+        double before = Double.NaN, after = Double.NaN, bufBefore = Double.NaN, bufSaved = Double.NaN, inAfter = Double.NaN, minSpeed = 9;
         java.util.UUID carBefore;
-        String err = "";
+        String err = "", states = "";
 
         public String id() {
             return "servo_elevator_reloads_mid_move";
         }
 
         public int ticks() {
-            return 200;
+            return 300;
         }
 
         public void build(TestContext ctx) {
@@ -291,17 +317,25 @@ public final class ServoCases {
             watch(dt -> {
                 tick++;
                 if (tick == 10) s.call(ctx, 6);
-                if (tick == 50) {
+                if (tick == 110) s.call(ctx, 0);   // (down empty: it lifts the counterweight, so it draws on its buffer)
+                if (tick == 150) {
                     var d = s.drive(ctx);
                     before = d.seg.position(d.clock - d.seg.startTick());
                     carBefore = d.carId;
+                    bufBefore = s.core(ctx).bufferJoules();
                     try {
-                        Reload.node(ctx.level(), s.head);
+                        bufSaved = find(Reload.node(ctx.level(), s.head).before, "api.machine.bufferJ");
                     } catch (ReflectiveOperationException | RuntimeException e) {
                         err = e.toString();
                     }
                     var f = s.drive(ctx);
                     after = f.seg.position(f.clock - f.seg.startTick());
+                }
+                if (tick == 151) inAfter = s.core(ctx).joulesIn();   // (the restored buffer is booked as delivered)
+                if (tick > 150 && tick <= 170) {
+                    var d = s.drive(ctx);
+                    states += d.machine.state().name().charAt(0);
+                    if (tick > 151) minSpeed = Math.min(minSpeed, Math.abs(d.speed));   // (at 151 this watch may run before its first step)
                 }
             });
         }
@@ -313,7 +347,21 @@ public final class ServoCases {
             ctx.check("servo: reloaded mid-move, the motion is where it was", before > 0.2 && before < 5.8 && Math.abs(after - before) < 1e-9,
                 before + " -> " + after + " " + err);
             ctx.check("servo: ... it adopts its car and finishes the move", s.cars(ctx).size() == 1 && d.carId.equals(carBefore)
-                && Math.abs(s.carFloor(ctx) - 6) < 1e-6, s.cars(ctx).size() + " cars, floor " + s.carFloor(ctx));
+                && Math.abs(s.carFloor(ctx)) < 1e-6, s.cars(ctx).size() + " cars, floor " + s.carFloor(ctx));
+            ctx.line("servo reload: machine buffer " + bufBefore + " J saved as " + bufSaved + ", booked in " + inAfter
+                + "; states after " + states + ", slowest " + minSpeed + " m/s");
+            ctx.check("servo: ... its machine's buffer is saved and loaded", bufBefore > 0 && bufSaved == bufBefore && inAfter >= bufBefore,
+                bufBefore + " " + bufSaved + " " + inAfter);
+            ctx.check("servo: ... and runs on at once (no power-up hold: the car doesn't stop)", states.matches("R{20}") && minSpeed > 0.5,
+                states + ", slowest " + minSpeed + " m/s");
+        }
+
+        /** The double at key anywhere in tag (the element's tag is nested in the node's). */
+        static double find(net.minecraft.nbt.CompoundTag tag, String key) {
+            if (tag.contains(key)) return tag.getDoubleOr(key, Double.NaN);
+            for (String k : tag.keySet())
+                if (tag.get(k) instanceof net.minecraft.nbt.CompoundTag c && !Double.isNaN(find(c, key))) return find(c, key);
+            return Double.NaN;
         }
     }
 
@@ -391,6 +439,136 @@ public final class ServoCases {
                 && Math.abs(feet - (6 + ElevatorCar.THICK)) < 0.05, "feet " + feet + ", floor " + s.carFloor(ctx));
             ctx.check("servo: ... and weighs on it", kg > 10, kg + " kg");
             pig.discard();
+        }
+    }
+
+    /**
+     * A starved supply (a 47 ohm line: at most ~210 W reach the drive) against a stiff one: going down empty, the car
+     * lifts its counterweight, which needs ~1 kW at full speed. The drive gets what the line can give and goes only as
+     * far as that pays for, so it is much slower, still arrives, and never did the work without paying for it.
+     */
+    static final class Starved extends Room {
+        Shaft stiff, weak;
+        double maxStiff, maxWeak, takenAtTop = Double.NaN, takenDown;
+        int weakSegments, notRunning, stiffDown, weakDown;
+        mods.eln.robotics.motion.Segment lastWeak;
+        boolean called;
+
+        public String id() {
+            return "servo_elevator_starved_supply_slower_still_arrives";
+        }
+
+        public int ticks() {
+            return 520;
+        }
+
+        public void build(TestContext ctx) {
+            stiff = new Shaft(ctx, ctx.at(2, 1, 1), new int[]{0, 6}, 0);
+            weak = new Shaft(ctx, ctx.at(8, 1, 1), new int[]{0, 6}, 44);   // (44 core items: 47 ohm)
+            watch(dt -> {
+                tick++;
+                if (tick == 10) {
+                    stiff.call(ctx, 6);
+                    weak.call(ctx, 6);
+                }
+                if (tick == 130) {   // (both at the top: going up empty costs nothing, so the weak one is as fast)
+                    takenAtTop = weak.core(ctx).joulesOut();
+                    stiff.call(ctx, 0);
+                    weak.call(ctx, 0);
+                    called = true;
+                }
+                if (called) {
+                    var w = weak.drive(ctx);
+                    maxStiff = Math.max(maxStiff, Math.abs(stiff.drive(ctx).speed));
+                    maxWeak = Math.max(maxWeak, Math.abs(w.speed));
+                    if (w.machine.state() != MachineState.RUNNING || w.stalled) notRunning++;
+                    if (w.seg != lastWeak) {
+                        lastWeak = w.seg;
+                        weakSegments++;
+                    }
+                    takenDown = weak.core(ctx).joulesOut() - takenAtTop;
+                    if (stiffDown == 0 && stiff.drive(ctx).status() == LinearServoDriveElement.IN_POSITION) stiffDown = tick - 130;
+                    if (weakDown == 0 && w.status() == LinearServoDriveElement.IN_POSITION) weakDown = tick - 130;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            double down = TRAVEL - weak.carFloor(ctx);   // (how far it got: all the way, if it arrived)
+            double work = mods.eln.robotics.motion.Drive.G * LinearServoDriveDescriptor.counterweightKg * down
+                / LinearServoDriveDescriptor.drive.efficiency();
+            double meanStiff = TRAVEL / (stiffDown / 20.0), meanWeak = TRAVEL / (weakDown / 20.0);
+            ctx.line(String.format("servo starved: down in %d ticks stiff (%.2f m/s on average), %d starved (%.2f m/s);", stiffDown, meanStiff,
+                weakDown, meanWeak) + String.format(" top speed down %.2f m/s stiff, %.2f m/s starved; %d segments, %d ticks not running;"
+                + " taken %.0f J for %.0f J of work over the efficiency; starved %s", maxStiff, maxWeak, weakSegments, notRunning,
+                takenDown, work, weak.drive(ctx).getWaila()));
+            ctx.check("servo starved: on a stiff line it goes 2 m/s", Math.abs(maxStiff - 2.0) < 0.05, "" + maxStiff);
+            // (its first second may be faster: the machine's buffer pays for it)
+            ctx.check("servo starved: on a starved line it is much slower", weakDown > 0 && meanWeak < 0.5 * meanStiff && meanWeak > 0.1,
+                meanWeak + " vs " + meanStiff + " m/s");
+            ctx.check("servo starved: ... cut to what the energy pays for (new segments)", weakSegments >= 2, weakSegments + " segments");
+            ctx.check("servo starved: ... it never did more work than it paid for", takenDown >= work * 0.99, takenDown + " J for " + work + " J");
+            ctx.check("servo starved: ... it keeps running (no stop-and-go, never stalled)", notRunning == 0, notRunning + " ticks");
+            ctx.check("servo starved: both arrive at the bottom", Math.abs(stiff.carFloor(ctx)) < 1e-6 && Math.abs(weak.carFloor(ctx)) < 1e-6,
+                stiff.carFloor(ctx) + " " + weak.carFloor(ctx));
+        }
+    }
+
+    /**
+     * The energy books of a lift on a stiff line: going down empty, the car lifts its 40 kg counterweight 6 m; the drive
+     * takes that work over its efficiency from the machine, and what the line delivered beyond that is its idle draw.
+     */
+    static final class EnergyBooks extends Room {
+        Shaft s;
+        double in0, out0, lost0, buf0, in1, out1, lost1, buf1;
+        int t0, t1;
+
+        public String id() {
+            return "servo_elevator_energy_books";
+        }
+
+        public int ticks() {
+            return 260;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            watch(dt -> {
+                tick++;
+                var c = s.core(ctx);
+                if (tick == 10) s.call(ctx, 6);
+                if (tick == 120) {
+                    s.call(ctx, 0);
+                    in0 = c.joulesIn();
+                    out0 = c.joulesOut();
+                    lost0 = c.joulesLost();
+                    buf0 = c.bufferJoules();
+                    t0 = tick;
+                }
+                if (tick > 120 && t1 == 0 && s.drive(ctx).status() == LinearServoDriveElement.IN_POSITION) {
+                    in1 = c.joulesIn();
+                    out1 = c.joulesOut();
+                    lost1 = c.joulesLost();
+                    buf1 = c.bufferJoules();
+                    t1 = tick;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            double work = mods.eln.robotics.motion.Drive.G * LinearServoDriveDescriptor.counterweightKg * TRAVEL
+                / LinearServoDriveDescriptor.drive.efficiency();
+            double taken = out1 - out0, delivered = in1 - in0, lost = lost1 - lost0;
+            double idle = LinearServoDriveDescriptor.drive.idleWatts() * (t1 - t0) * 0.05;
+            ctx.line(String.format("servo books: %d ticks down; delivered %.0f J, taken %.0f J (work/eff %.0f J), lost %.0f J (idle %.0f J),"
+                + " buffer %.0f -> %.0f J", t1 - t0, delivered, taken, work, lost, idle, buf0, buf1));
+            ctx.check("servo books: it arrived", t1 > 0 && Math.abs(s.carFloor(ctx)) < 1e-6, t1 + " " + s.carFloor(ctx));
+            ctx.check("servo books: taken = m g h / efficiency (+-2%)", Math.abs(taken - work) < 0.02 * work, taken + " vs " + work);
+            ctx.check("servo books: delivered = taken + idle + what's left in the buffer (+-3% of the work)",
+                Math.abs(delivered - taken - lost - (buf1 - buf0)) < 1e-6 * delivered + 1e-9 && Math.abs(lost - idle) < 0.03 * work,
+                delivered + " = " + taken + " + " + lost + " + " + (buf1 - buf0) + "; idle " + idle);
         }
     }
 }

@@ -137,8 +137,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - Linear Servo Drive (`robotics/servo/LinearServoDriveElement`): `clock` (long, the drive's own tick count; segments
   start on it, and it stops while its chunks are unloaded), the current segment `segStart` (long), `segFrom`, `segV0`,
   `segTo`, `segVmax`, `segAccel` (blocks and ticks), `target`, `fault` (byte: 0 none, 1 obstructed, 2 overheat, 3 no
-  rail), `proportional`, `carMost`/`carLeast` (the car's UUID); sim parts `powerUc`, `setpointUc`, `enableUc`,
-  `inPositionUc`, `faultOutUc`, `thermalTc`, and the outputs' `inPositionProcess*`/`faultProcess*`. The elevator car
+  rail, 4 overvoltage), `proportional`, `carMost`/`carLeast` (the car's UUID); its power, heat and signals are a
+  Machine API machine (the `api.machine.*` keys above: buffer, temperature, a trip, running; parts `powerUc`,
+  `in0Uc` setpoint, `in1Uc` enable, `out0Uc`/`drive0*` in-position, `out1Uc`/`drive1*` fault). Before the API (never
+  shipped, no upgrade path) it wrote `powerUc`, `setpointUc`, `enableUc`, `inPositionUc`, `faultOutUc`, `thermalTc`
+  and `inPositionProcess*`/`faultProcess*`; a save with those loads with a fresh machine. The elevator car
   entity is not saved (`noSave`, `shouldBeSaved` false): the drive finds it by UUID within a session, else spawns it
   again where its segment says. A stopped car's floor ghost (GhostBlock tFloor, UUID 0x5E7A, observer the drive) is an
   ordinary saved ghost, so a player logging in on a car mid-shaft stands on it before the car is back.

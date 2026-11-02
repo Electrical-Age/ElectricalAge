@@ -49,7 +49,7 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `gui/LayoutTest` | Layout engine; every `assets/eln/gui/*.json` has no overlaps and nothing outside its panel. |
 | `item/xray/XRayRayMarchTest` | X-ray ray march. |
 | `gametest/StructureFileTest` | The generated floor `.nbt` parses (3x3 stone floor). |
-| `robotics/motion/SegmentPropertyTest` (jqwik), `DriveTest` | Servo segments are continuous, within limits, arrive; retargets are seamless. Top speed follows the line, the draw. |
+| `robotics/motion/SegmentPropertyTest` (jqwik), `DriveTest` (jqwik) | Servo segments are continuous, within limits, arrive; retargets are seamless. Top speed follows the line; the energy rule: a step goes no further than its energy pays for, a cut move starts where the paid step ended at the speed the supply keeps paying for. |
 | `robotics/motion/StationsTest` | Stations from markers or spread evenly; setpoint bands and share; the panel's next stop; block-aligned stops. |
 | `robotics/servo/RidersTest` | Who stands on a car (players a round trip late on the server); the client's carry of its own player (the pure core of `CarCarry`). |
 | `robotics/servo/SegmentPayloadTest` | The segment payload's codec round trip; the client's segment matches the server's. |
@@ -104,8 +104,9 @@ old-format save, burn and repair).
 
 A case can run code part way (`ctx.after(ticks, r)`, as its measure runs: outside the simulator's tick) and reload a
 node from an edited tag (`Reload.node(level, pos, tag -> ...)`: a save as an older version wrote it).
-`ServoCases` (the elevator: to a station and in position, slower on a sagging line, stopped by an obstruction,
-reloaded mid-move, floor ghost, a mob carried; structure `floor_11x10x5`).
+`ServoCases` (the elevator: to a station and in position, slower on a sagging line, slower on a starved one and
+still arriving, the energy books of a lift, stopped by an obstruction, reloaded mid-move with its machine, floor
+ghost, a mob carried; structure `floor_11x10x5`).
 
 ### Golden data (`golden/1.12/*.json`, see `golden/README.md`)
 

@@ -177,13 +177,27 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     station up (top half) or down (bottom half). Every planned stop is on a whole block.
   - Connections: 200 V on the back. Seen from the car's side, the left flank takes the setpoint on a floor cable and
     gives in-position on a ceiling cable; the right flank takes enable on a floor cable (unconnected counts as enabled)
-    and gives the fault signal on a ceiling cable. Two signals a flank because the front is the shaft. A connected
+    and gives the fault signal on a ceiling cable. Two signals a flank because the front is the shaft (on the Machine
+    API: signals at cable positions, `CablePosition.FLOOR`/`CEILING`). A connected
     setpoint overrides the markers and the panel (its eight bands pick stations; an empty hand on the drive switches it
     to a share of the travel, to the nearest block).
-  - Motion: 2 m/s at 200 V, 1 m/s^2, slower on a lower line voltage (none below 60 V); a sag mid-move retargets the move
-    to the lower top speed. Draw: 40 W idle plus the lifting work over 80 % (a counterweight balances the car and 40 kg;
-    players count 80 kg, other creatures by size). The losses heat the motor: past 80 K over ambient it faults and holds
-    until it is back under 50 K. It never burns.
+  - Electrics: a Machine API consumer (`Machines.forElement`, the API's first new device): 200 V, rated ~3 kW (40 W
+    idle plus lifting 120 kg net, two riders over the counterweight, at full speed; tsugumi-lab's choice),
+    `Brownout.SLOW`. Each tick it asks for its step's lifting work over 80 % (a counterweight balances the car and 40
+    kg; players count 80 kg, other creatures by size; lowering costs only the idle draw) and moves only as far as what
+    it got pays for: short, it goes on from there at the speed paid for, its new top speed what the line keeps
+    delivering (continuous in position; the speed steps down, a lift braked by its load). So a weak or starved line, or
+    a load over its rating, makes a slower car that still arrives; the machine's buffer (two ticks of rated power) can
+    pay for a faster first second. Top speed also follows the line: 2 m/s at 200 V, 1 m/s^2, a sag or recovery
+    mid-move retargets it (up only once energy piles up in the buffer, so a starved car doesn't surge and fall back);
+    below 30 % of 200 V it holds, and runs again after half a second over 35 %. On a line weaker than it, the API keeps
+    it at the line's maximum power (about half the volts) instead of pulling the line down.
+  - Heat and trips (the API's heat model): 4 kJ/K, 4 W/K to a 20 C ambient, heated by the idle draw and the motor's
+    losses; over 100 C (the old 80 K over ambient) it trips, faults and holds, and runs again 3 s after it is back
+    under 90 C (the API's reset band; it was 50 K over ambient). Over 1.3x 200 V it trips (fault "overvoltage") and
+    holds until the line has been under 1.1x for 3 s: a servo amplifier's protection, so it never burns. A trip stops
+    the car dead, as any fault; a dead line brakes it where it can (lifting, it stops at once). Reloaded mid-move, its machine runs
+    on (the API keeps a running machine's state).
   - Safety: before each step the car and its riders are swept to the next position; a block or a creature that isn't
     riding stops it dead (fault; it clears on the next call or an enable toggle). Disabled, it stops at the next whole
     block it can; a dead line brakes it where it can.
@@ -197,7 +211,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     also be the panel's hitbox); joiners get the segment in the car's pairing bundle rather than in startSeenByPlayer
     (which runs after the spawn bundle); on the server, riders' sweep is clipped to the car's column (a rider's
     overhang meets the landing, it doesn't fault the car) and a player up to 1 m off the top (a round trip late) still counts as a rider.
-  - Tests: `ServoCases`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
+  - Tests: `ServoCases`, `DriveTest`, `SegmentPropertyTest`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
 
 ## Behaviour changes vs 1.12
 
