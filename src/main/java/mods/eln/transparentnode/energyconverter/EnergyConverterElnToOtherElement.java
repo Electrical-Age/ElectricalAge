@@ -1,21 +1,20 @@
 package mods.eln.transparentnode.energyconverter;
 
 import mods.eln.Eln;
+import mods.eln.api.Brownout;
+import mods.eln.api.ElementMachine;
+import mods.eln.api.MachineSpec;
+import mods.eln.api.Machines;
+import mods.eln.api.RelativeFace;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
-import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtResistor;
-import mods.eln.sim.process.destruct.Failure;
-import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -32,8 +31,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
- * EA -> other mods energy exporter. EA power comes in on the front (a resistor sized by the GUI's input-power limit
- * fills a buffer); energy leaves through the back face (front.back()), as in 1.7.10. 26.x: Forge Energy only (1.12:
+ * EA -> other mods energy exporter. EA power comes in on the front: a machine on the Machine API (a consumer rated at
+ * the exporter's maximum power) whose taken joules fill the buffer; energy leaves through the back face
+ * (front.back()), as in 1.7.10. 26.x: Forge Energy only (1.12:
  * FE, RF and IC2 EU; RF is FE now and IC2 has no 26.x port): the back face offers an extract-only {@link EnergyHandler}
  * (Capabilities.Energy.BLOCK on the transparent-node block entity, registered in Eln), and every simulator tick the
  * buffer is pushed into the neighbour behind if that block is loaded and accepts energy there. Ratio: config
@@ -43,10 +43,9 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
 
     final EnergyConverterElnToOtherDescriptor descriptor;
 
-    final NbtElectricalLoad load = new NbtElectricalLoad("load");
-    final NbtResistor powerInResistor = new NbtResistor("powerInResistor", load, null);
-    final ElectricalProcess electricalProcess = new ElectricalProcess();
-    final VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
+    /** The EA side; its parts are in this element's lists. */
+    public final ElementMachine machine;
+    final InputProcess inputProcess = new InputProcess();
     final PushProcess pushProcess = new PushProcess();
 
     public double energyBuffer = 0;
@@ -64,19 +63,16 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
         super(node, descriptor);
         this.descriptor = (EnergyConverterElnToOtherDescriptor) descriptor;
         this.descriptor.applyTo(this);
-        // in the constructor, as the other elements: readFromNBT (before initialize) restores what is listed here
-        electricalLoadList.add(load);
-        electricalComponentList.add(powerInResistor);
-        electricalProcessList.add(electricalProcess);
-        slowProcessList.add(watchdog);
+        // in the constructor, as the other elements: readFromNBT (before initialize) restores what is listed here.
+        // Slower on a sagging line, as its resistor was; burns over 1.3 x nominal, as its watchdog had it.
+        machine = Machines.forElement(this, MachineSpec.consumer(inStdVoltage).ratedWatts(inPowerMax)
+            .onBrownout(Brownout.SLOW).burnsOnOvervoltage().power(RelativeFace.FRONT).build());
+        slowProcessList.add(inputProcess);
         slowProcessList.add(pushProcess);
     }
 
     @Override
     public void initialize() {
-        ElnDeviceRegistry.applySmallRs(load);
-        load.setAsPrivate();
-        watchdog.set(load).setUNominal(inStdVoltage).set(new Failure(this).machine());
         connect();
     }
 
@@ -87,12 +83,12 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         // as the simple-node exporter: the front face, any cable position on it
-        return side == front ? NodeBase.maskElectricalPower : 0;
+        return machine.connectionMask(side);
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        return load;
+        return machine.powerLoad();
     }
 
     @Override
@@ -102,7 +98,7 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
 
     @Override
     public String multiMeterString(Direction side) {
-        return Utils.plotUIP(load.getU(), load.getCurrent());
+        return Utils.plotUIP(machine.volts(), machine.amps());
     }
 
     @Override
@@ -120,26 +116,31 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
         return true;
     }
 
-    class ElectricalProcess implements IProcess {
-        double timeout = 0;
+    /**
+     * Each tick: what the step delivered goes into the buffer, and the next ask is the GUI's share of the maximum
+     * power, eased off as the buffer passes half full (none when full). The ask scales with (U / Unom)^2, as the
+     * resistor sized at nominal volts it replaces drew.
+     */
+    class InputProcess implements IProcess {
+        /** The power asked for this tick, W (before the line's share). */
+        double inP;
 
         @Override
         public void process(double time) {
-            energyBuffer += powerInResistor.getP() * time;
-            timeout -= time;
-            if (timeout < 0) {
-                timeout = 0.05;
-                double energyMiss = energyBufferMax - energyBuffer;
-                if (energyMiss <= 0) {
-                    powerInResistor.highImpedance();
-                } else {
-                    double factor = Math.min(1, energyMiss / energyBufferMax * 2);
-                    if (factor < 0.005) factor = 0;
-                    double inP = factor * inPowerMax * inPowerFactor;
-                    powerInResistor.setR(inStdVoltage * inStdVoltage / inP);
-                }
-            }
+            double energyMiss = energyBufferMax - energyBuffer;
+            double factor = energyMiss <= 0 ? 0 : Math.min(1, energyMiss / energyBufferMax * 2);
+            if (factor < 0.005) factor = 0;
+            inP = factor * inPowerMax * inPowerFactor;
+            double r = machine.voltageRatio();
+            energyBuffer += machine.takeJoules(inP * r * r * time);
         }
+    }
+
+    @Override
+    public java.util.Map<String, String> getWaila() {
+        java.util.Map<String, String> info = super.getWaila();
+        machine.addWaila(info);
+        return info;
     }
 
     public double getOtherModEnergyBuffer(double conversionRatio) {
