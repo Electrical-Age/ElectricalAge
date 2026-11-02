@@ -121,6 +121,19 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - Data logger: per channel n `busc<n>`, a byte, the bus channel 0-15 it records (absent, or any other value: its
   wire), claimed again on load. The unreleased named `bus<n>` is ignored.
 
+- Machine API (`api/impl/ElementHost`, any element with `Machines.forElement`): `api.machine.bufferJ` (energy
+  delivered and not yet used, J), `api.machine.celsius` (with a heat model), `api.machine.trip` and
+  `api.machine.tripTicks` (a trip in its cooldown), `api.machine.lastTrip`, `...lastTripMeasured`, `...lastTripLimit`,
+  `...lastTripBurns`; its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
+  `api.machine.drive<i>highImpedance` / `U`, a producer's `api.machine.emfUc` / `U` / `Istate`. Taken back at the
+  first tick (after the element's own ratings); absent keys: a fresh machine.
+- Electrical machines (macerator, compressor, magnetizer, plate machine, tar sand separator) since the Machine API:
+  `powerOn`, `progressJ` (the item in hand, J; absent before: it starts from 0), and the machine keys above;
+  `electricalLoadUc` is no longer written or read (a node voltage, solved again on the first step).
+- FE exporter since the Machine API: `energyBuffer`, `inPowerFactor`, and the machine keys; `loadUc` and
+  `powerInResistorR` (its resistor, now the machine) are no longer read. Both its older saves load
+  (`wp11_legacy_exporter_save`, `wp11_exporter_old_save`).
+
 ## Ids that must never change
 
 - `src/main/resources/eln-ids.json`: `"<1.12 item>@<damage>"` (e.g. `eln:six_node@<id>`, `eln:transparent_node@<id>`,

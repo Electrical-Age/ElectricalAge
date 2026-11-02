@@ -36,6 +36,7 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `api/MachineSpecTest` | `MachineSpec` defaults (power on every face not given a signal or the bus) and every `build()` message. |
 | `api/MachineCoreTest`, `MachineCorePropertyTest` (jqwik) | `MachineCore` with no circuit: misuse throws; power-up hold (a flickering line never starts it); an ask sizes the next step (exactly one tick of lag); a retried failed `tryTakeJoules` is one ask; refill; each trip and its cooldown, the overheat reset in a hot place, a throwing trip listener. Properties over random specs (any voltage, floors 0.05..0.95, a heat model in a third) and line histories that dwell on every threshold: delivered == taken + buffered + lost exactly (producers: fed <= given, overdraw carried), buffer in bounds, load resistance >= Unom^2/rated and idle only below the floor, trips latch for the cooldown (also when another cause follows at once), undervoltage always recovers and never chatters, `Brownout.SLOW` never stops, droop and current limit. |
 | `api/BenchTest` | Machines in the real simulator (`ElnTestKit.bench()`): a stiff supply gives what is asked; two machines on a weak line sag it and share; a 200 V machine on 50 V is UNDERVOLTAGE and takes nothing; overvoltage trip and its cooldown; a producer feeds a consumer (taken <= delivered <= fed <= given; the refill backs off rather than collapsing the line); a starved producer stops and restarts a `Brownout.STOP` mill and settles under a `Brownout.SLOW` one; parallel producers share; signals, bus, thread check. Golden trace `src/test/resources/mods/eln/api/step-load.trace` (a step load on a weak line): regenerate deliberately with `./gradlew test -PapiTraces` and review the diff. |
+| `api/ElementHostTest` | The element host with a stub element: relative faces one-to-one for every front, masks and loads per face (power, gate in, gate out), an input's default until connected, outputs floating until set; parts in the element's lists (books first, plan in the pre-processes, one machine per element); the game's tick order in a bare `Simulator` (rated draw at 50 V, the old resistor's draw on a half-volt line, exact books); NBT under `api.machine.*` written through until the first tick; a burn goes to the element and a repaired element un-burns the core. `MachineCoreTest` also covers `respec`, `snapshot`/`restore` and `repair`; `MachineCorePropertyTest.respecConservesEnergy`. |
 | `api/MnaMachineTest` | `MnaMachine` in a bare simulator: a steady load on a weak line keeps its resistance tick to tick (no matrix rebuilds) with exact books; a producer given energy every third tick stays connected and opens 20 ticks after its queue runs dry; a simulator stepping other than once per tick is refused. |
 | `node/NodeSaveLoadTest` | Unloadable node tags (also a `LinkageError`) are kept by `NodeManager` as orphans and written back unchanged; dropped by position; a node whose save throws keeps its last good tag. |
 | `node/six/SixNodeLoadTest` | A six-node face that cannot load is kept and its side stays taken; load connects once; bad client packets ignored. |
@@ -93,7 +94,12 @@ wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Case
 `WorldSensorCases`, `ShaftMoreCases`, `LampSupplyCases`, `LampLightCases`, `CableSlotCases` (devices work with an empty
 inventory), `SixNodeBreakCases` (one face per break, kept-only voxel block, orphan block), `BurnChainCases` (one failure per network), `CableCases` (voxel vs six-node cables,
 currents agree to 0.1%), `PipeCases`, `OilCases`, `TurretCases`, `OreDropCases`, `ItemCapabilityCases` (hoppers/pipes),
-`TooltipCases`, `PortHelperCases` (fuel, smelting, `eln:light`, waterlogged six-node block).
+`TooltipCases`, `PortHelperCases` (fuel, smelting, `eln:light`, waterlogged six-node block), `MachineApiCases` (the
+electrical machines on the Machine API against their old resistor at 1x and 0.7x their volts, reload mid-item, an
+old-format save, burn and repair).
+
+A case can run code part way (`ctx.after(ticks, r)`, as its measure runs: outside the simulator's tick) and reload a
+node from an edited tag (`Reload.node(level, pos, tag -> ...)`: a save as an older version wrote it).
 
 ### Golden data (`golden/1.12/*.json`, see `golden/README.md`)
 

@@ -40,6 +40,7 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
 | `thermalProcessList` (six) / `thermalFastProcessList` (transparent) | `addThermalFastProcess` |
 | `thermalSlowProcessList` (six only; transparent has none) | `addThermalSlowProcess` |
 | `slowProcessList` | `addSlowProcess` |
+| `slowPreProcessList` (transparent only) | `addSlowPreProcess` (before the electrical step) |
 
 - `NodeBase.connect()` -> `connectJob()` -> element `connectJob()`; `disconnect()` -> `disconnectJob()` removes the same.
   Element `connectJob` is a no-op while the node `isDestructing()`; `TransparentNode` skips a burnt element.
@@ -54,6 +55,24 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
   many times faster time runs at a node. `ElectricalMachineElement` checks it once a second and multiplies its speed-up
   by it (as boosters do: the resistor drops, so the machine draws that much more power and finishes that much sooner,
   for the same energy per item). Test: `wp10a_macerator_in_a_3x_acceleration_field`.
+
+### Machines on elements (`api/Machines.forElement`, `api/impl/ElementHost`)
+
+An element builds its machine in its constructor; the machine's power terminal (an `NbtElectricalLoad` with a
+cable's small Rs), signal gates, resistor (or source) go into the element's lists. In one tick:
+
+1. slow pre-processes: the machine's `beforeStep` plans the step (`MnaMachine.applyBeforeStep`: the load for what
+   the owner asked last tick, or the source on or off);
+2. the electrical step;
+3. slow processes: the machine's `afterStep` (inserted first in the element's list: it books the step's energy,
+   updates the state, runs trip listeners), then the element's own processes, where the owner takes or gives;
+4. queued failures: a `burnsOnOvervoltage` trip burns the element through `Failure` (kind MACHINE). An element back
+   in the simulation unburnt (repaired, or the burn called off for a worse failure nearby) repairs its machine.
+
+So the owner works between `afterStep` and the next `beforeStep`, as `MachineCore` wants, whatever order the element
+adds its processes in. Faces: `RelativeFace` against the element's `front` (`api/impl/Faces`). One machine per
+element; a transparent node has no bus port (a spec with one is refused). Converted so far: the electrical machines
+and the FE exporter. Tests: `api/ElementHostTest`, `MachineApiCases`, `Wp11Cases` (exporter).
 
 ## MNA (`src/main/java/mods/eln/sim/mna/`)
 

@@ -226,6 +226,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Logic and analog chips are drawn at 0.75 (a case 6 voxels across; Baughn) and, in voxel blocks, go anywhere on a
   face; pins that touch connect (docs/voxel-cables.md, devices off centre).
 
+- The macerator, compressor, magnetizer and plate machine (50 V and 200 V; the tar sand separator shares their
+  element) and the FE exporter run on the Machine API (`Machines.forElement`; Baughn: the four main machines and the
+  exporter first, to test the API). Same nominal volts, rated power, energy per item and FE per joule; at or under
+  nominal volts they draw exactly what their resistor drew (`MachineApiCases` runs that model alongside, at 1x and
+  0.7x the line). Differences: above nominal volts they no longer speed up past their rating; they start half a
+  second after power comes (the API's power-up hold); overvoltage (over 1.3x nominal, either polarity for the
+  machines) burns them at once instead of after the watchdog's budget, and a repair brings them back; the exporter
+  no longer burns on a reverse voltage under -0.2x nominal; its machine holds up to two ticks of power in front of
+  the FE buffer (lost when it is broken, as the buffer is). A machine's progress on the item in hand is saved now
+  (it restarted on every load). Jade's "Power consumption" is the power drawn (it showed the power times the
+  boosters' efficiency).
+
 ## Bugs fixed
 
 - Shafts stored mass^2 x 0.25 J per rad/s (linear in speed): a line's inertia grew with the square of its total mass,
