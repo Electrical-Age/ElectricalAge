@@ -209,7 +209,7 @@ tasks.register('bikeTexture', JavaExec) {
 
 // ---- The eln-api jars: the API for other mods, to compile against (compileOnly; EA's own jar is the implementation)
 // build/libs/eln-api-<version>.jar (mods.eln.api, .lowlevel, .spi) and eln-api-testkit-<version>.jar (mods.eln.api.testkit,
-// for tests), each with its sources and javadoc jars; publishApiPublicationsToBuildRepoRepository puts them in
+// for tests), each with its sources and javadoc jars; publishAllPublicationsToBuildRepoRepository puts them in
 // build/repo as mods.eln:eln-api and mods.eln:eln-api-testkit. Their manifests carry ElnApi.API_VERSION.
 def apiVersionMatch = file('src/api/java/mods/eln/api/ElnApi.java').text =~ /String API_VERSION = "(\d+\.\d+\.\d+)";/
 if (!apiVersionMatch.find()) throw new GradleException('ElnApi.java has no API_VERSION = "major.minor.patch"')

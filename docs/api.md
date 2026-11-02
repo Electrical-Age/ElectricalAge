@@ -15,10 +15,97 @@ Both levels follow the same rules:
   every problem it finds in one exception.
 - Units are in the names (`ratedWatts`, `takeJoules`, `heatCapacityJPerK`).
 - Signals are levels from 0 to 1, never volts.
-- No EA internals appear in the signatures. The exception is `Machines.forElement`, which is for EA's own elements.
+- No EA internals appear in the signatures. The build compiles the API apart from the rest of EA and checks it
+  (see [The eln-api jar](#the-eln-api-jar)).
 
 Every code sample on this page is compiled and tested. It is a region of a file under
 `src/test/java/mods/eln/api/docs/`, and `ApiDocSamplesTest` fails if the page and the file differ.
+
+## The eln-api jar
+
+EA's build makes the API into jars of its own, for other mods to compile against. Each comes with a `-sources` and a
+`-javadoc` jar:
+
+- **`build/libs/eln-api-<version>.jar`:** `mods.eln.api`, `mods.eln.api.lowlevel` and `mods.eln.api.spi`.
+- **`build/libs/eln-api-testkit-<version>.jar`:** `mods.eln.api.testkit`, for tests only.
+
+`./gradlew publishAllPublicationsToBuildRepoRepository` also writes them to `build/repo` as `mods.eln:eln-api` and
+`mods.eln:eln-api-testkit`.
+
+The jars are for compiling only, and EA's own mod jar is the implementation. In your mod's `build.gradle`:
+
+- Add `compileOnly files("libs/eln-api-<version>.jar")`, or `compileOnly "mods.eln:eln-api:<version>"` from a Maven
+  repository.
+- Don't ship the jar or jar-in-jar it. EA's jar has the same classes, and two copies of a package break the game.
+- In a dev run, EA must be loaded as a mod. For example, put its jar in the run's `mods` folder.
+
+What is in the jars:
+
+- They hold the API alone. `mods.eln.api.spi` is how the API finds EA's implementation, and you don't use it.
+- EA keeps some packages out of the jars. These are `mods.eln.api.impl` and `mods.eln.api.element`, which hosts
+  machines on EA's own elements (see [Another mod's block entity, or an EA element](#another-mods-block-entity-or-an-ea-element)).
+- The API's classes are compiled against Minecraft and NeoForge alone, so no signature can name an EA internal.
+- The build also compiles this page's samples and EA's hidden test machine against the jars alone, as another mod
+  would (`compileApiConsumer`, `compileApiConsumerTest`). `ApiJarTest` checks that no class in the jars names an EA
+  class outside them.
+
+**Versions.** `ElnApi.API_VERSION` is a semantic version (major.minor.patch). It is also in each jar's manifest as
+`Eln-Api-Version`. EA promises the following:
+
+- Within a major version, changes are additive: new types, methods, enum constants and builder settings. Defaults,
+  units and behaviour you rely on stay the same, so a mod compiled against 1.x runs on any EA with API 1.y where y is
+  x or more.
+- Anything removed or changed incompatibly comes with a new major version.
+- Interfaces that EA implements (`Machine`, `MachineView`, `MachineRegistry` and the low level's parts) may gain
+  methods. Interfaces that you implement (`BurnHandler`, the listeners) don't change within a major version.
+- An enum may gain constants, so a `switch` over `MachineState` or `PortStatus` needs a `default` branch.
+
+`API_VERSION` is a constant, so javac copies it into your classes, and you get the version you compiled against.
+`ElnApi.apiVersion()` gives the installed EA's version.
+
+## Without Electrical Age
+
+If EA is a hard dependency (`type = "required"` in your `neoforge.mods.toml`), you have nothing to do. If EA is
+optional, its classes aren't there when it isn't installed. Any class of yours that names a `mods.eln.api` type then
+fails with `NoClassDefFoundError` as soon as it is used. To avoid this:
+
+- Check `ModList.get().isLoaded("eln")`.
+- Keep every API use in classes that run only after that check passes.
+
+```java src/test/java/mods/eln/api/docs/OptionalEa.java#guard
+/** Is EA installed? Ask before anything that reaches mods.eln.api. */
+public static final boolean ELN = ModList.get().isLoaded("eln");
+
+/** In the mod's constructor. This class names no mods.eln.api type, so it loads with or without EA. */
+public static void init(IEventBus modBus, Supplier<BlockEntityType<MillBlockEntity>> mill) {
+    if (ELN) EaCompat.register(modBus, mill);   // EaCompat, and the API with it, loads only here
+}
+
+/** The mill's energy this tick: from EA's line when EA is there, else none (it runs on its own fuel). */
+public static double joulesFor(BlockEntity mill, double wanted) {
+    return ELN ? EaCompat.take(mill, wanted) : 0;
+}
+
+/** Every mention of mods.eln.api is in classes like this one, reached only behind ELN. */
+static final class EaCompat {
+    static void register(IEventBus modBus, Supplier<BlockEntityType<MillBlockEntity>> mill) {
+        Mill.register(modBus, mill);
+    }
+
+    static double take(BlockEntity mill, double wanted) {
+        return ElnApi.machines().of(mill).takeJoules(wanted);
+    }
+}
+```
+
+There are two ways to get this wrong:
+
+- **The API is used without the check.** If EA is missing, the class that uses it fails with
+  `NoClassDefFoundError: mods/eln/api/...`. Only the check above prevents this.
+- **The API's classes are there but EA isn't.** This happens when the eln-api jar was put on the runtime classpath
+  (`implementation` instead of `compileOnly`) or shipped. Then the API's entry points (`ElnApi.machines()`,
+  `Circuit.create`, `ElnTestKit`) throw `IllegalStateException`. The message says that EA isn't loaded and points
+  here. `MachineSpec` builders, `Meters` and the enums don't need EA and still work.
 
 ## A consumer machine
 
@@ -313,7 +400,7 @@ public static List<String> tooltip(MachineView v) {
 
 | | Another mod's block entity | One of EA's own elements |
 |---|---|---|
-| Made by | `ElnApi.machines().register(type, be -> spec)` at common setup | `Machines.forElement(this, spec)` in the element's constructor |
+| Made by | `ElnApi.machines().register(type, be -> spec)` at common setup | `Machines.forElement(this, spec)` in the element's constructor (`mods.eln.api.element`, which is EA-internal and not in the eln-api jar) |
 | Handle | `ElnApi.machines().of(be)`, a `Machine` | the returned `ElementMachine` |
 | Node | EA's own unsaved node, tied to the block entity | the element's node |
 | Faces | each face is a leaf terminal; the first live one draws | one power terminal on every power face (the element may pass power through) |
@@ -321,7 +408,8 @@ public static List<String> tooltip(MachineView v) {
 | Burn | the spec's burn handler; the machine stays tripped (see [Burning](#burning)) | EA's own burn-out and repair |
 | Bus face | linked to a voxel bus cable | not supported (transparent nodes have no bus port) |
 
-An EA element delegates its faces and Jade lines to the machine:
+An EA element delegates its faces and Jade lines to the machine. This sample is the only one on the page that names EA's
+own types:
 
 ```java src/test/java/mods/eln/api/docs/HeaterElement.java#element
 static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(500).build();
@@ -355,8 +443,13 @@ public Map<String, String> getWaila() {
 
 ## Testing
 
-`mods.eln.api.testkit` runs machines in EA's real simulator from JUnit, with no world. `verifySpec` runs a canned
-property suite on a spec:
+`mods.eln.api.testkit` runs machines in EA's real simulator from JUnit, with no world. You compile your tests against
+the eln-api and eln-api-testkit jars (`testCompileOnly`), and EA's code does the work, so its mod jar goes on the
+tests' runtime classpath (`testRuntimeOnly`). EA's jar nests two libraries that the tests then need as well:
+`org.apache.commons:commons-math3:3.6.1` and `org.jetbrains.kotlin:kotlin-stdlib`. EA's build compiles this page's
+tests against the jars alone and runs them with EA's classes. Nobody has tried this setup in another mod's build yet.
+
+`verifySpec` runs a canned property suite on a spec:
 
 ```java src/test/java/mods/eln/api/docs/MillTest.java#verify
 @Test
