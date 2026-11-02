@@ -145,6 +145,7 @@ public final class ElnGameTests {
             } catch (RuntimeException e) {
                 ctx.check(c.id() + " measure", false, e.toString());
             }
+            mods.eln.introspect.DescribeCheck.run(helper.getLevel(), helper.getBounds(), ctx::check);
             persistence(helper, ctx);
             ctx.finish();
         });

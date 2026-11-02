@@ -320,6 +320,7 @@ public class Eln {
         mods.eln.sound.ElnSounds.register(modBus);
         mods.eln.datagen.ElnDataGen.register(modBus);
         mods.eln.gametest.LabCommands.register(); // /elnlab: render-port scenes (op only)
+        mods.eln.introspect.Introspect.register(modBus); // /eln describe, eln:describe (op only)
         mods.eln.node.voxel.CableConverter.register(); // six-node cables to voxel cables as chunks load (config)
         mods.eln.network.ServerPacketHandler.register();
         mods.eln.node.NodeServer nodeServer = new mods.eln.node.NodeServer();

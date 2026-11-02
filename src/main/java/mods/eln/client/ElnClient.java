@@ -101,6 +101,7 @@ public final class ElnClient {
         });
         mods.eln.bike.ElectricBike.clientSound = mods.eln.client.entity.BikeSound::tick;
         mods.eln.bike.ElectricBike.clientCrash = b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new mods.eln.bike.BikeCrash(b.getId()));
+        mods.eln.introspect.client.ClientIntrospect.register(); // the client half of device reports (agent tools)
         if (mods.eln.handbook.Handbook.guideAvailable())
             modBus.addListener(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent.class, HandbookGuide::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
