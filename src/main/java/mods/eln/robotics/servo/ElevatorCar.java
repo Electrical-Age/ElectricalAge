@@ -259,6 +259,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     @Override
     public void describe(mods.eln.introspect.Report r) {
         if (head != null) r.state().ref("head", head.getX() + "," + head.getY() + "," + head.getZ());
+        // (the drive's clock: a client gets only the ticks into the segment, so this isn't a sync key)
+        if (segment != null) r.state().num(mods.eln.introspect.Keys.SEGMENT_START, segment.startTick(), mods.eln.introspect.Unit.TICK);
         motion(r, serverNow - (segment == null ? 0 : segment.startTick()));
     }
 
@@ -274,7 +276,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     }
 
     /**
-     * Sync keys of both halves, from a segment and the ticks into it: the segment itself (exact: both come from one
+     * Sync keys of both halves, from a segment and the ticks into it: the segment's shape (exact: both come from one
      * payload), the ticks into it, and position and velocity, which may differ by SYNC_LAG_TICKS of motion.
      */
     private void motion(mods.eln.introspect.Report r, long dt) {
@@ -283,7 +285,6 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         if (segment == null || origin == null) return;
         double accel = segment.accel(), vmax = Math.abs(segment.vmax());
         sync.choice("axis", axis);
-        sync.num(mods.eln.introspect.Keys.SEGMENT_START, segment.startTick(), mods.eln.introspect.Unit.TICK).tol(0);
         var seg = sync.section("segment");
         seg.num("from", segment.from(), mods.eln.introspect.Unit.M).tol(1e-9);
         seg.num("to", segment.to(), mods.eln.introspect.Unit.M).tol(1e-9);
