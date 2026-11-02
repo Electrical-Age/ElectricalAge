@@ -60,7 +60,61 @@ public final class Describe {
                 out.addAll(via);
             }
         }
+        machine(level, pos, out);
         return out;
+    }
+
+    /**
+     * A machine on the EA API at pos (its eln:machine capability): an EA element machine's report gets the machine's
+     * spec and state; a foreign block entity hosting one replaces the bare hosted node's report with its own.
+     */
+    private static void machine(ServerLevel level, BlockPos pos, List<Report> out) {
+        mods.eln.api.MachineView v;
+        try {
+            v = level.getCapability(mods.eln.api.ElnApi.MACHINE, pos, null);
+        } catch (RuntimeException e) {
+            return;
+        }
+        if (v == null) return;
+        String at = pos.getX() + "," + pos.getY() + "," + pos.getZ();
+        for (Report r : out) {
+            String node = text(r.id(), Keys.NODE);
+            if ((node.equals("transparent") || node.equals("six")) && at.equals(ref(r.id(), Keys.POS)) && r.id().get("via_ghost") == null) {
+                Report target = r;
+                guard(target, () -> MachineDescribe.into(target, v));
+                return;
+            }
+        }
+        out.removeIf(r -> text(r.id(), Keys.NODE).equals("other") && at.equals(ref(r.id(), Keys.POS)));
+        out.add(hosted(level, pos, v));
+    }
+
+    /** A foreign block entity that is an EA machine: what and where it is, its machine, its ports from the spec. */
+    static Report hosted(ServerLevel level, BlockPos pos, mods.eln.api.MachineView v) {
+        Report r = new Report(Report.Half.SERVER);
+        hostedId(r, level.getBlockState(pos), level.getBlockEntity(pos), pos);
+        guard(r, () -> {
+            MachineDescribe.into(r, v);
+            MachineDescribe.ports(r, v.spec());
+            MachineDescribe.sync(r, v);
+        });
+        return r;
+    }
+
+    /** The id of a hosted machine, the same on both halves (they pair by node and kind). */
+    public static void hostedId(Report r, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.block.entity.BlockEntity be, BlockPos pos) {
+        r.id().text(Keys.KIND, String.valueOf(BuiltInRegistries.BLOCK.getKey(state.getBlock())));
+        r.id().text(Keys.NODE, "hosted");
+        r.id().ref(Keys.POS, pos.getX() + "," + pos.getY() + "," + pos.getZ());
+        if (be != null) r.id().text(Keys.ELEMENT, be.getClass().getSimpleName());
+    }
+
+    private static String text(Section s, String key) {
+        return s.get(key) instanceof Value.Text t ? t.v() : "";
+    }
+
+    private static String ref(Section s, String key) {
+        return s.get(key) instanceof Value.Ref t ? t.v() : "";
     }
 
     private static void node(NodeBase node, List<Report> out) {

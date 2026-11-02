@@ -6,7 +6,7 @@ package mods.eln.introspect;
  */
 public enum Unit {
     V("V"), A("A"), W("W"), J("J"), OHM("Ω"), C("°C"), K("K"), M("m"), M_PER_S("m/s"), M_PER_S2("m/s\u00B2"), KG("kg"), MB("mB"),
-    RPM("rpm"), TICK("t"), S("s"), RATIO("");
+    RPM("rpm"), TICK("t"), S("s"), J_PER_K("J/K"), W_PER_K("W/K"), RATIO("");
 
     /** What a person reads after the number. */
     public final String symbol;
