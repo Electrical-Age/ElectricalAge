@@ -286,6 +286,25 @@ public class ElementHostTest {
         assertEquals(a, d);
     }
 
+    /** Its loads carry the spec's names (introspect lists the ports by them): "power" and each signal's; saved as before. */
+    @Test
+    void signalLoadsAreNamedBySpecAndSavedByIndex() {
+        Element e = new Element();
+        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).power(RelativeFace.BACK)
+            .signalIn("setpoint", RelativeFace.LEFT).signalOut("in_position", RelativeFace.RIGHT).build());
+        e.front = Direction.XN;
+        var in = (mods.eln.sim.nbt.NbtElectricalLoad) m.electricalLoad(Faces.resolve(RelativeFace.LEFT, e.front));
+        var out = (mods.eln.sim.nbt.NbtElectricalLoad) m.electricalLoad(Faces.resolve(RelativeFace.RIGHT, e.front));
+        assertEquals("setpoint", in.name());
+        assertEquals("in_position", out.name());
+        assertEquals("power", ((mods.eln.sim.nbt.NbtElectricalLoad) m.powerLoad()).name());
+        CompoundTag t = new CompoundTag();
+        INBT.write(e, t);
+        assertTrue(t.contains("api.machine.in0Uc") && t.contains("api.machine.out0Uc") && t.contains("api.machine.powerUc"),
+            t.keySet().toString());
+        for (String k : t.keySet()) assertTrue(k.startsWith("api.machine."), k);
+    }
+
     /** The heat model cools to the element's ambient (EA's Ambient where it stands), taken up at the first tick. */
     @Test
     void heatFollowsTheElementsAmbient() {

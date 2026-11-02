@@ -190,6 +190,12 @@ public final class ServoCases {
             ctx.check("servo: in position (status and output)", d.status() == LinearServoDriveElement.IN_POSITION
                 && s.inPositionVolts(ctx) > 40 && s.faultVolts(ctx) < 10, d.status() + " " + s.inPositionVolts(ctx) + " V");
             ctx.check("servo: a floor ghost under the stopped car", d.ghostAt(3), "");
+            var ports = new java.util.TreeMap<String, mods.eln.introspect.Port.Kind>();
+            for (var r : mods.eln.introspect.Describe.at(ctx.level(), d.node.coordonate.pos()))
+                for (var p : r.ports()) ports.put(p.name(), p.kind());
+            ctx.check("servo: introspect lists its ports by the spec's names", ports.keySet().containsAll(
+                    List.of("power", "setpoint", "enable", "in_position", "fault"))
+                && ports.get("setpoint") == mods.eln.introspect.Port.Kind.SIGNAL && ports.keySet().stream().noneMatch(n -> n.startsWith("api_machine")), ports.toString());
         }
     }
 

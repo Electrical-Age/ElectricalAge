@@ -81,18 +81,19 @@ public final class ElementHost implements ElementMachine {
             if (p instanceof AfterStep) throw new IllegalStateException("one machine per element: this one already has " + ((AfterStep) p).host().spec());
         core = new MachineCore(Objects.requireNonNull(spec, "spec"));
         view = new ReadOnlyView(core);
-        power = new NbtElectricalLoad(NBT_PREFIX + "power");
+        power = new NbtElectricalLoad("power", NBT_PREFIX + "power");
         power.setRs(site.powerRs());
         mna = new MnaMachine(core, power);
         inputs = new NbtElectricalLoad[spec.signalsIn().size()];
         for (int i = 0; i < inputs.length; i++) {
-            inputs[i] = new NbtElectricalLoad(NBT_PREFIX + "in" + i);
+            // named by the spec's signal (introspect lists the port so), saved by index
+            inputs[i] = new NbtElectricalLoad(spec.signalsIn().get(i).name(), NBT_PREFIX + "in" + i);
             inputs[i].setRs(site.signalRs());
         }
         outputLoads = new NbtElectricalLoad[spec.signalsOut().size()];
         outputs = new NbtElectricalGateOutputProcess[outputLoads.length];
         for (int i = 0; i < outputs.length; i++) {
-            outputLoads[i] = new NbtElectricalLoad(NBT_PREFIX + "out" + i);
+            outputLoads[i] = new NbtElectricalLoad(spec.signalsOut().get(i).name(), NBT_PREFIX + "out" + i);
             outputLoads[i].setRs(site.signalRs());
             outputs[i] = new NbtElectricalGateOutputProcess(NBT_PREFIX + "drive" + i, outputLoads[i]);
             outputs[i].setHighImpedance(true); // outputs start floating
