@@ -26,13 +26,13 @@ import java.util.function.Consumer;
  * </ol>
  * Consumer: the buffer holds at most two ticks of rated work energy. The next step's load is idle watts plus work:
  * the demand smoothed over two ticks (fast attack: a rise counts at once, a fall halves first) plus a refill of at
- * most a quarter of a tick's rated work once the line has kept up for a second, but never more than the buffer's
+ * most a quarter of a tick's rated work (held back a second when the line can't keep up), but never more than the buffer's
  * room, and none without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle
  * watts only. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
  * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times.
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
- * queue holds energy, behind the droop resistance 0.05 U_nom^2 / rated (1.05 U_nom open, rated watts at U_nom);
+ * queue holds energy (and SOURCE_HOLD_TICKS after, feeding nothing), behind the droop resistance 0.05 U_nom^2 / rated (1.05 U_nom open, rated watts at U_nom);
  * sourceVolts lowers its voltage so the step takes no more than the queue and the current stays under rated /
  * U_nom (EA's PowerSource rule). Several sources in one circuit can still overdraw a little within one step; the
  * overdraw is carried as a negative queue that later gives repay.
@@ -62,14 +62,20 @@ public final class MachineCore implements MachineView {
     /** The buffer refill, as a share of rated work power. */
     public static final double REFILL_SHARE = 0.25;
     /**
-     * The refill only runs once the steps have delivered at least this share of the work they planned for
-     * REFILL_HOLDOFF_TICKS in a row: on a source that can't keep up (a weak line, a starved producer) it waits
-     * instead of pulling the voltage down further, which would collapse it.
+     * The refill stops for REFILL_HOLDOFF_TICKS when two steps in a row deliver less than this share of the work
+     * they planned: on a source that can't keep up (a starved producer) it waits instead of pulling the voltage
+     * down further, which would collapse it. One short step is only a resistive line sagging under a new load (the
+     * next plan, made at the sagged volts, is met).
      */
     public static final double REFILL_KEPT_UP = 0.95;
     public static final int REFILL_HOLDOFF_TICKS = 20;
     /** A producer's open-circuit voltage, share of nominal. */
     public static final double DROOP_OPEN_RATIO = 1.05;
+    /**
+     * A producer's source stays connected this many ticks after its queue empties, at zero current, so an owner
+     * that gives every few ticks doesn't switch the circuit (and rebuild its matrix) each time.
+     */
+    public static final int SOURCE_HOLD_TICKS = 20;
     /** The buffer, in ticks of rated energy. */
     public static final double BUFFER_TICKS = 2;
     /** Above this Thevenin resistance (ohm) nothing is connected to a source. */
@@ -92,9 +98,10 @@ public final class MachineCore implements MachineView {
 
     // consumer
     private double demand, failedTry, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
-    private int keptUpTicks = REFILL_HOLDOFF_TICKS;
+    private int keptUpTicks = REFILL_HOLDOFF_TICKS, shortSteps;
     // producer
     private boolean sourceOn;
+    private int emptyTicks = SOURCE_HOLD_TICKS; // a producer never given anything starts open
     private double sourceVolts;
     // books: consumer: delivered in / taken out / idle and spilled; producer: given in / fed out (source side)
     private double joulesIn, joulesOut, joulesLost;
@@ -138,7 +145,8 @@ public final class MachineCore implements MachineView {
             amps = a > 0 ? watts / a : 0;
             double idle = Math.min(joules, idleCommand * TICK_SECONDS);
             double work = joules - idle;
-            keptUpTicks = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS) : 0;
+            shortSteps = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? 0 : shortSteps + 1;
+            keptUpTicks = shortSteps >= 2 ? 0 : Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS);
             double stored = Math.max(0, Math.min(work, capacity - buffer));
             buffer += stored;
             joulesLost += joules - stored;
@@ -159,7 +167,8 @@ public final class MachineCore implements MachineView {
      */
     public double beforeStep() {
         if (producer) {
-            sourceOn = !state.tripped() && buffer > 0;
+            emptyTicks = buffer > 0 ? 0 : Math.min(emptyTicks + 1, SOURCE_HOLD_TICKS);
+            sourceOn = !state.tripped() && emptyTicks < SOURCE_HOLD_TICKS;
             return sourceOn ? Math.min(buffer / TICK_SECONDS, DROOP_OPEN_RATIO * spec.ratedWatts()) : 0;
         }
         double idle = 0, work = 0;
@@ -190,7 +199,7 @@ public final class MachineCore implements MachineView {
         return loadOhms;
     }
 
-    /** Producer: is the source connected for the next step? */
+    /** Producer: is the source connected for the next step? (With an empty queue, sourceVolts makes it feed nothing.) */
     public boolean sourceOn() {
         return sourceOn;
     }

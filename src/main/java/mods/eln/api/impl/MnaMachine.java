@@ -12,13 +12,20 @@ import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
  * Puts a MachineCore into the circuit at one terminal (an ElectricalLoad the host owns and wires to its cables).
  * Consumer: a resistor from the terminal to ground, set to the core's loadOhms() (high impedance for 0 W). Producer:
  * a voltage source on a private node behind the droop resistor to the terminal; the resistor goes high impedance
- * while the source is off, so an idle producer is no load on the line, and during the step (a root pre-step
+ * while the source is off (see MachineCore.sourceOn), so an idle producer is no load on the line, and during the step (a root pre-step
  * process, like EA's PowerSource) the source voltage comes from the core and the circuit's Thevenin equivalent.
  * <p>
  * The host calls applyBeforeStep() before the electrical step (a slow pre-process in game) and readAfterStep()
- * after it (outside the step: trip listeners run there). Assumes one electrical step per tick (EA's default).
+ * after it (outside the step: trip listeners run there). Needs one electrical step per tick (EA's default): addTo
+ * refuses a simulator that steps otherwise, since the energy books count one step per tick.
+ * <p>
+ * Every resistance change rebuilds the circuit's matrix, so a consumer's resistor keeps its value while that draws
+ * at most OHMS_DEADBAND less than planned (never more, but for 1 ppm of rounding); the books read the resistor as it is, so they stay exact.
  */
 public final class MnaMachine implements IRootSystemPreStepProcess {
+    /** A consumer's resistor is left alone while it is at most this share above the planned resistance. */
+    public static final double OHMS_DEADBAND = 0.01;
+
     private final MachineCore core;
     private final ElectricalLoad terminal;
     private final Resistor resistor;
@@ -44,8 +51,12 @@ public final class MnaMachine implements IRootSystemPreStepProcess {
         return core;
     }
 
-    /** Adds the machine's parts (not the terminal) to the simulator. */
+    /** Adds the machine's parts (not the terminal) to the simulator; throws unless it steps once per 50 ms tick. */
     public void addTo(Simulator sim) {
+        double tick = MachineCore.TICK_SECONDS;
+        if (Math.abs(sim.callPeriod - tick) > 1e-9 || Math.abs(sim.electricalPeriod - tick) > 1e-9)
+            throw new IllegalStateException("machines need one electrical step per " + tick + " s tick; this simulator is called every "
+                + sim.callPeriod + " s and steps every " + sim.electricalPeriod + " s");
         if (source != null) {
             sim.addElectricalLoad(emf);
             sim.addElectricalComponent(source);
@@ -68,15 +79,20 @@ public final class MnaMachine implements IRootSystemPreStepProcess {
     public void applyBeforeStep() {
         core.beforeStep();
         if (source == null) {
-            double r = core.loadOhms();
-            if (Double.isFinite(r)) resistor.setR(r);
-            else resistor.highImpedance();
+            double r = core.loadOhms(), now = resistor.getR();
+            if (!Double.isFinite(r)) resistor.highImpedance();
+            else if (!(now >= r * (1 - 1e-6) && now <= r * (1 + OHMS_DEADBAND))) resistor.setR(r); // (1 ppm: rounding)
         } else if (core.sourceOn()) {
             resistor.setR(core.sourceOhms());
         } else {
             resistor.highImpedance();
             source.setU(terminal.getU()); // no leak through the open resistor
         }
+    }
+
+    /** The machine's resistor now (the load, or the droop resistance), ohm; MnaConst.highImpedance when open. */
+    public double ohms() {
+        return resistor.getR();
     }
 
     /** Producer, during the step: the source voltage for the circuit as it is now. */
