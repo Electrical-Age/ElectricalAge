@@ -80,6 +80,11 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
      * runs it, and either burns over 1.3 x nominal (Baughn: fed negative it burned as "overvoltage").
      */
     public MachineSpec spec(double speedUp) {
+        return spec(descriptor, speedUp);
+    }
+
+    /** The spec of a machine of descriptor at a speed-up (see spec(double)). */
+    public static MachineSpec spec(ElectricalMachineDescriptor descriptor, double speedUp) {
         java.util.List<RelativeFace> faces = new java.util.ArrayList<>();
         for (RelativeFace f : RelativeFace.values())
             if (descriptor.powerLrdu(mods.eln.api.impl.Faces.resolve(f, Direction.XN), Direction.XN)) faces.add(f);

@@ -44,6 +44,52 @@ public final class MachineApiCases {
         cases.add(new MidSaveCase());
         cases.add(new OldSaveCase());
         cases.add(new BurnCase());
+        cases.add(new SpecsVerifyCase());
+    }
+
+    /**
+     * Every EA device on the Machine API passes ElnTestKit.verifySpec with the spec it really builds: the eight
+     * electrical machines (from their descriptors), the exporters, the Linear Servo Drive. In game, so the specs come
+     * from the registered descriptors; the bench runs a simulator of its own (off the world's field buses).
+     */
+    static final class SpecsVerifyCase implements TestCase {
+        public String id() {
+            return "api_ea_specs_verify";
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext c) {
+        }
+
+        public void measure(TestContext c) {
+            java.util.Map<String, mods.eln.api.MachineSpec> specs = new java.util.LinkedHashMap<>();
+            for (var e : Eln.transparentNodeItem.all().entrySet()) {
+                var d = e.getValue();
+                if (d instanceof ElectricalMachineDescriptor m) specs.put(d.name, ElectricalMachineElement.spec(m, 1));
+                else if (d instanceof mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor x)
+                    specs.put(d.name, x.machineSpec());
+                else if (d instanceof mods.eln.robotics.servo.LinearServoDriveDescriptor) specs.put(d.name,
+                    mods.eln.robotics.servo.LinearServoDriveDescriptor.spec());
+            }
+            c.check("specs: the eight machines, the exporters and the drive", specs.size() >= 12, specs.keySet().toString());
+            for (var e : specs.entrySet()) {
+                String detail;
+                boolean ok;
+                try {
+                    var r = mods.eln.api.testkit.ElnTestKit.verifySpec(e.getValue());
+                    ok = true;
+                    detail = r.checks().size() + " checks, " + r.checks().stream().filter(k -> k.result() == mods.eln.api.testkit.SpecReport.Result.SKIP)
+                        .map(k -> "skip " + k.name() + " (" + k.detail() + ")").toList();
+                } catch (mods.eln.api.testkit.ElnTestKit.SpecFailure f) {
+                    ok = false;
+                    detail = f.getMessage();
+                }
+                c.check("verifySpec: " + e.getKey() + " (" + e.getValue() + ")", ok, detail);
+            }
+        }
     }
 
     /** A stack this machine works on: copper (macerator, plate machine), sand (compressor), iron (magnetizer). */

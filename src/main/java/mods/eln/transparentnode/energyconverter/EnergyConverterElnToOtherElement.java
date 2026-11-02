@@ -1,11 +1,8 @@
 package mods.eln.transparentnode.energyconverter;
 
 import mods.eln.Eln;
-import mods.eln.api.Brownout;
 import mods.eln.api.ElementMachine;
-import mods.eln.api.MachineSpec;
 import mods.eln.api.Machines;
-import mods.eln.api.RelativeFace;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -64,9 +61,7 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
         this.descriptor = (EnergyConverterElnToOtherDescriptor) descriptor;
         this.descriptor.applyTo(this);
         // in the constructor, as the other elements: readFromNBT (before initialize) restores what is listed here.
-        // Slower on a sagging line, as its resistor was; burns over 1.3 x nominal, as its watchdog had it.
-        machine = Machines.forElement(this, MachineSpec.consumer(inStdVoltage).ratedWatts(inPowerMax)
-            .onBrownout(Brownout.SLOW).burnsOnOvervoltage().power(RelativeFace.FRONT).build());
+        machine = Machines.forElement(this, this.descriptor.machineSpec());
         slowProcessList.add(inputProcess);
         slowProcessList.add(pushProcess);
     }
