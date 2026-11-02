@@ -4,8 +4,8 @@ import java.util.Locale;
 
 /**
  * Why a machine tripped: the state it went to, the value that tripped it and the limit, in the state's unit (V for
- * overvoltage, degrees C for overheat). burns: the spec has burnsOnOvervoltage and the machine is
- * destroyed rather than reset.
+ * overvoltage, degrees C for overheat). burns: the spec has burnsOnOvervoltage and the machine burns rather than
+ * resets (an EA element burns out; another mod's block gets its spec's burn handler).
  */
 public record TripCause(MachineState state, double measured, double limit, boolean burns) {
     public TripCause {

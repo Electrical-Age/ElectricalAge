@@ -233,7 +233,7 @@ The model cools to the ambient where the machine stands, which EA sets by biome 
 | `RUNNING` | The line is in range. Takes are served from the buffer. |
 | `UNPOWERED` | No line (under 2% of nominal), or the line came back less than half a second ago. |
 | `UNDERVOLTAGE` | `Brownout.STOP` only: the line is under the floor. The machine draws idle watts only and takes return 0. It runs again once the line has held above the recovery threshold for half a second, so a line that sags under the machine's own load doesn't flip it every tick. |
-| `OVERVOLTAGE_TRIPPED` | The line went over 1.3 x nominal. It resets after the cooldown spent below 1.1 x nominal, or never if the spec `burnsOnOvervoltage()`. |
+| `OVERVOLTAGE_TRIPPED` | The line went over 1.3 x nominal. It resets after the cooldown spent below 1.1 x nominal, or never if the spec burns (see [Burning](#burning)). |
 | `OVERHEAT_TRIPPED` | The machine went over its trip point. It resets after the cooldown spent under the reset point. |
 | `DETACHED` | The machine is in no circuit: its block entity went, or its type was never registered. |
 
@@ -249,7 +249,37 @@ The energy books are exact at every tick:
 - A consumer: `joulesDelivered() == joulesTaken() + bufferJoules() + joulesLost()`.
 - A producer: `joulesGiven() == joulesDelivered() + bufferJoules() + joulesLost()`.
 
-`respec(spec)` swaps in other ratings while the machine runs, for upgrades. The faces and signals must stay the same.
+`respec(spec)` swaps in other ratings while the machine runs, for upgrades. The faces, signals and burn must stay the
+same.
+
+### Burning
+
+By default overvoltage only trips a machine. A spec can make it burn instead. EA can't burn another mod's block in place,
+so you choose what a burn does to your block (Baughn: "a callback. Let the API user choose how to handle it"):
+
+```java src/test/java/mods/eln/api/docs/Press.java#burn
+public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(3000)
+    .burnsOnOvervoltage(Press::burn)   // overvoltage burns it: it never resets
+    .build();
+
+/** Once, on the server thread: the press breaks and drops itself. Left standing, it would stay tripped. */
+static void burn(BurnHandler.Burn burn) {
+    burn.level().destroyBlock(burn.pos(), true);
+}
+```
+
+- The handler gets the level, position, block entity and `TripCause` (with `burns()` true). It is called once, at the
+  end of the simulator's tick, where changing the world is safe, and only if the block entity is still there.
+- Whatever the handler does, the machine stays `OVERVOLTAGE_TRIPPED` for good: it draws nothing and its takes return 0.
+  The burn is saved, so a reload doesn't bring it back or call the handler again. Only a new block entity starts afresh.
+- A handler that does nothing is allowed: the block stays, dead, as a broken machine would.
+- A handler that throws is logged; the machine stays burnt.
+- `burnsOnOvervoltage()` without a handler is for EA's own elements, which burn out EA's way until repaired. A machine at
+  another mod's block entity whose spec burns without a handler is refused when its machine is made: `of()` throws
+  `IllegalStateException`, and a block entity hosted as it loads logs the error and stays `DETACHED`. This can't be
+  checked earlier, because the spec comes from your function when each block entity is hosted. An element refuses a
+  handler with `IllegalArgumentException`.
+- On a bench there is no world, so a burn only latches the trip.
 
 ## Reading a machine: views, tooltips, meters
 
@@ -285,7 +315,7 @@ public static List<String> tooltip(MachineView v) {
 | Node | EA's own unsaved node, tied to the block entity | the element's node |
 | Faces | each face is a leaf terminal; the first live one draws | one power terminal on every power face (the element may pass power through) |
 | Saved | the `eln:machine` data attachment | the element's NBT, under `api.machine.*` |
-| Burn | destroys the block (EA can't burn another mod's block in place) | EA's own burn-out and repair |
+| Burn | the spec's burn handler; the machine stays tripped (see [Burning](#burning)) | EA's own burn-out and repair |
 | Bus face | linked to a voxel bus cable | not supported (transparent nodes have no bus port) |
 
 An EA element delegates its faces and Jade lines to the machine:

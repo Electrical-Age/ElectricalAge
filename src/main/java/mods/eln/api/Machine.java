@@ -71,7 +71,8 @@ public interface Machine extends MachineView {
 
     /**
      * Swaps in a spec with other ratings while the machine runs, for upgrades and speed changes (a booster fitted):
-     * ratings and protections may differ, kind, faces, signals and bus may not (else IllegalArgumentException). The
+     * ratings and protections may differ, kind, faces, signals, bus and the overvoltage burn (burnsOnOvervoltage, with
+     * or without its handler) may not (else IllegalArgumentException). The
      * next step is planned from the new ratings; a buffer over the new size keeps only what fits.
      */
     void respec(MachineSpec spec);

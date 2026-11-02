@@ -24,7 +24,10 @@ public interface ElementSite {
     /** The element is burnt out (out of the simulation until repaired). */
     boolean burnt();
 
-    /** Queues the element's burn-out for cause (EA's failure path: it runs at the end of the tick). */
+    /**
+     * Queues the burn for cause, to run at the end of the tick: an element's burn-out (EA's failure path), a hosted
+     * machine's burn handler.
+     */
     void burn(TripCause cause, double severity);
 
     /** The series resistance of the power terminal, ohm (what a cable's node has). */

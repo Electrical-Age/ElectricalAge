@@ -30,6 +30,7 @@ public class MachineSpecTest {
         assertEquals(0.75, s.minVoltageRatio());
         assertEquals(3, s.tripCooldownSeconds());
         assertFalse(s.burnsOnOvervoltage());
+        assertTrue(s.burnHandler().isEmpty());
         assertTrue(s.thermal().isEmpty());
         assertEquals(EnumSet.allOf(RelativeFace.class), s.powerFaces());
         assertTrue(s.busFace().isEmpty());
@@ -186,5 +187,21 @@ public class MachineSpecTest {
         assertEquals("overvoltage: 270.0 V over 260.0 V",
             new TripCause(MachineState.OVERVOLTAGE_TRIPPED, 270, 260, false).toString());
         assertThrows(IllegalArgumentException.class, () -> new TripCause(MachineState.RUNNING, 0, 0, false));
+    }
+
+    /** A burn with a handler (another mod's block) or without (EA's elements); never both, never a null handler. */
+    @Test
+    void burnHandler() {
+        BurnHandler h = burn -> {
+        };
+        MachineSpec with = MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(h).build();
+        assertTrue(with.burnsOnOvervoltage());
+        assertEquals(h, with.burnHandler().orElseThrow());
+        MachineSpec without = MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build();
+        assertTrue(without.burnsOnOvervoltage());
+        assertTrue(without.burnHandler().isEmpty());
+        assertThrows(NullPointerException.class, () -> MachineSpec.consumer(Tier.V50).burnsOnOvervoltage(null));
+        assertError(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().burnsOnOvervoltage(h),
+            "burnsOnOvervoltage is given twice");
     }
 }

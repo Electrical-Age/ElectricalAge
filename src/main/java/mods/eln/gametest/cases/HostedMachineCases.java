@@ -2,6 +2,7 @@ package mods.eln.gametest.cases;
 
 import mods.eln.api.ElnApi;
 import mods.eln.api.Machine;
+import mods.eln.api.MachineSpec;
 import mods.eln.api.MachineState;
 import mods.eln.api.MachineView;
 import mods.eln.api.RelativeFace;
@@ -38,7 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * face; its LIT toggling keeps its node, links and energy; breaking it takes the node away and its handle reads
  * DETACHED; its block entity saved, unloaded and loaded again gets its state back and its cable relinked; two in a
  * line with a cable between don't pass power through each other; its bus face links to a voxel bus cable; the
- * eln:machine capability answers for it and for an EA element machine; calls off the server thread throw.
+ * eln:machine capability answers for it and for an EA element machine; calls off the server thread throw; a spec
+ * that burns calls its burn handler once and stays tripped, and one that burns without a handler is refused.
  */
 public final class HostedMachineCases {
     private HostedMachineCases() {
@@ -52,6 +54,15 @@ public final class HostedMachineCases {
         cases.add(new Reloads());
         cases.add(new Leaves());
         cases.add(new Bus());
+        cases.add(new Burns());
+    }
+
+    /** Sets source's volts. */
+    static void volts(TestContext c, ElectricalSourceElement source, float volts) {
+        source.networkUnserialize(c.stream(out -> {
+            out.writeByte(ElectricalSourceElement.setVoltageId);
+            out.writeFloat(volts);
+        }));
     }
 
     /** One tick's rated work energy of the fixture, J (100 W, no idle). */
@@ -455,6 +466,86 @@ public final class HostedMachineCases {
             c.check("bus: the machine is running", m(c).state() == MachineState.RUNNING, m(c).state().name());
             c.check("bus: the bus cable beside its bus face reads its busy channel high", level == 1, String.valueOf(level));
             c.check("bus: a bus link, not a circuit link", !linked(v, HostedMachines.INSTANCE.node(entity(c, pos))), "");
+        }
+    }
+
+    /**
+     * Source, MV cable (an LV cable would burn at 80 V), the fixture with BURNING_SPEC: 80 V on it burns it, its
+     * handler is called once with the trip and leaves the block, and back at 50 V it stays tripped past the cooldown,
+     * also saved and loaded again (and its handler isn't called again).
+     * Beside it, a fixture whose spec burns without a handler is refused as it is hosted (and removed at once, before
+     * its own ticker asks for its machine).
+     */
+    static final class Burns implements TestCase {
+        BlockPos pos;
+        ElectricalSourceElement src;
+        MachineState before;
+        double workAtBurn = -1, workBeforeReload = -2;
+        Throwable refused;
+        List<mods.eln.api.TripCause> causesBeforeReload = List.of();
+
+        public String id() {
+            return "api_hosted_machine_burn_handler";
+        }
+
+        public int ticks() {
+            return 160;
+        }
+
+        public void build(TestContext c) {
+            src = (ElectricalSourceElement) c.placeSix(Wp10aCases.SOURCE, c.at(1, 1, 1));
+            volts(c, src, 50);
+            c.placeSix(MachineApiCases.MV_CABLE, c.at(2, 1, 1));
+            pos = machine(c, 3, Direction.EAST);
+            entity(c, pos).useSpec(ApiTestMachines.BURNING_SPEC);
+            BlockPos q = machine(c, 6, Direction.EAST);
+            entity(c, q).useSpec(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage().build());
+            try {
+                ElnApi.machines().of(entity(c, q));
+            } catch (Throwable x) {
+                refused = x;
+            }
+            c.level().removeBlock(q, false);
+            c.after(30, () -> {
+                before = ElnApi.machines().of(entity(c, pos)).state();
+                volts(c, src, 80);
+            });
+            c.after(40, () -> workAtBurn = entity(c, pos).workJoules());
+            c.after(60, () -> volts(c, src, 50));
+            c.after(70, () -> {   // saved burnt, unloaded and loaded again
+                ApiTestMachineEntity e = entity(c, pos);
+                causesBeforeReload = e.burnCauses();
+                workBeforeReload = e.workJoules();
+                CompoundTag saved = e.saveWithFullMetadata(c.level().registryAccess());
+                c.level().removeBlockEntity(pos);
+                BlockEntity fresh = BlockEntity.loadStatic(pos, c.level().getBlockState(pos), saved, c.level().registryAccess());
+                ((ApiTestMachineEntity) fresh).useSpec(ApiTestMachines.BURNING_SPEC);
+                c.level().setBlockEntity(fresh);
+            });
+        }
+
+        public void measure(TestContext c) {
+            c.check("burn: refused without a handler", refused instanceof IllegalStateException
+                && refused.getMessage().contains("burnsOnOvervoltage(handler)"), String.valueOf(refused));
+            ApiTestMachineEntity e = entity(c, pos);
+            c.check("burn: the block and its block entity stay (the handler leaves them)", e != null, "");
+            if (e == null) return;
+            Machine m = ElnApi.machines().of(e);
+            c.check("burn: it ran at 50 V first", before == MachineState.RUNNING, String.valueOf(before));
+            c.check("burn: reloaded, a new block entity", HostedMachines.INSTANCE.node(e) != null && !causesBeforeReload.isEmpty()
+                && e.burnCauses().isEmpty(), causesBeforeReload + " then " + e.burnCauses());
+            List<mods.eln.api.TripCause> causes = causesBeforeReload;
+            c.check("burn: the handler was called once, and not again on reload", causes.size() == 1 && e.burnCauses().isEmpty(),
+                causes + " then " + e.burnCauses());
+            if (causes.size() != 1) return;
+            mods.eln.api.TripCause t = causes.get(0);
+            c.check("burn: with the overvoltage that burnt it", t.state() == MachineState.OVERVOLTAGE_TRIPPED && t.burns()
+                && Math.abs(t.limit() - 65) < 1e-9 && t.measured() > 65, t.toString());
+            c.check("burn: reloaded, it stays tripped at 50 V past the cooldown", m.state() == MachineState.OVERVOLTAGE_TRIPPED
+                && m.lastTrip().map(t::equals).orElse(false), m.state() + " " + m.lastTrip());
+            c.check("burn: no work after the burn, nor after the reload", workAtBurn >= 0 && workBeforeReload == workAtBurn
+                && e.workJoules() == 0 && m.amps() < 1e-3,
+                "worked " + workAtBurn + " J, then " + workBeforeReload + " J; " + e.workJoules() + " J since the reload, " + m.amps() + " A");
         }
     }
 }

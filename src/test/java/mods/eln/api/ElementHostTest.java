@@ -312,6 +312,27 @@ public class ElementHostTest {
         assertEquals(MachineState.UNPOWERED, m.state());
     }
 
+    /** A burn is saved: loaded, the machine is burnt (its site told before the first step) and stays tripped. */
+    @Test
+    void burnIsSaved() {
+        Element e = new Element();
+        ElementHost m = e.machine(MACERATOR);
+        m.core().afterStep(70, 0);
+        e.burnt = true;
+        CompoundTag t = new CompoundTag();
+        m.saveState(t);
+        assertTrue(t.getBooleanOr(ElementHost.NBT_PREFIX + "burnt", false));
+        Element f = new Element();
+        f.burnt = true;
+        ElementHost n = f.machine(MACERATOR);
+        n.loadState(t);
+        assertTrue(n.burnt(), "known before the first step");
+        f.slowPre.get(0).process(0.05);
+        f.slow.get(0).process(0.05);
+        assertTrue(n.core().burnt());
+        assertEquals(MachineState.OVERVOLTAGE_TRIPPED, n.state());
+    }
+
     /** find() picks the machine out of an element's slow processes; saveState and loadState carry its buffer. */
     @Test
     void findAndStateRoundTrip() {

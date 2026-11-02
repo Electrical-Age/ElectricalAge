@@ -1,6 +1,7 @@
 package mods.eln.api.impl;
 
 import mods.eln.Eln;
+import mods.eln.api.BurnHandler;
 import mods.eln.api.MachineSpec;
 import mods.eln.api.RelativeFace;
 import mods.eln.api.TripCause;
@@ -41,6 +42,7 @@ import java.util.List;
  * (BusPeer), never as a NodeConnection.
  */
 public final class MachineNode extends GhostNode implements BusPeer {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("eln");
     /** The node's own uuid (in no save; publishing is off). */
     public static final String UUID = "h";
 
@@ -81,6 +83,7 @@ public final class MachineNode extends GhostNode implements BusPeer {
         host = new ElementHost(spec, new Site(), busPort, loads, components, slow, slowPre);
         slow.add(dt -> afterStep());   // (after the host books the step: ElementHost's process is first)
         if (data.saved != null) host.loadState(data.saved);
+        burning = host.burnt();   // (saved burnt: it stays so, and its handler isn't called again)
     }
 
     /** Joins the world: into NodeManager, connected, and its EA neighbours reconnected (they stay loaded while it isn't). */
@@ -312,7 +315,10 @@ public final class MachineNode extends GhostNode implements BusPeer {
             return burning;
         }
 
-        /** EA can't burn another mod's block in place: it is destroyed (no drops) at the end of the tick. */
+        /**
+         * EA can't burn another mod's block in place: the spec's burn handler says what a burn does (HostedMachines
+         * refuses a burning spec without one). Called once, at the end of the tick, if the block entity is still there.
+         */
         @Override
         public void burn(TripCause cause, double severity) {
             if (burning) return;
@@ -321,7 +327,15 @@ public final class MachineNode extends GhostNode implements BusPeer {
             Eln.simulator.queueDestruct(new IDestructable() {
                 @Override
                 public void destructImpl() {
-                    if (level.getBlockEntity(pos) == be) level.destroyBlock(pos, false);
+                    if (be.isRemoved() || level.getBlockEntity(pos) != be) return;
+                    var handler = host.core().spec().burnHandler().orElse(null);
+                    if (ApiTrace.enabled()) ApiTrace.log("burn machine %s at %s: %s", spec, pos.toShortString(), cause);
+                    if (handler == null) return;
+                    try {
+                        handler.onBurn(new BurnHandler.Burn(level, pos, be, cause));
+                    } catch (RuntimeException e) {   // (a bad handler mustn't break the tick: the machine stays burnt)
+                        LOG.error("Electrical Age: the burn handler of the machine at {} threw on {}", pos, cause, e);
+                    }
                 }
 
                 @Override

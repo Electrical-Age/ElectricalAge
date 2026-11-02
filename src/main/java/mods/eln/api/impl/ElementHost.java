@@ -36,11 +36,12 @@ import java.util.function.Consumer;
  * element's own slow processes, the owner's work, run between them, as MachineCore wants.
  * <p>
  * Saved under NBT_PREFIX by the afterStep process (an INBTTReady entry of the element's slow processes): the buffer,
- * temperature (with a heat model), a trip in progress or that it was running, and the last trip. A loaded state is applied at the first
+ * temperature (with a heat model), a trip in progress or that it was running, the last trip, and a burn. A loaded state is applied at the first
  * tick, after the element has set its ratings (respec) from its own loaded state.
  * <p>
- * A burn (burnsOnOvervoltage) goes through the element's failure path (ElementSite.burn). When the element is back in
- * the simulation unburnt (repaired, or the failure was called off for a worse one nearby) the core is repaired.
+ * A burn (burnsOnOvervoltage) goes to the site (ElementSite.burn): an element's failure path, or a hosted machine's
+ * burn handler. When the site is back in the simulation unburnt (repaired, or the failure was called off for a worse
+ * one nearby) the core is repaired.
  */
 public final class ElementHost implements ElementMachine {
     public static final String NBT_PREFIX = MnaMachine.NBT_PREFIX;
@@ -129,6 +130,11 @@ public final class ElementHost implements ElementMachine {
         afterStep.readFromNBT(nbt, "");
     }
 
+    /** It burnt and wasn't repaired: the core's, or a loaded state's not yet applied. */
+    public boolean burnt() {
+        return saved != null ? saved.burnt() && core.spec().burnsOnOvervoltage() : core.burnt();
+    }
+
     /** The core, for tests and the host's own views. */
     public MachineCore core() {
         return core;
@@ -185,7 +191,7 @@ public final class ElementHost implements ElementMachine {
             MachineState st = state(nbt.getStringOr(k + "trip", ""));
             if (st == null && nbt.getBooleanOr(k + "running", false)) st = MachineState.RUNNING;
             saved = new MachineCore.Saved(nbt.getDoubleOr(k + "bufferJ", 0), nbt.getDoubleOr(k + "celsius", MachineSpec.AMBIENT_CELSIUS),
-                st, nbt.getIntOr(k + "tripTicks", 0), last);
+                st, nbt.getIntOr(k + "tripTicks", 0), last, nbt.getBooleanOr(k + "burnt", false));
         }
 
         @Override
@@ -199,6 +205,7 @@ public final class ElementHost implements ElementMachine {
                 nbt.putInt(k + "tripTicks", s.tripTicks());
             }
             if (s.state() == MachineState.RUNNING) nbt.putBoolean(k + "running", true);
+            if (s.burnt()) nbt.putBoolean(k + "burnt", true);
             TripCause t = s.lastTrip();
             if (t != null) {
                 nbt.putString(k + "lastTrip", t.state().name());

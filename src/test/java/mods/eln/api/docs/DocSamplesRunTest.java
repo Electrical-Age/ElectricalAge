@@ -44,6 +44,17 @@ public class DocSamplesRunTest {
         assertEquals(0.5 * g.ratedJoulesPerTick(), g.joulesTaken() - before, 1e-9);
     }
 
+    /** On a bench (no world) a burn only latches: the handler is the hosted block's. */
+    @Test
+    void thePressBurnsForGood() {
+        ElnTestKit.verifySpec(Press.SPEC);
+        Bench b = ElnTestKit.bench().supply(280, 0.01);
+        BenchMachine p = b.add(Press.SPEC).owner(m -> m.takeJoules(m.ratedJoulesPerTick()));
+        b.ticks(5);
+        assertEquals(mods.eln.api.MachineState.OVERVOLTAGE_TRIPPED, p.state());
+        assertTrue(p.lastTrip().orElseThrow().burns());
+    }
+
     @Test
     void theKilnKeepsItsContractAndWarms() {
         ElnTestKit.verifySpec(Kiln.SPEC);

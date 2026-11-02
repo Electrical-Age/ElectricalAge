@@ -31,6 +31,16 @@ public final class ApiTestMachines {
         .power(RelativeFace.FRONT, RelativeFace.BACK)
         .signalIn("enable", RelativeFace.LEFT, 1).bus(RelativeFace.RIGHT).build();
 
+    /**
+     * SPEC, burning on overvoltage: its handler books the burn on the block entity and leaves the block in place (the
+     * machine stays tripped). For a block entity told to useSpec it before it is hosted.
+     */
+    public static final MachineSpec BURNING_SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(100)
+        .power(RelativeFace.FRONT, RelativeFace.BACK)
+        .signalIn("enable", RelativeFace.LEFT, 1).bus(RelativeFace.RIGHT)
+        .burnsOnOvervoltage(burn -> ((ApiTestMachineEntity) burn.blockEntity()).burnt(burn.cause()))
+        .build();
+
     /** The bus channel it writes 1 on while it works (0, white). */
     public static final int BUSY_CHANNEL = 0;
 
@@ -46,6 +56,7 @@ public final class ApiTestMachines {
     public static void register(IEventBus modBus) {
         BLOCKS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
-        modBus.addListener(FMLCommonSetupEvent.class, e -> ElnApi.machines().register(TYPE.get(), be -> SPEC));
+        // (useSpec isn't synced: a client's view has SPEC)
+        modBus.addListener(FMLCommonSetupEvent.class, e -> ElnApi.machines().register(TYPE.get(), ApiTestMachineEntity::spec));
     }
 }

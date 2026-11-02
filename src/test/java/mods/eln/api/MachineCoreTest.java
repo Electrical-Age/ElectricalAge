@@ -431,4 +431,40 @@ public class MachineCoreTest {
         powerUp(c, 50, ohms);
         assertTrue(c.lastTrip().orElseThrow().burns(), "the last trip is kept");
     }
+
+    /** A burnt core's snapshot says so; restored, it is burnt again and stays tripped; a spec that no longer burns starts afresh. */
+    @Test
+    void burntSurvivesASave() {
+        MachineSpec burns = MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(b -> {
+        }).build();
+        MachineCore c = new MachineCore(burns);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        step(c, 70, ohms);
+        MachineCore.Saved s = c.snapshot();
+        assertTrue(s.burnt());
+        MachineCore r = new MachineCore(burns);
+        r.restore(s);
+        assertTrue(r.burnt());
+        assertEquals(MachineState.OVERVOLTAGE_TRIPPED, r.state());
+        for (int i = 0; i < 200; i++) step(r, 50, ohms);
+        assertEquals(MachineState.OVERVOLTAGE_TRIPPED, r.state(), "a burn never resets");
+        assertEquals(0, r.takeJoules(1), 0);
+        MachineCore plain = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
+        plain.restore(s);
+        assertFalse(plain.burnt());
+    }
+
+    /** respec may not add, drop or change the overvoltage burn: the host checked it when the machine was made. */
+    @Test
+    void respecKeepsTheBurn() {
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
+        String m = assertThrows(IllegalArgumentException.class,
+            () -> c.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build())).getMessage();
+        assertTrue(m.contains("overvoltage burn"), m);
+        MachineCore b = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build());
+        assertThrows(IllegalArgumentException.class,
+            () -> b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(x -> {
+            }).build()));
+        b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage().build());
+    }
 }

@@ -31,8 +31,11 @@ import java.util.function.Function;
  * passes through the block from one face to another, so unloading it never cuts an EA line.</li>
  * <li>The machine's state (buffer, temperature, a trip, that it was running) is saved with the block entity, in a
  * data attachment (eln:machine), and restored when the node is made again; nothing to save by hand.</li>
- * <li>A spec that burnsOnOvervoltage destroys the block (no drops) when its line goes over; EA can't burn another
- * mod's block in place.</li>
+ * <li>EA can't burn another mod's block in place, so a spec that burns says what a burn does:
+ * burnsOnOvervoltage(handler), called once on the server thread; the machine stays OVERVOLTAGE_TRIPPED for good.
+ * A spec that burns without a handler is refused as its machine is made (of() throws IllegalStateException; a
+ * block entity hosted as it loads logs the error and stays DETACHED). Baughn: "a callback. Let the API user choose
+ * how to handle it".</li>
  * </ul>
  * Server thread only on the server (other threads throw IllegalStateException); on the client of() is a read-only
  * view, synced from the server (state at once, the numbers at most once a second).

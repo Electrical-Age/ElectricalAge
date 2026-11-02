@@ -126,12 +126,13 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   delivered and not yet used, J), `api.machine.celsius` (with a heat model), `api.machine.trip` and
   `api.machine.tripTicks` (a trip in its cooldown), `api.machine.running` (true when saved running: it runs on at
   once if the line is in range at the first step, no power-up hold), `api.machine.lastTrip`, `...lastTripMeasured`, `...lastTripLimit`,
-  `...lastTripBurns`; its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
+  `...lastTripBurns`, `api.machine.burnt` (true when it burnt and wasn't repaired: loaded, it is burnt again, if its
+  spec still burns; absent: not burnt); its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
   `api.machine.drive<i>highImpedance` / `U`, a producer's `api.machine.emfUc` / `U` / `Istate`. Taken back at the
   first tick (after the element's own ratings); absent keys: a fresh machine.
 - Machines at other mods' block entities (`ElnApi.machines()`): no node is saved (`MachineNode` is unsaved). The
   block entity's attachment `eln:machine` (under NeoForge's `neoforge:attachments`) holds a compound `state` with the
-  machine keys above (`api.machine.bufferJ`, `celsius`, `trip`, `tripTicks`, `running`, `lastTrip*`; not the parts'
+  machine keys above (`api.machine.bufferJ`, `celsius`, `trip`, `tripTicks`, `running`, `lastTrip*`, `burnt`; not the parts'
   `...Uc`, which live in the node). It is written from the live machine whenever the chunk saves
   (`MachineData.SERIALIZER`; the node marks the chunk unsaved when the state moved, without `setChanged`, which would
   update comparators), or from the state kept when the node went; nothing is written for a block entity never hosted.

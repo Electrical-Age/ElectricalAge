@@ -138,7 +138,7 @@ public final class MachineCore implements MachineView {
     }
 
     /**
-     * Swaps in a spec with other ratings (see Machine.respec): same kind, faces, signals and bus, else
+     * Swaps in a spec with other ratings (see Machine.respec): same kind, faces, signals, bus and burn, else
      * IllegalArgumentException. State, books and heat carry over; a buffer over the new capacity is cut to it and
      * the excess booked as lost (a consumer's as heat).
      */
@@ -150,6 +150,9 @@ public final class MachineCore implements MachineView {
         if (!next.signalsIn().equals(spec.signalsIn())) differs.add("signal inputs");
         if (!next.signalsOut().equals(spec.signalsOut())) differs.add("signal outputs");
         if (!next.busFace().equals(spec.busFace())) differs.add("bus face");
+        // (a host checks the burn when it is made: a burn handler can't come or go after)
+        if (next.burnsOnOvervoltage() != spec.burnsOnOvervoltage()
+            || next.burnHandler().isPresent() != spec.burnHandler().isPresent()) differs.add("overvoltage burn");
         if (!differs.isEmpty())
             throw new IllegalArgumentException("respec changes ratings only; " + next + " differs from " + spec
                 + " in its " + String.join(", ", differs));
@@ -168,26 +171,34 @@ public final class MachineCore implements MachineView {
         }
     }
 
-    /** What a host saves of a machine (see snapshot()); state is only kept when it is a trip or RUNNING. */
-    public record Saved(double bufferJoules, double celsius, MachineState state, int tripTicks, TripCause lastTrip) {
+    /**
+     * What a host saves of a machine (see snapshot()); state is only kept when it is a trip or RUNNING. burnt: it
+     * burnt (burnsOnOvervoltage) and was never repaired.
+     */
+    public record Saved(double bufferJoules, double celsius, MachineState state, int tripTicks, TripCause lastTrip, boolean burnt) {
+        /** Not burnt. */
+        public Saved(double bufferJoules, double celsius, MachineState state, int tripTicks, TripCause lastTrip) {
+            this(bufferJoules, celsius, state, tripTicks, lastTrip, false);
+        }
     }
 
     /**
-     * The machine's lasting state: its buffer, temperature, a trip in progress or that it was running, and the last
-     * trip. A burn is not kept as a trip (the host keeps that the machine burnt; repaired, it starts UNPOWERED as
-     * repair() leaves it).
+     * The machine's lasting state: its buffer, temperature, a trip in progress or that it was running, the last
+     * trip, and whether it burnt. A burn is not kept as a trip: restored, it is burnt again, and repaired it starts
+     * UNPOWERED as repair() leaves it.
      */
     public Saved snapshot() {
         boolean trip = state.tripped() && !burnt;
         MachineState kept = trip || state == MachineState.RUNNING && !burnt ? state : MachineState.UNPOWERED;
-        return new Saved(buffer, celsius, kept, trip ? tripTimer : 0, lastTrip);
+        return new Saved(buffer, celsius, kept, trip ? tripTimer : 0, lastTrip, burnt);
     }
 
     /**
      * On a fresh core (no step yet, else IllegalStateException): takes back a snapshot. The buffer is clamped to the
      * spec's capacity and booked as delivered (or given), so the books stay exact; a trip resumes its cooldown; a
      * machine saved running runs on at once if its first step finds the line in range (no power-up hold: a chunk or
-     * world reload doesn't stop it for half a second).
+     * world reload doesn't stop it for half a second). A machine saved burnt is burnt again (OVERVOLTAGE_TRIPPED for
+     * good), if its spec still burns.
      */
     public void restore(Saved saved) {
         if (ticks > 0) throw new IllegalStateException("restore on a core that has already stepped");
@@ -201,6 +212,11 @@ public final class MachineCore implements MachineView {
             tripTimer = Math.max(0, Math.min(saved.tripTicks(), cooldownTicks));
         } else if (saved.state() == MachineState.RUNNING) state = MachineState.RUNNING;
         lastTrip = saved.lastTrip();
+        if (saved.burnt() && spec.burnsOnOvervoltage()) {   // (a spec that no longer burns starts afresh)
+            burnt = true;
+            state = MachineState.OVERVOLTAGE_TRIPPED;
+            tripTimer = 0;
+        }
     }
 
     /**
@@ -508,7 +524,7 @@ public final class MachineCore implements MachineView {
         return joulesLost;
     }
 
-    /** Overvoltage destroyed it (burnsOnOvervoltage): the host removes the machine; it never resets. */
+    /** Overvoltage burnt it (burnsOnOvervoltage): it never resets; only its host's repair() brings it back. */
     public boolean burnt() {
         return burnt;
     }
