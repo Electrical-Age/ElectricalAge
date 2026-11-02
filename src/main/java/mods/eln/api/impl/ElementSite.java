@@ -35,4 +35,9 @@ public interface ElementSite {
 
     /** The series resistance of a signal gate, ohm. */
     double signalRs();
+
+    /** Where the element is, for messages and the debug trace. */
+    default String where() {
+        return "an element";
+    }
 }

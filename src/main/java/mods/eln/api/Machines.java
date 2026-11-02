@@ -83,6 +83,11 @@ public final class Machines {
             public double signalRs() {
                 return ElnDeviceRegistry.signalCableDescriptor.electricalRs;
             }
+
+            @Override
+            public String where() {
+                return element.getClass().getSimpleName() + (element.node == null ? "" : " at " + element.node.coordonate);
+            }
         };
         return new ElementHost(spec, site, element.electricalLoadList, element.electricalComponentList,
             element.slowProcessList, element.slowPreProcessList);

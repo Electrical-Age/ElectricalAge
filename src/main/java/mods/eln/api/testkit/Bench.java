@@ -3,6 +3,9 @@ package mods.eln.api.testkit;
 import mods.eln.api.MachineSpec;
 import mods.eln.api.impl.MachineCore;
 import mods.eln.api.impl.MnaMachine;
+import mods.eln.api.impl.lowlevel.CircuitImpl;
+import mods.eln.api.lowlevel.Circuit;
+import mods.eln.api.lowlevel.Load;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.mna.component.Resistor;
@@ -91,6 +94,74 @@ public final class Bench {
         if (Double.isInfinite(ohms)) load.highImpedance();
         else load.setR(ohms);
         return this;
+    }
+
+    /**
+     * The series resistance of a low-level circuit's power load on the bench, ohm (a low-voltage cable node's is of
+     * this order); a signal load's is SIGNAL_RS.
+     */
+    public static final double POWER_RS = 0.01, SIGNAL_RS = 100;
+
+    /**
+     * Attaches a low-level circuit (mods.eln.api.lowlevel) to the bench's simulator: its parts step with the machines,
+     * and its watchdogs check after each step. Port links have no world here: they read NOT_HOSTED. Once per circuit.
+     */
+    public Bench attach(Circuit circuit) {
+        checkThread();
+        CircuitImpl c = impl(circuit);
+        c.attach(new CircuitImpl.Site() {
+            @Override
+            public Simulator simulator() {
+                return sim;
+            }
+
+            @Override
+            public void checkThread() {
+                Bench.this.checkThread();
+            }
+
+            @Override
+            public double powerRs() {
+                return POWER_RS;
+            }
+
+            @Override
+            public double signalRs() {
+                return SIGNAL_RS;
+            }
+
+            @Override
+            public net.minecraft.server.level.ServerLevel level() {
+                return null;
+            }
+
+            @Override
+            public String where() {
+                return "the bench";
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Wires load (of a circuit attached here) to the machines' node, through its series resistance: the supply, line
+     * and machines feed it or draw from it.
+     */
+    public Bench connect(Circuit circuit, Load load) {
+        checkThread();
+        CircuitImpl c = impl(circuit);
+        if (!c.attached()) throw new IllegalStateException(circuit.name() + " is not attached: attach(circuit) first");
+        ElectricalLoad l = c.stateOf(load);
+        Resistor wire = new Resistor(bus, l);
+        wire.setR(l.getRs());
+        sim.addElectricalComponent(wire);
+        return this;
+    }
+
+    private static CircuitImpl impl(Circuit circuit) {
+        if (!(java.util.Objects.requireNonNull(circuit, "circuit") instanceof CircuitImpl c))
+            throw new IllegalArgumentException("not a circuit made by Circuit.create: " + circuit);
+        return c;
     }
 
     /** Power into the load of load(ohms) in the last step, W (0 without one). */

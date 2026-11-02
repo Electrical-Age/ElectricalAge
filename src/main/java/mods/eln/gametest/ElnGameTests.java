@@ -89,6 +89,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.OilPondCases.addTo(l);
         mods.eln.gametest.cases.ServoCases.addTo(l);
         mods.eln.gametest.cases.HostedMachineCases.addTo(l);
+        mods.eln.gametest.cases.LowLevelCases.addTo(l);
         return l;
     }
 

@@ -207,10 +207,18 @@ public final class MachineNode extends GhostNode implements BusPeer {
             if (getNeighbor(side) instanceof VoxelNode v && v.isAdded())
                 for (LRDU l : LRDU.values()) BusNet.link(busPort, v.busPortAt(side.getInverse(), l));
         }
+        if (ApiTrace.enabled()) ApiTrace.log("connect machine %s at %s: %s", spec, coordonate.pos().toShortString(), lineState());
+    }
+
+    /** The active face, its line and the machine's resistor, for the trace. */
+    private String lineState() {
+        return String.format(java.util.Locale.ROOT, "draws through %s, line %.3f V, resistor %.4g ohm, %s", active,
+            active == null ? 0.0 : terminals[active.ordinal()].getU(), host.core().loadOhms(), host.core().state());
     }
 
     @Override
     public void disconnectJob() {
+        if (ApiTrace.enabled()) ApiTrace.log("disconnect machine %s at %s: %s", spec, coordonate.pos().toShortString(), lineState());
         super.disconnectJob();
         setActive(null);
         Eln.simulator.removeAllSlowProcess(slow);
@@ -260,6 +268,7 @@ public final class MachineNode extends GhostNode implements BusPeer {
             selector = new ElectricalConnection(host.powerLoad(), terminals[f.ordinal()]);
             Eln.simulator.addElectricalComponent(selector);
         }
+        if (ApiTrace.enabled() && f != null) ApiTrace.log("machine %s at %s: %s", spec, coordonate.pos().toShortString(), lineState());
     }
 
     // ---- after each step: the attachment's save and sync
@@ -335,6 +344,11 @@ public final class MachineNode extends GhostNode implements BusPeer {
         @Override
         public double signalRs() {
             return ElnDeviceRegistry.signalCableDescriptor.electricalRs;
+        }
+
+        @Override
+        public String where() {
+            return coordonate.pos().toShortString();
         }
     }
 }

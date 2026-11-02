@@ -97,6 +97,8 @@ public final class ElementHost implements ElementMachine {
             outputs[i].setHighImpedance(true); // outputs start floating
         }
         core.onTrip(cause -> {
+            if (ApiTrace.enabled()) ApiTrace.log("trip machine %s at %s: %s (line %.3f V, %.3f A, resistor %.4g ohm)", core.spec(),
+                site.where(), cause, core.volts(), core.amps(), mna.ohms());
             // severity as EA's voltage watchdogs rank it: the overflow per budget of a quarter of nominal volts
             if (cause.burns()) site.burn(cause, (cause.measured() - cause.limit()) / (0.25 * core.spec().nominalVolts()));
         });

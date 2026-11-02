@@ -156,6 +156,7 @@ public final class HostedMachines implements MachineRegistry {
             }
         }
         for (MachineNode n : new ArrayList<>(hosted.values())) n.followFacing();
+        mods.eln.api.impl.lowlevel.CircuitHosts.INSTANCE.tick();   // (the low level's circuits, the same way)
     }
 
     private void host(BlockEntity be, MachineData d) {
@@ -173,10 +174,13 @@ public final class HostedMachines implements MachineRegistry {
         d.node = n;
         hosted.put(be, n);
         ((HostedMachine) d.handle).attach(n.host);
+        if (ApiTrace.enabled()) ApiTrace.log("host machine %s at %s (%s)", d.handle.spec(), be.getBlockPos().toShortString(), name(be.getType()));
         n.place();
     }
 
     private static void retire(MachineNode n) {
+        if (ApiTrace.enabled()) ApiTrace.log("retire machine %s at %s: %s, buffer %.3f J", n.host.spec(),
+            n.be.getBlockPos().toShortString(), n.host.state(), n.host.bufferJoules());
         n.retire();
         if (n.data.handle instanceof HostedMachine m) m.detach();
     }
@@ -189,6 +193,7 @@ public final class HostedMachines implements MachineRegistry {
     private void clear() {
         hosted.clear();
         added.clear();
+        mods.eln.api.impl.lowlevel.CircuitHosts.INSTANCE.clear();
     }
 
     // ---- the capability
