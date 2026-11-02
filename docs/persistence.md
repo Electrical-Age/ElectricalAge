@@ -129,7 +129,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   `...lastTripBurns`; its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
   `api.machine.drive<i>highImpedance` / `U`, a producer's `api.machine.emfUc` / `U` / `Istate`. Taken back at the
   first tick (after the element's own ratings); absent keys: a fresh machine.
-- Machines at other mods' block entities (`ElnApi.machines()`): no node is saved (`HostedNode` is unsaved). The
+- Machines at other mods' block entities (`ElnApi.machines()`): no node is saved (`MachineNode` is unsaved). The
   block entity's attachment `eln:machine` (under NeoForge's `neoforge:attachments`) holds a compound `state` with the
   machine keys above (`api.machine.bufferJ`, `celsius`, `trip`, `tripTicks`, `running`, `lastTrip*`; not the parts'
   `...Uc`, which live in the node). It is written from the live machine whenever the chunk saves

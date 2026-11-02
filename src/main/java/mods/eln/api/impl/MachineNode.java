@@ -40,7 +40,7 @@ import java.util.List;
  * over (chosen between steps). Signals use the host's gates; the bus face links to a voxel bus cable beside it
  * (BusPeer), never as a NodeConnection.
  */
-public final class HostedNode extends GhostNode implements BusPeer {
+public final class MachineNode extends GhostNode implements BusPeer {
     /** The node's own uuid (in no save; publishing is off). */
     public static final String UUID = "h";
 
@@ -63,7 +63,7 @@ public final class HostedNode extends GhostNode implements BusPeer {
     private MachineData.Snapshot sent;
     private int sinceSync, connects;
 
-    HostedNode(ServerLevel level, BlockEntity be, MachineSpec spec, MachineData data) {
+    MachineNode(ServerLevel level, BlockEntity be, MachineSpec spec, MachineData data) {
         this.level = level;
         this.be = be;
         this.data = data;
@@ -90,7 +90,7 @@ public final class HostedNode extends GhostNode implements BusPeer {
         connect();
         for (Direction d : Direction.values()) {
             NodeBase n = getNeighbor(d);
-            if (n != null && n.isAdded() && !(n instanceof HostedNode)) n.reconnect();
+            if (n != null && n.isAdded() && !(n instanceof MachineNode)) n.reconnect();
         }
     }
 

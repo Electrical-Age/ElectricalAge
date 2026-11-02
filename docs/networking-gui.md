@@ -54,9 +54,9 @@ That key exists only in the network tag and is never saved to disk.
 
 ## Machines at other mods' block entities: attachment sync
 
-A hosted machine (`ElnApi.machines()`) has no EA block entity to publish through (`HostedNode.publishToAllPlayer` only
+A hosted machine (`ElnApi.machines()`) has no EA block entity to publish through (`MachineNode.publishToAllPlayer` only
 clears the flag). Its client view comes from NeoForge's attachment sync of `eln:machine` (`MachineData.SYNC`):
-initial data rides with the chunk, and `HostedNode` calls `be.syncData` after a step when the state changed, else at
+initial data rides with the chunk, and `MachineNode` calls `be.syncData` after a step when the state changed, else at
 most once a second (20 ticks) while a number moved more than 1% (`Snapshot.near`). Payload: a boolean (hosted), then
 the state ordinal, volts, voltage ratio, amps, watts, buffer, buffer capacity, celsius (doubles) and the last trip
 (boolean, state, measured, limit, burns). Chosen over an EA payload for its initial sync and tracking for free; the

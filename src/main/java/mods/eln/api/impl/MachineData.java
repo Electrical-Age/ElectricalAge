@@ -24,7 +24,7 @@ public final class MachineData {
     /** Server: the state loaded with the block entity until a node takes it; the state at retirement after. */
     CompoundTag saved;
     /** Server: the node hosting the machine now, or null. */
-    HostedNode node;
+    MachineNode node;
     /** The owner's handle (server: a HostedMachine; client: a ClientMachine), made at the first of(). */
     Machine handle;
     /** Client: the last synced view, or null before the first. */
@@ -32,7 +32,7 @@ public final class MachineData {
 
     /** The state to save: the live machine's, else what was loaded (null: nothing). */
     CompoundTag stateTag() {
-        HostedNode n = node;
+        MachineNode n = node;
         if (n != null) {
             CompoundTag t = new CompoundTag();
             n.host.saveState(t);
@@ -61,7 +61,7 @@ public final class MachineData {
     static final AttachmentSyncHandler<MachineData> SYNC = new AttachmentSyncHandler<>() {
         @Override
         public void write(RegistryFriendlyByteBuf buf, MachineData d, boolean initialSync) {
-            HostedNode n = d.node;
+            MachineNode n = d.node;
             Snapshot s = n == null ? null : Snapshot.of(n.host);
             buf.writeBoolean(s != null);
             if (s != null) s.write(buf);

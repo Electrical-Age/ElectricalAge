@@ -58,7 +58,7 @@ public final class HostedMachines implements MachineRegistry {
     private final RegistrationBook<BlockEntityType<?>, Function<?, MachineSpec>> book = new RegistrationBook<>(
         "ElnApi.machines().register", "capabilities are registered; call it in FMLCommonSetupEvent");
     private final Queue<BlockEntity> added = new ConcurrentLinkedQueue<>();
-    private final Map<BlockEntity, HostedNode> hosted = new LinkedHashMap<>();
+    private final Map<BlockEntity, MachineNode> hosted = new LinkedHashMap<>();
     private final Map<BlockEntityType<?>, HostedMachine> unregistered = new ConcurrentHashMap<>();
 
     private HostedMachines() {
@@ -137,8 +137,8 @@ public final class HostedMachines implements MachineRegistry {
     /** Before each step: retire the gone, host the new, follow turned blocks. */
     void tick() {
         if (NodeManager.instance == null) return;
-        for (Iterator<HostedNode> i = hosted.values().iterator(); i.hasNext(); ) {
-            HostedNode n = i.next();
+        for (Iterator<MachineNode> i = hosted.values().iterator(); i.hasNext(); ) {
+            MachineNode n = i.next();
             if (n.be.isRemoved() || n.be.getLevel() != n.level) {
                 i.remove();
                 retire(n);
@@ -155,34 +155,34 @@ public final class HostedMachines implements MachineRegistry {
                 LOG.error("Electrical Age: hosting the machine of {} at {} failed; it stays detached", name(be.getType()), be.getBlockPos(), e);
             }
         }
-        for (HostedNode n : new ArrayList<>(hosted.values())) n.followFacing();
+        for (MachineNode n : new ArrayList<>(hosted.values())) n.followFacing();
     }
 
     private void host(BlockEntity be, MachineData d) {
         ServerLevel level = (ServerLevel) be.getLevel();
         Coordonate c = new Coordonate(be.getBlockPos(), level);
         NodeBase old = NodeManager.instance.getNodeFromCoordonate(c);
-        if (old instanceof HostedNode h) {
+        if (old instanceof MachineNode h) {
             hosted.remove(h.be);
             retire(h);
         } else if (old != null) {
             LOG.warn("Electrical Age: a stale {} node at {} gives way to the machine of {}", old.getClass().getSimpleName(), c, name(be.getType()));
             mods.eln.node.NodeOrphans.remove(old);
         }
-        HostedNode n = new HostedNode(level, be, d.handle.spec(), d);
+        MachineNode n = new MachineNode(level, be, d.handle.spec(), d);
         d.node = n;
         hosted.put(be, n);
         ((HostedMachine) d.handle).attach(n.host);
         n.place();
     }
 
-    private static void retire(HostedNode n) {
+    private static void retire(MachineNode n) {
         n.retire();
         if (n.data.handle instanceof HostedMachine m) m.detach();
     }
 
     /** The node hosting be's machine now, or null (tests). */
-    public HostedNode node(BlockEntity be) {
+    public MachineNode node(BlockEntity be) {
         return hosted.get(be);
     }
 

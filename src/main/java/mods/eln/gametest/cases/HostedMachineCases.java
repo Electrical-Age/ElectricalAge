@@ -7,7 +7,7 @@ import mods.eln.api.MachineView;
 import mods.eln.api.RelativeFace;
 import mods.eln.api.impl.ElementHost;
 import mods.eln.api.impl.HostedMachines;
-import mods.eln.api.impl.HostedNode;
+import mods.eln.api.impl.MachineNode;
 import mods.eln.apitest.ApiTestMachineEntity;
 import mods.eln.apitest.ApiTestMachines;
 import mods.eln.gametest.TestCase;
@@ -143,7 +143,7 @@ public final class HostedMachineCases {
             c.check("hosted: it runs on a 50 V line", m.state() == MachineState.RUNNING, m.state() + " at " + m.volts() + " V");
             c.checkValue("hosted: 20 ticks of work at its rated 100 W [J]", w1 - w0, 20 * TICK_J);
             c.check("hosted: the line at the machine is near 50 V", Math.abs(m.volts() - 50) < 1, m.volts() + " V");
-            HostedNode n = HostedMachines.INSTANCE.node(e);
+            MachineNode n = HostedMachines.INSTANCE.node(e);
             c.check("hosted: a node of its own at the block, linked to the cable", n != null && nodeAt(c, pos) == n
                 && linked(n, nodeAt(c, c.at(2, 1, 1))), String.valueOf(n));
             c.check("hosted: it draws through its back", n != null && n.activeFace() == RelativeFace.BACK, n == null ? "-" : String.valueOf(n.activeFace()));
@@ -195,7 +195,7 @@ public final class HostedMachineCases {
 
     /** Turned north its power faces leave the cable (it lands on the bus face); turned west its front takes it. */
     static final class Turns extends Fed {
-        HostedNode n0;
+        MachineNode n0;
         MachineState north;
         RelativeFace northFace;
         boolean sameNode;
@@ -217,7 +217,7 @@ public final class HostedMachineCases {
                 c.level().setBlock(pos, s.setValue(BlockStateProperties.FACING, Direction.NORTH), 3);
             });
             c.after(50, () -> {
-                HostedNode n = HostedMachines.INSTANCE.node(entity(c, pos));
+                MachineNode n = HostedMachines.INSTANCE.node(entity(c, pos));
                 sameNode = n == n0 && n != null;
                 north = m(c).state();
                 northFace = n == null ? null : n.activeFace();
@@ -230,7 +230,7 @@ public final class HostedMachineCases {
             c.check("turned: the same node follows the block", sameNode, String.valueOf(n0));
             c.check("turned north: no power face on the cable, unpowered", north == MachineState.UNPOWERED && northFace == null,
                 north + " " + northFace);
-            HostedNode n = HostedMachines.INSTANCE.node(entity(c, pos));
+            MachineNode n = HostedMachines.INSTANCE.node(entity(c, pos));
             c.check("turned west: its front takes the cable and it runs", m(c).state() == MachineState.RUNNING
                 && n != null && n.activeFace() == RelativeFace.FRONT, m(c).state() + " " + (n == null ? "-" : n.activeFace()));
         }
@@ -242,7 +242,7 @@ public final class HostedMachineCases {
      * beside it reconnects on every block update next to it, EA's neighbour rule; that relinks, it doesn't reset.)
      */
     static final class KeepsThroughLit extends Fed {
-        HostedNode n0;
+        MachineNode n0;
         int connects0;
         double delivered0, work0;
         final List<String> bad = new ArrayList<>();
@@ -271,7 +271,7 @@ public final class HostedMachineCases {
                     c.level().setBlock(pos, s.setValue(BlockStateProperties.LIT, !s.getValue(BlockStateProperties.LIT)), 3);
                 });
                 c.after(tick + 1, () -> {
-                    HostedNode n = HostedMachines.INSTANCE.node(entity(c, pos));
+                    MachineNode n = HostedMachines.INSTANCE.node(entity(c, pos));
                     Machine m = m(c);
                     double work = entity(c, pos).workJoules();
                     if (n != n0) bad.add(tick + ": a new node");
@@ -388,7 +388,7 @@ public final class HostedMachineCases {
                 && Math.abs(att.getDoubleOr(key, -1) - buffer) < 1e-9, buffer + " vs " + att);
             c.check("reload: unloaded, the node goes and the kept handle reads DETACHED", goneBetween, "");
             c.check("reload: unloaded, the cable that stays links to nothing there", cableFreeBetween, "");
-            HostedNode n = fresh == null ? null : HostedMachines.INSTANCE.node(fresh);
+            MachineNode n = fresh == null ? null : HostedMachines.INSTANCE.node(fresh);
             c.check("reload: a new node for the loaded block entity, the cable linked to it", n != null && nodeAt(c, pos) == n
                 && linked(n, nodeAt(c, c.at(2, 1, 1))), String.valueOf(n));
             c.check("reload: saved running, it runs at once (no half-second start)", first == MachineState.RUNNING, String.valueOf(first));
@@ -423,7 +423,7 @@ public final class HostedMachineCases {
 
         public void measure(TestContext c) {
             Machine a = ElnApi.machines().of(entity(c, m1)), z = ElnApi.machines().of(entity(c, m2));
-            HostedNode na = HostedMachines.INSTANCE.node(entity(c, m1));
+            MachineNode na = HostedMachines.INSTANCE.node(entity(c, m1));
             c.check("leaves: the first machine runs", a.state() == MachineState.RUNNING, a.state().name());
             c.check("leaves: cable B is linked to the first machine's front", linked(na, nodeAt(c, c.at(3, 1, 1))), "");
             double ub = Wp10aCases.loadU(b);
