@@ -52,7 +52,9 @@ public class BenchTest {
         assertEquals(MachineState.RUNNING, m.state());
         assertEquals(1020, m.watts(), 1020 * 1e-3); // 50 J a tick plus idle
         assertEquals(1020 / 200.0, b.supplyAmps(), 0.01);
-        for (int i = 3; i < 40; i++) assertEquals(50, t.got.get(i), 1e-6, "tick " + i);
+        // half a second of power-up hold, one tick of lag, then every ask is met
+        for (int i = 0; i < 10; i++) assertEquals(0, t.got.get(i), 1e-3, "tick " + i); // (the 1 Gohm open load's leak)
+        for (int i = 12; i < 40; i++) assertEquals(50, t.got.get(i), 1e-6, "tick " + i);
         assertEquals(1, m.voltageRatio(), 1e-3);
     }
 
@@ -127,7 +129,7 @@ public class BenchTest {
         // the mill's buffer refill outruns the dynamo's 180 W surplus: it backs off instead of collapsing the line
         assertFalse(b.trace().contains("UNDERVOLTAGE"), b.trace());
         assertEquals(MachineState.RUNNING, mill.state());
-        for (int i = 10; i < 200; i++) assertEquals(50, t.got.get(i), 1e-6, "tick " + i);
+        for (int i = 25; i < 200; i++) assertEquals(50, t.got.get(i), 1e-6, "tick " + i);
         double taken = t.got.stream().mapToDouble(Double::doubleValue).sum();
         double delivered = mill.joulesIn(), fed = dynamo.joulesOut(), given = dynamo.joulesIn();
         assertTrue(taken <= delivered, taken + " taken > " + delivered + " delivered");

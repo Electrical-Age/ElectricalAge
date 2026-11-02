@@ -28,13 +28,22 @@ public class MachineCorePropertyTest {
     record Tick(double ratio, int action, double share) {
     }
 
+    /** Consumers at any voltage, floors over the whole allowed range, and a heat model one time in three. */
     @Provide
     Arbitrary<MachineSpec> consumers() {
-        return Combinators.combine(Arbitraries.of(Tier.values()), Arbitraries.doubles().between(10, 20000),
-                Arbitraries.doubles().between(0, 0.5), Arbitraries.doubles().between(0.5, 0.9),
-                Arbitraries.doubles().between(0.5, 4))
-            .as((t, rated, idle, floor, cool) -> MachineSpec.consumer(t).ratedWatts(rated).idleWatts(idle * rated)
-                .minVoltageRatio(floor).tripCooldownSeconds(cool).build());
+        Arbitrary<double[]> heat = Arbitraries.frequencyOf(
+            net.jqwik.api.Tuple.of(2, Arbitraries.just(new double[0])),
+            net.jqwik.api.Tuple.of(1, Combinators.combine(Arbitraries.doubles().between(1, 1000),
+                Arbitraries.doubles().between(0.1, 10), Arbitraries.doubles().between(31, 100)).as((c, k, t) -> new double[]{c, k, t})));
+        return Combinators.combine(Arbitraries.doubles().between(10, 5000), Arbitraries.doubles().between(10, 20000),
+                Arbitraries.doubles().between(0, 0.5), Arbitraries.doubles().between(0.05, MachineSpec.MAX_MIN_VOLTAGE_RATIO),
+                Arbitraries.doubles().between(0.5, 4), heat)
+            .as((volts, rated, idle, floor, cool, h) -> {
+                MachineSpec.Builder b = MachineSpec.consumer(volts).ratedWatts(rated).idleWatts(idle * rated)
+                    .minVoltageRatio(floor).tripCooldownSeconds(cool);
+                if (h.length > 0) b.heatCapacityJPerK(h[0]).heatLossWPerK(h[1]).overheatCelsius(h[2]);
+                return b.build();
+            });
     }
 
     /** Volts that dwell near every threshold: 0, the floor, nominal, 1.1 and 1.3. */
@@ -42,7 +51,8 @@ public class MachineCorePropertyTest {
         return Arbitraries.frequencyOf(
             net.jqwik.api.Tuple.of(1, Arbitraries.just(0.0)),
             net.jqwik.api.Tuple.of(4, Arbitraries.doubles().between(0.9, 1.1)),
-            net.jqwik.api.Tuple.of(2, Arbitraries.doubles().between(0.6, 0.95)),
+            net.jqwik.api.Tuple.of(2, Arbitraries.doubles().between(0.6, 0.98)),
+            net.jqwik.api.Tuple.of(1, Arbitraries.doubles().between(0.02, 0.6)),
             net.jqwik.api.Tuple.of(2, Arbitraries.doubles().between(1.05, 1.15)),
             net.jqwik.api.Tuple.of(2, Arbitraries.doubles().between(1.25, 1.35)),
             net.jqwik.api.Tuple.of(1, Arbitraries.doubles().between(0, 1.6)));
@@ -50,7 +60,7 @@ public class MachineCorePropertyTest {
 
     @Provide
     Arbitrary<List<Tick>> histories() {
-        Arbitrary<Tick> tick = Combinators.combine(ratios(), Arbitraries.integers().between(0, 2),
+        Arbitrary<Tick> tick = Combinators.combine(ratios(), Arbitraries.integers().between(0, 3),
             Arbitraries.doubles().between(0, 2)).as(Tick::new);
         // runs of equal volts, so states get time to settle and cooldowns to finish
         return Combinators.combine(tick, Arbitraries.integers().between(1, 80)).as((t, n) -> java.util.Collections.nCopies(n, t))
@@ -58,12 +68,16 @@ public class MachineCorePropertyTest {
             .map(runs -> runs.stream().flatMap(List::stream).toList());
     }
 
-    /** The owner's action: 0 nothing, 1 takeJoules, 2 tryTakeJoules (within the buffer's size). */
+    /** The owner's action: 0 nothing, 1 takeJoules, 2 tryTakeJoules (within the buffer's size), 3 heatJoules. */
     static double act(MachineCore c, Tick t) {
         double j = t.share() * c.ratedJoulesPerTick();
         return switch (t.action()) {
             case 1 -> c.takeJoules(j);
             case 2 -> c.tryTakeJoules(Math.min(j, c.bufferCapacityJoules())) ? Math.min(j, c.bufferCapacityJoules()) : 0;
+            case 3 -> {
+                c.heatJoules(4 * j);
+                yield 0;
+            }
             default -> 0;
         };
     }
@@ -92,8 +106,9 @@ public class MachineCorePropertyTest {
     void consumerConservesEnergy(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
         runConsumer(spec, history, (i, c, state, u, got, p) -> {
             double eps = 1e-9 * (1 + c.joulesIn());
-            assertTrue(c.joulesOut() + c.bufferJoules() <= c.joulesIn() + eps,
-                "tick " + i + ": taken " + c.joulesOut() + " + buffered " + c.bufferJoules() + " > delivered " + c.joulesIn());
+            assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), eps,
+                "tick " + i + ": delivered != taken + buffered + lost");
+            assertTrue(c.joulesLost() >= 0, "tick " + i + ": lost " + c.joulesLost());
             assertTrue(c.bufferJoules() >= 0 && c.bufferJoules() <= c.bufferCapacityJoules() * (1 + 1e-12),
                 "tick " + i + ": buffer " + c.bufferJoules() + " outside 0.." + c.bufferCapacityJoules());
             if (state != MachineState.RUNNING) assertEquals(0, got, "tick " + i + ": took while " + state);
@@ -104,7 +119,9 @@ public class MachineCorePropertyTest {
     void consumerDrawStaysUnderCaps(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
         runConsumer(spec, history, (i, c, state, u, got, p) -> {
             double r = Math.abs(u) / spec.nominalVolts(), eps = 1e-9 * spec.ratedWatts();
-            assertTrue(p <= spec.ratedWatts() * r * r + eps, "tick " + i + ": " + p + " W over rated (U/Unom)^2 at " + u + " V");
+            double minOhms = spec.nominalVolts() * spec.nominalVolts() / spec.ratedWatts();
+            assertTrue(c.loadOhms() >= minOhms * (1 - 1e-9), "tick " + i + ": " + c.loadOhms() + " ohm under Unom^2/rated " + minOhms);
+            assertEquals(p > 0, Double.isFinite(c.loadOhms()), "tick " + i + ": open only when drawing nothing");
             assertTrue(p <= spec.ratedWatts() + eps, "tick " + i + ": " + p + " W over rated");
             if (r < spec.minVoltageRatio() || state != MachineState.RUNNING)
                 assertTrue(p <= spec.idleWatts() + eps, "tick " + i + ": " + p + " W, more than idle while " + state + " at " + u + " V");
@@ -112,15 +129,25 @@ public class MachineCorePropertyTest {
         });
     }
 
-    /** A trip lasts at least its cooldown; an overvoltage trip ends only after a cooldown spent under 1.1x. */
+    /**
+     * A trip lasts at least its cooldown, including one followed at once by a trip of another cause (each new trip
+     * restarts the count); an overvoltage trip ends only after a cooldown spent under 1.1x.
+     */
     @Property
     void tripsLatchForTheirCooldown(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
         int cooldown = (int) Math.ceil(spec.tripCooldownSeconds() / DT - 1e-9);
         int[] since = {-1};
         MachineState[] prev = {MachineState.UNPOWERED};
+        Object[] trip = {null};
         double[] ratios = history.stream().mapToDouble(Tick::ratio).toArray();
         runConsumer(spec, history, (i, c, state, u, got, p) -> {
-            if (state.tripped() && !prev[0].tripped()) since[0] = i;
+            Object now = c.lastTrip().orElse(null);
+            if (now != trip[0]) { // a new trip this tick
+                if (prev[0].tripped())
+                    assertTrue(i - since[0] >= cooldown, "tick " + i + ": " + prev[0] + " gave way to " + now + " after " + (i - since[0]));
+                trip[0] = now;
+                since[0] = i;
+            }
             if (prev[0].tripped() && !state.tripped()) {
                 assertTrue(i - since[0] >= cooldown, "tick " + i + ": " + prev[0] + " reset after " + (i - since[0]) + " < " + cooldown + " ticks");
                 if (prev[0] == MachineState.OVERVOLTAGE_TRIPPED)
@@ -161,9 +188,22 @@ public class MachineCorePropertyTest {
         });
     }
 
+    /** Once the line has held at the recovery level for UNDERVOLTAGE_RECOVERY_TICKS, the machine runs, whatever its floor. */
+    @Property
+    void undervoltageRecovers(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
+        double recover = Math.min(spec.minVoltageRatio() + MachineCore.UNDERVOLTAGE_BAND, (1 + spec.minVoltageRatio()) / 2);
+        int[] held = {0};
+        runConsumer(spec, history, (i, c, state, u, got, p) -> {
+            double r = u / spec.nominalVolts();
+            held[0] = r >= recover && r <= MachineCore.OVERVOLTAGE_RATIO ? held[0] + 1 : 0;
+            if (held[0] >= MachineCore.UNDERVOLTAGE_RECOVERY_TICKS && !state.tripped())
+                assertEquals(MachineState.RUNNING, state, "tick " + i + ": line at " + r + " for " + held[0] + " ticks");
+        });
+    }
+
     /**
      * Two machines with the same history except a bigger ask at tick n plan the same load up to tick n - 1, and at
-     * tick n (the step of tick n + 1) the bigger ask plans at least as much, more when it was served: the
+     * tick n (the step of tick n + 1) the bigger ask plans more, unless not running or at its cap: the
      * demand-to-load lag is exactly one tick.
      */
     @Property
@@ -177,8 +217,9 @@ public class MachineCorePropertyTest {
             double u = t.ratio() * spec.nominalVolts();
             a.afterStep(u, Double.isInfinite(ohmsA) ? 0 : u * u / ohmsA * DT);
             b.afterStep(u, Double.isInfinite(ohmsB) ? 0 : u * u / ohmsB * DT);
-            double gotA = a.takeJoules(t.share() / 4 * a.ratedJoulesPerTick());
-            double gotB = b.takeJoules((t.share() / 4 + (i == n ? extra : 0)) * b.ratedJoulesPerTick());
+            a.takeJoules(t.share() / 4 * a.ratedJoulesPerTick());
+            b.takeJoules((t.share() / 4 + (i == n ? extra : 0)) * b.ratedJoulesPerTick());
+            boolean running = a.state() == MachineState.RUNNING;
             double pA = a.beforeStep(), pB = b.beforeStep();
             ohmsA = a.loadOhms();
             ohmsB = b.loadOhms();
@@ -186,8 +227,8 @@ public class MachineCorePropertyTest {
             else {
                 assertTrue(pB >= pA, "the bigger ask planned less: " + pB + " < " + pA);
                 double cap = spec.ratedWatts() * Math.pow(u / spec.nominalVolts(), 2);
-                if (gotB > gotA && pA < Math.min(cap, spec.ratedWatts()) * (1 - 1e-9))
-                    assertTrue(pB > pA, "the served bigger ask planned no more: " + pB + " = " + pA);
+                if (running && pA < Math.min(cap, spec.ratedWatts()) * (1 - 1e-9))
+                    assertTrue(pB > pA, "the bigger ask planned no more: " + pB + " = " + pA);
             }
         }
     }

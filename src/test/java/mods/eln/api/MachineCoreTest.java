@@ -29,6 +29,16 @@ public class MachineCoreTest {
         return p;
     }
 
+    /** Power comes on at volts: UNPOWERED for the hold, then RUNNING. */
+    static void powerUp(MachineCore c, double volts, double[] ohms) {
+        for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) {
+            assertEquals(MachineState.UNPOWERED, c.state());
+            step(c, volts, ohms);
+            plan(c, ohms);
+        }
+        assertEquals(MachineState.RUNNING, c.state());
+    }
+
     @Test
     void misuseThrows() {
         MachineCore c = new MachineCore(MILL);
@@ -62,8 +72,8 @@ public class MachineCoreTest {
     void askSizesTheNextTick() {
         MachineCore c = new MachineCore(MILL);
         double[] ohms = {Double.POSITIVE_INFINITY};
-        step(c, 200, ohms);
-        assertEquals(MachineState.RUNNING, c.state());
+        powerUp(c, 200, ohms);
+        assertEquals(0, c.joulesIn()); // nothing drawn while powering up
         assertEquals(20, plan(c, ohms), 1e-9);
         step(c, 200, ohms);
         assertEquals(20 * DT, c.joulesIn(), 1e-9);
@@ -99,7 +109,7 @@ public class MachineCoreTest {
     void bigAskIsCapped() {
         MachineCore c = new MachineCore(MILL);
         double[] ohms = {Double.POSITIVE_INFINITY};
-        step(c, 200, ohms);
+        powerUp(c, 200, ohms);
         c.takeJoules(1e6);
         assertEquals(2000, plan(c, ohms), 1e-9);
     }
@@ -124,7 +134,7 @@ public class MachineCoreTest {
         List<TripCause> trips = new ArrayList<>();
         c.onTrip(trips::add);
         double[] ohms = {Double.POSITIVE_INFINITY};
-        step(c, 200, ohms);
+        powerUp(c, 200, ohms);
         step(c, 270, ohms);
         assertEquals(MachineState.OVERVOLTAGE_TRIPPED, c.state());
         assertEquals(0, plan(c, ohms));
@@ -156,7 +166,7 @@ public class MachineCoreTest {
     @Test
     void overheatTripsAndCools() {
         MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatCelsius(60).build());
-        c.afterStep(200, 0);
+        for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
         assertEquals(MachineSpec.AMBIENT_CELSIUS, c.celsius(), 1e-9);
         int n = 0;
         while (c.state() == MachineState.RUNNING && n < 1000) {
@@ -178,6 +188,84 @@ public class MachineCoreTest {
         d.heatJoules(1000); // 20 kW for one tick: +10 K in the limit of a short pulse
         d.afterStep(200, 0);
         assertEquals(10, d.celsius() - 20, 0.01);
+    }
+
+    /** Even with the highest floor, a sagged machine runs again once the line is back at nominal. */
+    @Test
+    void undervoltageRecoversWithAHighFloor() {
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(2000).minVoltageRatio(0.95).build());
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 200, ohms);
+        step(c, 185, ohms);
+        assertEquals(MachineState.UNDERVOLTAGE, c.state());
+        for (int i = 1; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) step(c, 196, ohms); // 0.98: halfway to nominal is 0.975
+        assertEquals(MachineState.UNDERVOLTAGE, c.state());
+        step(c, 196, ohms);
+        assertEquals(MachineState.RUNNING, c.state());
+    }
+
+    /** A line flickering on and off never starts the machine. */
+    @Test
+    void flickerDoesNotStartIt() {
+        MachineCore c = new MachineCore(MILL);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        for (int i = 0; i < 100; i++) {
+            step(c, i % 5 == 4 ? 0 : 200, ohms);
+            assertEquals(MachineState.UNPOWERED, c.state(), "tick " + i);
+            assertEquals(0, plan(c, ohms));
+        }
+    }
+
+    /** Failed tryTakes retried in one tick count once; a step up to the buffer's size is sized at a tick's rated work. */
+    @Test
+    void retriedTryTakeIsOneAsk() {
+        MachineCore c = new MachineCore(MILL);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 200, ohms);
+        double refill = MachineCore.REFILL_SHARE * c.ratedJoulesPerTick();
+        assertFalse(c.tryTakeJoules(40));
+        assertFalse(c.tryTakeJoules(40));
+        assertFalse(c.tryTakeJoules(30));
+        assertEquals(20 + (40 + refill) / DT, plan(c, ohms), 1e-9);
+        step(c, 200, ohms);
+        assertFalse(c.tryTakeJoules(150)); // more than a tick, within the buffer: allowed, sized at a tick
+        assertEquals(2000, plan(c, ohms), 1e-9);
+    }
+
+    /** In a place hotter than 10 K under the trip point, the overheat trip resets halfway down to ambient. */
+    @Test
+    void overheatResetsInAHotPlace() {
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000)
+            .heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build());
+        c.setAmbientCelsius(55);
+        assertEquals(55, c.celsius());
+        for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
+        c.heatJoules(100);
+        c.afterStep(200, 0);
+        assertEquals(MachineState.OVERHEAT_TRIPPED, c.state());
+        int n = 0;
+        while (c.state().tripped() && n++ < 10000) c.afterStep(200, 0);
+        assertEquals(MachineState.RUNNING, c.state());
+        assertTrue(c.celsius() < 57.5);
+        // no heat model: celsius() is the ambient set
+        MachineCore plain = new MachineCore(MILL);
+        plain.setAmbientCelsius(-5);
+        assertEquals(-5, plain.celsius());
+    }
+
+    /** A listener that throws is logged; the others still hear of the trip. */
+    @Test
+    void badListenerDoesNotSilenceTheOthers() {
+        MachineCore c = new MachineCore(MILL);
+        List<TripCause> heard = new ArrayList<>();
+        c.onTrip(t -> {
+            throw new RuntimeException("listener bug (expected in this test)");
+        });
+        c.onTrip(heard::add);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 200, ohms);
+        step(c, 300, ohms);
+        assertEquals(1, heard.size());
     }
 
     @Test

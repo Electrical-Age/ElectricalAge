@@ -26,10 +26,10 @@ import java.util.function.Consumer;
  * </ol>
  * Consumer: the buffer holds at most two ticks of rated work energy. The next step's load is idle watts plus work:
  * the demand smoothed over two ticks (fast attack: a rise counts at once, a fall halves first) plus a refill of at
- * most a quarter of a tick's rated work once the line has kept up for a second, but never more than the buffer's room, and none
- * without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle watts only.
- * Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the line rose) is
- * heat.
+ * most a quarter of a tick's rated work once the line has kept up for a second, but never more than the buffer's
+ * room, and none without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle
+ * watts only. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
+ * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times.
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
  * queue holds energy, behind the droop resistance 0.05 U_nom^2 / rated (1.05 U_nom open, rated watts at U_nom);
@@ -52,9 +52,12 @@ public final class MachineCore implements MachineView {
     public static final double OVERVOLTAGE_RATIO = 1.3;
     /** The overvoltage cooldown only counts below this share of nominal volts. */
     public static final double OVERVOLTAGE_RESET_RATIO = 1.1;
-    /** UNDERVOLTAGE ends this far (share of nominal) above the floor... */
+    /** UNDERVOLTAGE ends this far (share of nominal) above the floor, or halfway from the floor to nominal if nearer... */
     public static final double UNDERVOLTAGE_BAND = 0.05;
-    /** ...held for this many ticks, so a line that sags under the machine's own load doesn't flip it every tick. */
+    /**
+     * ...held for this many ticks; coming from UNPOWERED, the floor itself held as long. So a line that sags under
+     * the machine's own load, or flickers, doesn't flip it every tick.
+     */
     public static final int UNDERVOLTAGE_RECOVERY_TICKS = 10;
     /** The buffer refill, as a share of rated work power. */
     public static final double REFILL_SHARE = 0.25;
@@ -74,7 +77,7 @@ public final class MachineCore implements MachineView {
 
     private final MachineSpec spec;
     private final boolean producer;
-    private final double uNom, ratedJoulesPerTick, capacity, workWatts;
+    private final double uNom, ratedJoulesPerTick, capacity, workWatts, recoveryRatio;
     private final int cooldownTicks;
     private final MachineSpec.Thermal thermal;
     private final List<Consumer<TripCause>> listeners = new ArrayList<>();
@@ -84,17 +87,17 @@ public final class MachineCore implements MachineView {
     private MachineState state = MachineState.UNPOWERED;
     private TripCause lastTrip;
     private boolean burnt;
-    private int tripTimer, undervoltageTimer;
+    private int tripTimer, upTimer;
     private long ticks;
 
     // consumer
-    private double demand, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
+    private double demand, failedTry, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
     private int keptUpTicks = REFILL_HOLDOFF_TICKS;
     // producer
     private boolean sourceOn;
     private double sourceVolts;
-    // books: consumer: delivered in / taken out; producer: given in / fed out (source side)
-    private double joulesIn, joulesOut;
+    // books: consumer: delivered in / taken out / idle and spilled; producer: given in / fed out (source side)
+    private double joulesIn, joulesOut, joulesLost;
 
     public MachineCore(MachineSpec spec) {
         this.spec = spec;
@@ -104,6 +107,7 @@ public final class MachineCore implements MachineView {
         ratedJoulesPerTick = workWatts * TICK_SECONDS;
         capacity = BUFFER_TICKS * ratedJoulesPerTick;
         cooldownTicks = (int) Math.ceil(spec.tripCooldownSeconds() / TICK_SECONDS - 1e-9);
+        recoveryRatio = Math.min(spec.minVoltageRatio() + UNDERVOLTAGE_BAND, (1 + spec.minVoltageRatio()) / 2);
         thermal = spec.thermal().orElse(null);
     }
 
@@ -136,7 +140,8 @@ public final class MachineCore implements MachineView {
             keptUpTicks = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS) : 0;
             double stored = Math.max(0, Math.min(work, capacity - buffer));
             buffer += stored;
-            heat += idle + work - stored;
+            joulesLost += joules - stored;
+            heat += joules - stored;
         }
         if (thermal != null) {
             double k = thermal.heatLossWPerK();
@@ -162,14 +167,16 @@ public final class MachineCore implements MachineView {
             double cap = spec.ratedWatts() * r * r;
             idle = Math.min(spec.idleWatts(), cap);
             if (state == MachineState.RUNNING) {
-                double smoothed = Math.max(demand, (demand + previousDemand) / 2);
+                double asked = Math.min(ratedJoulesPerTick, demand + failedTry);
+                double smoothed = Math.max(asked, (asked + previousDemand) / 2);
                 double refill = keptUpTicks >= REFILL_HOLDOFF_TICKS ? REFILL_SHARE * ratedJoulesPerTick : 0;
                 double joules = smoothed > 0 ? Math.min(capacity - buffer, smoothed + refill) : 0;
                 work = Math.max(0, Math.min(joules / TICK_SECONDS, Math.min(workWatts, cap - idle)));
             }
         }
-        previousDemand = demand;
+        previousDemand = Math.min(ratedJoulesPerTick, demand + failedTry);
         demand = 0;
+        failedTry = 0;
         idleCommand = idle;
         workCommand = work;
         double p = idle + work;
@@ -208,7 +215,7 @@ public final class MachineCore implements MachineView {
             double byCurrent = theveninVolts + theveninOhms * spec.ratedWatts() / uNom;
             e = Math.max(theveninVolts, Math.min(open, Math.min(byCurrent, byPower)));
         }
-        if (!Double.isFinite(e)) e = 0;
+        if (!Double.isFinite(e)) e = Double.isFinite(theveninVolts) ? theveninVolts : open; // no current, never 0 V
         sourceVolts = e;
         return e;
     }
@@ -217,6 +224,7 @@ public final class MachineCore implements MachineView {
     public void setAmbientCelsius(double c) {
         if (!Double.isFinite(c)) throw new IllegalArgumentException("ambient must be finite, got " + c);
         ambientCelsius = c;
+        if (ticks == 0) celsius = c;
     }
 
     // ---- the owner side (see Machine for the contract)
@@ -227,8 +235,12 @@ public final class MachineCore implements MachineView {
         if (joules > capacity)
             throw new IllegalArgumentException("tryTakeJoules(" + joules + ") can never succeed: " + spec
                 + " buffers at most " + capacity + " J (two ticks at rated power); split the step or raise ratedWatts");
-        demand = Math.min(ratedJoulesPerTick, demand + capAsk(joules));
-        if (state != MachineState.RUNNING || buffer < joules * (1 - 1e-9)) return false;
+        // up to the buffer's size is a fair step (no warning); the load is sized for at most a tick's rated work
+        if (state != MachineState.RUNNING || buffer < joules * (1 - 1e-9)) {
+            failedTry = Math.max(failedTry, Math.min(joules, ratedJoulesPerTick)); // a retry in the same tick isn't more demand
+            return false;
+        }
+        demand = Math.min(ratedJoulesPerTick, demand + Math.min(joules, ratedJoulesPerTick));
         double got = Math.min(joules, buffer);
         buffer -= got;
         joulesOut += got;
@@ -310,7 +322,7 @@ public final class MachineCore implements MachineView {
 
     @Override
     public double celsius() {
-        return celsius;
+        return thermal != null ? celsius : ambientCelsius;
     }
 
     public double ratedJoulesPerTick() {
@@ -331,6 +343,11 @@ public final class MachineCore implements MachineView {
         return joulesOut;
     }
 
+    /** Consumer: delivered joules that never reached the buffer (idle watts, and what didn't fit), J. Producer: 0. */
+    public double joulesLost() {
+        return joulesLost;
+    }
+
     /** Overvoltage destroyed it (burnsOnOvervoltage): the host removes the machine; it never resets. */
     public boolean burnt() {
         return burnt;
@@ -349,12 +366,17 @@ public final class MachineCore implements MachineView {
         if (state.tripped()) {
             boolean clear = switch (state) {
                 case OVERVOLTAGE_TRIPPED -> r < OVERVOLTAGE_RESET_RATIO;
-                default -> celsius < thermal.overheatCelsius() - MachineSpec.OVERHEAT_RESET_KELVIN;
+                // 10 K under the trip point, or halfway down to ambient if that is nearer (a hot place still resets)
+                default -> celsius < thermal.overheatCelsius() - Math.min(MachineSpec.OVERHEAT_RESET_KELVIN,
+                    (thermal.overheatCelsius() - ambientCelsius) / 2);
             };
             tripTimer = clear ? tripTimer + 1 : 0;
             if (tripTimer < cooldownTicks) return;
             tripTimer = 0;
-            state = MachineState.UNPOWERED; // re-classified below as if power had just come
+            // the cooldown proved the line: classified at once, no power-up hold
+            state = r < UNPOWERED_RATIO ? MachineState.UNPOWERED
+                : r < spec.minVoltageRatio() ? MachineState.UNDERVOLTAGE : MachineState.RUNNING;
+            upTimer = 0;
         }
         if (r > OVERVOLTAGE_RATIO) {
             trip(new TripCause(MachineState.OVERVOLTAGE_TRIPPED, Math.abs(volts), OVERVOLTAGE_RATIO * uNom,
@@ -363,15 +385,18 @@ public final class MachineCore implements MachineView {
             trip(new TripCause(MachineState.OVERHEAT_TRIPPED, celsius, thermal.overheatCelsius(), false));
         } else if (r < UNPOWERED_RATIO) {
             state = MachineState.UNPOWERED;
-            undervoltageTimer = 0;
-        } else if (state == MachineState.UNDERVOLTAGE) {
-            undervoltageTimer = r >= spec.minVoltageRatio() + UNDERVOLTAGE_BAND ? undervoltageTimer + 1 : 0;
-            if (undervoltageTimer >= UNDERVOLTAGE_RECOVERY_TICKS) {
-                state = MachineState.RUNNING;
-                undervoltageTimer = 0;
-            }
+            upTimer = 0;
+        } else if (state == MachineState.RUNNING) {
+            if (r < spec.minVoltageRatio()) state = MachineState.UNDERVOLTAGE;
         } else {
-            state = r < spec.minVoltageRatio() ? MachineState.UNDERVOLTAGE : MachineState.RUNNING;
+            // UNPOWERED or UNDERVOLTAGE: runs once the line has held up for UNDERVOLTAGE_RECOVERY_TICKS
+            double needed = state == MachineState.UNPOWERED ? spec.minVoltageRatio() : recoveryRatio;
+            upTimer = r >= needed ? upTimer + 1 : 0;
+            if (r < spec.minVoltageRatio()) state = MachineState.UNDERVOLTAGE;
+            if (upTimer >= UNDERVOLTAGE_RECOVERY_TICKS) {
+                state = MachineState.RUNNING;
+                upTimer = 0;
+            }
         }
     }
 
@@ -379,9 +404,15 @@ public final class MachineCore implements MachineView {
         state = cause.state();
         lastTrip = cause;
         tripTimer = 0;
-        undervoltageTimer = 0;
+        upTimer = 0;
         if (cause.burns()) burnt = true;
-        for (Consumer<TripCause> l : List.copyOf(listeners)) l.accept(cause);
+        for (Consumer<TripCause> l : List.copyOf(listeners)) {
+            try {
+                l.accept(cause);
+            } catch (RuntimeException e) { // one bad listener mustn't skip the others, or the other machines
+                LOG.error("Machine {}: a trip listener threw on {}", spec, cause, e);
+            }
+        }
     }
 
     private double capAsk(double joules) {
