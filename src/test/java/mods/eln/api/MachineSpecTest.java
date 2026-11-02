@@ -41,6 +41,18 @@ public class MachineSpecTest {
         assertEquals(50, Tier.V50.volts());
         assertEquals(200, Tier.V200.volts());
         assertEquals(800, Tier.V800.volts());
+        assertEquals(3200, Tier.V3200.volts());
+    }
+
+    /** Tiers are a convenience: any positive voltage makes a spec. */
+    @Test
+    void anyNominalVolts() {
+        MachineSpec s = MachineSpec.producer(230).ratedWatts(500).build();
+        assertEquals(230, s.nominalVolts());
+        assertEquals("producer 230 V 500 W", s.toString());
+        assertError(MachineSpec.consumer(0).ratedWatts(1), "nominal volts must be positive and finite, got 0.0");
+        assertError(MachineSpec.consumer(Double.NaN).ratedWatts(1), "nominal volts must be positive and finite");
+        assertError(MachineSpec.consumer(Double.POSITIVE_INFINITY).ratedWatts(1), "nominal volts must be positive and finite");
     }
 
     @Test

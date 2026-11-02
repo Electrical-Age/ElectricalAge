@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * What a machine is, electrically: a consumer or producer at a tier, its power ratings, protections and which face
+ * What a machine is, electrically: a consumer or producer at a nominal voltage, its power ratings, protections and which face
  * does what. Immutable; made by consumer(tier) or producer(tier), then the builder's build(), which checks every
  * setting and lists all problems in one IllegalArgumentException. Baughn: a mod hands over a nominal machine spec
  * and gets volts and joules back; every default is the safe one, and the unsafe options say so in their names.
@@ -46,8 +46,7 @@ public final class MachineSpec {
     public static final double MIN_TRIP_COOLDOWN_SECONDS = 0.5;
 
     private final Kind kind;
-    private final Tier tier;
-    private final double ratedWatts, idleWatts, minVoltageRatio, maxWatts, tripCooldownSeconds;
+    private final double nominalVolts, ratedWatts, idleWatts, minVoltageRatio, maxWatts, tripCooldownSeconds;
     private final boolean burnsOnOvervoltage;
     private final Thermal thermal;
     private final Set<RelativeFace> powerFaces;
@@ -57,7 +56,7 @@ public final class MachineSpec {
 
     private MachineSpec(Builder b, Set<RelativeFace> powerFaces) {
         kind = b.kind;
-        tier = b.tier;
+        nominalVolts = b.nominalVolts;
         ratedWatts = b.ratedWatts;
         idleWatts = b.idleWatts;
         minVoltageRatio = b.minVoltageRatio;
@@ -71,27 +70,33 @@ public final class MachineSpec {
         busFace = b.busFace;
     }
 
-    /** A machine that draws power at the given tier. ratedWatts is required. */
+    /** A machine that draws power at one of EA's cable voltages. ratedWatts is required. */
     public static Builder consumer(Tier tier) {
-        return new Builder(Kind.CONSUMER, Objects.requireNonNull(tier, "tier"));
+        return consumer(Objects.requireNonNull(tier, "tier").volts());
     }
 
-    /** A machine that feeds power into the line at the given tier. ratedWatts is required. */
+    /** A machine that draws power at nominalVolts (positive, finite). ratedWatts is required. */
+    public static Builder consumer(double nominalVolts) {
+        return new Builder(Kind.CONSUMER, nominalVolts);
+    }
+
+    /** A machine that feeds power into the line at one of EA's cable voltages. ratedWatts is required. */
     public static Builder producer(Tier tier) {
-        return new Builder(Kind.PRODUCER, Objects.requireNonNull(tier, "tier"));
+        return producer(Objects.requireNonNull(tier, "tier").volts());
+    }
+
+    /** A machine that feeds power into the line at nominalVolts (positive, finite). ratedWatts is required. */
+    public static Builder producer(double nominalVolts) {
+        return new Builder(Kind.PRODUCER, nominalVolts);
     }
 
     public Kind kind() {
         return kind;
     }
 
-    public Tier tier() {
-        return tier;
-    }
-
-    /** The tier's nominal voltage, V. */
+    /** The voltage the machine is built for, V. */
     public double nominalVolts() {
-        return tier.volts();
+        return nominalVolts;
     }
 
     /** Consumer: the most it draws at nominal volts, idle included (W). Producer: what it feeds at nominal volts (W). */
@@ -149,13 +154,13 @@ public final class MachineSpec {
 
     @Override
     public String toString() {
-        return String.format(Locale.ROOT, "%s %s %.0f W", kind.name().toLowerCase(Locale.ROOT), tier, ratedWatts);
+        return String.format(Locale.ROOT, "%s %.0f V %.0f W", kind.name().toLowerCase(Locale.ROOT), nominalVolts, ratedWatts);
     }
 
     /** Collects a spec's settings; build() checks them. Not reusable after build(). */
     public static final class Builder {
         private final Kind kind;
-        private final Tier tier;
+        private final double nominalVolts;
         private double ratedWatts = Double.NaN, idleWatts = 0, minVoltageRatio = 0.75, maxWatts = Double.NaN;
         private double tripCooldownSeconds = 3;
         private boolean idleSet, maxSet, burnsOnOvervoltage;
@@ -166,9 +171,9 @@ public final class MachineSpec {
         private final List<SignalOut> signalsOut = new ArrayList<>();
         private RelativeFace busFace;
 
-        private Builder(Kind kind, Tier tier) {
+        private Builder(Kind kind, double nominalVolts) {
             this.kind = kind;
-            this.tier = tier;
+            this.nominalVolts = nominalVolts;
         }
 
         /** Consumer: the most it draws at nominal volts, idle included. Producer: its output at nominal volts. W, required. */
@@ -251,6 +256,8 @@ public final class MachineSpec {
         /** Checks every setting; throws IllegalArgumentException listing every problem found. */
         public MachineSpec build() {
             List<String> errors = new ArrayList<>();
+            if (!(Double.isFinite(nominalVolts) && nominalVolts > 0))
+                errors.add("nominal volts must be positive and finite, got " + nominalVolts);
             if (Double.isNaN(ratedWatts)) errors.add("ratedWatts is required");
             else if (!(Double.isFinite(ratedWatts) && ratedWatts > 0))
                 errors.add("ratedWatts must be positive and finite, got " + ratedWatts);
