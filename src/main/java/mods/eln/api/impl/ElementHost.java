@@ -9,11 +9,9 @@ import mods.eln.api.MachineState;
 import mods.eln.api.MachineView;
 import mods.eln.api.RelativeFace;
 import mods.eln.api.TripCause;
-import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
@@ -23,7 +21,6 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -292,13 +289,7 @@ public final class ElementHost implements ElementMachine {
 
     @Override
     public Map<String, String> wailaLines() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();
-        info.put(I18N.tr("Voltage"), Utils.plotVolt("", core.volts()));
-        boolean producer = core.spec().kind() == MachineSpec.Kind.PRODUCER;
-        info.put(I18N.tr(producer ? "Power output" : "Power consumption"), Utils.plotPower("", core.watts()));
-        if (core.state() != MachineState.RUNNING)
-            info.put(I18N.tr("Machine"), I18N.tr(core.state().name().toLowerCase(Locale.ROOT).replace('_', ' ')));
-        return info;
+        return MachineLines.element(view);
     }
 
     // ---- Machine

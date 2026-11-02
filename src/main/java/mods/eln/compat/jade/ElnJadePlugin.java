@@ -7,6 +7,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
@@ -22,7 +24,8 @@ import java.util.Map;
 /**
  * Jade (26.x's WAILA; Baughn: on Incognito) for every EA node: the device's own probe lines (getWaila, as 1.12's WAILA
  * showed them), from the server. A headline always; the full details while sneaking, or always with the config
- * probe.details (ElnConfig). Loaded by Jade only when it is installed.
+ * probe.details (ElnConfig). And for any other block with the eln:machine capability (a Machine API machine at
+ * another mod's block): MachineLines.hosted, from the server. Loaded by Jade only when it is installed.
  */
 @WailaPlugin
 public class ElnJadePlugin implements IWailaPlugin {
@@ -30,14 +33,19 @@ public class ElnJadePlugin implements IWailaPlugin {
     /** Lines shown without details. */
     static final int HEADLINE = 3;
 
+    /** The Machine API's machines at other mods' blocks. */
+    static final Identifier MACHINE_UID = Identifier.fromNamespaceAndPath("eln", "machine");
+
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(Server.INSTANCE, NodeBlockEntity.class);
+        registration.registerBlockDataProvider(MachineServer.INSTANCE, BlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(Client.INSTANCE, NodeBlock.class);
+        registration.registerBlockComponent(MachineClient.INSTANCE, Block.class);
     }
 
     /** The device's lines, ordered: key TAB value. */
@@ -138,6 +146,54 @@ public class ElnJadePlugin implements IWailaPlugin {
         @Override
         public Identifier getUid() {
             return UID;
+        }
+    }
+
+    /**
+     * A machine at another mod's block, by the eln:machine capability on the server (the live machine): its lines
+     * under elnMachine. EA's own blocks are the node provider's (an element machine's lines are in its getWaila).
+     */
+    enum MachineServer implements IServerDataProvider<BlockAccessor> {
+        INSTANCE;
+
+        @Override
+        public void appendServerData(CompoundTag tag, BlockAccessor acc) {
+            if (acc.getBlockEntity() == null || acc.getBlockEntity() instanceof NodeBlockEntity) return;
+            Map<String, String> m;
+            try {
+                m = mods.eln.api.impl.MachineLines.at(acc.getLevel(), acc.getPosition());
+            } catch (RuntimeException e) {
+                return;   // (a block mid-change: no lines this time)
+            }
+            if (m.isEmpty()) return;
+            ListTag list = new ListTag();
+            for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
+            tag.put("elnMachine", list);
+        }
+
+        @Override
+        public Identifier getUid() {
+            return MACHINE_UID;
+        }
+    }
+
+    /** The lines MachineServer sent, all of them (a machine's are few). */
+    enum MachineClient implements IBlockComponentProvider {
+        INSTANCE;
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
+            var list = acc.getServerData().getListOrEmpty("elnMachine");
+            for (int i = 0; i < list.size(); i++) {
+                String s = list.getStringOr(i, "");
+                int t = s.indexOf('\t');
+                tooltip.add(t < 0 ? Component.literal(s) : Component.literal(s.substring(0, t) + ": ").append(Component.literal(s.substring(t + 1).trim())));
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return MACHINE_UID;
         }
     }
 }

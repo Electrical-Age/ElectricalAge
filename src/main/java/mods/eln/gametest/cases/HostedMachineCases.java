@@ -193,6 +193,12 @@ public final class HostedMachineCases {
             Machine stray = ElnApi.machines().of(c.level().getBlockEntity(furnace));
             c.check("rules: a type never registered gets an inert DETACHED machine", stray.state() == MachineState.DETACHED
                 && stray.takeJoules(1) == 0 && !ElnApi.machines().registered(c.level().getBlockEntity(furnace).getType()), stray.toString());
+            var lines = mods.eln.api.impl.MachineLines.at(c.level(), pos);
+            c.check("jade: the machine's lines (voltage, power, state, buffer), by the capability", lines.size() == 4
+                && "running".equals(lines.get("Machine")), lines.toString());
+            c.check("jade: none for EA's element machine (its node's lines have them) nor for a plain furnace",
+                mods.eln.api.impl.MachineLines.at(c.level(), macerator).isEmpty()
+                    && mods.eln.api.impl.MachineLines.at(c.level(), furnace).isEmpty(), "");
             Throwable late = null;
             try {
                 ElnApi.machines().register(ApiTestMachines.TYPE.get(), be -> ApiTestMachines.SPEC);

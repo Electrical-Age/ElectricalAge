@@ -294,6 +294,9 @@ public static MachineView viewAt(Level level, BlockPos pos) {
 }
 ```
 
+With Jade installed, a machine at your block shows EA's lines without any code of yours: its voltage, power, state and
+buffer (and temperature, with a heat model), read on the server.
+
 `Meters` formats readings as EA's meters, Jade lines and tooltips do: three significant digits with an SI prefix.
 It has `volts`, `amps`, `watts`, `joules`, `ohms`, `kelvin` and `celsius`.
 

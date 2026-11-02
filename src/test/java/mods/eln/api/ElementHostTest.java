@@ -286,6 +286,21 @@ public class ElementHostTest {
         assertEquals(a, d);
     }
 
+    /** A hosted machine's Jade lines: the element's, then its state always, its buffer, and its heat with a heat model. */
+    @Test
+    void hostedJadeLines() {
+        Element e = new Element();
+        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
+        assertEquals(List.of("Voltage", "Power consumption", "Machine", "Buffer"),
+            List.copyOf(mods.eln.api.impl.MachineLines.hosted(m.view()).keySet()));
+        assertEquals("unpowered", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Machine"));
+        assertEquals("0J / 10.0J", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Buffer"));
+        Element h = new Element();
+        ElementHost hot = h.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build());
+        assertTrue(mods.eln.api.impl.MachineLines.hosted(hot.view()).containsKey("Temperature"));
+        assertEquals(mods.eln.api.impl.MachineLines.element(m.view()), m.wailaLines());
+    }
+
     /** Its loads carry the spec's names (introspect lists the ports by them): "power" and each signal's; saved as before. */
     @Test
     void signalLoadsAreNamedBySpecAndSavedByIndex() {
