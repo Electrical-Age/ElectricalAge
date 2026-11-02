@@ -319,4 +319,67 @@ public class MachineCoreTest {
         c.beforeStep();
         assertEquals(c.bufferJoules() > 0, c.sourceOn());
     }
+
+    /** respec changes ratings only: a booster doubles the draw from the next plan; a buffer over the new size is cut and booked lost. */
+    @Test
+    void respecChangesRatingsOnly() {
+        MachineSpec small = MachineSpec.consumer(Tier.V50).ratedWatts(200).onBrownout(Brownout.SLOW).power(RelativeFace.LEFT).build();
+        MachineSpec big = MachineSpec.consumer(Tier.V50).ratedWatts(400).onBrownout(Brownout.SLOW).power(RelativeFace.LEFT).build();
+        MachineCore c = new MachineCore(big);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 50, ohms);
+        for (int i = 0; i < 20; i++) {
+            step(c, 50, ohms);
+            c.takeJoules(5);    // a quarter of a tick: the buffer fills
+            plan(c, ohms);
+        }
+        assertTrue(c.bufferJoules() > small.ratedWatts() * 2 * DT, "buffer " + c.bufferJoules());
+        c.respec(small);
+        assertEquals(small.ratedWatts() * 2 * DT, c.bufferJoules(), 1e-9);
+        assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), 1e-9);
+        assertEquals(10, c.ratedJoulesPerTick(), 1e-12);
+        c.respec(big);
+        c.takeJoules(c.ratedJoulesPerTick());
+        assertEquals(400, plan(c, ohms), 1e-6);
+        // other faces, signals or kind: a different machine, not a respec
+        MachineSpec moved = MachineSpec.consumer(Tier.V50).ratedWatts(400).onBrownout(Brownout.SLOW).power(RelativeFace.RIGHT).build();
+        String m = assertThrows(IllegalArgumentException.class, () -> c.respec(moved)).getMessage();
+        assertTrue(m.contains("power faces"), m);
+        assertThrows(IllegalArgumentException.class, () -> c.respec(MachineSpec.producer(Tier.V50).ratedWatts(400).power(RelativeFace.LEFT).build()));
+    }
+
+    /** A snapshot taken back on a fresh core: buffer (booked as delivered), heat, a trip in its cooldown, the last trip. */
+    @Test
+    void snapshotRestores() {
+        MachineSpec hot = MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build();
+        MachineCore c = new MachineCore(hot);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 50, ohms);
+        c.takeJoules(5);
+        plan(c, ohms);
+        step(c, 50, ohms);
+        step(c, 70, ohms);  // overvoltage trip
+        MachineCore.Saved s = c.snapshot();
+        assertEquals(MachineState.OVERVOLTAGE_TRIPPED, s.state());
+        MachineCore d = new MachineCore(hot);
+        d.restore(s);
+        assertEquals(s, d.snapshot());
+        assertEquals(MachineState.OVERVOLTAGE_TRIPPED, d.state());
+        assertEquals(d.joulesIn(), d.joulesOut() + d.bufferJoules() + d.joulesLost(), 1e-12);
+        d.afterStep(50, 0);
+        assertThrows(IllegalStateException.class, () -> d.restore(s));
+    }
+
+    /** A burnt core repaired by its host starts again UNPOWERED and runs once the line holds. */
+    @Test
+    void repairUnburns() {
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build());
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        step(c, 70, ohms);
+        assertTrue(c.burnt());
+        c.repair();
+        assertFalse(c.burnt());
+        powerUp(c, 50, ohms);
+        assertTrue(c.lastTrip().orElseThrow().burns(), "the last trip is kept");
+    }
 }

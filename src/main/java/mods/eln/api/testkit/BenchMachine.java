@@ -149,6 +149,12 @@ public final class BenchMachine implements Machine {
     }
 
     @Override
+    public void respec(MachineSpec spec) {
+        bench.checkThread();
+        core.respec(spec);
+    }
+
+    @Override
     public MachineView view() {
         return new ReadOnlyView(core);
     }

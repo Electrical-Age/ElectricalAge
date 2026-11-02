@@ -39,6 +39,8 @@ import java.util.Map;
 public abstract class TransparentNodeElement implements GhostObserver, IPlayer, INodeElement, IBurnable {
 
     public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
+    /** Run each tick before the electrical step (Simulator's slow pre-processes), e.g. to plan the step's loads. */
+    public ArrayList<IProcess> slowPreProcessList = new ArrayList<IProcess>(1);
 
     public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
     public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
@@ -66,6 +68,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         if (node != null && node.isDestructing()) return;
         
         Eln.simulator.addAllSlowProcess(slowProcessList);
+        for (IProcess p : slowPreProcessList) Eln.simulator.addSlowPreProcess(p);
 
         Eln.simulator.addAllElectricalComponent(electricalComponentList);
         for (State load : electricalLoadList) Eln.simulator.addElectricalLoad(load);
@@ -83,6 +86,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public void disconnectJob() {
         Eln.simulator.removeAllSlowProcess(slowProcessList);
+        for (IProcess p : slowPreProcessList) Eln.simulator.removeSlowPreProcess(p);
 
         Eln.simulator.removeAllElectricalComponent(electricalComponentList);
         for (State load : electricalLoadList) Eln.simulator.removeElectricalLoad(load);
@@ -368,7 +372,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         }
 
         INBTTReady.readAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
-            slowProcessList, electricalProcessList, thermalFastProcessList);
+            slowProcessList, electricalProcessList, thermalFastProcessList, slowPreProcessList);
 
         byte b = nbt.getByteOr("others", (byte) 0);
         front = Direction.fromInt(b & 0x7);
@@ -390,7 +394,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         }
 
         INBTTReady.writeAll(nbt, electricalLoadList, thermalLoadList, electricalComponentList,
-            slowProcessList, electricalProcessList, thermalFastProcessList);
+            slowProcessList, electricalProcessList, thermalFastProcessList, slowPreProcessList);
 
 
         nbt.putByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));

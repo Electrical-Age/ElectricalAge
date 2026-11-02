@@ -118,6 +118,38 @@ public class MachineCorePropertyTest {
         });
     }
 
+    /**
+     * A respec part way (an upgrade fitted or taken out: rated watts times 0.2..5) keeps the books exact and the
+     * buffer within the new size, and the draw under the new caps from the next plan on.
+     */
+    @Property
+    void respecConservesEnergy(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history,
+                               @ForAll @DoubleRange(min = 0.2, max = 5) double factor) {
+        MachineSpec.Builder b = MachineSpec.consumer(spec.nominalVolts()).ratedWatts(spec.ratedWatts() * factor)
+            .idleWatts(spec.idleWatts()).tripCooldownSeconds(spec.tripCooldownSeconds());
+        if (spec.brownout() == Brownout.SLOW) b.onBrownout(Brownout.SLOW);
+        else b.minVoltageRatio(spec.minVoltageRatio());
+        spec.thermal().ifPresent(t -> b.heatCapacityJPerK(t.heatCapacityJPerK()).heatLossWPerK(t.heatLossWPerK()).overheatCelsius(t.overheatCelsius()));
+        if (spec.idleWatts() >= spec.ratedWatts() * factor) return; // (not a valid spec)
+        MachineSpec next = b.build();
+        int at = history.size() / 2;
+        MachineCore c = new MachineCore(spec);
+        double ohms = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < history.size(); i++) {
+            if (i == at) c.respec(next);
+            Tick t = history.get(i);
+            double u = t.ratio() * spec.nominalVolts();
+            c.afterStep(u, Double.isInfinite(ohms) ? 0 : u * u / ohms * DT);
+            act(c, t);
+            double p = c.beforeStep();
+            ohms = c.loadOhms();
+            double eps = 1e-9 * (1 + c.joulesIn());
+            assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), eps, "tick " + i);
+            assertTrue(c.bufferJoules() >= 0 && c.bufferJoules() <= c.bufferCapacityJoules() * (1 + 1e-12), "tick " + i);
+            assertTrue(p <= c.spec().ratedWatts() * (1 + 1e-9), "tick " + i + ": " + p + " W over rated " + c.spec().ratedWatts());
+        }
+    }
+
     @Property
     void consumerDrawStaysUnderCaps(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
         runConsumer(spec, history, (i, c, state, u, got, p) -> {

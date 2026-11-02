@@ -57,6 +57,13 @@ public interface Machine extends MachineView {
     /** Calls listener on the server thread whenever the machine trips, once per trip. */
     void onTrip(Consumer<TripCause> listener);
 
+    /**
+     * Swaps in a spec with other ratings while the machine runs, for upgrades and speed changes (a booster fitted):
+     * ratings and protections may differ, kind, faces, signals and bus may not (else IllegalArgumentException). The
+     * next step is planned from the new ratings; a buffer over the new size keeps only what fits.
+     */
+    void respec(MachineSpec spec);
+
     /** A read-only view of this machine, safe to hand to other code. */
     MachineView view();
 }

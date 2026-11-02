@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * most a quarter of a tick's rated work (held back a second when the line can't keep up), but never more than the buffer's
  * room, and none without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle
  * watts only. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
- * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times.
+ * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times (for a producer too).
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
  * queue holds energy (and SOURCE_HOLD_TICKS after, feeding nothing), behind the droop resistance 0.05 U_nom^2 / rated (1.05 U_nom open, rated watts at U_nom);
@@ -81,11 +81,12 @@ public final class MachineCore implements MachineView {
     /** Above this Thevenin resistance (ohm) nothing is connected to a source. */
     static final double OPEN_OHMS = 1e18;
 
-    private final MachineSpec spec;
     private final boolean producer;
-    private final double uNom, ratedJoulesPerTick, capacity, workWatts, floor, recoveryRatio;
-    private final int cooldownTicks;
-    private final MachineSpec.Thermal thermal;
+    // from the spec (respec changes them)
+    private MachineSpec spec;
+    private double uNom, ratedJoulesPerTick, capacity, workWatts, floor, recoveryRatio;
+    private int cooldownTicks;
+    private MachineSpec.Thermal thermal;
     private final List<Consumer<TripCause>> listeners = new ArrayList<>();
 
     private double volts, amps, watts, buffer, heatPending;
@@ -107,8 +108,12 @@ public final class MachineCore implements MachineView {
     private double joulesIn, joulesOut, joulesLost;
 
     public MachineCore(MachineSpec spec) {
-        this.spec = spec;
         producer = spec.kind() == MachineSpec.Kind.PRODUCER;
+        derive(spec);
+    }
+
+    private void derive(MachineSpec spec) {
+        this.spec = spec;
         uNom = spec.nominalVolts();
         workWatts = spec.ratedWatts() - spec.idleWatts();
         ratedJoulesPerTick = workWatts * TICK_SECONDS;
@@ -117,6 +122,76 @@ public final class MachineCore implements MachineView {
         floor = Math.max(UNPOWERED_RATIO, spec.minVoltageRatio()); // Brownout.SLOW: none above UNPOWERED
         recoveryRatio = Math.min(floor + UNDERVOLTAGE_BAND, (1 + floor) / 2);
         thermal = spec.thermal().orElse(null);
+    }
+
+    /**
+     * Swaps in a spec with other ratings (see Machine.respec): same kind, faces, signals and bus, else
+     * IllegalArgumentException. State, books and heat carry over; a buffer over the new capacity is cut to it and
+     * the excess booked as lost (a consumer's as heat).
+     */
+    public void respec(MachineSpec next) {
+        java.util.Objects.requireNonNull(next, "spec");
+        List<String> differs = new ArrayList<>();
+        if (next.kind() != spec.kind()) differs.add("kind");
+        if (!next.powerFaces().equals(spec.powerFaces())) differs.add("power faces");
+        if (!next.signalsIn().equals(spec.signalsIn())) differs.add("signal inputs");
+        if (!next.signalsOut().equals(spec.signalsOut())) differs.add("signal outputs");
+        if (!next.busFace().equals(spec.busFace())) differs.add("bus face");
+        if (!differs.isEmpty())
+            throw new IllegalArgumentException("respec changes ratings only; " + next + " differs from " + spec
+                + " in its " + String.join(", ", differs));
+        boolean hadHeat = thermal != null;
+        derive(next);
+        if (thermal == null || !hadHeat) celsius = ambientCelsius;
+        if (state == MachineState.OVERHEAT_TRIPPED && thermal == null) { // no heat model left to cool down
+            state = MachineState.UNPOWERED;
+            tripTimer = 0;
+        }
+        if (buffer > capacity) {
+            double excess = buffer - capacity;
+            buffer = capacity;
+            joulesLost += excess;
+            if (!producer) heatPending += excess;
+        }
+    }
+
+    /** What a host saves of a machine (see snapshot()); state is only kept when it is a trip. */
+    public record Saved(double bufferJoules, double celsius, MachineState state, int tripTicks, TripCause lastTrip) {
+    }
+
+    /** The machine's lasting state: its buffer, temperature, a trip in progress and the last trip. */
+    public Saved snapshot() {
+        return new Saved(buffer, celsius, state.tripped() ? state : MachineState.UNPOWERED,
+            state.tripped() ? tripTimer : 0, lastTrip);
+    }
+
+    /**
+     * On a fresh core (no step yet, else IllegalStateException): takes back a snapshot. The buffer is clamped to the
+     * spec's capacity and booked as delivered (or given), so the books stay exact; a trip resumes its cooldown.
+     */
+    public void restore(Saved saved) {
+        if (ticks > 0) throw new IllegalStateException("restore on a core that has already stepped");
+        double b = Double.isFinite(saved.bufferJoules()) ? Math.min(saved.bufferJoules(), capacity) : 0;
+        buffer = producer ? b : Math.max(0, b);
+        joulesIn += buffer;
+        if (thermal != null && Double.isFinite(saved.celsius())) celsius = saved.celsius();
+        if (saved.state() != null && saved.state().tripped()
+            && (saved.state() != MachineState.OVERHEAT_TRIPPED || thermal != null)) {
+            state = saved.state();
+            tripTimer = Math.max(0, Math.min(saved.tripTicks(), cooldownTicks));
+        }
+        lastTrip = saved.lastTrip();
+    }
+
+    /**
+     * The host repaired a burnt machine, or called its burn off (another failure in the circuit went first): it is
+     * no longer burnt and starts again UNPOWERED. lastTrip is kept.
+     */
+    public void repair() {
+        burnt = false;
+        state = MachineState.UNPOWERED;
+        tripTimer = 0;
+        upTimer = 0;
     }
 
     // ---- the circuit side
@@ -353,7 +428,10 @@ public final class MachineCore implements MachineView {
         return joulesOut;
     }
 
-    /** Consumer: delivered joules that never reached the buffer (idle watts, and what didn't fit), J. Producer: 0. */
+    /**
+     * Consumer: delivered joules that never reached the buffer (idle watts, what didn't fit, what a respec cut), J.
+     * Producer: given joules a respec cut from the queue.
+     */
     public double joulesLost() {
         return joulesLost;
     }
