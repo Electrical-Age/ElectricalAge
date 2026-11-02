@@ -1,9 +1,50 @@
 {
-  "multipart": [
-    {
-      "apply": {
-        "model": "eln:block/particle_iron"
-      }
+  "variants": {
+    "facing=down,lit=false": {
+      "model": "eln:block/api_test_machine",
+      "x": 90
+    },
+    "facing=down,lit=true": {
+      "model": "eln:block/api_test_machine_on",
+      "x": 90
+    },
+    "facing=east,lit=false": {
+      "model": "eln:block/api_test_machine",
+      "y": 90
+    },
+    "facing=east,lit=true": {
+      "model": "eln:block/api_test_machine_on",
+      "y": 90
+    },
+    "facing=north,lit=false": {
+      "model": "eln:block/api_test_machine"
+    },
+    "facing=north,lit=true": {
+      "model": "eln:block/api_test_machine_on"
+    },
+    "facing=south,lit=false": {
+      "model": "eln:block/api_test_machine",
+      "y": 180
+    },
+    "facing=south,lit=true": {
+      "model": "eln:block/api_test_machine_on",
+      "y": 180
+    },
+    "facing=up,lit=false": {
+      "model": "eln:block/api_test_machine",
+      "x": 270
+    },
+    "facing=up,lit=true": {
+      "model": "eln:block/api_test_machine_on",
+      "x": 270
+    },
+    "facing=west,lit=false": {
+      "model": "eln:block/api_test_machine",
+      "y": 270
+    },
+    "facing=west,lit=true": {
+      "model": "eln:block/api_test_machine_on",
+      "y": 270
     }
-  ]
+  }
 }

@@ -1,4 +1,4 @@
-// 26.3	2026-11-02T18:27:47.004641438	eln-global/EA models
+// 26.3	2026-11-02T19:48:37.462212972	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -31,7 +31,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/800v_defence_turret.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/8kw_generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/alloy_tank.json
-6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/api_test_machine.json
+520b0b2c6c9962d6459b9e0a4797499f5d22a421 assets/eln/blockstates/api_test_machine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/auto_miner.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/boiler.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacitor_bank.json
@@ -468,6 +468,8 @@ d056d8b24efebb6a5a3aefe2ef3dc43d87e0c5e1 assets/eln/items/x_ray_scanner.json
 ab94f8cbc90d170de011be7f9b4d263a590215a6 assets/eln/items/xnor_chip.json
 71cba1b1b77149026a0a839fe18e41aba9e722de assets/eln/items/xor_chip.json
 6c25b292ec9861f7c60a7a4deb48c0375dfd8184 assets/eln/items/yellow_brush.json
+1d77b5969674da0287f434d1159dec9bc0cc2355 assets/eln/models/block/api_test_machine.json
+2ae19023b38d074494402d987921a1c51837351e assets/eln/models/block/api_test_machine_on.json
 249b572af77b493f1d8fb801a3767a40324d368f assets/eln/models/block/cinnabar_ore.json
 a7eed2c81e04065f87305b8d7c30df425fc18349 assets/eln/models/block/deepslate_lead_ore.json
 0d8d961cba304aa34406e1126335beec99aff252 assets/eln/models/block/lead_ore.json

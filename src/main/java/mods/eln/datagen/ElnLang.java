@@ -130,6 +130,7 @@ public class ElnLang extends LanguageProvider {
         add(ElnRegistry.VOXEL_NODE_WALL.get(), "Pipes and Cables");
         add(ElnRegistry.GHOST_BLOCK.get(), "Electrical Age Multiblock Part");
         add(ElnRegistry.LIGHT_BLOCK.get(), "Electrical Age Light");
+        add(mods.eln.apitest.ApiTestMachines.BLOCK.get(), "API Test Machine");   // (the GameTests' hidden fixture)
         for (var b : ElnRegistry.TRANSPARENT_BLOCKS) {
             var d = b.get().descriptor;
             add(b.get(), d.name);
