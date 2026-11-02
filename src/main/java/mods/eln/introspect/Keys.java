@@ -16,7 +16,7 @@ public final class Keys {
 
     // spec
     public static final String NOMINAL_VOLTAGE = "nominal_voltage", RATED_POWER = "rated_power", IDLE_POWER = "idle_power",
-        MIN_VOLTAGE_RATIO = "min_voltage_ratio", MAX_SPEED = "max_speed", TRAVEL_MIN = "travel_min", TRAVEL_MAX = "travel_max";
+        MIN_VOLTAGE_RATIO = "min_voltage_ratio", MAX_SPEED = "max_speed", ACCELERATION = "acceleration", EFFICIENCY = "efficiency", TRAVEL_MIN = "travel_min", TRAVEL_MAX = "travel_max";
 
     // state
     public static final String STATUS = "status", VOLTAGE = "voltage", VOLTAGE_RATIO = "voltage_ratio", CURRENT = "current",
@@ -24,7 +24,7 @@ public final class Keys {
         TEMPERATURE = "temperature", ENABLED = "enabled", TARGET = "target", SPEED = "speed", LOAD = "load";
 
     // sync (both halves)
-    public static final String POSITION = "position", VELOCITY = "velocity", SEGMENT_START = "segment_start";
+    public static final String POSITION = "position", VELOCITY = "velocity", SEGMENT_START = "segment_start", ELAPSED = "elapsed";
 
     // electrical / thermal entries
     public static final String U = "u", I = "i", T = "t", P = "p";
