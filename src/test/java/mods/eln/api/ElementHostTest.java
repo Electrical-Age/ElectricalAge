@@ -312,6 +312,50 @@ public class ElementHostTest {
         assertEquals(MachineState.UNPOWERED, m.state());
     }
 
+    /** find() picks the machine out of an element's slow processes; saveState and loadState carry its buffer. */
+    @Test
+    void findAndStateRoundTrip() {
+        Element e = new Element();
+        assertNull(ElementHost.find(e.slow));
+        ElementHost m = e.machine(MACERATOR);
+        assertSame(m, ElementHost.find(e.slow));
+        m.core().restore(new MachineCore.Saved(7, 20, MachineState.RUNNING, 0, null));
+        CompoundTag t = new CompoundTag();
+        m.saveState(t);
+        assertEquals(7, t.getDoubleOr(ElementHost.NBT_PREFIX + "bufferJ", 0), 1e-12);
+        Element f = new Element();
+        ElementHost n = f.machine(MACERATOR);
+        n.loadState(t);
+        f.slowPre.get(0).process(0.05);   // (a loaded state is applied at the first step)
+        assertEquals(7, n.bufferJoules(), 1e-12);
+    }
+
+    /** A machine given a bus port reads and writes it (checked); without one, bus() says why. */
+    @Test
+    void busOnAPort() {
+        mods.eln.bus.BusNet.clear();
+        try {
+            Element e = new Element();
+            mods.eln.bus.BusPort port = new mods.eln.bus.BusPort(), other = new mods.eln.bus.BusPort();
+            MachineSpec spec = MachineSpec.consumer(Tier.V50).ratedWatts(100).bus(RelativeFace.BACK).build();
+            ElementHost m = new ElementHost(spec, e, port, e.loads, e.components, e.slow, e.slowPre);
+            mods.eln.bus.BusNet.link(port, other);
+            mods.eln.bus.BusNet.tick();
+            m.bus().write(3, 0.5);
+            assertEquals(1 << 3, port.claims());
+            mods.eln.bus.BusNet.tick();
+            assertEquals(0.5, other.read(3), 1e-12);
+            assertEquals(0.5, m.bus().read(3), 1e-12);
+            assertThrows(IllegalArgumentException.class, () -> m.bus().write(16, 0));
+            assertThrows(IllegalArgumentException.class, () -> m.bus().write(0, 2));
+            Element g = new Element();
+            ElementHost none = new ElementHost(spec, g, null, g.loads, g.components, g.slow, g.slowPre);
+            assertThrows(IllegalStateException.class, none::bus);
+        } finally {
+            mods.eln.bus.BusNet.clear();
+        }
+    }
+
     /** The element's NBT pass: every INBTTReady entry of its lists. */
     static final class INBT {
         static void write(Element e, CompoundTag t) {

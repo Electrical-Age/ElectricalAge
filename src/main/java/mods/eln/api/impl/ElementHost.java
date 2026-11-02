@@ -52,6 +52,7 @@ public final class ElementHost implements ElementMachine {
     private final NbtElectricalLoad[] inputs, outputLoads;
     private final NbtElectricalGateOutputProcess[] outputs;
     private final MachineView view;
+    private final MachineBus bus;
     private final AfterStep afterStep = new AfterStep();
     private final IProcess beforeStep = dt -> {
         applySaved();
@@ -62,11 +63,19 @@ public final class ElementHost implements ElementMachine {
 
     /**
      * Builds the machine and adds its parts: loads and components to the element's lists, afterStep first in slow,
-     * beforeStep to slowPre. Throws IllegalStateException if slow already holds a machine (one per element).
+     * beforeStep to slowPre. Throws IllegalStateException if slow already holds a machine (one per element). No bus
+     * port: bus() throws.
      */
     public ElementHost(MachineSpec spec, ElementSite site, List<? super NbtElectricalLoad> loads,
                        List<? super Component> components, List<IProcess> slow, List<IProcess> slowPre) {
+        this(spec, site, null, loads, components, slow, slowPre);
+    }
+
+    /** As above, with busPort as the machine's bus (used when the spec has a bus face; null: none). */
+    public ElementHost(MachineSpec spec, ElementSite site, mods.eln.bus.BusPort busPort, List<? super NbtElectricalLoad> loads,
+                       List<? super Component> components, List<IProcess> slow, List<IProcess> slowPre) {
         this.site = Objects.requireNonNull(site, "site");
+        bus = busPort != null && spec.busFace().isPresent() ? new PortBus(busPort) : null;
         for (IProcess p : slow)
             if (p instanceof AfterStep) throw new IllegalStateException("one machine per element: this one already has " + ((AfterStep) p).host().spec());
         core = new MachineCore(Objects.requireNonNull(spec, "spec"));
@@ -100,6 +109,22 @@ public final class ElementHost implements ElementMachine {
         for (NbtElectricalGateOutputProcess o : outputs) components.add(o);
         slow.add(0, afterStep);
         slowPre.add(beforeStep);
+    }
+
+    /** The machine in slow (an element's slow processes), or null if it has none. */
+    public static ElementHost find(List<IProcess> slow) {
+        for (IProcess p : slow) if (p instanceof AfterStep a) return a.host();
+        return null;
+    }
+
+    /** Writes the machine's saved state into nbt under NBT_PREFIX (as the element's NBT has it). */
+    public void saveState(CompoundTag nbt) {
+        afterStep.writeToNBT(nbt, "");
+    }
+
+    /** Reads a state saveState wrote; applied at the first step, as a loaded element's is. Ignored once running. */
+    public void loadState(CompoundTag nbt) {
+        afterStep.readFromNBT(nbt, "");
     }
 
     /** The core, for tests and the host's own views. */
@@ -361,6 +386,9 @@ public final class ElementHost implements ElementMachine {
     @Override
     public MachineBus bus() {
         site.checkThread();
+        if (bus != null) return bus;
+        if (core.spec().busFace().isEmpty())
+            throw new IllegalStateException(core.spec() + " has no bus face: add .bus(face) to its spec");
         throw new IllegalStateException(core.spec() + " has no bus port here: an element machine has none yet");
     }
 

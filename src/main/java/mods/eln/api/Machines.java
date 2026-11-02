@@ -4,14 +4,13 @@ import mods.eln.Eln;
 import mods.eln.api.impl.ElementHost;
 import mods.eln.api.impl.ElementSite;
 import mods.eln.api.impl.MnaMachine;
+import mods.eln.api.impl.ServerThread;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.sim.process.destruct.Failure;
 import mods.eln.sim.process.destruct.FailureCause;
-import net.minecraft.server.MinecraftServer;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.Objects;
 
@@ -54,10 +53,7 @@ public final class Machines {
 
             @Override
             public void checkThread() {
-                MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-                if (server != null && !server.isSameThread())
-                    throw new IllegalStateException("machine called from " + Thread.currentThread().getName()
-                        + "; only the server thread may");
+                ServerThread.check();
             }
 
             @Override
