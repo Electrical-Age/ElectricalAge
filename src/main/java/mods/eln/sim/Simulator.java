@@ -378,6 +378,12 @@ public class Simulator /* ,IPacketHandler */ {
 
     public boolean pleaseCrash = false;
 
+    /**
+     * Does tick() step the world's field buses (BusNet, static)? The game's simulator does; a private one (the Machine
+     * API's test bench, which may run inside a GameTest) must not, or the world's buses would advance out of turn.
+     */
+    public boolean tickFieldBuses = true;
+
     /** One server tick (50 ms). 26.x: called by Eln's ServerTickEvent.Pre listener (1.12: START phase). */
     public void tick() {
         if (pleaseCrash) throw new StackOverflowError();
@@ -387,7 +393,7 @@ public class Simulator /* ,IPacketHandler */ {
         long e0 = electricalNsStack, tf0 = thermalFastNsStack, ts0 = thermalSlowNsStack;
 
         // field buses first: last tick's writes become this tick's values (inline: init() and stop() clear the lists)
-        mods.eln.bus.BusNet.tick();
+        if (tickFieldBuses) mods.eln.bus.BusNet.tick();
 
         for (Object o : slowPreProcessList.toArray()) {
             IProcess process = (IProcess) o;

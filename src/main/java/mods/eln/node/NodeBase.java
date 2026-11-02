@@ -309,6 +309,17 @@ public abstract class NodeBase {
 
     public abstract ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB);
 
+    /**
+     * The load on side at lrdu for a connection of kind mask (maskElectricalPower, maskElectricalGate...): the
+     * two-argument load when the side's connection mask shares a kind bit (the low 16, as compareConnectionMask) with
+     * mask, else null. A node with several loads on one position (one per kind or colour) overrides it. Used to reach
+     * an existing port from outside (the Machine API's PortRef).
+     */
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu, int mask) {
+        if ((getSideConnectionMask(side, lrdu) & mask & 0xFFFF) == 0) return null;
+        return getElectricalLoad(side, lrdu);
+    }
+
     public void checkCanStay(boolean onCreate) {
 
     }

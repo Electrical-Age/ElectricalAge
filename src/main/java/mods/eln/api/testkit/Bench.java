@@ -27,7 +27,7 @@ public final class Bench {
     private final ElectricalLoad bus = new ElectricalLoad();
     private ElectricalLoad emf;
     private VoltageSource supply;
-    private Resistor feed;
+    private Resistor feed, load;
     private double supplyOhms, lineOhms;
     private final List<BenchMachine> machines = new ArrayList<>();
     private final double[] busNow = new double[16], busNext = new double[16];
@@ -35,6 +35,7 @@ public final class Bench {
     private long ticks;
 
     Bench() {
+        sim.tickFieldBuses = false; // (the world's buses are not the bench's: it may run inside a GameTest)
         sim.init();
         sim.addElectricalLoad(bus);
         Resistor leak = new Resistor(bus, null); // 1 Gohm to ground, so a bus with nothing on it still solves
@@ -74,6 +75,27 @@ public final class Bench {
         lineOhms = ohms;
         if (feed != null) feed.setR(supplyOhms + lineOhms);
         return this;
+    }
+
+    /**
+     * A resistive load of ohms (more than 0) from the machines' node to ground, for producers to feed; infinite
+     * removes it. Sets the one there is.
+     */
+    public Bench load(double ohms) {
+        checkThread();
+        if (!(ohms > 0)) throw new IllegalArgumentException("load ohms must be positive (infinite: none), got " + ohms);
+        if (load == null) {
+            load = new Resistor(bus, null);
+            sim.addElectricalComponent(load);
+        }
+        if (Double.isInfinite(ohms)) load.highImpedance();
+        else load.setR(ohms);
+        return this;
+    }
+
+    /** Power into the load of load(ohms) in the last step, W (0 without one). */
+    public double loadWatts() {
+        return load == null ? 0 : load.getP();
     }
 
     /**
