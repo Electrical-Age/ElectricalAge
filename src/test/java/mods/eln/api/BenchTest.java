@@ -140,6 +140,36 @@ public class BenchTest {
         assertTrue(b.volts() > 199 && b.volts() < 210, "line " + b.volts());
     }
 
+    /**
+     * A dynamo given 40 J a tick (800 W) feeding a mill that asks 50 J a tick (1000 W, plus 20 W idle): with
+     * Brownout.STOP (the default) the line falls under the floor and the mill stops and restarts; with
+     * Brownout.SLOW it settles on what the dynamo gives and takes all of it.
+     */
+    @Test
+    void starvedProducerStopOrSlow() {
+        for (Brownout mode : Brownout.values()) {
+            Bench b = ElnTestKit.bench();
+            BenchMachine dynamo = b.add(DYNAMO).owner(m -> m.giveJoules(40));
+            Taker t = new Taker(50);
+            MachineSpec.Builder spec = MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20);
+            BenchMachine mill = b.add(spec.onBrownout(mode).build()).owner(t::tick);
+            b.ticks(200);
+            List<String> states = b.trace().lines().skip(100).map(l -> l.substring(l.lastIndexOf(' ') + 1)).toList();
+            double late = t.got.subList(100, 200).stream().mapToDouble(Double::doubleValue).sum();
+            if (mode == Brownout.STOP) {
+                assertTrue(states.contains("UNDERVOLTAGE") && states.contains("RUNNING"), "stops and restarts: " + states);
+            } else {
+                assertTrue(states.stream().allMatch("RUNNING"::equals), "keeps running: " + states);
+                assertTrue(b.volts() < 150, "on a sagging line: " + b.volts());
+                // the dynamo's energy reaches the owner, less the idle watts and the droop loss (about 7% at this current)
+                double most = (800 - 20) * 0.05 * 100;
+                assertTrue(late <= most && late > 0.9 * most, "taken in the last 100 ticks: " + late + " of " + most);
+            }
+            assertTrue(dynamo.joulesOut() <= dynamo.joulesIn() + 1e-6);
+            assertTrue(mill.joulesIn() <= dynamo.joulesOut());
+        }
+    }
+
     /** Two producers in parallel (a singular matrix if they were ideal sources) share a load bigger than either's rating. */
     @Test
     void parallelProducersShare() {

@@ -14,7 +14,8 @@ public enum MachineState {
      */
     UNPOWERED,
     /**
-     * Line under the spec's minVoltageRatio: idle watts only, takes return 0. It runs again once the line has been
+     * Line under the spec's minVoltageRatio (Brownout.STOP, the default; a Brownout.SLOW machine never is): idle
+     * watts only, takes return 0. It runs again once the line has been
      * 5% of nominal above that floor (or halfway from it to nominal, if nearer) for half a second, so a line that
      * sags under the machine's own load doesn't flip it every tick.
      */

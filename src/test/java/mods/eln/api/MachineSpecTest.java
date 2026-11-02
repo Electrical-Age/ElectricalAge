@@ -36,6 +36,17 @@ public class MachineSpecTest {
     }
 
     @Test
+    void brownout() {
+        assertEquals(Brownout.STOP, MachineSpec.consumer(Tier.V200).ratedWatts(100).build().brownout());
+        MachineSpec slow = MachineSpec.consumer(Tier.V200).ratedWatts(100).onBrownout(Brownout.SLOW).build();
+        assertEquals(Brownout.SLOW, slow.brownout());
+        assertEquals(0, slow.minVoltageRatio());
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).onBrownout(Brownout.SLOW).minVoltageRatio(0.5),
+            "minVoltageRatio is the floor of Brownout.STOP; Brownout.SLOW has none");
+        assertError(MachineSpec.producer(Tier.V200).ratedWatts(100).onBrownout(Brownout.STOP), "onBrownout is for consumers");
+    }
+
+    @Test
     void tiers() {
         assertEquals(50, Tier.V50.volts());
         assertEquals(200, Tier.V200.volts());

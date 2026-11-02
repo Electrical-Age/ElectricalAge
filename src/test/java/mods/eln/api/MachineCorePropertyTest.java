@@ -13,6 +13,7 @@ import net.jqwik.api.constraints.IntRange;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -28,7 +29,7 @@ public class MachineCorePropertyTest {
     record Tick(double ratio, int action, double share) {
     }
 
-    /** Consumers at any voltage, floors over the whole allowed range, and a heat model one time in three. */
+    /** Consumers at any voltage, floors over the whole allowed range, a heat model one time in three, Brownout.SLOW one in four. */
     @Provide
     Arbitrary<MachineSpec> consumers() {
         Arbitrary<double[]> heat = Arbitraries.frequencyOf(
@@ -37,10 +38,12 @@ public class MachineCorePropertyTest {
                 Arbitraries.doubles().between(0.1, 10), Arbitraries.doubles().between(31, 100)).as((c, k, t) -> new double[]{c, k, t})));
         return Combinators.combine(Arbitraries.doubles().between(10, 5000), Arbitraries.doubles().between(10, 20000),
                 Arbitraries.doubles().between(0, 0.5), Arbitraries.doubles().between(0.05, MachineSpec.MAX_MIN_VOLTAGE_RATIO),
-                Arbitraries.doubles().between(0.5, 4), heat)
-            .as((volts, rated, idle, floor, cool, h) -> {
+                Arbitraries.doubles().between(0.5, 4), heat, Arbitraries.integers().between(0, 3))
+            .as((volts, rated, idle, floor, cool, h, slow) -> {
                 MachineSpec.Builder b = MachineSpec.consumer(volts).ratedWatts(rated).idleWatts(idle * rated)
-                    .minVoltageRatio(floor).tripCooldownSeconds(cool);
+                    .tripCooldownSeconds(cool);
+                if (slow == 0) b.onBrownout(Brownout.SLOW);
+                else b.minVoltageRatio(floor);
                 if (h.length > 0) b.heatCapacityJPerK(h[0]).heatLossWPerK(h[1]).overheatCelsius(h[2]);
                 return b.build();
             });
@@ -188,10 +191,18 @@ public class MachineCorePropertyTest {
         });
     }
 
+    /** Brownout.SLOW never stops for undervoltage: it runs whenever the line is up, after the power-up hold. */
+    @Property
+    void slowNeverStops(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
+        if (spec.brownout() != Brownout.SLOW) return;
+        runConsumer(spec, history, (i, c, state, u, got, p) -> assertNotEquals(MachineState.UNDERVOLTAGE, state, "tick " + i));
+    }
+
     /** Once the line has held at the recovery level for UNDERVOLTAGE_RECOVERY_TICKS, the machine runs, whatever its floor. */
     @Property
     void undervoltageRecovers(@ForAll("consumers") MachineSpec spec, @ForAll("histories") List<Tick> history) {
-        double recover = Math.min(spec.minVoltageRatio() + MachineCore.UNDERVOLTAGE_BAND, (1 + spec.minVoltageRatio()) / 2);
+        double floor = Math.max(MachineCore.UNPOWERED_RATIO, spec.minVoltageRatio());
+        double recover = Math.min(floor + MachineCore.UNDERVOLTAGE_BAND, (1 + floor) / 2);
         int[] held = {0};
         runConsumer(spec, history, (i, c, state, u, got, p) -> {
             double r = u / spec.nominalVolts();

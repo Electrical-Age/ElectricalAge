@@ -77,7 +77,7 @@ public final class MachineCore implements MachineView {
 
     private final MachineSpec spec;
     private final boolean producer;
-    private final double uNom, ratedJoulesPerTick, capacity, workWatts, recoveryRatio;
+    private final double uNom, ratedJoulesPerTick, capacity, workWatts, floor, recoveryRatio;
     private final int cooldownTicks;
     private final MachineSpec.Thermal thermal;
     private final List<Consumer<TripCause>> listeners = new ArrayList<>();
@@ -107,7 +107,8 @@ public final class MachineCore implements MachineView {
         ratedJoulesPerTick = workWatts * TICK_SECONDS;
         capacity = BUFFER_TICKS * ratedJoulesPerTick;
         cooldownTicks = (int) Math.ceil(spec.tripCooldownSeconds() / TICK_SECONDS - 1e-9);
-        recoveryRatio = Math.min(spec.minVoltageRatio() + UNDERVOLTAGE_BAND, (1 + spec.minVoltageRatio()) / 2);
+        floor = Math.max(UNPOWERED_RATIO, spec.minVoltageRatio()); // Brownout.SLOW: none above UNPOWERED
+        recoveryRatio = Math.min(floor + UNDERVOLTAGE_BAND, (1 + floor) / 2);
         thermal = spec.thermal().orElse(null);
     }
 
@@ -375,7 +376,7 @@ public final class MachineCore implements MachineView {
             tripTimer = 0;
             // the cooldown proved the line: classified at once, no power-up hold
             state = r < UNPOWERED_RATIO ? MachineState.UNPOWERED
-                : r < spec.minVoltageRatio() ? MachineState.UNDERVOLTAGE : MachineState.RUNNING;
+                : r < floor ? MachineState.UNDERVOLTAGE : MachineState.RUNNING;
             upTimer = 0;
         }
         if (r > OVERVOLTAGE_RATIO) {
@@ -387,12 +388,12 @@ public final class MachineCore implements MachineView {
             state = MachineState.UNPOWERED;
             upTimer = 0;
         } else if (state == MachineState.RUNNING) {
-            if (r < spec.minVoltageRatio()) state = MachineState.UNDERVOLTAGE;
+            if (r < floor) state = MachineState.UNDERVOLTAGE;
         } else {
             // UNPOWERED or UNDERVOLTAGE: runs once the line has held up for UNDERVOLTAGE_RECOVERY_TICKS
-            double needed = state == MachineState.UNPOWERED ? spec.minVoltageRatio() : recoveryRatio;
+            double needed = state == MachineState.UNPOWERED ? floor : recoveryRatio;
             upTimer = r >= needed ? upTimer + 1 : 0;
-            if (r < spec.minVoltageRatio()) state = MachineState.UNDERVOLTAGE;
+            if (r < floor) state = MachineState.UNDERVOLTAGE;
             if (upTimer >= UNDERVOLTAGE_RECOVERY_TICKS) {
                 state = MachineState.RUNNING;
                 upTimer = 0;

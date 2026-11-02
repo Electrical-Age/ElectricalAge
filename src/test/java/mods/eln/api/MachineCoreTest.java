@@ -190,6 +190,26 @@ public class MachineCoreTest {
         assertEquals(10, d.celsius() - 20, 0.01);
     }
 
+    /** Brownout.SLOW: a 200 V machine on a 100 V line runs, on a quarter of its rated power. */
+    @Test
+    void slowRunsOnWhatArrives() {
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20)
+            .onBrownout(Brownout.SLOW).build());
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 100, ohms);
+        double got = 0;
+        for (int i = 0; i < 40; i++) {
+            got = c.takeJoules(c.ratedJoulesPerTick());
+            assertTrue(plan(c, ohms) <= 500 + 1e-9);
+            step(c, 100, ohms);
+            assertEquals(MachineState.RUNNING, c.state());
+        }
+        assertEquals((500 - 20) * DT, got, 1e-6);
+        assertEquals(0.5, c.voltageRatio(), 1e-12);
+        step(c, 1, ohms);
+        assertEquals(MachineState.UNPOWERED, c.state());
+    }
+
     /** Even with the highest floor, a sagged machine runs again once the line is back at nominal. */
     @Test
     void undervoltageRecoversWithAHighFloor() {

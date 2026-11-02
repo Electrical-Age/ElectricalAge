@@ -50,6 +50,7 @@ public final class MachineSpec {
     private final Kind kind;
     private final double nominalVolts, ratedWatts, idleWatts, minVoltageRatio, tripCooldownSeconds;
     private final boolean burnsOnOvervoltage;
+    private final Brownout brownout;
     private final Thermal thermal;
     private final Set<RelativeFace> powerFaces;
     private final List<SignalIn> signalsIn;
@@ -61,7 +62,8 @@ public final class MachineSpec {
         nominalVolts = b.nominalVolts;
         ratedWatts = b.ratedWatts;
         idleWatts = b.idleWatts;
-        minVoltageRatio = b.minVoltageRatio;
+        minVoltageRatio = b.brownout == Brownout.SLOW ? 0 : b.minVoltageRatio;
+        brownout = b.brownout;
         tripCooldownSeconds = b.tripCooldownSeconds;
         burnsOnOvervoltage = b.burnsOnOvervoltage;
         thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatCelsius) : null;
@@ -110,9 +112,14 @@ public final class MachineSpec {
         return idleWatts;
     }
 
-    /** Below this share of nominal volts the machine is UNDERVOLTAGE. */
+    /** Below this share of nominal volts the machine is UNDERVOLTAGE; 0 with Brownout.SLOW (no floor). */
     public double minVoltageRatio() {
         return minVoltageRatio;
+    }
+
+    /** What the machine does when its line sags; STOP for producers. */
+    public Brownout brownout() {
+        return brownout;
     }
 
     /** How long a trip waits, once its cause is gone, before it resets, s. */
@@ -159,7 +166,9 @@ public final class MachineSpec {
         private final double nominalVolts;
         private double ratedWatts, idleWatts = 0, minVoltageRatio = 0.75, tripCooldownSeconds = 3;
         private double heatCapacityJPerK = Double.NaN, heatLossWPerK = Double.NaN, overheatCelsius = Double.NaN;
-        private boolean ratedSet, idleSet, heatSet, burnsOnOvervoltage;
+        private boolean ratedSet, idleSet, minSet, heatSet, burnsOnOvervoltage;
+        private Brownout brownout = Brownout.STOP;
+        private boolean brownoutSet;
         private Set<RelativeFace> power;
         private boolean powerTwice, busTwice;
         private final List<SignalIn> signalsIn = new ArrayList<>();
@@ -188,6 +197,14 @@ public final class MachineSpec {
         /** The undervoltage floor as a share of nominal volts, above 0 and at most 0.95; default 0.75. */
         public Builder minVoltageRatio(double ratio) {
             minVoltageRatio = ratio;
+            minSet = true;
+            return this;
+        }
+
+        /** What a consumer does when its line sags: Brownout.STOP (the default) or Brownout.SLOW. */
+        public Builder onBrownout(Brownout b) {
+            brownout = Objects.requireNonNull(b, "brownout");
+            brownoutSet = true;
             return this;
         }
 
@@ -275,6 +292,10 @@ public final class MachineSpec {
                 errors.add("idleWatts must be 0 or more and finite, got " + idleWatts);
             else if (ratedOk && idleWatts >= ratedWatts)
                 errors.add("idleWatts (" + idleWatts + ") must be less than ratedWatts (" + ratedWatts + ")");
+            if (kind == Kind.PRODUCER && brownoutSet)
+                errors.add("onBrownout is for consumers; a producer's output only stops on a trip");
+            if (brownout == Brownout.SLOW && minSet)
+                errors.add("minVoltageRatio is the floor of Brownout.STOP; Brownout.SLOW has none");
             if (!(minVoltageRatio > 0 && minVoltageRatio <= MAX_MIN_VOLTAGE_RATIO))
                 errors.add("minVoltageRatio must be above 0 and at most " + MAX_MIN_VOLTAGE_RATIO
                     + " (a line sags under load), got " + minVoltageRatio);
