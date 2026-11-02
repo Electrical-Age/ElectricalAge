@@ -184,6 +184,10 @@ public class BenchTest {
         assertThrows(IllegalStateException.class, m::bus);
         assertThrows(IllegalStateException.class, () -> m.giveJoules(1));
         assertFalse(m.view() instanceof Machine);
+        assertFalse(m.view() instanceof mods.eln.api.impl.MachineCore);
+        // nothing public on the view hands back what it reads
+        for (java.lang.reflect.Method x : m.view().getClass().getMethods())
+            assertFalse(MachineView.class.isAssignableFrom(x.getReturnType()), x.toString());
         AtomicReference<Throwable> off = new AtomicReference<>();
         Thread th = new Thread(() -> {
             try {

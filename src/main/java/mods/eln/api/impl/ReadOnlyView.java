@@ -7,8 +7,14 @@ import mods.eln.api.TripCause;
 
 import java.util.Optional;
 
-/** A MachineView that only reads another, so the view handed out can't be cast back to something that writes. */
-public record ReadOnlyView(MachineView of) implements MachineView {
+/** A MachineView that only reads another and never exposes it, so the view handed out can't be used to write. */
+public final class ReadOnlyView implements MachineView {
+    private final MachineView of;
+
+    public ReadOnlyView(MachineView of) {
+        this.of = java.util.Objects.requireNonNull(of, "of");
+    }
+
     @Override
     public MachineSpec spec() {
         return of.spec();
