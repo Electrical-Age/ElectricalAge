@@ -59,7 +59,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     public ElevatorCar(EntityType<? extends ElevatorCar> type, Level level) {
         super(type, level);
         panel = new ElevatorPanel(this);
-        panel.setId(getId() + 1);   // (as the client numbers it: recreateFromPacket)
+        // (no panel id here: a client's entity has none yet at construction, and getId() throws; setId and
+        // recreateFromPacket number the panel)
         setNoGravity(true);
         blocksBuilding = true;
     }
