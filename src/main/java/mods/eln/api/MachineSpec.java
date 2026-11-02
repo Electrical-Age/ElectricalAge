@@ -32,7 +32,8 @@ public final class MachineSpec {
 
     /**
      * A first-order heat model: heat capacity (J/K), loss to ambient (W/K) and the temperature that trips the
-     * machine (degrees C). The time constant is heatCapacityJperK / lossWperK seconds.
+     * machine (degrees C). The time constant is heatCapacityJperK / lossWperK seconds. Heat in: a consumer's idle
+     * watts and the delivered energy its buffer couldn't hold, a producer's droop loss, and Machine.heatJoules.
      */
     public record Thermal(double heatCapacityJperK, double lossWperK, double tripCelsius) {
     }
