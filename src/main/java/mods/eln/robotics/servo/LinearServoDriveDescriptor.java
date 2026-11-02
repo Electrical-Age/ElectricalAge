@@ -38,10 +38,10 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
     public static final double HEAT_CAPACITY_J_PER_K = 4000, HEAT_LOSS_W_PER_K = 4, OVERHEAT_CELSIUS = 100;
     /**
      * A move's top speed follows the line when its limit differs by this share, at most every RETARGET_TICKS; it
-     * speeds up only when that costs nothing or SPARE_TICKS of rated work have piled up in the machine's buffer
-     * (so a starved supply doesn't make it surge and fall back).
+     * speeds up only when that costs nothing or the machine's buffer is SPARE_SHARE full (energy piling up), so a
+     * starved supply doesn't make it surge and fall back.
      */
-    public static final double RETARGET_SHARE = 0.1, SPARE_TICKS = 1.5;
+    public static final double RETARGET_SHARE = 0.1, SPARE_SHARE = 0.75;
     public static final int RETARGET_TICKS = 10;
     /** Its signals (Machine API names). */
     public static final String SETPOINT = "setpoint", ENABLE = "enable", IN_POSITION = "in_position", FAULT = "fault";

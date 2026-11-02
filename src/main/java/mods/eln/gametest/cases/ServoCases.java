@@ -1,8 +1,6 @@
 package mods.eln.gametest.cases;
 
 import mods.eln.api.MachineState;
-import mods.eln.api.impl.ElementHost;
-import mods.eln.api.impl.MachineCore;
 import mods.eln.gametest.Reload;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
@@ -98,9 +96,9 @@ public final class ServoCases {
             return d.machine.electricalLoad(d.front.right(), LRDU.Up).getU();
         }
 
-        /** The drive's machine core (its energy books). */
-        MachineCore core(TestContext ctx) {
-            return ((ElementHost) drive(ctx).machine).core();
+        /** The drive's machine (its energy books). */
+        mods.eln.api.ElementMachine core(TestContext ctx) {
+            return drive(ctx).machine;
         }
 
         BlockPos marker(int m) {
@@ -331,7 +329,7 @@ public final class ServoCases {
                     var f = s.drive(ctx);
                     after = f.seg.position(f.clock - f.seg.startTick());
                 }
-                if (tick == 151) inAfter = s.core(ctx).joulesIn();   // (the restored buffer is booked as delivered)
+                if (tick == 151) inAfter = s.core(ctx).joulesDelivered();   // (the restored buffer is booked as delivered)
                 if (tick > 150 && tick <= 170) {
                     var d = s.drive(ctx);
                     states += d.machine.state().name().charAt(0);
@@ -472,7 +470,7 @@ public final class ServoCases {
                     weak.call(ctx, 6);
                 }
                 if (tick == 130) {   // (both at the top: going up empty costs nothing, so the weak one is as fast)
-                    takenAtTop = weak.core(ctx).joulesOut();
+                    takenAtTop = weak.core(ctx).joulesTaken();
                     stiff.call(ctx, 0);
                     weak.call(ctx, 0);
                     called = true;
@@ -486,7 +484,7 @@ public final class ServoCases {
                         lastWeak = w.seg;
                         weakSegments++;
                     }
-                    takenDown = weak.core(ctx).joulesOut() - takenAtTop;
+                    takenDown = weak.core(ctx).joulesTaken() - takenAtTop;
                     if (stiffDown == 0 && stiff.drive(ctx).status() == LinearServoDriveElement.IN_POSITION) stiffDown = tick - 130;
                     if (weakDown == 0 && w.status() == LinearServoDriveElement.IN_POSITION) weakDown = tick - 130;
                 }
@@ -540,15 +538,15 @@ public final class ServoCases {
                 if (tick == 10) s.call(ctx, 6);
                 if (tick == 120) {
                     s.call(ctx, 0);
-                    in0 = c.joulesIn();
-                    out0 = c.joulesOut();
+                    in0 = c.joulesDelivered();
+                    out0 = c.joulesTaken();
                     lost0 = c.joulesLost();
                     buf0 = c.bufferJoules();
                     t0 = tick;
                 }
                 if (tick > 120 && t1 == 0 && s.drive(ctx).status() == LinearServoDriveElement.IN_POSITION) {
-                    in1 = c.joulesIn();
-                    out1 = c.joulesOut();
+                    in1 = c.joulesDelivered();
+                    out1 = c.joulesTaken();
                     lost1 = c.joulesLost();
                     buf1 = c.bufferJoules();
                     t1 = tick;

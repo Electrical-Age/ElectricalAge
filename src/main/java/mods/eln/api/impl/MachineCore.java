@@ -466,8 +466,24 @@ public final class MachineCore implements MachineView {
         return ratedJoulesPerTick;
     }
 
+    @Override
     public double bufferCapacityJoules() {
         return capacity;
+    }
+
+    @Override
+    public double joulesDelivered() {
+        return producer ? joulesOut : joulesIn;
+    }
+
+    @Override
+    public double joulesTaken() {
+        return producer ? 0 : joulesOut;
+    }
+
+    @Override
+    public double joulesGiven() {
+        return producer ? joulesIn : 0;
     }
 
     /** Consumer: joules delivered by the line; producer: joules given by the owner. */
@@ -484,6 +500,7 @@ public final class MachineCore implements MachineView {
      * Consumer: delivered joules that never reached the buffer (idle watts, what didn't fit, what a respec cut), J.
      * Producer: given joules a respec cut from the queue.
      */
+    @Override
     public double joulesLost() {
         return joulesLost;
     }

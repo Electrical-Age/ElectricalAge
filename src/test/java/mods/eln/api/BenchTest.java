@@ -131,7 +131,13 @@ public class BenchTest {
         assertEquals(MachineState.RUNNING, mill.state());
         for (int i = 25; i < 200; i++) assertEquals(50, t.got.get(i), 1e-6, "tick " + i);
         double taken = t.got.stream().mapToDouble(Double::doubleValue).sum();
-        double delivered = mill.joulesIn(), fed = dynamo.joulesOut(), given = dynamo.joulesIn();
+        double delivered = mill.joulesDelivered(), fed = dynamo.joulesDelivered(), given = dynamo.joulesGiven();
+        assertEquals(taken, mill.joulesTaken(), 1e-9 * taken);
+        assertEquals(0, mill.joulesGiven());
+        assertEquals(0, dynamo.joulesTaken());
+        assertEquals(delivered, mill.joulesTaken() + mill.bufferJoules() + mill.joulesLost(), 1e-9 * delivered);
+        assertEquals(given, fed + dynamo.bufferJoules() + dynamo.joulesLost(), 1e-9 * given);
+        assertEquals(2 * mill.ratedJoulesPerTick(), mill.bufferCapacityJoules(), 1e-12);
         assertTrue(taken <= delivered, taken + " taken > " + delivered + " delivered");
         assertTrue(delivered <= fed, delivered + " delivered > " + fed + " fed");
         assertTrue(fed <= given + 1e-6, fed + " fed > " + given + " given");
@@ -167,8 +173,8 @@ public class BenchTest {
                 double most = (800 - 20) * 0.05 * 100;
                 assertTrue(late <= most && late > 0.9 * most, "taken in the last 100 ticks: " + late + " of " + most);
             }
-            assertTrue(dynamo.joulesOut() <= dynamo.joulesIn() + 1e-6);
-            assertTrue(mill.joulesIn() <= dynamo.joulesOut());
+            assertTrue(dynamo.joulesDelivered() <= dynamo.joulesGiven() + 1e-6);
+            assertTrue(mill.joulesDelivered() <= dynamo.joulesDelivered());
         }
     }
 
@@ -208,7 +214,7 @@ public class BenchTest {
         double w1 = d1.watts(), w2 = d2.watts();
         assertEquals(w1, w2, 0.05 * (w1 + w2), "share: " + w1 + " W and " + w2 + " W");
         assertEquals(mill.watts(), w1 + w2, 0.01 * mill.watts());
-        assertTrue(d1.joulesOut() <= d1.joulesIn() + 1e-6 && d2.joulesOut() <= d2.joulesIn() + 1e-6);
+        assertTrue(d1.joulesDelivered() <= d1.joulesGiven() + 1e-6 && d2.joulesDelivered() <= d2.joulesGiven() + 1e-6);
     }
 
     /** A producer that is given nothing is no load on the line, and an empty one stops feeding. */
@@ -219,7 +225,7 @@ public class BenchTest {
         b.ticks(10);
         assertEquals(0, d.amps(), 1e-6);
         assertEquals(0, b.supplyAmps(), 1e-3);
-        assertEquals(0, d.joulesOut());
+        assertEquals(0, d.joulesDelivered());
     }
 
     @Test

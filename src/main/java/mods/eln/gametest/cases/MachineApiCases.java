@@ -2,7 +2,6 @@ package mods.eln.gametest.cases;
 
 import mods.eln.Eln;
 import mods.eln.api.MachineState;
-import mods.eln.api.impl.ElementHost;
 import mods.eln.api.impl.MachineCore;
 import mods.eln.gametest.Reload;
 import mods.eln.gametest.TestCase;
@@ -64,10 +63,6 @@ public final class MachineApiCases {
         return Wp10aCases.field(m, "slowRefreshProcess");
     }
 
-    static MachineCore core(ElectricalMachineElement m) {
-        return ((ElementHost) m.machine).core();
-    }
-
     /** Places machine id at x = 2 fed on its left at ratio x its nominal volts (LV cable at 50 V, MV at 200 V). */
     static ElectricalMachineElement place(TestContext ctx, Wp10aCases.Layout l, int id, double ratio) {
         ElectricalMachineElement m = (ElectricalMachineElement) l.device(id, 2, 1);
@@ -126,7 +121,7 @@ public final class MachineApiCases {
                 if (tick == W0) {
                     in0 = m.getInventory().getItem(m.inSlotId).getCount();
                     p0 = process(m).progressJoules();
-                    line0 = core(m).joulesIn();
+                    line0 = m.machine.joulesDelivered();
                     oldCounter = p0;
                 } else if (tick > W0 && tick <= W1) {
                     double v = m.machine.volts(), j = pn * (v / un) * (v / un) * dt;   // the old resistor, Unom^2 / Pnom
@@ -140,7 +135,7 @@ public final class MachineApiCases {
                     if (tick == W1) {
                         in1 = m.getInventory().getItem(m.inSlotId).getCount();
                         p1 = process(m).progressJoules();
-                        line1 = core(m).joulesIn();
+                        line1 = m.machine.joulesDelivered();
                     }
                 }
             });

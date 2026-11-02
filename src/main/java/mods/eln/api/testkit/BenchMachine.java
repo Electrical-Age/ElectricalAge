@@ -214,14 +214,30 @@ public final class BenchMachine implements Machine {
         return core.celsius();
     }
 
-    /** Consumer: joules the line delivered so far; producer: joules the owner gave so far. */
-    public double joulesIn() {
-        return core.joulesIn();
+
+    @Override
+    public double bufferCapacityJoules() {
+        return core.bufferCapacityJoules();
     }
 
-    /** Consumer: joules the owner took so far; producer: joules its source fed so far (droop losses included). */
-    public double joulesOut() {
-        return core.joulesOut();
+    @Override
+    public double joulesDelivered() {
+        return core.joulesDelivered();
+    }
+
+    @Override
+    public double joulesTaken() {
+        return core.joulesTaken();
+    }
+
+    @Override
+    public double joulesGiven() {
+        return core.joulesGiven();
+    }
+
+    @Override
+    public double joulesLost() {
+        return core.joulesLost();
     }
 
     private MachineSpec.SignalIn inputSpec(String name) {

@@ -546,8 +546,8 @@ public final class Wp11Cases {
         public void measure(TestContext ctx) {
             try {
                 double ratio = Eln.ElnToTeConversionRatio;
-                var core = ((mods.eln.api.impl.ElementHost) e.machine).core();
-                double taken = core.joulesOut(), line = core.joulesIn();
+                var core = e.machine;
+                double taken = core.joulesTaken(), line = core.joulesDelivered();
                 long fe = sink.getAmountAsLong();
                 ctx.line(String.format("exporter: line %.1f J, taken %.1f J (machine buffer %.1f J), %d FE pushed, %.1f J left; ratio %.4f FE/J",
                     line, taken, core.bufferJoules(), fe, e.energyBuffer, ratio));

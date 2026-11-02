@@ -282,7 +282,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             double share = LinearServoDriveDescriptor.RETARGET_SHARE;
             // up only when it costs nothing (lowering) or energy is piling up: else the energy's limit holds it back
             boolean free = forceN * (target - p) <= 0;
-            boolean spare = machine.bufferJoules() >= LinearServoDriveDescriptor.SPARE_TICKS * machine.ratedJoulesPerTick();
+            boolean spare = machine.bufferJoules() >= LinearServoDriveDescriptor.SPARE_SHARE * machine.bufferCapacityJoules();
             if (vlim < (1 - share) * seg.vmax() || vlim > (1 + share) * seg.vmax() && (free || spare))
                 next = seg.retarget(t0, target, vlim, a);   // (the line sagged or recovered: the new top speed)
         }
@@ -604,6 +604,9 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         st.num(mods.eln.introspect.Keys.POWER, machine.watts(), mods.eln.introspect.Unit.W);
         st.num(mods.eln.introspect.Keys.VOLTAGE, machine.volts(), mods.eln.introspect.Unit.V);
         st.num(mods.eln.introspect.Keys.BUFFER_ENERGY, machine.bufferJoules(), mods.eln.introspect.Unit.J);
+        st.num("energy_delivered", machine.joulesDelivered(), mods.eln.introspect.Unit.J);
+        st.num("energy_taken", machine.joulesTaken(), mods.eln.introspect.Unit.J);
+        st.num("energy_lost", machine.joulesLost(), mods.eln.introspect.Unit.J);
         st.num(mods.eln.introspect.Keys.TEMPERATURE, machine.celsius(), mods.eln.introspect.Unit.C);
         st.choice("machine_state", machine.state());
         st.num(mods.eln.introspect.Keys.LOAD, loadKg, mods.eln.introspect.Unit.KG);

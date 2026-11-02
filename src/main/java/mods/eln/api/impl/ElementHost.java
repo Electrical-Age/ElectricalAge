@@ -426,4 +426,29 @@ public final class ElementHost implements ElementMachine {
     public double celsius() {
         return core.celsius();
     }
+
+    @Override
+    public double bufferCapacityJoules() {
+        return core.bufferCapacityJoules();
+    }
+
+    @Override
+    public double joulesDelivered() {
+        return core.joulesDelivered();
+    }
+
+    @Override
+    public double joulesTaken() {
+        return core.joulesTaken();
+    }
+
+    @Override
+    public double joulesGiven() {
+        return core.joulesGiven();
+    }
+
+    @Override
+    public double joulesLost() {
+        return core.joulesLost();
+    }
 }

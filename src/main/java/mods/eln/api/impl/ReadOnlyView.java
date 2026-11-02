@@ -59,4 +59,29 @@ public final class ReadOnlyView implements MachineView {
     public double celsius() {
         return of.celsius();
     }
+
+    @Override
+    public double bufferCapacityJoules() {
+        return of.bufferCapacityJoules();
+    }
+
+    @Override
+    public double joulesDelivered() {
+        return of.joulesDelivered();
+    }
+
+    @Override
+    public double joulesTaken() {
+        return of.joulesTaken();
+    }
+
+    @Override
+    public double joulesGiven() {
+        return of.joulesGiven();
+    }
+
+    @Override
+    public double joulesLost() {
+        return of.joulesLost();
+    }
 }
