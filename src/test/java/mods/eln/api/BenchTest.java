@@ -203,8 +203,11 @@ public class BenchTest {
         BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(100)
             .signalIn("enable", RelativeFace.UP, 1).signalOut("done", RelativeFace.DOWN).build());
         assertEquals(1, m.signal("enable"));
+        assertFalse(m.signalConnected("enable"));
         m.input("enable", 0.25);
         assertEquals(0.25, m.signal("enable"));
+        assertTrue(m.signalConnected("enable"));
+        assertThrows(IllegalArgumentException.class, () -> m.signalConnected("done"));
         assertTrue(m.output("done").isEmpty());
         m.setSignal("done", 1);
         assertEquals(1, m.output("done").orElseThrow());

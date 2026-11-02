@@ -113,6 +113,14 @@ public final class BenchMachine implements Machine {
         return inputs.getOrDefault(name, s.defaultValue());
     }
 
+    /** On the bench an input is connected while the bench drives it (input(name, level)). */
+    @Override
+    public boolean signalConnected(String name) {
+        bench.checkThread();
+        inputSpec(name);
+        return inputs.containsKey(name);
+    }
+
     @Override
     public void setSignal(String name, double level) {
         bench.checkThread();

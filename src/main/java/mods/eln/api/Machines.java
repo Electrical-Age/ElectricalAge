@@ -18,7 +18,7 @@ import java.util.Objects;
 /**
  * Makes machines. forElement puts one on an EA element: call it in the element's constructor (its parts must be in
  * the element's lists before readFromNBT), keep the ElementMachine, and delegate getElectricalLoad,
- * getConnectionMask and getWaila to it. The work goes in the element's own slow process, which takes or gives
+ * getConnectionMask and getWaila to it (with the cable position, when the spec puts signals at CablePositions). The work goes in the element's own slow process, which takes or gives
  * energy each tick.
  * <p>
  * Tick order in game: slow pre-processes (the machine plans the step: its load or source), the electrical step,
@@ -48,10 +48,8 @@ public final class Machines {
             }
 
             @Override
-            public boolean connected(Direction side) {
-                if (element.node == null) return false;
-                for (LRDU l : LRDU.values()) if (element.node.lrduCubeMask.get(side, l)) return true;
-                return false;
+            public boolean connected(Direction side, LRDU lrdu) {
+                return element.node != null && element.node.lrduCubeMask.get(side, lrdu);
             }
 
             @Override

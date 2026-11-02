@@ -1,7 +1,9 @@
 package mods.eln.api.impl;
 
+import mods.eln.api.CablePosition;
 import mods.eln.api.RelativeFace;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 
 /**
  * RelativeFace against an element's front, in EA's own terms: FRONT is front, BACK front.back(), LEFT front.left(),
@@ -22,6 +24,20 @@ public final class Faces {
             case UP -> front.up();
             case DOWN -> front.down();
         };
+    }
+
+    /** The cable position on a transparent node's face in EA's terms: FLOOR is LRDU.Down, CEILING LRDU.Up; ANY null. */
+    public static LRDU lrdu(CablePosition position) {
+        return switch (position) {
+            case ANY -> null;
+            case FLOOR -> LRDU.Down;
+            case CEILING -> LRDU.Up;
+        };
+    }
+
+    /** Does a cable at lrdu meet position? (Any cable meets ANY.) */
+    public static boolean at(CablePosition position, LRDU lrdu) {
+        return position == CablePosition.ANY || lrdu(position) == lrdu;
     }
 
     /** The relative face side is on, for an element facing front. */

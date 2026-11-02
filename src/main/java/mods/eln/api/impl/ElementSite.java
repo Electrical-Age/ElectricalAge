@@ -2,14 +2,21 @@ package mods.eln.api.impl;
 
 import mods.eln.api.TripCause;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 
 /** What an ElementHost needs of the element it is on (an adapter per element kind; a stub in unit tests). */
 public interface ElementSite {
     /** The element's front, or null before it is placed or loaded. */
     Direction front();
 
-    /** Something is connected to the element on side (a cable or a device). */
-    boolean connected(Direction side);
+    /** Something is connected to the element on side at cable position lrdu (a cable or a device). */
+    boolean connected(Direction side, LRDU lrdu);
+
+    /** Something is connected to the element on side, at any position. */
+    default boolean connected(Direction side) {
+        for (LRDU l : LRDU.values()) if (connected(side, l)) return true;
+        return false;
+    }
 
     /** Throws IllegalStateException off the server thread. */
     void checkThread();

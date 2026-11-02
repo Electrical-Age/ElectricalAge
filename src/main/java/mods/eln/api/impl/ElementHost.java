@@ -1,6 +1,7 @@
 package mods.eln.api.impl;
 
 import mods.eln.Eln;
+import mods.eln.api.CablePosition;
 import mods.eln.api.ElementMachine;
 import mods.eln.api.MachineBus;
 import mods.eln.api.MachineSpec;
@@ -11,6 +12,7 @@ import mods.eln.api.TripCause;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.ElectricalLoad;
@@ -186,23 +188,55 @@ public final class ElementHost implements ElementMachine {
 
     @Override
     public ElectricalLoad electricalLoad(Direction side) {
+        return load(side, null);
+    }
+
+    @Override
+    public ElectricalLoad electricalLoad(Direction side, LRDU lrdu) {
+        return load(side, Objects.requireNonNull(lrdu, "lrdu"));
+    }
+
+    /** The load at side and lrdu; lrdu null: the whole face's (none for signals at a position). */
+    private ElectricalLoad load(Direction side, LRDU lrdu) {
         RelativeFace f = relativeFace(side).orElse(null);
         if (f == null) return null;
         MachineSpec spec = core.spec();
         if (spec.powerFaces().contains(f)) return power;
-        for (int i = 0; i < inputs.length; i++) if (spec.signalsIn().get(i).face() == f) return inputs[i];
-        for (int i = 0; i < outputLoads.length; i++) if (spec.signalsOut().get(i).face() == f) return outputLoads[i];
+        for (int i = 0; i < inputs.length; i++) {
+            MachineSpec.SignalIn s = spec.signalsIn().get(i);
+            if (s.face() == f && meets(s.position(), lrdu)) return inputs[i];
+        }
+        for (int i = 0; i < outputLoads.length; i++) {
+            MachineSpec.SignalOut s = spec.signalsOut().get(i);
+            if (s.face() == f && meets(s.position(), lrdu)) return outputLoads[i];
+        }
         return null;
+    }
+
+    /** A cable at lrdu (null: the face as a whole) is at position. */
+    private static boolean meets(CablePosition position, LRDU lrdu) {
+        return lrdu == null ? position == CablePosition.ANY : Faces.at(position, lrdu);
     }
 
     @Override
     public int connectionMask(Direction side) {
+        return mask(side, null);
+    }
+
+    @Override
+    public int connectionMask(Direction side, LRDU lrdu) {
+        return mask(side, Objects.requireNonNull(lrdu, "lrdu"));
+    }
+
+    private int mask(Direction side, LRDU lrdu) {
         RelativeFace f = relativeFace(side).orElse(null);
         if (f == null) return 0;
         MachineSpec spec = core.spec();
         if (spec.powerFaces().contains(f)) return NodeBase.maskElectricalPower;
-        for (MachineSpec.SignalIn s : spec.signalsIn()) if (s.face() == f) return NodeBase.maskElectricalInputGate;
-        for (MachineSpec.SignalOut s : spec.signalsOut()) if (s.face() == f) return NodeBase.maskElectricalOutputGate;
+        for (MachineSpec.SignalIn s : spec.signalsIn())
+            if (s.face() == f && meets(s.position(), lrdu)) return NodeBase.maskElectricalInputGate;
+        for (MachineSpec.SignalOut s : spec.signalsOut())
+            if (s.face() == f && meets(s.position(), lrdu)) return NodeBase.maskElectricalOutputGate;
         return 0;
     }
 
@@ -248,13 +282,30 @@ public final class ElementHost implements ElementMachine {
     @Override
     public double signal(String name) {
         site.checkThread();
+        int i = inputIndex(name);
+        if (!connected(i)) return core.spec().signalsIn().get(i).defaultValue();
+        return Math.max(0, Math.min(1, inputs[i].getU() / Eln.SVU));
+    }
+
+    @Override
+    public boolean signalConnected(String name) {
+        site.checkThread();
+        return connected(inputIndex(name));
+    }
+
+    /** Is a cable connected to input i at its face and position? */
+    private boolean connected(int i) {
+        MachineSpec.SignalIn s = core.spec().signalsIn().get(i);
+        Direction front = site.front();
+        if (front == null) return false;
+        Direction side = Faces.resolve(s.face(), front);
+        LRDU at = Faces.lrdu(s.position());
+        return at == null ? site.connected(side) : site.connected(side, at);
+    }
+
+    private int inputIndex(String name) {
         List<MachineSpec.SignalIn> in = core.spec().signalsIn();
-        for (int i = 0; i < in.size(); i++) {
-            if (!in.get(i).name().equals(name)) continue;
-            Direction front = site.front();
-            if (front == null || !site.connected(Faces.resolve(in.get(i).face(), front))) return in.get(i).defaultValue();
-            return Math.max(0, Math.min(1, inputs[i].getU() / Eln.SVU));
-        }
+        for (int i = 0; i < in.size(); i++) if (in.get(i).name().equals(name)) return i;
         throw new IllegalArgumentException(core.spec() + " has no signal input '" + name + "'"
             + (outputIndex(name) >= 0 ? " (it is an output)" : ""));
     }

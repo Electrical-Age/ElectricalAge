@@ -22,12 +22,15 @@ public final class MachineSpec {
     /** Draws power from the line, or feeds it. */
     public enum Kind {CONSUMER, PRODUCER}
 
-    /** A signal input: read 0..1 by Machine.signal(name); defaultValue (0..1) when nothing drives it. */
-    public record SignalIn(String name, RelativeFace face, double defaultValue) {
+    /**
+     * A signal input: read 0..1 by Machine.signal(name); defaultValue (0..1) when nothing is connected. Its cable
+     * meets face at position (ANY: anywhere on it).
+     */
+    public record SignalIn(String name, RelativeFace face, CablePosition position, double defaultValue) {
     }
 
     /** A signal output: written 0..1 by Machine.setSignal(name, v); high impedance until first written. */
-    public record SignalOut(String name, RelativeFace face) {
+    public record SignalOut(String name, RelativeFace face, CablePosition position) {
     }
 
     /**
@@ -253,20 +256,34 @@ public final class MachineSpec {
             return this;
         }
 
-        /** A signal input that reads 0 when nothing drives it. */
+        /** A signal input on the whole of face that reads 0 when nothing is connected. */
         public Builder signalIn(String name, RelativeFace face) {
-            return signalIn(name, face, 0);
+            return signalIn(name, face, CablePosition.ANY, 0);
         }
 
-        /** A signal input that reads defaultValue (0..1) when nothing drives it. */
+        /** A signal input on the whole of face that reads defaultValue (0..1) when nothing is connected. */
         public Builder signalIn(String name, RelativeFace face, double defaultValue) {
-            signalsIn.add(new SignalIn(name, Objects.requireNonNull(face, "face"), defaultValue));
+            return signalIn(name, face, CablePosition.ANY, defaultValue);
+        }
+
+        /**
+         * A signal input whose cable meets face at position (a face can hold several signals at different
+         * positions); it reads defaultValue (0..1) when nothing is connected there.
+         */
+        public Builder signalIn(String name, RelativeFace face, CablePosition position, double defaultValue) {
+            signalsIn.add(new SignalIn(name, Objects.requireNonNull(face, "face"),
+                Objects.requireNonNull(position, "position"), defaultValue));
             return this;
         }
 
-        /** A signal output, high impedance until first written. */
+        /** A signal output on the whole of face, high impedance until first written. */
         public Builder signalOut(String name, RelativeFace face) {
-            signalsOut.add(new SignalOut(name, Objects.requireNonNull(face, "face")));
+            return signalOut(name, face, CablePosition.ANY);
+        }
+
+        /** A signal output whose cable meets face at position, high impedance until first written. */
+        public Builder signalOut(String name, RelativeFace face, CablePosition position) {
+            signalsOut.add(new SignalOut(name, Objects.requireNonNull(face, "face"), Objects.requireNonNull(position, "position")));
             return this;
         }
 
@@ -313,27 +330,27 @@ public final class MachineSpec {
                         + " K reset band)" + got(overheatCelsius));
             }
 
-            // signal names, then one role per face
+            // signal names, then one role per face (or per cable position on it)
             Set<String> names = new HashSet<>();
-            Map<RelativeFace, String> roles = new EnumMap<>(RelativeFace.class);
+            Map<RelativeFace, Map<CablePosition, String>> roles = new EnumMap<>(RelativeFace.class);
             for (SignalIn s : signalsIn) {
                 checkSignal(s.name(), names, errors);
                 if (!(s.defaultValue() >= 0 && s.defaultValue() <= 1))
                     errors.add("signal '" + s.name() + "' default must be 0..1 (a signal level, not volts), got "
                         + s.defaultValue());
-                claim(roles, s.face(), "signal '" + s.name() + "'", errors);
+                claim(roles, s.face(), s.position(), "signal '" + s.name() + "'", errors);
             }
             for (SignalOut s : signalsOut) {
                 checkSignal(s.name(), names, errors);
-                claim(roles, s.face(), "signal '" + s.name() + "'", errors);
+                claim(roles, s.face(), s.position(), "signal '" + s.name() + "'", errors);
             }
             if (busTwice) errors.add("bus is given twice; a machine has one bus port");
-            if (busFace != null) claim(roles, busFace, "the bus", errors);
+            if (busFace != null) claim(roles, busFace, CablePosition.ANY, "the bus", errors);
             Set<RelativeFace> powerFaces;
             if (power != null) {
                 if (powerTwice) errors.add("power faces are given twice");
                 if (power.isEmpty()) errors.add("power needs at least one face");
-                for (RelativeFace f : power) claim(roles, f, "power", errors);
+                for (RelativeFace f : power) claim(roles, f, CablePosition.ANY, "power", errors);
                 powerFaces = power;
             } else {
                 powerFaces = EnumSet.allOf(RelativeFace.class);
@@ -357,9 +374,22 @@ public final class MachineSpec {
             else if (!names.add(name)) errors.add("signal name '" + name + "' is used twice");
         }
 
-        private static void claim(Map<RelativeFace, String> roles, RelativeFace face, String role, List<String> errors) {
-            String had = roles.putIfAbsent(face, role);
-            if (had != null) errors.add("face " + face + " is given to both " + had + " and " + role);
+        /**
+         * Claims face (at position) for role. A face is one role's, but for signals at different cable positions;
+         * those only on the side faces.
+         */
+        private static void claim(Map<RelativeFace, Map<CablePosition, String>> roles, RelativeFace face, CablePosition position,
+                                  String role, List<String> errors) {
+            if (position != CablePosition.ANY && (face == RelativeFace.UP || face == RelativeFace.DOWN))
+                errors.add(role + ": " + position + " is a cable position on a side face (FRONT, BACK, LEFT, RIGHT), not " + face);
+            Map<CablePosition, String> at = roles.computeIfAbsent(face, f -> new EnumMap<>(CablePosition.class));
+            for (Map.Entry<CablePosition, String> e : at.entrySet()) {
+                if (e.getKey() == position && position != CablePosition.ANY)
+                    errors.add("the " + position + " cable of face " + face + " is given to both " + e.getValue() + " and " + role);
+                else if (e.getKey() == CablePosition.ANY || position == CablePosition.ANY)
+                    errors.add("face " + face + " is given to both " + e.getValue() + " and " + role);
+            }
+            at.putIfAbsent(position, role);
         }
     }
 }

@@ -145,6 +145,21 @@ public class MachineSpecTest {
             "power faces are given twice");
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).bus(RelativeFace.UP).bus(RelativeFace.DOWN),
             "bus is given twice");
+        // cable positions: two signals on one side face, at different positions
+        MachineSpec shared = MachineSpec.consumer(Tier.V200).ratedWatts(100)
+            .signalIn("a", RelativeFace.LEFT, CablePosition.FLOOR, 0).signalOut("b", RelativeFace.LEFT, CablePosition.CEILING).build();
+        assertEquals(EnumSet.complementOf(EnumSet.of(RelativeFace.LEFT)), shared.powerFaces());
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100)
+                .signalIn("a", RelativeFace.LEFT, CablePosition.FLOOR, 0).signalOut("b", RelativeFace.LEFT, CablePosition.FLOOR),
+            "the FLOOR cable of face LEFT is given to both signal 'a' and signal 'b'");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100)
+                .signalIn("a", RelativeFace.LEFT, CablePosition.FLOOR, 0).signalOut("b", RelativeFace.LEFT),
+            "face LEFT is given to both signal 'a' and signal 'b'");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).power(RelativeFace.BACK)
+                .signalIn("a", RelativeFace.BACK, CablePosition.FLOOR, 0),
+            "face BACK is given to both signal 'a' and power");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).signalIn("a", RelativeFace.UP, CablePosition.CEILING, 0),
+            "signal 'a': CEILING is a cable position on a side face (FRONT, BACK, LEFT, RIGHT), not UP");
         MachineSpec.Builder full = MachineSpec.consumer(Tier.V200).ratedWatts(100);
         int i = 0;
         for (RelativeFace f : RelativeFace.values()) full.signalIn("s" + i++, f);

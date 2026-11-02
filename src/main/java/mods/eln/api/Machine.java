@@ -42,6 +42,13 @@ public interface Machine extends MachineView {
     /** Signal input name's level, 0..1 (its default when nothing drives it). Unknown names throw IllegalArgumentException. */
     double signal(String name);
 
+    /**
+     * Is a cable connected to signal input name (at its face and position)? Unconnected, signal(name) reads the
+     * input's default; connected, it reads the wire (0 when nothing drives it). For "a wire overrides the buttons".
+     * Unknown names (and outputs) throw IllegalArgumentException.
+     */
+    boolean signalConnected(String name);
+
     /** Drives signal output name at level 0..1 (a level, not volts) until changed or released. */
     void setSignal(String name, double level);
 

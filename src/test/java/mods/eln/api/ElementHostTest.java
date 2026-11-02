@@ -5,6 +5,7 @@ import mods.eln.api.impl.ElementSite;
 import mods.eln.api.impl.Faces;
 import mods.eln.api.impl.MachineCore;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
@@ -40,7 +41,9 @@ public class ElementHostTest {
     static final class Element implements ElementSite {
         Direction front = Direction.XN;
         boolean burnt;
+        /** Sides with a cable at every position, and single cables (side, position). */
         final Set<Direction> connected = EnumSet.noneOf(Direction.class);
+        final Set<String> connectedAt = new java.util.HashSet<>();
         final List<TripCause> burns = new ArrayList<>();
         final ArrayList<State> loads = new ArrayList<>();
         final ArrayList<Component> components = new ArrayList<>();
@@ -54,8 +57,8 @@ public class ElementHostTest {
             return front;
         }
 
-        public boolean connected(Direction side) {
-            return connected.contains(side);
+        public boolean connected(Direction side, LRDU lrdu) {
+            return connected.contains(side) || connectedAt.contains(side + " " + lrdu);
         }
 
         public void checkThread() {
@@ -134,6 +137,45 @@ public class ElementHostTest {
         assertEquals(0.5, m.outputLevel("done").orElseThrow(), 1e-12);
         m.releaseSignal("done");
         assertTrue(m.outputLevel("done").isEmpty());
+    }
+
+    /**
+     * Signals at cable positions share a face: an input on the floor cable, an output on the ceiling one; the face
+     * as a whole has no load, and each input reads its default until its own cable is there.
+     */
+    @Test
+    void signalsShareAFaceAtCablePositions() {
+        Element e = new Element();
+        MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(100).power(RelativeFace.BACK)
+            .signalIn("set", RelativeFace.LEFT, CablePosition.FLOOR, 0.5).signalOut("there", RelativeFace.LEFT, CablePosition.CEILING)
+            .signalIn("run", RelativeFace.RIGHT, 1).build();
+        ElementHost m = e.machine(spec);
+        for (Direction front : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) {
+            e.front = front;
+            Direction left = front.left();
+            assertEquals(NodeBase.maskElectricalInputGate, m.connectionMask(left, LRDU.Down));
+            assertEquals(NodeBase.maskElectricalOutputGate, m.connectionMask(left, LRDU.Up));
+            assertEquals(0, m.connectionMask(left, LRDU.Left));
+            assertEquals(0, m.connectionMask(left), "a split face has no single mask");
+            assertNull(m.electricalLoad(left));
+            ElectricalLoad in = m.electricalLoad(left, LRDU.Down), out = m.electricalLoad(left, LRDU.Up);
+            assertTrue(in != null && out != null && in != out);
+            assertNull(m.electricalLoad(left, LRDU.Right));
+            // a whole-face role takes every position
+            assertEquals(NodeBase.maskElectricalInputGate, m.connectionMask(front.right(), LRDU.Left));
+            assertSame(m.electricalLoad(front.right()), m.electricalLoad(front.right(), LRDU.Up));
+            assertSame(m.powerLoad(), m.electricalLoad(front.back(), LRDU.Down));
+        }
+        e.front = Direction.ZP;
+        Direction left = Direction.ZP.left();
+        assertFalse(m.signalConnected("set"));
+        assertEquals(0.5, m.signal("set"));
+        e.connectedAt.add(left + " " + LRDU.Up); // the output's cable is not the input's
+        assertFalse(m.signalConnected("set"));
+        e.connectedAt.add(left + " " + LRDU.Down);
+        assertTrue(m.signalConnected("set"));
+        assertEquals(0, m.signal("set"), "wired and undriven: 0, not the default");
+        assertThrows(IllegalArgumentException.class, () -> m.signalConnected("there"));
     }
 
     @Test
