@@ -8,6 +8,11 @@ public class NbtThermalLoad extends ThermalLoad implements INBTTReady {
 
     String name;
 
+    /** The name its NBT keys start with (introspect reports name loads by it). */
+    public String name() {
+        return name;
+    }
+
     public NbtThermalLoad(String name, double Tc, double Rp, double Rs, double C) {
         super(Tc, Rp, Rs, C);
         this.name = name;

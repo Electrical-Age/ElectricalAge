@@ -8,6 +8,11 @@ public class NbtElectricalLoad extends ElectricalLoad implements INBTTReady {
 
     String name;
 
+    /** The name its NBT keys start with (introspect reports name loads by it). */
+    public String name() {
+        return name;
+    }
+
     public NbtElectricalLoad(String name) {
         super();
         this.name = name;
