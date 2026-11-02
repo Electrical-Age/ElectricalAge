@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The GameTest harness's describe pass: every node in a test's bounds is described, and each report must pass
+ * The GameTest harness's describe pass: every node and describable entity in a test's bounds is described, and each
+ * report must pass
  * {@link Report#problems()} and carry no describe_failed fault. Runs after a case's measure, like the persistence pass.
  */
 public final class DescribeCheck {
@@ -41,6 +42,20 @@ public final class DescribeCheck {
             if (bad.isEmpty()) ok++;
             else checker.check("describe at " + n.coordonate, false, String.join("; ", bad));
         }
-        if (total > 0) checker.check("describe: every node gives a valid report", ok == total, ok + "/" + total);
+        for (var e : level.getEntities((net.minecraft.world.entity.Entity) null, bounds, x -> x instanceof Describable)) {
+            List<String> bad = new ArrayList<>();
+            try {
+                Report r = Describe.entity(e);
+                bad.addAll(r.problems());
+                for (Report.Fault f : r.faults()) if (f.code().equals("describe_failed")) bad.add(f.text());
+                r.toJson();
+            } catch (RuntimeException ex) {
+                bad.add(ex.toString());
+            }
+            total++;
+            if (bad.isEmpty()) ok++;
+            else checker.check("describe " + e, false, String.join("; ", bad));
+        }
+        if (total > 0) checker.check("describe: every node and entity gives a valid report", ok == total, ok + "/" + total);
     }
 }
