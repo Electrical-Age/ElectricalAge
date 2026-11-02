@@ -237,7 +237,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   no longer burns on a reverse voltage under -0.2x nominal; its machine holds up to two ticks of power in front of
   the FE buffer (lost when it is broken, as the buffer is). A machine's progress on the item in hand is saved now
   (it restarted on every load). Jade's "Power consumption" is the power drawn (it showed the power times the
-  boosters' efficiency).
+  boosters' efficiency). Their terminal's series resistance is the LV cable's for every voltage: a 200 V machine's is
+  0.025 instead of the MV cable's 0.1 ohm, at its 10 A 0.75 V less drop (under 1% more power).
 
 ## Bugs fixed
 
