@@ -139,7 +139,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   Chosen over a stub the device would lay and own: a free stub dropped a pipe kit when mined (free pipe each place and
   break), had to reach a block face with free space to start a route, and lost its identity once a route joined it.
   Wears the Voltage Probe's model with a drawn iron stem up to the port. The items no longer fit a sensor on a pipe;
-  sensors already fitted keep working. `pipe_transmitter_*`.
+  sensors already fitted keep working. After the first client check: refused where it would touch a pipe, the device
+  wins the crosshair over the pipe end at its port, a second route to a piped port is refused, each kind carries a
+  coloured plate with a letter (P, T, Q), Jade's headline is reading, volts and full scale, and its own items are out of
+  JEI. `pipe_transmitter_*`.
 - Battery protection chips (Baughn 2026-10-27, after a protected, nearly empty battery burnt on a 50 V bus): the
   overheating chip is a charge limiter, run every electrical step (BatteryInventoryProcess.Step): charging held to the
   rated current (electricalStdI) by the cut switch's resistance, tapering to none as it nears the cut; the cut is at

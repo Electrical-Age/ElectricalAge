@@ -131,7 +131,16 @@ transparent neighbour).
   items (`PipeSensorItem.place`) on any face, always off centre (`VoxelNode.placeOffCentre`, a slot past the faces even
   at the face's centre) with its centre on the pipe routers' lattice (4, 8 or 12 across the face), the lattice point
   nearest the click where it fits, its front from the player's (as the Voltage Probe's) then turned clockwise. Refused
-  in mid-air, and on a pipe or fitting.
+  in mid-air, on a pipe or fitting, and where its body or the column up past its port would come within a voxel of a
+  pipe or fitting (`PipeSensorItem.nearPipe`: a lab test put one under a floor pipe, its port inside it).
+- `VoxelNode.aimed` gives the device, not the pipe, for a point in its body grown by a voxel or within 3 voxels of its
+  port (`PipeTransmitterElement.aimBoxes`): the end of the pipe laid to it covered the body from most angles, so Jade
+  and clicks got the pipe. Breaking still picks by `VoxelNodeBlock`'s own rule.
+- A pipe kit route doesn't start or end at a device's port that already has a pipe (`PipePlacer.portTaken`; a lab test
+  laid a second pipe beside the first).
+- Its kind shows on the body's top: a coloured plate (pressure blue, temperature red, quality green) with a raised white
+  letter P, T or Q for colourblind players. Jade's three headline lines: the reading, the output volts, the full scale.
+- Its own hidden items are out of the creative tab (`addWithoutRegistry`) and JEI (`ElnJeiPlugin.onRuntimeAvailable`).
 - Its port is `PORT_HEIGHT` (4) voxels off the face over its centre (`PipeTransmitterElement.port`), clear of its
   2-voxel body. `PipePlacer.devicePort` makes it a routing end any way round (dir -1) when a pipe kit clicks the
   device, for a route's start and its finish (laid with `lay`; the piece ends capped at the port). `KitPreview` does
@@ -240,7 +249,8 @@ device terminal plates) applies to six-node floor cables only, not voxel cables.
 - `gametest/cases/PipeTransmitterCases.java`: `pipe_transmitter_floor_pressure` (a route laid to the port, pressure,
   volts on its signal cable, Jade, scale step kept by NBT), `pipe_transmitter_wall_temperature` (wall, signal pin down,
   temperature; a ceiling one not connected), `pipe_transmitter_break_and_refuse` (lattice snap, drop, pipe stays,
-  refused in mid-air and on a pipe), `pipe_transmitter_joins_a_run` (a route from its port joins a run mid-way).
+  refused in mid-air and on a pipe), `pipe_transmitter_joins_a_run` (a route from its port joins a run mid-way), `pipe_transmitter_lab_fixes` (beside or under a
+  pipe, aim, a second route refused, Jade's headline, the creative tab).
 - Benchmark `gametest/bench/CableBench.java` (id `cable_bench`): `runGameTestServer -PelnBench=out.json
   [-PelnBenchLabel=x] [-PelnBenchConvert] [-PelnBenchNoRthCache]`; when set, it is the only test registered
   (`ElnGameTests`). ~20k cables; phases steady, churn, fault, teardown.

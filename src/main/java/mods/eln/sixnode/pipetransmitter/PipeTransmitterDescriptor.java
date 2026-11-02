@@ -56,6 +56,7 @@ public class PipeTransmitterDescriptor extends SixNodeDescriptor {
         front.glRotateOnX();
         draw();
         PipeTransmitterRender.drawStem();
+        PipeTransmitterRender.drawMark(sensing);
     }
 
     @Override

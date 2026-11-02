@@ -631,6 +631,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     public Aimed aimed(double x, double y, double z) {
+        // a pipe sensor device wins over the end of the pipe laid to its port, which covers its body from most angles
+        // (a lab test: Jade showed "Iron Pipe")
+        for (int i = 6; i < SLOTS; i++)
+            if (sideElementList[i] instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t)
+                for (int[] b : t.aimBoxes(elementBoxes(i).get(0))) if (VoxelPart.contains(b, x, y, z, 0.05)) return new Aimed(i, -1);
         int el = elementAt(x, y, z, 0), pi = partAt(x, y, z);
         if (el < 0 && pi < 0) el = elementAt(x, y, z, 2);
         return new Aimed(el, pi);

@@ -109,12 +109,31 @@ public class PipeSensorItem extends Item implements PipeTool {
         for (int[] o : centres) {
             LRDU f = first;
             for (int k = 0; k < 4; k++, f = f.getNextClockwise()) {
-                String e = v.placeOffCentre(stack, face, o[0], o[1], o[2], f, player);
+                String e = nearPipe(v, d, face, o, f) ? NEAR_PIPE : v.placeOffCentre(stack, face, o[0], o[1], o[2], f, player);
                 if (e == null) return null;
                 if (err == null) err = e;
             }
         }
         return err;
+    }
+
+    static final String NEAR_PIPE = "Too close to a pipe: put it on a free spot of the face and lay pipe to it";
+
+    /**
+     * Would the device there, with its port, touch a pipe or fitting? Its body and the column up to just past its port,
+     * grown by a voxel (a lab test: one clicked beside a floor pipe went in under it, its port inside the pipe). A pipe
+     * comes to its port only by being laid there.
+     */
+    static boolean nearPipe(VoxelNode v, mods.eln.node.six.SixNodeDescriptor d, mods.eln.misc.Direction face, int[] o, LRDU front) {
+        int f3 = face.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(f3);
+        int[] k = VoxelNode.rawBodyBox(d, face, front, o[0], o[1], o[2]);
+        int reach = mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor.PORT_HEIGHT + 2;
+        if (CablePart.plane(f3) == 0) k[n + 3] = Math.max(k[n + 3], reach);
+        else k[n] = Math.min(k[n], 16 - reach);
+        int[] g = {k[0] - 1, k[1] - 1, k[2] - 1, k[3] + 1, k[4] + 1, k[5] + 1};
+        for (VoxelPart p : v.parts)
+            if (!(p instanceof CablePart)) for (int[] b : p.boxes()) if (VoxelNode.overlaps(g, b)) return true;
+        return false;
     }
 
     /** Its tooltip lines (client ItemTooltips). */

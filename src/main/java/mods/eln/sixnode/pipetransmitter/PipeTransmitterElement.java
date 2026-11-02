@@ -65,6 +65,23 @@ public class PipeTransmitterElement extends SixNodeElement {
         return c;
     }
 
+    /**
+     * Where the crosshair means this device rather than the pipe at its port (VoxelNode.aimed; block voxels): its body
+     * grown by a voxel, and the last 3 voxels of pipe round the port, from the face to past the pipe's outline.
+     */
+    public java.util.List<int[]> aimBoxes(int[] body) {
+        int face = side.toEnumFacing().get3DDataValue(), n = CablePart.normalAxis(face);
+        int[] p = port(), b = new int[6];
+        for (int a = 0; a < 3; a++) {
+            b[a] = p[a] - 3;
+            b[a + 3] = p[a] + 3;
+        }
+        int reach = PipeTransmitterDescriptor.PORT_HEIGHT + 4;
+        b[n] = CablePart.plane(face) == 0 ? 0 : 16 - reach;
+        b[n + 3] = CablePart.plane(face) == 0 ? reach : 16;
+        return java.util.List.of(new int[]{body[0] - 1, body[1] - 1, body[2] - 1, body[3] + 1, body[4] + 1, body[5] + 1}, b);
+    }
+
     /** The pipe passing through or ending at the port, or null. */
     public PipePart pipe() {
         if (!(sixNode instanceof VoxelNode v)) return null;
@@ -116,11 +133,10 @@ public class PipeTransmitterElement extends SixNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new LinkedHashMap<>();
-        info.put("Reads", PipeSensorPart.name(descriptor.sensing));
-        if (connected) info.put("Reading", readingText());
-        else info.put("Pipe", "not connected to a pipe");
-        info.put("Full scale", String.format("%.0f %s at %.0f V", scale, PipeSensorPart.unit(descriptor.sensing), Eln.SVU));
+        // (three lines, all in Jade's headline: a lab test lost the volts below it)
+        info.put(PipeSensorPart.name(descriptor.sensing), connected ? readingText() : "not connected to a pipe");
         info.put("Output", Utils.plotVolt("", outputGate.getU()));
+        info.put("Full scale", String.format("%.0f %s at %.0f V", scale, PipeSensorPart.unit(descriptor.sensing), Eln.SVU));
         return info;
     }
 

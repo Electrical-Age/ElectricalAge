@@ -123,11 +123,26 @@ public final class PipePlacer {
      * or null. A route ends there capped, as at any inner end.
      */
     static PipeRouter.End devicePort(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
-        if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        int el = n.aimed(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ()).element();
-        if (el < 0 || !(n.getElement(el) instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t)) return null;
+        var t = deviceAt(level, pos, hit);
+        if (t == null) return null;
         int[] p = t.port();
         return new PipeRouter.End(pos.getX() * 16L + p[0], pos.getY() * 16L + p[1], pos.getZ() * 16L + p[2], -1);
+    }
+
+    /** The pipe sensor device under the crosshair, or null. */
+    static mods.eln.sixnode.pipetransmitter.PipeTransmitterElement deviceAt(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+        if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
+        int el = n.aimed(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ()).element();
+        return el >= 0 && n.getElement(el) instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t ? t : null;
+    }
+
+    /** A pipe sensor device's port that already has a pipe: no second route starts or ends there (a lab test: clicking
+     *  the device twice laid a second pipe beside the first). */
+    static final String PORT_TAKEN = "Its port already has a pipe";
+
+    static boolean portTaken(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+        var t = deviceAt(level, pos, hit);
+        return t != null && t.pipe() != null;
     }
 
     /** Route from start to end (ports, or a device's port) and lay it (GameTests). Null if done, else why not. */
@@ -176,7 +191,8 @@ public final class PipePlacer {
         }
         if (plan != null) plan.touched = now;
         PipeRouter.End port = portAt(level, pos, face);
-        if (port == null) port = devicePort(level, pos, hit);
+        boolean device = false;
+        if (port == null) device = (port = devicePort(level, pos, hit)) != null;
         if (player.isSecondaryUseActive()) {
             if (plan == null) return false;
             if (plan.waypoints.isEmpty()) {
@@ -187,6 +203,10 @@ public final class PipePlacer {
                 player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
                 preview(player, level, plan, null);
             }
+            return true;
+        }
+        if (device && portTaken(level, pos, hit)) {
+            player.sendOverlayMessage(Component.literal(PORT_TAKEN));
             return true;
         }
         if (plan == null) {
