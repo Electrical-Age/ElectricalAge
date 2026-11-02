@@ -74,9 +74,13 @@ public class ElectricalStackMachineProcess implements IProcess {
             itemStackInOld = itemStackIn;
         }
 
-        if (resumeJoules > 0) {
-            if (smeltInProcess) energyCounter = Math.min(resumeJoules, energyNeeded);
-            resumeJoules = 0;
+        if (resumeJoules > 0) { // given back once the item can be worked on; dropped with the item
+            if (smeltInProcess) {
+                energyCounter = Math.min(resumeJoules, energyNeeded);
+                resumeJoules = 0;
+            } else if (Utils.isEmpty(itemStackIn)) {
+                resumeJoules = 0;
+            }
         }
 
         power = 0;
@@ -103,7 +107,7 @@ public class ElectricalStackMachineProcess implements IProcess {
         return smeltInProcess ? energyCounter : 0;
     }
 
-    /** Gives a saved item's progress back at the first tick, if the same kind of item can still be made then. */
+    /** Gives a saved item's progress back when the item in the input slot can next be worked on (dropped if it goes). */
     public void resume(double joules) {
         resumeJoules = Double.isFinite(joules) && joules > 0 ? joules : 0;
     }
