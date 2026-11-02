@@ -5,7 +5,7 @@ package mods.eln.introspect;
  * them), K is for temperature differences. The JSON name is the constant's name.
  */
 public enum Unit {
-    V("V"), A("A"), W("W"), J("J"), OHM("Ω"), C("°C"), K("K"), M("m"), M_PER_S("m/s"), KG("kg"), MB("mB"),
+    V("V"), A("A"), W("W"), J("J"), OHM("Ω"), C("°C"), K("K"), M("m"), M_PER_S("m/s"), M_PER_S2("m/s\u00B2"), KG("kg"), MB("mB"),
     RPM("rpm"), TICK("t"), S("s"), RATIO("");
 
     /** What a person reads after the number. */
