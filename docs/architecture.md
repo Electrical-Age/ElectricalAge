@@ -93,6 +93,22 @@ Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to th
 - Load: `NodeManager.loadFromNbt` -> `upgradeTag` -> class by `"tag"` -> `readFromNBT` -> `initializeFromNBT` -> `globalBoot`. Unknown type or a throwing load: kept as an orphan tag and saved back unchanged (`keepOrphan`); a node placed later at that spot replaces it, and removing the block there drops it (`dropOrphans`).
 - Burn/repair (`sim/process/destruct`): `Failure` decides by `Failure.Kind`; most devices `burn()` in place (`IBurnable`): disconnect, then reconnect with the element skipped by `connectJob`; publish bit `HEADER_BURNT`; drops nothing of the device itself. `Repair.onActivated` (right-click with `getRepairPart()`) -> `repair()`. Real explosions only for rotating/battery cases; `Eln.explosionEnable`.
 
+## Machine API timing (`api`)
+
+- One game tick: the slow pre-processes (each machine plans its load, or its source, for the step), the electrical
+  step, then the slow processes: each machine books what the step delivered (state, heat, buffer) and then its owner
+  takes or gives energy. A consumer's asks in tick N size its load for the step of tick N+1: exactly one tick later.
+- The buffer holds two ticks of rated energy. An idle machine (no asks) draws only its idle watts and doesn't refill
+  its buffer, so the first ask of a run usually gets nothing, or only what was left in the buffer: work starts a tick
+  after the first ask. This is inherent (the step that would pay for it has already run). Owners either start their
+  work a tick late (the Linear Servo Drive stands still a tick and goes on), ask in the tick before they need the
+  energy, or keep asking a little while ready. While asks continue, a refill of up to a quarter of a tick's rated
+  energy keeps the buffer ahead of them.
+- Loading: a machine saved running runs on at its first step if the line is in range; otherwise a machine starts
+  UNPOWERED and runs after the line has held for half a second.
+- Books (`MachineView`): `joulesDelivered`, `joulesTaken`, `joulesGiven`, `joulesLost` since the machine was built or
+  loaded; a consumer's delivered = taken + buffer + lost, a producer's given = delivered + buffer + lost.
+
 ## Tests
 
 - `src/test/java/mods/eln/node/NodeSaveLoadTest.java`: unknown node types / devices kept and re-saved; orphans per dimension and dropped by position; a failing save keeps the last good tag.

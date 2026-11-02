@@ -7,6 +7,11 @@ import java.util.function.Consumer;
  * the circuit first, then the owner's tick runs; what a consumer asks for in a tick sizes its load for the next one
  * (exactly one tick later), and a machine that asks for nothing draws only its idle watts.
  * <p>
+ * So work starts a tick after the first ask: an idle machine's buffer isn't refilled, and the first take of a run
+ * gets only what was left in it (often nothing). That is inherent, not a fault: start the work a tick late, ask in
+ * the tick before the energy is needed, or keep asking while ready. Once asks continue, the buffer (two ticks of
+ * rated energy, bufferCapacityJoules()) stays ahead of them.
+ * <p>
  * Server thread only: calls from another thread throw IllegalStateException. Amounts must be finite and not
  * negative, else IllegalArgumentException. Taking on a producer, or giving on a consumer, throws
  * IllegalStateException.
