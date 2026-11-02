@@ -13,7 +13,9 @@ import java.util.List;
  * zero, 50 V at full scale) on any signal cable laid into its block, as a control valve takes its signal
  * (VoxelNode.connectSensors). An empty-hand right-click steps its full scale through {@link #PRESSURE_BAR},
  * {@link #TEMPERATURE_C} or {@link #WETNESS_PCT}. The steam quality sensor (Baughn 2026-10-29, the shaft redo: a turbine's
- * blades die of wet steam) reads the run's wetness: the share of its water that is liquid, in percent.
+ * blades die of wet steam) reads the run's wetness: the share of its water that is liquid, in percent. Since 2026-11-02
+ * the pipe sensor items place a device on a face instead (PipeTransmitterElement, Baughn); sensors already fitted load and
+ * work as before.
  */
 public final class PipeSensorPart extends VoxelPart {
     public static final String KIND = "pipe_sensor";
@@ -54,18 +56,32 @@ public final class PipeSensorPart extends VoxelPart {
     }
 
     public String name() {
-        return sensing == PRESSURE ? "Pressure sensor" : sensing == TEMPERATURE ? "Temperature sensor" : "Steam quality sensor";
+        return name(sensing);
     }
 
     public String unit() {
+        return unit(sensing);
+    }
+
+    /** A kind of sensor's name (also the pipe sensor devices', PipeTransmitterElement). */
+    public static String name(int sensing) {
+        return sensing == PRESSURE ? "Pressure sensor" : sensing == TEMPERATURE ? "Temperature sensor" : "Steam quality sensor";
+    }
+
+    public static String unit(int sensing) {
         return sensing == PRESSURE ? "bar" : sensing == TEMPERATURE ? "°C" : "% wet";
     }
 
-    /** Read the run under it: absolute pressure (bar), temperature (C) or wetness (% of its water that is liquid; 0 with
-     *  no water); sets the output. */
-    public void read(mods.eln.sim.fluid.FluidNode n) {
-        reading = sensing == PRESSURE ? n.P() / 1e5 : sensing == TEMPERATURE ? n.T() - mods.eln.sim.fluid.Water.T0
+    /** What a kind of sensor reads of a run: absolute pressure (bar), temperature (C) or wetness (% of its water that is
+     *  liquid; 0 with no water). */
+    public static double reading(int sensing, mods.eln.sim.fluid.FluidNode n) {
+        return sensing == PRESSURE ? n.P() / 1e5 : sensing == TEMPERATURE ? n.T() - mods.eln.sim.fluid.Water.T0
             : n.mWater > 1e-12 ? 100 * Math.max(0, Math.min(1, n.mLiquid() / n.mWater)) : 0;
+    }
+
+    /** Read the run under it (reading(sensing, n)); sets the output. */
+    public void read(mods.eln.sim.fluid.FluidNode n) {
+        reading = reading(sensing, n);
         if (outProcess != null) outProcess.setOutputNormalized(reading / scale);
     }
 
@@ -76,6 +92,11 @@ public final class PipeSensorPart extends VoxelPart {
 
     /** The next full scale up (wrapping). */
     public double nextScale() {
+        return nextScale(sensing, scale);
+    }
+
+    /** The full scale after this one for a kind of sensor (wrapping). */
+    public static double nextScale(int sensing, double scale) {
         double[] s = sensing == PRESSURE ? PRESSURE_BAR : sensing == TEMPERATURE ? TEMPERATURE_C : WETNESS_PCT;
         for (double v : s) if (v > scale + 1e-6) return v;
         return s[0];

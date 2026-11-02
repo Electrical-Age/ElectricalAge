@@ -128,6 +128,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   like the safety valve, one per block; the run's absolute pressure or temperature as 0-50 V on every signal cable in the
   block (full scale stepped by an empty-hand right-click: 2-100 bar, 100-500 C); the dial goes green to red.
   `pipe_pressure_and_temperature_sensors`.
+- Pipe sensors as devices (Baughn 2026-11-02: fitted on a pipe the sensor ended up in mid-air, where signal cables
+  can't go): the three pipe sensor items now place a small device (`sixnode/pipetransmitter`, hidden six-node ids
+  `6402`-`6404` beside the probes) anywhere on a floor, wall or ceiling of a voxel block, its centre on the pipe
+  routers' 4-voxel lattice. It has a pale signal pin on its front and a pipe port 4 voxels over its centre; a pipe kit
+  route starts or ends at the port when the device is clicked (`PipePlacer.devicePort`), and the pipe ends capped
+  there. It reads the run of the pipe through or ending at its port, same modes, full scales, right-click stepping and
+  0-50 V as before; without a pipe it says "not connected to a pipe" and gives 0 V. It holds no fluid, so the fluid
+  sim is unchanged; breaking it drops the sensor item and leaves the pipe (the player's own, paid for from the kit).
+  Chosen over a stub the device would lay and own: a free stub dropped a pipe kit when mined (free pipe each place and
+  break), had to reach a block face with free space to start a route, and lost its identity once a route joined it.
+  Wears the Voltage Probe's model with a drawn iron stem up to the port. The items no longer fit a sensor on a pipe;
+  sensors already fitted keep working. `pipe_transmitter_*`.
 - Battery protection chips (Baughn 2026-10-27, after a protected, nearly empty battery burnt on a 50 V bus): the
   overheating chip is a charge limiter, run every electrical step (BatteryInventoryProcess.Step): charging held to the
   rated current (electricalStdI) by the cut switch's resistance, tapering to none as it nears the cut; the cut is at

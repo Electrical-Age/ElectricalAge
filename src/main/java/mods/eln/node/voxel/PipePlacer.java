@@ -117,6 +117,29 @@ public final class PipePlacer {
         return null;
     }
 
+    /**
+     * The port of a pipe sensor device under the crosshair (PipeTransmitterElement.port: inside the block, over the
+     * device), as a routing end any way round (Baughn 2026-11-02: pipe is laid from the sensor to the pipe to measure),
+     * or null. A route ends there capped, as at any inner end.
+     */
+    static PipeRouter.End devicePort(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+        if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
+        int el = n.aimed(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ()).element();
+        if (el < 0 || !(n.getElement(el) instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t)) return null;
+        int[] p = t.port();
+        return new PipeRouter.End(pos.getX() * 16L + p[0], pos.getY() * 16L + p[1], pos.getZ() * 16L + p[2], -1);
+    }
+
+    /** Route from start to end (ports, or a device's port) and lay it (GameTests). Null if done, else why not. */
+    public static String routeForTests(Level level, int tier, PipeRouter.End start, PipeRouter.End end) {
+        var r = PipeRouter.route(space(level), PipePart.GRID[tier], start, List.of(), end);
+        return r.error != null ? r.error : lay(level, tier, r.points, null);
+    }
+
+    public static PipeRouter.End devicePortForTests(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+        return devicePort(level, pos, hit);
+    }
+
     /** Route from a port to join a pipe at join (world voxels) and lay it (GameTests). Null if done, else why not. */
     public static String routeAndJoinForTests(Level level, int tier, PipeRouter.End start, long[] join) {
         var r = PipeRouter.route(spaceAround(space(level), join, 6), PipePart.GRID[tier], start, List.of(),
@@ -153,6 +176,7 @@ public final class PipePlacer {
         }
         if (plan != null) plan.touched = now;
         PipeRouter.End port = portAt(level, pos, face);
+        if (port == null) port = devicePort(level, pos, hit);
         if (player.isSecondaryUseActive()) {
             if (plan == null) return false;
             if (plan.waypoints.isEmpty()) {

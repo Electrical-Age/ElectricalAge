@@ -11,7 +11,7 @@ unless a path says otherwise. Fluid physics and the MNA itself: see simulation.m
 | `VoxelNode` | server | `extends SixNode implements FluidDevice`; uuid `"v"` (registered in `Eln.java` via `NodeManager.registerUuid`). Holds `parts`, a `used` voxel BitSet, `legacy` (six-node NBT for revert), `host` (imitated BlockState), `carved` |
 | `VoxelPart` | both | Base of the parts; `read`/`deserialize` dispatch on `kind` |
 | `CablePart` (`"cable"`) | both | Polyline on one face (`face` 0..5, 3D value) or a knuckle (`face == -1`, a point on an edge); `TIERS[]` maps tiers to the six-node cable descriptors by name (Signal, LV, MV, HV, VHV, Copper Thermal) |
-| `PipePart` / `ValvePart` / `SafetyValvePart` / `PipeSensorPart` / `AdapterPart` | both | Pipes and fittings (`PipeSensorPart`: a signal output joined to the block's signal cables, as a control valve's input); `AdapterPart.tanks` is the fluid capability (capabilities.md) |
+| `PipePart` / `ValvePart` / `SafetyValvePart` / `PipeSensorPart` / `AdapterPart` | both | Pipes and fittings (`PipeSensorPart`: a signal output joined to the block's signal cables, as a control valve's input; no longer made since 2026-11-02, loaded and working where fitted); `AdapterPart.tanks` is the fluid capability (capabilities.md) |
 | `CableNet` | server | Groups a node's cable pieces into `Conductor`s and builds their loads |
 | `CableRouter`, `PipeRouter` | server | A* routers, pure Java (world behind a `Space` interface) |
 | `CablePlacer`, `PipePlacer`, `KitPreview` | server | Kit UX: start, waypoints, finish; preview outlines sent as `Eln.packetKitPreview` |
@@ -86,7 +86,7 @@ transparent neighbour).
   sockets and the anemometer, walls only).
 - Placed anywhere (Baughn): chips, the small sensors and sources of a0d38750, and the relays (drawn and measured at half
   scale), the four probes, the wireless receiver, transmitter and repeater, the Electrical Timer, the LED vuMeter, the
-  Signal Switch with LED, the power sockets, the Ground Cable, the Hub and the anemometer; the Energy Meter and Advanced Energy Meter (in line on a power run: its sign follows
+  Signal Switch with LED, the pipe sensor devices (see Pipe sensor devices), the power sockets, the Ground Cable, the Hub and the anemometer; the Energy Meter and Advanced Energy Meter (in line on a power run: its sign follows
   which way it faces), the Weak 50V, 50V and 200V Battery Chargers (four power pins, one load) and the Nuclear and
   Standard Alarms; the in-line passives (Baughn, batch 3: the 10A, 25A and Signal Diodes, Power Capacitor, Power
   Inductor, Power Resistor, Rheostat, Thermistor and Electrical Fuse Holder). Their models run their base and leads edge
@@ -124,6 +124,20 @@ transparent neighbour).
   `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A click on a device in a voxel block places on
   that device's face (`placeFace`).
 - `CableConverter.revert` refuses a block holding such devices.
+
+## Pipe sensor devices
+
+- `sixnode/pipetransmitter/PipeTransmitter{Descriptor,Element,Render}` (Baughn 2026-11-02): placed by the pipe sensor
+  items (`PipeSensorItem.place`) on any face, always off centre (`VoxelNode.placeOffCentre`, a slot past the faces even
+  at the face's centre) with its centre on the pipe routers' lattice (4, 8 or 12 across the face), the lattice point
+  nearest the click where it fits, its front from the player's (as the Voltage Probe's) then turned clockwise. Refused
+  in mid-air, and on a pipe or fitting.
+- Its port is `PORT_HEIGHT` (4) voxels off the face over its centre (`PipeTransmitterElement.port`), clear of its
+  2-voxel body. `PipePlacer.devicePort` makes it a routing end any way round (dir -1) when a pipe kit clicks the
+  device, for a route's start and its finish (laid with `lay`; the piece ends capped at the port). `KitPreview` does
+  the same.
+- The element reads `VoxelNode.pipeAt(port)` (any pipe through or ending at the port) via `FluidWorld.nodeFor` each
+  slow step, no fluid of its own; `PipeSensorPart.reading/nextScale/name/unit` are shared with the fitted sensor.
 
 ## Burn chain
 
@@ -223,6 +237,10 @@ device terminal plates) applies to six-node floor cables only, not voxel cables.
 - `gametest/cases/PipeCases.java`: `pipe_boiler_to_turbine`, `pipe_two_in_one_block`, `pipe_routed_over_a_wall`,
   `pipe_join_mid_run`, `pipe_kit_crafting`, `pipe_burst_vents`, `pipe_valve`, `pipe_adapter_capability`,
   `pipe_valve_by_player`, `pipe_kit_pickup_merges`.
+- `gametest/cases/PipeTransmitterCases.java`: `pipe_transmitter_floor_pressure` (a route laid to the port, pressure,
+  volts on its signal cable, Jade, scale step kept by NBT), `pipe_transmitter_wall_temperature` (wall, signal pin down,
+  temperature; a ceiling one not connected), `pipe_transmitter_break_and_refuse` (lattice snap, drop, pipe stays,
+  refused in mid-air and on a pipe), `pipe_transmitter_joins_a_run` (a route from its port joins a run mid-way).
 - Benchmark `gametest/bench/CableBench.java` (id `cable_bench`): `runGameTestServer -PelnBench=out.json
   [-PelnBenchLabel=x] [-PelnBenchConvert] [-PelnBenchNoRthCache]`; when set, it is the only test registered
   (`ElnGameTests`). ~20k cables; phases steady, churn, fault, teardown.

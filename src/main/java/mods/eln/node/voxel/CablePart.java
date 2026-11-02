@@ -164,7 +164,7 @@ public final class CablePart extends VoxelPart {
     }
 
     /** The axis normal to the attachment face (0 x, 1 y, 2 z). */
-    static int normalAxis(int face) {
+    public static int normalAxis(int face) {
         return switch (face) {
             case 0, 1 -> 1;
             case 2, 3 -> 2;
@@ -178,7 +178,7 @@ public final class CablePart extends VoxelPart {
     }
 
     /** The attachment face's plane coordinate: 0 for down/north/west, 16 for up/south/east. */
-    static int plane(int face) {
+    public static int plane(int face) {
         return face % 2 == 0 ? 0 : 16;
     }
 
