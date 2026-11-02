@@ -26,9 +26,10 @@ import java.util.function.Consumer;
  * </ol>
  * Consumer: the buffer holds at most two ticks of rated work energy. The next step's load is idle watts plus work:
  * the demand smoothed over two ticks (fast attack: a rise counts at once, a fall halves first) plus a refill of at
- * most a quarter of a tick's rated work, but never more than the buffer's room, and none without demand; all
- * capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle watts only. Delivered energy pays the
- * idle watts first; the rest goes to the buffer, and what doesn't fit (the line rose) is heat.
+ * most a quarter of a tick's rated work once the line has kept up for a second, but never more than the buffer's room, and none
+ * without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle watts only.
+ * Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the line rose) is
+ * heat.
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
  * queue holds energy, behind the droop resistance 0.05 U_nom^2 / rated (1.05 U_nom open, rated watts at U_nom);
@@ -59,6 +60,13 @@ public final class MachineCore implements MachineView {
     public static final double POWER_AVERAGE_ALPHA = 0.25;
     /** The buffer refill, as a share of rated work power. */
     public static final double REFILL_SHARE = 0.25;
+    /**
+     * The refill only runs once the steps have delivered at least this share of the work they planned for
+     * REFILL_HOLDOFF_TICKS in a row: on a source that can't keep up (a weak line, a starved producer) it waits
+     * instead of pulling the voltage down further, which would collapse it.
+     */
+    public static final double REFILL_KEPT_UP = 0.95;
+    public static final int REFILL_HOLDOFF_TICKS = 20;
     /** A producer's open-circuit voltage, share of nominal. */
     public static final double DROOP_OPEN_RATIO = 1.05;
     /** The buffer, in ticks of rated energy. */
@@ -82,7 +90,8 @@ public final class MachineCore implements MachineView {
     private long ticks;
 
     // consumer
-    private double demand, previousDemand, idleCommand, loadOhms = Double.POSITIVE_INFINITY;
+    private double demand, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
+    private int keptUpTicks = REFILL_HOLDOFF_TICKS;
     // producer
     private boolean sourceOn;
     private double sourceVolts;
@@ -126,6 +135,7 @@ public final class MachineCore implements MachineView {
             amps = a > 0 ? watts / a : 0;
             double idle = Math.min(joules, idleCommand * TICK_SECONDS);
             double work = joules - idle;
+            keptUpTicks = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS) : 0;
             double stored = Math.max(0, Math.min(work, capacity - buffer));
             buffer += stored;
             heat += idle + work - stored;
@@ -156,14 +166,15 @@ public final class MachineCore implements MachineView {
             idle = Math.min(spec.idleWatts(), cap);
             if (state == MachineState.RUNNING) {
                 double smoothed = Math.max(demand, (demand + previousDemand) / 2);
-                double joules = smoothed > 0
-                    ? Math.min(capacity - buffer, smoothed + REFILL_SHARE * ratedJoulesPerTick) : 0;
+                double refill = keptUpTicks >= REFILL_HOLDOFF_TICKS ? REFILL_SHARE * ratedJoulesPerTick : 0;
+                double joules = smoothed > 0 ? Math.min(capacity - buffer, smoothed + refill) : 0;
                 work = Math.max(0, Math.min(joules / TICK_SECONDS, Math.min(workWatts, cap - idle)));
             }
         }
         previousDemand = demand;
         demand = 0;
         idleCommand = idle;
+        workCommand = work;
         double p = idle + work;
         loadOhms = p > 0 ? volts * volts / p : Double.POSITIVE_INFINITY;
         return p;
