@@ -131,8 +131,8 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
             double factor = energyMiss <= 0 ? 0 : Math.min(1, energyMiss / energyBufferMax * 2);
             if (factor < 0.005) factor = 0;
             inP = factor * inPowerMax * inPowerFactor;
-            double r = machine.voltageRatio();
-            energyBuffer += machine.takeJoules(inP * r * r * time);
+            double r = machine.voltageRatio();   // (above nominal volts: no more than rated, the machine's ceiling)
+            energyBuffer += machine.takeJoules(Math.min(inP * r * r * time, machine.ratedJoulesPerTick()));
         }
     }
 

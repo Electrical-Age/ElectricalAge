@@ -230,7 +230,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   element) and the FE exporter run on the Machine API (`Machines.forElement`; Baughn: the four main machines and the
   exporter first, to test the API). Same nominal volts, rated power, energy per item and FE per joule; at or under
   nominal volts they draw exactly what their resistor drew (`MachineApiCases` runs that model alongside, at 1x and
-  0.7x the line). Differences: above nominal volts they no longer speed up past their rating; they start half a
+  0.7x the line). Differences: above nominal volts they no longer speed up past their rating (the exporter takes no more than its
+  maximum power); they start half a
   second after power comes (the API's power-up hold); overvoltage (over 1.3x nominal, either polarity for the
   machines) burns them at once instead of after the watchdog's budget, and a repair brings them back; the exporter
   no longer burns on a reverse voltage under -0.2x nominal; its machine holds up to two ticks of power in front of
