@@ -178,6 +178,17 @@ public class ElementHostTest {
         assertThrows(IllegalArgumentException.class, () -> m.signalConnected("there"));
     }
 
+    /** Jade lines a device places among its own: volts, power, and the machine's state when not running; never "State". */
+    @Test
+    void wailaLinesLeaveStateToTheDevice() {
+        ElementHost m = new Element().machine(MACERATOR);
+        var lines = m.wailaLines();
+        assertEquals(List.of("Voltage", "Power consumption", "Machine"), List.copyOf(lines.keySet()), "unpowered: " + lines);
+        assertEquals("unpowered", lines.get("Machine"));
+        for (int i = 0; i < 12; i++) m.core().afterStep(50, 0);
+        assertEquals(List.of("Voltage", "Power consumption"), List.copyOf(m.wailaLines().keySet()), "running");
+    }
+
     @Test
     void partsGoInTheElementsLists() {
         Element e = new Element();

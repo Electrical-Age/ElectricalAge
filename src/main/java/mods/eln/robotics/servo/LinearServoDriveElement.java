@@ -564,10 +564,9 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     }
 
     @Override
-    /** The machine's lines (volts, power drawn), then the drive's; its State line covers the machine's. */
+    /** The machine's lines (volts, power drawn, its state when not running), then the drive's. */
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
-        machine.addWaila(info);
+        Map<String, String> info = new LinkedHashMap<>(machine.wailaLines());
         double p = posAt(clock);
         info.put(I18N.tr("Position"), String.format("%.1f m", p));
         info.put(I18N.tr("Target"), String.format("%.0f m", target));

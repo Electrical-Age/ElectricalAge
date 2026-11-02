@@ -139,7 +139,7 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
     @Override
     public java.util.Map<String, String> getWaila() {
         java.util.Map<String, String> info = super.getWaila();
-        machine.addWaila(info);
+        info.putAll(machine.wailaLines());
         return info;
     }
 

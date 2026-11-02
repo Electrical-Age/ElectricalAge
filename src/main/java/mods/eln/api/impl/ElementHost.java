@@ -249,12 +249,14 @@ public final class ElementHost implements ElementMachine {
     }
 
     @Override
-    public void addWaila(Map<String, String> info) {
+    public Map<String, String> wailaLines() {
+        Map<String, String> info = new java.util.LinkedHashMap<>();
         info.put(I18N.tr("Voltage"), Utils.plotVolt("", core.volts()));
         boolean producer = core.spec().kind() == MachineSpec.Kind.PRODUCER;
         info.put(I18N.tr(producer ? "Power output" : "Power consumption"), Utils.plotPower("", core.watts()));
         if (core.state() != MachineState.RUNNING)
-            info.put(I18N.tr("State"), I18N.tr(core.state().name().toLowerCase(Locale.ROOT).replace('_', ' ')));
+            info.put(I18N.tr("Machine"), I18N.tr(core.state().name().toLowerCase(Locale.ROOT).replace('_', ' ')));
+        return info;
     }
 
     // ---- Machine

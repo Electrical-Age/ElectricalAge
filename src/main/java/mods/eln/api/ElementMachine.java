@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * A machine hosted by one of EA's own elements (Machines.forElement). Its parts are in the element's lists, so the
  * element's connect, disconnect, burn, repair and NBT handle them; the element delegates its faces and Jade lines
- * here. Faces are resolved against the element's front each call (RelativeFace.FRONT is the element's front,
+ * here (wailaLines). Faces are resolved against the element's front each call (RelativeFace.FRONT is the element's front,
  * LEFT its front.left(), UP its front.up()), so a machine turned with the wrench follows.
  */
 public interface ElementMachine extends Machine {
@@ -39,6 +39,10 @@ public interface ElementMachine extends Machine {
     /** The power terminal, for the element's meters. */
     ElectricalLoad powerLoad();
 
-    /** Adds the machine's Jade lines to info: volts, watts, and its state when not running. */
-    void addWaila(Map<String, String> info);
+    /**
+     * The machine's Jade lines, in order, for the element to place among its own (putAll where it wants them):
+     * "Voltage", "Power consumption" (a producer: "Power output"), and "Machine" with its state when it isn't
+     * running. Keys are translated; none is "State", which stays the device's own.
+     */
+    Map<String, String> wailaLines();
 }
