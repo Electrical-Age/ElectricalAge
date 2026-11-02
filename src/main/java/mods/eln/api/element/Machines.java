@@ -1,6 +1,8 @@
-package mods.eln.api;
+package mods.eln.api.element;
 
 import mods.eln.Eln;
+import mods.eln.api.MachineSpec;
+import mods.eln.api.TripCause;
 import mods.eln.api.impl.ElementHost;
 import mods.eln.api.impl.ElementSite;
 import mods.eln.api.impl.MnaMachine;

@@ -1,9 +1,9 @@
 package mods.eln.robotics.servo;
 
 import mods.eln.Eln;
-import mods.eln.api.ElementMachine;
+import mods.eln.api.element.ElementMachine;
 import mods.eln.api.MachineState;
-import mods.eln.api.Machines;
+import mods.eln.api.element.Machines;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;

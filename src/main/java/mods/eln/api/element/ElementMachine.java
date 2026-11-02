@@ -1,5 +1,7 @@
-package mods.eln.api;
+package mods.eln.api.element;
 
+import mods.eln.api.Machine;
+import mods.eln.api.RelativeFace;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.sim.ElectricalLoad;

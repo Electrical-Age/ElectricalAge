@@ -1,9 +1,9 @@
 package mods.eln.api.docs;
 
-import mods.eln.api.ElementMachine;
 import mods.eln.api.MachineSpec;
-import mods.eln.api.Machines;
 import mods.eln.api.Tier;
+import mods.eln.api.element.ElementMachine;
+import mods.eln.api.element.Machines;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.transparent.TransparentNode;

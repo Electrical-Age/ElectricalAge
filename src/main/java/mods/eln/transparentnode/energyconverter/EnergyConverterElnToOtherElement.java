@@ -1,8 +1,8 @@
 package mods.eln.transparentnode.energyconverter;
 
 import mods.eln.Eln;
-import mods.eln.api.ElementMachine;
-import mods.eln.api.Machines;
+import mods.eln.api.element.ElementMachine;
+import mods.eln.api.element.Machines;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;

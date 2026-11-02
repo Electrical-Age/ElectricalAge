@@ -2,9 +2,9 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.Eln;
 import mods.eln.api.Brownout;
-import mods.eln.api.ElementMachine;
+import mods.eln.api.element.ElementMachine;
 import mods.eln.api.MachineSpec;
-import mods.eln.api.Machines;
+import mods.eln.api.element.Machines;
 import mods.eln.api.RelativeFace;
 import mods.eln.i18n.I18N;
 import mods.eln.item.MachineBoosterDescriptor;

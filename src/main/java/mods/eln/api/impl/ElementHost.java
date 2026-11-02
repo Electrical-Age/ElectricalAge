@@ -2,7 +2,7 @@ package mods.eln.api.impl;
 
 import mods.eln.Eln;
 import mods.eln.api.CablePosition;
-import mods.eln.api.ElementMachine;
+import mods.eln.api.element.ElementMachine;
 import mods.eln.api.MachineBus;
 import mods.eln.api.MachineSpec;
 import mods.eln.api.MachineState;

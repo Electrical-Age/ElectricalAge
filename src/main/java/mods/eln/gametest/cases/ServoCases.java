@@ -97,7 +97,7 @@ public final class ServoCases {
         }
 
         /** The drive's machine (its energy books). */
-        mods.eln.api.ElementMachine core(TestContext ctx) {
+        mods.eln.api.element.ElementMachine core(TestContext ctx) {
             return drive(ctx).machine;
         }
 
