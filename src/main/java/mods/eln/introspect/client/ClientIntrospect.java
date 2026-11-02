@@ -51,6 +51,7 @@ public final class ClientIntrospect {
         if (be instanceof TransparentNodeEntity t && t.elementRender != null) out.add(transparent(t.elementRender, pos));
         if (be instanceof SixNodeEntity s)
             for (SixNodeElementRender r : s.elementRenderList) if (r != null) out.add(six(r, pos));
+        if (be != null && mods.eln.api.ElnApi.machines().registered(be.getType())) out.add(hosted(be, pos));
         return out;
     }
 
@@ -84,6 +85,22 @@ public final class ClientIntrospect {
         r.id().text(Keys.ELEMENT, e.getClass().getSimpleName());
         r.client().bool("burnt", e.burnt);
         if (e instanceof ClientDescribable d) own(r, d);
+        return r;
+    }
+
+    /** A foreign block entity that is an EA machine: the client's view of it (the server's last synced snapshot). */
+    static Report hosted(net.minecraft.world.level.block.entity.BlockEntity be, BlockPos pos) {
+        Report r = new Report(Report.Half.CLIENT);
+        mods.eln.introspect.Describe.hostedId(r, be.getBlockState(), be, pos);
+        try {
+            var v = mods.eln.api.ElnApi.machines().of(be);
+            mods.eln.introspect.MachineDescribe.sync(r, v);
+            r.client().choice("machine_state", v.state());
+            r.client().num(mods.eln.introspect.Keys.VOLTAGE, v.volts(), mods.eln.introspect.Unit.V);
+            r.client().num(mods.eln.introspect.Keys.POWER, v.watts(), mods.eln.introspect.Unit.W);
+        } catch (RuntimeException ex) {
+            r.fault("describe_failed", ex.toString());
+        }
         return r;
     }
 
