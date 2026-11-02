@@ -140,6 +140,8 @@ test {
     if (project.hasProperty('cadDetail')) systemProperty 'cad.detail', project.property('cadDetail')
     if (project.hasProperty('cadPreviews')) systemProperty 'cad.previews', project.property('cadPreviews')
     systemProperty 'eln.resources', file('src/main/resources').absolutePath
+    // machine API golden traces (BenchTest): -PapiTraces rewrites src/test/resources/mods/eln/api/*.trace instead of comparing
+    if (project.hasProperty('apiTraces')) systemProperty 'eln.api.traces', file('src/test/resources/mods/eln/api').absolutePath
     // LayoutTest checks every shipped screen layout (assets/eln/gui)
     systemProperty 'eln.guiDir', file('src/main/resources/assets/eln/gui').absolutePath
 }

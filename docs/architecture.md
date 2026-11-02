@@ -43,7 +43,8 @@ Tick data flow: `ServerTickEvent.Pre` -> `Simulator.tick()` (see simulation.md) 
 | `datagen` | lang, tags, recipes, item models -> `src/generated/resources` (committed) |
 | `gametest` | in-game tests and `/elnlab` lab commands (see testing.md) |
 | `api` | the machine API for other mods and new devices: `MachineSpec` (built and checked), `Tier`, `RelativeFace`, `MachineState`, `TripCause`, `Machine`/`MachineView`/`MachineBus`; no internal types in its signatures |
-| `api/impl` | the API's implementation: `MachineCore`, one machine's pure controller (buffer, state machine, heat model; plain numbers, no circuit types) |
+| `api/impl` | the API's implementation: `MachineCore`, one machine's pure controller (buffer, state machine, heat model; plain numbers, no circuit types); `MnaMachine` puts a core in the circuit at a terminal load (consumer: resistor to ground; producer: source behind its droop resistor, set at root pre-step from the Thevenin equivalent); hosts call `applyBeforeStep()` before the electrical step and `readAfterStep()` after it; `ReadOnlyView` |
+| `api/testkit` | `ElnTestKit.bench()`: `Bench` (supply, line, machines in EA's own simulator, ticked in the game's order, trace per tick) and `BenchMachine` (a `Machine` plus owner code, signal inputs/outputs, a shared field bus) |
 
 Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to the Java ones under `src/main/java`
 (e.g. `node/published.kt`, `node/INodeElement.kt`, `mechanical/*.kt`, `sixnode/AnalogChips.kt`, `sound/LoopedSound.kt`).
