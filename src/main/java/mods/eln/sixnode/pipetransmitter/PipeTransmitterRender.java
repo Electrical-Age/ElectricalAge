@@ -68,7 +68,9 @@ public class PipeTransmitterRender extends SixNodeElementRender {
                 if (GLYPHS[k][r].charAt(col) != '1') continue;
                 // (seen from off the face: +z up the letter, +y to its right)
                 float y0 = (col - 1.5f) * cell, z1 = (2.5f - r) * cell;
-                box(top, top + 0.25f / 16, y0, y0 + cell, z1 - cell, z1);
+                // raised past the stem's flange (top + 0.6 px), so the port's square doesn't cut the letter's
+                // middle row (AdventurAgent: P read like a ∩)
+                box(top + 0.65f / 16, top + 0.9f / 16, y0, y0 + cell, z1 - cell, z1);
             }
         GL11.glColor3f(1f, 1f, 1f);
     }
