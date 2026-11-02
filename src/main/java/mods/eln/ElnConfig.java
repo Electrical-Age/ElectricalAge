@@ -9,6 +9,7 @@ public final class ElnConfig {
 
     public static final ModConfigSpec SPEC;
     static final ModConfigSpec.DoubleValue BATTERY_LIFE_FACTOR;
+    static final ModConfigSpec.IntValue AUTOMINER_RANGE;
     static final ModConfigSpec.BooleanValue PROBE_DETAILS;
     static final ModConfigSpec.BooleanValue CONVERT_CABLES;
     static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
@@ -29,6 +30,8 @@ public final class ElnConfig {
         HEAT_FURNACE_FUEL = b.comment("Heat a fuel gives in the heat furnaces (stone and fuel), times its 1.12 value. Baughn 2026-10-26: with",
                 "steam turbines working by the expansion, coal to electricity straddles the old 33%: ~24% venting, ~44% with a condenser.")
             .defineInRange("heatFurnaceFuelFactor", 2.5, 0.01, 100.0);
+        AUTOMINER_RANGE = b.comment("The Auto Miner's ore radius, blocks round its shaft, once it is that deep (1.12: 10; Baughn 2026-11-02: 24).")
+            .defineInRange("autominerRange", 24, 1, 64);
         b.pop();
         b.push("fire");
         COAL_LAG = b.comment("Seconds a coal fire (the stone heat furnace) takes to follow its setting: a first-order lag (Baughn: coal",
@@ -162,6 +165,7 @@ public final class ElnConfig {
         mods.eln.bike.BikeType.terrainStep = (float) (double) TERRAIN_STEP.get();
         mods.eln.bike.BikeType.terrainJumpVy = mods.eln.bike.BikePhysics.velocityForPeak(TERRAIN_JUMP.get());
         mods.eln.bike.BikeType.terrainWatts = TERRAIN_MOTOR.get();
+        Eln.autominerRange = AUTOMINER_RANGE.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.powerW = ANVIL_POWER.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerUnit = ANVIL_UNIT.get();
         mods.eln.anvil.ElectricalAnvilDescriptor.joulesPerName = ANVIL_NAME.get();

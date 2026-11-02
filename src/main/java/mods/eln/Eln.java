@@ -62,8 +62,8 @@ public class Eln {
     public static String dictTungstenOre = "oreElnTungsten", dictTungstenDust = "dustElnTungsten", dictTungstenIngot = "ingotElnTungsten";
     public static String dictCheapChip = "circuitBasic", dictAdvancedChip = "circuitAdvanced";
 
-    /** 1.12 config balancing.autominerRange (10): maximum horizontal mining distance. */
-    public static int autominerRange = 10;
+    /** The Auto Miner's ore radius: config balancing.autominerRange (ElnConfig; 1.12: 10, Baughn: 24). */
+    public static int autominerRange = 24;
 
     /** 1.12 config balancing.platesPerIngot (1). */
     public static int plateConversionRatio = 1;

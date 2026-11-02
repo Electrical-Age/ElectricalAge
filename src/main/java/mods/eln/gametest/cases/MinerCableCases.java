@@ -72,6 +72,7 @@ public final class MinerCableCases {
                 return;
             }
             var w = miner.element.getWaila();
+            c.check("autominer: its ore radius is the config's, 24 by default (Baughn)", mods.eln.Eln.autominerRange == 24, "" + mods.eln.Eln.autominerRange);
             c.check("autominer: Jade says where its power goes, first", w.keySet().iterator().next().equals("Power") && w.get("Power").contains("corner"), w.toString());
         }
     }
