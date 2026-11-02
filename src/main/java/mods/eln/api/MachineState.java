@@ -23,7 +23,12 @@ public enum MachineState {
     /** Line went over 1.3x nominal: draws nothing. Resets after the trip cooldown spent below 1.1x. */
     OVERVOLTAGE_TRIPPED,
     /** Temperature went over the spec's trip point: draws nothing until the cooldown is spent 10 K below it. */
-    OVERHEAT_TRIPPED;
+    OVERHEAT_TRIPPED,
+    /**
+     * In no circuit: the block entity it was hosted at was removed or unloaded, or its type was never registered
+     * (ElnApi.machines()). Inert: draws nothing, takes return 0, gives are refused; signals read their defaults.
+     */
+    DETACHED;
 
     /** One of the trips? */
     public boolean tripped() {

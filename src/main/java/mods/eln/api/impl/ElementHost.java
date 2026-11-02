@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * A machine on an element (see Machines.forElement): a MachineCore and its MnaMachine on a power terminal of its
+ * A machine on an element (see Machines.forElement), or on the node HostedNode puts at another mod's block entity: a MachineCore and its MnaMachine on a power terminal of its
  * own, plus a gate node per signal, all added to the element's lists. Two processes drive it: the step's plan
  * (beforeStep) in the slow pre-processes, and the step's books (afterStep) first in the slow processes, so the
  * element's own slow processes, the owner's work, run between them, as MachineCore wants.

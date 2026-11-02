@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "mods.eln.api.impl.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "ServerLevelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

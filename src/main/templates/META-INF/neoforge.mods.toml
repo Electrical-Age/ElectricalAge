@@ -48,6 +48,10 @@ Electrical Age: electrical and mechanical simulation (MNA solver), ported to Min
 [[mixins]]
 config="${mod_id}.mixins.json"
 
+# Machine API (required): block entities joining a server level are offered to the host of machines at other mods' blocks.
+[[mixins]]
+config="${mod_id}.api.mixins.json"
+
 # Client look-only mixins (not required: if one can't apply, only that look is lost): a bike rider's legs on the pedals.
 [[mixins]]
 config="${mod_id}.client.mixins.json"
