@@ -174,7 +174,8 @@ public class MachineCorePropertyTest {
         int[] since = {-1};
         MachineState[] prev = {MachineState.UNPOWERED};
         Object[] trip = {null};
-        double[] ratios = history.stream().mapToDouble(Tick::ratio).toArray();
+        // the ratio as the core sees it, from the volts it is given (ratio 1.1 can come back as 1.0999999999999999)
+        double[] ratios = history.stream().mapToDouble(t -> t.ratio() * spec.nominalVolts() / spec.nominalVolts()).toArray();
         runConsumer(spec, history, (i, c, state, u, got, p) -> {
             Object now = c.lastTrip().orElse(null);
             if (now != trip[0]) { // a new trip this tick
