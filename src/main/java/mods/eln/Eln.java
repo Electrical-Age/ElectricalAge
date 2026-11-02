@@ -377,6 +377,7 @@ public class Eln {
         });
         mods.eln.network.ElnNet.register(modBus);
         mods.eln.api.impl.HostedMachines.register(modBus);   // machines at other mods' block entities (ElnApi.machines())
+        mods.eln.apitest.ApiTestMachines.register(modBus);   // the hidden eln:api_test_machine (GameTests of the above)
         mods.eln.gametest.ElnGameTests.register(modBus);
         LOG.info("Electrical Age (26.x port, P0) loaded");
     }
