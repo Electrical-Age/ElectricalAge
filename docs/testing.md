@@ -34,6 +34,7 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `sim/FireTest` | A fire's burn level lags its setting. |
 | `sim/fluid/FluidCoreTest`, `FluidPropertyTest` | Water/steam/air properties, flash, turbine calibration; random networks conserve mass/energy, no NaN, settle. Not jqwik: own seeds, printed in the failure message. |
 | `api/MachineSpecTest` | `MachineSpec` defaults (power on every face not given a signal or the bus) and every `build()` message. |
+| `api/MachineCoreTest`, `MachineCorePropertyTest` (jqwik) | `MachineCore` with no circuit: misuse throws; an ask sizes the next step (exactly one tick of lag); refill; each trip and its cooldown. Properties over random specs and line histories that dwell on every threshold: energy conserved (taken + buffered <= delivered; fed <= given, overdraw carried), buffer in bounds, draw <= rated (U/Unom)^2 and idle only below the floor, trips latch for the cooldown, no chatter at the trip point or the undervoltage floor, droop and current limit. |
 | `node/NodeSaveLoadTest` | Unloadable node tags (also a `LinkageError`) are kept by `NodeManager` as orphans and written back unchanged; dropped by position; a node whose save throws keeps its last good tag. |
 | `node/six/SixNodeLoadTest` | A six-node face that cannot load is kept and its side stays taken; load connects once; bad client packets ignored. |
 | `server/ElnWorldSavesTest` | Bad save files set aside, unreadable ones left and saving blocked, a whole `.tmp` preferred to the `.bak`. |
