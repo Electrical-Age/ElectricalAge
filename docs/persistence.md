@@ -16,6 +16,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 | Oil ponds done | vanilla SavedData `eln:oil_ponds` (codec key `lakes`: the oil lakes whose pond was placed or skipped) | `oil/OilPonds` |
 | Tutorial sign texts | `<world>/EA/tutorialSign.txt`, read only (the `.xml` reader is commented out) | `sixnode/tutorialsign/TutorialSignElement` via `Utils.readMapFile` |
 | Block entities | nothing persistent | `node/NodeBlockEntity` |
+| Machines at other mods' block entities (Machine API) | that block entity's NeoForge data attachment `eln:machine`, in the chunk | `api/impl/MachineData` |
 
 - `<dim>` = `misc/Dimensions.id(level)`: overworld 0, nether -1, end 1, others the hash of the dimension id.
 - Block entities (`NodeBlockEntity`, `SixNodeEntity`, `TransparentNodeEntity`, `VoxelNodeEntity`) have no
@@ -128,6 +129,13 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   `...lastTripBurns`; its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
   `api.machine.drive<i>highImpedance` / `U`, a producer's `api.machine.emfUc` / `U` / `Istate`. Taken back at the
   first tick (after the element's own ratings); absent keys: a fresh machine.
+- Machines at other mods' block entities (`ElnApi.machines()`): no node is saved (`HostedNode` is unsaved). The
+  block entity's attachment `eln:machine` (under NeoForge's `neoforge:attachments`) holds a compound `state` with the
+  machine keys above (`api.machine.bufferJ`, `celsius`, `trip`, `tripTicks`, `running`, `lastTrip*`; not the parts'
+  `...Uc`, which live in the node). It is written from the live machine whenever the chunk saves
+  (`MachineData.SERIALIZER`; the node marks the chunk unsaved when the state moved, without `setChanged`, which would
+  update comparators), or from the state kept when the node went; nothing is written for a block entity never hosted.
+  Loaded with the block entity and taken back at the node's first step, as an element's.
 - Electrical machines (macerator, compressor, magnetizer, plate machine, tar sand separator) since the Machine API:
   `powerOn`, `progressJ` (the item in hand, J; absent before: it starts from 0), and the machine keys above;
   `electricalLoadUc` is no longer written or read (a node voltage, solved again on the first step).

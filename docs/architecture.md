@@ -43,8 +43,9 @@ Tick data flow: `ServerTickEvent.Pre` -> `Simulator.tick()` (see simulation.md) 
 | `datagen` | lang, tags, recipes, item models -> `src/generated/resources` (committed) |
 | `robotics` | the servo layer, kept apart (own registers in `Robotics`, an `ElnContent` in `Eln.CONTENT`) so it can become a subproject: `motion` (pure: `Segment`, `Drive` with its energy rule, `Stations`), `servo` (Linear Servo Drive node, a Machine API machine, `ServoRailBlock`, `StationMarkerBlock`, `ElevatorCar` + `ElevatorPanel` part, `Riders`, `SegmentPayload`), `client` (car renderer, `CarCarry`), `mixin` (floating kick) |
 | `gametest` | in-game tests and `/elnlab` lab commands (see testing.md) |
-| `api` | the machine API for other mods and new devices: `MachineSpec` (built and checked; nominal volts are a plain number), `Tier` (a convenience: 50, 200, 800, 3200 V), `RelativeFace`, `CablePosition` (a signal's cable on a side face's floor or ceiling, so two signals can share a face), `MachineState`, `TripCause`, `Brownout` (STOP by default, or SLOW), `Machine`/`MachineView`/`MachineBus` (`Machine.respec` swaps in other ratings: upgrades; `Machine.signalConnected` tells a wired input from an unwired one; `MachineView` reads the buffer's capacity and the energy books since built or loaded: `joulesDelivered`, `joulesTaken`, `joulesGiven`, `joulesLost`); `Machines.forElement` and `ElementMachine` for EA's own elements (faces and masks per side, or per side and LRDU for signals at a cable position; `wailaLines()` for the element to place among its own Jade lines) (these name EA types: `TransparentNodeElement`, `Direction`, `ElectricalLoad`); no internal types in the rest |
-| `api/impl` | the API's implementation: `MachineCore`, one machine's pure controller (buffer, state machine, heat model with the spec's reset band, cooling to the ambient its host gives: EA's `Ambient` at an element, the bench's setting; plain numbers, no circuit types); `MnaMachine` puts a core in the circuit at a terminal load (consumer: resistor to ground; producer: source behind its droop resistor, set at root pre-step from the Thevenin equivalent); hosts call `applyBeforeStep()` before the electrical step and `readAfterStep()` after it (it refuses a simulator not stepping once per tick); a `Brownout.SLOW` consumer learns its line's Thevenin resistance from two steps and plans no more than the line's maximum power, on its stiff side (planning on the sagged volts alone collapsed a weak line to the machine's rated resistance); a consumer's resistor has a 1% dead-band (under-draw only) and a producer stays connected 20 ticks after its queue empties, so steady machines don't rebuild the matrix every tick; `ReadOnlyView`; `ElementHost` (a machine on an EA element: its parts in the element's lists, faces by `Faces`, state saved under `api.machine.*`) behind the public `Machines.forElement` / `ElementMachine` |
+| `api` | the machine API for other mods and new devices: `MachineSpec` (built and checked; nominal volts are a plain number), `Tier` (a convenience: 50, 200, 800, 3200 V), `RelativeFace`, `CablePosition` (a signal's cable on a side face's floor or ceiling, so two signals can share a face), `MachineState`, `TripCause`, `Brownout` (STOP by default, or SLOW), `Machine`/`MachineView`/`MachineBus` (`Machine.respec` swaps in other ratings: upgrades; `Machine.signalConnected` tells a wired input from an unwired one; `MachineView` reads the buffer's capacity and the energy books since built or loaded: `joulesDelivered`, `joulesTaken`, `joulesGiven`, `joulesLost`); `Machines.forElement` and `ElementMachine` for EA's own elements (faces and masks per side, or per side and LRDU for signals at a cable position; `wailaLines()` for the element to place among its own Jade lines) (these name EA types: `TransparentNodeElement`, `Direction`, `ElectricalLoad`); `ElnApi` (`machines()`: `MachineRegistry`, machines at other mods' block entities; `MACHINE`, the `eln:machine` block capability); no internal types in the rest |
+| `api/impl` | the API's implementation: `MachineCore`, one machine's pure controller (buffer, state machine, heat model with the spec's reset band, cooling to the ambient its host gives: EA's `Ambient` at an element, the bench's setting; plain numbers, no circuit types); `MnaMachine` puts a core in the circuit at a terminal load (consumer: resistor to ground; producer: source behind its droop resistor, set at root pre-step from the Thevenin equivalent); hosts call `applyBeforeStep()` before the electrical step and `readAfterStep()` after it (it refuses a simulator not stepping once per tick); a `Brownout.SLOW` consumer learns its line's Thevenin resistance from two steps and plans no more than the line's maximum power, on its stiff side (planning on the sagged volts alone collapsed a weak line to the machine's rated resistance); a consumer's resistor has a 1% dead-band (under-draw only) and a producer stays connected 20 ticks after its queue empties, so steady machines don't rebuild the matrix every tick; `ReadOnlyView`; `ElementHost` (a machine on an EA element: its parts in the element's lists, faces by `Faces`, state saved under `api.machine.*`; an optional bus port, `PortBus`) behind the public `Machines.forElement` / `ElementMachine`; the foreign block entity host (see "Machine API hosts"): `HostedMachines` (`ElnApi.machines()`, the lifecycle, the capability), `HostedNode`, `HostedMachine` (the server's handle, inert and `DETACHED` once its block entity goes), `ClientMachine` (the client's read-only view), `MachineData` (the `eln:machine` attachment), `RegistrationBook`, `HostFaces`, `ServerThread`, `mixin/ServerLevelMixin` |
+| `apitest` | the hidden `eln:api_test_machine` (FACING, LIT; no item), written on `mods.eln.api` alone like another mod: the GameTests' fixture for hosted machines |
 | `api/testkit` | `ElnTestKit.bench()`: `Bench` (supply, line, machines in EA's own simulator, ticked in the game's order, trace per tick) and `BenchMachine` (a `Machine` plus owner code, signal inputs/outputs, a shared field bus) |
 
 Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to the Java ones under `src/main/java`
@@ -58,6 +59,7 @@ Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to th
 | Transparent | `node/transparent/TransparentNode` / `"t"` | one `TransparentNodeBlock` per device (`ElnRegistry.TRANSPARENT_BLOCKS`, via `descriptor::newBlock`) | shared type `transparent_node` (`TransparentNodeEntity`) | one `TransparentNodeElement` | `TransparentNodeElementRender`, BER `TransparentNodeRender` |
 | Voxel | `node/voxel/VoxelNode extends SixNode` / `"v"` | `voxel_node` (+ fence/wall variants) | `VoxelNodeEntity` | voxel parts (cables, pipes) + hosted six-node elements | parts baked by `VoxelModel`; hosted elements via `SixNodeRender`. See voxel-cables.md |
 | Grid | a TransparentNode whose element is `gridnode/GridElement` | per device | as transparent | `GridElement` + `GridLink` set | `GridRender` (catenaries) |
+| Hosted machine | `api/impl/HostedNode extends GhostNode` / `"h"`, never saved | another mod's | another mod's | an `ElementHost` | none (the block's own; publishing is off) |
 
 - `NodeBase` (abstract): coordinate, `nodeConnectionList`, connect/disconnect, publish, NBT. `Node extends NodeBase` adds light (`lastLight`) and redstone. `NodeManager` keeps `Coordonate -> NodeBase` (all dimensions, one instance).
 - Multiblocks: `TransparentNodeDescriptor.getGhostGroup(front)` -> `GhostGroup.plot` places `GhostBlock`s; `GhostManager` maps ghost coord -> `GhostElement` (observer = the device), the element is a `GhostObserver` (`ghostDestroyed`, `ghostBlockActivated`). Breaking any ghost breaks the device. `misc/GhostPowerNode.kt` gives ghosts electrical ports.
@@ -108,6 +110,41 @@ Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to th
   UNPOWERED and runs after the line has held for half a second.
 - Books (`MachineView`): `joulesDelivered`, `joulesTaken`, `joulesGiven`, `joulesLost` since the machine was built or
   loaded; a consumer's delivered = taken + buffer + lost, a producer's given = delivered + buffer + lost.
+
+## Machine API hosts (`api/impl`)
+
+- Registration: `ElnApi.machines().register(type, be -> spec)` at common setup (common setups run in parallel: the
+  book is thread-safe). `HostedMachines` closes it in `RegisterCapabilitiesEvent` (registries freeze before common
+  setup; the capability for each type is the real deadline): later calls throw, naming `FMLCommonSetupEvent`. The
+  same type with the same function again is a no-op, with another it throws.
+- Load: NeoForge has no block entity load event. `mixin/ServerLevelMixin` (config `eln.api.mixins.json`, required)
+  hooks `ServerLevel.onBlockEntityAdded`, which both `LevelChunk.addAndRegisterBlockEntity` (placement, `setBlock`,
+  `setBlockEntity`) and `registerAllBlockEntitiesAfterLevelLoad` (chunk load) call; a registered type's block entity
+  is only queued there (the chunk is mid-promotion). `HostedMachines.tick` (`ServerTickEvent.Pre`, high priority, so
+  before `simulator.tick()`): retires hosted block entities that are `isRemoved()` (broken, replaced, chunk
+  unloaded: `clearAllBlockEntities` calls `setRemoved`), hosts the queue, then `followFacing` on each. `of(be)` on
+  the server hosts at once if it comes first (an owner's first tick).
+- Hosting: a `HostedNode` at the block (a stale node there is retired first), `neighborBlockRead` (loaded neighbours
+  only), `NodeManager.addNode`, `connect()`, then `reconnect()` on its added EA neighbours (Argon's trap 4: cables stay
+  in NodeManager while the block's chunk is unloaded; also re-runs a voxel neighbour's bus links). The node is tied
+  to the block entity object, so a block state change that keeps it (a furnace's LIT: trap 1) does nothing;
+  `followFacing` reconnects only when the front from the facing changed (trap 2: `HostFaces`, a property named
+  `facing` or `horizontal_facing` with Direction values, else north; then `Faces.resolve`).
+- Leaf faces (trap 3): each power face has its own terminal load (cables connect to it); one `ElectricalConnection`,
+  the selector, joins one terminal to the host's power node. A slow pre-process (first, before the host plans the
+  step) keeps the active face while it has its cable and, for a consumer, its line (2% of nominal); else the connected
+  face with the highest volts takes over; a connected face with a dead line is kept unless another face is live (no
+  switching between two live lines: two cables from one grid would flip-flop). Unselected terminals dangle (no
+  current), so no power ever passes between faces and removing the node never cuts a line.
+- Bus: the bus face's mask is 0 (no NodeConnection); the node links its `BusPort` to a voxel bus cable beside it
+  (`VoxelNode.busPortAt`), and a voxel node links to a `BusPeer` neighbour in its own `connectJob`.
+- Retire: the state goes into the attachment, then `onBreakBlock` (or only `disconnect` when its dimension already
+  dropped it), and the `HostedMachine` handle detaches (`DETACHED`, inert; it logs once if used).
+- Burn: `burnsOnOvervoltage` queues `level.destroyBlock(pos, false)` through the simulator's destruct queue (EA can't
+  burn another mod's block in place; open for Baughn).
+- Not saved: `mustBeSaved()` is false (the GameTest persistence pass skips such nodes); its state lives in the
+  block entity's `eln:machine` attachment (persistence.md), synced to clients (networking-gui.md).
+- The capability `eln:machine` (capabilities.md) reads `of(be).view()`.
 
 ## Tests
 

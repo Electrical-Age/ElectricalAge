@@ -6,7 +6,8 @@ registered, the side/burn/client rules, cache invalidation, and the tests that g
 ## Registration
 
 All registrations are lambdas on `RegisterCapabilitiesEvent` in `src/main/java/mods/eln/Eln.java` (mod bus, in the
-constructor next to `NodeServer`); the item-energy one calls `ItemEnergyCapability::register`. There is no separate
+constructor next to `NodeServer`); the item-energy one calls `ItemEnergyCapability::register`, and the Machine API's
+`eln:machine` is `HostedMachines.capabilities` (which also closes `ElnApi.machines().register`). There is no separate
 capabilities class (the javadoc of `fluid/ElementFluidHandler.java` still names an `ElnCapabilities`: it does not exist).
 
 | Capability | Target | Provider returns | Null-side | Client | Burnt |
@@ -15,6 +16,8 @@ capabilities class (the javadoc of `fluid/ElementFluidHandler.java` still names 
 | `Capabilities.Item.BLOCK` | `TRANSPARENT_NODE_ENTITY` | `TransparentNode.getItemHandler(side)` -> element | null | null | null (node and element) |
 | `Capabilities.Fluid.BLOCK` | `TRANSPARENT_NODE_ENTITY` | `TransparentNode.getFluidHandler()` if an `ElementFluidHandler` or a `ResourceHandler<FluidResource>` | allowed (side ignored) | null | NOT hidden |
 | `Capabilities.Fluid.BLOCK` | `VOXEL_NODE_ENTITY` | `VoxelNode.adapterOn(face).tanks` (`node/voxel/AdapterPart.Tanks`) | null | null | n/a |
+| `ElnApi.MACHINE` (`eln:machine`, `MachineView`) | every type registered with `ElnApi.machines()` | `of(be).view()` (`api/impl/HostedMachines`) | allowed (side ignored) | the synced read-only view | n/a |
+| `ElnApi.MACHINE` | `TRANSPARENT_NODE_ENTITY` | the element's Machine API machine, `ElementHost.find(slowProcessList).view()`; null for other elements | allowed | null | the machine's state |
 | `Capabilities.Energy.ITEM` | every item whose item or descriptor is an `IItemEnergyBattery` | `ItemEnergyCapability.Handler` | n/a | both | n/a |
 
 Not exposed: six-node blocks (only voxel adapters), ghost blocks (`ghost/GhostBlock.java` has no block entity: other
@@ -97,4 +100,6 @@ burn state, so it needs no invalidation on burn.
   a held `BlockCapabilityCache` clears when the adapter is removed and comes back when it is added again.
 - `port26 fluid handler` (`gametest/cases/PortHelperCases.java`): tank semantics; fuel heat furnace exposes its tank.
 - `oil_separator`, `oil_boiler`, `oil_column` (`gametest/cases/OilCases.java`): fluid capability lookups (null side).
+- `api_hosted_machine_works` (`gametest/cases/HostedMachineCases.java`): `eln:machine` at a hosted machine (null and
+  UP side) is its view, at an EA macerator its machine, at a furnace null.
 - Unit: `src/test/java/mods/eln/transparentnode/energyconverter/ExporterSaveUpgradeTest.java` (tag upgrade).
