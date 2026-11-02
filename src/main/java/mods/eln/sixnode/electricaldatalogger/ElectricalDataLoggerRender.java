@@ -68,8 +68,10 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        // the bus pin, in a voxel block (a plain block has no bus cable to meet)
-        if (front != null && inVoxelBlock()) drawBusPin(ElectricalDataLoggerElement.busEdge(pinEdge(), front), 0, 4 / 16f);
+        // the bus pin, in a voxel block (a plain block has no bus cable to meet): on the three-channel logger and the
+        // tilted terminal only; the box-bodied loggers' bodies cover it, and their screens showed it as a big violet
+        // square (Baughn); the pin still connects there
+        if (front != null && inVoxelBlock() && (descriptor.channels > 1 || descriptor.ceiling)) drawBusPin(ElectricalDataLoggerElement.busEdge(pinEdge(), front), 0, 4 / 16f);
         if (!descriptor.onFloor) {
             if (side.isY()) {
                 GL11.glPushMatrix();
