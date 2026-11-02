@@ -17,13 +17,11 @@ public enum MachineState {
     UNDERVOLTAGE,
     /** Line went over 1.3x nominal: draws nothing. Resets after the trip cooldown spent below 1.1x. */
     OVERVOLTAGE_TRIPPED,
-    /** Power, averaged over about 4 ticks, went over the spec's maxWatts: draws nothing until the cooldown is over. */
-    OVERPOWER_TRIPPED,
     /** Temperature went over the spec's trip point: draws nothing until the cooldown is spent 10 K below it. */
     OVERHEAT_TRIPPED;
 
-    /** One of the three trips? */
+    /** One of the trips? */
     public boolean tripped() {
-        return this == OVERVOLTAGE_TRIPPED || this == OVERPOWER_TRIPPED || this == OVERHEAT_TRIPPED;
+        return this == OVERVOLTAGE_TRIPPED || this == OVERHEAT_TRIPPED;
     }
 }

@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /**
  * Why a machine tripped: the state it went to, the value that tripped it and the limit, in the state's unit (V for
- * overvoltage, W for overpower, degrees C for overheat). burns: the spec has burnsOnOvervoltage and the machine is
+ * overvoltage, degrees C for overheat). burns: the spec has burnsOnOvervoltage and the machine is
  * destroyed rather than reset.
  */
 public record TripCause(MachineState state, double measured, double limit, boolean burns) {
@@ -17,12 +17,10 @@ public record TripCause(MachineState state, double measured, double limit, boole
     public String toString() {
         String what = switch (state) {
             case OVERVOLTAGE_TRIPPED -> "overvoltage";
-            case OVERPOWER_TRIPPED -> "overpower";
             default -> "overheat";
         };
         String unit = switch (state) {
             case OVERVOLTAGE_TRIPPED -> "V";
-            case OVERPOWER_TRIPPED -> "W";
             default -> "C";
         };
         return String.format(Locale.ROOT, "%s: %.1f %s over %.1f %s%s", what, measured, unit, limit, unit,

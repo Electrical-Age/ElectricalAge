@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * What a machine is, electrically: a consumer or producer at a nominal voltage, its power ratings, protections and which face
- * does what. Immutable; made by consumer(tier) or producer(tier), then the builder's build(), which checks every
- * setting and lists all problems in one IllegalArgumentException. Baughn: a mod hands over a nominal machine spec
+ * What a machine is, electrically: a consumer or producer at a nominal voltage, its power ratings, protections
+ * and which face does what. Immutable; made by consumer(volts or tier) or producer(volts or tier), then the
+ * builder's build(), which checks every setting and lists all problems in one IllegalArgumentException. Baughn: a mod hands over a nominal machine spec
  * and gets volts and joules back; every default is the safe one, and the unsafe options say so in their names.
  */
 public final class MachineSpec {
@@ -32,21 +32,23 @@ public final class MachineSpec {
 
     /**
      * A first-order heat model: heat capacity (J/K), loss to ambient (W/K) and the temperature that trips the
-     * machine (degrees C). The time constant is heatCapacityJperK / lossWperK seconds. Heat in: a consumer's idle
-     * watts and the delivered energy its buffer couldn't hold, a producer's droop loss, and Machine.heatJoules.
+     * machine (degrees C). The time constant is heatCapacityJPerK / heatLossWPerK seconds. Heat in: a consumer's
+     * idle watts and the delivered energy its buffer couldn't hold, a producer's droop loss, and Machine.heatJoules.
      */
-    public record Thermal(double heatCapacityJperK, double lossWperK, double tripCelsius) {
+    public record Thermal(double heatCapacityJPerK, double heatLossWPerK, double overheatCelsius) {
     }
 
     /** The ambient temperature the heat model starts at and cools to, degrees C. */
     public static final double AMBIENT_CELSIUS = 20;
-    /** An overheat trip resets only this far (K) below its trip point. */
+    /** An overheat trip resets only this far (K) below its trip point (or halfway to ambient, if that is nearer). */
     public static final double OVERHEAT_RESET_KELVIN = 10;
     /** The shortest trip cooldown build() accepts, s: shorter lets a trip chatter. */
     public static final double MIN_TRIP_COOLDOWN_SECONDS = 0.5;
+    /** The highest undervoltage floor build() accepts: a line always sags a little under load. */
+    public static final double MAX_MIN_VOLTAGE_RATIO = 0.95;
 
     private final Kind kind;
-    private final double nominalVolts, ratedWatts, idleWatts, minVoltageRatio, maxWatts, tripCooldownSeconds;
+    private final double nominalVolts, ratedWatts, idleWatts, minVoltageRatio, tripCooldownSeconds;
     private final boolean burnsOnOvervoltage;
     private final Thermal thermal;
     private final Set<RelativeFace> powerFaces;
@@ -60,10 +62,9 @@ public final class MachineSpec {
         ratedWatts = b.ratedWatts;
         idleWatts = b.idleWatts;
         minVoltageRatio = b.minVoltageRatio;
-        maxWatts = b.maxSet ? b.maxWatts : 1.25 * b.ratedWatts;
         tripCooldownSeconds = b.tripCooldownSeconds;
         burnsOnOvervoltage = b.burnsOnOvervoltage;
-        thermal = b.thermal;
+        thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatCelsius) : null;
         this.powerFaces = Collections.unmodifiableSet(EnumSet.copyOf(powerFaces));
         signalsIn = List.copyOf(b.signalsIn);
         signalsOut = List.copyOf(b.signalsOut);
@@ -114,11 +115,6 @@ public final class MachineSpec {
         return minVoltageRatio;
     }
 
-    /** Averaged power above this trips OVERPOWER_TRIPPED, W. */
-    public double maxWatts() {
-        return maxWatts;
-    }
-
     /** How long a trip waits, once its cause is gone, before it resets, s. */
     public double tripCooldownSeconds() {
         return tripCooldownSeconds;
@@ -161,10 +157,9 @@ public final class MachineSpec {
     public static final class Builder {
         private final Kind kind;
         private final double nominalVolts;
-        private double ratedWatts = Double.NaN, idleWatts = 0, minVoltageRatio = 0.75, maxWatts = Double.NaN;
-        private double tripCooldownSeconds = 3;
-        private boolean idleSet, maxSet, burnsOnOvervoltage;
-        private Thermal thermal;
+        private double ratedWatts, idleWatts = 0, minVoltageRatio = 0.75, tripCooldownSeconds = 3;
+        private double heatCapacityJPerK = Double.NaN, heatLossWPerK = Double.NaN, overheatCelsius = Double.NaN;
+        private boolean ratedSet, idleSet, heatSet, burnsOnOvervoltage;
         private Set<RelativeFace> power;
         private boolean powerTwice, busTwice;
         private final List<SignalIn> signalsIn = new ArrayList<>();
@@ -179,6 +174,7 @@ public final class MachineSpec {
         /** Consumer: the most it draws at nominal volts, idle included. Producer: its output at nominal volts. W, required. */
         public Builder ratedWatts(double watts) {
             ratedWatts = watts;
+            ratedSet = true;
             return this;
         }
 
@@ -189,21 +185,14 @@ public final class MachineSpec {
             return this;
         }
 
-        /** The undervoltage floor as a share of nominal volts, between 0 and 1; default 0.75. */
+        /** The undervoltage floor as a share of nominal volts, above 0 and at most 0.95; default 0.75. */
         public Builder minVoltageRatio(double ratio) {
             minVoltageRatio = ratio;
             return this;
         }
 
-        /** The overpower trip, W, above ratedWatts; default 1.25 x ratedWatts. */
-        public Builder maxWatts(double watts) {
-            maxWatts = watts;
-            maxSet = true;
-            return this;
-        }
-
         /** How long a trip waits after its cause is gone, s, at least 0.5; default 3. */
-        public Builder tripCooldown(double seconds) {
+        public Builder tripCooldownSeconds(double seconds) {
             tripCooldownSeconds = seconds;
             return this;
         }
@@ -214,9 +203,27 @@ public final class MachineSpec {
             return this;
         }
 
-        /** Adds the heat model (see Thermal); without it heatJoules is ignored and celsius() reads ambient. */
-        public Builder thermal(double heatCapacityJperK, double lossWperK, double tripCelsius) {
-            thermal = new Thermal(heatCapacityJperK, lossWperK, tripCelsius);
+        /**
+         * The heat model's heat capacity, J/K. The heat model (see Thermal) needs this, heatLossWPerK and
+         * overheatCelsius together; without it heatJoules is ignored and celsius() reads ambient.
+         */
+        public Builder heatCapacityJPerK(double jPerK) {
+            heatCapacityJPerK = jPerK;
+            heatSet = true;
+            return this;
+        }
+
+        /** The heat model's loss to ambient, W/K (see heatCapacityJPerK). */
+        public Builder heatLossWPerK(double wPerK) {
+            heatLossWPerK = wPerK;
+            heatSet = true;
+            return this;
+        }
+
+        /** The temperature that trips OVERHEAT_TRIPPED, degrees C, above 30 (see heatCapacityJPerK). */
+        public Builder overheatCelsius(double celsius) {
+            overheatCelsius = celsius;
+            heatSet = true;
             return this;
         }
 
@@ -258,7 +265,7 @@ public final class MachineSpec {
             List<String> errors = new ArrayList<>();
             if (!(Double.isFinite(nominalVolts) && nominalVolts > 0))
                 errors.add("nominal volts must be positive and finite, got " + nominalVolts);
-            if (Double.isNaN(ratedWatts)) errors.add("ratedWatts is required");
+            if (!ratedSet) errors.add("ratedWatts is required");
             else if (!(Double.isFinite(ratedWatts) && ratedWatts > 0))
                 errors.add("ratedWatts must be positive and finite, got " + ratedWatts);
             boolean ratedOk = Double.isFinite(ratedWatts) && ratedWatts > 0;
@@ -268,27 +275,21 @@ public final class MachineSpec {
                 errors.add("idleWatts must be 0 or more and finite, got " + idleWatts);
             else if (ratedOk && idleWatts >= ratedWatts)
                 errors.add("idleWatts (" + idleWatts + ") must be less than ratedWatts (" + ratedWatts + ")");
-            if (!(minVoltageRatio > 0 && minVoltageRatio < 1))
-                errors.add("minVoltageRatio must be between 0 and 1 (exclusive), got " + minVoltageRatio);
-            if (maxSet) {
-                if (!Double.isFinite(maxWatts)) errors.add("maxWatts must be finite, got " + maxWatts);
-                else if (ratedOk && maxWatts <= ratedWatts)
-                    errors.add("maxWatts (" + maxWatts + ") must be more than ratedWatts (" + ratedWatts
-                        + "), or the machine trips at its rating");
-            }
+            if (!(minVoltageRatio > 0 && minVoltageRatio <= MAX_MIN_VOLTAGE_RATIO))
+                errors.add("minVoltageRatio must be above 0 and at most " + MAX_MIN_VOLTAGE_RATIO
+                    + " (a line sags under load), got " + minVoltageRatio);
             if (!(Double.isFinite(tripCooldownSeconds) && tripCooldownSeconds >= MIN_TRIP_COOLDOWN_SECONDS))
-                errors.add("tripCooldown must be at least " + MIN_TRIP_COOLDOWN_SECONDS
+                errors.add("tripCooldownSeconds must be at least " + MIN_TRIP_COOLDOWN_SECONDS
                     + " s (shorter lets a trip chatter), got " + tripCooldownSeconds);
-            if (thermal != null) {
-                if (!(Double.isFinite(thermal.heatCapacityJperK()) && thermal.heatCapacityJperK() > 0))
-                    errors.add("thermal heatCapacityJperK must be positive and finite, got " + thermal.heatCapacityJperK());
-                if (!(Double.isFinite(thermal.lossWperK()) && thermal.lossWperK() > 0))
-                    errors.add("thermal lossWperK must be positive and finite, got " + thermal.lossWperK());
-                if (!(Double.isFinite(thermal.tripCelsius())
-                    && thermal.tripCelsius() > AMBIENT_CELSIUS + OVERHEAT_RESET_KELVIN))
-                    errors.add("thermal tripCelsius must be above " + (AMBIENT_CELSIUS + OVERHEAT_RESET_KELVIN)
+            if (heatSet) {
+                if (!(Double.isFinite(heatCapacityJPerK) && heatCapacityJPerK > 0))
+                    errors.add("heatCapacityJPerK must be positive and finite" + got(heatCapacityJPerK));
+                if (!(Double.isFinite(heatLossWPerK) && heatLossWPerK > 0))
+                    errors.add("heatLossWPerK must be positive and finite" + got(heatLossWPerK));
+                if (!(Double.isFinite(overheatCelsius) && overheatCelsius > AMBIENT_CELSIUS + OVERHEAT_RESET_KELVIN))
+                    errors.add("overheatCelsius must be above " + (AMBIENT_CELSIUS + OVERHEAT_RESET_KELVIN)
                         + " C (ambient " + AMBIENT_CELSIUS + " C plus the " + OVERHEAT_RESET_KELVIN
-                        + " K reset band), got " + thermal.tripCelsius());
+                        + " K reset band)" + got(overheatCelsius));
             }
 
             // signal names, then one role per face
@@ -323,6 +324,11 @@ public final class MachineSpec {
                 throw new IllegalArgumentException("Invalid " + kind.name().toLowerCase(Locale.ROOT) + " spec: "
                     + String.join("; ", errors));
             return new MachineSpec(this, powerFaces);
+        }
+
+        /** ", got x", or " (not set)" for a heat setting left out. */
+        private static String got(double v) {
+            return Double.isNaN(v) ? " (not set)" : ", got " + v;
         }
 
         private static void checkSignal(String name, Set<String> names, List<String> errors) {

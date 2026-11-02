@@ -34,7 +34,7 @@ public class MachineCorePropertyTest {
                 Arbitraries.doubles().between(0, 0.5), Arbitraries.doubles().between(0.5, 0.9),
                 Arbitraries.doubles().between(0.5, 4))
             .as((t, rated, idle, floor, cool) -> MachineSpec.consumer(t).ratedWatts(rated).idleWatts(idle * rated)
-                .minVoltageRatio(floor).tripCooldown(cool).build());
+                .minVoltageRatio(floor).tripCooldownSeconds(cool).build());
     }
 
     /** Volts that dwell near every threshold: 0, the floor, nominal, 1.1 and 1.3. */

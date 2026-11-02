@@ -56,8 +56,6 @@ public final class MachineCore implements MachineView {
     public static final double UNDERVOLTAGE_BAND = 0.05;
     /** ...held for this many ticks, so a line that sags under the machine's own load doesn't flip it every tick. */
     public static final int UNDERVOLTAGE_RECOVERY_TICKS = 10;
-    /** Overpower compares a running average, avg += ALPHA (P - avg) per tick, so one tick's surge doesn't trip it. */
-    public static final double POWER_AVERAGE_ALPHA = 0.25;
     /** The buffer refill, as a share of rated work power. */
     public static final double REFILL_SHARE = 0.25;
     /**
@@ -81,7 +79,7 @@ public final class MachineCore implements MachineView {
     private final MachineSpec.Thermal thermal;
     private final List<Consumer<TripCause>> listeners = new ArrayList<>();
 
-    private double volts, amps, watts, buffer, powerAverage, heatPending;
+    private double volts, amps, watts, buffer, heatPending;
     private double celsius = MachineSpec.AMBIENT_CELSIUS, ambientCelsius = MachineSpec.AMBIENT_CELSIUS;
     private MachineState state = MachineState.UNPOWERED;
     private TripCause lastTrip;
@@ -140,11 +138,10 @@ public final class MachineCore implements MachineView {
             buffer += stored;
             heat += idle + work - stored;
         }
-        powerAverage += POWER_AVERAGE_ALPHA * (watts - powerAverage);
         if (thermal != null) {
-            double k = thermal.lossWperK();
+            double k = thermal.heatLossWPerK();
             double eq = ambientCelsius + heat / TICK_SECONDS / k;
-            celsius = eq + (celsius - eq) * Math.exp(-k * TICK_SECONDS / thermal.heatCapacityJperK());
+            celsius = eq + (celsius - eq) * Math.exp(-k * TICK_SECONDS / thermal.heatCapacityJPerK());
         }
         updateState();
     }
@@ -352,8 +349,7 @@ public final class MachineCore implements MachineView {
         if (state.tripped()) {
             boolean clear = switch (state) {
                 case OVERVOLTAGE_TRIPPED -> r < OVERVOLTAGE_RESET_RATIO;
-                case OVERHEAT_TRIPPED -> celsius < thermal.tripCelsius() - MachineSpec.OVERHEAT_RESET_KELVIN;
-                default -> true; // overpower: it draws nothing while tripped
+                default -> celsius < thermal.overheatCelsius() - MachineSpec.OVERHEAT_RESET_KELVIN;
             };
             tripTimer = clear ? tripTimer + 1 : 0;
             if (tripTimer < cooldownTicks) return;
@@ -363,10 +359,8 @@ public final class MachineCore implements MachineView {
         if (r > OVERVOLTAGE_RATIO) {
             trip(new TripCause(MachineState.OVERVOLTAGE_TRIPPED, Math.abs(volts), OVERVOLTAGE_RATIO * uNom,
                 spec.burnsOnOvervoltage()));
-        } else if (powerAverage > spec.maxWatts()) {
-            trip(new TripCause(MachineState.OVERPOWER_TRIPPED, powerAverage, spec.maxWatts(), false));
-        } else if (thermal != null && celsius > thermal.tripCelsius()) {
-            trip(new TripCause(MachineState.OVERHEAT_TRIPPED, celsius, thermal.tripCelsius(), false));
+        } else if (thermal != null && celsius > thermal.overheatCelsius()) {
+            trip(new TripCause(MachineState.OVERHEAT_TRIPPED, celsius, thermal.overheatCelsius(), false));
         } else if (r < UNPOWERED_RATIO) {
             state = MachineState.UNPOWERED;
             undervoltageTimer = 0;

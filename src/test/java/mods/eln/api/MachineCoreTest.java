@@ -153,30 +153,9 @@ public class MachineCoreTest {
         assertEquals(MachineState.OVERVOLTAGE_TRIPPED, c.state());
     }
 
-    /** One tick's surge doesn't trip; a sustained one does, within a few ticks. */
-    @Test
-    void overpowerAveragesTheSurge() {
-        MachineCore c = new MachineCore(MILL);
-        c.afterStep(200, 2000 * DT);
-        c.afterStep(200, 3000 * DT);
-        c.afterStep(200, 2000 * DT);
-        assertEquals(MachineState.RUNNING, c.state());
-        int n = 0;
-        while (c.state() == MachineState.RUNNING && n < 20) {
-            c.afterStep(200, 3000 * DT);
-            n++;
-        }
-        assertEquals(MachineState.OVERPOWER_TRIPPED, c.state());
-        assertTrue(n >= 2 && n <= 5, "tripped after " + n);
-        for (int i = 1; i < 60; i++) c.afterStep(200, 0);
-        assertEquals(MachineState.OVERPOWER_TRIPPED, c.state());
-        c.afterStep(200, 0);
-        assertEquals(MachineState.RUNNING, c.state());
-    }
-
     @Test
     void overheatTripsAndCools() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).thermal(100, 1, 60).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatCelsius(60).build());
         c.afterStep(200, 0);
         assertEquals(MachineSpec.AMBIENT_CELSIUS, c.celsius(), 1e-9);
         int n = 0;
@@ -195,7 +174,7 @@ public class MachineCoreTest {
         assertEquals(MachineState.RUNNING, c.state());
         assertTrue(c.celsius() < 50);
         // exact first-order decay: tau = 100 s
-        MachineCore d = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).thermal(100, 1, 60).build());
+        MachineCore d = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatCelsius(60).build());
         d.heatJoules(1000); // 20 kW for one tick: +10 K in the limit of a short pulse
         d.afterStep(200, 0);
         assertEquals(10, d.celsius() - 20, 0.01);

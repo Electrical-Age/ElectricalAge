@@ -28,7 +28,6 @@ public class MachineSpecTest {
         assertEquals(200, s.nominalVolts());
         assertEquals(0, s.idleWatts());
         assertEquals(0.75, s.minVoltageRatio());
-        assertEquals(2500, s.maxWatts());
         assertEquals(3, s.tripCooldownSeconds());
         assertFalse(s.burnsOnOvervoltage());
         assertTrue(s.thermal().isEmpty());
@@ -77,6 +76,7 @@ public class MachineSpecTest {
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(0), "ratedWatts must be positive and finite, got 0.0");
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(-5), "ratedWatts must be positive and finite");
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(Double.POSITIVE_INFINITY), "ratedWatts must be positive and finite");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(Double.NaN), "ratedWatts must be positive and finite, got NaN");
     }
 
     @Test
@@ -90,21 +90,27 @@ public class MachineSpecTest {
 
     @Test
     void limits() {
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).minVoltageRatio(1), "minVoltageRatio must be between 0 and 1");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).minVoltageRatio(0), "minVoltageRatio must be between 0 and 1");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).maxWatts(100), "or the machine trips at its rating");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).maxWatts(Double.NaN), "maxWatts must be finite");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).tripCooldown(0.1), "tripCooldown must be at least 0.5 s");
-        assertEquals(150, MachineSpec.consumer(Tier.V200).ratedWatts(100).maxWatts(150).build().maxWatts());
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).minVoltageRatio(0.96), "minVoltageRatio must be above 0 and at most 0.95");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).minVoltageRatio(0), "minVoltageRatio must be above 0 and at most 0.95");
+        assertEquals(0.95, MachineSpec.consumer(Tier.V200).ratedWatts(100).minVoltageRatio(0.95).build().minVoltageRatio());
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).tripCooldownSeconds(0.1), "tripCooldownSeconds must be at least 0.5 s");
     }
 
     @Test
     void thermal() {
-        MachineSpec s = MachineSpec.consumer(Tier.V200).ratedWatts(100).thermal(1000, 2, 80).build();
-        assertEquals(80, s.thermal().orElseThrow().tripCelsius());
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).thermal(0, 2, 80), "heatCapacityJperK must be positive");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).thermal(10, -2, 80), "lossWperK must be positive");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).thermal(10, 2, 25), "tripCelsius must be above 30.0 C");
+        MachineSpec s = MachineSpec.consumer(Tier.V200).ratedWatts(100)
+            .heatCapacityJPerK(1000).heatLossWPerK(2).overheatCelsius(80).build();
+        assertEquals(new MachineSpec.Thermal(1000, 2, 80), s.thermal().orElseThrow());
+        MachineSpec.Builder ok = MachineSpec.consumer(Tier.V200).ratedWatts(100);
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(0).heatLossWPerK(2).overheatCelsius(80),
+            "heatCapacityJPerK must be positive and finite, got 0.0");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(-2).overheatCelsius(80),
+            "heatLossWPerK must be positive");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatCelsius(25),
+            "overheatCelsius must be above 30.0 C");
+        // the three go together
+        String m = error(ok.heatCapacityJPerK(10));
+        assertTrue(m.contains("heatLossWPerK must be positive and finite (not set)") && m.contains("overheatCelsius must be above"), m);
     }
 
     @Test
@@ -137,9 +143,9 @@ public class MachineSpecTest {
     /** All problems in one message, so a modder fixes them in one go. */
     @Test
     void listsEveryProblem() {
-        String m = error(MachineSpec.consumer(Tier.V200).idleWatts(-1).tripCooldown(0));
+        String m = error(MachineSpec.consumer(Tier.V200).idleWatts(-1).tripCooldownSeconds(0));
         assertTrue(m.startsWith("Invalid consumer spec: "), m);
-        assertTrue(m.contains("ratedWatts is required") && m.contains("idleWatts") && m.contains("tripCooldown"), m);
+        assertTrue(m.contains("ratedWatts is required") && m.contains("idleWatts") && m.contains("tripCooldownSeconds"), m);
     }
 
     @Test
