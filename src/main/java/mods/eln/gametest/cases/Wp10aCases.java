@@ -195,13 +195,18 @@ public final class Wp10aCases {
 
         /** LV cable on `side` of the device at p, and the 50 V source next to it. Returns {source, cable}. */
         public SixNodeElement[] feed(BlockPos device, Direction side) {
+            return feed(device, side, LV_CABLE, U);
+        }
+
+        /** A cable (six-node id) on `side` of the device at p, and a source of volts next to it. Returns {source, cable}. */
+        public SixNodeElement[] feed(BlockPos device, Direction side, int cableId, double volts) {
             BlockPos cp = off(device, side);
             if (!onPlatform(cp) || used.contains(cp)) throw new IllegalStateException("feed side " + side + " blocked at " + cp);
-            SixNodeElement cable = six(LV_CABLE, cp);
+            SixNodeElement cable = six(cableId, cp);
             ElectricalSourceElement src = (ElectricalSourceElement) six(SOURCE, next(cp, side));
             src.networkUnserialize(ctx.stream(out -> {
                 out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) U);
+                out.writeFloat((float) volts);
             }));
             return new SixNodeElement[]{src, cable};
         }
@@ -442,10 +447,9 @@ public final class Wp10aCases {
                 else s.append(" ").append(MACHINES[k]);
             }
             ctx.check("wp10a machines placed", ok == MACHINES.length, ok + "/" + MACHINES.length + (s.length() > 0 ? ", wrong:" + s : ""));
-            ElectricalLoad load = field(machines[0], "electricalLoad");
-            Resistor res = field(machines[0], "electricalResistor");
-            ctx.checkValue("wp10a idle macerator node voltage [V] (empty input: resistor open)", load.getU(), U);
-            ctx.check("wp10a idle macerator draws no power", Math.abs(res.getP()) < 0.01, String.format("P = %.6f W", res.getP()));
+            var macerator = ((ElectricalMachineElement) machines[0]).machine;
+            ctx.checkValue("wp10a idle macerator node voltage [V] (empty input: draws nothing)", macerator.powerLoad().getU(), U);
+            ctx.check("wp10a idle macerator draws no power", Math.abs(macerator.watts()) < 0.01, String.format("P = %.6f W", macerator.watts()));
         }
     }
 
@@ -741,7 +745,7 @@ public final class Wp10aCases {
         }
 
         static double pw(ElectricalMachineElement m) {
-            return Batch1Cases.<mods.eln.sim.mna.component.Resistor>field(m, "electricalResistor").getP();
+            return m.machine.watts();
         }
 
         public void measure(TestContext ctx) {

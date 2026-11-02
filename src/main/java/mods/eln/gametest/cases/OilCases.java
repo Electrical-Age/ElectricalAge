@@ -228,8 +228,7 @@ public final class OilCases {
             sep.getInventory().setItem(sep.inSlotId, new ItemStack(mods.eln.oil.OilWorldgen.TAR_SAND_ITEM.get(), 1));
             sep.getInventory().setChanged();
             // 20 kJ a block at 200 W is 100 s: run it 4x faster for the test (800 W, within the LV source and cable)
-            mods.eln.sim.ElectricalStackMachineProcess proc = Wp10aCases.field(sep, "slowRefreshProcess");
-            proc.setSpeedUp(4);
+            sep.machine.respec(sep.spec(4));
         }
 
         public void measure(TestContext ctx) {

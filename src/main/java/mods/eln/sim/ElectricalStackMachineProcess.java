@@ -3,21 +3,29 @@ package mods.eln.sim;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
-import mods.eln.sim.mna.component.Resistor;
+import mods.eln.api.Machine;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
+/**
+ * A machine's recipe work: each tick it runs it takes a tick's rated energy from its Machine (Machine API) and counts
+ * it, times its efficiency, towards the recipe's energy; then the item is done. A machine that can't run takes
+ * nothing, so it draws nothing. Run in the element's slow processes, after the machine's own.
+ */
 public class ElectricalStackMachineProcess implements IProcess {
 
     ElectricalStackMachineProcessObserver observer;
 
     public Container inventory;
     int inputSlotId, OutputSlotId, outputSlotNbr;
-    Resistor electricalResistor;
-    double resistorValue;
+    final Machine machine;
     RecipesList recipesList;
     int[] outSlotIdList;
-    double efficiency = 1.0, speedUp = 1.0;
+    double efficiency = 1.0;
+    /** The power taken in the last tick, W. */
+    double power;
+    /** Progress loaded from a save, given back to the item in the input slot at the first tick (0: none). */
+    double resumeJoules;
 
     ItemStack itemStackInOld = null;
 
@@ -34,13 +42,12 @@ public class ElectricalStackMachineProcess implements IProcess {
     }
 
     public ElectricalStackMachineProcess(Container inventory, int inputSlotId, int OutputSlotId, int outputSlotNbr,
-                                         Resistor electricalResistor, double resistorValue, RecipesList recipesList) {
+                                         Machine machine, RecipesList recipesList) {
         this.inventory = inventory;
         this.inputSlotId = inputSlotId;
         this.OutputSlotId = OutputSlotId;
         this.outputSlotNbr = outputSlotNbr;
-        this.electricalResistor = electricalResistor;
-        this.resistorValue = resistorValue;
+        this.machine = machine;
         this.recipesList = recipesList;
 
         outSlotIdList = new int[outputSlotNbr];
@@ -52,11 +59,6 @@ public class ElectricalStackMachineProcess implements IProcess {
 
     public void setEfficiency(double efficiency) {
         this.efficiency = efficiency;
-    }
-
-    public void setSpeedUp(double speedUp) {
-        this.speedUp = speedUp;
-        setResistorValue(resistorValue);
     }
 
     @Override
@@ -72,8 +74,16 @@ public class ElectricalStackMachineProcess implements IProcess {
             itemStackInOld = itemStackIn;
         }
 
+        if (resumeJoules > 0) {
+            if (smeltInProcess) energyCounter = Math.min(resumeJoules, energyNeeded);
+            resumeJoules = 0;
+        }
+
+        power = 0;
         if (smeltInProcess) {
-            energyCounter += getPower() * time;
+            double got = machine.takeJoules(machine.ratedJoulesPerTick());
+            power = got / time;
+            energyCounter += got * efficiency;
             if (energyCounter > energyNeeded) {
                 energyCounter -= energyNeeded;
                 smeltItem();
@@ -82,8 +92,20 @@ public class ElectricalStackMachineProcess implements IProcess {
         }
     }
 
+    /** The power that went into the work in the last tick (taken x efficiency), W. */
     public double getPower() {
-        return electricalResistor.getP() * efficiency;
+        return power * efficiency;
+    }
+
+    /** The current item's progress, J (what a save keeps); a loaded one not yet given back counts. */
+    public double progressJoules() {
+        if (resumeJoules > 0) return resumeJoules;
+        return smeltInProcess ? energyCounter : 0;
+    }
+
+    /** Gives a saved item's progress back at the first tick, if the same kind of item can still be made then. */
+    public void resume(double joules) {
+        resumeJoules = Double.isFinite(joules) && joules > 0 ? joules : 0;
     }
 
     public void smeltInit() {
@@ -92,18 +114,11 @@ public class ElectricalStackMachineProcess implements IProcess {
             smeltInProcess = false;
             energyNeeded = 1.0;
             energyCounter = 0.0;
-            electricalResistor.highImpedance();
         } else {
             smeltInProcess = true;
             energyNeeded = recipesList.getRecipe(inventory.getItem(inputSlotId)).energy;
             energyCounter = 0.0;
-            electricalResistor.setR(resistorValue / speedUp);
         }
-    }
-
-    public void setResistorValue(double value) {
-        resistorValue = value;
-        if (smeltInProcess) electricalResistor.setR(resistorValue / speedUp);
     }
 
     /**
