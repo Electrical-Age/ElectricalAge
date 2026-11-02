@@ -123,7 +123,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 
 - Machine API (`api/impl/ElementHost`, any element with `Machines.forElement`): `api.machine.bufferJ` (energy
   delivered and not yet used, J), `api.machine.celsius` (with a heat model), `api.machine.trip` and
-  `api.machine.tripTicks` (a trip in its cooldown), `api.machine.lastTrip`, `...lastTripMeasured`, `...lastTripLimit`,
+  `api.machine.tripTicks` (a trip in its cooldown), `api.machine.running` (true when saved running: it runs on at
+  once if the line is in range at the first step, no power-up hold), `api.machine.lastTrip`, `...lastTripMeasured`, `...lastTripLimit`,
   `...lastTripBurns`; its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
   `api.machine.drive<i>highImpedance` / `U`, a producer's `api.machine.emfUc` / `U` / `Istate`. Taken back at the
   first tick (after the element's own ratings); absent keys: a fresh machine.

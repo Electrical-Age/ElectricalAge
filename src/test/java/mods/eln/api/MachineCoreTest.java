@@ -370,6 +370,31 @@ public class MachineCoreTest {
         assertThrows(IllegalStateException.class, () -> d.restore(s));
     }
 
+    /**
+     * A machine saved running runs on at once after a load when its first step finds the line in range (no power-up
+     * hold); on a dead or sagging line it is classified as it finds it.
+     */
+    @Test
+    void savedRunningRunsOn() {
+        MachineSpec spec = MachineSpec.consumer(Tier.V50).ratedWatts(100).build();
+        MachineCore c = new MachineCore(spec);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 50, ohms);
+        MachineCore.Saved s = c.snapshot();
+        assertEquals(MachineState.RUNNING, s.state());
+        MachineCore d = new MachineCore(spec);
+        d.restore(s);
+        d.afterStep(50, 0);
+        assertEquals(MachineState.RUNNING, d.state(), "no power-up hold after a load");
+        MachineCore dead = new MachineCore(spec), weak = new MachineCore(spec);
+        dead.restore(s);
+        dead.afterStep(0, 0);
+        assertEquals(MachineState.UNPOWERED, dead.state());
+        weak.restore(s);
+        weak.afterStep(30, 0);
+        assertEquals(MachineState.UNDERVOLTAGE, weak.state());
+    }
+
     /** A burnt core repaired by its host starts again UNPOWERED and runs once the line holds. */
     @Test
     void repairUnburns() {

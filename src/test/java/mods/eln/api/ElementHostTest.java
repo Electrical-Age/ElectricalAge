@@ -253,6 +253,7 @@ public class ElementHostTest {
         INBT.write(e, a);
         for (String k : a.keySet()) assertTrue(k.startsWith("api.machine."), k);
         assertEquals(c.bufferJoules(), a.getDoubleOr("api.machine.bufferJ", -1), 0);
+        assertTrue(a.getBooleanOr("api.machine.running", false), "saved running");
 
         Element f = new Element();
         ElementHost n = f.machine(MACERATOR);
@@ -262,6 +263,7 @@ public class ElementHostTest {
         assertEquals(a, b, "written through before the first tick");
         f.slowPre.get(0).process(0.05); // the first tick
         assertEquals(c.bufferJoules(), n.bufferJoules(), 0);
+        assertEquals(MachineState.RUNNING, n.state(), "loaded running");
         CompoundTag d = new CompoundTag();
         INBT.write(f, d);
         assertEquals(a, d);

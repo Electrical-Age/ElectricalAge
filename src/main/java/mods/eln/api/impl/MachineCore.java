@@ -168,22 +168,26 @@ public final class MachineCore implements MachineView {
         }
     }
 
-    /** What a host saves of a machine (see snapshot()); state is only kept when it is a trip. */
+    /** What a host saves of a machine (see snapshot()); state is only kept when it is a trip or RUNNING. */
     public record Saved(double bufferJoules, double celsius, MachineState state, int tripTicks, TripCause lastTrip) {
     }
 
     /**
-     * The machine's lasting state: its buffer, temperature, a trip in progress and the last trip. A burn is not kept
-     * as a trip (the host keeps that the machine burnt; repaired, it starts UNPOWERED as repair() leaves it).
+     * The machine's lasting state: its buffer, temperature, a trip in progress or that it was running, and the last
+     * trip. A burn is not kept as a trip (the host keeps that the machine burnt; repaired, it starts UNPOWERED as
+     * repair() leaves it).
      */
     public Saved snapshot() {
         boolean trip = state.tripped() && !burnt;
-        return new Saved(buffer, celsius, trip ? state : MachineState.UNPOWERED, trip ? tripTimer : 0, lastTrip);
+        MachineState kept = trip || state == MachineState.RUNNING && !burnt ? state : MachineState.UNPOWERED;
+        return new Saved(buffer, celsius, kept, trip ? tripTimer : 0, lastTrip);
     }
 
     /**
      * On a fresh core (no step yet, else IllegalStateException): takes back a snapshot. The buffer is clamped to the
-     * spec's capacity and booked as delivered (or given), so the books stay exact; a trip resumes its cooldown.
+     * spec's capacity and booked as delivered (or given), so the books stay exact; a trip resumes its cooldown; a
+     * machine saved running runs on at once if its first step finds the line in range (no power-up hold: a chunk or
+     * world reload doesn't stop it for half a second).
      */
     public void restore(Saved saved) {
         if (ticks > 0) throw new IllegalStateException("restore on a core that has already stepped");
@@ -195,7 +199,7 @@ public final class MachineCore implements MachineView {
             && (saved.state() != MachineState.OVERHEAT_TRIPPED || thermal != null)) {
             state = saved.state();
             tripTimer = Math.max(0, Math.min(saved.tripTicks(), cooldownTicks));
-        }
+        } else if (saved.state() == MachineState.RUNNING) state = MachineState.RUNNING;
         lastTrip = saved.lastTrip();
     }
 
