@@ -1,9 +1,11 @@
-package mods.eln.api.testkit;
+package mods.eln.api.impl.testkit;
 
 import mods.eln.api.Brownout;
 import mods.eln.api.MachineSpec;
 import mods.eln.api.RelativeFace;
 import mods.eln.api.Tier;
+import mods.eln.api.testkit.ElnTestKit;
+import mods.eln.api.testkit.SpecReport;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

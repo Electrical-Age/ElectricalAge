@@ -1,4 +1,4 @@
-package mods.eln.api.testkit;
+package mods.eln.api.impl.testkit;
 
 import mods.eln.api.Brownout;
 import mods.eln.api.Machine;
@@ -6,6 +6,9 @@ import mods.eln.api.MachineSpec;
 import mods.eln.api.MachineState;
 import mods.eln.api.TripCause;
 import mods.eln.api.impl.MachineCore;
+import mods.eln.api.testkit.Bench;
+import mods.eln.api.testkit.BenchMachine;
+import mods.eln.api.testkit.SpecReport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +75,7 @@ final class SpecSuite {
 
     /** A fresh bench with the machine, its owner, and the per-tick invariants. */
     private final class Run {
-        final Bench bench = new Bench();
+        final Bench bench = new BenchImpl();
         final BenchMachine m;
         final List<MachineState> states = new ArrayList<>();
         final List<Double> watts = new ArrayList<>(), got = new ArrayList<>();

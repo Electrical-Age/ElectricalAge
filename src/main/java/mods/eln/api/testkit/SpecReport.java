@@ -19,7 +19,8 @@ public final class SpecReport {
     private final MachineSpec spec;
     private final List<Check> checks;
 
-    SpecReport(MachineSpec spec, List<Check> checks) {
+    /** The report of checks run on spec (EA's testkit makes it). */
+    public SpecReport(MachineSpec spec, List<Check> checks) {
         this.spec = spec;
         this.checks = List.copyOf(checks);
     }

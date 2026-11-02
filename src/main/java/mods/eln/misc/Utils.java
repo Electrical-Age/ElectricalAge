@@ -212,41 +212,9 @@ public class Utils {
      * Three significant digits with an SI prefix (µ to M). 1.12 multiplied its µ range by 1e4, not 1e6, so 0.5 mA read
      * "5.00µ" (found in AGE's history); its µ range started at 100 µ and it topped out at "2500k".
      */
+    /** Meters.number: three significant digits with an SI prefix (the API's Meters share it with EA's own text). */
     public static String plotValue(double value) {
-        double valueAbs = Math.abs(value);
-        if (valueAbs < 0.000001) {
-            return "0";
-        } else if (valueAbs < 0.00000999) {
-            return String.format("%1.2fµ", value * 1e6);
-        } else if (valueAbs < 0.0000999) {
-            return String.format("%2.1fµ", value * 1e6);
-        } else if (valueAbs < 0.000999) {
-            return String.format("%3.0fµ", value * 1e6);
-        } else if (valueAbs < 0.00999) {
-            return String.format("%1.2fm", value * 1000);
-        } else if (valueAbs < 0.0999) {
-            return String.format("%2.1fm", value * 1000);
-        } else if (valueAbs < 0.999) {
-            return String.format("%3.0fm", value * 1000);
-        } else if (valueAbs < 9.99) {
-            return String.format("%1.2f", value);
-        } else if (valueAbs < 99.9) {
-            return String.format("%2.1f", value);
-        } else if (valueAbs < 999) {
-            return String.format("%3.0f", value);
-        } else if (valueAbs < 9999) {
-            return String.format("%1.2fk", value / 1000.0);
-        } else if (valueAbs < 99999) {
-            return String.format("%2.1fk", value / 1000.0);
-        } else if (valueAbs < 999999) {
-            return String.format("%3.0fk", value / 1000.0);
-        } else if (valueAbs < 9999999) {
-            return String.format("%1.2fM", value / 1e6);
-        } else if (valueAbs < 99999999) {
-            return String.format("%2.1fM", value / 1e6);
-        } else {
-            return String.format("%3.0fM", value / 1e6);
-        }
+        return mods.eln.api.Meters.number(value);
     }
 
     public static String plotValue(double value, String unit) {

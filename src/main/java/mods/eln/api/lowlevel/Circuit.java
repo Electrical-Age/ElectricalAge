@@ -1,6 +1,6 @@
 package mods.eln.api.lowlevel;
 
-import mods.eln.api.impl.lowlevel.CircuitImpl;
+import mods.eln.api.spi.Implementations;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -14,9 +14,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * IllegalArgumentException. Calls off the server thread throw IllegalStateException.
  */
 public interface Circuit {
-    /** An empty circuit; name labels it in messages and the debug trace. */
+    /** An empty circuit; name labels it in messages and the debug trace. Throws IllegalStateException without EA. */
     static Circuit create(String name) {
-        return new CircuitImpl(name);
+        return Implementations.api().circuit(name);
     }
 
     String name();
