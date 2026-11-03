@@ -144,9 +144,10 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   most half of each phase it holds, net of inflow, and the rest of its outflow is its inflow passed through, with the
   mix and enthalpy from an implicit upwind solve (so pipe volume doesn't limit throughput or stability); then the
   transfer and a flash per node. Pumps are one-way edges from a sump with a head (`FluidEdge.boost`); a curved pump
-  (the condensers' `CondensatePump`) is set each step to its curve's tangent where it runs now (boost and open, the
-  slope capped near the shut-off). A chord from free flow, less steep than the curve, overshot every step near the
-  shut-off against a tight feed, and the pipe flipped between two pressures (`CondensatePumpTest`). Iron pipe holds
+  (the condensers' `CondensatePump`) is set each step to the chord from where it runs now on its curve to its shut-off
+  point (boost H0, open the chord's slope). Steeper than the curve over that stretch, it neither overshoots the settled
+  point nor pumps past the shut-off. A chord from free flow overshot every step near the shut-off against a tight feed,
+  and the pipe flipped between two pressures (`CondensatePumpTest`, `CondensatePumpPropertyTest`). Iron pipe holds
   0.03 L per block (tunable, not geometry); saves record the volume and older ones are rescaled on load.
 - `src/main/java/mods/eln/solver/Equation.java`: expression parser/evaluator for the math chip (`ElectricalMathElement`)
   and `AnalogChips.kt`; not part of the MNA.

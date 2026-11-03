@@ -43,20 +43,21 @@ public class CondensatePumpTest {
     }
 
     @Test
-    void theSolversLineIsTheCurvesTangentWithABoundedSlope() {
+    void theSolversLineRunsFromTheCurveToTheShutoff() {
         double g0 = p.freeKgPerS / p.shutoffPa;
         for (double dp = -1e5; dp <= 20e5; dp += 0.25e5) {
             double s = p.lineShare(dp), g = s * g0;
-            assertTrue(s >= 0.5 - 1e-9 && s <= CondensatePump.MAX_LINE_SHARE + 1e-9, "share " + s + " at " + dp);
-            assertEquals(p.kgPerS(dp), g * (p.boost(dp) - dp), 1e-9, "meets the curve at " + dp);
-            // its slope is the curve's (by a central difference) wherever that is within the cap
+            assertTrue(s > 0 && s <= CondensatePump.MAX_LINE_SHARE + 1e-9, "share " + s + " at " + dp);
+            assertEquals(p.shutoffPa, p.boost(dp), 1e-6, "no flow at the shut-off, from " + dp);
+            if (dp < 19.99e5) assertEquals(p.kgPerS(dp), g * (p.boost(dp) - dp), 1e-9, "meets the curve at " + dp);
+            // steeper than the curve's tangent wherever it runs (so a step can't overshoot)
             if (dp > 0.1e5 && dp < 19e5) {
                 double slope = (p.kgPerS(dp - 100) - p.kgPerS(dp + 100)) / 200;
-                assertEquals(slope, g, 1e-3 * slope, "tangent at " + dp);
+                assertTrue(g >= slope, "steeper than the tangent at " + dp);
             }
         }
         // past the shut-off: the line through it, pushing back (the check valve shuts)
-        assertTrue(p.lineShare(22e5) * g0 * (p.boost(22e5) - 22e5) <= 0);
+        assertTrue(p.lineShare(22e5) * g0 * (p.boost(22e5) - 22e5) < 0);
     }
 
     /**

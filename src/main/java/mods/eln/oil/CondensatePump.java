@@ -46,31 +46,28 @@ public final class CondensatePump {
         return Math.max(0, Math.min(1, dp / shutoffPa));
     }
 
-    /** The steepest the solver's line may be, as a share of Qmax / H0 (the tangent's slope runs to infinity at H0). */
-    static final double MAX_LINE_SHARE = 32;
+    /** The steepest the solver's line may be, as a share of Qmax / H0 (it runs to infinity at H0). */
+    static final double MAX_LINE_SHARE = 1000;
 
     /**
-     * The solver's line for this step (its edges are linear: Q = g (boost - dp)): the curve's tangent at dp, so it meets
-     * the curve where the pump runs now with its slope, its slope capped at MAX_LINE_SHARE (and at least the free-flow
-     * tangent's, 0.5, for a dp below 0). Returns the conductance as a share of Qmax / H0; boost() goes with it.
+     * The solver's line for this step (its edges are linear: Q = g (boost - dp)): the chord from where the pump runs now
+     * on its curve to the shut-off point (no flow at H0), its slope capped at MAX_LINE_SHARE. Returns the conductance as
+     * a share of Qmax / H0; boost() is H0.
      * <p>
-     * The pump is linearised before each step, on the back-pressure the step starts from. A chord from free flow (less
-     * steep than the curve) made each step overshoot the last near the shut-off, against a feed that passes little: the
-     * pipe to the boiler then flipped between two pressures every step (Baughn 2026-11-03: 10.5..12.5 bar). On the
-     * tangent the error of a step is of second order, and only within 1/(2 x MAX_LINE_SHARE)^2 of the shut-off (0.03 %)
-     * can it still overshoot.
+     * The pump is linearised before each step, on the back-pressure the step starts from. The chord is steeper than the
+     * curve between where it runs and the shut-off and meets it at both ends, so a step can neither overshoot the
+     * settled point nor pump past the shut-off: the error shrinks by at least half each step, from one side. A chord from
+     * free flow (flatter than the curve near the shut-off) overshot every step against a feed that passes little, and the
+     * pipe to the boiler flipped between two pressures (Baughn 2026-11-03: 10.5..12.5 bar); the curve's tangent overshot
+     * past the shut-off (CondensatePumpPropertyTest).
      */
     public double lineShare(double dp) {
-        double u = Math.sqrt(1 - x(dp));
-        return u <= 0.5 / MAX_LINE_SHARE ? MAX_LINE_SHARE : Math.max(0.5, 0.5 / u);
+        if (dp >= shutoffPa) return MAX_LINE_SHARE;
+        return Math.min(MAX_LINE_SHARE, share(dp) * shutoffPa / (shutoffPa - dp));
     }
 
-    /**
-     * The line's boost (Pa) at dp: Q = lineShare x Qmax / H0 x (boost - dp) meets the curve at dp. At and past the
-     * shut-off, the line through it: it pushes back, and the check valve shuts.
-     */
+    /** The line's boost (Pa): Q = lineShare x Qmax / H0 x (boost - dp) is 0 at the shut-off and meets the curve at dp. */
     public double boost(double dp) {
-        double q = share(dp);
-        return q <= 0 ? shutoffPa : dp + q * shutoffPa / lineShare(dp);
+        return shutoffPa;
     }
 }
