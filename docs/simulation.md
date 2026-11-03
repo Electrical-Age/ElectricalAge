@@ -117,6 +117,10 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
   furnace, electrical furnace). Its light goes out. Right-click: a meter reads it, anything else repairs it or says
   the repair part (`Repair.onActivated`); `hasGui` is false, `NodeMenus.menu` refuses, an open screen closes
   (`ElnNodeMenu.stillValid`). Client: no looped sounds, no render `refresh` (animation, particles). `BurntCases`.
+- Repair part (`Repair.defaultPart`): the descriptor's `repairPart` (item name) if set, else by kind: ELECTRONICS and
+  electrical MACHINE failures a Cheap Chip, other MACHINE failures a Copper Thermal Cable, TRANSFORMER a Cheap
+  Ferromagnetic Core, CAPACITOR a Dielectric, ROTATING an Electrical Motor, the rest one of the same item. Jade shows
+  the cause and the part on a burnt device.
 
 ## NBT of sim parts
 

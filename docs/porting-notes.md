@@ -177,6 +177,17 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   their thermal loads in the simulation: they cool to ambient and do nothing else, make no working sound or
   animation, give no light, and a right-click only says what repairs them (a meter still reads them); no GUI.
   Contents drop when broken. See simulation.md "Failures"; `BurntCases`.
+- Repair parts cost less than the device (Baughn: a stone heat furnace took a Machine Block, which cost more than the
+  furnace). Jade shows a burnt device's cause and repair part.
+
+  | Device | Old repair part | New |
+  |---|---|---|
+  | Stone Heat Furnace, Fuel Heat Furnace | Machine Block | Combustion Chamber (4 stone) |
+  | 50V / 200V Electric Heater | Cheap Chip (overvoltage), Machine Block (overheat) | its 50V / 200V Copper Heating Corp |
+  | Large Rheostat | Machine Block | Power Resistor |
+  | Other machines that overheat (thermal dissipators, smelter, boiler, column base, compact steam turbine, heat turbines) | Machine Block | Copper Thermal Cable |
+  | Machines on overvoltage (macerator, compressor, magnetizer, plate machine, exporter, pumps, ...) | Cheap Chip | unchanged |
+  | Electronics, transformers, capacitors, shaft machines, cables, batteries, HV gear | by kind | unchanged |
 - The FE exporter is a transparent node: it burns out in place and can be repaired instead of vanishing; old
   simple-node saves are upgraded on load (`transparentnode/energyconverter/ExporterSaveUpgrade.java`,
   `ExporterSaveUpgradeTest`). `SimpleNode` and its block/BE/item are gone.

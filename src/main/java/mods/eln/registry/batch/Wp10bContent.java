@@ -85,6 +85,7 @@ public class Wp10bContent implements ElnContent {
             LargeRheostatDescriptor desc = new LargeRheostatDescriptor(
                 name, dissipator, veryHighVoltageCableDescriptor, SerieEE.newE12(0)
             );
+            desc.repairPart = "Power Resistor";   // (its burnt element)
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -108,6 +109,7 @@ public class Wp10bContent implements ElnContent {
                 // combustionChamberPower,
                 new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
             );
+            desc.repairPart = "Combustion Chamber";   // (4 stone; Baughn: not a Machine Block, which cost more than the furnace)
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
@@ -117,6 +119,7 @@ public class Wp10bContent implements ElnContent {
 
             FuelHeatFurnaceDescriptor desc = new FuelHeatFurnaceDescriptor(name,
                 obj.getObj("FuelHeater"), new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2));
+            desc.repairPart = "Combustion Chamber";   // (its firebox)
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 

@@ -60,6 +60,24 @@ public class ElnJadePlugin implements IWailaPlugin {
         return Map.of();
     }
 
+    /** The device under the crosshair, if it can burn out (a transparent node's element, a six-node's in the aimed slot). */
+    static mods.eln.sim.process.destruct.IBurnable burnable(BlockAccessor acc) {
+        if (!(acc.getBlockEntity() instanceof NodeBlockEntity be)) return null;
+        var node = be.getNode();
+        if (node instanceof mods.eln.node.voxel.VoxelNode v) {
+            var h = acc.getHitResult().getLocation();
+            var p = acc.getPosition();
+            var a = v.aimed(h.x - p.getX(), h.y - p.getY(), h.z - p.getZ());
+            return a.element() >= 0 ? v.sideElementList[a.element()] : null;
+        }
+        if (node instanceof mods.eln.node.transparent.TransparentNode t) return t.element;
+        if (node instanceof mods.eln.node.six.SixNode s && be instanceof mods.eln.node.six.SixNodeEntity se) {
+            var side = mods.eln.node.six.SixNodeBlock.sideAt(se, acc.getPosition(), acc.getHitResult());
+            if (side != null) return s.sideElementList[side.getInt()];
+        }
+        return null;
+    }
+
     /** Does the device under the crosshair have thermal loads (so its ambient matters)? */
     static boolean hasHeat(BlockAccessor acc) {
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be)) return false;
@@ -102,6 +120,14 @@ public class ElnJadePlugin implements IWailaPlugin {
             }
             String title = title(acc);
             if (title != null) tag.putString("elnTitle", title);
+            var b = burnable(acc);
+            if (b != null && b.isBurnt()) {   // (first, in the headline: what happened and what repairs it)
+                var lines = new java.util.LinkedHashMap<String, String>();
+                lines.put(mods.eln.i18n.I18N.tr("Burnt out"), b.getBurnt().text);
+                lines.put(mods.eln.i18n.I18N.tr("Repair with"), "1 " + mods.eln.sim.process.destruct.Repair.partName(b));
+                if (m != null) lines.putAll(m);
+                m = lines;
+            }
             if (m == null || m.isEmpty()) return;
             if (hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
                 m = new java.util.LinkedHashMap<>(m);

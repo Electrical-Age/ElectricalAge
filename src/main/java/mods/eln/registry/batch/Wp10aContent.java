@@ -65,10 +65,15 @@ public class Wp10aContent implements ElnContent {
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
     public static void registerSteam(int id) {
-        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
-            LVU, 1000, lowVoltageCableDescriptor, "electricheater50v"));
-        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
-            MVU, 4000, meduimVoltageCableDescriptor, "electricheater200v"));
+        // (a burnt heater gets a new heating corp, overvoltage or overheat)
+        var heater50 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
+            LVU, 1000, lowVoltageCableDescriptor, "electricheater50v");
+        heater50.repairPart = "50V Copper Heating Corp";
+        transparentNodeItem.addDescriptor(0 + (id << 6), heater50);
+        var heater200 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
+            MVU, 4000, meduimVoltageCableDescriptor, "electricheater200v");
+        heater200.repairPart = "200V Copper Heating Corp";
+        transparentNodeItem.addDescriptor(4 + (id << 6), heater200);
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "boiler"));
         // Baughn: small steam turbines with the generator built in; they replace the heat turbines (now uncraftable)
         transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "50V Steam Turbine"),

@@ -25,8 +25,9 @@ import java.util.List;
 
 /**
  * Burnt devices (Baughn: a damaged machine should tick, but should stop doing useful things; right-click only shows
- * the repair message):
- * - a burnt stone heat furnace, hot and fed, cools towards ambient and takes no fuel;
+ * the repair message; repair costs less than the device):
+ * - a burnt stone heat furnace, hot and fed, cools towards ambient and takes no fuel; a burnt one's repair part is a
+ *   Combustion Chamber, and a right-click with one repairs it (an unfed one: a fed one takes fuel as it reloads);
  * - a burnt, powered macerator processes nothing, has no GUI and its screen doesn't open on the server's use path;
  * - a macerator burnt, then repaired a second in, processes as usual.
  */
@@ -43,7 +44,8 @@ public final class BurntCases {
     static final double HOT = 300;
 
     static final class FurnaceCase implements TestCase {
-        HeatFurnaceElement burnt;
+        HeatFurnaceElement burnt, spare;
+        ItemStack part;
 
         public String name() {
             return "burnt heat furnace cools and burns nothing";
@@ -69,6 +71,9 @@ public final class BurntCases {
         public void build(TestContext ctx) {
             burnt = fed(ctx, 1);
             burnt.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
+            spare = (HeatFurnaceElement) ctx.placeTransparent(Wp10bCases.HEAT_FURNACE, ctx.at(5, 1, 1));
+            spare.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
+            part = spare.getRepairPart();
         }
 
         public void measure(TestContext ctx) {
@@ -78,6 +83,19 @@ public final class BurntCases {
                 String.format("T %.1f", burnt.thermalLoad.Tc));
             ctx.check("burnt heat furnace: takes no fuel", coalBurnt == 16, "coal " + coalBurnt);
             ctx.check("burnt heat furnace: no screen", !burnt.node.hasGui(Direction.XN), "");
+            ctx.check("stone heat furnace: repaired with a Combustion Chamber",
+                ItemStack.isSameItem(part, Eln.findItemStack("Combustion Chamber")), String.valueOf(part));
+
+            FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+            ItemStack held = Eln.findItemStack("Combustion Chamber", 2);
+            fp.setItemInHand(InteractionHand.MAIN_HAND, held);
+            try {
+                boolean repaired = Repair.onActivated(spare, fp);
+                ctx.check("a right-click with a Combustion Chamber repairs it and uses one", repaired && !spare.isBurnt() && held.getCount() == 1,
+                    "repaired " + repaired + ", burnt " + spare.isBurnt() + ", left " + held.getCount());
+            } finally {
+                fp.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
         }
     }
 

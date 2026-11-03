@@ -15,17 +15,24 @@ public final class Repair {
     }
 
     /**
-     * The repair part by kind of device. Cables, HV gear and batteries are replaced (one of the same item); everything
-     * else gets the part that failed. Placeholders, to be tuned (Baughn didn't vote on these).
+     * The repair part: the descriptor's repairPart if it names one, else by kind of device. Cables, HV gear and
+     * batteries are replaced (one of the same item); everything else gets the part that failed, cheaper than the
+     * device (Baughn: a stone heat furnace took a Machine Block, which cost more than the furnace). An overheated
+     * machine gets a Copper Thermal Cable, which every heat device is built with.
      */
     public static ItemStack defaultPart(IBurnable b) {
         Failure.Kind kind = b.getBurntKind();
         if (kind == null) return ItemStack.EMPTY;
+        String named = descriptorPart(b);
+        if (named != null) {
+            ItemStack s = Eln.findItemStack(named);
+            if (!Utils.isEmpty(s)) return s;
+        }
         switch (kind) {
             case ELECTRONICS:
                 return Eln.findItemStack("Cheap Chip");
             case MACHINE:
-                return b.getBurnt() != null && b.getBurnt().electrical() ? Eln.findItemStack("Cheap Chip") : Eln.findItemStack("Machine Block");
+                return b.getBurnt() != null && b.getBurnt().electrical() ? Eln.findItemStack("Cheap Chip") : Eln.findItemStack("Copper Thermal Cable");
             case TRANSFORMER:
                 return Eln.findItemStack("Cheap Ferromagnetic Core");
             case CAPACITOR:
@@ -38,6 +45,16 @@ public final class Repair {
             default:
                 return sameItem(b);
         }
+    }
+
+    /** The repairPart of the device's descriptor, or null. */
+    @javax.annotation.Nullable
+    static String descriptorPart(IBurnable b) {
+        if (b instanceof mods.eln.node.transparent.TransparentNodeElement t && t.transparentNodeDescriptor != null)
+            return t.transparentNodeDescriptor.repairPart;
+        if (b instanceof mods.eln.node.six.SixNodeElement e && e.sixNodeElementDescriptor != null)
+            return e.sixNodeElementDescriptor.repairPart;
+        return null;
     }
 
     public static ItemStack sameItem(IBurnable b) {
@@ -72,8 +89,12 @@ public final class Repair {
     }
 
     public static String describe(IBurnable b) {
+        return "Burnt out (" + b.getBurnt().text + "). Repair: right-click with 1 " + partName(b) + ".";
+    }
+
+    /** The repair part's name, "?" if there is none (the chat message and Jade). */
+    public static String partName(IBurnable b) {
         ItemStack part = b.getRepairPart();
-        String what = Utils.isEmpty(part) ? "?" : part.getHoverName().getString();
-        return "Burnt out (" + b.getBurnt().text + "). Repair: right-click with 1 " + what + ".";
+        return Utils.isEmpty(part) ? "?" : part.getHoverName().getString();
     }
 }
