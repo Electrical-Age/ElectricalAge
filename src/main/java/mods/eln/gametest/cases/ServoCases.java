@@ -16,6 +16,7 @@ import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import mods.eln.sixnode.resistor.ResistorElement;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
@@ -41,6 +42,7 @@ public final class ServoCases {
         cases.add(new SaveMidMove());
         cases.add(new GhostFloor());
         cases.add(new CarriesAMob());
+        cases.add(new PanelId());
         cases.add(new Starved());
         cases.add(new EnergyBooks());
     }
@@ -443,6 +445,80 @@ public final class ServoCases {
                 && Math.abs(feet - (6 + ElevatorCar.THICK)) < 0.05, "feet " + feet + ", floor " + s.carFloor(ctx));
             ctx.check("servo: ... and weighs on it", kg > 10, kg + " kg");
             pig.discard();
+        }
+    }
+
+    /**
+     * The car's panel (a part entity, clicked through its own id) has an id no other entity has, before or after the
+     * entities spawned next; the client learns it from the spawn packet, not as the car's id + 1, so a click on the
+     * panel reaches the panel whatever id the server's counter gave it.
+     */
+    static final class PanelId extends Room {
+        Shaft s;
+        final List<Entity> spawned = new java.util.ArrayList<>();
+
+        public String id() {
+            return "servo_elevator_panel_id";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            watch(dt -> {
+                if (++tick != 20 || s.car(ctx) == null) return;
+                for (int i = 0; i < 3; i++) {   // (the entities made right after the car)
+                    Pig pig = net.minecraft.world.entity.EntityTypes.PIG.create(ctx.level(), EntitySpawnReason.TRIGGERED);
+                    pig.setNoAi(true);
+                    pig.snapTo(s.head.getX() + 3.5, s.head.getY(), s.head.getZ() + 0.5 + i, 0, 0);
+                    ctx.level().addFreshEntity(pig);
+                    spawned.add(pig);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            var level = ctx.level();
+            ElevatorCar car = s.car(ctx);
+            ctx.check("servo panel: a car, and the pigs spawned after it", car != null && spawned.size() == 3, car + " " + spawned);
+            if (car == null) return;
+            int id = car.panel.getId();
+            var others = new java.util.ArrayList<String>();
+            for (Entity e : level.getAllEntities()) if (e.getId() == id) others.add(e.toString());
+            ctx.line("servo panel: car " + car.getId() + ", panel " + id + ", pigs " + spawned.stream().map(Entity::getId).toList());
+            ctx.check("servo panel: no entity has the panel's id", others.isEmpty() && level.getEntity(id) == null
+                && spawned.stream().noneMatch(e -> e.getId() == id), others.toString());
+            ctx.check("servo panel: a click on its id reaches the panel", level.getEntityOrPart(id) == car.panel, String.valueOf(level.getEntityOrPart(id)));
+            // the client's car, made from the spawn packet, numbers its panel as the server's: also when that isn't car + 1
+            var packet = (net.minecraft.network.protocol.game.ClientboundAddEntityPacket) car.getAddEntityPacket(serverEntity(level, car));
+            ElevatorCar client = new ElevatorCar(Robotics.ELEVATOR_CAR.get(), level);
+            client.recreateFromPacket(packet);
+            ElevatorCar gap = new ElevatorCar(Robotics.ELEVATOR_CAR.get(), level);
+            gap.panel.setId(gap.getId() + 7);   // (as if another thread took the ids between the car and its panel)
+            ElevatorCar gapClient = new ElevatorCar(Robotics.ELEVATOR_CAR.get(), level);
+            gapClient.recreateFromPacket((net.minecraft.network.protocol.game.ClientboundAddEntityPacket) gap.getAddEntityPacket(serverEntity(level, gap)));
+            ctx.check("servo panel: the spawn packet gives the client the panel's id", client.getId() == car.getId()
+                && client.panel.getId() == id && gapClient.panel.getId() == gap.getId() + 7,
+                client.getId() + "/" + client.panel.getId() + " for " + car.getId() + "/" + id + "; gap " + gapClient.panel.getId());
+            for (Entity e : spawned) e.discard();
+        }
+
+        static net.minecraft.server.level.ServerEntity serverEntity(net.minecraft.server.level.ServerLevel level, Entity e) {
+            return new net.minecraft.server.level.ServerEntity(level, e, net.minecraft.world.entity.UpdateInterval.NEVER, false,
+                new net.minecraft.server.level.ServerEntity.Synchronizer() {
+                    public void sendToTrackingPlayers(net.minecraft.network.protocol.Packet<? super net.minecraft.network.protocol.game.ClientGamePacketListener> p) {
+                    }
+
+                    public void sendToTrackingPlayersAndSelf(net.minecraft.network.protocol.Packet<? super net.minecraft.network.protocol.game.ClientGamePacketListener> p) {
+                    }
+
+                    public void sendToTrackingPlayersFiltered(net.minecraft.network.protocol.Packet<? super net.minecraft.network.protocol.game.ClientGamePacketListener> p,
+                                                              java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> f) {
+                    }
+                });
         }
     }
 

@@ -3,9 +3,12 @@ package mods.eln.robotics.servo;
 import mods.eln.robotics.motion.Segment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -58,9 +61,9 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
 
     public ElevatorCar(EntityType<? extends ElevatorCar> type, Level level) {
         super(type, level);
+        // (on the server the panel, an Entity, takes its own id from the level's entity counter, so no other entity
+        // ever has it; a client learns it from the spawn packet: recreateFromPacket)
         panel = new ElevatorPanel(this);
-        // (no panel id here: a client's entity has none yet at construction, and getId() throws; setId and
-        // recreateFromPacket number the panel)
         setNoGravity(true);
         blocksBuilding = true;
     }
@@ -215,16 +218,20 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return new net.neoforged.neoforge.entity.PartEntity<?>[]{panel};
     }
 
+    /**
+     * The spawn packet carries the panel's id in its data: the server's counter gave it, and it needn't be the car's
+     * id + 1 (another thread may have taken that one first); assumed, a click on the panel could reach that entity.
+     */
     @Override
-    public void setId(int id) {
-        super.setId(id);
-        panel.setId(id + 1);
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+        return new ClientboundAddEntityPacket(this, serverEntity, panel.getId());
     }
 
+    /** Client: the car's id, and the panel's from the packet's data (getAddEntityPacket). */
     @Override
     public void recreateFromPacket(ClientboundAddEntityPacket packet) {
         super.recreateFromPacket(packet);
-        panel.setId(packet.getId() + 1);
+        panel.setId(packet.getData());
         panel.follow();
     }
 

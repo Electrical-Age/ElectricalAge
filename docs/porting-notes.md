@@ -210,7 +210,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     trip late. A stopped car has a floor ghost under its plate (a player logging in on it stands on that). A mixin
     keeps a rider from the floating kick when allow-flight is off.
   - Departures from the design: the panel is a part entity (the car's collider is only its plate, so the plate can't
-    also be the panel's hitbox); joiners get the segment in the car's pairing bundle rather than in startSeenByPlayer
+    also be the panel's hitbox; its id is the server's entity counter's, sent in the car's spawn packet, never assumed
+    to be the car's + 1); joiners get the segment in the car's pairing bundle rather than in startSeenByPlayer
     (which runs after the spawn bundle); on the server, riders' sweep is clipped to the car's column (a rider's
     overhang meets the landing, it doesn't fault the car) and a player up to 1 m off the top (a round trip late) still counts as a rider.
   - Tests: `ServoCases`, `DriveTest`, `SegmentPropertyTest`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
