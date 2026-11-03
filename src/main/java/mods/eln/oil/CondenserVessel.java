@@ -149,6 +149,17 @@ public final class CondenserVessel {
         return speed * curve.share(backPa);
     }
 
+    /**
+     * Jade's line on the pump's outlet (Baughn 2026-11-03): the pressure it works against and its flow there as a share
+     * of its rated (free) flow at its speed now, or that it is shut off and needs a pipe pump after it.
+     */
+    public String outletStatus() {
+        String against = String.format(mods.eln.i18n.I18N.tr("against %.1f bar"), outletPa / 1e5);
+        if (curve.share(backPa) < 0.05) return against + mods.eln.i18n.I18N.tr(": shut off, needs a pipe pump");
+        if (speed < 0.01) return against + mods.eln.i18n.I18N.tr(": not turning");
+        return against + String.format(mods.eln.i18n.I18N.tr(": %.0f%% of its rated flow"), flowShare() * 100);
+    }
+
     /** After a fluid step: the meters; returns the condensate pumped this step (kg). */
     public double after(double dt) {
         double kg = pump != null && pump.edge != null ? Math.max(0, pump.edge.fLiquid) * dt : 0;

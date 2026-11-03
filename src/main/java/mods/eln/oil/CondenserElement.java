@@ -227,6 +227,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         info.put(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("stopped: no turbine")
             : open <= 0.01 ? I18N.tr("stopped: it turns with the turbine; feed the boiler directly to start")
             : String.format("%.0f%%, %.0f mB/s", Math.min(1, open) * 100, pumped));
+        if (v.pump != null) info.put(I18N.tr("Pump outlet"), v.outletStatus());
         return info;
     }
 }

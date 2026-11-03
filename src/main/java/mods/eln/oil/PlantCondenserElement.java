@@ -290,6 +290,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW) + I18N.tr(" by its shell, ") + Utils.plotPower("", tubesW) + I18N.tr(" to its cooling water"));
         info.put(I18N.tr("Motor"), motor == null ? I18N.tr("none: put a Shaft Motor against its side")
             : String.format("%.0f%% speed, pumping %.0f mB/s, %.0f W off its shaft", motorShare * 100, v.pumped, pumpW));
+        if (v.pump != null) info.put(I18N.tr("Pump outlet"), v.outletStatus());
         return info;
     }
 }

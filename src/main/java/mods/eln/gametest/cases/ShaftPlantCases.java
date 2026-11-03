@@ -407,10 +407,14 @@ public final class ShaftPlantCases {
             ctx.line(String.format("%s: %.1f g/s pumped (a full HP makes %.1f g/s); back-pressure %.2f bar; curve %.1f bar shut-off, %.1f g/s free, "
                     + "%.1f g/s at %.0f bar; motor %.0f%%; %s", id, rate * 1000, hp * 1000, c.v.backPa / 1e5, c.v.curve.shutoffPa / 1e5,
                 c.v.curve.freeKgPerS * 1000, c.v.curve.kgPerS(c.v.curve.ratedPa) * 1000, c.v.curve.ratedPa / 1e5, c.motorShare * 100, c.getWaila()));
-            if (boilerPa <= mods.eln.mechanical.SteamTurbineSpec.HP.nominalPa)
+            String jade = "" + c.getWaila().get(mods.eln.i18n.I18N.tr("Pump outlet"));
+            if (boilerPa <= mods.eln.mechanical.SteamTurbineSpec.HP.nominalPa) {
                 ctx.check(id + ": it returns more than a full HP's condensate", rate > hp, String.format("%.1f g/s", rate * 1000));
-            else
+                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against 20") && jade.endsWith("of its rated flow"), jade);
+            } else {
                 ctx.check(id + ": past its shut-off it returns nothing (under 1 g/s)", rate < 0.001, String.format("%.2f g/s", rate * 1000));
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 27") && jade.endsWith("shut off, needs a pipe pump"), jade);
+            }
         }
     }
 

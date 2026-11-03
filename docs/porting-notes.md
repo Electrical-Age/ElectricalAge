@@ -53,6 +53,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   couldn't feed the HP's own 20 bar boiler. Its motor load now goes with the pressure it really pumps against. Speed
   still scales the flow only (the head stays at any speed). Was a straight line to a 15 bar shut-off for all.
   `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
+  Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
+  (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar

@@ -860,16 +860,19 @@ public final class OilCases {
                 c.v.backPa / 1e5, c.v.curve.shutoffPa / 1e5, c.v.curve.freeKgPerS * 1000, c.v.curve.kgPerS(c.v.curve.ratedPa) * 1000,
                 c.v.curve.ratedPa / 1e5, c.getWaila(), t.getWaila()));
             if (inlinePump) ctx.line(id + ": pump " + pump.getWaila());
+            String jade = "" + c.getWaila().get(mods.eln.i18n.I18N.tr("Pump outlet"));
             ctx.check(id + ": the turbine ran on its load (over 1 g/s of steam)", !t.isBurnt() && steam > 0.03, String.format("%.1f g", steam * 1000));
             if (boilerPa <= mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA || inlinePump) {
                 ctx.check(id + ": its condensate goes back to the boiler (over 90 %)", pumped > 0.9 * steam,
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
                 ctx.check(id + ": the level holds (no rise, under the float valve's shut level)", fill <= fill0 + 0.01 && fill < mods.eln.oil.CondenserVessel.MAKEUP_SHUT,
                     String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
+                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against") && jade.endsWith("of its rated flow"), jade);
             } else {
                 ctx.check(id + ": past its shut-off the pump returns next to nothing (under 10 %)", pumped < 0.1 * steam,
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
                 ctx.check(id + ": and the vessel fills", fill > fill0 + 0.005, String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 14") && jade.endsWith("shut off, needs a pipe pump"), jade);
             }
         }
     }
