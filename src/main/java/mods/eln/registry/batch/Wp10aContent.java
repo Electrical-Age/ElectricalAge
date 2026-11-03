@@ -128,14 +128,14 @@ public class Wp10aContent implements ElnContent {
             var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "tarsandseparator50v", LVU, 200, LVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0), lowVoltageCableDescriptor, mods.eln.Eln.separatorRecipes);
             transparentNodeItem.addDescriptor(0 + (id << 6), desc);
-            desc.setRunningSound("eln:macerator");
+            desc.setRunningSound("eln:separator");   // (Baughn's recording, 2026-11-03: squishier than the macerator)
         }
         {
             String name = TR_NAME(Type.NONE, "200V Tar Sand Separator");
             var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "tarsandseparator200v", MVU, 2000, MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0), meduimVoltageCableDescriptor, mods.eln.Eln.separatorRecipes);
             transparentNodeItem.addDescriptor(4 + (id << 6), desc);
-            desc.setRunningSound("eln:macerator");
+            desc.setRunningSound("eln:separator");   // (Baughn's recording, 2026-11-03: squishier than the macerator)
         }
     }
 

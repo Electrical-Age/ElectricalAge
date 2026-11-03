@@ -37,6 +37,7 @@ public final class OilCases {
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
         cases.add(new Coke());
+        cases.add(new SeparatorSound());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
@@ -568,6 +569,32 @@ public final class OilCases {
                     ctx.check("oil on pipes: the gas turbine's fuel tank filled from the pipe", f > 500, f + " mB of fuel, tank " + tank.getWaila());
                 }
             }
+        }
+    }
+
+    /** Baughn 2026-11-03: both tar sand separators run to his recording (eln:separator), not the macerator's sound. */
+    static final class SeparatorSound implements TestCase {
+        public String id() {
+            return "oil_separator_sound";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            for (int sub : new int[]{0, 4}) {
+                Object d = mods.eln.Eln.transparentNodeItem.getDescriptor(sub + (80 << 6));
+                String s = Batch1Cases.field(d, "runningSound");
+                ctx.check("oil: the separator runs to its own sound (" + sub + ")", "eln:separator".equals(s), "" + s);
+            }
+            boolean asset = OilCases.class.getResource("/assets/eln/sounds/separator.ogg") != null;
+            String json = "";
+            try (var in = OilCases.class.getResourceAsStream("/assets/eln/sounds.json")) {
+                if (in != null) json = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            } catch (java.io.IOException e) {
+                json = e.toString();
+            }
+            ctx.check("oil: the separator's sound is shipped and listed", asset && json.contains("\"eln:separator\""), asset + "");
         }
     }
 
