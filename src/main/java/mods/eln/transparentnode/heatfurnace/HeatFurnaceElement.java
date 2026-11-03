@@ -126,7 +126,7 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
     @Override
     public void beforeFluidStep(double dt) {
-        if (flue.step(furnaceProcess.getP(), dt, mods.eln.sim.Ambient.kelvin(node.coordonate))) needPublish();
+        if (flue.step(isBurnt() ? 0 : furnaceProcess.getP(), dt, mods.eln.sim.Ambient.kelvin(node.coordonate))) needPublish();   // (burnt: its fire is out)
         smoking = flue.smoking;
     }
 
@@ -175,8 +175,8 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
             stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
             stream.writeFloat((float) furnaceProcess.getGain());
             stream.writeFloat((float) regulator.getTarget());
-            stream.writeShort((int) furnaceProcess.getP());
-            stream.writeFloat((float) furnaceProcess.fire.level);
+            stream.writeShort(isBurnt() ? 0 : (int) furnaceProcess.getP());   // (burnt out: no glow, whatever it last burnt)
+            stream.writeFloat(isBurnt() ? 0f : (float) furnaceProcess.fire.level);
             stream.writeBoolean(furnaceProcess.fire.lighting());
 
             serialiseItemStack(stream, inventory.getItem(HeatFurnaceContainer.combustibleId));

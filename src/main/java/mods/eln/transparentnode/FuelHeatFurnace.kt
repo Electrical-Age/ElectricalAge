@@ -69,7 +69,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
             GL11.glColor3f(0f, 1f, 0f)
             UtilsClient.drawLight(powerLED)
         } else {
-            GL11.glColor3f(0f, 0.5f, 0f)
+            GL11.glColor3f(0.05f, 0.18f, 0.05f)   // (off: dark glass; it looked lit at half green, AdventurAgent)
             powerLED?.draw()
         }
 
@@ -77,12 +77,12 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
             GL11.glColor3f(1f, 0f, 0f)
             UtilsClient.drawLight(heatLED)
         } else {
-            GL11.glColor3f(0.5f, 0f, 0f)
+            GL11.glColor3f(0.2f, 0.04f, 0.04f)
             heatLED?.draw()
         }
         GL11.glColor3f(1f, 1f, 1f)
 
-        if (glow != null && fire > 0.01f) {
+        if (glow != null && heating && fire > 0.01f) {   // (only a burning flame: not while it kindles, nor when burnt out)
             val k = power.coerceIn(0f, 1f)
             UtilsClient.disableLight()
             GL11.glColor4f(0.85f + 0.15f * k, 0.38f + 0.54f * k, 0.08f + 0.67f * k * k, 1f)
@@ -163,7 +163,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun beforeFluidStep(dt: Double) {
         val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
         fuelIn.step(tank, dt, amb)
-        if (flue.step(actualHeatPower, dt, amb)) needPublish()
+        if (flue.step(if (isBurnt()) 0.0 else actualHeatPower, dt, amb)) needPublish()   // (burnt: its fire is out)
         smoking = flue.smoking
     }
 
@@ -283,12 +283,12 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeBoolean(mainSwitch)
         stream.writeFloat(heaterControlValue.toFloat())
         stream.writeFloat(setTemperature.toFloat())
-        stream.writeFloat(actualHeatPower.toFloat())
+        stream.writeFloat(if (isBurnt()) 0f else actualHeatPower.toFloat())   // (burnt out: no flame, whatever it last made)
         stream.writeFloat(thermalLoad.Tc.toFloat())
         stream.writeInt(FuelBurnerDescriptor.getDescriptor(inventory_.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type ?: -1)
-        stream.writeFloat(fire.level.toFloat())
+        stream.writeFloat(if (isBurnt()) 0f else fire.level.toFloat())
         stream.writeBoolean(fire.lighting())
-        stream.writeBoolean(smoking)
+        stream.writeBoolean(smoking && !isBurnt())
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -343,7 +343,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun getWaila(): MutableMap<String, String> {
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
-        info.put(I18N.tr("Power"), Utils.plotPower("", actualHeatPower))
+        info.put(I18N.tr("Power"), Utils.plotPower("", if (isBurnt()) 0.0 else actualHeatPower))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
         if (fuelIn.piped()) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
