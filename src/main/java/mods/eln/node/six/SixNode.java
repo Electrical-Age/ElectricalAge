@@ -518,11 +518,11 @@ public class SixNode extends Node {
 
     /** The elements' own connect jobs and their links inside the block (a voxel node hosting elements calls this). */
     protected void connectElements() {
-        // Burnt elements stay out of the simulation (see SixNodeElement.burn).
+        // Burnt elements keep only their thermal loads in the simulation (see SixNodeElement.connectBurntJob).
         for (SixNodeElement element : sideElementList) {
-            if (element != null && !element.isBurnt()) {
-                element.connectJob();
-            }
+            if (element == null) continue;
+            if (element.isBurnt()) element.connectBurntJob();
+            else element.connectJob();
         }
 
         //INTERNAL
@@ -575,9 +575,9 @@ public class SixNode extends Node {
     public void disconnectJob() {
         super.disconnectJob();
         for (SixNodeElement element : sideElementList) {
-            if (element != null && !element.isBurnt()) {
-                element.disconnectJob();
-            }
+            if (element == null) continue;
+            if (element.isBurnt()) element.disconnectBurntJob();
+            else element.disconnectJob();
         }
 
         Eln.simulator.removeAllElectricalConnection(internalElectricalConnectionList);
@@ -715,8 +715,8 @@ public class SixNode extends Node {
         SixNodeElement element = getElement(slot);
         if (element == null)
             return false;
-        if (element.isBurnt() && Repair.onActivated(element, entityPlayer))
-            return true;
+        // Burnt: a meter reads it, anything else repairs it or says what it needs; no GUI, no use (Baughn).
+        if (element.isBurnt()) return meterUseSlot(entityPlayer, slot) || Repair.onActivated(element, entityPlayer) || true;
         if (element.onBlockActivated(entityPlayer, element.side, vx, vy, vz))
             return true;
         if (meterUseSlot(entityPlayer, slot)) return true;
@@ -733,7 +733,7 @@ public class SixNode extends Node {
 
     @Override
     public boolean hasGui(Direction side) {
-        if (sideElementList[side.getInt()] == null)
+        if (sideElementList[side.getInt()] == null || sideElementList[side.getInt()].isBurnt())
             return false;
         return sideElementList[side.getInt()].hasGui();
     }
@@ -746,7 +746,7 @@ public class SixNode extends Node {
 
     public boolean hasGui(int slot) {
         SixNodeElement e = getElement(slot);
-        return e != null && e.hasGui();
+        return e != null && !e.isBurnt() && e.hasGui();
     }
 
     public float physicalSelfDestructionExplosionStrength() {
@@ -756,7 +756,7 @@ public class SixNode extends Node {
     public void recalculateLightValue() {
         int light = 0;
         for (SixNodeElement element : sideElementList) {
-            if (element == null)
+            if (element == null || element.isBurnt())
                 continue;
             int eLight = element.getLightValue();
             if (eLight > light)

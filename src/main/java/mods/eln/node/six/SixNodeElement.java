@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.misc.*;
 import mods.eln.node.INodeElement;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -417,7 +418,25 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return getCoordonate();
     }
 
-    /** Burn out: stay in the world but leave the simulation (SixNode skips burnt elements) until repaired. */
+    /**
+     * In the simulation while burnt (SixNode calls it instead of connectJob): only the thermal loads and the
+     * connections among them, so it cools to ambient and does nothing else (Baughn: a damaged device should tick, but
+     * should stop doing useful things).
+     */
+    public void connectBurntJob() {
+        if (sixNode != null && sixNode.isDestructing()) return;
+        ambient = mods.eln.sim.Ambient.relative(sixNode.coordonate);
+        mods.eln.sim.Ambient.stamp(thermalLoadList, ambient);
+        for (NbtThermalLoad load : thermalLoadList) Eln.simulator.addThermalLoad(load);
+        Eln.simulator.addAllThermalConnection(TransparentNodeElement.burntThermalConnections(thermalConnectionList, thermalLoadList));
+    }
+
+    public void disconnectBurntJob() {
+        for (NbtThermalLoad load : thermalLoadList) Eln.simulator.removeThermalLoad(load);
+        Eln.simulator.removeAllThermalConnection(TransparentNodeElement.burntThermalConnections(thermalConnectionList, thermalLoadList));
+    }
+
+    /** Burn out: stay in the world, out of the simulation but for its thermal loads (connectBurntJob), until repaired. */
     @Override
     public void burn(FailureCause cause, Failure.Kind kind) {
         if (burnt != null) return;
@@ -425,6 +444,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         burnt = cause;
         burntKind = kind;
         sixNode.connect();
+        sixNode.recalculateLightValue();
         needPublish();
     }
 
@@ -439,6 +459,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         for (IProcess p : thermalSlowProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         for (IProcess p : electricalProcessList) if (p instanceof ValueWatchdog) ((ValueWatchdog) p).reset();
         sixNode.connect();
+        sixNode.recalculateLightValue();
         needPublish();
     }
 

@@ -189,7 +189,8 @@ public class TransparentNode extends Node {
     }
 
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (element.isBurnt() && Repair.onActivated(element, entityPlayer)) return true;
+        // Burnt: a meter reads it, anything else repairs it or says what it needs; no GUI, no use (Baughn).
+        if (element.isBurnt()) return meterUse(entityPlayer, side) || Repair.onActivated(element, entityPlayer) || true;
         if (mods.eln.misc.Utils.isPlayerUsingWrench(entityPlayer) && element.wrenchTurn(entityPlayer)) return true;
         if (element.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true;
         if (mods.eln.fluid.FluidBuckets.use(entityPlayer, element.getFluidHandler())) return true;   // 26.x: buckets in and out
@@ -198,7 +199,7 @@ public class TransparentNode extends Node {
 
     @Override
     public boolean hasGui(Direction side) {
-        if (element == null) return false;
+        if (element == null || element.isBurnt()) return false;
         return element.hasGui();
     }
 
@@ -227,14 +228,16 @@ public class TransparentNode extends Node {
     @Override
     public void connectJob() {
         super.connectJob();
-        // A burnt element stays out of the simulation (see TransparentNodeElement.burn).
-        if (!element.isBurnt()) element.connectJob();
+        // A burnt element keeps only its thermal loads in the simulation (see TransparentNodeElement.connectBurntJob).
+        if (element.isBurnt()) element.connectBurntJob();
+        else element.connectJob();
     }
 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
-        if (!element.isBurnt()) element.disconnectJob();
+        if (element.isBurnt()) element.disconnectBurntJob();
+        else element.disconnectJob();
     }
 
     @Override

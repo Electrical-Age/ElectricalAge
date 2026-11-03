@@ -34,6 +34,13 @@ public class GenericItemBlockUsingDamageDescriptor {
     public void drawItem(boolean entity) {
     }
 
+    /**
+     * The item that repairs the device when it burns out, by name (Eln.findItemStack); null: by the kind of failure
+     * (Repair.defaultPart). Set where the kind's part would not fit the device or would cost more than it.
+     */
+    @javax.annotation.Nullable
+    public String repairPart;
+
     public GenericItemBlockUsingDamageDescriptor(String name) {
         this(name, name);
     }
