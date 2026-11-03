@@ -33,6 +33,7 @@ public final class OilCases {
         cases.add(new Outlet(true));
         cases.add(new Outlet(false));
         cases.add(new PumpIntoPipe());
+        for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
@@ -343,6 +344,150 @@ public final class OilCases {
             ctx.line("oil pump into pipe: " + left + " mB left in the pump, tank " + tank.getWaila());
             ctx.check("oil pump: its crude went into the pipe", left < 500, left + " mB left");
             ctx.check("oil pump: and along it into the tank, as crude", inTank > 200, String.format("%.0f mB of crude in the tank", inTank));
+        }
+    }
+
+    /**
+     * The oil devices on EA pipes (Baughn 2026-11-03: data-driven multi-fluid pipes), each through one iron pipe block
+     * between two devices side by side (west at x 1, east at x 3):
+     * column_in: a tank of crude into the column base's crude nozzle (its right side);
+     * residue_out: the hot column base's residue out of its left nozzle into a tank;
+     * segment_out: a column segment's gasoline out of its front nozzle into a tank;
+     * flare_in: a tank of crude into a flare stack's front flange, which burns it;
+     * turbine_fuel: a tank of gasoline (one block up) along a pipe down into a gas turbine's top fuel flange.
+     */
+    static final class OilOnPipes implements TestCase {
+        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel"};
+        final String variant;
+        mods.eln.node.transparent.TransparentNodeElement west, east;
+        mods.eln.oil.TankElement tank;
+        String err;
+        int before;
+
+        OilOnPipes(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "oil_on_pipes_" + variant;
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        /** Turn e so its side `which` (a function of its front) faces `want`. */
+        static void face(mods.eln.node.transparent.TransparentNodeElement e, java.util.function.UnaryOperator<mods.eln.misc.Direction> which, mods.eln.misc.Direction want) {
+            for (var f : new mods.eln.misc.Direction[]{mods.eln.misc.Direction.XN, mods.eln.misc.Direction.ZN, mods.eln.misc.Direction.XP, mods.eln.misc.Direction.ZP})
+                if (which.apply(f) == want) e.front = f;
+            e.reconnect();
+        }
+
+        static mods.eln.oil.TankElement tank(TestContext ctx, BlockPos p, mods.eln.misc.Direction back) {
+            var t = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, p);
+            t.front = back.back();
+            t.reconnect();
+            return t;
+        }
+
+        static void put(TestContext ctx, BlockPos p, net.minecraft.world.level.material.Fluid f, int mB) {
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, p, net.minecraft.core.Direction.UP);
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(f), mB, tx);
+                tx.commit();
+            }
+        }
+
+        void lay(TestContext ctx, BlockPos p, int... pts) {
+            try {
+                PipeCases.lay(ctx, p, 0, pts);
+            } catch (IllegalStateException e) {
+                err = e.getMessage();
+            }
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos w = ctx.at(1, 1, 1), mid = ctx.at(2, 1, 1), e = ctx.at(3, 1, 1);
+            var XP = mods.eln.misc.Direction.XP;
+            var XN = mods.eln.misc.Direction.XN;
+            switch (variant) {
+                case "column_in" -> {
+                    tank = tank(ctx, w, XP);   // (its back east: low side port 4 px up)
+                    east = ctx.placeTransparent(0 + (83 << 6), e);
+                    face(east, mods.eln.misc.Direction::right, XN);
+                    lay(ctx, mid, 0, 4, 8, 8, 4, 8, 8, 8, 8, 16, 8, 8);
+                    put(ctx, w, Oil.CRUDE.get(), 9000);
+                }
+                case "residue_out" -> {
+                    west = ctx.placeTransparent(0 + (83 << 6), w);
+                    face(west, mods.eln.misc.Direction::left, XP);
+                    tank = tank(ctx, e, XN);
+                    lay(ctx, mid, 0, 8, 8, 8, 8, 8, 8, 4, 8, 16, 4, 8);
+                    ((mods.eln.oil.ColumnBaseElement) west).tanks.setResidue(2000);
+                    ((mods.eln.oil.ColumnBaseElement) west).thermal.Tc = 360;   // (it comes off hot: cold residue barely flows)
+                }
+                case "segment_out" -> {
+                    west = ctx.placeTransparent(4 + (83 << 6), w);
+                    west.front = XP;
+                    west.reconnect();
+                    tank = tank(ctx, e, XN);
+                    lay(ctx, mid, 0, 8, 8, 8, 8, 8, 8, 4, 8, 16, 4, 8);
+                    ((mods.eln.oil.ColumnSegmentElement) west).tank.put(Oil.Cut.GASOLINE.source.get(), 2000);
+                }
+                case "flare_in" -> {
+                    tank = tank(ctx, w, XP);
+                    east = ctx.placeTransparent(8 + (83 << 6), e);
+                    east.front = XN;
+                    east.reconnect();
+                    lay(ctx, mid, 0, 4, 8, 8, 4, 8, 8, 8, 8, 16, 8, 8);
+                    put(ctx, w, Oil.CRUDE.get(), 9000);
+                }
+                case "turbine_fuel" -> {
+                    BlockPos t = ctx.at(2, 1, 1), up = ctx.at(2, 2, 1), beside = ctx.at(3, 2, 1);
+                    east = ctx.placeTransparent(GasPlantCases.GAS_TURBINE, t);
+                    lay(ctx, up, 8, 0, 8, 8, 4, 8, 16, 4, 8);   // (up out of its top flange, then east into the tank)
+                    ctx.level().setBlockAndUpdate(ctx.at(3, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+                    tank = tank(ctx, beside, XN);
+                    put(ctx, beside, Oil.Cut.GASOLINE.source.get(), 6000);
+                }
+                default -> throw new IllegalStateException(variant);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("oil on pipes " + variant + ": the pipe goes in", err == null, "" + err);
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            switch (variant) {
+                case "column_in" -> {
+                    int c = ((mods.eln.oil.ColumnBaseElement) east).tanks.crude();
+                    ctx.check("oil on pipes: the tank's crude went into the column base", c > 500, c + " mB of crude in the base, tank " + tank.getWaila());
+                }
+                case "residue_out" -> {
+                    int id = reg.id("eln:residue");
+                    double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    ctx.check("oil on pipes: the column base's residue went into the tank", got > 500,
+                        String.format("%.0f mB in the tank, %d left in the base", got, ((mods.eln.oil.ColumnBaseElement) west).tanks.residue()));
+                }
+                case "segment_out" -> {
+                    int id = reg.id("eln:gasoline");
+                    double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    ctx.check("oil on pipes: the segment's gasoline went into the tank", got > 500,
+                        String.format("%.0f mB in the tank, %d left in the segment", got, ((mods.eln.oil.ColumnSegmentElement) west).tank.getFluidAmount()));
+                }
+                case "flare_in" -> {
+                    int id = reg.id("eln:crude_oil");
+                    double left = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    ctx.check("oil on pipes: the flare stack took the tank's crude", left < 8500, String.format("%.0f mB left in the tank, flare %s", left, east.getWaila()));
+                }
+                case "turbine_fuel" -> {
+                    int f = ((mods.eln.mechanical.GasTurbineElement) east).tank.getFluidAmount();
+                    ctx.check("oil on pipes: the gas turbine's fuel tank filled from the pipe", f > 500, f + " mB of fuel, tank " + tank.getWaila());
+                }
+            }
         }
     }
 

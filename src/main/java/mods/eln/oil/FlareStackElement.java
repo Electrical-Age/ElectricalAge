@@ -21,7 +21,39 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** FlareStackDescriptor: burns its tank down at up to BURN_RATE; tells the client what burns, for the visuals. */
-public class FlareStackElement extends TransparentNodeElement {
+public class FlareStackElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
+    /** On EA pipes: whatever the pipe on its front flange holds that is a fluid, to burn (mods.eln.cad.models.Column). */
+    final mods.eln.fluid.PortBridge inlet = new mods.eln.fluid.PortBridge("inlet", mods.eln.fluid.PortBridge.Mode.IN, FlareStackDescriptor.BURN_RATE, 0);
+
+    @Override
+    public Object fluidLevel() {
+        return node.coordonate.dimention;
+    }
+
+    @Override
+    public java.util.List<FluidPort> fluidPorts() {
+        if (inlet.stub == null) return java.util.List.of();
+        int face = front.toEnumFacing().get3DDataValue();
+        return java.util.List.of(inlet.port(node.coordonate.pos().asLong(), face, TankElement.sideSpot(face, 8)));
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        inlet.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        if (inlet.stub != null) mods.eln.fluid.FluidWorld.add(this);
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        mods.eln.fluid.FluidWorld.remove(this);
+    }
+
     public final ElementFluidHandler tank = new ElementFluidHandler(FlareStackDescriptor.TANK_MB);
     public double burnRate;   // mB/s, averaged over whole seconds
     double carry, meterBurnt, meterTime;
@@ -92,6 +124,7 @@ public class FlareStackElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
+        inlet.make(node.coordonate.y + 0.5, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();
     }
 
@@ -108,12 +141,14 @@ public class FlareStackElement extends TransparentNodeElement {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        inlet.write(nbt);
         tank.writeToNBT(nbt, "tank");
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        inlet.read(nbt);
         tank.readFromNBT(nbt, "tank");
     }
 
