@@ -36,6 +36,11 @@ public final class Species {
     public final double mu1, t1, mu2, t2, muV;
     /** Colour (0xRRGGBB) for sight glasses, jets and sensors. */
     public final int colour;
+    /**
+     * Flammability (K; 0: it doesn't burn): over its flash point a leak of it catches from a flame near it, over its
+     * autoignition temperature by itself (Baughn 2026-11-03: fire from hot flammable leaks). Set by the loader.
+     */
+    public double flashPoint, autoignition;
 
     private final double andradeA, andradeB, tSteep;
 
@@ -78,7 +83,15 @@ public final class Species {
 
     /** A copy of this species' data under another id (the registry keeps ids stable across reloads). */
     Species withId(int newId) {
-        return new Species(newId, key, kind, group, rhoL, cpL, cpV, molarMass, r, tb, latentTb, tc, mu1, t1, mu2, t2, muV, colour);
+        Species s = new Species(newId, key, kind, group, rhoL, cpL, cpV, molarMass, r, tb, latentTb, tc, mu1, t1, mu2, t2, muV, colour);
+        s.flashPoint = flashPoint;
+        s.autoignition = autoignition;
+        return s;
+    }
+
+    /** Does it burn. */
+    public boolean flammable() {
+        return autoignition > 0;
     }
 
     public boolean condensable() {

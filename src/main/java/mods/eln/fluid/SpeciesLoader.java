@@ -36,6 +36,8 @@ import java.util.TreeMap;
  * vapour_viscosity     Pa s
  * colour               "#RRGGBB"
  * fluids               {"liquid": [fluid ids], "vapour": [fluid ids]}: the NeoForge fluids that are this species
+ * flammable            optional {"flash_point": K, "autoignition": K}: a leak catches from a flame over its flash
+ *                      point, by itself over its autoignition temperature
  * </pre>
  * A file that fails to parse or check is skipped with a log line; the species keeps its previous data, if any.
  */
@@ -126,11 +128,18 @@ public final class SpeciesLoader extends SimplePreparableReloadListener<Map<Stri
             String c = j.get("colour").getAsString();
             colour = Integer.parseInt(c.startsWith("#") ? c.substring(1) : c, 16);
         }
-        return new Species(-1, key, kind, req(j, "group").getAsString(), req(j, "density").getAsDouble(),
+        Species s = new Species(-1, key, kind, req(j, "group").getAsString(), req(j, "density").getAsDouble(),
             gas ? 0 : req(j, "cp_liquid").getAsDouble(), req(j, "cp_vapour").getAsDouble(), req(j, "molar_mass").getAsDouble(),
             curve ? req(j, "boiling_point").getAsDouble() : 0, curve ? req(j, "latent_heat").getAsDouble() : 0,
             curve ? req(j, "critical_temperature").getAsDouble() : 0, mu1, t1, mu2, t2,
             j.has("vapour_viscosity") ? j.get("vapour_viscosity").getAsDouble() : 1e-5, colour);
+        if (j.has("flammable")) {
+            JsonObject f = j.getAsJsonObject("flammable");
+            s.autoignition = req(f, "autoignition").getAsDouble();
+            s.flashPoint = f.has("flash_point") ? f.get("flash_point").getAsDouble() : 0;
+            if (!(s.autoignition > s.flashPoint)) throw new IllegalArgumentException("autoignition must be over the flash point");
+        }
+        return s;
     }
 
     private static JsonElement req(JsonObject j, String field) {

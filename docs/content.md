@@ -75,7 +75,10 @@ oil_on_pipes_*.
   critical temperature, liquid viscosity at two temperatures, colour, the NeoForge fluids it is). Water and air are
   built in. EA ships crude_oil, gasoline, diesel, heavy_oil (hydrocarbons, one group), residue (never boils, denser
   than water) and natural_gas. A modpack can add species or retune these; a file that fails its checks (the vapour's
-  energy must stay above the liquid's below the critical point) is skipped with a log line.
+  energy must stay above the liquid's below the critical point) is skipped with a log line. Optional `flammable`
+  {flash_point, autoignition} (K): a leak's jet (`node/voxel/SteamJet.burn`) of a species that burns catches by itself
+  at its autoignition temperature, over its flash point from a flame within 2 blocks (fire, lava, a torch, a lit
+  campfire, furnace or candle), and sets fire along the jet and to what stands in it (Baughn 2026-11-03).
 
 ## Entities
 

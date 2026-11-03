@@ -7,5 +7,6 @@
   "molar_mass": 0.6,
   "viscosity": [[293, 50], [423, 0.5]],
   "colour": "#2A2826",
-  "fluids": {"liquid": ["eln:residue"], "vapour": []}
+  "fluids": {"liquid": ["eln:residue"], "vapour": []},
+  "flammable": {"flash_point": 500, "autoignition": 680}
 }

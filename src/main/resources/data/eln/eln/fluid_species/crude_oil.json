@@ -11,5 +11,6 @@
   "viscosity": [[293, 0.01], [373, 0.002]],
   "vapour_viscosity": 8e-6,
   "colour": "#1A1410",
-  "fluids": {"liquid": ["eln:crude_oil"], "vapour": []}
+  "fluids": {"liquid": ["eln:crude_oil"], "vapour": []},
+  "flammable": {"flash_point": 280, "autoignition": 520}
 }

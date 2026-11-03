@@ -42,6 +42,9 @@ public final class PipeCases {
         cases.add(new Adapter());
         cases.add(new AdapterOil());
         cases.add(new SealedRunDrains());
+        cases.add(new LeakFire(0));
+        cases.add(new LeakFire(1));
+        cases.add(new LeakFire(2));
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
@@ -1235,6 +1238,72 @@ public final class PipeCases {
             n.removePart(0, true);
             var items = ctx.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(a).inflate(3));
             ctx.check("pipe: a burst piece drops nothing", items.isEmpty(), items.size() + " items");
+        }
+    }
+
+    /**
+     * Fire from a hot flammable leak (Baughn 2026-11-03): an iron run of heavy oil at 430 C (over its autoignition, 680 K)
+     * under air past its burst rating bursts, and its jet catches; the same run of diesel at 20 C (under its flash point)
+     * only sprays; gasoline at 20 C (over its flash point, under its autoignition) catches from torches beside it.
+     */
+    static final class LeakFire implements TestCase {
+        /** 0 hot heavy oil, 1 cold diesel, 2 gasoline beside torches. */
+        final int mode;
+        final boolean hot;
+        BlockPos a, b;
+
+        LeakFire(int mode) {
+            this.mode = mode;
+            this.hot = mode != 1;
+        }
+
+        public String id() {
+            return mode == 0 ? "pipe_hot_oil_leak_catches_fire" : mode == 1 ? "pipe_cold_diesel_leak_no_fire" : "pipe_gasoline_leak_catches_from_a_torch";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 120;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            b = ctx.at(2, 1, 1);
+            lay(ctx, a, 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, b, 0, 0, 8, 8, 16, 8, 8);
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            int id = reg.id(mode == 0 ? "eln:heavy_oil" : mode == 1 ? "eln:diesel" : "eln:gasoline");
+            double T = mode == 0 ? 703 : 293.15;
+            if (mode == 2)   // (torches round the run: whichever way it bursts, its jet passes within reach of one)
+                for (BlockPos p : new BlockPos[]{ctx.at(1, 1, 0), ctx.at(2, 1, 2), ctx.at(0, 1, 1), ctx.at(3, 1, 1)})
+                    ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.TORCH.defaultBlockState(), 3);
+            for (BlockPos p : new BlockPos[]{a, b}) {
+                VoxelNode n = node(ctx, p);
+                var f = ((PipePart) n.parts.get(0)).fluid;
+                f.fill(0, 45e5, T);
+                f.addMass(id, 0.6 * f.volume * reg.byId(id).rhoL);
+                f.energy = f.energyAt(T);
+                f.update();
+                mods.eln.fluid.FluidWorld.changed(n);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            PipePart pa = (PipePart) node(ctx, a).parts.get(0), pb = (PipePart) node(ctx, b).parts.get(0);
+            ctx.check("leak fire: the run burst", pa.burst || pb.burst, pa.burst + " " + pb.burst);
+            int fires = 0;
+            for (BlockPos p : BlockPos.betweenClosed(ctx.at(0, 0, 0), ctx.at(3, 3, 2)))
+                if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock) fires++;
+            if (mode == 0) ctx.check("leak fire: hot heavy oil over its autoignition catches", fires > 0, fires + " fire blocks");
+            else if (mode == 2) ctx.check("leak fire: gasoline over its flash point catches from a torch", fires > 0, fires + " fire blocks");
+            else ctx.check("leak fire: cold diesel under its flash point only sprays", fires == 0, fires + " fire blocks");
+            // (out, for the next test and the round trip)
+            for (BlockPos p : BlockPos.betweenClosed(ctx.at(0, 0, 0), ctx.at(3, 3, 2)))
+                if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock)
+                    ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
         }
     }
 
