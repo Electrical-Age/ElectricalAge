@@ -354,10 +354,11 @@ public final class OilCases {
      * residue_out: the hot column base's residue out of its left nozzle into a tank;
      * segment_out: a column segment's gasoline out of its front nozzle into a tank;
      * flare_in: a tank of crude into a flare stack's front flange, which burns it;
-     * turbine_fuel: a tank of gasoline (one block up) along a pipe down into a gas turbine's top fuel flange.
+     * turbine_fuel: a tank of gasoline (one block up) along a pipe down into a gas turbine's top fuel flange;
+     * separator_out: the tar sand separator's crude out of its back flange (4 px up, off centre) into a tank.
      */
     static final class OilOnPipes implements TestCase {
-        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel"};
+        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out"};
         final String variant;
         mods.eln.node.transparent.TransparentNodeElement west, east;
         mods.eln.oil.TankElement tank;
@@ -454,6 +455,17 @@ public final class OilCases {
                     tank = tank(ctx, beside, XN);
                     put(ctx, beside, Oil.Cut.GASOLINE.source.get(), 6000);
                 }
+                case "separator_out" -> {
+                    west = ctx.placeTransparent(0 + (80 << 6), w);
+                    west.front = XN;   // (its back, with the outlet, east)
+                    west.reconnect();
+                    tank = tank(ctx, e, XN);
+                    int at = mods.eln.fluid.PortBridge.endSpot(XN, XP, mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.OUTLET_Y,
+                        mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.OUTLET_Z);
+                    int y = at / 17, z = at % 17;
+                    lay(ctx, mid, 0, y, z, 8, y, z, 8, 4, 8, 16, 4, 8);
+                    ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 2000), true);
+                }
                 default -> throw new IllegalStateException(variant);
             }
         }
@@ -482,6 +494,12 @@ public final class OilCases {
                     int id = reg.id("eln:crude_oil");
                     double left = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
                     ctx.check("oil on pipes: the flare stack took the tank's crude", left < 8500, String.format("%.0f mB left in the tank, flare %s", left, east.getWaila()));
+                }
+                case "separator_out" -> {
+                    int id = reg.id("eln:crude_oil");
+                    double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    ctx.check("oil on pipes: the separator's crude went into the tank", got > 500,
+                        String.format("%.0f mB in the tank, %d left in the separator", got, ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).getFluidAmount()));
                 }
                 case "turbine_fuel" -> {
                     int f = ((mods.eln.mechanical.GasTurbineElement) east).tank.getFluidAmount();

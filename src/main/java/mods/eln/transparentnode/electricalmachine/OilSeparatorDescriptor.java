@@ -15,6 +15,10 @@ public class OilSeparatorDescriptor extends MaceratorDescriptor {
     public static final int TANK_MB = 4000;
     /** How fast its outlet pushes crude out (mB/s): far more than it makes. */
     public static final double OUTLET_MB_PER_S = 200;
+    /** Its outlet's flange on the back face (px, model frame: mods.eln.cad.models.TarSandSeparator.OUTLET_Y/Z), and the
+     *  head it pushes against on an EA pipe (Pa). */
+    public static final int OUTLET_Y = 4, OUTLET_Z = 6;
+    public static final double OUTLET_HEAD_PA = 6e5;
 
     public OilSeparatorDescriptor(String name, String modelName, double nominalU, double nominalP, double maximalU,
                                   ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {

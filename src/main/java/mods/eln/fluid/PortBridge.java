@@ -54,6 +54,18 @@ public final class PortBridge {
         return new FluidDevice.FluidPort(stub, pos, face, 0.5, PORT_K, at);
     }
 
+    /**
+     * The spot (FluidPort.at) on a device's front or back face of a point drawn at (y, z) px in its model's frame (front
+     * XN, right z+: docs/cad.md), for the device facing front.
+     */
+    public static int endSpot(mods.eln.misc.Direction front, mods.eln.misc.Direction face, int y, int z) {
+        mods.eln.misc.Direction r = front.right();
+        boolean plus = r == mods.eln.misc.Direction.XP || r == mods.eln.misc.Direction.ZP;
+        int w = plus ? z : 16 - z;
+        int f = face.toEnumFacing().get3DDataValue();
+        return f <= 3 ? w * 17 + y : y * 17 + w;   // (north/south: x then y; west/east: y then z)
+    }
+
     /** Whether a pipe meets it. */
     public boolean piped() {
         return stub != null && !FluidWorld.edgesOf(stub).isEmpty();
