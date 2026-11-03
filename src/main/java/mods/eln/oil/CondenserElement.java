@@ -232,7 +232,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
             info.put(I18N.tr("Temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
             info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)", floodShare() * 100, vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
         }
-        info.put(I18N.tr("Heat rejected"), Utils.plotPower("", heatW));
+        info.put(I18N.tr("Heat rejected"), Utils.plotPower("", Math.max(0, heatW)));   // (no -28 mW while idle: AdventurAgent)
         var makeup = v.makeup;
         if (makeup != null) {
             // (Baughn 2026-11-03: whether its signal holds it)

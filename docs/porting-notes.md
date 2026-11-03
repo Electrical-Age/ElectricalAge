@@ -46,10 +46,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
 - Condensate pump curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked one needs
   a pipe pump). Both condensers' pumps follow Q = speed x Qmax x sqrt(1 - dp / H0) (`CondensatePump`), dp the outlet
-  over the vessel: H0 = 1.3 x the turbine's rated inlet, and 1.5 x its condensate at full power against the rating.
-  Small/Steam Condenser (50V/200V turbines, 10 bar): shut-off 13 bar, ~3.0 / 11.9 g/s at 10 bar (6.2 / 24.8 g/s free;
-  their turbines condense ~2.0 / 7.9 g/s), short of full-power condensate above ~12 bar. Plant Steam Condenser (HP,
-  20 bar): shut-off 26 bar, 59 g/s at 20 bar (123 free; a full HP makes 39.5 g/s); it was 15 bar and 0.1 kg/s, which
+  over the vessel: H0 = 2 x the turbine's rated inlet, and 1.5 x its condensate at full power at 1.5 x the rating
+  (a governed turbine's boiler sits above its rating: ~14 bar for a 10 bar turbine, AdventurAgent on live 2026-11-03;
+  the first cut, shut-off at 1.3 x, flooded those condensers). Small/Steam Condenser (50V/200V turbines, 10 bar):
+  shut-off 20 bar, ~4.2 / 16.8 g/s at 10 bar, 3.0 / 11.9 at 15 (5.9 / 23.8 g/s free; their turbines condense
+  ~2.0 / 7.9 g/s), short of full-power condensate above ~18 bar. Plant Steam Condenser (HP, 20 bar): shut-off 40 bar,
+  84 g/s at 20 bar, 59 at 30 (118 free; a full HP makes 39.5 g/s); it was 15 bar and 0.1 kg/s, which
   couldn't feed the HP's own 20 bar boiler. Its motor load now goes with the pressure it really pumps against. Speed
   still scales the flow only (the head stays at any speed). Was a straight line to a 15 bar shut-off for all.
   `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
