@@ -205,12 +205,45 @@ public class BenchTest {
     @Test
     void benchAmbient() {
         Bench b = ElnTestKit.bench().supply(200, 0.01).ambientCelsius(35);
-        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(80).build());
+        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(60).build());
         b.ticks(5);
         assertEquals(35, m.celsius(), 1e-9);
         b.ambientCelsius(0);
         b.ticks(2000);
         assertEquals(0, m.celsius(), 0.1);
+    }
+
+    /**
+     * The Linear Servo Drive's own spec in the Nether (EA's ambient there is 90 C): idle it settles 10 K over its
+     * ambient, far under its trip 80 K over it (170 C); heated by its motor's losses it trips there, holds, and runs
+     * again a cooldown after it is back under 140 C (its 30 K band). With a trip at a fixed 100 C it would idle at it.
+     */
+    @Test
+    void servoDriveInTheNether() {
+        Bench b = ElnTestKit.bench().supply(200, 0.01).ambientCelsius(90);
+        double[] heat = {0};
+        List<TripCause> trips = new ArrayList<>();
+        BenchMachine m = b.add(mods.eln.robotics.servo.LinearServoDriveDescriptor.spec()).owner(x -> x.heatJoules(heat[0]));
+        m.onTrip(trips::add);
+        b.ticks(100_000);   // (five time constants: 4000 J/K over 4 W/K)
+        assertEquals(MachineState.RUNNING, m.state());
+        assertTrue(trips.isEmpty(), trips::toString);
+        assertEquals(100, m.celsius(), 0.1, "idle: 40 W over 4 W/K above 90 C");
+        heat[0] = 50;   // (1 kW of motor losses)
+        for (int i = 0; i < 100_000 && trips.isEmpty(); i++) b.tick();
+        assertEquals(1, trips.size());
+        assertEquals(MachineState.OVERHEAT_TRIPPED, trips.get(0).state());
+        assertEquals(170, trips.get(0).limit(), 1e-9);
+        heat[0] = 0;
+        int n = 0;
+        double coolest = Double.POSITIVE_INFINITY;
+        while (m.state() == MachineState.OVERHEAT_TRIPPED && n++ < 100_000) {
+            b.tick();
+            coolest = Math.min(coolest, m.celsius());
+        }
+        assertEquals(MachineState.RUNNING, m.state());
+        assertTrue(coolest < 140 && coolest > 139, "reset under 140 C: " + coolest);
+        assertEquals(1, trips.size());
     }
 
     /** Two producers in parallel (a singular matrix if they were ideal sources) share a load bigger than either's rating. */

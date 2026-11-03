@@ -32,6 +32,8 @@ final class SpecSuite {
     static final double[] RATIOS = {0, 0.01, 0.1, 0.25, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.25, 1.35, 1.5, 1.75, 2.0};
     /** A test longer than this many ticks (an hour) is skipped: a heat model too slow to cool on a bench. */
     static final int MAX_TICKS = 72_000;
+    /** The hot ambient the overheat check runs at too, degrees C: EA's Nether. */
+    static final double HOT_AMBIENT_CELSIUS = 90;
     static final double DT = MachineCore.TICK_SECONDS;
 
     private final MachineSpec spec, onBench;
@@ -67,7 +69,8 @@ final class SpecSuite {
             s.weakLine();
         }
         s.overvoltage();
-        s.overheat();
+        s.overheat(MachineSpec.AMBIENT_CELSIUS);
+        s.overheat(HOT_AMBIENT_CELSIUS);
         return new SpecReport(spec, s.checks);
     }
 
@@ -388,29 +391,35 @@ final class SpecSuite {
         }
     }
 
-    private void overheat() {
+    /**
+     * Heated past its trip point it trips, holds while over the reset point and runs again a cooldown after: at the
+     * nominal ambient and at HOT_AMBIENT_CELSIUS (the trip is a rise over ambient), the latter named with its ambient.
+     */
+    private void overheat(double amb) {
         var th = spec.thermal().orElse(null);
         if (th == null) {
-            skip("overheat", "no heat model");
+            if (amb == MachineSpec.AMBIENT_CELSIUS) skip("overheat", "no heat model");
             return;
         }
-        double amb = MachineSpec.AMBIENT_CELSIUS, delta = th.overheatCelsius() - amb, tau = th.heatCapacityJPerK() / th.heatLossWPerK();
+        double delta = th.overheatRiseKelvin(), tau = th.heatCapacityJPerK() / th.heatLossWPerK(), limitC = amb + delta;
         double heatW = 1.5 * th.heatLossWPerK() * delta / (1 - Math.exp(-5 / tau)); // over the trip point in about 5 s
-        double resetC = th.overheatCelsius() - Math.min(th.overheatResetKelvin(), delta / 2);
+        double resetC = limitC - Math.min(th.overheatResetKelvin(), delta / 2);
+        String where = amb == MachineSpec.AMBIENT_CELSIUS ? "" : String.format(Locale.ROOT, " at %.0f C ambient", amb);
         Run run = new Run(1);
+        run.bench.ambientCelsius(amb);
         if (producer) run.load(un * un / rated);
         run.run(30);
         run.heat = heatW * DT;
         int over = -1;
         for (int i = 0; i < 400 && over < 0; i++) {
             run.run(1);
-            if (run.m.celsius() > th.overheatCelsius()) over = run.ticks - 1;
+            if (run.m.celsius() > limitC) over = run.ticks - 1;
         }
         run.heat = 0;
         run.run(2); // (the heat given in the tick it tripped still lands)
         run.focus = over;
         if (over < 0) {
-            check("overheat trip", run, false, "%.4g W of heat for 20 s never passed %.1f C (at %.1f C)", heatW, th.overheatCelsius(), run.m.celsius());
+            check("overheat trip" + where, run, false, "%.4g W of heat for 20 s never passed %.1f C (at %.1f C)", heatW, limitC, run.m.celsius());
             return;
         }
         boolean trips = run.states.get(over) == MachineState.OVERHEAT_TRIPPED && run.trips.size() == 1
@@ -418,8 +427,8 @@ final class SpecSuite {
         double t0 = run.m.celsius();
         double coolTicks = tau * Math.log((t0 - amb) / (resetC - amb)) / DT;
         if (coolTicks + cooldownTicks > MAX_TICKS) {
-            check("overheat trip", run, trips, "tripped at %.1f C (limit %.1f C), %d trip(s)", run.m.celsius(), th.overheatCelsius(), run.trips.size());
-            skip("overheat reset", String.format(Locale.ROOT, "cools too slowly for a bench: %.0f s to %.1f C (time constant %.0f s)",
+            check("overheat trip" + where, run, trips, "tripped at %.1f C (limit %.1f C), %d trip(s)", run.m.celsius(), limitC, run.trips.size());
+            skip("overheat reset" + where, String.format(Locale.ROOT, "cools too slowly for a bench: %.0f s to %.1f C (time constant %.0f s)",
                 coolTicks * DT, resetC, tau));
             return;
         }
@@ -434,9 +443,9 @@ final class SpecSuite {
         int back = run.first(MachineState.RUNNING, over);
         run.focus = cool < 0 ? -1 : back < 0 ? cool + cooldownTicks : back;
         boolean resets = cool >= 0 && back >= cool + cooldownTicks - 1 && back <= cool + cooldownTicks + 2;
-        check("overheat trip and reset", run, trips && held && resets,
+        check("overheat trip and reset" + where, run, trips && held && resets,
             "tripped at %.1f C (limit %.1f C), %d trip(s); held while over %.1f C: %b; RUNNING %d ticks after it cooled below it (cooldown %d)",
-            t0, th.overheatCelsius(), run.trips.size(), resetC, held, cool < 0 || back < 0 ? -1 : back - cool + 1, cooldownTicks);
+            t0, limitC, run.trips.size(), resetC, held, cool < 0 || back < 0 ? -1 : back - cool + 1, cooldownTicks);
     }
 
     /** A producer's droop: open-circuit volts, rated power at nominal, the current limit, and output paced by its queue. */

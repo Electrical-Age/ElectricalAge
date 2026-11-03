@@ -35,10 +35,11 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
     public static Drive drive = new Drive(Eln.MVU, 2.0, 1.0, 40, 0.8, 120);
     public static double counterweightKg = 40, playerKg = 80, itemKg = 2;
     /**
-     * Its motor's heat (the old drive's): capacity (J/K), loss to ambient (W/K), the trip (80 K over the nominal 20 C
-     * ambient) and its reset 30 K under it (the old drive resumed at 50 K over ambient).
+     * Its motor's heat (the old drive's): capacity (J/K), loss to ambient (W/K), the trip 80 K over its ambient (100 C
+     * at 20 C, 170 C in the Nether; idle it sits 10 K over) and its reset 30 K under it (the old drive resumed at 50 K
+     * over ambient).
      */
-    public static final double HEAT_CAPACITY_J_PER_K = 4000, HEAT_LOSS_W_PER_K = 4, OVERHEAT_CELSIUS = 100, OVERHEAT_RESET_K = 30;
+    public static final double HEAT_CAPACITY_J_PER_K = 4000, HEAT_LOSS_W_PER_K = 4, OVERHEAT_RISE_K = 80, OVERHEAT_RESET_K = 30;
     /**
      * A move's top speed follows the line when its limit differs by this share, at most every RETARGET_TICKS; it
      * speeds up only when that costs nothing or the machine's buffer is SPARE_SHARE full (energy piling up), so a
@@ -68,7 +69,7 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
     public static MachineSpec spec() {
         return MachineSpec.consumer(drive.nominalVolts()).ratedWatts(drive.ratedWatts()).idleWatts(drive.idleWatts())
             .onBrownout(Brownout.SLOW)
-            .heatCapacityJPerK(HEAT_CAPACITY_J_PER_K).heatLossWPerK(HEAT_LOSS_W_PER_K).overheatCelsius(OVERHEAT_CELSIUS)
+            .heatCapacityJPerK(HEAT_CAPACITY_J_PER_K).heatLossWPerK(HEAT_LOSS_W_PER_K).overheatRiseKelvin(OVERHEAT_RISE_K)
             .overheatResetKelvin(OVERHEAT_RESET_K)
             .power(RelativeFace.BACK)
             .signalIn(SETPOINT, RelativeFace.LEFT, CablePosition.FLOOR, 0).signalOut(IN_POSITION, RelativeFace.LEFT, CablePosition.CEILING)

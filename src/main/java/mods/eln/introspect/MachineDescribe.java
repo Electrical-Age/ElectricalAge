@@ -65,7 +65,7 @@ public final class MachineDescribe {
             Section th = s.section("thermal");
             th.num("heat_capacity", t.heatCapacityJPerK(), Unit.J_PER_K);
             th.num("heat_loss", t.heatLossWPerK(), Unit.W_PER_K);
-            th.num("overheat", t.overheatCelsius(), Unit.C);
+            th.num("overheat_rise", t.overheatRiseKelvin(), Unit.K);
             th.num("overheat_reset", t.overheatResetKelvin(), Unit.K);
         });
     }

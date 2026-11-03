@@ -296,7 +296,7 @@ public class ElementHostTest {
         assertEquals("unpowered", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Machine"));
         assertEquals("0J / 10.0J", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Buffer"));
         Element h = new Element();
-        ElementHost hot = h.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build());
+        ElementHost hot = h.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());
         assertTrue(mods.eln.api.impl.MachineLines.hosted(hot.view()).containsKey("Temperature"));
         assertEquals(mods.eln.api.impl.MachineLines.element(m.view()), m.wailaLines());
     }
@@ -325,7 +325,7 @@ public class ElementHostTest {
     void heatFollowsTheElementsAmbient() {
         Element e = new Element();
         e.ambient = -10;   // snowy peaks
-        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build());
+        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());
         e.slowPre.get(0).process(0.05);
         assertEquals(-10, m.celsius(), 1e-12);
     }

@@ -32,10 +32,10 @@ public class VerifySpecTest {
             .power(RelativeFace.LEFT, RelativeFace.RIGHT, RelativeFace.UP, RelativeFace.DOWN).build(),   // EA's macerator's shape
         MachineSpec.consumer(Tier.V200).ratedWatts(1000).onBrownout(Brownout.SLOW).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(RelativeFace.FRONT).build(),
         MachineSpec.consumer(Tier.V800).ratedWatts(10000).idleWatts(500).minVoltageRatio(0.9).tripCooldownSeconds(1).build(),
-        MachineSpec.consumer(Tier.V3200).ratedWatts(50000).heatCapacityJPerK(2000).heatLossWPerK(50).overheatCelsius(90).build(),
+        MachineSpec.consumer(Tier.V3200).ratedWatts(50000).heatCapacityJPerK(2000).heatLossWPerK(50).overheatRiseKelvin(70).build(),
         MachineSpec.consumer(12).ratedWatts(5).idleWatts(1).onBrownout(Brownout.SLOW).build(),
         MachineSpec.producer(Tier.V200).ratedWatts(1500).build(),
-        MachineSpec.producer(Tier.V50).ratedWatts(300).heatCapacityJPerK(500).heatLossWPerK(5).overheatCelsius(60).build(),
+        MachineSpec.producer(Tier.V50).ratedWatts(300).heatCapacityJPerK(500).heatLossWPerK(5).overheatRiseKelvin(40).build(),
         MachineSpec.producer(Tier.V800).ratedWatts(20000).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
 
     @Test
@@ -53,6 +53,10 @@ public class VerifySpecTest {
         SpecReport.Check heat = r.checks().stream().filter(c -> c.name().startsWith("overheat")).findFirst().orElseThrow();
         assertEquals(SpecReport.Result.PASS, heat.result(), r::toString);
         assertEquals("overheat trip and reset", heat.name());
+        SpecReport.Check hot = r.checks().stream().filter(c -> c.name().equals("overheat trip and reset at 90 C ambient"))
+            .findFirst().orElseThrow(() -> new AssertionError(r.toString()));
+        assertEquals(SpecReport.Result.PASS, hot.result(), r::toString);
+        assertTrue(hot.detail().contains("limit 170.0 C"), hot::detail);
     }
 
     @Test

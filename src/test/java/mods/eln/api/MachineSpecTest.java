@@ -111,25 +111,25 @@ public class MachineSpecTest {
     @Test
     void thermal() {
         MachineSpec s = MachineSpec.consumer(Tier.V200).ratedWatts(100)
-            .heatCapacityJPerK(1000).heatLossWPerK(2).overheatCelsius(80).build();
-        assertEquals(new MachineSpec.Thermal(1000, 2, 80, MachineSpec.OVERHEAT_RESET_KELVIN), s.thermal().orElseThrow());
-        assertEquals(30, MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatCelsius(80)
+            .heatCapacityJPerK(1000).heatLossWPerK(2).overheatRiseKelvin(60).build();
+        assertEquals(new MachineSpec.Thermal(1000, 2, 60, MachineSpec.OVERHEAT_RESET_KELVIN), s.thermal().orElseThrow());
+        assertEquals(30, MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatRiseKelvin(60)
             .overheatResetKelvin(30).build().thermal().orElseThrow().overheatResetKelvin());
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatCelsius(80)
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatRiseKelvin(60)
             .overheatResetKelvin(0), "overheatResetKelvin must be positive and finite, got 0.0");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatCelsius(45)
-            .overheatResetKelvin(30), "overheatCelsius must be above 50.0 C");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatRiseKelvin(25)
+            .overheatResetKelvin(30), "overheatRiseKelvin must be more than the 30.0 K reset band");
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).overheatResetKelvin(5), "overheatResetKelvin is part of the heat model");
         MachineSpec.Builder ok = MachineSpec.consumer(Tier.V200).ratedWatts(100);
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(0).heatLossWPerK(2).overheatCelsius(80),
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(0).heatLossWPerK(2).overheatRiseKelvin(60),
             "heatCapacityJPerK must be positive and finite, got 0.0");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(-2).overheatCelsius(80),
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(-2).overheatRiseKelvin(60),
             "heatLossWPerK must be positive");
-        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatCelsius(25),
-            "overheatCelsius must be above 30.0 C");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatRiseKelvin(5),
+            "overheatRiseKelvin must be more than the 10.0 K reset band (it is K over the ambient");
         // the three go together
         String m = error(ok.heatCapacityJPerK(10));
-        assertTrue(m.contains("heatLossWPerK must be positive and finite (not set)") && m.contains("overheatCelsius must be above"), m);
+        assertTrue(m.contains("heatLossWPerK must be positive and finite (not set)") && m.contains("overheatRiseKelvin must be more than"), m);
     }
 
     @Test

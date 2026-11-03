@@ -35,7 +35,7 @@ public class MachineCorePropertyTest {
         Arbitrary<double[]> heat = Arbitraries.frequencyOf(
             net.jqwik.api.Tuple.of(2, Arbitraries.just(new double[0])),
             net.jqwik.api.Tuple.of(1, Combinators.combine(Arbitraries.doubles().between(1, 1000),
-                Arbitraries.doubles().between(0.1, 10), Arbitraries.doubles().between(31, 100)).as((c, k, t) -> new double[]{c, k, t})));
+                Arbitraries.doubles().between(0.1, 10), Arbitraries.doubles().between(11, 80)).as((c, k, t) -> new double[]{c, k, t})));
         return Combinators.combine(Arbitraries.doubles().between(10, 5000), Arbitraries.doubles().between(10, 20000),
                 Arbitraries.doubles().between(0, 0.5), Arbitraries.doubles().between(0.05, MachineSpec.MAX_MIN_VOLTAGE_RATIO),
                 Arbitraries.doubles().between(0.5, 4), heat, Arbitraries.integers().between(0, 3))
@@ -44,7 +44,7 @@ public class MachineCorePropertyTest {
                     .tripCooldownSeconds(cool);
                 if (slow == 0) b.onBrownout(Brownout.SLOW);
                 else b.minVoltageRatio(floor);
-                if (h.length > 0) b.heatCapacityJPerK(h[0]).heatLossWPerK(h[1]).overheatCelsius(h[2]);
+                if (h.length > 0) b.heatCapacityJPerK(h[0]).heatLossWPerK(h[1]).overheatRiseKelvin(h[2]);
                 return b.build();
             });
     }
@@ -129,7 +129,7 @@ public class MachineCorePropertyTest {
             .idleWatts(spec.idleWatts()).tripCooldownSeconds(spec.tripCooldownSeconds());
         if (spec.brownout() == Brownout.SLOW) b.onBrownout(Brownout.SLOW);
         else b.minVoltageRatio(spec.minVoltageRatio());
-        spec.thermal().ifPresent(t -> b.heatCapacityJPerK(t.heatCapacityJPerK()).heatLossWPerK(t.heatLossWPerK()).overheatCelsius(t.overheatCelsius()));
+        spec.thermal().ifPresent(t -> b.heatCapacityJPerK(t.heatCapacityJPerK()).heatLossWPerK(t.heatLossWPerK()).overheatRiseKelvin(t.overheatRiseKelvin()));
         if (spec.idleWatts() >= spec.ratedWatts() * factor) return; // (not a valid spec)
         MachineSpec next = b.build();
         int at = history.size() / 2;

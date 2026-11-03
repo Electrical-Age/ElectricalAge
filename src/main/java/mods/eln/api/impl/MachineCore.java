@@ -524,6 +524,14 @@ public final class MachineCore implements MachineView {
         return joulesLost;
     }
 
+    /**
+     * The temperature that trips it, degrees C: its ambient plus the spec's overheatRiseKelvin (NaN without a heat
+     * model). Relative, so a hot biome (the Nether's 90 C) doesn't leave a machine at or over its trip when idle.
+     */
+    public double overheatCelsius() {
+        return thermal == null ? Double.NaN : ambientCelsius + thermal.overheatRiseKelvin();
+    }
+
     /** Overvoltage burnt it (burnsOnOvervoltage): it never resets; only its host's repair() brings it back. */
     public boolean burnt() {
         return burnt;
@@ -542,9 +550,8 @@ public final class MachineCore implements MachineView {
         if (state.tripped()) {
             boolean clear = switch (state) {
                 case OVERVOLTAGE_TRIPPED -> r < OVERVOLTAGE_RESET_RATIO;
-                // 10 K under the trip point, or halfway down to ambient if that is nearer (a hot place still resets)
-                default -> celsius < thermal.overheatCelsius() - Math.min(thermal.overheatResetKelvin(),
-                    (thermal.overheatCelsius() - ambientCelsius) / 2);
+                // the reset band under the trip point, or halfway down to ambient if that is nearer
+                default -> celsius < overheatCelsius() - Math.min(thermal.overheatResetKelvin(), thermal.overheatRiseKelvin() / 2);
             };
             tripTimer = clear ? tripTimer + 1 : 0;
             if (tripTimer < cooldownTicks) return;
@@ -557,8 +564,8 @@ public final class MachineCore implements MachineView {
         if (r > OVERVOLTAGE_RATIO) {
             trip(new TripCause(MachineState.OVERVOLTAGE_TRIPPED, Math.abs(volts), OVERVOLTAGE_RATIO * uNom,
                 spec.burnsOnOvervoltage()));
-        } else if (thermal != null && celsius > thermal.overheatCelsius()) {
-            trip(new TripCause(MachineState.OVERHEAT_TRIPPED, celsius, thermal.overheatCelsius(), false));
+        } else if (thermal != null && celsius > overheatCelsius()) {
+            trip(new TripCause(MachineState.OVERHEAT_TRIPPED, celsius, overheatCelsius(), false));
         } else if (r < UNPOWERED_RATIO) {
             state = MachineState.UNPOWERED;
             upTimer = 0;

@@ -290,7 +290,7 @@ public static void tick(Machine m) {
 public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(4000)
     .heatCapacityJPerK(20000)      // J/K: with the loss, a time constant of 20000 / 50 = 400 s
     .heatLossWPerK(50)             // W/K to the ambient where it stands
-    .overheatCelsius(300)          // trips OVERHEAT_TRIPPED; resets 10 K under it after the cooldown
+    .overheatRiseKelvin(280)       // K over its ambient: trips OVERHEAT_TRIPPED; resets 10 K under that
     .build();
 
 public static void tick(Machine m) {
@@ -302,8 +302,9 @@ public static void tick(Machine m) {
 The heat model is first order, and its settings are named:
 
 - Heat capacity (J/K) and loss to ambient (W/K). Their ratio is the time constant.
-- The trip point (degrees C).
-- `overheatResetKelvin`, how far under the trip point the trip resets after its cooldown. The default is 10 K.
+- The trip point, `overheatRiseKelvin`: how far over its ambient the machine trips, in K, not degrees C.
+- `overheatResetKelvin`, how far under the trip point the trip resets after its cooldown. The default is 10 K, or halfway
+  down to ambient if that is nearer.
 
 Heat comes from three places:
 
@@ -311,7 +312,9 @@ Heat comes from three places:
 - Delivered energy the full buffer couldn't hold.
 - `heatJoules`: your own losses.
 
-The model cools to the ambient where the machine stands, which EA sets by biome and depth. `celsius()` reads it.
+The model cools to the ambient where the machine stands, which EA sets by biome and depth. `celsius()` reads the
+machine's temperature in degrees C. The trip is a rise over that ambient, so a machine that runs in a cool place runs in a
+hot one too. The kiln above trips at 300 C at 20 C ambient, and at 370 C in the Nether (90 C).
 
 ## States, trips and the energy books
 
@@ -321,7 +324,7 @@ The model cools to the ambient where the machine stands, which EA sets by biome 
 | `UNPOWERED` | No line (under 2% of nominal), or the line came back less than half a second ago. |
 | `UNDERVOLTAGE` | `Brownout.STOP` only: the line is under the floor. The machine draws idle watts only and takes return 0. It runs again once the line has held above the recovery threshold for half a second, so a line that sags under the machine's own load doesn't flip it every tick. |
 | `OVERVOLTAGE_TRIPPED` | The line went over 1.3 x nominal. It resets after the cooldown spent below 1.1 x nominal, or never if the spec burns (see [Burning](#burning)). |
-| `OVERHEAT_TRIPPED` | The machine went over its trip point. It resets after the cooldown spent under the reset point. |
+| `OVERHEAT_TRIPPED` | The machine went over its trip point (its ambient plus `overheatRiseKelvin`). It resets after the cooldown spent under the reset point. |
 | `DETACHED` | The machine is in no circuit: its block entity went, or its type was never registered. |
 
 `Brownout.SLOW` has no floor. The machine keeps running on whatever arrives, with its draw capped at
@@ -465,8 +468,8 @@ producer's queue full. The checks are:
 - **Brownout:** `STOP` stops and recovers without chatter; `SLOW` runs slower.
 - **A weak line.**
 - **Overvoltage:** the trip and its cooldown, or the burn.
-- **Overheat and its reset,** with a heat model. A model too slow to cool in an hour of game time is skipped, with
-  the reason.
+- **Overheat and its reset,** with a heat model, at 20 C and at 90 C ambient (the Nether). A model too slow to cool in
+  an hour of game time is skipped, with the reason.
 - **For producers:** the droop, the current limit, and output paced by what is given.
 
 On every tick of every check, the books must balance exactly, the buffer must stay in bounds, and a consumer's draw

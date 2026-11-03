@@ -194,9 +194,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     below 30 % of 200 V it holds, and runs again after half a second over 35 %. On a line weaker than it, the API keeps
     it at the line's maximum power (about half the volts) instead of pulling the line down.
   - Heat and trips (the API's heat model): 4 kJ/K, 4 W/K to the ambient where it stands (EA's Ambient), heated by
-    the idle draw and the motor's losses; over 100 C (the old 80 K over a 20 C ambient; now a fixed temperature, so a
-    hot biome leaves less margin) it trips, faults and holds, and runs again 3 s after it is back under 70 C (a 30 K
-    reset band, as the old drive's 50 K over ambient). Over 1.3x 200 V it trips (fault "overvoltage") and
+    the idle draw and the motor's losses; 80 K over its ambient (as the old drive: 100 C at 20 C, 170 C in the
+    Nether, where it idles at 100 C) it trips, faults and holds, and runs again 3 s after it is 30 K under that (as the
+    old drive's 50 K over ambient). The API's trip is a rise over ambient, so a hot biome costs it no margin. Over 1.3x 200 V it trips (fault "overvoltage") and
     holds until the line has been under 1.1x for 3 s: a servo amplifier's protection, so it never burns. A trip stops
     the car dead, as any fault; a dead line brakes it where it can (lifting, it stops at once). Reloaded mid-move, its machine runs
     on (the API keeps a running machine's state).

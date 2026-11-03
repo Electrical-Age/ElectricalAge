@@ -22,7 +22,10 @@ public enum MachineState {
     UNDERVOLTAGE,
     /** Line went over 1.3x nominal: draws nothing. Resets after the trip cooldown spent below 1.1x. */
     OVERVOLTAGE_TRIPPED,
-    /** Temperature went over the spec's trip point: draws nothing until the cooldown is spent 10 K below it. */
+    /**
+     * Temperature went over the spec's trip point (its ambient plus overheatRiseKelvin): draws nothing until the
+     * cooldown is spent under the reset point (overheatResetKelvin below the trip point, or halfway to ambient).
+     */
     OVERHEAT_TRIPPED,
     /**
      * In no circuit: the block entity it was hosted at was removed or unloaded, or its type was never registered

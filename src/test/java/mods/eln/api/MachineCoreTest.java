@@ -165,7 +165,7 @@ public class MachineCoreTest {
 
     @Test
     void overheatTripsAndCools() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatCelsius(60).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatRiseKelvin(40).build());
         for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
         assertEquals(MachineSpec.AMBIENT_CELSIUS, c.celsius(), 1e-9);
         int n = 0;
@@ -184,33 +184,48 @@ public class MachineCoreTest {
         assertEquals(MachineState.RUNNING, c.state());
         assertTrue(c.celsius() < 50);
         // exact first-order decay: tau = 100 s
-        MachineCore d = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatCelsius(60).build());
+        MachineCore d = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatRiseKelvin(40).build());
         d.heatJoules(1000); // 20 kW for one tick: +10 K in the limit of a short pulse
         d.afterStep(200, 0);
         assertEquals(10, d.celsius() - 20, 0.01);
     }
 
-    /** The reset band is the spec's, and the model cools to the ambient it is given (a desert's, say). */
+    /**
+     * The trip is a rise over the ambient the model is given, the reset the spec's band under it (or halfway down to
+     * ambient, if nearer), and the model cools to that ambient: at 40 C (a desert) and at 90 C (EA's Nether).
+     */
     @Test
-    void overheatResetsAtItsBandAndCoolsToItsAmbient() {
-        MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
-            .overheatCelsius(80).overheatResetKelvin(30).build();
-        MachineCore c = new MachineCore(spec);
-        c.setAmbientCelsius(40);
-        assertEquals(40, c.celsius(), 1e-12, "it starts at its ambient");
-        for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
-        while (c.state() == MachineState.RUNNING) {
-            c.heatJoules(100);
-            c.afterStep(200, 0);
+    void overheatIsARiseOverItsAmbient() {
+        for (double ambient : new double[]{40, 90}) {
+            for (double band : new double[]{30, 15}) {
+                MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
+                    .overheatRiseKelvin(40).overheatResetKelvin(band).build();
+                MachineCore c = new MachineCore(spec);
+                c.setAmbientCelsius(ambient);
+                assertEquals(ambient, c.celsius(), 1e-12, "it starts at its ambient");
+                assertEquals(ambient + 40, c.overheatCelsius(), 1e-12);
+                for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
+                double hottest = 0;
+                while (c.state() == MachineState.RUNNING) {
+                    c.heatJoules(10);
+                    c.afterStep(200, 0);
+                    hottest = Math.max(hottest, c.celsius());
+                }
+                assertEquals(MachineState.OVERHEAT_TRIPPED, c.state());
+                TripCause t = c.lastTrip().orElseThrow();
+                assertEquals(ambient + 40, t.limit(), 1e-12, "the trip's limit is ambient + rise");
+                assertTrue(t.measured() > ambient + 40 && t.measured() < ambient + 40.2, ambient + " C: tripped at " + t.measured());
+                double coolest = Double.POSITIVE_INFINITY;
+                while (c.state() == MachineState.OVERHEAT_TRIPPED) {
+                    c.afterStep(200, 0);
+                    coolest = Math.min(coolest, c.celsius());
+                }
+                double reset = ambient + 40 - Math.min(band, 20);   // (a 30 K band: halfway down, 20 K, is nearer)
+                assertTrue(coolest < reset && coolest > reset - 3, ambient + " C, " + band + " K band: reset under " + reset + ", at " + coolest);
+                for (int i = 0; i < 400000; i++) c.afterStep(200, 0);
+                assertEquals(ambient, c.celsius(), 0.01, "cooled to its ambient");
+            }
         }
-        double coolest = Double.POSITIVE_INFINITY;
-        while (c.state() == MachineState.OVERHEAT_TRIPPED) {
-            c.afterStep(200, 0);
-            coolest = Math.min(coolest, c.celsius());
-        }
-        assertTrue(coolest < 60 && coolest > 55, "reset 20 K under the trip (30 K band, but halfway to the 40 C ambient is nearer): " + coolest);
-        for (int i = 0; i < 400000; i++) c.afterStep(200, 0);
-        assertEquals(40, c.celsius(), 0.01, "cooled to its ambient");
     }
 
     /** Brownout.SLOW: a 200 V machine on a 100 V line runs, on a quarter of its rated power. */
@@ -275,22 +290,9 @@ public class MachineCoreTest {
         assertEquals(2000, plan(c, ohms), 1e-9);
     }
 
-    /** In a place hotter than 10 K under the trip point, the overheat trip resets halfway down to ambient. */
+    /** Without a heat model celsius() is the ambient set (the hot place's own trip: overheatIsARiseOverItsAmbient). */
     @Test
-    void overheatResetsInAHotPlace() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000)
-            .heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build());
-        c.setAmbientCelsius(55);
-        assertEquals(55, c.celsius());
-        for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
-        c.heatJoules(100);
-        c.afterStep(200, 0);
-        assertEquals(MachineState.OVERHEAT_TRIPPED, c.state());
-        int n = 0;
-        while (c.state().tripped() && n++ < 10000) c.afterStep(200, 0);
-        assertEquals(MachineState.RUNNING, c.state());
-        assertTrue(c.celsius() < 57.5);
-        // no heat model: celsius() is the ambient set
+    void noHeatModelReadsItsAmbient() {
         MachineCore plain = new MachineCore(MILL);
         plain.setAmbientCelsius(-5);
         assertEquals(-5, plain.celsius());
@@ -374,7 +376,7 @@ public class MachineCoreTest {
     /** A snapshot taken back on a fresh core: buffer (booked as delivered), heat, a trip in its cooldown, the last trip. */
     @Test
     void snapshotRestores() {
-        MachineSpec hot = MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatCelsius(60).build();
+        MachineSpec hot = MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build();
         MachineCore c = new MachineCore(hot);
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 50, ohms);
