@@ -152,7 +152,7 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     @Override
     public boolean stillValid(Player player) {
         if (node != null) {
-            if (node.isDestructing()) return false;
+            if (node.isDestructing() || mods.eln.node.NodeMenus.burnt(node, slot)) return false;
             NodeBase now = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, player.level()));
             if (now != node) return false;
         }

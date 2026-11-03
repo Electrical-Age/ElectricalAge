@@ -173,6 +173,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Meters, probes and power sockets no longer burn at their (former slot) cable's voltage: those watchdogs are off.
 - Fires lag their setting (coal ~3 min, oil ~20 s), go out below 15%, take time to relight (`sim/Fire.java`, `FireTest`).
 - Battery wear divided by `batteryLifeFactor` (default 25), doubled every 10 C above ambient, up to 4x at low charge.
+- Burnt devices (Baughn: they kept their temperature, made their sounds and opened their GUI) keep only
+  their thermal loads in the simulation: they cool to ambient and do nothing else, make no working sound or
+  animation, give no light, and a right-click only says what repairs them (a meter still reads them); no GUI.
+  Contents drop when broken. See simulation.md "Failures"; `BurntCases`.
 - The FE exporter is a transparent node: it burns out in place and can be repaired instead of vanishing; old
   simple-node saves are upgraded on load (`transparentnode/energyconverter/ExporterSaveUpgrade.java`,
   `ExporterSaveUpgradeTest`). `SimpleNode` and its block/BE/item are gone.

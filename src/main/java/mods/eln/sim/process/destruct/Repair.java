@@ -50,8 +50,9 @@ public final class Repair {
     }
 
     /**
-     * Right-click on a burnt device. With the repair part in hand: consume one, repair, return true.
-     * Otherwise say what's wrong and return false, so the usual action (GUI, so its contents can be taken out) runs.
+     * Right-click on a burnt device. With the repair part in hand: consume one, repair, return true. Otherwise say
+     * what's wrong and what repairs it, and return false; the node then does nothing else (Baughn: right-click on a
+     * damaged machine should only show the repair message; no GUI). Its contents drop when it is broken.
      */
     public static boolean onActivated(IBurnable b, Player player) {
         if (player.level().isClientSide() || !b.isBurnt()) return false;

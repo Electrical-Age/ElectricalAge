@@ -145,7 +145,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
         inventoryChange(getInventory());
 
         smeltResistor.highImpedance();
-        slowRefreshProcess.process(0.05);
+        if (!isBurnt()) slowRefreshProcess.process(0.05);   // (burnt: no smelting, loaded or not)
 
         ElnDeviceRegistry.lowVoltageCableDescriptor.applyTo(electricalLoad);
         //electricalLoad.setRs(MnaConst.highImpedance);

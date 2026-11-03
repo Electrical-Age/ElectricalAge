@@ -1818,7 +1818,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void recalculateLightValue() {
         int light = cables.glowLight();
-        for (mods.eln.node.six.SixNodeElement e : sideElementList) if (e != null) light = Math.max(light, e.getLightValue());
+        for (mods.eln.node.six.SixNodeElement e : sideElementList) if (e != null && !e.isBurnt()) light = Math.max(light, e.getLightValue());
         setLightValue(light);
     }
 

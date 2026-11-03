@@ -110,6 +110,13 @@ Guard: `SimulatorTimingTest.simulatedTimeTracksGameTime`, `SimulatorTimingTest.s
   (Baughn): one failure per network per tick, so a short burns the weakest cable, not the whole run.
 - `Failure.outcome(kind, cause, ...)`: burn in place (`IBurnable`, repair via `Repair`) or pop/arc flash/explode.
 - Element NBT: `burnt` (cause ordinal + 1), `burntKind`.
+- Burnt (`IBurnable.isBurnt`; Baughn: a damaged machine should tick, but should stop doing useful things): the node
+  calls the element's `connectBurntJob` instead of `connectJob`. Only its thermal loads and the thermal connections
+  with both ends among them join the simulation, so it cools to ambient through Rp; no process, watchdog or electrical
+  part runs, and its faces carry nothing. Elements that run a process from `initialize` skip it while burnt (heat
+  furnace, electrical furnace). Its light goes out. Right-click: a meter reads it, anything else repairs it or says
+  the repair part (`Repair.onActivated`); `hasGui` is false, `NodeMenus.menu` refuses, an open screen closes
+  (`ElnNodeMenu.stillValid`). Client: no looped sounds, no render `refresh` (animation, particles). `BurntCases`.
 
 ## NBT of sim parts
 

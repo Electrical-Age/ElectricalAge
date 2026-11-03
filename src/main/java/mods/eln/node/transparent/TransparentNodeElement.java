@@ -497,7 +497,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return coordonate();
     }
 
-    /** Burn out: stay in the world but leave the simulation (TransparentNode skips burnt elements) until repaired. */
+    /** Burn out: stay in the world, out of the simulation but for its thermal loads (connectBurntJob), until repaired. */
     @Override
     public void burn(FailureCause cause, Failure.Kind kind) {
         if (burnt != null) return;
@@ -505,8 +505,35 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         burnt = cause;
         burntKind = kind;
         node.connect();
+        node.setLightValue(0);   // (a glow process sets it again after repair)
         needPublish();
         node.invalidateCapabilities();
+    }
+
+    /**
+     * In the simulation while burnt (TransparentNode calls it instead of connectJob): only the thermal loads and the
+     * connections among them, so it cools to ambient through Rp and does nothing else. Baughn: a damaged machine
+     * should tick, but should stop doing useful things.
+     */
+    public void connectBurntJob() {
+        if (node != null && node.isDestructing()) return;
+        ambient = mods.eln.sim.Ambient.relative(node.coordonate);
+        mods.eln.sim.Ambient.stamp(thermalLoadList, ambient);
+        for (NbtThermalLoad load : thermalLoadList) Eln.simulator.addThermalLoad(load);
+        Eln.simulator.addAllThermalConnection(burntThermalConnections(thermalConnectionList, thermalLoadList));
+    }
+
+    public void disconnectBurntJob() {
+        for (NbtThermalLoad load : thermalLoadList) Eln.simulator.removeThermalLoad(load);
+        Eln.simulator.removeAllThermalConnection(burntThermalConnections(thermalConnectionList, thermalLoadList));
+    }
+
+    /** The connections with both ends in loads: one to a load left out of the simulation would pile up its heat. */
+    public static java.util.List<ThermalConnection> burntThermalConnections(java.util.List<ThermalConnection> connections,
+                                                                            java.util.List<? extends ThermalLoad> loads) {
+        java.util.List<ThermalConnection> out = new ArrayList<>();
+        for (ThermalConnection c : connections) if (loads.contains(c.L1) && loads.contains(c.L2)) out.add(c);
+        return out;
     }
 
     @Override
