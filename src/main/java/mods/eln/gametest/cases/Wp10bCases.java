@@ -88,6 +88,7 @@ public final class Wp10bCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new DissipatorCase());
+        cases.add(new FurnaceFlue());
         cases.add(new LargeRheostatCase());
         cases.add(new TurbineCase());
         cases.add(new FuelGeneratorCase());
@@ -709,6 +710,65 @@ public final class Wp10bCases {
             within(ctx, "wp10b stone heat furnace without fuel stays at ambient [K]", furnace.thermalLoad.Tc, 0, 1e-6);
             ctx.check("wp10b fuel heat furnace placed", fuelFurnace instanceof mods.eln.transparentnode.FuelHeatFurnaceElement,
                 String.valueOf(fuelFurnace));
+        }
+    }
+
+    /**
+     * The coal oven's flue (Baughn 2026-11-03): burning, with an iron pipe up from its top flange into a tank, its smoke
+     * (eln:flue_gas, hot) goes into the tank; one with nothing on its flange smokes out of its stack. Its load gets 80 %
+     * of the fire's power, the smoke 35 % over the ambient.
+     */
+    static final class FurnaceFlue implements TestCase {
+        mods.eln.transparentnode.heatfurnace.HeatFurnaceElement piped, open;
+        mods.eln.oil.TankElement tank;
+        String err;
+
+        public String id() {
+            return "heat_furnace_flue";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        mods.eln.transparentnode.heatfurnace.HeatFurnaceElement lit(TestContext ctx, BlockPos p) {
+            var f = (mods.eln.transparentnode.heatfurnace.HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, p);
+            f.getInventory().setItem(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL, 16));
+            f.setTakeFuel(true);
+            f.furnaceProcess.setGain(1);
+            f.furnaceProcess.fire.level = 1;   // (lit and burning hard already: a coal fire takes minutes to come up)
+            f.furnaceProcess.combustibleEnergy = f.furnaceProcess.nominalCombustibleEnergy;   // (a full fire bed)
+            return f;
+        }
+
+        public void build(TestContext ctx) {
+            piped = lit(ctx, ctx.at(1, 1, 1));
+            try {
+                PipeCases.lay(ctx, ctx.at(1, 2, 1), 0, 8, 0, 8, 8, 12, 8, 16, 12, 8);   // (up, then east into the tank's high port)
+            } catch (IllegalStateException e) {
+                err = e.getMessage();
+            }
+            ctx.level().setBlockAndUpdate(ctx.at(2, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(2, 2, 1));
+            tank.front = mods.eln.misc.Direction.XP;   // (its back, with its side ports, west)
+            tank.reconnect();
+            open = lit(ctx, ctx.at(3, 1, 2));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("heat furnace flue: a pipe goes up from its top flange", err == null, "" + err);
+            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:flue_gas");
+            double smoke = tank.vessel == null || id < 2 ? 0 : tank.vessel.mass(id);
+            double T = tank.vessel == null ? 0 : tank.vessel.T();
+            ctx.line(String.format("heat furnace flue: P %.0f W, smoke %.6f kg in the tank at %.1f K; piped %s; open %s", piped.furnaceProcess.getP(), smoke, T, piped.getWaila(), open.getWaila()));
+            ctx.check("heat furnace flue: its smoke goes up the pipe into the tank", smoke > 1e-5, String.format("%.6f kg", smoke));
+            ctx.check("heat furnace flue: and warms it", T > mods.eln.sim.Ambient.kelvin(open.node.coordonate) + 1, String.format("%.1f K", T));
+            ctx.check("heat furnace flue: its load gets 80 % of the fire", piped.furnaceProcess.heatShare == 0.8, "" + piped.furnaceProcess.heatShare);
+            ctx.check("heat furnace flue: with nothing on its flange it smokes out of its stack", open.getWaila().get("Flue").contains("stack"), open.getWaila().get("Flue"));
         }
     }
 }

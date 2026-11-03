@@ -18,6 +18,9 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
     /** The fire's real burn level (it lags the setting) and whether it's being lit. */
     public float fire;
     public boolean lighting;
+    /** Smoke up its stack (burning, nothing piped on its flue's flange). */
+    boolean smoking;
+    private float smokeDue;
 
 
     double temperature;
@@ -63,6 +66,16 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
     @Override
     public void refresh(float deltaT) {
         flicker = (flicker + deltaT * 7) % (float) (20 * Math.PI);
+        var level = tileEntity.getLevel();
+        if (!smoking || level == null) return;
+        // (smoke out of the stack's open flange, more of it the harder it burns)
+        smokeDue += deltaT * (2 + 10 * fire);
+        var p = tileEntity.getBlockPos();
+        while (smokeDue >= 1) {
+            smokeDue -= 1;
+            double jx = (Math.random() - 0.5) * 0.12, jz = (Math.random() - 0.5) * 0.12;
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.getX() + 0.5 + jx, p.getY() + 1.02, p.getZ() + 0.5 + jz, 0, 0.06, 0);
+        }
     }
 
     @Override
@@ -90,6 +103,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
             lighting = stream.readBoolean();
 
             entityItemIn = unserializeItemStackToEntityItem(stream, entityItemIn);
+            smoking = stream.readBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }
